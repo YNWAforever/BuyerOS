@@ -15,11 +15,20 @@ ROLE_PERMISSIONS: dict[str, frozenset[str]] = {
 _ENGINES: dict[str, object] = {}
 
 
+def async_database_url(url: str) -> str:
+    """SQLAlchemy async engines need the explicit `+psycopg` driver (as in the P8 worker)."""
+    if url.startswith("postgresql+"):
+        return url
+    if url.startswith("postgresql://"):
+        return url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return url
+
+
 def get_engine():
     """One async engine per distinct DSN, so tests may swap BUYEROS_DATABASE_URL."""
     from sqlalchemy.ext.asyncio import create_async_engine
 
-    url = get_settings().database_url
+    url = async_database_url(get_settings().database_url)
     engine = _ENGINES.get(url)
     if engine is None:
         engine = create_async_engine(url)
