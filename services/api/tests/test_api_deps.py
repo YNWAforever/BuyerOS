@@ -31,3 +31,13 @@ def test_workspace_admin_allows_everything():
 
 def test_unknown_role_denied():
     assert permission_for_roles(["ghost"], "project.read") is False
+
+
+def test_operator_creates_projects_but_cannot_approve_icp():
+    assert permission_for_roles(["operator"], "project.write") is True
+    assert permission_for_roles(["operator"], "icp.approve") is False
+
+
+def test_reviewer_approves_icp_but_cannot_create_projects():
+    assert permission_for_roles(["reviewer"], "icp.approve") is True
+    assert permission_for_roles(["reviewer"], "project.write") is False

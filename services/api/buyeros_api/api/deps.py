@@ -3,12 +3,15 @@ import uuid
 
 from ..settings import get_settings
 
+_READ = frozenset({"project.read", "buyer.read", "evidence.read", "usage.read"})
+
+# Derived from the contract's `x-permitted-roles` for the operations P9 implements.
 ROLE_PERMISSIONS: dict[str, frozenset[str]] = {
-    "viewer": frozenset({"project.read", "buyer.read", "evidence.read", "usage.read"}),
-    "operator": frozenset({"project.read", "buyer.read", "evidence.read", "usage.read", "run.write", "buyer.note", "outcome.write", "quote.request"}),
-    "reviewer": frozenset({"project.read", "buyer.read", "evidence.read", "usage.read", "run.write", "buyer.note", "outcome.write", "quote.request", "buyer.review", "draft.approve", "quote.confirm", "project.write"}),
-    "policy_admin": frozenset({"project.read", "policy.write", "suppression.write"}),
-    "budget_admin": frozenset({"project.read", "budget.write", "usage.read"}),
+    "viewer": _READ,
+    "operator": _READ | frozenset({"project.write", "run.write", "buyer.note", "outcome.write", "quote.request"}),
+    "reviewer": _READ | frozenset({"icp.approve", "run.write", "buyer.note", "outcome.write", "quote.request", "buyer.review", "draft.approve", "quote.confirm"}),
+    "policy_admin": _READ | frozenset({"policy.write", "suppression.write"}),
+    "budget_admin": _READ | frozenset({"budget.write"}),
     "workspace_admin": frozenset({"*"}),
 }
 
