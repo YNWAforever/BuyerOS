@@ -5,7 +5,9 @@ dispatcher publishes deterministic task IDs to the single Celery/Valkey broker.
 Queue acknowledgement is not durable business completion.
 """
 
-from sqlalchemy import ForeignKeyConstraint, Integer, String, UniqueConstraint
+from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKeyConstraint, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -25,3 +27,7 @@ class OutboxEvent(Base, TenantMixin):
     payload: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     state: Mapped[str] = mapped_column(String(32), nullable=False, default="ready")
+    dispatched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    lease_owner: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    fencing_generation: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
