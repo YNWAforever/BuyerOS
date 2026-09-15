@@ -60,3 +60,15 @@ def test_none_payload_is_blocked_not_raised():
 def test_negative_size_is_rejected():
     with pytest.raises(FetchRejected):
         validate_fetch("https://example.com/x", "text/html", -1)
+
+
+@pytest.mark.parametrize("bad", [None, 123, [1], {"a": 1}, True])
+def test_non_string_url_is_blocked_not_raised(bad):
+    result = handle(None, None, {"url": bad, "content_type": "text/html", "size": 1})
+    assert result.state == "blocked"
+
+
+@pytest.mark.parametrize("bad", [None, 123, ["text/html"], True])
+def test_non_string_content_type_is_blocked_not_raised(bad):
+    result = handle(None, None, {"url": "https://example.com/x", "content_type": bad, "size": 1})
+    assert result.state == "blocked"

@@ -47,12 +47,17 @@ def handle(session, context, payload) -> HandlerResult:
     """
     if not isinstance(payload, dict):
         return HandlerResult(state="blocked", detail="fetch.evidence: invalid payload")
+    url = payload.get("url")
+    content_type = payload.get("content_type")
+    size = payload.get("size", 0)
+    if not isinstance(url, str) or not isinstance(content_type, str):
+        return HandlerResult(state="blocked", detail="fetch.evidence: invalid payload")
     try:
-        size = int(payload.get("size", 0))
+        size_value = int(size)
     except (TypeError, ValueError):
         return HandlerResult(state="blocked", detail="fetch.evidence: invalid size")
     try:
-        validate_fetch(payload.get("url", ""), payload.get("content_type", ""), size)
+        validate_fetch(url, content_type, size_value)
     except FetchRejected as exc:
         return HandlerResult(state="blocked", detail=str(exc))
     return HandlerResult(state="done", detail="validated; retrieval client is not enabled in this phase")
