@@ -1,4 +1,4 @@
-from buyeros_worker.run_lifecycle import terminal, transition_run
+from buyeros_worker.run_lifecycle import halted, terminal, transition_run
 
 
 def test_valid_progressions():
@@ -48,3 +48,29 @@ def test_remaining_edges():
     assert transition_run("running", "partial") == "partial"
     assert transition_run("running", "pause_budget") == "paused_budget"
     assert transition_run("cancel_requested", "cancel") == "cancelled"
+
+
+def test_capability_block_reaches_the_blocked_state():
+    assert transition_run("draft", "capability_block") == "blocked"
+    assert transition_run("queued", "capability_block") == "blocked"
+    assert transition_run("running", "capability_block") == "blocked"
+
+
+def test_blocked_is_halting_but_not_terminal():
+    assert terminal("blocked") is False
+    assert halted("blocked") is True
+
+
+def test_blocked_never_regresses_or_retries():
+    assert transition_run("blocked", "start") == "blocked"
+    assert transition_run("blocked", "retry") == "blocked"
+    assert transition_run("blocked", "capability_block") == "blocked"
+
+
+def test_halted_covers_completed_cancelled_and_blocked():
+    assert halted("completed") is True
+    assert halted("cancelled") is True
+    assert halted("blocked") is True
+    assert halted("failed") is False
+    assert halted("running") is False
+
