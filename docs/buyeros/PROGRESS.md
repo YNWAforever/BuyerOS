@@ -41,7 +41,9 @@ Plan revision v1. Session date: 2026-09-15 (Hong Kong). Mode: **PLAN** (no Build
 | Upstream pins (A/R/F/S/L) | GitHub API commit lookups | **PASS** (5/5 resolve) |
 | OpenAPI structure | PyYAML parse + `$ref` resolution | **PASS** (70 ops, 139 schemas, 0 unresolved) |
 | Live Site | HTTP GET | **PASS** (200, Cloudflare) |
-| Source checkout `git rev-parse HEAD` / `git status --short` | local checkout | **PASS** — HEAD `72fef7d`, tree `38d3ff3`, working tree clean |
+| Source checkout `git rev-parse HEAD` / `git status --short` | local checkout | **PASS** — HEAD `2b3b788`, import tree `b4c6b538`, working tree clean |
+| Imported source integrity | read `package.json`, `.openai/hosting.json`, key paths | **PASS** — `site-creator-vinext-starter`, `pnpm@11.25.0`, project `appgprj_6aa82285e5108191aac9c44c840c5efe`; `vite.config.ts`, `features/workspace.tsx`, `services/contracts.ts`, `services/http-client.ts`, `db/schema.ts`, `app/layout.tsx`, `app/chatgpt-auth.ts`, `DEVELOPER_HANDOFF.md` all present; `AGENTS.md` count 0 |
+| Local vs remote `main` | GitHub API `commits/main` | **PASS** — both `2b3b788` |
 | `opencode --version` (CLI) | PATH | **NOT RUN** (CLI absent) |
 | `uv run pytest`, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build`, `node tests/domain-checks.mjs` | local | **NOT RUN** |
 | Playwright responsive/keyboard/locale | local | **NOT RUN** |
