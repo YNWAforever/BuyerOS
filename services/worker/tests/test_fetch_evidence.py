@@ -45,3 +45,18 @@ def test_malformed_url_is_rejected_not_raised():
 def test_handler_blocks_malformed_url():
     result = handle(None, None, {"url": "https://example.com:notaport/x", "content_type": "text/html", "size": 1})
     assert result.state == "blocked"
+
+
+def test_non_numeric_size_is_blocked_not_raised():
+    result = handle(None, None, {"url": "https://example.com/x", "content_type": "text/html", "size": "abc"})
+    assert result.state == "blocked"
+
+
+def test_none_payload_is_blocked_not_raised():
+    result = handle(None, None, None)
+    assert result.state == "blocked"
+
+
+def test_negative_size_is_rejected():
+    with pytest.raises(FetchRejected):
+        validate_fetch("https://example.com/x", "text/html", -1)
