@@ -19,14 +19,21 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
     "saveICPVersion": _WRITERS,
     "approveICPVersion": frozenset({"reviewer", "workspace_admin"}),
     "getReadiness": frozenset({"workspace_admin"}),
-    "getCapabilities": frozenset({"workspace_admin"}),
+    "getCapabilities": _VIEWERS,
 }
 
 
 def permitted_roles(operation_id: str) -> frozenset[str]:
     return OPERATION_ROLES.get(operation_id, frozenset())
 
-_ENGINES: dict[str, object] = {}
+# Engine cache keyed by (event loop, DSN).
+#
+# An AsyncEngine's connection pool is bound to the loop that opened it, and this
+# process serves one uvicorn loop in production. Keying by loop keeps the
+# singleton in production while preventing a second loop (a second TestClient, or
+# an `asyncio.run` in a test) from reusing a pool created on the first one.
+# `dispose_engines()` is the shutdown hook; P9 does not yet wire an app lifespan.
+_ENGINES: dict[tuple[object, str], object] = {}
 
 
 def async_database_url(url: str) -> str:
@@ -38,16 +45,34 @@ def async_database_url(url: str) -> str:
     return url
 
 
+def _current_loop_key() -> object:
+    import asyncio
+
+    try:
+        return asyncio.get_running_loop()
+    except RuntimeError:
+        return None
+
+
 def get_engine():
-    """One async engine per distinct DSN, so tests may swap BUYEROS_DATABASE_URL."""
+    """One async engine per (event loop, DSN), so tests may swap BUYEROS_DATABASE_URL."""
     from sqlalchemy.ext.asyncio import create_async_engine
 
     url = async_database_url(get_settings().database_url)
-    engine = _ENGINES.get(url)
+    key = (_current_loop_key(), url)
+    engine = _ENGINES.get(key)
     if engine is None:
         engine = create_async_engine(url)
-        _ENGINES[url] = engine
+        _ENGINES[key] = engine
     return engine
+
+
+async def dispose_engines() -> None:
+    """Release every cached engine. NOT wired to an app lifespan in P9 (BO-004)."""
+    engines = list(_ENGINES.values())
+    _ENGINES.clear()
+    for engine in engines:
+        await engine.dispose()
 
 
 def permission_for_roles(roles: list[str], permission: str) -> bool:

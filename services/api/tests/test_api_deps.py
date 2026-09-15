@@ -1,5 +1,6 @@
 from buyeros_api.api.deps import (
     async_database_url,
+    dispose_engines,
     get_engine,
     permitted_roles,
     permission_for_roles,
@@ -20,7 +21,33 @@ def test_get_engine_reuses_one_engine_per_dsn(monkeypatch):
 
     get_settings.cache_clear()
     try:
-        assert get_engine() is get_engine()
+        first = get_engine()
+        assert first is get_engine()
+        assert async_database_url("postgresql://u:p@localhost:5432/other") != async_database_url(
+            "postgresql://u:p@localhost:5432/reuse"
+        )
+    finally:
+        import asyncio
+
+        asyncio.run(dispose_engines())
+        get_settings.cache_clear()
+
+
+def test_dispose_engines_releases_the_cache(monkeypatch):
+    import asyncio
+
+    monkeypatch.setenv("BUYEROS_DATABASE_URL", "postgresql://u:p@localhost:5432/dispose")
+    from buyeros_api.settings import get_settings
+
+    get_settings.cache_clear()
+
+    async def _scenario():
+        get_engine()
+        await dispose_engines()
+        assert get_engine() is not None
+
+    try:
+        asyncio.run(_scenario())
     finally:
         get_settings.cache_clear()
 
@@ -59,10 +86,26 @@ def test_admins_without_contract_read_grants_are_denied_reads():
     assert permission_for_roles(["budget_admin"], "listBuyers") is False
 
 
+_VIEWERS = frozenset({"viewer", "operator", "reviewer", "workspace_admin"})
+_WRITERS = frozenset({"operator", "workspace_admin"})
+
+# Every operation P9 implements, with the contract's x-permitted-roles for it.
+CONTRACT_ROLES = {
+    "listWorkspaces": _VIEWERS,
+    "listProjects": _VIEWERS,
+    "getProject": _VIEWERS,
+    "listICPVersions": _VIEWERS,
+    "listBuyers": _VIEWERS,
+    "getBuyer": _VIEWERS,
+    "createProject": _WRITERS,
+    "updateProject": frozenset({"operator", "reviewer", "workspace_admin"}),
+    "saveICPVersion": _WRITERS,
+    "approveICPVersion": frozenset({"reviewer", "workspace_admin"}),
+    "getReadiness": frozenset({"workspace_admin"}),
+    "getCapabilities": _VIEWERS,
+}
+
+
 def test_operation_roles_are_verbatim_from_the_contract():
-    assert permitted_roles("createProject") == frozenset({"operator", "workspace_admin"})
-    assert permitted_roles("updateProject") == frozenset({"operator", "reviewer", "workspace_admin"})
-    assert permitted_roles("saveICPVersion") == frozenset({"operator", "workspace_admin"})
-    assert permitted_roles("approveICPVersion") == frozenset({"reviewer", "workspace_admin"})
-    assert permitted_roles("getReadiness") == frozenset({"workspace_admin"})
-    assert permitted_roles("listBuyers") == frozenset({"viewer", "operator", "reviewer", "workspace_admin"})
+    for operation_id, roles in CONTRACT_ROLES.items():
+        assert permitted_roles(operation_id) == roles, operation_id
