@@ -9,6 +9,9 @@ dependencies = [
   "sqlalchemy>=2.0,<2.1",
   "alembic>=1.13,<2",
   "psycopg[binary]>=3.2,<4",
+  "fastapi>=0.115,<1",
+  "httpx>=0.27,<1",
+  "uvicorn>=0.30,<1",
 ]
 
 [dependency-groups]
@@ -21,9 +24,9 @@ dev = [
 testpaths = ["tests"]
 pythonpath = ["."]
 
-# NOTE (BO-005 spike): fastapi, asyncpg and pyjwt[crypto] are intentionally
-# omitted here; they are added when BO-004 (bearer identity) and the HTTP
-# layer (BO-003/BO-007+) are implemented. No auth or API route exists yet.
+# NOTE (BO-005 spike): asyncpg and pyjwt[crypto] are intentionally omitted
+# here; they are added when BO-004 (bearer identity) is implemented. The
+# HTTP layer (BO-003/BO-007+, P9) uses fastapi/uvicorn.
 
 [build-system]
 requires = ["hatchling"]
