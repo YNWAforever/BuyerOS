@@ -28,6 +28,20 @@ def test_readiness_payload_matches_contract_without_secrets():
     assert "postgresql://" not in str(data)
 
 
+def test_readiness_payload_reflects_a_reachable_database_but_stays_unready():
+    reachable = readiness_payload(database="ready")
+    assert reachable["database"] == "ready"
+    assert reachable["queue"] == "unavailable"
+    assert reachable["worker"] == "unavailable"
+    assert reachable["ready"] is False
+    assert all(reachable[k] in {"ready", "unavailable"} for k in ("database", "queue"))
+    assert reachable["worker"] in {"ready", "stale", "unavailable"}
+
+
+def test_readiness_payload_reports_ready_only_when_every_dependency_is_ready():
+    assert readiness_payload(database="ready", queue="ready", worker="ready")["ready"] is True
+
+
 def test_capabilities_payload_matches_contract_without_secrets():
     page = capabilities_payload()
     assert set(page) == {"items", "offset", "limit", "total"}

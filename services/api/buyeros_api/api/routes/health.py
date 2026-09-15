@@ -14,13 +14,19 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def readiness_payload() -> dict:
-    """Contract `Readiness` shape. No credential, DSN or provider detail is ever included."""
+def readiness_payload(*, database: str = "unavailable", queue: str = "unavailable", worker: str = "unavailable") -> dict:
+    """Contract `Readiness` shape. No credential, DSN or provider detail is ever included.
+
+    The route only reaches this builder after a successful tenant-scoped query, so it
+    passes `database="ready"`; the queue and the worker stay `unavailable` because no
+    broker or worker is wired or observed in this phase. `ready` is therefore still
+    false, which is the honest answer.
+    """
     return {
-        "ready": False,
-        "database": "unavailable",
-        "queue": "unavailable",
-        "worker": "unavailable",
+        "ready": database == "ready" and queue == "ready" and worker == "ready",
+        "database": database,
+        "queue": queue,
+        "worker": worker,
         "checked_at": _now(),
     }
 
@@ -51,25 +57,28 @@ async def live() -> dict:
     }
 
 
-@router.get("/v1/workspaces/{workspace_id}/readiness")
-async def readiness(workspace_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)) -> dict:
+async def _authorize(principal: Principal, workspace_id: uuid.UUID, operation_id: str) -> None:
+    """Membership-check the caller for `operation_id` before any state is reported."""
     from ..deps import load_membership, permission_for_roles, tenant_scoped
-    from ..errors import ApiError, envelope
+    from ..errors import ApiError
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "getReadiness"):
+        if not permission_for_roles(membership["roles"], operation_id):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
-    return envelope(readiness_payload(), request.state.request_id)
+
+
+@router.get("/v1/workspaces/{workspace_id}/readiness")
+async def readiness(workspace_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)) -> dict:
+    from ..errors import envelope
+
+    await _authorize(principal, workspace_id, "getReadiness")
+    return envelope(readiness_payload(database="ready"), request.state.request_id)
 
 
 @router.get("/v1/workspaces/{workspace_id}/capabilities")
 async def capabilities(workspace_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)) -> dict:
-    from ..deps import load_membership, permission_for_roles, tenant_scoped
-    from ..errors import ApiError, envelope
+    from ..errors import envelope
 
-    async with tenant_scoped(workspace_id) as session:
-        membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "getCapabilities"):
-            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+    await _authorize(principal, workspace_id, "getCapabilities")
     return envelope(capabilities_payload(), request.state.request_id)
