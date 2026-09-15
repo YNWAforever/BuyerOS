@@ -51,7 +51,7 @@ Read with [00 decisions](../00_README_AND_DECISIONS.md), [02 architecture](../02
 | Check | Result | Status |
 |---|---|---|
 | Auth0 tenant discovery `https://dev-oaug20cdxqqgn1s8.us.auth0.com/.well-known/openid-configuration` | issuer matches; `authorization_code` and PKCE `S256` supported | VERIFIED (live, read-only) |
-| GitHub `YNWAforever/BuyerOS` | public, default branch `main`, **empty (0 commits, 409 on commits API)** | VERIFIED |
+| GitHub `YNWAforever/BuyerOS` | public, default branch `main`; planning pack committed at `1512d4c17d4f792e14598d524fdac3c9c37d27e7` (docs only, root tree `66c5e1f8b4e4059fc666b09bffe296b7cc712b3c`); source still not imported | VERIFIED (read-only) |
 | GitHub `YNWAforever/buyerosgpt` | public; HEAD `b804ba8d…`, tree `b4c6b538…` | VERIFIED (read-only) |
 | Source checkout `git rev-parse HEAD` / `git status --short` | no checkout available in the review environment | **NOT RUN** |
 | Render/Neon/R2 provisioning, Auth0 app reconfiguration, Site callback registration, membership owner | not performed | **NOT RUN / pending owner** |

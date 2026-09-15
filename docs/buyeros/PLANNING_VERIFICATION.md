@@ -45,4 +45,11 @@ No implementation task is DONE. Approving the plan does not approve all Build ta
 
 ## Final repository result
 
-Executed final check: `git diff --name-only HEAD` returned no tracked changes. Every `git status --porcelain=v1 --untracked-files=all` entry was a new `docs/buyeros/` planning artifact. HEAD and tree remain unchanged. Final package contains50 files including SHA256SUMS.txt; no application code, lockfile, active instruction/configuration or unrelated file changed. Only documentation is untracked; no commit or push was made.
+Executed final check: `git diff --name-only HEAD` returned no tracked changes. Every `git status --porcelain=v1 --untracked-files=all` entry was a new `docs/buyeros/` planning artifact. HEAD and tree remain unchanged. Final package contains50 files including SHA256SUMS.txt; no application code, lockfile, active instruction/configuration or unrelated file changed. Only documentation was untracked at packaging time; the planning session made no commit or push. A later owner-authorized commit and push to `YNWAforever/BuyerOS` is recorded in the addendum below.
+
+
+## Owner-authorized commit and push (2026-09-15)
+
+The owner separately authorized committing this planning package to the canonical repository. Executed and verified: `git init` in the local package directory; remote `https://github.com/YNWAforever/BuyerOS.git`; branch `main`; commit `1512d4c17d4f792e14598d524fdac3c9c37d27e7` ("Add FIMMICK BuyerOS planning pack (docs/buyeros)"); pushed to `origin/main`. Verified via the GitHub API: `main` HEAD `1512d4c17d4f792e14598d524fdac3c9c37d27e7`, root tree `66c5e1f8b4e4059fc666b09bffe296b7cc712b3c`, 59 files, not truncated.
+
+Scope of that commit: documentation only (`docs/buyeros/**`). It contains no application code, lockfile, dependency install, database migration, infrastructure, deployment, or provider call. Because the pack is now the repository's initial commit, the repo **root** tree is `66c5e1f...` rather than the audited source tree `b4c6b538...`; the "exact import" expectation therefore applies to a **future source-import commit**, which must carry tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`. The application source remains unimported. Build authorization is still outstanding.

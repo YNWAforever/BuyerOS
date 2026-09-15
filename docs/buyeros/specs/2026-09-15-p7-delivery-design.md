@@ -6,7 +6,7 @@ No application code, lockfile, dependency install, database migration, cloud res
 
 Related records: [P1](2026-09-15-p1-boundary-design.md), [P2](2026-09-15-p2-persistence-foundation-design.md), [P3](2026-09-15-p3-discovery-fit-design.md), [P4](2026-09-15-p4-contact-guardrails-design.md), [P5](2026-09-15-p5-draft-approval-export-design.md), [P6](2026-09-15-p6-hardening-pilot-design.md), [03 data/API contracts](../03_DATA_API_AND_STATE_CONTRACTS.md), [05 test/security/release](../05_TEST_SECURITY_AND_RELEASE.md).
 
-Base content commit: `b804ba8d1514a1049b7202c861278dd72c473a75`, tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`. Canonical repository: `YNWAforever/BuyerOS` (empty; exact import expected).
+Base content commit: `b804ba8d1514a1049b7202c861278dd72c473a75`, tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`. Canonical repository: `YNWAforever/BuyerOS` (planning pack committed at `1512d4c17d4f792e14598d524fdac3c9c37d27e7`; a source import is still expected to produce tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`).
 
 ## Scope
 

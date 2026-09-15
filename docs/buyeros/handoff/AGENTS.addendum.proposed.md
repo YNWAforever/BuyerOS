@@ -4,7 +4,7 @@ This document is a review proposal. Do not overwrite or activate it as `AGENTS.m
 
 ## Scope and product
 
-Target only the verified `YNWAforever/BuyerOS` source (exact import of the audited baseline `YNWAforever/buyerosgpt` commit b804ba8d1514a1049b7202c861278dd72c473a75 expected) linked to Site `appgprj_6aa82285e5108191aac9c44c840c5efe`. Preserve unrelated work, approved assets, routes, Vinext/React/TypeScript runtime, pnpm lockfile, English/zh-HK, and the existing table/drawer/draft workspace.
+Target only the verified `YNWAforever/BuyerOS` source (planning pack committed at `1512d4c`; a source import of the audited baseline `YNWAforever/buyerosgpt` commit b804ba8d1514a1049b7202c861278dd72c473a75 is still expected) linked to Site `appgprj_6aa82285e5108191aac9c44c840c5efe`. Preserve unrelated work, approved assets, routes, Vinext/React/TypeScript runtime, pnpm lockfile, English/zh-HK, and the existing table/drawer/draft workspace.
 
 Preserve: Offer → approved buyer profile → discovery → evidence → human acceptance → optional permitted business-contact lookup → grounded draft → human approval → outcomes. A company is distinct from its contacts and project-specific fit/review. Fit, acceptance, contact validity, suppression, contact-research permission, outreach permission, draft approval, and delivery status are independent.
 
