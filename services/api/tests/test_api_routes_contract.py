@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi.testclient import TestClient
 
 from buyeros_api.api.app import create_app
@@ -62,7 +64,67 @@ def test_the_app_actually_exposes_every_implemented_route():
         assert response.status_code != 404, (method, path)
 
 
-def test_approve_declares_the_required_if_match_precondition():
+def test_implemented_response_fields_are_declared_by_the_contract():
+    """P9 returns a *documented subset* of each contract entity (see the plan's deliberate gaps:
+    the ORM models do not yet carry every filtered/sensitive field). This guard pins the shape we
+    do return: every emitted key must be declared by the contract schema, so a renamed or invented
+    field fails here instead of drifting silently. It does NOT assert full required-field coverage —
+    that is the recorded BO-004/next-phase deferral."""
+    import yaml
+    from pathlib import Path
+
+    spec = yaml.safe_load(Path("../../docs/buyeros/contracts/openapi.proposed.yaml").read_text(encoding="utf-8"))
+    schemas = spec["components"]["schemas"]
+
+    def properties(name: str) -> set[str]:
+        return set(schemas[name].get("properties", {}))
+
+    readiness_keys = properties("Readiness")
+    capability_keys = properties("Capability")
+    workspace_keys = properties("Workspace")
+    project_keys = properties("Project")
+    icp_keys = properties("ICPVersion")
+    buyer_keys = properties("Buyer")
+
+    from buyeros_api.api.routes.buyers import _buyer_data
+    from buyeros_api.api.routes.health import capabilities_payload, readiness_payload
+    from buyeros_api.api.routes.icp import _icp_data
+    from buyeros_api.api.routes.projects import _project_data
+
+    assert set(readiness_payload()) <= readiness_keys
+
+    page = capabilities_payload()
+    assert set(page) <= {"items", "offset", "limit", "total"}
+    for item in page["items"]:
+        assert set(item) <= capability_keys, set(item) - capability_keys
+
+    class _Project:
+        id = workspace_id = uuid.UUID("11111111-1111-4111-8111-111111111111")
+        name = "P"
+        status = "active"
+
+    assert set(_project_data(_Project())) <= project_keys
+
+    class _Icp:
+        id = workspace_id = project_id = uuid.UUID("11111111-1111-4111-8111-111111111111")
+        number = 1
+        content_hash = "sha256:x"
+        approved_at = None
+        approved_by = None
+        content: dict = {}
+
+    assert set(_icp_data(_Icp())) <= icp_keys
+
+    class _Buyer:
+        id = workspace_id = project_id = company_id = uuid.UUID("11111111-1111-4111-8111-111111111111")
+        note = None
+
+    class _Company:
+        display_name = "C"
+
+    assert set(_buyer_data(_Buyer(), _Company())) <= buyer_keys
+    assert {"id", "name", "roles", "data_mode"} <= workspace_keys
+
     import yaml
     from pathlib import Path
 

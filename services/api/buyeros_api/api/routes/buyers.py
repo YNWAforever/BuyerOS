@@ -9,7 +9,20 @@ router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["buyers"])
 
 
 def _buyer_data(buyer, company) -> dict:
-    return {"id": str(buyer.id), "project_id": str(buyer.project_id), "company": company.display_name, "note": buyer.note}
+    """Contract `Buyer` subset: P9 returns identity + note only, under the contract's own keys.
+
+    `name` is the contract's company display name; `company_id` carries the company identity.
+    Every emitted key must exist in the contract `Buyer` schema (guarded by the contract test).
+    """
+    return {
+        "id": str(buyer.id),
+        "workspace_id": str(buyer.workspace_id),
+        "project_id": str(buyer.project_id),
+        "company_id": str(buyer.company_id),
+        "name": company.display_name,
+        "note": buyer.note,
+        "data_mode": "live",
+    }
 
 
 @router.get("/projects/{project_id}/buyers")
