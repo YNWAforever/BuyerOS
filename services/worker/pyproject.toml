@@ -1,0 +1,36 @@
+[project]
+name = "buyeros-worker"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "buyeros-api",
+  "celery>=5.4,<6",
+  "redis>=5,<6",
+  "psycopg[binary]>=3.2,<4",
+  "pydantic-settings>=2.5,<3",
+]
+
+[tool.uv.sources]
+buyeros-api = { path = "../api", editable = true }
+
+[project.scripts]
+buyeros-worker = "buyeros_worker.cli:main"
+
+# NOTE (P8 worker): `buyeros_api` is installed from the local path `../api`.
+# `services/api` declares a hatchling build-system that packages only
+# `buyeros_api`, so the path dependency builds and `import buyeros_api` works
+# at runtime (not just under pytest).
+
+[dependency-groups]
+dev = ["pytest>=8.3,<9", "pytest-asyncio>=0.24,<1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["buyeros_worker"]
