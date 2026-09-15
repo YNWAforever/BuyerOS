@@ -72,3 +72,4 @@ de3c29a0259d4e6fc51fe9d158a49da9ffacd0608b503283bb38e0ce7eedf9e6  specs/2026-09-
 8c060ab8973e0a9da62f807edf29d03684a1d2df736243a715b867dad776311a  decisions/BUILD_APPROVAL_RECORD.P8-worker.md
 476c725f50ae50398ccbee42c08b2daada983d7f53f1c6b51e14d1755553e758  specs/2026-09-15-p9-api-surface-design.md
 8165cfa778ff9a6d184026f78c3983f257f705f573aec5c1dbd1db207ea0d831  plans/2026-09-15-p9-api-surface-implementation.md
+fe1d65d7e464d2c637ebfb2c8ff1a8bc045c0aea5a229373c7222944b3cb898d  decisions/BUILD_APPROVAL_RECORD.P9-api.md
