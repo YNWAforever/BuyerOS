@@ -1477,12 +1477,12 @@ git commit -m "feat(api): pinned pnpm-generated TS client and tenant isolation t
 
 ## Self-Review
 
-- **Spec coverage:** A (Tasks 1, 4, 5, 6), B (Tasks 2, 3), C (Tasks 1, 5, 6, 7), D (Tasks 1, 4, 5, 6), E (Tasks 1?? tests) are mapped. Deliberate gaps to record before Build: full JWKS/RS256 verification inside `principal_from_token` (BO-004, needs B-IDENTITY); `If-Match` handling beyond ICP approval; `Idempotency-Key` persistence for other mutations; frontend wiring of `services/live/mapping.ts`.
-- **Placeholder scan:** no `TBD`/`TODO`; each code step contains complete code. The declared-path `501` map is enumerated in Task 6 and the readiness/capabilities payloads in Task 4, so no summarised behaviour remains.
+- **Spec coverage:** A (Tasks 1, 4, 5, 6), B (Tasks 2, 3), C (Tasks 1, 5, 6, 7), D (Tasks 1, 4, 5, 6), E (Tasks 1-7 tests) are mapped. Deliberate gaps to record before Build:
+  - full JWKS/RS256 verification inside `principal_from_token` (BO-004, needs B-IDENTITY);
+  - **blocking for BO-004:** the `buyeros_api` runtime role has no `SELECT` grant on `users` (migrations grant only `memberships` and `workspaces`), and both `load_membership` and `list_workspaces` read `users`. Every authenticated route therefore fails with `permission denied for table users` (500) under the runtime role once Auth0 is configured; a grant migration plus a runtime-role DB test must land with the live verifier. Recorded at owner direction: not fixed in P9 (outside its allowed files);
+  - `If-Match` handling beyond ICP approval; `Idempotency-Key` persistence (replay/conflict) beyond header presence;
+  - authenticated happy paths are **NOT RUN** in P9 (auth unconfigured; tests cover the fail-closed path only);
+  - frontend wiring of `services/live/mapping.ts`.
 - **Type consistency:** `ApiError(status_code, code, message, retryable)`, `envelope(data, request_id)`, `Principal(issuer, subject)`, `claims_to_principal(claims, *, issuer, audience, now)`, `permission_for_roles(roles, permission)`, `get_engine()`, `tenant_scoped(workspace_id)`, `load_membership(session, *, principal, workspace_id)` are consistent across tasks and reuse existing `buyeros_api` names (`tenant_session`, `canonical_hash`, `Project`, `IcpVersion`, `ProjectBuyer`, `Company`). `verify_approval_hash`/`StaleRevision` are **created** in Task 5 (`services/icp_service.py`), not reused: the P2 plan specified that module but it was never implemented.
-
-## Global Notes
-
-- No remote commits/pushes (beyond pushing this plan's branch), no deploys, cloud resources, real-data migrations, provider calls, or sends.
+- **Placeholder scan:** no `TBD`/`TODO`; each code step contains complete code. The declared-path `501` map is enumerated in Task 6 and the readiness/capabilities payloads in Task 4, so no summarised behaviour remains.
 - Every command is **NOT RUN** until executed under explicit approval; record exact output in `PROGRESS.md`.
-- Execution requires a recorded dependency waiver (BO-004 incomplete) and may use `superpowers:subagent-driven-development` or `superpowers:executing-plans`.
