@@ -49,7 +49,7 @@ wheels = [
 [[package]]
 name = "buyeros-api"
 version = "0.1.0"
-source = { directory = "../api" }
+source = { editable = "../api" }
 dependencies = [
     { name = "alembic" },
     { name = "psycopg", extra = ["binary"] },
@@ -76,7 +76,7 @@ dev = [
 [[package]]
 name = "buyeros-worker"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "buyeros-api" },
     { name = "celery" },
@@ -93,7 +93,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "buyeros-api", directory = "../api" },
+    { name = "buyeros-api", editable = "../api" },
     { name = "celery", specifier = ">=5.4,<6" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2,<4" },
     { name = "pydantic-settings", specifier = ">=2.5,<3" },
