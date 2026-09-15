@@ -509,7 +509,8 @@ git commit -m "feat(api): membership and tenant-scoped session dependencies"
 - Create: `services/api/tests/test_api_health.py`
 
 **Interfaces:**
-- Produces: `GET /health/live` (non-contract liveness probe; always 200, no auth, no secrets); the contract routes `GET /v1/workspaces/{workspace_id}/readiness` (`getReadiness`, `ReadinessResponse`) and `GET /v1/workspaces/{workspace_id}/capabilities` (`getCapabilities`, `CapabilityPageResponse`), both Bearer-authenticated; pure builders `readiness_payload()` (`{ready, database, queue, worker, checked_at}`) and `capabilities_payload()` (`{items, offset, limit, total}`).
+- Produces: `GET /health/live` (non-contract liveness probe; always 200, no auth, no secrets); the contract routes `GET /v1/workspaces/{workspace_id}/readiness` (`getReadiness`, `ReadinessResponse`) and `GET /v1/workspaces/{workspace_id}/capabilities` (`getCapabilities`, `CapabilityPageResponse`), both Bearer-authenticated; the shared `_authorize(principal, workspace_id, operation_id)` membership gate; pure builders `readiness_payload(*, database, queue, worker)` (`{ready, database, queue, worker, checked_at}`) and `capabilities_payload()` (`{items, offset, limit, total}`).
+- `readiness_payload` is **honest about observed state**: the route only reaches it after a successful tenant-scoped query, so it passes `database="ready"`; queue and worker stay `unavailable` (no broker or worker is wired or observed in this phase), so `ready` is still `false`. It must never claim `ready` while a dependency is unavailable.
 - Consumes: `create_app`, `get_settings`, `get_principal` (Task 2), `tenant_scoped`/`load_membership`/`permission_for_roles` (Task 3). The workspace-scoped routes enforce membership (foreign/absent workspace ??non-enumerating `404`; insufficient role ??`403`) before reporting state.
 
 **Contract note (pre-flight correction #2):** `/health/ready` is **not** a contract path and is dropped. Readiness is the authenticated contract route `/v1/workspaces/{workspace_id}/readiness`; `/health/live` remains a non-contract liveness probe only. The `Readiness` schema is `{ready, database, queue, worker, checked_at}` (no `api`/`providers`/`policy` keys) and `additionalProperties: false`.
@@ -546,6 +547,20 @@ def test_readiness_payload_matches_contract_without_secrets():
     assert set(data) == {"ready", "database", "queue", "worker", "checked_at"}
     assert "password" not in str(data).lower()
     assert "postgresql://" not in str(data)
+
+
+def test_readiness_payload_reflects_a_reachable_database_but_stays_unready():
+    reachable = readiness_payload(database="ready")
+    assert reachable["database"] == "ready"
+    assert reachable["queue"] == "unavailable"
+    assert reachable["worker"] == "unavailable"
+    assert reachable["ready"] is False
+    assert all(reachable[k] in {"ready", "unavailable"} for k in ("database", "queue"))
+    assert reachable["worker"] in {"ready", "stale", "unavailable"}
+
+
+def test_readiness_payload_reports_ready_only_when_every_dependency_is_ready():
+    assert readiness_payload(database="ready", queue="ready", worker="ready")["ready"] is True
 
 
 def test_capabilities_payload_matches_contract_without_secrets():
@@ -589,13 +604,19 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def readiness_payload() -> dict:
-    """Contract `Readiness` shape. No credential, DSN or provider detail is ever included."""
+def readiness_payload(*, database: str = "unavailable", queue: str = "unavailable", worker: str = "unavailable") -> dict:
+    """Contract `Readiness` shape. No credential, DSN or provider detail is ever included.
+
+    The route only reaches this builder after a successful tenant-scoped query, so it
+    passes `database="ready"`; the queue and the worker stay `unavailable` because no
+    broker or worker is wired or observed in this phase. `ready` is therefore still
+    false, which is the honest answer.
+    """
     return {
-        "ready": False,
-        "database": "unavailable",
-        "queue": "unavailable",
-        "worker": "unavailable",
+        "ready": database == "ready" and queue == "ready" and worker == "ready",
+        "database": database,
+        "queue": queue,
+        "worker": worker,
         "checked_at": _now(),
     }
 
@@ -626,27 +647,30 @@ async def live() -> dict:
     }
 
 
-@router.get("/v1/workspaces/{workspace_id}/readiness")
-async def readiness(workspace_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)) -> dict:
+async def _authorize(principal: Principal, workspace_id: uuid.UUID, operation_id: str) -> None:
+    """Membership-check the caller for `operation_id` before any state is reported."""
     from ..deps import load_membership, permission_for_roles, tenant_scoped
-    from ..errors import ApiError, envelope
+    from ..errors import ApiError
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "getReadiness"):
+        if not permission_for_roles(membership["roles"], operation_id):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
-    return envelope(readiness_payload(), request.state.request_id)
+
+
+@router.get("/v1/workspaces/{workspace_id}/readiness")
+async def readiness(workspace_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)) -> dict:
+    from ..errors import envelope
+
+    await _authorize(principal, workspace_id, "getReadiness")
+    return envelope(readiness_payload(database="ready"), request.state.request_id)
 
 
 @router.get("/v1/workspaces/{workspace_id}/capabilities")
 async def capabilities(workspace_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)) -> dict:
-    from ..deps import load_membership, permission_for_roles, tenant_scoped
-    from ..errors import ApiError, envelope
+    from ..errors import envelope
 
-    async with tenant_scoped(workspace_id) as session:
-        membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "getCapabilities"):
-            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+    await _authorize(principal, workspace_id, "getCapabilities")
     return envelope(capabilities_payload(), request.state.request_id)
 ```
 
