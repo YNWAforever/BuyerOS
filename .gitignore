@@ -49,6 +49,7 @@ next-env.d.ts
 
 # python (BuyerOS domain services, added by the BO-005 spike)
 services/**/.venv/
+services/api/node_modules/
 __pycache__/
 *.pyc
 .pytest_cache/
