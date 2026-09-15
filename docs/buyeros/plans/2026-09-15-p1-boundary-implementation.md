@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Canonical repository: `YNWAforever/BuyerOS` (planning pack committed at `1512d4c17d4f792e14598d524fdac3c9c37d27e7`; a source import of content baseline `b804ba8d1514a1049b7202c861278dd72c473a75` is still expected, tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`).
+- Canonical repository: `YNWAforever/BuyerOS` (the audited source is imported at commit `b804ba8d1514a1049b7202c861278dd72c473a75`, tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`, merged into `main` via `72fef7da785624a35bb6701f1451ebcf0184a089`).
 - Plan-only artifact. No commits, pushes, installs, migrations, provisioning, paid calls, mailbox connections, or Site changes are authorized by this plan.
 - Preserve the existing frontend runtime (Vinext 1.0.0-beta.5, React 19.2.6, TS 5.9.3, Tailwind 4.2.1) and pnpm 11.25.0; never migrate to standard Next.js/Vercel.
 - Money is `NUMERIC(20,6)` / `Decimal`; wire amounts are decimal strings. Tenant tables use `workspace_id NOT NULL`, `UNIQUE(workspace_id,id)`, `(workspace_id,parent_id)` FKs, RLS with `SET LOCAL`, and non-owner runtime roles (no `BYPASSRLS`).

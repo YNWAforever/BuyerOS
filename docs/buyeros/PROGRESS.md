@@ -5,9 +5,9 @@ Plan revision v1. Session date: 2026-09-15 (Hong Kong). Mode: **PLAN** (no Build
 ## Session and source
 
 - Executor and runtime: OpenCode desktop app, version **1.18.30** (Electron; `C:\Users\laich\AppData\Local\Programs\@opencode-aidesktop\OpenCode.exe`). No `opencode` CLI on PATH.
-- Repository identity: `YNWAforever/BuyerOS` (canonical). `main` @ `1974fab69cc6bd73faa554df64438b64923c47e4`, tree `cf5227285eb12bb673a17fbadee5710c5611aead`.
+- Repository identity: `YNWAforever/BuyerOS` (canonical). `main` @ `72fef7da785624a35bb6701f1451ebcf0184a089`, tree `38d3ff39531a13ba7f26e50ac9aaffada333e9ae`; audited source commit `b804ba8d1514a1049b7202c861278dd72c473a75` (tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`) is an ancestor.
 - Planning-pack commit: `1512d4c17d4f792e14598d524fdac3c9c37d27e7` (docs only); identity corrections `fccc6dd`; plan series `3dc7534`, `33421a0`, `7c79f00`, `aa164d3`, `1974fab`.
-- Base content commit: `b804ba8d1514a1049b7202c861278dd72c473a75`, tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1` (source **not yet imported**).
+- Base content commit: `b804ba8d1514a1049b7202c861278dd72c473a75`, tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1` — **imported** and merged into `main` via `72fef7da785624a35bb6701f1451ebcf0184a089`.
 - Site: `appgprj_6aa82285e5108191aac9c44c840c5efe`, `https://fimmick-buyeros.laichiwillyjp.chatgpt.site`, public/active/revision 2, unchanged.
 - Applicable instructions read: pack docs 00–06, contracts, tasks, research audits, decisions, specs, plans; global `~/.config/opencode/opencode.jsonc`.
 - Working tree: `docs/buyeros/**` only; local git repo initialized this session with `origin` = `https://github.com/YNWAforever/BuyerOS.git`.
@@ -41,7 +41,7 @@ Plan revision v1. Session date: 2026-09-15 (Hong Kong). Mode: **PLAN** (no Build
 | Upstream pins (A/R/F/S/L) | GitHub API commit lookups | **PASS** (5/5 resolve) |
 | OpenAPI structure | PyYAML parse + `$ref` resolution | **PASS** (70 ops, 139 schemas, 0 unresolved) |
 | Live Site | HTTP GET | **PASS** (200, Cloudflare) |
-| Source checkout `git rev-parse HEAD` / `git status --short` | local app checkout | **NOT RUN** (source not imported) |
+| Source checkout `git rev-parse HEAD` / `git status --short` | local checkout | **PASS** — HEAD `72fef7d`, tree `38d3ff3`, working tree clean |
 | `opencode --version` (CLI) | PATH | **NOT RUN** (CLI absent) |
 | `uv run pytest`, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build`, `node tests/domain-checks.mjs` | local | **NOT RUN** |
 | Playwright responsive/keyboard/locale | local | **NOT RUN** |
@@ -50,14 +50,14 @@ Plan revision v1. Session date: 2026-09-15 (Hong Kong). Mode: **PLAN** (no Build
 ## Outcome and recovery
 
 - Objective achieved: BO-000/001/002/003 reviewed; BO-004…BO-030 designed and planned; documentation published to the canonical repository.
-- Residual risks/blockers: source not imported; all B-* blockers open; three design defaults unconfirmed by the owner.
+- Residual risks/blockers: all B-* blockers open; three design defaults unconfirmed by the owner.
 - Rollback/roll-forward: documentation-only commits; supersede with a dated successor. No schema or ledger exists to reconcile.
 - Release status: **planning documentation only**.
 
 ## Exact resume instruction
 
 1. Re-read `00_README_AND_DECISIONS.md`, `HANDOFF_INDEX.md`, `tasks/index.json`, this record, and the selected task.
-2. Next concrete action: import the audited source into `YNWAforever/BuyerOS`; then re-verify BO-000 identity against tree `b4c6b538…`.
+2. Next concrete action: confirm B-IDENTITY/B-HOST and approve one Build task (BO-005 recommended); BO-000 identity is verified (import `b804ba8d1514a1049b7202c861278dd72c473a75`, tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`).
 3. Files to read next: the selected task plus its `contract_refs` and the matching spec/plan.
 4. Next eligible task for Plan review: **BO-004** (or BO-005) after the source import; still blocked by B-IDENTITY/B-HOST/B-APPROVAL.
 5. Prohibited until separately approved: Build, installs, migrations, provisioning, deployment, Site changes, paid provider calls, contact purchase, mailbox connections, sends.

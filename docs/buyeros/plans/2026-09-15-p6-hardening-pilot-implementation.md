@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Canonical repository: `YNWAforever/BuyerOS` (planning pack committed at `1512d4c17d4f792e14598d524fdac3c9c37d27e7`; a source import is still expected to produce tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`).
+- Canonical repository: `YNWAforever/BuyerOS` (the audited source is imported at commit `b804ba8d1514a1049b7202c861278dd72c473a75`, tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`, merged into `main` via `72fef7da785624a35bb6701f1451ebcf0184a089`).
 - Plan-only artifact. No commits, pushes, installs, migrations, provisioning, paid calls, mailbox connections, or deployment are authorized.
 - Depends on P1–P5. Delivery stays disabled; MVP-A has no sender.
 - Retention defaults are **provisional and configurable** (≈30-day event replay, 15-minute snapshot/export TTL); all values remain pending controller/legal review.

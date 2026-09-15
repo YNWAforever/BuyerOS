@@ -2,7 +2,7 @@
 
 **Status: PROPOSED / PLAN ONLY.** Plan revision v1. Recorded 2026-09-15 (Hong Kong). This is a handoff index, not Build approval.
 
-No application code, lockfile, install, migration, cloud resource, deployment, Site access change, paid provider call, mailbox connection, message, or send is authorized by this document. The application source is **not yet imported** into the repository.
+No application code, lockfile, install, migration, cloud resource, deployment, Site access change, paid provider call, mailbox connection, message, or send is authorized by this document. The audited application source is imported at `b804ba8d1514a1049b7202c861278dd72c473a75` (tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`) and merged into `main` via `72fef7da785624a35bb6701f1451ebcf0184a089`.
 
 - Canonical repository: `YNWAforever/BuyerOS`
 - Planning pack committed at `1512d4c17d4f792e14598d524fdac3c9c37d27e7` (docs only)
@@ -10,7 +10,7 @@ No application code, lockfile, install, migration, cloud resource, deployment, S
 - Sites source commit: `76892126c86031bfe8e7ab517adba7f306040313`; Site `appgprj_6aa82285e5108191aac9c44c840c5efe`
 - Live Site: `https://fimmick-buyeros.laichiwillyjp.chatgpt.site` (public, active, revision 2; unchanged)
 
-Because the pack is the repository's initial commit, the repo **root** tree is not `b4c6b538…`; the "exact import" expectation applies to a future **source-import commit** that must carry that tree.
+The import commit `b804ba8d…` carries tree `b4c6b538…`; `main` HEAD is the merge commit `72fef7d…`, whose tree combines source and docs.
 
 ## Task → design → plan map
 
@@ -71,7 +71,7 @@ These are defaults, not owner confirmations; change any of them and the affected
 
 ## Exact next action
 
-1. Import the audited application source into `YNWAforever/BuyerOS` so a commit carries tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`; re-verify BO-000 identity.
+1. (DONE) Audited source imported at `b804ba8d1514a1049b7202c861278dd72c473a75` and merged; BO-000 identity re-verifies against tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`.
 2. Resolve B-IDENTITY (Auth0 reconfigure + membership owner) and B-HOST (accounts/sizes).
 3. Approve **one** task (recommended: BO-005 or BO-004) with commit, allowed files/actions, approver and timestamp; then Build only that scope via `superpowers:subagent-driven-development` or `superpowers:executing-plans`.
 

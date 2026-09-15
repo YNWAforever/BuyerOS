@@ -1,6 +1,6 @@
 # Source import and identity verification checklist
 
-**Status: PROPOSED / NOT RUN.** Plan revision v1. Recorded 2026-09-15 (Hong Kong). **None of these commands has been executed.** Running them requires owner authorization; several mutate a remote repository.
+**Status: PROPOSED / EXECUTED (Option A).** Plan revision v1. Recorded 2026-09-15 (Hong Kong). Option A was executed with owner authorization: the audited commit `b804ba8d1514a1049b7202c861278dd72c473a75` was pushed as branch `import-b804ba8d` and merged into `main` via `72fef7da785624a35bb6701f1451ebcf0184a089`. Options B/C below remain unexecuted.
 
 Goal: place the audited application source into canonical repository `YNWAforever/BuyerOS` so a specific commit carries tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`, then re-verify the BO-000/BO-001 identity baseline.
 
