@@ -37,8 +37,19 @@ def claims_to_principal(claims: dict, *, issuer: str, audience: str, now: int | 
             raise AuthError("bad audience")
     elif aud != audience:
         raise AuthError("bad audience")
-    if int(claims.get("exp", 0)) <= now:
+    try:
+        exp = int(claims.get("exp", 0))
+    except (TypeError, ValueError) as exc:
+        raise AuthError("bad exp") from exc
+    if exp <= now:
         raise AuthError("expired")
+    if "nbf" in claims:
+        try:
+            nbf = int(claims["nbf"])
+        except (TypeError, ValueError) as exc:
+            raise AuthError("bad nbf") from exc
+        if nbf > now + 60:
+            raise AuthError("token not yet valid")
     if not claims.get("sub"):
         raise AuthError("missing subject")
     return Principal(issuer=issuer, subject=str(claims["sub"]))
@@ -49,11 +60,12 @@ async def get_principal(request: Request) -> Principal:
 
     settings = get_settings()
     header = request.headers.get("Authorization", "")
-    if not header.startswith("Bearer "):
+    scheme, _, token = header.partition(" ")
+    if scheme.lower() != "bearer" or not token.strip():
         raise ApiError(401, "UNAUTHENTICATED", "missing bearer token")
     try:
         return principal_from_token(
-            header.removeprefix("Bearer ").strip(),
+            token.strip(),
             issuer=settings.auth0_issuer,
             audience=settings.auth0_audience,
         )
