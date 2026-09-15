@@ -22,7 +22,10 @@ def _reject_if_blocked_host(host: str) -> None:
 
 
 def validate_fetch(url: str, content_type: str, size: int) -> None:
-    normalized = normalize_url(url)
+    try:
+        normalized = normalize_url(url)
+    except ValueError:
+        raise FetchRejected(f"malformed url: {url}") from None
     parsed = urlsplit(normalized)
     if parsed.scheme not in {"http", "https"}:
         raise FetchRejected(f"unsupported scheme {parsed.scheme}")
