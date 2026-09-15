@@ -131,3 +131,19 @@ Still not done: contact/quote/draft/approval tables (P4/P5), worker, API routes,
 | Fixture cleanup | `docker ps -a --filter name=buyeros-test` | **PASS** — 0 containers remaining |
 
 Still not done: worker/Celery execution, API routes/HTTP layer, auth (BO-004), search/LLM adapters, evidence fetch pipeline, frontend live adapter, and the remaining P3 tables. No task is marked DONE; the dependency waiver still stands.
+
+## P3 persistence extension (same waiver)
+
+- Added models: `buyeros_api/db/runs.py` — `search_runs`, `run_events`, `raw_candidates`, `company_aliases`, `people`, `contact_points`.
+- Added services: `run_events` (monotonic sequencing + duplicate/out-of-order rejection), `query_plan` (bounded DE/NL/FR/EN plan validation), `canonicalize` (registry-id-only auto-merge, shared domains → review), `fit` (evidence-ID validation, uncited-match → needs review), `providers/search` (provider-agnostic adapter + capability manifest; activation gated).
+- Added migration `0005_p3_tables` with composite tenant FKs and **RLS on all 6 new tenant tables**.
+
+| Check | Command | Result |
+|---|---|---|
+| Full suite | `uv run pytest -q` (cwd `services/api`) | **PASS — 104 passed** (incl. DB-backed) |
+| Migrations apply | disposable `postgres:16` fixture | **PASS** — up to `0005_p3_tables` |
+| RLS coverage (P3) | `pg_class` assertion incl. P3 tables | **PASS** — all 6 P3 tables forced-RLS |
+| Search activation gate | `test_search_adapter.py` | **PASS** — unverified provider cannot activate |
+| Fixture cleanup | `docker ps -a --filter name=buyeros-test` | **PASS** — 0 containers remaining |
+
+Still not done: worker/Celery dispatch, HTTP API layer, auth (BO-004), a real (BO-002-verified) search/LLM provider, evidence fetch pipeline, frontend live adapter, and the LangGraph fit graph. No task is marked DONE; the dependency waiver still stands.

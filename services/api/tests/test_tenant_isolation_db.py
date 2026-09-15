@@ -71,5 +71,11 @@ def test_rls_is_forced_on_p4_p5_tables(seeded):
         "outcome_events",
         "export_jobs",
         "audit_events",
+        "search_runs",
+        "run_events",
+        "raw_candidates",
+        "company_aliases",
+        "people",
+        "contact_points",
     }
     assert expected <= protected, expected - protected
