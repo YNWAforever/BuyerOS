@@ -62,3 +62,5 @@ cb933614310eaff60c1bd2e2ca9142ef36ef8e3e31d239280d158b26d67ddf80  plans/2026-09-
 d000ee2b120bccda722cd5bdfe5373e2a71fd7285ce760c3a340cce5a5c38026  plans/2026-09-15-p5-draft-approval-export-implementation.md
 6a7014f4276371bca800dbd92a1ac7783f3b1482b0f00ab8bf3ddaf110bfb3a2  plans/2026-09-15-p6-hardening-pilot-implementation.md
 fb01b0489725cb111cf20e5809d4ae8763e4a0ec580d91d3892238aa9403f475  plans/2026-09-15-p7-delivery-design-implementation.md
+c2f7ef7b4f00d2a7e1014a4aae474b9a3739cc718f6be1e6f4a0f33cc9674700  HANDOFF_INDEX.md
+69e71c993b1640efd42d946fa63cdf9ef91f31f7eae918f6251ceb9af74a9aed  PROGRESS.md

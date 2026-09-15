@@ -1,0 +1,6 @@
+# Keep planning-pack artifacts at LF so SHA256SUMS.txt stays valid on every checkout.
+*.md text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.txt text eol=lf
