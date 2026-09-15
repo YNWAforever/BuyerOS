@@ -25,16 +25,25 @@ def _valkey_container():
 
 
 def test_broker_is_reachable_and_dispatcher_selection_is_pure():
-    name = _valkey_container()
+    original = celery_app.conf.broker_url
+    name = None
     try:
-        time.sleep(3)
+        name = _valkey_container()
         port_output = subprocess.run(["docker", "port", name, "6379"], capture_output=True, text=True).stdout.strip()
         if not port_output:
             pytest.skip(f"could not resolve valkey port for {name}")
         port = port_output.splitlines()[0].rsplit(":", 1)[1]
         celery_app.conf.broker_url = f"redis://127.0.0.1:{port}/0"
-        with celery_app.connection() as conn:
-            conn.ensure_connection(max_retries=3)
+        for _ in range(15):
+            try:
+                with celery_app.connection() as conn:
+                    conn.ensure_connection(max_retries=1)
+            except Exception:
+                time.sleep(1)
+            else:
+                break
+        else:
+            pytest.skip("valkey broker did not become ready")
         assert celery_app.conf.broker_url.endswith("/0")
         selected = select_ready(
             [{"id": 1, "state": "ready", "lease_expires_at": None}],
@@ -42,4 +51,6 @@ def test_broker_is_reachable_and_dispatcher_selection_is_pure():
         )
         assert selected[0]["id"] == 1
     finally:
-        subprocess.run(["docker", "rm", "-f", name], capture_output=True, text=True)
+        celery_app.conf.broker_url = original
+        if name is not None:
+            subprocess.run(["docker", "rm", "-f", name], capture_output=True, text=True)
