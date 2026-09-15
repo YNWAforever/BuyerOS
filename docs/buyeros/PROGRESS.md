@@ -101,4 +101,16 @@ Extended the spike to the P2 domain tables under the same owner waiver.
 | Regression found & fixed | migration `0003` FK naming collision | **FIXED** — explicit composite-FK names; all migrations re-applied cleanly |
 | Disposable container cleanup | `docker rm -f buyeros-pg2` | **DONE** |
 
-Still not done: DB-backed automated isolation fixtures in pytest, contact/quote/draft/approval tables (P4/P5), worker, API routes, auth. No task is marked DONE.
+### DB-backed isolation fixture (automated)
+
+`tests/conftest.py` now provides `pg_dsn` (uses `BUYEROS_TEST_DATABASE_URL`, else starts/removes a disposable `postgres:16`), `migrated` (applies all Alembic migrations once) and `seeded` (two workspaces/projects + runtime-role login). `tests/test_tenant_isolation_db.py` asserts tenant isolation against the real database.
+
+| Check | Command | Result |
+|---|---|---|
+| Full suite incl. DB tests | `uv run pytest -q` (cwd `services/api`) | **PASS — 39 passed** (35 unit + 4 DB) |
+| Missing tenant context fails closed | RLS as `buyeros_api` | **PASS** — `UndefinedObject` raised |
+| Workspace-scoped reads | RLS as `buyeros_api` | **PASS** — A → `ProjectA`, B → `ProjectB` |
+| Cross-tenant write rejected | RLS `WITH CHECK` | **PASS** — `InsufficientPrivilege` |
+| Fixture cleanup | `docker ps -a --filter name=buyeros-test` | **PASS** — 0 containers remaining |
+
+Still not done: contact/quote/draft/approval tables (P4/P5), worker, API routes, auth. No task is marked DONE.
