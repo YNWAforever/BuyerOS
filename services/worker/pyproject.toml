@@ -1,0 +1,32 @@
+[project]
+name = "buyeros-worker"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "buyeros-api",
+  "celery>=5.4,<6",
+  "redis>=5,<6",
+  "psycopg[binary]>=3.2,<4",
+  "pydantic-settings>=2.5,<3",
+]
+
+[tool.uv.sources]
+buyeros-api = { path = "../api" }
+
+# NOTE (P8 worker): `buyeros_api` is a flat-layout project with no
+# [build-system] or [tool.setuptools] stanza, so the setuptools legacy backend
+# refuses to build it ("Multiple top-level packages discovered in a flat-layout:
+# ['alembic', 'buyeros_api']"). That makes the `../api` path dependency
+# un-installable, which would block `uv run` entirely. Until services/api
+# declares its packages (out of scope for this task), keep the declaration and
+# source above for intent, but exclude it from uv resolution and import it from
+# the source tree through the pytest `pythonpath` entry below.
+[tool.uv]
+exclude-dependencies = ["buyeros-api"]
+
+[dependency-groups]
+dev = ["pytest>=8.3,<9", "pytest-asyncio>=0.24,<1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "../api"]
