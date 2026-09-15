@@ -86,7 +86,31 @@ def test_every_registry_route_is_registered_on_its_declared_path():
         assert response.status_code == 401, (operation_id, method, concrete)
 
 
-def test_list_buyers_requires_the_contract_snapshot_id():
-    client = TestClient(create_app(), raise_server_exceptions=False)
-    response = client.get(f"/v1/workspaces/{WORKSPACE}/projects/{PROJECT}/buyers")
-    assert response.status_code == 401  # auth first; the query param is still declared required
+def test_list_buyers_declares_the_required_snapshot_id():
+    """Auth precedes validation, so assert the contract requirement in the app's schema."""
+    from buyeros_api.api.app import create_app as _create_app
+
+    schema = _create_app().openapi()
+    operation = schema["paths"]["/v1/workspaces/{workspace_id}/projects/{project_id}/buyers"]["get"]
+    query = [p for p in operation["parameters"] if p["in"] == "query"]
+    snapshot = [p for p in query if p["name"] == "snapshot_id"]
+    assert snapshot, "snapshot_id query parameter is not declared"
+    assert snapshot[0]["required"] is True
+
+
+def test_unimplemented_handler_actually_returns_501(monkeypatch):
+    """The 401 test cannot prove 501; this drives the handler with a satisfied principal."""
+    from buyeros_api.api import auth
+    from buyeros_api.api.app import create_app as _create_app
+
+    monkeypatch.setattr(
+        auth, "principal_from_token", lambda token, *, issuer, audience: auth.Principal("test", "auth0|1")
+    )
+    client = TestClient(_create_app(), raise_server_exceptions=False)
+    response = client.post(
+        f"/v1/workspaces/{WORKSPACE}/projects/{PROJECT}/runs",
+        json={},
+        headers={"Authorization": "Bearer t"},
+    )
+    assert response.status_code == 501
+    assert response.json()["code"] == "NOT_IMPLEMENTED"
