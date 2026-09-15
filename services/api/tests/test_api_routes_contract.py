@@ -74,7 +74,7 @@ def test_approve_declares_the_required_if_match_precondition():
     assert operation["x-version-precondition"] == "If-Match"
 
 
-def test_approve_rejects_a_missing_or_malformed_if_match():
+def test_approve_checks_auth_before_preconditions():
     client = TestClient(create_app(), raise_server_exceptions=False)
     path = f"/v1/workspaces/{WORKSPACE}/icp-versions/{ICP}/approve"
 
@@ -87,3 +87,42 @@ def test_approve_rejects_a_missing_or_malformed_if_match():
         headers={"Idempotency-Key": "k", "If-Match": "4"},
     )
     assert weak.status_code == 401
+
+
+def _approve_client_with_principal(monkeypatch):
+    """A client whose auth succeeds, so the route's own precondition logic runs."""
+    from fastapi import Depends
+
+    from buyeros_api.api import auth
+    from buyeros_api.api.app import create_app
+
+    monkeypatch.setattr(
+        auth, "principal_from_token", lambda token, *, issuer, audience: auth.Principal("test", "auth0|1")
+    )
+    app = create_app()
+
+    @app.middleware("http")
+    async def _accept_bearer(request, call_next):
+        return await call_next(request)
+
+    return TestClient(app, raise_server_exceptions=False)
+
+
+def test_approve_rejects_a_missing_or_malformed_if_match(monkeypatch):
+    """Regression guard: with auth satisfied, If-Match must be enforced (it was once absent)."""
+    client = _approve_client_with_principal(monkeypatch)
+    path = f"/v1/workspaces/{WORKSPACE}/icp-versions/{ICP}/approve"
+    body = {"content_hash": "sha256:x", "confirmation": True}
+
+    absent = client.post(path, json=body, headers={"Idempotency-Key": "k", "Authorization": "Bearer t"})
+    assert absent.status_code == 400
+    assert absent.json()["code"] == "INVALID_REQUEST"
+
+    for weak in ("4", 'W/"4"', '"x"', '""'):
+        response = client.post(
+            path,
+            json=body,
+            headers={"Idempotency-Key": "k", "Authorization": "Bearer t", "If-Match": weak},
+        )
+        assert response.status_code == 400, weak
+        assert response.json()["code"] == "INVALID_REQUEST"
