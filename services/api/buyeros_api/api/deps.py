@@ -3,17 +3,28 @@ import uuid
 
 from ..settings import get_settings
 
-_READ = frozenset({"project.read", "buyer.read", "evidence.read", "usage.read"})
+_VIEWERS = frozenset({"viewer", "operator", "reviewer", "workspace_admin"})
+_WRITERS = frozenset({"operator", "workspace_admin"})
 
-# Derived from the contract's `x-permitted-roles` for the operations P9 implements.
-ROLE_PERMISSIONS: dict[str, frozenset[str]] = {
-    "viewer": _READ,
-    "operator": _READ | frozenset({"project.write", "run.write", "buyer.note", "outcome.write", "quote.request"}),
-    "reviewer": _READ | frozenset({"icp.approve", "run.write", "buyer.note", "outcome.write", "quote.request", "buyer.review", "draft.approve", "quote.confirm"}),
-    "policy_admin": _READ | frozenset({"policy.write", "suppression.write"}),
-    "budget_admin": _READ | frozenset({"budget.write"}),
-    "workspace_admin": frozenset({"*"}),
+# Transcribed from the contract's `x-permitted-roles`, for the operations P9 implements.
+OPERATION_ROLES: dict[str, frozenset[str]] = {
+    "listWorkspaces": _VIEWERS,
+    "listProjects": _VIEWERS,
+    "getProject": _VIEWERS,
+    "listICPVersions": _VIEWERS,
+    "listBuyers": _VIEWERS,
+    "getBuyer": _VIEWERS,
+    "createProject": _WRITERS,
+    "updateProject": frozenset({"operator", "reviewer", "workspace_admin"}),
+    "saveICPVersion": _WRITERS,
+    "approveICPVersion": frozenset({"reviewer", "workspace_admin"}),
+    "getReadiness": frozenset({"workspace_admin"}),
+    "getCapabilities": frozenset({"workspace_admin"}),
 }
+
+
+def permitted_roles(operation_id: str) -> frozenset[str]:
+    return OPERATION_ROLES.get(operation_id, frozenset())
 
 _ENGINES: dict[str, object] = {}
 
@@ -40,11 +51,11 @@ def get_engine():
 
 
 def permission_for_roles(roles: list[str], permission: str) -> bool:
-    for role in roles:
-        granted = ROLE_PERMISSIONS.get(role)
-        if granted and ("*" in granted or permission in granted):
-            return True
-    return False
+    """Compatibility wrapper: `permission` names the contract operation being performed."""
+    allowed = permitted_roles(permission)
+    if "workspace_admin" in roles:
+        return True
+    return bool(allowed.intersection(roles))
 
 
 @contextlib.asynccontextmanager

@@ -1,4 +1,9 @@
-from buyeros_api.api.deps import async_database_url, get_engine, permission_for_roles
+from buyeros_api.api.deps import (
+    async_database_url,
+    get_engine,
+    permitted_roles,
+    permission_for_roles,
+)
 
 
 def test_async_database_url_selects_the_psycopg_driver():
@@ -21,23 +26,43 @@ def test_get_engine_reuses_one_engine_per_dsn(monkeypatch):
 
 
 def test_viewer_cannot_write():
-    assert permission_for_roles(["viewer"], "project.write") is False
-    assert permission_for_roles(["viewer"], "project.read") is True
+    assert permission_for_roles(["viewer"], "createProject") is False
+    assert permission_for_roles(["viewer"], "listProjects") is True
 
 
 def test_workspace_admin_allows_everything():
-    assert permission_for_roles(["workspace_admin"], "budget.write") is True
+    assert permission_for_roles(["workspace_admin"], "approveICPVersion") is True
 
 
 def test_unknown_role_denied():
-    assert permission_for_roles(["ghost"], "project.read") is False
+    assert permission_for_roles(["ghost"], "listProjects") is False
+
+
+def test_unknown_operation_denies_everyone_without_the_admin_wildcard():
+    assert permitted_roles("noSuchOperation") == frozenset()
+    assert permission_for_roles(["operator"], "noSuchOperation") is False
 
 
 def test_operator_creates_projects_but_cannot_approve_icp():
-    assert permission_for_roles(["operator"], "project.write") is True
-    assert permission_for_roles(["operator"], "icp.approve") is False
+    assert permission_for_roles(["operator"], "createProject") is True
+    assert permission_for_roles(["operator"], "approveICPVersion") is False
 
 
-def test_reviewer_approves_icp_but_cannot_create_projects():
-    assert permission_for_roles(["reviewer"], "icp.approve") is True
-    assert permission_for_roles(["reviewer"], "project.write") is False
+def test_reviewer_updates_and_approves_but_cannot_create():
+    assert permission_for_roles(["reviewer"], "approveICPVersion") is True
+    assert permission_for_roles(["reviewer"], "updateProject") is True
+    assert permission_for_roles(["reviewer"], "createProject") is False
+
+
+def test_admins_without_contract_read_grants_are_denied_reads():
+    assert permission_for_roles(["policy_admin"], "listProjects") is False
+    assert permission_for_roles(["budget_admin"], "listBuyers") is False
+
+
+def test_operation_roles_are_verbatim_from_the_contract():
+    assert permitted_roles("createProject") == frozenset({"operator", "workspace_admin"})
+    assert permitted_roles("updateProject") == frozenset({"operator", "reviewer", "workspace_admin"})
+    assert permitted_roles("saveICPVersion") == frozenset({"operator", "workspace_admin"})
+    assert permitted_roles("approveICPVersion") == frozenset({"reviewer", "workspace_admin"})
+    assert permitted_roles("getReadiness") == frozenset({"workspace_admin"})
+    assert permitted_roles("listBuyers") == frozenset({"viewer", "operator", "reviewer", "workspace_admin"})
