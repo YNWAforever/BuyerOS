@@ -4,12 +4,18 @@ from fastapi import FastAPI, Request
 
 from .errors import ApiError, error_handler
 from .routes.health import router as health_router
+from .routes.icp import router as icp_router
+from .routes.projects import router as projects_router
+from .routes.workspaces import router as workspaces_router
 
 
 def create_app() -> FastAPI:
     app = FastAPI(title="FIMMICK BuyerOS domain API", version="0.1.0")
     app.add_exception_handler(ApiError, error_handler)
     app.include_router(health_router)
+    app.include_router(workspaces_router)
+    app.include_router(projects_router)
+    app.include_router(icp_router)
 
     @app.middleware("http")
     async def request_id_middleware(request: Request, call_next):
