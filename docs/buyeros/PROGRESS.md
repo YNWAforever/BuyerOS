@@ -83,3 +83,22 @@ No automatic transition to Build, live spend, deployment, or P7 delivery follows
 | Disposable container cleanup | `docker rm -f buyeros-pg` | **DONE** |
 
 Remaining for full BO-005: DB-backed automated isolation fixtures, project/buyer/evidence/list tables (P2), and contract/auth integration. The repository now contains both the imported application source and this `services/api` spike.
+
+## P2 persistence extension (same waiver)
+
+Extended the spike to the P2 domain tables under the same owner waiver.
+
+- Added models: `buyeros_api/db/{icp,policy,budget,outbox,buyers}.py` — `projects`, `icp_versions`, `companies`, `project_buyers`, `source_documents`, `evidence`, `fit_assessments`, `human_reviews`, `buyer_lists`, `list_memberships`, `buyer_snapshots`, `buyer_snapshot_items`, `policy_decisions`, `suppressions`, `budget_accounts`, `budget_reservations`, `cost_events`, `outbox_events`.
+- Added services: `policy_service.effective_decision` (fail-closed, most-restrictive-wins), `budget_service.would_exceed`/`lock_order`, `outbox_service.build_intent`, `snapshot_service.materialize_snapshot`, `safe_fetch.is_blocked_host`/`normalize_url`, `icp.canonical_hash`.
+- Added migration `0003_p2_tables` with composite tenant FKs and **RLS on all 18 new tenant tables**.
+
+| Check | Command | Result |
+|---|---|---|
+| Unit tests (extended) | `uv run pytest -q` (cwd `services/api`) | **PASS — 35 passed** |
+| Migrations apply | `uv run alembic upgrade head` on disposable `postgres:16` | **PASS** — `alembic_version = 0003_p2_tables`, 22 tables |
+| RLS coverage | `pg_class` | **PASS** — 19 tables `relrowsecurity` + `relforcerowsecurity` (memberships + 18 P2) |
+| Tenant isolation (`projects`) | `psql` as `buyeros_api` | **PASS** — no context → error; workspace A → `ProjectA` only; workspace B → `ProjectB` only |
+| Regression found & fixed | migration `0003` FK naming collision | **FIXED** — explicit composite-FK names; all migrations re-applied cleanly |
+| Disposable container cleanup | `docker rm -f buyeros-pg2` | **DONE** |
+
+Still not done: DB-backed automated isolation fixtures in pytest, contact/quote/draft/approval tables (P4/P5), worker, API routes, auth. No task is marked DONE.
