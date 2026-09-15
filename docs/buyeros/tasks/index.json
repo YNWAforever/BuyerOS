@@ -1,0 +1,960 @@
+{
+  "base_commit": "b804ba8d1514a1049b7202c861278dd72c473a75",
+  "convention": "BuyerOS handoff convention; not a native OpenCode execution engine",
+  "default_external_spend_authorized": false,
+  "first_review_task": "BO-000",
+  "generated_at": "2026-09-15",
+  "implementation_executed": false,
+  "plan_revision": "v1",
+  "repository": "https://github.com/YNWAforever/BuyerOS",
+  "content_baseline_repository": "https://github.com/YNWAforever/buyerosgpt",
+  "schema_version": "1.0",
+  "source_site_commit": "76892126c86031bfe8e7ab517adba7f306040313",
+  "tasks": [
+    {
+      "acceptance_tests": [
+        "TEST-BO-000-01",
+        "TEST-BO-000-02",
+        "TEST-BO-000-03"
+      ],
+      "blocked_by": [],
+      "depends_on": [],
+      "document": "BO-000-reconcile-the-exact-source-missing-inputs-and-opencode-baseline.md",
+      "effort_range_hours": [
+        4,
+        8
+      ],
+      "owner_role": "platform",
+      "phase": "P0",
+      "source_requirements": [
+        "REQ-IDENTITY",
+        "REQ-INPUTS",
+        "REQ-OPENCODE"
+      ],
+      "status": "READY_FOR_REVIEW",
+      "task_id": "BO-000",
+      "title": "Reconcile the exact source, missing inputs, and OpenCode baseline"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-001-01",
+        "TEST-BO-001-02",
+        "TEST-BO-001-03"
+      ],
+      "blocked_by": [
+        "B-IDENTITY",
+        "B-HOST",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-000"
+      ],
+      "document": "BO-001-approve-the-runtime-identity-deployment-and-migration-decision-record.md",
+      "effort_range_hours": [
+        6,
+        12
+      ],
+      "owner_role": "platform",
+      "phase": "P0",
+      "source_requirements": [
+        "REQ-STACK",
+        "REQ-TENANT"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-001",
+      "title": "Approve the runtime, identity, deployment and migration decision record"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-002-01",
+        "TEST-BO-002-02",
+        "TEST-BO-002-03"
+      ],
+      "blocked_by": [
+        "B-PROVIDERS",
+        "B-LICENSE",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-000"
+      ],
+      "document": "BO-002-pin-reusable-upstream-components-and-verify-bounded-provider-capabilities.md",
+      "effort_range_hours": [
+        12,
+        20
+      ],
+      "owner_role": "ai",
+      "phase": "P0",
+      "source_requirements": [
+        "REQ-REUSE",
+        "REQ-PROVIDER",
+        "REQ-BUDGET"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-002",
+      "title": "Pin reusable upstream components and verify bounded provider capabilities"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-003-01",
+        "TEST-BO-003-02",
+        "TEST-BO-003-03"
+      ],
+      "blocked_by": [
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-001",
+        "BO-002"
+      ],
+      "document": "BO-003-freeze-domain-api-shapes-and-generate-a-typed-browser-boundary.md",
+      "effort_range_hours": [
+        14,
+        24
+      ],
+      "owner_role": "backend",
+      "phase": "P1",
+      "source_requirements": [
+        "REQ-CONTRACT",
+        "REQ-DEMO"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-003",
+      "title": "Freeze domain API shapes and generate a typed browser boundary"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-004-01",
+        "TEST-BO-004-02",
+        "TEST-BO-004-03"
+      ],
+      "blocked_by": [
+        "B-IDENTITY",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-003"
+      ],
+      "document": "BO-004-verify-api-bearer-identity-and-enforce-tenant-membership.md",
+      "effort_range_hours": [
+        18,
+        30
+      ],
+      "owner_role": "backend",
+      "phase": "P1",
+      "source_requirements": [
+        "REQ-TENANT",
+        "REQ-CONTRACT"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-004",
+      "title": "Verify API bearer identity and enforce tenant membership"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-005-01",
+        "TEST-BO-005-02",
+        "TEST-BO-005-03"
+      ],
+      "blocked_by": [
+        "B-HOST",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-003",
+        "BO-004"
+      ],
+      "document": "BO-005-create-tenant-safe-domain-persistence-and-one-migration-owner.md",
+      "effort_range_hours": [
+        24,
+        40
+      ],
+      "owner_role": "backend",
+      "phase": "P1",
+      "source_requirements": [
+        "REQ-DATA",
+        "REQ-TENANT"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-005",
+      "title": "Create tenant-safe domain persistence and one migration owner"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-006-01",
+        "TEST-BO-006-02",
+        "TEST-BO-006-03"
+      ],
+      "blocked_by": [
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-004",
+        "BO-005"
+      ],
+      "document": "BO-006-separate-demo-state-from-authenticated-live-adapters.md",
+      "effort_range_hours": [
+        20,
+        32
+      ],
+      "owner_role": "frontend",
+      "phase": "P1",
+      "source_requirements": [
+        "REQ-DEMO",
+        "REQ-UI",
+        "REQ-TENANT"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-006",
+      "title": "Separate demo state from authenticated live adapters"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-007-01",
+        "TEST-BO-007-02",
+        "TEST-BO-007-03",
+        "TEST-BO-007-04"
+      ],
+      "blocked_by": [
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-005",
+        "BO-006"
+      ],
+      "document": "BO-007-persist-projects-editable-offers-and-immutable-approved-buyer-profiles.md",
+      "effort_range_hours": [
+        24,
+        40
+      ],
+      "owner_role": "backend",
+      "phase": "P2",
+      "source_requirements": [
+        "REQ-PROFILE",
+        "REQ-DATA",
+        "REQ-UI"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-007",
+      "title": "Persist projects, editable offers and immutable approved buyer profiles"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-008-01",
+        "TEST-BO-008-02",
+        "TEST-BO-008-03"
+      ],
+      "blocked_by": [
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-007"
+      ],
+      "document": "BO-008-persist-buyer-evidence-views-reviews-stable-selections-and-lists.md",
+      "effort_range_hours": [
+        28,
+        44
+      ],
+      "owner_role": "backend",
+      "phase": "P2",
+      "source_requirements": [
+        "REQ-BUYERS",
+        "REQ-EVIDENCE",
+        "REQ-UI"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-008",
+      "title": "Persist buyer evidence views, reviews, stable selections and lists"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-009-01",
+        "TEST-BO-009-02",
+        "TEST-BO-009-03"
+      ],
+      "blocked_by": [
+        "B-POLICY",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-008"
+      ],
+      "document": "BO-009-enforce-purpose-specific-policy-and-scoped-suppression.md",
+      "effort_range_hours": [
+        18,
+        30
+      ],
+      "owner_role": "backend",
+      "phase": "P2",
+      "source_requirements": [
+        "REQ-POLICY",
+        "REQ-TENANT",
+        "REQ-APPROVAL"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-009",
+      "title": "Enforce purpose-specific policy and scoped suppression"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-010-01",
+        "TEST-BO-010-02",
+        "TEST-BO-010-03",
+        "TEST-BO-010-04",
+        "TEST-BO-010-05"
+      ],
+      "blocked_by": [
+        "B-PROVIDERS",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-005",
+        "BO-009"
+      ],
+      "document": "BO-010-reserve-and-settle-bounded-spend-atomically.md",
+      "effort_range_hours": [
+        24,
+        40
+      ],
+      "owner_role": "backend",
+      "phase": "P2",
+      "source_requirements": [
+        "REQ-BUDGET",
+        "REQ-PROVIDER"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-010",
+      "title": "Reserve and settle bounded spend atomically"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-011-01",
+        "TEST-BO-011-02",
+        "TEST-BO-011-03"
+      ],
+      "blocked_by": [
+        "B-HOST",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-005",
+        "BO-010"
+      ],
+      "document": "BO-011-enqueue-durable-work-through-one-transactional-outbox-and-queue.md",
+      "effort_range_hours": [
+        22,
+        36
+      ],
+      "owner_role": "platform",
+      "phase": "P2",
+      "source_requirements": [
+        "REQ-QUEUE",
+        "REQ-RECOVERY",
+        "REQ-TENANT"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-011",
+      "title": "Enqueue durable work through one transactional outbox and queue"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-012-01",
+        "TEST-BO-012-02",
+        "TEST-BO-012-03"
+      ],
+      "blocked_by": [
+        "B-HOST",
+        "B-POLICY",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-007",
+        "BO-009",
+        "BO-011"
+      ],
+      "document": "BO-012-safely-ingest-offer-files-and-fetch-permitted-web-evidence.md",
+      "effort_range_hours": [
+        24,
+        40
+      ],
+      "owner_role": "platform",
+      "phase": "P2",
+      "source_requirements": [
+        "REQ-FETCH",
+        "REQ-EVIDENCE",
+        "REQ-SECURITY"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-012",
+      "title": "Safely ingest offer files and fetch permitted web evidence"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-013-01",
+        "TEST-BO-013-02",
+        "TEST-BO-013-03"
+      ],
+      "blocked_by": [
+        "B-PROVIDERS",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-002",
+        "BO-010",
+        "BO-011",
+        "BO-012"
+      ],
+      "document": "BO-013-run-bounded-multilingual-discovery-with-verified-search-and-model-adapters.md",
+      "effort_range_hours": [
+        24,
+        40
+      ],
+      "owner_role": "ai",
+      "phase": "P3",
+      "source_requirements": [
+        "REQ-DISCOVERY",
+        "REQ-BUDGET",
+        "REQ-REUSE"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-013",
+      "title": "Run bounded multilingual discovery with verified search and model adapters"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-014-01",
+        "TEST-BO-014-02",
+        "TEST-BO-014-03"
+      ],
+      "blocked_by": [
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-008",
+        "BO-012",
+        "BO-013"
+      ],
+      "document": "BO-014-canonicalize-company-candidates-and-persist-linked-evidence.md",
+      "effort_range_hours": [
+        20,
+        34
+      ],
+      "owner_role": "ai",
+      "phase": "P3",
+      "source_requirements": [
+        "REQ-EVIDENCE",
+        "REQ-DATA",
+        "REQ-BUYERS"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-014",
+      "title": "Canonicalize company candidates and persist linked evidence"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-015-01",
+        "TEST-BO-015-02",
+        "TEST-BO-015-03"
+      ],
+      "blocked_by": [
+        "B-PROVIDERS",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-014"
+      ],
+      "document": "BO-015-assess-fit-through-a-checkpointed-evidence-first-langgraph.md",
+      "effort_range_hours": [
+        26,
+        44
+      ],
+      "owner_role": "ai",
+      "phase": "P3",
+      "source_requirements": [
+        "REQ-FIT",
+        "REQ-EVIDENCE",
+        "REQ-QUEUE"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-015",
+      "title": "Assess fit through a checkpointed evidence-first LangGraph"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-016-01",
+        "TEST-BO-016-02",
+        "TEST-BO-016-03"
+      ],
+      "blocked_by": [
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-006",
+        "BO-007",
+        "BO-011",
+        "BO-015"
+      ],
+      "document": "BO-016-expose-durable-run-progress-cancellation-and-retry-in-the-existing-ui.md",
+      "effort_range_hours": [
+        22,
+        36
+      ],
+      "owner_role": "frontend",
+      "phase": "P3",
+      "source_requirements": [
+        "REQ-EVENTS",
+        "REQ-DISCOVERY",
+        "REQ-UI"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-016",
+      "title": "Expose durable run progress, cancellation and retry in the existing UI"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-017-01",
+        "TEST-BO-017-02",
+        "TEST-BO-017-03"
+      ],
+      "blocked_by": [
+        "B-PROVIDERS",
+        "B-POLICY",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-002",
+        "BO-008",
+        "BO-009",
+        "BO-010",
+        "BO-016"
+      ],
+      "document": "BO-017-quote-eligible-business-contact-lookup-without-dispatching-it.md",
+      "effort_range_hours": [
+        18,
+        30
+      ],
+      "owner_role": "backend",
+      "phase": "P4",
+      "source_requirements": [
+        "REQ-QUOTE",
+        "REQ-POLICY",
+        "REQ-BUDGET"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-017",
+      "title": "Quote eligible business-contact lookup without dispatching it"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-018-01",
+        "TEST-BO-018-02",
+        "TEST-BO-018-03"
+      ],
+      "blocked_by": [
+        "B-PROVIDERS",
+        "B-POLICY",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-011",
+        "BO-017"
+      ],
+      "document": "BO-018-confirm-a-contact-quote-once-with-atomic-reservation-and-durable-job-creation.md",
+      "effort_range_hours": [
+        22,
+        36
+      ],
+      "owner_role": "backend",
+      "phase": "P4",
+      "source_requirements": [
+        "REQ-CONFIRM",
+        "REQ-BUDGET",
+        "REQ-POLICY"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-018",
+      "title": "Confirm a contact quote once with atomic reservation and durable job creation"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-019-01",
+        "TEST-BO-019-02",
+        "TEST-BO-019-03"
+      ],
+      "blocked_by": [
+        "B-PROVIDERS",
+        "B-POLICY",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-018"
+      ],
+      "document": "BO-019-submit-contact-operations-with-uncertainty-safe-provider-semantics.md",
+      "effort_range_hours": [
+        24,
+        40
+      ],
+      "owner_role": "backend",
+      "phase": "P4",
+      "source_requirements": [
+        "REQ-PROVIDER",
+        "REQ-RECOVERY",
+        "REQ-BUDGET"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-019",
+      "title": "Submit contact operations with uncertainty-safe provider semantics"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-020-01",
+        "TEST-BO-020-02",
+        "TEST-BO-020-03"
+      ],
+      "blocked_by": [
+        "B-PROVIDERS",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-019"
+      ],
+      "document": "BO-020-reconcile-provider-results-callback-replay-and-in-flight-cancellation.md",
+      "effort_range_hours": [
+        24,
+        40
+      ],
+      "owner_role": "backend",
+      "phase": "P4",
+      "source_requirements": [
+        "REQ-RECONCILE",
+        "REQ-POLICY",
+        "REQ-BUDGET"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-020",
+      "title": "Reconcile provider results, callback replay and in-flight cancellation"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-021-01",
+        "TEST-BO-021-02",
+        "TEST-BO-021-03"
+      ],
+      "blocked_by": [
+        "B-PROVIDERS",
+        "B-POLICY",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-009",
+        "BO-011",
+        "BO-015",
+        "BO-020"
+      ],
+      "document": "BO-021-generate-grounded-draft-revisions-from-approved-facts-and-evidence.md",
+      "effort_range_hours": [
+        22,
+        36
+      ],
+      "owner_role": "ai",
+      "phase": "P5",
+      "source_requirements": [
+        "REQ-DRAFT",
+        "REQ-EVIDENCE",
+        "REQ-BUDGET"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-021",
+      "title": "Generate grounded draft revisions from approved facts and evidence"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-022-01",
+        "TEST-BO-022-02",
+        "TEST-BO-022-03",
+        "TEST-BO-022-04"
+      ],
+      "blocked_by": [
+        "B-POLICY",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-021"
+      ],
+      "document": "BO-022-bind-human-approval-to-exact-draft-recipient-evidence-and-policy-revisions.md",
+      "effort_range_hours": [
+        22,
+        36
+      ],
+      "owner_role": "backend",
+      "phase": "P5",
+      "source_requirements": [
+        "REQ-APPROVAL",
+        "REQ-POLICY",
+        "REQ-RECOVERY"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-022",
+      "title": "Bind human approval to exact draft, recipient, evidence and policy revisions"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-023-01",
+        "TEST-BO-023-02",
+        "TEST-BO-023-03"
+      ],
+      "blocked_by": [
+        "B-POLICY",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-008",
+        "BO-009",
+        "BO-022"
+      ],
+      "document": "BO-023-authorize-and-audit-csv-draft-copy-and-download-without-bypassing-policy.md",
+      "effort_range_hours": [
+        16,
+        28
+      ],
+      "owner_role": "backend",
+      "phase": "P5",
+      "source_requirements": [
+        "REQ-EXPORT",
+        "REQ-POLICY",
+        "REQ-APPROVAL"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-023",
+      "title": "Authorize and audit CSV, draft copy and download without bypassing policy"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-024-01",
+        "TEST-BO-024-02",
+        "TEST-BO-024-03"
+      ],
+      "blocked_by": [
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-016",
+        "BO-020",
+        "BO-022",
+        "BO-023"
+      ],
+      "document": "BO-024-persist-manual-outcomes-and-reconcile-every-displayed-usage-metric.md",
+      "effort_range_hours": [
+        18,
+        30
+      ],
+      "owner_role": "backend",
+      "phase": "P5",
+      "source_requirements": [
+        "REQ-OUTCOME",
+        "REQ-USAGE",
+        "REQ-BUDGET"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-024",
+      "title": "Persist manual outcomes and reconcile every displayed usage metric"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-025-01",
+        "TEST-BO-025-02",
+        "TEST-BO-025-03"
+      ],
+      "blocked_by": [
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-006",
+        "BO-007",
+        "BO-008",
+        "BO-016",
+        "BO-020",
+        "BO-022",
+        "BO-023",
+        "BO-024"
+      ],
+      "document": "BO-025-preserve-bilingual-responsive-interactions-and-deep-link-behavior.md",
+      "effort_range_hours": [
+        20,
+        34
+      ],
+      "owner_role": "frontend",
+      "phase": "P5",
+      "source_requirements": [
+        "REQ-UI",
+        "REQ-DEMO"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-025",
+      "title": "Preserve bilingual responsive interactions and deep-link behavior"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-026-01",
+        "TEST-BO-026-02",
+        "TEST-BO-026-03"
+      ],
+      "blocked_by": [
+        "B-POLICY",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-012",
+        "BO-020",
+        "BO-022",
+        "BO-023",
+        "BO-024",
+        "BO-025"
+      ],
+      "document": "BO-026-harden-tenant-data-retention-secrets-and-dependency-boundaries.md",
+      "effort_range_hours": [
+        24,
+        40
+      ],
+      "owner_role": "platform",
+      "phase": "P6",
+      "source_requirements": [
+        "REQ-SECURITY",
+        "REQ-TENANT",
+        "REQ-EVIDENCE"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-026",
+      "title": "Harden tenant data, retention, secrets and dependency boundaries"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-027-01",
+        "TEST-BO-027-02",
+        "TEST-BO-027-03"
+      ],
+      "blocked_by": [
+        "B-HOST",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-010",
+        "BO-011",
+        "BO-016",
+        "BO-018",
+        "BO-019",
+        "BO-020",
+        "BO-022",
+        "BO-026"
+      ],
+      "document": "BO-027-prove-crash-recovery-budget-races-and-reversible-release-operations.md",
+      "effort_range_hours": [
+        24,
+        40
+      ],
+      "owner_role": "qa",
+      "phase": "P6",
+      "source_requirements": [
+        "REQ-RECOVERY",
+        "REQ-BUDGET",
+        "REQ-QUEUE",
+        "REQ-SECURITY"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-027",
+      "title": "Prove crash recovery, budget races and reversible release operations"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-028-01",
+        "TEST-BO-028-02",
+        "TEST-BO-028-03"
+      ],
+      "blocked_by": [
+        "B-PILOT",
+        "B-POLICY",
+        "B-HOST",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-024",
+        "BO-025",
+        "BO-026",
+        "BO-027"
+      ],
+      "document": "BO-028-prepare-a-reviewable-pilot-release-and-human-evaluation-protocol.md",
+      "effort_range_hours": [
+        16,
+        28
+      ],
+      "owner_role": "qa",
+      "phase": "P6",
+      "source_requirements": [
+        "REQ-PILOT",
+        "REQ-USAGE",
+        "REQ-SECURITY"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-028",
+      "title": "Prepare a reviewable pilot release and human evaluation protocol"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-029-01",
+        "TEST-BO-029-02",
+        "TEST-BO-029-03"
+      ],
+      "blocked_by": [
+        "B-PILOT",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-028"
+      ],
+      "document": "BO-029-execute-only-the-separately-approved-bounded-live-mvp-a-pilot.md",
+      "effort_range_hours": [
+        20,
+        36
+      ],
+      "owner_role": "platform",
+      "phase": "P6",
+      "source_requirements": [
+        "REQ-PILOT",
+        "REQ-BUDGET",
+        "REQ-USAGE"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-029",
+      "title": "Execute only the separately approved bounded live MVP-A pilot"
+    },
+    {
+      "acceptance_tests": [
+        "TEST-BO-030-01",
+        "TEST-BO-030-02",
+        "TEST-BO-030-03"
+      ],
+      "blocked_by": [
+        "B-DELIVERY",
+        "B-APPROVAL"
+      ],
+      "depends_on": [
+        "BO-028"
+      ],
+      "document": "BO-030-design-a-separately-approved-controlled-delivery-phase-without-activating-it.md",
+      "effort_range_hours": [
+        12,
+        20
+      ],
+      "owner_role": "platform",
+      "phase": "P7",
+      "source_requirements": [
+        "REQ-DELIVERY",
+        "REQ-POLICY",
+        "REQ-APPROVAL"
+      ],
+      "status": "BLOCKED",
+      "task_id": "BO-030",
+      "title": "Design a separately approved controlled delivery phase without activating it"
+    }
+  ]
+}
