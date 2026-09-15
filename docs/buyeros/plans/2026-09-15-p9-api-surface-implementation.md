@@ -1166,10 +1166,14 @@ git commit -m "feat(api): workspaces, projects and ICP routes"
 - Create: `services/api/tests/test_api_buyers.py`
 
 **Interfaces:**
-- Produces: `GET /v1/workspaces/{workspace_id}/projects/{project_id}/buyers` (`listBuyers`), `GET /v1/workspaces/{workspace_id}/buyers/{buyer_id}` (`getBuyer`); `UNIMPLEMENTED_OPERATIONS: dict[str, tuple[str, str]]` mapping `operationId -> (method, path)`; `unimplemented_router` registering `501 NOT_IMPLEMENTED` handlers on those declared contract paths only.
-- Consumes: `ProjectBuyer`/`Company`, `load_membership`, `permission_for_roles`, `tenant_scoped`, `get_principal`.
+- Produces: `GET /v1/workspaces/{workspace_id}/projects/{project_id}/buyers` (`listBuyers`, reading the contract's required `snapshot_id`), `GET /v1/workspaces/{workspace_id}/buyers/{buyer_id}` (`getBuyer`); `UNIMPLEMENTED_OPERATIONS: dict[str, tuple[str, str]]` mapping `operationId -> (method, path)`; `unimplemented_router` registering `501 NOT_IMPLEMENTED` handlers on those declared contract paths only.
+- Consumes: `ProjectBuyer`/`Company`/`BuyerSnapshot`/`BuyerSnapshotItem`, `load_membership`, `permission_for_roles`, `tenant_scoped`, `get_principal`.
 
 **Contract note (pre-flight correction #4):** the previously planned catch-all `/v1/unimplemented/{operation_id}` is deleted ??it invented a non-contract path, violating contract-first. Out-of-slice operations are now served `501` **only** on their declared contract path+method.
+
+**Coverage requirement (review round 1):** the registry must contain **every** contract operation P9 does not implement ??58 of the spec's 70 operations (12 implemented). Enumerating only 22 left 36 returning 404/405, violating the "explicit 501" constraint. `test_registry_covers_every_unimplemented_contract_operation` derives the expected set from the spec, so a newly added or missed operation fails the test rather than silently 404ing.
+
+**`listBuyers` contract requirement (review round 1):** the contract declares a **required** `snapshot_id` query param and a `BuyerPage` carrying `snapshot_id` + `expires_at`. The route reads the immutable `BuyerSnapshot` (404 when unknown), joins `BuyerSnapshotItem` ordered by `ordinal`, and returns those fields ??not a live tenant-wide query.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1214,6 +1218,21 @@ def test_unimplemented_paths_match_openapi_spec():
         assert paths[path][method]["operationId"] == operation_id
 
 
+def test_registry_covers_every_unimplemented_contract_operation():
+    """Regression guard: an out-of-slice operation must never silently 404."""
+    operations = {}
+    for path, item in paths.items():
+        for method, operation in item.items():
+            if method in {"get", "post", "patch", "put", "delete"}:
+                operations[operation["operationId"]] = (method, path)
+    implemented = {
+        "getLiveness", "listWorkspaces", "listProjects", "createProject", "getProject",
+        "listICPVersions", "saveICPVersion", "approveICPVersion", "getReadiness",
+        "getCapabilities", "listBuyers", "getBuyer",
+    }
+    assert set(operations) - implemented == set(UNIMPLEMENTED_OPERATIONS)
+
+
 def test_unimplemented_declared_path_fails_closed_then_501():
     client = TestClient(create_app(), raise_server_exceptions=False)
     # Unconfigured auth: fail closed before any 501 is reachable.
@@ -1246,29 +1265,59 @@ def _buyer_data(buyer, company) -> dict:
 
 @router.get("/projects/{project_id}/buyers")
 async def list_buyers(
-    workspace_id: uuid.UUID, project_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)
+    workspace_id: uuid.UUID,
+    project_id: uuid.UUID,
+    snapshot_id: uuid.UUID,
+    request: Request,
+    principal: Principal = Depends(get_principal),
 ) -> dict:
     from sqlalchemy import select
 
-    from ...db.buyers import Company, ProjectBuyer
+    from ...db.buyers import BuyerSnapshot, BuyerSnapshotItem, Company, ProjectBuyer
     from ..deps import load_membership, permission_for_roles, tenant_scoped
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
         if not permission_for_roles(membership["roles"], "listBuyers"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+        # The contract reads a page from a server-owned immutable snapshot, not a live query.
+        snapshot = (
+            await session.execute(
+                select(BuyerSnapshot).where(
+                    BuyerSnapshot.workspace_id == workspace_id,
+                    BuyerSnapshot.project_id == project_id,
+                    BuyerSnapshot.id == snapshot_id,
+                )
+            )
+        ).scalar_one_or_none()
+        if snapshot is None:
+            raise ApiError(404, "NOT_FOUND", "buyer snapshot not found")
         rows = (
             await session.execute(
                 select(ProjectBuyer, Company)
+                .join(Company, (Company.workspace_id == ProjectBuyer.workspace_id) & (Company.id == ProjectBuyer.company_id))
                 .join(
-                    Company,
-                    (Company.workspace_id == ProjectBuyer.workspace_id) & (Company.id == ProjectBuyer.company_id),
+                    BuyerSnapshotItem,
+                    (BuyerSnapshotItem.workspace_id == ProjectBuyer.workspace_id)
+                    & (BuyerSnapshotItem.buyer_id == ProjectBuyer.id),
                 )
-                .where(ProjectBuyer.workspace_id == workspace_id, ProjectBuyer.project_id == project_id)
+                .where(
+                    BuyerSnapshotItem.workspace_id == workspace_id,
+                    BuyerSnapshotItem.snapshot_id == snapshot_id,
+                )
+                .order_by(BuyerSnapshotItem.ordinal)
             )
         ).all()
         items = [_buyer_data(buyer, company) for buyer, company in rows]
-    return envelope({"items": items, "offset": 0, "limit": len(items), "total": len(items)}, request.state.request_id)
+        data = {
+            "items": items,
+            "snapshot_id": str(snapshot_id),
+            "offset": 0,
+            "limit": len(items),
+            "total": len(items),
+            "expires_at": snapshot.expires_at.isoformat() if snapshot.expires_at else None,
+        }
+    return envelope(data, request.state.request_id)
 
 
 @router.get("/buyers/{buyer_id}")
@@ -1317,28 +1366,64 @@ from .auth import Principal, get_principal
 from .errors import ApiError
 
 UNIMPLEMENTED_OPERATIONS: dict[str, tuple[str, str]] = {
-    "startRun": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/runs"),
+    "approveDraft": ("post", "/v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals"),
+    "archiveProject": ("delete", "/v1/workspaces/{workspace_id}/projects/{project_id}"),
+    "cancelEnrichmentJob": ("post", "/v1/workspaces/{workspace_id}/enrichment-jobs/{job_id}/cancel"),
+    "cancelLookupQuote": ("post", "/v1/workspaces/{workspace_id}/enrichment-quotes/{quote_id}/cancel"),
+    "cancelRun": ("post", "/v1/workspaces/{workspace_id}/runs/{run_id}/cancel"),
+    "changeListMemberships": ("post", "/v1/workspaces/{workspace_id}/lists/{list_id}/memberships"),
+    "confirmLookup": ("post", "/v1/workspaces/{workspace_id}/enrichment-quotes/{quote_id}/confirm"),
+    "correctOutcome": ("post", "/v1/workspaces/{workspace_id}/outcomes/{outcome_id}/corrections"),
+    "createBuyerList": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/lists"),
+    "createBuyerSnapshot": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-snapshots"),
+    "createSuppression": ("post", "/v1/workspaces/{workspace_id}/suppressions"),
+    "deleteOfferDocument": ("delete", "/v1/workspaces/{workspace_id}/offer-documents/{document_id}"),
+    "disabledDeliveryBoundary": ("post", "/v1/workspaces/{workspace_id}/drafts/{draft_id}/deliver"),
+    "downloadExport": ("get", "/v1/workspaces/{workspace_id}/exports/{export_id}/content"),
+    "editDraft": ("patch", "/v1/workspaces/{workspace_id}/drafts/{draft_id}"),
+    "exportBuyers": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/exports"),
+    "exportDraft": ("post", "/v1/workspaces/{workspace_id}/drafts/{draft_id}/exports"),
+    "generateDraft": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/drafts"),
+    "getAsyncJob": ("get", "/v1/workspaces/{workspace_id}/jobs/{job_id}"),
+    "getBuyerList": ("get", "/v1/workspaces/{workspace_id}/lists/{list_id}"),
+    "getDraft": ("get", "/v1/workspaces/{workspace_id}/drafts/{draft_id}"),
+    "getEnrichmentJob": ("get", "/v1/workspaces/{workspace_id}/enrichment-jobs/{job_id}"),
+    "getEvidence": ("get", "/v1/workspaces/{workspace_id}/evidence/{evidence_id}"),
+    "getExport": ("get", "/v1/workspaces/{workspace_id}/exports/{export_id}"),
+    "getLookupQuote": ("get", "/v1/workspaces/{workspace_id}/enrichment-quotes/{quote_id}"),
+    "getOfferDocument": ("get", "/v1/workspaces/{workspace_id}/offer-documents/{document_id}"),
+    "getPreferences": ("get", "/v1/workspaces/{workspace_id}/preferences"),
     "getRun": ("get", "/v1/workspaces/{workspace_id}/runs/{run_id}"),
     "getRunEvents": ("get", "/v1/workspaces/{workspace_id}/runs/{run_id}/events"),
-    "cancelRun": ("post", "/v1/workspaces/{workspace_id}/runs/{run_id}/cancel"),
-    "retryRun": ("post", "/v1/workspaces/{workspace_id}/runs/{run_id}/retry"),
-    "quoteLookup": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/enrichment-quotes"),
-    "confirmLookup": ("post", "/v1/workspaces/{workspace_id}/enrichment-quotes/{quote_id}/confirm"),
-    "getEnrichmentJob": ("get", "/v1/workspaces/{workspace_id}/enrichment-jobs/{job_id}"),
-    "cancelEnrichmentJob": ("post", "/v1/workspaces/{workspace_id}/enrichment-jobs/{job_id}/cancel"),
-    "generateDraft": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/drafts"),
-    "editDraft": ("patch", "/v1/workspaces/{workspace_id}/drafts/{draft_id}"),
-    "requestDraftReview": ("post", "/v1/workspaces/{workspace_id}/drafts/{draft_id}/review"),
-    "approveDraft": ("post", "/v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals"),
-    "exportBuyers": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/exports"),
-    "downloadExport": ("get", "/v1/workspaces/{workspace_id}/exports/{export_id}/content"),
-    "exportDraft": ("post", "/v1/workspaces/{workspace_id}/drafts/{draft_id}/exports"),
-    "recordOutcome": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/outcomes"),
-    "correctOutcome": ("post", "/v1/workspaces/{workspace_id}/outcomes/{outcome_id}/corrections"),
     "getUsage": ("get", "/v1/workspaces/{workspace_id}/projects/{project_id}/usage"),
-    "listBudgets": ("get", "/v1/workspaces/{workspace_id}/budgets"),
-    "uploadOfferDocument": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/offer-documents"),
     "ingestOfferUrl": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/offer-ingestions"),
+    "listAuditEvents": ("get", "/v1/workspaces/{workspace_id}/audit-events"),
+    "listBudgets": ("get", "/v1/workspaces/{workspace_id}/budgets"),
+    "listBuyerEvidence": ("get", "/v1/workspaces/{workspace_id}/buyers/{buyer_id}/evidence"),
+    "listBuyerLists": ("get", "/v1/workspaces/{workspace_id}/projects/{project_id}/lists"),
+    "listDrafts": ("get", "/v1/workspaces/{workspace_id}/projects/{project_id}/drafts"),
+    "listFilterPresets": ("get", "/v1/workspaces/{workspace_id}/projects/{project_id}/filter-presets"),
+    "listOutcomes": ("get", "/v1/workspaces/{workspace_id}/projects/{project_id}/outcomes"),
+    "listPolicyDecisions": ("get", "/v1/workspaces/{workspace_id}/policy-decisions"),
+    "listRuns": ("get", "/v1/workspaces/{workspace_id}/projects/{project_id}/runs"),
+    "listSuppressions": ("get", "/v1/workspaces/{workspace_id}/suppressions"),
+    "quoteLookup": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/enrichment-quotes"),
+    "receiveProviderCallback": ("post", "/v1/provider-callbacks/{provider}"),
+    "reconcileEnrichmentJob": ("post", "/v1/workspaces/{workspace_id}/enrichment-jobs/{job_id}/reconcile"),
+    "recordOutcome": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/outcomes"),
+    "recordPolicyDecision": ("post", "/v1/workspaces/{workspace_id}/policy-decisions"),
+    "removeSuppression": ("post", "/v1/workspaces/{workspace_id}/suppressions/{suppression_id}/remove"),
+    "renameBuyerList": ("patch", "/v1/workspaces/{workspace_id}/lists/{list_id}"),
+    "requestDraftReview": ("post", "/v1/workspaces/{workspace_id}/drafts/{draft_id}/review"),
+    "retryRun": ("post", "/v1/workspaces/{workspace_id}/runs/{run_id}/retry"),
+    "reviewBuyers": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-reviews"),
+    "saveFilterPreset": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/filter-presets"),
+    "startRun": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/runs"),
+    "updateBudget": ("patch", "/v1/workspaces/{workspace_id}/budgets/{budget_id}"),
+    "updateBuyer": ("patch", "/v1/workspaces/{workspace_id}/buyers/{buyer_id}"),
+    "updatePreferences": ("patch", "/v1/workspaces/{workspace_id}/preferences"),
+    "updateProject": ("patch", "/v1/workspaces/{workspace_id}/projects/{project_id}"),
+    "uploadOfferDocument": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/offer-documents"),
 }
 
 router = APIRouter(tags=["unimplemented"])
