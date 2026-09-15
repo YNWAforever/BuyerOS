@@ -1,6 +1,4 @@
-import pytest
-
-from buyeros_worker.registry import HandlerResult, UnknownHandler
+from buyeros_worker.registry import HandlerResult
 from buyeros_worker.tasks import run_intent
 
 
@@ -37,3 +35,9 @@ def test_run_intent_reports_blocked_without_raising():
 
     state = __import__("asyncio").run(run_intent(handler, {}, session, context={"workspace_id": "w"}))
     assert state == "blocked"
+
+
+def test_unknown_handler_state_is_terminal():
+    from buyeros_worker.tasks import resolve_handler_state
+
+    assert resolve_handler_state("does.not.exist") == "unknown_handler"
