@@ -112,6 +112,7 @@ async def approve_icp_version(
     request: Request,
     principal: Principal = Depends(get_principal),
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    if_match: str | None = Header(default=None, alias="If-Match"),
 ) -> dict:
     from datetime import datetime, timezone
 
@@ -123,6 +124,18 @@ async def approve_icp_version(
 
     if not idempotency_key:
         raise ApiError(400, "INVALID_REQUEST", "Idempotency-Key header is required")
+    # Contract `IfMatch`: strong version ETag ("4"); missing is 400, stale is 412.
+    if not if_match:
+        raise ApiError(400, "INVALID_REQUEST", "If-Match header is required")
+    if len(if_match) < 2 or not if_match.startswith('"') or not if_match.endswith('"'):
+        raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"')
+    try:
+        expected_version = int(if_match[1:-1])
+    except ValueError as exc:
+        raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"') from exc
+    if expected_version < 1:
+        raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"')
+
     body = await request.json()
     if body.get("confirmation") is not True:
         raise ApiError(400, "INVALID_REQUEST", "confirmation must be true")
@@ -141,6 +154,8 @@ async def approve_icp_version(
         ).scalar_one_or_none()
         if row is None:
             raise ApiError(404, "NOT_FOUND", "profile version not found")
+        if row.number != expected_version:
+            raise ApiError(412, "STALE_REVISION", "profile version changed; reload the profile")
         try:
             verify_approval_hash(row, expected_hash)
         except StaleRevision as exc:
