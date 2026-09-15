@@ -69,3 +69,4 @@ fff7d7c34a37f35e7dfa7b9156592acc4ddcec857e3cd5ab266050c35d21753f  plans/2026-09-
 b8d23868093d42452b222e9f3420cee7a331e37f316b86db49924486da6b9256  decisions/BUILD_APPROVAL_RECORD.BO-005.md
 de3c29a0259d4e6fc51fe9d158a49da9ffacd0608b503283bb38e0ce7eedf9e6  specs/2026-09-15-p8-worker-dispatcher-design.md
 972e2b28cf3a95cc0a4a32c42c8976f4fedb49b4cfe3b6f7c2417f4c015be1ba  plans/2026-09-15-p8-worker-dispatcher-implementation.md
+8c060ab8973e0a9da62f807edf29d03684a1d2df736243a715b867dad776311a  decisions/BUILD_APPROVAL_RECORD.P8-worker.md
