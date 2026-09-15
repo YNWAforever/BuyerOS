@@ -12,8 +12,9 @@ Deliver the first HTTP surface over the existing domain services: a FastAPI app 
 
 ## A. Architecture and boundaries
 
-- New `services/api/buyeros_api/api/`: `app.py` (app factory), `deps.py` (auth + tenant dependencies), `errors.py` (envelope + handlers), `routes/{health,workspaces,projects,icp,buyers}.py`.
+- New `services/api/buyeros_api/api/`: `app.py` (app factory), `deps.py` (auth + tenant dependencies), `errors.py` (envelope + handlers), `unimplemented.py` (declared-path 501 registry), `routes/{health,workspaces,projects,icp,buyers}.py`.
 - Routers are thin: they call existing domain services inside `tenant_session`; no business rules live in the router layer.
+- Liveness is a **non-contract** probe at `GET /health/live` only. Authenticated readiness and capabilities are contract routes under `/v1/workspaces/{workspace_id}/...`; there is no `/health/ready` contract path.
 - No frontend changes and no worker coupling in this phase.
 
 ## B. Auth and tenant dependencies (fail-closed, pluggable)
@@ -27,12 +28,12 @@ Deliver the first HTTP surface over the existing domain services: a FastAPI app 
 
 - `contracts/openapi.proposed.yaml` stays authoritative. Implemented routes must match its `operationId`, method, path, and schema names exactly.
 - A **contract test** loads the spec and asserts: every implemented route exists in the spec with matching `operationId` and method; success bodies validate against the schema's required fields; `data_mode == "live"`.
-- `services/generated/buyeros-api.ts` is generated from the spec with a **pinned** tool version; `services/live/mapping.ts` consumes it. The generation command and tool version are recorded.
-- Known-but-unimplemented operations are not silently absent: a small registry returns an explicit `501 NOT_IMPLEMENTED`.
+- `services/generated/buyeros-api.ts` is generated from the spec with an **exactly pinned** `openapi-typescript` devDependency in `services/api/package.json`, installed and run through the repository's pnpm toolchain (no unpinned `npx` fetch). The generation command and resolved version are recorded.
+- Known-but-unimplemented operations are not silently absent: they are enumerated in a registry and answered with an explicit `501 NOT_IMPLEMENTED` on their **declared** contract path+method only. No parallel or invented endpoint is introduced.
 
 ## D. Route slice and error envelope
 
-Implemented operations: `health`/`readiness`, `listWorkspaces`, `listProjects`/`createProject`/`getProject`, `listICPVersions`/`saveICPVersion`/`approveICPVersion` (hash-bound approval), `listBuyers`/`getBuyer`.
+Implemented operations: the non-contract `GET /health/live` liveness probe, the authenticated contract routes `GET /v1/workspaces/{workspace_id}/readiness` and `/capabilities`, `listWorkspaces`, `listProjects`/`createProject`/`getProject`, `listICPVersions`/`saveICPVersion`/`approveICPVersion` (hash-bound approval addressed by `icp_version_id`), `listBuyers`/`getBuyer`.
 
 - Success envelope: `{data, request_id, data_mode:"live"}`.
 - Error envelope: `{code, message, request_id, retryable}` using the 03 §4 status map, including `401 UNAUTHENTICATED`, `403 PERMISSION_DENIED`, `404 NOT_FOUND`, `409 IDEMPOTENCY_CONFLICT`, `412 STALE_REVISION`, `501 NOT_IMPLEMENTED`, `503 PROVIDER_UNAVAILABLE`.
