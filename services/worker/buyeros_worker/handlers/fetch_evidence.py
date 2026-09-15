@@ -23,13 +23,16 @@ def _reject_if_blocked_host(host: str) -> None:
 
 def validate_fetch(url: str, content_type: str, size: int) -> None:
     try:
-        normalized = normalize_url(url)
+        normalize_url(url)
     except ValueError:
         raise FetchRejected(f"malformed url: {url}") from None
-    parsed = urlsplit(normalized)
-    if parsed.scheme not in {"http", "https"}:
-        raise FetchRejected(f"unsupported scheme {parsed.scheme}")
-    _reject_if_blocked_host(parsed.hostname or "")
+    parts = urlsplit(url)
+    if parts.scheme not in {"http", "https"}:
+        raise FetchRejected(f"unsupported scheme {parts.scheme}")
+    host = parts.hostname
+    if not host:
+        raise FetchRejected("missing host")
+    _reject_if_blocked_host(host)
     if size < 0 or size > MAX_DECODED_BYTES:
         raise FetchRejected("decoded body size out of range")
     media_type = (content_type or "").split(";")[0].strip().lower()

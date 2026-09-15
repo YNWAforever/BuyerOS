@@ -72,3 +72,24 @@ def test_non_string_url_is_blocked_not_raised(bad):
 def test_non_string_content_type_is_blocked_not_raised(bad):
     result = handle(None, None, {"url": "https://example.com/x", "content_type": bad, "size": 1})
     assert result.state == "blocked"
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://[::1]/x",
+        "https://[fe80::1]/x",
+        "http://[fc00::1]/x",
+        "http://[::ffff:10.0.0.1]/x",
+        "http:///x",
+    ],
+)
+def test_ipv6_and_empty_host_are_rejected(url):
+    with pytest.raises(FetchRejected):
+        validate_fetch(url, "text/html", 10)
+
+
+@pytest.mark.parametrize("url", ["http://[::1]/x", "http:///x"])
+def test_ipv6_and_empty_host_blocked_via_handle(url):
+    result = handle(None, None, {"url": url, "content_type": "text/html", "size": 1})
+    assert result.state == "blocked"
