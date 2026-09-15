@@ -13,14 +13,14 @@
 - Canonical repository: `YNWAforever/BuyerOS`; branch `p9-api-surface` from `main` @ `4cd159a`.
 - Plan-only artifact: no remote commits/pushes, deploys, cloud resources, real-data migrations, paid calls, mailboxes, or sends.
 - Fail closed: with no `auth0_issuer`/`auth0_audience` configured, every route except liveness returns `401 UNAUTHENTICATED`. Roles come from Postgres membership, never token claims.
-- Contract-first: `contracts/openapi.proposed.yaml` is authoritative; implemented routes match its `operationId`, method, path, and schema names. `GET /health/live` is a **non-contract liveness probe only** (never the authenticated readiness signal); readiness and capabilities live at their declared `/v1/workspaces/{workspace_id}/...` contract paths. Operations outside the implemented slice are registered as explicit `501 NOT_IMPLEMENTED` on their **declared** contract path+method — no invented or parallel endpoint (see Task 6).
+- Contract-first: `contracts/openapi.proposed.yaml` is authoritative; implemented routes match its `operationId`, method, path, and schema names. `GET /health/live` is a **non-contract liveness probe only** (never the authenticated readiness signal); readiness and capabilities live at their declared `/v1/workspaces/{workspace_id}/...` contract paths. Operations outside the implemented slice are registered as explicit `501 NOT_IMPLEMENTED` on their **declared** contract path+method ??no invented or parallel endpoint (see Task 6).
 - Live responses are `{data, request_id, data_mode:"live"}`; no demo fixture may appear in a live response.
 - Mutations require `Idempotency-Key`; versioned edits require `If-Match`.
 - Every unexecuted check is **NOT RUN**.
 
 **Existing interfaces this plan consumes (already implemented):**
-- `buyeros_api.settings.get_settings()` → `Settings` with `database_url`, `database_migration_url`, `auth0_issuer`, `auth0_audience`, `jwks_cache_seconds`, `environment`.
-- `buyeros_api.db.session.tenant_session(engine, workspace_id)` → async context manager yielding a session with `SET LOCAL app.workspace_id`.
+- `buyeros_api.settings.get_settings()` ??`Settings` with `database_url`, `database_migration_url`, `auth0_issuer`, `auth0_audience`, `jwks_cache_seconds`, `environment`.
+- `buyeros_api.db.session.tenant_session(engine, workspace_id)` ??async context manager yielding a session with `SET LOCAL app.workspace_id`.
 - `buyeros_api.db.{models,icp,policy,budget,outbox,buyers,runs,contact,drafts,outcomes}` models; `buyeros_api.db.icp.canonical_hash(content)` and `IcpVersion`, `Project`.
 - `buyeros_api.db.models.{Workspace,User,Membership}`.
 
@@ -80,7 +80,7 @@ def test_request_id_header_is_returned():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_api_app.py -v` (cwd `services/api`)
-Expected: FAIL — `ModuleNotFoundError: buyeros_api.api`.
+Expected: FAIL ??`ModuleNotFoundError: buyeros_api.api`.
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -205,7 +205,7 @@ def test_jwks_uri_derivation():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_api_auth.py -v`
-Expected: FAIL — `ModuleNotFoundError`.
+Expected: FAIL ??`ModuleNotFoundError`.
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -295,11 +295,20 @@ git commit -m "feat(api): fail-closed auth dependency and claim validation"
 - Create: `services/api/tests/test_api_deps.py`
 
 **Interfaces:**
-- Produces: `get_engine()` (reused per distinct DSN); `permission_for_roles(roles, permission) -> bool`; `async def tenant_scoped(workspace_id)` yielding a session with the tenant context set; `async def load_membership(session, *, principal, workspace_id) -> dict` raising `ApiError(404)` for a foreign/absent workspace and returning `{user_id, roles}` only for an active membership.
+- Produces: `async_database_url(url) -> str`; `get_engine()` (reused per distinct DSN); `permitted_roles(operation_id) -> frozenset[str]` and `permission_for_roles(roles, permission) -> bool`; `async def tenant_scoped(workspace_id)` yielding a session with the tenant context set; `async def load_membership(session, *, principal, workspace_id) -> dict` raising `ApiError(404)` for a foreign/absent workspace and returning `{user_id, roles}` only for an active membership.
 - Consumes: `Principal` (Task 2), `ApiError` (Task 1), `tenant_session`, `get_settings`.
 - Role names match the contract `Workspace.roles` enum: `viewer`, `operator`, `reviewer`, `policy_admin`, `budget_admin`, `workspace_admin`.
+- **Authorization is the contract's `x-permitted-roles`, transcribed verbatim per operation.** The old role-bucket map was wrong in three ways (it denied `operator` on `createProject`, allowed `reviewer` on `createProject`/`saveICPVersion`, and granted `policy_admin`/`budget_admin` read permissions no contract operation lists), so it is replaced by an `OPERATION_ROLES` table keyed by `operationId`, copied from the contract for exactly the operations P9 implements:
+  - `listWorkspaces`, `listProjects`, `getProject`, `listICPVersions`, `listBuyers`, `getBuyer` -> `viewer`, `operator`, `reviewer`, `workspace_admin`
+  - `createProject` -> `operator`, `workspace_admin`
+  - `updateProject` -> `operator`, `reviewer`, `workspace_admin`
+  - `saveICPVersion` -> `operator`, `workspace_admin`
+  - `approveICPVersion` -> `reviewer`, `workspace_admin`
+  - `getReadiness` -> `workspace_admin` (BO-004, the only admin-only implemented path)
+  - `getCapabilities` -> `viewer`, `operator`, `reviewer`, `workspace_admin` (BO-006 differs from BO-004; transcribed separately)
 
-- [ ] **Step 1: Write the failing test** (pure permission mapping, no DB)
+  `permission_for_roles` is a thin compatibility wrapper over `permitted_roles`; routers gate on the **operation they implement**, so a `reviewer` is allowed `updateProject` but not `createProject`. Out-of-slice operations (whose permissions differ) are not modeled, because they return `501` before any role check.
+- The engine cache is keyed by `(running event loop, DSN)`: an `AsyncEngine`'s pool is bound to the loop that opened it, so production keeps one engine per DSN while a second loop (a second `TestClient`, an `asyncio.run`) cannot reuse a foreign pool. `dispose_engines()` is the release hook; wiring it to an app lifespan is deferred to BO-004.
 
 ```python
 # services/api/tests/test_api_deps.py
@@ -307,22 +316,61 @@ from buyeros_api.api.deps import permission_for_roles
 
 
 def test_viewer_cannot_write():
-    assert permission_for_roles(["viewer"], "project.write") is False
-    assert permission_for_roles(["viewer"], "project.read") is True
+    assert permission_for_roles(["viewer"], "createProject") is False
+    assert permission_for_roles(["viewer"], "listProjects") is True
 
 
 def test_workspace_admin_allows_everything():
-    assert permission_for_roles(["workspace_admin"], "budget.write") is True
+    assert permission_for_roles(["workspace_admin"], "approveICPVersion") is True
 
 
 def test_unknown_role_denied():
-    assert permission_for_roles(["ghost"], "project.read") is False
+    assert permission_for_roles(["ghost"], "listProjects") is False
+
+
+def test_operator_creates_projects_but_cannot_approve_icp():
+    assert permission_for_roles(["operator"], "createProject") is True
+    assert permission_for_roles(["operator"], "approveICPVersion") is False
+
+
+def test_reviewer_updates_and_approves_but_cannot_create():
+    assert permission_for_roles(["reviewer"], "approveICPVersion") is True
+    assert permission_for_roles(["reviewer"], "updateProject") is True
+    assert permission_for_roles(["reviewer"], "createProject") is False
+
+
+def test_admins_without_contract_read_grants_are_denied_reads():
+    assert permission_for_roles(["policy_admin"], "listProjects") is False
+    assert permission_for_roles(["budget_admin"], "listBuyers") is False
+
+
+CONTRACT_ROLES = {
+    "listWorkspaces": frozenset({"viewer", "operator", "reviewer", "workspace_admin"}),
+    "listProjects": frozenset({"viewer", "operator", "reviewer", "workspace_admin"}),
+    "getProject": frozenset({"viewer", "operator", "reviewer", "workspace_admin"}),
+    "listICPVersions": frozenset({"viewer", "operator", "reviewer", "workspace_admin"}),
+    "listBuyers": frozenset({"viewer", "operator", "reviewer", "workspace_admin"}),
+    "getBuyer": frozenset({"viewer", "operator", "reviewer", "workspace_admin"}),
+    "createProject": frozenset({"operator", "workspace_admin"}),
+    "updateProject": frozenset({"operator", "reviewer", "workspace_admin"}),
+    "saveICPVersion": frozenset({"operator", "workspace_admin"}),
+    "approveICPVersion": frozenset({"reviewer", "workspace_admin"}),
+    "getReadiness": frozenset({"workspace_admin"}),
+    "getCapabilities": frozenset({"viewer", "operator", "reviewer", "workspace_admin"}),
+}
+
+
+def test_operation_roles_are_verbatim_from_the_contract():
+    from buyeros_api.api.deps import permitted_roles
+
+    for operation_id, roles in CONTRACT_ROLES.items():
+        assert permitted_roles(operation_id) == roles, operation_id
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_api_deps.py -v`
-Expected: FAIL — `ModuleNotFoundError`.
+Expected: FAIL ??`ModuleNotFoundError`.
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -333,36 +381,75 @@ import uuid
 
 from ..settings import get_settings
 
-ROLE_PERMISSIONS: dict[str, frozenset[str]] = {
-    "viewer": frozenset({"project.read", "buyer.read", "evidence.read", "usage.read"}),
-    "operator": frozenset({"project.read", "buyer.read", "evidence.read", "usage.read", "run.write", "buyer.note", "outcome.write", "quote.request"}),
-    "reviewer": frozenset({"project.read", "buyer.read", "evidence.read", "usage.read", "run.write", "buyer.note", "outcome.write", "quote.request", "buyer.review", "draft.approve", "quote.confirm", "project.write"}),
-    "policy_admin": frozenset({"project.read", "policy.write", "suppression.write"}),
-    "budget_admin": frozenset({"project.read", "budget.write", "usage.read"}),
-    "workspace_admin": frozenset({"*"}),
+_VIEWERS = frozenset({"viewer", "operator", "reviewer", "workspace_admin"})
+_WRITERS = frozenset({"operator", "workspace_admin"})
+
+# Transcribed from the contract's `x-permitted-roles`, for the operations P9 implements.
+OPERATION_ROLES: dict[str, frozenset[str]] = {
+    "listWorkspaces": _VIEWERS,
+    "listProjects": _VIEWERS,
+    "getProject": _VIEWERS,
+    "listICPVersions": _VIEWERS,
+    "listBuyers": _VIEWERS,
+    "getBuyer": _VIEWERS,
+    "createProject": _WRITERS,
+    "updateProject": frozenset({"operator", "reviewer", "workspace_admin"}),
+    "saveICPVersion": _WRITERS,
+    "approveICPVersion": frozenset({"reviewer", "workspace_admin"}),
+    "getReadiness": frozenset({"workspace_admin"}),
+    "getCapabilities": _VIEWERS,
 }
 
-_ENGINES: dict[str, object] = {}
 
-
-def get_engine():
-    """One async engine per distinct DSN, so tests may swap BUYEROS_DATABASE_URL."""
-    from sqlalchemy.ext.asyncio import create_async_engine
-
-    url = get_settings().database_url
-    engine = _ENGINES.get(url)
-    if engine is None:
-        engine = create_async_engine(url)
-        _ENGINES[url] = engine
-    return engine
+def permitted_roles(operation_id: str) -> frozenset[str]:
+    return OPERATION_ROLES.get(operation_id, frozenset())
 
 
 def permission_for_roles(roles: list[str], permission: str) -> bool:
-    for role in roles:
-        granted = ROLE_PERMISSIONS.get(role)
-        if granted and ("*" in granted or permission in granted):
-            return True
-    return False
+    """Compatibility wrapper: `permission` names the contract operation being performed."""
+    allowed = permitted_roles(permission)
+    if "workspace_admin" in roles:
+        return True
+    return bool(allowed.intersection(roles))
+
+
+def async_database_url(url: str) -> str:
+    """SQLAlchemy async engines need the explicit `+psycopg` driver (as in the P8 worker)."""
+    if url.startswith("postgresql+"):
+        return url
+    if url.startswith("postgresql://"):
+        return url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return url
+
+
+def _current_loop_key() -> object:
+    import asyncio
+
+    try:
+        return asyncio.get_running_loop()
+    except RuntimeError:
+        return None
+
+
+def get_engine():
+    """One async engine per (event loop, DSN), so tests may swap BUYEROS_DATABASE_URL."""
+    from sqlalchemy.ext.asyncio import create_async_engine
+
+    url = async_database_url(get_settings().database_url)
+    key = (_current_loop_key(), url)
+    engine = _ENGINES.get(key)
+    if engine is None:
+        engine = create_async_engine(url)
+        _ENGINES[key] = engine
+    return engine
+
+
+async def dispose_engines() -> None:
+    """Release every cached engine. NOT wired to an app lifespan in P9 (deferred to BO-004)."""
+    engines = list(_ENGINES.values())
+    _ENGINES.clear()
+    for engine in engines:
+        await engine.dispose()
 
 
 @contextlib.asynccontextmanager
@@ -377,12 +464,13 @@ Also add, in the same file, the DB-backed membership check used by routers:
 
 ```python
 async def load_membership(session, *, principal, workspace_id) -> dict:
-    from sqlalchemy import select, text
+    """Callers pass a session from `tenant_scoped`, which already set the
+    transaction-local `app.workspace_id`; do not set it again here."""
+    from sqlalchemy import select
 
     from ..db.models import Membership, User
     from .errors import ApiError
 
-    await session.execute(text("SELECT set_config('app.workspace_id', :ws, true)"), {"ws": str(workspace_id)})
     user = (
         await session.execute(select(User).where(User.issuer == principal.issuer, User.subject == principal.subject))
     ).scalar_one_or_none()
@@ -401,7 +489,7 @@ async def load_membership(session, *, principal, workspace_id) -> dict:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/test_api_deps.py -v`
-Expected: PASS (3 passed).
+Expected: PASS (12 passed).
 
 - [ ] **Step 5: Commit**
 
@@ -422,7 +510,7 @@ git commit -m "feat(api): membership and tenant-scoped session dependencies"
 
 **Interfaces:**
 - Produces: `GET /health/live` (non-contract liveness probe; always 200, no auth, no secrets); the contract routes `GET /v1/workspaces/{workspace_id}/readiness` (`getReadiness`, `ReadinessResponse`) and `GET /v1/workspaces/{workspace_id}/capabilities` (`getCapabilities`, `CapabilityPageResponse`), both Bearer-authenticated; pure builders `readiness_payload()` (`{ready, database, queue, worker, checked_at}`) and `capabilities_payload()` (`{items, offset, limit, total}`).
-- Consumes: `create_app`, `get_settings`, `get_principal` (Task 2), `tenant_scoped`/`load_membership`/`permission_for_roles` (Task 3). The workspace-scoped routes enforce membership (foreign/absent workspace → non-enumerating `404`; insufficient role → `403`) before reporting state.
+- Consumes: `create_app`, `get_settings`, `get_principal` (Task 2), `tenant_scoped`/`load_membership`/`permission_for_roles` (Task 3). The workspace-scoped routes enforce membership (foreign/absent workspace ??non-enumerating `404`; insufficient role ??`403`) before reporting state.
 
 **Contract note (pre-flight correction #2):** `/health/ready` is **not** a contract path and is dropped. Readiness is the authenticated contract route `/v1/workspaces/{workspace_id}/readiness`; `/health/live` remains a non-contract liveness probe only. The `Readiness` schema is `{ready, database, queue, worker, checked_at}` (no `api`/`providers`/`policy` keys) and `additionalProperties: false`.
 
@@ -474,7 +562,7 @@ def test_capabilities_payload_matches_contract_without_secrets():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_api_health.py -v`
-Expected: FAIL — `ModuleNotFoundError: buyeros_api.api.routes` / 404.
+Expected: FAIL ??`ModuleNotFoundError: buyeros_api.api.routes` / 404.
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -545,7 +633,7 @@ async def readiness(workspace_id: uuid.UUID, request: Request, principal: Princi
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "usage.read"):
+        if not permission_for_roles(membership["roles"], "getReadiness"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
     return envelope(readiness_payload(), request.state.request_id)
 
@@ -557,7 +645,7 @@ async def capabilities(workspace_id: uuid.UUID, request: Request, principal: Pri
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "usage.read"):
+        if not permission_for_roles(membership["roles"], "getCapabilities"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
     return envelope(capabilities_payload(), request.state.request_id)
 ```
@@ -599,7 +687,7 @@ git commit -m "feat(api): liveness plus authenticated readiness and capabilities
 - Consumes: `get_principal` (Task 2), `get_engine`/`tenant_scoped`/`load_membership`/`permission_for_roles` (Task 3), `Project`/`IcpVersion`/`canonical_hash` (existing), `envelope`/`ApiError`.
 
 **Contract notes (pre-flight corrections #1 and #3):**
-1. Approve is `POST /v1/workspaces/{workspace_id}/icp-versions/{icp_version_id}/approve` with a UUID `icp_version_id` path parameter — **not** `.../projects/{project_id}/icp-versions/{number}/approve`. The ICP router therefore carries `prefix="/v1/workspaces/{workspace_id}"`: list/save are at `/projects/{project_id}/icp-versions`, approve at `/icp-versions/{icp_version_id}/approve`.
+1. Approve is `POST /v1/workspaces/{workspace_id}/icp-versions/{icp_version_id}/approve` with a UUID `icp_version_id` path parameter ??**not** `.../projects/{project_id}/icp-versions/{number}/approve`. The ICP router therefore carries `prefix="/v1/workspaces/{workspace_id}"`: list/save are at `/projects/{project_id}/icp-versions`, approve at `/icp-versions/{icp_version_id}/approve`.
 2. `memberships` is `FORCE ROW LEVEL SECURITY`, so the old join of `memberships` with no `app.workspace_id` always returned zero rows. `list_workspaces` must resolve the `User` by immutable `(issuer, subject)` first (`users` is **not** RLS-protected, `workspaces` is not either), then for each candidate workspace set the **transaction-local** tenant context and read that membership.
 3. Plan-defect fix: `buyeros_api.services.icp_service` was specified in the P2 plan but never implemented; this task creates it (Step 3) so the approve handler's hash check reuses its `StaleRevision`/`verify_approval_hash` names.
 
@@ -657,7 +745,7 @@ def test_implemented_routes_match_openapi_operation_ids():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_api_routes_contract.py -v`
-Expected: FAIL — routes return 404 (not registered) / `ModuleNotFoundError`.
+Expected: FAIL ??routes return 404 (not registered) / `ModuleNotFoundError`.
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -768,7 +856,7 @@ async def list_projects(workspace_id: uuid.UUID, request: Request, principal: Pr
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "project.read"):
+        if not permission_for_roles(membership["roles"], "listProjects"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
         rows = (await session.execute(select(Project).where(Project.workspace_id == workspace_id))).scalars().all()
         items = [_project_data(p) for p in rows]
@@ -794,7 +882,7 @@ async def create_project(
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "project.write"):
+        if not permission_for_roles(membership["roles"], "createProject"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
         project = Project(workspace_id=workspace_id, name=name)
         session.add(project)
@@ -814,7 +902,7 @@ async def get_project(
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "project.read"):
+        if not permission_for_roles(membership["roles"], "getProject"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
         project = (
             await session.execute(
@@ -874,7 +962,7 @@ async def list_icp_versions(
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "project.read"):
+        if not permission_for_roles(membership["roles"], "listICPVersions"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
         rows = (
             await session.execute(
@@ -907,7 +995,7 @@ async def save_icp_version(
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "project.write"):
+        if not permission_for_roles(membership["roles"], "saveICPVersion"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
         project = (
             await session.execute(
@@ -961,7 +1049,8 @@ async def approve_icp_version(
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "project.write"):
+        # approveICPVersion permits only reviewer/workspace_admin (contract x-permitted-roles).
+        if not permission_for_roles(membership["roles"], "approveICPVersion"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
         row = (
             await session.execute(
@@ -1012,7 +1101,7 @@ git commit -m "feat(api): workspaces, projects and ICP routes"
 - Produces: `GET /v1/workspaces/{workspace_id}/projects/{project_id}/buyers` (`listBuyers`), `GET /v1/workspaces/{workspace_id}/buyers/{buyer_id}` (`getBuyer`); `UNIMPLEMENTED_OPERATIONS: dict[str, tuple[str, str]]` mapping `operationId -> (method, path)`; `unimplemented_router` registering `501 NOT_IMPLEMENTED` handlers on those declared contract paths only.
 - Consumes: `ProjectBuyer`/`Company`, `load_membership`, `permission_for_roles`, `tenant_scoped`, `get_principal`.
 
-**Contract note (pre-flight correction #4):** the previously planned catch-all `/v1/unimplemented/{operation_id}` is deleted — it invented a non-contract path, violating contract-first. Out-of-slice operations are now served `501` **only** on their declared contract path+method.
+**Contract note (pre-flight correction #4):** the previously planned catch-all `/v1/unimplemented/{operation_id}` is deleted ??it invented a non-contract path, violating contract-first. Out-of-slice operations are now served `501` **only** on their declared contract path+method.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1067,7 +1156,7 @@ def test_unimplemented_declared_path_fails_closed_then_501():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_api_buyers.py -v`
-Expected: FAIL — 404 / `ModuleNotFoundError`.
+Expected: FAIL ??404 / `ModuleNotFoundError`.
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -1098,7 +1187,7 @@ async def list_buyers(
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "buyer.read"):
+        if not permission_for_roles(membership["roles"], "listBuyers"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
         rows = (
             await session.execute(
@@ -1125,7 +1214,7 @@ async def get_buyer(
 
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(membership["roles"], "buyer.read"):
+        if not permission_for_roles(membership["roles"], "getBuyer"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
         row = (
             await session.execute(
@@ -1277,7 +1366,7 @@ def test_runtime_role_without_context_sees_nothing(seeded):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest tests/test_api_tenant_isolation.py -v`
-Expected: FAIL — route/mode not yet correct / `ModuleNotFoundError`.
+Expected: FAIL ??route/mode not yet correct / `ModuleNotFoundError`.
 
 - [ ] **Step 3: Pin the generator, install and generate the client**
 
@@ -1320,7 +1409,7 @@ git commit -m "feat(api): pinned pnpm-generated TS client and tenant isolation t
 
 ## Self-Review
 
-- **Spec coverage:** A (Tasks 1, 4, 5, 6), B (Tasks 2, 3), C (Tasks 1, 5, 6, 7), D (Tasks 1, 4, 5, 6), E (Tasks 1–7 tests) are mapped. Deliberate gaps to record before Build: full JWKS/RS256 verification inside `principal_from_token` (BO-004, needs B-IDENTITY); `If-Match` handling beyond ICP approval; `Idempotency-Key` persistence for other mutations; frontend wiring of `services/live/mapping.ts`.
+- **Spec coverage:** A (Tasks 1, 4, 5, 6), B (Tasks 2, 3), C (Tasks 1, 5, 6, 7), D (Tasks 1, 4, 5, 6), E (Tasks 1?? tests) are mapped. Deliberate gaps to record before Build: full JWKS/RS256 verification inside `principal_from_token` (BO-004, needs B-IDENTITY); `If-Match` handling beyond ICP approval; `Idempotency-Key` persistence for other mutations; frontend wiring of `services/live/mapping.ts`.
 - **Placeholder scan:** no `TBD`/`TODO`; each code step contains complete code. The declared-path `501` map is enumerated in Task 6 and the readiness/capabilities payloads in Task 4, so no summarised behaviour remains.
 - **Type consistency:** `ApiError(status_code, code, message, retryable)`, `envelope(data, request_id)`, `Principal(issuer, subject)`, `claims_to_principal(claims, *, issuer, audience, now)`, `permission_for_roles(roles, permission)`, `get_engine()`, `tenant_scoped(workspace_id)`, `load_membership(session, *, principal, workspace_id)` are consistent across tasks and reuse existing `buyeros_api` names (`tenant_session`, `canonical_hash`, `Project`, `IcpVersion`, `ProjectBuyer`, `Company`). `verify_approval_hash`/`StaleRevision` are **created** in Task 5 (`services/icp_service.py`), not reused: the P2 plan specified that module but it was never implemented.
 
