@@ -59,3 +59,4 @@ c84aaf330c6238492eec3e5cf90901a13511dcf6c8e04ddc5fde45946f9e4a86  specs/2026-09-
 1b63c59e79f09925bf3c46b6baf4ab1763993f9b1971cd9cdf32b24669ed3d25  plans/2026-09-15-p2-persistence-foundation-implementation.md
 cb933614310eaff60c1bd2e2ca9142ef36ef8e3e31d239280d158b26d67ddf80  plans/2026-09-15-p3-discovery-fit-implementation.md
 96883f09fdfc6c87fda585e8c14a1007eeafe0d3fff0a1dcc825de043cb06eae  plans/2026-09-15-p4-contact-guardrails-implementation.md
+d000ee2b120bccda722cd5bdfe5373e2a71fd7285ce760c3a340cce5a5c38026  plans/2026-09-15-p5-draft-approval-export-implementation.md
