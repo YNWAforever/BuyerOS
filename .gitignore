@@ -54,3 +54,6 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 services/**/*.egg-info/
+
+# internal scratch (briefs, reports, ledgers)
+.superpowers/
