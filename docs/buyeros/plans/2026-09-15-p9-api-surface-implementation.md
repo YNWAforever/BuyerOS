@@ -1286,7 +1286,20 @@ router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["buyers"])
 
 
 def _buyer_data(buyer, company) -> dict:
-    return {"id": str(buyer.id), "project_id": str(buyer.project_id), "company": company.display_name, "note": buyer.note}
+    """Contract `Buyer` subset: P9 returns identity + note only, under the contract's own keys.
+
+    `name` is the contract's company display name; `company_id` carries the company identity.
+    Every emitted key must exist in the contract `Buyer` schema (guarded by the contract test).
+    """
+    return {
+        "id": str(buyer.id),
+        "workspace_id": str(buyer.workspace_id),
+        "project_id": str(buyer.project_id),
+        "company_id": str(buyer.company_id),
+        "name": company.display_name,
+        "note": buyer.note,
+        "data_mode": "live",
+    }
 
 
 @router.get("/projects/{project_id}/buyers")
@@ -1642,6 +1655,7 @@ git commit -m "feat(api): pinned pnpm-generated TS client and tenant isolation t
 - **Spec coverage:** A (Tasks 1, 4, 5, 6), B (Tasks 2, 3), C (Tasks 1, 5, 6, 7), D (Tasks 1, 4, 5, 6), E (Tasks 1-7 tests) are mapped. Deliberate gaps to record before Build:
   - full JWKS/RS256 verification inside `principal_from_token` (BO-004, needs B-IDENTITY);
   - **blocking for BO-004:** the `buyeros_api` runtime role has no `SELECT` grant on `users` (migrations grant only `memberships` and `workspaces`), and both `load_membership` and `list_workspaces` read `users`. Every authenticated route therefore fails with `permission denied for table users` (500) under the runtime role once Auth0 is configured; a grant migration plus a runtime-role DB test must land with the live verifier. Recorded at owner direction: not fixed in P9 (outside its allowed files);
+  - **response bodies are a documented subset, not a full contract mirror.** P9 emits only the fields the ORM models carry (for example `Project` returns `id/workspace_id/name/status` of the contract's 15 declared properties; `ICPVersion` omits `version`/`created_at`/`updated_at`). `test_implemented_response_fields_are_declared_by_the_contract` guards the shape actually returned (every emitted key must be a contract-declared property, which caught the non-contract `company` key in `listBuyers`), but full required-field coverage is deferred to the phase that adds the missing columns and `response_model`s. The spec's §C wording about validating success bodies should be read as this subset guarantee;
   - `If-Match` handling beyond ICP approval; `Idempotency-Key` persistence (replay/conflict) beyond header presence;
   - authenticated happy paths are **NOT RUN** in P9 (auth unconfigured; tests cover the fail-closed path only);
   - frontend wiring of `services/live/mapping.ts`.

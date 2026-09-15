@@ -27,7 +27,7 @@ Deliver the first HTTP surface over the existing domain services: a FastAPI app 
 ## C. Contract-first workflow
 
 - `contracts/openapi.proposed.yaml` stays authoritative. Implemented routes must match its `operationId`, method, path, and schema names exactly.
-- A **contract test** loads the spec and asserts: every implemented route exists in the spec with matching `operationId` and method; success bodies validate against the schema's required fields; `data_mode == "live"`.
+- A **contract test** loads the spec and asserts: every implemented route exists in the spec with matching `operationId` and method; every field of a returned success body is a property the contract schema declares (a *subset* guarantee — full required-field coverage is deferred to the phase that adds the missing columns and `response_model`s, since P9 returns only what the ORM models carry); `data_mode == "live"`.
 - `services/generated/buyeros-api.ts` is generated from the spec with an **exactly pinned** `openapi-typescript` devDependency in `services/api/package.json`, installed and run through the repository's pnpm toolchain (no unpinned `npx` fetch). The generation command and resolved version are recorded.
 - Known-but-unimplemented operations are not silently absent: they are enumerated in a registry and answered with an explicit `501 NOT_IMPLEMENTED` on their **declared** contract path+method only. No parallel or invented endpoint is introduced.
 
