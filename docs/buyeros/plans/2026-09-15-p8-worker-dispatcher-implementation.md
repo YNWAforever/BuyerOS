@@ -706,17 +706,19 @@ git commit -m "feat(worker): SSRF-safe fetch.evidence validation handler"
 
 **Files:**
 - Create: `services/worker/buyeros_worker/run_lifecycle.py`
+- Create: `services/worker/buyeros_worker/run_emitter.py`
 - Create: `services/worker/tests/test_run_lifecycle.py`
+- Create: `services/worker/tests/test_run_emitter.py`
 
 **Interfaces:**
-- Produces: `RUN_STATES`; `transition_run(current, event) -> str` (no regression); `terminal(state) -> bool`.
-- Consumes: `buyeros_api.services.run_events.next_sequence`/`apply_event` (P3).
+- Produces: `RUN_STATES`; `TERMINAL = {"completed", "cancelled"}` (owner decision — `failed`, `partial` and `paused_budget` stay retryable); `BLOCKED = {"blocked"}`; `transition_run(current, event) -> str` (no regression from a terminal or blocked state); `terminal(state) -> bool`; `halted(state) -> bool`; `async emit_run_event(session, run_id, event_type, *, transition=None, payload=None) -> int` (status update + one `run_events` row in the caller's transaction).
+- Consumes: `buyeros_api.services.run_events.next_sequence`/`apply_event` (P3); `buyeros_api.db.runs.SearchRun`/`RunEvent`.
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # services/worker/tests/test_run_lifecycle.py
-from buyeros_worker.run_lifecycle import terminal, transition_run
+from buyeros_worker.run_lifecycle import halted, terminal, transition_run
 
 
 def test_valid_progressions():
@@ -727,7 +729,20 @@ def test_valid_progressions():
 
 def test_terminal_states_do_not_regress():
     assert transition_run("completed", "start") == "completed"
-    assert transition_run("failed", "start") == "failed"
+    assert transition_run("cancelled", "start") == "cancelled"
+
+
+def test_failed_and_paused_budget_are_retryable():
+    assert transition_run("failed", "retry") == "queued"
+    assert transition_run("partial", "retry") == "queued"
+    assert transition_run("paused_budget", "retry") == "queued"
+
+
+def test_capability_blocked_runs_halt():
+    assert transition_run("running", "capability_block") == "blocked"
+    assert transition_run("blocked", "retry") == "blocked"
+    assert halted("blocked") is True
+    assert terminal("blocked") is False
 
 
 def test_cancel_requested_is_not_terminal():
@@ -749,8 +764,13 @@ Expected: FAIL — `ModuleNotFoundError`.
 
 ```python
 # services/worker/buyeros_worker/run_lifecycle.py
-RUN_STATES = ("draft", "queued", "running", "partial", "paused_budget", "completed", "failed", "cancel_requested", "cancelled")
-TERMINAL = {"completed", "failed", "cancelled"}
+RUN_STATES = ("draft", "queued", "running", "partial", "paused_budget", "completed", "failed", "cancel_requested", "cancelled", "blocked")
+# Owner decision: only completed/cancelled are terminal. failed, partial and
+# paused_budget are retryable and can return to queued.
+TERMINAL = {"completed", "cancelled"}
+# A capability-blocked run is halting (nothing retries it) but not a
+# business-terminal outcome, so it is tracked separately from TERMINAL.
+BLOCKED = {"blocked"}
 
 _TRANSITIONS = {
     ("draft", "enqueue"): "queued",
@@ -762,7 +782,15 @@ _TRANSITIONS = {
     ("running", "cancel"): "cancel_requested",
     ("partial", "retry"): "queued",
     ("failed", "retry"): "queued",
+    ("paused_budget", "retry"): "queued",
+    ("paused_budget", "resume"): "running",
     ("cancel_requested", "cancel"): "cancelled",
+    ("draft", "capability_block"): "blocked",
+    ("queued", "capability_block"): "blocked",
+    ("running", "capability_block"): "blocked",
+    ("partial", "capability_block"): "blocked",
+    ("paused_budget", "capability_block"): "blocked",
+    ("cancel_requested", "capability_block"): "blocked",
 }
 
 
@@ -770,11 +798,55 @@ def terminal(state: str) -> bool:
     return state in TERMINAL
 
 
+def halted(state: str) -> bool:
+    """Terminal or capability-blocked: no further transition is applied."""
+    return state in TERMINAL or state in BLOCKED
+
+
 def transition_run(current: str, event: str) -> str:
-    if terminal(current):
+    if halted(current):
         return current
     return _TRANSITIONS.get((current, event), current)
 ```
+
+```python
+# services/worker/buyeros_worker/run_emitter.py
+import uuid
+
+from sqlalchemy import func, select
+
+from buyeros_api.db.runs import RunEvent, SearchRun
+from buyeros_api.services.run_events import apply_event, next_sequence
+
+from .run_lifecycle import transition_run
+
+
+async def emit_run_event(session, run_id, event_type: str, *, transition: str | None = None, payload: dict | None = None) -> int:
+    """Advance the run (if ``transition``) and append exactly one event.
+
+    Runs on the caller's tenant transaction, so the status update and the
+    ``run_events`` insert commit with the work or roll back with it. Returns the
+    sequence, or 0 when there is nothing to do. Never makes an external call.
+    """
+    if session is None or run_id is None:
+        return 0
+    run_key = run_id if isinstance(run_id, uuid.UUID) else uuid.UUID(str(run_id))
+    result = await session.execute(select(SearchRun).where(SearchRun.id == run_key).with_for_update())
+    run = result.scalar_one_or_none()
+    if run is None:
+        return 0
+    last = (await session.execute(select(func.coalesce(func.max(RunEvent.sequence), 0)).where(RunEvent.run_id == run_key))).scalar_one()
+    sequence = next_sequence(int(last))
+    if not apply_event(int(last), sequence):
+        return 0
+    if transition is not None:
+        new_status = transition_run(run.status, transition)
+        if new_status != run.status:
+            run.status = new_status
+    session.add(RunEvent(workspace_id=run.workspace_id, run_id=run_key, sequence=sequence, event_type=event_type, payload=payload or {}))
+    return sequence
+```
+
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -794,29 +866,34 @@ git commit -m "feat(worker): run lifecycle transition table"
 
 **Files:**
 - Create: `services/worker/buyeros_worker/dispatcher.py`
-- Create: `services/worker/buyeros_worker/store.py`
 - Create: `services/worker/tests/test_dispatcher.py`
 
 **Interfaces:**
-- Produces: `async def claim_outbox_rows(session, owner, limit, now) -> list[dict]` (atomic conditional update, increments `fencing_generation`); `async def mark_dispatched(session, ids, now)`; `async def sweep_expired(session, now) -> list[str]`; `async def dispatch_once(session, publish, owner, now, limit) -> list[str]`.
-- Consumes: `can_claim`, `lease_expiry` (Task 3); `OutboxEvent` (Task 2).
+- Produces: `claimable(state, lease_expires_at, now) -> bool`; `select_ready(rows, now, limit) -> list[dict]`; `async def list_workspace_ids(session) -> list`; `async def claim_outbox_rows(session, owner, limit, now, lease_seconds, *, expired_only=False) -> list[dict]` (atomic conditional update, increments `fencing_generation`, never re-claims terminal rows); `async def release_claim(session, intent_key)`; `async def dispatch_once(engine, publish, owner, now, limit, lease_seconds) -> list[str]`; `async def sweep_once(engine, publish, owner, now, limit, lease_seconds) -> list[str]` (re-enqueues expired in-progress intents).
+- Consumes: `lease_expiry` (Task 3); `OutboxEvent`/`TERMINAL_STATES` (Task 2); `buyeros_api.db.session.tenant_session`, `Workspace`.
+- **RLS decision:** the dispatcher cannot read all tenants' `outbox_events`, so it enumerates tenants from `workspaces` (non-RLS tenant root, read grant added by migration `0007`) and sets the transaction-local tenant context per workspace via `tenant_session` before claiming.
+- **Ordering:** the claim (lease + `fencing_generation` bump + `state='dispatched'`) commits before the publish, so a crash between them is recovered by the sweeper's lease expiry; a publish failure calls `release_claim` to put the row straight back to `ready`. The published message carries only opaque ids.
 
 - [ ] **Step 1: Write the failing test** (pure selection logic, no DB)
 
 ```python
 # services/worker/tests/test_dispatcher.py
+import asyncio
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 
-from buyeros_worker.dispatcher import select_ready
+from buyeros_worker.dispatcher import claimable, dispatch_once, select_ready
 
 NOW = datetime(2026, 9, 15, tzinfo=timezone.utc)
 
 
-def test_only_ready_rows_are_selected():
+def test_only_ready_and_expired_rows_are_selected():
     rows = [
         {"id": 1, "state": "ready", "lease_expires_at": None},
         {"id": 2, "state": "dispatched", "lease_expires_at": NOW + timedelta(seconds=60)},
-        {"id": 3, "state": "ready", "lease_expires_at": NOW - timedelta(seconds=1)},
+        {"id": 3, "state": "dispatched", "lease_expires_at": NOW - timedelta(seconds=1)},
+        {"id": 4, "state": "done", "lease_expires_at": None},
+        {"id": 5, "state": "failed", "lease_expires_at": NOW - timedelta(days=1)},
     ]
     assert [r["id"] for r in select_ready(rows, NOW)] == [1, 3]
 
@@ -824,6 +901,34 @@ def test_only_ready_rows_are_selected():
 def test_batch_is_bounded():
     rows = [{"id": i, "state": "ready", "lease_expires_at": None} for i in range(20)]
     assert len(select_ready(rows, NOW, limit=5)) == 5
+
+
+def test_terminal_rows_are_never_claimable():
+    assert claimable("done", NOW - timedelta(days=1), NOW) is False
+    assert claimable("failed", None, NOW) is False
+
+
+def test_dispatch_once_publishes_only_opaque_ids(monkeypatch):
+    """The broker message never carries the instruction (event type/payload)."""
+
+    async def fake_workspace_ids(engine):
+        return ["ws-1"]
+
+    @asynccontextmanager
+    async def fake_tenant_session(engine, workspace_id):
+        yield object()
+
+    async def fake_claim(session, owner, limit, now, lease_seconds, *, expired_only=False):
+        return [{"id": 1, "workspace_id": "ws-1", "intent_key": "job:aaa",
+                 "event_type": "fetch.evidence", "payload": {"url": "https://e.com"}, "fencing_generation": 7}]
+
+    monkeypatch.setattr("buyeros_worker.dispatcher._workspace_ids", fake_workspace_ids)
+    monkeypatch.setattr("buyeros_worker.dispatcher.tenant_session", fake_tenant_session)
+    monkeypatch.setattr("buyeros_worker.dispatcher.claim_outbox_rows", fake_claim)
+    messages = []
+    out = asyncio.run(dispatch_once(object(), messages.append, "owner", NOW, 10, 120))
+    assert out == ["job:aaa"]
+    assert messages == [{"intent_key": "job:aaa", "workspace_id": "ws-1", "generation": 7}]
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -835,87 +940,150 @@ Expected: FAIL — `ModuleNotFoundError`.
 
 ```python
 # services/worker/buyeros_worker/dispatcher.py
+from collections.abc import Callable
 from datetime import datetime
-from typing import Callable
 
-from .leases import can_claim, lease_expiry
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import async_sessionmaker
+
+from buyeros_api.db.models import Workspace
+from buyeros_api.db.outbox import DISPATCHED_STATE, READY_STATE
+from buyeros_api.db.session import tenant_session
+
+from .leases import lease_expiry
+
+_CLAIM_COLUMNS = "id, workspace_id, intent_key, event_type, payload, fencing_generation"
+
+# Terminal rows (done/failed) are deliberately absent: the predicate is an
+# allow-list, so a terminal row can never be re-claimed or re-run.
+_CLAIMABLE_PREDICATE = "state = 'ready' OR (state = 'dispatched' AND lease_expires_at <= :now)"
+_EXPIRED_PREDICATE = "state = 'dispatched' AND lease_expires_at <= :now"
+
+
+def claimable(state: str, lease_expires_at: datetime | None, now: datetime) -> bool:
+    if state == READY_STATE:
+        return True
+    return state == DISPATCHED_STATE and lease_expires_at is not None and lease_expires_at <= now
 
 
 def select_ready(rows: list[dict], now: datetime, limit: int = 10) -> list[dict]:
-    selected = [r for r in rows if can_claim(r.get("state", "free"), r.get("lease_expires_at"), now)]
+    selected = [r for r in rows if claimable(r.get("state", READY_STATE), r.get("lease_expires_at"), now)]
     return selected[:limit]
 
 
-async def claim_outbox_rows(session, owner: str, limit: int, now: datetime) -> list[dict]:
-    """Claim ready outbox rows atomically, bumping the fencing generation."""
-    from sqlalchemy import text
+async def list_workspace_ids(session) -> list:
+    from sqlalchemy import select
 
+    return list((await session.execute(select(Workspace.id).order_by(Workspace.id))).scalars().all())
+
+
+async def claim_outbox_rows(
+    session, owner: str, limit: int, now: datetime, lease_seconds: int, *, expired_only: bool = False
+) -> list[dict]:
+    """Claim ready (or expired in-progress) rows, bumping the fencing generation."""
+    predicate = _EXPIRED_PREDICATE if expired_only else _CLAIMABLE_PREDICATE
     result = await session.execute(
         text(
-            """
+            f"""
             UPDATE outbox_events
                SET lease_owner = :owner,
                    lease_expires_at = :expires,
+                   dispatched_at = :now,
+                   attempts = attempts + 1,
                    fencing_generation = fencing_generation + 1,
                    state = 'dispatched'
              WHERE id IN (
                    SELECT id FROM outbox_events
-                    WHERE state = 'ready'
-                       OR (state = 'dispatched' AND lease_expires_at <= :now)
+                    WHERE {predicate}
                     ORDER BY created_at
                     LIMIT :limit
                     FOR UPDATE SKIP LOCKED
              )
-         RETURNING id, intent_key, event_type, payload, fencing_generation
+         RETURNING {_CLAIM_COLUMNS}
             """
         ),
-        {"owner": owner, "expires": lease_expiry(now, 120), "now": now, "limit": limit},
+        {"owner": owner, "expires": lease_expiry(now, lease_seconds), "now": now, "limit": limit},
     )
     return [dict(r._mapping) for r in result]
 
 
-async def mark_dispatched(session, ids: list[int], now: datetime) -> None:
-    from sqlalchemy import text
-
-    if not ids:
-        return
-    await session.execute(text("UPDATE outbox_events SET dispatched_at = :now WHERE id = ANY(:ids)"), {"now": now, "ids": ids})
-
-
-async def sweep_expired(session, now: datetime) -> list[int]:
-    """Return ids of dispatched rows whose lease expired (re-claimable)."""
-    from sqlalchemy import text
-
-    result = await session.execute(
-        text("SELECT id FROM outbox_events WHERE state = 'dispatched' AND lease_expires_at <= :now"),
-        {"now": now},
+async def release_claim(session, intent_key: str) -> None:
+    """Return a claimed row to the claimable pool (publish failure recovery)."""
+    await session.execute(
+        text(
+            "UPDATE outbox_events SET state = 'ready', lease_owner = NULL, lease_expires_at = NULL"
+            " WHERE intent_key = :key AND state = 'dispatched'"
+        ),
+        {"key": intent_key},
     )
-    return [r[0] for r in result]
 
 
-async def dispatch_once(session, publish: Callable, owner: str, now: datetime, limit: int) -> list[str]:
-    from buyeros_api.services.outbox_service import build_intent
+async def _workspace_ids(engine) -> list:
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    async with maker() as session:
+        return await list_workspace_ids(session)
 
-    claimed = await claim_outbox_rows(session, owner, limit, now)
+
+async def _dispatch_workspace(
+    engine, workspace_id, publish: Callable, owner: str, now: datetime, limit: int, lease_seconds: int, *, expired_only: bool
+) -> list[str]:
+    async with tenant_session(engine, workspace_id) as session:
+        claimed = await claim_outbox_rows(session, owner, limit, now, lease_seconds, expired_only=expired_only)
+    # The claim above committed, so dispatch state is durable before the publish.
     published: list[str] = []
     for row in claimed:
-        intent = build_intent(row["event_type"], row["payload"], 0)
-        publish(intent, row)
-        published.append(intent)
-    await mark_dispatched(session, [row["id"] for row in claimed], now)
+        message = {
+            "intent_key": row["intent_key"],
+            "workspace_id": str(row["workspace_id"]),
+            "generation": row["fencing_generation"],
+        }
+        try:
+            publish(message)
+        except Exception:
+            async with tenant_session(engine, workspace_id) as session:
+                await release_claim(session, row["intent_key"])
+            raise
+        published.append(row["intent_key"])
     return published
+
+
+async def _fan_out(
+    engine, publish: Callable, owner: str, now: datetime, limit: int, lease_seconds: int, *, expired_only: bool
+) -> list[str]:
+    published: list[str] = []
+    for workspace_id in await _workspace_ids(engine):
+        published.extend(
+            await _dispatch_workspace(
+                engine, workspace_id, publish, owner, now, limit, lease_seconds, expired_only=expired_only
+            )
+        )
+    return published
+
+
+async def dispatch_once(
+    engine, publish: Callable, owner: str, now: datetime, limit: int = 10, lease_seconds: int = 120
+) -> list[str]:
+    """Claim and publish ready intents across all workspaces."""
+    return await _fan_out(engine, publish, owner, now, limit, lease_seconds, expired_only=False)
+
+
+async def sweep_once(
+    engine, publish: Callable, owner: str, now: datetime, limit: int = 10, lease_seconds: int = 120
+) -> list[str]:
+    """Re-enqueue intents whose lease expired without a terminal state."""
+    return await _fan_out(engine, publish, owner, now, limit, lease_seconds, expired_only=True)
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/test_dispatcher.py -v`
-Expected: PASS (2 passed).
+Expected: PASS (7 passed).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add services/worker/buyeros_worker/dispatcher.py services/worker/buyeros_worker/store.py services/worker/tests/test_dispatcher.py
-git commit -m "feat(worker): outbox dispatcher with lease claims and sweeper"
+git add services/worker/buyeros_worker/dispatcher.py services/worker/tests/test_dispatcher.py
+git commit -m "feat(worker): RLS-aware dispatcher, re-enqueueing sweeper and CLI entrypoints"
 ```
 
 ---
@@ -923,56 +1091,105 @@ git commit -m "feat(worker): outbox dispatcher with lease claims and sweeper"
 ### Task 9: Celery task entrypoint (ack after commit)
 
 **Files:**
+- Create: `services/worker/buyeros_worker/engine.py`
 - Create: `services/worker/buyeros_worker/tasks.py`
+- Create: `services/worker/buyeros_worker/cli.py`
 - Create: `services/worker/tests/test_tasks.py`
 
 **Interfaces:**
-- Produces: `execute_intent(intent_key: str, event_type: str, payload: dict, generation: int) -> str` Celery task returning the terminal state; `run_intent(handler, payload, session_factory, context) -> str` pure orchestration helper.
-- Consumes: `get_handler` (Task 4), `fence_ok` (Task 3), `HandlerResult` (Task 4).
+- Produces: `engine.async_database_url(url)`/`create_engine()`/`set_active_engine(engine)`/`dispose_engine(**kwargs)`; `execute_intent_sync(intent_key, workspace_id, generation) -> str`; `async run_intent(session, context, intent_key, generation) -> str`; `async load_intent(session, intent_key)`; `async mark_outbox_terminal(session, intent_key, generation, state) -> int`; `execute_intent(intent_key, workspace_id, generation)` Celery task (acks late, retries on `RetryRequested`); `sweep` Celery task.
+- Consumes: `get_handler`/`UnknownHandler` (Task 4), `fence_ok` (Task 3), `TERMINAL_STATES`/`OutboxEvent` (Task 2), `create_engine`/`dispose_engine` (this task).
+- **Message contract:** the task signature is `(intent_key, workspace_id, generation)` only. The broker is never the instruction source: `run_intent` loads the row from the database, and the event type and payload come from that row.
+- **Fencing:** `load_intent` takes a `FOR UPDATE` lock and `fence_ok` compares the presented generation with the row's before any handler runs; a stale call returns `"stale"` with no handler execution and no writes.
+- **Engine lifecycle:** one engine is created and disposed per invocation on the same event loop (no singleton reused across `asyncio.run` loops). `dispose_engine` is connected to Celery's `worker_shutdown` signal as a mid-run safety net.
+
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # services/worker/tests/test_tasks.py
+import asyncio
+from contextlib import asynccontextmanager
+
 import pytest
 
+import buyeros_worker.engine as engine_mod
+import buyeros_worker.tasks as tasks
 from buyeros_worker.registry import HandlerResult, UnknownHandler
-from buyeros_worker.tasks import run_intent
 
 
-class FakeSession:
+class FakeEngine:
     def __init__(self):
-        self.committed = False
+        self.disposed = False
 
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, *exc):
-        return False
-
-    async def commit(self):
-        self.committed = True
+    async def dispose(self):
+        self.disposed = True
 
 
-def test_run_intent_returns_handler_state():
-    session = FakeSession()
+def test_each_invocation_creates_and_disposes_its_own_engine(monkeypatch):
+    created = []
 
-    async def handler(s, context, payload):
-        return HandlerResult(state="done", detail="ok")
+    def fake_create_engine():
+        engine = FakeEngine()
+        created.append(engine)
+        return engine
 
-    state = __import__("asyncio").run(run_intent(handler, {}, session, context={"workspace_id": "w"}))
-    assert state == "done"
-    assert session.committed is True
+    @asynccontextmanager
+    async def fake_tenant_session(engine, workspace_id):
+        yield object()
+
+    async def fake_run_intent(session, context, intent_key, generation):
+        return "done"
+
+    monkeypatch.setattr(tasks, "create_engine", fake_create_engine)
+    monkeypatch.setattr(tasks, "tenant_session", fake_tenant_session)
+    monkeypatch.setattr(tasks, "run_intent", fake_run_intent)
+    assert tasks.execute_intent_sync("job:1", "ws", 1) == "done"
+    assert tasks.execute_intent_sync("job:2", "ws", 1) == "done"
+    assert len(created) == 2
+    assert all(engine.disposed for engine in created)
 
 
-def test_run_intent_reports_blocked_without_raising():
-    session = FakeSession()
+def _row(state="dispatched", generation=1, event_type="fetch.evidence", payload=None):
+    return {"state": state, "event_type": event_type, "payload": payload or {}, "fencing_generation": generation}
 
-    async def handler(s, context, payload):
-        return HandlerResult(state="blocked", detail="no provider")
 
-    state = __import__("asyncio").run(run_intent(handler, {}, session, context={"workspace_id": "w"}))
-    assert state == "blocked"
+def test_run_intent_rejects_a_stale_generation_without_running_the_handler(monkeypatch):
+    async def fake_load(session, intent_key):
+        return _row(generation=9)
+
+    called = []
+    monkeypatch.setattr(tasks, "load_intent", fake_load)
+    monkeypatch.setattr(tasks, "get_handler", lambda event_type: lambda *args: called.append(event_type))
+    assert asyncio.run(tasks.run_intent(object(), {}, "job:1", 1)) == "stale"
+    assert called == []
+
+
+def test_run_intent_marks_the_row_done(monkeypatch):
+    async def fake_load(session, intent_key):
+        return _row()
+
+    terminal = []
+
+    async def fake_mark(session, intent_key, generation, state):
+        terminal.append((intent_key, generation, state))
+        return 1
+
+    monkeypatch.setattr(tasks, "load_intent", fake_load)
+    monkeypatch.setattr(tasks, "mark_outbox_terminal", fake_mark)
+    monkeypatch.setattr(tasks, "get_handler", lambda event_type: lambda s, c, p: HandlerResult(state="done"))
+    assert asyncio.run(tasks.run_intent(object(), {}, "job:1", 1)) == "done"
+    assert terminal == [("job:1", 1, "done")]
+
+
+def test_worker_shutdown_disposes_the_in_flight_engine():
+    from celery import signals
+
+    engine = FakeEngine()
+    engine_mod.set_active_engine(engine)
+    signals.worker_shutdown.send(sender=None)
+    assert engine.disposed is True
+    assert engine_mod._active_engine is None
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -983,58 +1200,173 @@ Expected: FAIL — `ModuleNotFoundError`.
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
+# services/worker/buyeros_worker/engine.py  (async engine lifecycle)
+def async_database_url(url: str) -> str:
+    """Force the psycopg (v3) async driver for SQLAlchemy async engines."""
+    if url.startswith("postgresql+"):
+        return url
+    if url.startswith("postgresql://"):
+        return url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return url
+
+
+def create_engine():
+    from buyeros_api.settings import get_settings
+    return create_async_engine(async_database_url(get_settings().database_url))
+
+
+def dispose_engine(**_) -> None:
+    """Dispose the in-flight engine. Wired to Celery's ``worker_shutdown``."""
+    global _active_engine
+    with _active_lock:
+        engine, _active_engine = _active_engine, None
+    if engine is not None:
+        asyncio.run(engine.dispose())
+```
+
+```python
 # services/worker/buyeros_worker/tasks.py
 import asyncio
+from collections.abc import Callable
+from datetime import datetime, timezone
 
+from celery import signals
+from sqlalchemy import select, update
+
+from buyeros_api.db.outbox import DISPATCHED_STATE, TERMINAL_STATES, OutboxEvent
+from buyeros_api.db.session import tenant_session
+
+from . import handlers  # noqa: F401  (import registers handlers)
 from .app import celery_app
-from .registry import get_handler
+from .engine import create_engine, dispose_engine, set_active_engine
+from .leases import fence_ok
+from .registry import UnknownHandler, get_handler
+
+# Handler result state -> terminal outbox state. ``retry`` is absent: it leaves
+# the row non-terminal and asks Celery for a bounded retry.
+TERMINAL_FOR_RESULT = {"done": "done", "blocked": "failed"}
 
 
-async def run_intent(handler, payload, session, context) -> str:
-    """Execute one handler inside the tenant session and commit before ack.
+class RetryRequested(Exception):
+    """The handler asked for a bounded Celery retry; the transaction rolls back."""
 
-    The caller passes a session already scoped with the transaction-local
-    tenant context; nothing is committed if the handler raises.
-    """
-    result = handler(session, context, payload)
+
+class StaleFenced(Exception):
+    """A superseded worker lost the fencing race; nothing may be committed."""
+
+
+async def load_intent(session, intent_key: str) -> dict | None:
+    """Lock and read the intent from the database (never from the message)."""
+    row = (await session.execute(select(OutboxEvent).where(OutboxEvent.intent_key == intent_key).with_for_update())).scalar_one_or_none()
+    if row is None:
+        return None
+    return {"state": row.state, "event_type": row.event_type, "payload": row.payload, "fencing_generation": row.fencing_generation}
+
+
+async def mark_outbox_terminal(session, intent_key: str, generation: int, state: str) -> int:
+    """Terminal write guarded by the fencing generation; returns rows updated."""
+    result = await session.execute(
+        update(OutboxEvent)
+        .where(OutboxEvent.intent_key == intent_key, OutboxEvent.fencing_generation == generation, OutboxEvent.state == DISPATCHED_STATE)
+        .values(state=state, lease_owner=None, lease_expires_at=None)
+    )
+    return result.rowcount or 0
+
+
+async def run_intent(session, context, intent_key: str, generation: int) -> str:
+    row = await load_intent(session, intent_key)
+    if row is None:
+        return "unknown_intent"
+    if row["state"] in TERMINAL_STATES:
+        return "duplicate"
+    if not fence_ok(generation, row["fencing_generation"]):
+        return "stale"
+    try:
+        handler = get_handler(row["event_type"])
+    except UnknownHandler:
+        await mark_outbox_terminal(session, intent_key, generation, "failed")
+        return "unknown_handler"
+    handler_context = dict(context or {})
+    handler_context["event_type"] = row["event_type"]
+    result = handler(session, handler_context, row["payload"])
     if asyncio.iscoroutine(result):
         result = await result
-    await session.commit()
+    if result.state == "retry":
+        raise RetryRequested()
+    terminal = TERMINAL_FOR_RESULT.get(result.state)
+    if terminal is not None and await mark_outbox_terminal(session, intent_key, generation, terminal) == 0:
+        raise StaleFenced()
     return result.state
 
 
-@celery_app.task(name="buyeros.execute_intent", acks_late=True)
-def execute_intent(intent_key: str, event_type: str, payload: dict, generation: int) -> str:
-    handler = get_handler(event_type)
+async def _with_engine(body: Callable):
+    """Create an engine, run ``body`` on a fresh loop, always dispose it."""
+    engine = create_engine()
+    set_active_engine(engine)
+    try:
+        return await body(engine)
+    finally:
+        try:
+            await engine.dispose()
+        finally:
+            set_active_engine(None)
 
-    async def _run() -> str:
-        from buyeros_api.db.session import tenant_session
 
-        engine = _engine()
-        async with tenant_session(engine, payload["workspace_id"]) as session:
-            return await run_intent(handler, payload, session, context={"workspace_id": payload["workspace_id"]})
+def execute_intent_sync(intent_key: str, workspace_id: str, generation: int) -> str:
+    async def body(engine):
+        async with tenant_session(engine, workspace_id) as session:
+            return await run_intent(session, {"workspace_id": workspace_id}, intent_key, generation)
 
-    return asyncio.run(_run())
+    try:
+        return asyncio.run(_with_engine(body))
+    except StaleFenced:
+        return "stale"
 
 
-def _engine():
-    from sqlalchemy.ext.asyncio import create_async_engine
+def publish_message(message: dict) -> None:
+    celery_app.send_task("buyeros.execute_intent", args=[message["intent_key"], message["workspace_id"], message["generation"]])
 
-    from buyeros_api.settings import get_settings
 
-    return create_async_engine(get_settings().database_url)
+def sweep_sync() -> list[str]:
+    from .config import get_settings
+    from .dispatcher import sweep_once
+
+    settings = get_settings()
+    now = datetime.now(timezone.utc)
+
+    async def body(engine):
+        return await sweep_once(engine, publish_message, "buyeros-sweeper", now, settings.batch_size, settings.lease_seconds)
+
+    return asyncio.run(_with_engine(body))
+
+
+@celery_app.task(name="buyeros.execute_intent", acks_late=True, bind=True)
+def execute_intent(self, intent_key: str, workspace_id: str, generation: int) -> str:
+    try:
+        return execute_intent_sync(intent_key, workspace_id, generation)
+    except RetryRequested:
+        raise self.retry(countdown=30, max_retries=3)
+
+
+@celery_app.task(name="buyeros.sweep")
+def sweep() -> int:
+    """Periodic recovery task (see ``beat_schedule`` in ``app.build_app``)."""
+    return len(sweep_sync())
+
+
+signals.worker_shutdown.connect(dispose_engine, weak=False)
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest tests/test_tasks.py -v`
-Expected: PASS (2 passed).
+Expected: PASS (12 passed).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add services/worker/buyeros_worker/tasks.py services/worker/tests/test_tasks.py
-git commit -m "feat(worker): celery task entrypoint with commit-before-ack"
+git add services/worker/buyeros_worker/engine.py services/worker/buyeros_worker/tasks.py services/worker/tests/test_tasks.py
+git commit -m "feat(worker): enforce fencing and resolve intents from the database"
 ```
 
 ---
@@ -1115,9 +1447,9 @@ git commit -m "test(worker): disposable valkey broker integration check"
 
 ## Self-Review
 
-- **Spec coverage:** A (Tasks 1, 2), B (Tasks 2, 3, 8, 9), C (Tasks 4, 5, 6, 7), D (Tasks 7, 9), E (Tasks 2 Step 5, 10) are mapped. Gaps intentionally deferred: the **live HTTP fetch client with DNS/IP pinning**, the sweeper's periodic schedule wiring, and dispatcher/worker CLI commands — noted as follow-ups, not silently omitted.
-- **Placeholder scan:** no `TBD`/`TODO`; every code step shows complete code. `store.py` is created but currently unused by the pure tests; it is reserved for the DB-backed dispatch test in a follow-up task and should either gain a test or be removed before Build.
-- **Type consistency:** `HandlerResult(state, detail)`, `register`/`get_handler`, `can_claim`/`lease_expiry`/`fence_ok`, `select_ready`/`claim_outbox_rows`/`sweep_expired`/`dispatch_once`, `transition_run`/`terminal`, `run_intent`/`execute_intent` are consistent across tasks and reuse `buyeros_api` names (`build_intent`, `next_sequence`, `apply_event`, `normalize_url`, `is_blocked_host`, `tenant_session`).
+- **Spec coverage:** A (Tasks 1, 2), B (Tasks 2, 3, 8, 9), C (Tasks 4, 5, 6, 7), D (Tasks 7, 9), E (Tasks 2 Step 5, 10) are mapped. The sweeper's periodic schedule (Celery `beat_schedule` + `buyeros.sweep`) and the `buyeros-worker dispatch`/`sweep` CLI are delivered in Task 9 and registered as a console script; the only intentional gap is the **live HTTP fetch client with DNS/IP pinning** (Task 6 stays validation-only).
+- **Placeholder scan:** no `TBD`/`TODO`; every code step shows complete code. `store.py` was removed from the plan and the tree: the dispatcher reads and writes `outbox_events` directly.
+- **Type consistency:** `HandlerResult(state, detail)`, `register`/`get_handler`, `lease_expiry`/`fence_ok`, `claimable`/`select_ready`/`claim_outbox_rows`/`release_claim`/`dispatch_once`/`sweep_once`, `transition_run`/`terminal`/`halted`/`emit_run_event`, `load_intent`/`mark_outbox_terminal`/`run_intent`/`execute_intent` are consistent across tasks and reuse `buyeros_api` names (`next_sequence`, `apply_event`, `TERMINAL_STATES`, `normalize_url`, `is_blocked_host`, `tenant_session`). There is no engine singleton: `_with_engine` creates and disposes one engine per invocation.
 
 ## Global Notes
 
