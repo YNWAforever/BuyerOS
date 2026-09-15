@@ -114,3 +114,20 @@ Extended the spike to the P2 domain tables under the same owner waiver.
 | Fixture cleanup | `docker ps -a --filter name=buyeros-test` | **PASS** — 0 containers remaining |
 
 Still not done: contact/quote/draft/approval tables (P4/P5), worker, API routes, auth. No task is marked DONE.
+
+## P4/P5 persistence extension (same waiver)
+
+- Added models: `buyeros_api/db/{contact,drafts,outcomes}.py` — `enrichment_quotes`, `enrichment_jobs`, `provider_operations`, `provider_events`, `idempotency_records`, `sender_identity_versions`, `outreach_drafts`, `draft_revisions`, `approvals`, `outcome_events`, `export_jobs`, `audit_events`.
+- Added services: `quote_service` (immutable quote + eligibility), `confirm_service` (idempotency), `provider_op` (uncertainty-safe transitions), `callback` (replay/digest), `settlement` (release vs reconcile), `approval_fingerprint` (versioned canonical JSON + golden vectors), `draft_service` (grounding), `approval_service` (material-change/stale), `csv_export` (formula neutralization), `usage` (zero-denominator + outcome chain).
+- Added migration `0004_p4_p5_tables` with composite tenant FKs and **RLS on all 12 new tenant tables**.
+- Shared golden vectors generated at `services/generated/approval-golden-vectors.json` (regeneration: `services/api/tools/generate_golden_vectors.py`).
+
+| Check | Command | Result |
+|---|---|---|
+| Full suite | `uv run pytest -q` (cwd `services/api`) | **PASS — 82 passed** (incl. DB-backed) |
+| Migrations apply | disposable `postgres:16` via fixture | **PASS** — up to `0004_p4_p5_tables` |
+| RLS coverage (P4/P5) | `pg_class` assertion in `test_tenant_isolation_db.py` | **PASS** — all 12 P4/P5 tables forced-RLS |
+| Approval fingerprint golden vectors | `test_approval_fingerprint.py` | **PASS** — Python matches pinned digests |
+| Fixture cleanup | `docker ps -a --filter name=buyeros-test` | **PASS** — 0 containers remaining |
+
+Still not done: worker/Celery execution, API routes/HTTP layer, auth (BO-004), search/LLM adapters, evidence fetch pipeline, frontend live adapter, and the remaining P3 tables. No task is marked DONE; the dependency waiver still stands.

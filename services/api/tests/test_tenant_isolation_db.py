@@ -48,3 +48,28 @@ def test_runtime_role_cannot_read_other_workspace_rows(seeded):
         conn.execute("SELECT set_config('app.workspace_id', %s, false)", (WORKSPACE_A,))
         rows = conn.execute("SELECT workspace_id FROM projects").fetchall()
         assert {str(r[0]) for r in rows} == {WORKSPACE_A}
+
+
+def test_rls_is_forced_on_p4_p5_tables(seeded):
+    with psycopg.connect(seeded) as conn:
+        rows = conn.execute(
+            "SELECT relname FROM pg_class WHERE relrowsecurity AND relforcerowsecurity"
+        ).fetchall()
+    protected = {row[0] for row in rows}
+    expected = {
+        "projects",
+        "evidence",
+        "budget_accounts",
+        "outbox_events",
+        "enrichment_quotes",
+        "enrichment_jobs",
+        "provider_operations",
+        "provider_events",
+        "outreach_drafts",
+        "draft_revisions",
+        "approvals",
+        "outcome_events",
+        "export_jobs",
+        "audit_events",
+    }
+    assert expected <= protected, expected - protected
