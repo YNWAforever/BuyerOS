@@ -60,3 +60,5 @@ c84aaf330c6238492eec3e5cf90901a13511dcf6c8e04ddc5fde45946f9e4a86  specs/2026-09-
 cb933614310eaff60c1bd2e2ca9142ef36ef8e3e31d239280d158b26d67ddf80  plans/2026-09-15-p3-discovery-fit-implementation.md
 96883f09fdfc6c87fda585e8c14a1007eeafe0d3fff0a1dcc825de043cb06eae  plans/2026-09-15-p4-contact-guardrails-implementation.md
 d000ee2b120bccda722cd5bdfe5373e2a71fd7285ce760c3a340cce5a5c38026  plans/2026-09-15-p5-draft-approval-export-implementation.md
+6a7014f4276371bca800dbd92a1ac7783f3b1482b0f00ab8bf3ddaf110bfb3a2  plans/2026-09-15-p6-hardening-pilot-implementation.md
+fb01b0489725cb111cf20e5809d4ae8763e4a0ec580d91d3892238aa9403f475  plans/2026-09-15-p7-delivery-design-implementation.md
