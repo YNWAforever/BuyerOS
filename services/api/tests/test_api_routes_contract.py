@@ -93,10 +93,16 @@ def test_implemented_response_fields_are_declared_by_the_contract():
 
     assert set(readiness_payload()) <= readiness_keys
 
+    page_keys = properties("CapabilityPage")
     page = capabilities_payload()
-    assert set(page) <= {"items", "offset", "limit", "total"}
+    assert set(page) <= page_keys
     for item in page["items"]:
         assert set(item) <= capability_keys, set(item) - capability_keys
+
+    # Every page wrapper the routes build inline must also use contract `*Page` keys.
+    for schema in ("WorkspacePage", "ProjectPage", "ICPVersionPage", "BuyerPage"):
+        assert {"items", "offset", "limit", "total"} <= properties(schema), schema
+    assert properties("BuyerPage") >= {"snapshot_id", "expires_at"}
 
     class _Project:
         id = workspace_id = uuid.UUID("11111111-1111-4111-8111-111111111111")
