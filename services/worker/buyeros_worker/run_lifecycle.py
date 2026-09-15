@@ -1,5 +1,5 @@
 RUN_STATES = ("draft", "queued", "running", "partial", "paused_budget", "completed", "failed", "cancel_requested", "cancelled")
-TERMINAL = {"completed", "failed", "cancelled"}
+TERMINAL = {"completed", "cancelled"}
 
 _TRANSITIONS = {
     ("draft", "enqueue"): "queued",
@@ -11,6 +11,8 @@ _TRANSITIONS = {
     ("running", "cancel"): "cancel_requested",
     ("partial", "retry"): "queued",
     ("failed", "retry"): "queued",
+    ("paused_budget", "retry"): "queued",
+    ("paused_budget", "resume"): "running",
     ("cancel_requested", "cancel"): "cancelled",
 }
 
