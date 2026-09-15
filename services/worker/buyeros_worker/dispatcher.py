@@ -57,12 +57,10 @@ async def sweep_expired(session, now: datetime) -> list[int]:
 
 
 async def dispatch_once(session, publish: Callable, owner: str, now: datetime, limit: int) -> list[str]:
-    from buyeros_api.services.outbox_service import build_intent
-
     claimed = await claim_outbox_rows(session, owner, limit, now)
     published: list[str] = []
     for row in claimed:
-        intent = build_intent(row["event_type"], row["payload"], 0)
+        intent = row["intent_key"]
         publish(intent, row)
         published.append(intent)
     await mark_dispatched(session, [row["id"] for row in claimed], now)
