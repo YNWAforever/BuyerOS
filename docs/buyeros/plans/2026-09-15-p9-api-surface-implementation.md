@@ -764,6 +764,35 @@ def test_implemented_routes_match_openapi_operation_ids():
         assert path in paths, path
         assert method in paths[path], (path, method)
         assert paths[path][method]["operationId"] == operation_id
+
+
+def test_the_app_actually_exposes_every_implemented_route():
+    """The YAML-only check above passes even with no routes registered; this one does not."""
+    client = TestClient(create_app(), raise_server_exceptions=False)
+    expected = (
+        ("GET", "/v1/workspaces"),
+        ("GET", f"/v1/workspaces/{WORKSPACE}/projects"),
+        ("POST", f"/v1/workspaces/{WORKSPACE}/projects"),
+        ("GET", f"/v1/workspaces/{WORKSPACE}/projects/{PROJECT}"),
+        ("GET", f"/v1/workspaces/{WORKSPACE}/projects/{PROJECT}/icp-versions"),
+        ("POST", f"/v1/workspaces/{WORKSPACE}/projects/{PROJECT}/icp-versions"),
+        ("POST", f"/v1/workspaces/{WORKSPACE}/icp-versions/{ICP}/approve"),
+    )
+    for method, path in expected:
+        response = client.request(method, path, json={})
+        assert response.status_code != 404, (method, path)
+
+
+def test_approve_declares_the_required_if_match_precondition():
+    import yaml
+    from pathlib import Path
+
+    spec = yaml.safe_load(Path("../../docs/buyeros/contracts/openapi.proposed.yaml").read_text(encoding="utf-8"))
+    operation = spec["paths"]["/v1/workspaces/{workspace_id}/icp-versions/{icp_version_id}/approve"]["post"]
+    parameters = {p.get("$ref", "").rsplit("/", 1)[-1]: p for p in operation["parameters"]}
+    assert "IfMatch" in parameters
+    assert spec["components"]["parameters"]["IfMatch"]["required"] is True
+    assert operation["x-version-precondition"] == "If-Match"
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -1055,6 +1084,7 @@ async def approve_icp_version(
     request: Request,
     principal: Principal = Depends(get_principal),
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    if_match: str | None = Header(default=None, alias="If-Match"),
 ) -> dict:
     from datetime import datetime, timezone
 
@@ -1066,6 +1096,18 @@ async def approve_icp_version(
 
     if not idempotency_key:
         raise ApiError(400, "INVALID_REQUEST", "Idempotency-Key header is required")
+    # Contract `IfMatch`: strong version ETag ("4"); missing is 400, stale is 412.
+    if not if_match:
+        raise ApiError(400, "INVALID_REQUEST", "If-Match header is required")
+    if len(if_match) < 2 or not if_match.startswith('"') or not if_match.endswith('"'):
+        raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"')
+    try:
+        expected_version = int(if_match[1:-1])
+    except ValueError as exc:
+        raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"') from exc
+    if expected_version < 1:
+        raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"')
+
     body = await request.json()
     if body.get("confirmation") is not True:
         raise ApiError(400, "INVALID_REQUEST", "confirmation must be true")
@@ -1085,6 +1127,8 @@ async def approve_icp_version(
         ).scalar_one_or_none()
         if row is None:
             raise ApiError(404, "NOT_FOUND", "profile version not found")
+        if row.number != expected_version:
+            raise ApiError(412, "STALE_REVISION", "profile version changed; reload the profile")
         try:
             verify_approval_hash(row, expected_hash)
         except StaleRevision as exc:
