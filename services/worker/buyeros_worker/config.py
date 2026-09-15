@@ -10,6 +10,7 @@ class WorkerSettings(BaseSettings):
     eager: bool = False
     lease_seconds: int = 120
     batch_size: int = 10
+    sweep_seconds: int = 60
 
 
 @lru_cache
