@@ -1,0 +1,26 @@
+[project]
+name = "buyeros-api"
+version = "0.1.0"
+description = "BuyerOS domain API (BO-005 persistence spike)"
+requires-python = ">=3.12"
+dependencies = [
+  "pydantic>=2.9,<3",
+  "pydantic-settings>=2.5,<3",
+  "sqlalchemy>=2.0,<2.1",
+  "alembic>=1.13,<2",
+  "psycopg[binary]>=3.2,<4",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.24,<1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+# NOTE (BO-005 spike): fastapi, asyncpg and pyjwt[crypto] are intentionally
+# omitted here; they are added when BO-004 (bearer identity) and the HTTP
+# layer (BO-003/BO-007+) are implemented. No auth or API route exists yet.

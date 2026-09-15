@@ -46,3 +46,11 @@ next-env.d.ts
 /work/
 
 *.tsbuildinfo
+
+# python (BuyerOS domain services, added by the BO-005 spike)
+services/**/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+services/**/*.egg-info/

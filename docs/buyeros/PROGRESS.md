@@ -65,3 +65,21 @@ Plan revision v1. Session date: 2026-09-15 (Hong Kong). Mode: **PLAN** (no Build
 5. Prohibited until separately approved: Build, installs, migrations, provisioning, deployment, Site changes, paid provider calls, contact purchase, mailbox connections, sends.
 
 No automatic transition to Build, live spend, deployment, or P7 delivery follows from this record.
+
+## BO-005 persistence spike (owner-authorized, dependency waiver)
+
+- Authorization: `decisions/BUILD_APPROVAL_RECORD.BO-005.md` — scope-limited spike with an explicit waiver of `depends_on: BO-003/BO-004` (BO-004 also blocked by B-IDENTITY). The waiver does **not** mark those tasks complete.
+- Created under `services/api/`: `pyproject.toml`, `buyeros_api/{__init__,settings}.py`, `buyeros_api/db/{base,models,session}.py`, `alembic/{env.py,script.py.mako}`, `alembic.ini`, `alembic/versions/{0001_initial,0002_rls_and_roles}.py`, and 4 test modules.
+- Scope: tenant models (`workspaces`, `users`, `memberships`), hand-written Alembic migrations (tables + roles + RLS), transaction-local tenant session. **No auth, no API routes, no providers, no frontend changes.**
+
+| Check | Command | Result |
+|---|---|---|
+| Dependencies install | `uv sync` | **PASS** (uv 0.11.27, Python 3.14.6) |
+| Unit tests | `uv run pytest -v` (cwd `services/api`) | **PASS — 12 passed**, 1 deprecation warning |
+| Migrations apply | `uv run alembic upgrade head` on disposable `postgres:16` | **PASS** — `0001_initial` then `0002_rls_and_roles` |
+| RLS catalog | `pg_class` / `pg_roles` | **PASS** — `memberships` RLS + FORCE on; `buyeros_api`/`buyeros_worker` `rolsuper=f`, `rolbypassrls=f` |
+| Tenant isolation | `psql` as `buyeros_api` | **PASS** — no context → hard error (fail-closed); workspace A → 1 row; workspace B → 0 rows |
+| DB-backed pytest (`test_tenant_isolation.py`) | — | **NOT RUN** (validated manually via psql instead) |
+| Disposable container cleanup | `docker rm -f buyeros-pg` | **DONE** |
+
+Remaining for full BO-005: DB-backed automated isolation fixtures, project/buyer/evidence/list tables (P2), and contract/auth integration. The repository now contains both the imported application source and this `services/api` spike.
