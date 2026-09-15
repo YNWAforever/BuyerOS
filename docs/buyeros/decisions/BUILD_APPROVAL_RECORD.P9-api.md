@@ -1,6 +1,16 @@
 # Build approval record — P9 API surface (dependency waiver)
 
-**Status: APPROVED (owner-authorized this session).** Plan revision v1. Recorded 2026-09-15 (Hong Kong).
+**Status: APPROVED (owner-authorized this session).** Plan revision **v1.1**. Recorded 2026-09-15 (Hong Kong).
+
+> **Revision v1.1 (execution session, 2026-09-16).** The plan and spec were corrected during execution under the
+> owner-approved pre-flight list (recorded in the P9 ledger) and several factual corrections found by task review.
+> Changes: the ICP approve route moved to the contract's `POST /v1/workspaces/{workspace_id}/icp-versions/{icp_version_id}/approve`;
+> readiness became the authenticated contract route (no `/health/ready`); `list_workspaces` resolves the user before
+> setting tenant context; the invented `/v1/unimplemented/{operation_id}` route was replaced by a registry covering all
+> 58 out-of-slice contract operations on their declared paths; generation uses a pinned pnpm toolchain; authorization is
+> transcribed from the contract's `x-permitted-roles`; `If-Match` is enforced on ICP approval; `listBuyers` reads the
+> contract's required `snapshot_id`. Scope and exclusions are unchanged; the waiver stands. `SHA256SUMS.txt` is
+> regenerated at HEAD and matches both P9 documents.
 
 | Field | Value |
 |---|---|
