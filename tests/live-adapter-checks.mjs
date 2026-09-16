@@ -303,4 +303,19 @@ await test('no token-shaped value is ever written to storage',()=>{
   assert.equal(written.some(([,v])=>/bearer|eyJ|token/i.test(v)),false);
 });
 
+await test('live requests are addressed to the configured API base URL',async()=>{
+  // Without this the live path would silently call the app's own origin.
+  const seen=[];
+  const client=live.createLiveClient(async(url)=>{seen.push(String(url));return {ok:true,json:async()=>({data:{},request_id:'r',data_mode:'live'})};},'https://api.example.test/');
+  await client.request({path:'/v1/workspaces',scope:'s1'});
+  assert.equal(seen[0],'https://api.example.test/v1/workspaces');
+});
+
+await test('with no base URL the path is used as-is',async()=>{
+  const seen=[];
+  const client=live.createLiveClient(async(url)=>{seen.push(String(url));return {ok:true,json:async()=>({data:{},request_id:'r',data_mode:'live'})};});
+  await client.request({path:'/v1/workspaces',scope:'s1'});
+  assert.equal(seen[0],'/v1/workspaces');
+});
+
 console.log(`${checks} live adapter checks passed`);

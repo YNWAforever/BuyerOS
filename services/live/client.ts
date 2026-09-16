@@ -24,7 +24,13 @@ async function bodyOf(response: {json: () => Promise<unknown>}): Promise<Record<
   }
 }
 
-export function createLiveClient(fetchImpl: typeof fetch = fetch) {
+/**
+ * The API base URL is resolved server-side and threaded down through `DataModeProvider`. Without it
+ * a live read would be sent to the app's own origin (`fetch(path)`) instead of the API. The default
+ * `''` keeps the path used as-is for callers that pass no base URL.
+ */
+export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '') {
+  const root = baseUrl.replace(/\/$/, '');
   return {
     async request<T>({path, method = 'GET', token, scope, signal}: LiveRequest): Promise<T> {
       void scope;
@@ -32,7 +38,7 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch) {
       if (token) headers.Authorization = `Bearer ${token}`;
       let response: Awaited<ReturnType<typeof fetch>>;
       try {
-        response = await fetchImpl(path, {method, headers, signal});
+        response = await fetchImpl(`${root}${path}`, {method, headers, signal});
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') throw new LiveCancelled('cancelled');
         throw new LiveError('request failed', 'NETWORK_ERROR', 0, '', true);

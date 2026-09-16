@@ -12,9 +12,8 @@ export function WorkspaceSessionProvider({children}: {children: ReactNode}) {
   const [value] = useState<SessionValue>(() => {
     const session = new SessionScope({mode, actor: ''});
     session.next({});
-    return {session, client: createLiveClient()};
+    return {session, client: createLiveClient(fetch, apiBaseUrl)};
   });
-  void apiBaseUrl;
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 

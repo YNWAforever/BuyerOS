@@ -3,6 +3,7 @@ import "./globals.css";
 import Workspace from "@/features/workspace";
 import { DataModeProvider } from "@/features/providers/data-mode";
 import { WorkspaceSessionProvider } from "@/features/providers/workspace-session";
+import { resolveMode } from "@/services/live/mode";
 
 export const metadata: Metadata = {
   title: "FIMMICK BuyerOS",
@@ -22,7 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const apiBaseUrl = process.env.BUYEROS_API_BASE_URL ?? '';
-  const mode = apiBaseUrl.trim() ? 'live' : 'demo';
+  // Use the tested resolver rather than re-deriving the rule inline.
+  const mode = resolveMode(apiBaseUrl);
   return (
     <html lang="en">
       <body className="antialiased">
