@@ -22,7 +22,13 @@
 - **WebMCP stays synthetic**: the `modelContext` tool is registered in demo mode only.
 - Mapping is strict: a payload missing a required field raises a typed error and is never coerced to an empty value.
 - **No new dependency.** Tests run as `node tests/live-adapter-checks.mjs`; the existing 11 `tests/domain-checks.mjs` checks must stay green.
-- **Runtime checks are not a type check.** The check harness transpiles with `tsc`'s emit but does not type-check, so a duplicate identifier, shadowed method or bad signature can stay green until another module calls it. Every task must also run `npx eslint <changed files>` clean, and type-check the modules it changes with `npx tsc --noEmit --moduleResolution nodenext --module ESNext --target ES2022 --strict <changed .ts files>`. **Type-invalid TypeScript is a defect even when the runtime checks pass.**
+- **Runtime checks are not a type check.** The check harness transpiles with `tsc`'s emit but does not type-check, so a duplicate identifier, shadowed method or bad signature can stay green until another module calls it. Every task must also run `npx eslint <changed files>` clean, and type-check the modules it changes using the repository's own module/resolution pair (mixing `--moduleResolution nodenext` with `--module ESNext` is an error, TS5110):
+
+  ```
+  npx tsc --noEmit --strict --module esnext --moduleResolution bundler --target ES2022 <changed .ts files>
+  ```
+
+  **Type-invalid TypeScript is a defect even when the runtime checks pass.**
 - Every unexecuted check is **NOT RUN**.
 
 **Existing interfaces this plan consumes (already implemented):**
@@ -733,7 +739,7 @@ Expected: FAIL — `Cannot find module .../services/live/read.ts`.
 ```ts
 import {availabilityFor, type Availability, type Section} from './mode';
 import {LiveCancelled, type LiveError, type LiveClient} from './client';
-import {scopeKey, type SessionScope} from './session';
+import type {SessionScope} from './session';
 
 export interface LoadResult {
   availability: Availability;
