@@ -102,15 +102,25 @@ def test_unimplemented_handler_actually_returns_501(monkeypatch):
     """The 401 test cannot prove 501; this drives the handler with a satisfied principal."""
     from buyeros_api.api import auth
     from buyeros_api.api.app import create_app as _create_app
+    from buyeros_api.settings import get_settings
 
-    monkeypatch.setattr(
-        auth, "principal_from_token", lambda token, *, issuer, audience: auth.Principal("test", "auth0|1")
-    )
-    client = TestClient(_create_app(), raise_server_exceptions=False)
-    response = client.post(
-        f"/v1/workspaces/{WORKSPACE}/projects/{PROJECT}/runs",
-        json={},
-        headers={"Authorization": "Bearer t"},
-    )
-    assert response.status_code == 501
-    assert response.json()["code"] == "NOT_IMPLEMENTED"
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
+    get_settings.cache_clear()
+
+    class _StubVerifier:
+        async def verify(self, token):
+            return auth.Principal(issuer="https://issuer.test/", subject="auth0|1")
+
+    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: _StubVerifier())
+    try:
+        client = TestClient(_create_app(), raise_server_exceptions=False)
+        response = client.post(
+            f"/v1/workspaces/{WORKSPACE}/projects/{PROJECT}/runs",
+            json={},
+            headers={"Authorization": "Bearer t"},
+        )
+        assert response.status_code == 501
+        assert response.json()["code"] == "NOT_IMPLEMENTED"
+    finally:
+        get_settings.cache_clear()

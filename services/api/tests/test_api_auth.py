@@ -108,20 +108,88 @@ def test_get_principal_bearer_scheme_is_case_insensitive(monkeypatch):
 
     from buyeros_api.api import auth
     from buyeros_api.api.app import create_app
+    from buyeros_api.settings import get_settings
+
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
+    get_settings.cache_clear()
 
     seen = {}
 
-    def fake_principal_from_token(token, *, issuer, audience):
-        seen["token"] = token
-        return auth.Principal(issuer=issuer or "issuer", subject="auth0|1")
+    class _StubVerifier:
+        async def verify(self, token):
+            seen["token"] = token
+            return auth.Principal(issuer="https://issuer.test/", subject="auth0|1")
 
-    monkeypatch.setattr(auth, "principal_from_token", fake_principal_from_token)
+    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: _StubVerifier())
+    try:
+        app = create_app()
+
+        @app.get("/protected")
+        async def protected(principal: auth.Principal = Depends(auth.get_principal)):
+            return {"data": {"subject": principal.subject}, "request_id": "x", "data_mode": "live"}
+
+        response = TestClient(app).get("/protected", headers={"Authorization": "bearer test-token"})
+        assert response.status_code == 200
+        assert seen["token"] == "test-token"
+    finally:
+        get_settings.cache_clear()
+
+
+def test_get_principal_verifies_a_real_token(monkeypatch):
+    import asyncio
+
+    from fastapi import Depends
+    from fastapi.testclient import TestClient
+
+    from buyeros_api.api import auth
+    from buyeros_api.api.app import create_app
+    from buyeros_api.api.jwks import JwksKeyCache
+    from buyeros_api.api.verifier import TokenVerifier
+    from tests import auth_fixtures as fx
+
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
+    from buyeros_api.settings import get_settings
+
+    get_settings.cache_clear()
+
+    cache = JwksKeyCache(lambda: asyncio.sleep(0, result=fx.jwks_document()), cache_seconds=300)
+    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: TokenVerifier(cache, issuer=fx.ISSUER, audience=fx.AUDIENCE))
+
     app = create_app()
 
-    @app.get("/protected")
-    async def protected(principal: auth.Principal = Depends(auth.get_principal)):
+    @app.get("/whoami")
+    async def whoami(principal: auth.Principal = Depends(auth.get_principal)):
         return {"data": {"subject": principal.subject}, "request_id": "x", "data_mode": "live"}
 
-    response = TestClient(app).get("/protected", headers={"Authorization": "bearer test-token"})
-    assert response.status_code == 200
-    assert seen["token"] == "test-token"
+    try:
+        good = TestClient(app).get("/whoami", headers={"Authorization": f"Bearer {fx.make_token()}"})
+        assert good.status_code == 200
+        assert good.json()["data"]["subject"] == "auth0|member"
+
+        bad = TestClient(app, raise_server_exceptions=False).get(
+            "/whoami", headers={"Authorization": f"Bearer {fx.make_token(iss='https://other.test/')}"}
+        )
+        assert bad.status_code == 401
+        assert bad.json()["code"] == "UNAUTHENTICATED"
+        assert "other.test" not in bad.text
+    finally:
+        get_settings.cache_clear()
+
+
+def test_verifier_is_reused_so_its_jwks_cache_survives(monkeypatch):
+    """A per-call verifier would cold-start the JWKS cache on every request."""
+    from buyeros_api.api import auth
+    from buyeros_api.settings import get_settings
+    from tests import auth_fixtures as fx
+
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
+    get_settings.cache_clear()
+    monkeypatch.setattr(auth, "_VERIFIER", None)
+    monkeypatch.setattr(auth, "_VERIFIER_KEY", None)
+    try:
+        assert auth._verifier_from_settings() is auth._verifier_from_settings()
+    finally:
+        get_settings.cache_clear()
