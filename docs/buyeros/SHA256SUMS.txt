@@ -74,5 +74,5 @@ de3c29a0259d4e6fc51fe9d158a49da9ffacd0608b503283bb38e0ce7eedf9e6  specs/2026-09-
 cd8974654d6652627d8bafbebc5274118899ae552336ce80acc852ecb80309bb  plans/2026-09-15-p9-api-surface-implementation.md
 a0a287ded255b0d8cb71805b42b43b5749a54c51a168e324647d6b4f100ddf79  decisions/BUILD_APPROVAL_RECORD.P9-api.md
 5bf61ab42e01cb25d2273a5e08c684983b6739bf7bf7332881919f7432fb6c62  specs/2026-09-17-p11-demo-live-adapter-design.md
-9139707ca8bdce891f78962c855d509148baeb80536e69ba29fa72dba9f42d20  plans/2026-09-17-p11-demo-live-adapter-implementation.md
+55155d74c18e4952157968e1a1169369ec647ac030c15ae6c9964838ef7a1c9e  plans/2026-09-17-p11-demo-live-adapter-implementation.md
 caadbfdb1fad6df192272f47a7656cf629bb10c3ef32a4352d20232992a24df0  decisions/BUILD_APPROVAL_RECORD.P11.md

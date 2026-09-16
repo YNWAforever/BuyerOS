@@ -145,13 +145,13 @@ export function moduleUrl(file){
 export async function loadModule(file){ return import(moduleUrl(file)); }
 ```
 
-Then in `tests/domain-checks.mjs`, replace the inline loader (its first six lines) with:
+Then in `tests/domain-checks.mjs`, replace only the loader block — the `fs`/`path`/`ts` imports, the `cache` map and the `url` function — with:
 
 ```js
 import {moduleUrl} from './ts-loader.mjs';
 ```
 
-and change each `url('...')` call to `moduleUrl('...')`. The three import sites are `data/demo/fixtures.ts`, `services/mock-client.ts` and `services/run-engine.ts`. The 11 existing checks and their assertions must not change.
+Keep `import assert from 'node:assert/strict';` (it is used by every check), and change each `url('...')` call to `moduleUrl('...')`. The three call sites are `data/demo/fixtures.ts`, `services/mock-client.ts` and `services/run-engine.ts`. The 11 existing checks and their assertions must not change.
 
 - [ ] **Step 4: Implement `services/live/mode.ts`**
 
