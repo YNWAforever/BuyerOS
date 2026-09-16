@@ -23,6 +23,8 @@ def _public_key(entry: dict):
     alone (not from ValueError/KeyError), so a malformed entry must be caught here
     or it would abort the whole fetch and empty the key set.
     """
+    if not isinstance(entry, dict):
+        return None
     if entry.get("kty") != "RSA":
         return None
     if entry.get("use") not in (None, "sig"):
@@ -71,6 +73,8 @@ class JwksKeyCache:
             document = await self._fetch_jwks()
             keys: dict[str, object] = {}
             for entry in document.get("keys", []):
+                if not isinstance(entry, dict):
+                    continue
                 kid = entry.get("kid")
                 if not kid:
                     continue
@@ -83,18 +87,15 @@ class JwksKeyCache:
     async def get_key(self, kid: str):
         if kid in self._keys and self._fresh():
             return self._keys[kid]
-        # Unknown kid with a fresh cache is the rotation path: allow one refetch, but
-        # rate-limit it so a stream of bogus kids cannot hammer the identity provider.
-        # A stale cache always gets its refresh attempt.
-        if self._fresh() and not self._cooldown_elapsed():
-            raise JwksError("key id unknown and refresh is rate limited")
-        seen_attempt = self._last_attempt_at
-        try:
-            await self._refetch(seen_attempt)
-        except Exception as exc:  # noqa: BLE001 - any fetch failure is an auth failure
-            if kid in self._keys:
-                return self._keys[kid]  # outage: serve a previously fetched key
-            raise JwksError("key set unavailable") from exc
+        # Every refetch is rate limited, not just the unknown-kid one: an outage keeps the
+        # cache permanently stale, so without this a bogus kid would drive one fetch per request.
+        if self._cooldown_elapsed():
+            seen_attempt = self._last_attempt_at
+            try:
+                await self._refetch(seen_attempt)
+            except Exception as exc:  # noqa: BLE001 - any fetch failure is an auth failure
+                if kid not in self._keys:
+                    raise JwksError("key set unavailable") from exc
         if kid not in self._keys:
             raise JwksError("unknown key id")
         return self._keys[kid]
