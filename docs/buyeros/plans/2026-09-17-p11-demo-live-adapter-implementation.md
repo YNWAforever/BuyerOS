@@ -22,6 +22,7 @@
 - **WebMCP stays synthetic**: the `modelContext` tool is registered in demo mode only.
 - Mapping is strict: a payload missing a required field raises a typed error and is never coerced to an empty value.
 - **No new dependency.** Tests run as `node tests/live-adapter-checks.mjs`; the existing 11 `tests/domain-checks.mjs` checks must stay green.
+- **Runtime checks are not a type check.** The check harness transpiles with `tsc`'s emit but does not type-check, so a duplicate identifier, shadowed method or bad signature can stay green until another module calls it. Every task must also run `npx eslint <changed files>` clean, and type-check the modules it changes with `npx tsc --noEmit --moduleResolution nodenext --module ESNext --target ES2022 --strict <changed .ts files>`. **Type-invalid TypeScript is a defect even when the runtime checks pass.**
 - Every unexecuted check is **NOT RUN**.
 
 **Existing interfaces this plan consumes (already implemented):**
@@ -583,12 +584,15 @@ export function scopeKey(scope: Scope): string {
 export class SessionScope {
   private scope: Scope;
   private generation = 0;
-  private controller: AbortController;
+  // Named `currentController`, not `controller`: a field and a method of the same name are a
+  // duplicate identifier in TypeScript, and at runtime the field shadowed the method so
+  // `session.controller()` threw only once something called it.
+  private currentController: AbortController;
   private currentToken: string | undefined;
 
   constructor(initial: {mode: DataMode; actor?: string; workspace?: string | null; project?: string | null}) {
     this.scope = {mode: initial.mode, actor: initial.actor ?? '', workspace: initial.workspace ?? null, project: initial.project ?? null};
-    this.controller = new AbortController();
+    this.currentController = new AbortController();
   }
 
   current(): Scope {
@@ -605,12 +609,12 @@ export class SessionScope {
 
   /** Advance the scope, aborting the previous controller so stale work is cancelled. */
   next(partial: Partial<Scope>): {scope: Scope; identity: string; previous: AbortController | undefined; controller: AbortController} {
-    const previous = this.controller;
+    const previous = this.currentController;
     previous?.abort();
     this.scope = {...this.scope, ...partial};
     this.generation += 1;
-    this.controller = new AbortController();
-    return {scope: this.current(), identity: this.identity(), previous, controller: this.controller};
+    this.currentController = new AbortController();
+    return {scope: this.current(), identity: this.identity(), previous, controller: this.currentController};
   }
 
   /** True only for the newest scope; a late response with a stale identity is discarded. */
@@ -620,7 +624,7 @@ export class SessionScope {
 
   /** The signal for the current scope. A read attaches to this; only a scope change aborts it. */
   controller(): AbortController {
-    return this.controller;
+    return this.currentController;
   }
 
   token(): string | undefined {
@@ -652,10 +656,13 @@ git commit -m "feat(live): session scope with abort and late-response discard"
 **Files:**
 - Create: `services/live/read.ts`
 - Modify: `tests/live-adapter-checks.mjs`
+- Modify: `services/live/session.ts` (defect fix: rename the shadowing field — see below)
 
 **Interfaces:**
-- Produces: `loadLive({client, session, section, path, liveReady, store?}): Promise<{availability: Availability; value?: unknown; error?: LiveError}>` — the single place a live read is attempted, so the "never fall back to demo" rule has exactly one implementation and one test.
+- Produces: `loadLive({client, session, section, path, store?}): Promise<{availability: Availability; value?: unknown; error?: LiveError; discarded?: boolean}>` — the single place a live read is attempted, so the "never fall back to demo" rule has exactly one implementation and one test.
 - Consumes: `client.ts` (Task 3), `session.ts` (Task 4), `mode.ts` (Task 1).
+
+**Carried defect from Task 4 (fix here).** `services/live/session.ts` declared a private field `controller` *and* a method `controller()`. That is a duplicate identifier (`tsc` TS2300), and at runtime the field shadowed the method, so `session.controller()` threw — invisible to Task 4's checks because none of them called it. Rename the field to `currentController` throughout (constructor, `next()`, `controller()`). The Task 4 checks must stay green unchanged; this is the corrected Task 4 source.
 
 - [ ] **Step 1: Write the failing checks**
 
