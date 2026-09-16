@@ -193,6 +193,23 @@ def test_outage_serves_a_previously_fetched_key():
     assert asyncio.run(cache.get_key("k1")) is not None
 
 
+def test_outage_does_not_fetch_once_per_request():
+    """An outage keeps the cache stale; the cooldown must still bound refetches."""
+    clock = Clock()
+    fetcher = Fetcher(_doc("k1"))
+    cache = JwksKeyCache(fetcher, now=clock)
+    asyncio.run(cache.get_key("k1"))  # calls == 1
+    clock.t += 301
+    fetcher.error = RuntimeError("network down")
+    for _ in range(20):  # 20 requests, one second apart, during the outage
+        clock.t += 1
+        assert asyncio.run(cache.get_key("k1")) is not None
+        with pytest.raises(JwksError):  # a bogus kid is bounded by the same cooldown
+            asyncio.run(cache.get_key("nope"))
+    # ~20s of outage at a 10s cooldown: a handful of fetches, never one per request
+    assert fetcher.calls <= 5, f"refetched {fetcher.calls} times during an outage"
+
+
 def test_outage_with_no_cached_key_raises_rather_than_bypassing():
     fetcher = Fetcher(_doc("k1"))
     fetcher.error = RuntimeError("network down")
@@ -216,6 +233,12 @@ def test_malformed_entries_are_skipped_without_failing_the_set():
     with pytest.raises(JwksError):
         asyncio.run(cache.get_key("ec"))
     # the malformed entries did not abort the fetch: the good key is usable
+    assert asyncio.run(cache.get_key("good")) is not None
+
+
+def test_non_dict_entries_are_skipped_without_failing_the_set():
+    fetcher = Fetcher({"keys": ["garbage", _entry("good")]})
+    cache = JwksKeyCache(fetcher, now=Clock())
     assert asyncio.run(cache.get_key("good")) is not None
 ```
 
@@ -253,6 +276,8 @@ def _public_key(entry: dict):
     alone (not from ValueError/KeyError), so a malformed entry must be caught here
     or it would abort the whole fetch and empty the key set.
     """
+    if not isinstance(entry, dict):
+        return None
     if entry.get("kty") != "RSA":
         return None
     if entry.get("use") not in (None, "sig"):
@@ -301,6 +326,8 @@ class JwksKeyCache:
             document = await self._fetch_jwks()
             keys: dict[str, object] = {}
             for entry in document.get("keys", []):
+                if not isinstance(entry, dict):
+                    continue
                 kid = entry.get("kid")
                 if not kid:
                     continue
@@ -313,18 +340,15 @@ class JwksKeyCache:
     async def get_key(self, kid: str):
         if kid in self._keys and self._fresh():
             return self._keys[kid]
-        # Unknown kid with a fresh cache is the rotation path: allow one refetch, but
-        # rate-limit it so a stream of bogus kids cannot hammer the identity provider.
-        # A stale cache always gets its refresh attempt.
-        if self._fresh() and not self._cooldown_elapsed():
-            raise JwksError("key id unknown and refresh is rate limited")
-        seen_attempt = self._last_attempt_at
-        try:
-            await self._refetch(seen_attempt)
-        except Exception as exc:  # noqa: BLE001 - any fetch failure is an auth failure
-            if kid in self._keys:
-                return self._keys[kid]  # outage: serve a previously fetched key
-            raise JwksError("key set unavailable") from exc
+        # Every refetch is rate limited, not just the unknown-kid one: an outage keeps the
+        # cache permanently stale, so without this a bogus kid would drive one fetch per request.
+        if self._cooldown_elapsed():
+            seen_attempt = self._last_attempt_at
+            try:
+                await self._refetch(seen_attempt)
+            except Exception as exc:  # noqa: BLE001 - any fetch failure is an auth failure
+                if kid not in self._keys:
+                    raise JwksError("key set unavailable") from exc
         if kid not in self._keys:
             raise JwksError("unknown key id")
         return self._keys[kid]
