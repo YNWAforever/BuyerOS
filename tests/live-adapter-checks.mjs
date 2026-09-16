@@ -122,4 +122,16 @@ await test('an aborted request surfaces as LiveCancelled, not as an error toast'
   await assert.rejects(()=>client.request({path:'/v1/workspaces',scope:'s1'}),e=>e instanceof live.LiveCancelled);
 });
 
+await test('a network failure is a retryable error, not a cancellation',async()=>{
+  // read.ts classifies on retryable/status, so this branch must be pinned, not merely implemented.
+  const client=live.createLiveClient(async()=>{throw new TypeError('failed to fetch');});
+  await assert.rejects(()=>client.request({path:'/v1/workspaces',scope:'s1'}),e=>{
+    assert.ok(e instanceof live.LiveError);
+    assert.equal(e.code,'NETWORK_ERROR');
+    assert.equal(e.status,0);
+    assert.equal(e.retryable,true);
+    return true;
+  });
+});
+
 console.log(`${checks} live adapter checks passed`);
