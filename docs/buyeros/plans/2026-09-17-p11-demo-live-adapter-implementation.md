@@ -547,7 +547,9 @@ await test('returning to a previously visited workspace is a NEW scope, not the 
   assert.equal(session.isCurrent(secondA),true);
 });
 
-await test('the token lives in the session and is cleared on scope change',()=>{
+await test('the token lives in the session and survives a scope change',()=>{
+  // The token identifies the actor, not the scope: switching workspace must not force
+  // re-authentication. `next()` therefore keeps it; only an explicit setToken clears it.
   const session=new SessionScope({mode:'live',actor:'a'});
   session.setToken('tok');
   assert.equal(session.token(),'tok');
@@ -581,7 +583,7 @@ export function scopeKey(scope: Scope): string {
 export class SessionScope {
   private scope: Scope;
   private generation = 0;
-  private controller: AbortController | undefined;
+  private controller: AbortController;
   private currentToken: string | undefined;
 
   constructor(initial: {mode: DataMode; actor?: string; workspace?: string | null; project?: string | null}) {
@@ -618,7 +620,7 @@ export class SessionScope {
 
   /** The signal for the current scope. A read attaches to this; only a scope change aborts it. */
   controller(): AbortController {
-    return this.controller!;
+    return this.controller;
   }
 
   token(): string | undefined {
