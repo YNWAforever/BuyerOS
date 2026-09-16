@@ -738,6 +738,15 @@ await test('each API failure code maps to its own state',async()=>{
   }
 });
 
+await test('a 404 is not_found, never denied',async()=>{
+  // §C keeps "not found" distinct from "refused": a non-enumerating 404 for a foreign
+  // resource must not render as a permission denial.
+  const client=live.createLiveClient(errorResponder(404,{code:'NOT_FOUND',message:'m',request_id:'r',retryable:false}));
+  const result=await loadLive({client,session:authed(),section:'overview',path:'/v1/workspaces',store:fakeStore()});
+  assert.equal(result.availability,'not_found');
+  assert.notEqual(result.availability,'denied');
+});
+
 await test('a 401 is a sign-in requirement, never not_configured',async()=>{
   // not_configured means "live is off and no request was made"; a 401 means a token was rejected.
   const client=live.createLiveClient(errorResponder(401,{code:'UNAUTHENTICATED',message:'m',request_id:'r',retryable:false}));
