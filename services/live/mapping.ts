@@ -13,11 +13,21 @@ function page(data: unknown): unknown[] {
   return items;
 }
 
-function str(row: Record<string, unknown>, key: string, required = true): string {
+/** A required string. A missing, empty or non-string value raises, never becomes ''. */
+function str(row: Record<string, unknown>, key: string): string {
   const v = row[key];
   if (typeof v === 'string' && v.length) return v;
-  if (required) throw new MapError(`missing required field: ${key}`);
-  return '';
+  throw new MapError(`missing required field: ${key}`);
+}
+
+/** A required list of strings. Absent, non-array or wrong-typed elements all raise. */
+function strList(row: Record<string, unknown>, key: string): string[] {
+  const v = row[key];
+  if (!Array.isArray(v)) throw new MapError(`missing required field: ${key}`);
+  for (const item of v) {
+    if (typeof item !== 'string') throw new MapError(`expected string elements in: ${key}`);
+  }
+  return v as string[];
 }
 
 function rows(data: unknown): Record<string, unknown>[] {
@@ -31,7 +41,7 @@ export function toWorkspaces(data: unknown): LiveWorkspace[] {
   return rows(data).map((r) => ({
     id: str(r, 'id'),
     name: str(r, 'name'),
-    roles: Array.isArray(r.roles) ? r.roles.filter((x): x is string => typeof x === 'string') : [],
+    roles: strList(r, 'roles'),
   }));
 }
 

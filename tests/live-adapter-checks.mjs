@@ -63,6 +63,24 @@ await test('a missing required field raises instead of becoming an empty value',
   assert.throws(()=>map.toBuyers(undefined),map.MapError);
 });
 
+await test('every mapper enforces its required fields',()=>{
+  assert.throws(()=>map.toProjects({items:[{id:'p-1',name:'Sensors'}]}),map.MapError);
+  assert.throws(()=>map.toIcpVersions({items:[{id:'i-1',content_hash:'h',status:'s'}]}),map.MapError);
+  assert.throws(()=>map.toBuyers({items:['not-an-object']}),map.MapError);
+});
+
+await test('a workspace missing roles raises rather than defaulting to an empty list',()=>{
+  assert.throws(()=>map.toWorkspaces({items:[{id:'w-1',name:'Acme'}]}),map.MapError);
+  assert.throws(()=>map.toWorkspaces({items:[{id:'w-1',name:'Acme',roles:['viewer',7]}]}),map.MapError);
+});
+
+await test('a version without an approval date maps to null, not an error',()=>{
+  assert.deepEqual(
+    map.toIcpVersions({items:[{id:'i-1',number:1,content_hash:'h',status:'saved'}]}),
+    [{id:'i-1',number:1,contentHash:'h',status:'saved',approvedAt:null}],
+  );
+});
+
 await test('an empty page is empty, not an error',()=>{
   assert.deepEqual(map.toBuyers({items:[],offset:0,limit:0,total:0}),[]);
 });
