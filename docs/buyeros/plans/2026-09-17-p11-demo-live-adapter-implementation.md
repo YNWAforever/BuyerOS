@@ -164,8 +164,10 @@ Keep `import assert from 'node:assert/strict';` (it is used by every check), and
 
 ```ts
 export type DataMode = 'demo' | 'live';
-/** unavailable = no backing operation; not_configured = no identity; denied = refused;
- *  transient = retryable (429/503/network). Never inferred from empty data. */
+/** Never inferred from empty data.
+ *  unavailable = no backing operation; not_configured = live is off and no request was made;
+ *  denied = refused (a 401 means sign-in is required; a 403 is a permission refusal);
+ *  transient = retryable (429/503/network); not_found = absent from this workspace. */
 export type Availability = 'available' | 'unavailable' | 'not_configured' | 'denied' | 'transient' | 'not_found';
 export type Section = 'overview' | 'discovery' | 'lists' | 'outreach' | 'results' | 'settings';
 
@@ -959,15 +961,14 @@ interface SessionValue { session: SessionScope; client: ReturnType<typeof create
 const SessionContext = createContext<SessionValue | null>(null);
 
 export function WorkspaceSessionProvider({children}: {children: ReactNode}) {
-  const {mode, apiBaseUrl} = useDataMode();
-  const ref = useRef<SessionValue | null>(null);
-  if (ref.current === null) {
+  const {mode} = useDataMode();
+  // Lazy `useState` is the lint-clean "construct exactly once" pattern. A `useRef` written
+  // during render and read back through `useMemo` trips `react-hooks/refs` (an error here).
+  const [value] = useState<SessionValue>(() => {
     const session = new SessionScope({mode, actor: ''});
     session.next({});
-    ref.current = {session, client: createLiveClient()};
-  }
-  const value = useMemo(() => ref.current!, []);
-  void apiBaseUrl;
+    return {session, client: createLiveClient()};
+  });
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
@@ -1026,7 +1027,7 @@ const mode = apiBaseUrl.trim() ? 'live' : 'demo';
 </body>
 ```
 
-**Verify the env mechanism before wiring (NOT RUN in the plan):** confirm the worker runtime exposes `process.env` to server code. If it does not, use the equivalent Cloudflare binding and record the observed mechanism in the task report.
+**The env mechanism (confirmed during Task 6, was NOT RUN in the plan).** `process.env` **is** reachable from the server component — the built `dist/server/index.js` keeps the runtime lookup — but it is populated from the **Cloudflare Worker `vars`/bindings**, not from the launching shell: a shell-level `BUYEROS_API_BASE_URL` left the mode at `demo`, while adding it to the built `dist/server/wrangler.json` `vars` flipped the mode to `live` with no rebuild. The repository therefore has **no in-repo source** for this variable; it must be set as a Worker `var` at deploy time. That is the intended "configuration change, not a code change" switch described in §B.
 
 - [ ] **Step 4: Run the checks and the existing suites**
 
