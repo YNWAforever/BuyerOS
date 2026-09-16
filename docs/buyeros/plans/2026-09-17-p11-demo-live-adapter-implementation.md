@@ -1022,6 +1022,34 @@ export function LiveUnavailable({state, reason}: {state: Exclude<Availability, '
 
 `features/live/overview.tsx` — renders the live workspace/project context from `useWorkspaceSession()`, calling `loadLive` for `/v1/workspaces`, and rendering `LiveUnavailable` for any non-`available` outcome. No demo import.
 
+It must handle all three outcomes explicitly (a rejected read is not an error):
+
+```tsx
+useEffect(() => {
+  let active = true;
+  const own = new AbortController();
+  loadLive({client, session, section: 'overview', path: '/v1/workspaces', signal: own.signal})
+    .then((result) => {
+      if (!active || result.discarded) return;   // a stale/cancelled read is a no-op, never an error
+      if (result.availability !== 'available') { setState({kind: result.availability, reason: result.error?.code}); return; }
+      try {
+        setState({kind: 'ok', workspaces: toWorkspaces(result.value)});
+      } catch (err) {
+        setState({kind: 'error', reason: err instanceof MapError ? err.message : 'unexpected response'});
+      }
+    })
+    .catch(() => {});
+  return () => { active = false; own.abort(); };
+}, [client, session]);
+```
+
+`loadLive` gains an optional `signal` that is combined with the session's scope signal, so **unmounting aborts the in-flight request** (spec §E) without aborting sibling reads:
+
+```ts
+  const scopeSignal = session.controller().signal;
+  const signal = input.signal ? AbortSignal.any([scopeSignal, input.signal]) : scopeSignal;
+```
+
 `services/http-client.ts` becomes:
 
 ```ts
@@ -1140,6 +1168,7 @@ export default function Workspace({mode='demo'}:{mode?:DataMode}){const [s,setS]
 ```
 
 2. Gate the demo-only effects. Wrap the bodies of the WebMCP effect (line 29), the demo storage restore (line 32), the preferences write (line 33) and the run timer (line 37) in `if(!demoEffectsEnabled(mode))return;` as their first statement. Gate the unconditional `usage(s)` computation (line 38) so `u` is computed only in demo mode, and give it a zero-valued fallback in live mode.
+   **Route the two storage effects through the tested guard.** The demo restore and the preferences write must call `readDemoState(window.localStorage, mode)` and `writePrefs(window.localStorage, mode, {locale})` from `services/live/storage.ts` instead of touching `localStorage` directly. `storage.ts` is the module the storage-hygiene checks exercise; leaving it with no production caller means the tested guard is not the enforcing one — the check would keep passing while the shipped code bypassed it.
 
 3. Branch the render: wrap the existing section blocks (lines 52-59) in `{mode==='demo'&&(<>…</>)}`, and add a sibling `{mode==='live'&&<LiveOverview/>}` for the overview route with `LiveUnavailable` for the other routes based on `availabilityFor(mode,'discovery')` etc. The demo branch keeps its current contents verbatim.
    Two implementation details this needs, neither of which is obvious from the snippet:
