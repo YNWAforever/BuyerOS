@@ -318,4 +318,25 @@ await test('with no base URL the path is used as-is',async()=>{
   assert.equal(seen[0],'/v1/workspaces');
 });
 
+const ws=await loadModule('services/live/workspace-logic.ts');
+
+await test('demo-only effects are enabled only in demo mode',()=>{
+  assert.equal(ws.demoEffectsEnabled('demo'),true);
+  assert.equal(ws.demoEffectsEnabled('live'),false);
+});
+
+await test('the empty live store contains no companies and no demo identifiers',()=>{
+  const s=ws.emptyStore();
+  assert.deepEqual(s.companies,[]);
+  assert.equal(s.budget,0);
+  assert.equal(s.locale,'en');
+});
+
+await test('the banner label states the real mode and cannot be made to claim live',()=>{
+  // Pin the leading mode word: the demo banner legitimately mentions "live" in
+  // "No live services connected", so a substring test would be meaningless.
+  assert.match(ws.modeBanner('demo'),/^demo mode\b/i);
+  assert.match(ws.modeBanner('live'),/^live mode\b/i);
+});
+
 console.log(`${checks} live adapter checks passed`);
