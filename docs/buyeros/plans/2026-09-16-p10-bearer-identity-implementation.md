@@ -910,31 +910,111 @@ def downgrade() -> None:
     op.execute("REVOKE SELECT ON users FROM buyeros_api, buyeros_worker;")
 ```
 
-- [ ] **Step 2: Verify the migration applies and reverses**
+- [ ] **Step 2: Verify the migration applies, and that the grant works**
 
 Run (cwd `services/api`): `uv run pytest tests/test_tenant_isolation_db.py -q`
 Expected: PASS — the `migrated` fixture applies all migrations through `0008`.
 
-Then verify the runtime role can now read `users` (uses the disposable database from the fixture; run once, record output):
+The grant itself is proven by the DB-backed tests: `test_route_tenant_scope_comes_from_the_membership_checked_path` (Step 3) reads `users` through the runtime role, so it fails with `permission denied for table users` if `0008` is missing or wrong. If Docker/PostgreSQL is unavailable and the DB tests skip, record that as **NOT RUN** with the reason — do not claim the grant was verified.
 
-```bash
-uv run python -c "
-import psycopg, uuid, subprocess
-name = 'buyeros-grant-check-' + uuid.uuid4().hex[:6]
-subprocess.run(['docker','run','-d','--name',name,'-e','POSTGRES_PASSWORD=buyeros','-e','POSTGRES_USER=buyeros','-e','POSTGRES_DB=buyeros','-p','127.0.0.1::5432','postgres:16'],capture_output=True)
-"
+- [ ] **Step 3: Migrate the last stale seam and strengthen the fail-closed test, then unskip**
+
+`services/api/tests/test_api_tenant_isolation.py` needs three changes. Two are required because `get_principal` no longer calls `principal_from_token` (Task 4): the skipped test still patches that old seam, and the unconfigured test cannot currently tell the short-circuit apart from a missing header.
+
+**(i)** Replace `test_tenant_routes_fail_closed_without_configured_auth` so it also proves the rejection comes from the *unconfigured short-circuit*. Without the bearer case, removing the short-circuit would not fail this test, because an absent `Authorization` header returns 401 anyway:
+
+```python
+def test_tenant_routes_fail_closed_without_configured_auth(monkeypatch):
+    """With no Auth0 issuer/audience configured every tenant route is unreachable, and the
+    rejection comes from the unconfigured short-circuit — not merely a missing header — so
+    deleting that guard fails this test rather than silently passing it."""
+    from buyeros_api.settings import get_settings
+
+    monkeypatch.delenv("BUYEROS_AUTH0_ISSUER", raising=False)
+    monkeypatch.delenv("BUYEROS_AUTH0_AUDIENCE", raising=False)
+    get_settings.cache_clear()
+    try:
+        client = TestClient(create_app(), raise_server_exceptions=False)
+        for method, path in (
+            ("GET", "/v1/workspaces"),
+            ("GET", f"/v1/workspaces/{WORKSPACE_B}/projects"),
+            ("GET", f"/v1/workspaces/{WORKSPACE_B}/readiness"),
+        ):
+            response = client.request(method, path)
+            assert response.status_code == 401, (method, path)
+            assert response.json()["code"] == "UNAUTHENTICATED"
+            assert "ProjectB" not in response.text
+
+        # A well-formed bearer still fails before any verification or key lookup.
+        guarded = client.get(
+            f"/v1/workspaces/{WORKSPACE_B}/projects", headers={"Authorization": "Bearer x"}
+        )
+        assert guarded.status_code == 401
+        assert guarded.json()["message"] == "authentication is not configured"
+    finally:
+        get_settings.cache_clear()
 ```
 
-If Docker is unavailable, record the check as **NOT RUN** with that reason rather than skipping silently.
+**(ii)** Remove the `@pytest.mark.skip(reason=...)` decorator from `test_route_tenant_scope_comes_from_the_membership_checked_path` — the `users` grant is what it was waiting for.
 
-- [ ] **Step 3: Unskip the route-level isolation test**
+**(iii)** Migrate that test's auth seam, and keep the seeded row's `issuer`/`subject` matching what the stub principal returns (the route looks the actor up by `(issuer, subject)`):
 
-In `services/api/tests/test_api_tenant_isolation.py`, remove the `@pytest.mark.skip(reason=...)` decorator from `test_route_tenant_scope_comes_from_the_membership_checked_path`. The test body is already correct; leave it otherwise unchanged.
+```python
+def test_route_tenant_scope_comes_from_the_membership_checked_path(seeded, monkeypatch):
+    """The route must set `app.workspace_id` from the path, so a member of A can never
+    read B's rows even though B is a real, seeded workspace in the same database."""
+    import uuid as _uuid
+
+    from buyeros_api.api import auth
+    from buyeros_api.settings import get_settings
+
+    monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(seeded))
+    # The short-circuit runs before the seam, so the issuer/audience must be configured...
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
+    get_settings.cache_clear()
+
+    # ...while the stub supplies the principal, whose (issuer, subject) must match the row below.
+    class _StubVerifier:
+        async def verify(self, token):
+            return auth.Principal(issuer="test", subject="auth0|member-a")
+
+    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: _StubVerifier())
+
+    user_id = _uuid.UUID("aaaaaaaa-0000-4000-8000-000000000001")
+    owner = psycopg.connect(seeded, autocommit=True)
+    owner.execute("DELETE FROM memberships WHERE user_id = %s", (user_id,))
+    owner.execute("DELETE FROM users WHERE id = %s", (user_id,))
+    owner.execute("INSERT INTO users(id, issuer, subject) VALUES (%s, 'test', 'auth0|member-a')", (user_id,))
+    owner.execute(
+        "INSERT INTO memberships(id, workspace_id, user_id, roles, active) VALUES (%s, %s, %s, %s, true)",
+        (_uuid.UUID("bbbbbbbb-0000-4000-8000-000000000001"), WORKSPACE_A, user_id, ["viewer"]),
+    )
+    owner.close()
+
+    try:
+        client = TestClient(create_app(), raise_server_exceptions=False)
+        headers = {"Authorization": "Bearer t"}
+        own = client.get(f"/v1/workspaces/{WORKSPACE_A}/projects", headers=headers)
+        assert own.status_code == 200, own.text
+        assert {item["name"] for item in own.json()["data"]["items"]} == {"ProjectA"}
+
+        # Same principal, foreign workspace id: non-enumerating 404, never B's data.
+        foreign = client.get(f"/v1/workspaces/{WORKSPACE_B}/projects", headers=headers)
+        assert foreign.status_code == 404, foreign.text
+        assert "ProjectB" not in foreign.text
+    finally:
+        get_settings.cache_clear()
+        cleanup = psycopg.connect(seeded, autocommit=True)
+        cleanup.execute("DELETE FROM memberships WHERE user_id = %s", (user_id,))
+        cleanup.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        cleanup.close()
+```
 
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `uv run pytest tests/test_api_tenant_isolation.py -v`
-Expected: PASS (4 passed, 0 skipped) — the previously skipped route-level test now runs against real PostgreSQL under the runtime role.
+Expected: PASS (4 passed, 0 skipped) — the previously skipped route-level test now runs against real PostgreSQL under the runtime role. If it skips, the database was unavailable: report that, do not claim the grant verified.
 
 - [ ] **Step 5: Commit**
 
@@ -948,12 +1028,11 @@ git commit -m "fix(api): grant runtime roles SELECT on users and unskip route is
 ### Task 6: Authenticated route acceptance tests
 
 **Files:**
-- Modify: `services/api/tests/test_api_tenant_isolation.py`
 - Create: `services/api/tests/test_auth_routes_db.py`
 
 **Interfaces:**
 - Consumes: `auth_fixtures` (Task 3), `TokenVerifier` (Task 3), `0008` grant (Task 5), `seeded`/`runtime_role_dsn` fixtures.
-- Produces: the three BO-004 acceptance tests against real PostgreSQL.
+- Produces: the three BO-004 acceptance tests against real PostgreSQL. (The route-level isolation test that Task 5 unskipped is separate and stays in `test_api_tenant_isolation.py`; this task adds only the new file.)
 
 - [ ] **Step 1: Write the failing acceptance tests**
 
