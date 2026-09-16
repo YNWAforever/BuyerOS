@@ -462,6 +462,22 @@ def test_future_nbf_rejected():
         _verify(fx.make_token(nbf=9999999999))
 
 
+def test_token_within_the_nbf_skew_is_accepted():
+    # §B allows nbf up to now + 60s. PyJWT's default nbf check would reject this outright, so a
+    # green here is what proves claims_to_principal owns nbf rather than the library.
+    import time
+
+    principal = _verify(fx.make_token(nbf=int(time.time()) + 30))
+    assert principal.subject == "auth0|member"
+
+
+def test_nbf_beyond_the_skew_is_rejected():
+    import time
+
+    with pytest.raises(AuthError):
+        _verify(fx.make_token(nbf=int(time.time()) + 600))
+
+
 def test_unknown_kid_rejected():
     with pytest.raises(AuthError):
         _verify(fx.make_token(kid="not-in-jwks"))
@@ -558,7 +574,17 @@ class TokenVerifier:
                 token,
                 key,
                 algorithms=list(ALLOWED_ALGORITHMS),
-                options={"verify_aud": False, "verify_iss": False},
+                # Signature and algorithm only. Every claim rule (iss/aud/exp/nbf/sub) is owned by
+                # claims_to_principal, so PyJWT's own claim checks must be off: its default exp/nbf
+                # verification would reject a token inside the spec's 60s nbf skew before our rules
+                # ever run, and would put exp/nbf ownership in two places at once.
+                options={
+                    "verify_aud": False,
+                    "verify_iss": False,
+                    "verify_exp": False,
+                    "verify_nbf": False,
+                    "verify_iat": False,
+                },
             )
         except jwt.PyJWTError as exc:
             raise AuthError("signature verification failed") from exc
