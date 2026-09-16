@@ -871,9 +871,11 @@ git commit -m "feat(api): verify bearer tokens in the request path"
 **Files:**
 - Create: `services/api/alembic/versions/0008_grant_users_select.py`
 - Modify: `services/api/tests/test_api_tenant_isolation.py`
+- Modify: `services/api/tests/conftest.py`
 
 **Interfaces:**
 - Produces: migration `0008_grant_users_select` (down_revision `0007_outbox_terminal_state`) granting `SELECT ON users` to `buyeros_api` and `buyeros_worker`.
+- Produces: a Windows selector-loop pin in the API test conftest, so the async SQLAlchemy engine can run under psycopg on this platform (Step 2).
 - Consumes: nothing.
 
 - [ ] **Step 1: Write the migration**
@@ -910,14 +912,29 @@ def downgrade() -> None:
     op.execute("REVOKE SELECT ON users FROM buyeros_api, buyeros_worker;")
 ```
 
-- [ ] **Step 2: Verify the migration applies, and that the grant works**
+- [ ] **Step 2: Pin the selector event loop on Windows (test infrastructure)**
+
+`psycopg`'s async driver cannot run on Windows' default `ProactorEventLoop`, so the unskipped route test (which drives the async SQLAlchemy engine) fails with an `InterfaceError` *before any SQL runs* — it looks like a grant problem but is not one. `services/worker/tests/conftest.py` already pins the selector loop for this exact reason and describes itself as mirroring the API conftest; the API conftest never carried the pin because no API test had used the async engine until now. Add the same block to `services/api/tests/conftest.py`, near the imports:
+
+```python
+# psycopg's async driver cannot run on Windows' default ProactorEventLoop; the
+# async SQLAlchemy engine used by the route tests needs the selector loop pinned.
+if sys.platform == "win32":
+    import asyncio
+
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+```
+
+This requires `import sys` at the top of `services/api/tests/conftest.py` (it is not currently imported). On non-Windows platforms the block is inert.
+
+- [ ] **Step 3: Verify the migration applies, and that the grant works**
 
 Run (cwd `services/api`): `uv run pytest tests/test_tenant_isolation_db.py -q`
 Expected: PASS — the `migrated` fixture applies all migrations through `0008`.
 
 The grant itself is proven by the DB-backed tests: `test_route_tenant_scope_comes_from_the_membership_checked_path` (Step 3) reads `users` through the runtime role, so it fails with `permission denied for table users` if `0008` is missing or wrong. If Docker/PostgreSQL is unavailable and the DB tests skip, record that as **NOT RUN** with the reason — do not claim the grant was verified.
 
-- [ ] **Step 3: Migrate the last stale seam and strengthen the fail-closed test, then unskip**
+- [ ] **Step 4: Migrate the last stale seam and strengthen the fail-closed test, then unskip**
 
 `services/api/tests/test_api_tenant_isolation.py` needs three changes. Two are required because `get_principal` no longer calls `principal_from_token` (Task 4): the skipped test still patches that old seam, and the unconfigured test cannot currently tell the short-circuit apart from a missing header.
 
@@ -1011,15 +1028,15 @@ def test_route_tenant_scope_comes_from_the_membership_checked_path(seeded, monke
         cleanup.close()
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [ ] **Step 5: Run the test to verify it passes**
 
 Run: `uv run pytest tests/test_api_tenant_isolation.py -v`
 Expected: PASS (4 passed, 0 skipped) — the previously skipped route-level test now runs against real PostgreSQL under the runtime role. If it skips, the database was unavailable: report that, do not claim the grant verified.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add services/api/alembic/versions/0008_grant_users_select.py services/api/tests/test_api_tenant_isolation.py
+git add services/api/alembic/versions/0008_grant_users_select.py services/api/tests/test_api_tenant_isolation.py services/api/tests/conftest.py
 git commit -m "fix(api): grant runtime roles SELECT on users and unskip route isolation test"
 ```
 
