@@ -73,6 +73,6 @@ de3c29a0259d4e6fc51fe9d158a49da9ffacd0608b503283bb38e0ce7eedf9e6  specs/2026-09-
 49b09160cc7119f1742f04cd659efd8b02de5ad1ad0a5ba06c80aab2c09da4ea  specs/2026-09-15-p9-api-surface-design.md
 cd8974654d6652627d8bafbebc5274118899ae552336ce80acc852ecb80309bb  plans/2026-09-15-p9-api-surface-implementation.md
 a0a287ded255b0d8cb71805b42b43b5749a54c51a168e324647d6b4f100ddf79  decisions/BUILD_APPROVAL_RECORD.P9-api.md
-5bf61ab42e01cb25d2273a5e08c684983b6739bf7bf7332881919f7432fb6c62  specs/2026-09-17-p11-demo-live-adapter-design.md
-55155d74c18e4952157968e1a1169369ec647ac030c15ae6c9964838ef7a1c9e  plans/2026-09-17-p11-demo-live-adapter-implementation.md
+7d4c7d7a69860e6be946efcdc2b1287ae5565e7fcf523b14c2f6d00bfa1145d3  specs/2026-09-17-p11-demo-live-adapter-design.md
+b8dc853bcd1afc01a4e760d046bac668c09e0bd61a1241cdc4543373f9612347  plans/2026-09-17-p11-demo-live-adapter-implementation.md
 caadbfdb1fad6df192272f47a7656cf629bb10c3ef32a4352d20232992a24df0  decisions/BUILD_APPROVAL_RECORD.P11.md

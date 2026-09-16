@@ -79,7 +79,7 @@ request<T>({ path, method, scope, token, signal }) -> Promise<T>
 | `LiveIcpVersion` | `id`, `number`, `contentHash`, `status`, `approvedAt` | `listICPVersions` |
 | `LiveBuyer` | `id`, `name`, `note` | `listBuyers` |
 
-Mapping is **strict**: if a payload lacks a field the model requires, the mapper raises a typed error rather than coercing to an empty string or null. An absent value must never render as if it were a finding.
+Mapping is **strict**: if a payload lacks a field the model requires, the mapper raises a typed error rather than coercing to an empty string or null. An absent value must never render as if it were a finding. This applies to every required field without exception — including `roles`, which is contract-required and must **not** default to an empty list, since "a member with no roles" is a different and misleading claim. Wrong-typed values inside a required field (for example a non-string element in `roles`) are shape surprises and raise too. Only genuinely nullable fields (`note`, `approvedAt`) may be `null`, and only when the payload says so.
 
 **Availability is explicit.** Each section carries one of `available | unavailable | not_configured | denied`, and it is never inferred from empty data.
 

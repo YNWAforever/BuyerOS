@@ -234,6 +234,24 @@ await test('a missing required field raises instead of becoming an empty value',
   assert.throws(()=>map.toBuyers(undefined),map.MapError);
 });
 
+await test('every mapper enforces its required fields',()=>{
+  assert.throws(()=>map.toProjects({items:[{id:'p-1',name:'Sensors'}]}),map.MapError);
+  assert.throws(()=>map.toIcpVersions({items:[{id:'i-1',content_hash:'h',status:'s'}]}),map.MapError);
+  assert.throws(()=>map.toBuyers({items:['not-an-object']}),map.MapError);
+});
+
+await test('a workspace missing roles raises rather than defaulting to an empty list',()=>{
+  assert.throws(()=>map.toWorkspaces({items:[{id:'w-1',name:'Acme'}]}),map.MapError);
+  assert.throws(()=>map.toWorkspaces({items:[{id:'w-1',name:'Acme',roles:['viewer',7]}]}),map.MapError);
+});
+
+await test('a version without an approval date maps to null, not an error',()=>{
+  assert.deepEqual(
+    map.toIcpVersions({items:[{id:'i-1',number:1,content_hash:'h',status:'saved'}]}),
+    [{id:'i-1',number:1,contentHash:'h',status:'saved',approvedAt:null}],
+  );
+});
+
 await test('an empty page is empty, not an error',()=>{
   assert.deepEqual(map.toBuyers({items:[],offset:0,limit:0,total:0}),[]);
 });
@@ -262,11 +280,21 @@ function page(data: unknown): unknown[] {
   return items;
 }
 
-function str(row: Record<string, unknown>, key: string, required = true): string {
+/** Every field passed here is required: a missing or empty value raises, never becomes ''. */
+function str(row: Record<string, unknown>, key: string): string {
   const v = row[key];
   if (typeof v === 'string' && v.length) return v;
-  if (required) throw new MapError(`missing required field: ${key}`);
-  return '';
+  throw new MapError(`missing required field: ${key}`);
+}
+
+/** A required list of strings. Absent, non-array or wrong-typed elements all raise. */
+function strList(row: Record<string, unknown>, key: string): string[] {
+  const v = row[key];
+  if (!Array.isArray(v)) throw new MapError(`missing required field: ${key}`);
+  for (const item of v) {
+    if (typeof item !== 'string') throw new MapError(`expected string elements in: ${key}`);
+  }
+  return v as string[];
 }
 
 function rows(data: unknown): Record<string, unknown>[] {
@@ -280,7 +308,7 @@ export function toWorkspaces(data: unknown): LiveWorkspace[] {
   return rows(data).map((r) => ({
     id: str(r, 'id'),
     name: str(r, 'name'),
-    roles: Array.isArray(r.roles) ? r.roles.filter((x): x is string => typeof x === 'string') : [],
+    roles: strList(r, 'roles'),
   }));
 }
 
@@ -310,7 +338,7 @@ export function toBuyers(data: unknown): LiveBuyer[] {
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `node tests/live-adapter-checks.mjs`
-Expected: `11 live adapter checks passed`.
+Expected: `14 live adapter checks passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -442,7 +470,7 @@ export type LiveClient = ReturnType<typeof createLiveClient>;
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `node tests/live-adapter-checks.mjs`
-Expected: `15 live adapter checks passed`.
+Expected: `18 live adapter checks passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -594,7 +622,7 @@ export class SessionScope {
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `node tests/live-adapter-checks.mjs`
-Expected: `20 live adapter checks passed`.
+Expected: `23 live adapter checks passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -736,7 +764,7 @@ export async function loadLive(input: {
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `node tests/live-adapter-checks.mjs`
-Expected: `24 live adapter checks passed`.
+Expected: `27 live adapter checks passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -929,7 +957,7 @@ const mode = apiBaseUrl.trim() ? 'live' : 'demo';
 
 - [ ] **Step 4: Run the checks and the existing suites**
 
-Run: `node tests/live-adapter-checks.mjs` → Expected: `27 live adapter checks passed`.
+Run: `node tests/live-adapter-checks.mjs` → Expected: `30 live adapter checks passed`.
 Run: `node tests/domain-checks.mjs` → Expected: `11 domain checks passed`.
 Run: `pnpm lint` → Expected: PASS (no new warnings).
 
@@ -1031,7 +1059,7 @@ Append the zh-HK strings for the new English labels: `Live mode · connected wor
 
 - [ ] **Step 6: Run everything**
 
-Run: `node tests/live-adapter-checks.mjs` → Expected: `30 live adapter checks passed`.
+Run: `node tests/live-adapter-checks.mjs` → Expected: `33 live adapter checks passed`.
 Run: `node tests/domain-checks.mjs` → Expected: `11 domain checks passed`.
 Run: `pnpm lint` → Expected: PASS.
 Run: `pnpm build` → Expected: PASS (the app still builds under vinext).
