@@ -8,11 +8,19 @@ again. Tests that need a database skip cleanly when neither is available.
 import os
 import shutil
 import subprocess
+import sys
 import time
 import uuid
 from pathlib import Path
 
 import pytest
+
+# psycopg's async driver cannot run on Windows' default ProactorEventLoop; the
+# async SQLAlchemy engine used by the route tests needs the selector loop pinned.
+if sys.platform == "win32":
+    import asyncio
+
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 SERVICE_ROOT = Path(__file__).resolve().parents[1]
 ALEMBIC_INI = SERVICE_ROOT / "alembic.ini"

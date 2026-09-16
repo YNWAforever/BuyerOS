@@ -1,5 +1,6 @@
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 
 from buyeros_api.api.app import create_app
@@ -157,23 +158,34 @@ def test_approve_checks_auth_before_preconditions():
     assert weak.status_code == 401
 
 
+@pytest.fixture(autouse=True)
+def _isolate_settings_cache():
+    """`get_settings` is process-wide lru_cached; a test that configures it must not leak
+    configured auth into later tests (it would silently nullify the unconfigured fail-closed
+    test in `test_api_tenant_isolation.py`)."""
+    from buyeros_api.settings import get_settings
+
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
 def _approve_client_with_principal(monkeypatch):
     """A client whose auth succeeds, so the route's own precondition logic runs."""
-    from fastapi import Depends
-
     from buyeros_api.api import auth
     from buyeros_api.api.app import create_app
+    from buyeros_api.settings import get_settings
 
-    monkeypatch.setattr(
-        auth, "principal_from_token", lambda token, *, issuer, audience: auth.Principal("test", "auth0|1")
-    )
-    app = create_app()
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
+    get_settings.cache_clear()
 
-    @app.middleware("http")
-    async def _accept_bearer(request, call_next):
-        return await call_next(request)
+    class _StubVerifier:
+        async def verify(self, token):
+            return auth.Principal(issuer="https://issuer.test/", subject="auth0|1")
 
-    return TestClient(app, raise_server_exceptions=False)
+    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: _StubVerifier())
+    return TestClient(create_app(), raise_server_exceptions=False)
 
 
 def test_approve_rejects_a_missing_or_malformed_if_match(monkeypatch):

@@ -10,19 +10,35 @@ WORKSPACE_A = "11111111-1111-4111-8111-111111111111"
 WORKSPACE_B = "22222222-2222-4222-8222-222222222222"
 
 
-def test_tenant_routes_fail_closed_without_configured_auth():
-    """With no Auth0 issuer/audience configured every tenant route is unreachable
-    and no cross-tenant data can be enumerated."""
-    client = TestClient(create_app(), raise_server_exceptions=False)
-    for method, path in (
-        ("GET", "/v1/workspaces"),
-        ("GET", f"/v1/workspaces/{WORKSPACE_B}/projects"),
-        ("GET", f"/v1/workspaces/{WORKSPACE_B}/readiness"),
-    ):
-        response = client.request(method, path)
-        assert response.status_code == 401, (method, path)
-        assert response.json()["code"] == "UNAUTHENTICATED"
-        assert "ProjectB" not in response.text
+def test_tenant_routes_fail_closed_without_configured_auth(monkeypatch):
+    """With no Auth0 issuer/audience configured every tenant route is unreachable, and the
+    rejection comes from the unconfigured short-circuit - not merely a missing header - so
+    deleting that guard fails this test rather than silently passing it."""
+    from buyeros_api.settings import get_settings
+
+    monkeypatch.delenv("BUYEROS_AUTH0_ISSUER", raising=False)
+    monkeypatch.delenv("BUYEROS_AUTH0_AUDIENCE", raising=False)
+    get_settings.cache_clear()
+    try:
+        client = TestClient(create_app(), raise_server_exceptions=False)
+        for method, path in (
+            ("GET", "/v1/workspaces"),
+            ("GET", f"/v1/workspaces/{WORKSPACE_B}/projects"),
+            ("GET", f"/v1/workspaces/{WORKSPACE_B}/readiness"),
+        ):
+            response = client.request(method, path)
+            assert response.status_code == 401, (method, path)
+            assert response.json()["code"] == "UNAUTHENTICATED"
+            assert "ProjectB" not in response.text
+
+        # A well-formed bearer still fails before any verification or key lookup.
+        guarded = client.get(
+            f"/v1/workspaces/{WORKSPACE_B}/projects", headers={"Authorization": "Bearer x"}
+        )
+        assert guarded.status_code == 401
+        assert guarded.json()["message"] == "authentication is not configured"
+    finally:
+        get_settings.cache_clear()
 
 
 def test_runtime_role_is_confined_to_one_tenant(seeded):
@@ -40,25 +56,26 @@ def test_runtime_role_without_context_sees_nothing(seeded):
             conn.execute("SELECT name FROM projects").fetchall()
 
 
-@pytest.mark.skip(
-    reason="blocked by the runtime-role `users` grant gap (0002/0007 grant memberships/workspaces only): "
-    "load_membership reads users, so every authenticated route 500s under buyeros_api. Recorded as a BO-004 "
-    "prerequisite in the P9 ledger and plan; unskip with the grant migration."
-)
 def test_route_tenant_scope_comes_from_the_membership_checked_path(seeded, monkeypatch):
     """The route must set `app.workspace_id` from the path, so a member of A can never
     read B's rows even though B is a real, seeded workspace in the same database."""
     import uuid as _uuid
 
     from buyeros_api.api import auth
-
-    monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(seeded))
     from buyeros_api.settings import get_settings
 
+    monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(seeded))
+    # The short-circuit runs before the seam, so the issuer/audience must be configured...
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
     get_settings.cache_clear()
-    monkeypatch.setattr(
-        auth, "principal_from_token", lambda token, *, issuer, audience: auth.Principal("test", "auth0|member-a")
-    )
+
+    # ...while the stub supplies the principal, whose (issuer, subject) must match the row below.
+    class _StubVerifier:
+        async def verify(self, token):
+            return auth.Principal(issuer="test", subject="auth0|member-a")
+
+    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: _StubVerifier())
 
     user_id = _uuid.UUID("aaaaaaaa-0000-4000-8000-000000000001")
     owner = psycopg.connect(seeded, autocommit=True)
