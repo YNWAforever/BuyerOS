@@ -55,19 +55,41 @@ def claims_to_principal(claims: dict, *, issuer: str, audience: str, now: int | 
     return Principal(issuer=issuer, subject=str(claims["sub"]))
 
 
+_VERIFIER = None
+_VERIFIER_KEY: tuple | None = None
+
+
+def _verifier_from_settings():
+    """One verifier per process, so its JWKS cache is shared rather than rebuilt per request.
+
+    Building a verifier per call would give every request a cold cache and therefore a JWKS
+    fetch, defeating the cache entirely. The key includes the settings the verifier derives
+    from, so a configuration change (or a test that swaps env) builds a fresh one.
+    """
+    global _VERIFIER, _VERIFIER_KEY
+
+    from ..settings import get_settings
+    from .verifier import default_verifier
+
+    settings = get_settings()
+    key = (settings.auth0_issuer, settings.auth0_audience, settings.jwks_cache_seconds)
+    if _VERIFIER is None or _VERIFIER_KEY != key:
+        _VERIFIER = default_verifier(settings)
+        _VERIFIER_KEY = key
+    return _VERIFIER
+
+
 async def get_principal(request: Request) -> Principal:
     from .errors import ApiError
 
     settings = get_settings()
+    if not settings.auth0_issuer or not settings.auth0_audience:
+        raise ApiError(401, "UNAUTHENTICATED", "authentication is not configured")
     header = request.headers.get("Authorization", "")
     scheme, _, token = header.partition(" ")
     if scheme.lower() != "bearer" or not token.strip():
         raise ApiError(401, "UNAUTHENTICATED", "missing bearer token")
     try:
-        return principal_from_token(
-            token.strip(),
-            issuer=settings.auth0_issuer,
-            audience=settings.auth0_audience,
-        )
+        return await _verifier_from_settings().verify(token.strip())
     except AuthError as exc:
-        raise ApiError(401, "UNAUTHENTICATED", str(exc)) from exc
+        raise ApiError(401, "UNAUTHENTICATED", "token rejected") from exc
