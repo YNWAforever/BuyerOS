@@ -183,4 +183,57 @@ await test('the token lives in the session and survives a scope change',()=>{
   assert.equal(session.token(),undefined);
 });
 
+const {loadLive}=await loadModule('services/live/read.ts');
+
+function fakeStore(){return {touched:false,get companies(){this.touched=true;throw new Error('demo store consulted');}};}
+function authed(){const s=new SessionScope({mode:'live',actor:'a'});s.setToken('tok');s.next({workspace:'w1'});return s;}
+
+await test('live failure surfaces the error with zero data and never touches the demo store',async()=>{
+  const store=fakeStore();
+  const client=live.createLiveClient(errorResponder(503,{code:'PROVIDER_UNAVAILABLE',message:'down',request_id:'r',retryable:true}));
+  const result=await loadLive({client,session:authed(),section:'overview',path:'/v1/workspaces',store});
+  assert.equal(result.value,undefined);
+  assert.equal(store.touched,false);
+  assert.equal(result.error.code,'PROVIDER_UNAVAILABLE');
+  assert.equal(result.availability,'transient');
+});
+
+await test('a 501 from a supported section marks it unavailable rather than failing',async()=>{
+  // section 'overview' IS live-supported, so the 501 must come from the response, not from availability.
+  const client=live.createLiveClient(errorResponder(501,{code:'NOT_IMPLEMENTED',message:'no',request_id:'r',retryable:false}));
+  const result=await loadLive({client,session:authed(),section:'overview',path:'/v1/workspaces',store:fakeStore()});
+  assert.equal(result.availability,'unavailable');
+  assert.equal(result.value,undefined);
+});
+
+await test('a section with no backing operation is unavailable without a request',async()=>{
+  let calls=0;
+  const client={request:async()=>{calls++;return {};}};
+  const result=await loadLive({client,session:authed(),section:'discovery',path:'/v1/x',store:fakeStore()});
+  assert.equal(result.availability,'unavailable');
+  assert.equal(calls,0);
+});
+
+await test('a response whose scope changed underneath is discarded',async()=>{
+  const session=authed();
+  let release;const gate=new Promise(r=>{release=r;});
+  const client={request:async()=>{await gate;return {items:[{id:'b-1',name:'A',note:null}]};}};
+  const pending=loadLive({client,session,section:'overview',path:'/v1/workspaces',store:fakeStore()});
+  session.next({workspace:'B'});
+  release();
+  const result=await pending;
+  assert.equal(result.value,undefined);
+  assert.equal(result.discarded,true);
+});
+
+await test('no token means not_configured and no request is sent',async()=>{
+  let calls=0;
+  const client={request:async()=>{calls++;return {};}};
+  const session=new SessionScope({mode:'live',actor:'a'});
+  session.next({workspace:'w1'});
+  const result=await loadLive({client,session,section:'overview',path:'/v1/workspaces',store:fakeStore()});
+  assert.equal(result.availability,'not_configured');
+  assert.equal(calls,0);
+});
+
 console.log(`${checks} live adapter checks passed`);

@@ -13,12 +13,12 @@ export function scopeKey(scope: Scope): string {
 export class SessionScope {
   private scope: Scope;
   private generation = 0;
-  private controller: AbortController;
+  private currentController: AbortController;
   private currentToken: string | undefined;
 
   constructor(initial: {mode: DataMode; actor?: string; workspace?: string | null; project?: string | null}) {
     this.scope = {mode: initial.mode, actor: initial.actor ?? '', workspace: initial.workspace ?? null, project: initial.project ?? null};
-    this.controller = new AbortController();
+    this.currentController = new AbortController();
   }
 
   current(): Scope {
@@ -35,12 +35,12 @@ export class SessionScope {
 
   /** Advance the scope, aborting the previous controller so stale work is cancelled. */
   next(partial: Partial<Scope>): {scope: Scope; identity: string; previous: AbortController | undefined; controller: AbortController} {
-    const previous = this.controller;
+    const previous = this.currentController;
     previous?.abort();
     this.scope = {...this.scope, ...partial};
     this.generation += 1;
-    this.controller = new AbortController();
-    return {scope: this.current(), identity: this.identity(), previous, controller: this.controller};
+    this.currentController = new AbortController();
+    return {scope: this.current(), identity: this.identity(), previous, controller: this.currentController};
   }
 
   /** True only for the newest scope; a late response with a stale identity is discarded. */
@@ -50,7 +50,7 @@ export class SessionScope {
 
   /** The signal for the current scope. A read attaches to this; only a scope change aborts it. */
   controller(): AbortController {
-    return this.controller;
+    return this.currentController;
   }
 
   token(): string | undefined {
