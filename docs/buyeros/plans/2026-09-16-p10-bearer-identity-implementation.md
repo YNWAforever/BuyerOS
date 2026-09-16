@@ -254,7 +254,7 @@ Expected: FAIL — `ModuleNotFoundError: buyeros_api.api.jwks`.
 """JWKS fetch/cache/rotation for RS256 verification (P10).
 
 The only stateful, network-touching unit in the auth path. Given a `kid` it
-returns a usable public key or raises — it never returns an empty set and never
+returns a usable public key or raises; it never returns an empty set and never
 skips verification, so a JWKS outage can never become a signature bypass.
 """
 
@@ -463,7 +463,7 @@ def test_future_nbf_rejected():
 
 
 def test_token_within_the_nbf_skew_is_accepted():
-    # §B allows nbf up to now + 60s. PyJWT's default nbf check would reject this outright, so a
+    # spec section B allows nbf up to now + 60s. PyJWT's default nbf check would reject this outright, so a
     # green here is what proves claims_to_principal owns nbf rather than the library.
     import time
 

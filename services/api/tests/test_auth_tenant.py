@@ -44,7 +44,7 @@ def test_future_nbf_rejected():
 
 
 def test_token_within_the_nbf_skew_is_accepted():
-    # 禮B allows nbf up to now + 60s. PyJWT's default nbf check would reject this outright, so a
+    # spec section B allows nbf up to now + 60s. PyJWT's default nbf check would reject this outright, so a
     # green here is what proves claims_to_principal owns nbf rather than the library.
     import time
 
