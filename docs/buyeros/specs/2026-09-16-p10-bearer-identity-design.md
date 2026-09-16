@@ -41,13 +41,13 @@ buyeros_api/api/
 
 `JwksKeyCache` is the only stateful, network-touching unit. Its public operation is: **given a `kid`, return a usable public key or raise.**
 
-- **State:** per-process `{keys: dict[kid, public_key], fetched_at: float}` plus the JWKS URI. Populated lazily on demand; no background refresh, no timers.
+- **State:** per-process `{keys: dict[kid, public_key], fetched_at: float, last_attempt_at: float}` plus the JWKS URI. Populated lazily on demand; no background refresh, no timers.
 - **Resolution:**
   1. Cache holds `kid` and is within `jwks_cache_seconds` → return it (no network).
   2. Cache holds `kid` but is stale → refetch once; return `kid` if present, else raise.
-  3. Cache lacks `kid` → refetch once (rotation path); return `kid` if present, else raise. **At most one refetch per verification**, so a token with a bogus `kid` cannot be used to hammer the identity provider.
-  4. Fetch failure (network error, non-200, malformed document) → if a cache entry exists and is within TTL, serve it; otherwise raise. **Never** return a key, an empty set, or skip verification. A JWKS outage must not become an API outage, and must never become a signature bypass.
-- **Parsing:** strict. Only `kty=RSA` keys; only `use=sig` when `use` is present; `kid`, `n` and `e` required. A malformed key entry is skipped, never coerced. Keys are built with the crypto library's RSA key type.
+  3. Cache lacks `kid` while the cache is fresh → this is the rotation path: refetch once, but **no more often than once per `min_refetch_seconds`**. A `kid` that is still absent after that attempt raises. At most one refetch happens per verification, and the cooldown bounds them across verifications — together these stop a stream of tokens with bogus `kid`s from hammering the identity provider.
+  4. Fetch failure (network error, non-200, malformed document) → if we already hold a key for `kid` from a previous successful fetch, serve it; otherwise raise. Serving a previously fetched key during an outage keeps a transient identity-provider failure from becoming an API outage. This does not weaken signature verification — the key was published by the issuer and the token's `exp` is still enforced — but it does mean a rotated-away key can still validate until the outage ends. **Never** return an empty set or skip verification, and never invent a key.
+- **Parsing:** strict. Only `kty=RSA` keys; only `use=sig` when `use` is present; `kid`, `n` and `e` required. A malformed key entry is **skipped without failing the rest of the set** — a single bad entry must not deny service for every other key. Keys are built with the crypto library's RSA key type, and the parser catches the crypto library's own error hierarchy (in PyJWT, `InvalidKeyError` derives from `PyJWTError` only — **not** from `ValueError` or `KeyError`), so an unexpected entry can never escape as an unhandled error.
 - **Fetching:** the JWKS URI derives from `auth0_issuer` (`jwks_uri_for`), with an explicit bounded timeout. No invented provider endpoint.
 - **Concurrency:** process-local, guarded so concurrent requests do not stampede a cold or rotating cache — one in-flight fetch is shared and the rest await its result. Each process keeps its own cache; the identity provider is the source of truth, so a cold cache costs one fetch, not correctness.
 

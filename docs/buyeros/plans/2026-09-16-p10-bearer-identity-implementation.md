@@ -82,24 +82,49 @@ git commit -m "chore(api): add pinned pyjwt[crypto] for bearer verification"
 - Create: `services/api/tests/test_jwks_cache.py`
 
 **Interfaces:**
-- Produces: `class JwksKeyCache(fetch_jwks, *, cache_seconds=300, now=time.monotonic)`; `async def get_key(kid: str) -> object` raising `JwksError`; `def invalidate() -> None`. `JwksError` is defined in this module.
+- Produces: `class JwksKeyCache(fetch_jwks, *, cache_seconds=300, min_refetch_seconds=10, now=time.monotonic)`; `async def get_key(kid: str) -> object` raising `JwksError`; `def invalidate() -> None`. `JwksError` is defined in this module.
 - Consumes: nothing from earlier tasks except the new `jwt` dependency.
 
-**Design note:** `fetch_jwks` is an injected zero-argument async callable returning a parsed JWKS document (`{"keys": [{...}, ...]}`). This is what makes the whole state machine testable with no network. `now` is an injected clock (defaulting to `time.monotonic`) for deterministic TTL tests. `get_key` is async because its only I/O is the fetch; the caller awaits it.
+**Design note:** `fetch_jwks` is an injected zero-argument async callable returning a parsed JWKS document (`{"keys": [{...}, ...]}`). This is what makes the whole state machine testable with no network. `now` is an injected clock (defaulting to `time.monotonic`) for deterministic TTL tests, and tests that cross the cooldown advance it. `get_key` is async because its only I/O is the fetch; the caller awaits it.
+
+**Two corrections applied during planning (both verified by running the code against pyjwt 2.14.0):**
+1. Tests must build JWKs from a **real generated RSA key**. A hand-written `{"n": "AQAB", "e": "AQAB"}` makes `from_jwk` raise `ValueError: e must be >= 3 and < n`, because the modulus must exceed the exponent.
+2. The parser must catch `jwt.PyJWTError`. `InvalidKeyError` (raised for a malformed RSA entry) derives from `PyJWTError` **only** — not from `ValueError` or `KeyError` — so an `except (ValueError, ...)` lets one bad JWKS entry abort the entire fetch and empty the key set, which is a denial of service, not a skip.
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # services/api/tests/test_jwks_cache.py
 import asyncio
+import json
 
+import jwt
 import pytest
+from cryptography.hazmat.primitives.asymmetric import rsa
 
 from buyeros_api.api.jwks import JwksError, JwksKeyCache
 
+# A real key: `from_jwk` rejects a hand-written modulus that is not > the exponent.
+_KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+_PUBLIC_JWK = json.loads(jwt.algorithms.RSAAlgorithm.to_jwk(_KEY.public_key()))
 
-def _doc(*kids):
-    return {"keys": [{"kty": "RSA", "use": "sig", "kid": kid, "n": "AQAB", "e": "AQAB"} for kid in kids]}
+
+def _entry(kid: str) -> dict:
+    return {**_PUBLIC_JWK, "kid": kid, "use": "sig"}
+
+
+def _doc(*kids: str) -> dict:
+    return {"keys": [_entry(kid) for kid in kids]}
+
+
+class Clock:
+    """Mutable clock so tests can cross the TTL and the refetch cooldown."""
+
+    def __init__(self, t: float = 1000.0) -> None:
+        self.t = t
+
+    def __call__(self) -> float:
+        return self.t
 
 
 class Fetcher:
@@ -119,63 +144,79 @@ class Fetcher:
 
 def test_returns_cached_key_without_refetching():
     fetcher = Fetcher(_doc("k1"))
-    cache = JwksKeyCache(fetcher, cache_seconds=300, now=lambda: 1000.0)
+    cache = JwksKeyCache(fetcher, now=Clock())
     assert asyncio.run(cache.get_key("k1")) is not None
     assert asyncio.run(cache.get_key("k1")) is not None
     assert fetcher.calls == 1
 
 
 def test_unknown_kid_refetches_once_for_rotation():
+    clock = Clock()
     fetcher = Fetcher(_doc("k1"), _doc("k1", "k2"))
-    cache = JwksKeyCache(fetcher, cache_seconds=300, now=lambda: 1000.0)
-    assert asyncio.run(cache.get_key("k1")) is not None
+    cache = JwksKeyCache(fetcher, now=clock)
+    asyncio.run(cache.get_key("k1"))
+    clock.t += 11  # past the refetch cooldown
     assert asyncio.run(cache.get_key("k2")) is not None
     assert fetcher.calls == 2
 
 
-def test_unknown_kid_that_never_appears_raises_without_hammering():
+def test_unknown_kid_is_rate_limited_so_it_cannot_hammer_the_provider():
+    clock = Clock()
     fetcher = Fetcher(_doc("k1"))
-    cache = JwksKeyCache(fetcher, cache_seconds=300, now=lambda: 1000.0)
-    with pytest.raises(JwksError):
-        asyncio.run(cache.get_key("nope"))
-    # one initial fetch + exactly one rotation refetch, never more
+    cache = JwksKeyCache(fetcher, now=clock)
+    asyncio.run(cache.get_key("k1"))  # calls == 1
+    clock.t += 11
+    for _ in range(3):
+        with pytest.raises(JwksError):
+            asyncio.run(cache.get_key("nope"))
+    # exactly one rotation refetch for all three attempts, never one per attempt
     assert fetcher.calls == 2
 
 
 def test_stale_entry_refetches_and_picks_up_new_keys():
-    clock = {"t": 1000.0}
+    clock = Clock()
     fetcher = Fetcher(_doc("k1"), _doc("k1", "k2"))
-    cache = JwksKeyCache(fetcher, cache_seconds=300, now=lambda: clock["t"])
+    cache = JwksKeyCache(fetcher, now=clock)
     asyncio.run(cache.get_key("k1"))
-    clock["t"] = 1000.0 + 301
+    clock.t += 301  # past cache_seconds
     assert asyncio.run(cache.get_key("k2")) is not None
     assert fetcher.calls == 2
 
 
-def test_outage_serves_a_still_valid_cache():
+def test_outage_serves_a_previously_fetched_key():
+    clock = Clock()
     fetcher = Fetcher(_doc("k1"))
-    cache = JwksKeyCache(fetcher, cache_seconds=300, now=lambda: 1000.0)
+    cache = JwksKeyCache(fetcher, now=clock)
     asyncio.run(cache.get_key("k1"))
+    clock.t += 301  # stale, so the next lookup must attempt a refresh
     fetcher.error = RuntimeError("network down")
     assert asyncio.run(cache.get_key("k1")) is not None
 
 
-def test_outage_with_no_valid_cache_raises_rather_than_bypassing():
+def test_outage_with_no_cached_key_raises_rather_than_bypassing():
     fetcher = Fetcher(_doc("k1"))
     fetcher.error = RuntimeError("network down")
-    cache = JwksKeyCache(fetcher, cache_seconds=300, now=lambda: 1000.0)
+    cache = JwksKeyCache(fetcher, now=Clock())
     with pytest.raises(JwksError):
         asyncio.run(cache.get_key("k1"))
 
 
-def test_malformed_entries_are_skipped_not_coerced():
-    doc = {"keys": [{"kty": "EC", "kid": "ec"}, {"kty": "RSA", "kid": "no-material"}]}
-    fetcher = Fetcher(doc)
-    cache = JwksKeyCache(fetcher, cache_seconds=300, now=lambda: 1000.0)
+def test_malformed_entries_are_skipped_without_failing_the_set():
+    def document():
+        return {
+            "keys": [
+                {"kty": "EC", "kid": "ec", "crv": "P-256", "x": "a", "y": "b"},
+                {"kty": "RSA", "kid": "no-material"},
+                _entry("good"),
+            ]
+        }
+
+    fetcher = Fetcher(document())
+    cache = JwksKeyCache(fetcher, now=Clock())
     with pytest.raises(JwksError):
         asyncio.run(cache.get_key("ec"))
-    with pytest.raises(JwksError):
-        asyncio.run(cache.get_key("no-material"))
+    # the malformed entries did not abort the fetch: the good key is usable
+    assert asyncio.run(cache.get_key("good")) is not None
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -206,45 +247,57 @@ class JwksError(Exception):
 
 
 def _public_key(entry: dict):
-    """Build an RSA public key from one JWK entry, or None if it is not usable."""
+    """Build an RSA public key from one JWK entry, or None if it is not usable.
+
+    Catches ``jwt.PyJWTError`` deliberately: ``InvalidKeyError`` derives from it
+    alone (not from ValueError/KeyError), so a malformed entry must be caught here
+    or it would abort the whole fetch and empty the key set.
+    """
     if entry.get("kty") != "RSA":
         return None
     if entry.get("use") not in (None, "sig"):
         return None
     try:
         return jwt.algorithms.RSAAlgorithm.from_jwk(entry)
-    except (ValueError, TypeError, KeyError):
+    except (jwt.PyJWTError, ValueError, TypeError, KeyError):
         return None
 
 
 class JwksKeyCache:
-    """Per-process key cache: TTL hit, one refetch on unknown kid, fail closed."""
+    """Per-process key cache: TTL hit, rate-limited refetch on unknown kid, fail closed."""
 
     def __init__(
         self,
         fetch_jwks: Callable[[], Awaitable[dict]],
         *,
         cache_seconds: int = 300,
+        min_refetch_seconds: int = 10,
         now: Callable[[], float] = time.monotonic,
     ) -> None:
         self._fetch_jwks = fetch_jwks
         self._cache_seconds = cache_seconds
+        self._min_refetch_seconds = min_refetch_seconds
         self._now = now
         self._keys: dict[str, object] = {}
         self._fetched_at: float | None = None
+        self._last_attempt_at: float | None = None
         self._lock = asyncio.Lock()
 
     def _fresh(self) -> bool:
         return self._fetched_at is not None and (self._now() - self._fetched_at) < self._cache_seconds
 
+    def _cooldown_elapsed(self) -> bool:
+        return self._last_attempt_at is None or (self._now() - self._last_attempt_at) >= self._min_refetch_seconds
+
     def invalidate(self) -> None:
         self._fetched_at = None
 
-    async def _refetch(self) -> None:
+    async def _refetch(self, seen_attempt: float | None) -> None:
         async with self._lock:
-            # Another request may have refreshed while we waited for the lock.
-            if self._fresh() and self._keys:
+            # Another caller already refetched (or tried) while we waited for the lock.
+            if self._last_attempt_at != seen_attempt:
                 return
+            self._last_attempt_at = self._now()
             document = await self._fetch_jwks()
             keys: dict[str, object] = {}
             for entry in document.get("keys", []):
@@ -260,11 +313,17 @@ class JwksKeyCache:
     async def get_key(self, kid: str):
         if kid in self._keys and self._fresh():
             return self._keys[kid]
+        # Unknown kid with a fresh cache is the rotation path: allow one refetch, but
+        # rate-limit it so a stream of bogus kids cannot hammer the identity provider.
+        # A stale cache always gets its refresh attempt.
+        if self._fresh() and not self._cooldown_elapsed():
+            raise JwksError("key id unknown and refresh is rate limited")
+        seen_attempt = self._last_attempt_at
         try:
-            await self._refetch()
+            await self._refetch(seen_attempt)
         except Exception as exc:  # noqa: BLE001 - any fetch failure is an auth failure
-            if kid in self._keys and self._fresh():
-                return self._keys[kid]  # outage: serve a still-valid cache
+            if kid in self._keys:
+                return self._keys[kid]  # outage: serve a previously fetched key
             raise JwksError("key set unavailable") from exc
         if kid not in self._keys:
             raise JwksError("unknown key id")
@@ -880,6 +939,8 @@ The crypto assumptions in this plan were checked against the actual resolved pac
 - `jwt.decode(..., algorithms=["RS256"], options={"verify_aud": False, "verify_iss": False})` succeeds and defers `iss`/`aud` to `claims_to_principal`.
 - `HS256` and `alg: none` both raise `InvalidAlgorithmError` under that allow-list, so the allow-list genuinely blocks them (asserted by `test_hs256_rejected` and `test_alg_none_rejected`).
 - `jwt.get_unverified_header` exposes `alg` and `kid`.
+- A JWK with `n` equal to `e` is rejected: `{"n": "AQAB", "e": "AQAB"}` raises `ValueError: e must be >= 3 and < n`. Test JWKs are therefore built from a real generated key.
+- `jwt.exceptions.InvalidKeyError` has MRO `InvalidKeyError → PyJWTError → Exception`: it is **not** a `ValueError` or `KeyError`. The parser catches `jwt.PyJWTError` so one malformed JWKS entry is skipped instead of aborting the fetch and emptying the key set (verified: without that catch, a document containing a malformed RSA entry yields an empty key set).
 - A synchronous `verify` bridging to the async cache with `asyncio.run` **fails** from an async route (`RuntimeError: asyncio.run() cannot be called from a running event loop`). The plan's `verify`/`get_key` are therefore async and the route awaits them; this was confirmed working end-to-end (a signed token verifies through an async FastAPI route, a bad token is rejected) in a scratch environment before the plan was finalized.
 
 ## Global Notes

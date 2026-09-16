@@ -73,6 +73,6 @@ de3c29a0259d4e6fc51fe9d158a49da9ffacd0608b503283bb38e0ce7eedf9e6  specs/2026-09-
 49b09160cc7119f1742f04cd659efd8b02de5ad1ad0a5ba06c80aab2c09da4ea  specs/2026-09-15-p9-api-surface-design.md
 23d9b629c2794c718224a439ef303b9a5805118938eb63412a8bc881ef12483a  plans/2026-09-15-p9-api-surface-implementation.md
 a0a287ded255b0d8cb71805b42b43b5749a54c51a168e324647d6b4f100ddf79  decisions/BUILD_APPROVAL_RECORD.P9-api.md
-fa6f1c336950011dbf3948a07a07a831dfca55a3782afca544eb02957750695f  specs/2026-09-16-p10-bearer-identity-design.md
-515ec3da3071b87eba7de2e822f3491264bfab0108137316bc31599590c0481b  plans/2026-09-16-p10-bearer-identity-implementation.md
+31a4ab4ae555fbd8f7aa9f32d15beb69f1eaa928d85ea5db4745debbc3f46491  specs/2026-09-16-p10-bearer-identity-design.md
+6b4c66f25275352461d9b43c366c7eafabc8fb5097dd40a992fd2a5c7d8520de  plans/2026-09-16-p10-bearer-identity-implementation.md
 dd375f453fdb90b0686c999c6e7a4ef284e81cde3737234d15a89c7683e2317a  decisions/BUILD_APPROVAL_RECORD.P10.md
