@@ -459,7 +459,8 @@ async function bodyOf(response: {json: () => Promise<unknown>}): Promise<Record<
   }
 }
 
-export function createLiveClient(fetchImpl: typeof fetch = fetch) {
+export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl: string = '') {
+  const root = baseUrl.replace(/\/+$/, '');
   return {
     async request<T>({path, method = 'GET', token, scope, signal}: LiveRequest): Promise<T> {
       void scope;
@@ -467,7 +468,8 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch) {
       if (token) headers.Authorization = `Bearer ${token}`;
       let response: Awaited<ReturnType<typeof fetch>>;
       try {
-        response = await fetchImpl(path, {method, headers, signal});
+        // Without the configured base URL a live read would hit the app's own origin.
+        response = await fetchImpl(`${root}${path}`, {method, headers, signal});
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') throw new LiveCancelled('cancelled');
         throw new LiveError('request failed', 'NETWORK_ERROR', 0, '', true);
@@ -889,6 +891,21 @@ await test('demo mode still reads and writes its own keys',()=>{
   assert.ok(calls.some(c=>c==='set:buyeros-prefs-v1'));
 });
 
+await test('live requests are addressed to the configured API base URL',async()=>{
+  // Without this the live path would silently call the app's own origin.
+  const seen=[];
+  const client=live.createLiveClient(async(url)=>{seen.push(String(url));return {ok:true,json:async()=>({data:{},request_id:'r',data_mode:'live'})};},'https://api.example.test/');
+  await client.request({path:'/v1/workspaces',scope:'s1'});
+  assert.equal(seen[0],'https://api.example.test/v1/workspaces');
+});
+
+await test('with no base URL the path is used as-is',async()=>{
+  const seen=[];
+  const client=live.createLiveClient(async(url)=>{seen.push(String(url));return {ok:true,json:async()=>({data:{},request_id:'r',data_mode:'live'})};});
+  await client.request({path:'/v1/workspaces',scope:'s1'});
+  assert.equal(seen[0],'/v1/workspaces');
+});
+
 await test('no token-shaped value is ever written to storage',()=>{
   const written=[];
   const fake={getItem:()=>null,setItem:(k,v)=>{written.push([k,String(v)]);}};
@@ -961,13 +978,13 @@ interface SessionValue { session: SessionScope; client: ReturnType<typeof create
 const SessionContext = createContext<SessionValue | null>(null);
 
 export function WorkspaceSessionProvider({children}: {children: ReactNode}) {
-  const {mode} = useDataMode();
+  const {mode, apiBaseUrl} = useDataMode();
   // Lazy `useState` is the lint-clean "construct exactly once" pattern. A `useRef` written
   // during render and read back through `useMemo` trips `react-hooks/refs` (an error here).
   const [value] = useState<SessionValue>(() => {
     const session = new SessionScope({mode, actor: ''});
     session.next({});
-    return {session, client: createLiveClient()};
+    return {session, client: createLiveClient(fetch, apiBaseUrl)};
   });
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
@@ -1015,8 +1032,11 @@ export {createLiveClient, LiveError, LiveCancelled} from './live/client';
 `app/layout.tsx` resolves mode server-side and wraps the shell:
 
 ```tsx
+import {resolveMode} from '@/services/live/mode';
+...
 const apiBaseUrl = process.env.BUYEROS_API_BASE_URL ?? '';
-const mode = apiBaseUrl.trim() ? 'live' : 'demo';
+// Use the tested resolver rather than re-deriving the rule inline.
+const mode = resolveMode(apiBaseUrl);
 ...
 <body className="antialiased">
   <DataModeProvider mode={mode} apiBaseUrl={apiBaseUrl}>
@@ -1031,7 +1051,7 @@ const mode = apiBaseUrl.trim() ? 'live' : 'demo';
 
 - [ ] **Step 4: Run the checks and the existing suites**
 
-Run: `node tests/live-adapter-checks.mjs` → Expected: `37 live adapter checks passed`.
+Run: `node tests/live-adapter-checks.mjs` → Expected: `39 live adapter checks passed`.
 Run: `node tests/domain-checks.mjs` → Expected: `11 domain checks passed`.
 Run: `pnpm lint` → Expected: PASS (no new warnings).
 
@@ -1133,7 +1153,7 @@ Append the zh-HK strings for the new English labels: `Live mode · connected wor
 
 - [ ] **Step 6: Run everything**
 
-Run: `node tests/live-adapter-checks.mjs` → Expected: `40 live adapter checks passed`.
+Run: `node tests/live-adapter-checks.mjs` → Expected: `42 live adapter checks passed`.
 Run: `node tests/domain-checks.mjs` → Expected: `11 domain checks passed`.
 Run: `pnpm lint` → Expected: PASS.
 Run: `pnpm build` → Expected: PASS (the app still builds under vinext).
