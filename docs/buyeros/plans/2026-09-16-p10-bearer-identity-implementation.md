@@ -926,7 +926,7 @@ The grant itself is proven by the DB-backed tests: `test_route_tenant_scope_come
 ```python
 def test_tenant_routes_fail_closed_without_configured_auth(monkeypatch):
     """With no Auth0 issuer/audience configured every tenant route is unreachable, and the
-    rejection comes from the unconfigured short-circuit — not merely a missing header — so
+    rejection comes from the unconfigured short-circuit - not merely a missing header - so
     deleting that guard fails this test rather than silently passing it."""
     from buyeros_api.settings import get_settings
 

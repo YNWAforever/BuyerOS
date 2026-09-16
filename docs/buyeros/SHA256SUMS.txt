@@ -74,5 +74,5 @@ de3c29a0259d4e6fc51fe9d158a49da9ffacd0608b503283bb38e0ce7eedf9e6  specs/2026-09-
 23d9b629c2794c718224a439ef303b9a5805118938eb63412a8bc881ef12483a  plans/2026-09-15-p9-api-surface-implementation.md
 a0a287ded255b0d8cb71805b42b43b5749a54c51a168e324647d6b4f100ddf79  decisions/BUILD_APPROVAL_RECORD.P9-api.md
 33212c8eeb79ce96c0a04e424dd4ef1118c9b2c02cefa62bcfd5bc6b98e80df8  specs/2026-09-16-p10-bearer-identity-design.md
-89261fd0eeee49b3310098ea9cb92421ebc9e3e5b74613a1545f3f8e0800bd5b  plans/2026-09-16-p10-bearer-identity-implementation.md
+1afc7e2c404c8f2bfba58f219574993e047433dbfb7a579b55fb9a10bda97033  plans/2026-09-16-p10-bearer-identity-implementation.md
 d46fc95105b2d8221bd3ebd31f2158b756e80886372f1ff8b2d3d6ad6e73ea68  decisions/BUILD_APPROVAL_RECORD.P10.md
