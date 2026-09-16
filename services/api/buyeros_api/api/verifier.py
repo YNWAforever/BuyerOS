@@ -45,7 +45,17 @@ class TokenVerifier:
                 token,
                 key,
                 algorithms=list(ALLOWED_ALGORITHMS),
-                options={"verify_aud": False, "verify_iss": False},
+                # Signature and algorithm only. Every claim rule (iss/aud/exp/nbf/sub) is owned by
+                # claims_to_principal, so PyJWT's own claim checks must be off: its default exp/nbf
+                # verification would reject a token inside the spec's 60s nbf skew before our rules
+                # ever run, and would put exp/nbf ownership in two places at once.
+                options={
+                    "verify_aud": False,
+                    "verify_iss": False,
+                    "verify_exp": False,
+                    "verify_nbf": False,
+                    "verify_iat": False,
+                },
             )
         except jwt.PyJWTError as exc:
             raise AuthError("signature verification failed") from exc
