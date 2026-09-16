@@ -402,6 +402,18 @@ await test('an aborted request surfaces as LiveCancelled, not as an error toast'
   const client=live.createLiveClient(async()=>{const e=new Error('aborted');e.name='AbortError';throw e;});
   await assert.rejects(()=>client.request({path:'/v1/workspaces',scope:'s1'}),e=>e instanceof live.LiveCancelled);
 });
+
+await test('a network failure is a retryable error, not a cancellation',async()=>{
+  // read.ts classifies on retryable/status, so this branch must be pinned, not merely implemented.
+  const client=live.createLiveClient(async()=>{throw new TypeError('failed to fetch');});
+  await assert.rejects(()=>client.request({path:'/v1/workspaces',scope:'s1'}),e=>{
+    assert.ok(e instanceof live.LiveError);
+    assert.equal(e.code,'NETWORK_ERROR');
+    assert.equal(e.status,0);
+    assert.equal(e.retryable,true);
+    return true;
+  });
+});
 ```
 
 - [ ] **Step 2: Run to verify it fails**
@@ -470,7 +482,7 @@ export type LiveClient = ReturnType<typeof createLiveClient>;
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `node tests/live-adapter-checks.mjs`
-Expected: `18 live adapter checks passed`.
+Expected: `19 live adapter checks passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -622,7 +634,7 @@ export class SessionScope {
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `node tests/live-adapter-checks.mjs`
-Expected: `23 live adapter checks passed`.
+Expected: `24 live adapter checks passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -764,7 +776,7 @@ export async function loadLive(input: {
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `node tests/live-adapter-checks.mjs`
-Expected: `27 live adapter checks passed`.
+Expected: `28 live adapter checks passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -957,7 +969,7 @@ const mode = apiBaseUrl.trim() ? 'live' : 'demo';
 
 - [ ] **Step 4: Run the checks and the existing suites**
 
-Run: `node tests/live-adapter-checks.mjs` → Expected: `30 live adapter checks passed`.
+Run: `node tests/live-adapter-checks.mjs` → Expected: `31 live adapter checks passed`.
 Run: `node tests/domain-checks.mjs` → Expected: `11 domain checks passed`.
 Run: `pnpm lint` → Expected: PASS (no new warnings).
 
@@ -1059,7 +1071,7 @@ Append the zh-HK strings for the new English labels: `Live mode · connected wor
 
 - [ ] **Step 6: Run everything**
 
-Run: `node tests/live-adapter-checks.mjs` → Expected: `33 live adapter checks passed`.
+Run: `node tests/live-adapter-checks.mjs` → Expected: `34 live adapter checks passed`.
 Run: `node tests/domain-checks.mjs` → Expected: `11 domain checks passed`.
 Run: `pnpm lint` → Expected: PASS.
 Run: `pnpm build` → Expected: PASS (the app still builds under vinext).
