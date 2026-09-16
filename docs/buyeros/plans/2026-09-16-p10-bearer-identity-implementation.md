@@ -240,6 +240,17 @@ def test_non_dict_entries_are_skipped_without_failing_the_set():
     fetcher = Fetcher({"keys": ["garbage", _entry("good")]})
     cache = JwksKeyCache(fetcher, now=Clock())
     assert asyncio.run(cache.get_key("good")) is not None
+
+
+def test_an_empty_key_set_does_not_wipe_good_keys():
+    """A misconfigured provider returning {"keys": []} must not invalidate held keys."""
+    clock = Clock()
+    fetcher = Fetcher(_doc("k1"), {"keys": []})
+    cache = JwksKeyCache(fetcher, now=clock)
+    assert asyncio.run(cache.get_key("k1")) is not None  # calls == 1
+    clock.t += 301  # stale, so the next lookup refetches and gets an empty set
+    assert asyncio.run(cache.get_key("k1")) is not None  # still serves the held key
+    assert fetcher.calls == 2
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -334,8 +345,11 @@ class JwksKeyCache:
                 key = _public_key(entry)
                 if key is not None:
                     keys[kid] = key
-            self._keys = keys
-            self._fetched_at = self._now()
+            # An empty-but-valid response is not a successful rotation: keep the keys we hold
+            # rather than letting a provider misconfiguration wipe every published key.
+            if keys or not self._keys:
+                self._keys = keys
+                self._fetched_at = self._now()
 
     async def get_key(self, kid: str):
         if kid in self._keys and self._fresh():
@@ -905,12 +919,14 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.execute("GRANT SELECT ON users TO buyeros_api, buyeros_worker;")
+    op.execute("GRANT SELECT ON users TO buyeros_api;")
 
 
 def downgrade() -> None:
-    op.execute("REVOKE SELECT ON users FROM buyeros_api, buyeros_worker;")
+    op.execute("REVOKE SELECT ON users FROM buyeros_api;")
 ```
+
+Only `buyeros_api` is granted: the API resolves the actor by reading `users`, the worker never reads it, and unlike the `workspaces` grant there is no reason to widen the privilege.
 
 - [ ] **Step 2: Pin the selector event loop on Windows (test infrastructure)**
 

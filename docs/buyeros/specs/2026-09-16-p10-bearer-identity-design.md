@@ -48,6 +48,7 @@ buyeros_api/api/
   2. Otherwise attempt **at most one refetch per `min_refetch_seconds`**, whether the cache is stale or the `kid` is unknown. If the cooldown has not elapsed, no fetch is attempted and any cached key is used as-is.
   3. After the attempt: if we hold a key for `kid`, return it; otherwise raise.
   4. Fetch failure (network error, non-200, malformed document) → if we already hold a key for `kid` from a previous successful fetch, serve it; otherwise raise. Serving a previously fetched key during an outage keeps a transient identity-provider failure from becoming an API outage. This does not weaken signature verification — the key was published by the issuer and the token's `exp` is still enforced — but it does mean a rotated-away key can still validate until the outage ends. **Never** return an empty set or skip verification, and never invent a key.
+  5. A response that parses to **no usable keys** is not a successful rotation. If we already hold keys, keep them rather than replacing the set — otherwise a provider misconfiguration returning `{"keys": []}` would silently invalidate every previously published key instead of serving the held set. It still fails closed.
   - **The cooldown applies to every refetch, not only the unknown-`kid` path.** This matters because a provider outage keeps the cache permanently stale: without a cooldown on the stale path, every request — including one carrying a bogus `kid`, exactly the case in (3) — would trigger its own fetch, turning the outage into a request-rate amplification against the identity provider.
 - **Parsing:** strict. Only `kty=RSA` keys; only `use=sig` when `use` is present; `kid`, `n` and `e` required. A malformed key entry is **skipped without failing the rest of the set** — a single bad entry must not deny service for every other key. Keys are built with the crypto library's RSA key type, and the parser catches the crypto library's own error hierarchy (in PyJWT, `InvalidKeyError` derives from `PyJWTError` only — **not** from `ValueError` or `KeyError`), so an unexpected entry can never escape as an unhandled error.
 - **Fetching:** the JWKS URI derives from `auth0_issuer` (`jwks_uri_for`), with an explicit bounded timeout. No invented provider endpoint.
@@ -61,10 +62,10 @@ buyeros_api/api/
 
 **Migration `0008_grant_users_select`** (new Alembic revision, `down_revision = "0007_outbox_terminal_state"`):
 
-- Upgrade: `GRANT SELECT ON users TO buyeros_api, buyeros_worker;`
-- Downgrade: `REVOKE SELECT ON users FROM buyeros_api, buyeros_worker;`
+- Upgrade: `GRANT SELECT ON users TO buyeros_api;`
+- Downgrade: `REVOKE SELECT ON users FROM buyeros_api;`
 
-**SELECT only.** The API resolves actors by reading `users` and never writes them (see §E), so no `INSERT`/`UPDATE` grant is added and `users` gains no RLS policy. `users` stays non-RLS, consistent with `workspaces`.
+**SELECT only, and only to the role that needs it.** The API resolves actors by reading `users` and never writes them (see §E), so no `INSERT`/`UPDATE` grant is added and `users` gains no RLS policy. `users` stays non-RLS, consistent with `workspaces`. Unlike the `workspaces` grant, this one does **not** extend to `buyeros_worker`: the worker never reads `users`, so granting it would be an unnecessary privilege expansion.
 
 This is a privilege grant, not a schema change: no table, column, index or row is touched, so it is safe to apply and safe to reverse. It is still a migration, and is therefore explicitly in scope for P10 rather than left implicit.
 
