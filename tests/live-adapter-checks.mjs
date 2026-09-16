@@ -134,4 +134,51 @@ await test('a network failure is a retryable error, not a cancellation',async()=
   });
 });
 
+const {SessionScope,scopeKey}=await loadModule('services/live/session.ts');
+
+await test('scopeKey encodes mode, actor, workspace and project',()=>{
+  assert.equal(scopeKey({mode:'live',actor:'a',workspace:'w',project:'p'}),'live:a:w:p');
+  assert.equal(scopeKey({mode:'demo',actor:'',workspace:null,project:null}),'demo::-:-');
+});
+
+await test('changing workspace advances the identity and aborts the previous controller',()=>{
+  const session=new SessionScope({mode:'live',actor:'a'});
+  const first=session.next({workspace:'w1'});
+  assert.equal(first.previous.signal.aborted,true);
+  assert.equal(session.isCurrent(first.identity),true);
+  const second=session.next({workspace:'w2'});
+  assert.equal(second.previous,first.controller);
+  assert.equal(second.previous.signal.aborted,true);
+  assert.equal(session.isCurrent(first.identity),false);
+});
+
+await test('a stale identity is not current, so a late response can be discarded',()=>{
+  const session=new SessionScope({mode:'live',actor:'a'});
+  const stale=session.next({workspace:'w1'}).identity;
+  session.next({workspace:'w2'});
+  assert.equal(session.isCurrent(stale),false);
+});
+
+await test('returning to a previously visited workspace is a NEW scope, not the old one',()=>{
+  const session=new SessionScope({mode:'live',actor:'a'});
+  const firstA=session.next({workspace:'A'}).identity;
+  session.next({workspace:'B'});
+  const secondA=session.next({workspace:'A'}).identity;
+  // Same value key, different generation: the earlier visit's response must not be accepted.
+  assert.equal(scopeKey(session.current()),'live:a:A:-');
+  assert.notEqual(firstA,secondA);
+  assert.equal(session.isCurrent(firstA),false);
+  assert.equal(session.isCurrent(secondA),true);
+});
+
+await test('the token lives in the session and is cleared on scope change',()=>{
+  const session=new SessionScope({mode:'live',actor:'a'});
+  session.setToken('tok');
+  assert.equal(session.token(),'tok');
+  session.next({workspace:'w2'});
+  assert.equal(session.token(),'tok');
+  session.setToken(undefined);
+  assert.equal(session.token(),undefined);
+});
+
 console.log(`${checks} live adapter checks passed`);
