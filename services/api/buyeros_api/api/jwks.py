@@ -81,8 +81,11 @@ class JwksKeyCache:
                 key = _public_key(entry)
                 if key is not None:
                     keys[kid] = key
-            self._keys = keys
-            self._fetched_at = self._now()
+            # An empty-but-valid response is not a successful rotation: keep the keys we hold
+            # rather than letting a provider misconfiguration wipe every published key.
+            if keys or not self._keys:
+                self._keys = keys
+                self._fetched_at = self._now()
 
     async def get_key(self, kid: str):
         if kid in self._keys and self._fresh():

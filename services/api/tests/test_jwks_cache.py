@@ -143,3 +143,14 @@ def test_non_dict_entries_are_skipped_without_failing_the_set():
     fetcher = Fetcher({"keys": ["garbage", _entry("good")]})
     cache = JwksKeyCache(fetcher, now=Clock())
     assert asyncio.run(cache.get_key("good")) is not None
+
+
+def test_an_empty_key_set_does_not_wipe_good_keys():
+    """A misconfigured provider returning {"keys": []} must not invalidate held keys."""
+    clock = Clock()
+    fetcher = Fetcher(_doc("k1"), {"keys": []})
+    cache = JwksKeyCache(fetcher, now=clock)
+    assert asyncio.run(cache.get_key("k1")) is not None  # calls == 1
+    clock.t += 301  # stale, so the next lookup refetches and gets an empty set
+    assert asyncio.run(cache.get_key("k1")) is not None  # still serves the held key
+    assert fetcher.calls == 2
