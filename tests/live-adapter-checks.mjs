@@ -85,4 +85,41 @@ await test('an empty page is empty, not an error',()=>{
   assert.deepEqual(map.toBuyers({items:[],offset:0,limit:0,total:0}),[]);
 });
 
+const live=await loadModule('services/live/client.ts');
+
+function responder(handler){return async (url,init)=>{await handler(url,init);return {status:200,ok:true,json:async()=>({data:{ok:true},request_id:'r-1',data_mode:'live'})};};}
+function errorResponder(status,body){return async ()=>({status,ok:false,json:async()=>body});}
+
+await test('a success unwraps data and sends the bearer only when a token is present',async()=>{
+  const seen=[];
+  const client=live.createLiveClient(responder((url,init)=>seen.push(init.headers)));
+  const out=await client.request({path:'/v1/workspaces',scope:'s1',token:'tok-1'});
+  assert.deepEqual(out,{ok:true});
+  assert.equal(seen[0].Authorization,'Bearer tok-1');
+  await client.request({path:'/v1/workspaces',scope:'s1'});
+  assert.equal(seen[1].Authorization,undefined);
+});
+
+await test('an error envelope becomes a typed LiveError keyed by code',async()=>{
+  const client=live.createLiveClient(errorResponder(503,{code:'PROVIDER_UNAVAILABLE',message:'down',request_id:'r-9',retryable:true}));
+  await assert.rejects(()=>client.request({path:'/v1/workspaces',scope:'s1'}),e=>{
+    assert.ok(e instanceof live.LiveError);
+    assert.equal(e.code,'PROVIDER_UNAVAILABLE');
+    assert.equal(e.status,503);
+    assert.equal(e.retryable,true);
+    assert.equal(e.requestId,'r-9');
+    return true;
+  });
+});
+
+await test('a non-envelope body still yields a typed error, never a crash',async()=>{
+  const client=live.createLiveClient(errorResponder(500,'<html>oops</html>'));// json() will throw
+  await assert.rejects(()=>client.request({path:'/v1/workspaces',scope:'s1'}),e=>e instanceof live.LiveError&&e.status===500);
+});
+
+await test('an aborted request surfaces as LiveCancelled, not as an error toast',async()=>{
+  const client=live.createLiveClient(async()=>{const e=new Error('aborted');e.name='AbortError';throw e;});
+  await assert.rejects(()=>client.request({path:'/v1/workspaces',scope:'s1'}),e=>e instanceof live.LiveCancelled);
+});
+
 console.log(`${checks} live adapter checks passed`);
