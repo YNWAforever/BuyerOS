@@ -21,6 +21,8 @@ export async function loadLive(input: {
   section: Section;
   path: string;
   store?: unknown;
+  /** A caller-owned abort (e.g. a panel unmount) combined with the session's scope signal. */
+  signal?: AbortSignal;
 }): Promise<LoadResult> {
   void input.store;
   const {client, session, section, path} = input;
@@ -34,8 +36,12 @@ export async function loadLive(input: {
   if (scope.mode === 'live' && !token) return {availability: 'not_configured'};
 
   const identity = session.identity();
+  // Unmounting a panel aborts its own read without aborting sibling reads: the caller's signal
+  // is combined with the session's scope signal, and either one cancels the request.
+  const scopeSignal = session.controller().signal;
+  const signal = input.signal ? AbortSignal.any([scopeSignal, input.signal]) : scopeSignal;
   try {
-    const value = await client.request({path, scope: identity, token, signal: session.controller().signal});
+    const value = await client.request({path, scope: identity, token, signal});
     if (!session.isCurrent(identity)) return {availability, discarded: true};
     return {availability, value};
   } catch (err) {

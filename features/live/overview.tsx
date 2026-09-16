@@ -2,7 +2,7 @@
 import {useEffect,useState} from 'react';
 import type {Availability} from '@/services/live/mode';
 import {loadLive} from '@/services/live/read';
-import {toWorkspaces,type LiveWorkspace} from '@/services/live/mapping';
+import {toWorkspaces,MapError,type LiveWorkspace} from '@/services/live/mapping';
 import {useWorkspaceSession} from '@/features/providers/workspace-session';
 import {LiveUnavailable} from './unavailable';
 
@@ -17,20 +17,24 @@ export function LiveOverview() {
 
   useEffect(() => {
     let active = true;
-    void loadLive({client, session, section: 'overview', path: '/v1/workspaces'}).then((result) => {
-      if (!active) return;
-      if (result.availability !== 'available') {
-        setState({kind: 'unavailable', state: result.availability, reason: result.error?.message});
-        return;
-      }
-      try {
-        setState({kind: 'ready', workspaces: toWorkspaces(result.value)});
-      } catch (error) {
-        // A payload that violates the contract is unavailable, never an empty list.
-        setState({kind: 'unavailable', state: 'unavailable', reason: error instanceof Error ? error.message : undefined});
-      }
-    });
-    return () => { active = false; };
+    const own = new AbortController();
+    void loadLive({client, session, section: 'overview', path: '/v1/workspaces', signal: own.signal})
+      .then((result) => {
+        // A stale or cancelled read is a silence, not a failure: never map it, never show an error.
+        if (!active || result.discarded) return;
+        if (result.availability !== 'available') {
+          setState({kind: 'unavailable', state: result.availability, reason: result.error?.message});
+          return;
+        }
+        try {
+          setState({kind: 'ready', workspaces: toWorkspaces(result.value)});
+        } catch (error) {
+          // A payload that violates the contract is unavailable, never an empty list.
+          setState({kind: 'unavailable', state: 'unavailable', reason: error instanceof MapError ? error.message : 'unexpected response'});
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; own.abort(); };
   }, [client, session]);
 
   if (state.kind === 'loading') {
