@@ -1142,6 +1142,9 @@ export default function Workspace({mode='demo'}:{mode?:DataMode}){const [s,setS]
 2. Gate the demo-only effects. Wrap the bodies of the WebMCP effect (line 29), the demo storage restore (line 32), the preferences write (line 33) and the run timer (line 37) in `if(!demoEffectsEnabled(mode))return;` as their first statement. Gate the unconditional `usage(s)` computation (line 38) so `u` is computed only in demo mode, and give it a zero-valued fallback in live mode.
 
 3. Branch the render: wrap the existing section blocks (lines 52-59) in `{mode==='demo'&&(<>…</>)}`, and add a sibling `{mode==='live'&&<LiveOverview/>}` for the overview route with `LiveUnavailable` for the other routes based on `availabilityFor(mode,'discovery')` etc. The demo branch keeps its current contents verbatim.
+   Two implementation details this needs, neither of which is obvious from the snippet:
+   - **Guard the derived `rows`/`run` values.** Line 39 derives from `s.runs`, and live mode's `emptyStore()` has `runs: []`, so `run.id` throws. Guard the derived values (e.g. a `rows` that tolerates no run) so the live branch renders without a run — the checks' demo path must stay byte-identical.
+   - **Add `mode` to the dependency arrays** of the effects you gate, otherwise `react-hooks/exhaustive-deps` reports new warnings against a file that already has pre-existing lint errors.
 
 4. Banner: replace the hard-coded demo banner text with `t(modeBanner(mode))` so it always states the resolved mode.
 
