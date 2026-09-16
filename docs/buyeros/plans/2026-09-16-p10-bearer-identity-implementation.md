@@ -788,9 +788,21 @@ def test_get_principal_bearer_scheme_is_case_insensitive(monkeypatch):
         get_settings.cache_clear()
 ```
 
-**(b)** In `services/api/tests/test_api_routes_contract.py`, replace `_approve_client_with_principal` (this also drops the dead `Depends` import and the no-op `_accept_bearer` middleware a prior review flagged):
+**(b)** In `services/api/tests/test_api_routes_contract.py`, add `import pytest` and an autouse cache-isolation fixture, then replace `_approve_client_with_principal` (this also drops the dead `Depends` import and the no-op `_accept_bearer` middleware a prior review flagged):
 
 ```python
+@pytest.fixture(autouse=True)
+def _isolate_settings_cache():
+    """`get_settings` is process-wide lru_cached; a test that configures it must not leak
+    configured auth into later tests (it would silently nullify the unconfigured fail-closed
+    test in `test_api_tenant_isolation.py`)."""
+    from buyeros_api.settings import get_settings
+
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
 def _approve_client_with_principal(monkeypatch):
     """A client whose auth succeeds, so the route's own precondition logic runs."""
     from buyeros_api.api import auth
