@@ -10,7 +10,8 @@
 | Spec | `docs/buyeros/specs/2026-09-16-p10-bearer-identity-design.md` |
 | Plan | `docs/buyeros/plans/2026-09-16-p10-bearer-identity-implementation.md` |
 | Base | branch `p10-bearer-identity` from `p9-api-surface` @ `b11cf5c` |
-| Allowed files | create `services/api/buyeros_api/api/{jwks,verifier}.py`, `services/api/alembic/versions/0008_grant_users_select.py`, `services/api/tests/{auth_fixtures,test_jwks_cache,test_auth_tenant,test_auth_routes_db}.py`; modify `services/api/buyeros_api/api/auth.py`, `services/api/tests/{test_api_auth,test_api_tenant_isolation}.py`, `services/api/pyproject.toml`, `services/api/uv.lock`; docs under `docs/buyeros/**` |
+| Allowed files | create `services/api/buyeros_api/api/{jwks,verifier}.py`, `services/api/alembic/versions/0008_grant_users_select.py`, `services/api/tests/{auth_fixtures,test_jwks_cache,test_auth_tenant,test_auth_routes_db}.py`; modify `services/api/buyeros_api/api/auth.py`, `services/api/tests/{test_api_auth,test_api_tenant_isolation,test_api_routes_contract,test_api_buyers}.py`, `services/api/pyproject.toml`, `services/api/uv.lock`; docs under `docs/buyeros/**` |
+| Scope extension (owner-approved, execution session) | `tests/test_api_routes_contract.py` and `tests/test_api_buyers.py` were added to the modify set so the **test-only** auth-seam migration could ride with Task 4. `get_principal` stops calling `principal_from_token`, so tests that made auth succeed by patching that symbol must patch `_verifier_from_settings` instead. No production behaviour change; keeping the suite green at every commit. |
 | New dependency | `pyjwt[crypto]` (pinned) — P9 explicitly omitted it; `uv.lock` changes are in scope |
 | Migration | `0008_grant_users_select` — `GRANT SELECT ON users` to the runtime roles. Privilege grant only; no table/column/index/row change; reversible |
 | Dependencies with evidence | BO-003/BO-004 prerequisites waived (see below) |

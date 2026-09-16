@@ -619,12 +619,17 @@ git commit -m "feat(api): verify RS256 bearer tokens against a JWKS cache"
 **Files:**
 - Modify: `services/api/buyeros_api/api/auth.py`
 - Modify: `services/api/tests/test_api_auth.py`
+- Modify: `services/api/tests/test_api_routes_contract.py` (scope expanded by owner — seam migration)
+- Modify: `services/api/tests/test_api_buyers.py` (scope expanded by owner — seam migration)
 
 **Interfaces:**
 - Consumes: `TokenVerifier`, `default_verifier` (Task 3).
 - Produces: `get_principal` that verifies real tokens; the unconfigured case still returns `401` before any verification. `claims_to_principal` and `principal_from_token` keep their P9 signatures (the latter still fails closed).
+- Produces the test seam `_verifier_from_settings()` — replaceable in tests, and the seam later tasks patch.
 
-**Note on the async path:** `get_principal` is already `async`, and `TokenVerifier.verify` is async (Task 3), so the handler simply awaits it. There is no thread offload and no `asyncio.run` anywhere in the request path — verification is CPU-bound crypto plus a cache lookup that is async only because of the JWKS fetch. Keep the existing `principal_from_token` name and signature as the test seam P9 established.
+**Note on the async path:** `get_principal` is already `async`, and `TokenVerifier.verify` is async (Task 3), so the handler simply awaits it. There is no thread offload and no `asyncio.run` anywhere in the request path — verification is CPU-bound crypto plus a cache lookup that is async only because of the JWKS fetch.
+
+**The auth seam moves, and three existing tests must move with it.** P9's tests made authentication succeed by monkeypatching `principal_from_token`. `get_principal` no longer calls it, so those tests would now receive `401`. The replacement seam is `_verifier_from_settings()`, which must be patched with a stub verifier **and** the issuer/audience env must be set (because the unconfigured short-circuit runs before the seam is reached). Step 5 migrates all three sites. This is test-only: no production behavior changes.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -675,11 +680,12 @@ def test_get_principal_verifies_a_real_token(monkeypatch):
 
 def test_verifier_is_reused_so_its_jwks_cache_survives(monkeypatch):
     """A per-call verifier would cold-start the JWKS cache on every request."""
-    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
-    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
     from buyeros_api.api import auth
     from buyeros_api.settings import get_settings
+    from tests import auth_fixtures as fx
 
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
     get_settings.cache_clear()
     monkeypatch.setattr(auth, "_VERIFIER", None)
     monkeypatch.setattr(auth, "_VERIFIER_KEY", None)
@@ -741,20 +747,108 @@ async def get_principal(request: Request) -> Principal:
 
 Note the final `except` maps to the fixed generic message `"token rejected"` — it must not interpolate `str(exc)`, because `exc` may name the failed check.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 4: Migrate the three tests that patched the old seam**
 
-Run: `uv run pytest tests/test_api_auth.py -v`
-Expected: PASS. All P9 auth tests must still pass unchanged; if any P9 test asserted the old literal message, update only the message expectation, not the behavior.
+These compile-time-compatible but behaviorally stale patches must be replaced. In each case: set the issuer/audience env, clear the settings cache, patch `_verifier_from_settings` with a stub verifier, and restore the settings cache afterwards.
+
+**(a)** In `services/api/tests/test_api_auth.py`, replace the `fake_principal_from_token` binding inside `test_get_principal_bearer_scheme_is_case_insensitive`:
+
+```python
+def test_get_principal_bearer_scheme_is_case_insensitive(monkeypatch):
+    from fastapi import Depends
+    from fastapi.testclient import TestClient
+
+    from buyeros_api.api import auth
+    from buyeros_api.api.app import create_app
+    from buyeros_api.settings import get_settings
+
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
+    get_settings.cache_clear()
+
+    seen = {}
+
+    class _StubVerifier:
+        async def verify(self, token):
+            seen["token"] = token
+            return auth.Principal(issuer="https://issuer.test/", subject="auth0|1")
+
+    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: _StubVerifier())
+    try:
+        app = create_app()
+
+        @app.get("/protected")
+        async def protected(principal: auth.Principal = Depends(auth.get_principal)):
+            return {"data": {"subject": principal.subject}, "request_id": "x", "data_mode": "live"}
+
+        response = TestClient(app).get("/protected", headers={"Authorization": "bearer test-token"})
+        assert response.status_code == 200
+        assert seen["token"] == "test-token"
+    finally:
+        get_settings.cache_clear()
+```
+
+**(b)** In `services/api/tests/test_api_routes_contract.py`, replace `_approve_client_with_principal` (this also drops the dead `Depends` import and the no-op `_accept_bearer` middleware a prior review flagged):
+
+```python
+def _approve_client_with_principal(monkeypatch):
+    """A client whose auth succeeds, so the route's own precondition logic runs."""
+    from buyeros_api.api import auth
+    from buyeros_api.api.app import create_app
+    from buyeros_api.settings import get_settings
+
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
+    get_settings.cache_clear()
+
+    class _StubVerifier:
+        async def verify(self, token):
+            return auth.Principal(issuer="https://issuer.test/", subject="auth0|1")
+
+    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: _StubVerifier())
+    return TestClient(create_app(), raise_server_exceptions=False)
+```
+
+**(c)** In `services/api/tests/test_api_buyers.py`, replace the body of `test_unimplemented_handler_actually_returns_501`:
+
+```python
+def test_unimplemented_handler_actually_returns_501(monkeypatch):
+    """The 401 test cannot prove 501; this drives the handler with a satisfied principal."""
+    from buyeros_api.api import auth
+    from buyeros_api.api.app import create_app as _create_app
+    from buyeros_api.settings import get_settings
+
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
+    get_settings.cache_clear()
+
+    class _StubVerifier:
+        async def verify(self, token):
+            return auth.Principal(issuer="https://issuer.test/", subject="auth0|1")
+
+    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: _StubVerifier())
+    try:
+        client = TestClient(_create_app(), raise_server_exceptions=False)
+        response = client.post(
+            f"/v1/workspaces/{WORKSPACE}/projects/{PROJECT}/runs",
+            json={},
+            headers={"Authorization": "Bearer t"},
+        )
+        assert response.status_code == 501
+        assert response.json()["code"] == "NOT_IMPLEMENTED"
+    finally:
+        get_settings.cache_clear()
+```
 
 - [ ] **Step 5: Run the full suite**
 
 Run: `uv run pytest -q`
-Expected: PASS (all prior tests plus the new ones).
+Expected: PASS (all prior tests plus the new ones). If any test still asserts a 501/If-Match outcome through the old seam, it will show up here as a 401 — fix the patch, not the behavior.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add services/api/buyeros_api/api/auth.py services/api/tests/test_api_auth.py
+git add services/api/buyeros_api/api/auth.py services/api/tests/test_api_auth.py services/api/tests/test_api_routes_contract.py services/api/tests/test_api_buyers.py
 git commit -m "feat(api): verify bearer tokens in the request path"
 ```
 
