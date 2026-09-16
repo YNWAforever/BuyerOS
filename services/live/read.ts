@@ -42,7 +42,10 @@ export async function loadLive(input: {
     if (err instanceof LiveCancelled) return {availability, discarded: true};
     const error = err as LiveError;
     if (error.code === 'NOT_IMPLEMENTED') return {availability: 'unavailable', error};
-    if (error.code === 'UNAUTHENTICATED') return {availability: 'not_configured', error};
+    // A received 401 means a token was presented and rejected: sign-in is required. It is NOT
+    // `not_configured`, which is reserved for "live is off and no request was made".
+    if (error.code === 'UNAUTHENTICATED' || error.code === 'PERMISSION_DENIED') return {availability: 'denied', error};
+    if (error.code === 'NOT_FOUND') return {availability: 'not_found', error};
     if (error.retryable || error.status === 429 || error.status >= 500) return {availability: 'transient', error};
     return {availability: 'denied', error};
   }

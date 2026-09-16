@@ -236,4 +236,45 @@ await test('no token means not_configured and no request is sent',async()=>{
   assert.equal(calls,0);
 });
 
+await test('each API failure code maps to its own state',async()=>{
+  const cases=[[401,'UNAUTHENTICATED','denied'],[403,'PERMISSION_DENIED','denied'],[404,'NOT_FOUND','not_found'],[503,'PROVIDER_UNAVAILABLE','transient'],[501,'NOT_IMPLEMENTED','unavailable']];
+  for(const [status,code,expected] of cases){
+    const client=live.createLiveClient(errorResponder(status,{code,message:'m',request_id:'r',retryable:status===503}));
+    const result=await loadLive({client,session:authed(),section:'overview',path:'/v1/workspaces',store:fakeStore()});
+    assert.equal(result.availability,expected,code);
+    assert.equal(result.value,undefined,code);
+  }
+});
+
+await test('a 401 is a sign-in requirement, never not_configured',async()=>{
+  // not_configured means "live is off and no request was made"; a 401 means a token was rejected.
+  const client=live.createLiveClient(errorResponder(401,{code:'UNAUTHENTICATED',message:'m',request_id:'r',retryable:false}));
+  const result=await loadLive({client,session:authed(),section:'overview',path:'/v1/workspaces',store:fakeStore()});
+  assert.equal(result.availability,'denied');
+  assert.notEqual(result.availability,'not_configured');
+});
+
+await test('a 404 is not_found, never denied',async()=>{
+  // A non-enumerating 404 for a foreign resource is "not found", not "refused".
+  const client=live.createLiveClient(errorResponder(404,{code:'NOT_FOUND',message:'m',request_id:'r',retryable:false}));
+  const result=await loadLive({client,session:authed(),section:'overview',path:'/v1/workspaces',store:fakeStore()});
+  assert.equal(result.availability,'not_found');
+  assert.notEqual(result.availability,'denied');
+});
+
+await test('a cancelled request is discarded, not an error',async()=>{
+  const client=live.createLiveClient(async()=>{const e=new Error('aborted');e.name='AbortError';throw e;});
+  const result=await loadLive({client,session:authed(),section:'overview',path:'/v1/workspaces',store:fakeStore()});
+  assert.equal(result.discarded,true);
+  assert.equal(result.error,undefined);
+});
+
+await test('the read attaches to the session controller signal',async()=>{
+  let seen;
+  const client={request:async(args)=>{seen=args.signal;return {items:[]};}};
+  const session=authed();
+  await loadLive({client,session,section:'overview',path:'/v1/workspaces',store:fakeStore()});
+  assert.equal(seen,session.controller().signal);
+});
+
 console.log(`${checks} live adapter checks passed`);
