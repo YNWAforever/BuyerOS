@@ -76,19 +76,34 @@ def test_valid_member_reaches_only_its_own_workspace(auth_env):
     assert "ProjectB" not in foreign.text
 
 
-def test_forged_expired_and_wrong_audience_are_denied(auth_env):
+def test_forged_expired_wrong_audience_and_malformed_are_denied(auth_env):
+    """Every rejection is a 401 whose body reveals nothing about which check failed.
+
+    The signature case uses a real keypair, so it fails at signature verification rather than
+    at header parsing - a test that only sent garbage would pass even if signatures stopped
+    being checked. The message assertion is what pins TEST-BO-004-03: without it, a regression
+    that interpolated the reason ("expired", "bad issuer") would keep these cases green.
+    """
+    from cryptography.hazmat.primitives.asymmetric import rsa
+
+    attacker = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     client = _client()
     path = f"/v1/workspaces/{WORKSPACE_A}/projects"
     for headers in (
         _headers(iss="https://other.test/"),
         _headers(aud="other-api"),
         _headers(exp=100),
+        _headers(key=attacker),  # correct header and kid, invalid signature
         {"Authorization": "Bearer not-a-jwt"},
     ):
         response = client.get(path, headers=headers)
         assert response.status_code == 401, headers
-        assert response.json()["code"] == "UNAUTHENTICATED"
+        body = response.json()
+        assert body["code"] == "UNAUTHENTICATED"
+        assert body["message"] == "token rejected"
         assert "oauth" not in response.text.lower()
+        assert "expired" not in response.text.lower()
+        assert "issuer" not in response.text.lower()
 
 
 def test_unknown_actor_is_a_non_enumerating_404(auth_env):
