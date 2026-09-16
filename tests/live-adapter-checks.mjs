@@ -277,4 +277,30 @@ await test('the read attaches to the session controller signal',async()=>{
   assert.equal(seen,session.controller().signal);
 });
 
+const storage=await loadModule('services/live/storage.ts');
+
+await test('live mode refuses to read or write any demo storage key',()=>{
+  const calls=[];
+  const fake={getItem:k=>{calls.push('get:'+k);return null;},setItem:(k)=>{calls.push('set:'+k);}};
+  storage.readDemoState(fake,'live');
+  storage.writePrefs(fake,'live',{locale:'en'});
+  assert.deepEqual(calls,[]);
+});
+
+await test('demo mode still reads and writes its own keys',()=>{
+  const calls=[];
+  const fake={getItem:k=>{calls.push('get:'+k);return null;},setItem:(k)=>{calls.push('set:'+k);}};
+  storage.readDemoState(fake,'demo');
+  storage.writePrefs(fake,'demo',{locale:'zh-HK'});
+  assert.ok(calls.some(c=>c==='get:buyeros-demo-v1'));
+  assert.ok(calls.some(c=>c==='set:buyeros-prefs-v1'));
+});
+
+await test('no token-shaped value is ever written to storage',()=>{
+  const written=[];
+  const fake={getItem:()=>null,setItem:(k,v)=>{written.push([k,String(v)]);}};
+  storage.writePrefs(fake,'demo',{locale:'en'});
+  assert.equal(written.some(([,v])=>/bearer|eyJ|token/i.test(v)),false);
+});
+
 console.log(`${checks} live adapter checks passed`);
