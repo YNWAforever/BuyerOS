@@ -778,7 +778,7 @@ export async function loadLive(input: {
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `node tests/live-adapter-checks.mjs`
-Expected: `28 live adapter checks passed`.
+Expected: `29 live adapter checks passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -971,7 +971,7 @@ const mode = apiBaseUrl.trim() ? 'live' : 'demo';
 
 - [ ] **Step 4: Run the checks and the existing suites**
 
-Run: `node tests/live-adapter-checks.mjs` → Expected: `31 live adapter checks passed`.
+Run: `node tests/live-adapter-checks.mjs` → Expected: `32 live adapter checks passed`.
 Run: `node tests/domain-checks.mjs` → Expected: `11 domain checks passed`.
 Run: `pnpm lint` → Expected: PASS (no new warnings).
 
@@ -1073,7 +1073,7 @@ Append the zh-HK strings for the new English labels: `Live mode · connected wor
 
 - [ ] **Step 6: Run everything**
 
-Run: `node tests/live-adapter-checks.mjs` → Expected: `34 live adapter checks passed`.
+Run: `node tests/live-adapter-checks.mjs` → Expected: `35 live adapter checks passed`.
 Run: `node tests/domain-checks.mjs` → Expected: `11 domain checks passed`.
 Run: `pnpm lint` → Expected: PASS.
 Run: `pnpm build` → Expected: PASS (the app still builds under vinext).
