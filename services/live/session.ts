@@ -13,7 +13,7 @@ export function scopeKey(scope: Scope): string {
 export class SessionScope {
   private scope: Scope;
   private generation = 0;
-  private controller: AbortController | undefined;
+  private controller: AbortController;
   private currentToken: string | undefined;
 
   constructor(initial: {mode: DataMode; actor?: string; workspace?: string | null; project?: string | null}) {
@@ -50,7 +50,7 @@ export class SessionScope {
 
   /** The signal for the current scope. A read attaches to this; only a scope change aborts it. */
   controller(): AbortController {
-    return this.controller!;
+    return this.controller;
   }
 
   token(): string | undefined {
