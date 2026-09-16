@@ -47,6 +47,22 @@
 - Produces: `tests/ts-loader.mjs` exporting `loadModule(path) -> Promise<module>`; `services/live/mode.ts` exporting `type DataMode = 'demo'|'live'`, `type Availability = 'available'|'unavailable'|'not_configured'|'denied'`, `type Section`, `resolveMode(apiBaseUrl?: string | null): DataMode`, `availabilityFor(mode: DataMode, section: Section, liveReady?: boolean): Availability`, `LIVE_SECTIONS: Section[]`.
 - Consumes: nothing from later tasks.
 
+- [ ] **Step 0: Provide the test toolchain (prerequisite)**
+
+The check scripts import `typescript` from the repository's `node_modules`, which is **not committed and not currently installed** (`scripts/install-pnpm.sh` is Linux-only — it requires `flock` and GNU `timeout` — so `npm run install:ci` cannot run here). Install with plain pnpm at the repository root:
+
+```bash
+pnpm install
+```
+
+This is gitignored build output: it must not add or change any tracked file, and it must not modify `pnpm-lock.yaml` (if it does, stop and report — the lockfile is not in scope). Verify the toolchain is present before continuing:
+
+```bash
+node -e "console.log(require('typescript').version)"
+```
+
+Expected: a `5.x` version, no error. If the install cannot complete, stop and report **BLOCKED** with the output — do not vendor `typescript` or hand-roll a transpiler.
+
 - [ ] **Step 1: Write the failing checks**
 
 Create `tests/live-adapter-checks.mjs`:
