@@ -671,6 +671,22 @@ def test_get_principal_verifies_a_real_token(monkeypatch):
         assert "other.test" not in bad.text
     finally:
         get_settings.cache_clear()
+
+
+def test_verifier_is_reused_so_its_jwks_cache_survives(monkeypatch):
+    """A per-call verifier would cold-start the JWKS cache on every request."""
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
+    from buyeros_api.api import auth
+    from buyeros_api.settings import get_settings
+
+    get_settings.cache_clear()
+    monkeypatch.setattr(auth, "_VERIFIER", None)
+    monkeypatch.setattr(auth, "_VERIFIER_KEY", None)
+    try:
+        assert auth._verifier_from_settings() is auth._verifier_from_settings()
+    finally:
+        get_settings.cache_clear()
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -683,11 +699,28 @@ Expected: FAIL — `AttributeError: module 'buyeros_api.api.auth' has no attribu
 In `services/api/buyeros_api/api/auth.py`, keep `AuthError`, `Principal`, `jwks_uri_for`, `claims_to_principal` and `principal_from_token` exactly as they are. Add a verifier accessor and change `get_principal` to use it:
 
 ```python
+_VERIFIER = None
+_VERIFIER_KEY: tuple | None = None
+
+
 def _verifier_from_settings():
+    """One verifier per process, so its JWKS cache is shared rather than rebuilt per request.
+
+    Building a verifier per call would give every request a cold cache and therefore a JWKS
+    fetch, defeating the cache entirely. The key includes the settings the verifier derives
+    from, so a configuration change (or a test that swaps env) builds a fresh one.
+    """
+    global _VERIFIER, _VERIFIER_KEY
+
     from ..settings import get_settings
     from .verifier import default_verifier
 
-    return default_verifier(get_settings())
+    settings = get_settings()
+    key = (settings.auth0_issuer, settings.auth0_audience, settings.jwks_cache_seconds)
+    if _VERIFIER is None or _VERIFIER_KEY != key:
+        _VERIFIER = default_verifier(settings)
+        _VERIFIER_KEY = key
+    return _VERIFIER
 
 
 async def get_principal(request: Request) -> Principal:
