@@ -166,7 +166,7 @@ Keep `import assert from 'node:assert/strict';` (it is used by every check), and
 export type DataMode = 'demo' | 'live';
 /** unavailable = no backing operation; not_configured = no identity; denied = refused;
  *  transient = retryable (429/503/network). Never inferred from empty data. */
-export type Availability = 'available' | 'unavailable' | 'not_configured' | 'denied' | 'transient';
+export type Availability = 'available' | 'unavailable' | 'not_configured' | 'denied' | 'transient' | 'not_found';
 export type Section = 'overview' | 'discovery' | 'lists' | 'outreach' | 'results' | 'settings';
 
 /** Sections the live API can back in this phase. Everything else is explicitly unavailable. */
@@ -727,6 +727,39 @@ await test('no token means not_configured and no request is sent',async()=>{
   assert.equal(result.availability,'not_configured');
   assert.equal(calls,0);
 });
+
+await test('each API failure code maps to its own state',async()=>{
+  const cases=[[401,'UNAUTHENTICATED','denied'],[403,'PERMISSION_DENIED','denied'],[404,'NOT_FOUND','not_found'],[503,'PROVIDER_UNAVAILABLE','transient'],[501,'NOT_IMPLEMENTED','unavailable']];
+  for(const [status,code,expected] of cases){
+    const client=live.createLiveClient(errorResponder(status,{code,message:'m',request_id:'r',retryable:status===503}));
+    const result=await loadLive({client,session:authed(),section:'overview',path:'/v1/workspaces',store:fakeStore()});
+    assert.equal(result.availability,expected,code);
+    assert.equal(result.value,undefined,code);
+  }
+});
+
+await test('a 401 is a sign-in requirement, never not_configured',async()=>{
+  // not_configured means "live is off and no request was made"; a 401 means a token was rejected.
+  const client=live.createLiveClient(errorResponder(401,{code:'UNAUTHENTICATED',message:'m',request_id:'r',retryable:false}));
+  const result=await loadLive({client,session:authed(),section:'overview',path:'/v1/workspaces',store:fakeStore()});
+  assert.equal(result.availability,'denied');
+  assert.notEqual(result.availability,'not_configured');
+});
+
+await test('a cancelled request is discarded, not an error',async()=>{
+  const client=live.createLiveClient(async()=>{const e=new Error('aborted');e.name='AbortError';throw e;});
+  const result=await loadLive({client,session:authed(),section:'overview',path:'/v1/workspaces',store:fakeStore()});
+  assert.equal(result.discarded,true);
+  assert.equal(result.error,undefined);
+});
+
+await test('the read attaches to the session controller signal',async()=>{
+  let seen;
+  const client={request:async(args)=>{seen=args.signal;return {items:[]};}};
+  const session=authed();
+  await loadLive({client,session,section:'overview',path:'/v1/workspaces',store:fakeStore()});
+  assert.equal(seen,session.controller().signal);
+});
 ```
 
 - [ ] **Step 2: Run to verify it fails**
@@ -781,7 +814,10 @@ export async function loadLive(input: {
     if (err instanceof LiveCancelled) return {availability, discarded: true};
     const error = err as LiveError;
     if (error.code === 'NOT_IMPLEMENTED') return {availability: 'unavailable', error};
-    if (error.code === 'UNAUTHENTICATED') return {availability: 'not_configured', error};
+    // A received 401 means a token was presented and rejected: sign-in is required. It is NOT
+    // `not_configured`, which is reserved for "live is off and no request was made".
+    if (error.code === 'UNAUTHENTICATED' || error.code === 'PERMISSION_DENIED') return {availability: 'denied', error};
+    if (error.code === 'NOT_FOUND') return {availability: 'not_found', error};
     if (error.retryable || error.status === 429 || error.status >= 500) return {availability: 'transient', error};
     return {availability: 'denied', error};
   }
@@ -791,7 +827,7 @@ export async function loadLive(input: {
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `node tests/live-adapter-checks.mjs`
-Expected: `29 live adapter checks passed`.
+Expected: `34 live adapter checks passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -944,6 +980,7 @@ const COPY: Record<Exclude<Availability, 'available'>, string> = {
   not_configured: 'Live mode is not configured. Showing nothing rather than sample data.',
   denied: 'Access denied for this workspace.',
   transient: 'The service is temporarily unavailable. Retry when ready.',
+  not_found: 'Not found in this workspace.',
 };
 
 export function LiveUnavailable({state, reason}: {state: Exclude<Availability, 'available'>; reason?: string}) {
@@ -984,7 +1021,7 @@ const mode = apiBaseUrl.trim() ? 'live' : 'demo';
 
 - [ ] **Step 4: Run the checks and the existing suites**
 
-Run: `node tests/live-adapter-checks.mjs` → Expected: `32 live adapter checks passed`.
+Run: `node tests/live-adapter-checks.mjs` → Expected: `37 live adapter checks passed`.
 Run: `node tests/domain-checks.mjs` → Expected: `11 domain checks passed`.
 Run: `pnpm lint` → Expected: PASS (no new warnings).
 
@@ -1086,7 +1123,7 @@ Append the zh-HK strings for the new English labels: `Live mode · connected wor
 
 - [ ] **Step 6: Run everything**
 
-Run: `node tests/live-adapter-checks.mjs` → Expected: `35 live adapter checks passed`.
+Run: `node tests/live-adapter-checks.mjs` → Expected: `40 live adapter checks passed`.
 Run: `node tests/domain-checks.mjs` → Expected: `11 domain checks passed`.
 Run: `pnpm lint` → Expected: PASS.
 Run: `pnpm build` → Expected: PASS (the app still builds under vinext).

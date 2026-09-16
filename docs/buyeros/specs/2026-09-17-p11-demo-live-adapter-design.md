@@ -81,7 +81,9 @@ request<T>({ path, method, scope, token, signal }) -> Promise<T>
 
 Mapping is **strict**: if a payload lacks a field the model requires, the mapper raises a typed error rather than coercing to an empty string or null. An absent value must never render as if it were a finding. This applies to every required field without exception — including `roles`, which is contract-required and must **not** default to an empty list, since "a member with no roles" is a different and misleading claim. Wrong-typed values inside a required field (for example a non-string element in `roles`) are shape surprises and raise too. Only genuinely nullable fields (`note`, `approvedAt`) may be `null`, and only when the payload says so.
 
-**Availability is explicit.** Each section carries one of `available | unavailable | not_configured | denied`, and it is never inferred from empty data.
+**Availability is explicit.** Each section carries one of `available | unavailable | not_configured | denied | transient | not_found`, and it is never inferred from empty data.
+
+`not_configured` is **only** for "live is off and no request was made" (no token). A `401` received from the API means a token was presented and rejected, which is a sign-in requirement, so it is `denied` — not `not_configured`. `not_found` is distinct from `denied`: a non-enumerating `404` for a foreign resource is "not found", not "refused".
 
 - **Available in live mode:** workspace selection, project list and detail, ICP version list, buyer list and detail.
 - **Unavailable in live mode:** Find Buyers (fit, evidence, runs), Buyer Lists, Outreach (drafts, quotes), Results (outcomes, usage). Where the API is actually called it answers `501 NOT_IMPLEMENTED` and that code is shown; where a section has no backing operation the UI says so without calling.
