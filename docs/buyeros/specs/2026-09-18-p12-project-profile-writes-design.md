@@ -4,7 +4,9 @@
 
 No application code, lockfile, dependency install, migration, cloud resource, deployment, Site access change, paid provider call, mailbox connection, message, or send is authorized by this document. Execution happens only under an explicit dependency waiver, on the separately approved task.
 
-Related records: [P2 persistence](2026-09-15-p2-persistence-foundation-design.md), [P5 draft/approval/export](2026-09-15-p5-draft-approval-export-design.md), [P9 API surface](2026-09-15-p9-api-surface-design.md), [P10 bearer identity](2026-09-16-p10-bearer-identity-design.md), [P11 demo/live adapter](2026-09-17-p11-demo-live-adapter-design.md), [BO-007 task](../tasks/BO-007-persist-projects-editable-offers-and-immutable-approved-buyer-profiles.md), [03 contracts](../03_DATA_API_AND_STATE_CONTRACTS.md), [contracts/openapi.proposed.yaml](../contracts/openapi.proposed.yaml). Base: `main` @ `d159ae9` (P10 merged); branch `p12-project-profile-writes`.
+Related records: [P2 persistence](2026-09-15-p2-persistence-foundation-design.md), [P5 draft/approval/export](2026-09-15-p5-draft-approval-export-design.md), [P9 API surface](2026-09-15-p9-api-surface-design.md), [P10 bearer identity](2026-09-16-p10-bearer-identity-design.md), [P11 demo/live adapter](2026-09-17-p11-demo-live-adapter-design.md), [BO-007 task](../tasks/BO-007-persist-projects-editable-offers-and-immutable-approved-buyer-profiles.md), [03 contracts](../03_DATA_API_AND_STATE_CONTRACTS.md), [contracts/openapi.proposed.yaml](../contracts/openapi.proposed.yaml).
+
+**Base: P11.** This phase **extends** the P11 seam — it adds write support to `services/live/client.ts` and new modules beside `read.ts`, so it branches from `p11-demo-live-adapter` @ `cf20b1a` (which itself contains `main` @ `d159ae9`, P10 merged). The branch is `p12-project-profile-writes`, and its pull request targets `p11-demo-live-adapter` until P11 merges, then `main`. Branching from `main` would not compile.
 
 ## Scope
 
