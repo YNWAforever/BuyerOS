@@ -80,3 +80,4 @@ c62e7b40d58ef60df5d01400b65694078c613b8b4afb39f9c4faec4d6d84334c  decisions/BUIL
 7c5ccd86deab9aa0672fb35308705e74d9247be97f531a22e43110d9e77bf722  plans/2026-09-17-p11-demo-live-adapter-implementation.md
 caadbfdb1fad6df192272f47a7656cf629bb10c3ef32a4352d20232992a24df0  decisions/BUILD_APPROVAL_RECORD.P11.md
 288fe9f19b020efeeb5f4587343ff3e554c60ee48bbb40f38ed7a794fb9cb15f  specs/2026-09-18-p12-project-profile-writes-design.md
+d8b973f5ed02c233b07413fc0e55c8aa0831a8dc6528824fe713694e7d480800  plans/2026-09-18-p12-project-profile-writes-implementation.md
