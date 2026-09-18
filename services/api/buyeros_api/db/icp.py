@@ -5,8 +5,8 @@ import json
 import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, ForeignKeyConstraint, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import BigInteger, DateTime, ForeignKeyConstraint, Integer, String, Text, UniqueConstraint
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base, TenantMixin
@@ -27,6 +27,13 @@ class Project(Base, TenantMixin):
 
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="active")
+    company_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    offer: Mapped[str] = mapped_column(Text, nullable=False)
+    website: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    markets: Mapped[list[str]] = mapped_column(ARRAY(String(2)), nullable=False, default=list)
+    language_preferences: Mapped[list[str]] = mapped_column(ARRAY(String(16)), nullable=False, default=list)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    active_icp_version_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
 
 
 class IcpVersion(Base, TenantMixin):
@@ -49,3 +56,4 @@ class IcpVersion(Base, TenantMixin):
     parent_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     approved_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    superseded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

@@ -81,6 +81,12 @@ def test_reviewer_updates_and_approves_but_cannot_create():
     assert permission_for_roles(["reviewer"], "createProject") is False
 
 
+def test_only_workspace_admin_may_archive_a_project():
+    assert permission_for_roles(["workspace_admin"], "archiveProject") is True
+    assert permission_for_roles(["operator"], "archiveProject") is False
+    assert permission_for_roles(["reviewer"], "archiveProject") is False
+
+
 def test_admins_without_contract_read_grants_are_denied_reads():
     assert permission_for_roles(["policy_admin"], "listProjects") is False
     assert permission_for_roles(["budget_admin"], "listBuyers") is False
@@ -99,6 +105,7 @@ CONTRACT_ROLES = {
     "getBuyer": _VIEWERS,
     "createProject": _WRITERS,
     "updateProject": frozenset({"operator", "reviewer", "workspace_admin"}),
+    "archiveProject": frozenset({"workspace_admin"}),
     "saveICPVersion": _WRITERS,
     "approveICPVersion": frozenset({"reviewer", "workspace_admin"}),
     "getReadiness": frozenset({"workspace_admin"}),

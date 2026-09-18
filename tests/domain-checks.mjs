@@ -1,12 +1,8 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import ts from 'typescript';
+import {moduleUrl} from './ts-loader.mjs';
 import assert from 'node:assert/strict';
-const cache=new Map();
-function url(f){f=path.resolve(f);if(cache.has(f))return cache.get(f);let js=ts.transpileModule(fs.readFileSync(f,'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;js=js.replace(/from\s*(['"])([^'"]+)\1/g,(all,q,spec)=>{let file=spec.startsWith('@/')?path.resolve(spec.slice(2)):path.resolve(path.dirname(f),spec);if(!path.extname(file))file+='.ts';return 'from '+JSON.stringify(url(file))});const u='data:text/javascript;base64,'+Buffer.from(js).toString('base64');cache.set(f,u);return u;}
-const {seed,base}=await import(url('data/demo/fixtures.ts'));
-const {quote,confirm,usage,block,csv,httpClient}=await import(url('services/mock-client.ts'));
-const {advanceRun,cancelRun,retryRun}=await import(url('services/run-engine.ts'));
+const {seed,base}=await import(moduleUrl('data/demo/fixtures.ts'));
+const {quote,confirm,usage,block,csv,httpClient}=await import(moduleUrl('services/mock-client.ts'));
+const {advanceRun,cancelRun,retryRun}=await import(moduleUrl('services/run-engine.ts'));
 let checks=0;function test(name,fn){fn();checks++;console.log('PASS '+name)}
 test('24 distinct fictional companies, 14/6/4 fit distribution',()=>{const s=seed();assert.equal(new Set(s.companies.map(c=>c.id)).size,24);assert.deepEqual(['Match','Needs review','Not a match'].map(f=>s.companies.filter(c=>c.fit===f).length),[14,6,4]);});
 test('Suppression, acceptance, suitability, policy and researched status block lookup independently',()=>{const c={...seed().companies[1],review:'Accepted'};assert.equal(block(c),null);for(const p of [{suppressed:true},{review:'Awaiting review'},{fit:'Needs review'},{policy:'Unknown'},{contact:'Catch-all'}])assert.ok(block({...c,...p}));});

@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 import pytest
@@ -107,8 +108,16 @@ def test_implemented_response_fields_are_declared_by_the_contract():
 
     class _Project:
         id = workspace_id = uuid.UUID("11111111-1111-4111-8111-111111111111")
+        version = 1
+        created_at = updated_at = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
         name = "P"
+        company_name = "Co"
+        offer = "O"
+        website = None
+        markets = ["US"]
+        language_preferences = ["en"]
         status = "active"
+        active_icp_version_id = None
 
     assert set(_project_data(_Project())) <= project_keys
 
@@ -118,6 +127,7 @@ def test_implemented_response_fields_are_declared_by_the_contract():
         content_hash = "sha256:x"
         approved_at = None
         approved_by = None
+        superseded_at = None
         content: dict = {}
 
     assert set(_icp_data(_Icp())) <= icp_keys
