@@ -127,6 +127,7 @@ def test_implemented_response_fields_are_declared_by_the_contract():
         content_hash = "sha256:x"
         approved_at = None
         approved_by = None
+        superseded_at = None
         content: dict = {}
 
     assert set(_icp_data(_Icp())) <= icp_keys

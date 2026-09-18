@@ -409,3 +409,58 @@ def test_the_same_key_with_a_different_body_conflicts(api):
     )
     assert second.status_code == 409
     assert second.json()["code"] == "IDEMPOTENCY_CONFLICT"
+
+
+def test_approval_sets_the_active_profile_and_requires_a_reviewer(api):
+    project_id = _create(api)
+    saved = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}/icp-versions",
+        json={"requirements": [{"id": "r1", "text": "Distributes sensors", "category": "must", "hard_exclusion": False}],
+              "markets": ["DE"], "buyer_types": ["Distributor"], "languages": ["en"], "offer_facts": []},
+        headers=_h(key="i1"),
+    )
+    assert saved.status_code == 201, saved.text
+    version = saved.json()["data"]
+    body = {"content_hash": version["content_hash"], "confirmation": True}
+
+    # operator cannot approve (approveICPVersion permits reviewer/workspace_admin)
+    denied = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/icp-versions/{version['id']}/approve",
+        json=body, headers=_h(key="ap1", **{"If-Match": f'"{version["number"]}"'}),
+    )
+    assert denied.status_code == 403
+
+    approved = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/icp-versions/{version['id']}/approve",
+        json=body, headers=_h(subject=REVIEWER, key="ap2", **{"If-Match": f'"{version["number"]}"'}),
+    )
+    assert approved.status_code == 200, approved.text
+
+    project = api.get(f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}", headers=_h()).json()["data"]
+    assert project["active_icp_version_id"] == version["id"]
+
+
+def test_a_material_change_supersedes_and_reopens_the_profile(api):
+    project_id = _create(api)
+    saved = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}/icp-versions",
+        json={"requirements": [{"id": "r1", "text": "x", "category": "must", "hard_exclusion": False}],
+              "markets": ["DE"], "buyer_types": ["Distributor"], "languages": ["en"], "offer_facts": []},
+        headers=_h(key="i1"),
+    ).json()["data"]
+    api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/icp-versions/{saved['id']}/approve",
+        json={"content_hash": saved["content_hash"], "confirmation": True},
+        headers=_h(subject=REVIEWER, key="ap1", **{"If-Match": f'"{saved["number"]}"'}),
+    )
+    api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"offer": "A materially different offer."},
+        headers=_h(key="update-30", **{"If-Match": '"1"'}),
+    )
+    project = api.get(f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}", headers=_h()).json()["data"]
+    assert project["active_icp_version_id"] is None
+    versions = api.get(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}/icp-versions", headers=_h()
+    ).json()["data"]["items"]
+    assert [v["status"] for v in versions] == ["superseded"]
