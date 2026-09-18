@@ -202,11 +202,14 @@ git commit -m "feat(api): add project profile columns and ICP supersession"
 - Create: `services/api/buyeros_api/api/schemas.py`
 - Create: `services/api/buyeros_api/api/idempotency.py`
 - Modify: `services/api/buyeros_api/api/routes/projects.py`
+- Modify: `services/api/buyeros_api/db/contact.py`
+- Create: `services/api/alembic/versions/0010_widen_idempotency_key.py`
 - Modify: `services/api/tests/test_api_projects_db.py`
 - Modify: `services/api/tests/test_api_routes_contract.py`
 
 **Interfaces:**
 - Produces: `ProjectCreate`, `ProjectUpdate`, `ArchiveRequest` (strict Pydantic v2 models); `_project_data(project) -> dict` returning the full contract subset; `begin_idempotency`/`complete_idempotency` in `api/idempotency.py`.
+- Post-review fix (committed separately): the contract's `IdempotencyKey` allows 8..200 chars but `idempotency_records.key` was `VARCHAR(128)`, so a 129-200 char key would 500. Migration `0010_widen_idempotency_key` widens it to 200 and the model matches.
 - Consumes: `Project` (Task 1), `envelope`/`ApiError`, `get_principal`, `tenant_scoped`/`load_membership`/`permission_for_roles`, `IdempotencyRecord`, `request_fingerprint`/`same_request`/`IdempotencyConflict`.
 
 - [ ] **Step 1: Write the failing test** (the DB-backed authenticated pattern from `test_auth_routes_db.py`)
