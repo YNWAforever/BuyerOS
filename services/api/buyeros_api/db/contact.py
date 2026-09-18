@@ -93,7 +93,7 @@ class IdempotencyRecord(Base, TenantMixin):
 
     actor_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     operation_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    key: Mapped[str] = mapped_column(String(128), nullable=False)
+    key: Mapped[str] = mapped_column(String(200), nullable=False)
     request_hash: Mapped[str] = mapped_column(String(80), nullable=False)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="in_progress")
     resource_id: Mapped[str | None] = mapped_column(String(64), nullable=True)

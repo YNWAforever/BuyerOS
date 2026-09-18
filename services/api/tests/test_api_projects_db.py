@@ -205,6 +205,16 @@ def test_a_malformed_idempotency_key_is_rejected(api):
     assert response.json()["code"] == "INVALID_REQUEST"
 
 
+def test_a_full_length_idempotency_key_is_accepted_and_replays(api):
+    key = "k" * 200
+    assert len(key) == 200 and len(key) > 128  # contract's 8..200 bound, past the old VARCHAR(128)
+    first = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=CREATE, headers=_h(key=key))
+    assert first.status_code == 201, first.text
+    second = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=CREATE, headers=_h(key=key))
+    assert second.status_code == 201, second.text
+    assert second.json()["data"]["id"] == first.json()["data"]["id"]
+
+
 def test_unknown_keys_are_rejected(api):
     body = {**CREATE, "sender_identity": {"display_name": "x"}}
     response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=body, headers=_h())
