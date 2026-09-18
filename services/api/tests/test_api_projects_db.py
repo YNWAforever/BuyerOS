@@ -231,3 +231,102 @@ def test_a_viewer_cannot_create(api):
     response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=CREATE, headers=_h(subject=REVIEWER))
     # reviewer is deliberately not in createProject's x-permitted-roles (operator, workspace_admin)
     assert response.status_code == 403, response.text
+
+
+def _create(api, key="create-1"):
+    response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=CREATE, headers=_h(key=key))
+    assert response.status_code == 201, response.text
+    return response.json()["data"]["id"]
+
+
+def test_update_bumps_the_version_and_sets_the_etag(api):
+    project_id = _create(api)
+    response = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"offer": "Revised offer for process monitoring."},
+        headers=_h(key="update-01", **{"If-Match": '"1"'}),
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()["data"]
+    assert data["offer"].startswith("Revised")
+    assert data["version"] == 2
+    assert response.headers["ETag"] == '"2"'
+    assert data["name"] == CREATE["name"]  # untouched fields survive a partial update
+
+
+def test_a_repeated_update_key_and_body_replays_the_version(api):
+    project_id = _create(api)
+    body = {"offer": "Revised offer for process monitoring."}
+    first = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json=body, headers=_h(key="update-replay", **{"If-Match": '"1"'}),
+    )
+    assert first.status_code == 200, first.text
+    replay = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json=body, headers=_h(key="update-replay", **{"If-Match": '"1"'}),
+    )
+    assert replay.status_code == 200, replay.text
+    assert replay.json()["data"]["version"] == 2  # a replay, not a second bump
+    assert replay.json()["data"]["id"] == first.json()["data"]["id"]
+
+
+def test_a_stale_if_match_is_rejected(api):
+    project_id = _create(api)
+    api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"offer": "first"},
+        headers=_h(key="update-10", **{"If-Match": '"1"'}),
+    )
+    response = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"offer": "second"},
+        headers=_h(key="update-11", **{"If-Match": '"1"'}),
+    )
+    assert response.status_code == 412
+    assert response.json()["code"] == "STALE_REVISION"
+
+
+def test_missing_if_match_is_rejected(api):
+    project_id = _create(api)
+    response = api.patch(f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}", json={"offer": "x"}, headers=_h(key="update-12"))
+    assert response.status_code == 400
+
+
+def test_archive_requires_workspace_admin(api):
+    project_id = _create(api)
+    response = api.request(
+        "DELETE",
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"reason": "Pilot ended."},
+        headers=_h(key="archive-01", **{"If-Match": '"1"'}),
+    )
+    assert response.status_code == 403  # operator is not permitted to archive
+
+
+def test_archive_requires_the_contract_reason(api):
+    project_id = _create(api)
+    response = api.request(
+        "DELETE",
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        headers=_h(key="archive-02", **{"If-Match": '"1"'}),
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == "INVALID_REQUEST"
+
+
+def test_the_same_key_with_a_different_body_conflicts(api):
+    project_id = _create(api)
+    first = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"offer": "one"},
+        headers=_h(key="dup-0001", **{"If-Match": '"1"'}),
+    )
+    assert first.status_code == 200
+    second = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"offer": "two"},
+        headers=_h(key="dup-0001", **{"If-Match": '"2"'}),
+    )
+    assert second.status_code == 409
+    assert second.json()["code"] == "IDEMPOTENCY_CONFLICT"
