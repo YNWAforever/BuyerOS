@@ -367,4 +367,44 @@ await test('a stale write surfaces as a typed STALE_REVISION',async()=>{
   });
 });
 
+const profile=await loadModule('services/live/profile.ts');
+
+await test('markets resolve from names and codes, case-insensitively',()=>{
+  assert.deepEqual(profile.resolveMarkets('Germany, Netherlands/Belgium').codes,['DE','NL','BE']);
+  assert.deepEqual(profile.resolveMarkets('de, NL').codes,['DE','NL']);
+});
+
+await test('an unknown market is returned, never dropped',()=>{
+  const r=profile.resolveMarkets('Germany, Narnia');
+  assert.deepEqual(r.codes,['DE']);
+  assert.deepEqual(r.unknown,['Narnia']);
+});
+
+await test('languages resolve from names',()=>{
+  assert.deepEqual(profile.resolveLanguages('English, German, Dutch, French').codes,['en','de','nl','fr']);
+});
+
+await test('an unresolvable value makes the mapper raise, naming it',()=>{
+  const offer={company:'Acme',product:'Sensors',value:'Value',website:'',markets:'Narnia',language:'English',must:'x',nice:'',exclude:'',buyerTypes:['Distributor'],roles:''};
+  assert.throws(()=>profile.toProjectCreate(offer),e=>e instanceof profile.ProfileError&&e.message.includes('Narnia'));
+});
+
+await test('toProjectCreate maps the contract fields without inventing values',()=>{
+  const offer={company:'Acme GmbH',product:'Industrial sensors',value:'Sensing for automation.',website:'https://acme.example',markets:'Germany',language:'German',must:'Distributes sensors',nice:'',exclude:'',buyerTypes:['Distributor'],roles:'procurement manager'};
+  const p=profile.toProjectCreate(offer);
+  assert.equal(p.name,'Acme GmbH');
+  assert.equal(p.company_name,'Acme GmbH');
+  assert.deepEqual(p.markets,['DE']);
+  assert.deepEqual(p.language_preferences,['de']);
+  assert.ok(p.offer.includes('Sensing for automation.'));
+});
+
+await test('toIcpSaveRequest maps requirements with their categories',()=>{
+  const offer={company:'Acme',product:'Sensors',value:'V',website:'',markets:'Germany',language:'English',must:'A;B',nice:'C',exclude:'D',buyerTypes:['Distributor'],roles:'buyer',offer_facts:[]};
+  const r=profile.toIcpSaveRequest(offer);
+  assert.deepEqual(r.requirements.map(x=>x.category),['must','must','nice','exclude']);
+  assert.ok(r.requirements.every(x=>typeof x.id==='string'&&x.id.length>0));
+  assert.deepEqual(r.buyer_types,['Distributor']);
+});
+
 console.log(`${checks} live adapter checks passed`);
