@@ -49,6 +49,13 @@ standalone parsing). Four contract/spec violations were found and corrected in t
    the acceptance criteria is recorded in the spec, not silently dropped.
 3. **`archiveProject` reason not persisted.** It is validated per the contract but no column stores it this phase;
    `ICPSaveRequest` validation also keeps its current key-extraction.
+4. **Route-aware live availability.** The plan's literal gate (`availabilityFor(mode, 'discovery')`) is `unavailable`
+   in live mode, which would have made the live wizard unreachable, contradicting the task's own goal. The gate is
+   route-aware so the wizard/overview are available while lists/outreach/results/settings remain unavailable;
+   `services/live/mode.ts` and its P11 checks are unchanged.
+5. **No live workspace selection.** `SessionScope` starts with `workspace: null` and nothing selects one, so the live
+   write UI would request `/v1/workspaces/null/...`. Workspace selection is out of scope this phase; live mode stays
+   gated off under the waiver, and the panel fails closed rather than falling back to demo data.
 
 ## Sign-off (owner)
 

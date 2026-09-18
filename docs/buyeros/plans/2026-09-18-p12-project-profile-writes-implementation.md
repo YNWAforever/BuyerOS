@@ -1453,10 +1453,10 @@ export function LiveProfile({project, icpVersion, onApprove, busy, error}: {
 
 The live branch currently renders `LiveOverview` for the overview route and `LiveUnavailable` elsewhere. Extend it, keeping the demo branch byte-identical:
 
-- import `LiveOfferWizard` and `LiveProfile`, and hold the saved ids in `useState` (empty until a save or approve succeeds): `{projectId, icpVersionId, project}`.
-- when `mode === 'live'` and `isWizard`, render `LiveOfferWizard` with the existing `offer`/`OfferSet` and `t`; `onSaved` stores the returned ids and then routes to `/app` so the profile panel can show them.
-- when `mode === 'live'` and `isOverview`, render `LiveProfile` above `LiveOverview`. Fetch the selected project/versions through the same `client`/`session` (`GET /v1/workspaces/{workspace}/projects/{projectId}` and `/icp-versions`) in a `useEffect`; the approve action calls `approveProfile` and then re-fetches.
-- `liveAvailability === 'available'` still gates both; an unavailable section shows `LiveUnavailable`, never the wizard.
+- import `LiveOfferWizard` and `LiveProfilePanel` (the panel is a self-contained container that re-reads the session).
+- when `mode === 'live'` and `isWizard`, render `LiveOfferWizard` with the existing `offer`/`OfferSet` and `t`; its `save` selects the saved project with `session.next({project})` and routes to `/app` so the profile panel can load it.
+- when `mode === 'live'` and `isOverview`, render `LiveProfilePanel` above `LiveOverview`; the panel fetches `GET /v1/workspaces/{workspace}/projects/{project}` and its `/icp-versions` in a `useEffect` (with the same abort/staleness discipline as `LiveOverview`), and approve calls `approveProfile` then re-fetches.
+- **Recorded deviation from this plan's literal text:** P11's `availabilityFor(mode, 'discovery')` is `unavailable` in live mode, so gating the wizard on `availabilityFor(mode, 'discovery')` would make `LiveOfferWizard` dead code — contradicting this task's own goal. The implementer made the gate route-aware (`availabilityFor(mode, isOverview || isWizard ? 'overview' : 'discovery')`), so the wizard and overview are `available` while lists/outreach/results/settings stay `LiveUnavailable`. `services/live/mode.ts` and its P11 checks are unchanged.
 
 - [ ] **Step 3: Copy**
 
