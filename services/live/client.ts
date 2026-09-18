@@ -13,6 +13,9 @@ export interface LiveRequest {
   token?: string;
   scope: string;
   signal?: AbortSignal;
+  body?: unknown;
+  idempotencyKey?: string;
+  ifMatch?: string;
 }
 
 async function bodyOf(response: {json: () => Promise<unknown>}): Promise<Record<string, unknown>> {
@@ -32,26 +35,33 @@ async function bodyOf(response: {json: () => Promise<unknown>}): Promise<Record<
 export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '') {
   const root = baseUrl.replace(/\/$/, '');
   return {
-    async request<T>({path, method = 'GET', token, scope, signal}: LiveRequest): Promise<T> {
+    async request<T>({path, method = 'GET', token, scope, signal, body, idempotencyKey, ifMatch}: LiveRequest): Promise<T> {
       void scope;
       const headers: Record<string, string> = {Accept: 'application/json'};
       if (token) headers.Authorization = `Bearer ${token}`;
+      if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
+      if (ifMatch) headers['If-Match'] = ifMatch;
+      let payload: string | undefined;
+      if (body !== undefined) {
+        headers['Content-Type'] = 'application/json';
+        payload = JSON.stringify(body);
+      }
       let response: Awaited<ReturnType<typeof fetch>>;
       try {
-        response = await fetchImpl(`${root}${path}`, {method, headers, signal});
+        response = await fetchImpl(`${root}${path}`, {method, headers, signal, body: payload});
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') throw new LiveCancelled('cancelled');
         throw new LiveError('request failed', 'NETWORK_ERROR', 0, '', true);
       }
       if (!response.ok) {
-        const body = await bodyOf(response as unknown as {json: () => Promise<unknown>});
-        const code = typeof body.code === 'string' ? body.code : 'UNKNOWN_ERROR';
-        const message = typeof body.message === 'string' ? body.message : 'request failed';
-        const requestId = typeof body.request_id === 'string' ? body.request_id : '';
-        throw new LiveError(message, code, response.status, requestId, body.retryable === true);
+        const errorBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
+        const code = typeof errorBody.code === 'string' ? errorBody.code : 'UNKNOWN_ERROR';
+        const message = typeof errorBody.message === 'string' ? errorBody.message : 'request failed';
+        const requestId = typeof errorBody.request_id === 'string' ? errorBody.request_id : '';
+        throw new LiveError(message, code, response.status, requestId, errorBody.retryable === true);
       }
-      const body = await bodyOf(response as unknown as {json: () => Promise<unknown>});
-      return (body as {data?: T}).data as T;
+      const responseBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
+      return (responseBody as {data?: T}).data as T;
     },
   };
 }

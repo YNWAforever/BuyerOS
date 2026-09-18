@@ -339,4 +339,32 @@ await test('the banner label states the real mode and cannot be made to claim li
   assert.match(ws.modeBanner('live'),/^live mode\b/i);
 });
 
+await test('a write sends a JSON body and the mutation headers',async()=>{
+  const seen=[];
+  const client=live.createLiveClient(async(url,init)=>{seen.push(init);return {status:201,ok:true,json:async()=>({data:{id:'p-1'},request_id:'r',data_mode:'live'})};});
+  await client.request({path:'/v1/workspaces/w/projects',method:'POST',scope:'s1',token:'t',body:{name:'x'},idempotencyKey:'k1'});
+  assert.equal(seen[0].method,'POST');
+  assert.equal(seen[0].headers['Content-Type'],'application/json');
+  assert.equal(seen[0].headers['Idempotency-Key'],'k1');
+  assert.equal(seen[0].headers['If-Match'],undefined);
+  assert.deepEqual(JSON.parse(seen[0].body),{name:'x'});
+});
+
+await test('If-Match is sent only when supplied',async()=>{
+  const seen=[];
+  const client=live.createLiveClient(async(url,init)=>{seen.push(init);return {status:200,ok:true,json:async()=>({data:{},request_id:'r',data_mode:'live'})};});
+  await client.request({path:'/v1/x',method:'PATCH',scope:'s1',body:{a:1},ifMatch:'"2"',idempotencyKey:'k'});
+  assert.equal(seen[0].headers['If-Match'],'"2"');
+});
+
+await test('a stale write surfaces as a typed STALE_REVISION',async()=>{
+  const client=live.createLiveClient(errorResponder(412,{code:'STALE_REVISION',message:'stale',request_id:'r',retryable:false}));
+  await assert.rejects(()=>client.request({path:'/v1/x',method:'PATCH',scope:'s1',body:{},ifMatch:'"1"',idempotencyKey:'k'}),e=>{
+    assert.ok(e instanceof live.LiveError);
+    assert.equal(e.code,'STALE_REVISION');
+    assert.equal(e.status,412);
+    return true;
+  });
+});
+
 console.log(`${checks} live adapter checks passed`);
