@@ -4,6 +4,7 @@ import re
 from dataclasses import dataclass
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 _ETAG = re.compile(r'"[1-9][0-9]*"')
 
@@ -32,35 +33,49 @@ async def begin_idempotency(
     if not (8 <= len(key) <= 200):
         raise ApiError(400, "INVALID_REQUEST", "Idempotency-Key must be 8..200 characters")
     fingerprint = request_fingerprint(body)
-    existing = (
-        await session.execute(
-            select(IdempotencyRecord).where(
-                IdempotencyRecord.workspace_id == workspace_id,
-                IdempotencyRecord.actor_id == actor_id,
-                IdempotencyRecord.operation_id == operation_id,
-                IdempotencyRecord.key == key,
-            )
+
+    def _scope():
+        return select(IdempotencyRecord).where(
+            IdempotencyRecord.workspace_id == workspace_id,
+            IdempotencyRecord.actor_id == actor_id,
+            IdempotencyRecord.operation_id == operation_id,
+            IdempotencyRecord.key == key,
         )
-    ).scalar_one_or_none()
-    if existing is None:
-        record = IdempotencyRecord(
-            workspace_id=workspace_id,
-            actor_id=actor_id,
-            operation_id=operation_id,
-            key=key,
-            request_hash=fingerprint,
-            status="in_progress",
-        )
-        session.add(record)
-        await session.flush()
-        return IdempotencyOutcome(record, replay=False)
+
+    def _resolve(existing):
+        try:
+            same_request(existing.key, existing.request_hash, key, fingerprint, raise_on_conflict=True)
+        except IdempotencyConflict as exc:
+            raise ApiError(409, "IDEMPOTENCY_CONFLICT", str(exc)) from exc
+        if existing.status != "completed":
+            raise ApiError(409, "IDEMPOTENCY_CONFLICT", "request with this key is still in progress")
+        return IdempotencyOutcome(existing, replay=True)
+
+    existing = (await session.execute(_scope())).scalar_one_or_none()
+    if existing is not None:
+        return _resolve(existing)
+
+    record = IdempotencyRecord(
+        workspace_id=workspace_id,
+        actor_id=actor_id,
+        operation_id=operation_id,
+        key=key,
+        request_hash=fingerprint,
+        status="in_progress",
+    )
     try:
-        same_request(existing.key, existing.request_hash, key, fingerprint, raise_on_conflict=True)
-    except IdempotencyConflict as exc:
-        raise ApiError(409, "IDEMPOTENCY_CONFLICT", str(exc)) from exc
-    if existing.status != "completed":
-        raise ApiError(409, "IDEMPOTENCY_CONFLICT", "request with this key is still in progress")
-    return IdempotencyOutcome(existing, replay=True)
+        # A concurrent identical request may win the unique index first; the savepoint keeps the
+        # outer transaction usable so we can re-select the winner instead of surfacing a 500.
+        async with session.begin_nested():
+            session.add(record)
+            await session.flush()
+    except IntegrityError:
+        existing = (await session.execute(_scope())).scalar_one_or_none()
+        if existing is None:
+            # The winner's transaction has not committed yet, so its record is not visible.
+            raise ApiError(409, "IDEMPOTENCY_CONFLICT", "request with this key is already in progress")
+        return _resolve(existing)
+    return IdempotencyOutcome(record, replay=False)
 
 
 def complete_idempotency(outcome: IdempotencyOutcome, resource_id: str) -> None:

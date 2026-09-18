@@ -440,6 +440,169 @@ def test_approval_sets_the_active_profile_and_requires_a_reviewer(api):
     assert project["active_icp_version_id"] == version["id"]
 
 
+def _save_icp(api, project_id, *, key, requirements_text="Distributes sensors"):
+    saved = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}/icp-versions",
+        json={"requirements": [{"id": "r1", "text": requirements_text, "category": "must", "hard_exclusion": False}],
+              "markets": ["DE"], "buyer_types": ["Distributor"], "languages": ["en"], "offer_facts": []},
+        headers=_h(key=key),
+    )
+    assert saved.status_code == 201, saved.text
+    return saved.json()["data"]
+
+
+def _approve_icp(api, version, *, key, subject=REVIEWER):
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/icp-versions/{version['id']}/approve",
+        json={"content_hash": version["content_hash"], "confirmation": True},
+        headers=_h(subject=subject, key=key, **{"If-Match": f'"{version["number"]}"'}),
+    )
+    assert response.status_code == 200, response.text
+    return response.json()["data"]
+
+
+def test_concurrent_same_key_inserts_do_not_surface_a_500(api):
+    """Two sessions race the same scoped idempotency key: the loser replays or gets a 409,
+    never an unhandled unique-constraint error."""
+    from buyeros_api.api.deps import get_engine
+    from buyeros_api.api.errors import ApiError
+    from buyeros_api.api.idempotency import begin_idempotency
+    from buyeros_api.db.session import tenant_session
+
+    workspace_id = uuid.UUID(WORKSPACE_A)
+    actor_id = uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)
+    key = "race-" + uuid.uuid4().hex
+    body = {"name": "race"}
+
+    async def scenario():
+        engine = get_engine()
+        a_ready = asyncio.Event()
+        b_started = asyncio.Event()
+        out: dict = {}
+
+        async def session_a():
+            async with tenant_session(engine, workspace_id) as session:
+                await begin_idempotency(
+                    session, workspace_id=workspace_id, actor_id=actor_id,
+                    operation_id="createProject", key=key, body=body,
+                )
+                a_ready.set()
+                await b_started.wait()
+                # Let the peer reach its conflicting INSERT while this row is uncommitted.
+                await asyncio.sleep(0.5)
+            # Exiting commits, releasing the unique-index lock the peer blocks on.
+
+        async def session_b():
+            await a_ready.wait()
+            async with tenant_session(engine, workspace_id) as session:
+                b_started.set()
+                try:
+                    out["outcome"] = await begin_idempotency(
+                        session, workspace_id=workspace_id, actor_id=actor_id,
+                        operation_id="createProject", key=key, body=body,
+                    )
+                except ApiError as exc:
+                    out["error"] = exc
+
+        await asyncio.gather(session_a(), session_b())
+        return out
+
+    result = asyncio.run(scenario())
+    outcome = result.get("outcome")
+    if outcome is not None:
+        assert outcome.replay is True
+    else:
+        error = result["error"]
+        assert error.status_code == 409
+        assert error.code == "IDEMPOTENCY_CONFLICT"
+
+
+def test_approving_a_new_version_supersedes_the_previous_active_one(api):
+    project_id = _create(api, key="supersede-create")
+    v1 = _save_icp(api, project_id, key="supersede-v1")
+    approved_v1 = _approve_icp(api, v1, key="supersede-ap1")
+    v2 = _save_icp(api, project_id, key="supersede-v2", requirements_text="Revised requirement")
+    _approve_icp(api, v2, key="supersede-ap2")
+
+    project = api.get(f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}", headers=_h()).json()["data"]
+    assert project["active_icp_version_id"] == v2["id"]
+
+    versions = api.get(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}/icp-versions", headers=_h()
+    ).json()["data"]["items"]
+    by_id = {v["id"]: v for v in versions}
+    assert by_id[v1["id"]]["status"] == "superseded"
+    assert by_id[v1["id"]]["approved_at"] == approved_v1["approved_at"]
+    assert by_id[v2["id"]]["status"] == "approved"
+    assert sum(v["status"] == "approved" for v in versions) == 1
+
+
+def test_a_material_change_retains_prior_approval_and_a_later_save_stays_retrievable(api):
+    project_id = _create(api, key="material-create")
+    v1 = _save_icp(api, project_id, key="material-v1")
+    approved_v1 = _approve_icp(api, v1, key="material-ap1")
+    api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"offer": "A materially different offer."},
+        headers=_h(key="material-update", **{"If-Match": '"1"'}),
+    )
+    project = api.get(f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}", headers=_h()).json()["data"]
+    assert project["active_icp_version_id"] is None
+
+    v2 = _save_icp(api, project_id, key="material-v2", requirements_text="A new requirement")
+    versions = api.get(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}/icp-versions", headers=_h()
+    ).json()["data"]["items"]
+    by_id = {v["id"]: v for v in versions}
+    assert by_id[v1["id"]]["status"] == "superseded"
+    assert by_id[v1["id"]]["approved_at"] == approved_v1["approved_at"]
+    assert by_id[v2["id"]]["status"] == "saved"
+
+
+def test_approving_a_foreign_workspace_version_is_a_non_enumerating_404(api, seeded):
+    foreign_version = str(uuid.uuid4())
+    project_b = "b0000000-0000-4000-8000-000000000002"
+    with psycopg.connect(seeded, autocommit=True) as conn:
+        conn.execute(
+            "INSERT INTO icp_versions(id, workspace_id, project_id, number, content, content_hash) "
+            "VALUES (%s, %s, %s, 1, '{}'::jsonb, 'sha256:foreign')",
+            (foreign_version, "22222222-2222-4222-8222-222222222222", project_b),
+        )
+    try:
+        response = api.post(
+            f"/v1/workspaces/{WORKSPACE_A}/icp-versions/{foreign_version}/approve",
+            json={"content_hash": "sha256:foreign", "confirmation": True},
+            headers=_h(subject=REVIEWER, key="foreign-approve", **{"If-Match": '"1"'}),
+        )
+        assert response.status_code == 404, response.text
+        assert response.json()["code"] == "NOT_FOUND"
+        assert "data" not in response.json()
+        assert foreign_version not in response.text
+    finally:
+        with psycopg.connect(seeded, autocommit=True) as conn:
+            conn.execute("DELETE FROM icp_versions WHERE id = %s", (foreign_version,))
+
+
+def test_a_foreign_project_cannot_be_updated_or_archived(api):
+    foreign = "b0000000-0000-4000-8000-000000000002"
+    patched = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{foreign}",
+        json={"offer": "x"},
+        headers=_h(key="foreign-patch", **{"If-Match": '"1"'}),
+    )
+    assert patched.status_code == 404, patched.text
+    assert patched.json()["code"] == "NOT_FOUND"
+
+    archived = api.request(
+        "DELETE",
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{foreign}",
+        json={"reason": "Pilot ended."},
+        headers=_h(subject=ADMIN, key="foreign-delete", **{"If-Match": '"1"'}),
+    )
+    assert archived.status_code == 404, archived.text
+    assert archived.json()["code"] == "NOT_FOUND"
+
+
 def test_a_material_change_supersedes_and_reopens_the_profile(api):
     project_id = _create(api)
     saved = api.post(

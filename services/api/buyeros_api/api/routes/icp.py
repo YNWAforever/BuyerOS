@@ -163,6 +163,14 @@ async def approve_icp_version(
         ).scalar_one_or_none()
         if project is None:
             raise ApiError(404, "NOT_FOUND", "project not found")
+        prior_id = project.active_icp_version_id
         project.active_icp_version_id = row.id
+        if prior_id is not None and prior_id != row.id:
+            # One immutable active version: approving a new version supersedes the prior active one.
+            await session.execute(
+                IcpVersion.__table__.update()
+                .where(IcpVersion.workspace_id == workspace_id, IcpVersion.id == prior_id)
+                .values(superseded_at=datetime.now(timezone.utc))
+            )
         data = _icp_data(row)
     return envelope(data, request.state.request_id)
