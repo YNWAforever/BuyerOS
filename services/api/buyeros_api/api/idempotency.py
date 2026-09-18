@@ -1,8 +1,11 @@
 """Project-mutation idempotency, reusing the P4 record and the P5 conflict rule."""
 
+import re
 from dataclasses import dataclass
 
 from sqlalchemy import select
+
+_ETAG = re.compile(r'"[1-9][0-9]*"')
 
 
 @dataclass
@@ -72,12 +75,6 @@ def if_match_version(if_match: str | None) -> int:
 
     if not if_match:
         raise ApiError(400, "INVALID_REQUEST", "If-Match header is required")
-    if len(if_match) < 2 or not if_match.startswith('"') or not if_match.endswith('"'):
+    if _ETAG.fullmatch(if_match) is None:
         raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"')
-    try:
-        version = int(if_match[1:-1])
-    except ValueError as exc:
-        raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"') from exc
-    if version < 1:
-        raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"')
-    return version
+    return int(if_match[1:-1])

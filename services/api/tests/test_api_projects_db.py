@@ -116,6 +116,7 @@ def test_0009_downgrade_then_upgrade_backfills_existing_rows(migrated):
 WORKSPACE_A = "11111111-1111-4111-8111-111111111111"
 OPERATOR = "auth0|operator-a"
 REVIEWER = "auth0|reviewer-a"
+ADMIN = "auth0|admin-a"
 CREATE = {
     "name": "Sensors Europe",
     "company_name": "HarbourSense Instruments",
@@ -127,7 +128,7 @@ CREATE = {
 
 @pytest.fixture
 def api(seeded, monkeypatch):
-    """An authenticated client on the runtime role with operator and reviewer members."""
+    """An authenticated client on the runtime role with operator, reviewer and admin members."""
     monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(seeded))
     monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
     monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
@@ -138,7 +139,7 @@ def api(seeded, monkeypatch):
     monkeypatch.setattr(auth, "_verifier_from_settings", lambda: TokenVerifier(cache, issuer=fx.ISSUER, audience=fx.AUDIENCE))
 
     owner = psycopg.connect(seeded, autocommit=True)
-    for subject, roles in ((OPERATOR, ["operator"]), (REVIEWER, ["reviewer"])):
+    for subject, roles in ((OPERATOR, ["operator"]), (REVIEWER, ["reviewer"]), (ADMIN, ["workspace_admin"])):
         user_id = uuid.uuid5(uuid.NAMESPACE_URL, subject)
         owner.execute("DELETE FROM memberships WHERE user_id = %s", (user_id,))
         owner.execute("DELETE FROM users WHERE id = %s", (user_id,))
@@ -153,7 +154,7 @@ def api(seeded, monkeypatch):
     finally:
         get_settings.cache_clear()
         owner = psycopg.connect(seeded, autocommit=True)
-        for subject in (OPERATOR, REVIEWER):
+        for subject in (OPERATOR, REVIEWER, ADMIN):
             user_id = uuid.uuid5(uuid.NAMESPACE_URL, subject)
             owner.execute("DELETE FROM memberships WHERE user_id = %s", (user_id,))
             owner.execute("DELETE FROM users WHERE id = %s", (user_id,))
@@ -293,6 +294,38 @@ def test_missing_if_match_is_rejected(api):
     assert response.status_code == 400
 
 
+def test_a_malformed_if_match_is_rejected(api):
+    project_id = _create(api)
+    response = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"offer": "x"},
+        headers=_h(key="update-13", **{"If-Match": '"01"'}),
+    )
+    assert response.status_code == 400
+    assert response.json()["code"] == "INVALID_REQUEST"
+
+
+def test_an_explicit_null_is_rejected_on_update(api):
+    project_id = _create(api)
+    response = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"name": None},
+        headers=_h(key="update-null-1", **{"If-Match": '"1"'}),
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == "INVALID_REQUEST"
+
+
+def test_an_explicit_null_is_rejected_on_create(api):
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects",
+        json={**CREATE, "website": None},
+        headers=_h(key="create-null-1"),
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == "INVALID_REQUEST"
+
+
 def test_archive_requires_workspace_admin(api):
     project_id = _create(api)
     response = api.request(
@@ -313,6 +346,52 @@ def test_archive_requires_the_contract_reason(api):
     )
     assert response.status_code == 422
     assert response.json()["code"] == "INVALID_REQUEST"
+
+
+def test_workspace_admin_archives_a_project(api):
+    project_id = _create(api)
+    response = api.request(
+        "DELETE",
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"reason": "Pilot ended."},
+        headers=_h(subject=ADMIN, key="archive-ok", **{"If-Match": '"1"'}),
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()["data"]
+    assert data["status"] == "archived"
+    assert data["version"] == 2
+    assert response.headers["ETag"] == '"2"'
+
+
+def test_a_repeated_archive_key_and_body_replays(api):
+    project_id = _create(api)
+    body = {"reason": "Pilot ended."}
+    headers = _h(subject=ADMIN, key="archive-replay", **{"If-Match": '"1"'})
+    first = api.request("DELETE", f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}", json=body, headers=headers)
+    assert first.status_code == 200, first.text
+    replay = api.request("DELETE", f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}", json=body, headers=headers)
+    assert replay.status_code == 200, replay.text
+    assert replay.json()["data"]["version"] == 2
+    assert replay.json()["data"]["id"] == first.json()["data"]["id"]
+
+
+def test_a_stale_archive_if_match_is_rejected(api):
+    project_id = _create(api)
+    first = api.request(
+        "DELETE",
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"reason": "Pilot ended."},
+        headers=_h(subject=ADMIN, key="archive-stale-1", **{"If-Match": '"1"'}),
+    )
+    assert first.status_code == 200, first.text
+    response = api.request(
+        "DELETE",
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+        json={"reason": "Pilot ended."},
+        headers=_h(subject=ADMIN, key="archive-stale-2", **{"If-Match": '"1"'}),
+    )
+    assert response.status_code == 412
+    assert response.json()["code"] == "STALE_REVISION"
 
 
 def test_the_same_key_with_a_different_body_conflicts(api):

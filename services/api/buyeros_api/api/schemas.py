@@ -2,7 +2,7 @@
 
 from urllib.parse import urlparse
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class _Strict(BaseModel):
@@ -40,6 +40,14 @@ class _ProjectFields(_Strict):
     def _uri_website(cls, value: str | None) -> str | None:
         return _check_website(value)
 
+    @model_validator(mode="after")
+    def _reject_explicit_nulls(self) -> "_ProjectFields":
+        """The contract types every project field non-nullable; `null` is not an omitted field."""
+        for name in self.model_fields_set:
+            if getattr(self, name) is None:
+                raise ValueError(f"{name} must not be null")
+        return self
+
 
 class ProjectCreate(_ProjectFields):
     pass
@@ -67,6 +75,14 @@ class ProjectUpdate(_Strict):
     @classmethod
     def _uri_website(cls, value: str | None) -> str | None:
         return _check_website(value)
+
+    @model_validator(mode="after")
+    def _reject_explicit_nulls(self) -> "ProjectUpdate":
+        """A partial update may omit fields, but an explicit `null` is not a value the DB accepts."""
+        for name in self.model_fields_set:
+            if getattr(self, name) is None:
+                raise ValueError(f"{name} must not be null")
+        return self
 
 
 class ArchiveRequest(_Strict):
