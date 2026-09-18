@@ -42,12 +42,14 @@
 
 **Files:**
 - Modify: `services/api/buyeros_api/db/icp.py`
+- Modify: `services/api/tests/conftest.py`
 - Create: `services/api/alembic/versions/0009_project_profile_columns.py`
 - Create: `services/api/tests/test_api_projects_db.py`
 
 **Interfaces:**
 - Produces: `Project.company_name`, `Project.offer`, `Project.website`, `Project.markets`, `Project.language_preferences`, `Project.version`, `Project.active_icp_version_id`; `IcpVersion.superseded_at`.
 - Consumes: `Base`, `TenantMixin`.
+- Note: `tests/conftest.py`'s `seeded` fixture must supply the new NOT NULL columns, because the migration drops the backfill defaults; without it every `seeded` consumer errors. The test module also proves the migration's downgrade/backfill round-trip and that the server defaults are dropped.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -188,7 +190,7 @@ Expected: PASS (3 passed) with Docker available; otherwise report the skips as N
 - [ ] **Step 5: Commit**
 
 ```bash
-git add services/api/alembic/versions/0009_project_profile_columns.py services/api/buyeros_api/db/icp.py services/api/tests/test_api_projects_db.py
+git add services/api/alembic/versions/0009_project_profile_columns.py services/api/buyeros_api/db/icp.py services/api/tests/conftest.py services/api/tests/test_api_projects_db.py
 git commit -m "feat(api): add project profile columns and ICP supersession"
 ```
 
