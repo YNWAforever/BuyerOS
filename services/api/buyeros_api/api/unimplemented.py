@@ -15,7 +15,6 @@ from .errors import ApiError
 
 UNIMPLEMENTED_OPERATIONS: dict[str, tuple[str, str]] = {
     "approveDraft": ("post", "/v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals"),
-    "archiveProject": ("delete", "/v1/workspaces/{workspace_id}/projects/{project_id}"),
     "cancelEnrichmentJob": ("post", "/v1/workspaces/{workspace_id}/enrichment-jobs/{job_id}/cancel"),
     "cancelLookupQuote": ("post", "/v1/workspaces/{workspace_id}/enrichment-quotes/{quote_id}/cancel"),
     "cancelRun": ("post", "/v1/workspaces/{workspace_id}/runs/{run_id}/cancel"),
@@ -70,7 +69,6 @@ UNIMPLEMENTED_OPERATIONS: dict[str, tuple[str, str]] = {
     "updateBudget": ("patch", "/v1/workspaces/{workspace_id}/budgets/{budget_id}"),
     "updateBuyer": ("patch", "/v1/workspaces/{workspace_id}/buyers/{buyer_id}"),
     "updatePreferences": ("patch", "/v1/workspaces/{workspace_id}/preferences"),
-    "updateProject": ("patch", "/v1/workspaces/{workspace_id}/projects/{project_id}"),
     "uploadOfferDocument": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/offer-documents"),
 }
 

@@ -339,4 +339,109 @@ await test('the banner label states the real mode and cannot be made to claim li
   assert.match(ws.modeBanner('live'),/^live mode\b/i);
 });
 
+await test('a write sends a JSON body and the mutation headers',async()=>{
+  const seen=[];
+  const client=live.createLiveClient(async(url,init)=>{seen.push(init);return {status:201,ok:true,json:async()=>({data:{id:'p-1'},request_id:'r',data_mode:'live'})};});
+  await client.request({path:'/v1/workspaces/w/projects',method:'POST',scope:'s1',token:'t',body:{name:'x'},idempotencyKey:'k1'});
+  assert.equal(seen[0].method,'POST');
+  assert.equal(seen[0].headers['Content-Type'],'application/json');
+  assert.equal(seen[0].headers['Idempotency-Key'],'k1');
+  assert.equal(seen[0].headers['If-Match'],undefined);
+  assert.deepEqual(JSON.parse(seen[0].body),{name:'x'});
+});
+
+await test('If-Match is sent only when supplied',async()=>{
+  const seen=[];
+  const client=live.createLiveClient(async(url,init)=>{seen.push(init);return {status:200,ok:true,json:async()=>({data:{},request_id:'r',data_mode:'live'})};});
+  await client.request({path:'/v1/x',method:'PATCH',scope:'s1',body:{a:1},ifMatch:'"2"',idempotencyKey:'k'});
+  assert.equal(seen[0].headers['If-Match'],'"2"');
+});
+
+await test('a stale write surfaces as a typed STALE_REVISION',async()=>{
+  const client=live.createLiveClient(errorResponder(412,{code:'STALE_REVISION',message:'stale',request_id:'r',retryable:false}));
+  await assert.rejects(()=>client.request({path:'/v1/x',method:'PATCH',scope:'s1',body:{},ifMatch:'"1"',idempotencyKey:'k'}),e=>{
+    assert.ok(e instanceof live.LiveError);
+    assert.equal(e.code,'STALE_REVISION');
+    assert.equal(e.status,412);
+    return true;
+  });
+});
+
+const profile=await loadModule('services/live/profile.ts');
+
+await test('markets resolve from names and codes, case-insensitively',()=>{
+  assert.deepEqual(profile.resolveMarkets('Germany, Netherlands/Belgium').codes,['DE','NL','BE']);
+  assert.deepEqual(profile.resolveMarkets('de, NL').codes,['DE','NL']);
+});
+
+await test('an unknown market is returned, never dropped',()=>{
+  const r=profile.resolveMarkets('Germany, Narnia');
+  assert.deepEqual(r.codes,['DE']);
+  assert.deepEqual(r.unknown,['Narnia']);
+});
+
+await test('languages resolve from names',()=>{
+  assert.deepEqual(profile.resolveLanguages('English, German, Dutch, French').codes,['en','de','nl','fr']);
+});
+
+await test('an unresolvable value makes the mapper raise, naming it',()=>{
+  const offer={company:'Acme',product:'Sensors',value:'Value',website:'',markets:'Narnia',language:'English',must:'x',nice:'',exclude:'',buyerTypes:['Distributor'],roles:''};
+  assert.throws(()=>profile.toProjectCreate(offer),e=>e instanceof profile.ProfileError&&e.message.includes('Narnia'));
+});
+
+await test('toProjectCreate maps the contract fields without inventing values',()=>{
+  const offer={company:'Acme GmbH',product:'Industrial sensors',value:'Sensing for automation.',website:'https://acme.example',markets:'Germany',language:'German',must:'Distributes sensors',nice:'',exclude:'',buyerTypes:['Distributor'],roles:'procurement manager'};
+  const p=profile.toProjectCreate(offer);
+  assert.equal(p.name,'Acme GmbH');
+  assert.equal(p.company_name,'Acme GmbH');
+  assert.deepEqual(p.markets,['DE']);
+  assert.deepEqual(p.language_preferences,['de']);
+  assert.ok(p.offer.includes('Sensing for automation.'));
+});
+
+await test('toIcpSaveRequest maps requirements with their categories',()=>{
+  const offer={company:'Acme',product:'Sensors',value:'V',website:'',markets:'Germany',language:'English',must:'A;B',nice:'C',exclude:'D',buyerTypes:['Distributor'],roles:'buyer',offer_facts:[]};
+  const r=profile.toIcpSaveRequest(offer);
+  assert.deepEqual(r.requirements.map(x=>x.category),['must','must','nice','exclude']);
+  assert.ok(r.requirements.every(x=>typeof x.id==='string'&&x.id.length>0));
+  assert.deepEqual(r.buyer_types,['Distributor']);
+});
+
+const writes=await loadModule('services/live/writes.ts');
+
+function liveSession(project=null){return {current:()=>({mode:'live',actor:'a',workspace:'w',project}),token:()=>'tok',identity:()=>'live:a:w:'+(project||'-')};}
+
+await test('saveProfile creates the project then saves a version, in order',async()=>{
+  const calls=[];
+  const client={request:async({path,method,idempotencyKey,ifMatch,token})=>{
+    calls.push({path,method,idempotencyKey,ifMatch,token});
+    if(method==='POST'&&path.endsWith('/projects'))return {id:'p1',version:1,active_icp_version_id:null};
+    return {id:'i1',number:1,content_hash:'sha256:x'};
+  }};
+  const offer={company:'Acme',product:'S',value:'V',website:'',markets:'Germany',language:'English',must:'m',nice:'',exclude:'',buyerTypes:['Distributor'],roles:''};
+  const out=await writes.saveProfile({client,session:liveSession(),offer,idempotencyKey:'k0000001'});
+  assert.deepEqual(calls.map(c=>c.method),['POST','POST']);
+  assert.ok(calls[1].path.endsWith('/projects/p1/icp-versions'));
+  assert.equal(calls[0].token,'tok');// the session token reaches the client
+  assert.equal(out.project.id,'p1');
+  assert.equal(out.icpVersion.id,'i1');
+});
+
+await test('saveProfile selects an already-selected project instead of creating one',async()=>{
+  const calls=[];
+  const client={request:async({path,method})=>{calls.push({path,method});return {id:'i2',number:2,content_hash:'sha256:y'};}};
+  await writes.saveProfile({client,session:liveSession('p9'),offer:{company:'Acme',product:'S',value:'V',markets:'Germany',language:'English',must:'m',buyerTypes:['Distributor']},idempotencyKey:'k0000002'});
+  assert.deepEqual(calls.map(c=>c.method),['POST']);
+  assert.ok(calls[0].path.endsWith('/projects/p9/icp-versions'));
+});
+
+await test('approveProfile sends the version number as If-Match and the hash',async()=>{
+  let seen;
+  const client={request:async(args)=>{seen=args;return {id:'i1',status:'approved'};}};
+  await writes.approveProfile({client,session:liveSession('p'),project:{id:'p'},icpVersion:{id:'i1',number:3,content_hash:'sha256:z'},idempotencyKey:'k0000003'});
+  assert.equal(seen.path,'/v1/workspaces/w/icp-versions/i1/approve');
+  assert.equal(seen.ifMatch,'"3"');
+  assert.deepEqual(seen.body,{content_hash:'sha256:z',confirmation:true});
+});
+
 console.log(`${checks} live adapter checks passed`);

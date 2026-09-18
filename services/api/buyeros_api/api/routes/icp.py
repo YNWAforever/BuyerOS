@@ -21,7 +21,7 @@ def _icp_data(row) -> dict:
         "project_id": str(row.project_id),
         "number": row.number,
         "content_hash": row.content_hash,
-        "status": "approved" if row.approved_at else "saved",
+        "status": "superseded" if row.superseded_at else ("approved" if row.approved_at else "saved"),
         "approved_at": row.approved_at.isoformat() if row.approved_at else None,
         "approved_by": str(row.approved_by) if row.approved_by else None,
         "requirements": content.get("requirements", []),
@@ -118,23 +118,15 @@ async def approve_icp_version(
 
     from sqlalchemy import select
 
-    from ...db.icp import IcpVersion
+    from ...db.icp import IcpVersion, Project
     from ...services.icp_service import StaleRevision, verify_approval_hash
     from ..deps import load_membership, permission_for_roles, tenant_scoped
+    from ..idempotency import if_match_version
 
     if not idempotency_key:
         raise ApiError(400, "INVALID_REQUEST", "Idempotency-Key header is required")
     # Contract `IfMatch`: strong version ETag ("4"); missing is 400, stale is 412.
-    if not if_match:
-        raise ApiError(400, "INVALID_REQUEST", "If-Match header is required")
-    if len(if_match) < 2 or not if_match.startswith('"') or not if_match.endswith('"'):
-        raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"')
-    try:
-        expected_version = int(if_match[1:-1])
-    except ValueError as exc:
-        raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"') from exc
-    if expected_version < 1:
-        raise ApiError(400, "INVALID_REQUEST", 'If-Match must be a strong ETag like "4"')
+    expected_version = if_match_version(if_match)
 
     body = await request.json()
     if body.get("confirmation") is not True:
@@ -164,5 +156,21 @@ async def approve_icp_version(
             return envelope(_icp_data(row), request.state.request_id)
         row.approved_at = datetime.now(timezone.utc)
         row.approved_by = membership["user_id"]
+        project = (
+            await session.execute(
+                select(Project).where(Project.workspace_id == workspace_id, Project.id == row.project_id).with_for_update()
+            )
+        ).scalar_one_or_none()
+        if project is None:
+            raise ApiError(404, "NOT_FOUND", "project not found")
+        prior_id = project.active_icp_version_id
+        project.active_icp_version_id = row.id
+        if prior_id is not None and prior_id != row.id:
+            # One immutable active version: approving a new version supersedes the prior active one.
+            await session.execute(
+                IcpVersion.__table__.update()
+                .where(IcpVersion.workspace_id == workspace_id, IcpVersion.id == prior_id)
+                .values(superseded_at=datetime.now(timezone.utc))
+            )
         data = _icp_data(row)
     return envelope(data, request.state.request_id)

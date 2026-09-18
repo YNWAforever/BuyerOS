@@ -53,6 +53,8 @@ def test_registry_covers_every_unimplemented_contract_operation():
         "listProjects",
         "createProject",
         "getProject",
+        "updateProject",
+        "archiveProject",
         "listICPVersions",
         "saveICPVersion",
         "approveICPVersion",
