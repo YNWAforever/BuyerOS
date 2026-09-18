@@ -113,9 +113,12 @@ def seeded(migrated):
             ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"),
         )
         conn.execute(
-            "INSERT INTO projects(id, workspace_id, name) VALUES "
-            "('a0000000-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'ProjectA'),"
-            "('b0000000-0000-4000-8000-000000000002', '22222222-2222-4222-8222-222222222222', 'ProjectB')"
+            "INSERT INTO projects"
+            "(id, workspace_id, name, company_name, offer, markets, language_preferences, version) VALUES "
+            "('a0000000-0000-4000-8000-000000000001', '11111111-1111-4111-8111-111111111111', 'ProjectA', "
+            "'ProjectA Co', 'Seeded offer A', '{US}', '{en}', 1),"
+            "('b0000000-0000-4000-8000-000000000002', '22222222-2222-4222-8222-222222222222', 'ProjectB', "
+            "'ProjectB Co', 'Seeded offer B', '{US}', '{en}', 1)"
         )
         conn.execute(f"ALTER ROLE {API_ROLE} LOGIN PASSWORD '{API_ROLE_PASSWORD}'")
         conn.execute(f"GRANT USAGE ON SCHEMA public TO {API_ROLE}")
