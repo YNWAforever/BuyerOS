@@ -118,7 +118,13 @@ def test_viewer_cannot_mutate(auth_env):
     response = client.post(
         f"/v1/workspaces/{WORKSPACE_A}/projects",
         headers={**_headers(VIEWER), "Idempotency-Key": "k-1"},
-        json={"name": "Nope"},
+        json={
+            "name": "Nope",
+            "company_name": "Nope Co",
+            "offer": "None",
+            "markets": ["US"],
+            "language_preferences": ["en"],
+        },
     )
     assert response.status_code == 403
     assert response.json()["code"] == "PERMISSION_DENIED"

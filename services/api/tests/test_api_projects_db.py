@@ -1,9 +1,17 @@
 """BO-007: the project/profile columns exist and the migration round-trips."""
+import asyncio
 import uuid
 
 import psycopg
+import pytest
+from fastapi.testclient import TestClient
 
-from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
+from buyeros_api.api import auth
+from buyeros_api.api.app import create_app
+from buyeros_api.api.jwks import JwksKeyCache
+from buyeros_api.api.verifier import TokenVerifier
+from tests import auth_fixtures as fx
+from tests.conftest import ALEMBIC_INI, SERVICE_ROOT, runtime_role_dsn
 
 PROJECT_COLUMNS = {"company_name", "offer", "website", "markets", "language_preferences", "version", "active_icp_version_id"}
 BACKFILLED_COLUMNS = ("company_name", "offer", "markets", "language_preferences", "version")
@@ -103,3 +111,113 @@ def test_0009_downgrade_then_upgrade_backfills_existing_rows(migrated):
                 )
             conn.execute("DELETE FROM projects WHERE id = %s", (project_id,))
             conn.execute("DELETE FROM workspaces WHERE id = %s", (workspace_id,))
+
+
+WORKSPACE_A = "11111111-1111-4111-8111-111111111111"
+OPERATOR = "auth0|operator-a"
+REVIEWER = "auth0|reviewer-a"
+CREATE = {
+    "name": "Sensors Europe",
+    "company_name": "HarbourSense Instruments",
+    "offer": "Industrial sensing for process monitoring.",
+    "markets": ["DE", "NL"],
+    "language_preferences": ["en", "de"],
+}
+
+
+@pytest.fixture
+def api(seeded, monkeypatch):
+    """An authenticated client on the runtime role with operator and reviewer members."""
+    monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(seeded))
+    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
+    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
+    from buyeros_api.settings import get_settings
+
+    get_settings.cache_clear()
+    cache = JwksKeyCache(lambda: asyncio.sleep(0, result=fx.jwks_document()), cache_seconds=300)
+    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: TokenVerifier(cache, issuer=fx.ISSUER, audience=fx.AUDIENCE))
+
+    owner = psycopg.connect(seeded, autocommit=True)
+    for subject, roles in ((OPERATOR, ["operator"]), (REVIEWER, ["reviewer"])):
+        user_id = uuid.uuid5(uuid.NAMESPACE_URL, subject)
+        owner.execute("DELETE FROM memberships WHERE user_id = %s", (user_id,))
+        owner.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        owner.execute("INSERT INTO users(id, issuer, subject) VALUES (%s, %s, %s)", (user_id, fx.ISSUER, subject))
+        owner.execute(
+            "INSERT INTO memberships(id, workspace_id, user_id, roles, active) VALUES (%s, %s, %s, %s, true)",
+            (uuid.uuid4(), WORKSPACE_A, user_id, roles),
+        )
+    owner.close()
+    try:
+        yield TestClient(create_app(), raise_server_exceptions=False)
+    finally:
+        get_settings.cache_clear()
+        owner = psycopg.connect(seeded, autocommit=True)
+        for subject in (OPERATOR, REVIEWER):
+            user_id = uuid.uuid5(uuid.NAMESPACE_URL, subject)
+            owner.execute("DELETE FROM memberships WHERE user_id = %s", (user_id,))
+            owner.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        owner.execute("DELETE FROM idempotency_records WHERE workspace_id = %s", (WORKSPACE_A,))
+        owner.execute("DELETE FROM icp_versions WHERE workspace_id = %s", (WORKSPACE_A,))
+        owner.execute("DELETE FROM projects WHERE workspace_id = %s", (WORKSPACE_A,))
+        owner.close()
+
+
+def _h(subject=OPERATOR, key="create-01", **extra):
+    headers = {"Authorization": f"Bearer {fx.make_token(sub=subject)}", "Idempotency-Key": key}
+    headers.update(extra)
+    return headers
+
+
+def test_create_project_persists_the_full_payload(api):
+    response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=CREATE, headers=_h())
+    assert response.status_code == 201, response.text
+    data = response.json()["data"]
+    assert data["company_name"] == CREATE["company_name"]
+    assert data["markets"] == ["DE", "NL"]
+    assert data["version"] == 1
+    assert response.headers["ETag"] == '"1"'
+
+
+def test_the_same_create_key_and_body_replays_instead_of_duplicating(api):
+    first = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=CREATE, headers=_h(key="create-replay"))
+    assert first.status_code == 201, first.text
+    second = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=CREATE, headers=_h(key="create-replay"))
+    assert second.status_code == 201, second.text
+    assert second.json()["data"]["id"] == first.json()["data"]["id"]
+    listed = api.get(f"/v1/workspaces/{WORKSPACE_A}/projects", headers=_h(key="list-0001")).json()["data"]["items"]
+    # `seeded` also leaves ProjectA in this workspace; assert the replay created no *second* copy.
+    created_id = first.json()["data"]["id"]
+    assert sum(item["id"] == created_id for item in listed) == 1
+
+
+def test_the_same_create_key_with_a_different_body_conflicts(api):
+    assert api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=CREATE, headers=_h(key="create-conflict")).status_code == 201
+    changed = {**CREATE, "name": "Sensors Europe revised"}
+    response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=changed, headers=_h(key="create-conflict"))
+    assert response.status_code == 409
+    assert response.json()["code"] == "IDEMPOTENCY_CONFLICT"
+
+
+def test_a_malformed_idempotency_key_is_rejected(api):
+    response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=CREATE, headers=_h(key="short"))
+    assert response.status_code == 400
+    assert response.json()["code"] == "INVALID_REQUEST"
+
+
+def test_unknown_keys_are_rejected(api):
+    body = {**CREATE, "sender_identity": {"display_name": "x"}}
+    response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=body, headers=_h())
+    assert response.status_code == 422
+    assert response.json()["code"] == "INVALID_REQUEST"
+
+
+def test_an_invalid_market_code_is_rejected(api):
+    response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json={**CREATE, "markets": ["germany"]}, headers=_h())
+    assert response.status_code == 422
+
+
+def test_a_viewer_cannot_create(api):
+    response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects", json=CREATE, headers=_h(subject=REVIEWER))
+    # reviewer is deliberately not in createProject's x-permitted-roles (operator, workspace_admin)
+    assert response.status_code == 403, response.text
