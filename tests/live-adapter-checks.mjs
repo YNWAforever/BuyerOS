@@ -407,4 +407,41 @@ await test('toIcpSaveRequest maps requirements with their categories',()=>{
   assert.deepEqual(r.buyer_types,['Distributor']);
 });
 
+const writes=await loadModule('services/live/writes.ts');
+
+function liveSession(project=null){return {current:()=>({mode:'live',actor:'a',workspace:'w',project}),token:()=>'tok',identity:()=>'live:a:w:'+(project||'-')};}
+
+await test('saveProfile creates the project then saves a version, in order',async()=>{
+  const calls=[];
+  const client={request:async({path,method,idempotencyKey,ifMatch,token})=>{
+    calls.push({path,method,idempotencyKey,ifMatch,token});
+    if(method==='POST'&&path.endsWith('/projects'))return {id:'p1',version:1,active_icp_version_id:null};
+    return {id:'i1',number:1,content_hash:'sha256:x'};
+  }};
+  const offer={company:'Acme',product:'S',value:'V',website:'',markets:'Germany',language:'English',must:'m',nice:'',exclude:'',buyerTypes:['Distributor'],roles:''};
+  const out=await writes.saveProfile({client,session:liveSession(),offer,idempotencyKey:'k0000001'});
+  assert.deepEqual(calls.map(c=>c.method),['POST','POST']);
+  assert.ok(calls[1].path.endsWith('/projects/p1/icp-versions'));
+  assert.equal(calls[0].token,'tok');// the session token reaches the client
+  assert.equal(out.project.id,'p1');
+  assert.equal(out.icpVersion.id,'i1');
+});
+
+await test('saveProfile selects an already-selected project instead of creating one',async()=>{
+  const calls=[];
+  const client={request:async({path,method})=>{calls.push({path,method});return {id:'i2',number:2,content_hash:'sha256:y'};}};
+  await writes.saveProfile({client,session:liveSession('p9'),offer:{company:'Acme',product:'S',value:'V',markets:'Germany',language:'English',must:'m',buyerTypes:['Distributor']},idempotencyKey:'k0000002'});
+  assert.deepEqual(calls.map(c=>c.method),['POST']);
+  assert.ok(calls[0].path.endsWith('/projects/p9/icp-versions'));
+});
+
+await test('approveProfile sends the version number as If-Match and the hash',async()=>{
+  let seen;
+  const client={request:async(args)=>{seen=args;return {id:'i1',status:'approved'};}};
+  await writes.approveProfile({client,session:liveSession('p'),project:{id:'p'},icpVersion:{id:'i1',number:3,content_hash:'sha256:z'},idempotencyKey:'k0000003'});
+  assert.equal(seen.path,'/v1/workspaces/w/icp-versions/i1/approve');
+  assert.equal(seen.ifMatch,'"3"');
+  assert.deepEqual(seen.body,{content_hash:'sha256:z',confirmation:true});
+});
+
 console.log(`${checks} live adapter checks passed`);
