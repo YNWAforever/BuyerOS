@@ -1,5 +1,5 @@
 'use client';
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 import {Wizard, type Offer} from '@/features/discovery/wizard';
 import {useWorkspaceSession} from '@/features/providers/workspace-session';
 import {saveProfile} from '@/services/live/writes';
@@ -11,13 +11,18 @@ export function LiveOfferWizard({offer, setOffer, onSaved, t}: {
   const {session, client} = useWorkspaceSession();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // One key per save action, reused across retries so a failed save cannot create a second
+  // project; only a successful save retires it, so the next action gets a fresh key.
+  const idempotencyKey = useRef<string | null>(null);
   async function save() {
     setBusy(true);
     setError('');
     try {
-      // A fresh key per user action, >= 8 chars per the contract.
-      const key = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      const out = await saveProfile({client, session, offer, idempotencyKey: key});
+      if (idempotencyKey.current === null) {
+        idempotencyKey.current = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      }
+      const out = await saveProfile({client, session, offer, idempotencyKey: idempotencyKey.current});
+      idempotencyKey.current = null;
       // Select the saved project in the session seam so the profile panel can load it.
       session.next({project: out.project.id});
       onSaved({projectId: out.project.id, icpVersionId: out.icpVersion.id});
