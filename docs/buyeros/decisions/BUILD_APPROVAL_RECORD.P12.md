@@ -10,7 +10,7 @@
 | Spec | `docs/buyeros/specs/2026-09-18-p12-project-profile-writes-design.md` |
 | Plan | `docs/buyeros/plans/2026-09-18-p12-project-profile-writes-implementation.md` |
 | Base | branch `p12-project-profile-writes` from `p11-demo-live-adapter` @ `cf20b1a` (which contains `main` @ `d159ae9`, P10 merged) |
-| Allowed files | create `services/api/buyeros_api/api/schemas.py`, `services/api/buyeros_api/api/idempotency.py`, `services/api/alembic/versions/{0009_project_profile_columns,0010_widen_idempotency_key}.py`, `services/api/tests/test_api_projects_db.py`, `services/live/profile.ts`, `services/live/writes.ts`, `features/live/{offer-wizard,profile}.tsx`; modify `services/api/buyeros_api/db/{icp,contact}.py`, `services/api/buyeros_api/api/routes/{projects,icp}.py`, `services/api/buyeros_api/api/unimplemented.py`, `services/api/tests/{conftest,test_api_buyers,test_api_routes_contract}.py`, `services/live/client.ts`, `tests/live-adapter-checks.mjs`, `features/workspace.tsx`; docs under `docs/buyeros/**` |
+| Allowed files | create `services/api/buyeros_api/api/schemas.py`, `services/api/buyeros_api/api/idempotency.py`, `services/api/alembic/versions/{0009_project_profile_columns,0010_widen_idempotency_key}.py`, `services/api/tests/test_api_projects_db.py`, `services/live/profile.ts`, `services/live/writes.ts`, `features/live/{offer-wizard,profile}.tsx`; modify `services/api/buyeros_api/db/{icp,contact}.py`, `services/api/buyeros_api/api/{deps,routes/projects,routes/icp,unimplemented}.py`, `services/api/tests/{conftest,test_api_buyers,test_api_routes_contract,test_api_deps}.py`, `services/live/client.ts`, `tests/live-adapter-checks.mjs`, `features/{workspace.tsx,live/offer-wizard.tsx}`; docs under `docs/buyeros/**` |
 | Dependencies with evidence | BO-003/BO-005/BO-006 are complete as far as P9-P11 carried them. The B-IDENTITY blocker (no live Auth0) is accepted below |
 | Approver | Owner (execution mode = subagent-driven) |
 | Environment/spend | none; no network, no identity provider, no credentials. Backend tests use the disposable `postgres:16` fixture; frontend checks use a stubbed fetch |
@@ -56,6 +56,21 @@ standalone parsing). Four contract/spec violations were found and corrected in t
 5. **No live workspace selection.** `SessionScope` starts with `workspace: null` and nothing selects one, so the live
    write UI would request `/v1/workspaces/null/...`. Workspace selection is out of scope this phase; live mode stays
    gated off under the waiver, and the panel fails closed rather than falling back to demo data.
+
+## Final-review fixes (recorded)
+
+The whole-branch review returned five Important findings; all were fixed before completion:
+
+1. `archiveProject` added to `OPERATION_ROLES`/`CONTRACT_ROLES` so the authorization map remains the authoritative
+   contract transcription (behavior was already correct via the `workspace_admin` wildcard).
+2. `begin_idempotency` now inserts under a SAVEPOINT and handles the unique-key `IntegrityError` (replay or `409`),
+   so concurrent same-key requests never surface a `500`.
+3. Approving a new ICP version now supersedes the previously active one in the same transaction, enforcing
+   "one immutable active version".
+4. Added the acceptance tests for a foreign-workspace approve `404`, the material-change retention of prior
+   approval plus a later `saved` version, and foreign project PATCH/DELETE `404`.
+5. The live wizard reuses one `Idempotency-Key` per save action, so a retry after partial failure replays the
+   create rather than duplicating the project.
 
 ## Sign-off (owner)
 
