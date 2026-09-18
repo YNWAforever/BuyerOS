@@ -2,11 +2,11 @@
 import uuid
 
 import psycopg
-import pytest
 
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 
 PROJECT_COLUMNS = {"company_name", "offer", "website", "markets", "language_preferences", "version", "active_icp_version_id"}
+BACKFILLED_COLUMNS = ("company_name", "offer", "markets", "language_preferences", "version")
 
 
 def test_project_profile_columns_exist(migrated):
@@ -37,6 +37,18 @@ def test_new_project_columns_are_not_nullable(migrated):
     assert nullable == {"website", "active_icp_version_id"}, nullable
 
 
+def test_0009_drops_the_backfill_server_defaults(migrated):
+    with psycopg.connect(migrated) as conn:
+        rows = conn.execute(
+            "SELECT column_name, column_default FROM information_schema.columns "
+            "WHERE table_name = 'projects' AND column_name = ANY(%s)",
+            (list(BACKFILLED_COLUMNS),),
+        ).fetchall()
+    defaults = dict(rows)
+    assert set(defaults) == set(BACKFILLED_COLUMNS), defaults
+    assert all(default is None for default in defaults.values()), defaults
+
+
 def test_0009_downgrade_then_upgrade_backfills_existing_rows(migrated):
     """0009 is reversible, and rows written before it are backfilled on re-upgrade."""
     from alembic import command
@@ -44,6 +56,12 @@ def test_0009_downgrade_then_upgrade_backfills_existing_rows(migrated):
 
     config = Config(str(ALEMBIC_INI))
     config.set_main_option("script_location", str(SERVICE_ROOT / "alembic"))
+
+    with psycopg.connect(migrated) as conn:
+        existing_rows = conn.execute(
+            "SELECT id, company_name, offer, website, markets, language_preferences, "
+            "version, active_icp_version_id FROM projects"
+        ).fetchall()
 
     workspace_id = str(uuid.uuid4())
     project_id = str(uuid.uuid4())
@@ -76,5 +94,12 @@ def test_0009_downgrade_then_upgrade_backfills_existing_rows(migrated):
     finally:
         command.upgrade(config, "head")
         with psycopg.connect(migrated, autocommit=True) as conn:
+            for row in existing_rows:
+                conn.execute(
+                    "UPDATE projects SET company_name = %s, offer = %s, website = %s, "
+                    "markets = %s, language_preferences = %s, version = %s, "
+                    "active_icp_version_id = %s WHERE id = %s",
+                    (*row[1:], row[0]),
+                )
             conn.execute("DELETE FROM projects WHERE id = %s", (project_id,))
             conn.execute("DELETE FROM workspaces WHERE id = %s", (workspace_id,))
