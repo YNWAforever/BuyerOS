@@ -232,11 +232,15 @@ async def update_buyer(
             if payload.owner_membership_id is None:
                 buyer.owner_user_id = None
             else:
+                try:
+                    owner_membership_id = uuid.UUID(payload.owner_membership_id)
+                except ValueError as exc:
+                    raise ApiError(422, "INVALID_REQUEST", "owner_membership_id must be a UUID") from exc
                 owner = (
                     await session.execute(
                         select(Membership).where(
                             Membership.workspace_id == workspace_id,
-                            Membership.id == uuid.UUID(payload.owner_membership_id),
+                            Membership.id == owner_membership_id,
                             Membership.active.is_(True),
                         )
                     )

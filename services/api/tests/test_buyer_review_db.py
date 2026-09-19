@@ -20,6 +20,7 @@ PROJECT_B = "b0000000-0000-4000-8000-000000000002"
 OPERATOR = "auth0|operator-a"
 REVIEWER = "auth0|reviewer-a"
 ADMIN = "auth0|admin-a"
+VIEWER = "auth0|viewer-a"
 
 
 def test_buyer_version_and_idempotency_response_columns_exist(migrated):
@@ -119,7 +120,12 @@ def api(seeded, monkeypatch):
     monkeypatch.setattr(auth, "_verifier_from_settings", lambda: TokenVerifier(cache, issuer=fx.ISSUER, audience=fx.AUDIENCE))
 
     owner = psycopg.connect(seeded, autocommit=True)
-    for subject, roles in ((OPERATOR, ["operator"]), (REVIEWER, ["reviewer"]), (ADMIN, ["workspace_admin"])):
+    for subject, roles in (
+        (OPERATOR, ["operator"]),
+        (REVIEWER, ["reviewer"]),
+        (ADMIN, ["workspace_admin"]),
+        (VIEWER, ["viewer"]),
+    ):
         user_id = uuid.uuid5(uuid.NAMESPACE_URL, subject)
         owner.execute("DELETE FROM memberships WHERE user_id = %s", (user_id,))
         owner.execute("DELETE FROM users WHERE id = %s", (user_id,))
@@ -134,7 +140,7 @@ def api(seeded, monkeypatch):
     finally:
         get_settings.cache_clear()
         owner = psycopg.connect(seeded, autocommit=True)
-        for subject in (OPERATOR, REVIEWER, ADMIN):
+        for subject in (OPERATOR, REVIEWER, ADMIN, VIEWER):
             user_id = uuid.uuid5(uuid.NAMESPACE_URL, subject)
             owner.execute("DELETE FROM memberships WHERE user_id = %s", (user_id,))
             owner.execute("DELETE FROM users WHERE id = %s", (user_id,))
@@ -152,11 +158,6 @@ def api(seeded, monkeypatch):
         ):
             owner.execute(statement, (WORKSPACE_A,))
         owner.close()
-        # A bare TestClient runs each request on its own loop, so every request caches a fresh
-        # engine in deps._ENGINES. Dispose them here or the suite exhausts Postgres connections.
-        from buyeros_api.api.deps import dispose_engines
-
-        asyncio.run(dispose_engines())
 
 
 def _seed_buyer(seeded, *, name, fit=None, review=None, owner_user_id=None, domain=None):
@@ -443,3 +444,48 @@ def test_update_buyer_404s_a_foreign_buyer_and_conflicts_on_reuse(api, seeded):
         json={"note": "two"}, headers=_h(key="update-conflict", **{"If-Match": '"2"'}),
     )
     assert conflict.status_code == 409 and conflict.json()["code"] == "IDEMPOTENCY_CONFLICT"
+
+
+def test_update_buyer_rejects_a_malformed_owner_not_a_server_error(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors")
+    response = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json={"owner_membership_id": "not-a-uuid"},
+        headers=_h(key="update-malformed-owner", **{"If-Match": '"1"'}),
+    )
+    assert response.status_code == 422, response.text
+    assert response.json()["code"] == "INVALID_REQUEST"
+    assert "owner_membership_id" in response.json()["message"]
+
+
+def test_update_buyer_clears_the_owner_with_an_explicit_null(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors")
+    membership_id = _admin_membership(seeded)
+    set_owner = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json={"owner_membership_id": membership_id},
+        headers=_h(key="clear-owner-set", **{"If-Match": '"1"'}),
+    )
+    assert set_owner.status_code == 200, set_owner.text
+    assert set_owner.json()["data"]["owner_membership_id"] == membership_id
+    assert set_owner.json()["data"]["version"] == 2
+    cleared = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json={"owner_membership_id": None},
+        headers=_h(key="clear-owner-null", **{"If-Match": '"2"'}),
+    )
+    assert cleared.status_code == 200, cleared.text
+    assert cleared.json()["data"]["owner_membership_id"] is None
+    assert cleared.json()["data"]["version"] == 3
+    assert cleared.headers["ETag"] == '"3"'
+
+
+def test_update_buyer_denies_a_viewer(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors")
+    response = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json={"note": "viewer cannot write"},
+        headers=_h(subject=VIEWER, key="update-viewer", **{"If-Match": '"1"'}),
+    )
+    assert response.status_code == 403, response.text
+    assert response.json()["code"] == "PERMISSION_DENIED"

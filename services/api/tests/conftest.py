@@ -125,6 +125,27 @@ def seeded(migrated):
     return migrated
 
 
+@pytest.fixture(autouse=True)
+def _dispose_api_engines():
+    """Release the per-test async engines cached by ``api.deps``.
+
+    A bare ``starlette`` ``TestClient`` starts a fresh event loop per request, and
+    ``deps.get_engine()`` caches one async engine per loop forever, so every DB-hitting
+    request retains a connection. Disposing after each test keeps the suite from
+    exhausting the test database's connection slots. ``dispose_engines`` is async, so
+    run it on a throwaway loop; a fresh loop is fine because the cache is global.
+    """
+    yield
+    import asyncio
+
+    from buyeros_api.api.deps import dispose_engines
+
+    try:
+        asyncio.run(dispose_engines())
+    except RuntimeError:
+        pass
+
+
 def runtime_role_dsn(dsn: str) -> str:
     """DSN for the non-owner, NOBYPASSRLS runtime role."""
     return dsn.replace(f"{DB_USER}:{DB_PASSWORD}", f"{API_ROLE}:{API_ROLE_PASSWORD}", 1)
