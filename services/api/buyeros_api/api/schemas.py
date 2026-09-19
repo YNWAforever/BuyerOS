@@ -128,7 +128,7 @@ class ExplicitSelection(_Strict):
 class SnapshotSelection(_Strict):
     kind: Literal["snapshot"]
     snapshot_id: str
-    excluded_ids: list[str] = Field(default_factory=list, max_length=1000)
+    excluded_ids: list[str] = Field(max_length=1000)
 
 
 Selection = Annotated[Union[ExplicitSelection, SnapshotSelection], Field(discriminator="kind")]

@@ -125,7 +125,7 @@ class HumanReview(Base, TenantMixin):
     project_buyer_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     fit_assessment_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     state: Mapped[str] = mapped_column(String(32), nullable=False)  # awaiting_review|accepted|rejected|needs_information
-    reason: Mapped[str | None] = mapped_column(String(400), nullable=True)
+    reason: Mapped[str | None] = mapped_column(String(2000), nullable=True)
     actor_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
 
 

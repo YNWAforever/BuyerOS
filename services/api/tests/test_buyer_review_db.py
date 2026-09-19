@@ -107,6 +107,19 @@ def test_review_request_discriminates_the_selection_kind():
             ReviewRequest.model_validate(bad)
 
 
+def test_snapshot_selection_requires_excluded_ids():
+    from pydantic import ValidationError
+
+    from buyeros_api.api.schemas import SnapshotSelection
+
+    with pytest.raises(ValidationError):
+        SnapshotSelection.model_validate({"kind": "snapshot", "snapshot_id": str(uuid.uuid4())})
+    parsed = SnapshotSelection.model_validate(
+        {"kind": "snapshot", "snapshot_id": str(uuid.uuid4()), "excluded_ids": []}
+    )
+    assert parsed.excluded_ids == []
+
+
 @pytest.fixture
 def api(seeded, monkeypatch):
     """An authenticated client on the runtime role with operator, reviewer and admin members."""
@@ -557,3 +570,62 @@ def test_review_requires_a_reviewer_and_replays(api, seeded):
     )
     assert replay.json()["data"] == first.json()["data"]  # the stored result, not a re-apply
     assert api.get(f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}", headers=_h(key="r-get-4")).json()["data"]["version"] == 2
+
+
+def test_a_long_review_reason_is_persisted(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    reason = "r" * 500
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json={"selection": {"kind": "explicit", "buyers": [{"id": buyer_id, "version": 1}]},
+              "status": "accepted", "reason": reason},
+        headers=_h(subject=REVIEWER, key="review-long-reason"),
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["data"]["updated"] == 1
+    stored = api.get(f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}", headers=_h(key="r-get-long")).json()["data"]
+    assert stored["review"]["reason"] == reason
+
+
+def test_a_malformed_snapshot_id_is_rejected_not_a_server_error(api):
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json={"selection": {"kind": "snapshot", "snapshot_id": "not-a-uuid", "excluded_ids": []},
+              "status": "accepted", "reason": "batch reviewed"},
+        headers=_h(subject=REVIEWER, key="review-bad-snapshot"),
+    )
+    assert response.status_code == 422, response.text
+    assert response.json()["code"] == "INVALID_REQUEST"
+    assert "snapshot_id" in response.json()["message"]
+
+
+def test_a_malformed_explicit_id_is_blocked_not_a_server_error(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json={"selection": {"kind": "explicit", "buyers": [
+            {"id": buyer_id, "version": 1}, {"id": "not-a-uuid", "version": 1}]},
+              "status": "accepted", "reason": "batch reviewed"},
+        headers=_h(subject=REVIEWER, key="review-bad-item"),
+    )
+    assert response.status_code == 200, response.text
+    result = response.json()["data"]
+    assert (result["requested"], result["updated"], result["blocked"]) == (2, 1, 1)
+    assert {"id": "not-a-uuid", "status": "blocked", "reason_code": "not_found"} in result["results"]
+
+
+def test_a_duplicate_explicit_id_is_processed_once(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json={"selection": {"kind": "explicit", "buyers": [
+            {"id": buyer_id, "version": 1}, {"id": buyer_id, "version": 1}]},
+              "status": "accepted", "reason": "reviewed once"},
+        headers=_h(subject=REVIEWER, key="review-dupe"),
+    )
+    assert response.status_code == 200, response.text
+    result = response.json()["data"]
+    assert result["requested"] == 1 and result["updated"] == 1
+    assert result["results"] == [
+        {"id": buyer_id, "status": "updated", "reason_code": "accepted", "version": 2}
+    ]

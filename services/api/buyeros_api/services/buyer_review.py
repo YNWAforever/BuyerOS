@@ -12,8 +12,23 @@ from ..db.buyers import BuyerSnapshot, BuyerSnapshotItem, FitAssessment, HumanRe
 async def _resolve_items(session, *, workspace_id, project_id, selection: dict):
     """Return deterministic (buyer_id, expected_version) pairs for the request's selection."""
     if selection["kind"] == "explicit":
-        return [(uuid.UUID(item["id"]), item["version"]) for item in selection["buyers"]]
-    snapshot_id = uuid.UUID(selection["snapshot_id"])
+        items: list[tuple[uuid.UUID | str, int]] = []
+        seen: set[str] = set()
+        for item in selection["buyers"]:
+            raw_id = item["id"]
+            if raw_id in seen:
+                continue
+            seen.add(raw_id)
+            try:
+                buyer_id: uuid.UUID | str = uuid.UUID(raw_id)
+            except (ValueError, AttributeError, TypeError):
+                buyer_id = raw_id  # a malformed id is reported blocked, never a server error
+            items.append((buyer_id, item["version"]))
+        return sorted(items, key=lambda pair: str(pair[0]))
+    try:
+        snapshot_id = uuid.UUID(selection["snapshot_id"])
+    except (ValueError, AttributeError, TypeError):
+        raise ApiError(422, "INVALID_REQUEST", "snapshot_id must be a UUID")
     snapshot = (
         await session.execute(
             select(BuyerSnapshot).where(
@@ -35,7 +50,8 @@ async def _resolve_items(session, *, workspace_id, project_id, selection: dict):
             .order_by(BuyerSnapshotItem.ordinal)
         )
     ).scalars().all()
-    return [(row.buyer_id, row.buyer_version) for row in rows if row.buyer_id not in excluded]
+    items = [(row.buyer_id, row.buyer_version) for row in rows if row.buyer_id not in excluded]
+    return sorted(items, key=lambda pair: str(pair[0]))
 
 
 async def _latest(session, model, workspace_id, buyer_id):
@@ -53,6 +69,10 @@ async def apply(session, *, workspace_id, project_id, actor_user_id, selection: 
     results: list[dict] = []
     updated = blocked = conflicts = 0
     for buyer_id, expected_version in items:
+        if not isinstance(buyer_id, uuid.UUID):
+            blocked += 1
+            results.append({"id": str(buyer_id), "status": "blocked", "reason_code": "not_found"})
+            continue
         buyer = (
             await session.execute(
                 select(ProjectBuyer)

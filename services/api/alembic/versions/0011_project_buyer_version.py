@@ -26,8 +26,16 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.add_column("project_buyers", sa.Column("version", sa.Integer(), nullable=False, server_default="1"))
     op.add_column("idempotency_records", sa.Column("response", postgresql.JSONB(), nullable=True))
+    op.alter_column(
+        "human_reviews", "reason",
+        type_=sa.String(2000), existing_type=sa.String(400), existing_nullable=True,
+    )
 
 
 def downgrade() -> None:
+    op.alter_column(
+        "human_reviews", "reason",
+        type_=sa.String(400), existing_type=sa.String(2000), existing_nullable=True,
+    )
     op.drop_column("idempotency_records", "response")
     op.drop_column("project_buyers", "version")
