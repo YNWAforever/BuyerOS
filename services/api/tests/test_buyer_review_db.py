@@ -288,6 +288,60 @@ def test_list_buyers_pages_the_frozen_snapshot(api, seeded):
     assert after.json()["data"]["total"] == 2
 
 
+def test_list_buyers_returns_the_second_page_with_the_full_total(api, seeded):
+    with psycopg.connect(seeded, autocommit=True) as conn:
+        conn.execute("DELETE FROM project_buyers WHERE workspace_id = %s", (WORKSPACE_A,))
+    _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    second = _seed_buyer(seeded, name="Beta Sensors", fit="match")
+    _seed_buyer(seeded, name="Gamma Sensors", fit="match")
+    snapshot_id = _snapshot(api, key="list-page")
+
+    response = api.get(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyers",
+        params={"snapshot_id": snapshot_id, "offset": 1, "limit": 1},
+        headers=_h(key="list-read-page-2"),
+    )
+    assert response.status_code == 200, response.text
+    page = response.json()["data"]
+    assert page["total"] == 3
+    assert page["offset"] == 1 and page["limit"] == 1
+    assert [item["id"] for item in page["items"]] == [second]
+
+    # the contract default limit is 20 when the caller omits it
+    defaulted = api.get(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyers",
+        params={"snapshot_id": snapshot_id},
+        headers=_h(key="list-read-default"),
+    )
+    assert defaulted.status_code == 200, defaulted.text
+    assert defaulted.json()["data"]["limit"] == 20
+
+    negative = api.get(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyers",
+        params={"snapshot_id": snapshot_id, "offset": -1},
+        headers=_h(key="list-read-negative"),
+    )
+    assert negative.status_code == 422
+    assert negative.json()["code"] == "INVALID_REQUEST"
+
+
+def test_an_expired_snapshot_is_not_found(api, seeded):
+    _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    snapshot_id = _snapshot(api, key="list-expired")
+    with psycopg.connect(seeded, autocommit=True) as conn:
+        conn.execute(
+            "UPDATE buyer_snapshots SET expires_at = now() - interval '1 hour' WHERE id = %s",
+            (snapshot_id,),
+        )
+    response = api.get(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyers",
+        params={"snapshot_id": snapshot_id},
+        headers=_h(key="list-expired-read"),
+    )
+    assert response.status_code == 404
+    assert response.json()["code"] == "NOT_FOUND"
+
+
 def test_a_foreign_or_unknown_snapshot_is_a_404(api):
     response = api.get(
         f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyers",

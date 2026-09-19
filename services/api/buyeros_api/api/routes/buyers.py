@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Header, Request, Response
+from fastapi import APIRouter, Depends, Header, Query, Request, Response
 
 from ..auth import Principal, get_principal
 from ..errors import ApiError, envelope
@@ -15,8 +15,8 @@ async def list_buyers(
     project_id: uuid.UUID,
     snapshot_id: uuid.UUID,
     request: Request,
-    offset: int = 0,
-    limit: int = 50,
+    offset: int = Query(default=0, ge=0),
+    limit: int = 20,
     principal: Principal = Depends(get_principal),
 ) -> dict:
     from datetime import datetime, timezone
