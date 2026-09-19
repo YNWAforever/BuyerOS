@@ -66,7 +66,6 @@ UNIMPLEMENTED_OPERATIONS: dict[str, tuple[str, str]] = {
     "saveFilterPreset": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/filter-presets"),
     "startRun": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/runs"),
     "updateBudget": ("patch", "/v1/workspaces/{workspace_id}/budgets/{budget_id}"),
-    "updateBuyer": ("patch", "/v1/workspaces/{workspace_id}/buyers/{buyer_id}"),
     "updatePreferences": ("patch", "/v1/workspaces/{workspace_id}/preferences"),
     "uploadOfferDocument": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/offer-documents"),
 }

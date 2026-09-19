@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Header, Query, Request, Response
 
 from ..auth import Principal, get_principal
 from ..errors import ApiError, envelope
-from ..schemas import SnapshotCreate
+from ..schemas import BuyerUpdate, SnapshotCreate
 
 router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["buyers"])
 
@@ -174,4 +174,82 @@ async def create_buyer_snapshot(
         await session.flush()
         data = snapshot_data(snapshot, sort=body["sort"], total=len(ordered), result_limit_reached=clipped)
         complete_idempotency(outcome, str(snapshot.id), response=data)
+    return envelope(data, request.state.request_id)
+
+
+@router.patch("/buyers/{buyer_id}")
+async def update_buyer(
+    workspace_id: uuid.UUID,
+    buyer_id: uuid.UUID,
+    payload: BuyerUpdate,
+    request: Request,
+    response: Response,
+    principal: Principal = Depends(get_principal),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    if_match: str | None = Header(default=None, alias="If-Match"),
+) -> dict:
+    from sqlalchemy import select
+
+    from ...db.buyers import Company, ProjectBuyer
+    from ...db.models import Membership
+    from ...services.buyer_read import view
+    from ..deps import load_membership, permission_for_roles, tenant_scoped
+    from ..idempotency import begin_idempotency, complete_idempotency, if_match_version
+
+    if not idempotency_key:
+        raise ApiError(400, "INVALID_REQUEST", "Idempotency-Key header is required")
+    expected_version = if_match_version(if_match)
+    body = payload.model_dump(mode="json")
+
+    async with tenant_scoped(workspace_id) as session:
+        membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
+        if not permission_for_roles(membership["roles"], "updateBuyer"):
+            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+        outcome = await begin_idempotency(
+            session, workspace_id=workspace_id, actor_id=membership["user_id"],
+            operation_id="updateBuyer", key=idempotency_key, body=body,
+        )
+        buyer = (
+            await session.execute(
+                select(ProjectBuyer)
+                .where(ProjectBuyer.workspace_id == workspace_id, ProjectBuyer.id == buyer_id)
+                .with_for_update()
+            )
+        ).scalar_one_or_none()
+        if buyer is None:
+            raise ApiError(404, "NOT_FOUND", "buyer not found")
+        company = (
+            await session.execute(
+                select(Company).where(Company.workspace_id == workspace_id, Company.id == buyer.company_id)
+            )
+        ).scalar_one()
+        if outcome.replay:
+            response.headers["ETag"] = f'"{buyer.version}"'
+            return envelope(await view(session, workspace_id=workspace_id, buyer=buyer, company=company), request.state.request_id)
+        if buyer.version != expected_version:
+            raise ApiError(412, "STALE_REVISION", "buyer changed; reload it")
+        if "owner_membership_id" in payload.model_fields_set:
+            if payload.owner_membership_id is None:
+                buyer.owner_user_id = None
+            else:
+                owner = (
+                    await session.execute(
+                        select(Membership).where(
+                            Membership.workspace_id == workspace_id,
+                            Membership.id == uuid.UUID(payload.owner_membership_id),
+                            Membership.active.is_(True),
+                        )
+                    )
+                ).scalar_one_or_none()
+                if owner is None:
+                    raise ApiError(422, "INVALID_REQUEST", "owner_membership_id is not an active member")
+                buyer.owner_user_id = owner.user_id
+        if "note" in payload.model_fields_set:
+            buyer.note = payload.note
+        buyer.version += 1
+        await session.flush()
+        await session.refresh(buyer)
+        complete_idempotency(outcome, str(buyer.id))
+        data = await view(session, workspace_id=workspace_id, buyer=buyer, company=company)
+        response.headers["ETag"] = f'"{buyer.version}"'
     return envelope(data, request.state.request_id)

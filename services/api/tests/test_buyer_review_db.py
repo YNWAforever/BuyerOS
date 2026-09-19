@@ -152,6 +152,11 @@ def api(seeded, monkeypatch):
         ):
             owner.execute(statement, (WORKSPACE_A,))
         owner.close()
+        # A bare TestClient runs each request on its own loop, so every request caches a fresh
+        # engine in deps._ENGINES. Dispose them here or the suite exhausts Postgres connections.
+        from buyeros_api.api.deps import dispose_engines
+
+        asyncio.run(dispose_engines())
 
 
 def _seed_buyer(seeded, *, name, fit=None, review=None, owner_user_id=None, domain=None):
@@ -360,3 +365,81 @@ def test_get_buyer_returns_the_contract_subset_and_404s_foreign(api, seeded):
     foreign = api.get(f"/v1/workspaces/{WORKSPACE_B}/buyers/{buyer_id}", headers=_h(key="get-02"))
     assert foreign.status_code == 404
     assert "Alpha" not in foreign.text
+
+
+def _admin_membership(seeded, subject=ADMIN):
+    user_id = uuid.uuid5(uuid.NAMESPACE_URL, subject)
+    with psycopg.connect(seeded, autocommit=True) as conn:
+        return str(conn.execute(
+            "SELECT id FROM memberships WHERE workspace_id = %s AND user_id = %s",
+            (WORKSPACE_A, user_id),
+        ).fetchone()[0])
+
+
+def test_update_buyer_bumps_the_version_and_sets_the_etag(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    response = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json={"note": "Reviewed scope."},
+        headers=_h(key="update-01", **{"If-Match": '"1"'}),
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()["data"]
+    assert data["note"] == "Reviewed scope."
+    assert data["version"] == 2
+    assert response.headers["ETag"] == '"2"'
+
+
+def test_update_buyer_rejects_stale_and_missing_if_match(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors")
+    stale = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json={"note": "x"},
+        headers=_h(key="update-10", **{"If-Match": '"9"'}),
+    )
+    assert stale.status_code == 412 and stale.json()["code"] == "STALE_REVISION"
+    missing = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json={"note": "x"}, headers=_h(key="update-11"),
+    )
+    assert missing.status_code == 400
+
+
+def test_update_buyer_replays_and_validates_the_owner(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors")
+    body = {"owner_membership_id": _admin_membership(seeded)}
+    first = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json=body, headers=_h(key="update-replay", **{"If-Match": '"1"'}),
+    )
+    assert first.status_code == 200, first.text
+    assert first.json()["data"]["owner_membership_id"] == body["owner_membership_id"]
+    replay = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json=body, headers=_h(key="update-replay", **{"If-Match": '"1"'}),
+    )
+    assert replay.json()["data"]["version"] == 2  # a replay, not a second bump
+    bad = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json={"owner_membership_id": str(uuid.uuid4())},
+        headers=_h(key="update-bad-owner", **{"If-Match": '"2"'}),
+    )
+    assert bad.status_code == 422
+
+
+def test_update_buyer_404s_a_foreign_buyer_and_conflicts_on_reuse(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors")
+    foreign = api.patch(
+        f"/v1/workspaces/{WORKSPACE_B}/buyers/{buyer_id}",
+        json={"note": "x"}, headers=_h(key="update-f", **{"If-Match": '"1"'}),
+    )
+    assert foreign.status_code == 404
+    assert api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json={"note": "one"}, headers=_h(key="update-conflict", **{"If-Match": '"1"'}),
+    ).status_code == 200
+    conflict = api.patch(
+        f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}",
+        json={"note": "two"}, headers=_h(key="update-conflict", **{"If-Match": '"2"'}),
+    )
+    assert conflict.status_code == 409 and conflict.json()["code"] == "IDEMPOTENCY_CONFLICT"
