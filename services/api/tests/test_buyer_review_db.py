@@ -489,3 +489,71 @@ def test_update_buyer_denies_a_viewer(api, seeded):
     )
     assert response.status_code == 403, response.text
     assert response.json()["code"] == "PERMISSION_DENIED"
+
+
+def test_review_updates_only_the_explicit_selection(api, seeded):
+    first = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    second = _seed_buyer(seeded, name="Beta Sensors", fit="match")
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json={"selection": {"kind": "explicit", "buyers": [{"id": first, "version": 1}]},
+              "status": "accepted", "reason": "reviewed evidence"},
+        headers=_h(subject=REVIEWER, key="review-01"),
+    )
+    assert response.status_code == 200, response.text
+    result = response.json()["data"]
+    assert (result["requested"], result["updated"], result["blocked"], result["conflicts"]) == (1, 1, 0, 0)
+    assert result["results"][0]["version"] == 2
+    assert api.get(f"/v1/workspaces/{WORKSPACE_A}/buyers/{first}", headers=_h(key="r-get-1")).json()["data"]["version"] == 2
+    assert api.get(f"/v1/workspaces/{WORKSPACE_A}/buyers/{second}", headers=_h(key="r-get-2")).json()["data"]["version"] == 1
+
+
+def test_a_stale_review_version_conflicts_and_preserves_the_prior_record(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors", fit="match", review="accepted")
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json={"selection": {"kind": "explicit", "buyers": [{"id": buyer_id, "version": 9}]},
+              "status": "rejected", "reason": "changed mind"},
+        headers=_h(subject=REVIEWER, key="review-conflict"),
+    )
+    result = response.json()["data"]
+    assert result["conflicts"] == 1 and result["updated"] == 0
+    assert result["results"][0] == {"id": buyer_id, "status": "conflict", "reason_code": "version_conflict", "version": 1}
+    assert api.get(f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}", headers=_h(key="r-get-3")).json()["data"]["review"]["status"] == "accepted"
+
+
+def test_a_snapshot_review_expands_excluding_removed_ids(api, seeded):
+    first = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    second = _seed_buyer(seeded, name="Beta Sensors", fit="match")
+    snapshot_id = _snapshot(api, key="review-snap")
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json={"selection": {"kind": "snapshot", "snapshot_id": snapshot_id, "excluded_ids": [second]},
+              "status": "accepted", "reason": "batch reviewed"},
+        headers=_h(subject=REVIEWER, key="review-snap-key"),
+    )
+    result = response.json()["data"]
+    assert result["requested"] == 1 and result["updated"] == 1
+    assert {row["id"] for row in result["results"]} == {first}
+
+
+def test_review_requires_a_reviewer_and_replays(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    body = {"selection": {"kind": "explicit", "buyers": [{"id": buyer_id, "version": 1}]},
+            "status": "needs_information", "reason": "ask for detail"}
+    denied = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json=body, headers=_h(subject=OPERATOR, key="review-denied"),
+    )
+    assert denied.status_code == 403
+    first = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json=body, headers=_h(subject=REVIEWER, key="review-replay"),
+    )
+    assert first.status_code == 200 and first.json()["data"]["updated"] == 1
+    replay = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json=body, headers=_h(subject=REVIEWER, key="review-replay"),
+    )
+    assert replay.json()["data"] == first.json()["data"]  # the stored result, not a re-apply
+    assert api.get(f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}", headers=_h(key="r-get-4")).json()["data"]["version"] == 2

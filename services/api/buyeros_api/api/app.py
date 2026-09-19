@@ -9,6 +9,7 @@ from .routes.buyers import router as buyers_router
 from .routes.health import router as health_router
 from .routes.icp import router as icp_router
 from .routes.projects import router as projects_router
+from .routes.reviews import router as reviews_router
 from .routes.workspaces import router as workspaces_router
 from .unimplemented import router as unimplemented_router
 
@@ -23,6 +24,7 @@ def create_app() -> FastAPI:
     app.include_router(projects_router)
     app.include_router(icp_router)
     app.include_router(buyers_router)
+    app.include_router(reviews_router)
     app.include_router(unimplemented_router)
 
     @app.middleware("http")
