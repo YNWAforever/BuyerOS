@@ -14,6 +14,7 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
     "listICPVersions": _VIEWERS,
     "listBuyers": _VIEWERS,
     "getBuyer": _VIEWERS,
+    "createBuyerSnapshot": _VIEWERS,
     "createProject": _WRITERS,
     "updateProject": frozenset({"operator", "reviewer", "workspace_admin"}),
     "archiveProject": frozenset({"workspace_admin"}),

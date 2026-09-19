@@ -62,6 +62,7 @@ def test_registry_covers_every_unimplemented_contract_operation():
         "getCapabilities",
         "listBuyers",
         "getBuyer",
+        "createBuyerSnapshot",
     }
     out_of_slice = set(_contract_operations()) - implemented
     assert out_of_slice, "contract parse produced no out-of-slice operations"

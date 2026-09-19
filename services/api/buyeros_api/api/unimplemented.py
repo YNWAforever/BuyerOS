@@ -22,7 +22,6 @@ UNIMPLEMENTED_OPERATIONS: dict[str, tuple[str, str]] = {
     "confirmLookup": ("post", "/v1/workspaces/{workspace_id}/enrichment-quotes/{quote_id}/confirm"),
     "correctOutcome": ("post", "/v1/workspaces/{workspace_id}/outcomes/{outcome_id}/corrections"),
     "createBuyerList": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/lists"),
-    "createBuyerSnapshot": ("post", "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-snapshots"),
     "createSuppression": ("post", "/v1/workspaces/{workspace_id}/suppressions"),
     "deleteOfferDocument": ("delete", "/v1/workspaces/{workspace_id}/offer-documents/{document_id}"),
     "disabledDeliveryBoundary": ("post", "/v1/workspaces/{workspace_id}/drafts/{draft_id}/deliver"),

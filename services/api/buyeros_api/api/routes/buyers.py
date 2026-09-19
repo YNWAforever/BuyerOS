@@ -1,9 +1,10 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Header, Request, Response
 
 from ..auth import Principal, get_principal
 from ..errors import ApiError, envelope
+from ..schemas import SnapshotCreate
 
 router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["buyers"])
 
@@ -109,4 +110,71 @@ async def get_buyer(
             raise ApiError(404, "NOT_FOUND", "buyer not found")
         buyer, company = row
         data = _buyer_data(buyer, company)
+    return envelope(data, request.state.request_id)
+
+
+@router.post("/projects/{project_id}/buyer-snapshots", status_code=201)
+async def create_buyer_snapshot(
+    workspace_id: uuid.UUID,
+    project_id: uuid.UUID,
+    payload: SnapshotCreate,
+    request: Request,
+    response: Response,
+    principal: Principal = Depends(get_principal),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+) -> dict:
+    from datetime import datetime, timedelta, timezone
+
+    from sqlalchemy import select
+
+    from ...db.buyers import BuyerSnapshot, BuyerSnapshotItem
+    from ...db.icp import Project
+    from ...services.buyer_selection import filters_hash, materialize
+    from ...services.buyer_view import snapshot_data
+    from ..deps import load_membership, permission_for_roles, tenant_scoped
+    from ..idempotency import begin_idempotency, complete_idempotency
+
+    if not idempotency_key:
+        raise ApiError(400, "INVALID_REQUEST", "Idempotency-Key header is required")
+    body = payload.model_dump(mode="json")
+
+    async with tenant_scoped(workspace_id) as session:
+        membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
+        if not permission_for_roles(membership["roles"], "createBuyerSnapshot"):
+            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+        project = (
+            await session.execute(
+                select(Project).where(Project.workspace_id == workspace_id, Project.id == project_id)
+            )
+        ).scalar_one_or_none()
+        if project is None:
+            raise ApiError(404, "NOT_FOUND", "project not found")
+        outcome = await begin_idempotency(
+            session, workspace_id=workspace_id, actor_id=membership["user_id"],
+            operation_id="createBuyerSnapshot", key=idempotency_key, body=body,
+        )
+        if outcome.replay and outcome.response is not None:
+            return envelope(outcome.response, request.state.request_id)
+        ordered, matched, clipped = await materialize(
+            session, workspace_id=workspace_id, project_id=project_id,
+            filters=body["filters"], sort=body["sort"], limit=body["requested_limit"],
+        )
+        snapshot = BuyerSnapshot(
+            workspace_id=workspace_id, project_id=project_id,
+            filter_hash=filters_hash(body["filters"], body["sort"]),
+            actor_user_id=membership["user_id"],
+            expires_at=datetime.now(timezone.utc) + timedelta(minutes=15),
+        )
+        session.add(snapshot)
+        await session.flush()
+        for ordinal, (buyer_id, buyer_version) in enumerate(ordered):
+            session.add(
+                BuyerSnapshotItem(
+                    workspace_id=workspace_id, snapshot_id=snapshot.id,
+                    ordinal=ordinal, buyer_id=buyer_id, buyer_version=buyer_version,
+                )
+            )
+        await session.flush()
+        data = snapshot_data(snapshot, sort=body["sort"], total=len(ordered), result_limit_reached=clipped)
+        complete_idempotency(outcome, str(snapshot.id), response=data)
     return envelope(data, request.state.request_id)
