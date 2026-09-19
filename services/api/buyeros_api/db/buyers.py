@@ -46,6 +46,7 @@ class ProjectBuyer(Base, TenantMixin):
     company_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     owner_user_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     note: Mapped[str | None] = mapped_column(String(4000), nullable=True)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
 
 
 class SourceDocument(Base, TenantMixin):
