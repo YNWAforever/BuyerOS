@@ -51,3 +51,53 @@ def test_a_raw_project_buyer_insert_defaults_to_version_one(seeded):
         conn.execute("DELETE FROM project_buyers WHERE id = %s", (buyer_id,))
         conn.execute("DELETE FROM companies WHERE id = %s", (company_id,))
     assert version == 1
+
+
+def test_buyer_update_rejects_an_empty_body_and_a_null_note():
+    from pydantic import ValidationError
+
+    from buyeros_api.api.schemas import BuyerUpdate
+
+    with pytest.raises(ValidationError):
+        BuyerUpdate.model_validate({})
+    with pytest.raises(ValidationError):
+        BuyerUpdate.model_validate({"note": None})
+    # an explicit null owner is allowed (it clears the owner)
+    assert BuyerUpdate.model_validate({"owner_membership_id": None}).owner_membership_id is None
+
+
+def test_snapshot_create_rejects_unknown_keys_and_bounds():
+    from pydantic import ValidationError
+
+    from buyeros_api.api.schemas import SnapshotCreate
+
+    base = {"filters": {}, "sort": "best_fit", "requested_limit": 10}
+    assert SnapshotCreate.model_validate(base).requested_limit == 10
+    for bad in (
+        {**base, "extra": 1},
+        {**base, "sort": "newest"},
+        {**base, "requested_limit": 0},
+        {**base, "requested_limit": 1001},
+    ):
+        with pytest.raises(ValidationError):
+            SnapshotCreate.model_validate(bad)
+
+
+def test_review_request_discriminates_the_selection_kind():
+    from pydantic import ValidationError
+
+    from buyeros_api.api.schemas import ReviewRequest
+
+    explicit = {
+        "selection": {"kind": "explicit", "buyers": [{"id": str(uuid.uuid4()), "version": 2}]},
+        "status": "accepted",
+        "reason": "reviewed",
+    }
+    assert ReviewRequest.model_validate(explicit).status == "accepted"
+    for bad in (
+        {**explicit, "status": "approved"},
+        {**explicit, "reason": "no"},
+        {"selection": {"kind": "other"}, "status": "accepted", "reason": "reviewed"},
+    ):
+        with pytest.raises(ValidationError):
+            ReviewRequest.model_validate(bad)

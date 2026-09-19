@@ -88,10 +88,10 @@ def test_implemented_response_fields_are_declared_by_the_contract():
     icp_keys = properties("ICPVersion")
     buyer_keys = properties("Buyer")
 
-    from buyeros_api.api.routes.buyers import _buyer_data
     from buyeros_api.api.routes.health import capabilities_payload, readiness_payload
     from buyeros_api.api.routes.icp import _icp_data
     from buyeros_api.api.routes.projects import _project_data
+    from buyeros_api.services.buyer_view import buyer_data
 
     assert set(readiness_payload()) <= readiness_keys
 
@@ -134,12 +134,16 @@ def test_implemented_response_fields_are_declared_by_the_contract():
 
     class _Buyer:
         id = workspace_id = project_id = company_id = uuid.UUID("11111111-1111-4111-8111-111111111111")
+        version = 1
+        created_at = updated_at = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
+        owner_user_id = None
         note = None
 
     class _Company:
         display_name = "C"
+        domain = None
 
-    assert set(_buyer_data(_Buyer(), _Company())) <= buyer_keys
+    assert set(buyer_data(_Buyer(), _Company())) <= buyer_keys
     assert {"id", "name", "roles", "data_mode"} <= workspace_keys
 
     import yaml
