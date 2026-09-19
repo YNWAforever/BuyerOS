@@ -62,6 +62,8 @@ def test_registry_covers_every_unimplemented_contract_operation():
         "getCapabilities",
         "listBuyers",
         "getBuyer",
+        "listBuyerEvidence",
+        "getEvidence",
         "createBuyerSnapshot",
         "updateBuyer",
         "reviewBuyers",

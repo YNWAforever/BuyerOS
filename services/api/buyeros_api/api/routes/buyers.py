@@ -257,3 +257,98 @@ async def update_buyer(
         data = await view(session, workspace_id=workspace_id, buyer=buyer, company=company)
         response.headers["ETag"] = f'"{buyer.version}"'
     return envelope(data, request.state.request_id)
+
+
+@router.get("/buyers/{buyer_id}/evidence")
+async def list_buyer_evidence(
+    workspace_id: uuid.UUID,
+    buyer_id: uuid.UUID,
+    request: Request,
+    offset: int = Query(default=0, ge=0),
+    limit: int = 20,
+    principal: Principal = Depends(get_principal),
+) -> dict:
+    from sqlalchemy import func, select
+
+    from ...db.buyers import Evidence, ProjectBuyer, SourceDocument
+    from ...services.buyer_view import evidence_data
+    from ..deps import load_membership, permission_for_roles, tenant_scoped
+
+    limit = max(1, min(limit, 100))
+    async with tenant_scoped(workspace_id) as session:
+        membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
+        if not permission_for_roles(membership["roles"], "listBuyerEvidence"):
+            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+        buyer = (
+            await session.execute(
+                select(ProjectBuyer).where(ProjectBuyer.workspace_id == workspace_id, ProjectBuyer.id == buyer_id)
+            )
+        ).scalar_one_or_none()
+        if buyer is None:
+            raise ApiError(404, "NOT_FOUND", "buyer not found")
+        total = (
+            await session.execute(
+                select(func.count())
+                .select_from(Evidence)
+                .where(
+                    Evidence.workspace_id == workspace_id,
+                    Evidence.project_id == buyer.project_id,
+                    Evidence.company_id == buyer.company_id,
+                )
+            )
+        ).scalar_one()
+        rows = (
+            await session.execute(
+                select(Evidence, SourceDocument)
+                .outerjoin(
+                    SourceDocument,
+                    (SourceDocument.workspace_id == Evidence.workspace_id)
+                    & (SourceDocument.id == Evidence.source_document_id),
+                )
+                .where(
+                    Evidence.workspace_id == workspace_id,
+                    Evidence.project_id == buyer.project_id,
+                    Evidence.company_id == buyer.company_id,
+                )
+                .order_by(Evidence.created_at, Evidence.id)
+                .offset(offset)
+                .limit(limit)
+            )
+        ).all()
+        items = [evidence_data(evidence, source) for evidence, source in rows]
+    return envelope({"items": items, "offset": offset, "limit": limit, "total": total}, request.state.request_id)
+
+
+@router.get("/evidence/{evidence_id}")
+async def get_evidence(
+    workspace_id: uuid.UUID,
+    evidence_id: uuid.UUID,
+    request: Request,
+    principal: Principal = Depends(get_principal),
+) -> dict:
+    from sqlalchemy import select
+
+    from ...db.buyers import Evidence, SourceDocument
+    from ...services.buyer_view import evidence_data
+    from ..deps import load_membership, permission_for_roles, tenant_scoped
+
+    async with tenant_scoped(workspace_id) as session:
+        membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
+        if not permission_for_roles(membership["roles"], "getEvidence"):
+            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+        row = (
+            await session.execute(
+                select(Evidence, SourceDocument)
+                .outerjoin(
+                    SourceDocument,
+                    (SourceDocument.workspace_id == Evidence.workspace_id)
+                    & (SourceDocument.id == Evidence.source_document_id),
+                )
+                .where(Evidence.workspace_id == workspace_id, Evidence.id == evidence_id)
+            )
+        ).one_or_none()
+        if row is None:
+            raise ApiError(404, "NOT_FOUND", "evidence not found")
+        evidence, source = row
+        data = evidence_data(evidence, source)
+    return envelope(data, request.state.request_id)

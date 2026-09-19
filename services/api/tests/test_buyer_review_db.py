@@ -643,3 +643,41 @@ def test_a_duplicate_explicit_id_is_processed_once(api, seeded):
     assert result["results"] == [
         {"id": buyer_id, "status": "updated", "reason_code": "accepted", "version": 2}
     ]
+
+
+def _seed_evidence(seeded, buyer_id, company_id):
+    source_id = str(uuid.uuid4())
+    evidence_id = str(uuid.uuid4())
+    with psycopg.connect(seeded, autocommit=True) as conn:
+        conn.execute(
+            "INSERT INTO source_documents(id, workspace_id, canonical_url, digest, retrieved_at, language) "
+            "VALUES (%s, %s, 'https://example.test/a', 'sha256:x', now(), 'en')",
+            (source_id, WORKSPACE_A),
+        )
+        conn.execute(
+            "INSERT INTO evidence(id, workspace_id, project_id, company_id, source_document_id, stance, excerpt) "
+            "VALUES (%s, %s, %s, %s, %s, 'supports', 'supports the requirement')",
+            (evidence_id, WORKSPACE_A, PROJECT_A, company_id, source_id),
+        )
+    return evidence_id
+
+
+def test_buyer_evidence_is_scoped_and_404s_foreign(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    with psycopg.connect(seeded) as conn:
+        company_id = conn.execute("SELECT company_id FROM project_buyers WHERE id = %s", (buyer_id,)).fetchone()[0]
+    evidence_id = _seed_evidence(seeded, buyer_id, company_id)
+
+    page = api.get(f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}/evidence", headers=_h(key="ev-01"))
+    assert page.status_code == 200, page.text
+    body = page.json()["data"]
+    assert body["total"] == 1 and body["items"][0]["id"] == evidence_id
+    assert body["items"][0]["relationship"] == "supports"
+    assert body["items"][0]["source_url"] == "https://example.test/a"
+
+    one = api.get(f"/v1/workspaces/{WORKSPACE_A}/evidence/{evidence_id}", headers=_h(key="ev-02"))
+    assert one.status_code == 200 and one.json()["data"]["id"] == evidence_id
+
+    foreign = api.get(f"/v1/workspaces/{WORKSPACE_B}/evidence/{evidence_id}", headers=_h(key="ev-03"))
+    assert foreign.status_code == 404
+    assert evidence_id not in foreign.text
