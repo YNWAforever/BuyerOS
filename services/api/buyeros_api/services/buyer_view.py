@@ -20,19 +20,18 @@ def fit_data(fit) -> dict:
     }
 
 
-def review_data(review, icp_version_id) -> dict:
-    data = {
+def review_data(review, fit) -> dict:
+    """The contract HumanReview must carry both assessment_id and icp_version_id; only call this
+    when both are known (see buyer_data)."""
+    return {
         "id": str(review.id),
         "status": review.state,
         "reason": review.reason or "",
         "actor_id": str(review.actor_user_id),
         "at": review.created_at.isoformat(),
+        "assessment_id": str(review.fit_assessment_id),
+        "icp_version_id": str(fit.icp_version_id),
     }
-    if review.fit_assessment_id is not None:
-        data["assessment_id"] = str(review.fit_assessment_id)
-    if icp_version_id is not None:
-        data["icp_version_id"] = str(icp_version_id)
-    return data
 
 
 def evidence_data(evidence, source) -> dict:
@@ -98,7 +97,8 @@ def buyer_data(buyer, company, *, fit=None, review=None, owner_membership_id=Non
         data["normalized_domain"] = company.domain
     if fit is not None:
         data["fit"] = fit_data(fit)
-    if review is not None:
-        icp_version_id = fit.icp_version_id if fit is not None else None
-        data["review"] = review_data(review, icp_version_id)
+    # The review is contract-valid only when its assessment is known; a review stored without a fit
+    # (reviewBuyers on a fit-less buyer) is omitted rather than emitted incomplete.
+    if review is not None and fit is not None and review.fit_assessment_id is not None:
+        data["review"] = review_data(review, fit)
     return data

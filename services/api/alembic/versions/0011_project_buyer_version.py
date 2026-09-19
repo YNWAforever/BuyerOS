@@ -33,9 +33,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.alter_column(
-        "human_reviews", "reason",
-        type_=sa.String(400), existing_type=sa.String(2000), existing_nullable=True,
-    )
+    # A plain narrowing raises if a >400-char reason was stored; truncate instead so the downgrade
+    # is data-safe.
+    op.execute("ALTER TABLE human_reviews ALTER COLUMN reason TYPE varchar(400) USING left(reason, 400)")
     op.drop_column("idempotency_records", "response")
     op.drop_column("project_buyers", "version")

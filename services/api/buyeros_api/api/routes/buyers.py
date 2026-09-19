@@ -148,7 +148,7 @@ async def create_buyer_snapshot(
             raise ApiError(404, "NOT_FOUND", "project not found")
         outcome = await begin_idempotency(
             session, workspace_id=workspace_id, actor_id=membership["user_id"],
-            operation_id="createBuyerSnapshot", key=idempotency_key, body=body,
+            operation_id=f"createBuyerSnapshot:{project_id}", key=idempotency_key, body=body,
         )
         if outcome.replay and outcome.response is not None:
             return envelope(outcome.response, request.state.request_id)

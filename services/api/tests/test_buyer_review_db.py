@@ -1,6 +1,7 @@
 """BO-008 slice 1: buyer version, snapshots, reviews and evidence."""
 import asyncio
 import uuid
+from pathlib import Path
 
 import psycopg
 import pytest
@@ -16,7 +17,10 @@ from tests.conftest import runtime_role_dsn
 WORKSPACE_A = "11111111-1111-4111-8111-111111111111"
 WORKSPACE_B = "22222222-2222-4222-8222-222222222222"
 PROJECT_A = "a0000000-0000-4000-8000-000000000001"
+PROJECT_A2 = "a0000000-0000-4000-8000-00000000000a"
 PROJECT_B = "b0000000-0000-4000-8000-000000000002"
+ALEMBIC_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
+SERVICE_ROOT = Path(__file__).resolve().parents[1]
 OPERATOR = "auth0|operator-a"
 REVIEWER = "auth0|reviewer-a"
 ADMIN = "auth0|admin-a"
@@ -186,17 +190,20 @@ def _seed_buyer(seeded, *, name, fit=None, review=None, owner_user_id=None, doma
             "VALUES (%s, %s, %s, %s, %s)",
             (buyer_id, WORKSPACE_A, PROJECT_A, company_id, owner_user_id),
         )
+        fit_id = None
         if fit is not None:
+            fit_id = str(uuid.uuid4())
             conn.execute(
                 "INSERT INTO fit_assessments(id, workspace_id, project_buyer_id, icp_version_id, evidence_set_hash, "
                 "verdict, rationale, evidence_ids) VALUES (%s, %s, %s, %s, 'sha256:x', %s, 'because', '[]'::jsonb)",
-                (str(uuid.uuid4()), WORKSPACE_A, buyer_id, str(uuid.uuid4()), fit),
+                (fit_id, WORKSPACE_A, buyer_id, str(uuid.uuid4()), fit),
             )
         if review is not None:
+            # A review is only contract-valid alongside its fit, so link it when both are seeded.
             conn.execute(
-                "INSERT INTO human_reviews(id, workspace_id, project_buyer_id, state, actor_user_id) "
-                "VALUES (%s, %s, %s, %s, %s)",
-                (str(uuid.uuid4()), WORKSPACE_A, buyer_id, review, str(uuid.uuid4())),
+                "INSERT INTO human_reviews(id, workspace_id, project_buyer_id, state, actor_user_id, fit_assessment_id) "
+                "VALUES (%s, %s, %s, %s, %s, %s)",
+                (str(uuid.uuid4()), WORKSPACE_A, buyer_id, review, str(uuid.uuid4()), fit_id),
             )
     return buyer_id
 
@@ -261,6 +268,33 @@ def test_a_snapshot_replays_for_the_same_key_and_body(api):
     )
     assert first.status_code == second.status_code == 201
     assert first.json()["data"]["id"] == second.json()["data"]["id"]
+
+
+def test_the_same_snapshot_key_on_another_project_is_not_a_replay(api, seeded):
+    """The idempotency scope includes the project, so one key cannot replay across projects."""
+    with psycopg.connect(seeded, autocommit=True) as conn:
+        conn.execute(
+            "INSERT INTO projects(id, workspace_id, name, company_name, offer, markets, language_preferences, "
+            "version) VALUES (%s, %s, 'ProjectA2', 'ProjectA2 Co', 'offer', '{US}', '{en}', 1) "
+            "ON CONFLICT (id) DO NOTHING",
+            (PROJECT_A2, WORKSPACE_A),
+        )
+    body = {"filters": {}, "sort": "name_asc", "requested_limit": 10}
+    try:
+        first = api.post(
+            f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-snapshots",
+            json=body, headers=_h(key="snapshot-scope"),
+        )
+        second = api.post(
+            f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A2}/buyer-snapshots",
+            json=body, headers=_h(key="snapshot-scope"),
+        )
+        assert first.status_code == second.status_code == 201, second.text
+        assert first.json()["data"]["id"] != second.json()["data"]["id"]
+        assert second.json()["data"]["project_id"] == PROJECT_A2
+    finally:
+        with psycopg.connect(seeded, autocommit=True) as conn:
+            conn.execute("DELETE FROM projects WHERE id = %s", (PROJECT_A2,))
 
 
 def _snapshot(api, *, limit=10, key="list-001"):
@@ -613,7 +647,7 @@ def test_a_malformed_excluded_id_is_rejected_not_a_server_error(api, seeded):
     assert "excluded_ids" in response.json()["message"]
 
 
-def test_a_malformed_explicit_id_is_blocked_not_a_server_error(api, seeded):
+def test_a_malformed_explicit_id_is_rejected_not_a_server_error(api, seeded):
     buyer_id = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
     response = api.post(
         f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
@@ -622,10 +656,30 @@ def test_a_malformed_explicit_id_is_blocked_not_a_server_error(api, seeded):
               "status": "accepted", "reason": "batch reviewed"},
         headers=_h(subject=REVIEWER, key="review-bad-item"),
     )
+    # A malformed id never lands in the uuid-typed result; it is rejected up front.
+    assert response.status_code == 422, response.text
+    assert response.json()["code"] == "INVALID_REQUEST"
+    assert "buyer id" in response.json()["message"]
+
+
+def test_a_review_without_a_fit_is_stored_but_not_emitted(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors")
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json={"selection": {"kind": "explicit", "buyers": [{"id": buyer_id, "version": 1}]},
+              "status": "accepted", "reason": "no fit to anchor"},
+        headers=_h(subject=REVIEWER, key="review-no-fit"),
+    )
     assert response.status_code == 200, response.text
-    result = response.json()["data"]
-    assert (result["requested"], result["updated"], result["blocked"]) == (2, 1, 1)
-    assert {"id": "not-a-uuid", "status": "blocked", "reason_code": "not_found"} in result["results"]
+    assert response.json()["data"]["updated"] == 1
+    stored = api.get(f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}", headers=_h(key="r-get-no-fit")).json()["data"]
+    assert "review" not in stored
+    with psycopg.connect(seeded) as conn:
+        count = conn.execute(
+            "SELECT count(*) FROM human_reviews WHERE workspace_id = %s AND project_buyer_id = %s",
+            (WORKSPACE_A, buyer_id),
+        ).fetchone()[0]
+    assert count == 1
 
 
 def test_a_duplicate_explicit_id_is_processed_once(api, seeded):
@@ -681,3 +735,63 @@ def test_buyer_evidence_is_scoped_and_404s_foreign(api, seeded):
     foreign = api.get(f"/v1/workspaces/{WORKSPACE_B}/evidence/{evidence_id}", headers=_h(key="ev-03"))
     assert foreign.status_code == 404
     assert evidence_id not in foreign.text
+
+
+def test_0011_downgrade_truncates_a_long_review_reason(migrated):
+    """0011's downgrade narrows `reason` without failing on a stored >400-char value."""
+    import os
+
+    from alembic import command
+    from alembic.config import Config
+
+    from buyeros_api.settings import get_settings
+
+    config = Config(str(ALEMBIC_INI))
+    config.set_main_option("script_location", str(SERVICE_ROOT / "alembic"))
+
+    workspace_id = str(uuid.uuid4())
+    project_id = str(uuid.uuid4())
+    company_id = str(uuid.uuid4())
+    buyer_id = str(uuid.uuid4())
+    reason = "r" * 500
+    os.environ["BUYEROS_DATABASE_URL"] = migrated
+    get_settings.cache_clear()
+    try:
+        with psycopg.connect(migrated, autocommit=True) as conn:
+            conn.execute("INSERT INTO workspaces(id, name, data_mode) VALUES (%s, 'mig', 'live')", (workspace_id,))
+            conn.execute(
+                "INSERT INTO projects(id, workspace_id, name, company_name, offer, markets, language_preferences, "
+                "version) VALUES (%s, %s, 'P', 'C', 'o', '{US}', '{en}', 1)",
+                (project_id, workspace_id),
+            )
+            conn.execute(
+                "INSERT INTO companies(id, workspace_id, legal_name, display_name) VALUES (%s, %s, 'C', 'C Co')",
+                (company_id, workspace_id),
+            )
+            conn.execute(
+                "INSERT INTO project_buyers(id, workspace_id, project_id, company_id) VALUES (%s, %s, %s, %s)",
+                (buyer_id, workspace_id, project_id, company_id),
+            )
+            conn.execute(
+                "INSERT INTO human_reviews(id, workspace_id, project_buyer_id, state, reason, actor_user_id) "
+                "VALUES (%s, %s, %s, 'accepted', %s, %s)",
+                (str(uuid.uuid4()), workspace_id, buyer_id, reason, str(uuid.uuid4())),
+            )
+
+        command.downgrade(config, "0010_widen_idempotency_key")
+        command.upgrade(config, "head")
+
+        with psycopg.connect(migrated) as conn:
+            stored = conn.execute(
+                "SELECT reason FROM human_reviews WHERE workspace_id = %s", (workspace_id,)
+            ).fetchone()
+        assert stored is not None
+        assert stored[0] == reason[:400]
+    finally:
+        command.upgrade(config, "head")
+        with psycopg.connect(migrated, autocommit=True) as conn:
+            conn.execute("DELETE FROM human_reviews WHERE workspace_id = %s", (workspace_id,))
+            conn.execute("DELETE FROM project_buyers WHERE workspace_id = %s", (workspace_id,))
+            conn.execute("DELETE FROM companies WHERE workspace_id = %s", (workspace_id,))
+            conn.execute("DELETE FROM projects WHERE workspace_id = %s", (workspace_id,))
+            conn.execute("DELETE FROM workspaces WHERE id = %s", (workspace_id,))
