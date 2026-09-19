@@ -12,7 +12,7 @@ export function LiveBuyers() {
   const {session,client}=useWorkspaceSession();
   const [page,setPage]=useState<LiveBuyerPage|null>(null);
   const [selected,setSelected]=useState<Record<string,number>>({});
-  const [detail,setDetail]=useState<string|null>(null);
+  const [detail,setDetail]=useState<LiveBuyer|null>(null);
   const [status,setStatus]=useState<(typeof REVIEW_STATUSES)[number]>('accepted');
   const [reason,setReason]=useState('');
   const [busy,setBusy]=useState(false);
@@ -102,7 +102,7 @@ export function LiveBuyers() {
         <div className="activity" key={buyer.id}>
           <input type="checkbox" aria-label={`Select ${buyer.name}`} checked={selected[buyer.id]!==undefined} onChange={()=>toggle(buyer)}/>
           <div><b>{buyer.name}</b><p>{buyer.fitVerdict||'no fit'} - {buyer.reviewStatus||'awaiting_review'} - {buyer.note||'no note'}</p></div>
-          <button onClick={()=>setDetail(buyer.id)}>Details</button>
+          <button onClick={()=>setDetail(buyer)}>Details</button>
         </div>
       )):<p className="muted">No buyers in this snapshot.</p>}
       <div className="inline">
@@ -112,7 +112,7 @@ export function LiveBuyers() {
         <input aria-label="Review reason" value={reason} onChange={(event)=>setReason(event.target.value)} placeholder="Reason (required)"/>
         <button onClick={submitReview} disabled={busy}>{busy?'Reviewing...':'Apply review'}</button>
       </div>
-      {detail?<LiveBuyerDetail buyerId={detail} onClose={()=>setDetail(null)}/>:null}
+      {detail?<LiveBuyerDetail key={detail.id} buyer={detail} onChanged={(updated)=>{setDetail(updated);setReload((value)=>value+1);}} onClose={()=>setDetail(null)}/>:null}
     </section>
   );
 }
