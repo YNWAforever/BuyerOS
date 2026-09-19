@@ -72,12 +72,15 @@ def test_snapshot_create_rejects_unknown_keys_and_bounds():
     from buyeros_api.api.schemas import SnapshotCreate
 
     base = {"filters": {}, "sort": "best_fit", "requested_limit": 10}
+    # `filters` is required by the contract, but an empty object is a valid value.
     assert SnapshotCreate.model_validate(base).requested_limit == 10
+    without_filters = {"sort": "best_fit", "requested_limit": 10}
     for bad in (
         {**base, "extra": 1},
         {**base, "sort": "newest"},
         {**base, "requested_limit": 0},
         {**base, "requested_limit": 1001},
+        without_filters,
     ):
         with pytest.raises(ValidationError):
             SnapshotCreate.model_validate(bad)

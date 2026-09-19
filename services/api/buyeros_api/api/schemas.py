@@ -110,7 +110,7 @@ class BuyerFilters(_Strict):
 
 
 class SnapshotCreate(_Strict):
-    filters: BuyerFilters = Field(default_factory=BuyerFilters)
+    filters: BuyerFilters
     sort: Literal["best_fit", "name_asc"]
     requested_limit: int = Field(ge=1, le=1000)
 
