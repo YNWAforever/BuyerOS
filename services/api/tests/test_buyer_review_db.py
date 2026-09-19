@@ -219,6 +219,17 @@ def test_a_deferred_filter_is_rejected_loudly(api):
     assert "markets" in response.json()["message"]
 
 
+def test_a_malformed_owner_membership_is_rejected_not_a_server_error(api):
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-snapshots",
+        json={"filters": {"owner_membership_id": "not-a-uuid"}, "sort": "best_fit", "requested_limit": 10},
+        headers=_h(key="snapshot-owner"),
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == "INVALID_REQUEST"
+    assert "owner_membership_id" in response.json()["message"]
+
+
 def test_a_snapshot_replays_for_the_same_key_and_body(api):
     body = {"filters": {}, "sort": "best_fit", "requested_limit": 10}
     first = api.post(

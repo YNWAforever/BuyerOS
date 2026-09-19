@@ -10,7 +10,6 @@ from ..db.buyers import Company, Evidence, FitAssessment, HumanReview, ProjectBu
 
 # Filters this phase can source. `source_types` is deferred: neither evidence nor source_documents
 # carries a source-type column yet (that lands with P3/BO-014 ingestion).
-_SUPPORTED = frozenset({"q", "fit", "review", "owner_membership_id", "evidence_retrieved_after"})
 _DEFERRED = ("markets", "buyer_types", "contact", "suppressed", "source_types", "run_id", "list_id")
 _FIT_RANK = {"match": 0, "needs_review": 1, "not_a_match": 2}
 
@@ -57,7 +56,9 @@ async def _buyers_with_evidence_after(session, workspace_id, project_id, buyer_i
             select(ProjectBuyer.id)
             .join(
                 Evidence,
-                (Evidence.workspace_id == ProjectBuyer.workspace_id) & (Evidence.company_id == ProjectBuyer.company_id),
+                (Evidence.workspace_id == ProjectBuyer.workspace_id)
+                & (Evidence.company_id == ProjectBuyer.company_id)
+                & (Evidence.project_id == ProjectBuyer.project_id),
             )
             .join(
                 SourceDocument,
@@ -91,11 +92,15 @@ async def materialize(session, *, workspace_id, project_id, filters: dict, sort:
     if owner_membership_id:
         from ..db.models import Membership
 
+        try:
+            parsed_owner_membership_id = uuid.UUID(owner_membership_id)
+        except (ValueError, TypeError, AttributeError) as exc:
+            raise ApiError(422, "INVALID_REQUEST", "owner_membership_id must be a UUID") from exc
         owner_user_id = (
             await session.execute(
                 select(Membership.user_id).where(
                     Membership.workspace_id == workspace_id,
-                    Membership.id == uuid.UUID(owner_membership_id),
+                    Membership.id == parsed_owner_membership_id,
                     Membership.active.is_(True),
                 )
             )
