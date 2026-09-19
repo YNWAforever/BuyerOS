@@ -42,7 +42,12 @@ async def _resolve_items(session, *, workspace_id, project_id, selection: dict):
         raise ApiError(404, "NOT_FOUND", "buyer snapshot not found")
     if snapshot.expires_at is not None and snapshot.expires_at <= datetime.now(timezone.utc):
         raise ApiError(404, "NOT_FOUND", "buyer snapshot expired")
-    excluded = {uuid.UUID(value) for value in selection["excluded_ids"]}
+    excluded: set[uuid.UUID] = set()
+    for value in selection["excluded_ids"]:
+        try:
+            excluded.add(uuid.UUID(value))
+        except (ValueError, AttributeError, TypeError):
+            raise ApiError(422, "INVALID_REQUEST", "excluded_ids must be UUIDs")
     rows = (
         await session.execute(
             select(BuyerSnapshotItem)

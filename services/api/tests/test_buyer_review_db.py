@@ -599,6 +599,20 @@ def test_a_malformed_snapshot_id_is_rejected_not_a_server_error(api):
     assert "snapshot_id" in response.json()["message"]
 
 
+def test_a_malformed_excluded_id_is_rejected_not_a_server_error(api, seeded):
+    _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    snapshot_id = _snapshot(api, key="review-bad-excluded-snap")
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
+        json={"selection": {"kind": "snapshot", "snapshot_id": snapshot_id, "excluded_ids": ["not-a-uuid"]},
+              "status": "accepted", "reason": "batch reviewed"},
+        headers=_h(subject=REVIEWER, key="review-bad-excluded"),
+    )
+    assert response.status_code == 422, response.text
+    assert response.json()["code"] == "INVALID_REQUEST"
+    assert "excluded_ids" in response.json()["message"]
+
+
 def test_a_malformed_explicit_id_is_blocked_not_a_server_error(api, seeded):
     buyer_id = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
     response = api.post(
