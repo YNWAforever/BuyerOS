@@ -242,3 +242,67 @@ def test_a_snapshot_replays_for_the_same_key_and_body(api):
     )
     assert first.status_code == second.status_code == 201
     assert first.json()["data"]["id"] == second.json()["data"]["id"]
+
+
+def _snapshot(api, *, limit=10, key="list-001"):
+    response = api.post(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-snapshots",
+        json={"filters": {}, "sort": "name_asc", "requested_limit": limit},
+        headers=_h(key=key),
+    )
+    assert response.status_code == 201, response.text
+    return response.json()["data"]["id"]
+
+
+def test_list_buyers_pages_the_frozen_snapshot(api, seeded):
+    with psycopg.connect(seeded, autocommit=True) as conn:
+        conn.execute("DELETE FROM project_buyers WHERE workspace_id = %s", (WORKSPACE_A,))
+    first = _seed_buyer(seeded, name="Alpha Sensors", fit="match", review="accepted")
+    _seed_buyer(seeded, name="Beta Sensors", fit="needs_review", review="awaiting_review")
+    snapshot_id = _snapshot(api)
+
+    response = api.get(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyers",
+        params={"snapshot_id": snapshot_id, "offset": 0, "limit": 1},
+        headers=_h(key="list-read"),
+    )
+    assert response.status_code == 200, response.text
+    page = response.json()["data"]
+    assert page["total"] == 2 and page["offset"] == 0 and page["limit"] == 1
+    assert len(page["items"]) == 1
+    item = page["items"][0]
+    assert item["id"] == first
+    assert item["version"] == 1
+    assert item["fit"]["verdict"] == "match"
+    assert item["review"]["status"] == "accepted"
+    assert item["evidence_count"] == 0
+    assert item["suppressed"] is False
+
+    # a buyer created after the snapshot is not in it
+    _seed_buyer(seeded, name="Gamma Sensors", fit="match")
+    after = api.get(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyers",
+        params={"snapshot_id": snapshot_id, "offset": 0, "limit": 10},
+        headers=_h(key="list-read-2"),
+    )
+    assert after.json()["data"]["total"] == 2
+
+
+def test_a_foreign_or_unknown_snapshot_is_a_404(api):
+    response = api.get(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyers",
+        params={"snapshot_id": str(uuid.uuid4()), "offset": 0, "limit": 10},
+        headers=_h(key="list-404"),
+    )
+    assert response.status_code == 404
+    assert response.json()["code"] == "NOT_FOUND"
+
+
+def test_get_buyer_returns_the_contract_subset_and_404s_foreign(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
+    own = api.get(f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}", headers=_h(key="get-01"))
+    assert own.status_code == 200, own.text
+    assert own.json()["data"]["id"] == buyer_id
+    foreign = api.get(f"/v1/workspaces/{WORKSPACE_B}/buyers/{buyer_id}", headers=_h(key="get-02"))
+    assert foreign.status_code == 404
+    assert "Alpha" not in foreign.text

@@ -9,36 +9,25 @@ from ..schemas import SnapshotCreate
 router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["buyers"])
 
 
-def _buyer_data(buyer, company) -> dict:
-    """Contract `Buyer` subset: P9 returns identity + note only, under the contract's own keys.
-
-    `name` is the contract's company display name; `company_id` carries the company identity.
-    Every emitted key must exist in the contract `Buyer` schema (guarded by the contract test).
-    """
-    return {
-        "id": str(buyer.id),
-        "workspace_id": str(buyer.workspace_id),
-        "project_id": str(buyer.project_id),
-        "company_id": str(buyer.company_id),
-        "name": company.display_name,
-        "note": buyer.note,
-        "data_mode": "live",
-    }
-
-
 @router.get("/projects/{project_id}/buyers")
 async def list_buyers(
     workspace_id: uuid.UUID,
     project_id: uuid.UUID,
     snapshot_id: uuid.UUID,
     request: Request,
+    offset: int = 0,
+    limit: int = 50,
     principal: Principal = Depends(get_principal),
 ) -> dict:
+    from datetime import datetime, timezone
+
     from sqlalchemy import select
 
     from ...db.buyers import BuyerSnapshot, BuyerSnapshotItem, Company, ProjectBuyer
+    from ...services.buyer_read import view
     from ..deps import load_membership, permission_for_roles, tenant_scoped
 
+    limit = max(1, min(100, limit))
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
         if not permission_for_roles(membership["roles"], "listBuyers"):
@@ -54,6 +43,8 @@ async def list_buyers(
             )
         ).scalar_one_or_none()
         if snapshot is None:
+            raise ApiError(404, "NOT_FOUND", "buyer snapshot not found")
+        if snapshot.expires_at is not None and snapshot.expires_at <= datetime.now(timezone.utc):
             raise ApiError(404, "NOT_FOUND", "buyer snapshot not found")
         rows = (
             await session.execute(
@@ -71,13 +62,18 @@ async def list_buyers(
                 .order_by(BuyerSnapshotItem.ordinal)
             )
         ).all()
-        items = [_buyer_data(buyer, company) for buyer, company in rows]
+        total = len(rows)
+        page = rows[offset : offset + limit]
+        items = [
+            await view(session, workspace_id=workspace_id, buyer=buyer, company=company)
+            for buyer, company in page
+        ]
         data = {
             "items": items,
             "snapshot_id": str(snapshot_id),
-            "offset": 0,
-            "limit": len(items),
-            "total": len(items),
+            "offset": offset,
+            "limit": limit,
+            "total": total,
             "expires_at": snapshot.expires_at.isoformat() if snapshot.expires_at else None,
         }
     return envelope(data, request.state.request_id)
@@ -90,6 +86,7 @@ async def get_buyer(
     from sqlalchemy import select
 
     from ...db.buyers import Company, ProjectBuyer
+    from ...services.buyer_read import view
     from ..deps import load_membership, permission_for_roles, tenant_scoped
 
     async with tenant_scoped(workspace_id) as session:
@@ -109,7 +106,7 @@ async def get_buyer(
         if row is None:
             raise ApiError(404, "NOT_FOUND", "buyer not found")
         buyer, company = row
-        data = _buyer_data(buyer, company)
+        data = await view(session, workspace_id=workspace_id, buyer=buyer, company=company)
     return envelope(data, request.state.request_id)
 
 
