@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import vinext from "vinext";
 import { defineConfig } from "vite";
 import hostingConfig from "./.openai/hosting.json";
@@ -12,6 +13,7 @@ const { d1, r2 } = hostingConfig;
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 const managedLinux = readExecutionProfile() === "managed-linux";
+const vercelTarget = process.env.BUYEROS_DEPLOY_TARGET === "vercel";
 
 const localBindingConfig = {
   main: "vinext/server/fetch-handler",
@@ -48,13 +50,16 @@ export default defineConfig(async () => {
   process.env.MINIFLARE_REGISTRY_PATH ??= ".wrangler/registry";
 
   // Wrangler snapshots its log path while the Cloudflare plugin is imported.
-  const { cloudflare } = await import("@cloudflare/vite-plugin");
+  const cloudflare = vercelTarget ? null : (await import("@cloudflare/vite-plugin")).cloudflare;
 
   return {
+    // Nitro's CSS import resolver treats Tailwind's bare package import as a
+    // relative file in this build; target the package's exported stylesheet.
+    ...(vercelTarget ? { resolve: { alias: [{ find: /^tailwindcss$/, replacement: fileURLToPath(import.meta.resolve("tailwindcss/index.css")) }] } } : {}),
     // Public, build-time browser configuration only. The Cloudflare dev RSC runtime does not
     // inherit Node process.env; never add a client secret or provider credential here.
     define: {
-      "process.env.BUYEROS_API_BASE_URL": JSON.stringify(process.env.BUYEROS_API_BASE_URL ?? ""),
+      "process.env.BUYEROS_API_BASE_URL": JSON.stringify(vercelTarget ? "/" : (process.env.BUYEROS_API_BASE_URL ?? "")),
       "process.env.BUYEROS_AUTH0_ISSUER": JSON.stringify(process.env.BUYEROS_AUTH0_ISSUER ?? ""),
       "process.env.BUYEROS_AUTH0_CLIENT_ID": JSON.stringify(process.env.BUYEROS_AUTH0_CLIENT_ID ?? ""),
       "process.env.BUYEROS_AUTH0_AUDIENCE": JSON.stringify(process.env.BUYEROS_AUTH0_AUDIENCE ?? ""),
@@ -63,14 +68,16 @@ export default defineConfig(async () => {
       ...(managedLinux ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] } : {}),
       ...(isCodexSeatbeltSandbox ? { watch: { useFsEvents: false, usePolling: true } } : {}),
     },
-    plugins: [
-      vinext(),
-      sites({ mockAuth: !managedLinux }),
-      cloudflare({
-        viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
-        inspectorPort: false,
-        config: localBindingConfig,
-      }),
-    ],
+    plugins: vercelTarget
+      ? [vinext(), (await import("nitro/vite")).nitro()]
+      : [
+          vinext(),
+          sites({ mockAuth: !managedLinux }),
+          cloudflare!({
+            viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
+            inspectorPort: false,
+            config: localBindingConfig,
+          }),
+        ],
   };
 });

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "app": {
+      "root": ".",
+      "framework": "nitro",
+      "buildCommand": "node scripts/run-vercel.mjs build",
+      "devCommand": "node scripts/run-vercel.mjs dev",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "api",
+          "format": "url",
+          "env": "BUYEROS_INTERNAL_API_URL"
+        }
+      ]
+    },
+    "api": {
+      "root": "services/api",
+      "framework": "fastapi",
+      "entrypoint": "buyeros_api.api.vercel:app"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": { "service": "app" }
+    }
+  ]
+}
