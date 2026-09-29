@@ -6,7 +6,12 @@ test('demo UI loads beside an isolated Postgres API fixture with fake identity',
   await expect(page.locator('body')).toContainText(/demo mode/i);
   await page.screenshot({ path: 'test-results/t00-demo-fixture.png', fullPage: true });
 
-  const response = await request.get('http://127.0.0.1:8000/v1/workspaces');
+  const unauthenticated = await request.get('http://127.0.0.1:8000/v1/workspaces');
+  expect(unauthenticated.status()).toBe(401);
+
+  const response = await request.get('http://127.0.0.1:8000/v1/workspaces', {
+    headers: { Authorization: 'Bearer fixture-access' },
+  });
   expect(response.status()).toBe(200);
   const body = await response.json();
   expect(body.data_mode).toBe('live');
@@ -14,6 +19,7 @@ test('demo UI loads beside an isolated Postgres API fixture with fake identity',
     {
       id: 'e0000000-0000-4000-8000-000000000001',
       name: 'E2E fixture workspace',
+      membership_id: 'e0000000-0000-4000-8000-000000000003',
       roles: ['operator'],
       data_mode: 'live',
     },
