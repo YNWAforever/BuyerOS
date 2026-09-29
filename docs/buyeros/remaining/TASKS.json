@@ -47,7 +47,7 @@
         "build": "passed",
         "api_pytest": "283 passed, 0 failed, 0 skipped",
         "worker_pytest": "87 passed, 0 failed, 0 skipped",
-        "browser_smoke": "1 passed with fake identity and disposable Postgres",
+        "browser_smoke": "Hosted PR #7 CI run 36598703202 on f8eaec7: 1 passed with isolated PostgreSQL 16 and fake identity; missing bearer remains 401.",
         "lint": "failed: 7 errors in unchanged features/workspace.tsx, 6 warnings in unchanged files; new T00 JS/TS files pass",
         "deployed": "not run"
       }
@@ -1155,7 +1155,8 @@
         "docker_control_probe": "2026-09-29 bounded Docker probe: docker info and ps respond, but inspect timed out after 15s and start timed out after 20s for one exact no-volume buyeros-test container created by the failed strict API fixture; it remained Created. Seven own Created containers remain, none running. Docker Desktop hosts many active unrelated project containers, so restart was not performed. The current strict API/worker fixture gate remains blocked by local Docker; earlier 569/569 and 169/169 are historical only. No DB skip was converted to pass.",
         "release_reconciliation": "2026-09-29: RELEASE_READINESS.md corrected to 410-path inventory and historical strict-test wording. API_OPERATION_STATUS.csv has 78 rows, all handler_present and deployed=unverified. One exact no-volume BuyerOS container inspect stalled; 13 BuyerOS test containers remain Created while approximately 122 unrelated containers run, so no disruptive Docker Desktop restart was performed. Current strict API gate is blocked at fixture setup; worker/API-backed browser not rerun. No external action, commit or deployment.",
         "current_local_release_checks": "2026-09-29: domain 11/11, live-adapter 73/73, Node contract/cleanup 3/3 with zero skips; tsc, lint, Vinext build, API type check, 78-route map and diff --check exit 0. Pack-to-ledger 70/70 original plus eight extensions; 78/78 handlers, 78/78 deployed unverified. Sole Alembic head 0033_api_rate_windows. Current strict DB fixture remains blocked and is not counted as passing.",
-        "docker_maintenance_attempt": "2026-09-30: user confirmed restart. Normal docker desktop restart exited 1, context deadline exceeded stopping Desktop; Linux engine pipe unavailable. Synchronous start hung/interrupted; bounded detached start exited 0 with Starting Docker Desktop, latest status starting but engine readiness unverified. No current strict DB pass, no force kill or unrelated container removal. Draft PR authorized and being prepared."
+        "docker_maintenance_attempt": "2026-09-30: user confirmed restart. Normal docker desktop restart exited 1, context deadline exceeded stopping Desktop; Linux engine pipe unavailable. Synchronous start hung/interrupted; bounded detached start exited 0 with Starting Docker Desktop, latest status starting but engine readiness unverified. No current strict DB pass, no force kill or unrelated container removal. Draft PR authorized and being prepared.",
+        "published_pr_ci": "2026-09-30 HK: draft PR #7; CI run 36598703202 on code commit f8eaec7 passed frontend, API 569/569 zero skips, worker 169/169 zero skips, browser smoke 1/1. Initial smoke red 401 from missing fixture bearer, fixed in test with explicit negative 401. Local Docker restart failed from WSL CommandTimedOut; full T30 journey and live activation remain open."
       }
     }
   ],
@@ -1190,7 +1191,7 @@
     "Audit 338 passed/53 skipped is historical baseline evidence, not release verification.",
     "T28 external restore replay, T29 actual zoom/assistive review and T30 complete offer-to-addressed-approval journey/release remain open; preserve newer source and unrelated changes."
   ],
-  "reviewed_source_sha": "f43a9d88b334c2c4029fa06fa71624ed52efe4a2",
+  "reviewed_source_sha": "f8eaec7fe4e11252915106b322e95f2f70ed97c4",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
   "next_eligible_task": "T29"
 }
