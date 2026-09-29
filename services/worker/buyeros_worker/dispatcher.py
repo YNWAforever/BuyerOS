@@ -17,6 +17,7 @@ generation still matches.
 
 from collections.abc import Callable
 from datetime import datetime
+from time import monotonic
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -25,6 +26,7 @@ from buyeros_api.db.models import Workspace
 from buyeros_api.db.outbox import DISPATCHED_STATE, READY_STATE
 from buyeros_api.db.session import tenant_session
 
+from .config import get_settings
 from .leases import lease_expiry
 
 _CLAIM_COLUMNS = "id, workspace_id, intent_key, event_type, payload, fencing_generation"
@@ -69,7 +71,11 @@ async def claim_outbox_rows(
                    state = 'dispatched'
              WHERE id IN (
                    SELECT id FROM outbox_events
-                    WHERE {predicate}
+                    WHERE ({predicate})
+                      AND (:paid_dispatch_enabled OR event_type NOT IN
+                           ('provider.external', 'run.discover', 'contact.lookup'))
+                      AND (:reconciliation_enabled OR event_type NOT IN
+                           ('provider.reconcile', 'research.reconcile', 'contact.reconcile'))
                     ORDER BY created_at
                     LIMIT :limit
                     FOR UPDATE SKIP LOCKED
@@ -77,7 +83,9 @@ async def claim_outbox_rows(
          RETURNING {_CLAIM_COLUMNS}
             """
         ),
-        {"owner": owner, "expires": lease_expiry(now, lease_seconds), "now": now, "limit": limit},
+        {"owner": owner, "expires": lease_expiry(now, lease_seconds), "now": now,
+         "limit": limit, "paid_dispatch_enabled": get_settings().paid_dispatch_enabled,
+         "reconciliation_enabled": get_settings().reconciliation_enabled},
     )
     return [dict(r._mapping) for r in result]
 
@@ -147,3 +155,38 @@ async def sweep_once(
 ) -> list[str]:
     """Re-enqueue intents whose lease expired without a terminal state."""
     return await _fan_out(engine, publish, owner, now, limit, lease_seconds, expired_only=True)
+
+
+async def dispatch_cycle(
+    engine, publish: Callable, owner: str, now: datetime, *,
+    max_total: int, time_budget_seconds: float, cursor: int = 0,
+    lease_seconds: int = 120, expired_only: bool = False,
+) -> dict:
+    """Bound one cycle globally and rotate the first tenant on each invocation.
+
+    The returned cursor is kept by the supervised process. A tenant with an
+    empty queue cannot prevent later tenants from being visited.
+    """
+    if not 1 <= max_total <= 1000 or not 0 < time_budget_seconds <= 60:
+        raise ValueError("dispatcher cycle requires bounded count and time")
+    workspaces = await _workspace_ids(engine)
+    if not workspaces:
+        return {"published": [], "next_cursor": 0, "visited": 0}
+    position = cursor % len(workspaces)
+    published: list[str] = []
+    visited = 0
+    empty_streak = 0
+    started = monotonic()
+    while len(published) < max_total and empty_streak < len(workspaces):
+        if monotonic() - started >= time_budget_seconds:
+            break
+        workspace_id = workspaces[position]
+        batch = await _dispatch_workspace(
+            engine, workspace_id, publish, owner, now, 1, lease_seconds,
+            expired_only=expired_only,
+        )
+        published.extend(batch)
+        visited += 1
+        empty_streak = 0 if batch else empty_streak + 1
+        position = (position + 1) % len(workspaces)
+    return {"published": published, "next_cursor": position, "visited": visited}

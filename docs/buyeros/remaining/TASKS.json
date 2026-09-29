@@ -1,0 +1,1197 @@
+{
+  "format_version": 1,
+  "plan_status": "execution_in_progress",
+  "executor": "Codex GPT-6 Sol",
+  "audit_baseline": "5e61f401bf1bcdf80ea1ce254dd9c62e8eedbab0",
+  "date_hk": "2026-09-27",
+  "tasks": [
+    {
+      "id": "T00",
+      "title": "更新基線、合約與可執行測試環境",
+      "phase": "F0",
+      "depends_on": [],
+      "audit": [
+        "A17"
+      ],
+      "bo": "BO-000/001/003/028",
+      "modify": [
+        "docs/buyeros/PROGRESS.md",
+        "docs/buyeros/tasks/index.json",
+        "docs/buyeros/contracts/openapi.proposed.yaml",
+        "services/api/tests/conftest.py",
+        "services/worker/tests/conftest.py",
+        "package.json",
+        "README.md"
+      ],
+      "create": [
+        "docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md",
+        "docs/buyeros/decisions/2026-09-27-contract-delta.md",
+        "scripts/check-required-tests.py",
+        "scripts/generate-api-types.mjs",
+        ".github/workflows/buyeros-ci.yml",
+        "playwright.config.ts",
+        "tests/e2e/harness.spec.ts"
+      ],
+      "interfaces": "輸入：本包三份 audit、當前 HEAD/diff、既有 70 operationIds。輸出：按 operation 的 code/integrated/tested/deployed 四欄 ledger、OpenAPI delta、可重建 TS schema 與 CI。`check-required-tests.py --junit PATH` 對指定必要 suite 的 failure/error/skip 任一非零回 exit 1。新增測試工具與 scripts 必須在本任務建立後，後續命令才能使用。",
+      "tests": "`test_required_suite_skip_fails_gate`：含一項 skipped 的 JUnit fixture 必須 exit 1；完整 pass 為 0。`test_contract_required_fields`：缺任一 required response field、錯 enum、錯型別均失敗，不再只驗 keys 子集合。`harness.spec.ts`：隔離 API/DB 測試頁能在 preserved runtime 載入，不能以 demo 回應替代 live fixture。",
+      "steps": "先核對 remote/HEAD/AGENTS/工作樹，對 audit baseline 做 diff；已有修復用新證據標 resolved，避免覆蓋。讀完整原 BO 文件但把旧 proposed 路徑映射到現有 `api/routes`、`db`、`services`，不重新建立 `main.py/db.py` 第二套骨架。\n建立 CI 專用可丟棄 PostgreSQL 16 與 Valkey，API/worker 分開 test DB；現有 fixture 會 DELETE/ALTER ROLE，禁止接真實資料庫。新增 strict-integration 開關，在 CI 資料庫缺失直接失敗。\n鎖定並加入所需 Playwright、HTTP schema validation 及 OpenAPI TS generator 開發依賴，沿用 pnpm/uv locks；先盤點既有 generated/types。根據 SPEC 的明確 delta 同步 schemas、role map、生成器；每個後續任務提交自己的 response contract tests。把 missing provider/auth 設定分為「程式可用 fixtures 驗證」與「live activation blocked」。",
+      "command": "根目錄：node tests/domain-checks.mjs；node tests/live-adapter-checks.mjs；pnpm exec tsc --noEmit；pnpm lint；pnpm build。API/worker 各目錄：uv sync --frozen；uv run --frozen pytest -q --junitxml=artifacts/tests.xml。之後根目錄：python scripts/check-required-tests.py --junit services/api/artifacts/tests.xml（worker 同理）。新增 harness 後：pnpm exec playwright test tests/e2e/harness.spec.ts。",
+      "rollback": "僅變更開發工具／文件／合約；新增 CI 失敗不能靠降低 required coverage 或允許 skip 解決。",
+      "operations": [],
+      "status": "implemented_release_gate_open",
+      "verification": {
+        "domain_checks": "11 passed",
+        "live_adapter_checks": "60 passed",
+        "generated_types": "1 passed",
+        "typescript": "passed",
+        "build": "passed",
+        "api_pytest": "283 passed, 0 failed, 0 skipped",
+        "worker_pytest": "87 passed, 0 failed, 0 skipped",
+        "browser_smoke": "Hosted PR #7 CI run 36598703202 on f8eaec7: 1 passed with isolated PostgreSQL 16 and fake identity; missing bearer remains 401.",
+        "lint": "failed: 7 errors in unchanged features/workspace.tsx, 6 warnings in unchanged files; new T00 JS/TS files pass",
+        "deployed": "not run"
+      }
+    },
+    {
+      "id": "T01",
+      "title": "共用 idempotency：固定 target、precondition 與原始結果",
+      "phase": "F1",
+      "depends_on": [
+        "T00"
+      ],
+      "audit": [
+        "A03",
+        "A08"
+      ],
+      "bo": "BO-003/007",
+      "modify": [
+        "services/api/buyeros_api/api/idempotency.py",
+        "services/api/buyeros_api/api/routes/projects.py",
+        "services/api/buyeros_api/db/contact.py"
+      ],
+      "create": [
+        "services/api/tests/test_idempotency_replay_db.py"
+      ],
+      "interfaces": "在 `api/idempotency.py` 定義 `request_fingerprint(operation_id: str, target: dict, precondition: str | None, body: dict) -> str`；擴充現有 begin/complete helper，scope 仍為 workspace/actor/operation/key，target 放 fingerprint。`complete_idempotency` 保存 status、version、resource_id 與最小 replay payload；不要新增第二套 ledger。",
+      "tests": "`test_same_key_same_request_replays_exact_result`：原 project 後來已更新，重試仍回原 mutation 結果。`test_same_key_other_target_conflicts`：A/B 同 body/key→409，B 無變動。`test_changed_if_match_conflicts`：同 key 改 precondition→409。`test_twenty_concurrent_same_keys_one_write`：20 connections→一個結果 identity，無 500。權限已撤銷的 replay 仍拒絕。",
+      "steps": "先在真 PostgreSQL 加 failing replay/concurrency tests。\n把 canonical serializer version 納入 record；取得 ledger 後檢查完整 fingerprint 和 recorded target，再做業務鎖。對 completed replay 先重驗現在身份與讀取權限，不能藉 replay 暴露已失權內容；敏感 export/contact 只保存不含 PII 的結果指標並重新授權。\n對歷史缺少 target 的 project update/archive records 不猜測，回可識別 conflict／要求新動作 key，保留歷史；新 create 回傳最初 resource/version。同 transaction 完成 ledger、mutation、audit/outbox（如適用）；存在 in-progress record 回固定資源或 bounded retry，不能重複執行。需要欄位才新增下一個 Alembic revision。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_idempotency_replay_db.py tests/test_api_projects_db.py",
+      "rollback": "關閉受影響寫入入口；保留 ledger，不清空 keys 來「修復」重試。Additive migration 優先 roll-forward。",
+      "operations": [
+        "createProject",
+        "updateProject",
+        "archiveProject"
+      ],
+      "status": "implemented_fixture_verified",
+      "verification": {
+        "red": "3 replay/target/precondition tests failed before fix; ledger payload test failed before metadata fix",
+        "task_and_contract_checks": "42 passed, 0 failed, 0 skipped on disposable PostgreSQL",
+        "shared_buyer_regression": "35 passed, 0 failed, 0 skipped",
+        "concurrency": "20 same-key requests returned one version 2 result",
+        "migration": "none; existing 0011 JSONB response column reused",
+        "ui": "not run for T01",
+        "deployed": "not run"
+      }
+    },
+    {
+      "id": "T02",
+      "title": "嚴格 ICP schema、真正重試安全與版本編號",
+      "phase": "F1",
+      "depends_on": [
+        "T01"
+      ],
+      "audit": [
+        "A03",
+        "A04"
+      ],
+      "bo": "BO-007",
+      "modify": [
+        "services/api/buyeros_api/api/schemas.py",
+        "services/api/buyeros_api/api/routes/icp.py",
+        "services/api/buyeros_api/api/errors.py",
+        "services/api/buyeros_api/db/icp.py"
+      ],
+      "create": [
+        "services/api/tests/test_icp_write_integrity_db.py",
+        "services/api/tests/test_icp_validation_http.py"
+      ],
+      "interfaces": "Pydantic `ICPSaveRequest`、`ICPApproveRequest` 對應 OpenAPI；新增 save `basis_offer_revision: int >= 1` 與 approve `expected_project_version: int >= 1`（SPEC delta）。`save_icp_version` 回完整 ICPVersionResponse，沿用 route signature，由 framework 解析 strict body。",
+      "tests": "`test_invalid_icp_never_writes`：{}、requirements string、markets number、unknown field、壞 UUID、少於1 fact/requirement、超上限、1字元 key→400/422且零 row。`test_malformed_json_envelope`：422 INVALID_REQUEST + request_id/header，非500。`test_retried_save_one_version`：同 key 同資料得同 id/number。`test_parallel_distinct_saves`：有序不同 number，無未處理 unique error。",
+      "steps": "依現版 OpenAPI 複製必填、長度和 nested enum，保留 stable fact/requirement UUID；approved=true 不能自行授予審批權。先加入 basis 欄位，未能驗 basis 的狀態不得允許 approved；T03 完成 binding。\n套用 T01 helper，在 Project 鎖內配置下一個 ICP number，檢查 parent/document 所有權及同 project；存 immutable content/hash。不可只 patch mock tests。\n用框架 JSON validation 統一422；確保所有錯誤都有 request_id、retryability 及安全 message，5xx detail 不回 stack/secret。所有 8..200 Idempotency-Key 路徑一致。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_icp_validation_http.py tests/test_icp_write_integrity_db.py tests/test_api_routes_contract.py",
+      "rollback": "不能改舊 ICP 內容或 hash；舊不合規資料標 legacy/unapprovable，要求另存有效 successor。",
+      "operations": [
+        "saveICPVersion"
+      ],
+      "status": "implemented_fixture_verified"
+    },
+    {
+      "id": "T03",
+      "title": "Offer basis、審批鎖序與 stale/archive 保護",
+      "phase": "F1",
+      "depends_on": [
+        "T02"
+      ],
+      "audit": [
+        "A06",
+        "A09"
+      ],
+      "bo": "BO-007",
+      "modify": [
+        "services/api/buyeros_api/api/routes/projects.py",
+        "services/api/buyeros_api/api/routes/icp.py",
+        "services/api/buyeros_api/db/icp.py",
+        "services/api/buyeros_api/services/icp_service.py"
+      ],
+      "create": [
+        "services/api/tests/test_profile_approval_races_db.py"
+      ],
+      "interfaces": "Project 增 `offer_revision`；ICP 增 `basis_offer_revision`。內部 `approve_icp(session: AsyncSession, project_id: UUID, icp_id: UUID, expected_project_version: int, content_hash: str, actor_id: UUID) -> dict` 放 `services/icp_service.py`，回 ICPVersion 合約資料。Project.version 與 offer_revision 分開。",
+      "tests": "`test_saved_v2_approval_preserves_v1_history`；`test_offer_change_stales_pending_basis`：保存v2後改offer→舊v2批准412。`test_approve_archived_project_denied`。`test_approve_update_archive_races`：獨立 connections+barrier 重複競爭，無未處理 deadlock；stale expected_project_version 的批准失敗。同一批准重試回 T01 原結果。",
+      "steps": "所有競爭路徑固定 idempotency→Project→ICP（涉及多筆按 UUID排序）；批准、update、archive 共用順序。Material offer/market/language edit 增 offer_revision；rename 不必令研究 basis 失效。\nSave 要求 caller basis 等於鎖內現值；approve 比較 ICP hash/number、basis、project.version、active status、角色；更新 active pointer 與 Project.version 同 transaction。歷史 approved/superseded 留存，不能重寫。\n回傳完整 profile 內容/來源/requirements及 current/saved/stale 標示，list 加 offset/limit<=100；補 approval audit；歷史 basis 不明不回填成「已證明」，採 successor 修復。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_profile_approval_races_db.py tests/test_icp_write_integrity_db.py tests/test_api_projects_db.py",
+      "rollback": "先停 profile approval；不還原或刪除已批准歷史。Pointer 修正須有 audit 與版本比對。",
+      "operations": [
+        "listProjects",
+        "getProject",
+        "listICPVersions",
+        "approveICPVersion"
+      ],
+      "status": "implemented_fixture_verified"
+    },
+    {
+      "id": "T04",
+      "title": "DB 同專案限制、RLS、JWKS 及 runtime lifecycle",
+      "phase": "F1",
+      "depends_on": [
+        "T03"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-004/005/026",
+      "modify": [
+        "services/api/buyeros_api/db/models.py",
+        "services/api/buyeros_api/db/buyers.py",
+        "services/api/buyeros_api/db/icp.py",
+        "services/api/buyeros_api/api/jwks.py",
+        "services/api/buyeros_api/api/deps.py",
+        "services/api/buyeros_api/api/app.py"
+      ],
+      "create": [
+        "services/api/tests/test_project_constraints_db.py",
+        "services/api/tests/test_auth_cache_lifecycle.py"
+      ],
+      "interfaces": "沿用 SQLAlchemy models／tenant_session；為 project-bound links 實施 `(workspace_id, project_id, id)` composite reference。新增 JWKS `max_stale_seconds` 可配置 hard ceiling；建議預設3600秒、normal refresh300秒，屬本計劃安全預設，不是供應商保證。",
+      "tests": "`test_same_tenant_cross_project_links_rejected` 包含 buyer/list、assessment/evidence/run/ICP、active pointer。`test_runtime_role_pool_reuse_isolated` 以非owner/NOBYPASSRLS測 A/B/無context。`test_jwks_stale_ceiling`：舊key outage超3600秒拒絕、未知kid刷新失败拒絕、撤銷membership立即拒絕。`test_app_shutdown_disposes_pool`。",
+      "steps": "先列既有不一致 rows/count，migration 不自動刪資料；違例產 remediation report。以可驗證 migration 增 unique/composite FK/index，避免 active pointer 循環插入死結，允許初始化 null 再指定合法ICP。\nJWKS 用 monotonic time、有界 refresh/backoff；fetch失敗不能無限延壽，signature/iss/aud/exp/alg 檢查不可放寬。\nAPI lifespan 接 dispose_engines；檢查每 route 角色映射及新operation無權限預設拒絕（不得因 admin wildcard 默許未定義能力）。Runtime與migration roles分離，加入物件/event/export/count隔離測試。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_project_constraints_db.py tests/test_auth_cache_lifecycle.py tests/test_jwks_cache.py tests/test_tenant_isolation_db.py tests/test_api_tenant_isolation.py",
+      "rollback": "新增 constraint 先於擴大 writes；有 legacy violations 則停該 migration 並列具體 rows，不作 destructive cleanup。",
+      "operations": [],
+      "status": "implemented_fixture_verified"
+    },
+    {
+      "id": "T05",
+      "title": "OIDC 登入、reactive session、工作區及專案導航",
+      "phase": "F2",
+      "depends_on": [
+        "T04"
+      ],
+      "audit": [
+        "A01",
+        "A07",
+        "A16"
+      ],
+      "bo": "BO-004/006/025",
+      "modify": [
+        "features/providers/workspace-session.tsx",
+        "services/live/session.ts",
+        "features/live/overview.tsx",
+        "features/workspace.tsx",
+        "app/[...slug]/page.tsx"
+      ],
+      "create": [
+        "services/live/auth.ts",
+        "features/live/workspace-picker.tsx",
+        "app/auth/callback/page.tsx",
+        "tests/e2e/live-auth-scope.spec.ts"
+      ],
+      "interfaces": "`AuthAdapter` in auth.ts：`signIn(returnPath: string): Promise<void>`、`completeCallback(): Promise<void>`、`getAccessToken(): Promise<string>`、`signOut(): Promise<void>`。SessionScope 加 `subscribe(listener): () => void`、stable `getSnapshot()`；`captureWriteContext(): {identity, actor, workspace, project, signal}`，token仍私有。",
+      "tests": "`live-auth-scope.spec.ts`：無membership、1/多workspace、callback state/nonce/PKCE錯、token expiry、logout、A→B→A晚到結果、project不存在、reload皆正確。無授權workspace不發write；不把 token 放URL/localStorage/log。測試 OIDC issuer 僅在隔離 harness，正式 build 不能啟用 fixture auth。",
+      "steps": "沿用 ADR Auth0 public SPA+PKCE；核查現有 Auth0 app是否仍是confidential型態，缺正確設定用清楚blocked狀態，不能把client secret塞前端。API membership為authority；初始管理員由一次性受控bootstrap建立，禁止首個登入者自動成admin。\n對現有 `/app` 路徑以 `workspace/project/profile` query scope 保存deep link；既有run route保留，unknown id明確404。Provider通知React，membership/project選取後才read/write；每次新scope增加generation並取消舊工作。\n登入恢復時重新驗scope；清空舊敏感cache；UI按 server roles顯示動作。此任務可在test issuer完成，正式Auth0 round trip另列activation gate。",
+      "command": "根目錄：node tests/live-adapter-checks.mjs；pnpm exec playwright test tests/e2e/live-auth-scope.spec.ts",
+      "rollback": "身份接駁異常就關閉live entry，保留demo獨立入口；禁止live錯誤自動切demo。",
+      "operations": [
+        "listWorkspaces"
+      ],
+      "status": "implemented_fixture_verified"
+    },
+    {
+      "id": "T06",
+      "title": "CORS、typed live client 及通用 scope 保護",
+      "phase": "F2",
+      "depends_on": [
+        "T05"
+      ],
+      "audit": [
+        "A02",
+        "A07",
+        "A17"
+      ],
+      "bo": "BO-003/006",
+      "modify": [
+        "services/api/buyeros_api/api/app.py",
+        "services/api/buyeros_api/settings.py",
+        "services/live/client.ts",
+        "services/live/writes.ts",
+        "services/generated/buyeros-api.ts"
+      ],
+      "create": [
+        "services/live/operations.ts",
+        "services/api/tests/test_cors_http.py",
+        "tests/e2e/live-cors-errors.spec.ts"
+      ],
+      "interfaces": "`requestOperation<K extends keyof operations>(id: K, input: OperationInput<K>, ctx: WriteContext): Promise<OperationOutput<K>>` 在 operations.ts；OperationInput/Output 從 T00 generated OpenAPI types 推導，WriteContext為T05 capture結果加取token函式，不複製 DTO。",
+      "tests": "`test_preflight_allowed_origin`：Authorization/JSON/Idempotency-Key/If-Match成功；拒絕origin无allow-origin。401/412/422仍可讀request-id；ETag exposed。`test_scope_changed_between_writes`：create後切workspace，不送第二request、不改新session。abort後server可能已提交，重試回同結果。",
+      "steps": "CORS包住成功及error response；明確 allowlist、GET/POST/PATCH/DELETE/OPTIONS、所需header；bearer API不採 ambient cookie auth，不加wildcard。\n先從service boundary替換generic unchecked casts；所有mutations採固定scope、AbortSignal、步驟前後generation check。錯誤轉已翻譯可執行提示，401重新登入、412比較、409重新選取/quote，不通用盲重试。\n由action建立且綁定immutable payload的key；double click共用inflight，改payload是新動作，失去response保持原key。列出request-id供copy。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_cors_http.py。根目錄：node tests/live-adapter-checks.mjs；pnpm exec playwright test tests/e2e/live-cors-errors.spec.ts",
+      "rollback": "回退client變更前保留server正確CORS/auth；不要以放寬origin或吞掉401令畫面「恢復」。",
+      "operations": [],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T07",
+      "title": "完整 Offer Wizard、內容審批與 live shell",
+      "phase": "F2",
+      "depends_on": [
+        "T06"
+      ],
+      "audit": [
+        "A05",
+        "A06",
+        "A11",
+        "A16"
+      ],
+      "bo": "BO-007/025",
+      "modify": [
+        "features/live/offer-wizard.tsx",
+        "features/live/profile.tsx",
+        "features/discovery/wizard.tsx",
+        "features/workspace.tsx",
+        "services/live/profile.ts",
+        "services/live/writes.ts",
+        "services/live/mapping.ts"
+      ],
+      "create": [
+        "features/live/project-manager.tsx",
+        "tests/e2e/offer-profile.spec.ts"
+      ],
+      "interfaces": "`saveProfile({mode: \"create\"|\"edit\", projectId?, expectedProjectVersion?, basisOfferRevision?, offer, actionKey, ctx}) -> Promise<{project, icpVersion}>`，兩個結果用generated response types；create/edit意圖明確，不以selected project猜測。`approveProfile`傳 exact ICP hash/number和 expectedProjectVersion。",
+      "tests": "`offer-profile.spec.ts`：建立→保存→approve v1→修改product/value→save v2→reload→查看差異→approve v2；確認PATCH真的送出且重讀一致。create已成功但ICP失敗→原key恢復不建第二project。busy雙擊單次write；viewer不可寫、operator不可approve；en/zh-HK、錯誤focus、未存離開提示。",
+      "steps": "Validate全表單再首次write；用user_entered stable facts保存產品與價值，不再offer_facts=[]。已有專案以If-Match PATCH，依返回offer_revision保存ICP；step result以非PII action metadata恢復，refresh後可選已建立project再繼續。多步不是假裝原子，顯示「專案已保存／輪廓待保存」。\n儲存導航到新profile ID；current與pending分欄，展示requirements/must/nice/exclude、facts、markets/languages、sources和diff；批准只對正在顯示的exact version。\n抽出mode-aware Wizard actions，移除live demo文案和noop search，busy disable、取消/恢復、field errors；sidebar用真identity/project/budget空值。Markets/languages選項由capabilities約束，不硬編只支援DE/NL/BE。Settings可用性不依discovery。專案edit/archive manager有reason與history入口。",
+      "command": "根目錄：node tests/live-adapter-checks.mjs；pnpm exec playwright test tests/e2e/offer-profile.spec.ts；pnpm exec tsc --noEmit；pnpm build",
+      "rollback": "保留舊approved profile可讀；關閉問題write入口，不把不完整save顯示成功。",
+      "operations": [],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T08",
+      "title": "穩定買家 snapshot、分頁及完整 dossier read model",
+      "phase": "F3",
+      "depends_on": [
+        "T07"
+      ],
+      "audit": [
+        "A10",
+        "A15"
+      ],
+      "bo": "BO-008/014",
+      "modify": [
+        "services/api/buyeros_api/api/routes/buyers.py",
+        "services/api/buyeros_api/services/snapshot_service.py",
+        "services/api/buyeros_api/db/buyers.py",
+        "features/buyers/detail.tsx"
+      ],
+      "create": [
+        "services/live/buyers.ts",
+        "features/live/buyer-results.tsx",
+        "services/api/tests/test_snapshot_access_db.py",
+        "tests/e2e/buyer-results.spec.ts"
+      ],
+      "interfaces": "`create_snapshot(session, actor_id: UUID, project_id: UUID, request: SnapshotCreate) -> BuyerSnapshot`；`resolve_selection(session, actor_id, project_id, selection: Selection) -> list[tuple[UUID,int]]`（SnapshotCreate/Selection為OpenAPI schemas）。列表回BuyerPage，drawer讀identity/evidence/fit/review/contact維度分離資料。",
+      "tests": "`test_actor_expiry_filter_guard`：同tenant他人snapshot、跨project、900秒expiry、filter變更都拒絕。`test_stable_pagination_while_new_results_arrive`：並行insert不移位/重複；limit101→422；1001 selection拒絕。`buyer-results.spec.ts`：8/12/24 rows、本頁/全篩選/排除、URL filters、drawer next/previous。",
+      "steps": "在資料庫materialize最多1000 versioned IDs，TTL900秒，stable sort最後用buyer_id tie-break；limit1..100，default20，SQL分页，不全部取回再slice。對大於1000 filter顯示bounded count及縮窄提示，不聲稱已選全部。\n逐次read與mutation重驗actor/project/membership/expiry，不以snapshot代替權限。讀取permissions改變顯示明確row unavailable，不能洩露被撤權contact。\nDossier回應必要完整fields及permitted sources，避免N+1，null資料不冒充sample；fixture只經test harness種入隔離DB。T17/T19日後寫入相同model，無需第二套resultsUI。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_snapshot_access_db.py tests/test_api_buyers.py。根目錄：pnpm exec playwright test tests/e2e/buyer-results.spec.ts",
+      "rollback": "停snapshot create或顯示重選；不延長已過期selection去繞過409。",
+      "operations": [
+        "createBuyerSnapshot",
+        "listBuyers",
+        "getBuyer",
+        "listBuyerEvidence",
+        "getEvidence"
+      ],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T09",
+      "title": "人工審閱、owner/note、清單及保存篩選",
+      "phase": "F3",
+      "depends_on": [
+        "T08"
+      ],
+      "audit": [
+        "A12"
+      ],
+      "bo": "BO-008",
+      "modify": [
+        "services/api/buyeros_api/db/buyers.py",
+        "services/api/buyeros_api/api/routes/buyers.py",
+        "services/api/buyeros_api/services/approval_service.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/buyer_management.py",
+        "services/api/buyeros_api/services/buyer_management.py",
+        "services/api/tests/test_buyer_management_db.py",
+        "tests/e2e/buyer-management.spec.ts"
+      ],
+      "interfaces": "`review_buyers(session, actor_id, project_id, request: BuyerReviewRequest) -> BulkResult`（以實際OpenAPI request schema名生成alias）；`update_buyer(..., expected_version: int, patch: BuyerUpdate) -> Buyer`。List/preset採既有operationIds和schemas，不另建 lead/campaign domain。",
+      "tests": "接受/拒絕/needs_information均append review並綁當時ICP/assessment；stale assessment不可當current accepted。foreign/inactive owner拒絕。same-project list重加unchanged、跨project拒絕。note變更不改draft正文revision；material review撤銷即invalidate approval。filter保存reload同scope。",
+      "steps": "以T08 selection解析器＋per-item version locks做審閱；不能允許一次POST任意覆寫fit/contact/policy。寫入review event、buyer.version、audit。\n實作list create/read/rename/membership及preset list/save，name長度等沿用schemas；已在清單是unchanged；移除清單成員不刪buyer。\nUI單列及批量review共用server result；drawer保留Overview/Evidence/Contacts/Activity，允許人工檢查證據後「儲存並下一筆」。Owner/note inline edit顯示pending和412，不覆蓋他人修改。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_buyer_management_db.py。根目錄：pnpm exec playwright test tests/e2e/buyer-management.spec.ts",
+      "rollback": "以superseding review或版本化更正回復；不刪除review/audit history。",
+      "operations": [
+        "updateBuyer",
+        "reviewBuyers",
+        "listBuyerLists",
+        "createBuyerList",
+        "getBuyerList",
+        "renameBuyerList",
+        "changeListMemberships",
+        "listFilterPresets",
+        "saveFilterPreset"
+      ],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T10",
+      "title": "用途政策、suppression 及同步失效判定",
+      "phase": "F3",
+      "depends_on": [
+        "T09"
+      ],
+      "audit": [
+        "A12",
+        "A18"
+      ],
+      "bo": "BO-009/026",
+      "modify": [
+        "services/api/buyeros_api/services/policy_service.py",
+        "services/api/buyeros_api/db/policy.py",
+        "services/api/buyeros_api/services/approval_service.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/policy.py",
+        "services/api/tests/test_policy_lifecycle_db.py",
+        "features/live/policy-settings.tsx"
+      ],
+      "interfaces": "沿用 `policy_service` pure helpers，新增 `evaluate_current_policy(session, subject: dict, purpose: str, now: datetime) -> dict`，結果為合約PolicyDecision/effective gates。權限目的分 contact research、draft preparation、account/contact export、outreach。",
+      "tests": "valid contact+accepted buyer+unknown policy仍拒絕；suppression新增立即阻止未提交工作與export；remove不復活舊approval；expiry回unknown；workspace/project/contact最嚴格rule生效。mutation與dispatch race用同subject gate證明無穿透；late result可settle但quarantine不展示。",
+      "steps": "提供list/write policy和suppression add/remove，理由、scope、purpose、expiry、actor審計完整；client無法自行將policy設permitted。\n建立server同步gate供T18/T21/T22/T24/T25/T26使用；異步fan-out只加速cache invalidation，不能作唯一保護。分離 provider validity、suppression、fit和人手審閱status。\nUI寫清blocked reason與authorized next step；policy controller/retention仍需真實批准，test fixture許可不啟用真實候選人資料。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_policy_lifecycle_db.py tests/test_policy.py tests/test_approval.py",
+      "rollback": "rollback採更嚴格blocked狀態；撤销事件留存，不自動重新准許已阻擋工作。",
+      "operations": [
+        "listPolicyDecisions",
+        "recordPolicyDecision",
+        "listSuppressions",
+        "createSuppression",
+        "removeSuppression"
+      ],
+      "status": "implemented_disposable_integration_verified_policy_activation_blocked"
+    },
+    {
+      "id": "T11",
+      "title": "可恢復批量操作、分派與逐列結果",
+      "phase": "F3",
+      "depends_on": [
+        "T10"
+      ],
+      "audit": [
+        "A12",
+        "A13"
+      ],
+      "bo": "BO-008/024（audit新增bulk owner）",
+      "modify": [
+        "services/api/buyeros_api/db/outbox.py",
+        "services/api/buyeros_api/api/routes/buyer_management.py",
+        "services/api/buyeros_api/services/buyer_management.py",
+        "features/live/buyer-results.tsx"
+      ],
+      "create": [
+        "services/api/buyeros_api/services/bulk_service.py",
+        "services/api/buyeros_api/api/routes/jobs.py",
+        "services/worker/buyeros_worker/handlers/bulk_mutate.py",
+        "features/live/bulk-actions.tsx",
+        "services/api/tests/test_bulk_jobs_db.py",
+        "tests/e2e/bulk-actions.spec.ts"
+      ],
+      "interfaces": "新contract operation `assignBuyerOwners` 見SPEC。現有review/list mutation增加明確202 AsyncJobResponse選項；<=100列可同步，101..1000列背景job；`getAsyncJob`回progress和bounded result pages。`apply_bulk_chunk(session, job_id: UUID, limit: int = 50) -> dict` 回committed counts，item unique(job,buyer)。",
+      "tests": "`test_bulk_partial_result_and_resume`：混合合法/stale/blocked rows→updated/unchanged/blocked/conflict總和=requested；worker第2chunk crash後續跑不重做第1chunk。`test_retry_failed_only_new_versions`：重選current versions且只含失敗項。snapshot1010拒絕、wrong actor拒絕、job read外租戶404。UI有預覽/確認/進度/失敗原因匯出。",
+      "steps": "先持久job/intents，重用既有outbox/runtime，T15再強化運行；新增bulk handler不直接送broker。固定selection及排除IDs，每項重驗角色/版本/owner資格。先鎖job control再排序buyer，per-item audit同transaction。\nUI流程選取→预覽範圍/原因→確認→可reload job→逐列結果→只重試衝突/失敗；沒有假all-success toast。owner可清空，但不能指向停用membership。\n早期failure report只含內部buyer_id/原因，不含contact/個人資料；仍要current job授權。稍後T26共用完整authorized export framework。取消只停止未執行items，已提交項目顯示已完成，不聲稱全批rollback。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_bulk_jobs_db.py。根目錄：pnpm exec playwright test tests/e2e/bulk-actions.spec.ts",
+      "rollback": "暫停新bulk job；已完成列保留，必要補償操作須用新command及audit。",
+      "operations": [
+        "getAsyncJob"
+      ],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T12",
+      "title": "Settings、成員角色、audit 與營運工作台",
+      "phase": "F3",
+      "depends_on": [
+        "T11"
+      ],
+      "audit": [
+        "A11",
+        "A13"
+      ],
+      "bo": "BO-024/025/026/028（成員管理新增）",
+      "modify": [
+        "services/api/buyeros_api/api/routes/health.py",
+        "services/api/buyeros_api/db/models.py",
+        "features/live/overview.tsx",
+        "features/workspace.tsx"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/settings.py",
+        "services/api/buyeros_api/api/routes/memberships.py",
+        "services/api/buyeros_api/api/routes/audit.py",
+        "features/live/settings.tsx",
+        "features/live/operations.tsx",
+        "services/api/tests/test_admin_operations_db.py",
+        "tests/e2e/admin-settings.spec.ts"
+      ],
+      "interfaces": "新 `listMemberships/updateMembership` operation見SPEC；僅管理已存在且由核實 identity bootstrap 建立之membership，不新增自助跨租戶邀請。`readiness_payload` 以實際DB/broker/worker heartbeat產生狀態；capabilities ready須綁已驗證配置/health而非環境變數存在。",
+      "tests": "viewer/operator直接呼叫admin route被拒絕；不能移除最後active workspace_admin；role改變立即影響既有session。archive reason在audit可見；audit無token/contact正文。未配置research仍可打開Settings；worker heartbeat過期degraded；budget零/缺值不NaN。preferences zh-HK reload後保留。",
+      "steps": "Preference按actor/workspace持久化；roles精確沿用viewer/operator/reviewer/workspace_admin，UI「管理員」不是新role enum。membership變更If-Match+reason+audit，拒絕無限權限升級。\n工作台先顯示已有真實read model可支持的待批/待審/失敗job，其他卡片明示未接通；T27补complete metrics，不能填sample counts。Operations提供request-id、job filter、integration status、retry eligibility，不能查看secrets。\n新增共用audit append helper並回接T01–T11 mutations；health public liveness保持最小，readiness受權限；部署後T15接heartbeat。所有尚未提供的控制項disabled並給原因。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_admin_operations_db.py tests/test_api_health.py。根目錄：pnpm exec playwright test tests/e2e/admin-settings.spec.ts",
+      "rollback": "保留最後admin與只讀audit；角色回復使用可追蹤的版本化變更。",
+      "operations": [
+        "getLiveness",
+        "getReadiness",
+        "getCapabilities",
+        "getPreferences",
+        "updatePreferences",
+        "listAuditEvents"
+      ],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T13",
+      "title": "原子預算、Decimal ledger、period rollover",
+      "phase": "F4",
+      "depends_on": [
+        "T12"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-010/024",
+      "modify": [
+        "services/api/buyeros_api/services/budget_service.py",
+        "services/api/buyeros_api/services/settlement.py",
+        "services/api/buyeros_api/db/budget.py",
+        "services/api/buyeros_api/api/routes/projects.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/budgets.py",
+        "services/api/tests/test_budget_atomicity_db.py",
+        "services/api/tests/test_budget_rollover_db.py"
+      ],
+      "interfaces": "`reserve_operation(session, operation_id: UUID, scope: dict, upper_bound: Decimal, currency: str, price_version: str) -> UUID`；`settle_operation(session, operation_id: UUID, actual: Decimal, external_event_id: str) -> dict`。Money為NUMERIC(20,6)/Decimal/USD string；SignedMoney供net metrics，禁止float。",
+      "tests": "20個並行確認上限不得超支；一次operation在workspace/project/run/category投影不能重複計算。quote不reserve；unknown hold跨日/月仍保留；UTC rollover race、late refund、zero new-period limit、limit reduction below settled+held拒絕。settle重複event一次effect，未有cost evidence不可當免費。",
+      "steps": "重用既有budget/reservation/events表，在短transaction按固定workspace→project→run→category和ID鎖；先policy/admission再計算cap。零額project/category accounts隨project建立；migration對歷史project補零額，不給預算授權。\n新period零limit，carried unknown holds計入有效reserved，超cap則freeze新admission但繼續reconcile。reservation origin不改，退款append reversal不改舊ledger。\n提供listBudgets/updateBudget，server budget role依contract，If-Match/reason/audit；UI用字串money formatting，remaining<0顯示freeze不負數進度。Reserve和job/outbox同transaction接口供T18/T22使用；沒有可信provider上限就blocked。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_budget_atomicity_db.py tests/test_budget_rollover_db.py tests/test_budget.py tests/test_settlement.py",
+      "rollback": "kill switch停止新paid admission；保留settle/reconcile/read。用compensating events修正，禁止DELETE財務歷史。",
+      "operations": [
+        "listBudgets",
+        "updateBudget"
+      ],
+      "status": "implemented_disposable_integration_verified",
+      "checkpoint": "T13 strict API 397 passed/0 skipped (t13-api-settled.xml); targeted final 13 passed/0 skipped; 0018 migration chain 8 passed including empty downgrade/re-upgrade and legacy-row refusal. Fresh disposable PostgreSQL + fake-OIDC browser T13 1 passed; budget save/reload/zh-HK/390px/viewer denial. No live provider, Auth0 or deployment."
+    },
+    {
+      "id": "T14",
+      "title": "供應商能力契約、價格證據與可替换 adapter",
+      "phase": "F4",
+      "depends_on": [
+        "T13"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-002/013/017/019/021",
+      "modify": [
+        "services/api/buyeros_api/providers/search.py",
+        "services/api/buyeros_api/services/provider_op.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/providers/base.py",
+        "services/api/buyeros_api/providers/contact.py",
+        "services/api/buyeros_api/providers/model.py",
+        "docs/buyeros/provider-capabilities.md",
+        "services/api/tests/test_provider_contracts.py"
+      ],
+      "interfaces": "`ProviderCapability` fields：provider/adapter_version/service/markets/languages/auth_model/pricing_version/max_liability/idempotency/status/callback/cancel/retention/verified_at/source_urls。Adapter methods `estimate(request)->Money`、`submit(intent)->SubmissionResult`、`status(provider_ref)->StatusResult`；types在base.py定義，result包含accepted/unknown、provider_ref、observed_usage、redacted_digest，不含假vendor guarantees。",
+      "tests": "unsupported market/role、無bounded tariff、unknown status semantics→capability blocked。deterministic fixture驗timeout-after-acceptance=unknown、duplicate ref不重settle、price change需reconfirm。search/model/contact獨立capabilities，不能因searchready就讓contactready。fixture adapter在正式配置不可選。",
+      "steps": "從現有BO-002/upstream記錄開始；以官方最新docs核實選定search、model、contact供應商。不要從規劃placeholder發明vendor endpoint/webhook schema，不為了完成計劃自動採購。\n建立redacted fixture和schema驗證；每個model route/prompt版本記錄tools、tokens、deadline、repair上限；原始頁面不能控制tools。供應商未決仍實作protocol＋fixtures，狀態是implemented-fixture/activation-blocked。\n完成重用/授權inventory；GPL finder/orchestrator不默認複製進產品，現有permissive helpers先用。供應商實際payload、價目證據及授權條件就緒後才合入live adapter；不需因此停止無關修復。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_provider_contracts.py tests/test_search_adapter.py tests/test_provider_op.py",
+      "rollback": "停該capability的新submit，保留舊adapter版本供已在途operation reconciliation。",
+      "operations": [],
+      "status": "implemented_fixture_verified_activation_blocked",
+      "checkpoint": "T14 red import failure observed; final strict targeted command 16 passed/0 failed/errors/skipped (t14-targeted-green.xml). Synthetic adapter, exact USD money, unknown hold, duplicate provider ref/one ledger event and separate service gates verified. Named live provider/price/rights/status evidence absent; live allowlist empty. No migration or provider call."
+    },
+    {
+      "id": "T15",
+      "title": "Dispatcher 服務、worker engine、lease 與外部呼叫交易邊界",
+      "phase": "F4",
+      "depends_on": [
+        "T14"
+      ],
+      "audit": [
+        "A14",
+        "A15"
+      ],
+      "bo": "BO-011/027",
+      "modify": [
+        "services/worker/buyeros_worker/dispatcher.py",
+        "services/worker/buyeros_worker/tasks.py",
+        "services/worker/buyeros_worker/engine.py",
+        "services/worker/buyeros_worker/cli.py",
+        "services/worker/buyeros_worker/app.py",
+        "services/worker/buyeros_worker/leases.py"
+      ],
+      "create": [
+        "services/worker/buyeros_worker/external_runner.py",
+        "services/worker/tests/test_dispatcher_runtime.py",
+        "services/worker/tests/test_external_runner_db.py",
+        "docs/buyeros/runbooks/worker-runtime.md"
+      ],
+      "interfaces": "CLI新增 `buyeros-worker dispatch --loop`（保留one-shot）；`dispatch_cycle(max_total: int, time_budget_seconds: float) -> dict` 有公平workspace cursor及上限。`execute_external(intent_id, generation)`：prepare+commit→network→finalize+commit三段，回持久operation status。",
+      "tests": "新ready row在只有worker+beat時不會被當已處理；啟動dispatcher後可達terminal。broker outage/restart、publish後crash、lease過期、duplicate delivery、stale generation不能覆蓋。慢vendor network時DB transaction已關閉；100workspaces無永久starvation；engine不可跨fork/event-loop重用。",
+      "steps": "提供受監督dispatcher loop/heartbeat/優雅shutdown，保留single Valkey broker，不引入第二queue。依cycle max_total/time budget輪轉，空workspace不無限交易；loop失敗backoff可觀測。\nCelery child process明確選一個長存event-loop/engine lifecycle或可驗證sync execution方式；不可把AsyncEngine跨每次asyncio.run loop硬共享。關閉時dispose，限制connection pool。\n純DB handler仍可原子transaction；所有network handler重構成短prepare（寫submitting、provider identity與lease token）→外部call→短finalize（fence+result+ledger+event）。Unknown不能把outbox簡單done當業務成功；reconcile另有durable intent。把T11 bulk handler接入runtime。",
+      "command": "services/worker：uv run --frozen pytest -q tests/test_dispatcher_runtime.py tests/test_external_runner_db.py tests/test_valkey_integration.py tests/test_worker_integrity_db.py",
+      "rollback": "pause dispatcher只停止新publish；retain DB intents/leases及必要reconciliation；不可flush broker或刪outbox求乾淨。",
+      "operations": [],
+      "status": "implemented_disposable_integration_verified_provider_activation_blocked",
+      "checkpoint": "T15 red CLI/cycle failures 3/3, ready-row guard failure, missing durable reconcile import, missing Celery route, price-change reconciliation failure and real Celery Windows Proactor failure observed. Exact strict four-file command 19 passed/0 failed/errors/skipped (t15-task-green.xml); full strict worker 104 passed/0 failed/errors/skipped (t15-worker-green.xml). Disposable PostgreSQL and Valkey proved dispatcher claim, separate Celery process delivery, fenced provider fixture submit, durable reconcile intent, no transaction over network, unknown hold retention and no repeat submit. No T15 migration or real provider call. Next T16; vendor activation remains blocked."
+    },
+    {
+      "id": "T16",
+      "title": "Offer 檔案／URL ingestion 與真實 evidence fetch",
+      "phase": "F5",
+      "depends_on": [
+        "T15"
+      ],
+      "audit": [
+        "A14"
+      ],
+      "bo": "BO-012",
+      "modify": [
+        "services/api/buyeros_api/services/safe_fetch.py",
+        "services/worker/buyeros_worker/handlers/fetch_evidence.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/offer_documents.py",
+        "services/api/buyeros_api/services/ingestion_service.py",
+        "services/worker/buyeros_worker/handlers/ingest_offer.py",
+        "services/api/tests/test_ingestion_security.py",
+        "services/worker/tests/test_fetch_persistence.py"
+      ],
+      "interfaces": "`fetch_permitted_document(intent, transport, object_store) -> dict` 回retrieved/quarantined/blocked及source_id/digest/bytes，不允許僅URL驗證就done。`ingest_offer_document`輸出candidate facts，必須人審後才作approved offer facts。",
+      "tests": "SSRF private/loopback/IPv6/metadata/DNS rebinding/每次redirect、compressed bomb/decoded>2097152 bytes、timeout、錯MIME、惡意HTML與prompt injection均拒絕或quarantine。upload偽副檔名/解析bomb不可觸發worker任意網絡。foreign object/download拒絕；delete傳播stale evidence。",
+      "steps": "Upload quarantine→size/type/magic驗證→受限parser→candidate facts；按OpenAPI上限，不執行macros/embedded scripts，不將未掃描object公開。URL fetch限制scheme、每跳resolvedIP、連線目標、redirect數和總deadline；不跟頁面文字指示拿secret/callcontact。\n真保存permitted excerpt/source digest/language/retrieved_at及private object reference；worker terminal必須有持久結果。尚未配置object store/fetch permission回blocked，不成功造資料。\nR2為既有決策，實作S3-compatible abstraction；重新核實「APAC jurisdiction」是否真的可配置，location hint不能聲稱是jurisdiction或資料落地保證。敏感下載走API current auth/policy，避免可撤銷要求被直連URL繞過。UI檔案狀態/刪除/失敗可恢復。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_ingestion_security.py tests/test_safe_fetch.py。services/worker：uv run --frozen pytest -q tests/test_fetch_persistence.py tests/test_fetch_evidence.py",
+      "rollback": "關閉ingestion/fetch入口並保留quarantine；不把原validated-only done records標成retrieved，需明確reprocess新intent。",
+      "operations": [
+        "uploadOfferDocument",
+        "ingestOfferUrl",
+        "getOfferDocument",
+        "deleteOfferDocument"
+      ],
+      "status": "code_complete_fixture_verified_external_activation_blocked",
+      "checkpoint": "T16 code complete in this local execution scope; no external activation. Red evidence: validated-only fetch falsely done (1), missing upload routes (3), missing private worker boundary (1), URL 501, profile citation rejection, absent pagination, PDF parser import (2), and source provenance absent. Final strict API suite: BUYEROS_STRICT_INTEGRATION=1 uv run --frozen pytest -q --tb=short --junitxml=artifacts/t16-api-full-green.xml => 437 passed, 0 failed/errors/skipped, 67 warnings; JUnit gate 437/0/0/0. Final strict worker suite => 111 passed, 0 failed/errors/skipped, 4 warnings (artifacts/t16-worker-final.xml); JUnit gate 111/0/0/0. Final security/API target 32 passed; PDF security target 3 passed. Generated types and 77-operation route map, TypeScript, focused ESLint, Vinext build, git diff --check passed. Disposable Playwright pnpm.cmd exec playwright test --config playwright.ingestion.config.ts --reporter=line => 1 passed in 3.6m: fake OIDC, persisted text upload/reload, en/zh-HK, 390px no overflow, viewer denial. Screenshots visually inspected: test-results/t16-offer-upload-en-fixture.png and t16-offer-upload-zh-mobile-fixture.png. One 0019 Alembic head; disposable empty 0019->0018->0019 and populated downgrade refusal passed. Private R2 adapter remains disabled; no live R2/egress, Cloudflare account, production migration, provider call or deploy. PDF subprocess has Linux CPU/memory and cross-platform wall/page/byte caps; Linux deployment smoke remains. Private-bucket orphan lifecycle, exact source-permission activation and APAC residence decision remain external gates. Next eligible T17; no commit/push/merge/delivery."
+    },
+    {
+      "id": "T17",
+      "title": "Canonical company、evidence 與 assessment 持久化",
+      "phase": "F5",
+      "depends_on": [
+        "T16"
+      ],
+      "audit": [
+        "A10",
+        "A18"
+      ],
+      "bo": "BO-014",
+      "modify": [
+        "services/api/buyeros_api/services/canonicalize.py",
+        "services/api/buyeros_api/db/buyers.py",
+        "services/api/buyeros_api/db/runs.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/services/evidence_service.py",
+        "services/api/tests/test_evidence_persistence_db.py"
+      ],
+      "interfaces": "`persist_candidate_evidence(session, run_id: UUID, provider_operation_id: UUID, candidate: dict, sources: list[dict]) -> UUID` 回project_buyer id；company tenant-local，unique(project,company)。保留raw→canonical映射，source/evidence immutable版本。",
+      "tests": "重播同provider results不多company/buyer；同domain不同legal entity不自動merge；同company三contact仍一company；跨tenant同domain不共享PII。evidence不在相同project/permission/context時拒絕；過期source不能仍作current支援。",
+      "steps": "正規化URL/domain用現有helpers，建立確定性alias規則及ambiguous review狀態，不用fuzzy name合併實體。\n寫入candidate/company/buyer/evidence/run counters/events同transaction，row version及索引完整；所有claim/evidence留provenance與observed/retrieved timestamps。\n接T08 read model展示真source、snippet、language、unknown/conflicting evidence；無contact時留空且不產生.example；review UI可見資料freshness。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_evidence_persistence_db.py tests/test_canonicalize.py tests/test_models_constraints.py",
+      "rollback": "不 destructive merge；錯誤canonical關係透過可審计的split/supersede修正，保留原raw linkage。",
+      "operations": [],
+      "status": "code_complete_fixture_verified_external_activation_blocked"
+    },
+    {
+      "id": "T18",
+      "title": "Run admission、bounded multilingual discovery",
+      "phase": "F5",
+      "depends_on": [
+        "T17"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-010/013",
+      "modify": [
+        "services/api/buyeros_api/services/query_plan.py",
+        "services/api/buyeros_api/db/runs.py",
+        "services/api/buyeros_api/services/outbox_service.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/runs.py",
+        "services/worker/buyeros_worker/handlers/discover.py",
+        "services/api/tests/test_run_admission_db.py",
+        "services/worker/tests/test_discovery_limits.py"
+      ],
+      "interfaces": "`admit_run(session, actor_id: UUID, project_id: UUID, request: RunCreate) -> dict` 產RunResponse/202及outbox。`build_query_plan(icp, capabilities, remaining_limits) -> dict` schema `query-plan.v1`。T13每外部intent reserve，T14 adapter，T15 runner。",
+      "tests": "未approved/stale ICP、archived project、invalid market、零budget皆不dispatch；idempotent start一次job。跨三round/retry/restart總queries<=12、raw<=300、pages<=200、tokens<=100000、duration<=1800s、concurrency<=4、target<=100；測每項N與N+1，不只happy path。",
+      "steps": "保存immutable requestedlimits/capability/ICP/price basis，先admission再outbox。上限以SPEC表與原RunLimits較嚴者為準，時間從第一次externaldispatch且restart不reset。\nQuery按approved market/language及requirements產生；DE/NL/BE是sample strategy，不是全產品硬限制。只用已驗provider filters；structured schema驗證、最多一次bounded escalation及允許repair，所有model calls計費/計tokens。\n取得candidates走T17、evidence走T16；失敗保留partial results/cost。Graph停在人手review，禁止自動contact/draft/send。新增handler之前fail-closed能力保持，fixture測通不等於productionready。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_run_admission_db.py。services/worker：uv run --frozen pytest -q tests/test_discovery_limits.py",
+      "rollback": "停止新run/childdispatch，保留partial結果、holds及reconcile，不刪run重設使用量。",
+      "operations": [
+        "startRun"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T19",
+      "title": "LangGraph checkpoints、evidence-first fit 及評估集",
+      "phase": "F5",
+      "depends_on": [
+        "T18"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-011/015",
+      "modify": [
+        "services/api/buyeros_api/services/fit.py",
+        "services/worker/buyeros_worker/handlers/discover.py"
+      ],
+      "create": [
+        "services/worker/buyeros_worker/graphs/research.py",
+        "services/worker/buyeros_worker/checkpoints.py",
+        "services/worker/tests/test_research_graph.py",
+        "services/worker/tests/test_research_restart_db.py",
+        "tests/fixtures/research-eval.json"
+      ],
+      "interfaces": "`build_research_graph(checkpointer, provider_runner)`；checkpoint key `(workspace_id,run_id,workflow_version,attempt)`。Fit output需verdict、supported requirement IDs/evidence versions、contradictions/unknowns、concise rationale、next action；不保存隱藏思考鏈。",
+      "tests": "進程在每個node前/後被kill，resume不重做已提交provider operation；同workspace不同run/不同workspace checkpoint不混。偽evidenceID/硬排除未知/過期來源→needs_review或拒絕，不Match。注入內容要求洩secret/contact/send永不進tools。evaluation fixtures包含match/notmatch/unknown/矛盾/跨語言及重複。",
+      "steps": "先驗證並pin LangGraph/Postgres saver版本和schema，Alembic owner建表，runtime禁止setupDDL；保持singleCelery執行途徑，不建第二job系統。\nHard exclusions先deterministic；fit模型只能引用allowlisted evidence/requirement IDs；verifier逐claim檢查可讀來源和版本，repair最多一次且計budget/tokens。\nDB為business truth，checkpoint只存IDs/counters；重啟先查provider intent state再繼續，unknown不當新operation。驗收集報confusion/unsupported-claim率與人審差異，絕不把fit分數寫成購買機率。",
+      "command": "services/worker：uv run --frozen pytest -q tests/test_research_graph.py tests/test_research_restart_db.py。services/api：uv run --frozen pytest -q tests/test_fit.py",
+      "rollback": "保留workflow/adapter版本供在途run恢復；不強行以新graph載入不相容checkpoint，需版本化resume或可觀測blocked。",
+      "operations": [],
+      "status": "implemented_fixture_verified_model_route_blocked"
+    },
+    {
+      "id": "T20",
+      "title": "Run 進度、SSE replay、取消／重試及日常 UI",
+      "phase": "F5",
+      "depends_on": [
+        "T19"
+      ],
+      "audit": [
+        "A11",
+        "A13",
+        "A16"
+      ],
+      "bo": "BO-016/025",
+      "modify": [
+        "services/api/buyeros_api/api/routes/runs.py",
+        "services/api/buyeros_api/services/run_events.py",
+        "services/worker/buyeros_worker/run_emitter.py",
+        "services/worker/buyeros_worker/run_lifecycle.py"
+      ],
+      "create": [
+        "services/live/runs.ts",
+        "features/live/run-progress.tsx",
+        "services/api/tests/test_run_events_http.py",
+        "tests/e2e/run-lifecycle.spec.ts"
+      ],
+      "interfaces": "既有 getRunEvents 支援 authenticated fetch SSE及JSON polling，cursor=sequence；run state/event在同transaction提交。`subscribeRun({runId, afterSequence, ctx, onEvent}) -> () => void`，不得token置URL。",
+      "tests": "refresh/reconnect/duplicate/out-of-order/gap與token expiry；SSE unavailable自動poll同cursor；scope switch終止舊stream。cancel beforedispatch可release，提交中unknown保留hold。retry不resetglobal limits，不重買unknown。run少於target但正常完成明確顯示actual yield。",
+      "steps": "實作list/get/cancel/retry/events，角色與project檢查一致；取消flag與taskstate分離；retry只涵蓋可證明safe的未完成節點並保持economicintent。\nUI顯示queued/running/partial/paused_budget/failed及可保留的results；count/progress由committed events，不用demo timer。顯示current stage、費用/hold、nextstep和request-id。\n停止按鈕在未知submission時提示「已停止新增工作，部分結果待核對」；保留job/run URL與清晰404，錄製雙語E2E。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_run_events_http.py tests/test_run_events.py。根目錄：pnpm exec playwright test tests/e2e/run-lifecycle.spec.ts",
+      "rollback": "可暫停SSE改poll，但不能移除auth或把未完成run強制completed。",
+      "operations": [
+        "listRuns",
+        "getRun",
+        "cancelRun",
+        "retryRun",
+        "getRunEvents"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T21",
+      "title": "可選聯絡人報價：eligible preview、不扣費",
+      "phase": "F6",
+      "depends_on": [
+        "T20"
+      ],
+      "audit": [
+        "A12",
+        "A18"
+      ],
+      "bo": "BO-017",
+      "modify": [
+        "services/api/buyeros_api/services/quote_service.py",
+        "services/api/buyeros_api/db/contact.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/quotes.py",
+        "features/live/contact-quote.tsx",
+        "services/api/tests/test_lookup_quotes_db.py",
+        "tests/e2e/contact-quote.spec.ts"
+      ],
+      "interfaces": "`quote_lookup(session, actor_id, project_id, request: LookupQuoteRequest) -> LookupQuote`（schema alias對應現版OpenAPI）；綁selection versions、policy/suppression/context、capability/price_version、roles、max cost和expiry。",
+      "tests": "quote不reserve、不enqueue、不network；accepted+currentMatch+contactResearch permitted+unsuppressed才eligible。changed price/selection/context需新quote；過期quote不可confirm；different actor不可read/consume。UI逐列eligible/blocked原因、requested role、maximumcost和budget清楚。",
+      "steps": "採T08 frozen selection、T10 current gates及T14已驗bounded pricing產quote；server而非client算eligible/maxcost。Notfound/providercredit/subscription不同單位清楚列出，不虚構固定USD0.30。\n實作get/cancelquote，不釋放已consumed job之hold；quote取消只影響未consume。UI明確「查看報價」與「確認查找」分開，後者由T22接。\npartial eligibility先展示，confirm必須對exact quoted eligible set；context變動不能悄悄按另一subset收費。沒聯絡人仍可日後做unaddressed draft，contact lookup不是強制步驟。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_lookup_quotes_db.py tests/test_quote.py。根目錄：pnpm exec playwright test tests/e2e/contact-quote.spec.ts",
+      "rollback": "取消未consume quote；已consume只能走job cancel/reconcile，不能解除既有hold。",
+      "operations": [
+        "quoteLookup",
+        "getLookupQuote",
+        "cancelLookupQuote"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T22",
+      "title": "確認報價：一次 job、一次 reservation、一次 outbox",
+      "phase": "F6",
+      "depends_on": [
+        "T21"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-018",
+      "modify": [
+        "services/api/buyeros_api/services/confirm_service.py",
+        "services/api/buyeros_api/api/routes/quotes.py",
+        "services/api/buyeros_api/db/contact.py"
+      ],
+      "create": [
+        "services/api/tests/test_contact_confirm_atomicity_db.py"
+      ],
+      "interfaces": "`confirm_lookup(session, actor_id, quote_id: UUID, request: LookupConfirmRequest, idempotency_key: str) -> dict` 回202 EnrichmentJobResponse；消耗quote/reservation/providerintents/outbox/audit/idempotency在同一transaction。",
+      "tests": "20 concurrent confirmations、samekey/samebody、samekey/differentbody、twokeys/samequote均最多一job/hold；不足預算零新outbox；價格/permission/版本變動回QUOTE_CHANGED。lostresponse重試回原job，非新providercall。race suppression vs confirm要有明確winner及後續dispatchguard。",
+      "steps": "固定lock順序：idempotency→quote→sorted subject/buyer gates→budget hierarchy→job/outbox。重驗actor/expiry/quotehash、price/context及duplicateactive lookup，不沿用UI preview作authority。\nT13 reserve接口同transaction分配operationbound，不能runhold+childhold doublecount；quote consumed pointer唯一。\n回202顯示已排隊，requesttimeout先查原job或原key重試；不能在UI直接顯示聯絡人成功或扣款完成。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_contact_confirm_atomicity_db.py tests/test_budget_atomicity_db.py tests/test_confirm.py",
+      "rollback": "關閉confirm admission，保留existing jobs/holds及reconciliation；禁止釋放可能已提交reservation。",
+      "operations": [
+        "confirmLookup"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T23",
+      "title": "Contact submit、callbacks、unknown reconciliation 與取消",
+      "phase": "F6",
+      "depends_on": [
+        "T22"
+      ],
+      "audit": [
+        "A13",
+        "A18"
+      ],
+      "bo": "BO-019/020",
+      "modify": [
+        "services/api/buyeros_api/services/provider_op.py",
+        "services/api/buyeros_api/services/callback.py",
+        "services/api/buyeros_api/services/settlement.py",
+        "services/worker/buyeros_worker/handlers/capability_blocked.py"
+      ],
+      "create": [
+        "services/worker/buyeros_worker/handlers/contact_submit.py",
+        "services/worker/buyeros_worker/handlers/reconcile.py",
+        "services/api/buyeros_api/api/routes/enrichment.py",
+        "services/api/buyeros_api/api/routes/provider_callbacks.py",
+        "services/api/tests/test_provider_callbacks_db.py",
+        "services/worker/tests/test_contact_uncertainty_db.py",
+        "tests/e2e/contact-job.spec.ts"
+      ],
+      "interfaces": "T15 `execute_external` 調T14 contactadapter；callback `verify_raw_callback(provider, raw_bytes: bytes, headers: dict) -> dict` 驗真vendor協議再normalized event。由persisted provideroperation定位tenant，不收callback自稱workspace。",
+      "tests": "vendoraccept後workercrash、timeout/connectionreset→unknown且hold保留；sameproviderref重送不重收；outoforder不倒退、digestconflict隔離、bad signature/replay拒絕。cancel前後不同語意；suppression後late resultquarantine、charge合法settle；unknown無safevendoridempotency不得自動resubmit。",
+      "steps": "提交前重新核對policy/suppression/cancel/budget，寫submitting+stable providerkey後commit，網絡不持DB鎖。finalize校驗fencinggeneration，結果、ledger、event同transaction。\nstatus/callback/reconcile使用provider真實capability；無法確認時Operations明示unknown及負責人，不假定failedfree。手動reconcile也要證據reference、reason及權限，不提供任意「標記無扣費」捷徑。\nget/cancel/reconcilejob回per-operation outcomes與funds；contact加provenance、checked_at、validity，值加密/最小化/按purpose授權。UI不把validity當outreach permission。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_provider_callbacks_db.py tests/test_callback.py。services/worker：uv run --frozen pytest -q tests/test_contact_uncertainty_db.py。根目錄：pnpm exec playwright test tests/e2e/contact-job.spec.ts",
+      "rollback": "停止新的submit，保留callback/status/reconcile收斂；未核實unknown不得release資金或重建operation。",
+      "operations": [
+        "getEnrichmentJob",
+        "cancelEnrichmentJob",
+        "reconcileEnrichmentJob",
+        "receiveProviderCallback"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T24",
+      "title": "Sender 身份版本及 grounded draft 產生／編輯",
+      "phase": "F6",
+      "depends_on": [
+        "T23"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-007/021",
+      "modify": [
+        "services/api/buyeros_api/services/draft_service.py",
+        "services/api/buyeros_api/db/drafts.py",
+        "services/api/buyeros_api/api/schemas.py",
+        "services/api/buyeros_api/api/routes/projects.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/drafts.py",
+        "services/worker/buyeros_worker/handlers/draft_generate.py",
+        "features/live/drafts.tsx",
+        "services/api/tests/test_sender_identity_db.py",
+        "services/worker/tests/test_grounded_drafts.py",
+        "tests/e2e/draft-editor.spec.ts"
+      ],
+      "interfaces": "恢復既有ProjectUpdate.sender_identity schema，server產immutable sender_identity_versions與active version_key；reviewer/workspace_admin才可改。`generate_draft(session, actor_id, project_id, request: DraftGenerateRequest) -> AsyncJobResponse`；edit creates new immutable revision，If-Match守護。",
+      "tests": "forged/stale/foreign sender version不可用；sender update與approve race安全。無contact可產unaddressed draft但不能addressed approve/export。不支持的證書/客戶關係/數字承諾必須拒絕或unknown；修改/翻譯/followup建立新revision；generate retry不重扣費。",
+      "steps": "Sender是配置metadata審核，不連mailbox、不證明domainownership。改sender帶confirm/reason/audit，失效相關approval；project role map不能讓一般operator偷偷改sender。\n從approvedofferfacts+permittedbuyerevidence產initial或explicitfollowup；purpose/objective/tone/language/route/promptversion固定，T13/14/15處理model成本/uncertainty。\n草稿list/get/edit持久化，claim-evidence map可檢查；人工修改若增加事實需來源或標示待核實，禁止直接沿用舊approval。UI保存狀態、版本diff、errorfocus、未存離開提示及可選recipient。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_sender_identity_db.py tests/test_draft.py。services/worker：uv run --frozen pytest -q tests/test_grounded_drafts.py。根目錄：pnpm exec playwright test tests/e2e/draft-editor.spec.ts",
+      "rollback": "暫停generation但保留已存draft可讀；不覆寫approvedrevision，sender rollback以新version作審核。",
+      "operations": [
+        "listDrafts",
+        "generateDraft",
+        "getDraft",
+        "editDraft"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T25",
+      "title": "Exact-context 草稿審批與不可寄送邊界",
+      "phase": "F6",
+      "depends_on": [
+        "T24"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-022/030",
+      "modify": [
+        "services/api/buyeros_api/services/approval_service.py",
+        "services/api/buyeros_api/services/approval_fingerprint.py",
+        "services/generated/approval-golden-vectors.json",
+        "services/api/buyeros_api/api/routes/drafts.py"
+      ],
+      "create": [
+        "services/api/tests/test_draft_approval_context_db.py",
+        "tests/e2e/draft-approval.spec.ts"
+      ],
+      "interfaces": "`approve_draft(session, actor_id, draft_id, expected_version, confirmation) -> DraftApprovalResponse` 從server currentcontext計fingerprint；canonical schema/version與Python/TS golden vectors同步。`disabledDeliveryBoundary` 永遠403 DELIVERY_DISABLED且零dispatch。",
+      "tests": "edit/approve race只有一個符合precondition；recipientvalue/contactversion、sender、ICP/evidence/policy、suppression、review變動全部stale。presentationlocale不改message；翻譯是newrevision。client偽hash不能通過；removedmembership拒絕；approved draft呼叫deliver仍403/zerooutbox。",
+      "steps": "requestreview可由指定writer，approve依reviewer/admin；固定鎖序並同步重驗buyer/recipient/policy/sender與sourceaccess，不等背景invalidator。\n把所有materialcontext欄位纳canonicalserialization，明確schema版本；區分ICP raw64hash與draft fingerprint既有sha256前綴，不能混用或改寫historicalhash。\nUI完整展示收件人、寄件身份、正文、來源與條件，必須明確確認exactrevision。任何stale給diff與重新review入口；不顯示Send CTA，API防線不依UI隱藏。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_draft_approval_context_db.py tests/test_approval_fingerprint.py。根目錄：pnpm exec playwright test tests/e2e/draft-approval.spec.ts",
+      "rollback": "停approval/export，保留immutable歷史；禁止回復失效approval以便下載。",
+      "operations": [
+        "requestDraftReview",
+        "approveDraft",
+        "disabledDeliveryBoundary"
+      ],
+      "status": "implemented_fixture_verified_live_activation_blocked"
+    },
+    {
+      "id": "T26",
+      "title": "授權 CSV／草稿 copy/download、撤銷與防注入",
+      "phase": "F6",
+      "depends_on": [
+        "T25"
+      ],
+      "audit": [
+        "A12",
+        "A18"
+      ],
+      "bo": "BO-023",
+      "modify": [
+        "services/api/buyeros_api/services/csv_export.py",
+        "services/api/buyeros_api/db/drafts.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/exports.py",
+        "services/api/buyeros_api/services/export_service.py",
+        "features/live/export-dialog.tsx",
+        "services/api/tests/test_exports_authorization_db.py",
+        "tests/e2e/exports.spec.ts"
+      ],
+      "interfaces": "`create_export(session, actor_id, request) -> ExportResponse`；`authorize_export_content(session, actor_id, export_id: UUID) -> dict` 在download/copy時重新取current policy/context，透過authAPI返回stream。expiry預設900秒，privateobject只由server取。",
+      "tests": "snapshot過期/foreignactor拒絕；exportcreated後revokepolicy/recipient/suppression→download拒絕；copy不绕过同guard。CSV = + - @、leading whitespace/control/tab/CR、Unicode/newline/quotes neutralized；deniedrow counts顯示。export/copy不令任何outcome變sent。",
+      "steps": "company-only與contact-inclusive policy分開；addresseddraft須currentexactapproval與eligiblecontact。非addresseddraft匯出若保留需明顯unapproved/unaddressed且符合獨立policy，不冒稱可寄送。\n使用white-listcolumns、consistentescaping與formula-defense，限定selection/byte上限；job與audit記scope/reasons，不記PII正文。\nUI預覽allowed/excluded及原因，完成後提供有期限下載/approvedcopy；撤權即失效，rawR2URL不可繞過。將T11 failure-report接入同框架。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_exports_authorization_db.py tests/test_csv_export.py。根目錄：pnpm exec playwright test tests/e2e/exports.spec.ts",
+      "rollback": "停新export並revoke現有downloadreferences；保留audit，不刪financial/event歷史。",
+      "operations": [
+        "exportBuyers",
+        "exportDraft",
+        "getExport",
+        "downloadExport"
+      ],
+      "status": "implemented_fixture_verified_live_activation_blocked"
+    },
+    {
+      "id": "T27",
+      "title": "真實 usage、manual outcomes 及團隊工作台",
+      "phase": "F6",
+      "depends_on": [
+        "T26"
+      ],
+      "audit": [
+        "A13",
+        "A15"
+      ],
+      "bo": "BO-024",
+      "modify": [
+        "services/api/buyeros_api/services/usage.py",
+        "services/api/buyeros_api/db/outcomes.py",
+        "features/live/overview.tsx"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/outcomes.py",
+        "services/api/buyeros_api/api/routes/usage.py",
+        "features/live/results.tsx",
+        "services/api/tests/test_usage_outcomes_db.py",
+        "tests/e2e/daily-workbench.spec.ts"
+      ],
+      "interfaces": "`get_usage(session, project_id, from_utc, to_utc, as_of) -> UsageResponse`；`recordOutcome/correctOutcome` append鏈而非overwrite。區間為UTC半開[from,to)，UI以使用者時區說明。",
+      "tests": "同company三contacts denominator=1；zero denominator→null/「—」；failed/partial/cancelled真實cost仍計入；held分列且不doublecount，refund可SignedMoney負值。manualoutcome actor/occurred_at/recorded_at可追溯、correction不刪原記錄；locale轉換不移動period。",
+      "steps": "依03 contracts §9準確定義currentaccepted/newlyaccepted/contactable及blendedcost，不將報價當actualspend、不把人手記錄當已自動送信。\nDashboard「待審／待批准／未分派／失敗／unknown」每張卡點入相同serverfilter，顯示project和as_of，不混期間cost與目前存量。\n支援Outcome新增/更正、authorizedactivity/audit、使用量period filters；索引/aggregation bounded，易懂空狀態及支援request-id。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_usage_outcomes_db.py tests/test_usage.py。根目錄：pnpm exec playwright test tests/e2e/daily-workbench.spec.ts",
+      "rollback": "暫停錯誤metric卡並標不可用；修正projection可rebuild，immutableledger/outcomehistory不可改。",
+      "operations": [
+        "getUsage",
+        "listOutcomes",
+        "recordOutcome",
+        "correctOutcome"
+      ],
+      "status": "implemented_fixture_verified_live_activation_blocked"
+    },
+    {
+      "id": "T28",
+      "title": "Retention、秘密保護、故障恢复及 kill switches",
+      "phase": "F7",
+      "depends_on": [
+        "T27"
+      ],
+      "audit": [
+        "A13",
+        "A18"
+      ],
+      "bo": "BO-026/027",
+      "modify": [
+        "services/api/buyeros_api/settings.py",
+        "services/api/buyeros_api/db/policy.py",
+        "services/worker/buyeros_worker/app.py"
+      ],
+      "create": [
+        "services/worker/buyeros_worker/handlers/retention.py",
+        "services/api/tests/test_retention_authorization_db.py",
+        "services/worker/tests/test_crash_recovery_matrix.py",
+        "docs/buyeros/runbooks/recovery.md",
+        "docs/buyeros/runbooks/retention.md"
+      ],
+      "interfaces": "`expire_subject_data(session, subject_id, policy_version, now) -> dict` 產invalidation/retention audit與durable objectdeletejob；feature kill switches分read/admit/dispatch/reconcile，預設關閉未驗證paidcapability。",
+      "tests": "source/contactexpiry傳播object/cache/checkpoint/evidence/fit/approval/export，不能殘留currentclaim；tokens/DSNs/contact正文不在logs/events/browserbundle。API/worker/broker在commit前後kill，恢復不lostjob、不duplicatesettlement；killnewdispatch仍能reconcileunknown。備份restore後RLS與ledger對帳一致。",
+      "steps": "Retention期限沿owner/controller/source約束，未決部分保持configurationblocked，不能拿工程預設當合法性聲明。保存最低必要audit/financialhash，刪PIIpayload並使derivedcontent失效。\n加入request/job/intent correlation、queueage/lease/unknownhold/error metrics及精簡告警；secret集中serverconfig、redaction與rotationrunbook。\n實作故障矩陣（beforeintent/aftercommit/beforepublish/afteraccept/beforefinalize/afterfinalize）；備份還原和rollforward rehearsal只在disposable/staging，提供操作證據。安全檢查與rate limits覆蓋expensive reads/writes，而非只登入。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_retention_authorization_db.py。services/worker：uv run --frozen pytest -q tests/test_crash_recovery_matrix.py",
+      "rollback": "freezeadmission，保留secure reads/reconcile；刪除不可逆資料之前dry-run與範圍核對，這不授權修改正式資料。",
+      "operations": [],
+      "status": "implemented_disposable_older_backup_replay_verified_external_journal_and_activation_open",
+      "verification": {
+        "focused_api": "16 passed, 0 failed/skipped, 13 warnings; t28-api-final-focus.xml",
+        "full_api": "565 passed, 0 failed/errors/skipped, 109 warnings; t28-api-strict-retry.xml; JUnit gate 565/0/0/0",
+        "worker": "168 passed, 0 failed/errors/skipped, 4 warnings; t28-worker-final-clean.xml; JUnit gate 168/0/0/0",
+        "older_backup_replay": "red restored pre-tombstone source excerpt; green strict disposable two-container API T28 focus 10 passed, 0 failed/errors/skipped, 14 warnings in 55.03s; fixture journal outside DB, READ_DISABLED before/after, RLS, ledger, one delete intent, idempotent replay; external journal custody/completeness and physical deletion not verified",
+        "full_api_after_older_backup": "569 passed, 0 failed/errors/skipped, 110 warnings in 430.47s; t28-older-backup-full-api.xml; required JUnit gate 569/0/0/0; zero running buyeros-test containers afterward"
+      }
+    },
+    {
+      "id": "T29",
+      "title": "效能實測、前端拆分、雙語／手機／無障礙",
+      "phase": "F7",
+      "depends_on": [
+        "T28"
+      ],
+      "audit": [
+        "A11",
+        "A15",
+        "A16"
+      ],
+      "bo": "BO-025/027/028",
+      "modify": [
+        "features/workspace.tsx",
+        "features/ui.tsx",
+        "app/globals.css",
+        "services/live/client.ts",
+        "services/worker/buyeros_worker/dispatcher.py"
+      ],
+      "create": [
+        "features/workspace/shell.tsx",
+        "features/workspace/navigation.tsx",
+        "features/workspace/route-view.tsx",
+        "features/workspace/modals.tsx",
+        "tests/e2e/responsive-accessibility.spec.ts",
+        "scripts/benchmark-buyeros.py",
+        "docs/buyeros/performance-baseline.md"
+      ],
+      "interfaces": "保留對外 Workspace component與routepaths；抽出的shell/navigation/route-view/modals只移責任，不更換frontend。`benchmark-buyeros.py --fixture-size 1000|10000 --workspaces 1|10|100` 輸出機器/commit/dataset/concurrency/P50/P95/querycount/bytes/queueage，targets為本計劃建議驗收值。",
+      "tests": "SQLboundedpages<=100，snapshot<=1000；1000/10000buyers、100projects、100ICPrevisions、10並行staff requests不N+1。390/768/1280/1440px、keyboard、focusreturn、200%zoom、labels/ARIA/contrast、en/zh-HK flows；tablemobilecards與bulkactions可用，無body橫向溢出。",
+      "steps": "先記baseline再優化：EXPLAIN ANALYZE支撐索引；量querycount、P95、responsebytes、DBconnection及dispatchfairness；必要才virtualrows，不把demo24rows當性能證據。\n分次extractworkspace責任，每次跑既有journeyE2E，非首屏draft/adminlazyload、route-levelloading；避免為漂亮diff一次重寫全部48KB component。\n統一locale keys含errors/status/ARIA及html lang；UI數字格式/日期/空值一致、live不hardcoded示例姓名。性能目標見SPEC，記device/network/samplecount，不將lab數字稱productionp75。",
+      "command": "根目錄：pnpm exec playwright test tests/e2e/responsive-accessibility.spec.ts；pnpm exec tsc --noEmit；pnpm lint；pnpm build；python scripts/benchmark-buyeros.py --fixture-size 10000 --workspaces 100",
+      "rollback": "每次小extract可獨立revert；index先確認寫入成本，禁止未量測大量新增index或降低功能換分數。",
+      "operations": [],
+      "status": "partial_ui_and_disposable_performance_verified_postfix_and_release_gates_open",
+      "verification": {
+        "lint": "pnpm.cmd lint exited 0 after T29 action-dialog extraction",
+        "typecheck": "pnpm.cmd exec tsc --noEmit exited 0 after T29 action-dialog extraction",
+        "build": "pnpm.cmd build exited 0 after T29 action-dialog extraction; nonfatal >500 kB client chunk advisory remains",
+        "responsive_demo_fixture": "Final 17 passed, 0 failed/skipped in 1.6m against directly started local Vinext after Outreach extraction; en/zh-HK, 320-1440 CSS pixels, 720px representative reflow, focus return, AX names, navigation/dialog/project/Overview/discovery/Outreach callbacks, mobile bulk, Settings privacy/suppression and quote/list action dialogs. Actual browser 200% zoom unverified.",
+        "responsive_api_fixture": "fresh full workbench suite 8 passed, 0 failed/skipped in 2.7m after scoped form-control contrast fix; en/zh-HK, fixture OIDC/disposable PostgreSQL, 320-1440 CSS pixels",
+        "performance_pre_rate_pool_fix": "10k buyers/100 workspaces; ten distinct fixture staff P95 274.030ms, 11 SQL/request; buyer PATCH P95 62.865ms, run admission P95 88.219ms; 100-workspace broker publish P95 4.039s. All in-process/disposable, no provider/deployed proof.",
+        "rate_pool_regression": "red HTTP 500 SQLAlchemy TimeoutError with one tenant slot; green 2 passed, 0 failed/skipped, 8 warnings in 46.56s on disposable PostgreSQL; strict full API rerun pending after Docker setup stalled",
+        "screenshots": "artifacts/t29-screenshots/*-post-retry.png contains four en/zh-HK 390/1440 fixture screenshots; regenerated zh-results-usage-390-post-extraction.png visually inspected after the 17-test suite with SHA256 E3E8B8BEB965BEB206DE02482D60DD511A05FF1FFCAAB3464138F2845956BF28",
+        "remaining": "Actual browser 200% zoom, screen reader and non-text contrast of other controls/icons remain unverified; T30 addressed exact approval continuity and current strict API/worker/API-backed browser gates after Docker recovery; external activation. T29 demo route/table code is locally implemented but these acceptance conditions remain open.",
+        "performance_post_rate_pool_fix": "10k buyers/100 workspaces; sequential read P95 39.377ms, ten distinct fixture staff P95 244.895ms, 11 SQL/request, 10 DB connections; buyer PATCH P95 60.865ms, run admission P95 168.524ms, 100-workspace broker publish P95 2.280s. API 1/1, dispatcher 1/1, mutation 1/1; in-process/disposable only.",
+        "accessibility": "measured browser-computed text contrast for visible Overview, Results and Operations text in en/zh-HK; new form-control boundary/fill regression red 16 Results controls at 1.0-1.27:1, green focused 1/1 in 1.9m and full workbench 8/8 in 2.7m. Actual zoom, screen reader and unmeasured non-text elements pending",
+        "scope_list_timeout": "red permanent spinner on held first GET; bounded timeout/retry green focused 1 passed in 3.1m and included in full 7/7 suite",
+        "strict_api": "567 passed, 0 failed/errors/skipped, 109 warnings in 310.90s; required JUnit gate 567/0/0/0 after admission-pool fix",
+        "strict_worker": "168 passed, 0 failed/errors/skipped, 4 warnings in 41.33s; required JUnit gate 168/0/0/0",
+        "actual_zoom": "2026-09-30: isolated Chromium extension tabs.setZoom/getZoom 2.0; observed 1440->720 CSS px and DPR 1->2. Final pnpm.cmd exec playwright test --config playwright.zoom.config.ts tests/e2e/actual-browser-zoom.spec.ts --reporter=line passed 2/2, 0 failed/skipped in 22.9s across six fictional demo routes in en/zh-HK; element bounds, text clipping and document overflow asserted. Screen reader, remaining non-text contrast and API-backed actual zoom unverified. Misleading CDP/Playwright zoom captures were removed; prior responsive screenshots retained.",
+        "navigation_extraction": "Demo sidebar and top-bar shell moved into features/workspace/navigation.tsx and shell.tsx with parent-owned route/usage/locale callbacks preserved; focused sidebar Playwright 1/1 in 2.3m, final full demo responsive/accessibility 7/7 in 4.1m; pnpm lint, tsc --noEmit and Vinext production build passed. Demo fixtures, not live identity/provider or actual 200% zoom.",
+        "modal_extraction": "features/workspace/modals.tsx owns fictional source and connection requirements dialogs with parent-owned open state; focused browser 1/1 in 2.1m, full demo responsive 8/8 in 3.1m; full lint, tsc --noEmit and Vinext build pass. Route view/general action modal extraction remains open.",
+        "route_heading_extraction": "features/workspace/route-view.tsx owns demo project strip, localized page heading and sample/new-search actions; parent still owns route and modal state. Focused browser 1/1 in 2.8m; final full demo suite 9/9 in 3.4m; full lint, tsc --noEmit and Vinext build passed. Route bodies remain in parent.",
+        "results_route_extraction": "Red zh-HK Results browser 1 failed at untranslated usage labels; Results body extracted to route-view.tsx with parent-owned outcome updates; focused green 1/1 in 2.7m, 390px mobile bulk 1/1 in 1.7m, full demo 11/11 in 3.0m. 390px screenshot SHA256 CED75E7A0DA08CCDA31D2CFB917E81044CA209EED18859C2E599538E9878FE0C visually inspected. Lint, typecheck, build, generated API types and 78-operation route map pass. No schema change.",
+        "settings_route_extraction": "Demo Settings body extracted into route-view.tsx with typed callbacks; parent retains locale, storage and suppression state. Existing Field already localized Company. Settings save/privacy/suppression browser baseline 1/1 in 1.8m and post-extraction 1/1 in 2.7m; final full demo suite 12/12 in 4.2m. Typecheck, lint and Vinext build pass; no schema change.",
+        "settings_connection_locale": "Focused zh-HK browser failed 1/1 with raw Research in Settings connection list; applying t(connection) passed focused 1/1 in 1.7m. Playwright-managed cold full rerun failed before tests due verified stale lock, then a worker-runner startup error; direct local pnpm dev started and warm-server full browser suite passed 12/12 in 1.2m. Final lint, tsc and build pass; startup root cause remains unproven.",
+        "action_dialog_extraction": "DemoActionDialog presentation extracted to features/workspace/modals.tsx with parent-owned actions and reservations. Quote cancel/confirm baseline 1/1 in 4.4s; post-extraction focused 4/4 in 11.8s; Settings unsuppress and list create/rename focused 2/2 in 6.6s; final full demo responsive 14/14 in 1.2m, 0 failed/skipped. pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, generated API type check, 78-operation route check and git diff --check exited 0. Sole Alembic head 0033_api_rate_windows; no migration. Direct dev server stopped, verified stale lock removed; managed cold-start cause unproven.",
+        "overview_route_extraction": "DemoOverviewView extracted from features/workspace.tsx to route-view.tsx with parent-owned metric/project navigation. New Overview browser regression first failed from premature click before hydration, then baseline 1/1 in 5.1s after explicit readiness waits and post-extraction 1/1 in 6.6s. Initial lint had one unused icon warning, removed; final full browser 15/15 in 1.2m, 0 failed/skipped. pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, generated API type check, 78-operation route check and git diff --check exited 0; build has nonfatal >500 kB advisory. No schema/provider change, migration or production action.",
+        "lists_route_extraction": "DemoListsView extracted fictional Lists strip/actions to route-view.tsx; parent retains selected list, routing, modal mutations and buyer table. Extended list-create/rename browser with route selection: baseline 1/1 in 9.1s, post-extraction 1/1 in 4.5s, final full responsive suite 15/15 in 1.2m with 0 failed/skipped. pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, generated API type check, 78-operation route check and git diff --check exited 0. No schema/provider change or migration; nonfatal >500 kB build advisory remains.",
+        "discovery_route_extraction": "DemoDiscoveryRunView extracted the fictional run summary, status panel, review prompt and history into route-view.tsx with parent-owned filters, run cancel/retry and navigation; shared buyer table remains parent-owned. New discovery filter/history browser regression baseline 1/1 in 10.7s and post-extraction 1/1 in 11.4s; final full demo suite 16/16 in 1.4m with 0 failed/skipped. Initial lint warned about four obsolete parent imports, removed; final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, generated API types, 78-operation route check and git diff --check exited 0. Sole Alembic head 0033_api_rate_windows. No schema/provider change. API-backed browser and strict DB gates not rerun because local Docker cannot start isolated fixtures.",
+        "outreach_route_extraction": "DemoOutreachView extracted fictional recipient queue, editor and review panel into route-view.tsx; parent retains draft selection, edit, review request, exact approval and modal state. New browser regression first failed because test edited sender/policy after review request, correctly invalidating review; corrected pre-extraction baseline 1/1 in 4.4s, post-extraction focused 1/1 in 7.0s, final full responsive 17/17 in 1.6m with 0 failed/skipped. Initial lint had three obsolete parent-import warnings, removed; final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, generated API types, 78-operation route check and git diff --check exited 0. No schema/live provider or delivery change. API-backed/browser strict gates remain blocked by local Docker.",
+        "buyer_table_extraction": "Shared fictional buyer table moved to features/workspace/buyer-table.tsx with typed presentation props; DemoWorkspace retains filter, selection, pagination, export, list mutation and buyer navigation state. New desktop real-page regression baseline 1/1 in 6.3s and post-extraction focused 2/2 in 13.2s. Initial regression failed after a full page reload discarded expected session-only list state; corrected to in-app navigation. Mobile screenshot exposed a sidebar sheet remaining open after route selection; added hidden-sheet assertion, observed red 1/1, then closed mobile sheet on navigation in navigation.tsx and observed green 1/1. Strengthened 390px test saves a page-two buyer absent from the seed list, confirms list grows 3->4, and passed focused 1/1 in 8.4s. Final direct Vinext responsive/accessibility suite 18/18, 0 failed/skipped in 1.7m. Final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, node scripts/generate-api-types.mjs --check, services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; build retains nonfatal >500 kB chunk advisory. Visually inspected en buyer page-two 1280 screenshot SHA256 0C51B0EDBB6762344C6CF86DB267DCDB2C56AAEA49242BAAC631A43013B49634 and en saved-list 390 screenshot SHA256 C716797B484F3FE64D7FB9BA8892D3D9BD7EA90F4910222E7F7574FED8A98E96. No schema/provider/delivery change; current strict DB gate still blocked by local Docker startup.",
+        "full_buyer_route_extraction": "DemoFullBuyerView moved fictional full-buyer route wrapper and missing-record recovery to features/workspace/route-view.tsx; parent retains route/data/action/source/update callbacks and shared BuyerDetail drawer. Baseline new full-dossier regression red 1/1 because hidden Full-page view was assumed as return control; revised to require a visible Return to buyers action, observed red 1/1, then green 1/1 in 5.2s after adding accessible return. zh-HK 390px dossier passed 1/1; added untranslated note-placeholder assertion red 1/1, localized it in BuyerDetail/locales and focused green 2/2 in 8.8s. Final direct Vinext responsive/accessibility suite 20/20, 0 failed/skipped in 1.5m. Final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, node scripts/generate-api-types.mjs --check and services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; build retains nonfatal >500 kB chunk advisory. Visually inspected zh-buyer-full-390-post-extraction.png SHA256 9D93F87A9FFD949527022B1375ADF9CE7369518FFD06B83C5476E78C36A3656D. No schema/provider/delivery change.",
+        "nontext_buyer_controls": "New browser-computed contrast regression for visible demo buyer search and desktop filter boundaries in en/zh-HK at 390/1280 CSS px: red 1/1, search border rgb(224,229,238) measured 1.26:1 on white; scoped CSS changed border to #6d7c8f (4.26:1 on white), focused green 1/1 in 5.6s. Final directly started Vinext responsive/accessibility suite 21/21, 0 failed/skipped in 1.6m. Final pnpm.cmd build, pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, node scripts/generate-api-types.mjs --check and services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; nonfatal >500 kB client chunk advisory remains. Final desktop/mobile screenshots visually inspected with SHA256 0C51B0EDBB6762344C6CF86DB267DCDB2C56AAEA49242BAAC631A43013B49634 and C716797B484F3FE64D7FB9BA8892D3D9BD7EA90F4910222E7F7574FED8A98E96.",
+        "release_reconciliation": "2026-09-29: 410 unstaged paths, 0 staged; current strict API blocked at disposable Docker startup, earlier 569/569 API and 169/169 worker are historical fixture runs. Desktop browser-control initialization failed under Windows ACL, but an isolated Chromium extension subsequently verified actual 200% zoom 2/2 on demo routes; screen reader remains unverified. Demo responsive/accessibility remains prior 21/21; no new browser pass claimed."
+      }
+    },
+    {
+      "id": "T30",
+      "title": "整體驗收、部署證據、可審閱 pilot release",
+      "phase": "F7",
+      "depends_on": [
+        "T29"
+      ],
+      "audit": [
+        "A17"
+      ],
+      "bo": "BO-028/029/030",
+      "modify": [
+        "docs/buyeros/PROGRESS.md",
+        "docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md",
+        "docs/buyeros/tasks/index.json"
+      ],
+      "create": [
+        "tests/e2e/mvp-a-journey.spec.ts",
+        "docs/buyeros/runbooks/release.md",
+        "docs/buyeros/RELEASE_READINESS.md",
+        "docs/buyeros/PILOT_EXECUTION_RECORD.md"
+      ],
+      "interfaces": "輸入：所有task evidence/mergedHEAD、schema revision、CI artifacts、auth/provider/hosting configuration records。輸出：releasecandidate+stagingproof、blockedlist、rollbackplan及可供owner最後批准的pilot實際範圍/最高費用。本plan的保存不是production/spend授權。",
+      "tests": "真HTTP+DB+worker+broker fixture journey：登入→create/editoffer→approve→research→review→list/assign→optionalquoteconfirm→groundeddraft→approve→authorizedexport→manualoutcome→reload，雙角色雙語。缺requiredDBsuite不得skip當pass。deliverendpoint始終403/零mailbox連線。approvedconfig下另驗真Auth0與boundedprovider，未獲授權則NOT RUN。",
+      "steps": "把unit/integration/DOM/chaos/performance與migrationrestore結果綁定releaseSHA；70原operations全部有明確disposition，新extension也列出；不要求把disabledDelivery改成功。對未可啟用vendor操作用503 blocked而非decorativeready，清楚區分implemented-fixture與liveverified。\n準備Render API/worker/dispatcher/Valkey、Neon runtimepool/directmigration、privateR2及Auth0callback具體configdiff、health/rollback/checklist；沿既有服務，不自動另開雲資源。部署若已授權可執行，否則做到可審閱releasecandidate再列明尚需批准的具體action。\n小pilot限定已批准workspace/users/markets/caps/provider/retention和stopconditions；實际呼叫前budgetsignedoff、unknownrecovery演練完成。保留無contact路徑。最後交changedfiles、testresults、screenshots、release/deployedSHA、migration/rollback與remainingblocks。BO-030只保留disabledboundary，發信另一期。",
+      "command": "根目錄：pnpm exec playwright test tests/e2e/mvp-a-journey.spec.ts；執行 T00 全套 CI＋required no-skip gates；照 release.md 在明確target核對 readiness/部署SHA。此處不是一條可無條件執行的 production deploy 指令。",
+      "rollback": "先關admission/dispatch，保留reconciliation；回退compatibleapp或rollforward資料，保留ledger/history。不得為回退重置DB或清queue。",
+      "operations": [],
+      "status": "partial_same_dataset_offer_approval_research_to_grounded_draft_addressed_approval_and_release_gates_open",
+      "verification": {
+        "release_preparation": "RELEASE_READINESS.md, runbooks/release.md, PILOT_EXECUTION_RECORD.md and pilot/evaluation-protocol.md drafted without external action",
+        "full_staff_journey": "PARTIAL: one disposable project passes UI offer edit, saved ICP v2 exact reviewer approval, browser-created bounded research, broker/worker fit, reviewer list/assignment and worker-generated grounded unaddressed draft. Offer creation and addressed exact approval/export/outcome are verified in separate fixtures; full continuity and external activation remain open",
+        "deployment": "not authorized or performed",
+        "partial_ui_journey": "1 passed, 0 failed/skipped in 2.7m: same seeded project/buyer evidence, list, assignment, exact approval, authorized export, manual outcome, refresh, zh-HK mobile; viewer export 403 and delivery 403; fixture OIDC/disposable PostgreSQL only",
+        "screenshots": "artifacts/t30-screenshots/en-fixture.png and zh-mobile-fixture.png visually inspected with SHA256 recorded in REMAINING_DEVELOPMENT_STATUS.md",
+        "fixture_cleanup": "red guard listed 17 specialized configs missing globalTeardown; green node test 1/1 after wiring existing teardown; T30 partial rerun 1/1 in 2.1m and zero running buyeros-test containers/absent marker afterward",
+        "broker_worker_research": "separate disposable PostgreSQL16/Valkey8/Celery fixture 1 passed, 0 failed/skipped, 4 warnings in 24.21s; cited evidence, buyer, USD 0.050000 cost, cleared hold and terminal outbox; no external provider",
+        "same_dataset_research_to_draft": "pnpm.cmd exec playwright test --config playwright.mvp-research.config.ts --reporter=line: 1 passed, 0 failed/skipped in 2.4m after adding UI offer edit and exact reviewer approval; one disposable PostgreSQL project, fake OIDC, two separate Valkey/Celery passes, completed match fit, accepted/listed/assigned buyer and zero-cost grounded draft containing the edited offer fact; no live provider; current-CSS rerun 1/1 in 3.6m",
+        "same_dataset_screenshots": "artifacts/t30-screenshots/ui-worker-grounded-en-fixture.png SHA256 AA8E683EE487771C8C203B61777C60B3C72679044CBB5B8D9527990B7B047A3A; ui-worker-grounded-zh-mobile-fixture.png SHA256 29EF16FE5945FC9BAFDB4C6C51C53B7DBD25826FCA3022527AF5E1A13F9D7E54; visually inspected",
+        "strict_worker": "169 passed, 0 failed/errors/skipped, 4 warnings in 47.82s; JUnit gate 169/0/0/0 after approval projection fix",
+        "strict_api": "569 passed, 0 failed/errors/skipped, 109 warnings in 255.96s; JUnit gate 569/0/0/0 after approval projection fix",
+        "final_local_checks": "pnpm.cmd build, pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, 78-operation route check, generated API type check, fixture teardown guard 1/1, TASKS JSON, sole Alembic head 0033 and git diff --check passed",
+        "saved_fact_authority": "red DB regression 1 failed; green 1 passed, 8 warnings in 9.77s; saved content/hash unchanged; reviewer-approved user/document facts derived at read/admission/worker/recheck, model inference excluded; focused API 31/31, worker 5/5, T07 browser 1/1 in 2.1m",
+        "addressed_gate_code_audit": "Code audit: admit_grounded_template returns 503 PROVIDER_UNAVAILABLE for nonzero max_cost and any recipient_contact_id; edit_draft returns 503 for non-null recipient_contact_id. Same-project generated unaddressed draft cannot safely become addressed without a named provider/policy activation; no approval record or live call was fabricated.",
+        "finishing_branch_gate": "2026-09-29 user-invoked finishing-a-development-branch gate on HEAD f43a9d88 plus 402 unstaged paths: domain checks 11/11, live-adapter checks 73/73, Node tests 3/3 with zero skips, pnpm lint, tsc --noEmit, Vinext build, generated API types and 78-operation route check passed. Current strict API full run produced widespread setup errors and was interrupted without a valid full count; fail-fast rerun had 1 setup error in 89.33s because services/api/tests/conftest.py disposable docker run timed out after 30 seconds. Seven containers created by this run remain in Created state after Docker inspect and rm stalled; no running fixture container was observed. Strict worker and browser journey were not rerun after the API gate failed. Earlier API 569/569 and worker 169/169 are historical fixture evidence only. Skill completion/merge/PR menu is ineligible while T29/T30 partial and current full strict gate is red.",
+        "docker_control_probe": "2026-09-29 bounded Docker probe: docker info and ps respond, but inspect timed out after 15s and start timed out after 20s for one exact no-volume buyeros-test container created by the failed strict API fixture; it remained Created. Seven own Created containers remain, none running. Docker Desktop hosts many active unrelated project containers, so restart was not performed. The current strict API/worker fixture gate remains blocked by local Docker; earlier 569/569 and 169/169 are historical only. No DB skip was converted to pass.",
+        "release_reconciliation": "2026-09-29: RELEASE_READINESS.md corrected to 410-path inventory and historical strict-test wording. API_OPERATION_STATUS.csv has 78 rows, all handler_present and deployed=unverified. One exact no-volume BuyerOS container inspect stalled; 13 BuyerOS test containers remain Created while approximately 122 unrelated containers run, so no disruptive Docker Desktop restart was performed. Current strict API gate is blocked at fixture setup; worker/API-backed browser not rerun. No external action, commit or deployment.",
+        "current_local_release_checks": "2026-09-29: domain 11/11, live-adapter 73/73, Node contract/cleanup 3/3 with zero skips; tsc, lint, Vinext build, API type check, 78-route map and diff --check exit 0. Pack-to-ledger 70/70 original plus eight extensions; 78/78 handlers, 78/78 deployed unverified. Sole Alembic head 0033_api_rate_windows. Current strict DB fixture remains blocked and is not counted as passing.",
+        "docker_maintenance_attempt": "2026-09-30: user confirmed restart. Normal docker desktop restart exited 1, context deadline exceeded stopping Desktop; Linux engine pipe unavailable. Synchronous start hung/interrupted; bounded detached start exited 0 with Starting Docker Desktop, latest status starting but engine readiness unverified. No current strict DB pass, no force kill or unrelated container removal. Draft PR authorized and being prepared.",
+        "published_pr_ci": "2026-09-30 HK: draft PR #7; CI run 36598703202 on code commit f8eaec7 passed frontend, API 569/569 zero skips, worker 169/169 zero skips, browser smoke 1/1. Initial smoke red 401 from missing fixture bearer, fixed in test with explicit negative 401. Local Docker restart failed from WSL CommandTimedOut; full T30 journey and live activation remain open."
+      }
+    }
+  ],
+  "proposed_new_operations": [
+    {
+      "operation_id": "assignBuyerOwners",
+      "task": "T11"
+    },
+    {
+      "operation_id": "listMemberships",
+      "task": "T12"
+    },
+    {
+      "operation_id": "updateMembership",
+      "task": "T12"
+    },
+    {
+      "operation_id": "retryFailedAsyncJob",
+      "task": "T11"
+    },
+    {
+      "operation_id": "cancelAsyncJob",
+      "task": "T11"
+    },
+    {
+      "operation_id": "listAsyncJobs",
+      "task": "T12"
+    }
+  ],
+  "warnings": [
+    "Supplied task tests were proposals; current execution results are in REMAINING_DEVELOPMENT_STATUS.md.",
+    "Audit 338 passed/53 skipped is historical baseline evidence, not release verification.",
+    "T28 external restore replay, T29 actual zoom/assistive review and T30 complete offer-to-addressed-approval journey/release remain open; preserve newer source and unrelated changes."
+  ],
+  "reviewed_source_sha": "f8eaec7fe4e11252915106b322e95f2f70ed97c4",
+  "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
+  "next_eligible_task": "T29"
+}

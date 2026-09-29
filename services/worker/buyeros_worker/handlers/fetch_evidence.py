@@ -63,4 +63,7 @@ def handle(session, context, payload) -> HandlerResult:
         validate_fetch(url, content_type, size_value)
     except FetchRejected as exc:
         return HandlerResult(state="blocked", detail=str(exc))
-    return HandlerResult(state="done", detail="validated; retrieval client is not enabled in this phase")
+    return HandlerResult(
+        state="blocked",
+        detail="fetch.evidence: retrieval and persistence are not configured",
+    )

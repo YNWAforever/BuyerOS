@@ -1,0 +1,127 @@
+name: BuyerOS CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node tests/domain-checks.mjs
+      - run: node tests/live-adapter-checks.mjs
+      - run: node tests/live-auth-checks.mjs
+      - run: node --test tests/api-types-generation.test.mjs
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm lint
+      - run: pnpm build
+
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: buyeros
+          POSTGRES_PASSWORD: buyeros
+          POSTGRES_DB: buyeros_test_api
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U buyeros -d buyeros_test_api"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      BUYEROS_TEST_DATABASE_URL: postgresql://buyeros:buyeros@127.0.0.1:5432/buyeros_test_api
+      BUYEROS_STRICT_INTEGRATION: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install uv==0.11.27
+      - run: uv sync --frozen
+        working-directory: services/api
+      - run: uv run --frozen python ../../scripts/generate-operation-routes.py --check
+        working-directory: services/api
+      - run: mkdir -p artifacts
+        working-directory: services/api
+      - run: uv run --frozen pytest -q --junitxml=artifacts/tests.xml
+        working-directory: services/api
+      - run: python scripts/check-required-tests.py --junit services/api/artifacts/tests.xml
+
+  worker:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: buyeros
+          POSTGRES_PASSWORD: buyeros
+          POSTGRES_DB: buyeros_test_worker
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U buyeros -d buyeros_test_worker"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      valkey:
+        image: valkey/valkey:8
+        ports: ['6379:6379']
+    env:
+      BUYEROS_TEST_DATABASE_URL: postgresql://buyeros:buyeros@127.0.0.1:5432/buyeros_test_worker
+      BUYEROS_STRICT_INTEGRATION: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install uv==0.11.27
+      - run: uv sync --frozen
+        working-directory: services/worker
+      - run: mkdir -p artifacts
+        working-directory: services/worker
+      - run: uv run --frozen pytest -q --junitxml=artifacts/tests.xml
+        working-directory: services/worker
+      - run: python scripts/check-required-tests.py --junit services/worker/artifacts/tests.xml
+
+  browser-smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: buyeros
+          POSTGRES_PASSWORD: buyeros
+          POSTGRES_DB: buyeros_test_e2e
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U buyeros -d buyeros_test_e2e"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      BUYEROS_TEST_DATABASE_URL: postgresql://buyeros:buyeros@127.0.0.1:5432/buyeros_test_e2e
+      BUYEROS_STRICT_INTEGRATION: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install uv==0.11.27
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --frozen
+        working-directory: services/api
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test tests/e2e/harness.spec.ts

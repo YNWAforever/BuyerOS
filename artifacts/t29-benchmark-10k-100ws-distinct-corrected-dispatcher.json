@@ -1,0 +1,22 @@
+{
+  "source_sha": "f43a9d88b334c2c4029fa06fa71624ed52efe4a2",
+  "machine": "Windows-11-10.0.26200-SP0",
+  "conditions": {
+    "database": "disposable PostgreSQL 16 Docker",
+    "broker": "disposable Valkey 8 Docker",
+    "worker_process": "not started; publish_message enqueues to real broker",
+    "event_type": "source.delete non-paid fixture",
+    "workspaces": 100,
+    "ready_intents": 100,
+    "dispatcher_time_budget_seconds_per_cycle": 5
+  },
+  "published_unique": 100,
+  "cycles": 1,
+  "visited": 100,
+  "ready_to_publish_seconds": {
+    "p50": 3.41,
+    "p95": 4.039,
+    "max": 4.084
+  },
+  "every_workspace_progressed": true
+}

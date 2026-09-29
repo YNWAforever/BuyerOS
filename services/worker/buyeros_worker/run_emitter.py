@@ -45,13 +45,17 @@ async def emit_run_event(session, run_id, event_type: str, *, transition: str | 
         if new_status != run.status:
             run.status = new_status
 
+    details = {"version": run.version, "stage": run.stage,
+               "company_count": (run.usage_counters or {}).get("companies", 0),
+               "raw_count": run.raw_result_count}
+    details.update(payload or {})
     session.add(
         RunEvent(
             workspace_id=run.workspace_id,
             run_id=run_key,
             sequence=sequence,
             event_type=event_type,
-            payload=payload or {},
+            payload=details,
         )
     )
     return sequence

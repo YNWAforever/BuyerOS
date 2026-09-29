@@ -16,9 +16,15 @@ def test_buyers_list_requires_auth():
 
 
 def test_unimplemented_registry_uses_declared_contract_paths():
-    assert UNIMPLEMENTED_OPERATIONS["startRun"] == (
-        "post",
-        "/v1/workspaces/{workspace_id}/projects/{project_id}/runs",
+    assert "startRun" not in UNIMPLEMENTED_OPERATIONS
+    assert {"listRuns", "getRun", "cancelRun", "retryRun", "getRunEvents"}.isdisjoint(
+        UNIMPLEMENTED_OPERATIONS
+    )
+    assert {"listDrafts", "generateDraft", "getDraft", "editDraft"}.isdisjoint(
+        UNIMPLEMENTED_OPERATIONS
+    )
+    assert {"exportBuyers", "exportDraft", "getExport", "downloadExport"}.isdisjoint(
+        UNIMPLEMENTED_OPERATIONS
     )
     for method, path in UNIMPLEMENTED_OPERATIONS.values():
         assert method in {"get", "post", "patch", "delete"}
@@ -62,9 +68,26 @@ def test_registry_covers_every_unimplemented_contract_operation():
         "getCapabilities",
         "listBuyers",
         "getBuyer",
+        "listBuyerEvidence",
+        "getEvidence",
+        "createBuyerSnapshot",
+        "updateBuyer",
+        "reviewBuyers",
+        "listBuyerLists", "createBuyerList", "getBuyerList", "renameBuyerList",
+        "changeListMemberships", "listFilterPresets", "saveFilterPreset",
+        "assignBuyerOwners", "getAsyncJob", "listAsyncJobs", "retryFailedAsyncJob", "cancelAsyncJob",
+        "listMemberships", "updateMembership", "getPreferences", "updatePreferences", "listAuditEvents",
+        "listBudgets", "updateBudget", "startRun", "listRuns", "getRun", "cancelRun", "retryRun", "getRunEvents",
+        "quoteLookup", "getLookupQuote", "cancelLookupQuote", "confirmLookup",
+        "getEnrichmentJob", "cancelEnrichmentJob", "reconcileEnrichmentJob", "receiveProviderCallback",
+        "listPolicyDecisions", "recordPolicyDecision", "listSuppressions", "createSuppression", "removeSuppression",
+        "uploadOfferDocument", "ingestOfferUrl", "getOfferDocument", "listOfferDocuments", "deleteOfferDocument",
+        "listDrafts", "generateDraft", "getDraft", "editDraft",
+        "requestDraftReview", "approveDraft", "disabledDeliveryBoundary",
+        "exportBuyers", "exportDraft", "getExport", "downloadExport", "exportBulkFailures",
+        "getUsage", "listOutcomes", "recordOutcome", "correctOutcome",
     }
     out_of_slice = set(_contract_operations()) - implemented
-    assert out_of_slice, "contract parse produced no out-of-slice operations"
     assert out_of_slice == set(UNIMPLEMENTED_OPERATIONS)
 
 
@@ -100,29 +123,13 @@ def test_list_buyers_declares_the_required_snapshot_id():
     assert snapshot[0]["required"] is True
 
 
-def test_unimplemented_handler_actually_returns_501(monkeypatch):
-    """The 401 test cannot prove 501; this drives the handler with a satisfied principal."""
-    from buyeros_api.api import auth
-    from buyeros_api.api.app import create_app as _create_app
-    from buyeros_api.settings import get_settings
-
-    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
-    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
-    get_settings.cache_clear()
-
-    class _StubVerifier:
-        async def verify(self, token):
-            return auth.Principal(issuer="https://issuer.test/", subject="auth0|1")
-
-    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: _StubVerifier())
-    try:
-        client = TestClient(_create_app(), raise_server_exceptions=False)
-        response = client.post(
-            f"/v1/workspaces/{WORKSPACE}/projects/{PROJECT}/runs",
-            json={},
-            headers={"Authorization": "Bearer t"},
-        )
-        assert response.status_code == 501
-        assert response.json()["code"] == "NOT_IMPLEMENTED"
-    finally:
-        get_settings.cache_clear()
+def test_no_declared_operation_is_left_on_a_501_stub():
+    """All contract operations now have domain routes; no stub may shadow one."""
+    app = create_app()
+    assert not UNIMPLEMENTED_OPERATIONS
+    contract = set(_contract_operations().values())
+    registered = {(method, path) for path, methods in app.openapi()["paths"].items()
+                  for method in methods if method in {"get", "post", "patch", "put", "delete"}}
+    assert contract <= registered
+    assert not [route for route in app.routes
+                if getattr(getattr(route, "endpoint", None), "__name__", "").startswith("not_implemented_")]

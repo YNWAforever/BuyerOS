@@ -956,5 +956,6 @@
       "task_id": "BO-030",
       "title": "Design a separately approved controlled delivery phase without activating it"
     }
-  ]
+  ],
+  "current_execution_tracker": "docs/buyeros/remaining/TASKS.json"
 }

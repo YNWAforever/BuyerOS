@@ -12,9 +12,20 @@ disposed its own engine); the hook is the safety net.
 """
 
 import asyncio
+import selectors
+import sys
 from threading import Lock
 
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+
+
+def run_async(coro):
+    """Use a psycopg-compatible loop in every Windows Celery child process."""
+    if sys.platform == "win32":
+        return asyncio.run(
+            coro, loop_factory=lambda: asyncio.SelectorEventLoop(selectors.SelectSelector())
+        )
+    return asyncio.run(coro)
 
 
 def async_database_url(url: str) -> str:
@@ -29,7 +40,10 @@ def async_database_url(url: str) -> str:
 def create_engine() -> AsyncEngine:
     from buyeros_api.settings import get_settings
 
-    return create_async_engine(async_database_url(get_settings().database_url))
+    return create_async_engine(
+        async_database_url(get_settings().database_url),
+        pool_size=2, max_overflow=0, pool_pre_ping=True,
+    )
 
 
 _active_engine: AsyncEngine | None = None
@@ -49,4 +63,4 @@ def dispose_engine(**_: object) -> None:
         engine = _active_engine
         _active_engine = None
     if engine is not None:
-        asyncio.run(engine.dispose())
+        run_async(engine.dispose())

@@ -38,7 +38,7 @@ const map=await loadModule('services/live/mapping.ts');
 
 await test('workspaces map to the narrow model',()=>{
   const payload={items:[{id:'ws-1',name:'Acme',roles:['viewer'],data_mode:'live'}],offset:0,limit:1,total:1};
-  assert.deepEqual(map.toWorkspaces(payload),[{id:'ws-1',name:'Acme',roles:['viewer']}]);
+  assert.deepEqual(map.toWorkspaces(payload),[{id:'ws-1',name:'Acme',roles:['viewer'],membershipId:null}]);
 });
 
 await test('projects map to the narrow model',()=>{
@@ -51,11 +51,6 @@ await test('icp versions map approved_at to approvedAt and keep the hash',()=>{
   assert.deepEqual(map.toIcpVersions(payload),[{id:'i-1',number:2,contentHash:'sha256:aa',status:'approved',approvedAt:'2026-09-01T00:00:00Z'}]);
 });
 
-await test('buyers map to the narrow model and keep a null note as null',()=>{
-  const payload={items:[{id:'b-1',name:'Example GmbH',note:null}],offset:0,limit:1,total:1};
-  assert.deepEqual(map.toBuyers(payload),[{id:'b-1',name:'Example GmbH',note:null}]);
-});
-
 await test('a missing required field raises instead of becoming an empty value',()=>{
   assert.throws(()=>map.toBuyers({items:[{id:'b-1',note:null}],offset:0,limit:1,total:1}),map.MapError);
   assert.throws(()=>map.toWorkspaces({items:[{name:'no id'}]}),map.MapError);
@@ -66,7 +61,7 @@ await test('a missing required field raises instead of becoming an empty value',
 await test('every mapper enforces its required fields',()=>{
   assert.throws(()=>map.toProjects({items:[{id:'p-1',name:'Sensors'}]}),map.MapError);
   assert.throws(()=>map.toIcpVersions({items:[{id:'i-1',content_hash:'h',status:'s'}]}),map.MapError);
-  assert.throws(()=>map.toBuyers({items:['not-an-object']}),map.MapError);
+  assert.throws(()=>map.toBuyers({items:[{id:'b-1',name:'X'}]}),map.MapError);
 });
 
 await test('a workspace missing roles raises rather than defaulting to an empty list',()=>{
@@ -404,22 +399,33 @@ await test('toIcpSaveRequest maps requirements with their categories',()=>{
   const r=profile.toIcpSaveRequest(offer);
   assert.deepEqual(r.requirements.map(x=>x.category),['must','must','nice','exclude']);
   assert.ok(r.requirements.every(x=>typeof x.id==='string'&&x.id.length>0));
+  assert.ok(r.requirements.every(x=>/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(x.id)));
+  assert.equal(new Set(r.requirements.map(x=>x.id)).size,r.requirements.length);
   assert.deepEqual(r.buyer_types,['Distributor']);
+});
+
+await test('ICP payload carries user-entered product and value facts before any write',()=>{
+  const offer={company:'Acme',product:'Sensors',value:'Reduces downtime',website:'',markets:'Germany',language:'English',must:'Distributor',buyerTypes:['Distributor']};
+  const first=profile.toIcpSaveRequest(offer), retry=profile.toIcpSaveRequest(offer);
+  assert.deepEqual(first.offer_facts,retry.offer_facts);
+  assert.deepEqual(first.offer_facts.map(f=>[f.field,f.value,f.provenance,f.approved]),[
+    ['product','Sensors','user_entered',false],['value_proposition','Reduces downtime','user_entered',false],
+  ]);
 });
 
 const writes=await loadModule('services/live/writes.ts');
 
-function liveSession(project=null){return {current:()=>({mode:'live',actor:'a',workspace:'w',project}),token:()=>'tok',identity:()=>'live:a:w:'+(project||'-')};}
+function liveSession(project=null){const s=new SessionScope({mode:'live',actor:'a',workspace:'w',project});s.setToken('tok');return s;}
 
 await test('saveProfile creates the project then saves a version, in order',async()=>{
   const calls=[];
   const client={request:async({path,method,idempotencyKey,ifMatch,token})=>{
     calls.push({path,method,idempotencyKey,ifMatch,token});
-    if(method==='POST'&&path.endsWith('/projects'))return {id:'p1',version:1,active_icp_version_id:null};
+    if(method==='POST'&&path.endsWith('/projects'))return {id:'p1',version:1,offer_revision:1,active_icp_version_id:null};
     return {id:'i1',number:1,content_hash:'sha256:x'};
   }};
   const offer={company:'Acme',product:'S',value:'V',website:'',markets:'Germany',language:'English',must:'m',nice:'',exclude:'',buyerTypes:['Distributor'],roles:''};
-  const out=await writes.saveProfile({client,session:liveSession(),offer,idempotencyKey:'k0000001'});
+  const out=await writes.saveProfile({mode:'create',client,session:liveSession(),offer,idempotencyKey:'k0000001'});
   assert.deepEqual(calls.map(c=>c.method),['POST','POST']);
   assert.ok(calls[1].path.endsWith('/projects/p1/icp-versions'));
   assert.equal(calls[0].token,'tok');// the session token reaches the client
@@ -427,21 +433,192 @@ await test('saveProfile creates the project then saves a version, in order',asyn
   assert.equal(out.icpVersion.id,'i1');
 });
 
-await test('saveProfile selects an already-selected project instead of creating one',async()=>{
+await test('saveProfile explicitly creates a new project even if another is selected',async()=>{
   const calls=[];
-  const client={request:async({path,method})=>{calls.push({path,method});return {id:'i2',number:2,content_hash:'sha256:y'};}};
-  await writes.saveProfile({client,session:liveSession('p9'),offer:{company:'Acme',product:'S',value:'V',markets:'Germany',language:'English',must:'m',buyerTypes:['Distributor']},idempotencyKey:'k0000002'});
-  assert.deepEqual(calls.map(c=>c.method),['POST']);
-  assert.ok(calls[0].path.endsWith('/projects/p9/icp-versions'));
+  const client={request:async args=>{calls.push(args);return args.path.endsWith('/projects')?{id:'p10',offer_revision:1}:{id:'i2',number:1,content_hash:'sha256:y'};}};
+  await writes.saveProfile({mode:'create',client,session:liveSession('p9'),offer:{company:'Acme',product:'S',value:'V',markets:'Germany',language:'English',must:'m',buyerTypes:['Distributor']},idempotencyKey:'k0000002'});
+  assert.deepEqual(calls.map(c=>c.method),['POST','POST']);
+  assert.ok(calls[1].path.endsWith('/projects/p10/icp-versions'));
+});
+
+await test('explicit edit patches the offer under If-Match before saving a new ICP version',async()=>{
+  const calls=[];
+  const client={request:async args=>{
+    calls.push(args);
+    if(args.method==='PATCH')return {id:'p9',version:5,offer_revision:2,offer:'Sensors\nReduces downtime'};
+    return {id:'i2',number:2,content_hash:'sha256:y'};
+  }};
+  const offer={company:'Acme',product:'Sensors',value:'Reduces downtime',markets:'Germany',language:'English',must:'Distributor',buyerTypes:['Distributor']};
+  const out=await writes.saveProfile({mode:'edit',projectId:'p9',expectedProjectVersion:4,basisOfferRevision:1,parentIcpVersionId:'i1',client,session:liveSession('p9'),offer,idempotencyKey:'edit-action'});
+  assert.deepEqual(calls.map(c=>c.method),['PATCH','POST']);
+  assert.equal(calls[0].ifMatch,'"4"');
+  assert.equal(calls[0].body.offer,'Sensors\nReduces downtime');
+  assert.equal(calls[0].body.website,null);
+  assert.equal(calls[1].body.basis_offer_revision,2);
+  assert.equal(calls[1].body.parent_icp_version_id,'i1');
+  assert.equal(out.project.version,5);
+});
+await test('edit conflict stops before ICP write',async()=>{
+  const calls=[];
+  const client={request:async args=>{calls.push(args);throw new live.LiveError('stale','STALE_REVISION',412,'req-edit',false);}};
+  const offer={company:'Acme',product:'Sensors',value:'Value',markets:'Germany',language:'English',must:'Distributor'};
+  await assert.rejects(()=>writes.saveProfile({mode:'edit',projectId:'p9',expectedProjectVersion:4,basisOfferRevision:1,client,session:liveSession('p9'),offer,idempotencyKey:'edit-conflict'}),e=>e.status===412);
+  assert.deepEqual(calls.map(c=>c.method),['PATCH']);
 });
 
 await test('approveProfile sends the version number as If-Match and the hash',async()=>{
   let seen;
   const client={request:async(args)=>{seen=args;return {id:'i1',status:'approved'};}};
-  await writes.approveProfile({client,session:liveSession('p'),project:{id:'p'},icpVersion:{id:'i1',number:3,content_hash:'sha256:z'},idempotencyKey:'k0000003'});
+  await writes.approveProfile({client,session:liveSession('p'),project:{id:'p',version:4},icpVersion:{id:'i1',number:3,content_hash:'sha256:z'},idempotencyKey:'k0000003'});
   assert.equal(seen.path,'/v1/workspaces/w/icp-versions/i1/approve');
   assert.equal(seen.ifMatch,'"3"');
-  assert.deepEqual(seen.body,{content_hash:'sha256:z',confirmation:true});
+  assert.deepEqual(seen.body,{content_hash:'sha256:z',confirmation:true,expected_project_version:4});
+});
+
+await test('buyers map to the versioned review model',()=>{
+  const payload={items:[{id:'b-1',name:'Example GmbH',version:3,note:null,evidence_count:2,
+    fit:{verdict:'match',freshness:'current',rationale:'Linked evidence'},review:{status:'accepted',reason:'Reviewed',at:'2026-09-27T00:00:00Z'},owner_membership_id:null,normalized_domain:'example.test',contact_research_status:'not_researched'}],offset:0,limit:1,total:1};
+  assert.deepEqual(map.toBuyers(payload),[{id:'b-1',name:'Example GmbH',version:3,fitVerdict:'match',fitFreshness:'current',
+    reviewStatus:'accepted',ownerMembershipId:null,note:null,evidenceCount:2,domain:'example.test',
+    contactResearchStatus:'not_researched',fitRationale:'Linked evidence',reviewReason:'Reviewed',reviewAt:'2026-09-27T00:00:00Z'}]);
+});
+
+await test('a buyer without a fit or review maps those to null, not an error',()=>{
+  const payload={items:[{id:'b-1',name:'Example GmbH',version:1,note:'n',evidence_count:0}]};
+  const [row]=map.toBuyers(payload);
+  assert.equal(row.fitVerdict,null);
+  assert.equal(row.fitFreshness,null);
+  assert.equal(row.reviewStatus,null);
+});
+
+await test('a buyer page keeps the snapshot id and paging',()=>{
+  const page=map.toBuyerPage({items:[{id:'b-1',name:'A',version:1,note:null,evidence_count:0}],
+    snapshot_id:'s-1',offset:0,limit:50,total:1,expires_at:'2026-09-19T00:00:00Z'});
+  assert.equal(page.snapshotId,'s-1');
+  assert.equal(page.total,1);
+  assert.equal(page.items[0].id,'b-1');
+});
+
+await test('a buyer page maps the snapshot expiry, null when absent',()=>{
+  const dated=map.toBuyerPage({items:[],snapshot_id:'s-1',offset:0,limit:1,total:0,expires_at:'2026-09-19T00:00:00Z'});
+  const open=map.toBuyerPage({items:[],snapshot_id:'s-2',offset:0,limit:1,total:0});
+  assert.equal(dated.expiresAt,'2026-09-19T00:00:00Z');
+  assert.equal(open.expiresAt,null);
+});
+
+await test('evidence maps provenance and does not expose a stale source link',()=>{
+  const payload={items:[{id:'e-1',relationship:'supports',excerpt:'x',kind:'observation',status:'available',
+    source_url:'https://example.test/a',retrieved_at:'2026-09-27T00:00:00Z',observed_at:'2026-09-26T00:00:00Z',
+    retention_until:'2026-10-27T00:00:00Z',original_language:'en',content_hash:'a'.repeat(64),
+    requirement_id:'r-1',translated_excerpt:'translation'}],offset:0,limit:1,total:1};
+  assert.deepEqual(map.toEvidencePage(payload).items,[{id:'e-1',relationship:'supports',excerpt:'x',
+    kind:'observation',status:'available',sourceUrl:'https://example.test/a',
+    retrievedAt:'2026-09-27T00:00:00Z',observedAt:'2026-09-26T00:00:00Z',
+    retentionUntil:'2026-10-27T00:00:00Z',originalLanguage:'en',contentHash:'a'.repeat(64),
+    requirementId:'r-1',translatedExcerpt:'translation'}]);
+  assert.equal(map.toEvidence({items:[{...payload.items[0],status:'expired'}]})[0].sourceUrl,null);
+});
+
+const selection=await loadModule('services/live/buyer-selection.ts');
+
+await test('an explicit selection carries the frozen versions',()=>{
+  assert.deepEqual(selection.explicitSelection([{id:'b-1',version:2}]),{kind:'explicit',buyers:[{id:'b-1',version:2}]});
+});
+
+await test('a snapshot selection excludes the removed ids',()=>{
+  assert.deepEqual(selection.snapshotSelection('s-1',['b-9']),{kind:'snapshot',snapshot_id:'s-1',excluded_ids:['b-9']});
+});
+
+await test('scope changed between project creation and ICP save sends no second write',async()=>{
+  const session=new SessionScope({mode:'live',actor:'actor',workspace:'A'});
+  session.setToken('token');
+  const calls=[];
+  const client={request:async args=>{
+    calls.push(args);
+    if(calls.length===1){session.next({workspace:'B',project:null});return {id:'project-A',offer_revision:1};}
+    return {id:'icp-wrong-scope',number:1,content_hash:'sha256:wrong'};
+  }};
+  const offer={company:'Acme',product:'Sensors',value:'Value',markets:'Germany',language:'English',must:'Distributor'};
+  await assert.rejects(()=>writes.saveProfile({mode:'create',client,session,offer,idempotencyKey:'key-for-action'}),live.LiveCancelled);
+  assert.equal(calls.length,1);
+  assert.equal(session.current().workspace,'B');
+});
+
+const operationModule=await loadModule('services/live/operations.ts');
+function operationContext(session){const captured=session.captureWriteContext();return {...captured,getToken:async()=>session.token(),isCurrent:()=>session.isCurrent(captured.identity)};}
+
+await test('generated operation route builds scoped path and bearer request',async()=>{
+  const session=new SessionScope({mode:'live',actor:'actor',workspace:'A',project:'P'});session.setToken('secret-token');
+  let seen;
+  const client={request:async args=>{seen=args;return {id:'P'};}};
+  const value=await operationModule.createOperationClient(client).requestOperation('getProject',{path:{workspace_id:'A',project_id:'P'}},operationContext(session));
+  assert.deepEqual(value,{id:'P'});
+  assert.equal(seen.path,'/v1/workspaces/A/projects/P');assert.equal(seen.token,'secret-token');
+});
+await test('operation rejects cross-workspace path before sending',async()=>{
+  const session=new SessionScope({mode:'live',actor:'actor',workspace:'A'});session.setToken('token');
+  let calls=0;const client={request:async()=>{calls++;return {};}};
+  await assert.rejects(()=>operationModule.createOperationClient(client).requestOperation('getProject',{path:{workspace_id:'B',project_id:'P'}},operationContext(session)),live.LiveCancelled);
+  assert.equal(calls,0);
+});
+await test('operation rejects scope change during token acquisition before request',async()=>{
+  const session=new SessionScope({mode:'live',actor:'actor',workspace:'A'});session.setToken('token');
+  const captured=session.captureWriteContext();let release;
+  const tokenGate=new Promise(resolve=>{release=resolve;});let calls=0;
+  const client={request:async()=>{calls++;return {};}};
+  const pending=operationModule.createOperationClient(client).requestOperation('getProject',{path:{workspace_id:'A',project_id:'P'}},{...captured,getToken:async()=>{await tokenGate;return 'token';},isCurrent:()=>session.isCurrent(captured.identity)});
+  session.next({workspace:'B'});release();await assert.rejects(()=>pending,live.LiveCancelled);assert.equal(calls,0);
+});
+
+await test('live client rejects demo or malformed success envelopes',async()=>{
+  for(const body of [{data:{items:[]},data_mode:'demo',request_id:'r'}, {data:{items:[]},request_id:'r'}, {data_mode:'live',request_id:'r'}]){
+    const client=live.createLiveClient(async()=>({ok:true,status:200,json:async()=>body}));
+    await assert.rejects(()=>client.request({path:'/v1/workspaces',scope:'one',token:'token'}),error=>error instanceof live.LiveError && error.code==='INVALID_ENVELOPE');
+  }
+});
+await test('error keeps response header request ID when body omits it',async()=>{
+  const client=live.createLiveClient(async()=>({ok:false,status:412,headers:{get:key=>key.toLowerCase()==='x-request-id'?'request-42':null},json:async()=>({code:'STALE_REVISION',message:'stale'})}));
+  await assert.rejects(()=>client.request({path:'/v1/x',scope:'one',token:'token'}),error=>error instanceof live.LiveError && error.requestId==='request-42');
+});
+
+await test('live error guidance distinguishes reauth, stale revision and key conflict with request ID',()=>{
+  const cases=[
+    [401,'UNAUTHENTICATED','Sign in'],[412,'STALE_REVISION','Refresh'],[409,'IDEMPOTENCY_CONFLICT','new action'],
+  ];
+  for(const [status,code,phrase] of cases){
+    const advice=live.describeLiveError(new live.LiveError('server message',code,status,'req-123',false));
+    assert.ok(advice.includes(phrase),advice);assert.ok(advice.includes('req-123'),advice);
+  }
+});
+
+const actionModule=await loadModule('services/live/action-intent.ts');
+await test('double click shares one immutable action and one inflight promise',async()=>{
+  let release,calls=0;const gate=new Promise(resolve=>{release=resolve;});
+  const intent=new actionModule.ActionIntent(()=>`key-${++calls}`);
+  const work=async key=>{await gate;return key;};
+  const first=intent.run('same-payload',work), second=intent.run('same-payload',work);
+  assert.equal(first,second);assert.equal(calls,1);release();
+  assert.equal(await first,'key-1');
+});
+await test('lost response reuses the key; changed payload uses a new key',async()=>{
+  let count=0;const intent=new actionModule.ActionIntent(()=>`key-${++count}`);
+  await assert.rejects(()=>intent.run('payload-A',async()=>{throw Error('response lost');}));
+  assert.equal(await intent.run('payload-A',async key=>key),'key-1');
+  assert.equal(await intent.run('payload-B',async key=>key),'key-2');
+});
+
+
+await test('multipart upload keeps the browser-generated boundary and bearer in memory',async()=>{
+  const seen=[];
+  const client=live.createLiveClient(responder((url,init)=>seen.push(init)));
+  const form=new FormData();
+  form.append('declared_sha256','a'.repeat(64));
+  await client.request({path:'/v1/workspaces/w/projects/p/offer-documents',method:'POST',scope:'w:p',token:'memory-token',formData:form,idempotencyKey:'offer-file-001'});
+  assert.equal(seen.length,1);
+  assert.equal(seen[0].body,form);
+  assert.equal(seen[0].headers['Content-Type'],undefined);
+  assert.equal(seen[0].headers.Authorization,'Bearer memory-token');
+  assert.equal(seen[0].headers['Idempotency-Key'],'offer-file-001');
 });
 
 console.log(`${checks} live adapter checks passed`);

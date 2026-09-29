@@ -61,9 +61,9 @@ def test_fencing_rejects_a_stale_generation_with_no_writes(worker_database_url, 
         ).fetchone() == ("dispatched", 1)
 
     # The generation the worker presents is what decides; the matching one works.
-    assert execute_intent_sync(intent, WS_A, 1) == "done"
+    assert execute_intent_sync(intent, WS_A, 1) == "blocked"
     with psycopg.connect(pg_dsn, autocommit=True) as conn:
-        assert _scalar(conn, "SELECT state FROM outbox_events WHERE intent_key = %s", intent) == "done"
+        assert _scalar(conn, "SELECT state FROM outbox_events WHERE intent_key = %s", intent) == "failed"
 
 
 def test_duplicate_delivery_of_a_terminal_intent_is_a_noop(worker_database_url, pg_dsn):

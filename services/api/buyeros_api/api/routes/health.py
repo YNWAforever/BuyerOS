@@ -17,10 +17,9 @@ def _now() -> str:
 def readiness_payload(*, database: str = "unavailable", queue: str = "unavailable", worker: str = "unavailable") -> dict:
     """Contract `Readiness` shape. No credential, DSN or provider detail is ever included.
 
-    The route only reaches this builder after a successful tenant-scoped query, so it
-    passes `database="ready"`; the queue and the worker stay `unavailable` because no
-    broker or worker is wired or observed in this phase. `ready` is therefore still
-    false, which is the honest answer.
+    The route reaches this builder after a tenant-scoped DB query. Queue and worker
+    become ready only with a recent committed heartbeat from a broker-delivered
+    sweep task; absence and expiry fail closed.
     """
     return {
         "ready": database == "ready" and queue == "ready" and worker == "ready",
@@ -48,13 +47,12 @@ def capabilities_payload() -> dict:
 
 
 @router.get("/health/live")
-async def live() -> dict:
-    """Non-contract liveness probe only: no auth and no dependency or secret disclosure."""
-    return {
-        "data": {"status": "ok", "service": "buyeros-api", "timestamp": _now()},
-        "request_id": "",
-        "data_mode": "live",
-    }
+async def live(request: Request) -> dict:
+    """Minimal unauthenticated liveness with a contract-valid correlation ID."""
+    from ..errors import envelope
+
+    return envelope({"status": "ok", "service": "buyeros-api", "timestamp": _now()},
+                    request.state.request_id)
 
 
 async def _authorize(principal: Principal, workspace_id: uuid.UUID, operation_id: str) -> None:
@@ -72,8 +70,26 @@ async def _authorize(principal: Principal, workspace_id: uuid.UUID, operation_id
 async def readiness(workspace_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)) -> dict:
     from ..errors import envelope
 
-    await _authorize(principal, workspace_id, "getReadiness")
-    return envelope(readiness_payload(database="ready"), request.state.request_id)
+    from sqlalchemy import select
+    from ...db.worker import WorkerHeartbeat
+    from ..deps import load_membership, permission_for_roles, tenant_scoped
+    from ..errors import ApiError
+    from ...settings import get_settings
+
+    async with tenant_scoped(workspace_id) as session:
+        member = await load_membership(session, principal=principal, workspace_id=workspace_id)
+        if not permission_for_roles(member["roles"], "getReadiness"):
+            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+        heartbeat = (await session.execute(select(WorkerHeartbeat)
+            .order_by(WorkerHeartbeat.observed_at.desc()).limit(1))).scalar_one_or_none()
+        worker, queue = "unavailable", "unavailable"
+        if heartbeat is not None:
+            age = (datetime.now(timezone.utc) - heartbeat.observed_at).total_seconds()
+            if 0 <= age <= get_settings().worker_heartbeat_max_age_seconds:
+                worker, queue = "ready", heartbeat.broker_state
+            else:
+                worker = "stale"
+    return envelope(readiness_payload(database="ready", queue=queue, worker=worker), request.state.request_id)
 
 
 @router.get("/v1/workspaces/{workspace_id}/capabilities")

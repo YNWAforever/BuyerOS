@@ -1,6 +1,23 @@
 # vinext-starter
 
+> BuyerOS execution status: [docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md](docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md). The browser app still has demo mode; API fixture evidence is tracked separately from live activation.
+
 A clean full-stack starter running on [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and Drizzle support.
+
+## BuyerOS live sign-in (T05 fixture scope)
+
+The live browser entry requires the following public, build-time values. Without `BUYEROS_API_BASE_URL`, the separate demo remains the default. If the API URL exists but the OIDC values are missing or invalid, the live entry shows a blocked configuration state; it never falls back to demo data.
+
+| Variable | Source | Purpose |
+| --- | --- | --- |
+| `BUYEROS_API_BASE_URL` | Approved FastAPI origin | Enables live mode and directs bearer API requests. |
+| `BUYEROS_AUTH0_ISSUER` | Auth0 public SPA tenant issuer, HTTPS | Starts OIDC and verifies the signed ID token. |
+| `BUYEROS_AUTH0_CLIENT_ID` | Auth0 public SPA application client ID | Authorization Code + PKCE client identity. |
+| `BUYEROS_AUTH0_AUDIENCE` | Auth0 API audience | Access-token audience requested for FastAPI. |
+
+Register `/auth/callback` and the app origin as the public SPA callback/logout URLs in Auth0 before a real round trip. The previously recorded Auth0 application is `regular_web`/`client_secret_post`; its public-SPA conversion and current membership owner remain activation decisions. Never place an Auth0 client secret in these variables. The API resolves current memberships; sign-in alone does not create an administrator.
+
+`node tests/live-auth-checks.mjs` exercises PKCE, signed ID token verification, state/nonce failures, expiry, logout and the reactive scope in memory. `pnpm exec playwright test tests/e2e/live-auth-scope.spec.ts --config playwright.live.config.ts` uses a test-only intercepted issuer and API; no fixture-auth bypass is included in the application build. This fixture result is not a real Auth0, CORS, or deployed API proof.
 
 ## Prerequisites
 

@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 from buyeros_api.api.app import create_app
 from buyeros_api.api.routes.health import capabilities_payload, readiness_payload
+from tests.contract_validation import assert_contract_response
 
 WORKSPACE = "11111111-1111-4111-8111-111111111111"
 
@@ -11,6 +12,7 @@ def test_liveness_needs_no_auth():
     response = client.get("/health/live")
     assert response.status_code == 200
     assert response.json()["data"]["status"] == "ok"
+    assert_contract_response("HealthResponse", response.json())
 
 
 def test_readiness_and_capabilities_require_auth():
@@ -51,3 +53,15 @@ def test_capabilities_payload_matches_contract_without_secrets():
     for item in page["items"]:
         assert item["status"] in {"unconfigured", "blocked", "ready", "degraded", "disabled"}
         assert "password" not in str(item).lower()
+
+
+def test_expired_worker_heartbeat_degrades_readiness():
+    state = readiness_payload(database="ready", queue="ready", worker="stale")
+    assert state["worker"] == "stale"
+    assert state["ready"] is False
+
+
+def test_capabilities_never_become_ready_from_an_unverified_env_value(monkeypatch):
+    monkeypatch.setenv("BUYEROS_RESEARCH_PROVIDER_KEY", "fixture-only")
+    page = capabilities_payload()
+    assert next(x for x in page["items"] if x["name"] == "research")["status"] == "unconfigured"

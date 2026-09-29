@@ -40,5 +40,89 @@
       "display_locale": "zh-HK"
     },
     "digest": "sha256:b28deb984a0fc99881ae0f9bb2487ada400013bb7211d6c60f277fa8115d872a"
+  },
+  {
+    "name": "v2-exact-context-crlf",
+    "serializer_version": "approval-cjson-v2",
+    "context": {
+      "draft_id": "10000000-0000-4000-8000-000000000001",
+      "revision_id": "10000000-0000-4000-8000-000000000002",
+      "revision_number": 2,
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "subject": "Hello",
+      "body": "Line 1\r\nLine 2",
+      "kind": "initial",
+      "language": "en",
+      "recipient": {
+        "id": "10000000-0000-4000-8000-000000000003",
+        "version": 3,
+        "value": "buyer@example.test",
+        "type": "business_email",
+        "validity": "provider_marked_valid",
+        "checked_at": null,
+        "quarantined": false
+      },
+      "sender": {
+        "id": "10000000-0000-4000-8000-000000000004",
+        "version_key": "sender:10000000-0000-4000-8000-000000000004:1",
+        "display_name": "Alex",
+        "role": "Partner",
+        "organization": "Fictional Co",
+        "business_email": "alex@example.test",
+        "country": "US",
+        "reviewed_at": "2026-09-27T00:00:00+00:00"
+      },
+      "icp": {
+        "id": "10000000-0000-4000-8000-000000000005",
+        "content_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "number": 1,
+        "offer_revision": 2
+      },
+      "buyer": {
+        "id": "10000000-0000-4000-8000-000000000006",
+        "version": 4,
+        "company_id": "10000000-0000-4000-8000-000000000007"
+      },
+      "fit": {
+        "id": "10000000-0000-4000-8000-000000000008",
+        "evidence_set_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "review": {
+        "id": "10000000-0000-4000-8000-000000000009",
+        "state": "accepted",
+        "fit_assessment_id": "10000000-0000-4000-8000-000000000008"
+      },
+      "evidence": [
+        {
+          "id": "10000000-0000-4000-8000-000000000010",
+          "version": 2,
+          "content_hash": null,
+          "source_id": "10000000-0000-4000-8000-000000000011",
+          "source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "source_retention_until": "2026-10-01T00:00:00+00:00"
+        }
+      ],
+      "offer_fact_ids": [
+        "10000000-0000-4000-8000-000000000012"
+      ],
+      "policy": {
+        "rows": [
+          {
+            "id": "10000000-0000-4000-8000-000000000013",
+            "version": 1,
+            "purpose": "outreach",
+            "status": "permitted",
+            "subject_type": "project",
+            "subject_id": "10000000-0000-4000-8000-000000000014",
+            "expires_at": "2026-10-01T00:00:00+00:00"
+          }
+        ],
+        "active_ids": [
+          "10000000-0000-4000-8000-000000000013"
+        ]
+      },
+      "suppression": []
+    },
+    "digest": "sha256:bc41439bfff1b2f808f7370164e51195809e21c52abbe61771f3a7f83ed7f331"
   }
 ]
