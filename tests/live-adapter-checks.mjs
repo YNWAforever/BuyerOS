@@ -51,11 +51,6 @@ await test('icp versions map approved_at to approvedAt and keep the hash',()=>{
   assert.deepEqual(map.toIcpVersions(payload),[{id:'i-1',number:2,contentHash:'sha256:aa',status:'approved',approvedAt:'2026-09-01T00:00:00Z'}]);
 });
 
-await test('buyers map to the narrow model and keep a null note as null',()=>{
-  const payload={items:[{id:'b-1',name:'Example GmbH',note:null}],offset:0,limit:1,total:1};
-  assert.deepEqual(map.toBuyers(payload),[{id:'b-1',name:'Example GmbH',note:null}]);
-});
-
 await test('a missing required field raises instead of becoming an empty value',()=>{
   assert.throws(()=>map.toBuyers({items:[{id:'b-1',note:null}],offset:0,limit:1,total:1}),map.MapError);
   assert.throws(()=>map.toWorkspaces({items:[{name:'no id'}]}),map.MapError);
@@ -66,7 +61,7 @@ await test('a missing required field raises instead of becoming an empty value',
 await test('every mapper enforces its required fields',()=>{
   assert.throws(()=>map.toProjects({items:[{id:'p-1',name:'Sensors'}]}),map.MapError);
   assert.throws(()=>map.toIcpVersions({items:[{id:'i-1',content_hash:'h',status:'s'}]}),map.MapError);
-  assert.throws(()=>map.toBuyers({items:['not-an-object']}),map.MapError);
+  assert.throws(()=>map.toBuyers({items:[{id:'b-1',name:'X'}]}),map.MapError);
 });
 
 await test('a workspace missing roles raises rather than defaulting to an empty list',()=>{
@@ -442,6 +437,52 @@ await test('approveProfile sends the version number as If-Match and the hash',as
   assert.equal(seen.path,'/v1/workspaces/w/icp-versions/i1/approve');
   assert.equal(seen.ifMatch,'"3"');
   assert.deepEqual(seen.body,{content_hash:'sha256:z',confirmation:true});
+});
+
+await test('buyers map to the versioned review model',()=>{
+  const payload={items:[{id:'b-1',name:'Example GmbH',version:3,note:null,evidence_count:2,
+    fit:{verdict:'match'},review:{status:'accepted'},owner_membership_id:null}],offset:0,limit:1,total:1};
+  assert.deepEqual(map.toBuyers(payload),[{id:'b-1',name:'Example GmbH',version:3,fitVerdict:'match',
+    reviewStatus:'accepted',ownerMembershipId:null,note:null,evidenceCount:2}]);
+});
+
+await test('a buyer without a fit or review maps those to null, not an error',()=>{
+  const payload={items:[{id:'b-1',name:'Example GmbH',version:1,note:'n',evidence_count:0}]};
+  const [row]=map.toBuyers(payload);
+  assert.equal(row.fitVerdict,null);
+  assert.equal(row.reviewStatus,null);
+});
+
+await test('a buyer page keeps the snapshot id and paging',()=>{
+  const page=map.toBuyerPage({items:[{id:'b-1',name:'A',version:1,note:null,evidence_count:0}],
+    snapshot_id:'s-1',offset:0,limit:50,total:1,expires_at:'2026-09-19T00:00:00Z'});
+  assert.equal(page.snapshotId,'s-1');
+  assert.equal(page.total,1);
+  assert.equal(page.items[0].id,'b-1');
+});
+
+await test('a buyer page maps the snapshot expiry, null when absent',()=>{
+  const dated=map.toBuyerPage({items:[],snapshot_id:'s-1',offset:0,limit:1,total:0,expires_at:'2026-09-19T00:00:00Z'});
+  const open=map.toBuyerPage({items:[],snapshot_id:'s-2',offset:0,limit:1,total:0});
+  assert.equal(dated.expiresAt,'2026-09-19T00:00:00Z');
+  assert.equal(open.expiresAt,null);
+});
+
+await test('evidence maps the contract subset',()=>{
+  const payload={items:[{id:'e-1',relationship:'supports',excerpt:'x',kind:'observation',status:'available',
+    source_url:'https://example.test/a'}],offset:0,limit:1,total:1};
+  assert.deepEqual(map.toEvidencePage(payload).items,[{id:'e-1',relationship:'supports',excerpt:'x',
+    kind:'observation',status:'available',sourceUrl:'https://example.test/a'}]);
+});
+
+const selection=await loadModule('services/live/buyer-selection.ts');
+
+await test('an explicit selection carries the frozen versions',()=>{
+  assert.deepEqual(selection.explicitSelection([{id:'b-1',version:2}]),{kind:'explicit',buyers:[{id:'b-1',version:2}]});
+});
+
+await test('a snapshot selection excludes the removed ids',()=>{
+  assert.deepEqual(selection.snapshotSelection('s-1',['b-9']),{kind:'snapshot',snapshot_id:'s-1',excluded_ids:['b-9']});
 });
 
 console.log(`${checks} live adapter checks passed`);

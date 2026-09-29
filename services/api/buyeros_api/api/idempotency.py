@@ -15,6 +15,7 @@ class IdempotencyOutcome:
 
     record: object
     replay: bool
+    response: dict | None = None
 
 
 async def begin_idempotency(
@@ -49,7 +50,7 @@ async def begin_idempotency(
             raise ApiError(409, "IDEMPOTENCY_CONFLICT", str(exc)) from exc
         if existing.status != "completed":
             raise ApiError(409, "IDEMPOTENCY_CONFLICT", "request with this key is still in progress")
-        return IdempotencyOutcome(existing, replay=True)
+        return IdempotencyOutcome(existing, replay=True, response=existing.response)
 
     existing = (await session.execute(_scope())).scalar_one_or_none()
     if existing is not None:
@@ -78,10 +79,12 @@ async def begin_idempotency(
     return IdempotencyOutcome(record, replay=False)
 
 
-def complete_idempotency(outcome: IdempotencyOutcome, resource_id: str) -> None:
-    """Mark this transaction's record complete, so a later replay can return its resource."""
+def complete_idempotency(outcome: IdempotencyOutcome, resource_id: str, response: dict | None = None) -> None:
+    """Mark this transaction's record complete, so a later replay can return its resource/response."""
     outcome.record.status = "completed"
     outcome.record.resource_id = resource_id
+    if response is not None:
+        outcome.record.response = response
 
 
 def if_match_version(if_match: str | None) -> int:

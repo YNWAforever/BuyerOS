@@ -1,5 +1,6 @@
 """Strict request bodies (contract `additionalProperties: false` and x-validation)."""
 
+from typing import Annotated, Literal, Union
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -89,3 +90,64 @@ class ArchiveRequest(_Strict):
     """Contract `ArchiveRequest`: a required, auditable reason."""
 
     reason: str = Field(min_length=3, max_length=2000)
+
+
+class BuyerFilters(_Strict):
+    """Contract `BuyerFilters`. All optional; the route rejects a deferred non-empty filter."""
+
+    q: str | None = Field(default=None, max_length=200)
+    markets: list[str] | None = None
+    buyer_types: list[str] | None = None
+    fit: list[str] | None = None
+    review: list[str] | None = None
+    contact: list[str] | None = None
+    suppressed: bool | None = None
+    source_types: list[str] | None = None
+    evidence_retrieved_after: str | None = None
+    run_id: str | None = None
+    list_id: str | None = None
+    owner_membership_id: str | None = None
+
+
+class SnapshotCreate(_Strict):
+    filters: BuyerFilters
+    sort: Literal["best_fit", "name_asc"]
+    requested_limit: int = Field(ge=1, le=1000)
+
+
+class VersionedId(_Strict):
+    id: str
+    version: int = Field(ge=1)
+
+
+class ExplicitSelection(_Strict):
+    kind: Literal["explicit"]
+    buyers: list[VersionedId] = Field(min_length=1, max_length=1000)
+
+
+class SnapshotSelection(_Strict):
+    kind: Literal["snapshot"]
+    snapshot_id: str
+    excluded_ids: list[str] = Field(max_length=1000)
+
+
+Selection = Annotated[Union[ExplicitSelection, SnapshotSelection], Field(discriminator="kind")]
+
+
+class ReviewRequest(_Strict):
+    selection: Selection
+    status: Literal["accepted", "rejected", "needs_information"]
+    reason: str = Field(min_length=3, max_length=2000)
+
+
+class BuyerUpdate(_Strict):
+    note: str | None = Field(default=None, max_length=4000)
+    owner_membership_id: str | None = None
+
+    @model_validator(mode="after")
+    def _required_patch(self) -> "BuyerUpdate":
+        if not self.model_fields_set:
+            raise ValueError("at least one field is required")
+        if "note" in self.model_fields_set and self.note is None:
+            raise ValueError("note must not be null")
+        return self

@@ -97,3 +97,4 @@ class IdempotencyRecord(Base, TenantMixin):
     request_hash: Mapped[str] = mapped_column(String(80), nullable=False)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="in_progress")
     resource_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    response: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
