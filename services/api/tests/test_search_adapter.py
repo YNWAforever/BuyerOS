@@ -6,7 +6,7 @@ from buyeros_api.providers.search import FixtureSearchAdapter, SearchCapability,
 def test_unverified_provider_cannot_activate():
     assert not is_activation_allowed(SearchCapability(verified=False, max_results=10, bounded_price=False))
     assert not is_activation_allowed(SearchCapability(verified=True, max_results=10, bounded_price=False))
-    assert is_activation_allowed(SearchCapability(verified=True, max_results=10, bounded_price=True))
+    assert not is_activation_allowed(SearchCapability(verified=True, max_results=10, bounded_price=True))
 
 
 @pytest.mark.asyncio

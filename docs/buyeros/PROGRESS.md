@@ -1,5 +1,7 @@
 # BuyerOS progress / resume record
 
+> Current execution record: [REMAINING_DEVELOPMENT_STATUS.md](REMAINING_DEVELOPMENT_STATUS.md). The entries below are historical checkpoints; current T00-T30 task state is maintained in `remaining/TASKS.json`.
+
 Plan revision v1. Session date: 2026-09-15 (Hong Kong). Mode: **PLAN** (no Build). This record replaces the template with actual session state; placeholders are not evidence.
 
 ## Session and source

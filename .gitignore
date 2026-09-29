@@ -58,3 +58,9 @@ services/**/*.egg-info/
 
 # internal scratch (briefs, reports, ledgers)
 .superpowers/
+
+# local verification artifacts
+/services/api/artifacts/
+/services/worker/artifacts/
+/test-results/
+/playwright-report/

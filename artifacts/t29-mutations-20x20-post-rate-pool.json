@@ -1,0 +1,31 @@
+{
+  "source_sha": "f43a9d88b334c2c4029fa06fa71624ed52efe4a2",
+  "machine": "Windows-11-10.0.26200-SP0",
+  "python": "3.14.6",
+  "conditions": {
+    "database": "disposable PostgreSQL 16 Docker",
+    "identity": "fixture OIDC",
+    "client": "in-process FastAPI ASGITransport, persistent event loop",
+    "network": "none",
+    "provider": "fixture capability; no provider call",
+    "warmups_each": 3,
+    "sequential_samples_each": 20
+  },
+  "buyer_note_patch_ms": {
+    "p50": 43.108,
+    "p95": 60.865,
+    "response_bytes_min": 605,
+    "response_bytes_max": 607
+  },
+  "buyer_note_patch_sql_per_request": 18.0,
+  "run_admission_ms": {
+    "p50": 90.145,
+    "p95": 168.524,
+    "response_bytes_min": 896,
+    "response_bytes_max": 896
+  },
+  "run_admission_sql_per_request": 33.0,
+  "persisted_buyer_edits": 23,
+  "persisted_queued_runs": 23,
+  "persisted_outbox_intents": 23
+}

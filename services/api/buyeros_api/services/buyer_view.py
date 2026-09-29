@@ -1,22 +1,26 @@
 """Contract-shaped Buyer, FitAssessment, HumanReview, Evidence and snapshot subsets (BO-008)."""
 
+from datetime import datetime, timezone
 
-def fit_data(fit) -> dict:
+
+def fit_data(fit, *, freshness: str = "current") -> dict:
+    details = fit.assessment_details or {}
     return {
         "id": str(fit.id),
         "icp_version_id": str(fit.icp_version_id),
         "assessment_version": 1,
         "verdict": fit.verdict,
         "rationale": fit.rationale,
-        "supported_requirement_ids": [],
-        "contradictory_evidence_ids": [],
-        "evidence_refs": [],
-        "unknowns": [],
-        "next_action": "human_review",
-        "freshness": "current",
+        "supported_requirement_ids": details.get("supported_requirement_ids", []),
+        "contradictory_evidence_ids": details.get("contradictory_evidence_ids", []),
+        "evidence_refs": details.get("evidence_refs", []),
+        "unknowns": (["Source evidence needs refresh"] if freshness == "stale"
+                     else details.get("unknown_requirement_ids", [])),
+        "next_action": "request_evidence" if freshness == "stale" else details.get("next_action", "human_review"),
+        "freshness": freshness,
         "evidence_set_hash": fit.evidence_set_hash,
-        "prompt_version": "unversioned",
-        "model_route_version": "unversioned",
+        "prompt_version": fit.fit_algorithm_version,
+        "model_route_version": "none" if fit.fit_algorithm_version == "fit-v1" else "unversioned",
     }
 
 
@@ -34,28 +38,55 @@ def review_data(review, fit) -> dict:
     }
 
 
-def evidence_data(evidence, source) -> dict:
+def evidence_data(evidence, source, *, mapped_company_id=None) -> dict:
+    """Expose source provenance and current accessibility without leaking retired content."""
+    modern = source is not None and source.project_id is not None
+    if source is None:
+        status = "deleted"
+    elif modern and (source.project_id != evidence.project_id
+                     or source.permission_purpose != "account_research"
+                     or (evidence.run_id is not None and source.run_id != evidence.run_id)):
+        status = "access_blocked"
+    elif modern and not source.excerpt and not source.object_key:
+        status = "deleted"
+    elif evidence.raw_candidate_id is not None and mapped_company_id != evidence.company_id:
+        status = "stale"
+    elif source.retention_until is not None and source.retention_until <= datetime.now(timezone.utc):
+        status = "expired"
+    elif not modern or source.retention_until is None or not source.excerpt:
+        status = "stale"
+    else:
+        status = "available"
+    available = status == "available"
     data = {
         "id": str(evidence.id),
         "workspace_id": str(evidence.workspace_id),
         "project_id": str(evidence.project_id),
         "company_id": str(evidence.company_id),
-        "source_document_id": str(evidence.source_document_id) if evidence.source_document_id else None,
-        "version": 1,
-        "excerpt": evidence.excerpt,
+        "version": evidence.version,
+        "excerpt": evidence.excerpt if available or not modern else "Source unavailable",
         "kind": "inference" if evidence.is_inference else "observation",
         "relationship": evidence.stance,
-        "status": "available",
+        "status": status,
         "data_mode": "live",
     }
-    if source is not None:
+    if evidence.source_document_id:
+        data["source_document_id"] = str(evidence.source_document_id)
+    if source is not None and status not in {"deleted", "access_blocked"}:
         data["source_url"] = source.canonical_url
-        data["retrieved_at"] = source.retrieved_at.isoformat() if source.retrieved_at else None
+        if source.retrieved_at:
+            data["retrieved_at"] = source.retrieved_at.isoformat()
         if source.language:
             data["original_language"] = source.language
+        if source.retention_until:
+            data["retention_until"] = source.retention_until.isoformat()
+    if evidence.observed_at:
+        data["observed_at"] = evidence.observed_at.isoformat()
+    if evidence.content_hash:
+        data["content_hash"] = evidence.content_hash
     if evidence.requirement_id:
         data["requirement_id"] = evidence.requirement_id
-    if evidence.translation:
+    if evidence.translation and available:
         data["translated_excerpt"] = evidence.translation
     return data
 
@@ -76,7 +107,7 @@ def snapshot_data(snapshot, *, sort: str, total: int, result_limit_reached: bool
     }
 
 
-def buyer_data(buyer, company, *, fit=None, review=None, owner_membership_id=None, evidence_count=0) -> dict:
+def buyer_data(buyer, company, *, fit=None, fit_freshness="current", review=None, review_fit=None, owner_membership_id=None, evidence_count=0) -> dict:
     data = {
         "id": str(buyer.id),
         "workspace_id": str(buyer.workspace_id),
@@ -90,15 +121,17 @@ def buyer_data(buyer, company, *, fit=None, review=None, owner_membership_id=Non
         "contact_research_status": "not_researched",
         "suppressed": False,
         "owner_membership_id": str(owner_membership_id) if owner_membership_id else None,
-        "note": buyer.note,
+        "note": buyer.note or "",
+        "contacts": [],
+        "policies": [],
         "evidence_count": evidence_count,
     }
     if company.domain:
         data["normalized_domain"] = company.domain
     if fit is not None:
-        data["fit"] = fit_data(fit)
+        data["fit"] = fit_data(fit, freshness=fit_freshness)
     # The review is contract-valid only when its assessment is known; a review stored without a fit
     # (reviewBuyers on a fit-less buyer) is omitted rather than emitted incomplete.
-    if review is not None and fit is not None and review.fit_assessment_id is not None:
-        data["review"] = review_data(review, fit)
+    if review is not None and review_fit is not None and review.fit_assessment_id is not None:
+        data["review"] = review_data(review, review_fit)
     return data

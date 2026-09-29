@@ -51,6 +51,14 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    // Public, build-time browser configuration only. The Cloudflare dev RSC runtime does not
+    // inherit Node process.env; never add a client secret or provider credential here.
+    define: {
+      "process.env.BUYEROS_API_BASE_URL": JSON.stringify(process.env.BUYEROS_API_BASE_URL ?? ""),
+      "process.env.BUYEROS_AUTH0_ISSUER": JSON.stringify(process.env.BUYEROS_AUTH0_ISSUER ?? ""),
+      "process.env.BUYEROS_AUTH0_CLIENT_ID": JSON.stringify(process.env.BUYEROS_AUTH0_CLIENT_ID ?? ""),
+      "process.env.BUYEROS_AUTH0_AUDIENCE": JSON.stringify(process.env.BUYEROS_AUTH0_AUDIENCE ?? ""),
+    },
     server: {
       ...(managedLinux ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] } : {}),
       ...(isCodexSeatbeltSandbox ? { watch: { useFsEvents: false, usePolling: true } } : {}),

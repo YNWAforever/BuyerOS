@@ -21,6 +21,8 @@ _TRANSITIONS = {
     ("draft", "enqueue"): "queued",
     ("queued", "start"): "running",
     ("running", "complete"): "completed",
+    ("partial", "resume"): "running",  # authoritative reconciliation resolved the partial operation
+    ("partial", "complete"): "completed",  # retained for completed legacy attempts
     ("running", "partial"): "partial",
     ("running", "pause_budget"): "paused_budget",
     ("running", "fail"): "failed",

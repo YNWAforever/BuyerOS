@@ -109,6 +109,7 @@ def test_implemented_response_fields_are_declared_by_the_contract():
     class _Project:
         id = workspace_id = uuid.UUID("11111111-1111-4111-8111-111111111111")
         version = 1
+        offer_revision = 1
         created_at = updated_at = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
         name = "P"
         company_name = "Co"
@@ -124,6 +125,9 @@ def test_implemented_response_fields_are_declared_by_the_contract():
     class _Icp:
         id = workspace_id = project_id = uuid.UUID("11111111-1111-4111-8111-111111111111")
         number = 1
+        basis_offer_revision = None
+        parent_id = None
+        created_at = updated_at = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
         content_hash = "sha256:x"
         approved_at = None
         approved_by = None
@@ -161,13 +165,14 @@ def test_approve_checks_auth_before_preconditions():
     client = TestClient(create_app(), raise_server_exceptions=False)
     path = f"/v1/workspaces/{WORKSPACE}/icp-versions/{ICP}/approve"
 
-    absent = client.post(path, json={"content_hash": "sha256:x", "confirmation": True}, headers={"Idempotency-Key": "k"})
+    body = {"content_hash": "sha256:" + "0" * 64, "confirmation": True, "expected_project_version": 1}
+    absent = client.post(path, json=body, headers={"Idempotency-Key": "approve-precondition"})
     assert absent.status_code == 401  # auth is checked before preconditions
 
     weak = client.post(
         path,
-        json={"content_hash": "sha256:x", "confirmation": True},
-        headers={"Idempotency-Key": "k", "If-Match": "4"},
+        json=body,
+        headers={"Idempotency-Key": "approve-precondition", "If-Match": "4"},
     )
     assert weak.status_code == 401
 
@@ -206,9 +211,9 @@ def test_approve_rejects_a_missing_or_malformed_if_match(monkeypatch):
     """Regression guard: with auth satisfied, If-Match must be enforced (it was once absent)."""
     client = _approve_client_with_principal(monkeypatch)
     path = f"/v1/workspaces/{WORKSPACE}/icp-versions/{ICP}/approve"
-    body = {"content_hash": "sha256:x", "confirmation": True}
+    body = {"content_hash": "sha256:" + "0" * 64, "confirmation": True, "expected_project_version": 1}
 
-    absent = client.post(path, json=body, headers={"Idempotency-Key": "k", "Authorization": "Bearer t"})
+    absent = client.post(path, json=body, headers={"Idempotency-Key": "approve-precondition", "Authorization": "Bearer t"})
     assert absent.status_code == 400
     assert absent.json()["code"] == "INVALID_REQUEST"
 
@@ -216,7 +221,7 @@ def test_approve_rejects_a_missing_or_malformed_if_match(monkeypatch):
         response = client.post(
             path,
             json=body,
-            headers={"Idempotency-Key": "k", "Authorization": "Bearer t", "If-Match": weak},
+            headers={"Idempotency-Key": "approve-precondition", "Authorization": "Bearer t", "If-Match": weak},
         )
         assert response.status_code == 400, weak
         assert response.json()["code"] == "INVALID_REQUEST"

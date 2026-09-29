@@ -112,3 +112,85 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
 .run-history{margin-top:25px;color:#71839b;font-size:13px}.run-history summary{cursor:pointer}.run-history button{display:flex;justify-content:space-between;gap:20px;align-items:center;text-align:left;width:100%;padding:14px;border-bottom:1px solid #e5eaf2;background:white}.run-history button b{font-size:13px}.run-history button span{font-size:12px}.mobile-summary{display:none}
 @media(max-width:767px){.wizard-summary{display:block;order:-1;padding:0;background:none;border:none;box-shadow:none}.wizard-summary .desktop-summary{display:none}.mobile-summary{display:block;padding:12px 16px;background:#fff;border:1px solid #e3e9f2;border-radius:8px}.mobile-summary summary{cursor:pointer;color:#657895;font-size:13px}.mobile-summary p{font-size:12px;margin:10px 0 0}.run-history button{flex-wrap:wrap;gap:7px}}
 @media(max-width:600px){.page-heading p{display:none}.page-heading{margin-bottom:16px;gap:12px}.project-line{margin-bottom:14px}.run-metrics{grid-template-columns:1fr 1fr 1fr;gap:0}.run-metrics>:nth-child(4){display:none}.run-metrics>:nth-child(2){border-right:1px solid #e9edf4}.run-metrics>:nth-child(3){padding-left:12px;border:0}.run-metrics strong{font-size:23px}.run-metrics .tiny{font-size:10px;padding:2px 4px}.run-metrics span{font-size:11px;line-height:1.5}.next-action{padding:14px 0}.next-action p{font-size:12px}.table-toolbar{padding-top:14px;padding-bottom:13px}.run-summary h2{font-size:14px}.run-status{margin-top:0}.page-heading h1{font-size:26px}.topbar .demo-indicator{font-size:11px}}
+
+/* The live buyer dossier stays visible while a long result page remains in place. */
+.live-buyer-backdrop{position:fixed;inset:0;background:rgba(16,24,40,.38);z-index:80}
+.live-buyer-drawer{position:fixed;top:0;right:0;bottom:0;width:min(32rem,100vw);margin:0;overflow-y:auto;z-index:81;border-radius:0;box-shadow:-1rem 0 2rem rgba(16,24,40,.18);padding:1.5rem;background:var(--background,#fff)}
+@media(max-width:640px){.live-buyer-drawer{width:100vw;padding:1rem}}
+
+/* Live buyer bulk actions: readable controls and result IDs at narrow widths. */
+.live-buyer-results .inline{flex-wrap:wrap}
+.live-buyer-results [role="group"][aria-label="Buyer filters"]{align-items:flex-end}
+.live-buyer-results [role="group"][aria-label="Buyer filters"]>label{min-width:100px}
+.bulk-action-panel{display:grid;gap:12px;min-width:0}
+.bulk-action-panel .bulk-action-field{display:block;min-width:0}
+.bulk-action-panel .bulk-action-field input{display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:8px;border:1px solid #d5deea;border-radius:6px}
+.bulk-action-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.bulk-action-row label{flex:1 1 210px;min-width:0}
+.bulk-action-panel button{padding:7px 10px;border:1px solid #cdd8e5;border-radius:6px;background:#f8fbff;color:#1d3557;line-height:1.4}
+.bulk-action-panel button:disabled{opacity:.55}
+.bulk-action-panel ul{margin:0;padding-left:18px}
+.bulk-action-panel li{overflow-wrap:anywhere}
+@media(max-width:767px){.live-buyer-results [role="group"][aria-label="Buyer filters"]>label{flex:1 1 120px}.bulk-action-row>button{max-width:100%}}
+
+.live-offer-docs{display:grid;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid #e5e9f0}
+.live-offer-docs h4{font-size:14px;font-weight:650;margin:0}
+.live-offer-docs>label{display:grid;gap:5px}
+.live-offer-docs input[type=file]{max-width:100%}
+.live-offer-doc-actions,.live-offer-doc-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.live-offer-doc-actions button,.live-offer-doc-row button,.live-offer-docs li button{padding:6px 10px;border:1px solid #cdd8e5;border-radius:6px;background:#f8fbff;color:#1d3557;line-height:1.4}
+.live-offer-doc-row{justify-content:space-between}
+.live-offer-doc-row span{overflow-wrap:anywhere}
+.live-offer-docs ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.live-offer-docs li{display:grid;gap:8px;padding:10px;border:1px solid #e5e9f0;border-radius:8px}
+.live-offer-docs li label{display:inline-flex;align-items:center;gap:6px}
+.live-offer-docs li>div:last-child:not(.live-offer-doc-row){display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media(max-width:767px){.live-offer-doc-actions button{flex:1 1 160px}.live-offer-doc-row{align-items:flex-start}}
+
+@media(max-width:767px){
+  .live-topbar{height:auto;min-height:64px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center;padding:12px 16px}
+  .live-topbar>b{grid-column:1;grid-row:1;white-space:nowrap}
+  .live-topbar>span{grid-column:1;grid-row:2;white-space:nowrap}
+  .live-topbar>label{grid-column:2;grid-row:2;white-space:nowrap}
+  .live-topbar>button{grid-column:2;grid-row:1;justify-self:end;white-space:nowrap}
+}
+
+/* Durable live research status remains readable from desktop to narrow mobile. */
+.live-runs .run-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr));gap:.8rem;align-items:end}
+.live-runs input{width:100%;min-width:0}
+.live-runs .run-list{list-style:none;padding:0;margin:1rem 0}
+.live-runs .run-list li{border-block-end:1px solid var(--border,#ddd);padding:.55rem 0}
+.live-runs .run-list button{text-align:start;overflow-wrap:anywhere}
+.live-runs .run-detail{overflow-wrap:anywhere}
+
+.live-draft-editor {min-width:0;}
+.live-draft-fields {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:.8rem;margin:.8rem 0;}
+.live-draft-fields label {display:flex;flex-direction:column;gap:.3rem;min-width:0;}
+.live-draft-fields input,.live-draft-fields select,.live-draft-fields textarea {width:100%;min-width:0;max-width:100%;box-sizing:border-box;}
+.live-draft-fields label:has(input[type=checkbox]) {flex-direction:row;align-items:center;}
+.live-draft-fields input[type=checkbox] {width:auto;}
+.live-draft-option {display:flex;gap:.5rem;align-items:start;margin:.4rem 0;overflow-wrap:anywhere;}
+.live-draft-editor .panel {min-width:0;overflow-wrap:anywhere;}
+.live-draft-editor .inline {flex-wrap:wrap;}
+@media (max-width:600px) {.live-draft-fields{grid-template-columns:minmax(0,1fr);}}
+
+/* Keep the persisted usage filters and refresh action inside narrow live panels. */
+.live-usage-controls{flex-wrap:wrap;min-width:0}
+.live-usage-controls label{min-width:0}
+.live-usage-controls input[type=date]{max-width:100%;box-sizing:border-box}
+.live-outcome-fields{flex-wrap:wrap;min-width:0}
+.live-outcome-fields label{min-width:0}
+.live-outcome-fields input[type=datetime-local]{max-width:100%;box-sizing:border-box}
+
+/* Staff queue labels and supporting text need readable contrast on white panels. */
+.main-shell .activity{color:#5f6f85}
+.main-shell .muted{color:#5d6b7f}
+
+/* Form boundaries remain identifiable without relying on placeholder or label text. */
+.live-workspace input:not([type=checkbox]):not([type=radio]):not([type=hidden]),
+.live-workspace select,.live-workspace textarea{border:1px solid #6d7c8f!important;border-radius:4px}
+
+
+/* Buyer search and visible desktop filter boundaries are distinguishable on white panels. */
+.main-shell .results-panel .searchbox,
+.main-shell .results-panel .desktop-filters .pick{border:1px solid #6d7c8f}

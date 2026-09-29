@@ -65,7 +65,10 @@ class TokenVerifier:
 def default_verifier(settings) -> TokenVerifier:
     uri = jwks_uri_for(settings.auth0_issuer)
     return TokenVerifier(
-        JwksKeyCache(lambda: fetch_jwks_document(uri), cache_seconds=settings.jwks_cache_seconds),
+        JwksKeyCache(
+            lambda: fetch_jwks_document(uri), cache_seconds=settings.jwks_cache_seconds,
+            max_stale_seconds=settings.jwks_max_stale_seconds,
+        ),
         issuer=settings.auth0_issuer,
         audience=settings.auth0_audience,
     )

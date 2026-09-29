@@ -29,8 +29,8 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <DataModeProvider mode={mode} apiBaseUrl={apiBaseUrl}>
-          <WorkspaceSessionProvider>
-            <Workspace mode={mode} />
+          <WorkspaceSessionProvider authConfig={process.env.BUYEROS_AUTH0_ISSUER && process.env.BUYEROS_AUTH0_CLIENT_ID && process.env.BUYEROS_AUTH0_AUDIENCE ? {issuer: process.env.BUYEROS_AUTH0_ISSUER, clientId: process.env.BUYEROS_AUTH0_CLIENT_ID, audience: process.env.BUYEROS_AUTH0_AUDIENCE} : null}>
+            <Workspace mode={mode} />{children}
           </WorkspaceSessionProvider>
         </DataModeProvider>
       </body>

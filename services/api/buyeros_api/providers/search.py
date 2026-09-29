@@ -25,7 +25,8 @@ class SearchCapability:
 
 
 def is_activation_allowed(cap: SearchCapability) -> bool:
-    return cap.verified and cap.bounded_price and cap.max_results > 0
+    """The legacy four-field shape cannot prove safe live activation."""
+    return False
 
 
 class SearchAdapter(Protocol):

@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import DateTime, ForeignKeyConstraint, String, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKeyConstraint, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -22,8 +22,17 @@ class EnrichmentQuote(Base, TenantMixin):
     __table_args__ = (
         UniqueConstraint("workspace_id", "id", name="uq_enrichment_quotes_workspace_id"),
         ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_enrichment_quotes_workspace"),
+        ForeignKeyConstraint(["workspace_id", "project_id"], ["projects.workspace_id", "projects.id"],
+                             name="fk_enrichment_quotes_project"),
     )
 
+    project_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    actor_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    adapter_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    roles: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    eligibility: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    contact_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
     purpose: Mapped[str] = mapped_column(String(32), nullable=False)
     selection: Mapped[dict] = mapped_column(JSONB, nullable=False)
     request_hash: Mapped[str] = mapped_column(String(80), nullable=False)
@@ -45,6 +54,7 @@ class EnrichmentJob(Base, TenantMixin):
     )
 
     quote_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
     reservation_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     state: Mapped[str] = mapped_column(String(32), nullable=False, default="reserved")
     cancel_requested: Mapped[bool] = mapped_column(nullable=False, default=False)
@@ -56,8 +66,18 @@ class ProviderOperation(Base, TenantMixin):
         UniqueConstraint("workspace_id", "id", name="uq_provider_operations_workspace_id"),
         UniqueConstraint("workspace_id", "intent_key", name="uq_provider_operations_intent"),
         ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_provider_operations_workspace"),
+        UniqueConstraint("workspace_id", "job_id", "buyer_id", name="uq_provider_operations_job_buyer"),
+        ForeignKeyConstraint(["workspace_id", "job_id"], ["enrichment_jobs.workspace_id", "enrichment_jobs.id"], name="fk_provider_operations_job"),
+        ForeignKeyConstraint(["workspace_id", "buyer_id"], ["project_buyers.workspace_id", "project_buyers.id"], name="fk_provider_operations_buyer"),
     )
 
+    job_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    buyer_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    provider_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    account_reference: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    observed_cost: Mapped[Decimal | None] = mapped_column(MONEY, nullable=True)
+    external_event_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    result_contact_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     intent_key: Mapped[str] = mapped_column(String(128), nullable=False)
     capability: Mapped[str] = mapped_column(String(64), nullable=False)
     input_hash: Mapped[str] = mapped_column(String(80), nullable=False)

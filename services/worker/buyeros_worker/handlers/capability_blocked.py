@@ -1,7 +1,7 @@
 from ..registry import HandlerResult, register
 from ..run_emitter import emit_run_event
 
-BLOCKED_EVENTS = frozenset({"run.discover", "contact.submit", "draft.generate"})
+BLOCKED_EVENTS = frozenset({"run.discover", "run.fit", "contact.submit"})
 
 
 async def blocked(session, context, payload) -> HandlerResult:

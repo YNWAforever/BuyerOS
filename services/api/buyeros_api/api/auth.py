@@ -72,7 +72,8 @@ def _verifier_from_settings():
     from .verifier import default_verifier
 
     settings = get_settings()
-    key = (settings.auth0_issuer, settings.auth0_audience, settings.jwks_cache_seconds)
+    key = (settings.auth0_issuer, settings.auth0_audience,
+           settings.jwks_cache_seconds, settings.jwks_max_stale_seconds)
     if _VERIFIER is None or _VERIFIER_KEY != key:
         _VERIFIER = default_verifier(settings)
         _VERIFIER_KEY = key

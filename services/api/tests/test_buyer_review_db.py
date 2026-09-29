@@ -1,5 +1,6 @@
 """BO-008 slice 1: buyer version, snapshots, reviews and evidence."""
 import asyncio
+import json
 import uuid
 from pathlib import Path
 
@@ -157,24 +158,37 @@ def api(seeded, monkeypatch):
     finally:
         get_settings.cache_clear()
         owner = psycopg.connect(seeded, autocommit=True)
-        for subject in (OPERATOR, REVIEWER, ADMIN, VIEWER):
-            user_id = uuid.uuid5(uuid.NAMESPACE_URL, subject)
-            owner.execute("DELETE FROM memberships WHERE user_id = %s", (user_id,))
-            owner.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        owner.execute("UPDATE projects SET active_icp_version_id=NULL WHERE workspace_id=%s", (WORKSPACE_A,))
         for statement in (
+            "DELETE FROM export_jobs WHERE workspace_id = %s",
+            "DELETE FROM outbox_events WHERE workspace_id = %s",
+            "DELETE FROM async_job_items WHERE workspace_id = %s",
+            "DELETE FROM async_jobs WHERE workspace_id = %s",
+            "DELETE FROM filter_presets WHERE workspace_id = %s",
+            "DELETE FROM policy_decisions WHERE workspace_id = %s",
+            "DELETE FROM suppressions WHERE workspace_id = %s",
             "DELETE FROM buyer_snapshot_items WHERE workspace_id = %s",
             "DELETE FROM buyer_snapshots WHERE workspace_id = %s",
             "DELETE FROM human_reviews WHERE workspace_id = %s",
             "DELETE FROM fit_assessments WHERE workspace_id = %s",
+            "DELETE FROM icp_versions WHERE workspace_id = %s",
             "DELETE FROM list_memberships WHERE workspace_id = %s",
+            "DELETE FROM buyer_lists WHERE workspace_id = %s",
             "DELETE FROM project_buyers WHERE workspace_id = %s",
             "DELETE FROM evidence WHERE workspace_id = %s",
             "DELETE FROM source_documents WHERE workspace_id = %s",
             "DELETE FROM companies WHERE workspace_id = %s",
+            "DELETE FROM workspace_preferences WHERE workspace_id = %s",
+            "DELETE FROM audit_events WHERE workspace_id = %s",
             "DELETE FROM idempotency_records WHERE workspace_id = %s",
         ):
             owner.execute(statement, (WORKSPACE_A,))
+        for subject in (OPERATOR, REVIEWER, ADMIN, VIEWER):
+            user_id = uuid.uuid5(uuid.NAMESPACE_URL, subject)
+            owner.execute("DELETE FROM memberships WHERE user_id = %s", (user_id,))
+            owner.execute("DELETE FROM users WHERE id = %s", (user_id,))
         owner.close()
+
 
 
 def _seed_buyer(seeded, *, name, fit=None, review=None, owner_user_id=None, domain=None):
@@ -193,10 +207,28 @@ def _seed_buyer(seeded, *, name, fit=None, review=None, owner_user_id=None, doma
         fit_id = None
         if fit is not None:
             fit_id = str(uuid.uuid4())
+            active = conn.execute(
+                "SELECT active_icp_version_id FROM projects WHERE workspace_id=%s AND id=%s",
+                (WORKSPACE_A, PROJECT_A),
+            ).fetchone()[0]
+            if active is None:
+                icp_id = str(uuid.uuid4())
+                conn.execute(
+                    "INSERT INTO icp_versions(id, workspace_id, project_id, number, content, content_hash, "
+                    "basis_offer_revision) VALUES (%s, %s, %s, 1, '{}'::jsonb, %s, 1)",
+                    (icp_id, WORKSPACE_A, PROJECT_A, "sha256:" + "0" * 64),
+                )
+                conn.execute(
+                    "UPDATE projects SET active_icp_version_id=%s WHERE workspace_id=%s AND id=%s",
+                    (icp_id, WORKSPACE_A, PROJECT_A),
+                )
+            else:
+                icp_id = str(active)
             conn.execute(
-                "INSERT INTO fit_assessments(id, workspace_id, project_buyer_id, icp_version_id, evidence_set_hash, "
-                "verdict, rationale, evidence_ids) VALUES (%s, %s, %s, %s, 'sha256:x', %s, 'because', '[]'::jsonb)",
-                (fit_id, WORKSPACE_A, buyer_id, str(uuid.uuid4()), fit),
+                "INSERT INTO fit_assessments(id, workspace_id, project_id, project_buyer_id, icp_version_id, "
+                "evidence_set_hash, verdict, rationale, evidence_ids) "
+                "VALUES (%s, %s, %s, %s, %s, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', %s, 'because', '[]'::jsonb)",
+                (fit_id, WORKSPACE_A, PROJECT_A, buyer_id, icp_id, fit),
             )
         if review is not None:
             # A review is only contract-valid alongside its fit, so link it when both are seeded.
@@ -294,14 +326,19 @@ def test_the_same_snapshot_key_on_another_project_is_not_a_replay(api, seeded):
         assert second.json()["data"]["project_id"] == PROJECT_A2
     finally:
         with psycopg.connect(seeded, autocommit=True) as conn:
+            conn.execute(
+                "DELETE FROM buyer_snapshot_items WHERE snapshot_id IN "
+                "(SELECT id FROM buyer_snapshots WHERE project_id = %s)", (PROJECT_A2,)
+            )
+            conn.execute("DELETE FROM buyer_snapshots WHERE project_id = %s", (PROJECT_A2,))
             conn.execute("DELETE FROM projects WHERE id = %s", (PROJECT_A2,))
 
 
-def _snapshot(api, *, limit=10, key="list-001"):
+def _snapshot(api, *, limit=10, key="list-001", subject=OPERATOR):
     response = api.post(
         f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-snapshots",
         json={"filters": {}, "sort": "name_asc", "requested_limit": limit},
-        headers=_h(key=key),
+        headers=_h(subject=subject, key=key),
     )
     assert response.status_code == 201, response.text
     return response.json()["data"]["id"]
@@ -572,7 +609,7 @@ def test_a_stale_review_version_conflicts_and_preserves_the_prior_record(api, se
 def test_a_snapshot_review_expands_excluding_removed_ids(api, seeded):
     first = _seed_buyer(seeded, name="Alpha Sensors", fit="match")
     second = _seed_buyer(seeded, name="Beta Sensors", fit="match")
-    snapshot_id = _snapshot(api, key="review-snap")
+    snapshot_id = _snapshot(api, key="review-snap", subject=REVIEWER)
     response = api.post(
         f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
         json={"selection": {"kind": "snapshot", "snapshot_id": snapshot_id, "excluded_ids": [second]},
@@ -635,7 +672,7 @@ def test_a_malformed_snapshot_id_is_rejected_not_a_server_error(api):
 
 def test_a_malformed_excluded_id_is_rejected_not_a_server_error(api, seeded):
     _seed_buyer(seeded, name="Alpha Sensors", fit="match")
-    snapshot_id = _snapshot(api, key="review-bad-excluded-snap")
+    snapshot_id = _snapshot(api, key="review-bad-excluded-snap", subject=REVIEWER)
     response = api.post(
         f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
         json={"selection": {"kind": "snapshot", "snapshot_id": snapshot_id, "excluded_ids": ["not-a-uuid"]},
@@ -662,7 +699,7 @@ def test_a_malformed_explicit_id_is_rejected_not_a_server_error(api, seeded):
     assert "buyer id" in response.json()["message"]
 
 
-def test_a_review_without_a_fit_is_stored_but_not_emitted(api, seeded):
+def test_a_review_without_a_fit_is_blocked_and_not_stored(api, seeded):
     buyer_id = _seed_buyer(seeded, name="Alpha Sensors")
     response = api.post(
         f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-reviews",
@@ -671,7 +708,8 @@ def test_a_review_without_a_fit_is_stored_but_not_emitted(api, seeded):
         headers=_h(subject=REVIEWER, key="review-no-fit"),
     )
     assert response.status_code == 200, response.text
-    assert response.json()["data"]["updated"] == 1
+    assert response.json()["data"]["updated"] == 0
+    assert response.json()["data"]["blocked"] == 1
     stored = api.get(f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}", headers=_h(key="r-get-no-fit")).json()["data"]
     assert "review" not in stored
     with psycopg.connect(seeded) as conn:
@@ -679,7 +717,7 @@ def test_a_review_without_a_fit_is_stored_but_not_emitted(api, seeded):
             "SELECT count(*) FROM human_reviews WHERE workspace_id = %s AND project_buyer_id = %s",
             (WORKSPACE_A, buyer_id),
         ).fetchone()[0]
-    assert count == 1
+    assert count == 0
 
 
 def test_a_duplicate_explicit_id_is_processed_once(api, seeded):
@@ -705,7 +743,7 @@ def _seed_evidence(seeded, buyer_id, company_id):
     with psycopg.connect(seeded, autocommit=True) as conn:
         conn.execute(
             "INSERT INTO source_documents(id, workspace_id, canonical_url, digest, retrieved_at, language) "
-            "VALUES (%s, %s, 'https://example.test/a', 'sha256:x', now(), 'en')",
+            "VALUES (%s, %s, 'https://example.test/a', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', now(), 'en')",
             (source_id, WORKSPACE_A),
         )
         conn.execute(
@@ -735,6 +773,34 @@ def test_buyer_evidence_is_scoped_and_404s_foreign(api, seeded):
     foreign = api.get(f"/v1/workspaces/{WORKSPACE_B}/evidence/{evidence_id}", headers=_h(key="ev-03"))
     assert foreign.status_code == 404
     assert evidence_id not in foreign.text
+
+
+
+def test_expired_or_deleted_source_is_not_current_evidence(api, seeded):
+    buyer_id = _seed_buyer(seeded, name="Source freshness", fit="match")
+    with psycopg.connect(seeded) as conn:
+        company_id = conn.execute("SELECT company_id FROM project_buyers WHERE id=%s", (buyer_id,)).fetchone()[0]
+    evidence_id = _seed_evidence(seeded, buyer_id, company_id)
+    with psycopg.connect(seeded, autocommit=True) as conn:
+        conn.execute("UPDATE fit_assessments SET evidence_ids=%s::jsonb WHERE project_buyer_id=%s",
+                     (json.dumps([evidence_id]), buyer_id))
+        conn.execute("UPDATE source_documents SET project_id=%s, permission_purpose='account_research',"
+                     " excerpt='supports the requirement', retention_until=now()-interval '1 second'"
+                     " WHERE id=(SELECT source_document_id FROM evidence WHERE id=%s)", (PROJECT_A, evidence_id))
+    buyer = api.get(f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyer_id}", headers=_h())
+    assert buyer.status_code == 200
+    assert buyer.json()["data"]["fit"]["freshness"] == "stale"
+    expired = api.get(f"/v1/workspaces/{WORKSPACE_A}/evidence/{evidence_id}", headers=_h())
+    assert expired.status_code == 200
+    assert expired.json()["data"]["status"] == "expired"
+    assert expired.json()["data"]["excerpt"] != "supports the requirement"
+    with psycopg.connect(seeded, autocommit=True) as conn:
+        conn.execute("UPDATE source_documents SET excerpt=NULL,object_key=NULL WHERE id="
+                     "(SELECT source_document_id FROM evidence WHERE id=%s)", (evidence_id,))
+    deleted = api.get(f"/v1/workspaces/{WORKSPACE_A}/evidence/{evidence_id}", headers=_h())
+    assert deleted.status_code == 200
+    assert deleted.json()["data"]["status"] == "deleted"
+    assert "source_url" not in deleted.json()["data"]
 
 
 def test_0011_downgrade_truncates_a_long_review_reason(migrated):
@@ -794,4 +860,5 @@ def test_0011_downgrade_truncates_a_long_review_reason(migrated):
             conn.execute("DELETE FROM project_buyers WHERE workspace_id = %s", (workspace_id,))
             conn.execute("DELETE FROM companies WHERE workspace_id = %s", (workspace_id,))
             conn.execute("DELETE FROM projects WHERE workspace_id = %s", (workspace_id,))
+            conn.execute("DELETE FROM budget_accounts WHERE workspace_id = %s", (workspace_id,))
             conn.execute("DELETE FROM workspaces WHERE id = %s", (workspace_id,))

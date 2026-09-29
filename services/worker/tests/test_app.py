@@ -29,3 +29,7 @@ def test_build_app_applies_eager_setting_and_beat_schedule(monkeypatch):
     schedule = app.conf.beat_schedule["buyeros-sweep-expired"]
     assert schedule["task"] == "buyeros.sweep"
     assert schedule["schedule"] == 15.0
+
+
+def test_broker_connection_probe_has_bounded_timeout():
+    assert celery_app.conf.broker_connection_timeout == 5

@@ -30,6 +30,9 @@ def _patch_engine(monkeypatch):
 
     monkeypatch.setattr(tasks, "create_engine", fake_create_engine)
     monkeypatch.setattr(tasks, "tenant_session", fake_tenant_session)
+    async def fake_load(session, intent_key):
+        return _row()
+    monkeypatch.setattr(tasks, "load_intent", fake_load)
     return created
 
 

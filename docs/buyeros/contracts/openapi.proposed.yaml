@@ -375,6 +375,77 @@ paths:
       - POLICY_BLOCKED
       - BUDGET_LIMIT
       - PROVIDER_UNAVAILABLE
+  /v1/workspaces/{workspace_id}/memberships:
+    get:
+      operationId: listMemberships
+      summary: List existing verified workspace memberships
+      tags: [BO-024]
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      responses:
+        '200':
+          description: Authorized member page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipPageResponse'
+      x-permitted-roles: [workspace_admin]
+      x-cost: none
+      x-idempotency: Read-only.
+  /v1/workspaces/{workspace_id}/memberships/{membership_id}:
+    patch:
+      operationId: updateMembership
+      summary: Versioned role or active-state change for an existing member
+      tags: [BO-024]
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: membership_id
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MembershipUpdate'
+      responses:
+        '200':
+          description: Versioned existing member
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipResponse'
+      x-permitted-roles: [workspace_admin]
+      x-cost: none
+      x-idempotency: Exact target, precondition and body replay.
   /v1/workspaces/{workspace_id}/preferences:
     get:
       operationId: getPreferences
@@ -1069,6 +1140,52 @@ paths:
                 value:
                   reason: Illustrative contract value
   /v1/workspaces/{workspace_id}/projects/{project_id}/offer-documents:
+    get:
+      operationId: listOfferDocuments
+      summary: List persisted offer document ingestion states for recovery
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: project_id
+        in: path
+        required: true
+        schema: *id001
+      - *id002
+      - *id003
+      responses:
+        '200':
+          description: Stable persisted page, including failed and deleted states.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferDocumentPageResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      x-implementation-status: IMPLEMENTED_LOCAL
+      x-work-package: BO-012
+      x-tenant-authorization: Current membership and project scope under tenant RLS.
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-policy: Read-only, no private object key or signed URL.
+      x-cost: none
+      x-idempotency: Read-only.
+      x-version-precondition: none
+      x-validation: offset >= 0 and limit 1..100; stable created_at/id order.
     post:
       operationId: uploadOfferDocument
       summary: Quarantine and ingest an offer document
@@ -2581,7 +2698,7 @@ paths:
                       workspace_id: 10000000-0000-4000-8000-000000000001
                       project_id: 10000000-0000-4000-8000-000000000001
                       actor_id: 10000000-0000-4000-8000-000000000001
-                      filters_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      filters_hash: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       sort: best_fit
                       total: 0
                       created_at: '2026-09-15T02:00:00Z'
@@ -3191,6 +3308,64 @@ paths:
       - POLICY_BLOCKED
       - BUDGET_LIMIT
       - PROVIDER_UNAVAILABLE
+  /v1/workspaces/{workspace_id}/projects/{project_id}/buyer-owner-assignments:
+    post:
+      operationId: assignBuyerOwners
+      summary: Assign or clear buyer owners with per-row version checks
+      description: Up to 100 buyers complete synchronously; 101..1000 create a durable, actor-bound bulk job.
+      tags:
+      - BO-008
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: project_id
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Synchronous per-buyer outcomes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResultResponse'
+        '202':
+          description: Frozen selection accepted for durable chunked processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncJobResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-work-package: BO-008
+      x-permitted-roles:
+      - operator
+      - workspace_admin
+      x-tenant-authorization: Current workspace membership and project scope are rechecked.
+      x-idempotency: Required; original 200 or 202 response replays exactly.
+      x-version-precondition: Each frozen buyer version is rechecked under a row lock.
+      x-cost: none
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OwnerAssignRequest'
   /v1/workspaces/{workspace_id}/projects/{project_id}/buyer-reviews:
     post:
       operationId: reviewBuyers
@@ -3226,6 +3401,7 @@ paths:
                     data:
                       requested: 0
                       updated: 0
+                      unchanged: 0
                       blocked: 0
                       conflicts: 0
                       results: []
@@ -3239,6 +3415,12 @@ paths:
               schema:
                 type: string
               description: Version ETag when response is one versioned entity
+        '202':
+          description: Durable bulk job accepted for 101..1000 frozen buyer rows.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncJobResponse'
         '400':
           $ref: '#/components/responses/Error'
         '401':
@@ -3713,6 +3895,7 @@ paths:
                     data:
                       requested: 0
                       updated: 0
+                      unchanged: 0
                       blocked: 0
                       conflicts: 0
                       results: []
@@ -3726,6 +3909,12 @@ paths:
               schema:
                 type: string
               description: Version ETag when response is one versioned entity
+        '202':
+          description: Durable bulk job accepted for 101..1000 frozen buyer rows.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncJobResponse'
         '400':
           $ref: '#/components/responses/Error'
         '401':
@@ -5472,7 +5661,6 @@ paths:
       x-permitted-roles:
       - operator
       - reviewer
-      - budget_admin
       - workspace_admin
       x-policy: Server-side membership and project scope; no implicit contact-data access.
       x-cost: none
@@ -5583,7 +5771,6 @@ paths:
       x-tenant-authorization: Validate JWT issuer/audience/signature/expiry, current membership and role; workspace_id
         is a selector, never authority. Check every project/entity belongs to it; tenant-safe 404 for foreign IDs.
       x-permitted-roles:
-      - budget_admin
       - workspace_admin
       x-policy: Server-side membership and project scope; no implicit contact-data access.
       x-cost: none
@@ -5934,6 +6121,40 @@ paths:
                   max_cost:
                     amount: '2.400000'
                     currency: USD
+  /v1/workspaces/{workspace_id}/jobs:
+    get:
+      operationId: listAsyncJobs
+      summary: List actor-scoped durable jobs for operations recovery
+      tags: [BO-024]
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - *id002
+      - *id003
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [queued, running, cancel_requested, cancelled, completed, failed]
+      - name: project_id
+        in: query
+        required: false
+        schema: *id001
+      responses:
+        '200':
+          description: Bounded actor-scoped job page; workspace admins may view all workspace jobs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncJobPageResponse'
+      x-permitted-roles: [viewer, operator, reviewer, workspace_admin]
+      x-cost: none
+      x-idempotency: Read-only.
   /v1/workspaces/{workspace_id}/jobs/{job_id}:
     get:
       operationId: getAsyncJob
@@ -5952,6 +6173,21 @@ paths:
         in: path
         required: true
         schema: *id001
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
       responses:
         '200':
           description: Success; endpoint is PROPOSED, not implemented.
@@ -6024,6 +6260,102 @@ paths:
       - POLICY_BLOCKED
       - BUDGET_LIMIT
       - PROVIDER_UNAVAILABLE
+  /v1/workspaces/{workspace_id}/jobs/{job_id}/cancel:
+    post:
+      operationId: cancelAsyncJob
+      summary: Stop only unprocessed rows of a durable bulk job
+      description: Previously committed rows remain committed and visible in the job result page.
+      tags:
+      - BO-008
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: job_id
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Cancellation requested for pending rows.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncJobResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+      x-work-package: BO-008
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - workspace_admin
+      x-tenant-authorization: Only the current original actor may cancel the job.
+      x-idempotency: Required; original cancellation response replays exactly.
+      x-version-precondition: Job control row is locked before state change.
+      x-cost: none
+  /v1/workspaces/{workspace_id}/jobs/{job_id}/retry-failed:
+    post:
+      operationId: retryFailedAsyncJob
+      summary: Retry only blocked and conflicted buyer rows using current versions
+      description: Rechecks the original actor and present roles; a new action preserves the original job history.
+      tags:
+      - BO-008
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: job_id
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: At most 100 failed buyer rows reprocessed synchronously.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResultResponse'
+        '202':
+          description: More than 100 failed buyer rows queued as a new durable job.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncJobResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+      x-work-package: BO-008
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - workspace_admin
+      x-tenant-authorization: Original job actor and present operation permission are required.
+      x-idempotency: Required; exact response replays.
+      x-version-precondition: Failed buyer current version is selected under the new command transaction.
+      x-cost: none
   /v1/workspaces/{workspace_id}/drafts/{draft_id}:
     get:
       operationId: getDraft
@@ -6500,6 +6832,56 @@ paths:
                   - 70000000-0000-4000-8000-000000000001
                   sender_identity_version: sender:80000000-0000-4000-8000-000000000001:1
                   confirmation: true
+  /v1/workspaces/{workspace_id}/jobs/{job_id}/exports:
+    post:
+      operationId: exportBulkFailures
+      summary: Create an audited, short-lived export of a bulk job's failed buyer IDs and reason codes
+      description: Failure rows are read from the actor's terminal bulk job. Content rechecks current
+        membership, project and source-job result state, and never includes contact data.
+      tags:
+      - BO-023
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: job_id
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '202':
+          description: Audited export reference is ready for authorized content retrieval.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJobResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-implementation-status: IMPLEMENTED
+      x-work-package: BO-023
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - workspace_admin
+      x-cost: none
+      x-idempotency: Required; source job ID is included in the fingerprint.
+      x-version-precondition: none
   /v1/workspaces/{workspace_id}/projects/{project_id}/exports:
     post:
       operationId: exportBuyers
@@ -7460,6 +7842,8 @@ components:
           - PROVIDER_UNAVAILABLE
           - PROVIDER_SUBMISSION_UNKNOWN
           - PROVIDER_CAPABILITY_BLOCKED
+          - CAPABILITY_DISABLED
+          - READ_DISABLED
           - EVENT_CURSOR_EXPIRED
           - EVIDENCE_STALE
           - APPROVAL_STALE
@@ -7518,6 +7902,7 @@ components:
         id: *id001
         name:
           type: string
+        membership_id: *id001
         roles:
           type: array
           items:
@@ -7538,6 +7923,82 @@ components:
       - name
       - roles
       - data_mode
+    Membership:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        workspace_id: *id001
+        user_id: *id001
+        roles:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            enum: [viewer, operator, reviewer, workspace_admin]
+        active:
+          type: boolean
+        version:
+          type: integer
+          minimum: 1
+      required: [id, workspace_id, user_id, roles, active, version]
+    MembershipUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        roles:
+          type: array
+          minItems: 1
+          maxItems: 4
+          uniqueItems: true
+          items:
+            type: string
+            enum: [viewer, operator, reviewer, workspace_admin]
+        active:
+          type: boolean
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 2000
+      required: [roles, active, reason]
+    MembershipPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Membership'
+        offset: *id005
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total: *id005
+      required: [items, offset, limit, total]
+    MembershipPageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/MembershipPage'
+        request_id: *id001
+        data_mode:
+          type: string
+          enum: [live]
+      required: [data, request_id, data_mode]
+    MembershipResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/Membership'
+        request_id: *id001
+        data_mode:
+          type: string
+          enum: [live]
+      required: [data, request_id, data_mode]
     Preferences:
       type: object
       additionalProperties: false
@@ -7626,9 +8087,12 @@ components:
         offer: &id011
           type: string
           maxLength: 20000
-        website: &id012
-          type: string
-          format: uri
+        website:
+          oneOf:
+          - &id012
+            type: string
+            format: uri
+          - type: 'null'
         markets: &id013
           type: array
           items:
@@ -7653,13 +8117,17 @@ components:
         id: *id001
         workspace_id: *id001
         version: *id006
+        offer_revision: *id006
         created_at: *id004
         updated_at: *id004
         data_mode: *id008
         name: *id009
         company_name: *id010
         offer: *id011
-        website: *id012
+        website:
+          oneOf:
+          - *id012
+          - type: 'null'
         markets: *id013
         language_preferences: *id014
         status:
@@ -7679,6 +8147,7 @@ components:
       - id
       - workspace_id
       - version
+      - offer_revision
       - created_at
       - updated_at
       - data_mode
@@ -7715,7 +8184,11 @@ components:
           type: string
         media_type:
           type: string
-        sha256: *id015
+        sha256:
+          anyOf:
+          - *id015
+          - type: 'null'
+          description: Null while a URL fetch is queued or blocked; never a synthetic digest.
         status:
           type: string
           enum:
@@ -7742,7 +8215,6 @@ components:
       - project_id
       - filename
       - media_type
-      - sha256
       - status
     OfferFact:
       type: object
@@ -7813,6 +8285,9 @@ components:
       type: object
       additionalProperties: false
       properties:
+        basis_offer_revision:
+          type: integer
+          minimum: 1
         offer_document_ids: &id017
           type: array
           items: *id001
@@ -7855,6 +8330,7 @@ components:
           maxItems: 20
         parent_icp_version_id: *id001
       required:
+      - basis_offer_revision
       - offer_facts
       - requirements
       - markets
@@ -7880,15 +8356,36 @@ components:
         parent_icp_version_id: *id001
         project_id: *id001
         number: *id006
-        content_hash: *id015
+        basis_offer_revision:
+          oneOf:
+          - type: integer
+            minimum: 1
+          - type: 'null'
+        basis_status:
+          type: string
+          enum:
+          - current
+          - stale
+          - unknown
+        is_current:
+          type: boolean
+        content_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
         status:
           type: string
           enum:
           - saved
           - approved
           - superseded
-        approved_by: *id001
-        approved_at: *id004
+        approved_by:
+          oneOf:
+          - *id001
+          - type: 'null'
+        approved_at:
+          oneOf:
+          - *id004
+          - type: 'null'
       required:
       - id
       - workspace_id
@@ -7898,6 +8395,9 @@ components:
       - data_mode
       - project_id
       - number
+      - basis_offer_revision
+      - basis_status
+      - is_current
       - content_hash
       - status
       - requirements
@@ -7909,12 +8409,18 @@ components:
       type: object
       additionalProperties: false
       properties:
-        content_hash: *id015
+        content_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        expected_project_version:
+          type: integer
+          minimum: 1
         confirmation:
           type: boolean
           const: true
       required:
       - content_hash
+      - expected_project_version
       - confirmation
     RunLimits:
       type: object
@@ -8007,6 +8513,10 @@ components:
         data_mode: *id008
         project_id: *id001
         icp_version_id: *id001
+        target_companies:
+          type: integer
+          minimum: 1
+          maximum: 100
         status:
           type: string
           enum:
@@ -8204,15 +8714,9 @@ components:
       - workspace_id
       - project_id
       - company_id
-      - source_document_id
       - version
-      - source_type
-      - title
       - excerpt
-      - original_language
-      - retrieved_at
       - kind
-      - requirement_id
       - relationship
       - status
       - data_mode
@@ -8362,6 +8866,7 @@ components:
         purpose:
           type: string
           enum:
+          - offer_research
           - account_research
           - contact_research
           - draft_preparation
@@ -8437,10 +8942,6 @@ components:
       - project_id
       - company_id
       - name
-      - market
-      - buyer_type
-      - fit
-      - review
       - contact_research_status
       - contacts
       - suppressed
@@ -8503,6 +9004,12 @@ components:
         run_id: *id001
         list_id: *id001
         owner_membership_id: *id001
+        owner_unassigned:
+          type: boolean
+          description: Project buyers without an assigned owner.
+        unknown_fit:
+          type: boolean
+          description: Project buyers without a current fit assessment.
       required: []
     SnapshotCreate:
       type: object
@@ -8531,7 +9038,9 @@ components:
         workspace_id: *id001
         project_id: *id001
         actor_id: *id001
-        filters_hash: *id015
+        filters_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
         sort:
           type: string
           enum:
@@ -8653,6 +9162,7 @@ components:
           - unchanged
           - blocked
           - conflict
+          - cancelled
         reason_code:
           type: string
         version: *id006
@@ -8665,6 +9175,7 @@ components:
       properties:
         requested: *id005
         updated: *id005
+        unchanged: *id005
         blocked: *id005
         conflicts: *id005
         results:
@@ -8674,11 +9185,30 @@ components:
       required:
       - requested
       - updated
+      - unchanged
       - blocked
       - conflicts
       - results
       description: Per-item committed outcomes. No client success toast may conceal blocked/conflict rows. Eligibility
         is rechecked under each buyer lock.
+    OwnerAssignRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        selection:
+          $ref: '#/components/schemas/Selection'
+        owner_membership_id:
+          oneOf:
+          - *id001
+          - type: 'null'
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 2000
+      required:
+      - selection
+      - owner_membership_id
+      - reason
     BuyerUpdate:
       type: object
       additionalProperties: false
@@ -9084,6 +9614,7 @@ components:
         purpose: &id031
           type: string
           enum:
+          - offer_research
           - account_research
           - contact_research
           - draft_preparation
@@ -9539,6 +10070,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GroundedClaim'
+        approval_review:
+          $ref: '#/components/schemas/DraftApprovalReview'
         approval_id:
           oneOf:
           - *id001
@@ -9602,6 +10135,73 @@ components:
       - evidence_ids
       - offer_fact_ids
       - kind
+    DraftApprovalReview:
+      type: object
+      additionalProperties: false
+      properties:
+        recipient:
+          type: object
+          additionalProperties: false
+          properties:
+            id: *id001
+            version: *id006
+            value:
+              type: string
+              format: email
+            validity:
+              type: string
+          required:
+          - id
+          - version
+          - value
+          - validity
+        sender:
+          type: object
+          additionalProperties: false
+          properties:
+            version_key:
+              type: string
+            display_name:
+              type: string
+            organization:
+              type: string
+            business_email:
+              type: string
+              format: email
+          required:
+          - version_key
+          - display_name
+          - organization
+          - business_email
+        evidence:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              id: *id001
+              version: *id006
+              source_id: *id001
+            required:
+            - id
+            - version
+            - source_id
+        policy_decision_ids:
+          type: array
+          items: *id001
+        fit_id: *id001
+        review_id: *id001
+        icp_version_id: *id001
+        context_hash: *id015
+      required:
+      - recipient
+      - sender
+      - evidence
+      - policy_decision_ids
+      - fit_id
+      - review_id
+      - icp_version_id
+      - context_hash
     DraftReviewRequest:
       type: object
       additionalProperties: false
@@ -9765,6 +10365,13 @@ components:
           enum:
           - buyer_csv
           - draft_text
+          - bulk_failure_csv
+        format:
+          type: string
+          enum:
+          - csv
+          - text
+          - clipboard
         record_count: *id005
         expires_at: *id004
         download_url:
@@ -9794,6 +10401,22 @@ components:
       - excluded_records
       description: Download URL points to an authenticated BuyerOS endpoint. Storage remains private; policy rechecked
         at download. Do not serve a long-lived object URL bypassing revocation.
+    AsyncJobResultPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkItemResult'
+        offset: *id005
+        limit: *id005
+        total: *id005
+      required:
+      - items
+      - offset
+      - limit
+      - total
     AsyncJob:
       type: object
       additionalProperties: false
@@ -9808,6 +10431,7 @@ components:
           - draft_generation
           - export
           - reconciliation
+          - bulk_mutation
         status:
           type: string
           enum:
@@ -9818,6 +10442,15 @@ components:
           - completed
           - failed
           - unknown
+        requested: *id005
+        processed: *id005
+        updated: *id005
+        unchanged: *id005
+        blocked: *id005
+        conflicts: *id005
+        cancelled: *id005
+        result_page:
+          $ref: '#/components/schemas/AsyncJobResultPage'
         result_id: *id001
         failure_code:
           type: string
@@ -9886,6 +10519,10 @@ components:
         actor_id: *id001
         recorded_at: *id004
         supersedes_id: *id001
+        correction_reason:
+          type: string
+          minLength: 3
+          maxLength: 1000
       required:
       - id
       - workspace_id
@@ -10025,9 +10662,7 @@ components:
       - workspace_id
       - action
       - entity_type
-      - entity_id
       - occurred_at
-      - request_id
     HealthResponse:
       type: object
       additionalProperties: false
@@ -10190,6 +10825,42 @@ components:
       - data
       - request_id
       - data_mode
+    OfferDocumentPageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/OfferDocument'
+            offset:
+              type: integer
+              minimum: 0
+            limit:
+              type: integer
+              minimum: 1
+              maximum: 100
+            total:
+              type: integer
+              minimum: 0
+          required:
+          - items
+          - offset
+          - limit
+          - total
+        request_id: *id001
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
     OfferDocumentResponse:
       type: object
       additionalProperties: false
@@ -10205,6 +10876,32 @@ components:
       - data
       - request_id
       - data_mode
+    AsyncJobPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AsyncJob'
+        offset: *id005
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total: *id005
+      required: [items, offset, limit, total]
+    AsyncJobPageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/AsyncJobPage'
+        request_id: *id001
+        data_mode:
+          type: string
+          enum: [live]
+      required: [data, request_id, data_mode]
     AsyncJobResponse:
       type: object
       additionalProperties: false
@@ -10951,12 +11648,17 @@ components:
         sender_confirmation:
           type: boolean
           const: true
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 400
       required:
       - display_name
       - organization
       - business_email
       - country
       - sender_confirmation
+      - reason
       description: Project-level human-reviewed identity configuration only. PATCH project field requires reviewer
         or workspace_admin and creates immutable identity version; operator cannot assert approval. No mailbox OAuth
         or sending is activated, and this review does not prove mailbox ownership.

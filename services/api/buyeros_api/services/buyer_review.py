@@ -3,13 +3,16 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from ..api.errors import ApiError
 from ..db.buyers import BuyerSnapshot, BuyerSnapshotItem, FitAssessment, HumanReview, ProjectBuyer
+from ..db.icp import canonical_hash
+from ..db.drafts import Approval, OutreachDraft
+from .audit_service import append_audit
 
 
-async def _resolve_items(session, *, workspace_id, project_id, selection: dict):
+async def _resolve_items(session, *, workspace_id, project_id, actor_user_id, selection: dict):
     """Return deterministic (buyer_id, expected_version) pairs for the request's selection."""
     if selection["kind"] == "explicit":
         items: list[tuple[uuid.UUID, int]] = []
@@ -39,9 +42,9 @@ async def _resolve_items(session, *, workspace_id, project_id, selection: dict):
             )
         )
     ).scalar_one_or_none()
-    if snapshot is None:
+    if snapshot is None or snapshot.actor_user_id != actor_user_id:
         raise ApiError(404, "NOT_FOUND", "buyer snapshot not found")
-    if snapshot.expires_at is not None and snapshot.expires_at <= datetime.now(timezone.utc):
+    if snapshot.expires_at is None or snapshot.expires_at <= datetime.now(timezone.utc):
         raise ApiError(404, "NOT_FOUND", "buyer snapshot expired")
     excluded: set[uuid.UUID] = set()
     for value in selection["excluded_ids"]:
@@ -65,15 +68,15 @@ async def _latest(session, model, workspace_id, buyer_id):
         await session.execute(
             select(model)
             .where(model.workspace_id == workspace_id, model.project_buyer_id == buyer_id)
-            .order_by(model.created_at.desc(), model.id)
+            .order_by(model.created_at.desc(), model.id.desc())
         )
     ).scalars().first()
 
 
-async def apply(session, *, workspace_id, project_id, actor_user_id, selection: dict, status: str, reason: str) -> dict:
-    items = await _resolve_items(session, workspace_id=workspace_id, project_id=project_id, selection=selection)
+async def apply(session, *, workspace_id, project_id, actor_user_id, active_icp_version_id, selection: dict, status: str, reason: str) -> dict:
+    items = await _resolve_items(session, workspace_id=workspace_id, project_id=project_id, actor_user_id=actor_user_id, selection=selection)
     results: list[dict] = []
-    updated = blocked = conflicts = 0
+    updated = unchanged = blocked = conflicts = 0
     for buyer_id, expected_version in items:
         buyer = (
             await session.execute(
@@ -94,11 +97,21 @@ async def apply(session, *, workspace_id, project_id, actor_user_id, selection: 
             conflicts += 1
             results.append({"id": str(buyer_id), "status": "conflict", "reason_code": "version_conflict", "version": buyer.version})
             continue
+        fit = await _latest(session, FitAssessment, workspace_id, buyer_id)
+        if fit is None or active_icp_version_id is None:
+            blocked += 1
+            results.append({"id": str(buyer_id), "status": "blocked", "reason_code": "assessment_unavailable", "version": buyer.version})
+            continue
+        if fit.icp_version_id != active_icp_version_id:
+            blocked += 1
+            results.append({"id": str(buyer_id), "status": "blocked", "reason_code": "stale_assessment", "version": buyer.version})
+            continue
         latest = await _latest(session, HumanReview, workspace_id, buyer_id)
-        if latest is not None and latest.state == status:
+        if (latest is not None and latest.state == status
+                and latest.fit_assessment_id == fit.id and latest.reason == reason):
+            unchanged += 1
             results.append({"id": str(buyer_id), "status": "unchanged", "version": buyer.version})
             continue
-        fit = await _latest(session, FitAssessment, workspace_id, buyer_id)
         session.add(
             HumanReview(
                 workspace_id=workspace_id, project_buyer_id=buyer_id, state=status, reason=reason,
@@ -106,9 +119,25 @@ async def apply(session, *, workspace_id, project_id, actor_user_id, selection: 
             )
         )
         buyer.version += 1
+        draft_ids = select(OutreachDraft.id).where(
+            OutreachDraft.workspace_id == workspace_id,
+            OutreachDraft.project_id == project_id,
+            OutreachDraft.buyer_id == buyer_id,
+        )
+        await session.execute(
+            update(Approval)
+            .where(Approval.workspace_id == workspace_id,
+                   Approval.draft_id.in_(draft_ids),
+                   Approval.invalidated_reason.is_(None))
+            .values(invalidated_reason="buyer_review_changed", invalidated_at=datetime.now(timezone.utc))
+        )
+        append_audit(session, workspace_id=workspace_id, actor_id=actor_user_id,
+            action="buyer.reviewed", entity_type="project_buyer", entity_id=buyer_id,
+            detail_digest=canonical_hash({"status": status, "assessment_id": str(fit.id), "reason": reason}))
         await session.flush()
         updated += 1
         results.append({"id": str(buyer_id), "status": "updated", "reason_code": status, "version": buyer.version})
     return {
-        "requested": len(items), "updated": updated, "blocked": blocked, "conflicts": conflicts, "results": results,
+        "requested": len(items), "updated": updated, "unchanged": unchanged,
+        "blocked": blocked, "conflicts": conflicts, "results": results,
     }

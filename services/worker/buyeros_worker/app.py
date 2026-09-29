@@ -15,6 +15,7 @@ def build_app() -> Celery:
         task_acks_late=True,
         worker_prefetch_multiplier=1,
         broker_connection_retry_on_startup=True,
+        broker_connection_timeout=5,
         beat_schedule={
             "buyeros-sweep-expired": {
                 "task": "buyeros.sweep",

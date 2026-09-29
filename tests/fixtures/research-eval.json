@@ -1,0 +1,153 @@
+{
+  "schema": "research-eval.v1",
+  "source": "fictional deterministic fixture",
+  "cases": [
+    {
+      "name": "supported_match",
+      "expected": "match",
+      "requirements": [
+        {
+          "id": "r1",
+          "category": "must",
+          "hard_exclusion": true
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "requirement_id": "r1",
+          "stance": "supports",
+          "current": true,
+          "is_inference": false,
+          "version": 1,
+          "excerpt": "A distributor of industrial sensors",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "name": "hard_exclusion",
+      "expected": "not_a_match",
+      "requirements": [
+        {
+          "id": "r1",
+          "category": "exclude",
+          "hard_exclusion": true
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e2",
+          "requirement_id": "r1",
+          "stance": "supports",
+          "current": true,
+          "is_inference": false,
+          "version": 1,
+          "excerpt": "A distributor of industrial sensors",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "name": "unknown",
+      "expected": "needs_review",
+      "requirements": [
+        {
+          "id": "r1",
+          "category": "must",
+          "hard_exclusion": true
+        }
+      ],
+      "evidence": []
+    },
+    {
+      "name": "contradictory",
+      "expected": "needs_review",
+      "requirements": [
+        {
+          "id": "r1",
+          "category": "must",
+          "hard_exclusion": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e3",
+          "requirement_id": "r1",
+          "stance": "supports",
+          "current": true,
+          "is_inference": false,
+          "version": 1,
+          "excerpt": "A distributor of industrial sensors",
+          "language": "en"
+        },
+        {
+          "id": "e4",
+          "requirement_id": "r1",
+          "stance": "contradicts",
+          "current": true,
+          "is_inference": false,
+          "version": 1,
+          "excerpt": "A distributor of industrial sensors",
+          "language": "en"
+        }
+      ]
+    },
+    {
+      "name": "cross_language",
+      "expected": "match",
+      "requirements": [
+        {
+          "id": "r1",
+          "category": "must",
+          "hard_exclusion": true
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e5",
+          "requirement_id": "r1",
+          "stance": "supports",
+          "current": true,
+          "is_inference": false,
+          "version": 1,
+          "excerpt": "Distributeur de capteurs industriels",
+          "language": "fr"
+        }
+      ]
+    },
+    {
+      "name": "duplicate",
+      "expected": "match",
+      "requirements": [
+        {
+          "id": "r1",
+          "category": "must",
+          "hard_exclusion": true
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e6",
+          "requirement_id": "r1",
+          "stance": "supports",
+          "current": true,
+          "is_inference": false,
+          "version": 1,
+          "excerpt": "A distributor of industrial sensors",
+          "language": "en"
+        },
+        {
+          "id": "e6",
+          "requirement_id": "r1",
+          "stance": "supports",
+          "current": true,
+          "is_inference": false,
+          "version": 1,
+          "excerpt": "A distributor of industrial sensors",
+          "language": "en"
+        }
+      ]
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 import uuid
 
-from sqlalchemy import Boolean, ForeignKeyConstraint, String, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKeyConstraint, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -43,3 +43,21 @@ class Membership(Base, TenantMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     roles: Mapped[list[str]] = mapped_column(ARRAY(String(32)), nullable=False, default=list)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+
+class WorkspacePreference(Base, TenantMixin):
+    """Persisted locale and default markets for one verified member."""
+
+    __tablename__ = "workspace_preferences"
+    __table_args__ = (
+        UniqueConstraint("workspace_id", "id", name="uq_workspace_preferences_workspace_id"),
+        UniqueConstraint("workspace_id", "user_id", name="uq_workspace_preferences_workspace_user"),
+        ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_workspace_preferences_workspace"),
+        ForeignKeyConstraint(["user_id"], ["users.id"], name="fk_workspace_preferences_user"),
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    locale: Mapped[str] = mapped_column(String(5), nullable=False, default="en")
+    default_markets: Mapped[list[str]] = mapped_column(ARRAY(String(2)), nullable=False, default=list)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)

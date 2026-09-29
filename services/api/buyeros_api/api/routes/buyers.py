@@ -16,18 +16,19 @@ async def list_buyers(
     snapshot_id: uuid.UUID,
     request: Request,
     offset: int = Query(default=0, ge=0),
-    limit: int = 20,
+    limit: int = Query(default=20, ge=1, le=100),
     principal: Principal = Depends(get_principal),
 ) -> dict:
     from datetime import datetime, timezone
 
-    from sqlalchemy import select
+    from sqlalchemy import func, select
 
     from ...db.buyers import BuyerSnapshot, BuyerSnapshotItem, Company, ProjectBuyer
-    from ...services.buyer_read import view
+    from ...services.buyer_read import view_many
     from ..deps import load_membership, permission_for_roles, tenant_scoped
 
-    limit = max(1, min(100, limit))
+    if set(request.query_params) - {"snapshot_id", "offset", "limit"}:
+        raise ApiError(422, "INVALID_REQUEST", "create a new snapshot when filters change")
     async with tenant_scoped(workspace_id) as session:
         membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
         if not permission_for_roles(membership["roles"], "listBuyers"):
@@ -42,10 +43,19 @@ async def list_buyers(
                 )
             )
         ).scalar_one_or_none()
-        if snapshot is None:
+        if snapshot is None or snapshot.actor_user_id != membership["user_id"]:
             raise ApiError(404, "NOT_FOUND", "buyer snapshot not found")
-        if snapshot.expires_at is not None and snapshot.expires_at <= datetime.now(timezone.utc):
+        if snapshot.expires_at is None or snapshot.expires_at <= datetime.now(timezone.utc):
             raise ApiError(404, "NOT_FOUND", "buyer snapshot not found")
+        total = (
+            await session.execute(
+                select(func.count()).select_from(BuyerSnapshotItem).where(
+                    BuyerSnapshotItem.workspace_id == workspace_id,
+                    BuyerSnapshotItem.project_id == project_id,
+                    BuyerSnapshotItem.snapshot_id == snapshot_id,
+                )
+            )
+        ).scalar_one()
         rows = (
             await session.execute(
                 select(ProjectBuyer, Company)
@@ -57,17 +67,17 @@ async def list_buyers(
                 )
                 .where(
                     BuyerSnapshotItem.workspace_id == workspace_id,
+                    BuyerSnapshotItem.project_id == project_id,
                     BuyerSnapshotItem.snapshot_id == snapshot_id,
                 )
                 .order_by(BuyerSnapshotItem.ordinal)
+                .offset(offset)
+                .limit(limit)
             )
         ).all()
-        total = len(rows)
-        page = rows[offset : offset + limit]
-        items = [
-            await view(session, workspace_id=workspace_id, buyer=buyer, company=company)
-            for buyer, company in page
-        ]
+        if len(rows) != min(limit, max(0, total - offset)):
+            raise ApiError(409, "SNAPSHOT_STALE", "buyer row unavailable; refresh the snapshot")
+        items = await view_many(session, workspace_id=workspace_id, rows=rows)
         data = {
             "items": items,
             "snapshot_id": str(snapshot_id),
@@ -167,7 +177,7 @@ async def create_buyer_snapshot(
         for ordinal, (buyer_id, buyer_version) in enumerate(ordered):
             session.add(
                 BuyerSnapshotItem(
-                    workspace_id=workspace_id, snapshot_id=snapshot.id,
+                    workspace_id=workspace_id, project_id=project_id, snapshot_id=snapshot.id,
                     ordinal=ordinal, buyer_id=buyer_id, buyer_version=buyer_version,
                 )
             )
@@ -208,6 +218,7 @@ async def update_buyer(
         outcome = await begin_idempotency(
             session, workspace_id=workspace_id, actor_id=membership["user_id"],
             operation_id="updateBuyer", key=idempotency_key, body=body,
+            target={"buyer_id": str(buyer_id)}, precondition=if_match,
         )
         buyer = (
             await session.execute(
@@ -224,8 +235,10 @@ async def update_buyer(
             )
         ).scalar_one()
         if outcome.replay:
-            response.headers["ETag"] = f'"{buyer.version}"'
-            return envelope(await view(session, workspace_id=workspace_id, buyer=buyer, company=company), request.state.request_id)
+            if outcome.response is None:
+                raise ApiError(409, "IDEMPOTENCY_CONFLICT", "legacy buyer replay requires a new action key")
+            response.headers["ETag"] = f'"{outcome.response["version"]}"'
+            return envelope(outcome.response, request.state.request_id)
         if buyer.version != expected_version:
             raise ApiError(412, "STALE_REVISION", "buyer changed; reload it")
         if "owner_membership_id" in payload.model_fields_set:
@@ -253,8 +266,8 @@ async def update_buyer(
         buyer.version += 1
         await session.flush()
         await session.refresh(buyer)
-        complete_idempotency(outcome, str(buyer.id))
         data = await view(session, workspace_id=workspace_id, buyer=buyer, company=company)
+        complete_idempotency(outcome, str(buyer.id), response=data)
         response.headers["ETag"] = f'"{buyer.version}"'
     return envelope(data, request.state.request_id)
 
@@ -271,6 +284,7 @@ async def list_buyer_evidence(
     from sqlalchemy import func, select
 
     from ...db.buyers import Evidence, ProjectBuyer, SourceDocument
+    from ...db.runs import RawCandidate
     from ...services.buyer_view import evidence_data
     from ..deps import load_membership, permission_for_roles, tenant_scoped
 
@@ -299,11 +313,16 @@ async def list_buyer_evidence(
         ).scalar_one()
         rows = (
             await session.execute(
-                select(Evidence, SourceDocument)
+                select(Evidence, SourceDocument, RawCandidate.canonical_company_id)
                 .outerjoin(
                     SourceDocument,
                     (SourceDocument.workspace_id == Evidence.workspace_id)
                     & (SourceDocument.id == Evidence.source_document_id),
+                )
+                .outerjoin(
+                    RawCandidate,
+                    (RawCandidate.workspace_id == Evidence.workspace_id)
+                    & (RawCandidate.id == Evidence.raw_candidate_id),
                 )
                 .where(
                     Evidence.workspace_id == workspace_id,
@@ -315,7 +334,8 @@ async def list_buyer_evidence(
                 .limit(limit)
             )
         ).all()
-        items = [evidence_data(evidence, source) for evidence, source in rows]
+        items = [evidence_data(evidence, source, mapped_company_id=company_id)
+                 for evidence, source, company_id in rows]
     return envelope({"items": items, "offset": offset, "limit": limit, "total": total}, request.state.request_id)
 
 
@@ -329,6 +349,7 @@ async def get_evidence(
     from sqlalchemy import select
 
     from ...db.buyers import Evidence, SourceDocument
+    from ...db.runs import RawCandidate
     from ...services.buyer_view import evidence_data
     from ..deps import load_membership, permission_for_roles, tenant_scoped
 
@@ -338,17 +359,22 @@ async def get_evidence(
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
         row = (
             await session.execute(
-                select(Evidence, SourceDocument)
+                select(Evidence, SourceDocument, RawCandidate.canonical_company_id)
                 .outerjoin(
                     SourceDocument,
                     (SourceDocument.workspace_id == Evidence.workspace_id)
                     & (SourceDocument.id == Evidence.source_document_id),
+                )
+                .outerjoin(
+                    RawCandidate,
+                    (RawCandidate.workspace_id == Evidence.workspace_id)
+                    & (RawCandidate.id == Evidence.raw_candidate_id),
                 )
                 .where(Evidence.workspace_id == workspace_id, Evidence.id == evidence_id)
             )
         ).one_or_none()
         if row is None:
             raise ApiError(404, "NOT_FOUND", "evidence not found")
-        evidence, source = row
-        data = evidence_data(evidence, source)
+        evidence, source, company_id = row
+        data = evidence_data(evidence, source, mapped_company_id=company_id)
     return envelope(data, request.state.request_id)

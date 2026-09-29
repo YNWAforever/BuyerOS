@@ -15,6 +15,7 @@ import time
 import uuid
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import pytest
 
@@ -32,7 +33,7 @@ ALEMBIC_INI = API_ROOT / "alembic.ini"
 POSTGRES_IMAGE = "postgres:16"
 DB_USER = "buyeros"
 DB_PASSWORD = "buyeros"
-DB_NAME = "buyeros"
+DB_NAME = "buyeros_test_worker"
 API_ROLE = "buyeros_api"
 API_ROLE_PASSWORD = "test-only"
 
@@ -41,6 +42,27 @@ WS_B = "22222222-2222-4222-8222-222222222222"
 PROJECT_A = "a0000000-0000-4000-8000-000000000001"
 ICP_A = "b0000000-0000-4000-8000-0000000000a1"
 RUN_A = "d0000000-0000-4000-8000-0000000000a1"
+
+
+def _require_disposable_test_dsn(dsn: str) -> None:
+    parsed = urlsplit(dsn)
+    database = parsed.path.lstrip("/")
+    if (
+        parsed.scheme not in {"postgresql", "postgres"}
+        or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}
+        or not database.startswith("buyeros_test_")
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise pytest.UsageError(
+            "destructive fixtures require a disposable loopback buyeros_test_* database"
+        )
+
+
+def _unavailable(message: str) -> None:
+    if os.environ.get("BUYEROS_STRICT_INTEGRATION") == "1":
+        pytest.fail("Docker/disposable integration database required: " + message)
+    pytest.skip(message)
 
 
 def _docker(*args: str) -> subprocess.CompletedProcess:
@@ -58,7 +80,7 @@ def _start_container() -> tuple[str, str]:
         POSTGRES_IMAGE,
     )
     if created.returncode != 0:
-        pytest.skip(f"could not start postgres container: {created.stderr.strip()}")
+        _unavailable(f"could not start postgres container: {created.stderr.strip()}")
 
     deadline = time.time() + 60
     while time.time() < deadline:
@@ -67,11 +89,25 @@ def _start_container() -> tuple[str, str]:
         time.sleep(1)
     else:
         _docker("rm", "-f", name)
-        pytest.skip("postgres container did not become ready")
+        _unavailable("postgres container did not become ready")
 
     mapping = _docker("port", name, "5432").stdout.strip().splitlines()[0]
     port = mapping.rsplit(":", 1)[1]
-    return name, f"postgresql://{DB_USER}:{DB_PASSWORD}@127.0.0.1:{port}/{DB_NAME}"
+    dsn = f"postgresql://{DB_USER}:{DB_PASSWORD}@127.0.0.1:{port}/{DB_NAME}"
+    # pg_isready can succeed against the temporary init server before it
+    # restarts; migrations connect through the published host port.
+    import psycopg
+
+    deadline = time.time() + 60
+    while time.time() < deadline:
+        try:
+            with psycopg.connect(dsn, connect_timeout=2):
+                return name, dsn
+        except psycopg.OperationalError:
+            time.sleep(1)
+    _docker("rm", "-f", name)
+    _unavailable("postgres host port did not become ready")
+    raise AssertionError("unreachable")
 
 
 def runtime_role_dsn(dsn: str) -> str:
@@ -82,10 +118,11 @@ def runtime_role_dsn(dsn: str) -> str:
 def pg_dsn():
     env_dsn = os.environ.get("BUYEROS_TEST_DATABASE_URL")
     if env_dsn:
+        _require_disposable_test_dsn(env_dsn)
         yield env_dsn
         return
     if shutil.which("docker") is None:
-        pytest.skip("set BUYEROS_TEST_DATABASE_URL or install docker for DB tests")
+        _unavailable("set BUYEROS_TEST_DATABASE_URL or install docker for DB tests")
     name, dsn = _start_container()
     try:
         yield dsn
@@ -116,7 +153,9 @@ def migrated(pg_dsn):
             (WS_A, WS_B),
         )
         conn.execute(
-            "INSERT INTO projects(id, workspace_id, name) VALUES (%s, %s, 'ProjectA')",
+            "INSERT INTO projects"
+            "(id, workspace_id, name, company_name, offer, markets, language_preferences, version)"
+            " VALUES (%s, %s, 'ProjectA', 'ProjectA Co', 'Seeded offer A', '{US}', '{en}', 1)",
             (PROJECT_A, WS_A),
         )
         conn.execute(

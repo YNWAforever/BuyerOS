@@ -3,15 +3,14 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import case, func, or_, select
 
 from ..api.errors import ApiError
-from ..db.buyers import Company, Evidence, FitAssessment, HumanReview, ProjectBuyer, SourceDocument
+from ..db.buyers import BuyerList, Company, Evidence, FitAssessment, HumanReview, ListMembership, ProjectBuyer, SourceDocument
 
 # Filters this phase can source. `source_types` is deferred: neither evidence nor source_documents
 # carries a source-type column yet (that lands with P3/BO-014 ingestion).
-_DEFERRED = ("markets", "buyer_types", "contact", "suppressed", "source_types", "run_id", "list_id")
-_FIT_RANK = {"match": 0, "needs_review": 1, "not_a_match": 2}
+_DEFERRED = ("markets", "buyer_types", "contact", "suppressed", "source_types", "run_id")
 
 
 def reject_unsupported_filters(filters: dict) -> None:
@@ -28,70 +27,56 @@ def filters_hash(filters: dict, sort: str) -> str:
     return canonical_hash({"filters": normalized, "sort": sort})
 
 
-async def _latest(session, model, workspace_id, buyer_ids):
-    if not buyer_ids:
-        return {}
-    rows = (
-        await session.execute(
-            select(model)
-            .where(model.workspace_id == workspace_id, model.project_buyer_id.in_(buyer_ids))
-            .order_by(model.project_buyer_id, model.created_at.desc(), model.id)
-        )
-    ).scalars().all()
-    latest: dict = {}
-    for row in rows:
-        latest.setdefault(row.project_buyer_id, row)
-    return latest
-
-
-async def _buyers_with_evidence_after(session, workspace_id, project_id, buyer_ids, retrieved_after):
-    if not buyer_ids:
-        return set()
-    try:
-        cutoff = datetime.fromisoformat(retrieved_after)
-    except ValueError as exc:
-        raise ApiError(422, "INVALID_REQUEST", "evidence_retrieved_after must be an ISO-8601 timestamp") from exc
-    rows = (
-        await session.execute(
-            select(ProjectBuyer.id)
-            .join(
-                Evidence,
-                (Evidence.workspace_id == ProjectBuyer.workspace_id)
-                & (Evidence.company_id == ProjectBuyer.company_id)
-                & (Evidence.project_id == ProjectBuyer.project_id),
-            )
-            .join(
-                SourceDocument,
-                (SourceDocument.workspace_id == Evidence.workspace_id)
-                & (SourceDocument.id == Evidence.source_document_id),
-            )
-            .where(
-                ProjectBuyer.workspace_id == workspace_id,
-                ProjectBuyer.project_id == project_id,
-                ProjectBuyer.id.in_(buyer_ids),
-                SourceDocument.retrieved_at.is_not(None),
-                SourceDocument.retrieved_at >= cutoff,
-            )
-        )
-    ).scalars().all()
-    return set(rows)
-
-
 async def materialize(session, *, workspace_id, project_id, filters: dict, sort: str, limit: int):
-    """Return ordered (buyer_id, version) pairs, the matched total, and whether the limit clipped it."""
+    """Materialize at most limit IDs plus one clip probe; filters and order run in SQL."""
     reject_unsupported_filters(filters)
-    query = (
-        select(ProjectBuyer, Company)
-        .join(Company, (Company.workspace_id == ProjectBuyer.workspace_id) & (Company.id == ProjectBuyer.company_id))
-        .where(ProjectBuyer.workspace_id == workspace_id, ProjectBuyer.project_id == project_id)
+    fit_verdict = (
+        select(FitAssessment.verdict)
+        .where(FitAssessment.workspace_id == workspace_id,
+               FitAssessment.project_buyer_id == ProjectBuyer.id)
+        .order_by(FitAssessment.created_at.desc(), FitAssessment.id.desc())
+        .limit(1).correlate(ProjectBuyer).scalar_subquery()
     )
+    review_state = (
+        select(HumanReview.state)
+        .where(HumanReview.workspace_id == workspace_id,
+               HumanReview.project_buyer_id == ProjectBuyer.id)
+        .order_by(HumanReview.created_at.desc(), HumanReview.id.desc())
+        .limit(1).correlate(ProjectBuyer).scalar_subquery()
+    )
+    query = (
+        select(ProjectBuyer.id, ProjectBuyer.version)
+        .join(Company, (Company.workspace_id == ProjectBuyer.workspace_id)
+              & (Company.id == ProjectBuyer.company_id))
+        .where(ProjectBuyer.workspace_id == workspace_id,
+               ProjectBuyer.project_id == project_id)
+    )
+    list_id = filters.get("list_id")
+    if list_id:
+        try:
+            parsed_list_id = uuid.UUID(list_id)
+        except (ValueError, TypeError, AttributeError) as exc:
+            raise ApiError(422, "INVALID_REQUEST", "list_id must be a UUID") from exc
+        owned_list = (await session.execute(select(BuyerList.id).where(
+            BuyerList.workspace_id == workspace_id, BuyerList.project_id == project_id,
+            BuyerList.id == parsed_list_id,
+        ))).scalar_one_or_none()
+        if owned_list is None:
+            raise ApiError(404, "NOT_FOUND", "buyer list not found")
+        member = select(ListMembership.id).where(
+            ListMembership.workspace_id == workspace_id,
+            ListMembership.project_id == project_id,
+            ListMembership.list_id == parsed_list_id,
+            ListMembership.buyer_id == ProjectBuyer.id,
+        ).correlate(ProjectBuyer).exists()
+        query = query.where(member)
     q = filters.get("q")
     if q:
-        query = query.where(Company.display_name.ilike(f"%{q}%"))
+        escaped = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        query = query.where(Company.display_name.ilike(f"%{escaped}%", escape="\\"))
     owner_membership_id = filters.get("owner_membership_id")
     if owner_membership_id:
         from ..db.models import Membership
-
         try:
             parsed_owner_membership_id = uuid.UUID(owner_membership_id)
         except (ValueError, TypeError, AttributeError) as exc:
@@ -108,35 +93,45 @@ async def materialize(session, *, workspace_id, project_id, filters: dict, sort:
         if owner_user_id is None:
             raise ApiError(422, "INVALID_REQUEST", "owner_membership_id is not an active member")
         query = query.where(ProjectBuyer.owner_user_id == owner_user_id)
-
-    rows = (await session.execute(query)).all()
-    buyer_ids = [buyer.id for buyer, _ in rows]
-    fits = await _latest(session, FitAssessment, workspace_id, buyer_ids)
-    reviews = await _latest(session, HumanReview, workspace_id, buyer_ids)
-    wanted_fit = set(filters.get("fit") or [])
-    wanted_review = set(filters.get("review") or [])
-    retrieved_after = filters.get("evidence_retrieved_after")
-    evidence_ok = (
-        await _buyers_with_evidence_after(session, workspace_id, project_id, buyer_ids, retrieved_after)
-        if retrieved_after
-        else set(buyer_ids)
-    )
-
-    selected = []
-    for buyer, company in rows:
-        fit = fits.get(buyer.id)
-        review = reviews.get(buyer.id)
-        if wanted_fit and (fit.verdict if fit else None) not in wanted_fit:
-            continue
-        if wanted_review and (review.state if review else None) not in wanted_review:
-            continue
-        if buyer.id not in evidence_ok:
-            continue
-        selected.append((buyer, company, fit))
-
+    if filters.get("owner_unassigned"):
+        query = query.where(ProjectBuyer.owner_user_id.is_(None))
+    if filters.get("unknown_fit"):
+        query = query.where(fit_verdict.is_(None))
+    if filters.get("fit"):
+        query = query.where(fit_verdict.in_(filters["fit"]))
+    if filters.get("review"):
+        requested = filters["review"]
+        clause = review_state.in_(requested)
+        if "awaiting_review" in requested:
+            clause = or_(clause, review_state.is_(None))
+        query = query.where(clause)
+    if filters.get("evidence_retrieved_after"):
+        try:
+            cutoff = datetime.fromisoformat(filters["evidence_retrieved_after"])
+            if cutoff.tzinfo is None:
+                raise ValueError("timezone required")
+        except (ValueError, TypeError) as exc:
+            raise ApiError(422, "INVALID_REQUEST", "evidence_retrieved_after must be a timezone-aware ISO-8601 timestamp") from exc
+        evidence_exists = (
+            select(Evidence.id)
+            .join(SourceDocument,
+                  (SourceDocument.workspace_id == Evidence.workspace_id)
+                  & (SourceDocument.id == Evidence.source_document_id))
+            .where(Evidence.workspace_id == workspace_id,
+                   Evidence.project_id == ProjectBuyer.project_id,
+                   Evidence.company_id == ProjectBuyer.company_id,
+                   SourceDocument.retrieved_at >= cutoff)
+            .correlate(ProjectBuyer).exists()
+        )
+        query = query.where(evidence_exists)
+    name_order = func.lower(Company.display_name)
     if sort == "name_asc":
-        selected.sort(key=lambda item: (item[1].display_name, str(item[0].id)))
+        query = query.order_by(name_order, ProjectBuyer.id)
     else:
-        selected.sort(key=lambda item: (_FIT_RANK.get(item[2].verdict if item[2] else None, 3), item[1].display_name, str(item[0].id)))
-    matched = len(selected)
-    return [(buyer.id, buyer.version) for buyer, _, _ in selected[:limit]], matched, matched > limit
+        rank = case((fit_verdict == "match", 0),
+                    (fit_verdict == "needs_review", 1),
+                    (fit_verdict == "not_a_match", 2), else_=3)
+        query = query.order_by(rank, name_order, ProjectBuyer.id)
+    rows = (await session.execute(query.limit(limit + 1))).all()
+    clipped = len(rows) > limit
+    return [(buyer_id, version) for buyer_id, version in rows[:limit]], len(rows), clipped

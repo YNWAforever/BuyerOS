@@ -27,3 +27,12 @@ class WorkerLease(Base, TenantMixin):
     fencing_generation: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     state: Mapped[str] = mapped_column(String(16), nullable=False, default="free")
     attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+class WorkerHeartbeat(Base):
+    """Global non-customer operational signal from a delivered sweep task."""
+
+    __tablename__ = "worker_heartbeats"
+    worker_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    broker_state: Mapped[str] = mapped_column(String(16), nullable=False)

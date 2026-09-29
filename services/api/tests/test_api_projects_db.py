@@ -11,6 +11,7 @@ from buyeros_api.api.app import create_app
 from buyeros_api.api.jwks import JwksKeyCache
 from buyeros_api.api.verifier import TokenVerifier
 from tests import auth_fixtures as fx
+from tests.icp_fixtures import valid_icp_payload
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT, runtime_role_dsn
 
 PROJECT_COLUMNS = {"company_name", "offer", "website", "markets", "language_preferences", "version", "active_icp_version_id"}
@@ -110,6 +111,7 @@ def test_0009_downgrade_then_upgrade_backfills_existing_rows(migrated):
                     (*row[1:], row[0]),
                 )
             conn.execute("DELETE FROM projects WHERE id = %s", (project_id,))
+            conn.execute("DELETE FROM budget_accounts WHERE workspace_id = %s", (workspace_id,))
             conn.execute("DELETE FROM workspaces WHERE id = %s", (workspace_id,))
 
 
@@ -158,7 +160,13 @@ def api(seeded, monkeypatch):
             user_id = uuid.uuid5(uuid.NAMESPACE_URL, subject)
             owner.execute("DELETE FROM memberships WHERE user_id = %s", (user_id,))
             owner.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        owner.execute("DELETE FROM audit_events WHERE workspace_id = %s", (WORKSPACE_A,))
         owner.execute("DELETE FROM idempotency_records WHERE workspace_id = %s", (WORKSPACE_A,))
+        owner.execute(
+            "UPDATE projects SET active_icp_version_id = NULL, active_sender_identity_version_id = NULL "
+            "WHERE workspace_id = %s", (WORKSPACE_A,)
+        )
+        owner.execute("DELETE FROM sender_identity_versions WHERE workspace_id = %s", (WORKSPACE_A,))
         owner.execute("DELETE FROM icp_versions WHERE workspace_id = %s", (WORKSPACE_A,))
         owner.execute("DELETE FROM projects WHERE workspace_id = %s", (WORKSPACE_A,))
         owner.close()
@@ -326,6 +334,24 @@ def test_an_explicit_null_is_rejected_on_create(api):
     assert response.json()["code"] == "INVALID_REQUEST"
 
 
+def test_clearing_offer_website_invalidates_active_profile(api):
+    created = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects",
+                       json={**CREATE, "website": "https://acme.example"},
+                       headers=_h(key="website-create-01"))
+    assert created.status_code == 201, created.text
+    project_id = created.json()["data"]["id"]
+    version = _save_icp(api, project_id, key="website-icp-01")
+    _approve_icp(api, version, key="website-approve-01")
+    updated = api.patch(f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
+                        json={"website": None},
+                        headers=_h(key="website-clear-01", **{"If-Match": '"2"'}))
+    assert updated.status_code == 200, updated.text
+    data = updated.json()["data"]
+    assert data["website"] is None
+    assert data["offer_revision"] == 2
+    assert data["active_icp_version_id"] is None
+
+
 def test_archive_requires_workspace_admin(api):
     project_id = _create(api)
     response = api.request(
@@ -375,6 +401,33 @@ def test_a_repeated_archive_key_and_body_replays(api):
     assert replay.json()["data"]["id"] == first.json()["data"]["id"]
 
 
+def test_archive_records_one_redacted_history_event_after_replay(api, seeded):
+    project_id = _create(api)
+    reason = "Pilot closed after review."
+    headers = _h(subject=ADMIN, key="archive-audit-0001", **{"If-Match": '"1"'})
+    path = f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}"
+    first = api.request("DELETE", path, json={"reason": reason}, headers=headers)
+    replay = api.request("DELETE", path, json={"reason": reason}, headers=headers)
+    assert first.status_code == replay.status_code == 200
+    second_intent = api.request("DELETE", path, json={"reason": "Try again later."},
+                                headers=_h(subject=ADMIN, key="archive-audit-0002", **{"If-Match": '"2"'}))
+    assert second_intent.status_code == 409
+    with psycopg.connect(seeded, autocommit=True) as owner:
+        rows = owner.execute(
+            "SELECT action, subject_type, subject_id, detail_digest, reason "
+            "FROM audit_events WHERE workspace_id = %s AND subject_id = %s",
+            (WORKSPACE_A, project_id),
+        ).fetchall()
+    assert len(rows) == 2  # one creation and one archive; neither replay adds an event
+    created = [row for row in rows if row[0] == "project.created"]
+    archived = [row for row in rows if row[0] == "project.archived"]
+    assert len(created) == len(archived) == 1
+    assert archived[0][:3] == ("project.archived", "project", project_id)
+    assert archived[0][3].startswith("sha256:")
+    assert archived[0][4] == "pilot_closed_after_review"
+    assert reason not in str(rows)
+
+
 def test_a_stale_archive_if_match_is_rejected(api):
     project_id = _create(api)
     first = api.request(
@@ -413,26 +466,19 @@ def test_the_same_key_with_a_different_body_conflicts(api):
 
 def test_approval_sets_the_active_profile_and_requires_a_reviewer(api):
     project_id = _create(api)
-    saved = api.post(
-        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}/icp-versions",
-        json={"requirements": [{"id": "r1", "text": "Distributes sensors", "category": "must", "hard_exclusion": False}],
-              "markets": ["DE"], "buyer_types": ["Distributor"], "languages": ["en"], "offer_facts": []},
-        headers=_h(key="i1"),
-    )
-    assert saved.status_code == 201, saved.text
-    version = saved.json()["data"]
-    body = {"content_hash": version["content_hash"], "confirmation": True}
+    version = _save_icp(api, project_id, key="approval-save-0001")
+    body = {"content_hash": version["content_hash"], "confirmation": True, "expected_project_version": 1}
 
     # operator cannot approve (approveICPVersion permits reviewer/workspace_admin)
     denied = api.post(
         f"/v1/workspaces/{WORKSPACE_A}/icp-versions/{version['id']}/approve",
-        json=body, headers=_h(key="ap1", **{"If-Match": f'"{version["number"]}"'}),
+        json=body, headers=_h(key="approval-denied-0001", **{"If-Match": f'"{version["number"]}"'}),
     )
     assert denied.status_code == 403
 
     approved = api.post(
         f"/v1/workspaces/{WORKSPACE_A}/icp-versions/{version['id']}/approve",
-        json=body, headers=_h(subject=REVIEWER, key="ap2", **{"If-Match": f'"{version["number"]}"'}),
+        json=body, headers=_h(subject=REVIEWER, key="approval-allowed-0001", **{"If-Match": f'"{version["number"]}"'}),
     )
     assert approved.status_code == 200, approved.text
 
@@ -441,20 +487,26 @@ def test_approval_sets_the_active_profile_and_requires_a_reviewer(api):
 
 
 def _save_icp(api, project_id, *, key, requirements_text="Distributes sensors"):
+    project = api.get(f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}", headers=_h()).json()["data"]
+    body = valid_icp_payload()
+    body["requirements"][0]["text"] = requirements_text
+    body["basis_offer_revision"] = project["offer_revision"]
     saved = api.post(
         f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}/icp-versions",
-        json={"requirements": [{"id": "r1", "text": requirements_text, "category": "must", "hard_exclusion": False}],
-              "markets": ["DE"], "buyer_types": ["Distributor"], "languages": ["en"], "offer_facts": []},
-        headers=_h(key=key),
+        json=body, headers=_h(key=key),
     )
     assert saved.status_code == 201, saved.text
     return saved.json()["data"]
 
 
 def _approve_icp(api, version, *, key, subject=REVIEWER):
+    project = api.get(
+        f"/v1/workspaces/{WORKSPACE_A}/projects/{version['project_id']}", headers=_h()
+    ).json()["data"]
     response = api.post(
         f"/v1/workspaces/{WORKSPACE_A}/icp-versions/{version['id']}/approve",
-        json={"content_hash": version["content_hash"], "confirmation": True},
+        json={"content_hash": version["content_hash"], "confirmation": True,
+              "expected_project_version": project["version"]},
         headers=_h(subject=subject, key=key, **{"If-Match": f'"{version["number"]}"'}),
     )
     assert response.status_code == 200, response.text
@@ -541,11 +593,12 @@ def test_a_material_change_retains_prior_approval_and_a_later_save_stays_retriev
     project_id = _create(api, key="material-create")
     v1 = _save_icp(api, project_id, key="material-v1")
     approved_v1 = _approve_icp(api, v1, key="material-ap1")
-    api.patch(
+    updated = api.patch(
         f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
         json={"offer": "A materially different offer."},
-        headers=_h(key="material-update", **{"If-Match": '"1"'}),
+        headers=_h(key="material-update", **{"If-Match": '"2"'}),
     )
+    assert updated.status_code == 200, updated.text
     project = api.get(f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}", headers=_h()).json()["data"]
     assert project["active_icp_version_id"] is None
 
@@ -571,7 +624,8 @@ def test_approving_a_foreign_workspace_version_is_a_non_enumerating_404(api, see
     try:
         response = api.post(
             f"/v1/workspaces/{WORKSPACE_A}/icp-versions/{foreign_version}/approve",
-            json={"content_hash": "sha256:foreign", "confirmation": True},
+            json={"content_hash": "sha256:" + "0" * 64, "confirmation": True,
+                  "expected_project_version": 1},
             headers=_h(subject=REVIEWER, key="foreign-approve", **{"If-Match": '"1"'}),
         )
         assert response.status_code == 404, response.text
@@ -605,21 +659,17 @@ def test_a_foreign_project_cannot_be_updated_or_archived(api):
 
 def test_a_material_change_supersedes_and_reopens_the_profile(api):
     project_id = _create(api)
-    saved = api.post(
-        f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}/icp-versions",
-        json={"requirements": [{"id": "r1", "text": "x", "category": "must", "hard_exclusion": False}],
-              "markets": ["DE"], "buyer_types": ["Distributor"], "languages": ["en"], "offer_facts": []},
-        headers=_h(key="i1"),
-    ).json()["data"]
+    saved = _save_icp(api, project_id, key="material-save-0001")
     api.post(
         f"/v1/workspaces/{WORKSPACE_A}/icp-versions/{saved['id']}/approve",
-        json={"content_hash": saved["content_hash"], "confirmation": True},
-        headers=_h(subject=REVIEWER, key="ap1", **{"If-Match": f'"{saved["number"]}"'}),
+        json={"content_hash": saved["content_hash"], "confirmation": True,
+              "expected_project_version": 1},
+        headers=_h(subject=REVIEWER, key="material-approve-0001", **{"If-Match": f'"{saved["number"]}"'}),
     )
     api.patch(
         f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}",
         json={"offer": "A materially different offer."},
-        headers=_h(key="update-30", **{"If-Match": '"1"'}),
+        headers=_h(key="update-30", **{"If-Match": '"2"'}),
     )
     project = api.get(f"/v1/workspaces/{WORKSPACE_A}/projects/{project_id}", headers=_h()).json()["data"]
     assert project["active_icp_version_id"] is None

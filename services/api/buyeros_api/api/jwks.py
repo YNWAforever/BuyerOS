@@ -43,11 +43,15 @@ class JwksKeyCache:
         fetch_jwks: Callable[[], Awaitable[dict]],
         *,
         cache_seconds: int = 300,
+        max_stale_seconds: int = 3600,
         min_refetch_seconds: int = 10,
         now: Callable[[], float] = time.monotonic,
     ) -> None:
         self._fetch_jwks = fetch_jwks
+        if cache_seconds <= 0 or max_stale_seconds <= 0 or min_refetch_seconds <= 0:
+            raise ValueError("JWKS cache intervals must be positive")
         self._cache_seconds = cache_seconds
+        self._max_stale_seconds = max_stale_seconds
         self._min_refetch_seconds = min_refetch_seconds
         self._now = now
         self._keys: dict[str, object] = {}
@@ -55,8 +59,16 @@ class JwksKeyCache:
         self._last_attempt_at: float | None = None
         self._lock = asyncio.Lock()
 
+    def _age(self) -> float | None:
+        return None if self._fetched_at is None else self._now() - self._fetched_at
+
+    def _within_hard_ceiling(self) -> bool:
+        age = self._age()
+        return age is not None and 0 <= age < self._max_stale_seconds
+
     def _fresh(self) -> bool:
-        return self._fetched_at is not None and (self._now() - self._fetched_at) < self._cache_seconds
+        age = self._age()
+        return age is not None and 0 <= age < self._cache_seconds and self._within_hard_ceiling()
 
     def _cooldown_elapsed(self) -> bool:
         return self._last_attempt_at is None or (self._now() - self._last_attempt_at) >= self._min_refetch_seconds
@@ -101,4 +113,6 @@ class JwksKeyCache:
                     raise JwksError("key set unavailable") from exc
         if kid not in self._keys:
             raise JwksError("unknown key id")
+        if not self._within_hard_ceiling():
+            raise JwksError("cached key exceeded hard staleness ceiling")
         return self._keys[kid]
