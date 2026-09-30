@@ -1272,7 +1272,27 @@
             "sha256": "4a7717ad740092166a01665f701fd23e377a8329b6bd4390179d44c992b7e9b2",
             "visually_inspected": true
           }
-        ]
+        ],
+        "initial_workspace_diagnosis": {
+          "user_report": "Signed in but no workspace",
+          "live_read_only_database": {
+            "users": 0,
+            "workspaces": 0,
+            "schema_head": "0033_api_rate_windows"
+          },
+          "membership_listing_fixture": {
+            "passed": 2,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 8,
+            "seconds": 6.76
+          },
+          "initial_membership_seeded": false,
+          "proposal": "docs/buyeros/INITIAL_WORKSPACE_PROPOSAL.json",
+          "owner_identity": "pending sign-in email and verified Auth0 subject",
+          "management_lookup": "expired CLI session; no production Auth0 change"
+        }
       }
     }
   ],
@@ -1309,6 +1329,6 @@
   ],
   "reviewed_source_sha": "531774989f842ff8d65cd2fad5164f819301fe16",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "T30: obtain a real human staff Auth0 sign-in/callback/token round trip, then verify current scoped API membership. An initial membership bootstrap requires exact named workspace, Auth0 subject and owner approval; none is inferred or seeded. Full staff continuity/provider/policy/pilot gates and independent T29 assistive/non-text review remain open.",
+  "next_eligible_task": "T30: match the reported sign-in email to a verified Auth0 subject, finalize the prepared first FIMMICK/workspace_admin membership proposal and obtain its specific production bootstrap approval. Production users/workspaces are currently empty; no identity or ownership is guessed. Then verify real scoped API/UI. Other full-journey/provider/policy/pilot and T29 accessibility gates remain open.",
   "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6"
 }

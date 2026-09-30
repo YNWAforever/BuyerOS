@@ -1,0 +1,70 @@
+{
+  "status": "prepared_waiting_for_verified_owner_identity_and_specific_production_bootstrap_approval",
+  "database": {
+    "project": "nameless-bar-15324691",
+    "branch": "br-autumn-block-b3exsqii",
+    "name": "neondb",
+    "alembic_head": "0033_api_rate_windows"
+  },
+  "read_only_diagnosis": {
+    "users": 0,
+    "workspaces": 0,
+    "workspace_memberships": [],
+    "cause": "Auth0 sign-in does not create an application user, workspace or current Postgres membership"
+  },
+  "proposed_workspace": {
+    "id": "900cd19b-4e03-4446-bdd6-7cb199d96060",
+    "name": "FIMMICK",
+    "data_mode": "live",
+    "controller_scope": null
+  },
+  "proposed_user": {
+    "id": "e053f462-fb24-44c2-bb6e-1f0280d00248",
+    "issuer": "https://dev-oaug20cdxqqgn1s8.us.auth0.com/",
+    "subject": null,
+    "identity_status": "not_yet_matched_to_reported_login"
+  },
+  "proposed_membership": {
+    "id": "d8190b6e-c290-41d6-8dd2-3d0c90b824cc",
+    "roles": [
+      "workspace_admin"
+    ],
+    "active": true,
+    "version": 1
+  },
+  "execution_requirements": [
+    "Match the user-supplied sign-in email to an actual Auth0 immutable subject; never use email as the subject",
+    "Specific approval for the named account to own this production workspace",
+    "Read-only database preflight and one atomic, tenant-scoped transaction; abort on mismatched existing identities or workspace IDs",
+    "Record actual applied configuration separately from owner approval; no forged BO approval record",
+    "Verify current runtime membership/listing; user sign-in needed to prove the live UI"
+  ],
+  "planned_changes": [
+    "One verified application user",
+    "One workspace",
+    "One active workspace_admin membership",
+    "One redacted bootstrap audit event"
+  ],
+  "excluded": [
+    "schema migration",
+    "demo projects or buyers",
+    "policy permission",
+    "paid admission",
+    "R2 activation",
+    "worker or provider activation",
+    "mailbox/CRM/delivery"
+  ],
+  "fixture_verification": {
+    "command": "$env:BUYEROS_STRICT_INTEGRATION=1; .venv/Scripts/python.exe -m pytest -q tests/test_workspace_listing_db.py --junitxml=../../artifacts/workspace-membership-check.xml",
+    "passed": 2,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "warnings": 8,
+    "seconds": 6.76,
+    "required_junit_gate": "passed=2 failed=0 errors=0 skipped=0",
+    "scope": "Existing listing/pagination regression against disposable PostgreSQL with fixture principal; no live staff token"
+  },
+  "production_changes_applied": false,
+  "management_identity_lookup": "Auth0 CLI management session expired; latest login query was not completed. Production SPA configuration was not changed."
+}
