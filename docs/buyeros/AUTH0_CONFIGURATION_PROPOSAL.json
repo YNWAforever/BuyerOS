@@ -206,6 +206,14 @@
       "duration_ms": 192.785908
     },
     "deployed": false,
-    "real_staff_session_verified": false
+    "real_staff_session_verified": false,
+    "preview": {
+      "deployment_id": "dpl_ABTjYtq5QcWqZD1vzwubehuMU2KM",
+      "source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+      "frontend_status": 200,
+      "anonymous_api_status": 401,
+      "production_auth0_config_in_preview": false
+    },
+    "hosted_ci_jobs_passed": 4
   }
 }

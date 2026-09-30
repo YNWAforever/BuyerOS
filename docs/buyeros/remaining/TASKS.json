@@ -1165,7 +1165,55 @@
         "live_sign_in_entry": "2026-09-30: Playwright primary alias /app HTTP 500 but JavaScript recovers to enabled Sign in. Click reaches exact Auth0 tenant /u/login, title Log in | BuyerOS and visible email field. No credentials/token/staff session; two real RSC responses 200. Old deployment also initial HTML 500. Screenshots recorded. Fresh Linux build diagnosis in progress.",
         "deployed_runtime_regression": "node --test tests/deployment/vercel-runtime.mjs with required BUYEROS_VERCEL_VERIFY_URL primary production origin: exit 1; 1 passed, 3 failed, 0 cancelled/skipped in 3743.3519ms. Three frontend HTML 500; unauthenticated API 401 passes. Red deployment acceptance, not a completed fix. Linux source builds timed out at dependency installation; no renderer count from those attempts.",
         "linux_ssr_regression": "2026-09-30: exact Node24.18 Linux committed-source baseline builds but SSR tslib default crashes. Named emitted-function regression red 0 passed/3 failed/0 skips in 2050.061956ms. Nitro Node-platform hypothesis did not change error and was reverted. Targeted public tslib ESM alias plus explicit already-locked 2.8.1: frozen build exit0, regression 3 passed/0 failed/0 cancelled/skipped in 192.785908ms, direct/isolated process HTML200 with original build path absent. tsc/lint each exit0, proxy5/5, auth8/8. Source candidate awaiting review/publication and specific changed-source production deployment approval.",
-        "linux_ssr_source_commit": "531774989f842ff8d65cd2fad5164f819301fe16"
+        "linux_ssr_source_commit": "531774989f842ff8d65cd2fad5164f819301fe16",
+        "hosted_ci_after_ssr_fix": {
+          "head_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+          "run_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36662932533",
+          "jobs_passed": 4,
+          "jobs_failed": 0,
+          "api": {
+            "passed": 569,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 79,
+            "seconds": 121.98
+          },
+          "worker": {
+            "passed": 169,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 1,
+            "seconds": 22.0
+          },
+          "browser_fixture": {
+            "passed": 1,
+            "seconds": 15.7
+          },
+          "render_function": {
+            "passed": 3,
+            "failed": 0,
+            "skipped": 0,
+            "duration_ms": 229.913351
+          },
+          "scope": "Disposable database and fake identity/provider fixtures; narrower than complete staff journey"
+        },
+        "vercel_fix_preview": {
+          "id": "dpl_ABTjYtq5QcWqZD1vzwubehuMU2KM",
+          "source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+          "state": "READY",
+          "frontend_status": 200,
+          "frontend_routes": [
+            "/",
+            "/app",
+            "/auth/callback"
+          ],
+          "unauthenticated_api_status": 401,
+          "production_auth0_variables_applied": false,
+          "production_fix_deployed": false
+        },
+        "publication": "Draft PR #9 attached; code commit 531774989f842ff8d65cd2fad5164f819301fe16; tested PR head 62d40bc7687477f42e971ae5143485806630f1a6; final checkpoint changes documentation only."
       }
     }
   ],
@@ -1202,5 +1250,5 @@
   ],
   "reviewed_source_sha": "531774989f842ff8d65cd2fad5164f819301fe16",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "T30: publish/review verified Linux SSR fix, then obtain specific changed-source deployment approval and verify deployed HTML/Auth0 staff round trip; membership/provider/pilot gates remain independent."
+  "next_eligible_task": "T30: specific approval to rebuild preview dpl_ABTjYtq5QcWqZD1vzwubehuMU2KM / tested source 62d40bc7687477f42e971ae5143485806630f1a6 as production with the nine saved production variables, then deployed HTTP/Auth0 entry and actual staff/membership verification. Other owner/provider/pilot gates remain independent."
 }
