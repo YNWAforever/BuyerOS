@@ -11,7 +11,7 @@
 | Externally blocked | Manual screen-reader/non-text review, external restore journal custody/completeness, continuous external worker/Valkey, private R2, named data-policy/provider economics and exact bounded pilot approval. |
 | Deployed | Read-only production-alias metadata at2026-09-30T20:14:58Z: READY, dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3, source62d40bc7687477f42e971ae5143485806630f1a6. This candidate has not been deployed to production. |
 
-Reviewed candidate source: **PUBLICATION_PENDING**. Existing draft [PR9](https://github.com/YNWAforever/BuyerOS/pull/9), branch codex/fix-vercel-tslib-ssr, base main. Starting source479141f5f04455cdc19c786cb40a3a0fd9f4b4d2. No reset, merge, owner approval fabrication, new production mutation or paid/provider/delivery activation. Source review was performed inline by the author; no subagent or independent review is claimed.
+Reviewed candidate source: **41810627540dd52c4567f853ae65d51e2bb6365d**. Existing draft [PR9](https://github.com/YNWAforever/BuyerOS/pull/9), branch codex/fix-vercel-tslib-ssr, base main. Starting source479141f5f04455cdc19c786cb40a3a0fd9f4b4d2. No reset, merge, owner approval fabrication, new production mutation or paid/provider/delivery activation. Source review was performed inline by the author; no subagent or independent review is claimed.
 
 ## Exact current commands and outputs
 
@@ -33,7 +33,7 @@ For each retained XML: services/api/.venv/Scripts/python.exe scripts/check-requi
 
 Static gates: node tests/domain-checks.mjs11/11; node tests/live-adapter-checks.mjs74/74; node tests/live-auth-checks.mjs8/8 total including cryptographic checks; node --test tests/api-types-generation.test.mjs1/1; node --test tests/vercel-services.test.mjs5/5; services/api: .venv/Scripts/python.exe ../../scripts/generate-operation-routes.py --check78 operations. pnpm.cmd exec tsc --noEmit, pnpm.cmd lint, pnpm.cmd build and git diff --check exit0. The build retains its nonfatal >500kB chunk advisory. Local raw summaries and hashes: [output](../../artifacts/t30-local-test-output-20261001.txt), [manifest](../../artifacts/t30-verification-20261001.json), [JUnit](../../artifacts/t30-tests/).
 
-Hosted CI: **PUBLICATION_PENDING**. The workflow adds a separate owned-container continuity job, runs4 continuous cases plus8 workbench,1 pagination,3 management and1 original seeded regression, requires zero failures/errors/skips and retains each suite before the next fixture cleans test-results. The separate actual-zoom job also requires its JUnit gate. CI covers the Vercel build/emitted renderer. Hosted results are not inferred from local results.
+Hosted CI: **6/6 jobs SUCCESS** on reviewed source41810627540dd52c4567f853ae65d51e2bb6365d, [run36772517309](https://github.com/YNWAforever/BuyerOS/actions/runs/36772517309). Required API577/0fail/error/skip,81warnings,135.14s; worker174/0fail/error/skip,1warning,26.09s. Browser continuity4/2.5m,workbench8/1.1m,pagination1/27.6s,management3/30.4s,original seeded acceptance1/27.3s and actual zoom2/31.5s all pass their zero-skip checks. Smoke1/18.7s and emitted renderer3/3 pass. Exact observed summaries: artifacts/t30-hosted-ci-20261001.json. The workflow adds a separate owned-container continuity job, runs4 continuous cases plus8 workbench,1 pagination,3 management and1 original seeded regression, requires zero failures/errors/skips and retains each suite before the next fixture cleans test-results. The separate actual-zoom job also requires its JUnit gate. CI covers the Vercel build/emitted renderer. Hosted results are not inferred from local results.
 
 ## Meaningful failures and repairs
 
@@ -74,7 +74,7 @@ Classification compares current source with audit baseline5e61f401bf1bcdf80ea1ce
 
 ## Screenshots
 
-Eight final principal full-page screenshots were inspected: en/zh-HK × desktop/mobile × approved export/persisted outcome. Paths: artifacts/t30-screenshots/t30-continuity-LOCALE-LAYOUT-approved-export-fixture.png and ...-outcome-fixture.png. Four additional mobile-readback screenshots are retained. These show fictional accounts/data; no screenshot is presented as a production staff journey. Current actual Chromium200% zoom2/2 is evidenced by JUnit and its assertions across six routes; older T29 zoom screenshots retain their own source attribution. Actual screen-reader use and remaining non-text checks are not claimed.
+Eight final principal full-page screenshots were inspected: en/zh-HK × desktop/mobile × approved export/persisted outcome. Paths: artifacts/t30-screenshots/t30-continuity-LOCALE-LAYOUT-approved-export-fixture.png and ...-outcome-fixture.png. Four additional mobile-readback screenshots are retained. These show fictional accounts/data; no screenshot is presented as a production staff journey. Current local actual Chromium200% zoom2/2 has JUnit evidence. Four current Linux CI viewport screenshots and two reports are also retained as t30-hosted-api-actual-zoom-4181062-*; all four were inspected. Chromium153.0.8010.12 reports1440px beforezoom→720CSSpx, DPR1→2, zoom2.0, zero overflow and no clipped text across six routes per locale. Older T29 screenshots keep their own source attribution. Actual screen-reader use and remaining non-text checks are not claimed.
 
 ## Migration, restore and rollback
 
@@ -94,4 +94,10 @@ Candidate deployment approval would authorize no paid provider or pilot. A later
 
 ## Changed files
 
-See [remaining/CHANGED_FILES.md](remaining/CHANGED_FILES.md) for the exact current path inventory. Reviewed source and hosted CI results are filled only after publication.
+See [remaining/CHANGED_FILES.md](remaining/CHANGED_FILES.md) for the exact current path inventory. Reviewed application/test source is41810627540dd52c4567f853ae65d51e2bb6365d; source hashes match all tested code files and Git-normalized blobs; six-job hosted CI success is verified. The following commit contains documentation/evidence only.
+
+## Preview and rollout checkpoint
+
+Vercel preview dpl_9vrsNEUsyzfGjbr745ersK6XWEVF is READY at source4181062. Direct /app and /v1/workspaces return302 to vercel.com/sso-api under existing deployment protection; HTTP application acceptance is blocked, not a pass. No protection setting or credential was changed. Production remains separately proven62d40bc.
+
+Queued addressed template commands contain recipient_context. An activated external worker must use the reviewed source4181062 or a proven compatible newer build before dispatch. Keep the current worker implementation while such commands remain queued; an older62d40bc worker does not enforce that context. Before any worker rollback, freeze admission/dispatch and retain the queued context for reviewed reconciliation; do not replay addressed jobs through an older worker. Application rollback alone must preserve this worker requirement.

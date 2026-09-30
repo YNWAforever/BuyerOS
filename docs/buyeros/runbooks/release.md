@@ -30,3 +30,6 @@ On tenant leakage, unauthorized contact access, lost budget lock, unexplained ch
 ## Evidence still needed
 
 Approved Vercel production source62d40bc and Neon/Auth0 initial setup are documented in RELEASE_READINESS.md. The first FIMMICK administrator setup has exact four-row readback and human-reported UI visibility. These configuration approvals do not authorize this newer candidate deployment, provider spend or a pilot. Current strict API/worker fixture gates pass; authenticated API/full live continuity, external worker/Valkey, private R2, policy/provider evidence, external restore custody and a bounded pilot decision remain required. Do not overwrite the nine saved production values or set the injected binding variable yourself.
+## Current compatible worker requirement
+
+Reviewed source4181062 binds recipient_context in queued zero-cost template commands. Use that source or a proven compatible newer worker before dispatching them. Freeze admission/dispatch before a worker rollback and preserve the queued bound commands; an older62d40bc worker does not enforce the new recipient binding. Reverting the API/frontend alone does not authorize replay through that older worker.

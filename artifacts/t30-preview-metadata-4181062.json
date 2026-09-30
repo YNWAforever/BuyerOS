@@ -1,0 +1,26 @@
+{
+  "observed_at_utc": "2026-09-30T20:47:16.8699243Z",
+  "id": "dpl_9vrsNEUsyzfGjbr745ersK6XWEVF",
+  "url": "https://buyer-7x1bukipk-ynwaforevers-projects.vercel.app",
+  "target": null,
+  "state": "READY",
+  "source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+  "direct_checks": [
+    {
+      "redirect_host": "vercel.com",
+      "status": 302,
+      "path": "/app",
+      "redirect_path": "/sso-api"
+    },
+    {
+      "redirect_host": "vercel.com",
+      "status": 302,
+      "path": "/v1/workspaces",
+      "redirect_path": "/sso-api"
+    }
+  ],
+  "acceptance_status": "blocked by existing Vercel SSO protection",
+  "passed": 0,
+  "blocked": 2,
+  "scope": "Metadata READY verified; direct anonymous app/proxy acceptance not established. No protection configuration changed and no production/provider action."
+}

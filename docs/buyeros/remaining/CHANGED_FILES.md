@@ -501,3 +501,25 @@ tests/e2e/fixtures/workbench-auth.ts
 tests/e2e/mvp-a-research.spec.ts
 tests/live-adapter-checks.mjs
 ```
+
+## T30 publication evidence checkpoint
+
+Application/test commit41810627540dd52c4567f853ae65d51e2bb6365d above has58 paths and six-job CI success. This following checkpoint changes only documentation/evidence, including the current hosted zoom files. No application/schema/owner approval change.
+
+```text
+artifacts/t30-hosted-ci-20261001.json
+artifacts/t30-preview-metadata-4181062.json
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-en-buyers.png
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-en-operations.png
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-en.json
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-zh-HK-buyers.png
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-zh-HK-operations.png
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-zh-HK.json
+artifacts/t30-verification-20261001.json
+docs/buyeros/RELEASE_READINESS.md
+docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
+docs/buyeros/T30_RELEASE_CANDIDATE_HANDOFF_20261001.md
+docs/buyeros/remaining/CHANGED_FILES.md
+docs/buyeros/remaining/TASKS.json
+docs/buyeros/runbooks/release.md
+```

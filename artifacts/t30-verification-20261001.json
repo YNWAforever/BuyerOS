@@ -1,9 +1,17 @@
 {
   "date_hk": "2026-10-01",
   "base_source_sha": "479141f5f04455cdc19c786cb40a3a0fd9f4b4d2",
-  "reviewed_source_sha": null,
-  "publication": "pending",
-  "hosted_ci": "pending",
+  "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+  "publication": "pushed to origin/codex/fix-vercel-tslib-ssr; existing draft PR9",
+  "hosted_ci": {
+    "source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+    "run_id": 36772517309,
+    "jobs_passed": 6,
+    "jobs_failed": 0,
+    "status": "completed",
+    "conclusion": "success",
+    "evidence": "artifacts/t30-hosted-ci-20261001.json"
+  },
   "local_required_suites": [
     {
       "path": "artifacts/t30-tests/api-actual-zoom-required-20261001.xml",
@@ -303,5 +311,73 @@
     }
   ],
   "activation": "No new production migration/mutation/deployment/provider/delivery activation; user confirmed FIMMICK/admin visibility.",
-  "source_hash_method": "SHA256 of tested Windows working-tree bytes plus Git-normalized blob OID, bound to reviewed commit after publication."
+  "source_hash_method": "SHA256 of tested Windows working-tree bytes plus Git-normalized blob OID, bound to reviewed commit after publication.",
+  "preview": {
+    "observed_at_utc": "2026-09-30T20:47:16.8699243Z",
+    "id": "dpl_9vrsNEUsyzfGjbr745ersK6XWEVF",
+    "url": "https://buyer-7x1bukipk-ynwaforevers-projects.vercel.app",
+    "target": null,
+    "state": "READY",
+    "source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+    "direct_checks": [
+      {
+        "redirect_host": "vercel.com",
+        "status": 302,
+        "path": "/app",
+        "redirect_path": "/sso-api"
+      },
+      {
+        "redirect_host": "vercel.com",
+        "status": 302,
+        "path": "/v1/workspaces",
+        "redirect_path": "/sso-api"
+      }
+    ],
+    "acceptance_status": "blocked by existing Vercel SSO protection",
+    "passed": 0,
+    "blocked": 2,
+    "scope": "Metadata READY verified; direct anonymous app/proxy acceptance not established. No protection configuration changed and no production/provider action."
+  },
+  "hosted_zoom": [
+    {
+      "path": "artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-en-buyers.png",
+      "sha256": "054e283e363111600affd94fc43872bc7eae12a5788a1c78588d614eb34c60dc",
+      "workflow_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-en-operations.png",
+      "sha256": "234c2c10362aa7b0dfd2f7ad28c91d68828ca336631fb1f22d58241b897d6d32",
+      "workflow_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-en.json",
+      "sha256": "1bd249382507d3fa9490678f1a1fabcc21919344f6d57607631d91f32254a226",
+      "workflow_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+      "visually_inspected": false,
+      "browser": "153.0.8010.12",
+      "measured_routes": 6
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-zh-HK-buyers.png",
+      "sha256": "4c97bac509a303508d801039c25ae2b144611779c85f656b1c6d58266b5b56c7",
+      "workflow_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-zh-HK-operations.png",
+      "sha256": "e038f2dafd0d4455f46cf514d32581cd3c26be5ad02e797d095b7b01fc624f9d",
+      "workflow_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-zh-HK.json",
+      "sha256": "53230bac7e1cdedeafe06c4125a23021236c4073502f31699b4e681914b7a123",
+      "workflow_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+      "visually_inspected": false,
+      "browser": "153.0.8010.12",
+      "measured_routes": 6
+    }
+  ]
 }
