@@ -1,4 +1,4 @@
-# Vercel Services deployment candidate
+# Vercel Services configuration and activation status
 
 `vercel.json` defines two HTTP services. `app` is the Vinext/React frontend built with Vite + Nitro's Vercel preset; it receives the public catch-all route. `api` is FastAPI at `services/api` and has no public service rewrite. The app's `/v1/*` route forwards each browser bearer request to `api` with the runtime service binding `BUYEROS_INTERNAL_API_URL`. Vercel generates this variable for the `app` function; do not set it in the dashboard or a build environment. Browser code uses a same-origin `/v1/*` URL and never receives the binding. The proxy handles FastAPI redirects manually and rewrites internal `/v1/*` locations back to the public path.
 
@@ -11,8 +11,21 @@ node --test tests/vercel-services.test.mjs
 pnpm.cmd exec tsc --noEmit
 pnpm.cmd lint
 node scripts/run-vercel.mjs build
+node --test tests/vercel-render.test.mjs
 ```
 
-The last command emits Nitro's `.vercel/output` Build Output API bundle. With Vercel Services access and an approved, isolated runtime configuration, `vercel dev -L` is the service-level local check; a direct Nitro function smoke test does not prove Vercel's service router, Python builder, or deployed networking. This configuration has not been deployed.
+The build command emits Nitro's `.vercel/output` Build Output API bundle. With Vercel Services access and an approved, isolated runtime configuration, `vercel dev -L` is the service-level local check; a direct Nitro function smoke test does not prove Vercel's service router, Python builder, or deployed networking. Vercel reports the approved production rebuild `dpl_8euDMPQdBGKMENWNEHrEnZM4ywF5` READY at source `0852552c47676598adea5c3478938ae3f594a5d9`. Real staff sign-in and the complete staff journey remain unverified; READY alone does not establish service integration.
 
-The live app also needs the public Auth0 SPA issuer, client ID and audience described in the README, and the API needs its corresponding issuer/audience and an explicitly configured `BUYEROS_DATABASE_URL`. Apply Alembic migrations via the established migration process. Provider, R2, Render worker, Valkey and Neon activation still require their separate existing decisions. No service binding authorizes a paid provider, enables sending or changes the disabled delivery endpoint.
+The public Auth0 issuer/client ID and same-origin API configuration are saved in Vercel production. User-approved Neon initialization reached `0033_api_rate_windows`; the restricted, pooled `buyeros_api` connection is saved as sensitive `BUYEROS_DATABASE_URL`. The migration owner is not stored in Vercel. The user-approved rebuild dpl_8euDMPQdBGKMENWNEHrEnZM4ywF5 applied these values; the public API proxy returns expected unauthenticated 401, while frontend routes return 500.
+
+The user-approved Auth0 configuration is now applied and verified. BuyerOS is a public SPA with token endpoint authentication None and authorization-code/PKCE; both production aliases have callback `/auth/callback`, logout `/app` and exact origins, with existing localhost entries retained. The custom BuyerOS API `https://buyer-os-nu.vercel.app/v1` uses RS256 and one-hour access tokens, with offline access disabled. `BUYEROS_AUTH0_AUDIENCE` is saved in Vercel production. Both production callback probes now return expected unauthenticated `login_required`; an invalid callback and unknown audience are rejected.
+
+The approved production rebuild is READY and its rendered RSC layout includes the saved issuer/client/audience; initial HTML returns HTTP 500, but browser recovery and Sign in reaching Auth0 Universal Login are verified. The targeted Linux source fix is verified below and awaits deployment. No real staff token or authenticated application session has been verified. See [the exact configuration and results](AUTH0_CONFIGURATION_PROPOSAL.json).
+
+See [the current execution checkpoint](REMAINING_DEVELOPMENT_STATUS.md#approved-neon-initialization-and-vercel-configuration---2026-09-30-hk) for exact source, migration, restore-branch, permission and environment evidence. Provider, R2, continuous worker/Valkey and initial membership ownership remain open gates. No service binding authorizes a paid provider, enables sending or changes the disabled delivery endpoint.
+
+## Linux SSR regression and source fix
+
+The production frontend initially returned 500 while RSC/API routing worked and the browser recovered to Sign in. This was reproduced from committed source on Linux Node 24.18.0: the workspace chunk imported tslib's CommonJS default through its Node export wrapper and crashed before rendering. For the Vercel build only, `vite.config.ts` resolves bare tslib to the package's public `tslib.es6.mjs` entry. Exact tslib 2.8.1 is now an explicit dependency, preserving the already-locked version. The emitted-function regression runs in Linux CI after the build; the baseline failed 3/3 and the fixed candidate passed 3/3.
+
+The changed source has not yet replaced production. The separate anonymous deployed check is explicit: set `BUYEROS_VERCEL_VERIFY_URL` to the exact origin and run `node --test tests/deployment/vercel-runtime.mjs`. Its latest production result is 1 pass/3 failures/0 skips on source 0852552. It does not acquire a token, mutate data or call a provider.
