@@ -27,6 +27,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm build
       - run: node scripts/run-vercel.mjs build
+      - run: node --test tests/vercel-render.test.mjs
 
   api:
     runs-on: ubuntu-latest

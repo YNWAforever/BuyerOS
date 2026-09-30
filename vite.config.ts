@@ -55,7 +55,12 @@ export default defineConfig(async () => {
   return {
     // Nitro's CSS import resolver treats Tailwind's bare package import as a
     // relative file in this build; target the package's exported stylesheet.
-    ...(vercelTarget ? { resolve: { alias: [{ find: /^tailwindcss$/, replacement: fileURLToPath(import.meta.resolve("tailwindcss/index.css")) }] } } : {}),
+    ...(vercelTarget ? { resolve: { alias: [
+      { find: /^tailwindcss$/, replacement: fileURLToPath(import.meta.resolve("tailwindcss/index.css")) },
+      // The Node export wrapper imports a CommonJS default that Rolldown loses
+      // in the Linux SSR bundle. Use tslib's public ESM helpers directly.
+      { find: /^tslib$/, replacement: fileURLToPath(import.meta.resolve("tslib/tslib.es6.mjs")) },
+    ] } } : {}),
     // Public, build-time browser configuration only. The Cloudflare dev RSC runtime does not
     // inherit Node process.env; never add a client secret or provider credential here.
     define: {
