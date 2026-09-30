@@ -22,7 +22,7 @@ The user-approved Auth0 configuration is now applied and verified. BuyerOS is a 
 
 The approved production deployment serves `/`, `/app` and `/auth/callback` with initial HTML HTTP 200. A browser reaches Auth0 Universal Login from Sign in with no application console/page errors. The real authorization request uses the exact saved public client ID, audience and primary callback, response type `code` and PKCE S256. No real staff token or authenticated application session has been verified. See [the exact configuration and results](AUTH0_CONFIGURATION_PROPOSAL.json).
 
-See [the current execution checkpoint](REMAINING_DEVELOPMENT_STATUS.md#approved-neon-initialization-and-vercel-configuration---2026-09-30-hk) for exact source, migration, restore-branch, permission and environment evidence. Provider, R2, continuous worker/Valkey and initial membership ownership remain open gates. No service binding authorizes a paid provider, enables sending or changes the disabled delivery endpoint.
+See [the current execution checkpoint](REMAINING_DEVELOPMENT_STATUS.md) for exact source, migration, restore-branch, permission and environment evidence. The separately approved first FIMMICK workspace and verified account's active workspace_admin membership are committed and read back in Neon; [the setup execution record](INITIAL_WORKSPACE_PROPOSAL.json) distinguishes the denied owner role-switch check from successful exact-row/catalog verification. Fresh anonymous deployment checks passed 4/4; the real signed-in UI/API confirmation remains pending. Provider, R2 and continuous worker/Valkey remain open gates. No service binding authorizes a paid provider, enables sending or changes the disabled delivery endpoint.
 
 ## Linux SSR regression and source fix
 

@@ -1288,10 +1288,10 @@
             "warnings": 8,
             "seconds": 6.76
           },
-          "initial_membership_seeded": false,
+          "initial_membership_seeded": true,
           "proposal": "docs/buyeros/INITIAL_WORKSPACE_PROPOSAL.json",
-          "owner_identity": "Sign-in email supplied; waiting for verified immutable Auth0 subject, not guessed from email",
-          "management_lookup": "Expired CLI token; first authorization rejected as Invalid network change; fresh normal device authorization pending. No runtime config change.",
+          "owner_identity": "Verified exact supplied email, email_verified true, unblocked Google-linked Auth0 user, one match, same immutable subject in successful BuyerOS client login. Exact subject remains ignored; public SHA256 reference in proposal.",
+          "management_lookup": "Fresh authorization succeeded; exact account/login verified; no runtime Auth0 configuration changed.",
           "prepared_transaction_fixture": {
             "scope": "Session-local ignored administrative helper, disposable PostgreSQL, fixture identity only; no application endpoint or production mutation",
             "source_sha256": "51f7827b778f41e1d1f676928deefcd346c9db14750278ff9d9818fb76651c84",
@@ -1307,9 +1307,99 @@
               "Retry does not duplicate or change membership/audit; conflicting existing workspace is preserved and rejected",
               "Database failure at membership insert rolls back user/workspace/audit"
             ],
-            "identity_verified": false,
-            "production_applied": false
-          }
+            "production_applied": false,
+            "live_identity_verified_by_tests": false
+          },
+          "production_preflight": {
+            "database": "nameless-bar-15324691/br-autumn-block-b3exsqii/neondb",
+            "head": "0033_api_rate_windows",
+            "users": 0,
+            "workspaces": 0,
+            "changes_applied": false
+          },
+          "identity_verification": {
+            "email_exact_match": true,
+            "email_verified": true,
+            "blocked": false,
+            "subject_sha256": "cfe7cd302e6627375d838e3af5fd04fec145b607025d77046e8aac11cc784efb",
+            "matches": 1,
+            "providers": [
+              "google-oauth2"
+            ],
+            "latest_successful_login": {
+              "date": "2026-09-30T14:31:37.074Z",
+              "type": "s",
+              "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R"
+            },
+            "real_staff_api_session_verified": false
+          },
+          "approved_setup_execution": {
+            "authorization_source": "Direct user reply to the named FIMMICK production workspace and verified-account administrator proposal in this execution session",
+            "authorization_reply": "Approve this workspace setup",
+            "scope": "One verified application user, FIMMICK live workspace, active workspace_admin membership and redacted bootstrap audit",
+            "bootstrap_result": {
+              "workspace_id": "900cd19b-4e03-4446-bdd6-7cb199d96060",
+              "membership_id": "d8190b6e-c290-41d6-8dd2-3d0c90b824cc",
+              "changes_applied": true,
+              "replay": false
+            },
+            "combined_apply_and_role_check_exit_code": 1,
+            "apply_commit": "succeeded before the subsequent role-switch permission check failed",
+            "role_check_failure": "neondb_owner cannot SET ROLE buyeros_api; no new role grant or RLS weakening performed",
+            "followup_read_only_verification_exit_code": 0,
+            "database_verification": {
+              "database_counts": {
+                "users": 1,
+                "workspaces": 1,
+                "target_memberships": 1,
+                "target_bootstrap_audits": 1
+              },
+              "exact_identity_and_membership_readback": "passed",
+              "workspace": "FIMMICK",
+              "roles": [
+                "workspace_admin"
+              ],
+              "active": true,
+              "version": 1,
+              "schema_heads": [
+                "0033_api_rate_windows"
+              ],
+              "api_role_catalog": {
+                "select_users_workspaces_memberships": [
+                  true,
+                  true,
+                  true
+                ],
+                "membership_rls_enabled": true,
+                "membership_rls_forced": true,
+                "login": true,
+                "superuser": false,
+                "createdb": false,
+                "createrole": false,
+                "bypassrls": false
+              },
+              "verification_method": "Read-only owner connection plus catalog permissions; not an authenticated API request or actual runtime-role connection",
+              "role_switch_attempt": "Denied: neondb_owner cannot SET ROLE buyeros_api; no additional role membership granted",
+              "real_staff_api_session_verified": false,
+              "migration": "none",
+              "deployment": "unchanged",
+              "provider_delivery_activation": "none"
+            },
+            "anonymous_deployed_regression": {
+              "passed": 4,
+              "failed": 0,
+              "cancelled": 0,
+              "skipped": 0,
+              "duration_ms": 3877.6165
+            },
+            "staff_ui_confirmation": "pending human refresh and sign-in; not counted as an agent-verified authenticated API journey",
+            "migration": "none; existing sole head0033 unchanged",
+            "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+            "rollback": "No production rollback performed; failed-insert atomic rollback verified only on disposable fixture",
+            "provider_delivery_activation": "none",
+            "bo_owner_approval_records_modified": false
+          },
+          "current_initial_setup_state": "One FIMMICK live workspace and exact verified-account active workspace_admin membership persisted; four approved rows read back. Authenticated staff UI/API confirmation remains pending."
         }
       }
     }
@@ -1347,6 +1437,6 @@
   ],
   "reviewed_source_sha": "531774989f842ff8d65cd2fad5164f819301fe16",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "T30: match the reported sign-in email to a verified Auth0 subject, finalize the prepared first FIMMICK/workspace_admin membership proposal and obtain its specific production bootstrap approval. Production users/workspaces are currently empty; no identity or ownership is guessed. Then verify real scoped API/UI. Other full-journey/provider/policy/pilot and T29 accessibility gates remain open.",
+  "next_eligible_task": "T30: confirm the real refreshed staff UI/API loads FIMMICK and workspace_admin after the specifically approved four-row production setup. Database identity/membership/audit readback and unchanged restricted-role/RLS catalog checks passed; owner SET ROLE was denied and not bypassed. Then complete staff continuity, T29 accessibility and independent provider/policy/worker/pilot gates.",
   "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6"
 }

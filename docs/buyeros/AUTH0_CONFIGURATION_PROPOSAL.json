@@ -258,5 +258,14 @@
     "production_deployment_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
     "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
     "production_environment_applied": true
+  },
+  "initial_workspace_setup": {
+    "separately_user_approved": true,
+    "applied": true,
+    "workspace_name": "FIMMICK",
+    "role": "workspace_admin",
+    "exact_identity_and_membership_readback": "passed",
+    "execution_reference": "INITIAL_WORKSPACE_PROPOSAL.json",
+    "real_staff_api_session_verified": false
   }
 }

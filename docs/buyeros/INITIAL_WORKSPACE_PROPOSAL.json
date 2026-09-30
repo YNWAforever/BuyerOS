@@ -1,5 +1,5 @@
 {
-  "status": "prepared_waiting_for_verified_owner_identity_and_specific_production_bootstrap_approval",
+  "status": "explicitly_approved_applied_exact_database_readback_verified_staff_ui_confirmation_pending",
   "database": {
     "project": "nameless-bar-15324691",
     "branch": "br-autumn-block-b3exsqii",
@@ -22,8 +22,11 @@
     "id": "e053f462-fb24-44c2-bb6e-1f0280d00248",
     "issuer": "https://dev-oaug20cdxqqgn1s8.us.auth0.com/",
     "subject": null,
-    "identity_status": "not_yet_matched_to_reported_login",
-    "supplied_email_sha256": "bae7f1f4f92e9dc5bac2b79d2b17ae7bb0ce59de5040ae1fcc1c1bb13c073714"
+    "identity_status": "verified_exact_email_and_immutable_subject_by_auth0_management",
+    "supplied_email_sha256": "bae7f1f4f92e9dc5bac2b79d2b17ae7bb0ce59de5040ae1fcc1c1bb13c073714",
+    "subject_storage": "Exact subject retained only in ignored local plan; public reference is SHA256",
+    "subject_sha256": "cfe7cd302e6627375d838e3af5fd04fec145b607025d77046e8aac11cc784efb",
+    "identity_verified": true
   },
   "proposed_membership": {
     "id": "d8190b6e-c290-41d6-8dd2-3d0c90b824cc",
@@ -66,8 +69,8 @@
     "required_junit_gate": "passed=2 failed=0 errors=0 skipped=0",
     "scope": "Existing listing/pagination regression against disposable PostgreSQL with fixture principal; no live staff token"
   },
-  "production_changes_applied": false,
-  "management_identity_lookup": "Supplied sign-in email received; immutable Auth0 subject still unverified. Expired management token blocked search. First fresh device authorization rejected by Auth0: Invalid network change. Normal fresh authorization is pending on a trusted stable network; no runtime Auth0 configuration changed.",
+  "production_changes_applied": true,
+  "management_identity_lookup": "Fresh administrator authorization succeeded. Exact verified email matched one unblocked Google-linked Auth0 user; successful BuyerOS-client login matched that same immutable subject. No runtime Auth0 configuration changed. The separately approved production workspace membership was applied and read back; signed-in domain API/UI confirmation remains pending.",
   "proposed_audit": {
     "id": "105006f4-3fa3-492e-961b-50e4af4a3656",
     "action": "workspace.initialized",
@@ -89,7 +92,96 @@
       "Retry does not duplicate or change membership/audit; conflicting existing workspace is preserved and rejected",
       "Database failure at membership insert rolls back user/workspace/audit"
     ],
-    "identity_verified": false,
-    "production_applied": false
+    "production_applied": false,
+    "live_identity_verified_by_tests": false
+  },
+  "identity_verification": {
+    "email_exact_match": true,
+    "email_verified": true,
+    "blocked": false,
+    "subject_sha256": "cfe7cd302e6627375d838e3af5fd04fec145b607025d77046e8aac11cc784efb",
+    "matches": 1,
+    "providers": [
+      "google-oauth2"
+    ],
+    "latest_successful_login": {
+      "date": "2026-09-30T14:31:37.074Z",
+      "type": "s",
+      "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R"
+    },
+    "real_staff_api_session_verified": false
+  },
+  "production_preflight": {
+    "database": "nameless-bar-15324691/br-autumn-block-b3exsqii/neondb",
+    "head": "0033_api_rate_windows",
+    "users": 0,
+    "workspaces": 0,
+    "changes_applied": false
+  },
+  "execution_record": {
+    "authorization_source": "Direct user reply to the named FIMMICK production workspace and verified-account administrator proposal in this execution session",
+    "authorization_reply": "Approve this workspace setup",
+    "scope": "One verified application user, FIMMICK live workspace, active workspace_admin membership and redacted bootstrap audit",
+    "bootstrap_result": {
+      "workspace_id": "900cd19b-4e03-4446-bdd6-7cb199d96060",
+      "membership_id": "d8190b6e-c290-41d6-8dd2-3d0c90b824cc",
+      "changes_applied": true,
+      "replay": false
+    },
+    "combined_apply_and_role_check_exit_code": 1,
+    "apply_commit": "succeeded before the subsequent role-switch permission check failed",
+    "role_check_failure": "neondb_owner cannot SET ROLE buyeros_api; no new role grant or RLS weakening performed",
+    "followup_read_only_verification_exit_code": 0,
+    "database_verification": {
+      "database_counts": {
+        "users": 1,
+        "workspaces": 1,
+        "target_memberships": 1,
+        "target_bootstrap_audits": 1
+      },
+      "exact_identity_and_membership_readback": "passed",
+      "workspace": "FIMMICK",
+      "roles": [
+        "workspace_admin"
+      ],
+      "active": true,
+      "version": 1,
+      "schema_heads": [
+        "0033_api_rate_windows"
+      ],
+      "api_role_catalog": {
+        "select_users_workspaces_memberships": [
+          true,
+          true,
+          true
+        ],
+        "membership_rls_enabled": true,
+        "membership_rls_forced": true,
+        "login": true,
+        "superuser": false,
+        "createdb": false,
+        "createrole": false,
+        "bypassrls": false
+      },
+      "verification_method": "Read-only owner connection plus catalog permissions; not an authenticated API request or actual runtime-role connection",
+      "role_switch_attempt": "Denied: neondb_owner cannot SET ROLE buyeros_api; no additional role membership granted",
+      "real_staff_api_session_verified": false,
+      "migration": "none",
+      "deployment": "unchanged",
+      "provider_delivery_activation": "none"
+    },
+    "anonymous_deployed_regression": {
+      "passed": 4,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 3877.6165
+    },
+    "staff_ui_confirmation": "pending human refresh and sign-in; not counted as an agent-verified authenticated API journey",
+    "migration": "none; existing sole head0033 unchanged",
+    "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+    "rollback": "No production rollback performed; failed-insert atomic rollback verified only on disposable fixture",
+    "provider_delivery_activation": "none",
+    "bo_owner_approval_records_modified": false
   }
 }
