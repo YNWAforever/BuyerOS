@@ -83,6 +83,8 @@ def draft_job(worker_database_url, pg_dsn):
     with psycopg.connect(pg_dsn, autocommit=True) as db:
         db.execute("INSERT INTO users(id,issuer,subject) VALUES (%s,'fixture',%s)",
                    (actor, f"draft-{actor}"))
+        db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES (%s,%s,%s,'{operator}',true)",
+                   (uuid.uuid4(), WS_A, actor))
         db.execute("UPDATE icp_versions SET content=%s::jsonb, content_hash=%s, "
                    "basis_offer_revision=1, approved_at=now(), approved_by=%s WHERE id=%s",
                    (json.dumps(content), canonical_hash(content), actor, ICP_A))
@@ -135,7 +137,7 @@ def draft_job(worker_database_url, pg_dsn):
     finally:
         with psycopg.connect(pg_dsn, autocommit=True) as db:
             for table in ("approvals", "draft_revisions", "outreach_drafts", "async_job_items",
-                          "outbox_events", "async_jobs", "suppressions", "policy_decisions",
+                          "outbox_events", "async_jobs", "suppressions", "policy_decisions", "contact_points",
                           "human_reviews", "fit_assessments", "evidence", "source_documents",
                           "project_buyers", "companies"):
                 db.execute(f"DELETE FROM {table} WHERE workspace_id=%s", (WS_A,))
@@ -144,6 +146,7 @@ def draft_job(worker_database_url, pg_dsn):
             db.execute("DELETE FROM sender_identity_versions WHERE id=%s", (sender,))
             db.execute("UPDATE icp_versions SET content='{}'::jsonb,content_hash='hash',"
                        "basis_offer_revision=NULL,approved_at=NULL,approved_by=NULL WHERE id=%s", (ICP_A,))
+            db.execute("DELETE FROM memberships WHERE user_id=%s", (actor,))
             db.execute("DELETE FROM users WHERE id=%s", (actor,))
 
 
@@ -193,3 +196,77 @@ def test_suppression_before_worker_prevents_draft_materialization(draft_job):
                           (case["job"],)).fetchone() == ("failed", 1)
         assert db.execute("SELECT count(*) FROM outreach_drafts WHERE workspace_id=%s",
                           (case["workspace"],)).fetchone()[0] == 0
+
+
+def _address_job(case):
+    import hashlib
+    import json
+    import uuid
+    import psycopg
+    from tests.conftest import PROJECT_A
+
+    contact_id = uuid.uuid4()
+    with psycopg.connect(case["dsn"], autocommit=True) as db:
+        checked, retention = db.execute("INSERT INTO contact_points(id,workspace_id,company_id,type,normalized_value,"
+            "validity,checked_at,quarantined,retention_expires_at) VALUES (%s,%s,%s,'business_email',"
+            "'recipient@fixture.example.test','provider_marked_valid',now(),false,now()+interval '1 day') RETURNING checked_at,retention_expires_at",
+            (contact_id, case["workspace"], case["company"])).fetchone()
+        for purpose in ("outreach", "export_contacts"):
+            db.execute("INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,"
+                "controller_scope_id,purpose,status,policy_version,basis_reference,provenance,countries,"
+                "expires_at,retention_days,decision_author_id) VALUES (%s,%s,'project',%s,%s,%s,"
+                "'permitted','fixture-v1','fixture','fixture',ARRAY['US'],now()+interval '1 day',1,%s)",
+                (uuid.uuid4(), case["workspace"], PROJECT_A, case["workspace"], purpose, case["actor"]))
+        policies = [{"id":str(row[0]), "version":row[1], "purpose":row[2], "status":row[3],
+                     "expires_at":row[4].isoformat()} for row in db.execute(
+            "SELECT id,version,purpose,status,expires_at FROM policy_decisions "
+            "WHERE workspace_id=%s ORDER BY id", (case["workspace"],))]
+        context = {"contact":{"id":str(contact_id), "version":1, "type":"business_email",
+            "validity":"provider_marked_valid", "value_hash":hashlib.sha256(b'recipient@fixture.example.test').hexdigest(),
+            "checked_at":checked.isoformat(), "retention_until":retention.isoformat()}, "policies":policies}
+        db.execute("UPDATE async_jobs SET command=command || %s::jsonb WHERE id=%s",
+                   (json.dumps({"recipient_context":context}), case["job"]))
+    return contact_id
+
+
+def test_worker_materializes_addressed_grounded_template_without_provider(draft_job):
+    import psycopg
+    from buyeros_worker.tasks import execute_intent_sync
+
+    contact_id = _address_job(draft_job)
+    with psycopg.connect(draft_job["dsn"]) as db:
+        before = tuple(db.execute(f"SELECT count(*) FROM {table} WHERE workspace_id=%s",
+                                  (draft_job["workspace"],)).fetchone()[0]
+                       for table in ("provider_operations", "budget_reservations"))
+    assert execute_intent_sync(draft_job["intent_key"], draft_job["workspace"], 1) == "done"
+    with psycopg.connect(draft_job["dsn"]) as db:
+        content = db.execute("SELECT content FROM draft_revisions WHERE workspace_id=%s",
+                             (draft_job["workspace"],)).fetchone()[0]
+        assert content["recipient_contact_id"] == str(contact_id)
+        assert content["grounding_status"] == "grounded" and content["claims"]
+        after = tuple(db.execute(f"SELECT count(*) FROM {table} WHERE workspace_id=%s",
+                                 (draft_job["workspace"],)).fetchone()[0]
+                      for table in ("provider_operations", "budget_reservations"))
+        assert after == before
+
+
+@pytest.mark.parametrize("changed", ["value", "validity", "policy", "membership"])
+def test_worker_rechecks_addressed_contact_and_policy_after_admission(draft_job, changed):
+    import psycopg
+    from buyeros_worker.tasks import execute_intent_sync
+
+    contact_id = _address_job(draft_job)
+    with psycopg.connect(draft_job["dsn"], autocommit=True) as db:
+        if changed == "value":
+            db.execute("UPDATE contact_points SET normalized_value='other@fixture.example.test' WHERE id=%s", (contact_id,))
+        elif changed == "validity":
+            db.execute("UPDATE contact_points SET validity='catch_all' WHERE id=%s", (contact_id,))
+        elif changed == "policy":
+            db.execute("UPDATE policy_decisions SET status='blocked' WHERE purpose='outreach'")
+        else:
+            db.execute("UPDATE memberships SET active=false WHERE user_id=%s", (draft_job["actor"],))
+    assert execute_intent_sync(draft_job["intent_key"], draft_job["workspace"], 1) == "done"
+    with psycopg.connect(draft_job["dsn"]) as db:
+        assert db.execute("SELECT status,blocked FROM async_jobs WHERE id=%s", (draft_job["job"],)).fetchone() == ("failed", 1)
+        assert db.execute("SELECT count(*) FROM outreach_drafts WHERE workspace_id=%s",
+                          (draft_job["workspace"],)).fetchone()[0] == 0

@@ -1,5 +1,7 @@
 import {expect,test} from '@playwright/test';
-import {signInWorkbench as signIn,workspace,project} from './fixtures/workbench-auth';
+import {signInWorkbench as signIn,resetWorkbenchFixtureRateWindows,workspace,project} from './fixtures/workbench-auth';
+
+test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
 
 test('T27 usage, queue filters and manual outcome history survive refresh in both locales',async({page,request})=>{
   test.setTimeout(240_000);await signIn(page);
@@ -125,12 +127,12 @@ test('T29 locale waits for current preference version and survives a fresh sign-
   });
   try{
     await signIn(page,false);
-    await expect(page.locator('section[aria-label="Workspace selection"] select')).toHaveValue(workspace,{timeout:30_000});
+    await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue(workspace,{timeout:30_000});
     await expect(page.locator('header select')).toBeDisabled();
   }finally{
     releasePreference();
   }
-  await expect(page.locator('section[aria-label="Project selection"] select')).toHaveValue(project,{timeout:30_000});
+  await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});
   await expect(page.locator('header select')).toBeEnabled({timeout:30_000});
   if(await page.locator('header select').inputValue()==='zh-HK'){
     const reset=page.waitForResponse(response=>response.url().includes('/preferences')
@@ -145,7 +147,7 @@ test('T29 locale waits for current preference version and survives a fresh sign-
   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
   await page.reload();
   await page.getByRole('button',{name:'Sign in'}).click();
-  await expect(page.locator('section[aria-label="Project selection"] select'))
+  await expect(page.getByRole('combobox',{name:/^(Project|專案)$/}))
     .toHaveValue(project,{timeout:30_000});
   await expect(page.locator('header select')).toHaveValue('zh-HK',{timeout:30_000});
   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
@@ -261,15 +263,15 @@ test('T29 scope list timeout offers a bounded retry with current identity',async
   });
   try{
     await signIn(page,false);
-    const picker=page.getByRole('region',{name:'Workspace selection'});
+    const picker=page.getByRole('region',{name:/^(Workspace selection|工作區選擇)$/});
     await expect(picker.getByRole('alert')).toBeVisible({timeout:20_000});
     await expect(page.getByRole('button',{name:'Retry loading workspaces'})).toBeEnabled();
   }finally{
     releaseFirst();
   }
   await page.getByRole('button',{name:'Retry loading workspaces'}).click();
-  await expect(page.locator('section[aria-label="Workspace selection"] select')).toHaveValue(workspace,{timeout:30_000});
-  await expect(page.locator('section[aria-label="Project selection"] select')).toHaveValue(project,{timeout:30_000});
+  await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue(workspace,{timeout:30_000});
+  await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});
 });
 
 

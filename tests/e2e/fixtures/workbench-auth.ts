@@ -1,8 +1,20 @@
 // Fake OIDC identity for the isolated HTTP/PostgreSQL workbench fixture only.
 import {expect,type Page} from '@playwright/test';
 import {webcrypto} from 'node:crypto';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {resolve} from 'node:path';
 export const workspace='e0000000-0000-4000-8000-000000000001';
 export const project='e1000000-0000-4000-8000-000000000001';
+
+/** Isolate independent cases on the guarded owned Docker fixture, before login. */
+export async function resetWorkbenchFixtureRateWindows(){
+  const cwd=resolve('services/worker');
+  const python=resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
+  const {stdout}=await promisify(execFile)(python,['tests/fixtures/prepare_browser_project.py','isolate-workbench'],
+    {cwd,timeout:30_000});
+  expect(JSON.parse(stdout).fixture_initial_rate_windows_reset).toBe(true);
+}
 
 export async function signInWorkbench(page:Page,waitForProject=true){
   const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,
@@ -28,7 +40,7 @@ export async function signInWorkbench(page:Page,waitForProject=true){
   await page.goto(`/app?workspace=${workspace}&project=${project}`);
   await page.getByRole('button',{name:'Sign in'}).click();
   if(waitForProject){
-    try{await expect(page.locator('section[aria-label="Project selection"] select')).toHaveValue(project,{timeout:30_000});}
+    try{await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});}
     catch(error){throw new Error(`Project selection did not settle; API events: ${apiEvents.join(' | ')}`,{cause:error});}
   }
 }

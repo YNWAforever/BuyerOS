@@ -88,3 +88,24 @@ test('T09 viewer cannot mutate buyers or lists',async({page})=>{
   await expect(page.getByRole('button',{name:'Assign to me'})).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Save review'})).toHaveCount(0);
 });
+
+test('T29 zh-HK list and saved filter actions use localized accessible names and feedback',async({page})=>{
+  test.setTimeout(180_000);
+  await signIn(page);
+  await page.locator('header select').selectOption('zh-HK');
+  const controls=page.getByRole('region',{name:'買家清單及已儲存篩選'});
+  await expect(controls.getByRole('heading',{name:'清單及已儲存篩選'})).toBeVisible();
+  await controls.getByRole('textbox',{name:'清單名稱'}).fill('中文工作清單');
+  await controls.getByRole('button',{name:'建立清單',exact:true}).click();
+  await expect(controls.getByRole('status')).toHaveText('已建立清單 中文工作清單');
+  await expect(controls.getByRole('combobox',{name:'買家清單'})).toContainText('中文工作清單 (0)');
+  await page.getByRole('checkbox',{name:'選取 Buyer Fixture 02'}).check();
+  await controls.getByRole('button',{name:'將已選買家加入清單'}).click();
+  await expect(controls.getByRole('status')).toContainText('已更新 1 項；已阻止 0 項；衝突 0 項。');
+  await controls.getByRole('textbox',{name:'篩選名稱'}).fill('中文已儲存篩選');
+  await controls.getByRole('button',{name:'儲存目前篩選'}).click();
+  await expect(controls.getByRole('status')).toHaveText('已儲存篩選 中文已儲存篩選');
+  await controls.getByRole('button',{name:'套用已儲存篩選'}).click();
+  await expect(controls.getByRole('status')).toHaveText('已套用篩選 中文已儲存篩選；已清除選取。');
+  await expect(controls.getByRole('button',{name:'Create list',exact:true})).toHaveCount(0);
+});

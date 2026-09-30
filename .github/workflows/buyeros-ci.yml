@@ -162,10 +162,82 @@ jobs:
       - run: uv sync --frozen
         working-directory: services/api
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --reporter=line
+      - run: pnpm exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --reporter=line,junit
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/zoom.xml
+      - run: python scripts/check-required-tests.py --junit test-results/zoom.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: buyeros-api-actual-zoom
           path: test-results/
-          if-no-files-found: warn
+          if-no-files-found: error
+
+  browser-continuity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # The reviewed helper requires its own named, loopback-only Postgres
+    # container. Do not point its destructive fixture at a shared database.
+    env:
+      BUYEROS_STRICT_INTEGRATION: '1'
+      PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/t30-browser.xml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install uv==0.11.27
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --frozen
+        working-directory: services/api
+      - run: uv sync --frozen
+        working-directory: services/worker
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test --config playwright.mvp-research.config.ts tests/e2e/mvp-a-research.spec.ts --reporter=line,junit
+      - run: python scripts/check-required-tests.py --junit test-results/t30-browser.xml
+      - run: |
+          mkdir -p artifacts/ci-t30/continuity
+          cp -r test-results/. artifacts/ci-t30/continuity/
+      - run: pnpm exec playwright test --config playwright.workbench.config.ts tests/e2e/daily-workbench.spec.ts --reporter=line,junit
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/workbench.xml
+      - run: |
+          python scripts/check-required-tests.py --junit test-results/workbench.xml
+          mkdir -p artifacts/ci-t30/workbench
+          cp -r test-results/. artifacts/ci-t30/workbench/
+      - run: pnpm exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --workers=1 --reporter=line,junit
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/buyers.xml
+      - run: |
+          python scripts/check-required-tests.py --junit test-results/buyers.xml
+          mkdir -p artifacts/ci-t30/buyers
+          cp -r test-results/. artifacts/ci-t30/buyers/
+      - run: pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --reporter=line,junit
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/buyer-management.xml
+      - run: |
+          python scripts/check-required-tests.py --junit test-results/buyer-management.xml
+          mkdir -p artifacts/ci-t30/buyer-management
+          cp -r test-results/. artifacts/ci-t30/buyer-management/
+      - run: pnpm exec playwright test --config playwright.mvp.config.ts tests/e2e/mvp-a-journey.spec.ts --reporter=line,junit
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/mvp-acceptance.xml
+      - run: |
+          python scripts/check-required-tests.py --junit test-results/mvp-acceptance.xml
+          mkdir -p artifacts/ci-t30/mvp-acceptance
+          cp -r test-results/. artifacts/ci-t30/mvp-acceptance/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-bilingual-continuity-fixture
+          path: |
+            test-results/
+            artifacts/ci-t30/
+          if-no-files-found: error

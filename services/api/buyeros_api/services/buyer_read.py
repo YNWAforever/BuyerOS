@@ -20,6 +20,33 @@ async def _latest(session, model, workspace_id, buyer_id):
     ).scalars().first()
 
 
+async def contact_detail(session, *, workspace_id, buyer) -> list[dict]:
+    """Purpose-gated retained values for authorized detail readers, never list fixtures."""
+    from datetime import datetime, timezone
+    from ..db.runs import ContactPoint
+    from .policy_service import evaluate_current_policy
+
+    now = datetime.now(timezone.utc)
+    rows = (await session.execute(select(ContactPoint).where(
+        ContactPoint.workspace_id == workspace_id, ContactPoint.company_id == buyer.company_id,
+        ContactPoint.quarantined.is_(False), ContactPoint.retention_expires_at > now,
+    ).order_by(ContactPoint.id).limit(100))).scalars().all()
+    result = []
+    for contact in rows:
+        gate = await evaluate_current_policy(session, {"workspace_id": workspace_id,
+            "project_id": buyer.project_id, "company_id": buyer.company_id,
+            "contact_point_id": contact.id}, "contact_research", now)
+        if not gate["allowed"]:
+            continue
+        item = {"id": str(contact.id), "company_id": str(contact.company_id), "type": contact.type,
+            "value": contact.normalized_value, "validity": contact.validity, "version": contact.version,
+            "retention_until": contact.retention_expires_at.isoformat(), "access_state": "visible"}
+        if contact.checked_at:
+            item["checked_at"] = contact.checked_at.isoformat()
+        result.append(item)
+    return result
+
+
 async def _fit_freshness(session, *, workspace_id, fits, buyers_by_id) -> dict:
     """Evaluate cited source state in one tenant-scoped query per buyer page."""
     ids = set()

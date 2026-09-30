@@ -3,6 +3,10 @@ import psycopg
 import pytest
 from alembic import command
 from alembic.config import Config
+from alembic.migration import MigrationContext
+from alembic.operations import Operations
+from alembic.script import ScriptDirectory
+from sqlalchemy import create_engine
 
 from buyeros_api.settings import get_settings
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
@@ -50,16 +54,33 @@ def test_0028_refuses_populated_approval_downgrade(quote_case, monkeypatch):
     monkeypatch.setenv("BUYEROS_DATABASE_URL", dsn)
     get_settings.cache_clear()
     # The API calls above create short-lived rate windows. Clear only those
-    # disposable counters so this rollback reaches its retained-history guard.
+    # disposable counters so this rollback reaches the contact retention guard.
     with psycopg.connect(dsn, autocommit=True) as db:
         assert db.execute("SELECT count(*) FROM api_rate_windows").fetchone()[0] > 0
         db.execute("DELETE FROM api_rate_windows")
-    with pytest.raises(RuntimeError, match="retained approval history"):
+    with pytest.raises(RuntimeError, match="contact retention dates are retained"):
         command.downgrade(_config(), "0027_draft_integrity")
+    assert _head(dsn) == HEAD
+
+    # Exercise the older guard independently: a real rollback from the current
+    # head must stop at 0032. Do not erase retention dates or bypass that guard
+    # merely to reach 0028. Its populated-history branch executes before DDL.
+    revision = ScriptDirectory.from_config(_config()).get_revision("0028_draft_approval_context")
+    engine = create_engine(dsn.replace("postgresql://", "postgresql+psycopg://", 1))
+    try:
+        with pytest.raises(RuntimeError, match="retained approval history"):
+            with engine.begin() as connection:
+                with Operations.context(MigrationContext.configure(connection)):
+                    revision.module.downgrade()
+    finally:
+        engine.dispose()
     assert _head(dsn) == HEAD
     with psycopg.connect(dsn) as db:
         assert db.execute("SELECT count(*) FROM approvals WHERE draft_id=%s",
                           (draft_id,)).fetchone()[0] == 1
+        assert db.execute("SELECT retention_expires_at IS NOT NULL FROM contact_points "
+                          "WHERE id=(SELECT recipient_contact_id FROM approvals WHERE draft_id=%s)",
+                          (draft_id,)).fetchone()[0] is True
 
 
 

@@ -31,6 +31,10 @@ const words:Record<string,string>={
   'Save sender':'儲存寄件人','Prepare grounded draft':'準備有證據草稿','Approved offer facts':'已批准的產品事實',
   'Supporting buyer evidence':'支持買家的證據','Objective':'目的','Tone':'語氣','Language':'語言',
   'Generate unaddressed draft':'產生未指定收件人的草稿','Job status':'工作狀態',
+  'Recipient (optional)':'收件人（可選）','No recipient — unaddressed draft':'不指定收件人 — 未指定收件人的草稿',
+  'Generate addressed draft':'產生已指定收件人的草稿',
+  'Recipient expired; refresh buyer details.':'收件人資料已到期；請重新整理買家詳情。',
+  'Prepare a grounded draft; delivery is disabled.':'準備有證據草稿；發送功能已停用。',
   'Refresh job':'重新整理工作','Draft list':'草稿列表','Previous page':'上一頁','Next page':'下一頁',
   'Open draft':'開啟草稿','Subject':'主旨','Body':'內容','Save revision':'儲存修訂',
   'Revision':'版本','Claims and sources':'陳述及來源','No drafts yet.':'尚未有草稿。',
@@ -61,6 +65,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   const [total,setTotal]=useState(0),[offset,setOffset]=useState(0);
   const [selectedFacts,setSelectedFacts]=useState<string[]>([]),[selectedEvidence,setSelectedEvidence]=useState<string[]>([]);
   const [objective,setObjective]=useState('Introduce the approved offer'),[tone,setTone]=useState<'professional'|'concise'|'warm'>('professional');
+  const [recipient,setRecipient]=useState('');
   const [draftKind,setDraftKind]=useState<'initial'|'follow_up'>('initial'),[parentDraftId,setParentDraftId]=useState<string|null>(null);
   const [subject,setSubject]=useState(''),[body,setBody]=useState(''),[draftLanguage,setDraftLanguage]=useState<'en'|'zh-HK'>('en');
   const [senderName,setSenderName]=useState(''),[senderRole,setSenderRole]=useState(''),[senderOrg,setSenderOrg]=useState('');
@@ -91,7 +96,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
           nextDraft?getDraft(client,session,nextDraft):Promise.resolve(null),
         ]);
         if(!active)return;
-        setProject(p);setDrafts(page.items);setTotal(page.total);setOffset(0);setContext(c);setJob(j);setDraft(d);setApprovalConfirmed(false);setStaleDiff([]);
+        setProject(p);setDrafts(page.items);setTotal(page.total);setOffset(0);setContext(c);setRecipient('');setJob(j);setDraft(d);setApprovalConfirmed(false);setStaleDiff([]);
         if(c){setSelectedFacts((c.icp?.offer_facts||[]).filter(f=>f.approved).map(f=>f.id));
           setSelectedEvidence(c.evidence.filter(eligibleEvidence).map(e=>e.id));}
         if(d){setSubject(d.subject);setBody(d.body);setDraftLanguage(d.language==='zh-HK'?'zh-HK':'en');}
@@ -118,8 +123,11 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   }
   async function startDraft(){
     if(!context||!project?.sender_identity||!context.icp||!canGenerate||busy)return;
+    if(recipient&&!context.buyer.contacts.some(contact=>contact.id===recipient&&contact.retention_until
+      &&Date.parse(contact.retention_until)>Date.now())){setError(t('Recipient expired; refresh buyer details.'));return;}
     setBusy(true);setError('');setNotice('');
     const bodyRequest={buyer_id:context.buyer.id,buyer_version:context.buyer.version,
+      recipient_contact_id:recipient||undefined,
       objective:objective.trim(),tone,language:draftLanguage,approved_offer_fact_ids:selectedFacts,
       evidence_refs:context.evidence.filter(e=>selectedEvidence.includes(e.id)).map(e=>({id:e.id,version:e.version})),
       kind:draftKind,parent_draft_id:draftKind==='follow_up'?parentDraftId||undefined:undefined,
@@ -148,7 +156,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   }
   async function prepareFollowUp(){
     if(!draft||busy)return;setBusy(true);setError('');
-    try{const loaded=await loadDraftContext(client,session,draft.buyer_id);setContext(loaded);
+    try{const loaded=await loadDraftContext(client,session,draft.buyer_id);setContext(loaded);setRecipient('');
       setSelectedFacts((loaded.icp?.offer_facts||[]).filter(f=>f.approved).map(f=>f.id));
       setSelectedEvidence(loaded.evidence.filter(eligibleEvidence).map(e=>e.id));
       setDraftKind('follow_up');setParentDraftId(draft.id);replaceQuery({buyer:draft.buyer_id});
@@ -210,8 +218,10 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   }
   const approvedFacts=useMemo(()=>context?.icp?.offer_facts.filter(f=>f.approved)||[],[context]);
   const availableEvidence=useMemo(()=>context?.evidence.filter(eligibleEvidence)||[],[context]);
+  const recipients=context?.buyer.contacts.filter(contact=>contact.access_state==='visible'&&contact.value
+    &&contact.validity==='provider_marked_valid'&&contact.checked_at&&contact.retention_until)||[];
   return <section className="panel live-draft-editor" aria-label={t('Drafts')}>
-    <h2>{t('Drafts')}</h2><p>{t('Unaddressed preparation only; delivery is disabled.')}</p>
+    <h2>{t('Drafts')}</h2><p>{t('Prepare a grounded draft; delivery is disabled.')}</p>
     {error&&<p ref={errorRef} tabIndex={-1} role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
     {!project&&<p role="status">Loading draft workspace...</p>}
     {project&&<section className="panel" aria-label={t('Sender identity')}><h3>{t('Sender identity')}</h3>
@@ -234,10 +244,14 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
       <fieldset><legend>{t('Approved offer facts')}</legend>{approvedFacts.map(f=><label key={f.id} className="live-draft-option"><input type="checkbox" checked={selectedFacts.includes(f.id)} onChange={e=>setSelectedFacts(v=>e.target.checked?[...v,f.id]:v.filter(id=>id!==f.id))}/>{f.value}</label>)}</fieldset>
       <fieldset><legend>{t('Supporting buyer evidence')}</legend>{availableEvidence.map(e=><label key={e.id} className="live-draft-option"><input type="checkbox" checked={selectedEvidence.includes(e.id)} onChange={event=>setSelectedEvidence(v=>event.target.checked?[...v,e.id]:v.filter(id=>id!==e.id))}/>{e.excerpt} · v{e.version}</label>)}</fieldset>
       <p>{draftKind==='follow_up'?`${t('Follow-up')}: ${parentDraftId}`:t('Initial')}</p>
+      <label>{t('Recipient (optional)')} <select value={recipient} onChange={event=>setRecipient(event.target.value)} disabled={busy||!canGenerate}>
+        <option value="">{t('No recipient — unaddressed draft')}</option>
+        {recipients.map(contact=><option key={contact.id} value={contact.id}>{contact.value} · v{contact.version}</option>)}
+      </select></label>
       <div className="live-draft-fields"><label>{t('Objective')} <input value={objective} maxLength={1000} onChange={e=>setObjective(e.target.value)}/></label>
         <label>{t('Tone')} <select value={tone} onChange={e=>setTone(e.target.value as typeof tone)}><option value="professional">professional</option><option value="concise">concise</option><option value="warm">warm</option></select></label>
         <label>{t('Language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
-      <button type="button" disabled={busy||!canGenerate||!project?.sender_identity||!context.icp||(draftKind==='follow_up'&&!parentDraftId)||selectedFacts.length===0||selectedEvidence.length===0||objective.trim().length<3} onClick={()=>void startDraft()}>{t('Generate unaddressed draft')}</button>
+      <button type="button" disabled={busy||!canGenerate||!project?.sender_identity||!context.icp||(recipient!==''&&!recipients.some(contact=>contact.id===recipient))||(draftKind==='follow_up'&&!parentDraftId)||selectedFacts.length===0||selectedEvidence.length===0||objective.trim().length<3} onClick={()=>void startDraft()}>{t(recipient?'Generate addressed draft':'Generate unaddressed draft')}</button>
     </section>}
     {job&&<section className="panel" role="status"><h3>{t('Job status')}</h3><p>{job.id} · {t(job.status)}</p><button type="button" disabled={busy} onClick={()=>void refreshJob()}>{t('Refresh job')}</button></section>}
     {project&&<section className="panel" aria-label={t('Draft list')}><h3>{t('Draft list')}</h3><p>{offset+1}–{Math.min(offset+8,total)} / {total}</p>

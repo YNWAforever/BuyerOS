@@ -3,7 +3,7 @@
   "plan_status": "execution_in_progress",
   "executor": "Codex GPT-6 Sol",
   "audit_baseline": "5e61f401bf1bcdf80ea1ce254dd9c62e8eedbab0",
-  "date_hk": "2026-09-27",
+  "date_hk": "2026-10-01",
   "tasks": [
     {
       "id": "T00",
@@ -1212,7 +1212,17 @@
             "unmeasured non-text controls/icons",
             "T30 complete same-dataset creation to addressed approval/export/outcome journey",
             "external provider/policy/worker/R2/pilot gates"
-          ]
+          ],
+          "hosted_ci": {
+            "run": "https://github.com/YNWAforever/BuyerOS/actions/runs/36752690146",
+            "source_sha": "479141f5f04455cdc19c786cb40a3a0fd9f4b4d2",
+            "jobs": "all five success",
+            "api": "569 passed, 0 failed/errors/skipped, 79 warnings, 119.95s",
+            "worker": "169 passed, 0 failed/errors/skipped",
+            "browser_zoom": "2 passed, 24.7s",
+            "browser_smoke": "1 passed, 22.7s",
+            "frontend": "success including generated/type/lint/framework and Vercel builds"
+          }
         }
       }
     },
@@ -1244,7 +1254,7 @@
       "command": "根目錄：pnpm exec playwright test tests/e2e/mvp-a-journey.spec.ts；執行 T00 全套 CI＋required no-skip gates；照 release.md 在明確target核對 readiness/部署SHA。此處不是一條可無條件執行的 production deploy 指令。",
       "rollback": "先關admission/dispatch，保留reconciliation；回退compatibleapp或rollforward資料，保留ledger/history。不得為回退重置DB或清queue。",
       "operations": [],
-      "status": "partial_same_dataset_offer_approval_research_to_grounded_draft_addressed_approval_and_release_gates_open",
+      "status": "implemented_full_fixture_journey_verified_release_activation_open",
       "verification": {
         "release_preparation": "RELEASE_READINESS.md, runbooks/release.md, PILOT_EXECUTION_RECORD.md and pilot/evaluation-protocol.md drafted without external action",
         "full_staff_journey": "PARTIAL: one disposable project passes UI offer edit, saved ICP v2 exact reviewer approval, browser-created bounded research, broker/worker fit, reviewer list/assignment and worker-generated grounded unaddressed draft. Offer creation and addressed exact approval/export/outcome are verified in separate fixtures; full continuity and external activation remain open",
@@ -1517,6 +1527,46 @@
             }
           },
           "current_initial_setup_state": "Four approved rows persisted and read back; the user confirmed FIMMICK and admin role visible on 2026-10-01 HK. Full staff continuity and agent-observed authenticated API trace remain unverified."
+        },
+        "ongoing_continuity_slice_20261001": {
+          "status": "current_local_gates_pass_reviewable_release_candidate_publication_pending",
+          "base_source_sha": "479141f5f04455cdc19c786cb40a3a0fd9f4b4d2",
+          "working_tree": "Authorized application/test slice under base479141f. Current required API577/worker174/rollback3, full locale/layout journeys4, workbench8, actual zoom2, pagination1, management3 and original seeded acceptance1 pass with no failures/errors/skips. Final source checkpoint/publication and hosted CI pending. No schema migration or new production deployment.",
+          "observed_red": [
+            "Addressed API admission 5 failed against current 503 boundary",
+            "Worker addressed recipient/race 4 failed against ignored context",
+            "Canonical getBuyer contacts absent 1 failed",
+            "UI-created project research 422 unsupported buyer role; display Distributor was saved instead of distributor",
+            "Actual UI recipient selector missing after same-project worker research",
+            "Worker inactive operator still materialized draft 1 failed",
+            "Contact expired after exact review still approved 201: 1 failed",
+            "zh-HK list accessible region absent: 1 failed before localization",
+            "zh-HK project selection accessible region absent: 1 failed before selector/dossier localization"
+          ],
+          "current_green": [
+            "Full final API: 577 passed, 0 failed/errors/skipped, 110 warnings, 220.26s; JUnit required gate exit0",
+            "Full final worker: 174 passed, 0 failed/errors/skipped, 4 warnings, 86.36s; JUnit required gate exit0",
+            "Rollback guards: 3 passed, 0 failed/errors/skipped, 12 warnings, 8.91s; 0032 retained contact dates and independent0028 approval history remain intact",
+            "Buyer/list regressions: 3 passed, 0 failed/skipped, 1.8m; English durable management, viewer denial, zh-HK accessible controls and feedback",
+            "Domain11/adapter74/auth8/generated1/routes78; TypeScript/lint/build exit0; final no-skip artifacts retained under artifacts/t30-tests",
+            "Full continuous UI-created project/edit/ICP approval/bounded research/review/list/assignment/grounded addressed generation/exact approval/authorized download/manual outcome/refresh: 4 passed, 0 failed/errors/skipped, 4.8m; en and zh-HK, initial1280x800 and390x844; explicit draft language verified in downloaded text; viewer export403 and approved delivery403 DELIVERY_DISABLED in each case.",
+            "Final workbench: 8 passed, 0 failed/errors/skipped, 2.8m; scope retry, partial errors, preference recovery, responsive routes and measured contrast; required JUnit gate exit0.",
+            "Final actual Chromium 200% API-backed zoom: 2 passed, 0 failed/errors/skipped, 2.1m; six routes en/zh-HK. Required JUnit retained; earlier zoom screenshots keep their original T29 source.",
+            "Final real buyer snapshot pagination/dossier: 1 passed, 0 failed/errors/skipped, 2.3m.",
+            "Final durable list/preset/note/owner/review, viewer denial and localized list feedback: 3 passed, 0 failed/errors/skipped, 2.0m; required JUnit retained.",
+            "Final TypeScript and lint exit0 after the guarded per-case workbench fixture hook.",
+            "Original named mvp-a-journey.spec.ts acceptance: 1 passed, 0 failed/errors/skipped, 2.5m; seeded addressed approval/export/outcome regression, separate from four UI-created continuous journeys."
+          ],
+          "new_source_scope": "Stored retained recipient/purpose/suppression binding for zero-cost templates; worker current recipient/policy/member recheck; eligible contact detail on existing getBuyer; raw fit hash projection; wizard canonical buyer type roundtrip; synchronous approval recipient expiry; continuous UI-created project, edits, approvals, real fixture broker/worker research and generated addressed draft/export/outcome test.",
+          "fixture_boundary": "Fresh owned loopback PostgreSQL16 and Valkey8; fake OIDC/search. Guarded helper supplies only fictional policy/budget prerequisites and existing valid fictional contact input to a UI-created project. Independent cases initialize only their named fake actors rate counters before research/login; production limiter and all limits within each case remain active. No project/buyer/ICP/review/draft/approval/outcome seed in this helper; no live lookup/provider verification.",
+          "remaining": "Publish reviewed release candidate and verify hosted CI. External assistive/non-text accessibility, restore journal custody, authenticated deployed full journey, continuous worker/Valkey/R2, named policy/provider and exact pilot activation remain open.",
+          "diagnostic_failures": [
+            "Final API preceding repair: 576 passed/1 failed/0 errors/skips; valid retention caused0032 rollback guard to fire before0028. Fixed test to assert both without deleting dates.",
+            "First bilingual fixture repeat: 1 passed/1 failed at duplicate known contact input for shared canonical company; fixture now reuses and verifies its unchanged valid input.",
+            "Initial bilingual test construction had incomplete labels/expectation table and was repaired; those attempts are not product defect RED evidence.",
+            "Initial four-case continuity matrix: 2 passed/2 failed; sanitized API capture proved429 RATE_LIMITED caused by prior independent cases reusing fictional actors. Reset only initial fake-actor windows once for a new unresearched UI project; final4 passed.",
+            "First final workbench rerun: 7 passed/1 failed at429 on shared fictional reviewer. Guarded counter isolation once before each independent case; final8 passed. No retry, production limit increase or suppression inside a case."
+          ]
         }
       }
     }
@@ -1550,10 +1600,10 @@
   "warnings": [
     "Supplied task tests were proposals; current execution results are in REMAINING_DEVELOPMENT_STATUS.md.",
     "Audit 338 passed/53 skipped is historical baseline evidence, not release verification.",
-    "T28 external restore replay, T29 assistive/non-text review and T30 complete offer-to-addressed-approval journey/release remain open; preserve newer source and unrelated changes."
+    "T28 external recovery journal custody/completeness, T29 assistive/non-text review and T30 live authorization/provider/release gates remain open; the complete fixture journey passes all four locale/layout cases; preserve newer source and unrelated changes."
   ],
   "reviewed_source_sha": "531774989f842ff8d65cd2fad5164f819301fe16",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "T29 remaining manual screen-reader and unmeasured non-text checks; independently T30 full same-dataset project/offer creation through research, addressed approval/export/manual outcome and refresh. Human FIMMICK/admin workspace visibility is confirmed. Provider/policy/worker/R2/pilot activation remains separately gated.",
+  "next_eligible_task": "T30 reviewed candidate publication/hosted CI, then separately approved candidate deployment verification. T29 actual manual assistive/non-text review and T28 external recovery journal custody remain open. Named policy/provider/worker/R2 and exact bounded pilot activation require the actual selected owners/configuration; delivery stays disabled.",
   "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6"
 }

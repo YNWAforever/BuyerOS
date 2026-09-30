@@ -164,7 +164,8 @@ async def current_approval_context(session, *, workspace_id, project, draft, rev
         ContactPoint.company_id == buyer.company_id,
     ))).scalar_one_or_none()
     if (contact is None or contact.quarantined or contact.validity != "provider_marked_valid"
-            or contact.type != "business_email" or not contact.normalized_value):
+            or contact.type != "business_email" or not contact.normalized_value
+            or contact.retention_expires_at is None or contact.retention_expires_at <= now):
         raise ApiError(412, "STALE_REVISION", "eligible recipient changed")
     fit = (await session.execute(select(FitAssessment).where(
         FitAssessment.workspace_id == workspace_id, FitAssessment.project_buyer_id == buyer.id,

@@ -4,6 +4,7 @@ import json
 import uuid
 
 import psycopg
+import pytest
 
 from buyeros_api.db.icp import canonical_hash
 from tests.contract_validation import assert_contract_response
@@ -69,7 +70,7 @@ def test_zero_cost_grounded_draft_is_queued_without_provider_or_budget_hold(quot
     addressed = _request(buyer_id, evidence_id)
     addressed["recipient_contact_id"] = str(uuid.uuid4())
     unavailable = api.post(path, json=addressed, headers=_h(OPERATOR, key="draft-addressed-001"))
-    assert unavailable.status_code == 503 and unavailable.json()["code"] == "PROVIDER_UNAVAILABLE"
+    assert unavailable.status_code == 412 and unavailable.json()["code"] == "STALE_REVISION"
     with psycopg.connect(dsn) as db:
         assert db.execute("SELECT count(*) FROM outbox_events WHERE event_type='draft.generate'").fetchone()[0] == 1
         assert db.execute("SELECT count(*) FROM budget_reservations WHERE workspace_id=%s", (WORKSPACE_A,)).fetchone()[0] == 0
@@ -171,3 +172,85 @@ def test_draft_list_uses_bounded_real_database_pages(quote_case):
     assert (first_page["total"], second_page["total"]) == (3, 3)
     assert (len(first_page["items"]), len(second_page["items"])) == (2, 1)
     assert {row["id"] for row in first_page["items"] + second_page["items"]} == expected
+
+
+def test_addressed_template_admission_binds_current_contact_without_paid_intent(quote_case):
+    from tests.test_draft_approval_context_db import _addressed_case
+
+    api, dsn, buyers = quote_case
+    _, contact_id = _addressed_case(api, dsn, buyers)
+    with psycopg.connect(dsn, autocommit=True) as db:
+        db.execute("UPDATE contact_points SET retention_expires_at=now()+interval '1 day' WHERE id=%s", (contact_id,))
+    with psycopg.connect(dsn) as db:
+        evidence = str(db.execute("SELECT id FROM evidence WHERE company_id=%s",
+                                  (buyers[0][1],)).fetchone()[0])
+    body = {**_request(buyers[0][0], evidence), "recipient_contact_id": contact_id}
+    response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/drafts",
+                        json=body, headers=_h(OPERATOR, key="addressed-template-current"))
+    assert response.status_code == 202, response.text
+    assert_contract_response("AsyncJobResponse", response.json())
+    with psycopg.connect(dsn) as db:
+        command = db.execute("SELECT command FROM async_jobs WHERE id=%s",
+                              (response.json()["data"]["id"],)).fetchone()[0]
+        assert command["recipient_context"]["contact"]["id"] == contact_id
+        assert command["recipient_context"]["contact"]["version"] == 1
+        assert db.execute("SELECT count(*) FROM provider_operations").fetchone()[0] == 0
+        assert db.execute("SELECT count(*) FROM budget_reservations").fetchone()[0] == 0
+
+
+def test_buyer_contact_detail_requires_current_read_purpose_and_retention(quote_case):
+    from tests.test_draft_approval_context_db import _addressed_case
+
+    api, dsn, buyers = quote_case
+    _, contact_id = _addressed_case(api, dsn, buyers)
+    with psycopg.connect(dsn, autocommit=True) as db:
+        db.execute("UPDATE contact_points SET retention_expires_at=now()+interval '1 day' WHERE id=%s", (contact_id,))
+    path = f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyers[0][0]}"
+    response = api.get(path, headers=_h(OPERATOR))
+    assert response.status_code == 200, response.text
+    assert response.json()["data"]["contacts"], "eligible stored contact is absent from the canonical buyer read"
+    assert_contract_response("BuyerResponse", response.json())
+    assert response.json()["data"]["contacts"][0]["id"] == contact_id
+    assert response.json()["data"]["contacts"][0]["value"] == "recipient@fixture.example"
+    with psycopg.connect(dsn, autocommit=True) as db:
+        db.execute("UPDATE memberships SET roles=ARRAY['viewer'] WHERE workspace_id=%s AND user_id=%s",
+                   (WORKSPACE_A, uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)))
+    assert api.get(path, headers=_h(OPERATOR)).json()["data"]["contacts"] == []
+    with psycopg.connect(dsn, autocommit=True) as db:
+        db.execute("UPDATE memberships SET roles=ARRAY['operator'] WHERE workspace_id=%s AND user_id=%s",
+                   (WORKSPACE_A, uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)))
+    with psycopg.connect(dsn, autocommit=True) as db:
+        db.execute("UPDATE policy_decisions SET status='blocked' WHERE purpose='contact_research'")
+    assert api.get(path, headers=_h(OPERATOR)).json()["data"]["contacts"] == []
+    with psycopg.connect(dsn, autocommit=True) as db:
+        db.execute("UPDATE policy_decisions SET status='permitted' WHERE purpose='contact_research'")
+        db.execute("UPDATE contact_points SET retention_expires_at=now()-interval '1 second' WHERE id=%s", (contact_id,))
+    assert api.get(path, headers=_h(OPERATOR)).json()["data"]["contacts"] == []
+
+
+@pytest.mark.parametrize("changed", ["catch_all", "quarantined", "wrong_company", "expired", "policy_blocked"])
+def test_addressed_admission_rejects_ineligible_contact_or_policy(quote_case, changed):
+    from tests.test_draft_approval_context_db import _addressed_case
+
+    api, dsn, buyers = quote_case
+    _, contact_id = _addressed_case(api, dsn, buyers)
+    with psycopg.connect(dsn, autocommit=True) as db:
+        db.execute("UPDATE contact_points SET retention_expires_at=now()+interval '1 day' WHERE id=%s", (contact_id,))
+        evidence = str(db.execute("SELECT id FROM evidence WHERE company_id=%s",
+                                  (buyers[0][1],)).fetchone()[0])
+        if changed == "catch_all":
+            db.execute("UPDATE contact_points SET validity='catch_all' WHERE id=%s", (contact_id,))
+        elif changed == "quarantined":
+            db.execute("UPDATE contact_points SET quarantined=true WHERE id=%s", (contact_id,))
+        elif changed == "wrong_company":
+            db.execute("UPDATE contact_points SET company_id=%s WHERE id=%s", (buyers[1][1], contact_id))
+        elif changed == "expired":
+            db.execute("UPDATE contact_points SET retention_expires_at=now()-interval '1 second' WHERE id=%s", (contact_id,))
+        else:
+            db.execute("UPDATE policy_decisions SET status='blocked' WHERE purpose='outreach'")
+    response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/drafts",
+        json={**_request(buyers[0][0], evidence), "recipient_contact_id": contact_id},
+        headers=_h(OPERATOR, key=f"addressed-denied-{changed}"))
+    assert response.status_code == (403 if changed == "policy_blocked" else 412), response.text
+    with psycopg.connect(dsn) as db:
+        assert db.execute("SELECT count(*) FROM async_jobs WHERE operation='generateDraft'").fetchone()[0] == 0

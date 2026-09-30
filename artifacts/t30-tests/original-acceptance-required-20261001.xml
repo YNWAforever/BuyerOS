@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="147.30633500000002">
+<testsuite name="mvp-a-journey.spec.ts" timestamp="2026-09-30T20:15:24.897Z" hostname="" tests="1" failures="0" skipped="0" time="11.635" errors="0">
+<testcase name="T30 partial fixture walkthrough: review, list, assign, exact approval, export and manual outcome" classname="mvp-a-journey.spec.ts" time="11.635">
+</testcase>
+</testsuite>
+</testsuites>

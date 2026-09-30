@@ -1,0 +1,307 @@
+{
+  "date_hk": "2026-10-01",
+  "base_source_sha": "479141f5f04455cdc19c786cb40a3a0fd9f4b4d2",
+  "reviewed_source_sha": null,
+  "publication": "pending",
+  "hosted_ci": "pending",
+  "local_required_suites": [
+    {
+      "path": "artifacts/t30-tests/api-actual-zoom-required-20261001.xml",
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "6518f19b060014719f1f8b3795d71a7439d7c8963b7a01c5ffc5dbed29d831d9"
+    },
+    {
+      "path": "artifacts/t30-tests/api-required-20261001.xml",
+      "passed": 577,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "f7f9756d4df3c0a6c2157b4d95387d1f53f44d96d5f649f9f4036ffa97fef5fb"
+    },
+    {
+      "path": "artifacts/t30-tests/bilingual-continuity-desktop-20261001.xml",
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "94fc36d7ea3e7fec7e63ac09dfba13cf5bebb70e762351a2b3a8002eed8b36af"
+    },
+    {
+      "path": "artifacts/t30-tests/buyer-management-required-20261001.xml",
+      "passed": 3,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "7346af435938dab271fade3c474b98333702105e90199805940e44325722f762"
+    },
+    {
+      "path": "artifacts/t30-tests/buyer-pagination-required-20261001.xml",
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "bbda272301d0bfedb9038b14651c9361a8d8313d5678741881849dd6e1a17c02"
+    },
+    {
+      "path": "artifacts/t30-tests/continuity-all-layouts-20261001.xml",
+      "passed": 4,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "0264bb5fb84fffe5daf15ee3a6a906a4f8355e8ae1ab8f7982ebf2409694b193"
+    },
+    {
+      "path": "artifacts/t30-tests/original-acceptance-required-20261001.xml",
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "a34ccd01ab187db46984fc77f6910f6021d9881cdf097abe0d24f6e68bab42f3"
+    },
+    {
+      "path": "artifacts/t30-tests/rollback-guards-20261001.xml",
+      "passed": 3,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "651687d1b44ee49669e9a80aeb7d5106b420dbc04b4c9604e1f81d405f841e37"
+    },
+    {
+      "path": "artifacts/t30-tests/workbench-required-20261001.xml",
+      "passed": 8,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "4d27328bfebb0dd7d54603168c8434ce2a8398501d81dd6e0a2529594423bcd0"
+    },
+    {
+      "path": "artifacts/t30-tests/worker-required-20261001.xml",
+      "passed": 174,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "847a0744aacafd625c87b5470590dad9550d2265adce06bf561981a34694840e"
+    }
+  ],
+  "tested_code_files": [
+    {
+      "path": ".github/workflows/buyeros-ci.yml",
+      "sha256": "3c7b85dcea184f1710f3a5e52e5c962db7654dca55506af735727e55390da3d3",
+      "git_blob_oid": "e52b0ca966215619031da2128a11243928837d5b"
+    },
+    {
+      "path": "features/live/buyer-detail.tsx",
+      "sha256": "e3b9013ea1ff924624c0e8aab0d43a6a1f276fe9bc6b3e5d2d52366f8e7a0191",
+      "git_blob_oid": "54d4c24ccbf20f6aeecf58fd0dd8cb5e8612aeb9"
+    },
+    {
+      "path": "features/live/buyer-management-controls.tsx",
+      "sha256": "14c9a6db86e29dcc92eaadf2b0bb33ab3d7a9fabaeaaff7e5ef2c7d9a32be677",
+      "git_blob_oid": "8785af7890b7b27c7b7e026f7dd6bb9e1cff77a1"
+    },
+    {
+      "path": "features/live/buyer-results.tsx",
+      "sha256": "9548afcb828818db77db8958dabb6ec95779f7160ad5ff8711b0e3882905c890",
+      "git_blob_oid": "e70de49352170f32ddec66ae9ab3b4180bb4d991"
+    },
+    {
+      "path": "features/live/drafts.tsx",
+      "sha256": "973c389e69c7bf69d70c7834d91153c8504dc4d62b5b2620d3d9fe2cee90e761",
+      "git_blob_oid": "12f67879f17a7f04acacdc60b3ccb8766aab559d"
+    },
+    {
+      "path": "features/live/locale.ts",
+      "sha256": "423ac757be6a1377dd8e3dc4ccf9a1c568106542168198b4ebc50e6fae47df04",
+      "git_blob_oid": "6e18cbe9557f8ac8538c7abf1086127a094ad6bf"
+    },
+    {
+      "path": "features/live/workspace-picker.tsx",
+      "sha256": "e0a42014c3964e139fe86e5bf4eea47a1c660d2f329f805d3abbe76f8b43059c",
+      "git_blob_oid": "0a48e8aa097e020ca7b3707d4e4224924c816085"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/buyers.py",
+      "sha256": "6178c899b24ca396c856bd99f32f37fbc84640e07bbf5ffe34cc9add8dbe9464",
+      "git_blob_oid": "66dad4e8e5b34fd8fac3e6a609b476d30a3b7978"
+    },
+    {
+      "path": "services/api/buyeros_api/services/approval_service.py",
+      "sha256": "304669a71c8522c5d2cbc775b665005ea3541fd8cd2b588c6a9939e0def25ab8",
+      "git_blob_oid": "6566d9758c1dfe4724f2a85d79947f45ef849ff2"
+    },
+    {
+      "path": "services/api/buyeros_api/services/buyer_read.py",
+      "sha256": "c2f41b3ef26514d78322906dfe344a0e3a912ba456dabd0ffb68b621b3d2563e",
+      "git_blob_oid": "01c988677f2cd066c1683ce7335ce93d3ef4914e"
+    },
+    {
+      "path": "services/api/buyeros_api/services/buyer_view.py",
+      "sha256": "f93954468b65981addc2821360407fc9dc531ed29ba1927d0cbe1c9d3ac5d477",
+      "git_blob_oid": "85853fca1945325579305e4910ec612f2c3f18e5"
+    },
+    {
+      "path": "services/api/buyeros_api/services/draft_service.py",
+      "sha256": "28a1a4ee8a143f860d38c049b17b09c858b77c252c0d90704c31efc03f56aaa9",
+      "git_blob_oid": "fe962c5a140324385982f3ddade3aa9a1681834e"
+    },
+    {
+      "path": "services/api/tests/test_draft_approval_context_db.py",
+      "sha256": "7a565015f900969a49411e39da7dbe881e5a05b5e6169ffe5a165800d6723687",
+      "git_blob_oid": "cdb2886814b8dce97bd7b8ed7501ca1cfb001d4e"
+    },
+    {
+      "path": "services/api/tests/test_draft_approval_migration.py",
+      "sha256": "590586f072916b16a5be2dbffb2f908c6bb4064e1cfd33e401aa1e6e65fe9c01",
+      "git_blob_oid": "c3ea5f0df223bdd415957517c5310dfd04851130"
+    },
+    {
+      "path": "services/api/tests/test_draft_persistence_db.py",
+      "sha256": "f5635d301d36eba90414afbfc4da212b4575691af251028410caed993d5c733b",
+      "git_blob_oid": "2d8d2538202ada71bf171e861ee9c65f340f4757"
+    },
+    {
+      "path": "services/api/tools/serve_e2e_fixture.py",
+      "sha256": "af790657fcb7fe3a2be8a3cedfa033864a5927d338bd10da825e3839f791eb3d",
+      "git_blob_oid": "b324c59e0a597192b0d79cf2efb1c63c536f8cee"
+    },
+    {
+      "path": "services/live/profile.ts",
+      "sha256": "38c81d72118c8dcb635f2900e35de089eac4f26ddcbde3f85d8af86361e82f9e",
+      "git_blob_oid": "17044d44f5e7a61ce4555a761227aa209df3a922"
+    },
+    {
+      "path": "services/worker/buyeros_worker/handlers/draft_generate.py",
+      "sha256": "8ec839f4cb024d828638c92d57d3c9c7fdb083b77621923cee406e798c4b035e",
+      "git_blob_oid": "2f66886df5f7fd6c186102bfb16be01eadee910f"
+    },
+    {
+      "path": "services/worker/tests/fixtures/prepare_browser_project.py",
+      "sha256": "1a7b43f6fec27b27f3abe89a47908a71aeca523da6da899c3f4bd62fe9790457",
+      "git_blob_oid": "0fe659fb03b6b98cf5e07f0a9332e4ad8327d07f"
+    },
+    {
+      "path": "services/worker/tests/test_grounded_drafts.py",
+      "sha256": "d3af10ae1ae1a6ab8708f131ea4c8a9038934c046005edb3e92a9981cac39686",
+      "git_blob_oid": "f0cfd25eb161147ab2fd9234b9decbcf5a1bde3c"
+    },
+    {
+      "path": "tests/e2e/buyer-management.spec.ts",
+      "sha256": "72c8a80e3ded1c08975a95f454e3c9ef377220b04870bcd35bd488771e72885c",
+      "git_blob_oid": "782fa74c25cb8b46f13c880e1c64ae7a051f2303"
+    },
+    {
+      "path": "tests/e2e/daily-workbench.spec.ts",
+      "sha256": "12261cbb5da2e28abc1b8e12b61ab6cbe58943ad60e2cd037a17a49da5c774ed",
+      "git_blob_oid": "9765b214b38c7b80276c993c0f6650f58969b596"
+    },
+    {
+      "path": "tests/e2e/fixtures/workbench-auth.ts",
+      "sha256": "07403ee139e6f13642f1114713297bd11046de5795b5170b2ccc7287e15b298b",
+      "git_blob_oid": "eb970ec9add9d5a47b1e53a122a2ed3cd7443e03"
+    },
+    {
+      "path": "tests/e2e/mvp-a-research.spec.ts",
+      "sha256": "0dcada64f5d11cf06b092b5c428870f90e878dd3cfd1a599dfb06bea301f9cd3",
+      "git_blob_oid": "194007930eea6c051a76e36881416f4d540a7742"
+    },
+    {
+      "path": "tests/live-adapter-checks.mjs",
+      "sha256": "5515e9d7e28e76f47bc91cc058fe43de6d6a158ab621c5739625fd633e350fa3",
+      "git_blob_oid": "5ed03e1425720813f58fde5128cd6a2f3f4b395d"
+    }
+  ],
+  "static_checks": {
+    "domain": 11,
+    "live_adapters": 74,
+    "oidc_total_including_crypto": 8,
+    "generated_types": 1,
+    "service_bindings": 5,
+    "operation_routes": 78,
+    "typescript_exit": 0,
+    "lint_exit": 0,
+    "vinext_build_exit": 0,
+    "diff_check_exit": 0
+  },
+  "migration": {
+    "head": "0033_api_rate_windows",
+    "new_revisions": [],
+    "production_changes": false,
+    "rollback_guard_passed": 3,
+    "rollback_boundary": "Real chain refuses retained0032 contact expiry; independent0028 guard refuses approval history; sole head/history preserved."
+  },
+  "fixture_boundary": "Owned loopback PostgreSQL16 and Valkey8 with actual dispatcher/Celery; OIDC/search/contact input fictional. Only initial named actor counters isolated before independent cases; within-case limiter active. No live lookup/model/search/delivery invoked.",
+  "coverage": {
+    "original_operations": 70,
+    "current_operations": 78,
+    "missing_original": [],
+    "extensions": [
+      "assignBuyerOwners",
+      "cancelAsyncJob",
+      "exportBulkFailures",
+      "listAsyncJobs",
+      "listMemberships",
+      "listOfferDocuments",
+      "retryFailedAsyncJob",
+      "updateMembership"
+    ],
+    "deployed_operation_dispositions": "all unverified"
+  },
+  "production": {
+    "observed_at_utc": "2026-09-30T20:14:58.3380363Z",
+    "id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+    "url": "buyer-q328zmlkl-ynwaforevers-projects.vercel.app",
+    "target": "production",
+    "state": "READY",
+    "source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+    "project_id": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw",
+    "production_alias": "https://buyer-os-nu.vercel.app",
+    "method": "Read-only Vercel deployment metadata for the production alias"
+  },
+  "screenshots": [
+    {
+      "path": "artifacts/t30-screenshots/t30-continuity-en-desktop-approved-export-fixture.png",
+      "sha256": "227a1208572c419721536663020deb15a3a94d01580354fd02108b8a2038a438",
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-continuity-en-desktop-outcome-fixture.png",
+      "sha256": "7905469486d650921f5e08c36bb14523acbb1bdfc1cb61a0be58c890d0b99465",
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-continuity-en-mobile-approved-export-fixture.png",
+      "sha256": "302a241c58c3f171df4a63734c7eba69227eb293f2f36bf9cde7cff78344e874",
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-continuity-en-mobile-outcome-fixture.png",
+      "sha256": "b076660567bbad488152586f508ba75ed816fb41b42d3adb32b045a1443a4806",
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-continuity-zh-HK-desktop-approved-export-fixture.png",
+      "sha256": "5e51145b51cabe09984fe75415b54bf12cc49ce2020189d5c4b2d5f0c4c85515",
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-continuity-zh-HK-desktop-outcome-fixture.png",
+      "sha256": "d978ab3e7ca8acd5935564a17b51ee7e571ac5194e19cca1f1cbe21262383fd0",
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-continuity-zh-HK-mobile-approved-export-fixture.png",
+      "sha256": "6071e137c81a23e37e98c36b72fc398df03f68a542c7308ad72c2bc85ee084c1",
+      "visually_inspected": true
+    },
+    {
+      "path": "artifacts/t30-screenshots/t30-continuity-zh-HK-mobile-outcome-fixture.png",
+      "sha256": "ee6bfdeddde6dc21814f3ca5639456afdbb10e4fd8fbffe037804c12fb95e586",
+      "visually_inspected": true
+    }
+  ],
+  "activation": "No new production migration/mutation/deployment/provider/delivery activation; user confirmed FIMMICK/admin visibility.",
+  "source_hash_method": "SHA256 of tested Windows working-tree bytes plus Git-normalized blob OID, bound to reviewed commit after publication."
+}

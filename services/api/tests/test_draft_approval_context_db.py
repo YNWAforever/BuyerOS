@@ -56,8 +56,8 @@ def _addressed_case(api, dsn, buyers):
                        (uuid.uuid4(), WORKSPACE_A, PROJECT, WORKSPACE_A, purpose,
                         uuid.uuid5(uuid.NAMESPACE_URL, REVIEWER)))
         db.execute("INSERT INTO contact_points(id,workspace_id,company_id,type,normalized_value,"
-                   "validity,checked_at,quarantined) VALUES (%s,%s,%s,'business_email',"
-                   "'recipient@fixture.example','provider_marked_valid',now(),false)",
+                   "validity,checked_at,quarantined,retention_expires_at) VALUES (%s,%s,%s,'business_email',"
+                   "'recipient@fixture.example','provider_marked_valid',now(),false,now()+interval '1 day')",
                    (contact_id, WORKSPACE_A, company_id))
         content = {
             "subject": "Introduction: Industrial sensors",
@@ -165,7 +165,7 @@ def test_forged_hash_and_contact_change_fail_current_context(quote_case):
 
 
 @pytest.mark.parametrize("changed_field", [
-    "recipient_value", "contact_version", "sender", "icp", "evidence",
+    "recipient_value", "contact_version", "recipient_expired", "sender", "icp", "evidence",
     "policy", "suppression", "review",
 ])
 def test_material_change_since_review_blocks_approval(quote_case, changed_field):
@@ -180,6 +180,8 @@ def test_material_change_since_review_blocks_approval(quote_case, changed_field)
                        "version=version+1 WHERE id=%s", (contact_id,))
         elif changed_field == "contact_version":
             db.execute("UPDATE contact_points SET version=version+1 WHERE id=%s", (contact_id,))
+        elif changed_field == "recipient_expired":
+            db.execute("UPDATE contact_points SET retention_expires_at=now()-interval '1 second' WHERE id=%s", (contact_id,))
         elif changed_field == "sender":
             db.execute("UPDATE projects SET active_sender_identity_version_id=NULL WHERE id=%s", (PROJECT,))
         elif changed_field == "icp":

@@ -1,0 +1,11 @@
+{
+  "observed_at_utc": "2026-09-30T20:14:58.3380363Z",
+  "id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+  "url": "buyer-q328zmlkl-ynwaforevers-projects.vercel.app",
+  "target": "production",
+  "state": "READY",
+  "source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+  "project_id": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw",
+  "production_alias": "https://buyer-os-nu.vercel.app",
+  "method": "Read-only Vercel deployment metadata for the production alias"
+}
