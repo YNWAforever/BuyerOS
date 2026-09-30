@@ -1083,13 +1083,13 @@
         "performance_pre_rate_pool_fix": "10k buyers/100 workspaces; ten distinct fixture staff P95 274.030ms, 11 SQL/request; buyer PATCH P95 62.865ms, run admission P95 88.219ms; 100-workspace broker publish P95 4.039s. All in-process/disposable, no provider/deployed proof.",
         "rate_pool_regression": "red HTTP 500 SQLAlchemy TimeoutError with one tenant slot; green 2 passed, 0 failed/skipped, 8 warnings in 46.56s on disposable PostgreSQL; strict full API rerun pending after Docker setup stalled",
         "screenshots": "artifacts/t29-screenshots/*-post-retry.png contains four en/zh-HK 390/1440 fixture screenshots; regenerated zh-results-usage-390-post-extraction.png visually inspected after the 17-test suite with SHA256 E3E8B8BEB965BEB206DE02482D60DD511A05FF1FFCAAB3464138F2845956BF28",
-        "remaining": "Actual browser 200% zoom, screen reader and non-text contrast of other controls/icons remain unverified; T30 addressed exact approval continuity and current strict API/worker/API-backed browser gates after Docker recovery; external activation. T29 demo route/table code is locally implemented but these acceptance conditions remain open.",
+        "remaining": "Actual Chromium tab zoom is now verified for the disposable API-backed six-route workbench in en/zh-HK. Screen reader and unmeasured non-text controls/icons remain open; T30 complete same-dataset addressed journey and external activation remain open.",
         "performance_post_rate_pool_fix": "10k buyers/100 workspaces; sequential read P95 39.377ms, ten distinct fixture staff P95 244.895ms, 11 SQL/request, 10 DB connections; buyer PATCH P95 60.865ms, run admission P95 168.524ms, 100-workspace broker publish P95 2.280s. API 1/1, dispatcher 1/1, mutation 1/1; in-process/disposable only.",
         "accessibility": "measured browser-computed text contrast for visible Overview, Results and Operations text in en/zh-HK; new form-control boundary/fill regression red 16 Results controls at 1.0-1.27:1, green focused 1/1 in 1.9m and full workbench 8/8 in 2.7m. Actual zoom, screen reader and unmeasured non-text elements pending",
         "scope_list_timeout": "red permanent spinner on held first GET; bounded timeout/retry green focused 1 passed in 3.1m and included in full 7/7 suite",
         "strict_api": "567 passed, 0 failed/errors/skipped, 109 warnings in 310.90s; required JUnit gate 567/0/0/0 after admission-pool fix",
         "strict_worker": "168 passed, 0 failed/errors/skipped, 4 warnings in 41.33s; required JUnit gate 168/0/0/0",
-        "actual_zoom": "2026-09-30: isolated Chromium extension tabs.setZoom/getZoom 2.0; observed 1440->720 CSS px and DPR 1->2. Final pnpm.cmd exec playwright test --config playwright.zoom.config.ts tests/e2e/actual-browser-zoom.spec.ts --reporter=line passed 2/2, 0 failed/skipped in 22.9s across six fictional demo routes in en/zh-HK; element bounds, text clipping and document overflow asserted. Screen reader, remaining non-text contrast and API-backed actual zoom unverified. Misleading CDP/Playwright zoom captures were removed; prior responsive screenshots retained.",
+        "actual_zoom": "2026-09-30: isolated Chromium extension tabs.setZoom/getZoom 2.0; observed 1440->720 CSS px and DPR 1->2. Final pnpm.cmd exec playwright test --config playwright.zoom.config.ts tests/e2e/actual-browser-zoom.spec.ts --reporter=line passed 2/2, 0 failed/skipped in 22.9s across six fictional demo routes in en/zh-HK; element bounds, text clipping and document overflow asserted. Screen reader, remaining non-text contrast and API-backed actual zoom unverified. Misleading CDP/Playwright zoom captures were removed; prior responsive screenshots retained. API-backed actual tab zoom/localized buyer controls subsequently passed2/2 on2026-10-01 HK; see api_actual_zoom_localization.",
         "navigation_extraction": "Demo sidebar and top-bar shell moved into features/workspace/navigation.tsx and shell.tsx with parent-owned route/usage/locale callbacks preserved; focused sidebar Playwright 1/1 in 2.3m, final full demo responsive/accessibility 7/7 in 4.1m; pnpm lint, tsc --noEmit and Vinext production build passed. Demo fixtures, not live identity/provider or actual 200% zoom.",
         "modal_extraction": "features/workspace/modals.tsx owns fictional source and connection requirements dialogs with parent-owned open state; focused browser 1/1 in 2.1m, full demo responsive 8/8 in 3.1m; full lint, tsc --noEmit and Vinext build pass. Route view/general action modal extraction remains open.",
         "route_heading_extraction": "features/workspace/route-view.tsx owns demo project strip, localized page heading and sample/new-search actions; parent still owns route and modal state. Focused browser 1/1 in 2.8m; final full demo suite 9/9 in 3.4m; full lint, tsc --noEmit and Vinext build passed. Route bodies remain in parent.",
@@ -1104,7 +1104,116 @@
         "buyer_table_extraction": "Shared fictional buyer table moved to features/workspace/buyer-table.tsx with typed presentation props; DemoWorkspace retains filter, selection, pagination, export, list mutation and buyer navigation state. New desktop real-page regression baseline 1/1 in 6.3s and post-extraction focused 2/2 in 13.2s. Initial regression failed after a full page reload discarded expected session-only list state; corrected to in-app navigation. Mobile screenshot exposed a sidebar sheet remaining open after route selection; added hidden-sheet assertion, observed red 1/1, then closed mobile sheet on navigation in navigation.tsx and observed green 1/1. Strengthened 390px test saves a page-two buyer absent from the seed list, confirms list grows 3->4, and passed focused 1/1 in 8.4s. Final direct Vinext responsive/accessibility suite 18/18, 0 failed/skipped in 1.7m. Final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, node scripts/generate-api-types.mjs --check, services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; build retains nonfatal >500 kB chunk advisory. Visually inspected en buyer page-two 1280 screenshot SHA256 0C51B0EDBB6762344C6CF86DB267DCDB2C56AAEA49242BAAC631A43013B49634 and en saved-list 390 screenshot SHA256 C716797B484F3FE64D7FB9BA8892D3D9BD7EA90F4910222E7F7574FED8A98E96. No schema/provider/delivery change; current strict DB gate still blocked by local Docker startup.",
         "full_buyer_route_extraction": "DemoFullBuyerView moved fictional full-buyer route wrapper and missing-record recovery to features/workspace/route-view.tsx; parent retains route/data/action/source/update callbacks and shared BuyerDetail drawer. Baseline new full-dossier regression red 1/1 because hidden Full-page view was assumed as return control; revised to require a visible Return to buyers action, observed red 1/1, then green 1/1 in 5.2s after adding accessible return. zh-HK 390px dossier passed 1/1; added untranslated note-placeholder assertion red 1/1, localized it in BuyerDetail/locales and focused green 2/2 in 8.8s. Final direct Vinext responsive/accessibility suite 20/20, 0 failed/skipped in 1.5m. Final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, node scripts/generate-api-types.mjs --check and services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; build retains nonfatal >500 kB chunk advisory. Visually inspected zh-buyer-full-390-post-extraction.png SHA256 9D93F87A9FFD949527022B1375ADF9CE7369518FFD06B83C5476E78C36A3656D. No schema/provider/delivery change.",
         "nontext_buyer_controls": "New browser-computed contrast regression for visible demo buyer search and desktop filter boundaries in en/zh-HK at 390/1280 CSS px: red 1/1, search border rgb(224,229,238) measured 1.26:1 on white; scoped CSS changed border to #6d7c8f (4.26:1 on white), focused green 1/1 in 5.6s. Final directly started Vinext responsive/accessibility suite 21/21, 0 failed/skipped in 1.6m. Final pnpm.cmd build, pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, node scripts/generate-api-types.mjs --check and services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; nonfatal >500 kB client chunk advisory remains. Final desktop/mobile screenshots visually inspected with SHA256 0C51B0EDBB6762344C6CF86DB267DCDB2C56AAEA49242BAAC631A43013B49634 and C716797B484F3FE64D7FB9BA8892D3D9BD7EA90F4910222E7F7574FED8A98E96.",
-        "release_reconciliation": "2026-09-29: 410 unstaged paths, 0 staged; current strict API blocked at disposable Docker startup, earlier 569/569 API and 169/169 worker are historical fixture runs. Desktop browser-control initialization failed under Windows ACL, but an isolated Chromium extension subsequently verified actual 200% zoom 2/2 on demo routes; screen reader remains unverified. Demo responsive/accessibility remains prior 21/21; no new browser pass claimed."
+        "release_reconciliation": "2026-09-29: 410 unstaged paths, 0 staged; current strict API blocked at disposable Docker startup, earlier 569/569 API and 169/169 worker are historical fixture runs. Desktop browser-control initialization failed under Windows ACL, but an isolated Chromium extension subsequently verified actual 200% zoom 2/2 on demo routes; screen reader remains unverified. Demo responsive/accessibility remains prior 21/21; no new browser pass claimed.",
+        "api_actual_zoom_localization": {
+          "date_hk": "2026-10-01",
+          "source_sha": "1f348666e913a275249803daab0654ac75029fcf",
+          "source_base_sha": "e5d7968a92c18cc347a72efd2d02078b64598d6d",
+          "scope": "Local Chromium 153.0.8010.12, fake OIDC reviewer, real HTTP API with restricted runtime role, owned disposable PostgreSQL; no live Auth0/provider verification",
+          "regressions": [
+            {
+              "case": "localized buyer region/heading/counter/search/pagination/selection",
+              "red": "zh-HK failed at missing localized buyer region/heading, exit1, 1 failed",
+              "green": "both locales pass actual 200% zoom with real pagination/filter/selection/reset"
+            },
+            {
+              "case": "localized queue All option",
+              "red": "zh-HK failed option count0 expected1, exit1, 1 failed",
+              "green": "localized All option included in final two-locale pass"
+            }
+          ],
+          "zoom": {
+            "method": "isolated Chromium extension tabs.setZoom/getZoom(2)",
+            "before_css_width": 1440,
+            "before_dpr": 1,
+            "after_css_width": 720,
+            "after_dpr": 2,
+            "routes_per_locale": 6,
+            "locales": [
+              "en",
+              "zh-HK"
+            ],
+            "passed": 2,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "20.7s",
+            "command": "BUYEROS_STRICT_INTEGRATION=1 BUYEROS_REUSE_TEST_SERVER=1 pnpm.cmd exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --reporter=line",
+            "measured": "page overflow, root bounds, clipped heading/paragraph text, real next/previous rows, query snapshot total, selection reset"
+          },
+          "buyer_regression": {
+            "command": "pnpm.cmd exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --reporter=line",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "15.7s"
+          },
+          "workbench": {
+            "command": "pnpm.cmd exec playwright test --config playwright.workbench.config.ts tests/e2e/daily-workbench.spec.ts --reporter=line",
+            "passed": 8,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "49.1s"
+          },
+          "responsive_demo": {
+            "command": "pnpm.cmd exec playwright test --config playwright.responsive.config.ts tests/e2e/responsive-accessibility.spec.ts --reporter=line",
+            "passed": 21,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "3.1m",
+            "scope": "fictional demo; effective viewport cases are not actual tab zoom"
+          },
+          "static_checks": {
+            "typecheck": "pnpm.cmd exec tsc --noEmit exit0",
+            "lint": "pnpm.cmd lint exit0",
+            "build": "pnpm.cmd build exit0; unchanged nonfatal >500kB chunk advisory",
+            "domain_checks": 11,
+            "live_adapter_checks": 73,
+            "oidc_auth_checks": 8,
+            "generated_types": 1,
+            "operation_routes": 78,
+            "alembic_head": "0033_api_rate_windows",
+            "staged_diff_check": "exit0 after removing new test helper trailing blank line"
+          },
+          "ci": "Separate browser-zoom job with own loopback buyeros_test_zoom database; five-job hosted gate pending push/result",
+          "capture": "Four unscrolled physical viewport PNGs at1440x900 plus two measured JSON reports. Distorted fullPage/zoomed-scroll captures were replaced; no full-page visual proof claimed.",
+          "artifacts": [
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en-buyers.png",
+              "sha256": "c8418ef912bbafb9a14555f1552852dead934ab38061ef0bdc5f164449073e7b"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en-operations.png",
+              "sha256": "7db37bcace598fa4f3913b8644d7533466bc6b7003c1f0359ef31641bb66f792"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en.json",
+              "sha256": "1bd249382507d3fa9490678f1a1fabcc21919344f6d57607631d91f32254a226"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK-buyers.png",
+              "sha256": "0694cb935b2c8134bb5ac1fac33f7d9fe6070032bedcc1e60af31f0f3364fedc"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK-operations.png",
+              "sha256": "f04e62d29f67378b9c127115271f0847ecb8c789e80ff8fa56a8ba44f43a2f93"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK.json",
+              "sha256": "53230bac7e1cdedeafe06c4125a23021236c4073502f31699b4e681914b7a123"
+            }
+          ],
+          "startup": "First Playwright-managed frontend exited ECONNRESET before tests. Same environment direct startup served HTTP200; exact failed-attempt marker cleanup removed its owned orphan container; root cause remains unproven.",
+          "migration": "none; no new revision",
+          "production_changes": "none; deployed source62d40bc unchanged",
+          "performance": "No new benchmark or field P75 claim; preceding in-process/disposable conditions remain their original scope",
+          "review": "Inline author self-review; no subagent dispatched under user constraint",
+          "remaining": [
+            "screen-reader use",
+            "unmeasured non-text controls/icons",
+            "T30 complete same-dataset creation to addressed approval/export/outcome journey",
+            "external provider/policy/worker/R2/pilot gates"
+          ]
+        }
       }
     },
     {
@@ -1392,14 +1501,22 @@
               "skipped": 0,
               "duration_ms": 3877.6165
             },
-            "staff_ui_confirmation": "pending human refresh and sign-in; not counted as an agent-verified authenticated API journey",
+            "staff_ui_confirmation": "Confirmed by the user on 2026-10-01 HK: FIMMICK and admin role are visible. This is human-reported UI access, not an agent-observed authenticated API trace or full journey.",
             "migration": "none; existing sole head0033 unchanged",
             "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
             "rollback": "No production rollback performed; failed-insert atomic rollback verified only on disposable fixture",
             "provider_delivery_activation": "none",
-            "bo_owner_approval_records_modified": false
+            "bo_owner_approval_records_modified": false,
+            "human_staff_ui_confirmation": {
+              "date_hk": "2026-10-01",
+              "source": "Direct user reply to refresh/sign-in workspace confirmation question",
+              "answer": "FIMMICK and admin role are visible",
+              "method": "human reported UI confirmation",
+              "authenticated_api_trace_observed_by_agent": false,
+              "full_staff_journey_verified": false
+            }
           },
-          "current_initial_setup_state": "One FIMMICK live workspace and exact verified-account active workspace_admin membership persisted; four approved rows read back. Authenticated staff UI/API confirmation remains pending."
+          "current_initial_setup_state": "Four approved rows persisted and read back; the user confirmed FIMMICK and admin role visible on 2026-10-01 HK. Full staff continuity and agent-observed authenticated API trace remain unverified."
         }
       }
     }
@@ -1437,6 +1554,6 @@
   ],
   "reviewed_source_sha": "531774989f842ff8d65cd2fad5164f819301fe16",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "T30: confirm the real refreshed staff UI/API loads FIMMICK and workspace_admin after the specifically approved four-row production setup. Database identity/membership/audit readback and unchanged restricted-role/RLS catalog checks passed; owner SET ROLE was denied and not bypassed. Then complete staff continuity, T29 accessibility and independent provider/policy/worker/pilot gates.",
+  "next_eligible_task": "T29 remaining manual screen-reader and unmeasured non-text checks; independently T30 full same-dataset project/offer creation through research, addressed approval/export/manual outcome and refresh. Human FIMMICK/admin workspace visibility is confirmed. Provider/policy/worker/R2/pilot activation remains separately gated.",
   "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6"
 }

@@ -266,6 +266,14 @@
     "role": "workspace_admin",
     "exact_identity_and_membership_readback": "passed",
     "execution_reference": "INITIAL_WORKSPACE_PROPOSAL.json",
-    "real_staff_api_session_verified": false
+    "real_staff_api_session_verified": false,
+    "human_staff_ui_confirmation": {
+      "date_hk": "2026-10-01",
+      "source": "Direct user reply to refresh/sign-in workspace confirmation question",
+      "answer": "FIMMICK and admin role are visible",
+      "method": "human reported UI confirmation",
+      "authenticated_api_trace_observed_by_agent": false,
+      "full_staff_journey_verified": false
+    }
   }
 }

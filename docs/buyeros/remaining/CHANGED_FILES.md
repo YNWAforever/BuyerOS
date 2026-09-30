@@ -1,6 +1,6 @@
 # BuyerOS review inventory
 
-This local T00–T30 release-candidate inventory records the pre-commit diff relative to base `f43a9d88b334c2c4029fa06fa71624ed52efe4a2`. `M` means tracked modification at that snapshot; `??` means newly created file at that snapshot. Generated fixture evidence is listed separately from deployed proof, which does not exist. The eventual PR head SHA is recorded in the PR and final handoff.
+This local T00–T30 release-candidate inventory records the pre-commit diff relative to base `f43a9d88b334c2c4029fa06fa71624ed52efe4a2`. `M` means tracked modification at that snapshot; `??` means newly created file at that snapshot. This is a historical inventory. Generated fixture evidence and subsequent deployment proof are distinguished in `../RELEASE_READINESS.md`; current source/checkpoint details appear in `../REMAINING_DEVELOPMENT_STATUS.md`.
 
 Exact working-tree paths: **410**.
 
@@ -415,4 +415,24 @@ Exact working-tree paths: **410**.
 ?? tests/live-auth-checks.mjs
 ?? tests/live-runs-checks.mjs
 ?? tests/operation-input.types.ts
+```
+
+## Subsequent T29 slice (2026-10-01 HK)
+
+Commit `1f348666e913a275249803daab0654ac75029fcf` contains these 13 paths. The following documentation checkpoint separately records the direct human FIMMICK/admin confirmation and precise verification boundaries.
+
+```text
+.github/workflows/buyeros-ci.yml
+features/live/buyer-results.tsx
+features/live/locale.ts
+playwright.live-zoom.config.ts
+tests/e2e/api-browser-zoom.spec.ts
+tests/e2e/daily-workbench.spec.ts
+tests/e2e/fixtures/workbench-auth.ts
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en.json
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en-buyers.png
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en-operations.png
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK.json
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK-buyers.png
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK-operations.png
 ```
