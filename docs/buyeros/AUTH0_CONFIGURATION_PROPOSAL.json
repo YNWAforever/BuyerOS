@@ -1,5 +1,5 @@
 {
-  "status": "explicitly_approved_applied_deployed_frontend_runtime_verification_failed",
+  "status": "explicitly_approved_applied_deployed_anonymous_runtime_and_auth0_entry_verified_staff_session_pending",
   "tenant": "dev-oaug20cdxqqgn1s8.us.auth0.com",
   "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R",
   "current_client": {
@@ -183,16 +183,56 @@
     },
     "vercel_readback": "passed",
     "production_environment_count": 9,
-    "redeployed": false
+    "redeployed": true
   },
   "deployment_verification": {
-    "deployment_id": "dpl_8euDMPQdBGKMENWNEHrEnZM4ywF5",
-    "source_sha": "0852552c47676598adea5c3478938ae3f594a5d9",
+    "deployment_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+    "source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
     "state": "READY",
-    "frontend_http_status": 500,
-    "public_config_in_rsc": true,
+    "target": "production",
+    "public_origin": "https://buyer-os-nu.vercel.app",
+    "frontend_http_status": 200,
+    "frontend_routes": [
+      "/",
+      "/app",
+      "/auth/callback"
+    ],
+    "public_config_in_authorize_request": true,
     "unauthenticated_api_status": 401,
-    "real_staff_session_verified": false
+    "unauthenticated_api_code": "UNAUTHENTICATED",
+    "acceptance": {
+      "passed": 4,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 5271.2125
+    },
+    "browser": {
+      "initial_html_status": 200,
+      "application_errors": [],
+      "universal_login_origin": "https://dev-oaug20cdxqqgn1s8.us.auth0.com",
+      "universal_login_path": "/u/login",
+      "visible_blank_email_field": true,
+      "credentials_entered": false
+    },
+    "authorize_request": {
+      "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R",
+      "audience": "https://buyer-os-nu.vercel.app/v1",
+      "redirect_uri": "https://buyer-os-nu.vercel.app/auth/callback",
+      "response_type": "code",
+      "code_challenge_method": "S256",
+      "pkce_challenge_present": true
+    },
+    "real_staff_session_verified": false,
+    "previous_failed_deployment": {
+      "deployment_id": "dpl_8euDMPQdBGKMENWNEHrEnZM4ywF5",
+      "source_sha": "0852552c47676598adea5c3478938ae3f594a5d9",
+      "state": "READY",
+      "frontend_http_status": 500,
+      "public_config_in_rsc": true,
+      "unauthenticated_api_status": 401,
+      "real_staff_session_verified": false
+    }
   },
   "source_fix_verification": {
     "source_sha": "531774989f842ff8d65cd2fad5164f819301fe16",
@@ -205,7 +245,7 @@
       "skipped": 0,
       "duration_ms": 192.785908
     },
-    "deployed": false,
+    "deployed": true,
     "real_staff_session_verified": false,
     "preview": {
       "deployment_id": "dpl_ABTjYtq5QcWqZD1vzwubehuMU2KM",
@@ -214,6 +254,9 @@
       "anonymous_api_status": 401,
       "production_auth0_config_in_preview": false
     },
-    "hosted_ci_jobs_passed": 4
+    "hosted_ci_jobs_passed": 4,
+    "production_deployment_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+    "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+    "production_environment_applied": true
   }
 }
