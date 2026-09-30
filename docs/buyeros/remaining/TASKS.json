@@ -1290,8 +1290,26 @@
           },
           "initial_membership_seeded": false,
           "proposal": "docs/buyeros/INITIAL_WORKSPACE_PROPOSAL.json",
-          "owner_identity": "pending sign-in email and verified Auth0 subject",
-          "management_lookup": "expired CLI session; no production Auth0 change"
+          "owner_identity": "Sign-in email supplied; waiting for verified immutable Auth0 subject, not guessed from email",
+          "management_lookup": "Expired CLI token; first authorization rejected as Invalid network change; fresh normal device authorization pending. No runtime config change.",
+          "prepared_transaction_fixture": {
+            "scope": "Session-local ignored administrative helper, disposable PostgreSQL, fixture identity only; no application endpoint or production mutation",
+            "source_sha256": "51f7827b778f41e1d1f676928deefcd346c9db14750278ff9d9818fb76651c84",
+            "tests_sha256": "e7afa9273a5b4a08176ee58527204b5a4efeef201d9ef5efd074cd7b17e81ebb",
+            "passed": 3,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 4,
+            "seconds": 9.54,
+            "checks": [
+              "Initial workspace_admin membership is visible through restricted API role; unrelated fixture actor sees no workspace",
+              "Retry does not duplicate or change membership/audit; conflicting existing workspace is preserved and rejected",
+              "Database failure at membership insert rolls back user/workspace/audit"
+            ],
+            "identity_verified": false,
+            "production_applied": false
+          }
         }
       }
     }

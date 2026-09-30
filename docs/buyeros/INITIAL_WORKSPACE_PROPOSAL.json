@@ -22,7 +22,8 @@
     "id": "e053f462-fb24-44c2-bb6e-1f0280d00248",
     "issuer": "https://dev-oaug20cdxqqgn1s8.us.auth0.com/",
     "subject": null,
-    "identity_status": "not_yet_matched_to_reported_login"
+    "identity_status": "not_yet_matched_to_reported_login",
+    "supplied_email_sha256": "bae7f1f4f92e9dc5bac2b79d2b17ae7bb0ce59de5040ae1fcc1c1bb13c073714"
   },
   "proposed_membership": {
     "id": "d8190b6e-c290-41d6-8dd2-3d0c90b824cc",
@@ -66,5 +67,29 @@
     "scope": "Existing listing/pagination regression against disposable PostgreSQL with fixture principal; no live staff token"
   },
   "production_changes_applied": false,
-  "management_identity_lookup": "Auth0 CLI management session expired; latest login query was not completed. Production SPA configuration was not changed."
+  "management_identity_lookup": "Supplied sign-in email received; immutable Auth0 subject still unverified. Expired management token blocked search. First fresh device authorization rejected by Auth0: Invalid network change. Normal fresh authorization is pending on a trusted stable network; no runtime Auth0 configuration changed.",
+  "proposed_audit": {
+    "id": "105006f4-3fa3-492e-961b-50e4af4a3656",
+    "action": "workspace.initialized",
+    "subject_type": "workspace",
+    "reason": "initial_workspace_owner_setup"
+  },
+  "prepared_transaction_verification": {
+    "scope": "Session-local ignored administrative helper, disposable PostgreSQL, fixture identity only; no application endpoint or production mutation",
+    "source_sha256": "51f7827b778f41e1d1f676928deefcd346c9db14750278ff9d9818fb76651c84",
+    "tests_sha256": "e7afa9273a5b4a08176ee58527204b5a4efeef201d9ef5efd074cd7b17e81ebb",
+    "passed": 3,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "warnings": 4,
+    "seconds": 9.54,
+    "checks": [
+      "Initial workspace_admin membership is visible through restricted API role; unrelated fixture actor sees no workspace",
+      "Retry does not duplicate or change membership/audit; conflicting existing workspace is preserved and rejected",
+      "Database failure at membership insert rolls back user/workspace/audit"
+    ],
+    "identity_verified": false,
+    "production_applied": false
+  }
 }
