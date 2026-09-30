@@ -128,3 +128,44 @@ jobs:
         working-directory: services/api
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm exec playwright test tests/e2e/harness.spec.ts
+
+  browser-zoom:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: buyeros
+          POSTGRES_PASSWORD: buyeros
+          POSTGRES_DB: buyeros_test_zoom
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U buyeros -d buyeros_test_zoom"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      BUYEROS_TEST_DATABASE_URL: postgresql://buyeros:buyeros@127.0.0.1:5432/buyeros_test_zoom
+      BUYEROS_STRICT_INTEGRATION: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install uv==0.11.27
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --frozen
+        working-directory: services/api
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --reporter=line
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-api-actual-zoom
+          path: test-results/
+          if-no-files-found: warn

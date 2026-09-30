@@ -1,0 +1,167 @@
+{
+  "fixture_only": true,
+  "identity": "fake OIDC reviewer",
+  "database": "disposable PostgreSQL",
+  "browser": "153.0.8010.12",
+  "locale": "en",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "before": {
+    "width": 1440,
+    "dpr": 1
+  },
+  "measurements": [
+    {
+      "route": "/app",
+      "zoom": 2,
+      "css_width": 720,
+      "dpr": 2,
+      "overflow": 0,
+      "bounds": [
+        {
+          "tag": "MAIN",
+          "left": 0,
+          "right": 720
+        },
+        {
+          "tag": "HEADER",
+          "left": 16,
+          "right": 704
+        },
+        {
+          "tag": "NAV",
+          "left": 16,
+          "right": 704
+        }
+      ],
+      "clippedText": []
+    },
+    {
+      "route": "/app/discover",
+      "zoom": 2,
+      "css_width": 720,
+      "dpr": 2,
+      "overflow": 0,
+      "bounds": [
+        {
+          "tag": "MAIN",
+          "left": 0,
+          "right": 720
+        },
+        {
+          "tag": "HEADER",
+          "left": 16,
+          "right": 704
+        },
+        {
+          "tag": "NAV",
+          "left": 16,
+          "right": 704
+        }
+      ],
+      "clippedText": []
+    },
+    {
+      "route": "/app/results",
+      "zoom": 2,
+      "css_width": 720,
+      "dpr": 2,
+      "overflow": 0,
+      "bounds": [
+        {
+          "tag": "MAIN",
+          "left": 0,
+          "right": 720
+        },
+        {
+          "tag": "HEADER",
+          "left": 16,
+          "right": 704
+        },
+        {
+          "tag": "NAV",
+          "left": 16,
+          "right": 704
+        }
+      ],
+      "clippedText": []
+    },
+    {
+      "route": "/app/outreach",
+      "zoom": 2,
+      "css_width": 720,
+      "dpr": 2,
+      "overflow": 0,
+      "bounds": [
+        {
+          "tag": "MAIN",
+          "left": 0,
+          "right": 720
+        },
+        {
+          "tag": "HEADER",
+          "left": 16,
+          "right": 704
+        },
+        {
+          "tag": "NAV",
+          "left": 16,
+          "right": 704
+        }
+      ],
+      "clippedText": []
+    },
+    {
+      "route": "/app/settings",
+      "zoom": 2,
+      "css_width": 720,
+      "dpr": 2,
+      "overflow": 0,
+      "bounds": [
+        {
+          "tag": "MAIN",
+          "left": 0,
+          "right": 720
+        },
+        {
+          "tag": "HEADER",
+          "left": 16,
+          "right": 704
+        },
+        {
+          "tag": "NAV",
+          "left": 16,
+          "right": 704
+        }
+      ],
+      "clippedText": []
+    },
+    {
+      "route": "/app/operations",
+      "zoom": 2,
+      "css_width": 720,
+      "dpr": 2,
+      "overflow": 0,
+      "bounds": [
+        {
+          "tag": "MAIN",
+          "left": 0,
+          "right": 720
+        },
+        {
+          "tag": "HEADER",
+          "left": 16,
+          "right": 704
+        },
+        {
+          "tag": "NAV",
+          "left": 16,
+          "right": 704
+        }
+      ],
+      "clippedText": []
+    }
+  ]
+}

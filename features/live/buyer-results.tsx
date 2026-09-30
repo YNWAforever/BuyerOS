@@ -134,44 +134,44 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
     }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));return false;}
     finally{setBusy(false);}
   }
-  if(!workspace||!project)return <section className="panel" role="status">No project selected. Save a profile to create one.</section>;
+  if(!workspace||!project)return <section className="panel" role="status">{t('No project selected. Save a profile to create one.')}</section>;
   const index=page?.items.findIndex(buyer=>buyer.id===detailId)??-1;
   const current=index>=0?page?.items[index]:undefined;
-  return <section className="panel live-buyer-results" aria-label="Buyer results">
-    <div className="inline spread"><h2>Buyers</h2><span>{snapshot?`${snapshot.total} in snapshot`:'Loading snapshot...'}</span></div>
-    <div className="inline" role="group" aria-label="Buyer filters">
-      <label>Search buyers <input aria-label="Search buyers" value={search} onChange={event=>setSearch(event.target.value)} onKeyDown={event=>{if(event.key==='Enter')changeQuery({q:search.trim()},true);}}/></label>
-      <button type="button" onClick={()=>changeQuery({q:search.trim()},true)}>Apply filters</button>
-      <label>Fit <select aria-label="Fit filter" value={query.fit} onChange={event=>changeQuery({fit:event.target.value as BuyerQuery['fit']},true)}><option value="">Any</option><option value="match">Match</option><option value="needs_review">Needs review</option><option value="not_a_match">Not a match</option></select></label>
-      <label>Review <select aria-label="Review filter" value={query.review} onChange={event=>changeQuery({review:event.target.value as BuyerQuery['review']},true)}><option value="">Any</option><option value="awaiting_review">Awaiting review</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option><option value="needs_information">Needs information</option></select></label>
-      <label>{t('Queue')} <select aria-label={t('Work queue filter')} value={query.queue} onChange={event=>changeQuery({queue:event.target.value as BuyerQuery['queue']},true)}><option value="">All</option><option value="unassigned">{t('Unassigned')}</option><option value="unknown">{t('Unknown fit')}</option></select></label>
-      <label>Sort <select aria-label="Buyer sort" value={query.sort} onChange={event=>changeQuery({sort:event.target.value as BuyerQuery['sort']},true)}><option value="name_asc">Name</option><option value="best_fit">Best fit</option></select></label>
-      <button type="button" onClick={()=>setReload(value=>value+1)}>Refresh results</button>
+  return <section className="panel live-buyer-results" aria-label={t('Buyer results')}>
+    <div className="inline spread"><h2>{t('Buyers')}</h2><span>{snapshot?t('{count} in snapshot').replace('{count}',String(snapshot.total)):t('Loading snapshot...')}</span></div>
+    <div className="inline" role="group" aria-label={t('Buyer filters')}>
+      <label>{t('Search buyers')} <input aria-label={t('Search buyers')} value={search} onChange={event=>setSearch(event.target.value)} onKeyDown={event=>{if(event.key==='Enter')changeQuery({q:search.trim()},true);}}/></label>
+      <button type="button" onClick={()=>changeQuery({q:search.trim()},true)}>{t('Apply filters')}</button>
+      <label>{t('Fit')} <select aria-label={t('Fit filter')} value={query.fit} onChange={event=>changeQuery({fit:event.target.value as BuyerQuery['fit']},true)}><option value="">{t('Any')}</option><option value="match">{t('Match')}</option><option value="needs_review">{t('Needs review')}</option><option value="not_a_match">{t('Not a match')}</option></select></label>
+      <label>{t('Review')} <select aria-label={t('Review filter')} value={query.review} onChange={event=>changeQuery({review:event.target.value as BuyerQuery['review']},true)}><option value="">{t('Any')}</option><option value="awaiting_review">{t('Awaiting review')}</option><option value="accepted">{t('Accepted')}</option><option value="rejected">{t('Rejected')}</option><option value="needs_information">{t('Needs information')}</option></select></label>
+      <label>{t('Queue')} <select aria-label={t('Work queue filter')} value={query.queue} onChange={event=>changeQuery({queue:event.target.value as BuyerQuery['queue']},true)}><option value="">{t('All')}</option><option value="unassigned">{t('Unassigned')}</option><option value="unknown">{t('Unknown fit')}</option></select></label>
+      <label>{t('Sort')} <select aria-label={t('Buyer sort')} value={query.sort} onChange={event=>changeQuery({sort:event.target.value as BuyerQuery['sort']},true)}><option value="name_asc">{t('Name')}</option><option value="best_fit">{t('Best fit')}</option></select></label>
+      <button type="button" onClick={()=>setReload(value=>value+1)}>{t('Refresh results')}</button>
     </div>
-    {snapshot?.clipped&&<p role="status">Showing the first 1000 matching buyers. Narrow filters to select all matching buyers.</p>}
-    {error&&<p role="alert">{error}</p>}{loading&&<p role="status">Loading buyers...</p>}
+    {snapshot?.clipped&&<p role="status">{t('Showing the first 1000 matching buyers. Narrow filters to select all matching buyers.')}</p>}
+    {error&&<p role="alert">{t(error)}</p>}{loading&&<p role="status">{t('Loading buyers...')}</p>}
     {page&&<>
-      <div className="inline"><button type="button" disabled={!page.items.length} onClick={selectPage}>Select this page</button>
-        <button type="button" disabled={!snapshot||snapshot.clipped||!snapshot.total} onClick={()=>{setAllFiltered(true);setSelected({});setExcluded([]);}}>Select all filtered</button>
-        <button type="button" onClick={()=>{setAllFiltered(false);setSelected({});setExcluded([]);}}>Clear selection</button>
-        <span aria-live="polite">{selectedCount} selected {allFiltered?'across this snapshot':'explicitly'}</span>
+      <div className="inline"><button type="button" disabled={!page.items.length} onClick={selectPage}>{t('Select this page')}</button>
+        <button type="button" disabled={!snapshot||snapshot.clipped||!snapshot.total} onClick={()=>{setAllFiltered(true);setSelected({});setExcluded([]);}}>{t('Select all filtered')}</button>
+        <button type="button" onClick={()=>{setAllFiltered(false);setSelected({});setExcluded([]);}}>{t('Clear selection')}</button>
+        <span aria-live="polite">{t(allFiltered?'{count} selected across this snapshot':'{count} selected explicitly').replace('{count}',String(selectedCount))}</span>
       </div>
       {page.items.length?page.items.map(buyer=><div className="activity" key={buyer.id}>
-        <input type="checkbox" aria-label={`Select ${buyer.name}`} checked={allFiltered?!excluded.includes(buyer.id):buyer.id in selected} onChange={()=>toggle(buyer.id,buyer.version)}/>
-        <div><b>{buyer.name}</b><p>{buyer.fitVerdict||'Fit not assessed'} · {buyer.reviewStatus||'Not reviewed'} · {buyer.note||'No note'}</p></div>
-        <button type="button" onClick={event=>{lastDetailTrigger.current=event.currentTarget;setDetailId(buyer.id);}}>Details</button>
+        <input type="checkbox" aria-label={t('Select {buyer}').replace('{buyer}',buyer.name)} checked={allFiltered?!excluded.includes(buyer.id):buyer.id in selected} onChange={()=>toggle(buyer.id,buyer.version)}/>
+        <div><b>{buyer.name}</b><p>{t(buyer.fitVerdict||'Fit not assessed')} · {t(buyer.reviewStatus||'Not reviewed')} · {buyer.note||t('No note')}</p></div>
+        <button type="button" onClick={event=>{lastDetailTrigger.current=event.currentTarget;setDetailId(buyer.id);}}>{t('Details')}</button>
         {onManualOutcome&&<button type="button" onClick={()=>onManualOutcome(buyer.id)}>{t('Log outcome')}</button>}
-      </div>):<p>No buyers in this snapshot.</p>}
-      <div className="inline spread"><div className="inline"><button type="button" disabled={query.offset===0||loading} onClick={()=>changeQuery({offset:Math.max(0,query.offset-query.size)})}>Previous page</button>
-        <span>Rows {page.total?query.offset+1:0}–{Math.min(query.offset+page.items.length,page.total)} of {page.total}</span>
-        <button type="button" disabled={loading||query.offset+page.items.length>=page.total} onClick={()=>changeQuery({offset:query.offset+query.size})}>Next page</button></div>
-        <label>Rows per page <select aria-label="Rows per page" value={query.size} onChange={event=>changeQuery({size:Number(event.target.value) as BuyerQuery['size'],offset:0})}><option value={8}>8</option><option value={12}>12</option><option value={24}>24</option></select></label>
+      </div>):<p>{t('No buyers in this snapshot.')}</p>}
+      <div className="inline spread"><div className="inline"><button type="button" disabled={query.offset===0||loading} onClick={()=>changeQuery({offset:Math.max(0,query.offset-query.size)})}>{t('Previous page')}</button>
+        <span>{t('Rows {from}–{to} of {total}').replace('{from}',String(page.total?query.offset+1:0)).replace('{to}',String(Math.min(query.offset+page.items.length,page.total))).replace('{total}',String(page.total))}</span>
+        <button type="button" disabled={loading||query.offset+page.items.length>=page.total} onClick={()=>changeQuery({offset:query.offset+query.size})}>{t('Next page')}</button></div>
+        <label>{t('Rows per page')} <select aria-label={t('Rows per page')} value={query.size} onChange={event=>changeQuery({size:Number(event.target.value) as BuyerQuery['size'],offset:0})}><option value={8}>8</option><option value={12}>12</option><option value={24}>24</option></select></label>
       </div>
     </>}
-    {canReview&&page&&<div className="inline"><label>Review status <select aria-label="Review status" value={status} onChange={event=>setStatus(event.target.value as typeof status)}>{reviewStatuses.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
-      <label>Review reason <input aria-label="Review reason" value={reason} onChange={event=>setReason(event.target.value)}/></label>
-      <button type="button" disabled={busy||selectedCount<=0} onClick={()=>void submitReview()}>{busy?'Reviewing...':'Apply review'}</button></div>}
-    {reviewResult&&<p role="status">Review: {reviewResult.updated} updated; {reviewResult.blocked} blocked; {reviewResult.conflicts} conflicts. {reviewResult.results.filter(row=>row.status==='blocked'||row.status==='conflict').map(row=>`${row.id}: ${row.reason_code??row.status}`).join('; ')}</p>}
+    {canReview&&page&&<div className="inline"><label>{t('Review status')} <select aria-label={t('Review status')} value={status} onChange={event=>setStatus(event.target.value as typeof status)}>{reviewStatuses.map(value=><option key={value} value={value}>{t(value)}</option>)}</select></label>
+      <label>{t('Review reason')} <input aria-label={t('Review reason')} value={reason} onChange={event=>setReason(event.target.value)}/></label>
+      <button type="button" disabled={busy||selectedCount<=0} onClick={()=>void submitReview()}>{t(busy?'Reviewing...':'Apply review')}</button></div>}
+    {reviewResult&&<p role="status">{t('Review: {updated} updated; {blocked} blocked; {conflicts} conflicts.').replace('{updated}',String(reviewResult.updated)).replace('{blocked}',String(reviewResult.blocked)).replace('{conflicts}',String(reviewResult.conflicts))} {reviewResult.results.filter(row=>row.status==='blocked'||row.status==='conflict').map(row=>`${row.id}: ${row.reason_code??row.status}`).join('; ')}</p>}
     {canEdit&&<ExportDialog key={`export:${workspace}:${project}`} locale={locale} selection={selection()} canExport={canEdit}/>}
     <LiveBulkActions key={`bulk:${workspace}:${project}`} locale={locale} selection={selection()} count={selectedCount} canAssign={canAssign} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted}/>
     {jobId&&<BulkJobPanel locale={locale} jobId={jobId} onJob={onJob} onCommitted={onCommitted} onClose={closeJob}/>}
