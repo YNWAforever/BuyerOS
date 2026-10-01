@@ -31,6 +31,16 @@ TARGET_KEYS = frozenset(("vercel_project_id", "vercel_project_name", "neon_proje
                          "session_started_at", "expires_at"))
 
 
+class NativeProbeFailure(RuntimeError):
+    """Closed error-class metadata only; no child traceback or exception message."""
+    def __init__(self, error_type):
+        allowed = {"ModuleNotFoundError", "ImportError", "FileNotFoundError", "PermissionError", "OSError",
+                   "AssertionError", "OperationalError", "UndefinedTable", "InsufficientPrivilege",
+                   "ValueError", "RuntimeError", "TypeError", "KeyError", "TimeoutExpired", "CalledProcessError"}
+        self.native_error_type = error_type if isinstance(error_type, str) and error_type in allowed else "NativeProbeFailed"
+        super().__init__("native preview probe failed")
+
+
 def validate_target(target, now):
     """Validate exact resource identities supplied from operator readback."""
     try:
@@ -192,7 +202,7 @@ def run_native_probe(dsn, service_root, target):
         raise ValueError("preview diagnostic output exceeded its bound")
     result = json.loads(raw)
     if process.returncode:
-        raise RuntimeError(result.get("error_type", "NativeProbeFailed"))
+        raise NativeProbeFailure(result.get("error_type"))
     return result
 
 
@@ -237,7 +247,10 @@ def create_preview_app(target):
             else:
                 result = await asyncio.to_thread(run_native_probe, dsn, Path(__file__).resolve().parents[2], target)
         except Exception as exc:
-            return JSONResponse({"code": "PROBE_FAILED", "error_type": type(exc).__name__}, status_code=503,
+            failure = {"code": "PROBE_FAILED", "error_type": type(exc).__name__}
+            if isinstance(exc, NativeProbeFailure):
+                failure["native_error_type"] = exc.native_error_type
+            return JSONResponse(failure, status_code=503,
                                 headers={"Cache-Control": "private, no-store"})
         return JSONResponse(result | {"source_sha": target["source_sha"], "wall_seconds": time.perf_counter() - start},
                             headers={"Cache-Control": "private, no-store"})

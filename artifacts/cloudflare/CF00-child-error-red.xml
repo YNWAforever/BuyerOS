@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="6.361" timestamp="2026-10-01T23:42:38.949146+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_native_child_failure_reports_only_allowlisted_error_class" time="0.718"><failure message="AssertionError: assert None == 'ModuleNotFoundError'&#10; +  where None = getattr(RuntimeError('ModuleNotFoundError'), 'native_error_type', None)&#10; +    where RuntimeError('ModuleNotFoundError') = &lt;ExceptionInfo RuntimeError('ModuleNotFoundError') tblen=2&gt;.value">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001E95925C510&gt;
+
+    def test_native_child_failure_reports_only_allowlisted_error_class(monkeypatch):
+        module = load_module(TEMPLATE, "cf_preview_diagnostic_safe_child_error")
+        def fail(_args, **kwargs):
+            kwargs["stdout"].write(b'{"error_type":"ModuleNotFoundError"}')
+            return type("Result", (), {"returncode": 1})()
+        monkeypatch.setattr(module.subprocess, "run", fail)
+        with pytest.raises(RuntimeError) as caught:
+            module.run_native_probe(environment()["BUYEROS_CHECKPOINT_DATABASE_URL"], ROOT, target())
+&gt;       assert getattr(caught.value, "native_error_type", None) == "ModuleNotFoundError"
+E       AssertionError: assert None == 'ModuleNotFoundError'
+E        +  where None = getattr(RuntimeError('ModuleNotFoundError'), 'native_error_type', None)
+E        +    where RuntimeError('ModuleNotFoundError') = &lt;ExceptionInfo RuntimeError('ModuleNotFoundError') tblen=2&gt;.value
+
+tests\test_cloudflare_preview_diagnostic.py:341: AssertionError</failure></testcase></testsuite></testsuites>
