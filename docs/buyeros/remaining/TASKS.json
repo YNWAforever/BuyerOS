@@ -1254,10 +1254,10 @@
       "command": "根目錄：pnpm exec playwright test tests/e2e/mvp-a-journey.spec.ts；執行 T00 全套 CI＋required no-skip gates；照 release.md 在明確target核對 readiness/部署SHA。此處不是一條可無條件執行的 production deploy 指令。",
       "rollback": "先關admission/dispatch，保留reconciliation；回退compatibleapp或rollforward資料，保留ledger/history。不得為回退重置DB或清queue。",
       "operations": [],
-      "status": "implemented_full_fixture_journey_verified_release_activation_open",
+      "status": "implemented_full_fixture_journey_verified_production_anonymous_and_human_scope_verified_live_gates_open",
       "verification": {
         "release_preparation": "RELEASE_READINESS.md, runbooks/release.md, PILOT_EXECUTION_RECORD.md and pilot/evaluation-protocol.md drafted without external action",
-        "full_staff_journey": "PARTIAL: one disposable project passes UI offer edit, saved ICP v2 exact reviewer approval, browser-created bounded research, broker/worker fit, reviewer list/assignment and worker-generated grounded unaddressed draft. Offer creation and addressed exact approval/export/outcome are verified in separate fixtures; full continuity and external activation remain open",
+        "full_staff_journey": "Complete fixture continuity4/4 on reviewed source4181062: UI offer creation/edit, exact ICP approval, bounded research via real disposable DB/broker/worker, review/list/assignment, grounded addressed generation, exact approval, authorized export, manual outcome and refresh in en/zh-HK desktop/mobile. Test OIDC/search/contact remain fictional. Deployed4181062 has anonymous/bootstrap4/4 and refreshed human FIMMICK/admin visibility; full authenticated production staff/provider/worker continuity remains unverified.",
         "deployment": "2026-09-30 HK: user specifically approved redeploying tested source 62d40bc7687477f42e971ae5143485806630f1a6 with the nine saved production variables. vercel redeploy exited 0; dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3 READY, target production, exact source SHA verified. Public frontend routes /, /app, /auth/callback HTTP200, /v1/workspaces HTTP401 UNAUTHENTICATED. Anonymous acceptance 4 passed/0 failed/cancelled/skipped in 5271.2125ms. Actual Sign in reaches Auth0 Universal Login with approved public parameters and PKCE S256. No real staff session, membership seed, migration or paid/provider activation.",
         "partial_ui_journey": "1 passed, 0 failed/skipped in 2.7m: same seeded project/buyer evidence, list, assignment, exact approval, authorized export, manual outcome, refresh, zh-HK mobile; viewer export 403 and delivery 403; fixture OIDC/disposable PostgreSQL only",
         "screenshots": "artifacts/t30-screenshots/en-fixture.png and zh-mobile-fixture.png visually inspected with SHA256 recorded in REMAINING_DEVELOPMENT_STATUS.md",
@@ -1529,9 +1529,9 @@
           "current_initial_setup_state": "Four approved rows persisted and read back; the user confirmed FIMMICK and admin role visible on 2026-10-01 HK. Full staff continuity and agent-observed authenticated API trace remain unverified."
         },
         "ongoing_continuity_slice_20261001": {
-          "status": "reviewed_candidate_pushed_hosted_six_job_ci_verified_activation_open",
+          "status": "reviewed_source_deployed_anonymous_and_human_scope_verified_live_gates_open",
           "base_source_sha": "479141f5f04455cdc19c786cb40a3a0fd9f4b4d2",
-          "working_tree": "Reviewed application/test/evidence source4181062 published to draft PR9. Local required gates and hosted six-job CI all pass with zero required skips. This following checkpoint changes documentation/evidence only. No migration, merge or new production deployment.",
+          "working_tree": "Reviewed application/test source4181062 is now deployed to the specifically authorized existing production Vercel project. Local required gates and source-bound hosted six-job CI pass; actual anonymous production checks4/4 pass and the user confirms FIMMICK/workspace_admin visible after refresh/sign-in. Following checkpoints change documentation/evidence only; no migration, merge, direct database mutation command or external worker/provider activation.",
           "observed_red": [
             "Addressed API admission 5 failed against current 503 boundary",
             "Worker addressed recipient/race 4 failed against ignored context",
@@ -1559,7 +1559,7 @@
           ],
           "new_source_scope": "Stored retained recipient/purpose/suppression binding for zero-cost templates; worker current recipient/policy/member recheck; eligible contact detail on existing getBuyer; raw fit hash projection; wizard canonical buyer type roundtrip; synchronous approval recipient expiry; continuous UI-created project, edits, approvals, real fixture broker/worker research and generated addressed draft/export/outcome test.",
           "fixture_boundary": "Fresh owned loopback PostgreSQL16 and Valkey8; fake OIDC/search. Guarded helper supplies only fictional policy/budget prerequisites and existing valid fictional contact input to a UI-created project. Independent cases initialize only their named fake actors rate counters before research/login; production limiter and all limits within each case remain active. No project/buyer/ICP/review/draft/approval/outcome seed in this helper; no live lookup/provider verification.",
-          "remaining": "Human source review, specific newer candidate deployment approval and authenticated deployed acceptance. Actual assistive/non-text accessibility, external recovery journal custody, continuous worker/Valkey/R2 and named policy/provider/pilot activation remain open.",
+          "remaining": "Human source review, agent-observed authenticated domain API acceptance and complete production staff continuity remain open. Deployment4181062 and refreshed human FIMMICK/admin visibility are verified. Actual assistive/non-text accessibility, external recovery journal custody, compatible continuous worker/Valkey/R2 and named policy/provider/pilot activation remain open.",
           "diagnostic_failures": [
             "Final API preceding repair: 576 passed/1 failed/0 errors/skips; valid retention caused0032 rollback guard to fire before0028. Fixed test to assert both without deleting dates.",
             "First bilingual fixture repeat: 1 passed/1 failed at duplicate known contact input for shared canonical company; fixture now reuses and verifies its unchanged valid input.",
@@ -1687,6 +1687,31 @@
             "evidence": "artifacts/t30-ci-head-checkpoint-20261001.json",
             "scope": "Fresh metadata verifies all six jobs and PR checks at this source. Exact test counts remain attributed to reviewed code4181062/run36772517309; no new deployment or owner approval is claimed.",
             "checkpoint_checks": "JSON/source attribution checks passed; git diff --quiet from4181062 excluding docs/artifacts exit0; git diff --check exit0. Documentation/evidence only; no additional application test results claimed."
+          },
+          "production_deployment_20261001": {
+            "source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+            "deployment_id": "dpl_5Yt2v611QZwJntN8sBnwyWojJQvT",
+            "target": "production",
+            "state": "READY",
+            "url": "https://buyer-os-nu.vercel.app",
+            "project_id": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw",
+            "command": "vercel.cmd redeploy dpl_9vrsNEUsyzfGjbr745ersK6XWEVF --target production --scope ynwaforevers-projects --no-wait",
+            "authorization": "User continued immediately after the explicit final question naming4181062 and the existing production project; exact deployment authorization was announced before execution. BO owner approval records were not changed.",
+            "build_duration_seconds": 74.433,
+            "saved_production_variables": "All nine IDs/names/types/update timestamps unchanged; paid admission false, R2 false, binding URL platform-injected.",
+            "http_acceptance": "node artifacts/t30-production-acceptance-4181062-20261001.mjs exited0:4 passed/0 failed/skipped. Root/app200 and public Auth0 bootstrap; missing/malformed bearer401 exact UNAUTHENTICATED contract, request IDs and no data rows.",
+            "error_scan": "Deployment-filtered error-level10m query exited0:0 returned records/0 unparsed lines; max100. Does not establish continuous monitoring or drains.",
+            "human_scope_confirmation": "User confirmed FIMMICK and workspace_admin visible after refreshing/signing in on the updated production deployment. Human UI evidence, not an agent-observed API trace or full journey.",
+            "checkpoint_checks": "node --check acceptance artifact exit0; UTF-8 JSON5 parsed/source-state-count assertions pass; API generate-operation-routes.py --check matches78 operations; application/CI diff from4181062 excluding docs/artifacts empty; git diff --check exit0. No new API/worker fixture count is claimed.",
+            "evidence_prefix": "artifacts/t30-production-*-4181062-20261001.*",
+            "previous_deployment_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+            "previous_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+            "migrations_run": 0,
+            "direct_database_mutation_commands": 0,
+            "paid_provider_requests": 0,
+            "external_worker_activated": false,
+            "delivery_activated": false,
+            "scope": "App/API deployment and bounded anonymous production checks only. No live pilot or full deployed staff/provider/worker verification."
           }
         }
       }
@@ -1725,6 +1750,6 @@
   ],
   "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "T30 specific reviewed-candidate deployment decision for existing BuyerOS Vercel project; source4181062 has six-job CI success. Earlier production approval applied to62d40bc. Independent T29 actual assistive/non-text review and T28 external recovery-journal custody remain open; provider/policy/worker/R2/pilot activation needs actual named owners/configuration and delivery stays disabled.",
-  "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6"
+  "next_eligible_task": "T30 agent-observed authenticated domain API acceptance and complete deployed staff continuity; source4181062 is READY with actual anonymous4/4 and refreshed human FIMMICK/admin visibility. First external execution prerequisite is an exact compatible Render worker/dispatcher and existing one-Valkey target/configuration; no paid provisioning/provider/pilot authority is inferred. Independent T29 assistive/non-text review and T28 external recovery-journal custody remain open. Delivery stays disabled.",
+  "deployed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d"
 }

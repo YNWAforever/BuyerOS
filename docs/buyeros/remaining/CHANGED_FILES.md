@@ -535,3 +535,21 @@ docs/buyeros/T30_RELEASE_CANDIDATE_HANDOFF_20261001.md
 docs/buyeros/remaining/CHANGED_FILES.md
 docs/buyeros/remaining/TASKS.json
 ```
+
+## T30 specifically authorized production rollout checkpoint
+
+Documentation/evidence only after deploying reviewed application source4181062 to the existing production Vercel project. Five new artifacts preserve sanitized preflight, deployment source/alias readback, standalone four-GET acceptance, exact results and bounded error counts. Six existing documents track current deployment, refreshed human FIMMICK/admin visibility and remaining external gates. No domain application/schema/owner approval changed; per-operation authorized deployment success is not inferred from anonymous HTTP checks.
+
+```text
+artifacts/t30-production-preflight-4181062-20261001.json
+artifacts/t30-production-deployment-4181062-20261001.json
+artifacts/t30-production-acceptance-4181062-20261001.mjs
+artifacts/t30-production-acceptance-4181062-20261001.json
+artifacts/t30-production-error-scan-4181062-20261001.json
+docs/buyeros/RELEASE_READINESS.md
+docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
+docs/buyeros/T30_RELEASE_CANDIDATE_HANDOFF_20261001.md
+docs/buyeros/remaining/CHANGED_FILES.md
+docs/buyeros/remaining/TASKS.json
+docs/buyeros/runbooks/release.md
+```
