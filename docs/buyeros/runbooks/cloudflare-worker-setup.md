@@ -3,6 +3,9 @@
 Status: local implementation and explicitly approved isolated hosted fictional
 preview verified, now fenced/suspended. No production migration, paid providers
 or delivery activated. Hosted proof is in CF00-hosted-preview-checkpoint.json.
+Current0036 permission correction and bounded production setup proposal are in
+[the inspected production proposal](cloudflare-production-setup-proposal-20261002.md).
+Production remains0033; no production role/schema/deployment change is approved.
 Architecture exception and local implementation approval are in TASKS.json;
 they do not authorize production activation. Auth0, Neon, R2 and the one native
 FastAPI domain owner remain. Celery is a compatible optional adapter.
@@ -95,7 +98,12 @@ lag by the sweep duration. Hosted alert routing/notification is not configured.
 
 ## Schema rollback and restore
 
-Migration owner: API Alembic, next allocated0035 after0034; no revision overwritten.
+Migration owner: API Alembic. Historical CF06 allocated0035 after0034; no revision overwritten.
+Subsequent inspected permission correction allocates0036 after verified0035:
+checkpoint_migrations grants become SELECT-only for workers, and runtime catalog
+proof rejects any version-table mutation right. Native checkpoint data DML stays
+unchanged. Its compatibility downgrade retains that hardening and all data;
+source0036 and focused/local PG18 proofs are separate from hosted595865f/0035.
 0035 adds a minimal global probe row, persistent recovery cursor and limited API
 selector reads. Empty upgrade→downgrade0034→re-upgrade is locally verified.
 Populated probe/recovery evidence refuses downgrade atomically, preserving

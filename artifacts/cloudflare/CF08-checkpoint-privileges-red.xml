@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="6" time="74.525" timestamp="2026-10-02T01:35:07.159425+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_worker_cannot_mutate_checkpoint_schema_versions[INSERT INTO buyeros_graph.checkpoint_migrations(v) VALUES(99)]" time="67.019"><failure message="Failed: DID NOT RAISE &lt;class 'psycopg.errors.InsufficientPrivilege'&gt;">schema_worker = 'postgresql://buyeros_schema_fixture:test-only@127.0.0.1:61823/buyeros_test_api'
+statement = 'INSERT INTO buyeros_graph.checkpoint_migrations(v) VALUES(99)'
+
+    @pytest.mark.parametrize("statement", [
+        "INSERT INTO buyeros_graph.checkpoint_migrations(v) VALUES(99)",
+        "UPDATE buyeros_graph.checkpoint_migrations SET v=99 WHERE v=9",
+        "DELETE FROM buyeros_graph.checkpoint_migrations WHERE v=9",
+        "TRUNCATE buyeros_graph.checkpoint_migrations",
+    ])
+    def test_worker_cannot_mutate_checkpoint_schema_versions(schema_worker, statement):
+        with psycopg.connect(schema_worker) as worker:
+            assert worker.execute("SELECT max(v),count(*) FROM buyeros_graph.checkpoint_migrations").fetchone() == (9, 10)
+            try:
+&gt;               with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               Failed: DID NOT RAISE &lt;class 'psycopg.errors.InsufficientPrivilege'&gt;
+
+tests\test_checkpoint_schema_privileges_db.py:37: Failed</failure></testcase><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_worker_cannot_mutate_checkpoint_schema_versions[UPDATE buyeros_graph.checkpoint_migrations SET v=99 WHERE v=9]" time="0.122"><failure message="Failed: DID NOT RAISE &lt;class 'psycopg.errors.InsufficientPrivilege'&gt;">schema_worker = 'postgresql://buyeros_schema_fixture:test-only@127.0.0.1:61823/buyeros_test_api'
+statement = 'UPDATE buyeros_graph.checkpoint_migrations SET v=99 WHERE v=9'
+
+    @pytest.mark.parametrize("statement", [
+        "INSERT INTO buyeros_graph.checkpoint_migrations(v) VALUES(99)",
+        "UPDATE buyeros_graph.checkpoint_migrations SET v=99 WHERE v=9",
+        "DELETE FROM buyeros_graph.checkpoint_migrations WHERE v=9",
+        "TRUNCATE buyeros_graph.checkpoint_migrations",
+    ])
+    def test_worker_cannot_mutate_checkpoint_schema_versions(schema_worker, statement):
+        with psycopg.connect(schema_worker) as worker:
+            assert worker.execute("SELECT max(v),count(*) FROM buyeros_graph.checkpoint_migrations").fetchone() == (9, 10)
+            try:
+&gt;               with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               Failed: DID NOT RAISE &lt;class 'psycopg.errors.InsufficientPrivilege'&gt;
+
+tests\test_checkpoint_schema_privileges_db.py:37: Failed</failure></testcase><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_worker_cannot_mutate_checkpoint_schema_versions[DELETE FROM buyeros_graph.checkpoint_migrations WHERE v=9]" time="0.057"><failure message="Failed: DID NOT RAISE &lt;class 'psycopg.errors.InsufficientPrivilege'&gt;">schema_worker = 'postgresql://buyeros_schema_fixture:test-only@127.0.0.1:61823/buyeros_test_api'
+statement = 'DELETE FROM buyeros_graph.checkpoint_migrations WHERE v=9'
+
+    @pytest.mark.parametrize("statement", [
+        "INSERT INTO buyeros_graph.checkpoint_migrations(v) VALUES(99)",
+        "UPDATE buyeros_graph.checkpoint_migrations SET v=99 WHERE v=9",
+        "DELETE FROM buyeros_graph.checkpoint_migrations WHERE v=9",
+        "TRUNCATE buyeros_graph.checkpoint_migrations",
+    ])
+    def test_worker_cannot_mutate_checkpoint_schema_versions(schema_worker, statement):
+        with psycopg.connect(schema_worker) as worker:
+            assert worker.execute("SELECT max(v),count(*) FROM buyeros_graph.checkpoint_migrations").fetchone() == (9, 10)
+            try:
+&gt;               with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               Failed: DID NOT RAISE &lt;class 'psycopg.errors.InsufficientPrivilege'&gt;
+
+tests\test_checkpoint_schema_privileges_db.py:37: Failed</failure></testcase><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_worker_cannot_mutate_checkpoint_schema_versions[TRUNCATE buyeros_graph.checkpoint_migrations]" time="0.100" /><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_runtime_catalog_rejects_reintroduced_checkpoint_version_write" time="0.636"><failure message="assert (True,) == (False,)&#10;  &#10;  At index 0 diff: True != False&#10;  Use -v to get more diff">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:61823/buyeros_test_api'
+schema_worker = 'postgresql://buyeros_schema_fixture:test-only@127.0.0.1:61823/buyeros_test_api'
+
+    def test_runtime_catalog_rejects_reintroduced_checkpoint_version_write(migrated, schema_worker):
+        from buyeros_api.services.worker_execution import WORKER_ROLE_CATALOG_SQL
+        with psycopg.connect(migrated, autocommit=True) as owner:
+            previous = owner.execute("SELECT has_table_privilege('buyeros_schema_fixture', "
+                                     "'buyeros_graph.checkpoint_migrations','INSERT')").fetchone()[0]
+            owner.execute("GRANT INSERT ON buyeros_graph.checkpoint_migrations TO buyeros_schema_fixture")
+            try:
+                with psycopg.connect(schema_worker) as worker:
+&gt;                   assert worker.execute(WORKER_ROLE_CATALOG_SQL).fetchone() == (False,)
+E                   assert (True,) == (False,)
+E
+E                     At index 0 diff: True != False
+E                     Use -v to get more diff
+
+tests\test_checkpoint_schema_privileges_db.py:51: AssertionError</failure></testcase><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_schema_read_only_worker_resumes_actual_checkpoint_without_replaying" time="2.637" /></testsuite></testsuites>

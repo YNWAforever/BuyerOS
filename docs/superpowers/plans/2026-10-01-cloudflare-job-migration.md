@@ -10,7 +10,7 @@
 
 **Spec:** [2026-10-01-cloudflare-job-migration-design.md](../specs/2026-10-01-cloudflare-job-migration-design.md).
 
-**Current status (2026-10-01 HK):** local architecture/implementation approved and completed through CF08 RC at reviewed source d6c2849. CF00 hosted feasibility remains pending. Paid resource setup, preview/production schema/deployment/secrets and production activation are not approved. Direct earlier Git authority permits push/update existing draft PR10 only, no merge. Original planning baseline aed7a7eb and expected commands below retain historical scope; actual outputs are in CF00–CF08 checkpoint artifacts and the current handoff. No future expected result is counted as evidence.
+**Current status (2026-10-02 HK):** local CF00–CF08 and the specifically approved isolated hosted preview are complete; that preview is fenced and its approval expired. Source6ef38d1 adds the production-preflight permission correction at newly allocated0036, verified on owned PostgreSQL16/18 with full worker186; current full CI remains pending. Production is read-only inspected at0033/source12327c7. The exact guarded production setup proposal is prepared, not approved/applied. Earlier Git authority permits push/update existing draft PR10, no merge. Original planning baseline/expected commands and earlier checkpoints retain their historical scope.
 
 ## Global constraints
 
@@ -217,7 +217,7 @@ single bounded protected-preview proposal. Author review only, no independent
 approval is claimed. Architecture/local implementation is already approved;
 no repeated local-edit approval is required.
 
-**Next eligible:** CF00 protected hosted feasibility after specific isolated
-preview resource/schema/secret/test authorization. The two remaining CF08
-activation/deployed checkboxes intentionally remain unchecked. Production
-cutover requires a later exact decision and applicable external gates.
+**Next eligible:** current-source CI and real source review, followed by the
+[guarded production setup decision](../../buyeros/runbooks/cloudflare-production-setup-proposal-20261002.md).
+The two remaining CF08 activation/deployed checkboxes remain unchecked. The
+completed preview does not authorize production or a new preview window.

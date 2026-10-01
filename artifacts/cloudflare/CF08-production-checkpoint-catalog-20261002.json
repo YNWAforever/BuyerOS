@@ -1,0 +1,105 @@
+{
+  "observed_at": "2026-10-01T17:27:14.763934+00:00",
+  "project_id": "nameless-bar-15324691",
+  "branch_id": "br-autumn-block-b3exsqii",
+  "mode": "read_only_catalog",
+  "production_mutations": false,
+  "queries": {
+    "heads": "a0843c38ad90ce0ff6520ad46d9b8d223ba5ee6fcd3a208b342d3da383dd4f4f",
+    "schemas": "90932d5e290f540fa44fd2e48e464974dc099e8772ea602b780a9e9791a5c176",
+    "checkpoint_tables": "dc54215e9a2956982346d6feee53a2fd8eeab12b7e537131c59ef5ba801459f9",
+    "checkpoint_schema_version": "86013945f53033f140d4263f150de4ff8af8eb82f224328a9aeadd82a2082b7d",
+    "checkpoint_policies": "4d1f071408837ad901c190366f1092570be179c8f58f4afd52435f007825decb"
+  },
+  "results": {
+    "heads": [
+      {
+        "version_num": "0033_api_rate_windows"
+      }
+    ],
+    "schemas": [
+      {
+        "nspname": "buyeros_graph",
+        "owner": "neondb_owner",
+        "worker_usage": true,
+        "worker_create": false
+      },
+      {
+        "nspname": "public",
+        "owner": "pg_database_owner",
+        "worker_usage": true,
+        "worker_create": false
+      }
+    ],
+    "checkpoint_tables": [
+      {
+        "relname": "checkpoint_blobs",
+        "owner": "neondb_owner",
+        "relrowsecurity": true,
+        "relforcerowsecurity": true,
+        "worker_select": true,
+        "worker_insert": true,
+        "worker_update": true,
+        "worker_delete": true
+      },
+      {
+        "relname": "checkpoint_migrations",
+        "owner": "neondb_owner",
+        "relrowsecurity": false,
+        "relforcerowsecurity": false,
+        "worker_select": true,
+        "worker_insert": true,
+        "worker_update": true,
+        "worker_delete": true
+      },
+      {
+        "relname": "checkpoint_writes",
+        "owner": "neondb_owner",
+        "relrowsecurity": true,
+        "relforcerowsecurity": true,
+        "worker_select": true,
+        "worker_insert": true,
+        "worker_update": true,
+        "worker_delete": true
+      },
+      {
+        "relname": "checkpoints",
+        "owner": "neondb_owner",
+        "relrowsecurity": true,
+        "relforcerowsecurity": true,
+        "worker_select": true,
+        "worker_insert": true,
+        "worker_update": true,
+        "worker_delete": true
+      }
+    ],
+    "checkpoint_schema_version": [
+      {
+        "maximum": 9,
+        "versions": 10
+      }
+    ],
+    "checkpoint_policies": [
+      {
+        "tablename": "checkpoint_blobs",
+        "cmd": "ALL",
+        "qual": "(split_part(thread_id, ':'::text, 1) = current_setting('app.workspace_id'::text, true))",
+        "with_check": "(split_part(thread_id, ':'::text, 1) = current_setting('app.workspace_id'::text, true))"
+      },
+      {
+        "tablename": "checkpoint_writes",
+        "cmd": "ALL",
+        "qual": "(split_part(thread_id, ':'::text, 1) = current_setting('app.workspace_id'::text, true))",
+        "with_check": "(split_part(thread_id, ':'::text, 1) = current_setting('app.workspace_id'::text, true))"
+      },
+      {
+        "tablename": "checkpoints",
+        "cmd": "ALL",
+        "qual": "(split_part(thread_id, ':'::text, 1) = current_setting('app.workspace_id'::text, true))",
+        "with_check": "(split_part(thread_id, ':'::text, 1) = current_setting('app.workspace_id'::text, true))"
+      }
+    ]
+  },
+  "status": "verified",
+  "transaction_rolled_back": true
+}

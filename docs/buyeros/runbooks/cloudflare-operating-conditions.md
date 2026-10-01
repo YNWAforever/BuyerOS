@@ -1,6 +1,8 @@
 # Cloudflare operating conditions and cost worksheet
 
-2026-10-01. Local results; no hosted latency or account bill was measured.
+2026-10-02 HK. Local workload percentiles below retain their original source.
+The isolated hosted preview separately proved61s transport and one operational
+probe; no production workload percentile or account bill was measured.
 
 ## Measured conditions
 
@@ -91,3 +93,18 @@ Cloudflare account/plan and locality/privacy review; Vercel plan/compute billing
 Neon actual size/rate/autosuspend; real probe/backlog alerts; authenticated staff
 continuity. Monitor hourly usage initially. Retain paid admission/dispatch, R2,
 mailbox/CRM/sending off. Delivery remains403 `DELIVERY_DISABLED`.
+
+## Inspected production setup proposal — 2026-10-02 HK
+
+Production0033/source12327c7, FreePG18/Singapore0.25..2CU, Vercel Pro/iad1 and
+empty ready/dispatched/provider/hold aggregates were freshly read-only inspected.
+Compute returnedidle after the short catalog transactions. Remaining allowance
+is unverified; zero metadata counters are not a quota guarantee. Cloudflare
+subscriptions still403; no Paid plan confirmation or upgrade is inferred.
+[The exact setup proposal](cloudflare-production-setup-proposal-20261002.md)
+has Cronempty and one ID-only probe, with an attended maximum2hour window and
+mandatory fencing. At the unchanged production size range a continuously awake
+two-hour scenario is0.5..4CU-hours plus tail/other activity, not0.5CU-hours or a
+spend cap. Continuous dispatch, scheduling, customer locality and alert delivery
+remain separate decisions. The newly allocated0036 permission fix does not
+change provider, billing or delivery authorization.

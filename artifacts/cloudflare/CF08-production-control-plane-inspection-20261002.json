@@ -1,0 +1,334 @@
+{
+  "observed_at": "2026-10-01T17:18:03.906173+00:00",
+  "mode": "read_only_control_plane",
+  "production_mutations": false,
+  "database_connected": false,
+  "preview_reactivated": false,
+  "sections": {
+    "neon": {
+      "status": "verified",
+      "details": {
+        "project": {
+          "id": "nameless-bar-15324691",
+          "name": "BuyerOS",
+          "org_id": "org-soft-sunset-25251479",
+          "region_id": "aws-ap-southeast-1",
+          "pg_version": 18,
+          "compute_time_seconds": 0,
+          "cpu_used_sec": 0,
+          "data_storage_bytes_hour": 0,
+          "active_time_seconds": 0,
+          "settings": {
+            "allowed_ips": {
+              "ips": [],
+              "protected_branches_only": false
+            },
+            "enable_logical_replication": false,
+            "maintenance_window": {
+              "weekdays": [
+                7
+              ],
+              "start_time": "18:00",
+              "end_time": "19:00"
+            },
+            "block_public_connections": false,
+            "block_vpc_connections": false,
+            "hipaa": false
+          },
+          "owner_plan": "free_v3"
+        },
+        "branch": {
+          "id": "br-autumn-block-b3exsqii",
+          "name": "production",
+          "primary": true,
+          "default": true,
+          "current_state": "ready",
+          "parent_id": null,
+          "created_at": "2026-09-29T18:49:21Z",
+          "updated_at": "2026-10-01T08:35:43Z"
+        },
+        "endpoints": [
+          {
+            "id": "ep-dark-dawn-b3au2rn1",
+            "host": "ep-dark-dawn-b3au2rn1.c-4.ap-southeast-1.aws.neon.tech",
+            "branch_id": "br-autumn-block-b3exsqii",
+            "project_id": "nameless-bar-15324691",
+            "region_id": "aws-ap-southeast-1",
+            "type": "read_write",
+            "current_state": "idle",
+            "pending_state": null,
+            "autoscaling_limit_min_cu": 0.25,
+            "autoscaling_limit_max_cu": 2,
+            "suspend_timeout_seconds": 0,
+            "disabled": false,
+            "last_active": "2026-10-01T02:23:00Z"
+          }
+        ],
+        "role_names": [
+          "buyeros_api",
+          "buyeros_worker",
+          "neondb_owner"
+        ],
+        "databases": [
+          {
+            "id": 425848,
+            "name": "neondb",
+            "owner_name": "neondb_owner"
+          }
+        ],
+        "database_connected": false
+      }
+    },
+    "vercel": {
+      "status": "verified",
+      "details": {
+        "project": {
+          "id": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw",
+          "name": "buyer-os",
+          "accountId": "team_qvzlsFmfCsLkgItSypqHjw3z",
+          "nodeVersion": "24.x",
+          "framework": "services",
+          "ssoProtection": {
+            "deploymentType": "all_except_custom_domains"
+          },
+          "resourceConfig": {
+            "fluid": true,
+            "functionDefaultRegions": [
+              "iad1"
+            ],
+            "elasticConcurrencyEnabled": true,
+            "buildMachineType": "standard",
+            "buildMachineSelection": "fixed"
+          },
+          "autoExposeSystemEnvs": true
+        },
+        "team": {
+          "id": "team_qvzlsFmfCsLkgItSypqHjw3z",
+          "billing": {
+            "plan": "pro",
+            "status": "active"
+          }
+        },
+        "production": {
+          "id": "dpl_wdPCQmzg7EkFusgFknHAA2tXdKth",
+          "url": "buyer-h23obpifd-ynwaforevers-projects.vercel.app",
+          "target": "production",
+          "readyState": "READY",
+          "regions": [
+            "iad1"
+          ],
+          "alias": [
+            "buyer-os-nu.vercel.app",
+            "buyer-os-ynwaforevers-projects.vercel.app"
+          ],
+          "createdAt": 1790819572558,
+          "buildingAt": 1790819573760,
+          "ready": 1790819626971,
+          "git_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+          "git_ref": "main",
+          "services": [
+            {
+              "name": "app",
+              "framework": "nitro",
+              "root": ".",
+              "entrypoint": null,
+              "bindings": [
+                {
+                  "type": "service",
+                  "service": "api",
+                  "format": "url",
+                  "env": "BUYEROS_INTERNAL_API_URL"
+                }
+              ],
+              "builder_config": {
+                "handlerFunction": null,
+                "maxDuration": null,
+                "runtime": null
+              }
+            },
+            {
+              "name": "api",
+              "framework": "fastapi",
+              "root": "services/api",
+              "entrypoint": "buyeros_api/api/vercel.py",
+              "bindings": null,
+              "builder_config": {
+                "handlerFunction": "app",
+                "maxDuration": null,
+                "runtime": null
+              }
+            }
+          ],
+          "function_configuration": null
+        },
+        "environment": [
+          {
+            "key": "BUYEROS_AUTH0_AUDIENCE",
+            "target": [
+              "production"
+            ],
+            "type": "plain",
+            "gitBranch": null,
+            "createdAt": 1790731097765,
+            "updatedAt": 1790731097765
+          },
+          {
+            "key": "BUYEROS_DATABASE_URL",
+            "target": [
+              "production"
+            ],
+            "type": "sensitive",
+            "gitBranch": null,
+            "createdAt": 1790709220039,
+            "updatedAt": 1790709220039
+          },
+          {
+            "key": "BUYEROS_CORS_ORIGINS",
+            "target": [
+              "production"
+            ],
+            "type": "plain",
+            "gitBranch": null,
+            "createdAt": 1790707257640,
+            "updatedAt": 1790707257640
+          },
+          {
+            "key": "BUYEROS_R2_ENABLED",
+            "target": [
+              "production"
+            ],
+            "type": "plain",
+            "gitBranch": null,
+            "createdAt": 1790707254496,
+            "updatedAt": 1790707254496
+          },
+          {
+            "key": "BUYEROS_PAID_ADMISSION_ENABLED",
+            "target": [
+              "production"
+            ],
+            "type": "plain",
+            "gitBranch": null,
+            "createdAt": 1790707251949,
+            "updatedAt": 1790707251949
+          },
+          {
+            "key": "BUYEROS_ENVIRONMENT",
+            "target": [
+              "production"
+            ],
+            "type": "plain",
+            "gitBranch": null,
+            "createdAt": 1790707248914,
+            "updatedAt": 1790707248914
+          },
+          {
+            "key": "BUYEROS_AUTH0_CLIENT_ID",
+            "target": [
+              "production"
+            ],
+            "type": "plain",
+            "gitBranch": null,
+            "createdAt": 1790707246515,
+            "updatedAt": 1790707246515
+          },
+          {
+            "key": "BUYEROS_AUTH0_ISSUER",
+            "target": [
+              "production"
+            ],
+            "type": "plain",
+            "gitBranch": null,
+            "createdAt": 1790707243709,
+            "updatedAt": 1790707243709
+          },
+          {
+            "key": "BUYEROS_API_BASE_URL",
+            "target": [
+              "production"
+            ],
+            "type": "plain",
+            "gitBranch": null,
+            "createdAt": 1790707222641,
+            "updatedAt": 1790707222641
+          }
+        ],
+        "secret_values_read": false
+      }
+    },
+    "cloudflare": {
+      "status": "verified",
+      "details": {
+        "account_id": "e387dfbeded3deb5b8f0023a78a660b5",
+        "reads": [
+          {
+            "resource": "workers/scripts",
+            "http_status": 200,
+            "success": true,
+            "buyeros_resources": [
+              {
+                "id": "buyeros-jobs-preview",
+                "created_on": "2026-10-01T15:21:48.352657Z",
+                "modified_on": "2026-10-01T16:26:05.572025Z"
+              }
+            ]
+          },
+          {
+            "resource": "queues",
+            "http_status": 200,
+            "success": true,
+            "buyeros_resources": [
+              {
+                "queue_id": "a7abef331d014874949a698c555c0f11",
+                "queue_name": "buyeros-jobs-preview",
+                "created_on": "2026-10-01T15:03:54.872541Z",
+                "modified_on": "2026-10-01T15:03:54.872541Z",
+                "consumers_total_count": 1,
+                "producers_total_count": 1
+              },
+              {
+                "queue_id": "42d563146fb84ab4804ef45f5d52a824",
+                "queue_name": "buyeros-jobs-preview-dlq",
+                "created_on": "2026-10-01T15:04:00.574189Z",
+                "modified_on": "2026-10-01T15:04:00.574189Z",
+                "consumers_total_count": 0,
+                "producers_total_count": 1
+              }
+            ]
+          },
+          {
+            "resource": "workflows",
+            "http_status": 200,
+            "success": true,
+            "buyeros_resources": [
+              {
+                "id": "45ac0dd3-1c31-48d7-9d38-c49a8ae5cb58",
+                "name": "buyeros-job-preview",
+                "created_on": "2026-10-01T15:21:57.369Z",
+                "modified_on": "2026-10-01T16:26:09.998Z",
+                "script_name": "buyeros-jobs-preview",
+                "class_name": "BuyerOSJobWorkflow"
+              }
+            ]
+          },
+          {
+            "resource": "workers/account-settings",
+            "http_status": 200,
+            "success": true,
+            "settings": {
+              "default_usage_model": "standard",
+              "green_compute": false,
+              "enforce_public_origin": null
+            }
+          },
+          {
+            "resource": "subscriptions",
+            "http_status": 403,
+            "success": false
+          }
+        ],
+        "billing_plan": "unverified"
+      }
+    }
+  }
+}

@@ -1869,7 +1869,7 @@
         "evidence": "artifacts/cloudflare/CF08-checkpoint.json"
       }
     ],
-    "reviewed_source_sha": "79d6caf8b51aac00560cf6d69b0198c8614df528",
+    "reviewed_source_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
     "handoff": "docs/buyeros/CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md",
     "hosted_integration_verified": true,
     "deployed_source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
@@ -1940,7 +1940,7 @@
       "billing_plan_changed": false,
       "session_closed": true
     },
-    "reviewed_source_sha_scope": "Author-reviewed source including vendor-path fix, exact isolation regression and screenshot-upload selection. Independent review still pending. Hosted deployed source595865f distinct.",
+    "reviewed_source_sha_scope": "Author-reviewed permission correction23 source files; local focused23/PG18compat37/worker186/gateway4 verified. Current full CI pending; independent review pending. Prior hosted595865f at0035 remains separate.",
     "hosted_integration_verified_scope": "Isolated approved fictional native/PDF/checkpoint/protection/61-second two-hop and one ID-only Queue/Workflow/HMAC/API/Neon receipt only; no staff/customer/provider/production verification",
     "post_hosted_regression_ci": {
       "run_id": 36893525903,
@@ -1997,7 +1997,13 @@
         "jobs": 8
       },
       "production_activation_approved": false,
-      "next_eligible_task": "Current-source CI and exact guarded production setup proposal; retain expired preview fences and independent-review/provider/policy gates"
+      "next_eligible_task": "Current-source CI and exact guarded production setup proposal; retain expired preview fences and independent-review/provider/policy gates",
+      "source_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
+      "evidence": "artifacts/cloudflare/CF08-production-preparation-checkpoint.json",
+      "proposal": "docs/buyeros/runbooks/cloudflare-production-setup-proposal-20261002.md",
+      "controller_config": "artifacts/cloudflare/CF08-production-controller-proposal.json",
+      "production_setup_proposal_approved": false,
+      "continuous_dispatch_proposed_in_this_stage": false
     }
   },
   "deployed_source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",

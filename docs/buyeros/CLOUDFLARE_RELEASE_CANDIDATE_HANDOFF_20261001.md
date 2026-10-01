@@ -2,6 +2,16 @@
 
 ## Current facts
 
+**2026-10-02 HK update:** reviewed implementation6ef38d1 adds0036 checkpoint
+schema-version permissions and a fail-closed catalog proof. Focused23, ownedPG18
+37, full worker186 and gateway/release4 pass; current full CI is pending.
+The preceding8ffd91f checkpoint CI now passes8/8. Production was freshly
+read-only inspected at source12327c7/schema0033, with no work/holds/runtime login.
+No production mutation or new hosted verification occurred.
+See [the exact guarded setup proposal](runbooks/cloudflare-production-setup-proposal-20261002.md)
+and [current preparation checkpoint](../../artifacts/cloudflare/CF08-production-preparation-checkpoint.json).
+Earlier source-bound test/hosted tables below remain historical to their named source.
+
 | Fact | Evidence and practical limit |
 | --- | --- |
 | Code implemented | CF00 local and CF01–CF08 local implementation complete. One API-owned Python execution engine, strict signed bridge and TypeScript Cron/Queue/Workflow controller; compatible thin Celery adapters remain. Default selector is Celery/off/epoch1. |
