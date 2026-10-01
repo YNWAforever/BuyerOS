@@ -9,7 +9,7 @@
 | Local integration verified | Actual Miniflare Cron/Queue/Workflow → machine HMAC → native FastAPI/SQLAlchemy → owned PostgreSQL. Full API650, worker186, seven current Cloudflare UI cases, six preserved legacy suites, and PG18 compatibility29 have zero required failures/errors/skips. |
 | Hosted integration | CF00 hosted package/PDF/checkpoint/protection and both-hop enforcement remain NOT RUN. No fixture/mock is counted as live provider proof. |
 | Externally blocked | Exact preview setup authorization; later production plan/quota/privacy and selector scope; independent review; external deletion journal/R2, policy/provider economics/pilot, full authenticated staff trace and assistive accessibility. |
-| Deployed | This Cloudflare migration has NOT been deployed. No migration deployed SHA is available. Historical app source12327c7 evidence in the T30 handoff was not refreshed here; it does not describe this candidate. |
+| Deployed | Cloudflare controller/schema/selector remain undeployed. Existing Git integration automatically published app/API **preview** dpl_EPr4wsjaMNcgo3XA2itL1NxDGsc7 at source d8ca315 (READY, targetnull, iad1, branch alias only). This is not protected native-job feasibility or production cutover; historical production12327c7 is not a refreshed live readback. |
 
 **Reviewed code/configuration source:** `d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8`.
 CF07 comprehensive source commit `14fcb37d36bf00e65c8d7ab319002cd71fbeee99`.
@@ -52,7 +52,8 @@ PG18 prompted the additional fresh-container18.6 compatibility gate.
 
 CF07 full suites are retained at their source/input manifests. CF08 changes
 configuration and an optional platform header; backend/business/UI route source
-is unchanged from CF07. UI suites were not rerun after those CF08 deltas.
+is unchanged from CF07. UI suites were not rerun locally after those CF08 deltas; fresh Linux CI
+subsequently reran the full seven-case journey successfully at d8ca315.
 The current optional header and gateway path are covered by27 controller and19
 Node checks; application HMAC still matches the fixed vector.
 
@@ -92,8 +93,7 @@ nested2 cases are not counted as two additional unique API tests.
 Required JUnit command (root): `uv run --frozen --project services/api python scripts/check-required-tests.py --junit PATH`.
 Every final required XML has zero failures/errors/skips. Static/public78/internal5
 generation, strict TS/lint/bindings, frozen pnpm, normal Vinext build and Vercel
-build pass in retained CF07/CF08 evidence. CI YAML parses eight jobs; remote CI
-for the newly pushed source must be reported separately from these local passes.
+build pass in retained CF07/CF08 evidence. CI YAML parses eight jobs; new remote CI is reported separately below from these local passes.
 
 CF08 red before fix: configuration0 passed/3 failed; stale binding generation
 exit1; protection transport3 passed/3 failed. Green19 Node,27 Workers, PG18
@@ -108,6 +108,38 @@ Whitespace-only log normalization and original hashes are recorded separately.
 [original CF08 log hashes](../../artifacts/cloudflare/CF08-log-normalization.json),
 [author review rulings](../../artifacts/cloudflare/CF08-review-rulings.md).
 Author review is not independent approval; no agents were authorized.
+
+## Fresh pushed-source CI and automatic app/API preview
+
+[CI36859284850](https://github.com/YNWAforever/BuyerOS/actions/runs/36859284850)
+is completed SUCCESS, eight/eight jobs at branch source d8ca315. GitHub checked
+out its synthetic test-merge8634fba, not a merged PR. The acceptance manifest
+matches all recorded source files to the branch Git blobs. Exact current archive
+digests and safe namespaces were verified; retained older reports/failures in
+the uploaded directory were not relabelled as fresh results.
+
+| Fresh Linux gate | Actual result |
+| --- | --- |
+| API |650 passed,96 warnings,195.27s; required checker650/0/0/0 |
+| Worker |186 passed,1 warning,24.81s; required checker186/0/0/0 |
+| Controller |27/0/0/0, actual Workers runtime; dry-run137.54KiB/gzip24.49KiB |
+| PG18 compatibility |29 passed,9 warnings,41.06s; required checker29/0/0/0 |
+| Operating repetitions |2 passed,1 warning,41.71s; required checker2/0/0/0 |
+| Staff journey after CF08 |7/0/0/0,1.2m; exact build/test exits0 |
+| Legacy continuity |4/8/1/3/1; each required checker zero failure/error/skip |
+| Remaining jobs |Frontend/contract/types/lint/both builds, smoke and actual zoom all SUCCESS |
+
+[Remote summaries and preview metadata](../../artifacts/cloudflare/CF08-remote-ci.json),
+[verified current CI manifest/XML/report](../../artifacts/cloudflare/ci-d8ca315/).
+A following documentation/evidence-only head can retain this reviewed code proof;
+its own new Git-triggered CI status must not be fabricated as complete.
+
+Vercel metadata confirms existing Git automation created a READY branch app/API
+preview at d8ca315, deployment dpl_EPr4wsjaMNcgo3XA2itL1NxDGsc7, regioniad1,
+targetnull. No explicit platform deploy command or production alias change was
+performed. No runtime job, protected diagnostic, CF resource or production schema
+activation was verified by that preview. The isolated preview proposal remains
+required because this existing project is not a dedicated empty test target.
 
 ## Audit A01–A18 closure table
 

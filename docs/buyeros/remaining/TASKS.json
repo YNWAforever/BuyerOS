@@ -1872,7 +1872,28 @@
     "handoff": "docs/buyeros/CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md",
     "hosted_integration_verified": false,
     "deployed_source_sha": null,
-    "preview_setup_approved": false
+    "preview_setup_approved": false,
+    "remote_ci": {
+      "branch_head": "d8ca3150e620f6f7f978a420852dd4ac9f024712",
+      "test_merge": "8634fba98e2e455a516e4f707058255ccdf4aced",
+      "run_id": 36859284850,
+      "successful_jobs": 8
+    },
+    "git_triggered_app_api_preview": {
+      "id": "dpl_EPr4wsjaMNcgo3XA2itL1NxDGsc7",
+      "url": "buyer-qzwxlwr6n-ynwaforevers-projects.vercel.app",
+      "state": "READY",
+      "target": null,
+      "source": "git",
+      "sha": "d8ca3150e620f6f7f978a420852dd4ac9f024712",
+      "regions": [
+        "iad1"
+      ],
+      "alias": [
+        "buyer-os-git-codex-fix-vercel-tslib-ssr-ynwaforevers-projects.vercel.app"
+      ]
+    },
+    "deployed_source_sha_scope": "Cloudflare job stack not deployed; automatic existing-project app/API preview recorded separately."
   },
   "deployed_source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
   "reviewed_source_sha_scope": "Historical T30 application; hosting_migration_proposal.reviewed_source_sha is current Cloudflare RC.",

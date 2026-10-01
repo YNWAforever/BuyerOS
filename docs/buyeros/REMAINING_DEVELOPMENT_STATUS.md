@@ -12,10 +12,13 @@ actual local Queue/Workflow/HMAC/native PostgreSQL integration verified.
 Required API650/worker186, UI7 and retained legacy4/8/1/3/1/2 are zero-skip CF07
 proof; CF08 controller27, Node19 and owned PG18 compatibility29 pass. No backend/
 business/UI route changes after CF07; its UI suite was not rerun after the CF08
-configuration/optional protection-header deltas. Both90-second budget mechanisms
+configuration/optional protection-header deltas; subsequent Linux CI8/8 at
+d8ca315/test-merge8634fba reran the full7-case journey successfully. Both90-second budget mechanisms
 are locally schema/build verified; hosted enforcement/native package/protection
 is NOT RUN. No Cloudflare resource, production migration/provider call or
-migration deployment occurred. Historical app deployment facts below retain
+Cloudflare controller/schema/selector deployment occurred. Existing Git automation
+published a READY branch app/API preview dpl_EPr4wsjaMNcgo3XA2itL1NxDGsc7 at d8ca315
+(iad1/targetnull); no hosted job proof follows. Historical app deployment facts below retain
 only their earlier scope; no migration deployed SHA exists.
 
 Next eligible decision is the exact two-hour private protected-preview setup
@@ -83,7 +86,7 @@ The three audit documents in the supplied pack, including its HTML rendering, de
 | A14 worker completion | source changed | Actual Cron/Queue/Workflow/HMAC/nativePG; retained actual Celery/Valkey continuity. No deployed controller/provider completion is inferred. |
 | A15 performance/cost | still open | Two local10-job repetitions meet first-step P95 target;100-workspace fairness and10k late SQL page measured. Hosted latency, actual billing and all-day Neon quota decision remain open. |
 | A16 locale/a11y | still open | English/zh-HK at390/1280, negative roles, current screenshots and actual200% Chromium zoom over six routes verified. Manual screen reader/non-text elements remain unverified. |
-| A17 evidence truth | still open | All required local suites zero skip; full journey/state/hold/restart proof and red artifacts retained. Live identity/provider/pilot and new remote CI/hosted acceptance remain separate. |
+| A17 evidence truth | still open | All required local suites zero skip; full journey/state/hold/restart proof and red artifacts retained. Live identity/provider/pilot and protected hosted acceptance remain separate; new CI8/8 is source-recorded in the handoff. |
 | A18 activation | still open | Current actor/RLS/approval, intent/holds, private transport, paused readiness, CAS/drain/refusal verified. No new cloud resources/production migration/provider activation; preview and later production approval still required. |
 
 Totals:10 already fixed with evidence,3 source changed,5 still open;0 classified
@@ -1063,3 +1066,17 @@ Performance conditions/results are in runbooks/cloudflare-operating-conditions.m
   metered overages; no new Neon/Vercel paid plan or production/provider scope.
 - CF00 hosted remains NOT RUN; CF08 activation/deployed fields remain pending.
   Next eligible: bounded hosted feasibility after that exact authorization.
+
+## CF08 pushed-source verification checkpoint
+
+- CI36859284850 at branch d8ca315/test-merge8634fba: eight/eight SUCCESS.
+  Actual Linux API650/0/0/0 (195.27s), worker186/0/0/0 (24.81s), controller27,
+  PG18compatibility29, operating2, full staff7, legacy4/8/1/3/1 plus zoom/smoke
+  and frontend gates. Exact current archive digests, XML counts/source manifests
+  and decoded checker outputs retained in `CF08-remote-ci.json`/`ci-d8ca315/`.
+- Existing Git/Vercel automation published app/API preview d8ca315, READY
+  dpl_EPr4wsjaMNcgo3XA2itL1NxDGsc7, iad1/targetnull/branch alias. It is not the
+  approved dedicated empty preview, CF job deployment, production cutover or
+  hosted native feasibility proof. Cloudflare stack deployed SHA remains null.
+- Following updates are documentation/evidence only; code remains reviewed
+  d6c2849. No paid resource/production migration/provider/pilot activation.
