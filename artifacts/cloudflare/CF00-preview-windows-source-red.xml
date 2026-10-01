@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.391" timestamp="2026-10-01T21:40:49.327973+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preparer_accepts_clean_windows_checkout_but_refuses_changes_or_unsafe_output" time="0.704"><failure message="ValueError: commit and review the preview source before rendering">tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-212/test_preparer_accepts_clean_wi0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002759AB2C8A0&gt;
+
+    def test_preparer_accepts_clean_windows_checkout_but_refuses_changes_or_unsafe_output(tmp_path, monkeypatch):
+        import subprocess
+        module = load_module(PREPARER, "cf_preview_preparer")
+        paths = ("scripts/cloudflare-preview/runtime_probe.py", "scripts/prepare-cloudflare-preview.py",
+                 "vercel.json", "app/v1/[...path]/route.ts")
+        def git(*args):
+            return subprocess.check_output(["git", *args], cwd=tmp_path, stderr=subprocess.DEVNULL, text=True).strip()
+        git("init", "--quiet")
+        git("config", "core.autocrlf", "true")
+        (tmp_path / ".gitattributes").write_text("* text eol=crlf\n", encoding="utf-8")
+        for relative in paths:
+            file = tmp_path / relative
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.write_bytes((ROOT / relative).read_bytes())
+        git("add", "--", ".gitattributes", *paths)
+        git("-c", "user.name=BuyerOS Fixture", "-c", "user.email=fixture@example.test", "commit", "--quiet", "-m", "fixture")
+        for relative in paths:
+            file = tmp_path / relative
+            file.write_bytes(file.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
+        git("diff", "--exit-code", "HEAD", "--", *paths)
+        monkeypatch.setattr(module, "ROOT", tmp_path)
+        inputs = tmp_path / "target.json"
+        inputs.write_text(json.dumps(target() | {"source_sha": git("rev-parse", "HEAD")}), encoding="utf-8")
+        destination = tmp_path / ".sites-runtime/cf-preview-fixture"
+&gt;       report = module.prepare_overlay(inputs, destination)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:197:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+target_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-212/test_preparer_accepts_clean_wi0/target.json')
+output = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-212/test_preparer_accepts_clean_wi0/.sites-runtime/cf-preview-fixture')
+
+    def prepare_overlay(target_path, output):
+        target = json.loads(target_path.read_text(encoding="utf-8"))
+        # Read the source-controlled guard without depending on the API environment.
+        spec = importlib.util.spec_from_file_location("preview_overlay_guard", ROOT / TEMPLATE)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        module.validate_target(target, datetime.now(timezone.utc))
+        head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        if target["source_sha"] != head:
+            raise ValueError("overlay must use the exact current committed source SHA")
+        for relative in (TEMPLATE, "scripts/prepare-cloudflare-preview.py", "vercel.json", "app/v1/[...path]/route.ts"):
+            committed = subprocess.check_output(["git", "show", f"{head}:{relative}"], cwd=ROOT)
+            if committed != (ROOT / relative).read_bytes():
+&gt;               raise ValueError("commit and review the preview source before rendering")
+E               ValueError: commit and review the preview source before rendering
+
+..\..\scripts\prepare-cloudflare-preview.py:58: ValueError</failure></testcase></testsuite></testsuites>

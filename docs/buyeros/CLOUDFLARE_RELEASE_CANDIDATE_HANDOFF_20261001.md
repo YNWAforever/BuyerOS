@@ -12,6 +12,10 @@
 | Deployed | Cloudflare controller/schema/selector remain undeployed. Existing Git integration automatically published app/API **preview** dpl_EPr4wsjaMNcgo3XA2itL1NxDGsc7 at source d8ca315 (READY, targetnull, iad1, branch alias only). This is not protected native-job feasibility or production cutover; historical production12327c7 is not a refreshed live readback. |
 
 **Reviewed code/configuration source:** `d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8`.
+**Reviewed temporary-preview preparation source:** `07a7537befbf1e2290ee7079e18a258083615ed6`.
+Its48 zero-skip local checks do not verify hosted packaging or Vercel hop limits.
+Release routes/schema are unchanged. Prior RC CI36861185237 at229a76c/
+test-merge57b8560 is8/8 SUCCESS; it predates this preparation source.
 CF07 comprehensive source commit `14fcb37d36bf00e65c8d7ab319002cd71fbeee99`.
 Migration baseline `aed7a7eb2b7370c10cd7a41306eecf09d378ad42`; no reset.
 Audit baseline `5e61f401bf1bcdf80ea1ce254dd9c62e8eedbab0` is not an ancestor;
@@ -248,8 +252,8 @@ This decision does not activate production customer jobs, providers or delivery.
 
 | Target | Exact proposal / verified fact |
 | --- | --- |
-| Source | Reviewed code `d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8`, plus separately reviewed default-off temporary diagnostic patch before hosted deployment. Current RC has no diagnostic endpoint. |
-| Cloudflare account | Read-only identity: `Laichiwillyjp@gmail.com's Account`, ID `e387dfbeded3deb5b8f0023a78a660b5`. Current billing plan not inspected. Workers Paid US$5/month base if needed; metered shared-account overages additional. Stop before any other paid plan/resource. |
+| Source | Release code d6c2849; separately reviewed prepared overlay source `07a7537befbf1e2290ee7079e18a258083615ed6`, tested48/0/0/0. Release API has no diagnostic endpoint. Exact new-target manifest/overlay hashes required before deployment. |
+| Cloudflare account | Read-only identity: `Laichiwillyjp@gmail.com's Account`, ID `e387dfbeded3deb5b8f0023a78a660b5`. Subscription GET403; account setting standard does not prove Paid. No BuyerOS names in13Workers/4Queues/2Workflows. Workers Paid US$5/month base if needed; metered shared-account overages additional. Stop before any other paid plan/resource. |
 | Cloudflare resources | Private Worker/Queue `buyeros-jobs-preview`; DLQ `buyeros-jobs-preview-dlq`; Workflow `buyeros-job-preview`. Root production names distinct/off. No fetch route, workers.dev or public preview URL. Queue batch1/concurrency1/retries5, DB permit1 is the true execution limit. |
 | Vercel | New dedicated protected project `buyeros-cf-preview` in existing team `team_qvzlsFmfCsLkgItSypqHjw3z`. Retain app/API service names, app public catch-all and runtime app→internalAPI binding. No new paid Vercel plan included; stop if required. Read generated project ID/domain/actual budgets back before secrets. Existing `buyer-os` project unchanged. |
 | Neon | New **empty** project `BuyerOS-CF-preview-20261001`, existing organization `org-soft-sunset-25251479`, Singapore `aws-ap-southeast-1`, PG18, Free, fixed0.25CU if account permits. No production branch/data/roles/DSN clone. Read project/branch/host IDs and quota back before migration. No paid Neon upgrade included. |
@@ -272,8 +276,9 @@ This decision does not activate production customer jobs, providers or delivery.
 | Runtime | `EXECUTION_ENABLED`, `RUNTIME_EPOCH`, `BUYEROS_CLOUDFLARE_EXECUTION_ENABLED` | Initially false/current DB epoch from readback. Only bounded fictional preview probe may temporarily enable after packaging/security proof; pause at end. No production selector cutover. |
 | API | `BUYEROS_PAID_ADMISSION_ENABLED`, `BUYEROS_PAID_DISPATCH_ENABLED`, `BUYEROS_R2_ENABLED` | false throughout. Production adapters unconfigured. No provider/R2/Auth0 tenant change; mailbox/CRM/sending disabled and delivery403 always. |
 
-[Exact hosted proof recipe](runbooks/cloudflare-preview-probe.md) is preparation,
-not an already implemented remote runner. Existing local probe/harness rejects
+[Exact hosted proof recipe](runbooks/cloudflare-preview-probe.md) now includes
+the prepared source, overlay and runtime map. It has not run remotely.
+Existing local probe/harness rejects
 remote DSNs/preview mode. Before publishing the approved temporary diagnostic,
 review its exact diff and exact new target; keep production/other projects out.
 Run the protected probe through the actual gateway and internal API. Verify

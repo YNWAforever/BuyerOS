@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="9" time="5.439" timestamp="2026-10-01T21:17:04.389084+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change0]" time="3.938" /><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change1]" time="0.005" /><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change2]" time="0.009" /><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change3]" time="0.073" /><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change4]" time="0.019" /><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change5]" time="0.006" /><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change6]" time="0.013" /><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change7]" time="0.006"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">change = {'secret': 'must-never-be-in-a-target-manifest'}
+
+    @pytest.mark.parametrize("change", [
+        {"neon_project_id": "nameless-bar-15324691"}, {"vercel_project_name": "buyer-os"},
+        {"expires_at": (NOW - timedelta(seconds=1)).isoformat()},
+        {"expires_at": (NOW + timedelta(hours=3)).isoformat()},
+        {"worker_role": "neondb_owner"}, {"neon_host": "localhost"}, {"source_sha": "main"},
+        {"secret": "must-never-be-in-a-target-manifest"},
+    ])
+    def test_preview_target_pins_fresh_names_roles_and_two_hour_window(change):
+        module = load_module(TEMPLATE, "cf_preview_diagnostic")
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+tests\test_cloudflare_preview_diagnostic.py:82: Failed</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preparer_guard_import_has_no_application_side_effects" time="0.004"><failure message="AssertionError: the overlay template must be safe for the stdlib-only preparer to import&#10;assert not True&#10; +  where True = hasattr(&lt;module 'cf_preview_diagnostic' from 'C:\\Users\\laich\\Documents\\BuyerOS\\scripts\\cloudflare-preview\\runtime_probe.py'&gt;, 'app')">def test_preparer_guard_import_has_no_application_side_effects():
+        module = load_module(TEMPLATE, "cf_preview_diagnostic")
+&gt;       assert not hasattr(module, "app"), "the overlay template must be safe for the stdlib-only preparer to import"
+E       AssertionError: the overlay template must be safe for the stdlib-only preparer to import
+E       assert not True
+E        +  where True = hasattr(&lt;module 'cf_preview_diagnostic' from 'C:\\Users\\laich\\Documents\\BuyerOS\\scripts\\cloudflare-preview\\runtime_probe.py'&gt;, 'app')
+
+tests\test_cloudflare_preview_diagnostic.py:158: AssertionError</failure></testcase></testsuite></testsuites>

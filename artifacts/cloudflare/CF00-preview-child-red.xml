@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.440" timestamp="2026-10-01T21:24:01.232577+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_native_child_requires_compiled_target_before_driver_io" time="0.052"><failure message="AssertionError: assert {'error_type'...sertionError'} == {'error_type': 'ValueError'}&#10;  &#10;  Differing items:&#10;  {'error_type': 'AssertionError'} != {'error_type': 'ValueError'}&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000183828AC2B0&gt;
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x00000183827CB230&gt;
+
+    def test_native_child_requires_compiled_target_before_driver_io(monkeypatch, capsys):
+        import io
+        module = load_module(TEMPLATE, "cf_preview_diagnostic")
+        data = {"target": target(), "dsn": environment()["BUYEROS_CHECKPOINT_DATABASE_URL"]}
+        monkeypatch.setattr(sys, "stdin", io.TextIOWrapper(io.BytesIO(json.dumps(data).encode())))
+        def forbidden(*_args):
+            raise AssertionError("native driver I/O must not run without the compiled target")
+        monkeypatch.setattr(module, "native_checks", forbidden)
+        assert module.main_child() == 1
+&gt;       assert json.loads(capsys.readouterr().out) == {"error_type": "ValueError"}
+E       AssertionError: assert {'error_type'...sertionError'} == {'error_type': 'ValueError'}
+E
+E         Differing items:
+E         {'error_type': 'AssertionError'} != {'error_type': 'ValueError'}
+E         Use -v to get more diff
+
+tests\test_cloudflare_preview_diagnostic.py:170: AssertionError</failure></testcase></testsuite></testsuites>

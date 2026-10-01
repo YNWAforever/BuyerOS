@@ -5,6 +5,7 @@ This is the current execution ledger for the 2026-09-27 implementation pack. The
 ## Current Cloudflare release candidate
 
 Reviewed code/configuration `d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8`;
+temporary-preview preparation `07a7537befbf1e2290ee7079e18a258083615ed6`;
 [complete current handoff](CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md).
 CF01–CF07 complete; CF00 local complete/hosted pending; CF08 local RC complete/
 external activation pending. Code implemented and fictional fixture verified;
@@ -25,6 +26,34 @@ Next eligible decision is the exact two-hour private protected-preview setup
 in the handoff, including fresh empty Neon and dedicated Vercel project;
 production cutover, all-day Neon quota/plan, providers/R2/policy/pilot and
 independent/assistive review remain separate. Do not restart completed tasks.
+
+### Current CF00 preparation checkpoint
+
+Prepared an overlay-only, default-off diagnostic and source/target renderer;
+release API/gateway/selector/schema unchanged. Final committed-source focused
+suite48 passed/0 failed/errors/skips in93.90s,46 retained deprecation warnings.
+Actual loopback61-second wait/replay after app recreation, native PDF/8-second
+kill, restricted worker and interrupted/resumed/cross-tenant checkpoint pass.
+No test fixture points remotely; only its host guard is substituted locally.
+Windows Linux caps and the positive deployed child/package/two-hop/protection
+checks remain NOT RUN. Current runbook has exact inputs, guards and SHA.
+
+Root TS exit0, release config Node9/0/0/0, public78 contract and Alembic0035 head
+verified. No migration added/applied remotely. Source/destination/CRLF regressions
+observed before fixes; expected reds and two Windows stat-cache fixture setup
+failures retained. No weakened assertions or ignored required DB skips.
+Latest prior RC CI36861185237 at229a76c/test-merge57b8560 has8 successful jobs:
+API650, worker186, controller27, PG18 compatibility29, operating2, staff7 and
+legacy4/8/1/3/1, all required0fail/error/skip; it predates preparation source07a7537.
+
+Read-only target preflight confirms Vercel Pro/active, exact new-project404;
+Neon Free/PG18/Singapore, proposed fresh name absent from22projects;
+Cloudflare13Workers/4Queues/2Workflows with no BuyerOS names. Subscription read403
+means billing plan remains unknown, not Free/Paid proof. No new resource,
+hosted diagnostic/deployment, secret write or production/provider action.
+Next is the same single bounded protected-preview setup decision, now with
+concrete code/test/configuration evidence. Architecture approval is preserved;
+no paid/deployment/owner approval is inferred from this local checkpoint.
 
 ## Task state
 

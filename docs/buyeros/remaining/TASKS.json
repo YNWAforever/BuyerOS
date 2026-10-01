@@ -1783,7 +1783,7 @@
   ],
   "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "CF00 protected hosted feasibility after exact isolated-preview setup authorization; CF08 production activation remains pending. Do not restart completed tasks.",
+  "next_eligible_task": "CF00 protected hosted feasibility using prepared temporary overlay source07a7537 after exact isolated-preview setup authorization; CF08 production activation remains pending. Do not restart completed tasks.",
   "hosting_migration_proposal": {
     "status": "local_release_candidate_complete_external_activation_pending",
     "date_hk": "2026-10-01",
@@ -1873,10 +1873,23 @@
     "hosted_integration_verified": false,
     "deployed_source_sha": null,
     "preview_setup_approved": false,
+    "preview_preparation": {
+      "status": "complete_local_hosted_setup_pending",
+      "reviewed_source_sha": "07a7537befbf1e2290ee7079e18a258083615ed6",
+      "evidence": "artifacts/cloudflare/CF00-preview-preparation-checkpoint.json",
+      "test_counts": {"passed": 48, "failed": 0, "errors": 0, "skipped": 0},
+      "actual_duration_seconds": 61,
+      "schema_change": false,
+      "hosted_verified": false,
+      "resource_created": false,
+      "runtime_diagnostic_in_release_api": false,
+      "billing_inspection": "Cloudflare subscriptions GET403; standard account setting is not Paid proof. Vercel team Pro active, Neon owner Free. No plan upgrade."
+    },
     "remote_ci": {
-      "branch_head": "d8ca3150e620f6f7f978a420852dd4ac9f024712",
-      "test_merge": "8634fba98e2e455a516e4f707058255ccdf4aced",
-      "run_id": 36859284850,
+      "branch_head": "229a76c2d1ad6d608d3afba70b86b6dcc863f03c",
+      "test_merge": "57b8560f4cfec4bcaf5fcb130951a5b30f8433a1",
+      "run_id": 36861185237,
+      "scope": "Prior RC checkpoint, before temporary-preview preparation source07a7537.",
       "successful_jobs": 8
     },
     "git_triggered_app_api_preview": {

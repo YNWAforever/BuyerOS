@@ -1,0 +1,221 @@
+{
+  "task": "CF00 protected-preview preparation",
+  "timestamp_utc": "2026-10-01T13:49:55Z",
+  "state": "complete_local_hosted_setup_pending",
+  "preparation_source_sha": "07a7537befbf1e2290ee7079e18a258083615ed6",
+  "release_source_sha": "d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8",
+  "tests": {
+    "passed": 48,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 93.9,
+    "warnings": 46
+  },
+  "commands": [
+    "$env:PYTHONUTF8='1'; Remove-Item Env:BUYEROS_TEST_DATABASE_URL -ErrorAction SilentlyContinue; $env:BUYEROS_STRICT_INTEGRATION='1'; uv run --frozen pytest -q tests/test_cloudflare_preview_diagnostic.py tests/test_cloudflare_runtime_probe.py tests/test_cloudflare_bridge_db.py --junitxml=../../artifacts/cloudflare/CF00-preview-preparation-final.xml",
+    "python scripts/check-required-tests.py --junit artifacts/cloudflare/CF00-preview-preparation-final.xml",
+    "pnpm.cmd exec tsc --noEmit",
+    "node --test tests/vercel-services.test.mjs tests/deployment/cloudflare-python-runtime.test.mjs tests/deployment/cloudflare-release-config.test.mjs",
+    "uv run --frozen python ../../scripts/generate-operation-routes.py --check",
+    "uv run --frozen alembic heads"
+  ],
+  "node_counts": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0
+  },
+  "guard_counts": {
+    "passed": 35,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "deselected": 3,
+    "overlaps_final_suite": true
+  },
+  "local_duration": {
+    "environment": "local_owned_fixture",
+    "two_hop_hosted": false,
+    "result": {
+      "slept_seconds": 61,
+      "hosted_feasible": false,
+      "source_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "wall_seconds": 61.00461119998363
+    }
+  },
+  "native": {
+    "environment": "local_owned_fixture",
+    "guard_override": "loopback fixture only",
+    "child_wrapper_hosted": false,
+    "result": {
+      "records": [
+        {
+          "check": "native_imports",
+          "state": "verified",
+          "details": {
+            "versions": {
+              "psycopg": "3.3.5",
+              "sqlalchemy": "2.0.53",
+              "pypdf": "6.19.0",
+              "langgraph": "1.2.12",
+              "langgraph-checkpoint-postgres": "3.1.2"
+            },
+            "cold_import_seconds": 1.0033131000236608,
+            "warm_import_seconds": 0.05406029999721795,
+            "python": "3.14.6",
+            "platform": "win32",
+            "development_dependencies_present": true
+          }
+        },
+        {
+          "check": "pdf_native",
+          "state": "verified",
+          "details": {
+            "wall_seconds": 0.4653311000147369,
+            "parent_cpu_seconds": 0.0,
+            "sample_sha256": "56698f27c3989f9977ac9193fb8cbb3ab80579851ab94419a577d32e32c397a1",
+            "facts": 1
+          }
+        },
+        {
+          "check": "pdf_isolation",
+          "state": "verified",
+          "details": {
+            "environment_keys": [
+              "PYTHONDONTWRITEBYTECODE",
+              "PYTHONIOENCODING",
+              "SystemRoot"
+            ],
+            "timeout_seconds": 8,
+            "temporary_workdir": true,
+            "stdin_bytes_only": true
+          }
+        },
+        {
+          "check": "pdf_timeout",
+          "state": "verified",
+          "details": {
+            "timeout_seconds": 8,
+            "child_killed": true,
+            "fixture": "sleeping child",
+            "wall_seconds": 8.0154857999878
+          }
+        },
+        {
+          "check": "postgres_role",
+          "state": "verified",
+          "details": {
+            "superuser": false,
+            "bypassrls": false,
+            "checkpoint_owner": false,
+            "worker_role_membership": true,
+            "environment": "disposable fixture role"
+          }
+        },
+        {
+          "check": "postgres_checkpoint",
+          "state": "verified",
+          "details": {
+            "committed_node_replayed": false,
+            "interrupted_node_resumed": true,
+            "cross_tenant_read_closed": true,
+            "schema_created_at_runtime": false
+          }
+        },
+        {
+          "check": "linux_caps",
+          "state": "not_run",
+          "details": {
+            "platform": "win32"
+          }
+        }
+      ],
+      "hosted_feasible": false,
+      "hosted_feasible_reason": "deployment protection, bundle and two-hop duration evidence collected separately"
+    }
+  },
+  "red_observed": [
+    "22 failures: missing preparation",
+    "2 failures: target secret field and side-effecting import",
+    "1 failure: direct native child without compiled manifest",
+    "1 failure: committed LF versus clean CRLF checkout"
+  ],
+  "retained_fixture_failures": [
+    "Two initial git status stat-cache assertions reported modifications; committed-content git diff --exit-code succeeds. Raw XML retained."
+  ],
+  "migrations": {
+    "head": "0035_worker_recovery_probe",
+    "added": false,
+    "production_applied": false
+  },
+  "coverage": {
+    "public_original": 70,
+    "public_extensions": 8,
+    "private_release_operations": 5,
+    "diagnostic_in_release": false
+  },
+  "account_preflight": {
+    "vercel_team": "team_qvzlsFmfCsLkgItSypqHjw3z",
+    "vercel_plan": "pro",
+    "vercel_plan_status": "active",
+    "new_vercel_target_lookup": 404,
+    "neon_org": "org-soft-sunset-25251479",
+    "neon_owner_plan": "free_v3",
+    "neon_pg_version": 18,
+    "neon_region": "aws-ap-southeast-1",
+    "neon_project_inventory_count": 22,
+    "proposed_neon_name_present": false,
+    "cloudflare_account": "e387dfbeded3deb5b8f0023a78a660b5",
+    "worker_count": 13,
+    "queue_count": 4,
+    "workflow_count": 2,
+    "buyeros_name_conflicts": 0,
+    "cloudflare_usage_setting": "standard",
+    "cloudflare_billing_read_status": 403,
+    "cloudflare_billing_plan": "unverified"
+  },
+  "reviewed_files_sha256": {
+    "scripts/cloudflare-preview/runtime_probe.py": "06d4f049d68b5e8ff923399b022e7cca4cea1d22bbaffeb685759d17da17cc8c",
+    "scripts/prepare-cloudflare-preview.py": "0f6a181316f47c2d675b0c4c2b8b242f7a0b28c2ce0deb99979ea125e2c74a07",
+    "services/api/tests/test_cloudflare_preview_diagnostic.py": "4df31419deb2fe2b7ca22644c787bb5f059bf257b7c9407786507c2efff44a10"
+  },
+  "evidence_files_sha256": {
+    "CF00-preview-additional-red.xml": "59ccf6eacac07ec09591304026e65a5a6b01fce1bdc234daedc294eb42ae555f",
+    "CF00-preview-child-red.xml": "546dc7ed45ec71c7bd682d92dbc0f0c6c231181dc409bf3592b4df572309d703",
+    "CF00-preview-duration-local.json": "b5c9727fd1ce79168b169f88aa57819d09429c54ccf9bccd0adf17bf98b18067",
+    "CF00-preview-guards-final.xml": "d3cdcf57dbc82213f8e605903f1da2666a2ba48257db45367288c1dcf2f7a561",
+    "CF00-preview-native-local.json": "8c1b970cbf846c54f9cb449ee1396f0b949921516f84c5d92171b3340536a373",
+    "CF00-preview-preparation-final.xml": "5ac89d8e948ad36740f2e81c8790e9bc30672f7ed6efaee4f1c8a39f0bddeb5a",
+    "CF00-preview-preparation-green.xml": "b0a61d5a010e99875355096f1390e26fdc1e7a5ffb9e8b793b3534c59659550b",
+    "CF00-preview-preparation-red.xml": "afe0419b08d8379515b53dcea4b4fce849e773424a4f034c9bb78631a1d5115d",
+    "CF00-preview-remote-ci-229.json": "7e5bfab74ce8e87733b7276b334827136067319d8e29da3f4d2c8bea3f6a8882",
+    "CF00-preview-windows-fixture-red-2.xml": "11d30524c71384ed98e8b1644ebf32f2cb3aa9277c618a109742ae1fb70d111c",
+    "CF00-preview-windows-fixture-red.xml": "7ad760615297b99c80ac7d3b1cf44735ae51dd0e6a96d7a34abc990d3a9860b9",
+    "CF00-preview-windows-source-red.xml": "5dffcca065131e80d6726ef358614a9c9936a2b6402c6fc50b096a2c9e7a9478"
+  },
+  "risks": [
+    "Hosted native subprocess wrapper/frozen no-dev bundle/protection/private binding/two-hop enforcement NOT RUN.",
+    "Windows native record linux_caps NOT RUN; local development dependencies are present.",
+    "Author review is not independent approval.",
+    "Cloudflare billing read403 is an OAuth permission limit, not an automatic approval-review rejection.",
+    "No new resource, remote role/schema/secret/deployment/provider or production action."
+  ],
+  "next_eligible_task": "CF00 exact two-hour isolated protected-preview setup authorization, then readback/feasibility; CF08 production activation remains separate",
+  "deployed_source_sha": null,
+  "evidence_normalization": {
+    "hash_basis": "Git committed/index blob bytes with canonical LF; checkpoint excluded from its own hash set",
+    "xml_change": "Trailing horizontal whitespace and CRLF only; every XML element, attribute, test count and failure remains retained",
+    "raw_xml_local_directory": ".superpowers/sdd/2026-10-01-cloudflare-job-migration/raw-cf00-preview",
+    "raw_xml_sha256": {
+      "CF00-preview-additional-red.xml": "253d9f29fa7b3aba09cce1ac791f8de6429d51a113f3347c3aff4789fd9e4ca0",
+      "CF00-preview-child-red.xml": "d4e680c04a8fb8e2f1cc07a36f9e62dc1be75d234d2dfa07fcc39729784249f1",
+      "CF00-preview-guards-final.xml": "d3cdcf57dbc82213f8e605903f1da2666a2ba48257db45367288c1dcf2f7a561",
+      "CF00-preview-preparation-final.xml": "5ac89d8e948ad36740f2e81c8790e9bc30672f7ed6efaee4f1c8a39f0bddeb5a",
+      "CF00-preview-preparation-green.xml": "b0a61d5a010e99875355096f1390e26fdc1e7a5ffb9e8b793b3534c59659550b",
+      "CF00-preview-preparation-red.xml": "812e93694e6864efd18a5df3f22ecd4c5833d335571f226e895f6ee4e730d18a",
+      "CF00-preview-windows-fixture-red-2.xml": "08accd98d87d589c0b9d33a3057004db041784636f687ff30778abd4dc258c6a",
+      "CF00-preview-windows-fixture-red.xml": "7d5c5c527d414bc51f316be26d66c6e3841855cb20647c9d4f165a0040a96d1c",
+      "CF00-preview-windows-source-red.xml": "134005a65b9c7f564f41dfd0b36424fe86ae2cb1834523e35416261c1cb9b429"
+    }
+  }
+}

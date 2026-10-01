@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="22" skipped="0" tests="22" time="4.053" timestamp="2026-10-01T21:09:32.934413+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_guard_denies_before_any_runtime_io[change0]" time="0.130"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'BUYEROS_PREVIEW_PROBE_ENABLED': 'false'}
+
+    @pytest.mark.parametrize("change", [
+        {"BUYEROS_PREVIEW_PROBE_ENABLED": "false"}, {"VERCEL_ENV": "production"},
+        {"VERCEL_PROJECT_ID": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw"},
+        {"BUYEROS_PREVIEW_PROBE_SOURCE_SHA": "b" * 40},
+        {"BUYEROS_EXECUTION_DATABASE_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_DATABASE_MIGRATION_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_PAID_ADMISSION_ENABLED": "true"}, {"BUYEROS_R2_ENABLED": "true"},
+        {"BUYEROS_CLOUDFLARE_EXECUTION_ENABLED": "true"}, {"BUYEROS_PREVIEW_PROBE_SECRET": "short"},
+    ])
+    def test_preview_guard_denies_before_any_runtime_io(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:68:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_guard_denies_before_any_runtime_io[change1]" time="0.007"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'VERCEL_ENV': 'production'}
+
+    @pytest.mark.parametrize("change", [
+        {"BUYEROS_PREVIEW_PROBE_ENABLED": "false"}, {"VERCEL_ENV": "production"},
+        {"VERCEL_PROJECT_ID": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw"},
+        {"BUYEROS_PREVIEW_PROBE_SOURCE_SHA": "b" * 40},
+        {"BUYEROS_EXECUTION_DATABASE_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_DATABASE_MIGRATION_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_PAID_ADMISSION_ENABLED": "true"}, {"BUYEROS_R2_ENABLED": "true"},
+        {"BUYEROS_CLOUDFLARE_EXECUTION_ENABLED": "true"}, {"BUYEROS_PREVIEW_PROBE_SECRET": "short"},
+    ])
+    def test_preview_guard_denies_before_any_runtime_io(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:68:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_guard_denies_before_any_runtime_io[change2]" time="0.010"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'VERCEL_PROJECT_ID': 'prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw'}
+
+    @pytest.mark.parametrize("change", [
+        {"BUYEROS_PREVIEW_PROBE_ENABLED": "false"}, {"VERCEL_ENV": "production"},
+        {"VERCEL_PROJECT_ID": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw"},
+        {"BUYEROS_PREVIEW_PROBE_SOURCE_SHA": "b" * 40},
+        {"BUYEROS_EXECUTION_DATABASE_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_DATABASE_MIGRATION_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_PAID_ADMISSION_ENABLED": "true"}, {"BUYEROS_R2_ENABLED": "true"},
+        {"BUYEROS_CLOUDFLARE_EXECUTION_ENABLED": "true"}, {"BUYEROS_PREVIEW_PROBE_SECRET": "short"},
+    ])
+    def test_preview_guard_denies_before_any_runtime_io(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:68:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_guard_denies_before_any_runtime_io[change3]" time="0.004"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'BUYEROS_PREVIEW_PROBE_SOURCE_SHA': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'}
+
+    @pytest.mark.parametrize("change", [
+        {"BUYEROS_PREVIEW_PROBE_ENABLED": "false"}, {"VERCEL_ENV": "production"},
+        {"VERCEL_PROJECT_ID": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw"},
+        {"BUYEROS_PREVIEW_PROBE_SOURCE_SHA": "b" * 40},
+        {"BUYEROS_EXECUTION_DATABASE_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_DATABASE_MIGRATION_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_PAID_ADMISSION_ENABLED": "true"}, {"BUYEROS_R2_ENABLED": "true"},
+        {"BUYEROS_CLOUDFLARE_EXECUTION_ENABLED": "true"}, {"BUYEROS_PREVIEW_PROBE_SECRET": "short"},
+    ])
+    def test_preview_guard_denies_before_any_runtime_io(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:68:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_guard_denies_before_any_runtime_io[change4]" time="0.007"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'BUYEROS_EXECUTION_DATABASE_URL': 'postgresql://owner:secret@production.neon.tech/neondb'}
+
+    @pytest.mark.parametrize("change", [
+        {"BUYEROS_PREVIEW_PROBE_ENABLED": "false"}, {"VERCEL_ENV": "production"},
+        {"VERCEL_PROJECT_ID": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw"},
+        {"BUYEROS_PREVIEW_PROBE_SOURCE_SHA": "b" * 40},
+        {"BUYEROS_EXECUTION_DATABASE_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_DATABASE_MIGRATION_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_PAID_ADMISSION_ENABLED": "true"}, {"BUYEROS_R2_ENABLED": "true"},
+        {"BUYEROS_CLOUDFLARE_EXECUTION_ENABLED": "true"}, {"BUYEROS_PREVIEW_PROBE_SECRET": "short"},
+    ])
+    def test_preview_guard_denies_before_any_runtime_io(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:68:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_guard_denies_before_any_runtime_io[change5]" time="0.005"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'BUYEROS_DATABASE_MIGRATION_URL': 'postgresql://owner:secret@production.neon.tech/neondb'}
+
+    @pytest.mark.parametrize("change", [
+        {"BUYEROS_PREVIEW_PROBE_ENABLED": "false"}, {"VERCEL_ENV": "production"},
+        {"VERCEL_PROJECT_ID": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw"},
+        {"BUYEROS_PREVIEW_PROBE_SOURCE_SHA": "b" * 40},
+        {"BUYEROS_EXECUTION_DATABASE_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_DATABASE_MIGRATION_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_PAID_ADMISSION_ENABLED": "true"}, {"BUYEROS_R2_ENABLED": "true"},
+        {"BUYEROS_CLOUDFLARE_EXECUTION_ENABLED": "true"}, {"BUYEROS_PREVIEW_PROBE_SECRET": "short"},
+    ])
+    def test_preview_guard_denies_before_any_runtime_io(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:68:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_guard_denies_before_any_runtime_io[change6]" time="0.007"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'BUYEROS_PAID_ADMISSION_ENABLED': 'true'}
+
+    @pytest.mark.parametrize("change", [
+        {"BUYEROS_PREVIEW_PROBE_ENABLED": "false"}, {"VERCEL_ENV": "production"},
+        {"VERCEL_PROJECT_ID": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw"},
+        {"BUYEROS_PREVIEW_PROBE_SOURCE_SHA": "b" * 40},
+        {"BUYEROS_EXECUTION_DATABASE_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_DATABASE_MIGRATION_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_PAID_ADMISSION_ENABLED": "true"}, {"BUYEROS_R2_ENABLED": "true"},
+        {"BUYEROS_CLOUDFLARE_EXECUTION_ENABLED": "true"}, {"BUYEROS_PREVIEW_PROBE_SECRET": "short"},
+    ])
+    def test_preview_guard_denies_before_any_runtime_io(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:68:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_guard_denies_before_any_runtime_io[change7]" time="0.003"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'BUYEROS_R2_ENABLED': 'true'}
+
+    @pytest.mark.parametrize("change", [
+        {"BUYEROS_PREVIEW_PROBE_ENABLED": "false"}, {"VERCEL_ENV": "production"},
+        {"VERCEL_PROJECT_ID": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw"},
+        {"BUYEROS_PREVIEW_PROBE_SOURCE_SHA": "b" * 40},
+        {"BUYEROS_EXECUTION_DATABASE_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_DATABASE_MIGRATION_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_PAID_ADMISSION_ENABLED": "true"}, {"BUYEROS_R2_ENABLED": "true"},
+        {"BUYEROS_CLOUDFLARE_EXECUTION_ENABLED": "true"}, {"BUYEROS_PREVIEW_PROBE_SECRET": "short"},
+    ])
+    def test_preview_guard_denies_before_any_runtime_io(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:68:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_guard_denies_before_any_runtime_io[change8]" time="0.003"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'BUYEROS_CLOUDFLARE_EXECUTION_ENABLED': 'true'}
+
+    @pytest.mark.parametrize("change", [
+        {"BUYEROS_PREVIEW_PROBE_ENABLED": "false"}, {"VERCEL_ENV": "production"},
+        {"VERCEL_PROJECT_ID": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw"},
+        {"BUYEROS_PREVIEW_PROBE_SOURCE_SHA": "b" * 40},
+        {"BUYEROS_EXECUTION_DATABASE_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_DATABASE_MIGRATION_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_PAID_ADMISSION_ENABLED": "true"}, {"BUYEROS_R2_ENABLED": "true"},
+        {"BUYEROS_CLOUDFLARE_EXECUTION_ENABLED": "true"}, {"BUYEROS_PREVIEW_PROBE_SECRET": "short"},
+    ])
+    def test_preview_guard_denies_before_any_runtime_io(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:68:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_guard_denies_before_any_runtime_io[change9]" time="0.004"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'BUYEROS_PREVIEW_PROBE_SECRET': 'short'}
+
+    @pytest.mark.parametrize("change", [
+        {"BUYEROS_PREVIEW_PROBE_ENABLED": "false"}, {"VERCEL_ENV": "production"},
+        {"VERCEL_PROJECT_ID": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw"},
+        {"BUYEROS_PREVIEW_PROBE_SOURCE_SHA": "b" * 40},
+        {"BUYEROS_EXECUTION_DATABASE_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_DATABASE_MIGRATION_URL": "postgresql://owner:secret@production.neon.tech/neondb"},
+        {"BUYEROS_PAID_ADMISSION_ENABLED": "true"}, {"BUYEROS_R2_ENABLED": "true"},
+        {"BUYEROS_CLOUDFLARE_EXECUTION_ENABLED": "true"}, {"BUYEROS_PREVIEW_PROBE_SECRET": "short"},
+    ])
+    def test_preview_guard_denies_before_any_runtime_io(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:68:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change0]" time="0.002"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'neon_project_id': 'nameless-bar-15324691'}
+
+    @pytest.mark.parametrize("change", [
+        {"neon_project_id": "nameless-bar-15324691"}, {"vercel_project_name": "buyer-os"},
+        {"expires_at": (NOW - timedelta(seconds=1)).isoformat()},
+        {"expires_at": (NOW + timedelta(hours=3)).isoformat()},
+        {"worker_role": "neondb_owner"}, {"neon_host": "localhost"}, {"source_sha": "main"},
+    ])
+    def test_preview_target_pins_fresh_names_roles_and_two_hour_window(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:80:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change1]" time="0.006"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'vercel_project_name': 'buyer-os'}
+
+    @pytest.mark.parametrize("change", [
+        {"neon_project_id": "nameless-bar-15324691"}, {"vercel_project_name": "buyer-os"},
+        {"expires_at": (NOW - timedelta(seconds=1)).isoformat()},
+        {"expires_at": (NOW + timedelta(hours=3)).isoformat()},
+        {"worker_role": "neondb_owner"}, {"neon_host": "localhost"}, {"source_sha": "main"},
+    ])
+    def test_preview_target_pins_fresh_names_roles_and_two_hour_window(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:80:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change2]" time="0.002"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'expires_at': '2026-10-01T13:09:32.076263+00:00'}
+
+    @pytest.mark.parametrize("change", [
+        {"neon_project_id": "nameless-bar-15324691"}, {"vercel_project_name": "buyer-os"},
+        {"expires_at": (NOW - timedelta(seconds=1)).isoformat()},
+        {"expires_at": (NOW + timedelta(hours=3)).isoformat()},
+        {"worker_role": "neondb_owner"}, {"neon_host": "localhost"}, {"source_sha": "main"},
+    ])
+    def test_preview_target_pins_fresh_names_roles_and_two_hour_window(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:80:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change3]" time="0.002"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'expires_at': '2026-10-01T16:09:33.076263+00:00'}
+
+    @pytest.mark.parametrize("change", [
+        {"neon_project_id": "nameless-bar-15324691"}, {"vercel_project_name": "buyer-os"},
+        {"expires_at": (NOW - timedelta(seconds=1)).isoformat()},
+        {"expires_at": (NOW + timedelta(hours=3)).isoformat()},
+        {"worker_role": "neondb_owner"}, {"neon_host": "localhost"}, {"source_sha": "main"},
+    ])
+    def test_preview_target_pins_fresh_names_roles_and_two_hour_window(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:80:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change4]" time="0.004"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'worker_role': 'neondb_owner'}
+
+    @pytest.mark.parametrize("change", [
+        {"neon_project_id": "nameless-bar-15324691"}, {"vercel_project_name": "buyer-os"},
+        {"expires_at": (NOW - timedelta(seconds=1)).isoformat()},
+        {"expires_at": (NOW + timedelta(hours=3)).isoformat()},
+        {"worker_role": "neondb_owner"}, {"neon_host": "localhost"}, {"source_sha": "main"},
+    ])
+    def test_preview_target_pins_fresh_names_roles_and_two_hour_window(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:80:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change5]" time="0.003"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'neon_host': 'localhost'}
+
+    @pytest.mark.parametrize("change", [
+        {"neon_project_id": "nameless-bar-15324691"}, {"vercel_project_name": "buyer-os"},
+        {"expires_at": (NOW - timedelta(seconds=1)).isoformat()},
+        {"expires_at": (NOW + timedelta(hours=3)).isoformat()},
+        {"worker_role": "neondb_owner"}, {"neon_host": "localhost"}, {"source_sha": "main"},
+    ])
+    def test_preview_target_pins_fresh_names_roles_and_two_hour_window(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:80:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_pins_fresh_names_roles_and_two_hour_window[change6]" time="0.002"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">change = {'source_sha': 'main'}
+
+    @pytest.mark.parametrize("change", [
+        {"neon_project_id": "nameless-bar-15324691"}, {"vercel_project_name": "buyer-os"},
+        {"expires_at": (NOW - timedelta(seconds=1)).isoformat()},
+        {"expires_at": (NOW + timedelta(hours=3)).isoformat()},
+        {"worker_role": "neondb_owner"}, {"neon_host": "localhost"}, {"source_sha": "main"},
+    ])
+    def test_preview_target_pins_fresh_names_roles_and_two_hour_window(change):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:80:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_guard_accepts_only_pinned_tls_database_and_non_owner_roles" time="0.002"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">def test_preview_guard_accepts_only_pinned_tls_database_and_non_owner_roles():
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:86:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_signature_is_distinct_and_binds_exact_request" time="0.003"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">def test_preview_signature_is_distinct_and_binds_exact_request():
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:96:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_disabled_preview_and_release_api_have_no_diagnostic" time="2.838"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x0000023ACF5A96E0&gt;
+
+    @pytest.mark.asyncio
+    async def test_disabled_preview_and_release_api_have_no_diagnostic(monkeypatch):
+        from buyeros_api.api.app import create_app
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:112:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_rejects_unsigned_query_and_unknown_operations_before_io" time="0.005"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x0000023AD12C35C0&gt;
+
+    @pytest.mark.asyncio
+    async def test_preview_rejects_unsigned_query_and_unknown_operations_before_io(monkeypatch):
+&gt;       module = load_module(TEMPLATE, "cf_preview_diagnostic")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:123:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py')
+name = 'cf_preview_diagnostic'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/cloudflare-preview/runtime_probe.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_prepared_overlay_preserves_release_routes_and_binds_ninety_second_budgets" time="0.042"><failure message="AssertionError: protected preview diagnostic preparation is missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/prepare-cloudflare-preview.py').is_file">tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-205/test_prepared_overlay_preserve0')
+
+    def test_prepared_overlay_preserves_release_routes_and_binds_ninety_second_budgets(tmp_path):
+&gt;       module = load_module(PREPARER, "cf_preview_preparer")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:139:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/prepare-cloudflare-preview.py')
+name = 'cf_preview_preparer'
+
+    def load_module(path, name):
+&gt;       assert path.is_file(), "protected preview diagnostic preparation is missing"
+E       AssertionError: protected preview diagnostic preparation is missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/scripts/prepare-cloudflare-preview.py').is_file
+
+tests\test_cloudflare_preview_diagnostic.py:23: AssertionError</failure></testcase></testsuite></testsuites>
