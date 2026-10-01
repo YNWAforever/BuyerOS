@@ -1,0 +1,104 @@
+FFFFFFFFF
+======================================================================
+FAIL: test_activation_must_be_an_explicit_boolean (test_render_worker_launch.RenderWorkerLaunchTests.test_activation_must_be_an_explicit_boolean)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 41, in test_activation_must_be_an_explicit_boolean
+    launcher = load_launcher()
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 17, in load_launcher
+    assert LAUNCHER.is_file(), "Render runtime launcher is missing"
+           ~~~~~~~~~~~~~~~~^^
+AssertionError: Render runtime launcher is missing
+
+======================================================================
+FAIL: test_activation_requires_production_and_both_connections (test_render_worker_launch.RenderWorkerLaunchTests.test_activation_requires_production_and_both_connections)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 48, in test_activation_requires_production_and_both_connections
+    launcher = load_launcher()
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 17, in load_launcher
+    assert LAUNCHER.is_file(), "Render runtime launcher is missing"
+           ~~~~~~~~~~~~~~~~^^
+AssertionError: Render runtime launcher is missing
+
+======================================================================
+FAIL: test_api_owner_and_unencrypted_database_connections_are_rejected (test_render_worker_launch.RenderWorkerLaunchTests.test_api_owner_and_unencrypted_database_connections_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 57, in test_api_owner_and_unencrypted_database_connections_are_rejected
+    launcher = load_launcher()
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 17, in load_launcher
+    assert LAUNCHER.is_file(), "Render runtime launcher is missing"
+           ~~~~~~~~~~~~~~~~^^
+AssertionError: Render runtime launcher is missing
+
+======================================================================
+FAIL: test_broker_loopback_or_wrong_protocol_is_rejected (test_render_worker_launch.RenderWorkerLaunchTests.test_broker_loopback_or_wrong_protocol_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 72, in test_broker_loopback_or_wrong_protocol_is_rejected
+    launcher = load_launcher()
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 17, in load_launcher
+    assert LAUNCHER.is_file(), "Render runtime launcher is missing"
+           ~~~~~~~~~~~~~~~~^^
+AssertionError: Render runtime launcher is missing
+
+======================================================================
+FAIL: test_check_mode_never_connects_or_executes_and_does_not_print_credentials (test_render_worker_launch.RenderWorkerLaunchTests.test_check_mode_never_connects_or_executes_and_does_not_print_credentials)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 97, in test_check_mode_never_connects_or_executes_and_does_not_print_credentials
+    launcher = load_launcher()
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 17, in load_launcher
+    assert LAUNCHER.is_file(), "Render runtime launcher is missing"
+           ~~~~~~~~~~~~~~~~^^
+AssertionError: Render runtime launcher is missing
+
+======================================================================
+FAIL: test_dispatcher_uses_the_existing_continuous_bounded_outbox_cli (test_render_worker_launch.RenderWorkerLaunchTests.test_dispatcher_uses_the_existing_continuous_bounded_outbox_cli)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 89, in test_dispatcher_uses_the_existing_continuous_bounded_outbox_cli
+    launcher = load_launcher()
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 17, in load_launcher
+    assert LAUNCHER.is_file(), "Render runtime launcher is missing"
+           ~~~~~~~~~~~~~~~~^^
+AssertionError: Render runtime launcher is missing
+
+======================================================================
+FAIL: test_invalid_configuration_exits_before_execution_without_disclosing_a_dsn (test_render_worker_launch.RenderWorkerLaunchTests.test_invalid_configuration_exits_before_execution_without_disclosing_a_dsn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 111, in test_invalid_configuration_exits_before_execution_without_disclosing_a_dsn
+    launcher = load_launcher()
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 17, in load_launcher
+    assert LAUNCHER.is_file(), "Render runtime launcher is missing"
+           ~~~~~~~~~~~~~~~~^^
+AssertionError: Render runtime launcher is missing
+
+======================================================================
+FAIL: test_unconfigured_service_stays_in_standby (test_render_worker_launch.RenderWorkerLaunchTests.test_unconfigured_service_stays_in_standby)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 35, in test_unconfigured_service_stays_in_standby
+    launcher = load_launcher()
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 17, in load_launcher
+    assert LAUNCHER.is_file(), "Render runtime launcher is missing"
+           ~~~~~~~~~~~~~~~~^^
+AssertionError: Render runtime launcher is missing
+
+======================================================================
+FAIL: test_worker_runs_the_canonical_celery_app_with_recovery_and_bounded_concurrency (test_render_worker_launch.RenderWorkerLaunchTests.test_worker_runs_the_canonical_celery_app_with_recovery_and_bounded_concurrency)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 81, in test_worker_runs_the_canonical_celery_app_with_recovery_and_bounded_concurrency
+    launcher = load_launcher()
+  File "C:\Users\laich\Documents\BuyerOS\tests\test_render_worker_launch.py", line 17, in load_launcher
+    assert LAUNCHER.is_file(), "Render runtime launcher is missing"
+           ~~~~~~~~~~~~~~~~^^
+AssertionError: Render runtime launcher is missing
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.002s
+
+FAILED (failures=9)

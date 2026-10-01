@@ -15,6 +15,8 @@ Status: **NOT READY FOR LIVE PILOT**. Current production deployment `dpl_wdPCQmz
 
 ## Required gates before staging or a pilot
 
+The user has requested worker creation. A source-controlled Render standby proposal is prepared in root render.yaml with [exact configuration and current US$24/month base cost](runbooks/render-worker-setup.md). It has not been provisioned; authenticated account/workspace, priced-resource decision and later least-privilege worker credential/runtime activation remain separate evidence gates.
+
 | Gate | Owner/evidence needed | Current result | Failure action |
 | --- | --- | --- | --- |
 | Source and contracts | Repository owner: review candidate diff, 78-operation ledger, final PR head SHA | Pending | Keep PR draft until review and remaining gates close. |

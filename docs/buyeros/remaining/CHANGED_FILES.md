@@ -564,3 +564,23 @@ artifacts/t30-production-acceptance-12327c7-20261001.mjs
 artifacts/t30-production-acceptance-12327c7-20261001.json
 artifacts/t30-production-error-scan-12327c7-20261001.json
 ```
+
+## Requested Render worker setup proposal
+
+New proposal: root Render Blueprint, a separate default-standby launch gate, official-schema validation and meaningful startup/process regressions wired into the existing CI. The source-controlled proposal contains no runtime/database/broker credentials. Costs, activation boundaries and variable sources are reviewable in the new runbook; no cloud resources are provisioned.
+
+```text
+.github/workflows/buyeros-ci.yml
+render.yaml
+scripts/run-render-worker.py
+scripts/verify-render-blueprint.py
+tests/test_render_worker_launch.py
+tests/render-worker-process-check.py
+artifacts/t30-render-blueprint-validation-20261001.json
+artifacts/t30-tests/render-worker-launch-red-20261001.txt
+artifacts/t30-tests/render-worker-launch-green-20261001.txt
+docs/buyeros/runbooks/render-worker-setup.md
+docs/buyeros/runbooks/release.md
+docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
+docs/buyeros/remaining/TASKS.json
+```

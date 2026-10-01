@@ -1727,7 +1727,23 @@
             "configuration": "Nine saved production variable records unchanged; paid admission and R2 false; platform binding preserved.",
             "evidence": "artifacts/t30-external-merge-production-12327c7-20261001.json and t30-production-acceptance/error-scan-12327c7-20261001.*",
             "human_scope": "Human FIMMICK/admin confirmation pertains to preceding4181062; current successor has identical app/CI content and unchanged configuration. Agent authenticated domain trace/full staff journey remain unverified.",
-            "follow_up_review": "5e89eb1 deployment evidence is newer than merged PR9 head. Merge base a594219 ensures follow-up diff contains only documentation/evidence; preserve original source records."
+            "follow_up_review": "5e89eb1 deployment evidence is newer than merged PR9 head. The checkpoint through35eb899 contains documentation/evidence only; subsequent requested Render preparation is separately tracked. Preserve original source records."
+          },
+          "render_worker_setup_20261001": {
+            "status": "prepared_not_provisioned_linux_ci_pending_paid_resource_and_account_gates_open",
+            "request": "User asked the agent to create the worker after the existing-target question; no priced provisioning or production worker role grant is fabricated.",
+            "proposal": "root render.yaml: buyer-os-worker and buyer-os-dispatcher, one0.5c-512mb instance each; one buyer-os-broker256mb; allSingapore. BaseUS$24/month before tax/workspace/usage extras, current primary pricing verified2026-10-01. Paid previews/autodeployoff.",
+            "runtime": "Both callers bind the same internal broker. WORKER_RUNTIME_ENABLEDfalse starts standby without BuyerOS imports, connections or queued jobs. Activation requires production, dedicated buyeros_worker_runtime login/TLS and remote broker; name checks do not verify catalog privileges. Canonical Celery concurrency1/prefetch1/recoverybeat and existing bounded dispatcher CLI remain owners.",
+            "local_checks": "Named unittest red0/9/0 exit1 (0.002s); green9/0/0 exit0 (0.023s). Official schema first rejected unquoted YAMLoff; quoted enums pass unchanged validator. Worker/dispatcher --check2/2 standby; canonical module help imports2/2. No database/broker/provider contacted by these checks.",
+            "evidence": "artifacts/t30-tests/render-worker-launch-red/green-20261001.txt; artifacts/t30-render-blueprint-validation-20261001.json; runbooks/render-worker-setup.md exact variables/cost/rollback.",
+            "hosted_checks": "New official schema, launch, Linux SIGTERM and frozen no-dev build/CLI gates added to existing full CI; pending actual completion. Prior35eb899/run36805885881 passed6/6 and does not verify these new changes.",
+            "configuration_missing": "Authenticated Render account/workspace and concreteUS$24/month standby-resource decision. Later runtime activation needs exact production worker role/credential/catalog/queue approval; no migration/source seed or paid provider is part of this proposal.",
+            "provisioned": false,
+            "worker_activated": false,
+            "broker_live_verified": false,
+            "production_schema_changed": false,
+            "paid_provider_enabled": false,
+            "delivery_enabled": false
           }
         }
       }
@@ -1766,6 +1782,6 @@
   ],
   "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "T30 agent-observed authenticated domain API/full staff continuity on current owner-merged12327c7; app/CI equals reviewed4181062, current-source anonymous4/4 and main CI6/6 pass, preceding identical app has human FIMMICK/admin confirmation. User now requests agent-created worker: prepare exact Render worker/dispatcher/one-Valkey configuration, verify costs/account and review before paid provisioning. No provider/pilot authority inferred. T29 assistive/non-text and T28 external journal custody remain open; delivery disabled.",
+  "next_eligible_task": "T30 requested Render worker setup: finish source-bound Linux/full CI verification of reviewed standby configuration, then concreteUS$24/month Singapore worker/dispatcher/one-Valkey creation decision and authenticated account/workspace access. Resources not provisioned; production role/catalog/runtime activation remains a later exact gate. Current app production12327c7 matches reviewed4181062, anonymous4/4/main CI6/6 and prior human FIMMICK/admin confirmation. Agent authenticated full continuity, provider/policy/pilot/R2, T29 assistive/non-text and T28 external journal custody remain open; delivery disabled.",
   "deployed_source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6"
 }

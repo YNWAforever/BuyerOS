@@ -12,7 +12,7 @@ This procedure is a review artifact. It authorizes no cloud creation, deploy, se
 | Celery worker and dispatcher/Render Singapore | `BUYEROS_DATABASE_URL`, `BUYEROS_BROKER_URL`, `BUYEROS_PAID_DISPATCH_ENABLED`, `BUYEROS_RECONCILIATION_ENABLED`, `BUYEROS_RETENTION_POLICY_VERSION` | Same authorized Neon tenant data, one persistent non-evicting Valkey broker, separate worker DB role, paid dispatch false until vendor/finance gate. |
 | R2 private object store | `BUYEROS_R2_ENABLED`, `BUYEROS_R2_ACCOUNT_ID`, `BUYEROS_R2_BUCKET`, `BUYEROS_R2_ACCESS_KEY_ID`, `BUYEROS_R2_SECRET_ACCESS_KEY`, `BUYEROS_R2_JURISDICTION` | Private APAC bucket, server-only credentials, minimum permissions, tested deletion/restore journal and no public object link. |
 
-Never place a secret, DSN, full callback URL with credentials, contact value or provider reference in this document or task output. The current repository does not contain a verified Render/Neon/R2 deployment manifest; create an exact reviewed config diff for the selected account only after target and account ownership are established.
+Never place a secret, DSN, full callback URL with credentials, contact value or provider reference in this document or task output. The repository now has a Render standby configuration proposal in root render.yaml, with costs and source-bound gates in [render-worker-setup.md](render-worker-setup.md). It is not provisioned or live-verified. Authenticated Render account/workspace and priced-resource approval remain pending; Neon worker login/permissions and R2 activation are separate gates.
 
 ## Staged order and checks
 

@@ -55,6 +55,8 @@ jobs:
         working-directory: services/api
       - run: uv run --frozen python ../../scripts/generate-operation-routes.py --check
         working-directory: services/api
+      - run: uv run --frozen python ../../scripts/verify-render-blueprint.py
+        working-directory: services/api
       - run: mkdir -p artifacts
         working-directory: services/api
       - run: uv run --frozen pytest -q --junitxml=artifacts/tests.xml
@@ -88,11 +90,20 @@ jobs:
       - run: python -m pip install uv==0.11.27
       - run: uv sync --frozen
         working-directory: services/worker
+      - run: uv run --frozen python -m unittest discover -s ../../tests -p test_render_worker_launch.py
+        working-directory: services/worker
+      - run: uv run --frozen python ../../tests/render-worker-process-check.py
+        working-directory: services/worker
       - run: mkdir -p artifacts
         working-directory: services/worker
       - run: uv run --frozen pytest -q --junitxml=artifacts/tests.xml
         working-directory: services/worker
       - run: python scripts/check-required-tests.py --junit services/worker/artifacts/tests.xml
+      - run: python -m pip install uv==0.11.27 && uv sync --project services/worker --frozen --no-dev --python 3.12
+      - run: services/worker/.venv/bin/python scripts/run-render-worker.py worker --check
+      - run: services/worker/.venv/bin/python scripts/run-render-worker.py dispatcher --check
+      - run: services/worker/.venv/bin/python -m celery -A buyeros_worker.app:celery_app worker --help
+      - run: services/worker/.venv/bin/python -m buyeros_worker.cli dispatch --help
 
   browser-smoke:
     runs-on: ubuntu-latest
