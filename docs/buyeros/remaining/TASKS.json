@@ -1783,6 +1783,84 @@
   ],
   "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "T30 reviewed Render setup e061d33/full CI36807776580 passes6/6 including Linux standby and frozen production build. ConcreteUS$24/month Singapore worker/dispatcher/one-Valkey standby creation decision and authenticated Render account/workspace access remain required; CLI device authorization pending. Resources not provisioned; production role/catalog/runtime activation remains a later exact gate. Current app production12327c7 matches reviewed4181062, anonymous4/4/main CI6/6 and prior human FIMMICK/admin confirmation. Agent authenticated full continuity, provider/policy/pilot/R2, T29 assistive/non-text and T28 external journal custody remain open; delivery disabled.",
+  "next_eligible_task": "Continue CF02 fenced internal bridge from the observed red tests; CF00 local and CF01 complete. Hosted CF00 proof, paid Cloudflare/deployment/production/provider activation remain gated. No agents; preserve remaining T28/T29/T30 findings.",
+  "hosting_migration_proposal": {
+    "status": "local_implementation_in_progress",
+    "date_hk": "2026-10-01",
+    "source_sha": "aed7a7eb2b7370c10cd7a41306eecf09d378ad42",
+    "design": "docs/superpowers/specs/2026-10-01-cloudflare-job-migration-design.md",
+    "plan": "docs/superpowers/plans/2026-10-01-cloudflare-job-migration.md",
+    "execution_method": "same_session_executing_plans_no_agents",
+    "architecture_exception_approved": true,
+    "implementation_approved": true,
+    "approval_evidence": "Direct user message approve after the Cloudflare design/implementation plan handoff, 2026-10-01 HK. Authorizes local CF00-CF08 implementation and the transport architecture exception only; no owner/provider or production activation record is inferred.",
+    "paid_resources_approved": false,
+    "production_activation_approved": false,
+    "tasks": [
+      {
+        "id": "CF00",
+        "depends_on": [],
+        "status": "complete_local_hosted_gate_pending",
+        "evidence": "artifacts/cloudflare/CF00-checkpoint.json"
+      },
+      {
+        "id": "CF01",
+        "depends_on": [
+          "CF00"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF01-checkpoint.json"
+      },
+      {
+        "id": "CF02",
+        "depends_on": [
+          "CF01"
+        ],
+        "status": "in_progress"
+      },
+      {
+        "id": "CF03",
+        "depends_on": [
+          "CF02"
+        ],
+        "status": "proposed_not_started"
+      },
+      {
+        "id": "CF04",
+        "depends_on": [
+          "CF03"
+        ],
+        "status": "proposed_not_started"
+      },
+      {
+        "id": "CF05",
+        "depends_on": [
+          "CF04"
+        ],
+        "status": "proposed_not_started"
+      },
+      {
+        "id": "CF06",
+        "depends_on": [
+          "CF05"
+        ],
+        "status": "proposed_not_started"
+      },
+      {
+        "id": "CF07",
+        "depends_on": [
+          "CF06"
+        ],
+        "status": "proposed_not_started"
+      },
+      {
+        "id": "CF08",
+        "depends_on": [
+          "CF07"
+        ],
+        "status": "proposed_not_started"
+      }
+    ]
+  },
   "deployed_source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6"
 }
