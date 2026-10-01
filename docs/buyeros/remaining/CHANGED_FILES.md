@@ -1,6 +1,6 @@
 # BuyerOS review inventory
 
-This local T00–T30 release-candidate inventory records the pre-commit diff relative to base `f43a9d88b334c2c4029fa06fa71624ed52efe4a2`. `M` means tracked modification at that snapshot; `??` means newly created file at that snapshot. Generated fixture evidence is listed separately from deployed proof, which does not exist. The eventual PR head SHA is recorded in the PR and final handoff.
+This local T00–T30 release-candidate inventory records the pre-commit diff relative to base `f43a9d88b334c2c4029fa06fa71624ed52efe4a2`. `M` means tracked modification at that snapshot; `??` means newly created file at that snapshot. This is a historical inventory. Generated fixture evidence and subsequent deployment proof are distinguished in `../RELEASE_READINESS.md`; current source/checkpoint details appear in `../REMAINING_DEVELOPMENT_STATUS.md`.
 
 Exact working-tree paths: **410**.
 
@@ -415,4 +415,123 @@ Exact working-tree paths: **410**.
 ?? tests/live-auth-checks.mjs
 ?? tests/live-runs-checks.mjs
 ?? tests/operation-input.types.ts
+```
+
+## Subsequent T29 slice (2026-10-01 HK)
+
+Commit `1f348666e913a275249803daab0654ac75029fcf` contains these 13 paths. The following documentation checkpoint separately records the direct human FIMMICK/admin confirmation and precise verification boundaries.
+
+```text
+.github/workflows/buyeros-ci.yml
+features/live/buyer-results.tsx
+features/live/locale.ts
+playwright.live-zoom.config.ts
+tests/e2e/api-browser-zoom.spec.ts
+tests/e2e/daily-workbench.spec.ts
+tests/e2e/fixtures/workbench-auth.ts
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en.json
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en-buyers.png
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en-operations.png
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK.json
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK-buyers.png
+artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK-operations.png
+```
+
+## Subsequent T30 full continuity slice — 2026-10-01 HK
+
+Starting source479141f5f04455cdc19c786cb40a3a0fd9f4b4d2; author-reviewed current slice below. Source SHA is recorded in the final handoff after commit. Earlier path inventories remain historical.
+
+```text
+.github/workflows/buyeros-ci.yml
+artifacts/t30-local-test-output-20261001.txt
+artifacts/t30-production-metadata-20261001.json
+artifacts/t30-screenshots/t30-continuity-en-desktop-approved-export-fixture.png
+artifacts/t30-screenshots/t30-continuity-en-desktop-mobile-readback-fixture.png
+artifacts/t30-screenshots/t30-continuity-en-desktop-outcome-fixture.png
+artifacts/t30-screenshots/t30-continuity-en-mobile-approved-export-fixture.png
+artifacts/t30-screenshots/t30-continuity-en-mobile-mobile-readback-fixture.png
+artifacts/t30-screenshots/t30-continuity-en-mobile-outcome-fixture.png
+artifacts/t30-screenshots/t30-continuity-zh-HK-desktop-approved-export-fixture.png
+artifacts/t30-screenshots/t30-continuity-zh-HK-desktop-mobile-readback-fixture.png
+artifacts/t30-screenshots/t30-continuity-zh-HK-desktop-outcome-fixture.png
+artifacts/t30-screenshots/t30-continuity-zh-HK-mobile-approved-export-fixture.png
+artifacts/t30-screenshots/t30-continuity-zh-HK-mobile-mobile-readback-fixture.png
+artifacts/t30-screenshots/t30-continuity-zh-HK-mobile-outcome-fixture.png
+artifacts/t30-tests/api-actual-zoom-required-20261001.xml
+artifacts/t30-tests/api-required-20261001.xml
+artifacts/t30-tests/bilingual-continuity-desktop-20261001.xml
+artifacts/t30-tests/buyer-management-required-20261001.xml
+artifacts/t30-tests/buyer-pagination-required-20261001.xml
+artifacts/t30-tests/continuity-all-layouts-20261001.xml
+artifacts/t30-tests/original-acceptance-required-20261001.xml
+artifacts/t30-tests/rollback-guards-20261001.xml
+artifacts/t30-tests/workbench-required-20261001.xml
+artifacts/t30-tests/worker-required-20261001.xml
+artifacts/t30-verification-20261001.json
+docs/buyeros/03_DATA_API_AND_STATE_CONTRACTS.md
+docs/buyeros/RELEASE_READINESS.md
+docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
+docs/buyeros/T30_RELEASE_CANDIDATE_HANDOFF_20261001.md
+docs/buyeros/remaining/API_OPERATION_STATUS.csv
+docs/buyeros/remaining/CHANGED_FILES.md
+docs/buyeros/remaining/TASKS.json
+docs/buyeros/runbooks/release.md
+features/live/buyer-detail.tsx
+features/live/buyer-management-controls.tsx
+features/live/buyer-results.tsx
+features/live/drafts.tsx
+features/live/locale.ts
+features/live/workspace-picker.tsx
+services/api/buyeros_api/api/routes/buyers.py
+services/api/buyeros_api/services/approval_service.py
+services/api/buyeros_api/services/buyer_read.py
+services/api/buyeros_api/services/buyer_view.py
+services/api/buyeros_api/services/draft_service.py
+services/api/tests/test_draft_approval_context_db.py
+services/api/tests/test_draft_approval_migration.py
+services/api/tests/test_draft_persistence_db.py
+services/api/tools/serve_e2e_fixture.py
+services/live/profile.ts
+services/worker/buyeros_worker/handlers/draft_generate.py
+services/worker/tests/fixtures/prepare_browser_project.py
+services/worker/tests/test_grounded_drafts.py
+tests/e2e/buyer-management.spec.ts
+tests/e2e/daily-workbench.spec.ts
+tests/e2e/fixtures/workbench-auth.ts
+tests/e2e/mvp-a-research.spec.ts
+tests/live-adapter-checks.mjs
+```
+
+## T30 publication evidence checkpoint
+
+Application/test commit41810627540dd52c4567f853ae65d51e2bb6365d above has58 paths and six-job CI success. This following checkpoint changes only documentation/evidence, including the current hosted zoom files. No application/schema/owner approval change.
+
+```text
+artifacts/t30-hosted-ci-20261001.json
+artifacts/t30-preview-metadata-4181062.json
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-en-buyers.png
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-en-operations.png
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-en.json
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-zh-HK-buyers.png
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-zh-HK-operations.png
+artifacts/t30-screenshots/t30-hosted-api-actual-zoom-4181062-zh-HK.json
+artifacts/t30-verification-20261001.json
+docs/buyeros/RELEASE_READINESS.md
+docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
+docs/buyeros/T30_RELEASE_CANDIDATE_HANDOFF_20261001.md
+docs/buyeros/remaining/CHANGED_FILES.md
+docs/buyeros/remaining/TASKS.json
+docs/buyeros/runbooks/release.md
+```
+
+## T30 published-checkpoint reconciliation
+
+Documentation/evidence only: preserve reviewed application source4181062 and deployed source62d40bc. Correct the stale unpublished-CI and T30-fixture-pending descriptions; retain fresh six-job success metadata for documentation head326de15. No application, migration, owner approval or activation change.
+
+```text
+artifacts/t30-ci-head-checkpoint-20261001.json
+docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
+docs/buyeros/T30_RELEASE_CANDIDATE_HANDOFF_20261001.md
+docs/buyeros/remaining/CHANGED_FILES.md
+docs/buyeros/remaining/TASKS.json
 ```

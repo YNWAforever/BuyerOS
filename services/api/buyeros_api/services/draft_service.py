@@ -7,6 +7,48 @@ class UncitedClaim(Exception):
     pass
 
 
+async def preparation_recipient_context(session, *, workspace_id, project_id, company_id, contact_id):
+    """Bind an existing recipient and current purpose policy; never discover a contact."""
+    from datetime import datetime, timezone
+    from hashlib import sha256
+    from sqlalchemy import and_, or_, select
+    from ..api.errors import ApiError
+    from ..db.policy import PolicyDecision
+    from ..db.runs import ContactPoint
+    from .policy_service import evaluate_current_policy
+
+    now = datetime.now(timezone.utc)
+    contact = (await session.execute(select(ContactPoint).where(
+        ContactPoint.workspace_id == workspace_id, ContactPoint.company_id == company_id,
+        ContactPoint.id == contact_id,
+    ).with_for_update())).scalar_one_or_none()
+    if (contact is None or contact.quarantined or contact.type != "business_email"
+            or contact.validity != "provider_marked_valid" or not contact.normalized_value
+            or contact.checked_at is None or contact.retention_expires_at is None
+            or contact.retention_expires_at <= now):
+        raise ApiError(412, "STALE_REVISION", "current retained eligible recipient required")
+    purposes = ("draft_preparation", "outreach", "export_contacts")
+    subject = {"workspace_id": workspace_id, "project_id": project_id,
+               "company_id": company_id, "contact_point_id": contact.id}
+    for purpose in purposes:
+        if not (await evaluate_current_policy(session, subject, purpose, now))["allowed"]:
+            raise ApiError(403, "POLICY_BLOCKED", f"{purpose} is not permitted")
+    scopes = [and_(PolicyDecision.subject_type == kind, PolicyDecision.subject_id == value)
+              for kind, value in (("project", project_id), ("company", company_id),
+                                  ("contact_point", contact.id))]
+    rows = (await session.execute(select(PolicyDecision).where(
+        PolicyDecision.workspace_id == workspace_id,
+        PolicyDecision.controller_scope_id == workspace_id,
+        PolicyDecision.purpose.in_(purposes), or_(*scopes), PolicyDecision.expires_at > now,
+    ).order_by(PolicyDecision.id))).scalars().all()
+    return {"contact": {"id": str(contact.id), "version": contact.version,
+        "type": contact.type, "validity": contact.validity,
+        "value_hash": sha256(contact.normalized_value.encode()).hexdigest(),
+        "checked_at": contact.checked_at.isoformat(), "retention_until": contact.retention_expires_at.isoformat()},
+        "policies": [{"id": str(row.id), "version": row.version, "purpose": row.purpose,
+                      "status": row.status, "expires_at": row.expires_at.isoformat()} for row in rows]}
+
+
 def validate_grounding(revision: dict, allowed_evidence: set[str], allowed_facts: set[str]) -> dict:
     evidence = revision.get("evidence_ids", [])
     facts = revision.get("offer_fact_ids", [])
@@ -36,14 +78,13 @@ async def admit_grounded_template(session, *, workspace_id, project_id, actor_id
     from ..db.policy import PolicyDecision
     from .buyer_read import _fit_freshness
     from .outbox_service import build_intent
-    from .policy_service import evaluate_current_policy
+    from .policy_service import evaluate_current_policy, policy_workspace_lock
 
     if Decimal(request.max_cost.amount) != 0:
         raise ApiError(503, "PROVIDER_UNAVAILABLE", "no verified paid model route is selected")
-    if request.recipient_contact_id is not None:
-        raise ApiError(503, "PROVIDER_UNAVAILABLE", "addressed draft preparation is not enabled")
     if request.language not in {"en", "zh-HK"}:
         raise ApiError(422, "INVALID_REQUEST", "unsupported draft language")
+    await policy_workspace_lock(session, workspace_id)
     project = (await session.execute(select(Project).where(
         Project.workspace_id == workspace_id, Project.id == project_id,
     ).with_for_update())).scalar_one_or_none()
@@ -93,6 +134,10 @@ async def admit_grounded_template(session, *, workspace_id, project_id, actor_id
     }, "draft_preparation", datetime.now(timezone.utc))
     if not decision["allowed"]:
         raise ApiError(403, "POLICY_BLOCKED", "draft preparation is not permitted")
+    recipient_context = None
+    if request.recipient_contact_id is not None:
+        recipient_context = await preparation_recipient_context(session, workspace_id=workspace_id,
+            project_id=project_id, company_id=buyer.company_id, contact_id=request.recipient_contact_id)
     selected_fact_ids = [str(value) for value in request.approved_offer_fact_ids]
     if len(set(selected_fact_ids)) != len(selected_fact_ids):
         raise ApiError(422, "INVALID_REQUEST", "duplicate offer fact")
@@ -151,6 +196,8 @@ async def admit_grounded_template(session, *, workspace_id, project_id, actor_id
                "language": request.language, "kind": request.kind,
                "parent_draft_id": str(request.parent_draft_id) if request.parent_draft_id else None,
                "route": "grounded-template.v1", "max_cost": request.max_cost.amount}
+    if recipient_context is not None:
+        command["recipient_context"] = recipient_context
     job = AsyncJob(workspace_id=workspace_id, project_id=project_id, actor_user_id=actor_id,
                    kind="draft_generation", operation="generateDraft", command=command,
                    status="queued", requested=1, processed=0, updated=0, unchanged=0,

@@ -94,27 +94,27 @@ export function LiveBuyerDetail({buyer,locale,canEdit,canQuote,canReview,ownMemb
   }
   const data=full??buyer;
   return <><div className="live-buyer-backdrop" onClick={onClose} aria-hidden="true" />
-    <section className="panel live-buyer-drawer" role="dialog" aria-modal="true" aria-label={`Buyer details: ${buyer.name}`}>
+    <section className="panel live-buyer-drawer" role="dialog" aria-modal="true" aria-label={t('Buyer details: {buyer}').replace('{buyer}',buyer.name)}>
     <div className="inline spread"><h3 ref={titleRef} tabIndex={-1}>{buyer.name}</h3><div className="inline">
-      <button type="button" disabled={!onPrevious} onClick={onPrevious}>Previous buyer</button>
-      <button type="button" disabled={!onNext} onClick={onNext}>Next buyer</button>
-      <button type="button" onClick={onClose}>Close details</button>
+      <button type="button" disabled={!onPrevious} onClick={onPrevious}>{t('Previous buyer')}</button>
+      <button type="button" disabled={!onNext} onClick={onNext}>{t('Next buyer')}</button>
+      <button type="button" onClick={onClose}>{t('Close details')}</button>
     </div></div>
-    <div role="tablist" aria-label="Buyer dossier tabs" className="inline">{(['Overview','Evidence','Contacts','Activity'] as const).map(name=>
-      <button type="button" role="tab" aria-selected={tab===name} key={name} onClick={()=>setTab(name)}>{name}</button>)}</div>
+    <div role="tablist" aria-label={t('Buyer dossier tabs')} className="inline">{(['Overview','Evidence','Contacts','Activity'] as const).map(name=>
+      <button type="button" role="tab" aria-selected={tab===name} key={name} onClick={()=>setTab(name)}>{t(name)}</button>)}</div>
     {error&&<p role="alert">{error}</p>}
-    {!full||evidence===null?<p role="status">Loading buyer dossier...</p>:<div role="tabpanel">
-      {tab==='Overview'&&<><p>Company: {data.name}</p><p>Domain: {data.domain??'Unknown'}</p><p>Fit: {data.fitVerdict??'Not assessed'}{data.fitFreshness==='stale'&&` · ${t('stale evidence')}`}</p>
-        {data.fitRationale&&<p>Assessment: {data.fitRationale}</p>}{canEdit&&data.reviewStatus==='accepted'&&data.fitVerdict==='match'&&data.fitFreshness==='current'&&<button type="button" onClick={()=>{const scope=session.current();if(scope.workspace&&scope.project){onClose();router.push(`/app/outreach?${new URLSearchParams({workspace:scope.workspace,project:scope.project,buyer:data.id})}`);}}}>{t('Prepare grounded draft')}</button>}<p>Human review: {data.reviewStatus??'Not reviewed'}</p>
-        <p>Owner membership: {data.ownerMembershipId??'Unassigned'}</p><p>Evidence records: {data.evidenceCount}</p>
-        {canEdit&&<><div className="inline"><label>Buyer note <textarea aria-label="Buyer note" maxLength={20000} value={note} onChange={event=>setNote(event.target.value)}/></label>
-          <button type="button" disabled={saving} onClick={()=>void savePatch({note})}>{saving?'Saving...':'Save note'}</button>
-          <button type="button" disabled={saving||!onNext} onClick={()=>void savePatch({note},true)}>Save note and next</button></div>
-          <div className="inline">{ownMembershipId&&data.ownerMembershipId!==ownMembershipId&&<button type="button" disabled={saving} onClick={()=>void savePatch({owner_membership_id:ownMembershipId})}>Assign to me</button>}
-            {data.ownerMembershipId&&<button type="button" disabled={saving} onClick={()=>void savePatch({owner_membership_id:null})}>Clear owner</button>}</div></>}
-        {canReview&&<div className="inline"><label>Individual review status <select aria-label="Individual review status" value={reviewStatus} onChange={event=>setReviewStatus(event.target.value as typeof reviewStatus)}><option value="accepted">Accepted</option><option value="rejected">Rejected</option><option value="needs_information">Needs information</option></select></label>
-          <label>Individual review reason <input aria-label="Individual review reason" value={reviewReason} onChange={event=>setReviewReason(event.target.value)}/></label>
-          <button type="button" disabled={saving||reviewReason.trim().length<3} onClick={()=>void saveReviewAndNext()}>{onNext?'Save review and next':'Save review'}</button></div>}
+    {!full||evidence===null?<p role="status">{t('Loading buyer dossier...')}</p>:<div role="tabpanel">
+      {tab==='Overview'&&<><p>{t('Company')}: {data.name}</p><p>{t('Domain')}: {data.domain??t('Unknown')}</p><p>{t('Fit')}: {t(data.fitVerdict??'Not assessed')}{data.fitFreshness==='stale'&&` · ${t('stale evidence')}`}</p>
+        {data.fitRationale&&<p>{t('Assessment')}: {data.fitRationale}</p>}{canEdit&&data.reviewStatus==='accepted'&&data.fitVerdict==='match'&&data.fitFreshness==='current'&&<button type="button" onClick={()=>{const scope=session.current();if(scope.workspace&&scope.project){onClose();router.push(`/app/outreach?${new URLSearchParams({workspace:scope.workspace,project:scope.project,buyer:data.id})}`);}}}>{t('Prepare grounded draft')}</button>}<p>{t('Human review')}: {t(data.reviewStatus??'Not reviewed')}</p>
+        <p>{t('Owner membership')}: {data.ownerMembershipId??t('Unassigned')}</p><p>{t('Evidence records')}: {data.evidenceCount}</p>
+        {canEdit&&<><div className="inline"><label>{t('Buyer note')} <textarea aria-label={t('Buyer note')} maxLength={20000} value={note} onChange={event=>setNote(event.target.value)}/></label>
+          <button type="button" disabled={saving} onClick={()=>void savePatch({note})}>{saving?t('Saving...'):t('Save note')}</button>
+          <button type="button" disabled={saving||!onNext} onClick={()=>void savePatch({note},true)}>{t('Save note and next')}</button></div>
+          <div className="inline">{ownMembershipId&&data.ownerMembershipId!==ownMembershipId&&<button type="button" disabled={saving} onClick={()=>void savePatch({owner_membership_id:ownMembershipId})}>{t('Assign to me')}</button>}
+            {data.ownerMembershipId&&<button type="button" disabled={saving} onClick={()=>void savePatch({owner_membership_id:null})}>{t('Clear owner')}</button>}</div></>}
+        {canReview&&<div className="inline"><label>{t('Individual review status')} <select aria-label={t('Individual review status')} value={reviewStatus} onChange={event=>setReviewStatus(event.target.value as typeof reviewStatus)}><option value="accepted">{t('Accepted')}</option><option value="rejected">{t('Rejected')}</option><option value="needs_information">{t('Needs information')}</option></select></label>
+          <label>{t('Individual review reason')} <input aria-label={t('Individual review reason')} value={reviewReason} onChange={event=>setReviewReason(event.target.value)}/></label>
+          <button type="button" disabled={saving||reviewReason.trim().length<3} onClick={()=>void saveReviewAndNext()}>{t(onNext?'Save review and next':'Save review')}</button></div>}
         {saveError&&<p role="alert">{saveError}</p>}</>}
       {tab==='Evidence'&&(evidence.length?evidence.map(row=><div className="activity" key={row.id}><div><b>{t(row.relationship)}</b>
         <p>{row.excerpt}</p>{row.translatedExcerpt&&<p>{t('Translation')}: {row.translatedExcerpt}</p>}
@@ -126,11 +126,11 @@ export function LiveBuyerDetail({buyer,locale,canEdit,canQuote,canReview,ownMemb
         {row.originalLanguage&&<p>{t('Original language')}: {row.originalLanguage}</p>}
         {row.contentHash&&<p>{t('Content hash')}: {row.contentHash}</p>}
       </div></div>):<p>{t('No evidence recorded for this buyer.')}</p>)}
-      {tab==='Contacts'&&<><p>Contact research: {data.contactResearchStatus??'Unknown'}</p>
-        <p>No contact details are available in this read model.</p>
+      {tab==='Contacts'&&<><p>{t('Contact research')}: {t(data.contactResearchStatus??'Unknown')}</p>
+        <p>{t('Eligible retained recipients can be selected when preparing a grounded draft.')}</p>
         <ContactQuotePreview key={`${data.id}:${data.version}`} buyerId={data.id} buyerVersion={data.version} canQuote={canQuote} t={t}/></>}
-      {tab==='Activity'&&<><p>Review: {data.reviewStatus??'No human review recorded'}</p>
-        {data.reviewReason&&<p>Reason: {data.reviewReason}</p>}{data.reviewAt&&<p>Reviewed at: {data.reviewAt}</p>}</>}
+      {tab==='Activity'&&<><p>{t('Review')}: {t(data.reviewStatus??'No human review recorded')}</p>
+        {data.reviewReason&&<p>{t('Reason')}: {data.reviewReason}</p>}{data.reviewAt&&<p>{t('Reviewed at')}: {data.reviewAt}</p>}</>}
     </div>}
   </section></>;
 }

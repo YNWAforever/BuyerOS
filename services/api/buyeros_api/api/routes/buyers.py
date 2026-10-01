@@ -96,7 +96,7 @@ async def get_buyer(
     from sqlalchemy import select
 
     from ...db.buyers import Company, ProjectBuyer
-    from ...services.buyer_read import view
+    from ...services.buyer_read import view, contact_detail
     from ..deps import load_membership, permission_for_roles, tenant_scoped
 
     async with tenant_scoped(workspace_id) as session:
@@ -117,6 +117,8 @@ async def get_buyer(
             raise ApiError(404, "NOT_FOUND", "buyer not found")
         buyer, company = row
         data = await view(session, workspace_id=workspace_id, buyer=buyer, company=company)
+        if set(membership["roles"]) & {"operator", "reviewer", "workspace_admin"}:
+            data["contacts"] = await contact_detail(session, workspace_id=workspace_id, buyer=buyer)
     return envelope(data, request.state.request_id)
 
 

@@ -1,0 +1,279 @@
+{
+  "status": "explicitly_approved_applied_deployed_anonymous_runtime_and_auth0_entry_verified_staff_session_pending",
+  "tenant": "dev-oaug20cdxqqgn1s8.us.auth0.com",
+  "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R",
+  "current_client": {
+    "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R",
+    "name": "BuyerOS",
+    "app_type": "regular_web",
+    "token_endpoint_auth_method": "client_secret_post",
+    "callbacks": [
+      "http://localhost:3000/auth/callback"
+    ],
+    "allowed_logout_urls": [
+      "http://localhost:3000/"
+    ],
+    "web_origins": null,
+    "allowed_origins": null,
+    "grant_types": [
+      "authorization_code",
+      "implicit",
+      "refresh_token",
+      "client_credentials"
+    ],
+    "oidc_conformant": true,
+    "is_first_party": true
+  },
+  "create_api": {
+    "name": "BuyerOS",
+    "identifier": "https://buyer-os-nu.vercel.app/v1",
+    "signing_alg": "RS256",
+    "allow_offline_access": false,
+    "token_lifetime": 3600,
+    "token_lifetime_for_web": 3600,
+    "scopes": []
+  },
+  "patch_client": {
+    "app_type": "spa",
+    "token_endpoint_auth_method": "none",
+    "grant_types": [
+      "authorization_code"
+    ],
+    "callbacks": [
+      "http://localhost:3000/auth/callback",
+      "https://buyer-os-nu.vercel.app/auth/callback",
+      "https://buyer-os-ynwaforevers-projects.vercel.app/auth/callback"
+    ],
+    "allowed_logout_urls": [
+      "http://localhost:3000/",
+      "https://buyer-os-nu.vercel.app/app",
+      "https://buyer-os-ynwaforevers-projects.vercel.app/app",
+      "http://localhost:3000/app"
+    ],
+    "web_origins": [
+      "https://buyer-os-nu.vercel.app",
+      "https://buyer-os-ynwaforevers-projects.vercel.app",
+      "http://localhost:3000"
+    ],
+    "allowed_origins": [
+      "https://buyer-os-nu.vercel.app",
+      "https://buyer-os-ynwaforevers-projects.vercel.app",
+      "http://localhost:3000"
+    ]
+  },
+  "vercel_environment_after_verification": {
+    "key": "BUYEROS_AUTH0_AUDIENCE",
+    "value": "https://buyer-os-nu.vercel.app/v1",
+    "type": "plain",
+    "target": [
+      "production"
+    ]
+  },
+  "risk": "Converting this existing client disables client-secret authentication, client_credentials, implicit and refresh_token grants. Any other integration using those features would need a separate confidential client. BuyerOS source uses public authorization code with PKCE and in-memory access tokens.",
+  "preserved": "Client ID/name, existing localhost callback/logout entries, OIDC/first-party flags, unrelated client settings, database memberships/RLS, disabled provider/delivery switches.",
+  "not_included": [
+    "deployment",
+    "domain_data_seed",
+    "membership_bootstrap",
+    "paid_provider_calls",
+    "delivery_activation"
+  ],
+  "verification_plan": [
+    "Re-read client fields and API identifier before applying; stop if changed.",
+    "Create the API only if still absent; record its ID without secrets.",
+    "Patch only listed client fields; preserve existing URLs.",
+    "Read back exact client/API configuration.",
+    "Probe both production callback URLs with PKCE and prompt=none; require expected unauthenticated response instead of callback/audience error.",
+    "Save and read back public audience in Vercel production."
+  ],
+  "execution_record": {
+    "tenant": "dev-oaug20cdxqqgn1s8.us.auth0.com",
+    "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R",
+    "audience": "https://buyer-os-nu.vercel.app/v1",
+    "changes": [
+      "created_custom_api",
+      "configured_public_spa"
+    ],
+    "api": {
+      "id": "6abc62c95f1a148990e0595d",
+      "name": "BuyerOS",
+      "identifier": "https://buyer-os-nu.vercel.app/v1",
+      "signing_alg": "RS256",
+      "allow_offline_access": false,
+      "token_lifetime": 3600,
+      "token_lifetime_for_web": 3600
+    },
+    "client": {
+      "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R",
+      "name": "BuyerOS",
+      "app_type": "spa",
+      "token_endpoint_auth_method": "none",
+      "callbacks": [
+        "http://localhost:3000/auth/callback",
+        "https://buyer-os-nu.vercel.app/auth/callback",
+        "https://buyer-os-ynwaforevers-projects.vercel.app/auth/callback"
+      ],
+      "allowed_logout_urls": [
+        "http://localhost:3000/",
+        "https://buyer-os-nu.vercel.app/app",
+        "https://buyer-os-ynwaforevers-projects.vercel.app/app",
+        "http://localhost:3000/app"
+      ],
+      "web_origins": [
+        "https://buyer-os-nu.vercel.app",
+        "https://buyer-os-ynwaforevers-projects.vercel.app",
+        "http://localhost:3000"
+      ],
+      "allowed_origins": [
+        "https://buyer-os-nu.vercel.app",
+        "https://buyer-os-ynwaforevers-projects.vercel.app",
+        "http://localhost:3000"
+      ],
+      "grant_types": [
+        "authorization_code"
+      ],
+      "oidc_conformant": true,
+      "is_first_party": true
+    },
+    "management_readback": "passed",
+    "public_probes": [
+      {
+        "name": "primary_callback",
+        "http_status": 302,
+        "error": "login_required",
+        "callback_mismatch": false,
+        "passed": true,
+        "authorization_code_returned": false
+      },
+      {
+        "name": "secondary_callback",
+        "http_status": 302,
+        "error": "login_required",
+        "callback_mismatch": false,
+        "passed": true,
+        "authorization_code_returned": false
+      },
+      {
+        "name": "unregistered_callback",
+        "http_status": 403,
+        "error": null,
+        "callback_mismatch": true,
+        "passed": true,
+        "authorization_code_returned": false
+      },
+      {
+        "name": "unknown_audience",
+        "http_status": 302,
+        "error": "access_denied",
+        "callback_mismatch": false,
+        "passed": true,
+        "authorization_code_returned": false
+      }
+    ],
+    "public_probe_passed": 4,
+    "public_probe_failed": 0,
+    "public_probe_skipped": 0,
+    "vercel_audience": {
+      "key": "BUYEROS_AUTH0_AUDIENCE",
+      "value": "https://buyer-os-nu.vercel.app/v1",
+      "type": "plain",
+      "target": [
+        "production"
+      ]
+    },
+    "vercel_readback": "passed",
+    "production_environment_count": 9,
+    "redeployed": true
+  },
+  "deployment_verification": {
+    "deployment_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+    "source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+    "state": "READY",
+    "target": "production",
+    "public_origin": "https://buyer-os-nu.vercel.app",
+    "frontend_http_status": 200,
+    "frontend_routes": [
+      "/",
+      "/app",
+      "/auth/callback"
+    ],
+    "public_config_in_authorize_request": true,
+    "unauthenticated_api_status": 401,
+    "unauthenticated_api_code": "UNAUTHENTICATED",
+    "acceptance": {
+      "passed": 4,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 5271.2125
+    },
+    "browser": {
+      "initial_html_status": 200,
+      "application_errors": [],
+      "universal_login_origin": "https://dev-oaug20cdxqqgn1s8.us.auth0.com",
+      "universal_login_path": "/u/login",
+      "visible_blank_email_field": true,
+      "credentials_entered": false
+    },
+    "authorize_request": {
+      "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R",
+      "audience": "https://buyer-os-nu.vercel.app/v1",
+      "redirect_uri": "https://buyer-os-nu.vercel.app/auth/callback",
+      "response_type": "code",
+      "code_challenge_method": "S256",
+      "pkce_challenge_present": true
+    },
+    "real_staff_session_verified": false,
+    "previous_failed_deployment": {
+      "deployment_id": "dpl_8euDMPQdBGKMENWNEHrEnZM4ywF5",
+      "source_sha": "0852552c47676598adea5c3478938ae3f594a5d9",
+      "state": "READY",
+      "frontend_http_status": 500,
+      "public_config_in_rsc": true,
+      "unauthenticated_api_status": 401,
+      "real_staff_session_verified": false
+    }
+  },
+  "source_fix_verification": {
+    "source_sha": "531774989f842ff8d65cd2fad5164f819301fe16",
+    "change": "Vercel-only public tslib ESM resolution; already-locked tslib 2.8.1 declared explicitly",
+    "linux_node_version": "24.18.0",
+    "built_function_tests": {
+      "passed": 3,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 192.785908
+    },
+    "deployed": true,
+    "real_staff_session_verified": false,
+    "preview": {
+      "deployment_id": "dpl_ABTjYtq5QcWqZD1vzwubehuMU2KM",
+      "source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+      "frontend_status": 200,
+      "anonymous_api_status": 401,
+      "production_auth0_config_in_preview": false
+    },
+    "hosted_ci_jobs_passed": 4,
+    "production_deployment_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+    "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+    "production_environment_applied": true
+  },
+  "initial_workspace_setup": {
+    "separately_user_approved": true,
+    "applied": true,
+    "workspace_name": "FIMMICK",
+    "role": "workspace_admin",
+    "exact_identity_and_membership_readback": "passed",
+    "execution_reference": "INITIAL_WORKSPACE_PROPOSAL.json",
+    "real_staff_api_session_verified": false,
+    "human_staff_ui_confirmation": {
+      "date_hk": "2026-10-01",
+      "source": "Direct user reply to refresh/sign-in workspace confirmation question",
+      "answer": "FIMMICK and admin role are visible",
+      "method": "human reported UI confirmation",
+      "authenticated_api_trace_observed_by_agent": false,
+      "full_staff_journey_verified": false
+    }
+  }
+}

@@ -256,8 +256,8 @@ def _seed_draft_approval_context(conn) -> None:
     draft = "ec000000-0000-4000-8000-000000000002"
     revision = "ee000000-0000-4000-8000-000000000002"
     conn.execute("INSERT INTO contact_points(id,workspace_id,company_id,type,normalized_value,"
-                 "validity,checked_at,quarantined) VALUES (%s,%s,%s,'business_email',"
-                 "'recipient@fixture.example.test','provider_marked_valid',now(),false)",
+                 "validity,checked_at,quarantined,retention_expires_at) VALUES (%s,%s,%s,'business_email',"
+                 "'recipient@fixture.example.test','provider_marked_valid',now(),false,now()+interval '1 day')",
                  (contact, WORKSPACE_ID, company))
     for index,purpose in enumerate(("outreach","export_contacts"),start=2):
         policy=f"ed000000-0000-4000-8000-{index:012x}"

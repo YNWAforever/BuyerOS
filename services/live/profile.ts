@@ -65,6 +65,8 @@ export function toProjectCreate(offer: Offerish) {
 }
 
 type RequirementCategory = 'must' | 'nice' | 'exclude';
+const BUYER_TYPES:Record<string,string>={Distributor:'distributor',Importer:'importer',Wholesaler:'wholesaler',
+  Retailer:'retailer','System integrator':'system_integrator','End-user business':'end_user_business'};
 function requirements(text: string, category: RequirementCategory) {
   return split(text).map((item, index) => ({
     // IDs are stable across same-payload retries and unique within a version.
@@ -94,7 +96,7 @@ export function toIcpSaveRequest(offer: Offerish) {
     })),
     requirements: requirementsList,
     markets,
-    buyer_types: offer.buyerTypes?.length ? offer.buyerTypes : ['Distributor'],
+    buyer_types: (offer.buyerTypes?.length ? offer.buyerTypes : ['Distributor']).map(value=>BUYER_TYPES[value]??value),
     languages,
     desired_roles: split(offer.roles ?? ''),
   };
@@ -136,7 +138,7 @@ export function offerFromProject(project: ProjectForOffer, icp?: ProfileForOffer
   return {...emptyLiveOffer(),company:project.company_name||project.name,product:fact('product')??text[0]??'',
     value:fact('value_proposition')??text[1]??'',website:project.website??'',
     markets:project.markets.join(', '),language:project.language_preferences.join(', '),
-    buyerTypes:icp?.buyer_types??[],roles:icp?.desired_roles?.join(', ')??'',
+    buyerTypes:(icp?.buyer_types??[]).map(value=>Object.keys(BUYER_TYPES).find(label=>BUYER_TYPES[label]===value)??value),roles:icp?.desired_roles?.join(', ')??'',
     must:icp?.requirements.filter(item=>item.category==='must').map(item=>item.text).join('; ')??'',
     nice:icp?.requirements.filter(item=>item.category==='nice').map(item=>item.text).join('; ')??'',
     exclude:icp?.requirements.filter(item=>item.category==='exclude').map(item=>item.text).join('; ')??'',

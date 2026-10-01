@@ -3,7 +3,7 @@
   "plan_status": "execution_in_progress",
   "executor": "Codex GPT-6 Sol",
   "audit_baseline": "5e61f401bf1bcdf80ea1ce254dd9c62e8eedbab0",
-  "date_hk": "2026-09-27",
+  "date_hk": "2026-10-01",
   "tasks": [
     {
       "id": "T00",
@@ -1083,13 +1083,13 @@
         "performance_pre_rate_pool_fix": "10k buyers/100 workspaces; ten distinct fixture staff P95 274.030ms, 11 SQL/request; buyer PATCH P95 62.865ms, run admission P95 88.219ms; 100-workspace broker publish P95 4.039s. All in-process/disposable, no provider/deployed proof.",
         "rate_pool_regression": "red HTTP 500 SQLAlchemy TimeoutError with one tenant slot; green 2 passed, 0 failed/skipped, 8 warnings in 46.56s on disposable PostgreSQL; strict full API rerun pending after Docker setup stalled",
         "screenshots": "artifacts/t29-screenshots/*-post-retry.png contains four en/zh-HK 390/1440 fixture screenshots; regenerated zh-results-usage-390-post-extraction.png visually inspected after the 17-test suite with SHA256 E3E8B8BEB965BEB206DE02482D60DD511A05FF1FFCAAB3464138F2845956BF28",
-        "remaining": "Actual browser 200% zoom, screen reader and non-text contrast of other controls/icons remain unverified; T30 addressed exact approval continuity and current strict API/worker/API-backed browser gates after Docker recovery; external activation. T29 demo route/table code is locally implemented but these acceptance conditions remain open.",
+        "remaining": "Actual Chromium tab zoom is verified for the disposable API-backed six-route workbench in en/zh-HK. T30 complete same-dataset addressed fixture journey passes4/4. Screen reader, unmeasured non-text controls/icons and external activation remain open.",
         "performance_post_rate_pool_fix": "10k buyers/100 workspaces; sequential read P95 39.377ms, ten distinct fixture staff P95 244.895ms, 11 SQL/request, 10 DB connections; buyer PATCH P95 60.865ms, run admission P95 168.524ms, 100-workspace broker publish P95 2.280s. API 1/1, dispatcher 1/1, mutation 1/1; in-process/disposable only.",
         "accessibility": "measured browser-computed text contrast for visible Overview, Results and Operations text in en/zh-HK; new form-control boundary/fill regression red 16 Results controls at 1.0-1.27:1, green focused 1/1 in 1.9m and full workbench 8/8 in 2.7m. Actual zoom, screen reader and unmeasured non-text elements pending",
         "scope_list_timeout": "red permanent spinner on held first GET; bounded timeout/retry green focused 1 passed in 3.1m and included in full 7/7 suite",
         "strict_api": "567 passed, 0 failed/errors/skipped, 109 warnings in 310.90s; required JUnit gate 567/0/0/0 after admission-pool fix",
         "strict_worker": "168 passed, 0 failed/errors/skipped, 4 warnings in 41.33s; required JUnit gate 168/0/0/0",
-        "actual_zoom": "2026-09-30: isolated Chromium extension tabs.setZoom/getZoom 2.0; observed 1440->720 CSS px and DPR 1->2. Final pnpm.cmd exec playwright test --config playwright.zoom.config.ts tests/e2e/actual-browser-zoom.spec.ts --reporter=line passed 2/2, 0 failed/skipped in 22.9s across six fictional demo routes in en/zh-HK; element bounds, text clipping and document overflow asserted. Screen reader, remaining non-text contrast and API-backed actual zoom unverified. Misleading CDP/Playwright zoom captures were removed; prior responsive screenshots retained.",
+        "actual_zoom": "2026-09-30: isolated Chromium extension tabs.setZoom/getZoom 2.0; observed 1440->720 CSS px and DPR 1->2. Final pnpm.cmd exec playwright test --config playwright.zoom.config.ts tests/e2e/actual-browser-zoom.spec.ts --reporter=line passed 2/2, 0 failed/skipped in 22.9s across six fictional demo routes in en/zh-HK; element bounds, text clipping and document overflow asserted. Screen reader, remaining non-text contrast and API-backed actual zoom unverified. Misleading CDP/Playwright zoom captures were removed; prior responsive screenshots retained. API-backed actual tab zoom/localized buyer controls subsequently passed2/2 on2026-10-01 HK; see api_actual_zoom_localization.",
         "navigation_extraction": "Demo sidebar and top-bar shell moved into features/workspace/navigation.tsx and shell.tsx with parent-owned route/usage/locale callbacks preserved; focused sidebar Playwright 1/1 in 2.3m, final full demo responsive/accessibility 7/7 in 4.1m; pnpm lint, tsc --noEmit and Vinext production build passed. Demo fixtures, not live identity/provider or actual 200% zoom.",
         "modal_extraction": "features/workspace/modals.tsx owns fictional source and connection requirements dialogs with parent-owned open state; focused browser 1/1 in 2.1m, full demo responsive 8/8 in 3.1m; full lint, tsc --noEmit and Vinext build pass. Route view/general action modal extraction remains open.",
         "route_heading_extraction": "features/workspace/route-view.tsx owns demo project strip, localized page heading and sample/new-search actions; parent still owns route and modal state. Focused browser 1/1 in 2.8m; final full demo suite 9/9 in 3.4m; full lint, tsc --noEmit and Vinext build passed. Route bodies remain in parent.",
@@ -1104,7 +1104,126 @@
         "buyer_table_extraction": "Shared fictional buyer table moved to features/workspace/buyer-table.tsx with typed presentation props; DemoWorkspace retains filter, selection, pagination, export, list mutation and buyer navigation state. New desktop real-page regression baseline 1/1 in 6.3s and post-extraction focused 2/2 in 13.2s. Initial regression failed after a full page reload discarded expected session-only list state; corrected to in-app navigation. Mobile screenshot exposed a sidebar sheet remaining open after route selection; added hidden-sheet assertion, observed red 1/1, then closed mobile sheet on navigation in navigation.tsx and observed green 1/1. Strengthened 390px test saves a page-two buyer absent from the seed list, confirms list grows 3->4, and passed focused 1/1 in 8.4s. Final direct Vinext responsive/accessibility suite 18/18, 0 failed/skipped in 1.7m. Final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, node scripts/generate-api-types.mjs --check, services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; build retains nonfatal >500 kB chunk advisory. Visually inspected en buyer page-two 1280 screenshot SHA256 0C51B0EDBB6762344C6CF86DB267DCDB2C56AAEA49242BAAC631A43013B49634 and en saved-list 390 screenshot SHA256 C716797B484F3FE64D7FB9BA8892D3D9BD7EA90F4910222E7F7574FED8A98E96. No schema/provider/delivery change; current strict DB gate still blocked by local Docker startup.",
         "full_buyer_route_extraction": "DemoFullBuyerView moved fictional full-buyer route wrapper and missing-record recovery to features/workspace/route-view.tsx; parent retains route/data/action/source/update callbacks and shared BuyerDetail drawer. Baseline new full-dossier regression red 1/1 because hidden Full-page view was assumed as return control; revised to require a visible Return to buyers action, observed red 1/1, then green 1/1 in 5.2s after adding accessible return. zh-HK 390px dossier passed 1/1; added untranslated note-placeholder assertion red 1/1, localized it in BuyerDetail/locales and focused green 2/2 in 8.8s. Final direct Vinext responsive/accessibility suite 20/20, 0 failed/skipped in 1.5m. Final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, node scripts/generate-api-types.mjs --check and services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; build retains nonfatal >500 kB chunk advisory. Visually inspected zh-buyer-full-390-post-extraction.png SHA256 9D93F87A9FFD949527022B1375ADF9CE7369518FFD06B83C5476E78C36A3656D. No schema/provider/delivery change.",
         "nontext_buyer_controls": "New browser-computed contrast regression for visible demo buyer search and desktop filter boundaries in en/zh-HK at 390/1280 CSS px: red 1/1, search border rgb(224,229,238) measured 1.26:1 on white; scoped CSS changed border to #6d7c8f (4.26:1 on white), focused green 1/1 in 5.6s. Final directly started Vinext responsive/accessibility suite 21/21, 0 failed/skipped in 1.6m. Final pnpm.cmd build, pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, node scripts/generate-api-types.mjs --check and services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; nonfatal >500 kB client chunk advisory remains. Final desktop/mobile screenshots visually inspected with SHA256 0C51B0EDBB6762344C6CF86DB267DCDB2C56AAEA49242BAAC631A43013B49634 and C716797B484F3FE64D7FB9BA8892D3D9BD7EA90F4910222E7F7574FED8A98E96.",
-        "release_reconciliation": "2026-09-29: 410 unstaged paths, 0 staged; current strict API blocked at disposable Docker startup, earlier 569/569 API and 169/169 worker are historical fixture runs. Desktop browser-control initialization failed under Windows ACL, but an isolated Chromium extension subsequently verified actual 200% zoom 2/2 on demo routes; screen reader remains unverified. Demo responsive/accessibility remains prior 21/21; no new browser pass claimed."
+        "release_reconciliation": "2026-09-29: 410 unstaged paths, 0 staged; current strict API blocked at disposable Docker startup, earlier 569/569 API and 169/169 worker are historical fixture runs. Desktop browser-control initialization failed under Windows ACL, but an isolated Chromium extension subsequently verified actual 200% zoom 2/2 on demo routes; screen reader remains unverified. Demo responsive/accessibility remains prior 21/21; no new browser pass claimed.",
+        "api_actual_zoom_localization": {
+          "date_hk": "2026-10-01",
+          "source_sha": "1f348666e913a275249803daab0654ac75029fcf",
+          "source_base_sha": "e5d7968a92c18cc347a72efd2d02078b64598d6d",
+          "scope": "Local Chromium 153.0.8010.12, fake OIDC reviewer, real HTTP API with restricted runtime role, owned disposable PostgreSQL; no live Auth0/provider verification",
+          "regressions": [
+            {
+              "case": "localized buyer region/heading/counter/search/pagination/selection",
+              "red": "zh-HK failed at missing localized buyer region/heading, exit1, 1 failed",
+              "green": "both locales pass actual 200% zoom with real pagination/filter/selection/reset"
+            },
+            {
+              "case": "localized queue All option",
+              "red": "zh-HK failed option count0 expected1, exit1, 1 failed",
+              "green": "localized All option included in final two-locale pass"
+            }
+          ],
+          "zoom": {
+            "method": "isolated Chromium extension tabs.setZoom/getZoom(2)",
+            "before_css_width": 1440,
+            "before_dpr": 1,
+            "after_css_width": 720,
+            "after_dpr": 2,
+            "routes_per_locale": 6,
+            "locales": [
+              "en",
+              "zh-HK"
+            ],
+            "passed": 2,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "20.7s",
+            "command": "BUYEROS_STRICT_INTEGRATION=1 BUYEROS_REUSE_TEST_SERVER=1 pnpm.cmd exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --reporter=line",
+            "measured": "page overflow, root bounds, clipped heading/paragraph text, real next/previous rows, query snapshot total, selection reset"
+          },
+          "buyer_regression": {
+            "command": "pnpm.cmd exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --reporter=line",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "15.7s"
+          },
+          "workbench": {
+            "command": "pnpm.cmd exec playwright test --config playwright.workbench.config.ts tests/e2e/daily-workbench.spec.ts --reporter=line",
+            "passed": 8,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "49.1s"
+          },
+          "responsive_demo": {
+            "command": "pnpm.cmd exec playwright test --config playwright.responsive.config.ts tests/e2e/responsive-accessibility.spec.ts --reporter=line",
+            "passed": 21,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "3.1m",
+            "scope": "fictional demo; effective viewport cases are not actual tab zoom"
+          },
+          "static_checks": {
+            "typecheck": "pnpm.cmd exec tsc --noEmit exit0",
+            "lint": "pnpm.cmd lint exit0",
+            "build": "pnpm.cmd build exit0; unchanged nonfatal >500kB chunk advisory",
+            "domain_checks": 11,
+            "live_adapter_checks": 73,
+            "oidc_auth_checks": 8,
+            "generated_types": 1,
+            "operation_routes": 78,
+            "alembic_head": "0033_api_rate_windows",
+            "staged_diff_check": "exit0 after removing new test helper trailing blank line"
+          },
+          "ci": "Separate browser-zoom job with own loopback buyeros_test_zoom database; five-job hosted gate pending push/result",
+          "capture": "Four unscrolled physical viewport PNGs at1440x900 plus two measured JSON reports. Distorted fullPage/zoomed-scroll captures were replaced; no full-page visual proof claimed.",
+          "artifacts": [
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en-buyers.png",
+              "sha256": "c8418ef912bbafb9a14555f1552852dead934ab38061ef0bdc5f164449073e7b"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en-operations.png",
+              "sha256": "7db37bcace598fa4f3913b8644d7533466bc6b7003c1f0359ef31641bb66f792"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en.json",
+              "sha256": "1bd249382507d3fa9490678f1a1fabcc21919344f6d57607631d91f32254a226"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK-buyers.png",
+              "sha256": "0694cb935b2c8134bb5ac1fac33f7d9fe6070032bedcc1e60af31f0f3364fedc"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK-operations.png",
+              "sha256": "f04e62d29f67378b9c127115271f0847ecb8c789e80ff8fa56a8ba44f43a2f93"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK.json",
+              "sha256": "53230bac7e1cdedeafe06c4125a23021236c4073502f31699b4e681914b7a123"
+            }
+          ],
+          "startup": "First Playwright-managed frontend exited ECONNRESET before tests. Same environment direct startup served HTTP200; exact failed-attempt marker cleanup removed its owned orphan container; root cause remains unproven.",
+          "migration": "none; no new revision",
+          "production_changes": "none; deployed source62d40bc unchanged",
+          "performance": "No new benchmark or field P75 claim; preceding in-process/disposable conditions remain their original scope",
+          "review": "Inline author self-review; no subagent dispatched under user constraint",
+          "remaining": [
+            "screen-reader use",
+            "unmeasured non-text controls/icons",
+            "T30 complete same-dataset creation to addressed approval/export/outcome journey",
+            "external provider/policy/worker/R2/pilot gates"
+          ],
+          "hosted_ci": {
+            "run": "https://github.com/YNWAforever/BuyerOS/actions/runs/36752690146",
+            "source_sha": "479141f5f04455cdc19c786cb40a3a0fd9f4b4d2",
+            "jobs": "all five success",
+            "api": "569 passed, 0 failed/errors/skipped, 79 warnings, 119.95s",
+            "worker": "169 passed, 0 failed/errors/skipped",
+            "browser_zoom": "2 passed, 24.7s",
+            "browser_smoke": "1 passed, 22.7s",
+            "frontend": "success including generated/type/lint/framework and Vercel builds"
+          }
+        }
       }
     },
     {
@@ -1135,11 +1254,11 @@
       "command": "根目錄：pnpm exec playwright test tests/e2e/mvp-a-journey.spec.ts；執行 T00 全套 CI＋required no-skip gates；照 release.md 在明確target核對 readiness/部署SHA。此處不是一條可無條件執行的 production deploy 指令。",
       "rollback": "先關admission/dispatch，保留reconciliation；回退compatibleapp或rollforward資料，保留ledger/history。不得為回退重置DB或清queue。",
       "operations": [],
-      "status": "partial_same_dataset_offer_approval_research_to_grounded_draft_addressed_approval_and_release_gates_open",
+      "status": "implemented_full_fixture_journey_verified_release_activation_open",
       "verification": {
         "release_preparation": "RELEASE_READINESS.md, runbooks/release.md, PILOT_EXECUTION_RECORD.md and pilot/evaluation-protocol.md drafted without external action",
         "full_staff_journey": "PARTIAL: one disposable project passes UI offer edit, saved ICP v2 exact reviewer approval, browser-created bounded research, broker/worker fit, reviewer list/assignment and worker-generated grounded unaddressed draft. Offer creation and addressed exact approval/export/outcome are verified in separate fixtures; full continuity and external activation remain open",
-        "deployment": "not authorized or performed",
+        "deployment": "2026-09-30 HK: user specifically approved redeploying tested source 62d40bc7687477f42e971ae5143485806630f1a6 with the nine saved production variables. vercel redeploy exited 0; dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3 READY, target production, exact source SHA verified. Public frontend routes /, /app, /auth/callback HTTP200, /v1/workspaces HTTP401 UNAUTHENTICATED. Anonymous acceptance 4 passed/0 failed/cancelled/skipped in 5271.2125ms. Actual Sign in reaches Auth0 Universal Login with approved public parameters and PKCE S256. No real staff session, membership seed, migration or paid/provider activation.",
         "partial_ui_journey": "1 passed, 0 failed/skipped in 2.7m: same seeded project/buyer evidence, list, assignment, exact approval, authorized export, manual outcome, refresh, zh-HK mobile; viewer export 403 and delivery 403; fixture OIDC/disposable PostgreSQL only",
         "screenshots": "artifacts/t30-screenshots/en-fixture.png and zh-mobile-fixture.png visually inspected with SHA256 recorded in REMAINING_DEVELOPMENT_STATUS.md",
         "fixture_cleanup": "red guard listed 17 specialized configs missing globalTeardown; green node test 1/1 after wiring existing teardown; T30 partial rerun 1/1 in 2.1m and zero running buyeros-test containers/absent marker afterward",
@@ -1156,7 +1275,420 @@
         "release_reconciliation": "2026-09-29: RELEASE_READINESS.md corrected to 410-path inventory and historical strict-test wording. API_OPERATION_STATUS.csv has 78 rows, all handler_present and deployed=unverified. One exact no-volume BuyerOS container inspect stalled; 13 BuyerOS test containers remain Created while approximately 122 unrelated containers run, so no disruptive Docker Desktop restart was performed. Current strict API gate is blocked at fixture setup; worker/API-backed browser not rerun. No external action, commit or deployment.",
         "current_local_release_checks": "2026-09-29: domain 11/11, live-adapter 73/73, Node contract/cleanup 3/3 with zero skips; tsc, lint, Vinext build, API type check, 78-route map and diff --check exit 0. Pack-to-ledger 70/70 original plus eight extensions; 78/78 handlers, 78/78 deployed unverified. Sole Alembic head 0033_api_rate_windows. Current strict DB fixture remains blocked and is not counted as passing.",
         "docker_maintenance_attempt": "2026-09-30: user confirmed restart. Normal docker desktop restart exited 1, context deadline exceeded stopping Desktop; Linux engine pipe unavailable. Synchronous start hung/interrupted; bounded detached start exited 0 with Starting Docker Desktop, latest status starting but engine readiness unverified. No current strict DB pass, no force kill or unrelated container removal. Draft PR authorized and being prepared.",
-        "published_pr_ci": "2026-09-30 HK: draft PR #7; CI run 36598703202 on code commit f8eaec7 passed frontend, API 569/569 zero skips, worker 169/169 zero skips, browser smoke 1/1. Initial smoke red 401 from missing fixture bearer, fixed in test with explicit negative 401. Local Docker restart failed from WSL CommandTimedOut; full T30 journey and live activation remain open."
+        "published_pr_ci": "2026-09-30 HK: draft PR #7; CI run 36598703202 on code commit f8eaec7 passed frontend, API 569/569 zero skips, worker 169/169 zero skips, browser smoke 1/1. Initial smoke red 401 from missing fixture bearer, fixed in test with explicit negative 401. Local Docker restart failed from WSL CommandTimedOut; full T30 journey and live activation remain open.",
+        "production_neon_initialization": "2026-09-30 HK, explicitly user-approved: nameless-bar-15324691 / br-autumn-block-b3exsqii / neondb upgraded through existing sole head 0033_api_rate_windows; 33 migrations succeeded, 0 failed. Fresh catalog read: public 50, buyeros_graph 4, neon_auth 9 tables; Neon Auth column-definition hash unchanged. Pre-initialization no-compute restore branch br-odd-sky-b39qyb5m retained; production restore/downgrade not executed.",
+        "production_runtime_configuration": "Restricted buyeros_api LOGIN, no superuser/createdb/createrole/bypassrls or schema ownership. Pooled client TLS, 45 tenant tables with active/forced RLS, callback table denial, Neon Auth denial and application SQLAlchemy async connection passed. BUYEROS_DATABASE_URL saved sensitive/production in Vercel and metadata reverified. No production fixtures, domain seeds or worker login. Two check-harness assumptions were corrected before successful storage; details in REMAINING_DEVELOPMENT_STATUS.md.",
+        "auth0_activation": "2026-09-30 HK, explicitly approved: created BuyerOS API 6abc62c95f1a148990e0595d / https://buyer-os-nu.vercel.app/v1, RS256, 3600-second tokens, offline access false. Client iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R now public SPA, token endpoint auth none, authorization_code only; both production callback/logout/origin sets registered, existing localhost entries retained. Exact management read-back passed. Public probes: 4 passed, 0 failed/skipped; both callbacks yield login_required, invalid callback 403, unknown audience access_denied. No staff token/session obtained. Auth0 configuration blocker resolved; subsequent approved source62d40bc deployment verifies HTTP200 login entry and exact client/audience/callback with PKCE S256. Actual staff token/callback round trip remains pending.",
+        "vercel_auth0_environment": "Nine production keys reverified by metadata after the approved source62d40bc deployment: database sensitive; paid admission/R2 false; runtime service binding not manually set; migration owner absent. Deployment dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3 applies approved client/audience/callback, proven by actual browser authorization request.",
+        "auth0_redeploy_preparation": "Historical 2026-09-30 HK preparation on main0852552: proxy5/5, Windows build exit0, compiled handler200 with public Auth0 props; browser-chunk-only assertion corrected to the actual server-rendered config path. Later hosted/Linux SSR failure and its regression/fix are recorded separately. Specific source62d40bc production deployment is now approved and verified; actual staff token/callback round trip remains pending. No local Windows prebuilt bundle was deployed.",
+        "live_sign_in_entry": "2026-09-30 HK, source62d40bc: Playwright /app HTTP200, title FIMMICK BuyerOS, enabled Sign in, zero application console/page errors. Click reaches exact Auth0 tenant /u/login, title Log in | BuyerOS, one visible blank email field. Authorization request asserts exact public client, API audience, primary callback, code and PKCE S256 with challenge present. No credentials entered/token/session obtained. Two screenshots visually inspected; hashes recorded in execution checkpoint.",
+        "deployed_runtime_regression": "node --test tests/deployment/vercel-runtime.mjs with BUYEROS_VERCEL_VERIFY_URL=https://buyer-os-nu.vercel.app/: exit0, 4 passed/0 failed/cancelled/skipped in 5271.2125ms on deployed source62d40bc. Earlier source0852552 red: 1 passed/3 failed/0 cancelled/skipped in 3743.3519ms. Anonymous HTML/proxy only, no data mutation or provider call.",
+        "linux_ssr_regression": "2026-09-30: exact Node24.18 Linux committed-source baseline builds but SSR tslib default crashes. Named emitted-function regression red 0 passed/3 failed/0 skips in 2050.061956ms. Nitro Node-platform hypothesis did not change error and was reverted. Targeted public tslib ESM alias plus explicit already-locked 2.8.1: frozen build exit0, regression 3 passed/0 failed/0 cancelled/skipped in 192.785908ms, direct/isolated process HTML200 with original build path absent. tsc/lint each exit0, proxy5/5, auth8/8. Source published in draft PR9 and deployed with specific user approval; live regression4/4. Real staff journey remains pending.",
+        "linux_ssr_source_commit": "531774989f842ff8d65cd2fad5164f819301fe16",
+        "hosted_ci_after_ssr_fix": {
+          "head_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+          "run_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36662932533",
+          "jobs_passed": 4,
+          "jobs_failed": 0,
+          "api": {
+            "passed": 569,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 79,
+            "seconds": 121.98
+          },
+          "worker": {
+            "passed": 169,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 1,
+            "seconds": 22.0
+          },
+          "browser_fixture": {
+            "passed": 1,
+            "seconds": 15.7
+          },
+          "render_function": {
+            "passed": 3,
+            "failed": 0,
+            "skipped": 0,
+            "duration_ms": 229.913351
+          },
+          "scope": "Disposable database and fake identity/provider fixtures; narrower than complete staff journey"
+        },
+        "vercel_fix_preview": {
+          "id": "dpl_ABTjYtq5QcWqZD1vzwubehuMU2KM",
+          "source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+          "state": "READY",
+          "frontend_status": 200,
+          "frontend_routes": [
+            "/",
+            "/app",
+            "/auth/callback"
+          ],
+          "unauthenticated_api_status": 401,
+          "production_auth0_variables_applied": false,
+          "production_fix_deployed": true
+        },
+        "publication": "Draft PR #9 attached; code commit 531774989f842ff8d65cd2fad5164f819301fe16; tested PR head 62d40bc7687477f42e971ae5143485806630f1a6; final checkpoint changes documentation only.",
+        "vercel_fix_production": {
+          "deployment_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+          "source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+          "state": "READY",
+          "target": "production",
+          "public_origin": "https://buyer-os-nu.vercel.app",
+          "frontend_http_status": 200,
+          "frontend_routes": [
+            "/",
+            "/app",
+            "/auth/callback"
+          ],
+          "public_config_in_authorize_request": true,
+          "unauthenticated_api_status": 401,
+          "unauthenticated_api_code": "UNAUTHENTICATED",
+          "acceptance": {
+            "passed": 4,
+            "failed": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "duration_ms": 5271.2125
+          },
+          "browser": {
+            "initial_html_status": 200,
+            "application_errors": [],
+            "universal_login_origin": "https://dev-oaug20cdxqqgn1s8.us.auth0.com",
+            "universal_login_path": "/u/login",
+            "visible_blank_email_field": true,
+            "credentials_entered": false
+          },
+          "authorize_request": {
+            "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R",
+            "audience": "https://buyer-os-nu.vercel.app/v1",
+            "redirect_uri": "https://buyer-os-nu.vercel.app/auth/callback",
+            "response_type": "code",
+            "code_challenge_method": "S256",
+            "pkce_challenge_present": true
+          },
+          "real_staff_session_verified": false
+        },
+        "hosted_ci_followup": {
+          "head_sha": "2a2682e55b81f99a1a0838b6dcfe34a8d990841c",
+          "run_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36663605615",
+          "jobs_passed": 4,
+          "jobs_failed": 0,
+          "scope": "Documentation-only follow-up; fresh PR check metadata confirms four hosted CI jobs and both Vercel checks SUCCESS. Exact counts for previously tested/deployed source remain in hosted_ci_after_ssr_fix."
+        },
+        "live_screenshots": [
+          {
+            "path": "artifacts/t30-screenshots/vercel-sign-in-fixed-20260930.png",
+            "sha256": "4e9a9d74409ec6ad972b37721f8fecbe721022ef00ab225db50ba68f2ce1b56c",
+            "visually_inspected": true
+          },
+          {
+            "path": "artifacts/t30-screenshots/auth0-universal-login-fixed-20260930.png",
+            "sha256": "4a7717ad740092166a01665f701fd23e377a8329b6bd4390179d44c992b7e9b2",
+            "visually_inspected": true
+          }
+        ],
+        "initial_workspace_diagnosis": {
+          "user_report": "Signed in but no workspace",
+          "live_read_only_database": {
+            "users": 0,
+            "workspaces": 0,
+            "schema_head": "0033_api_rate_windows"
+          },
+          "membership_listing_fixture": {
+            "passed": 2,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 8,
+            "seconds": 6.76
+          },
+          "initial_membership_seeded": true,
+          "proposal": "docs/buyeros/INITIAL_WORKSPACE_PROPOSAL.json",
+          "owner_identity": "Verified exact supplied email, email_verified true, unblocked Google-linked Auth0 user, one match, same immutable subject in successful BuyerOS client login. Exact subject remains ignored; public SHA256 reference in proposal.",
+          "management_lookup": "Fresh authorization succeeded; exact account/login verified; no runtime Auth0 configuration changed.",
+          "prepared_transaction_fixture": {
+            "scope": "Session-local ignored administrative helper, disposable PostgreSQL, fixture identity only; no application endpoint or production mutation",
+            "source_sha256": "51f7827b778f41e1d1f676928deefcd346c9db14750278ff9d9818fb76651c84",
+            "tests_sha256": "e7afa9273a5b4a08176ee58527204b5a4efeef201d9ef5efd074cd7b17e81ebb",
+            "passed": 3,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 4,
+            "seconds": 9.54,
+            "checks": [
+              "Initial workspace_admin membership is visible through restricted API role; unrelated fixture actor sees no workspace",
+              "Retry does not duplicate or change membership/audit; conflicting existing workspace is preserved and rejected",
+              "Database failure at membership insert rolls back user/workspace/audit"
+            ],
+            "production_applied": false,
+            "live_identity_verified_by_tests": false
+          },
+          "production_preflight": {
+            "database": "nameless-bar-15324691/br-autumn-block-b3exsqii/neondb",
+            "head": "0033_api_rate_windows",
+            "users": 0,
+            "workspaces": 0,
+            "changes_applied": false
+          },
+          "identity_verification": {
+            "email_exact_match": true,
+            "email_verified": true,
+            "blocked": false,
+            "subject_sha256": "cfe7cd302e6627375d838e3af5fd04fec145b607025d77046e8aac11cc784efb",
+            "matches": 1,
+            "providers": [
+              "google-oauth2"
+            ],
+            "latest_successful_login": {
+              "date": "2026-09-30T14:31:37.074Z",
+              "type": "s",
+              "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R"
+            },
+            "real_staff_api_session_verified": false
+          },
+          "approved_setup_execution": {
+            "authorization_source": "Direct user reply to the named FIMMICK production workspace and verified-account administrator proposal in this execution session",
+            "authorization_reply": "Approve this workspace setup",
+            "scope": "One verified application user, FIMMICK live workspace, active workspace_admin membership and redacted bootstrap audit",
+            "bootstrap_result": {
+              "workspace_id": "900cd19b-4e03-4446-bdd6-7cb199d96060",
+              "membership_id": "d8190b6e-c290-41d6-8dd2-3d0c90b824cc",
+              "changes_applied": true,
+              "replay": false
+            },
+            "combined_apply_and_role_check_exit_code": 1,
+            "apply_commit": "succeeded before the subsequent role-switch permission check failed",
+            "role_check_failure": "neondb_owner cannot SET ROLE buyeros_api; no new role grant or RLS weakening performed",
+            "followup_read_only_verification_exit_code": 0,
+            "database_verification": {
+              "database_counts": {
+                "users": 1,
+                "workspaces": 1,
+                "target_memberships": 1,
+                "target_bootstrap_audits": 1
+              },
+              "exact_identity_and_membership_readback": "passed",
+              "workspace": "FIMMICK",
+              "roles": [
+                "workspace_admin"
+              ],
+              "active": true,
+              "version": 1,
+              "schema_heads": [
+                "0033_api_rate_windows"
+              ],
+              "api_role_catalog": {
+                "select_users_workspaces_memberships": [
+                  true,
+                  true,
+                  true
+                ],
+                "membership_rls_enabled": true,
+                "membership_rls_forced": true,
+                "login": true,
+                "superuser": false,
+                "createdb": false,
+                "createrole": false,
+                "bypassrls": false
+              },
+              "verification_method": "Read-only owner connection plus catalog permissions; not an authenticated API request or actual runtime-role connection",
+              "role_switch_attempt": "Denied: neondb_owner cannot SET ROLE buyeros_api; no additional role membership granted",
+              "real_staff_api_session_verified": false,
+              "migration": "none",
+              "deployment": "unchanged",
+              "provider_delivery_activation": "none"
+            },
+            "anonymous_deployed_regression": {
+              "passed": 4,
+              "failed": 0,
+              "cancelled": 0,
+              "skipped": 0,
+              "duration_ms": 3877.6165
+            },
+            "staff_ui_confirmation": "Confirmed by the user on 2026-10-01 HK: FIMMICK and admin role are visible. This is human-reported UI access, not an agent-observed authenticated API trace or full journey.",
+            "migration": "none; existing sole head0033 unchanged",
+            "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+            "rollback": "No production rollback performed; failed-insert atomic rollback verified only on disposable fixture",
+            "provider_delivery_activation": "none",
+            "bo_owner_approval_records_modified": false,
+            "human_staff_ui_confirmation": {
+              "date_hk": "2026-10-01",
+              "source": "Direct user reply to refresh/sign-in workspace confirmation question",
+              "answer": "FIMMICK and admin role are visible",
+              "method": "human reported UI confirmation",
+              "authenticated_api_trace_observed_by_agent": false,
+              "full_staff_journey_verified": false
+            }
+          },
+          "current_initial_setup_state": "Four approved rows persisted and read back; the user confirmed FIMMICK and admin role visible on 2026-10-01 HK. Full staff continuity and agent-observed authenticated API trace remain unverified."
+        },
+        "ongoing_continuity_slice_20261001": {
+          "status": "reviewed_candidate_pushed_hosted_six_job_ci_verified_activation_open",
+          "base_source_sha": "479141f5f04455cdc19c786cb40a3a0fd9f4b4d2",
+          "working_tree": "Reviewed application/test/evidence source4181062 published to draft PR9. Local required gates and hosted six-job CI all pass with zero required skips. This following checkpoint changes documentation/evidence only. No migration, merge or new production deployment.",
+          "observed_red": [
+            "Addressed API admission 5 failed against current 503 boundary",
+            "Worker addressed recipient/race 4 failed against ignored context",
+            "Canonical getBuyer contacts absent 1 failed",
+            "UI-created project research 422 unsupported buyer role; display Distributor was saved instead of distributor",
+            "Actual UI recipient selector missing after same-project worker research",
+            "Worker inactive operator still materialized draft 1 failed",
+            "Contact expired after exact review still approved 201: 1 failed",
+            "zh-HK list accessible region absent: 1 failed before localization",
+            "zh-HK project selection accessible region absent: 1 failed before selector/dossier localization"
+          ],
+          "current_green": [
+            "Full final API: 577 passed, 0 failed/errors/skipped, 110 warnings, 220.26s; JUnit required gate exit0",
+            "Full final worker: 174 passed, 0 failed/errors/skipped, 4 warnings, 86.36s; JUnit required gate exit0",
+            "Rollback guards: 3 passed, 0 failed/errors/skipped, 12 warnings, 8.91s; 0032 retained contact dates and independent0028 approval history remain intact",
+            "Buyer/list regressions: 3 passed, 0 failed/skipped, 1.8m; English durable management, viewer denial, zh-HK accessible controls and feedback",
+            "Domain11/adapter74/auth8/generated1/routes78; TypeScript/lint/build exit0; final no-skip artifacts retained under artifacts/t30-tests",
+            "Full continuous UI-created project/edit/ICP approval/bounded research/review/list/assignment/grounded addressed generation/exact approval/authorized download/manual outcome/refresh: 4 passed, 0 failed/errors/skipped, 4.8m; en and zh-HK, initial1280x800 and390x844; explicit draft language verified in downloaded text; viewer export403 and approved delivery403 DELIVERY_DISABLED in each case.",
+            "Final workbench: 8 passed, 0 failed/errors/skipped, 2.8m; scope retry, partial errors, preference recovery, responsive routes and measured contrast; required JUnit gate exit0.",
+            "Final actual Chromium 200% API-backed zoom: 2 passed, 0 failed/errors/skipped, 2.1m; six routes en/zh-HK. Required JUnit retained; earlier zoom screenshots keep their original T29 source.",
+            "Final real buyer snapshot pagination/dossier: 1 passed, 0 failed/errors/skipped, 2.3m.",
+            "Final durable list/preset/note/owner/review, viewer denial and localized list feedback: 3 passed, 0 failed/errors/skipped, 2.0m; required JUnit retained.",
+            "Final TypeScript and lint exit0 after the guarded per-case workbench fixture hook.",
+            "Original named mvp-a-journey.spec.ts acceptance: 1 passed, 0 failed/errors/skipped, 2.5m; seeded addressed approval/export/outcome regression, separate from four UI-created continuous journeys."
+          ],
+          "new_source_scope": "Stored retained recipient/purpose/suppression binding for zero-cost templates; worker current recipient/policy/member recheck; eligible contact detail on existing getBuyer; raw fit hash projection; wizard canonical buyer type roundtrip; synchronous approval recipient expiry; continuous UI-created project, edits, approvals, real fixture broker/worker research and generated addressed draft/export/outcome test.",
+          "fixture_boundary": "Fresh owned loopback PostgreSQL16 and Valkey8; fake OIDC/search. Guarded helper supplies only fictional policy/budget prerequisites and existing valid fictional contact input to a UI-created project. Independent cases initialize only their named fake actors rate counters before research/login; production limiter and all limits within each case remain active. No project/buyer/ICP/review/draft/approval/outcome seed in this helper; no live lookup/provider verification.",
+          "remaining": "Human source review, specific newer candidate deployment approval and authenticated deployed acceptance. Actual assistive/non-text accessibility, external recovery journal custody, continuous worker/Valkey/R2 and named policy/provider/pilot activation remain open.",
+          "diagnostic_failures": [
+            "Final API preceding repair: 576 passed/1 failed/0 errors/skips; valid retention caused0032 rollback guard to fire before0028. Fixed test to assert both without deleting dates.",
+            "First bilingual fixture repeat: 1 passed/1 failed at duplicate known contact input for shared canonical company; fixture now reuses and verifies its unchanged valid input.",
+            "Initial bilingual test construction had incomplete labels/expectation table and was repaired; those attempts are not product defect RED evidence.",
+            "Initial four-case continuity matrix: 2 passed/2 failed; sanitized API capture proved429 RATE_LIMITED caused by prior independent cases reusing fictional actors. Reset only initial fake-actor windows once for a new unresearched UI project; final4 passed.",
+            "First final workbench rerun: 7 passed/1 failed at429 on shared fictional reviewer. Guarded counter isolation once before each independent case; final8 passed. No retry, production limit increase or suppression inside a case."
+          ],
+          "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+          "publication": "source4181062 pushed to existing draft PR9; no merge/new production deployment",
+          "hosted_ci": {
+            "head_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+            "run_id": 36772517309,
+            "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36772517309",
+            "status": "completed",
+            "conclusion": "success",
+            "jobs": [
+              {
+                "id": 110082194682,
+                "name": "worker",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              {
+                "id": 110082194989,
+                "name": "browser-continuity",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              {
+                "id": 110082195067,
+                "name": "api",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              {
+                "id": 110082195138,
+                "name": "frontend",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              {
+                "id": 110082195141,
+                "name": "browser-zoom",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              {
+                "id": 110082195174,
+                "name": "browser-smoke",
+                "status": "completed",
+                "conclusion": "success"
+              }
+            ],
+            "logs": {
+              "api": {
+                "log_sha256": "d36641fa4f2f920bb5adad4ed5ac445f962ffe35cec475938d7af8c3e081e436",
+                "exact_summary": [
+                  "2026-09-30T20:28:11.8674956Z 577 passed, 81 warnings in 135.14s (0:02:15)",
+                  "2026-09-30T20:28:13.1254541Z passed=577 failed=0 errors=0 skipped=0"
+                ]
+              },
+              "worker": {
+                "log_sha256": "d82d08ae4790aab20754e97bffa0519ea74a8a9ddbe31202f3376b4ab57064f6",
+                "exact_summary": [
+                  "2026-09-30T20:26:21.1285404Z 174 passed, 1 warning in 26.09s",
+                  "2026-09-30T20:26:21.9868717Z passed=174 failed=0 errors=0 skipped=0"
+                ]
+              },
+              "continuity": {
+                "log_sha256": "c20adfadbf7853e3c7850b181771e2e14d1d46feb9df3cbc6963673a0dca7a1f",
+                "exact_summary": [
+                  "2026-09-30T20:28:50.2413243Z   4 passed (2.5m)",
+                  "2026-09-30T20:28:50.3256501Z passed=4 failed=0 errors=0 skipped=0",
+                  "2026-09-30T20:29:56.6440497Z   8 passed (1.1m)",
+                  "2026-09-30T20:29:56.7333097Z passed=8 failed=0 errors=0 skipped=0",
+                  "2026-09-30T20:30:25.3731624Z   1 passed (27.6s)",
+                  "2026-09-30T20:30:25.4594461Z passed=1 failed=0 errors=0 skipped=0",
+                  "2026-09-30T20:30:56.8673820Z   3 passed (30.4s)",
+                  "2026-09-30T20:30:56.9549579Z passed=3 failed=0 errors=0 skipped=0",
+                  "2026-09-30T20:31:25.3411543Z   1 passed (27.3s)",
+                  "2026-09-30T20:31:25.4273866Z passed=1 failed=0 errors=0 skipped=0"
+                ]
+              },
+              "zoom": {
+                "log_sha256": "2a914e6b7012ecb0e0968b4d7f43ac0c8f4014ab5e4e787560ad1fe4dbea8e2b",
+                "exact_summary": [
+                  "2026-09-30T20:32:51.4986252Z   2 passed (31.5s)",
+                  "2026-09-30T20:32:51.5806946Z passed=2 failed=0 errors=0 skipped=0"
+                ]
+              },
+              "smoke": {
+                "log_sha256": "a106c6bf76180ff98102997096572f6c07f3d4bab8b123341f29e71516079838",
+                "exact_summary": [
+                  "2026-09-30T20:27:21.6589383Z   1 passed (18.7s)"
+                ]
+              },
+              "frontend": {
+                "log_sha256": "60d6f2ad3b71b1f63d9d130624098cb72161e57e28a694235f0990708a1441e1",
+                "exact_summary": [
+                  "2026-09-30T20:26:06.4496449Z ℹ tests 1",
+                  "2026-09-30T20:26:06.4497016Z ℹ pass 1",
+                  "2026-09-30T20:26:06.4510646Z ℹ fail 0",
+                  "2026-09-30T20:26:06.4520910Z ℹ skipped 0",
+                  "2026-09-30T20:26:06.6097984Z ℹ tests 5",
+                  "2026-09-30T20:26:06.6098703Z ℹ pass 5",
+                  "2026-09-30T20:26:06.6110507Z ℹ fail 0",
+                  "2026-09-30T20:26:06.6131184Z ℹ skipped 0",
+                  "2026-09-30T20:26:47.3740751Z ℹ tests 3",
+                  "2026-09-30T20:26:47.3750428Z ℹ pass 3",
+                  "2026-09-30T20:26:47.3765568Z ℹ fail 0",
+                  "2026-09-30T20:26:47.3766265Z ℹ skipped 0"
+                ]
+              }
+            },
+            "identity_provider_scope": "Fictional OIDC/search/contact, actual disposable DB/broker/worker; no live provider proof."
+          },
+          "preview": "READY source4181062; direct app/API requests302 to Vercel SSO, so anonymous HTTP acceptance is blocked and not counted as pass",
+          "documentation_checkpoint_ci": {
+            "head_sha": "326de151aa429a5243372b0fe39cf03d39be17a2",
+            "run_id": 36775490988,
+            "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988",
+            "status": "completed",
+            "conclusion": "success",
+            "successful_jobs": 6,
+            "evidence": "artifacts/t30-ci-head-checkpoint-20261001.json",
+            "scope": "Fresh metadata verifies all six jobs and PR checks at this source. Exact test counts remain attributed to reviewed code4181062/run36772517309; no new deployment or owner approval is claimed.",
+            "checkpoint_checks": "JSON/source attribution checks passed; git diff --quiet from4181062 excluding docs/artifacts exit0; git diff --check exit0. Documentation/evidence only; no additional application test results claimed."
+          }
+        }
       }
     }
   ],
@@ -1189,9 +1721,10 @@
   "warnings": [
     "Supplied task tests were proposals; current execution results are in REMAINING_DEVELOPMENT_STATUS.md.",
     "Audit 338 passed/53 skipped is historical baseline evidence, not release verification.",
-    "T28 external restore replay, T29 actual zoom/assistive review and T30 complete offer-to-addressed-approval journey/release remain open; preserve newer source and unrelated changes."
+    "T28 external recovery journal custody/completeness, T29 assistive/non-text review and T30 live authorization/provider/release gates remain open; the complete fixture journey passes all four locale/layout cases; preserve newer source and unrelated changes."
   ],
-  "reviewed_source_sha": "f8eaec7fe4e11252915106b322e95f2f70ed97c4",
+  "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "T29"
+  "next_eligible_task": "T30 specific reviewed-candidate deployment decision for existing BuyerOS Vercel project; source4181062 has six-job CI success. Earlier production approval applied to62d40bc. Independent T29 actual assistive/non-text review and T28 external recovery-journal custody remain open; provider/policy/worker/R2/pilot activation needs actual named owners/configuration and delivery stays disabled.",
+  "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6"
 }

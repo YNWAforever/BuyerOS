@@ -18,7 +18,7 @@ def fit_data(fit, *, freshness: str = "current") -> dict:
                      else details.get("unknown_requirement_ids", [])),
         "next_action": "request_evidence" if freshness == "stale" else details.get("next_action", "human_review"),
         "freshness": freshness,
-        "evidence_set_hash": fit.evidence_set_hash,
+        "evidence_set_hash": fit.evidence_set_hash.removeprefix("sha256:"),
         "prompt_version": fit.fit_algorithm_version,
         "model_route_version": "none" if fit.fit_algorithm_version == "fit-v1" else "unversioned",
     }

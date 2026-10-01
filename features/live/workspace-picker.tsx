@@ -178,18 +178,18 @@ export function LiveWorkspace() {
   return <main className="main-shell live-workspace"><div className="content">
     <header className="topbar live-topbar"><b>FIMMICK BuyerOS</b><span>{t('Live workspace')}</span><label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving||!localeReady}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label><button onClick={() => {session.setToken(undefined); void auth.signOut();}}>{t('Sign out')}</button></header>
     <LiveNavigation t={t} navigate={navigate} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>
-    <section className="panel" aria-label="Workspace selection"><h2>{t('Workspaces')}</h2>
-      {workspaces.kind === 'loading' && <p role="status">Loading workspaces…</p>}
+    <section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
+      {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
       {workspaces.kind === 'error' && <><p role="alert">{workspaces.message}</p><button onClick={()=>{setWorkspaces({kind:'loading'});setWorkspaceRefresh(value=>value+1);}}>{t('Retry loading workspaces')}</button></>}
-      {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">Choose workspace</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>No workspace membership. Ask an administrator for access.</p>)}
+      {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>{t('No workspace membership. Ask an administrator for access.')}</p>)}
       {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
     </section>
     {selectionError && <section className="panel" role="alert">{selectionError}</section>}
     {localeError && <section className="panel" role="alert">{localeError}</section>}
-    {authorized && <section className="panel" aria-label="Project selection"><h2>{t('Projects')}</h2>
-      {projects.kind === 'loading' && <p role="status">Loading projects…</p>}
+    {authorized && <section className="panel" aria-label={t('Project selection')}><h2>{t('Projects')}</h2>
+      {projects.kind === 'loading' && <p role="status">{t('Loading projects…')}</p>}
       {projects.kind === 'error' && <><p role="alert">{projects.message}</p><button onClick={()=>{setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}>{t('Retry loading projects')}</button></>}
-      {projects.kind === 'ready' && (projects.items.length ? <label>{t('Project')} <select aria-label={t('Project')} value={project || ''} onChange={event=>chooseProject(event.target.value)}><option value="">Choose project</option>{projects.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>No projects yet.</p>)}
+      {projects.kind === 'ready' && (projects.items.length ? <label>{t('Project')} <select aria-label={t('Project')} value={project || ''} onChange={event=>chooseProject(event.target.value)}><option value="">{t('Choose project')}</option>{projects.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>{t('No projects yet.')}</p>)}
       {(canCreate||canEdit&&projectKnown&&projectActive) && <div className="inline">{canCreate&&<button onClick={()=>navigate('/app/discover/new')}>{t('New project')}</button>}{canEdit&&projectKnown&&projectActive&&<button onClick={()=>navigate('/app/discover/edit')}>{t('Edit offer')}</button>}</div>}
     </section>}
     {authorized && canCreate && pathname === '/app/discover/new' && <LiveOfferWizard key={`new-${workspace}`} mode="create" onSaved={saved} t={t}/>}

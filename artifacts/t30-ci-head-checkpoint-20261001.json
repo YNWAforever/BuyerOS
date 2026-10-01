@@ -1,0 +1,142 @@
+{
+  "observed_at_utc": "2026-10-01T00:44:40.6812487Z",
+  "reviewed_code_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+  "observed_documentation_head_sha": "326de151aa429a5243372b0fe39cf03d39be17a2",
+  "run_id": 36775490988,
+  "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988",
+  "status": "completed",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "worker",
+      "status": "completed",
+      "conclusion": "success",
+      "completed_at": "2026-09-30T20:51:57Z",
+      "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218037"
+    },
+    {
+      "name": "api",
+      "status": "completed",
+      "conclusion": "success",
+      "completed_at": "2026-09-30T20:53:41Z",
+      "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218191"
+    },
+    {
+      "name": "browser-smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "completed_at": "2026-09-30T20:52:37Z",
+      "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218195"
+    },
+    {
+      "name": "browser-continuity",
+      "status": "completed",
+      "conclusion": "success",
+      "completed_at": "2026-09-30T20:57:27Z",
+      "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218280"
+    },
+    {
+      "name": "browser-zoom",
+      "status": "completed",
+      "conclusion": "success",
+      "completed_at": "2026-09-30T20:52:44Z",
+      "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218379"
+    },
+    {
+      "name": "frontend",
+      "status": "completed",
+      "conclusion": "success",
+      "completed_at": "2026-09-30T20:52:31Z",
+      "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218460"
+    }
+  ],
+  "pr": {
+    "headRefOid": "326de151aa429a5243372b0fe39cf03d39be17a2",
+    "isDraft": true,
+    "number": 9,
+    "state": "OPEN",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-30T20:52:31Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218460",
+        "name": "frontend",
+        "startedAt": "2026-09-30T20:51:05Z",
+        "status": "COMPLETED",
+        "workflowName": "BuyerOS CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-30T20:53:41Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218191",
+        "name": "api",
+        "startedAt": "2026-09-30T20:51:02Z",
+        "status": "COMPLETED",
+        "workflowName": "BuyerOS CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-30T20:51:57Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218037",
+        "name": "worker",
+        "startedAt": "2026-09-30T20:51:02Z",
+        "status": "COMPLETED",
+        "workflowName": "BuyerOS CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-30T20:52:37Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218195",
+        "name": "browser-smoke",
+        "startedAt": "2026-09-30T20:51:02Z",
+        "status": "COMPLETED",
+        "workflowName": "BuyerOS CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-30T20:52:44Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218379",
+        "name": "browser-zoom",
+        "startedAt": "2026-09-30T20:51:02Z",
+        "status": "COMPLETED",
+        "workflowName": "BuyerOS CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-30T20:57:27Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988/job/110092218280",
+        "name": "browser-continuity",
+        "startedAt": "2026-09-30T20:51:14Z",
+        "status": "COMPLETED",
+        "workflowName": "BuyerOS CI"
+      },
+      {
+        "__typename": "StatusContext",
+        "context": "Vercel",
+        "startedAt": "2026-09-30T20:51:56Z",
+        "state": "SUCCESS",
+        "targetUrl": "https://vercel.com/ynwaforevers-projects/buyer-os/3Epdmcz5mWdqvEeLRKuUQShAmG5d"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-30T20:51:57Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://vercel.com/github",
+        "name": "Vercel Preview Comments",
+        "startedAt": "2026-09-30T20:51:57Z",
+        "status": "COMPLETED",
+        "workflowName": ""
+      }
+    ],
+    "url": "https://github.com/YNWAforever/BuyerOS/pull/9"
+  },
+  "exact_test_counts_source": "artifacts/t30-hosted-ci-20261001.json: run36772517309 on reviewed code4181062",
+  "scope": "Read-only GitHub metadata. This record does not claim new test counts, a deployment, live provider verification or owner approval.",
+  "command": "gh run view 36775490988 --json databaseId,headSha,conclusion,status,url,jobs; gh pr view 9 --json number,url,state,isDraft,headRefOid,statusCheckRollup"
+}

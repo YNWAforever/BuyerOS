@@ -1,0 +1,195 @@
+{
+  "status": "explicitly_approved_applied_exact_database_readback_verified_human_staff_ui_confirmed",
+  "database": {
+    "project": "nameless-bar-15324691",
+    "branch": "br-autumn-block-b3exsqii",
+    "name": "neondb",
+    "alembic_head": "0033_api_rate_windows"
+  },
+  "read_only_diagnosis": {
+    "users": 0,
+    "workspaces": 0,
+    "workspace_memberships": [],
+    "cause": "Auth0 sign-in does not create an application user, workspace or current Postgres membership"
+  },
+  "proposed_workspace": {
+    "id": "900cd19b-4e03-4446-bdd6-7cb199d96060",
+    "name": "FIMMICK",
+    "data_mode": "live",
+    "controller_scope": null
+  },
+  "proposed_user": {
+    "id": "e053f462-fb24-44c2-bb6e-1f0280d00248",
+    "issuer": "https://dev-oaug20cdxqqgn1s8.us.auth0.com/",
+    "subject": null,
+    "identity_status": "verified_exact_email_and_immutable_subject_by_auth0_management",
+    "supplied_email_sha256": "bae7f1f4f92e9dc5bac2b79d2b17ae7bb0ce59de5040ae1fcc1c1bb13c073714",
+    "subject_storage": "Exact subject retained only in ignored local plan; public reference is SHA256",
+    "subject_sha256": "cfe7cd302e6627375d838e3af5fd04fec145b607025d77046e8aac11cc784efb",
+    "identity_verified": true
+  },
+  "proposed_membership": {
+    "id": "d8190b6e-c290-41d6-8dd2-3d0c90b824cc",
+    "roles": [
+      "workspace_admin"
+    ],
+    "active": true,
+    "version": 1
+  },
+  "execution_requirements": [
+    "Match the user-supplied sign-in email to an actual Auth0 immutable subject; never use email as the subject",
+    "Specific approval for the named account to own this production workspace",
+    "Read-only database preflight and one atomic, tenant-scoped transaction; abort on mismatched existing identities or workspace IDs",
+    "Record actual applied configuration separately from owner approval; no forged BO approval record",
+    "Verify current runtime membership/listing; user sign-in needed to prove the live UI"
+  ],
+  "planned_changes": [
+    "One verified application user",
+    "One workspace",
+    "One active workspace_admin membership",
+    "One redacted bootstrap audit event"
+  ],
+  "excluded": [
+    "schema migration",
+    "demo projects or buyers",
+    "policy permission",
+    "paid admission",
+    "R2 activation",
+    "worker or provider activation",
+    "mailbox/CRM/delivery"
+  ],
+  "fixture_verification": {
+    "command": "$env:BUYEROS_STRICT_INTEGRATION=1; .venv/Scripts/python.exe -m pytest -q tests/test_workspace_listing_db.py --junitxml=../../artifacts/workspace-membership-check.xml",
+    "passed": 2,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "warnings": 8,
+    "seconds": 6.76,
+    "required_junit_gate": "passed=2 failed=0 errors=0 skipped=0",
+    "scope": "Existing listing/pagination regression against disposable PostgreSQL with fixture principal; no live staff token"
+  },
+  "production_changes_applied": true,
+  "management_identity_lookup": "Exact verified Auth0 account and BuyerOS login matched; separately approved production membership applied and read back. On 2026-10-01 HK the user confirmed FIMMICK and the admin role are visible after refresh/sign-in. The agent has not observed an authenticated API response or the full staff journey.",
+  "proposed_audit": {
+    "id": "105006f4-3fa3-492e-961b-50e4af4a3656",
+    "action": "workspace.initialized",
+    "subject_type": "workspace",
+    "reason": "initial_workspace_owner_setup"
+  },
+  "prepared_transaction_verification": {
+    "scope": "Session-local ignored administrative helper, disposable PostgreSQL, fixture identity only; no application endpoint or production mutation",
+    "source_sha256": "51f7827b778f41e1d1f676928deefcd346c9db14750278ff9d9818fb76651c84",
+    "tests_sha256": "e7afa9273a5b4a08176ee58527204b5a4efeef201d9ef5efd074cd7b17e81ebb",
+    "passed": 3,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "warnings": 4,
+    "seconds": 9.54,
+    "checks": [
+      "Initial workspace_admin membership is visible through restricted API role; unrelated fixture actor sees no workspace",
+      "Retry does not duplicate or change membership/audit; conflicting existing workspace is preserved and rejected",
+      "Database failure at membership insert rolls back user/workspace/audit"
+    ],
+    "production_applied": false,
+    "live_identity_verified_by_tests": false
+  },
+  "identity_verification": {
+    "email_exact_match": true,
+    "email_verified": true,
+    "blocked": false,
+    "subject_sha256": "cfe7cd302e6627375d838e3af5fd04fec145b607025d77046e8aac11cc784efb",
+    "matches": 1,
+    "providers": [
+      "google-oauth2"
+    ],
+    "latest_successful_login": {
+      "date": "2026-09-30T14:31:37.074Z",
+      "type": "s",
+      "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R"
+    },
+    "real_staff_api_session_verified": false
+  },
+  "production_preflight": {
+    "database": "nameless-bar-15324691/br-autumn-block-b3exsqii/neondb",
+    "head": "0033_api_rate_windows",
+    "users": 0,
+    "workspaces": 0,
+    "changes_applied": false
+  },
+  "execution_record": {
+    "authorization_source": "Direct user reply to the named FIMMICK production workspace and verified-account administrator proposal in this execution session",
+    "authorization_reply": "Approve this workspace setup",
+    "scope": "One verified application user, FIMMICK live workspace, active workspace_admin membership and redacted bootstrap audit",
+    "bootstrap_result": {
+      "workspace_id": "900cd19b-4e03-4446-bdd6-7cb199d96060",
+      "membership_id": "d8190b6e-c290-41d6-8dd2-3d0c90b824cc",
+      "changes_applied": true,
+      "replay": false
+    },
+    "combined_apply_and_role_check_exit_code": 1,
+    "apply_commit": "succeeded before the subsequent role-switch permission check failed",
+    "role_check_failure": "neondb_owner cannot SET ROLE buyeros_api; no new role grant or RLS weakening performed",
+    "followup_read_only_verification_exit_code": 0,
+    "database_verification": {
+      "database_counts": {
+        "users": 1,
+        "workspaces": 1,
+        "target_memberships": 1,
+        "target_bootstrap_audits": 1
+      },
+      "exact_identity_and_membership_readback": "passed",
+      "workspace": "FIMMICK",
+      "roles": [
+        "workspace_admin"
+      ],
+      "active": true,
+      "version": 1,
+      "schema_heads": [
+        "0033_api_rate_windows"
+      ],
+      "api_role_catalog": {
+        "select_users_workspaces_memberships": [
+          true,
+          true,
+          true
+        ],
+        "membership_rls_enabled": true,
+        "membership_rls_forced": true,
+        "login": true,
+        "superuser": false,
+        "createdb": false,
+        "createrole": false,
+        "bypassrls": false
+      },
+      "verification_method": "Read-only owner connection plus catalog permissions; not an authenticated API request or actual runtime-role connection",
+      "role_switch_attempt": "Denied: neondb_owner cannot SET ROLE buyeros_api; no additional role membership granted",
+      "real_staff_api_session_verified": false,
+      "migration": "none",
+      "deployment": "unchanged",
+      "provider_delivery_activation": "none"
+    },
+    "anonymous_deployed_regression": {
+      "passed": 4,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 3877.6165
+    },
+    "staff_ui_confirmation": "Confirmed by the user on 2026-10-01 HK: FIMMICK and admin role are visible. This is human-reported UI access, not an agent-observed authenticated API trace or full journey.",
+    "migration": "none; existing sole head0033 unchanged",
+    "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+    "rollback": "No production rollback performed; failed-insert atomic rollback verified only on disposable fixture",
+    "provider_delivery_activation": "none",
+    "bo_owner_approval_records_modified": false,
+    "human_staff_ui_confirmation": {
+      "date_hk": "2026-10-01",
+      "source": "Direct user reply to refresh/sign-in workspace confirmation question",
+      "answer": "FIMMICK and admin role are visible",
+      "method": "human reported UI confirmation",
+      "authenticated_api_trace_observed_by_agent": false,
+      "full_staff_journey_verified": false
+    }
+  }
+}

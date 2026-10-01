@@ -401,7 +401,7 @@ await test('toIcpSaveRequest maps requirements with their categories',()=>{
   assert.ok(r.requirements.every(x=>typeof x.id==='string'&&x.id.length>0));
   assert.ok(r.requirements.every(x=>/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(x.id)));
   assert.equal(new Set(r.requirements.map(x=>x.id)).size,r.requirements.length);
-  assert.deepEqual(r.buyer_types,['Distributor']);
+  assert.deepEqual(r.buyer_types,['distributor']);
 });
 
 await test('ICP payload carries user-entered product and value facts before any write',()=>{
@@ -411,6 +411,16 @@ await test('ICP payload carries user-entered product and value facts before any 
   assert.deepEqual(first.offer_facts.map(f=>[f.field,f.value,f.provenance,f.approved]),[
     ['product','Sensors','user_entered',false],['value_proposition','Reduces downtime','user_entered',false],
   ]);
+});
+
+await test('canonical buyer types remain selected when editing and saving a profile',()=>{
+  const labels=['Distributor','Importer','Wholesaler','Retailer','System integrator','End-user business'];
+  const offer={company:'Acme',product:'Sensors',value:'Reduces downtime',website:'',markets:'US',language:'en',must:'industrial sensors',buyerTypes:labels};
+  const saved=profile.toIcpSaveRequest(offer);
+  assert.deepEqual(saved.buyer_types,['distributor','importer','wholesaler','retailer','system_integrator','end_user_business']);
+  const edited=profile.offerFromProject(profile.toProjectCreate(offer),saved);
+  assert.deepEqual(edited.buyerTypes,labels);
+  assert.deepEqual(profile.toIcpSaveRequest(edited).buyer_types,saved.buyer_types);
 });
 
 const writes=await loadModule('services/live/writes.ts');

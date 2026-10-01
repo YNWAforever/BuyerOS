@@ -87,12 +87,17 @@ async def _materialize(session, workspace_id: uuid.UUID, job_id: uuid.UUID):
     from buyeros_api.db.drafts import DraftRevision, OutreachDraft, SenderIdentityVersion
     from buyeros_api.db.icp import IcpVersion, Project, canonical_hash
     from buyeros_api.db.outbox import AsyncJob, AsyncJobItem
+    from buyeros_api.db.models import Membership
     from buyeros_api.db.policy import PolicyDecision
     from buyeros_api.services.audit_service import append_audit
     from buyeros_api.services.buyer_read import _fit_freshness
     from buyeros_api.services.policy_service import evaluate_current_policy
+    from buyeros_api.services.policy_service import policy_workspace_lock
+    from buyeros_api.services.draft_service import preparation_recipient_context
+    from buyeros_api.api.errors import ApiError
     from buyeros_api.services.icp_service import effective_offer_facts
 
+    await policy_workspace_lock(session, workspace_id)
     job = (await session.execute(select(AsyncJob).where(
         AsyncJob.workspace_id == workspace_id, AsyncJob.id == job_id,
         AsyncJob.kind == "draft_generation", AsyncJob.operation == "generateDraft",
@@ -119,6 +124,11 @@ async def _materialize(session, workspace_id: uuid.UUID, job_id: uuid.UUID):
     command = job.command
     if command.get("route") != ROUTE or command.get("max_cost") != "0.000000":
         return reject("unsupported_route")
+    member = (await session.execute(select(Membership).where(
+        Membership.workspace_id == workspace_id, Membership.user_id == job.actor_user_id,
+    ).with_for_update())).scalar_one_or_none()
+    if member is None or not member.active or not set(member.roles) & {"operator", "workspace_admin"}:
+        return reject("membership_changed")
     project = (await session.execute(select(Project).where(
         Project.workspace_id == workspace_id, Project.id == job.project_id,
     ).with_for_update())).scalar_one_or_none()
@@ -167,6 +177,17 @@ async def _materialize(session, workspace_id: uuid.UUID, job_id: uuid.UUID):
     }, "draft_preparation", datetime.now(timezone.utc))
     if not decision["allowed"]:
         return reject("policy_blocked")
+    recipient_id = None
+    if command.get("recipient_context") is not None:
+        expected = command["recipient_context"]
+        try:
+            recipient_id = uuid.UUID(expected["contact"]["id"])
+            current = await preparation_recipient_context(session, workspace_id=workspace_id,
+                project_id=project.id, company_id=buyer.company_id, contact_id=recipient_id)
+        except (ApiError, ValueError, TypeError, KeyError):
+            return reject("recipient_or_policy_changed")
+        if current != expected:
+            return reject("recipient_or_policy_changed")
     policy_ids = (await session.execute(select(PolicyDecision.id).where(
         PolicyDecision.workspace_id == workspace_id,
         PolicyDecision.purpose == "draft_preparation",
@@ -218,7 +239,8 @@ async def _materialize(session, workspace_id: uuid.UUID, job_id: uuid.UUID):
         validate_grounded_output(generated, facts=facts, evidence=evidence)
     except (ValueError, TypeError, KeyError):
         return reject("grounding_failed")
-    content = {**generated, "sender_identity_version": sender.version_key,
+    content = {**generated, "recipient_contact_id": str(recipient_id) if recipient_id else None,
+               "sender_identity_version": sender.version_key,
                "evidence_refs": command["evidence_refs"],
                "value_proposition_fact_ids": command["offer_fact_ids"],
                "icp_version_id": str(icp.id), "evidence_set_hash": fit.evidence_set_hash,

@@ -1,0 +1,8 @@
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="0" time="162.96369499999997">
+<testsuite name="mvp-a-research.spec.ts" timestamp="2026-09-30T19:12:14.790Z" hostname="" tests="2" failures="0" skipped="0" time="67.907" errors="0">
+<testcase name="T30 en UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="mvp-a-research.spec.ts" time="35.623">
+</testcase>
+<testcase name="T30 zh-HK UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="mvp-a-research.spec.ts" time="32.284">
+</testcase>
+</testsuite>
+</testsuites>

@@ -64,3 +64,6 @@ services/**/*.egg-info/
 /services/worker/artifacts/
 /test-results/
 /playwright-report/
+
+# Checkout-local Auth0 CLI authentication state
+/.config/auth0/
