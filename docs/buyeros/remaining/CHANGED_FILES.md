@@ -523,3 +523,15 @@ docs/buyeros/remaining/CHANGED_FILES.md
 docs/buyeros/remaining/TASKS.json
 docs/buyeros/runbooks/release.md
 ```
+
+## T30 published-checkpoint reconciliation
+
+Documentation/evidence only: preserve reviewed application source4181062 and deployed source62d40bc. Correct the stale unpublished-CI and T30-fixture-pending descriptions; retain fresh six-job success metadata for documentation head326de15. No application, migration, owner approval or activation change.
+
+```text
+artifacts/t30-ci-head-checkpoint-20261001.json
+docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
+docs/buyeros/T30_RELEASE_CANDIDATE_HANDOFF_20261001.md
+docs/buyeros/remaining/CHANGED_FILES.md
+docs/buyeros/remaining/TASKS.json
+```

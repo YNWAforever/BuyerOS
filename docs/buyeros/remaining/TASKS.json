@@ -1083,7 +1083,7 @@
         "performance_pre_rate_pool_fix": "10k buyers/100 workspaces; ten distinct fixture staff P95 274.030ms, 11 SQL/request; buyer PATCH P95 62.865ms, run admission P95 88.219ms; 100-workspace broker publish P95 4.039s. All in-process/disposable, no provider/deployed proof.",
         "rate_pool_regression": "red HTTP 500 SQLAlchemy TimeoutError with one tenant slot; green 2 passed, 0 failed/skipped, 8 warnings in 46.56s on disposable PostgreSQL; strict full API rerun pending after Docker setup stalled",
         "screenshots": "artifacts/t29-screenshots/*-post-retry.png contains four en/zh-HK 390/1440 fixture screenshots; regenerated zh-results-usage-390-post-extraction.png visually inspected after the 17-test suite with SHA256 E3E8B8BEB965BEB206DE02482D60DD511A05FF1FFCAAB3464138F2845956BF28",
-        "remaining": "Actual Chromium tab zoom is now verified for the disposable API-backed six-route workbench in en/zh-HK. Screen reader and unmeasured non-text controls/icons remain open; T30 complete same-dataset addressed journey and external activation remain open.",
+        "remaining": "Actual Chromium tab zoom is verified for the disposable API-backed six-route workbench in en/zh-HK. T30 complete same-dataset addressed fixture journey passes4/4. Screen reader, unmeasured non-text controls/icons and external activation remain open.",
         "performance_post_rate_pool_fix": "10k buyers/100 workspaces; sequential read P95 39.377ms, ten distinct fixture staff P95 244.895ms, 11 SQL/request, 10 DB connections; buyer PATCH P95 60.865ms, run admission P95 168.524ms, 100-workspace broker publish P95 2.280s. API 1/1, dispatcher 1/1, mutation 1/1; in-process/disposable only.",
         "accessibility": "measured browser-computed text contrast for visible Overview, Results and Operations text in en/zh-HK; new form-control boundary/fill regression red 16 Results controls at 1.0-1.27:1, green focused 1/1 in 1.9m and full workbench 8/8 in 2.7m. Actual zoom, screen reader and unmeasured non-text elements pending",
         "scope_list_timeout": "red permanent spinner on held first GET; bounded timeout/retry green focused 1 passed in 3.1m and included in full 7/7 suite",
@@ -1676,7 +1676,18 @@
             },
             "identity_provider_scope": "Fictional OIDC/search/contact, actual disposable DB/broker/worker; no live provider proof."
           },
-          "preview": "READY source4181062; direct app/API requests302 to Vercel SSO, so anonymous HTTP acceptance is blocked and not counted as pass"
+          "preview": "READY source4181062; direct app/API requests302 to Vercel SSO, so anonymous HTTP acceptance is blocked and not counted as pass",
+          "documentation_checkpoint_ci": {
+            "head_sha": "326de151aa429a5243372b0fe39cf03d39be17a2",
+            "run_id": 36775490988,
+            "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988",
+            "status": "completed",
+            "conclusion": "success",
+            "successful_jobs": 6,
+            "evidence": "artifacts/t30-ci-head-checkpoint-20261001.json",
+            "scope": "Fresh metadata verifies all six jobs and PR checks at this source. Exact test counts remain attributed to reviewed code4181062/run36772517309; no new deployment or owner approval is claimed.",
+            "checkpoint_checks": "JSON/source attribution checks passed; git diff --quiet from4181062 excluding docs/artifacts exit0; git diff --check exit0. Documentation/evidence only; no additional application test results claimed."
+          }
         }
       }
     }
