@@ -1,0 +1,33 @@
+✓ Lockfile passes supply-chain policies (verified 6m ago)
+Progress: resolved 1, reused 0, downloaded 0, added 0
+[WARN] deprecated eslint@9.39.4: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+Progress: resolved 47, reused 44, downloaded 0, added 0
+Progress: resolved 176, reused 104, downloaded 0, added 0
+Progress: resolved 237, reused 138, downloaded 0, added 0
+Progress: resolved 258, reused 171, downloaded 1, added 0
+Progress: resolved 381, reused 272, downloaded 3, added 0
+Progress: resolved 539, reused 347, downloaded 3, added 0
+Progress: resolved 684, reused 462, downloaded 5, added 0
+Progress: resolved 738, reused 534, downloaded 5, added 0
+Progress: resolved 813, reused 555, downloaded 6, added 0
+Progress: resolved 918, reused 699, downloaded 6, added 0
+[WARN] 2 deprecated subdependencies found: @esbuild-kit/core-utils@3.3.2, @esbuild-kit/esm-loader@2.6.5
+Packages: +43 -13
++++++++++++++++++++++++++++++++++++++++++++-------------
+Progress: resolved 918, reused 699, downloaded 6, added 1
+Progress: resolved 918, reused 699, downloaded 6, added 17
+Progress: resolved 918, reused 699, downloaded 6, added 42
+Progress: resolved 918, reused 699, downloaded 6, added 43, done
+.../esbuild@0.28.1/node_modules/esbuild postinstall$ node install.js
+.../node_modules/workerd postinstall$ node install.js
+.../esbuild@0.28.1/node_modules/esbuild postinstall: Done
+.../node_modules/workerd postinstall: Done
+[WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.
+
+devDependencies:
++ @cloudflare/vitest-plugin 1.2.4
++ vitest 4.1.0
+- wrangler 4.92.0
++ wrangler 4.137.0
+
+Done in 18.8s using pnpm v11.25.0

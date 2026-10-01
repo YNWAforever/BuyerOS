@@ -1,0 +1,13 @@
+$ eslint services/cloudflare-jobs --max-warnings=0
+
+C:\Users\laich\Documents\BuyerOS\services\cloudflare-jobs\.sites-runtime\cloudflare-dry-run\index.js
+   123:24  warning  '_' is defined but never used                                          @typescript-eslint/no-unused-vars
+   125:21  warning  '_arg' is defined but never used                                       @typescript-eslint/no-unused-vars
+   129:24  warning  '_x' is defined but never used                                         @typescript-eslint/no-unused-vars
+  2550:5   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  3412:13  error    Unexpected aliasing of 'this' to local variable                        @typescript-eslint/no-this-alias
+  3427:13  error    Unexpected aliasing of 'this' to local variable                        @typescript-eslint/no-this-alias
+
+✖ 6 problems (2 errors, 4 warnings)
+
+[ELIFECYCLE] Command failed with exit code 1.

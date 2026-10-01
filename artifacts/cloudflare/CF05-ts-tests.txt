@@ -1,0 +1,1 @@
+services/cloudflare-jobs/tests/platform-pg.integration.ts(6,10): error TS2724: '"../src/protocol"' has no exported member named 'parseJobEnvelope'. Did you mean 'parseEnvelope'?

@@ -1,0 +1,15 @@
+✔ checked-in API types match the current OpenAPI contract (11027.048ms)
+✔ Vercel exposes only the app and binds its API call to the internal API service (4.8351ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (255.5523ms)
+✔ the app proxy fails closed when the binding is absent (4.1149ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (2.2649ms)
+✔ FastAPI redirects stay on the public app path (5.0158ms)
+✔ test_internal_headers_forward_only_on_allowlisted_paths (92.9995ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11422.6705

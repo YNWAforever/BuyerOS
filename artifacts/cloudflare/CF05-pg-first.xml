@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="43.769" timestamp="2026-10-01T15:05:17.558192+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_platform_db" name="test_actual_local_queue_workflow_api_postgres" time="39.928"><failure message="TypeError: unsupported operand type(s) for +: 'NoneType' and 'NoneType'">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:55882/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:55882/buyeros_test_api', 2)
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002183E25A060&gt;
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-180/test_actual_local_queue_workfl0')
+
+    def test_actual_local_queue_workflow_api_postgres(migrated, worker_runtime, monkeypatch, tmp_path):
+        from buyeros_api.api.app import create_app
+        from buyeros_api.settings import get_settings
+
+        envelope = seed_envelope(migrated, worker_runtime[1])
+        project, actor, member = seed_project(migrated, envelope.workspace_id)
+        job, company, buyer = (uuid.uuid4() for _ in range(3))
+        with psycopg.connect(migrated, autocommit=True) as db:
+            db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested) "
+                       "VALUES(%s,%s,%s,%s,'bulk_mutation','assignBuyerOwners',%s::jsonb,'queued',1)",
+                       (job, envelope.workspace_id, project, actor, json.dumps({'owner_membership_id': str(member), 'reason': 'Fictional platform proof'})))
+            db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES(%s,%s,'Fixture','Fixture')", (company, envelope.workspace_id))
+            db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES(%s,%s,%s,%s)", (buyer, envelope.workspace_id, project, company))
+            db.execute("INSERT INTO async_job_items(id,workspace_id,job_id,buyer_id,ordinal,expected_version,status) VALUES(%s,%s,%s,%s,0,1,'pending')",
+                       (uuid.uuid4(), envelope.workspace_id, job, buyer))
+            db.execute("UPDATE outbox_events SET payload=%s::jsonb WHERE id=%s", (json.dumps({'job_id': str(job)}), envelope.outbox_id))
+        monkeypatch.setenv('BUYEROS_WORKER_CURRENT_KEY_ID', 'fictional-key')
+        monkeypatch.setenv('BUYEROS_WORKER_CURRENT_SECRET', 'fictional-cf05-secret-32-bytes-only')
+        get_settings.cache_clear()
+        sock = socket.socket()
+        sock.bind(('127.0.0.1', 0))
+        port = sock.getsockname()[1]
+        server = uvicorn.Server(uvicorn.Config(create_app(), log_level='error', access_log=False))
+        thread = threading.Thread(target=server.run, kwargs={'sockets': [sock]}, daemon=True)
+        thread.start()
+        try:
+            deadline = time.monotonic() + 10
+            while not server.started and thread.is_alive() and time.monotonic() &lt; deadline:
+                time.sleep(0.05)
+            assert server.started, 'owned API must actually start'
+            context = tmp_path / 'opaque-worker-context.json'
+            context.write_text(json.dumps({'origin': f'http://127.0.0.1:{port}', 'job': envelope.model_dump(mode='json')}), encoding='utf8')
+            root = Path(__file__).resolve().parents[3]
+            env = {key: value for key, value in os.environ.items() if not key.startswith(('BUYEROS_', 'AUTH0_', 'R2_', 'VERCEL_', 'CLOUDFLARE_'))}
+            env['BUYEROS_CF_TEST_CONTEXT'] = str(context)
+            result = subprocess.run(['node', 'node_modules/vitest/vitest.mjs', 'run', '--config', 'services/cloudflare-jobs/vitest.pg.config.ts',
+                                     '--reporter=default', '--reporter=junit', '--outputFile.junit=artifacts/cloudflare/CF05-platform-pg.xml'],
+                                    cwd=root, env=env, capture_output=True, text=True, timeout=120)
+&gt;           (root / 'artifacts/cloudflare/CF05-platform-pg.txt').write_text(result.stdout + result.stderr, encoding='utf8')
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: unsupported operand type(s) for +: 'NoneType' and 'NoneType'
+
+tests\test_cloudflare_platform_db.py:61: TypeError</failure></testcase></testsuite></testsuites>

@@ -11,6 +11,10 @@
     "build": "node scripts/run-framework.mjs build",
     "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .vercel",
+    "cloudflare:types": "tsc --noEmit -p services/cloudflare-jobs/tests/tsconfig.json",
+    "cloudflare:lint": "eslint services/cloudflare-jobs --max-warnings=0",
+    "cloudflare:test": "vitest run --config services/cloudflare-jobs/vitest.config.ts",
+    "cloudflare:bindings": "wrangler types services/cloudflare-jobs/worker-configuration.d.ts --config services/cloudflare-jobs/wrangler.jsonc --strict-vars=false --check",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
@@ -42,7 +46,9 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",
-    "@cloudflare/workers-types": "4.20260515.1",
+    "@cloudflare/vitest-plugin": "1.2.4",
+    "@cloudflare/workers-types": "5.20260921.1",
+    "@msw/cloudflare": "0.0.1",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",
@@ -53,6 +59,7 @@
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
     "eslint-config-next": "16.3.4",
+    "msw": "2.14.7",
     "nitro": "3.0.260903-beta",
     "openapi-typescript": "^7.13.0",
     "react-server-dom-webpack": "19.2.6",
@@ -61,7 +68,8 @@
     "typescript": "5.9.3",
     "vinext": "1.0.0-beta.5",
     "vite": "8.0.13",
-    "wrangler": "4.92.0"
+    "vitest": "4.1.0",
+    "wrangler": "4.137.0"
   },
   "type": "module",
   "overrides": {

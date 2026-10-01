@@ -1783,7 +1783,7 @@
   ],
   "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "CF05 local Cloudflare scheduling/Queue/Workflow controller. Hosted, paid and production activation gates remain pending. No agents.",
+  "next_eligible_task": "CF06 local recovery/readiness/guarded rollback; hosted/paid/production activation pending. No agents.",
   "hosting_migration_proposal": {
     "status": "local_implementation_in_progress",
     "date_hk": "2026-10-01",
@@ -1840,14 +1840,15 @@
         "depends_on": [
           "CF04"
         ],
-        "status": "in_progress"
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF05-checkpoint.json"
       },
       {
         "id": "CF06",
         "depends_on": [
           "CF05"
         ],
-        "status": "proposed_not_started"
+        "status": "in_progress"
       },
       {
         "id": "CF07",

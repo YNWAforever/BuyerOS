@@ -1,0 +1,33 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "buyeros-jobs",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-21",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "vars": {
+    "EXECUTION_ENABLED": "false",
+    "RUNTIME_EPOCH": "1",
+    "WORKER_API_ORIGIN": "https://invalid.example",
+    "WORKER_API_ALLOWED_ORIGINS": "[]",
+    "WORKER_CURRENT_KEY_ID": "unconfigured",
+    "LOCAL_TEST_MODE": "false"
+  },
+  "secrets": { "required": ["WORKER_CURRENT_SECRET"] },
+  "queues": {
+    "producers": [
+      { "binding": "JOBS", "queue": "buyeros-jobs", "remote": false },
+      { "binding": "QUARANTINE", "queue": "buyeros-jobs-dlq", "remote": false }
+    ],
+    "consumers": [{
+      "queue": "buyeros-jobs", "max_batch_size": 1, "max_batch_timeout": 1,
+      "max_concurrency": 1, "max_retries": 5, "retry_delay": 5,
+      "dead_letter_queue": "buyeros-jobs-dlq"
+    }]
+  },
+  "workflows": [{ "binding": "JOB_WORKFLOW", "name": "buyeros-job", "class_name": "BuyerOSJobWorkflow" }],
+  "triggers": { "crons": ["* * * * *"] },
+  "limits": { "cpu_ms": 10000, "subrequests": 50 },
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
+}

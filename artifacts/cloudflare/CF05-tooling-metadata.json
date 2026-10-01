@@ -1,0 +1,15 @@
+{
+  "version": "1.2.4",
+  "peerDependencies": {
+    "vitest": "^4.1.0",
+    "@vitest/runner": "^4.1.0",
+    "@vitest/snapshot": "^4.1.0"
+  },
+  "dependencies": {
+    "zod": "4.4.3",
+    "esbuild": "0.28.1",
+    "wrangler": "4.137.0",
+    "miniflare": "5.20260921.0-alpha",
+    "cjs-module-lexer": "1.2.3"
+  }
+}

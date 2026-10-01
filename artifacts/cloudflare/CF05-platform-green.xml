@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="18" failures="3" errors="0" time="2.177">
+    <testsuite name="services/cloudflare-jobs/tests/api-client.test.ts" timestamp="2026-10-01T06:51:19.600Z" hostname="DESKTOP-30TFME5" tests="4" failures="2" errors="0" skipped="0" time="0.017">
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="signs exact POST path and raw bytes with a fixed protocol vector and no redirect" time="0.005">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="refuses credentials, origin mismatch, URL prefix/query and non-HTTPS outside isolated loopback mode" time="0.003">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="rejects a redirect response without sending signed headers to its destination" time="0.005">
+            <failure message="Cannot read properties of undefined (reading &apos;activate&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;activate&apos;)
+ ❯ services/cloudflare-jobs/tests/api-client.test.ts:32:13
+            </failure>
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="bounds API response bytes before parsing or persisting its outcome" time="0.002">
+            <failure message="Cannot read properties of undefined (reading &apos;activate&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;activate&apos;)
+ ❯ services/cloudflare-jobs/tests/api-client.test.ts:45:13
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/dispatcher.test.ts" timestamp="2026-10-01T06:51:19.613Z" hostname="DESKTOP-30TFME5" tests="3" failures="0" errors="0" skipped="0" time="0.585">
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="dispatch off performs no API or binding calls" time="0.577">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="claims at most ten IDs for ten seconds and records only accepted publication" time="0.004">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="publish-before-receipt crash keeps the original opaque generation for recovery" time="0.003">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/platform.test.ts" timestamp="2026-10-01T06:51:19.614Z" hostname="DESKTOP-30TFME5" tests="1" failures="1" errors="0" skipped="0" time="0.007">
+        <testcase classname="services/cloudflare-jobs/tests/platform.test.ts" name="real queue handler creates a durable Workflow; duplicate handoff keeps the same instance" time="0.006">
+            <failure message="Cannot read properties of undefined (reading &apos;activate&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;activate&apos;)
+ ❯ services/cloudflare-jobs/tests/platform.test.ts:11:13
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/protocol.test.ts" timestamp="2026-10-01T06:51:19.616Z" hostname="DESKTOP-30TFME5" tests="3" failures="0" errors="0" skipped="0" time="0.532">
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; rejects extra customer fields, URLs and unsafe numbers before scheduling" time="0.526">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; separates operational probes and deterministic workflow IDs" time="0.003">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; requires the four-field bounded outcome and server-issued step key" time="0.002">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/queue.test.ts" timestamp="2026-10-01T06:51:19.617Z" hostname="DESKTOP-30TFME5" tests="2" failures="0" errors="0" skipped="0" time="0.514">
+        <testcase classname="services/cloudflare-jobs/tests/queue.test.ts" name="ACK requires verified creation or inspection of the deterministic instance" time="0.51">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/queue.test.ts" name="does not ACK an unverified handoff or restart an existing failed workflow" time="0.001">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/workflow.test.ts" timestamp="2026-10-01T06:51:19.618Z" hostname="DESKTOP-30TFME5" tests="5" failures="0" errors="0" skipped="0" time="0.522">
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="HTTP timeout reads committed status before any repeated execution" time="0.502">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="busy permits wait without consuming the transient error budget" time="0.003">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="unknown acceptance stops the controller without a new submit" time="0.001">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="a failed status read is retried as status, never another execution request" time="0.001">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="halts a cyclic continuation at the persisted receipt ceiling" time="0.011">
+        </testcase>
+    </testsuite>
+</testsuites>

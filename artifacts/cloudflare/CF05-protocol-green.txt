@@ -1,0 +1,12 @@
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+ ✓ services/cloudflare-jobs/tests/protocol.test.ts (3 tests) 1726ms
+     ✓ rejects extra customer fields, URLs and unsafe numbers before scheduling  1712ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  14:39:53
+   Duration  8.56s (transform 1.43s, setup 0ms, import 221ms, tests 1.73s, environment 0ms)
+
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF05-protocol-green.xml

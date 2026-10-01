@@ -1,0 +1,39 @@
+✓ Lockfile passes supply-chain policies (verified 2m ago)
+Progress: resolved 1, reused 0, downloaded 0, added 0
+[WARN] deprecated eslint@9.39.4: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+Progress: resolved 26, reused 23, downloaded 0, added 0
+Progress: resolved 34, reused 31, downloaded 0, added 0
+Progress: resolved 42, reused 39, downloaded 2, added 0
+Progress: resolved 46, reused 43, downloaded 2, added 0
+Progress: resolved 49, reused 44, downloaded 3, added 0
+Progress: resolved 177, reused 156, downloaded 11, added 0
+Progress: resolved 236, reused 212, downloaded 15, added 0
+Progress: resolved 252, reused 221, downloaded 22, added 0
+Progress: resolved 259, reused 228, downloaded 22, added 0
+Progress: resolved 356, reused 256, downloaded 23, added 0
+Progress: resolved 435, reused 312, downloaded 23, added 0
+Progress: resolved 537, reused 377, downloaded 27, added 0
+Progress: resolved 548, reused 382, downloaded 29, added 0
+Progress: resolved 573, reused 384, downloaded 30, added 0
+Progress: resolved 736, reused 510, downloaded 32, added 0
+Progress: resolved 740, reused 513, downloaded 33, added 0
+Progress: resolved 918, reused 669, downloaded 33, added 0
+[ERR_PNPM_NO_MATURE_MATCHING_VERSION] 18 versions do not meet the minimumReleaseAge constraint:
+  @cloudflare/vitest-plugin@1.3.4 was published at 2026-09-30T14:30:00.757Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  @cloudflare/workerd-darwin-64@1.20260930.2 was published at 2026-09-30T10:25:30.485Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  @cloudflare/workerd-darwin-64@1.20260930.2 was published at 2026-09-30T10:25:30.485Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  @cloudflare/workerd-darwin-arm64@1.20260930.2 was published at 2026-09-30T10:25:55.195Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  @cloudflare/workerd-darwin-arm64@1.20260930.2 was published at 2026-09-30T10:25:55.195Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  @cloudflare/workerd-linux-64@1.20260930.2 was published at 2026-09-30T10:31:01.305Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  @cloudflare/workerd-linux-64@1.20260930.2 was published at 2026-09-30T10:31:01.305Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  @cloudflare/workerd-linux-arm64@1.20260930.2 was published at 2026-09-30T10:43:51.286Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  @cloudflare/workerd-linux-arm64@1.20260930.2 was published at 2026-09-30T10:43:51.286Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  @cloudflare/workerd-windows-64@1.20260930.2 was published at 2026-09-30T10:25:31.781Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  @cloudflare/workerd-windows-64@1.20260930.2 was published at 2026-09-30T10:25:31.781Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  miniflare@5.20260930.0-alpha was published at 2026-09-30T13:46:24.631Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  miniflare@5.20260930.0-alpha was published at 2026-09-30T13:46:24.631Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  workerd@1.20260930.2 was published at 2026-09-30T10:28:52.577Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  workerd@1.20260930.2 was published at 2026-09-30T10:28:52.577Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  workerd@1.20260930.2 was published at 2026-09-30T10:28:52.577Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  wrangler@4.145.0 was published at 2026-09-30T14:20:28.735Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)
+  wrangler@4.145.0 was published at 2026-09-30T14:20:28.735Z, within the minimumReleaseAge cutoff (2026-09-24T06:27:22.889Z)

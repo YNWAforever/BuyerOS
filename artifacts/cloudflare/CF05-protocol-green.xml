@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="3" failures="0" errors="0" time="1.726">
+    <testsuite name="services/cloudflare-jobs/tests/protocol.test.ts" timestamp="2026-10-01T06:40:01.886Z" hostname="DESKTOP-30TFME5" tests="3" failures="0" errors="0" skipped="0" time="1.726">
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; rejects extra customer fields, URLs and unsafe numbers before scheduling" time="1.712">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; separates operational probes and deterministic workflow IDs" time="0.004">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; requires the four-field bounded outcome and server-issued step key" time="0.007">
+        </testcase>
+    </testsuite>
+</testsuites>

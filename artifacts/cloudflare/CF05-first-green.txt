@@ -1,0 +1,57 @@
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+Using secrets defined in process.env
+▲ [WARNING] Missing required secrets: WORKER_CURRENT_SECRET. Add them to .dev.vars, .env, or set as environment variables.
+
+
+Using secrets defined in process.env
+▲ [WARNING] Missing required secrets: WORKER_CURRENT_SECRET. Add them to .dev.vars, .env, or set as environment variables.
+
+
+Using secrets defined in process.env
+▲ [WARNING] Missing required secrets: WORKER_CURRENT_SECRET. Add them to .dev.vars, .env, or set as environment variables.
+
+
+Using secrets defined in process.env
+▲ [WARNING] Missing required secrets: WORKER_CURRENT_SECRET. Add them to .dev.vars, .env, or set as environment variables.
+
+
+Using secrets defined in process.env
+▲ [WARNING] Missing required secrets: WORKER_CURRENT_SECRET. Add them to .dev.vars, .env, or set as environment variables.
+
+
+ ✓ services/cloudflare-jobs/tests/queue.test.ts (2 tests) 668ms
+   ✓ ACK requires verified creation or inspection of the deterministic instance  664ms
+ ✓ services/cloudflare-jobs/tests/protocol.test.ts (3 tests) 769ms
+     ✓ rejects extra customer fields, URLs and unsafe numbers before scheduling  761ms
+ ✓ services/cloudflare-jobs/tests/dispatcher.test.ts (3 tests) 803ms
+   ✓ dispatch off performs no API or binding calls  792ms
+ ✓ services/cloudflare-jobs/tests/workflow.test.ts (3 tests) 793ms
+   ✓ HTTP timeout reads committed status before any repeated execution  786ms
+ ❯ services/cloudflare-jobs/tests/api-client.test.ts (2 tests | 1 failed) 808ms
+   × signs exact POST path and raw bytes with a fixed protocol vector and no redirect 802ms
+   ✓ refuses credentials, origin mismatch, URL prefix/query and non-HTTPS outside isolated loopback mode 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  services/cloudflare-jobs/tests/api-client.test.ts > signs exact POST path and raw bytes with a fixed protocol vector and no redirect
+TypeError: Invalid redirect value, must be one of "follow" or "manual" ("error" won't be implemented since it does not make sense at the edge; use "manual" and check the response status code).
+ ❯ buildSignedRequest services/cloudflare-jobs/src/api-client.ts:42:10
+     40|   const key = await crypto.subtle.importKey('raw', secret, { name: 'HM…
+     41|   const signature = hex(await crypto.subtle.sign('HMAC', key, canonica…
+     42|   return new Request(origin + path, {
+       |          ^
+     43|     method: 'POST', body: payload, redirect: 'error',
+     44|     signal: AbortSignal.timeout(Math.max(1, Math.min(75_000, options.t…
+ ❯ services/cloudflare-jobs/tests/api-client.test.ts:10:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 12 passed (13)
+   Start at  14:46:28
+   Duration  9.91s (transform 2.11s, setup 0ms, import 638ms, tests 3.84s, environment 0ms)
+
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF05-first-green.xml

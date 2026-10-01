@@ -29,6 +29,33 @@ jobs:
       - run: node scripts/run-vercel.mjs build
       - run: node --test tests/vercel-render.test.mjs
 
+  cloudflare-controller:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm cloudflare:types
+      - run: pnpm cloudflare:lint
+      - run: pnpm cloudflare:bindings
+      - run: pnpm cloudflare:test --reporter=default --reporter=junit --outputFile.junit=artifacts/cloudflare/ci-controller.xml
+      - run: pnpm exec wrangler deploy --dry-run --config services/cloudflare-jobs/wrangler.jsonc --outdir .sites-runtime/cloudflare-dry-run
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-cloudflare-local-controller
+          path: artifacts/cloudflare/
+          if-no-files-found: error
+
   api:
     runs-on: ubuntu-latest
     services:
@@ -47,6 +74,15 @@ jobs:
       BUYEROS_STRICT_INTEGRATION: '1'
     steps:
       - uses: actions/checkout@v4
+      # The mandatory owned-PG test drives the actual local Queue/Workflow runtime.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

@@ -1,0 +1,8 @@
+
+C:\Users\laich\Documents\BuyerOS\services\cloudflare-jobs\worker-configuration.d.ts
+  10648:44  warning  Unused eslint-disable directive (no problems were reported)
+  10665:70  warning  Unused eslint-disable directive (no problems were reported)
+
+✖ 2 problems (0 errors, 2 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+

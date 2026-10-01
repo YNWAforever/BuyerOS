@@ -1,0 +1,59 @@
+$ vitest run --config services/cloudflare-jobs/vitest.config.ts "--reporter=default" "--reporter=junit" "--outputFile.junit=artifacts/cloudflare/CF05-controller-final.xml"
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+Using secrets defined in process.env
+Using secrets defined in process.env
+Using secrets defined in process.env
+Using secrets defined in process.env
+Using secrets defined in process.env
+Using secrets defined in process.env
+Using secrets defined in process.env
+ ✓ services/cloudflare-jobs/tests/queue.test.ts (2 tests) 799ms
+   ✓ ACK requires verified creation or inspection of the deterministic instance  791ms
+ ✓ services/cloudflare-jobs/tests/dispatcher.test.ts (5 tests) 814ms
+   ✓ dispatch off performs no API or binding calls  786ms
+ ✓ services/cloudflare-jobs/tests/protocol.test.ts (3 tests) 823ms
+     ✓ rejects extra customer fields, URLs and unsafe numbers before scheduling  805ms
+ ✓ services/cloudflare-jobs/tests/workflow.test.ts (5 tests) 819ms
+   ✓ HTTP timeout reads committed status before any repeated execution  796ms
+ ✓ services/cloudflare-jobs/tests/api-client.test.ts (4 tests) 856ms
+   ✓ signs exact POST path and raw bytes with a fixed protocol vector and no redirect  767ms
+ ❯ services/cloudflare-jobs/tests/handler.test.ts (2 tests | 1 failed) 29ms
+   ✓ quarantines only opaque metadata and ACKs invalid data after quarantine accepts 16ms
+   × disabled handoff retains messages for retry and has no public fetch entrypoint 8ms
+ ✓ services/cloudflare-jobs/tests/platform.test.ts (1 test) 202ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  services/cloudflare-jobs/tests/handler.test.ts > disabled handoff retains messages for retry and has no public fetch entrypoint
+AssertionError: expected [ { msgId: 'opaque-paused-1' } ] to deeply equal [ { msgId: 'opaque-paused-1', …(1) } ]
+
+- Expected
++ Received
+
+  [
+    {
+-     "delaySeconds": 60,
+      "msgId": "opaque-paused-1",
+    },
+  ]
+
+ ❯ services/cloudflare-jobs/tests/handler.test.ts:22:32
+     20|   const result = await getQueueResult(batch, createExecutionContext());
+     21|   expect(result.explicitAcks).toEqual([]);
+     22|   expect(result.retryMessages).toEqual([{ msgId: 'opaque-paused-1', de…
+       |                                ^
+     23|   expect('fetch' in worker).toBe(false);
+     24| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 21 passed (22)
+   Start at  15:13:39
+   Duration  20.45s (transform 37.11s, setup 71.46s, import 2.19s, tests 4.34s, environment 7ms)
+
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF05-controller-final.xml
+[ELIFECYCLE] Command failed with exit code 1.

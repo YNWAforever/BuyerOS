@@ -1,0 +1,5 @@
+$ tsc --noEmit -p services/cloudflare-jobs/tests/tsconfig.json
+services/cloudflare-jobs/tests/handler.test.ts(11,29): error TS2352: Conversion of type '{ QUARANTINE: { send: Mock<Procedure>; }; JOB_WORKFLOW: { create: Mock<Procedure>; }; JOBS: Queue; EXECUTION_ENABLED: string; RUNTIME_EPOCH: string; ... 4 more ...; WORKER_CURRENT_SECRET: string; }' to type 'Env' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'QUARANTINE' are incompatible.
+    Type '{ send: Mock<Procedure>; }' is missing the following properties from type 'Queue<unknown>': metrics, sendBatch
+[ELIFECYCLE] Command failed with exit code 2.
