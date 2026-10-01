@@ -1,0 +1,1 @@
+Local handoff links valid: 43; audit18; registry state complete_local_external_activation_pending;15 selected final XML files have0failures/errors/skips; reviewed code d6c2849.

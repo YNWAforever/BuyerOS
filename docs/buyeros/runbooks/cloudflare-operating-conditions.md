@@ -60,11 +60,29 @@ Use these rates only after verifying the selected account plan and current bill.
 
 One-minute database queries prevent the usual five-minute Neon inactivity window.
 Inference: an enabled all-day dispatcher can keep compute active for720 hours/month;
-at0.25CU that is180CU-hours. The actual project's compute size, plan, allowances
-and rate are not inspected here, so a total dollar saving is not claimed.
+at0.25CU that is180CU-hours. Read-only account metadata now confirms production project `nameless-bar-15324691`,
+PG18 in Singapore, `free_v3`, autoscale0.25..2CU. Its endpoint was actually
+suspended/idle; no database queries were made. The current published Free allowance
+is100CU-hours per project per month. Therefore the180CU-hour minimum all-day
+scenario exceeds Free; an increased compute size costs more. No total dollar saving
+or implicit Neon upgrade is claimed. Remaining allowance and actual billing
+were not read. [Neon current Free quota](https://github.com/neondatabase/website/blob/main/content/faqs/free-plan-limits-and-quotas.md).
 [Neon scale-to-zero source](https://github.com/neondatabase/website/blob/main/content/docs/introduction/scale-to-zero.md).
 Approved working-hour scheduling could reduce cost but would change readiness and
 queue latency; it is a separate design decision, not silently implemented here.
+
+## Bounded feasibility preview proposal
+
+Use a fresh empty PG18 project `BuyerOS-CF-preview-20261001`, Singapore,
+Free, min=max0.25CU, subject to actual account quota/configuration readback.
+A two-hour test window implies0.5CU-hours at that size, plus startup and
+scale-to-zero tail; it is not a hard bill cap. Do not copy production data,
+roles, connection strings or fixtures. Disable the preview Cron/selector at
+completion or two hours, whichever occurs first. No scheduled automation exists.
+The separate Cloudflare account's current billing plan remains unverified;
+US$5/month is the proposed Paid base if not already active, before account-wide
+metered overages. No Neon/Vercel paid-plan change is included in preview approval.
+Stop and report any additional paid requirement before proceeding.
 
 ## Activation measurements still required
 

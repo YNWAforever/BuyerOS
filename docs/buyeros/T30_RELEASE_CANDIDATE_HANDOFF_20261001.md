@@ -1,6 +1,8 @@
 # T30 release candidate handoff — 2026-10-01 HK
 
-## Current facts
+**Current migration handoff:** [Cloudflare release candidate](CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md), reviewed source d6c2849. Local implementation and fixtures verified; hosted/paid/production activation pending. The following T30 application/deployment facts retain their historical source scope.
+
+## Historical T30 application/deployment facts
 
 | Fact | Evidence |
 | --- | --- |

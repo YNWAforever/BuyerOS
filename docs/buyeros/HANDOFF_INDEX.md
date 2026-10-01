@@ -1,5 +1,7 @@
 # BuyerOS plan index, decisions and current state
 
+**Current migration handoff:** [Cloudflare release candidate](CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md), reviewed source d6c2849. Local implementation and fixtures verified; hosted/paid/production activation pending. The following 2026-09-15 plan/BO approval records are historical and are not changed by the later direct execution authorization.
+
 **Status: PROPOSED / PLAN ONLY.** Plan revision v1. Recorded 2026-09-15 (Hong Kong). This is a handoff index, not Build approval.
 
 No application code, lockfile, install, migration, cloud resource, deployment, Site access change, paid provider call, mailbox connection, message, or send is authorized by this document. The audited application source is imported at `b804ba8d1514a1049b7202c861278dd72c473a75` (tree `b4c6b5384ccfd6d0bdd5b4b92440427db83de7c1`) and merged into `main` via `72fef7da785624a35bb6701f1451ebcf0184a089`.

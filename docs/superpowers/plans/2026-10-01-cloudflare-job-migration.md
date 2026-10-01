@@ -1,6 +1,6 @@
 # BuyerOS Cloudflare Job Migration Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task-by-task in the current session. The user selected that execution method and did not authorize agents. Steps use checkboxes for tracking; every checkbox is currently incomplete.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task-by-task in the current session. The user selected that execution method and did not authorize agents. Steps use checkboxes for tracking; local CF00–CF08 work is complete, hosted/production activation checkboxes remain pending.
 
 **Goal:** Replace continuous Celery/Valkey/Render job hosting with Cloudflare Queues/Workflows and resumable Python steps, preserving BuyerOS domain and financial behavior.
 
@@ -10,7 +10,7 @@
 
 **Spec:** [2026-10-01-cloudflare-job-migration-design.md](../specs/2026-10-01-cloudflare-job-migration-design.md).
 
-**Status:** Local implementation approved by direct user reply, 2026-10-01 HK. CF00 local, CF01 and CF02 completed; hosted/paid/production activation is not approved. Initial planning snapshot: Source `aed7a7eb2b7370c10cd7a41306eecf09d378ad42`, initial diff clean. Implementation/architecture change and external activation are not approved by requesting this plan. All future tests and commands below are **NOT RUN**; expected results describe acceptance, not evidence.
+**Current status (2026-10-01 HK):** local architecture/implementation approved and completed through CF08 RC at reviewed source d6c2849. CF00 hosted feasibility remains pending. Paid resource setup, preview/production schema/deployment/secrets and production activation are not approved. Direct earlier Git authority permits push/update existing draft PR10 only, no merge. Original planning baseline aed7a7eb and expected commands below retain historical scope; actual outputs are in CF00–CF08 checkpoint artifacts and the current handoff. No future expected result is counted as evidence.
 
 ## Global constraints
 
@@ -202,16 +202,22 @@ Completion ruling: CF05 establishes the actual Queue/Workflow/HMAC/PG transport.
 
 **Interfaces:** `ActivationProposal` names reviewed source SHA, account/plan, resources, origin/budgets, DB migration/role, secrets source map, initial allowed capability scope, expected usage, locality/privacy review and rollback. It records requested approvals separately from received approvals.
 
-- [ ] Validate config/schema with execution disabled, public routes/binding unchanged and no customer/provider secrets in bundles. Prepare exact migration/role/config diffs and protected preview probes; do not publish them to obtain approval.
-- [ ] Inspect all changed source and retained test evidence; update A01–A18 with current proof, public70+8/internal5 coverage and remaining source/activation blockers. Migration head/upgrade/populated refusal and paused-runtime rollback evidence must be source-bound. No deployment SHA is emitted without platform proof.
-- [ ] Present the architecture change for review if not already approved. Once local work is complete, present the **single exact activation change** with account/plan, monthly usage estimate, private resource names, verified Vercel budgets, approved migration/role/secret placement, enabled job scope and rollback. Missing provider/policy/R2/pilot approval remains independent; do not include it implicitly.
+- [x] Validate config/schema with execution disabled, public routes/binding unchanged and no customer/provider secrets in bundles. Prepare exact migration/role/config diffs and protected preview probes; do not publish them to obtain approval.
+- [x] Inspect all changed source and retained test evidence; update A01–A18 with current proof, public70+8/internal5 coverage and remaining source/activation blockers. Migration head/upgrade/populated refusal and paused-runtime rollback evidence must be source-bound. No deployment SHA is emitted without platform proof.
+- [x] Present the architecture change for review if not already approved. Once local work is complete, present the **single exact activation change** with account/plan, monthly usage estimate, private resource names, verified Vercel budgets, approved migration/role/secret placement, enabled job scope and rollback. Missing provider/policy/R2/pilot approval remains independent; do not include it implicitly.
 - [ ] Only after that specific activation authorization: deploy compatible API off, migrate the approved target, configure secrets/bindings, deploy Worker off, prove protected hosted fixture boundaries, stop legacy claimers, inspect in-flight operations, change epoch/selector and enable the approved non-delivery scope. Resource creation/preview tests may need a separate earlier exact authorization; do not count elapsed time as approval.
 - [ ] Verify deployed source, real Queue/Workflow probe, disabled gates, authenticated staff continuity and cost/latency on the approved scope; report code implemented, fixture verified, hosted integration verified, externally blocked and deployed as separate facts. Prepare/push reviewable changes only under existing Git authority; no merge. Suggested commit: `docs: hand off guarded Cloudflare BuyerOS release evidence`.
 
-## Plan self-review and current handoff
+## Current handoff
 
-Reviewed against the design: runtime ownership, auth, schema, package direction, step state, duplicates/uncertainty, actor/policy races, counters, deletion, platform expiry, concurrency, costs, UI, contracts, rollback and external gates each map to CF00–CF08. Exact signatures/types are shared above. Review-focus tests map to their owning tasks; all commands for future files are marked NOT RUN.
+[Cloudflare RC handoff](../../buyeros/CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md)
+contains the exact reviewed source,176 source/config/test paths, audit18,70+8
+coverage/internal5, local test/screenshot/rollback/performance evidence and a
+single bounded protected-preview proposal. Author review only, no independent
+approval is claimed. Architecture/local implementation is already approved;
+no repeated local-edit approval is required.
 
-Planning checks only: source/origin/diff inspected; native dependency/handler/proxy sources read through graph then targeted fallback; current Alembic head inspected offline. New migration/tests/runtime are not implemented, no cloud account configuration was inspected, and no resource was created. The execution registry links this proposal without changing completed T00–T30 results or historical owner approvals.
-
-**Next eligible decision:** review this plan and its design, particularly bounded Python execution on Vercel, the Celery/Valkey exception, internal routes and one-minute queueing. After approval, start CF00 in this session; do not restart T00 or assume agent permission. The writing-plans skill requires review before implementation for this newly requested migration plan. Approval of the plan does not activate paid resources or production jobs.
+**Next eligible:** CF00 protected hosted feasibility after specific isolated
+preview resource/schema/secret/test authorization. The two remaining CF08
+activation/deployed checkboxes intentionally remain unchecked. Production
+cutover requires a later exact decision and applicable external gates.

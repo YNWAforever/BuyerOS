@@ -15,6 +15,7 @@ FastAPI domain owner remain. Celery is a compatible optional adapter.
 | Worker | `RUNTIME_EPOCH` | Current DB selector epoch, never guessed or reset. |
 | Worker | `WORKER_API_ORIGIN`, `WORKER_API_ALLOWED_ORIGINS` | Exact approved HTTPS origin and JSON allowlist, no path/query/userinfo. Production URL/protection still to be verified. |
 | Worker + API | current key ID/secret; optional previous pair | Newly generated machine key in server-only secret stores. Do not put in Git/browser/public env. API uses `BUYEROS_WORKER_*`; Worker uses `WORKER_*`. |
+| Worker only | `WORKER_API_PROTECTION_BYPASS` (optional) | Dedicated preview project automation bypass secret. Header only after HTTPS origin approval; never URL/query/cookie/browser. Proxy strips it before the internal API. No value committed/configured. |
 | API | `BUYEROS_EXECUTION_DATABASE_URL` | Dedicated nonowner NOBYPASSRLS member of `buyeros_worker`; inspect current role catalog. No production migration connection. |
 | API | `BUYEROS_CLOUDFLARE_EXECUTION_ENABLED` | `false` by default; selector and environment must both agree. |
 | API | `BUYEROS_RETENTION_POLICY_VERSION` | Explicit reviewed current retention policy, maximum64 characters; absent means no invented automatic retention policy. |
@@ -40,9 +41,11 @@ per outbox and2048 controller actions. Transport retries5, backoff≤30 seconds;
 permit contention does not consume the transient retry budget. Stored money,
 query/page/time counters and approvals are not reset on restart.
 
-Both Vercel app/API90-second budgets and the protected hosted native bundle,
-parser, DB and signed hop are unverified activation gates. Local timing does
-not establish those limits on the actual account.
+Both local budget mechanisms are validated: API service functions use the resolved
+`buyeros_api/api/vercel.py` with maxDuration90; Nitro emits the app gateway
+`.vc-config.json` with maxDuration90. These are schema/build proofs. Actual hosted
+plan enforcement, native bundle, parser, checkpoint and protected signed hop remain
+unverified activation gates; local timing does not establish account capability.
 
 ## Readiness and alerts
 
@@ -117,3 +120,19 @@ and audit, not live provider acceptance.
 Mailbox/CRM/sending remain off. Approved draft delivery still returns403
 `DELIVERY_DISABLED`. Hosted resources, production schema/selector, provider scope,
 R2 policy and pilot activation require the exact later reviewed proposal.
+
+## Isolated preview target (prepared, not created)
+
+`wrangler.jsonc` defines `--env preview`: private Worker/Queue
+`buyeros-jobs-preview`, DLQ `buyeros-jobs-preview-dlq`, Workflow
+`buyeros-job-preview`. Default and preview execution are off, origins
+invalid/allowlist empty and no fetch/public route exists. Do not set the Vercel
+service binding manually. Preview variable/secret placement and the exact
+resource/migration/scope decision are in
+[the current release handoff](../CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md).
+Root production names stay distinct. `WORKER_API_PROTECTION_BYPASS` is optional
+and absent from committed Wrangler vars and required-secret types.
+The typed API-client settings accept it at runtime; application HMAC is independent.
+[Vercel automation protection bypass](https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation)
+uses a project-scoped secret; use a dedicated preview project because a token can
+access other deployments in its project. No production token is reused.

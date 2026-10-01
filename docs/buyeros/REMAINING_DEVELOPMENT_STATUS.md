@@ -2,6 +2,27 @@
 
 This is the current execution ledger for the 2026-09-27 implementation pack. The older `PROGRESS.md` and `tasks/index.json` contain historical plan and BO approval records; their approval states are not changed here. At execution start the checked-out source was `f43a9d88b334c2c4029fa06fa71624ed52efe4a2` on `p14-buyer-lists`, with origin `https://github.com/YNWAforever/BuyerOS.git`. Current application/deployment and production configuration evidence is in the latest 2026-10-01 rollout checkpoint below; earlier entries retain their historical scope. The working tree was clean before T00. The audit baseline `5e61f401bf1bcdf80ea1ce254dd9c62e8eedbab0` was fetched for comparison; it is not an ancestor of this branch, so findings require current-source verification.
 
+## Current Cloudflare release candidate
+
+Reviewed code/configuration `d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8`;
+[complete current handoff](CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md).
+CF01–CF07 complete; CF00 local complete/hosted pending; CF08 local RC complete/
+external activation pending. Code implemented and fictional fixture verified;
+actual local Queue/Workflow/HMAC/native PostgreSQL integration verified.
+Required API650/worker186, UI7 and retained legacy4/8/1/3/1/2 are zero-skip CF07
+proof; CF08 controller27, Node19 and owned PG18 compatibility29 pass. No backend/
+business/UI route changes after CF07; its UI suite was not rerun after the CF08
+configuration/optional protection-header deltas. Both90-second budget mechanisms
+are locally schema/build verified; hosted enforcement/native package/protection
+is NOT RUN. No Cloudflare resource, production migration/provider call or
+migration deployment occurred. Historical app deployment facts below retain
+only their earlier scope; no migration deployed SHA exists.
+
+Next eligible decision is the exact two-hour private protected-preview setup
+in the handoff, including fresh empty Neon and dedicated Vercel project;
+production cutover, all-day Neon quota/plan, providers/R2/policy/pilot and
+independent/assistive review remain separate. Do not restart completed tasks.
+
 ## Task state
 
 | Task | State | Evidence and remaining gate |
@@ -44,28 +65,32 @@ The detailed task registry is `remaining/TASKS.json`. `remaining/API_OPERATION_S
 
 The three audit documents in the supplied pack, including its HTML rendering, describe one audit; the reproduction scripts use fake identity or persistence. They were inspected but not treated as live Auth0, RLS, or browser evidence. Pack outer checksums passed 43/43 and evidence ZIP inner checksums passed 12/12. No unsafe archive path or link was extracted.
 
-| Finding | Current classification | Evidence / next owner |
+| Finding | Classification | Current evidence / remaining limit |
 | --- | --- | --- |
-| A01 login/workspace | already fixed with evidence — approved setup readback and human UI confirmation; agent API trace open | Exact approved Neon FIMMICK/User/active workspace_admin/AuditEvent readback passed. The user confirmed FIMMICK and admin role visible on2026-10-01 HK after sign-in. Auth0 public SPA/API/PKCE configuration and deployed entry are verified; the authenticated bearer trace/full live staff journey was not observed by the agent. |
-| A02 cross-domain API | source changed — Same-origin bound API proxy deployed; authenticated round trip open | T06 disposable browser CORS/bearer checks passed3/3. Current owner-merged12327c7 matches reviewed4181062 app/CI; missing/malformed bearer same-origin /v1/workspaces401 passes the exact contract on both separately recorded deployments. Human FIMMICK/admin visibility was confirmed on4181062; an agent-observed authenticated domain trace remains unverified. |
-| A03 ICP replay/numbering | already fixed with evidence — Already fixed with fixture evidence | T02 retried save returns one immutable version; two different-key concurrent saves allocate numbers 1 and 2 under the Project lock. |
-| A04 ICP validation | already fixed with evidence — Already fixed with fixture evidence | T02 typed body rejects malformed/nested/oversize fields with zero rows; malformed JSON and unexpected 500 use sanitized request-ID envelopes. |
-| A05 offer persistence | already fixed with evidence | T07 offer creation/edit/reload/partial-save recovery and current T30 four en/zh-HK desktop/mobile UI-created projects preserve actual typed product/value facts. Fake OIDC is used for fixture journeys; real FIMMICK/admin visibility is human-confirmed, full deployed continuity unverified. |
-| A06 approval context/version | already fixed with evidence | T03 exact version/hash/basis guards and current T30 reviewer approvals of edited v2 pass in all four locale/layout cases. Same-project researched buyer is later recipient-bound and approved at its exact context; expiry/policy/member races fail closed. Full deployed journey unverified. |
-| A07 scope races | already fixed with evidence — Disposable fixture and UI verified; live activation open | T05 A→B→A discard, T06 immutable write context, and T07 response-lost same-action replay plus reload/project-only recovery passed. Real network interruption in a deployed environment remains unverified. |
-| A08 project idempotency fingerprint | already fixed with evidence — Already fixed with evidence | T01 real-DB tests prove same-key different target and changed If-Match return 409; first result replay and 20 concurrent requests pass. |
-| A09 lock order/stale profile | already fixed with evidence — Already fixed with fixture evidence | T03 repeats approve/update/archive races over independent PostgreSQL connections; Project→ICP lock order, stale rejection and one active pointer pass. |
-| A10 snapshot and pagination | already fixed with evidence — Fixed in disposable integration; live activation open | T08 actor/project/expiry/filter guards, bounded SQL snapshot and page reads, 8/12/24 browser pagination, stable insert/tie ordering and dossier source tabs passed. Fake identity and fictional evidence; no deployed claim. |
-| A11 demo-only controls | source changed | Current T30 four full API/DB/Valkey/Celery fixture journeys create/edit offer, approve ICP, research and use persisted review/list/assignment, grounded addressed draft, exact approval, authorized export, outcome and refresh. Optional contact input/search/OIDC are fictional; live provider and deployed full-journey proof remain open. |
-| A12 maintenance/bulk | already fixed with evidence | T09/T10 durable note/list/review/policy and T11 101-row assignment/progress/retry/cancel browser evidence are recorded. T26 failure reports use audited expiring export authorization; 50-row crash/resume/current-version retry/actor-access/pending-cancel are DB verified. Current T30 list/assignment and viewer denial pass4/4. Live worker/provider and deployed authorization remain open. |
-| A13 operations/recovery | still open — Disposable recovery verified; deployed recovery open | T11/T12 durable jobs, pagination, audit and heartbeat, T15 Celery/Valkey broker delivery, T19/T20 checkpoint/restart and T23 unknown-hold reconciliation have local crash/retry evidence. T28 retention/backup intent replay and switches are implemented; a two-container older-backup fixture journal replay passed 10/10 with reads disabled, RLS and ledger checks. External journal custody/completeness, physical deletion and deployed recovery remain open. |
-| A14 worker completion/dispatch | source changed — Fixture integration fixed; deployed proof open | T15 dispatcher cycle, ready claim, lease/fence and separate Celery/Valkey delivery passed on disposable services. T16–T20 add persisted retrieval, evidence/fit graph, checkpoint and restart recovery. No live provider or deployed worker claim follows from these fixture tests. |
-| A15 performance | still open — disposable measurements and pool fix; release proof open | Post-rate-pool T29 10k/100 ASGI read P95 39.377ms sequential and 244.895ms across ten distinct fixture staff, 11 SQL/request and 10 DB connections. Persisted buyer PATCH/admission P95 60.865/168.524ms; 100-workspace Valkey broker publish P95 2.280s. One-slot 500 red then 2/2 green; hosted PR CI strict API 569/569 passed on `f8eaec7`, and current T30 local strict API577/577 and worker174/174 passed with zero skips after Docker recovery; these gates are not new performance measurements. Worker consumption and production latency remain unverified. |
-| A16 locale/routes/a11y | still open | Current workbench8/8 and continuous journey4/4 pass with fake OIDC/owned PostgreSQL: en/zh-HK desktop/mobile, translated scope/list/dossier controls, locale and scope recovery, partial failure, no page overflow and measured text/control contrast. Eight final export/outcome screenshots were visually inspected. Current actual Chromium200% API-backed zoom passes2/2 over six routes in en/zh-HK. Manual screen-reader and remaining non-text elements are unverified. |
-| A17 progress/test truth | still open | Required local API577/worker174, rollback3 and full fixture continuity4 have retained zero-skip evidence; workbench8 passes. Source4181062, documentation326de15/a594219 and current main12327c7 have source-bound six-job CI SUCCESS. Authorized4181062 and current owner-merged12327c7 each have separately recorded anonymous/public-bootstrap HTTP4/4; refreshed human FIMMICK/admin visibility was confirmed on4181062. Agent-observed authenticated full staff/provider/pilot evidence remains open. |
-| A18 activation safety | still open — fixture guards and specifically approved setup/deployment verified; live pilot activation open | Membership/RLS, fail-closed policy, unknown holds, exact approval/export revocation, permanent delivery403 and recovery switches have fixture evidence. Exact approved Neon/Auth0/FIMMICK setup and refreshed human scope visibility remain recorded. Authorized4181062 rollout and current owner-merged12327c7 preserve nine saved config records, paid admission false and R2 false; no direct production database mutation/migration command, provider call or external worker activation occurred. Policy/provider, compatible worker/Valkey, R2 and pilot gates remain open. |
+| A01 login/workspace | already fixed with evidence | Historical approved FIMMICK/admin setup readback and human sign-in confirmation. Local fictional OIDC journeys pass; agent-authenticated full hosted API trace remains open. |
+| A02 API domain | source changed | One same-origin app proxy with runtime app→API binding; actual emitted frontend and native integration verified. Historical deployed anonymous401/bootstrap only, not this migration rollout. |
+| A03 ICP replay/numbering | already fixed with evidence | Existing actual-PG immutable/idempotent numbering races retained; four complete UI-created current-version approvals. |
+| A04 typed validation | already fixed with evidence | Strict public and private contracts; malformed/extra/oversize payload denial, sanitized errors, generated78+5 current. |
+| A05 offer persistence | already fixed with evidence | Four UI-created offers edited/reloaded and then used through research, draft, export and outcome. |
+| A06 exact approval | already fixed with evidence | Edited offer/ICPv2 and recipient-bound exact-context approval; member/policy/expiry changes deny. Approved delivery remains403. |
+| A07 scope races | already fixed with evidence | Held actual proxy reply A→B→A; old A absent in B and durable A rows restored; local negative roles and partial failures retained. |
+| A08 idempotency | already fixed with evidence | Same-key target/body/precondition fingerprint races;20 concurrent requests and actor checks retained. |
+| A09 locking/stale profile | already fixed with evidence | Project→ICP ordering/races, one active pointer, stale/version rejection; no lock during provider I/O. |
+| A10 snapshots/pagination | already fixed with evidence | Actor/current-scope/expiry guards; actual page2 for101 bulk, bounded late SQL page at10k buyers, persisted filters/list and finite limits. |
+| A11 demo controls | source changed | Actual API/PG/Queue/Workflow staff journey, durable assignments/lists/notes/drafts/exports/outcomes. OIDC/providers remain explicit fixture seams. |
+| A12 maintenance/bulk | already fixed with evidence |101 rows in50-row units, restart/receipt conservation, real second page, retry/cancel/export/current actor and viewer negatives retained. |
+| A13 operations/recovery | still open | Local process kill, restart, platform expiry, epoch fencing, older-backup replay and unknown0.300000 hold conservation pass. External journal custody/completeness, physical object deletion and hosted recovery remain open. |
+| A14 worker completion | source changed | Actual Cron/Queue/Workflow/HMAC/nativePG; retained actual Celery/Valkey continuity. No deployed controller/provider completion is inferred. |
+| A15 performance/cost | still open | Two local10-job repetitions meet first-step P95 target;100-workspace fairness and10k late SQL page measured. Hosted latency, actual billing and all-day Neon quota decision remain open. |
+| A16 locale/a11y | still open | English/zh-HK at390/1280, negative roles, current screenshots and actual200% Chromium zoom over six routes verified. Manual screen reader/non-text elements remain unverified. |
+| A17 evidence truth | still open | All required local suites zero skip; full journey/state/hold/restart proof and red artifacts retained. Live identity/provider/pilot and new remote CI/hosted acceptance remain separate. |
+| A18 activation | still open | Current actor/RLS/approval, intent/holds, private transport, paused readiness, CAS/drain/refusal verified. No new cloud resources/production migration/provider activation; preview and later production approval still required. |
 
-## Verification categories
+Totals:10 already fixed with evidence,3 source changed,5 still open;0 classified
+not reproducible. This classification does not close a hosted/owner/provider gate.
+
+
+## Historical verification categories — early T30 checkpoint
 
 - **Code implemented:** T00–T28 are published in the reviewable source candidate; T29/T30 remain partial. The SSR fix is published in draft PR9, reviewed code5317749 and tested/deployed source62d40bc. Historical BO approval records are unchanged.
 - **Fixture verified:** Hosted CI on source62d40bc passed strict API569/569 and worker169/169 with required zero skips, browser smoke1/1 and emitted renderer3/3. An earlier local Docker setup failure remains historical evidence; it is not counted as a passing run. Fake identity/provider fixtures do not establish live providers or staff identity.
@@ -73,7 +98,7 @@ The three audit documents in the supplied pack, including its HTML rendering, de
 - **Externally blocked/unverified:** Human staff Auth0 sign-in/token/callback, exact workspace membership owner, continuous worker/Valkey, R2, named provider/account/price acceptance, policy, full staff continuity, external restore custody and pilot remain open. Delivery is disabled by design. No owner approval or membership seed is inferred from the setup/deploy approvals.
 - **Deployed:** Approved production `dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3` at proven source62d40bc serves initial frontend HTML200 and anonymous API401; live acceptance4/4 and actual Auth0 Universal Login entry passed. Nine saved production variables apply. Earlier separately approved Neon initialization reached0033; this deploy added no migration or paid/provider/delivery activation. No live-pilot claim.
 
-The current Alembic head is `0033_api_rate_windows` (one head); T00–T01 added no schema revision. T02 allocated 0012 after checking 0011, and T04 allocated 0013 after checking the single 0012 head. The migration names in the external plan are proposals, and Alembic remains the single schema owner.
+At that historical checkpoint the local/approved production initialization head was `0033_api_rate_windows` (one head); current migration local head is `0035_worker_recovery_probe`, with no new production schema readback; T00–T01 added no schema revision. T02 allocated 0012 after checking 0011, and T04 allocated 0013 after checking the single 0012 head. The migration names in the external plan are proposals, and Alembic remains the single schema owner.
 
 ## T00 checkpoint
 
@@ -1014,3 +1039,27 @@ Code and local fixture integration complete. Exact commands, counts, source hash
 Regressions observed then fixed: paused-Celery readiness; non-owner legacy fixture selector setup; hung Queue publication; public proxy scope interception; outside-test route teardown error; stale acceptance success/JUnit. Failed attempts are retained and not counted green. Windows dev/HMR itself remains unreliable; the chosen Vercel emitted handler and runtime binding pass. Four locale/layout flows, real page2,101-row bulk restart, unknown0.300000 hold/one submit, scope race and negative roles are verified only with fictional identity/providers.
 
 Performance conditions/results are in runbooks/cloudflare-operating-conditions.md; actual Queue ten-job repetitions P95 first-step9.85/14.07s and one global native body,100 cold workspaces in10 ticks each;10k-row ASGI late-page P9558.60ms sequential/258.65ms ten distinct actors. No hosted/provider latency inference. No migration added in CF07; current local head0035 with prior empty rollback and populated refusal. CF00 hosted4, paid resource/production/provider/R2/policy/pilot and independent review gates remain open. Next CF08; no external activation.
+
+## CF08 final local release checkpoint — 2026-10-01 HK
+
+- Reviewed code/configuration commit d6c2849; exact baseline/path/source manifest,
+  author rulings, commands, failure artifacts and current audit18 table are in the
+  linked Cloudflare handoff and `artifacts/cloudflare/CF08-checkpoint.json`.
+- Red: missing budgets/private preview3 failures; stale bindings exit1;
+  optional protection3 failures. Green: Node19/0/0/0, controller27/0/0/0,
+  strict owned PG18 compatibility29/0/0/0 (426.51s), types/lint/bindings0.
+  Vercel build/emitted90, official schema validation and preview dry-run0;
+ 137.54KiB/gzip24.49KiB. Static scan2333 frontend artifacts plus Worker:
+  listed credential shapes/test secrets absent, not a hosted secret-store audit.
+- Public original70+8 extension IDs match78 handler rows; internal5 separate.
+  Per-operation deployed statuses remain unverified. Delivery403 retained.
+- No new schema in CF08. One local head0035; additive0034/35 allocated properly
+  and rollback/empty roundtrip/populated refusal/unknown-hold evidence retained.
+  Production Neon metadata only: PG18/Singapore/Free0.25..2CU, suspended compute.
+  Minute polling minimum180CU-hours/month exceeds published Free100; no upgrade.
+- Requested, not approved: exact isolated preview Worker/Queue/DLQ/Workflow,
+  dedicated protected Vercel project and fresh empty Neon Free project, max2h
+  fictional machine proof. Workers Paid US$5/month base if needed plus shared
+  metered overages; no new Neon/Vercel paid plan or production/provider scope.
+- CF00 hosted remains NOT RUN; CF08 activation/deployed fields remain pending.
+  Next eligible: bounded hosted feasibility after that exact authorization.

@@ -1,0 +1,1 @@
+Initial auxiliary document validation exit1 after all15 final XML checks passed. Assertion used a broad substring count for audit rows that also matched API configuration rows. Corrected to anchored A01-A18 regex; audit table itself remains18. This was a documentation checker error, not a product-test failure.

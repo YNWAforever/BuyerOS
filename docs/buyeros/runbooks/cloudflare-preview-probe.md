@@ -18,7 +18,8 @@ Retain the native Linux report separately from the Windows report.
 
 ## Exact hosted proof to prepare before activation
 
-1. Select a protected disposable Vercel preview and disposable Neon branch;
+1. Select dedicated protected Vercel project `buyeros-cf-preview` and a fresh
+   empty Neon project `BuyerOS-CF-preview-20261001` (not a production clone);
    obtain specific authorization for preview deployment/role/schema/secrets.
 2. Inspect actual app and API service runtime schemas and configured >=90-second
    budgets, region, memory/CPU, plan billing and deployment protection. Preserve
@@ -40,4 +41,15 @@ Retain the native Linux report separately from the Windows report.
 
 There is intentionally no remote-execution switch in the local probe. A hosted
 runner must use the separately reviewed machine-authenticated bridge and exact
-approved branch/origin. No deployment or paid resource was created for CF00.
+approved new project/branch/origin. Actual generated IDs must be read back
+before secrets or migrations. Budget config and optional header are locally
+verified in CF08; no hosted diagnostic/remote fixture has been executed.
+The temporary hosted diagnostic still requires a reviewed, source-bound patch
+with default-off gating, machine authentication and exact disposable target
+validation before deployment. It is not present in the release API.
+Create/run that bounded diagnostic only within the specifically approved preview
+session, then remove it; preserve the five internal operation contract.
+Require protection denial without the bypass and application401 without valid
+HMAC even with the bypass, no redirect forwarding, exact source readback and
+private API binding. Collect actual60-plus-second two-hop output before claiming
+90-second account support. Do not run local destructive fixtures remotely. No deployment or paid resource was created for CF00.
