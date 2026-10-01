@@ -1,0 +1,344 @@
+..FFFFFF.                                                                [100%]
+================================== FAILURES ===================================
+______ test_queue_or_workflow_retention_does_not_reexecute_terminal_step ______
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:63389/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:63389/buyeros_test_api', 5)
+
+    def test_queue_or_workflow_retention_does_not_reexecute_terminal_step(migrated, worker_runtime):
+        module = recovery_module()
+        envelope = seed_envelope(migrated, worker_runtime[1])
+        now = datetime.now(timezone.utc)
+        with psycopg.connect(migrated, autocommit=True) as db:
+            db.execute("UPDATE outbox_events SET state='done',lease_expires_at=%s WHERE id=%s", (now - timedelta(days=15), envelope.outbox_id))
+>       report = call_worker(lambda engine: module.recover_execution(engine, now=now, limit=10))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:70:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_cloudflare_recovery_db.py:30: in call_worker
+    return asyncio.run(call())
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:205: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:128: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\base_events.py:719: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_cloudflare_recovery_db.py:27: in call
+    return await action(engine)
+           ^^^^^^^^^^^^^^^^^^^^
+buyeros_api\services\worker_recovery.py:189: in recover_execution
+    return await asyncio.wait_for(recover(), timeout=10)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\tasks.py:488: in wait_for
+    return await fut
+           ^^^^^^^^^
+buyeros_api\services\worker_recovery.py:174: in recover
+    recovered += await _expire_retention(session, now=now, limit=limit - recovered)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x0000020C6B7635F0>
+
+    async def _expire_retention(session, *, now, limit):
+        """Configured policy only; bounded tenant tombstones, no object-store I/O."""
+        from buyeros_api.execution.config import get_settings as execution_settings
+>       from buyeros_api.db.source import SourceDocument
+E       ModuleNotFoundError: No module named 'buyeros_api.db.source'
+
+buyeros_api\services\worker_recovery.py:99: ModuleNotFoundError
+_____ test_expired_local_step_can_resume_only_after_atomic_receipt_fence ______
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:63389/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:63389/buyeros_test_api', 6)
+
+    def test_expired_local_step_can_resume_only_after_atomic_receipt_fence(migrated, worker_runtime):
+        module = recovery_module()
+        from buyeros_api.db.session import tenant_session
+        from buyeros_api.services.worker_execution import claim_execution_step
+        envelope = seed_envelope(migrated, worker_runtime[1], event_type='document.parse', payload={})
+        now = datetime.now(timezone.utc)
+        async def claim(engine):
+            async with tenant_session(engine, envelope.workspace_id) as session:
+                return await claim_execution_step(session, envelope, 'start', now - timedelta(seconds=121))
+        assert call_worker(claim).state == 'claimed'
+>       report = call_worker(lambda engine: module.recover_execution(engine, now=now, limit=10))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:86:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_cloudflare_recovery_db.py:30: in call_worker
+    return asyncio.run(call())
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:205: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:128: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\base_events.py:719: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_cloudflare_recovery_db.py:27: in call
+    return await action(engine)
+           ^^^^^^^^^^^^^^^^^^^^
+buyeros_api\services\worker_recovery.py:189: in recover_execution
+    return await asyncio.wait_for(recover(), timeout=10)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\tasks.py:488: in wait_for
+    return await fut
+           ^^^^^^^^^
+buyeros_api\services\worker_recovery.py:174: in recover
+    recovered += await _expire_retention(session, now=now, limit=limit - recovered)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x0000020C6B9F1DB0>
+
+    async def _expire_retention(session, *, now, limit):
+        """Configured policy only; bounded tenant tombstones, no object-store I/O."""
+        from buyeros_api.execution.config import get_settings as execution_settings
+>       from buyeros_api.db.source import SourceDocument
+E       ModuleNotFoundError: No module named 'buyeros_api.db.source'
+
+buyeros_api\services\worker_recovery.py:99: ModuleNotFoundError
+___ test_oldest_work_alert_is_durable_and_cross_tenant_reads_remain_closed ____
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:63389/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:63389/buyeros_test_api', 7)
+
+    def test_oldest_work_alert_is_durable_and_cross_tenant_reads_remain_closed(migrated, worker_runtime):
+        module = recovery_module()
+        envelope = seed_envelope(migrated, worker_runtime[1])
+        now = datetime.now(timezone.utc)
+        with psycopg.connect(migrated, autocommit=True) as db:
+            db.execute("UPDATE outbox_events SET state='ready',created_at=%s WHERE id=%s", (now - timedelta(seconds=301), envelope.outbox_id))
+>       call_worker(lambda engine: module.recover_execution(engine, now=now, limit=10))
+
+tests\test_cloudflare_recovery_db.py:100:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_cloudflare_recovery_db.py:30: in call_worker
+    return asyncio.run(call())
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:205: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:128: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\base_events.py:719: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_cloudflare_recovery_db.py:27: in call
+    return await action(engine)
+           ^^^^^^^^^^^^^^^^^^^^
+buyeros_api\services\worker_recovery.py:189: in recover_execution
+    return await asyncio.wait_for(recover(), timeout=10)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\tasks.py:488: in wait_for
+    return await fut
+           ^^^^^^^^^
+buyeros_api\services\worker_recovery.py:174: in recover
+    recovered += await _expire_retention(session, now=now, limit=limit - recovered)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x0000020C6B9F6210>
+
+    async def _expire_retention(session, *, now, limit):
+        """Configured policy only; bounded tenant tombstones, no object-store I/O."""
+        from buyeros_api.execution.config import get_settings as execution_settings
+>       from buyeros_api.db.source import SourceDocument
+E       ModuleNotFoundError: No module named 'buyeros_api.db.source'
+
+buyeros_api\services\worker_recovery.py:99: ModuleNotFoundError
+_____ test_uncertain_inventory_is_bounded_and_all_status_intents_survive ______
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:63389/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:63389/buyeros_test_api', 8)
+
+    def test_uncertain_inventory_is_bounded_and_all_status_intents_survive(migrated, worker_runtime):
+        module = recovery_module()
+        case = uncertain_contact(migrated, worker_runtime[1], historical_count=101)
+        now = datetime.now(timezone.utc)
+        for tick in range(101):
+>           call_worker(lambda engine: module.recover_execution(engine, now=now + timedelta(seconds=61 * tick), limit=1))
+
+tests\test_cloudflare_recovery_db.py:126:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_cloudflare_recovery_db.py:30: in call_worker
+    return asyncio.run(call())
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:205: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:128: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\base_events.py:719: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_cloudflare_recovery_db.py:27: in call
+    return await action(engine)
+           ^^^^^^^^^^^^^^^^^^^^
+buyeros_api\services\worker_recovery.py:189: in recover_execution
+    return await asyncio.wait_for(recover(), timeout=10)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\tasks.py:488: in wait_for
+    return await fut
+           ^^^^^^^^^
+buyeros_api\services\worker_recovery.py:174: in recover
+    recovered += await _expire_retention(session, now=now, limit=limit - recovered)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x0000020C6B98C590>
+
+    async def _expire_retention(session, *, now, limit):
+        """Configured policy only; bounded tenant tombstones, no object-store I/O."""
+        from buyeros_api.execution.config import get_settings as execution_settings
+>       from buyeros_api.db.source import SourceDocument
+E       ModuleNotFoundError: No module named 'buyeros_api.db.source'
+
+buyeros_api\services\worker_recovery.py:99: ModuleNotFoundError
+_____ test_malformed_provider_intent_does_not_abort_independent_recovery ______
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:63389/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:63389/buyeros_test_api', 9)
+
+    def test_malformed_provider_intent_does_not_abort_independent_recovery(migrated, worker_runtime):
+        module = recovery_module()
+        bad = seed_envelope(migrated, worker_runtime[1], event_type='contact.lookup', payload={'job_id': 'invalid'})
+        good = seed_envelope(migrated, worker_runtime[1], event_type='document.parse')
+>       call_worker(lambda engine: module.recover_execution(engine, now=datetime.now(timezone.utc)))
+
+tests\test_cloudflare_recovery_db.py:144:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_cloudflare_recovery_db.py:30: in call_worker
+    return asyncio.run(call())
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:205: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:128: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\base_events.py:719: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_cloudflare_recovery_db.py:27: in call
+    return await action(engine)
+           ^^^^^^^^^^^^^^^^^^^^
+buyeros_api\services\worker_recovery.py:189: in recover_execution
+    return await asyncio.wait_for(recover(), timeout=10)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\tasks.py:488: in wait_for
+    return await fut
+           ^^^^^^^^^
+buyeros_api\services\worker_recovery.py:174: in recover
+    recovered += await _expire_retention(session, now=now, limit=limit - recovered)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x0000020C6BB36660>
+
+    async def _expire_retention(session, *, now, limit):
+        """Configured policy only; bounded tenant tombstones, no object-store I/O."""
+        from buyeros_api.execution.config import get_settings as execution_settings
+>       from buyeros_api.db.source import SourceDocument
+E       ModuleNotFoundError: No module named 'buyeros_api.db.source'
+
+buyeros_api\services\worker_recovery.py:99: ModuleNotFoundError
+________ test_configured_periodic_retention_is_bounded_and_idempotent _________
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:63389/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:63389/buyeros_test_api', 10)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000020C6B99F110>
+
+    def test_configured_periodic_retention_is_bounded_and_idempotent(migrated, worker_runtime, monkeypatch):
+        from tests.test_cloudflare_local_steps_db import seed_project
+        from buyeros_api.execution.config import get_settings as execution_settings
+        module = recovery_module()
+        envelope = seed_envelope(migrated, worker_runtime[1])
+        project, _, _ = seed_project(migrated, envelope.workspace_id)
+        with psycopg.connect(migrated, autocommit=True) as db:
+            db.execute("UPDATE outbox_events SET state='done' WHERE id=%s", (envelope.outbox_id,))
+            for _ in range(11):
+                source = uuid.uuid4()
+                db.execute("INSERT INTO source_documents(id,workspace_id,project_id,canonical_url,digest,storage_mode,object_key,excerpt,retention_until) "
+                           "VALUES(%s,%s,%s,%s,%s,'private_object',%s,'Fictional retained source',now()-interval '1 minute')",
+                           (source, envelope.workspace_id, project, f'https://fixture.invalid/{source}', 'a'*64, f'tenants/{envelope.workspace_id}/{source}'))
+        monkeypatch.delenv('BUYEROS_RETENTION_POLICY_VERSION', raising=False)
+        execution_settings.cache_clear()
+>       call_worker(lambda engine: module.recover_execution(engine, now=datetime.now(timezone.utc)))
+
+tests\test_cloudflare_recovery_db.py:165:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_cloudflare_recovery_db.py:30: in call_worker
+    return asyncio.run(call())
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:205: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:128: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\base_events.py:719: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_cloudflare_recovery_db.py:27: in call
+    return await action(engine)
+           ^^^^^^^^^^^^^^^^^^^^
+buyeros_api\services\worker_recovery.py:189: in recover_execution
+    return await asyncio.wait_for(recover(), timeout=10)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\tasks.py:488: in wait_for
+    return await fut
+           ^^^^^^^^^
+buyeros_api\services\worker_recovery.py:174: in recover
+    recovered += await _expire_retention(session, now=now, limit=limit - recovered)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x0000020C6BAA1B70>
+
+    async def _expire_retention(session, *, now, limit):
+        """Configured policy only; bounded tenant tombstones, no object-store I/O."""
+        from buyeros_api.execution.config import get_settings as execution_settings
+>       from buyeros_api.db.source import SourceDocument
+E       ModuleNotFoundError: No module named 'buyeros_api.db.source'
+
+buyeros_api\services\worker_recovery.py:99: ModuleNotFoundError
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_cloudflare_recovery_db.py::test_environment_flag_cannot_make_readiness_ready
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_cloudflare_recovery_db.py::test_environment_flag_cannot_make_readiness_ready
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\Documents\BuyerOS\artifacts\cloudflare\CF06-conservation-first-green.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_cloudflare_recovery_db.py::test_queue_or_workflow_retention_does_not_reexecute_terminal_step
+FAILED tests/test_cloudflare_recovery_db.py::test_expired_local_step_can_resume_only_after_atomic_receipt_fence
+FAILED tests/test_cloudflare_recovery_db.py::test_oldest_work_alert_is_durable_and_cross_tenant_reads_remain_closed
+FAILED tests/test_cloudflare_recovery_db.py::test_uncertain_inventory_is_bounded_and_all_status_intents_survive
+FAILED tests/test_cloudflare_recovery_db.py::test_malformed_provider_intent_does_not_abort_independent_recovery
+FAILED tests/test_cloudflare_recovery_db.py::test_configured_periodic_retention_is_bounded_and_idempotent
+6 failed, 3 passed, 6 warnings in 10.48s

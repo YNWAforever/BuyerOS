@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="5" time="142.042" timestamp="2026-10-01T15:29:51.416219+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_recovery_db" name="test_environment_flag_cannot_make_readiness_ready" time="126.257"><failure message="AssertionError: CF06 durable recovery and probe receipt missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:58322/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:58322/buyeros_test_api', 2)
+
+    def test_environment_flag_cannot_make_readiness_ready(migrated, worker_runtime):
+        now = datetime.now(timezone.utc)
+&gt;       assert health(now)['queue'] == health(now)['worker'] == 'unavailable'
+               ^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:42:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_cloudflare_recovery_db.py:33: in health
+    module = recovery_module()
+             ^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def recovery_module():
+        source = Path(__file__).resolve().parents[1] / 'buyeros_api/services/worker_recovery.py'
+&gt;       assert source.is_file(), 'CF06 durable recovery and probe receipt missing'
+E       AssertionError: CF06 durable recovery and probe receipt missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file
+
+tests\test_cloudflare_recovery_db.py:16: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_recovery_db" name="test_probe_epoch_freshness_duplicate_and_pause_fail_closed" time="0.227"><failure message="AssertionError: CF06 durable recovery and probe receipt missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:58322/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:58322/buyeros_test_api', 3)
+
+    def test_probe_epoch_freshness_duplicate_and_pause_fail_closed(migrated, worker_runtime):
+&gt;       module = recovery_module()
+                 ^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:47:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def recovery_module():
+        source = Path(__file__).resolve().parents[1] / 'buyeros_api/services/worker_recovery.py'
+&gt;       assert source.is_file(), 'CF06 durable recovery and probe receipt missing'
+E       AssertionError: CF06 durable recovery and probe receipt missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file
+
+tests\test_cloudflare_recovery_db.py:16: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_recovery_db" name="test_queue_or_workflow_retention_does_not_reexecute_terminal_step" time="0.191"><failure message="AssertionError: CF06 durable recovery and probe receipt missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:58322/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:58322/buyeros_test_api', 4)
+
+    def test_queue_or_workflow_retention_does_not_reexecute_terminal_step(migrated, worker_runtime):
+&gt;       module = recovery_module()
+                 ^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:64:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def recovery_module():
+        source = Path(__file__).resolve().parents[1] / 'buyeros_api/services/worker_recovery.py'
+&gt;       assert source.is_file(), 'CF06 durable recovery and probe receipt missing'
+E       AssertionError: CF06 durable recovery and probe receipt missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file
+
+tests\test_cloudflare_recovery_db.py:16: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_recovery_db" name="test_expired_local_step_can_resume_only_after_atomic_receipt_fence" time="0.210"><failure message="AssertionError: CF06 durable recovery and probe receipt missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:58322/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:58322/buyeros_test_api', 5)
+
+    def test_expired_local_step_can_resume_only_after_atomic_receipt_fence(migrated, worker_runtime):
+&gt;       module = recovery_module()
+                 ^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:76:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def recovery_module():
+        source = Path(__file__).resolve().parents[1] / 'buyeros_api/services/worker_recovery.py'
+&gt;       assert source.is_file(), 'CF06 durable recovery and probe receipt missing'
+E       AssertionError: CF06 durable recovery and probe receipt missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file
+
+tests\test_cloudflare_recovery_db.py:16: AssertionError</failure></testcase><testcase classname="tests.test_cloudflare_recovery_db" name="test_oldest_work_alert_is_durable_and_cross_tenant_reads_remain_closed" time="7.951"><failure message="AssertionError: CF06 durable recovery and probe receipt missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:58322/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:58322/buyeros_test_api', 6)
+
+    def test_oldest_work_alert_is_durable_and_cross_tenant_reads_remain_closed(migrated, worker_runtime):
+&gt;       module = recovery_module()
+                 ^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:94:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def recovery_module():
+        source = Path(__file__).resolve().parents[1] / 'buyeros_api/services/worker_recovery.py'
+&gt;       assert source.is_file(), 'CF06 durable recovery and probe receipt missing'
+E       AssertionError: CF06 durable recovery and probe receipt missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file
+
+tests\test_cloudflare_recovery_db.py:16: AssertionError</failure></testcase></testsuite></testsuites>

@@ -126,6 +126,18 @@
       "MaintenanceRequest": {
         "additionalProperties": false,
         "properties": {
+          "probe_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Probe Id"
+          },
           "runtime_epoch": {
             "maximum": 9007199254740991.0,
             "minimum": 1.0,
@@ -142,6 +154,18 @@
       "MaintenanceResult": {
         "additionalProperties": false,
         "properties": {
+          "alerts": {
+            "items": {
+              "enum": [
+                "PROBE_STALE",
+                "WORK_BACKLOG"
+              ],
+              "type": "string"
+            },
+            "maxItems": 2,
+            "title": "Alerts",
+            "type": "array"
+          },
           "enabled": {
             "title": "Enabled",
             "type": "boolean"
@@ -162,7 +186,8 @@
         "required": [
           "runtime_epoch",
           "recovered",
-          "enabled"
+          "enabled",
+          "alerts"
         ],
         "title": "MaintenanceResult",
         "type": "object"

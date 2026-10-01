@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="34.532" timestamp="2026-10-01T16:09:38.499403+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_recovery_boundaries_db" name="test_0035_empty_round_trip_default_off_and_limited_api_privileges" time="5.482" /><testcase classname="tests.test_cloudflare_recovery_boundaries_db" name="test_populated_rollback_preserves_unknown_holds" time="7.792" /><testcase classname="tests.test_cloudflare_recovery_boundaries_db" name="test_killed_native_process_resumes_new_generation_once" time="2.665" /><testcase classname="tests.test_cloudflare_recovery_boundaries_db" name="test_restore_then_deletion_replay_keeps_reads_closed" time="17.393"><failure message="AssertionError: assert '0035_worker_recovery_probe' == '0034_worker_execution'&#10;  &#10;  - 0034_worker_execution&#10;  + 0035_worker_recovery_probe">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001F5C000E470&gt;
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-190/test_restore_then_deletion_rep0')
+
+    def test_restore_then_deletion_replay_keeps_reads_closed(monkeypatch, tmp_path):
+        # The existing inspected T28 rehearsal owns two isolated Docker clusters,
+        # dumps an older backup, replays an external fixture tombstone, checks RLS,
+        # spend conservation, and READ_DISABLED before/after replay.
+        from tests.test_backup_restore_t28 import test_disposable_restore_replays_older_backup_deletion_journal
+&gt;       test_disposable_restore_replays_older_backup_deletion_journal(monkeypatch, tmp_path)
+
+tests\test_cloudflare_recovery_boundaries_db.py:134:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001F5C000E470&gt;
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-190/test_restore_then_deletion_rep0')
+
+    def test_disposable_restore_replays_older_backup_deletion_journal(monkeypatch, tmp_path):
+        source_name = target_name = None
+        prior = os.environ.get("BUYEROS_DATABASE_URL")
+        prior_read = os.environ.get("BUYEROS_LIVE_READ_ENABLED")
+        try:
+            source_name, source_dsn = _start_container()
+            target_name, target_dsn = _start_container()
+            monkeypatch.setenv("BUYEROS_DATABASE_URL", source_dsn)
+            get_settings.cache_clear()
+            config = Config(str(ALEMBIC_INI))
+            config.set_main_option("script_location", str(SERVICE_ROOT / "alembic"))
+            command.upgrade(config, "head")
+            source_id, account_id, cost_id = uuid.uuid4(), uuid.uuid4(), uuid.uuid4()
+            period_start = datetime(2026, 9, 1, tzinfo=timezone.utc)
+            period_end = datetime(2026, 10, 1, tzinfo=timezone.utc)
+            with psycopg.connect(source_dsn, autocommit=True) as db:
+                db.execute("ALTER ROLE buyeros_api LOGIN PASSWORD 'test-only'")
+                db.execute("GRANT USAGE ON SCHEMA public TO buyeros_api")
+                db.execute("INSERT INTO workspaces(id,name,data_mode) "
+                           "VALUES (%s,'A','live'),(%s,'B','live')", (WS_A, WS_B))
+                db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,"
+                           "language_preferences,version) VALUES "
+                           "(%s,%s,'A','Fictional','Fixture offer',ARRAY['US'],ARRAY['en'],1)",
+                           (PROJECT_A, WS_A))
+                db.execute("INSERT INTO source_documents(id,workspace_id,project_id,canonical_url,"
+                           "digest,storage_mode,object_key,excerpt,retention_until) VALUES "
+                           "(%s,%s,%s,%s,%s,'private_object',%s,%s,now()-interval '1 day')",
+                           (source_id, WS_A, PROJECT_A, f"https://fixture.invalid/{source_id}",
+                            "a" * 64, f"tenants/{WS_A}/{source_id}", "fixture source text"))
+                db.execute("INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,"
+                           "currency,period,period_start,period_end,version,frozen,approved_limit,"
+                           "settled_spend) VALUES (%s,%s,'workspace',%s,'all','USD','monthly',"
+                           "%s,%s,1,false,10.000000,1.250000)",
+                           (account_id, WS_A, WS_A, period_start, period_end))
+                db.execute("INSERT INTO cost_events(id,workspace_id,kind,amount,pricing_version) "
+                           "VALUES (%s,%s,'commit',1.250000,'fixture-v1')", (cost_id, WS_A))
+
+            dump = _docker_binary(["exec", source_name, "pg_dump", "-U", DB_USER,
+                                   "-d", DB_NAME, "--format=custom", "--no-owner"])
+            # This dump predates the deletion. A separately held journal must drive
+            # replay before the restored database can serve live reads.
+            journal_path = tmp_path / "deletion-journal.json"
+            async def expire_original():
+                engine = create_async_engine(async_database_url(runtime_role_dsn(source_dsn)))
+                try:
+                    async with tenant_session(engine, WS_A) as session:
+                        return await expire_subject_data(session, source_id, "fixture-policy-v1",
+                                                         datetime.now(timezone.utc),
+                                                         subject_type="source_document")
+                finally:
+                    await engine.dispose()
+            assert asyncio.run(expire_original())["expired"] is True
+            with psycopg.connect(source_dsn) as db:
+                audit = db.execute(
+                    "SELECT detail_digest FROM audit_events WHERE workspace_id=%s "
+                    "AND subject_id=%s AND subject_type='source_document' "
+                    "AND action='source.expired'", (WS_A, str(source_id)),
+                ).fetchone()
+                assert audit is not None
+                expected_digest = "sha256:" + hashlib.sha256(b"fixture-policy-v1").hexdigest()
+                assert audit[0] == expected_digest
+            journal_path.write_text(json.dumps({
+                "workspace_id": str(WS_A), "subject_id": str(source_id),
+                "subject_type": "source_document", "policy_version": "fixture-policy-v1",
+                "policy_digest": expected_digest,
+            }), encoding="utf-8")
+
+            with psycopg.connect(target_dsn, autocommit=True) as db:
+                db.execute("CREATE ROLE buyeros_api NOBYPASSRLS LOGIN PASSWORD 'test-only'")
+                db.execute("CREATE ROLE buyeros_worker NOBYPASSRLS")
+            _docker_binary(["exec", "-i", target_name, "pg_restore", "-U", DB_USER,
+                            "-d", DB_NAME, "--no-owner"], input_bytes=dump)
+            with psycopg.connect(target_dsn, autocommit=True) as db:
+                db.execute("GRANT USAGE ON SCHEMA public TO buyeros_api")
+&gt;               assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0034_worker_execution"
+E               AssertionError: assert '0035_worker_recovery_probe' == '0034_worker_execution'
+E
+E                 - 0034_worker_execution
+E                 + 0035_worker_recovery_probe
+
+tests\test_backup_restore_t28.py:116: AssertionError</failure></testcase></testsuite></testsuites>

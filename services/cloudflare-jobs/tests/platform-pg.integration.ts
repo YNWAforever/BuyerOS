@@ -23,3 +23,14 @@ it('actual Queue binding commits one API-owned mutation; duplicate delivery keep
     expect(await callWorkerApi(env, 'workerExecuteStep', { envelope: job, step_key: 'start' })).toEqual(expected);
   } finally { await introspector.dispose(); }
 });
+
+it('actual Queue probe commits an opaque current-epoch API receipt', async () => {
+  const job = parseEnvelope(JSON.parse((env as Env & { CF_TEST_JOB: string }).CF_TEST_JOB));
+  const probe = { v: 1 as const, kind: 'probe' as const, probe_id: crypto.randomUUID(), runtime_epoch: job.runtime_epoch };
+  const introspector = await introspectWorkflowInstance(env.JOB_WORKFLOW, workflowId(probe));
+  try {
+    await env.JOBS.send(probe);
+    await introspector.waitForStatus('complete');
+    expect(await introspector.getOutput()).toEqual({ state: 'done', code: 'OK', next_step_key: null, retry_at: null });
+  } finally { await introspector.dispose(); }
+});

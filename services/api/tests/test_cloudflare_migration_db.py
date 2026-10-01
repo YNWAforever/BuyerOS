@@ -29,7 +29,7 @@ def test_0034_empty_upgrade_downgrade_reupgrade_and_populated_refusal(monkeypatc
         with pytest.raises(RuntimeError, match="retained execution/replay/fencing state"):
             command.downgrade(config, "0033_api_rate_windows")
         with psycopg.connect(dsn) as db:
-            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0034_worker_execution"
+            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0035_worker_recovery_probe"
             assert db.execute("SELECT count(*) FROM worker_bridge_nonces").fetchone()[0] == 1
             assert db.execute("SELECT to_regclass('budget_reservations')").fetchone()[0] is not None
     finally:

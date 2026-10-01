@@ -15,7 +15,7 @@ export default defineConfig({
   })],
   test: {
     setupFiles: ['services/cloudflare-jobs/tests/setup.ts'],
-    include: ['services/cloudflare-jobs/tests/**/*.test.ts'],
+    include: ['services/cloudflare-jobs/tests/**/*.test.ts', 'tests/integration/cloudflare-recovery.test.ts'],
     testTimeout: 30_000,
   },
 });

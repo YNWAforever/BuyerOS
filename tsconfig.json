@@ -43,6 +43,7 @@
   "exclude": [
     "node_modules",
     "examples",
-    "services/cloudflare-jobs"
+    "services/cloudflare-jobs",
+    "tests/integration/cloudflare-recovery.test.ts"
   ]
 }

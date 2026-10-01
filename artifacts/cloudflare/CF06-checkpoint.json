@@ -1,0 +1,169 @@
+{
+  "task": "CF06",
+  "status": "complete_local",
+  "base_sha": "20f7ee7f3b377e2383c2e25232435fba4c4994b9",
+  "environment": "Windows, owned Docker PostgreSQL16, actual local Cloudflare Queue/Workflow, loopback FastAPI; fictional identity/provider/private store only",
+  "commands": [
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest tests/test_cloudflare_recovery_db.py tests/test_cloudflare_recovery_boundaries_db.py tests/test_cloudflare_migration_db.py tests/test_cloudflare_platform_db.py -q --junitxml=../../artifacts/cloudflare/CF06-final-db.xml",
+      "exit": 0,
+      "passed": 15,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "artifacts/cloudflare/CF06-final-db.xml"
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest tests/test_cloudflare_bridge_db.py tests/test_cloudflare_runtime_control_db.py tests/test_cloudflare_local_steps_db.py tests/test_cloudflare_provider_steps_db.py -q --junitxml=../../artifacts/cloudflare/CF06-predecessors.xml",
+      "exit": 0,
+      "passed": 48,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "artifacts/cloudflare/CF06-predecessors.xml"
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest tests/test_cloudflare_recovery_boundaries_db.py -q --junitxml=../../artifacts/cloudflare/CF06-boundaries-final.xml",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "artifacts/cloudflare/CF06-boundaries-final.xml"
+    },
+    {
+      "cwd": ".",
+      "command": "pnpm.cmd exec vitest run --config services/cloudflare-jobs/vitest.config.ts --reporter=default --reporter=junit --outputFile.junit=artifacts/cloudflare/CF06-controller.xml",
+      "exit": 0,
+      "passed": 24,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "artifacts/cloudflare/CF06-controller.xml"
+    }
+  ],
+  "actual_platform": {
+    "parent": "CF06-final-db.xml",
+    "nested_queue_workflow_http_pg": {
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "other_checks": {
+    "node_contract_gateway": {
+      "command": "node --test tests/api-types-generation.test.mjs tests/vercel-services.test.mjs tests/worker-gateway.test.mjs",
+      "exit": 0,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0
+    },
+    "commands_exit_0": [
+      "uv run --frozen alembic heads (API cwd)",
+      "uv run --frozen python tools/export_worker_openapi.py (API cwd)",
+      "node scripts/generate-worker-api-types.mjs --check",
+      "pnpm.cmd cloudflare:types",
+      "pnpm.cmd cloudflare:lint",
+      "pnpm.cmd cloudflare:bindings",
+      "pnpm.cmd exec tsc --noEmit",
+      "pnpm.cmd lint",
+      "pnpm.cmd exec wrangler deploy --dry-run --config services/cloudflare-jobs/wrangler.jsonc --outdir .sites-runtime/cloudflare-dry-run"
+    ],
+    "dry_run": {
+      "upload_kib": 136.94,
+      "gzip_kib": 24.28,
+      "execution_enabled": false
+    }
+  },
+  "migration": {
+    "head": "0035_worker_recovery_probe",
+    "prior_head": "0034_worker_execution",
+    "owner": "API Alembic",
+    "empty_round_trip": "verified",
+    "populated_refusal": "verified; unknown0.300000 USD hold unchanged, cost events0",
+    "production": "not_run"
+  },
+  "regressions": {
+    "readiness": "environment-only unavailable; actual Queue probe fresh; duplicate cannot refresh; old epoch/paused unavailable; age181 stale",
+    "conservation": "101 historical uncertain operations receive one status-only child per parent per tick over bounded fair sweeps; all101 preserved; hold0.300000 active, no cost events",
+    "tenants": "flush before SET LOCAL scope change; forced RLS cross-tenant0; API selector SELECT limited columns; no activation writes",
+    "retention": "absent policy no redaction; explicit fictional policy11 sources in10+1,11 audits and11 permanent deletion intents",
+    "process_restore": "native process actually killed after committed step claim; owned clock advancement; newer generation executes one buyer update/audit; older-backup two-container external fixture journal restores with live reads closed",
+    "controls": "dry run; atomic epoch CAS pause; enable refuses live permit/leases; compatible disposable Celery switch; stale epoch rejected"
+  },
+  "failure_history": {
+    "CF06-boundaries-first.xml": {
+      "passed": 3,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "CF06-conservation-first-green.xml": {
+      "passed": 3,
+      "failed": 6,
+      "errors": 0,
+      "skipped": 0
+    },
+    "CF06-conservation-red.xml": {
+      "passed": 3,
+      "failed": 6,
+      "errors": 0,
+      "skipped": 0
+    },
+    "CF06-conservation-second-green.xml": {
+      "passed": 7,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0
+    },
+    "CF06-first-green.xml": {
+      "passed": 4,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "CF06-red.xml": {
+      "passed": 0,
+      "failed": 5,
+      "errors": 0,
+      "skipped": 0
+    },
+    "CF06-step-key-red.xml": {
+      "passed": 2,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "CF06-workflow-authority-red.xml": {
+      "passed": 0,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0
+    },
+    "CF06-workflow-red.xml": {
+      "passed": 0,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "source_sha256": {
+    "services/api/alembic/versions/0035_worker_recovery_probe.py": "9f910e1b1130bc816b4b88b6521e85ac456adc15dfa03097a4975dc5fc432b60",
+    "services/api/buyeros_api/services/worker_recovery.py": "68358c010f096ec341e2b6546d3f2836d611965fa79510e57e927116394a586c",
+    "services/api/buyeros_api/services/worker_execution.py": "dfa522e6081386978eb755404a48fb571d6368ac81022e63971a9372ea6cd575",
+    "services/api/buyeros_api/api/routes/health.py": "fcec93f05061f07eef49b3a535d6961e49247f71f4784eef0dace76f1202bece",
+    "services/cloudflare-jobs/src/workflow.ts": "3c0c8070a4f52c1cccaf0377c62d8f01801a92953dfd41478418917256edd995",
+    "services/cloudflare-jobs/src/protocol.ts": "69357aea02779ed86582b9a4b2775abcaac3204cdb68f4634ffd31519090828e"
+  },
+  "risks": [
+    "Hosted protected native/both90-second hops/account origin/budget still not_run",
+    "No production resources, migration, provider/R2/journal custody or deployment proof",
+    "Existing public API/worker full suites and full staff/browser/build/performance gates belong to CF07 and remain pending",
+    "Unsupported old Celery binaries must be stopped; no fallback resources provisioned"
+  ],
+  "next_eligible": "CF07"
+}

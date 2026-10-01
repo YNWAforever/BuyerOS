@@ -28,7 +28,8 @@ describe('opaque worker protocol', () => {
     const valid = { state: 'continue', code: 'OK', next_step_key: 'step:1', retry_at: null };
     expect(parseOutcome(valid)).toEqual(valid);
     for (const value of [{ ...valid, next_step_key: 'https://bad.invalid/' }, { ...valid, result: 'secret' },
-      { state: 'done', code: 'OK' }, { ...valid, retry_at: 'not-a-time' }, { ...valid, state: 'success' }]) {
+      { state: 'done', code: 'OK' }, { ...valid, retry_at: 'not-a-time' }, { ...valid, state: 'success' },
+      { ...valid, next_step_key: 'step.1' }]) {
       expect(() => parseOutcome(value)).toThrow();
     }
   });

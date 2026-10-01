@@ -113,7 +113,7 @@ def test_disposable_restore_replays_older_backup_deletion_journal(monkeypatch, t
                         "-d", DB_NAME, "--no-owner"], input_bytes=dump)
         with psycopg.connect(target_dsn, autocommit=True) as db:
             db.execute("GRANT USAGE ON SCHEMA public TO buyeros_api")
-            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0034_worker_execution"
+            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0035_worker_recovery_probe"
             assert db.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class "
                               "WHERE relname='source_documents'").fetchone() == (True, True)
             account_spend = db.execute("SELECT settled_spend FROM budget_accounts WHERE id=%s",

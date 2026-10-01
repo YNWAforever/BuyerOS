@@ -142,11 +142,15 @@ export interface components {
         };
         /** MaintenanceRequest */
         MaintenanceRequest: {
+            /** Probe Id */
+            probe_id?: string | null;
             /** Runtime Epoch */
             runtime_epoch: number;
         };
         /** MaintenanceResult */
         MaintenanceResult: {
+            /** Alerts */
+            alerts: ("PROBE_STALE" | "WORK_BACKLOG")[];
             /** Enabled */
             enabled: boolean;
             /** Recovered */

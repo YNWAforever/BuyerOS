@@ -1,0 +1,177 @@
+FFFFF                                                                    [100%]
+================================== FAILURES ===================================
+______________ test_environment_flag_cannot_make_readiness_ready ______________
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:58322/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:58322/buyeros_test_api', 2)
+
+    def test_environment_flag_cannot_make_readiness_ready(migrated, worker_runtime):
+        now = datetime.now(timezone.utc)
+>       assert health(now)['queue'] == health(now)['worker'] == 'unavailable'
+               ^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:42:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_cloudflare_recovery_db.py:33: in health
+    module = recovery_module()
+             ^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def recovery_module():
+        source = Path(__file__).resolve().parents[1] / 'buyeros_api/services/worker_recovery.py'
+>       assert source.is_file(), 'CF06 durable recovery and probe receipt missing'
+E       AssertionError: CF06 durable recovery and probe receipt missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file
+
+tests\test_cloudflare_recovery_db.py:16: AssertionError
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001_initial, initial tenant boundary: workspaces, users, memberships
+INFO  [alembic.runtime.migration] Running upgrade 0001_initial -> 0002_rls_and_roles, row-level security and least-privilege runtime roles
+INFO  [alembic.runtime.migration] Running upgrade 0002_rls_and_roles -> 0003_p2_tables, P2 domain tables (projects, buyers, evidence, policy, budget, outbox) + RLS
+INFO  [alembic.runtime.migration] Running upgrade 0003_p2_tables -> 0004_p4_p5_tables, P4/P5 tables (quotes, provider ops, drafts, approvals, outcomes) + RLS
+INFO  [alembic.runtime.migration] Running upgrade 0004_p4_p5_tables -> 0005_p3_tables, P3 tables (runs, events, candidates, aliases, contacts) + RLS
+INFO  [alembic.runtime.migration] Running upgrade 0005_p3_tables -> 0006_worker_leases, worker leases and outbox dispatch columns
+INFO  [alembic.runtime.migration] Running upgrade 0006_worker_leases -> 0007_outbox_terminal_state, terminal outbox states, claim index and dispatcher workspace read
+INFO  [alembic.runtime.migration] Running upgrade 0007_outbox_terminal_state -> 0008_grant_users_select, grant SELECT on users to the API role
+INFO  [alembic.runtime.migration] Running upgrade 0008_grant_users_select -> 0009_project_profile_columns, project profile columns and ICP supersession
+INFO  [alembic.runtime.migration] Running upgrade 0009_project_profile_columns -> 0010_widen_idempotency_key, widen idempotency_records.key to the contract's 200 chars
+INFO  [alembic.runtime.migration] Running upgrade 0010_widen_idempotency_key -> 0011_project_buyer_version, buyer version and idempotency response storage
+INFO  [alembic.runtime.migration] Running upgrade 0011_project_buyer_version -> 0012_offer_basis_revision, Track the offer revision used by immutable ICP versions.
+INFO  [alembic.runtime.migration] Running upgrade 0012_offer_basis_revision -> 0013_project_link_constraints, Constrain project-bound links across a shared workspace.
+INFO  [alembic.runtime.migration] Running upgrade 0013_project_link_constraints -> 0014_buyer_management, Version buyer lists and persist actor-scoped presets under tenant RLS.
+INFO  [alembic.runtime.migration] Running upgrade 0014_buyer_management -> 0015_policy_lifecycle, Give policy and suppression the full purpose/subject lifecycle contract.
+INFO  [alembic.runtime.migration] Running upgrade 0015_policy_lifecycle -> 0016_bulk_jobs, Durable actor-bound bulk jobs and per-buyer results.
+INFO  [alembic.runtime.migration] Running upgrade 0016_bulk_jobs -> 0017_settings_audit, Version existing memberships and persist actor preferences and audit request IDs.
+INFO  [alembic.runtime.migration] Running upgrade 0017_settings_audit -> 0018_budget_ledger, Versioned UTC budget scopes, one operation hold and economic-event identity.
+INFO  [alembic.runtime.migration] Running upgrade 0018_budget_ledger -> 0019_offer_documents, Private offer documents and fetched-source retention metadata.
+INFO  [alembic.runtime.migration] Running upgrade 0019_offer_documents -> 0020_research_provenance, Bind canonical candidates and evidence to one tenant/run/provider context.
+INFO  [alembic.runtime.migration] Running upgrade 0020_research_provenance -> 0021_run_bounds, Persist immutable run admission basis and cumulative execution counters.
+INFO  [alembic.runtime.migration] Running upgrade 0021_run_bounds -> 0022_research_checkpoints, Own LangGraph Postgres saver 3.1.2 schema in Alembic, never at runtime.
+INFO  [alembic.runtime.migration] Running upgrade 0022_research_checkpoints -> 0023_contact_quote_basis, Bind optional contact quotes to actor, project and immutable eligibility basis.
+INFO  [alembic.runtime.migration] Running upgrade 0023_contact_quote_basis -> 0024_contact_job_execution, Persist contact job versions and provider intent/result ownership.
+INFO  [alembic.runtime.migration] Running upgrade 0024_contact_job_execution -> 0025_provider_callback_route, Narrow, non-PII callback routing index for verified vendor references.
+INFO  [alembic.runtime.migration] Running upgrade 0025_provider_callback_route -> 0026_sender_identity_versions, Bind reviewed sender metadata to an active project-owned version.
+INFO  [alembic.runtime.migration] Running upgrade 0026_sender_identity_versions -> 0027_draft_integrity, Constrain draft buyer scope and make written revisions immutable.
+INFO  [alembic.runtime.migration] Running upgrade 0027_draft_integrity -> 0028_draft_approval_context, Bind draft approval review and recipient context without rewriting historical approvals.
+INFO  [alembic.runtime.migration] Running upgrade 0028_draft_approval_context -> 0029_export_authorization, Keep actor-bound export manifests so every content read can reauthorize live data.
+INFO  [alembic.runtime.migration] Running upgrade 0029_export_authorization -> 0030_manual_outcome_provenance, Bind manual outcomes to project and make runtime writes append-only.
+INFO  [alembic.runtime.migration] Running upgrade 0030_manual_outcome_provenance -> 0031_retention_redaction, Allow narrow, irreversible retention redaction of derived draft and approval payloads.
+INFO  [alembic.runtime.migration] Running upgrade 0031_retention_redaction -> 0032_contact_retention, Add explicit contact expiry and one-way addressed-draft redaction.
+INFO  [alembic.runtime.migration] Running upgrade 0032_contact_retention -> 0033_api_rate_windows, Durable per-actor API rate windows under tenant RLS.
+INFO  [alembic.runtime.migration] Running upgrade 0033_api_rate_windows -> 0034_worker_execution, Add disabled runtime selector, fenced step receipts and machine replay guard.
+_________ test_probe_epoch_freshness_duplicate_and_pause_fail_closed __________
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:58322/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:58322/buyeros_test_api', 3)
+
+    def test_probe_epoch_freshness_duplicate_and_pause_fail_closed(migrated, worker_runtime):
+>       module = recovery_module()
+                 ^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:47:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def recovery_module():
+        source = Path(__file__).resolve().parents[1] / 'buyeros_api/services/worker_recovery.py'
+>       assert source.is_file(), 'CF06 durable recovery and probe receipt missing'
+E       AssertionError: CF06 durable recovery and probe receipt missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file
+
+tests\test_cloudflare_recovery_db.py:16: AssertionError
+______ test_queue_or_workflow_retention_does_not_reexecute_terminal_step ______
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:58322/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:58322/buyeros_test_api', 4)
+
+    def test_queue_or_workflow_retention_does_not_reexecute_terminal_step(migrated, worker_runtime):
+>       module = recovery_module()
+                 ^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:64:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def recovery_module():
+        source = Path(__file__).resolve().parents[1] / 'buyeros_api/services/worker_recovery.py'
+>       assert source.is_file(), 'CF06 durable recovery and probe receipt missing'
+E       AssertionError: CF06 durable recovery and probe receipt missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file
+
+tests\test_cloudflare_recovery_db.py:16: AssertionError
+_____ test_expired_local_step_can_resume_only_after_atomic_receipt_fence ______
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:58322/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:58322/buyeros_test_api', 5)
+
+    def test_expired_local_step_can_resume_only_after_atomic_receipt_fence(migrated, worker_runtime):
+>       module = recovery_module()
+                 ^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:76:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def recovery_module():
+        source = Path(__file__).resolve().parents[1] / 'buyeros_api/services/worker_recovery.py'
+>       assert source.is_file(), 'CF06 durable recovery and probe receipt missing'
+E       AssertionError: CF06 durable recovery and probe receipt missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file
+
+tests\test_cloudflare_recovery_db.py:16: AssertionError
+___ test_oldest_work_alert_is_durable_and_cross_tenant_reads_remain_closed ____
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:58322/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:58322/buyeros_test_api', 6)
+
+    def test_oldest_work_alert_is_durable_and_cross_tenant_reads_remain_closed(migrated, worker_runtime):
+>       module = recovery_module()
+                 ^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:94:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def recovery_module():
+        source = Path(__file__).resolve().parents[1] / 'buyeros_api/services/worker_recovery.py'
+>       assert source.is_file(), 'CF06 durable recovery and probe receipt missing'
+E       AssertionError: CF06 durable recovery and probe receipt missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/services/worker_recovery.py').is_file
+
+tests\test_cloudflare_recovery_db.py:16: AssertionError
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_cloudflare_recovery_db.py::test_environment_flag_cannot_make_readiness_ready
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_cloudflare_recovery_db.py::test_environment_flag_cannot_make_readiness_ready
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\Documents\BuyerOS\artifacts\cloudflare\CF06-red.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_cloudflare_recovery_db.py::test_environment_flag_cannot_make_readiness_ready
+FAILED tests/test_cloudflare_recovery_db.py::test_probe_epoch_freshness_duplicate_and_pause_fail_closed
+FAILED tests/test_cloudflare_recovery_db.py::test_queue_or_workflow_retention_does_not_reexecute_terminal_step
+FAILED tests/test_cloudflare_recovery_db.py::test_expired_local_step_can_resume_only_after_atomic_receipt_fence
+FAILED tests/test_cloudflare_recovery_db.py::test_oldest_work_alert_is_durable_and_cross_tenant_reads_remain_closed
+5 failed, 6 warnings in 142.04s (0:02:22)

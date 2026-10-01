@@ -31,7 +31,7 @@ export function workflowId(value: QueueEnvelope): string {
     : `bo1-${envelope.outbox_id.replaceAll('-', '')}-g${envelope.generation}-e${envelope.runtime_epoch}`;
 }
 
-export const stepKeySchema = z.string().regex(/^[a-z0-9][a-z0-9:._-]{0,63}$/);
+export const stepKeySchema = z.string().regex(/^[a-z0-9][a-z0-9:_-]{0,63}$/);
 const outcomeSchema = z.object({
   state: z.enum(['done', 'continue', 'retry_later', 'reconcile', 'blocked', 'stale']),
   code: z.enum(['OK', 'EXECUTION_DISABLED', 'CAPABILITY_UNAVAILABLE', 'POLICY_CHANGED',
@@ -57,10 +57,11 @@ export const claimSchema = z.object({
 }).strict();
 export const maintenanceSchema = z.object({
   runtime_epoch: positive, recovered: z.number().int().min(0).max(10), enabled: z.boolean(),
+  alerts: z.array(z.enum(['PROBE_STALE', 'WORK_BACKLOG'])).max(2),
 }).strict();
 export const requestSchemas = {
   workerClaim: z.object({ runtime_epoch: positive, max_total: z.number().int().min(1).max(10), time_budget_seconds: z.number().int().min(1).max(10) }).strict(),
-  workerMaintenance: z.object({ runtime_epoch: positive }).strict(),
+  workerMaintenance: z.object({ runtime_epoch: positive, probe_id: uuid.nullable().optional() }).strict(),
   workerRecordPublication: z.object({ envelope: jobSchema, state: z.enum(['published', 'unknown', 'failed']) }).strict(),
   workerExecuteStep: z.object({ envelope: jobSchema, step_key: stepKeySchema }).strict(),
   workerStepStatus: z.object({ envelope: jobSchema, step_key: stepKeySchema }).strict(),

@@ -70,9 +70,11 @@ class PublicationRequest(WorkerModel):
 
 class MaintenanceRequest(WorkerModel):
     runtime_epoch: SafePositiveInt
+    probe_id: UUID | None = None
 
 
 class MaintenanceResult(WorkerModel):
     runtime_epoch: SafePositiveInt
     recovered: Annotated[int, Field(strict=True, ge=0, le=10)]
     enabled: bool
+    alerts: list[Literal['PROBE_STALE', 'WORK_BACKLOG']] = Field(max_length=2)

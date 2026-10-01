@@ -1,0 +1,31 @@
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+Using secrets defined in process.env
+Using secrets defined in process.env
+Using secrets defined in process.env
+Using secrets defined in process.env
+Using secrets defined in process.env
+Using secrets defined in process.env
+Using secrets defined in process.env
+Using secrets defined in process.env
+ ✓ services/cloudflare-jobs/tests/queue.test.ts (2 tests) 501ms
+   ✓ ACK requires verified creation or inspection of the deterministic instance  484ms
+ ✓ services/cloudflare-jobs/tests/dispatcher.test.ts (5 tests) 505ms
+   ✓ dispatch off performs no API or binding calls  481ms
+ ✓ services/cloudflare-jobs/tests/protocol.test.ts (3 tests) 535ms
+     ✓ rejects extra customer fields, URLs and unsafe numbers before scheduling  515ms
+ ✓ services/cloudflare-jobs/tests/workflow.test.ts (5 tests) 516ms
+   ✓ HTTP timeout reads committed status before any repeated execution  481ms
+ ✓ services/cloudflare-jobs/tests/handler.test.ts (2 tests) 39ms
+ ✓ services/cloudflare-jobs/tests/api-client.test.ts (4 tests) 593ms
+   ✓ signs exact POST path and raw bytes with a fixed protocol vector and no redirect  499ms
+ ✓ services/cloudflare-jobs/tests/platform.test.ts (1 test) 161ms
+ ✓ tests/integration/cloudflare-recovery.test.ts (2 tests) 237ms
+
+ Test Files  8 passed (8)
+      Tests  24 passed (24)
+   Start at  16:12:31
+   Duration  10.65s (transform 15.46s, setup 40.89s, import 1.79s, tests 3.09s, environment 1ms)
+
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF06-controller.xml

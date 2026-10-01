@@ -1,0 +1,63 @@
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+Using secrets defined in process.env
+ ❯ tests/integration/cloudflare-recovery.test.ts (2 tests | 2 failed) 226ms
+   × the probe Workflow carries its opaque probe ID into the committed receipt request 142ms
+   × a probe cannot report success when the durable selector is paused 80ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/cloudflare-recovery.test.ts > the probe Workflow carries its opaque probe ID into the committed receipt request
+AssertionError: expected { runtime_epoch: 1 } to deeply equal { runtime_epoch: 1, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "probe_id": "8e829138-15eb-4cf1-9b0a-065c9207ce37",
+    "runtime_epoch": 1,
+  }
+
+ ❯ tests/integration/cloudflare-recovery.test.ts:20:18
+     18|     await env.JOB_WORKFLOW.create({ id: workflowId(probe), params: pro…
+     19|     await introspector.waitForStatus('complete');
+     20|     expect(body).toEqual({ runtime_epoch: 1, probe_id: probe.probe_id …
+       |                  ^
+     21|     expect(await introspector.getOutput()).toEqual({ state: 'done', co…
+     22|   } finally { await introspector.dispose(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/integration/cloudflare-recovery.test.ts > a probe cannot report success when the durable selector is paused
+AssertionError: expected { Object (state, code, ...) } to deeply equal { state: 'blocked', …(3) }
+
+- Expected
++ Received
+
+  {
+-   "code": "EXECUTION_DISABLED",
++   "code": "OK",
+    "next_step_key": null,
+    "retry_at": null,
+-   "state": "blocked",
++   "state": "done",
+  }
+
+ ❯ tests/integration/cloudflare-recovery.test.ts:33:44
+     31|     await env.JOB_WORKFLOW.create({ id: workflowId(probe), params: pro…
+     32|     await introspector.waitForStatus('complete');
+     33|     expect(await introspector.getOutput()).toEqual({ state: 'blocked',…
+       |                                            ^
+     34|   } finally { await introspector.dispose(); }
+     35| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  15:33:00
+   Duration  6.98s (transform 2.21s, setup 3.53s, import 372ms, tests 226ms, environment 0ms)
+
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF06-workflow-authority-red.xml

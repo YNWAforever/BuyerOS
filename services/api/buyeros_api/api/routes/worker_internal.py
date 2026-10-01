@@ -65,4 +65,4 @@ async def publication(body: PublicationRequest, request: Request):
 
 @router.post("/maintenance", operation_id="workerMaintenance", response_model=MaintenanceResult)
 async def maintenance(body: MaintenanceRequest, request: Request):
-    return await service.maintenance(request.state.execution_engine, body.runtime_epoch)
+    return await service.maintenance(request.state.execution_engine, body.runtime_epoch, probe_id=body.probe_id)

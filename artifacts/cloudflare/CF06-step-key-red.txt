@@ -1,0 +1,2 @@
+Using secrets defined in process.env
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF06-step-key-red.xml

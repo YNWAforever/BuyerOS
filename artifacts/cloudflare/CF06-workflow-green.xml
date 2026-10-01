@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="2" failures="0" errors="0" time="0.193">
+    <testsuite name="tests/integration/cloudflare-recovery.test.ts" timestamp="2026-10-01T07:42:21.643Z" hostname="DESKTOP-30TFME5" tests="2" failures="0" errors="0" skipped="0" time="0.193">
+        <testcase classname="tests/integration/cloudflare-recovery.test.ts" name="the probe Workflow carries its opaque probe ID into the committed receipt request" time="0.14">
+        </testcase>
+        <testcase classname="tests/integration/cloudflare-recovery.test.ts" name="a probe cannot report success when the durable selector is paused" time="0.047">
+        </testcase>
+    </testsuite>
+</testsuites>

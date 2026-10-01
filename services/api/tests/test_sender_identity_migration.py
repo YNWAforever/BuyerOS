@@ -9,7 +9,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0034_worker_execution"
+HEAD = "0035_worker_recovery_probe"
 PROJECT_A = "a0000000-0000-4000-8000-000000000001"
 
 

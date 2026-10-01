@@ -63,9 +63,9 @@ def test_actual_local_queue_workflow_api_postgres(migrated, worker_runtime, monk
         env = {key: value for key, value in os.environ.items() if not key.startswith(('BUYEROS_', 'AUTH0_', 'R2_', 'VERCEL_', 'CLOUDFLARE_'))}
         env['BUYEROS_CF_TEST_CONTEXT'] = str(context)
         result = subprocess.run(['node', 'node_modules/vitest/vitest.mjs', 'run', '--config', 'services/cloudflare-jobs/vitest.pg.config.ts',
-                                 '--reporter=default', '--reporter=junit', '--outputFile.junit=artifacts/cloudflare/CF05-platform-pg.xml'],
+                                 '--reporter=default', '--reporter=junit', '--outputFile.junit=artifacts/cloudflare/CF06-platform-pg.xml'],
                                 cwd=root, env=env, capture_output=True, text=True, encoding='utf8', timeout=120)
-        (root / 'artifacts/cloudflare/CF05-platform-pg.txt').write_text(result.stdout + result.stderr, encoding='utf8')
+        (root / 'artifacts/cloudflare/CF06-platform-pg.txt').write_text(result.stdout + result.stderr, encoding='utf8')
         assert result.returncode == 0, result.stdout + result.stderr
         with psycopg.connect(migrated) as db:
             assert db.execute('SELECT status,processed,updated,conflicts FROM async_jobs WHERE id=%s', (job,)).fetchone() == ('completed', 1, 1, 0)
@@ -73,6 +73,10 @@ def test_actual_local_queue_workflow_api_postgres(migrated, worker_runtime, monk
             assert db.execute("SELECT count(*) FROM audit_events WHERE workspace_id=%s AND action='buyer.owner_assigned'", (envelope.workspace_id,)).fetchone()[0] == 1
             assert db.execute('SELECT count(*) FROM worker_steps WHERE outbox_id=%s', (envelope.outbox_id,)).fetchone()[0] == 1
             assert db.execute("SELECT state FROM outbox_events WHERE id=%s", (envelope.outbox_id,)).fetchone()[0] == 'done'
+            probe_epoch, probe_id, observed = db.execute('SELECT runtime_epoch,last_probe_id,last_probe_at FROM worker_runtime_probe').fetchone()
+            assert probe_epoch == worker_runtime[1] and probe_id is not None
+            from datetime import datetime, timezone
+            assert 0 <= (datetime.now(timezone.utc) - observed).total_seconds() <= 180
     finally:
         server.should_exit = True
         thread.join(10)

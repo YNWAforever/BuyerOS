@@ -15,6 +15,7 @@ class WorkerRuntimeControl(Base):
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False)
     epoch: Mapped[int] = mapped_column(BigInteger, nullable=False)
     cursor: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    recovery_cursor: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     active_owner: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     active_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
@@ -43,3 +44,15 @@ class WorkerBridgeNonce(Base):
     key_id: Mapped[str] = mapped_column(String(64), primary_key=True)
     nonce: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class WorkerRuntimeProbe(Base):
+    """Global opaque operational signal; no customer or financial payload."""
+    __tablename__ = 'worker_runtime_probe'
+    singleton: Mapped[int] = mapped_column(Integer, primary_key=True)
+    runtime_epoch: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    last_probe_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    last_probe_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    metrics_epoch: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    oldest_work_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    scan_oldest_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

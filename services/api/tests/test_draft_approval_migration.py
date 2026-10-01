@@ -14,7 +14,7 @@ from tests.test_api_projects_db import api
 from tests.test_draft_approval_context_db import _addressed_case, _approval_payload, _approve, _review
 from tests.test_lookup_quotes_db import quote_case
 
-HEAD = "0034_worker_execution"
+HEAD = "0035_worker_recovery_probe"
 
 
 def _config():

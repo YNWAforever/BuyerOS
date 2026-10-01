@@ -224,10 +224,24 @@ async def record_publication(engine, envelope, state: str) -> StepOutcome:
         return outcome("done", "OK")
 
 
-async def maintenance(engine, runtime_epoch: int) -> MaintenanceResult:
+async def maintenance(engine, runtime_epoch: int, *, probe_id: uuid.UUID | None = None,
+                      now: datetime | None = None) -> MaintenanceResult:
+    from .worker_recovery import read_execution_health, recover_execution, record_probe
+    now = now or datetime.now(timezone.utc)
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as session:
         control = await control_row(session)
-        return MaintenanceResult(runtime_epoch=control.epoch, recovered=0,
-                                 enabled=control.enabled and control.backend == "cloudflare"
-                                 and control.epoch == runtime_epoch and get_settings().cloudflare_execution_enabled)
+        epoch = control.epoch
+        enabled = (control.enabled and control.backend == 'cloudflare'
+                   and epoch == runtime_epoch and get_settings().cloudflare_execution_enabled)
+    recovered = 0
+    if enabled:
+        report = await recover_execution(engine, now=now, limit=10, runtime_epoch=runtime_epoch)
+        recovered = report.recovered
+        if probe_id is not None:
+            enabled = await record_probe(engine, runtime_epoch=runtime_epoch, probe_id=probe_id, now=now)
+    async with maker() as session:
+        current = await control_row(session)
+        health = await read_execution_health(session, now=now)
+        return MaintenanceResult(runtime_epoch=current.epoch, recovered=recovered,
+            enabled=enabled and current.epoch == runtime_epoch and current.enabled, alerts=health['alerts'])

@@ -43,7 +43,7 @@ export async function runJob(envelope: JobEnvelope, ports: WorkflowPorts): Promi
       if (failures >= 5) return blocked('TRANSIENT_UNAVAILABLE');
       needsStatus = true;
       controllerOperations += 1;
-      await ports.sleep(`transport:${iteration}`, Math.min(60_000, 1000 * 2 ** failures));
+      await ports.sleep(`transport:${iteration}`, Math.min(30_000, 1000 * 2 ** failures));
       continue;
     }
     if (['done', 'blocked', 'stale', 'reconcile'].includes(result.state)) return result;
@@ -70,10 +70,10 @@ export class BuyerOSJobWorkflow extends WorkflowEntrypoint<Env, QueueEnvelope> {
     if (this.env.EXECUTION_ENABLED !== 'true') return blocked('EXECUTION_DISABLED');
     const api: ApiCall = (operation, body, timeout) => callWorkerApi(this.env, operation, body, timeout);
     if ('kind' in envelope) {
-      // CF06 records the end-to-end operational receipt. This maintenance call
-      // alone does not mark readiness or claim a customer/provider intent.
-      await step.do('operational-probe', { retries: { limit: 0, delay: '1 second' }, timeout: '90 seconds' },
-        () => api('workerMaintenance', { runtime_epoch: envelope.runtime_epoch }));
+      const receipt = await step.do('operational-probe', { retries: { limit: 0, delay: '1 second' }, timeout: '90 seconds' },
+        () => api('workerMaintenance', { runtime_epoch: envelope.runtime_epoch, probe_id: envelope.probe_id }));
+      if (!receipt.enabled) return blocked('EXECUTION_DISABLED');
+      if (receipt.runtime_epoch !== envelope.runtime_epoch) return { state: 'stale', code: 'STALE_FENCE', next_step_key: null, retry_at: null };
       return { state: 'done', code: 'OK', next_step_key: null, retry_at: null };
     }
     return runJob(envelope, {
