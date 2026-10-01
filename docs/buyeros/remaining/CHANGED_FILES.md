@@ -577,6 +577,7 @@ scripts/verify-render-blueprint.py
 tests/test_render_worker_launch.py
 tests/render-worker-process-check.py
 artifacts/t30-render-blueprint-validation-20261001.json
+artifacts/t30-render-worker-ci-e061d33-20261001.json
 artifacts/t30-tests/render-worker-launch-red-20261001.txt
 artifacts/t30-tests/render-worker-launch-green-20261001.txt
 docs/buyeros/runbooks/render-worker-setup.md

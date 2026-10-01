@@ -1730,14 +1730,15 @@
             "follow_up_review": "5e89eb1 deployment evidence is newer than merged PR9 head. The checkpoint through35eb899 contains documentation/evidence only; subsequent requested Render preparation is separately tracked. Preserve original source records."
           },
           "render_worker_setup_20261001": {
-            "status": "prepared_not_provisioned_linux_ci_pending_paid_resource_and_account_gates_open",
+            "status": "prepared_local_and_hosted_verified_not_provisioned_paid_resource_and_account_gates_open",
+            "reviewed_source_sha": "e061d33a32a46502a084d5a5c26d9262904a7b60",
             "request": "User asked the agent to create the worker after the existing-target question; no priced provisioning or production worker role grant is fabricated.",
             "proposal": "root render.yaml: buyer-os-worker and buyer-os-dispatcher, one0.5c-512mb instance each; one buyer-os-broker256mb; allSingapore. BaseUS$24/month before tax/workspace/usage extras, current primary pricing verified2026-10-01. Paid previews/autodeployoff.",
             "runtime": "Both callers bind the same internal broker. WORKER_RUNTIME_ENABLEDfalse starts standby without BuyerOS imports, connections or queued jobs. Activation requires production, dedicated buyeros_worker_runtime login/TLS and remote broker; name checks do not verify catalog privileges. Canonical Celery concurrency1/prefetch1/recoverybeat and existing bounded dispatcher CLI remain owners.",
             "local_checks": "Named unittest red0/9/0 exit1 (0.002s); green9/0/0 exit0 (0.023s). Official schema first rejected unquoted YAMLoff; quoted enums pass unchanged validator. Worker/dispatcher --check2/2 standby; canonical module help imports2/2. No database/broker/provider contacted by these checks.",
-            "evidence": "artifacts/t30-tests/render-worker-launch-red/green-20261001.txt; artifacts/t30-render-blueprint-validation-20261001.json; runbooks/render-worker-setup.md exact variables/cost/rollback.",
-            "hosted_checks": "New official schema, launch, Linux SIGTERM and frozen no-dev build/CLI gates added to existing full CI; pending actual completion. Prior35eb899/run36805885881 passed6/6 and does not verify these new changes.",
-            "configuration_missing": "Authenticated Render account/workspace and concreteUS$24/month standby-resource decision. Later runtime activation needs exact production worker role/credential/catalog/queue approval; no migration/source seed or paid provider is part of this proposal.",
+            "evidence": "artifacts/t30-tests/render-worker-launch-red/green-20261001.txt; artifacts/t30-render-blueprint-validation-20261001.json; artifacts/t30-render-worker-ci-e061d33-20261001.json; runbooks/render-worker-setup.md exact variables/cost/rollback.",
+            "hosted_checks": "Run36807776580 at e061d33 completed6/6 SUCCESS. Required API577/0/0/0 (78 warnings129.79s), worker174/0/0/0 (1 warning22.33s), browser continuity4+8+1+3+1 and zoom2 required no-skip gates pass; smoke1. Launcher9/0/0 in0.006s, real Linux standby/SIGTERM2/0/0, official schema and exact frozen no-dev production build/two standby CLI checks/two canonical imports pass on Python3.12.14/uv0.11.27. Actual fixture containers, fictional identity/search/contact; no deployed Render integration claimed.",
+            "configuration_missing": "Authenticated Render account/workspace and concreteUS$24/month standby-resource decision. Official CLI2.28.0 archive digest verified and safely extracted in ignored checkout-local storage; device authorization is pending. Later runtime activation needs exact production worker role/credential/catalog/queue approval; no migration/source seed or paid provider is part of this proposal.",
             "provisioned": false,
             "worker_activated": false,
             "broker_live_verified": false,
@@ -1782,6 +1783,6 @@
   ],
   "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "T30 requested Render worker setup: finish source-bound Linux/full CI verification of reviewed standby configuration, then concreteUS$24/month Singapore worker/dispatcher/one-Valkey creation decision and authenticated account/workspace access. Resources not provisioned; production role/catalog/runtime activation remains a later exact gate. Current app production12327c7 matches reviewed4181062, anonymous4/4/main CI6/6 and prior human FIMMICK/admin confirmation. Agent authenticated full continuity, provider/policy/pilot/R2, T29 assistive/non-text and T28 external journal custody remain open; delivery disabled.",
+  "next_eligible_task": "T30 reviewed Render setup e061d33/full CI36807776580 passes6/6 including Linux standby and frozen production build. ConcreteUS$24/month Singapore worker/dispatcher/one-Valkey standby creation decision and authenticated Render account/workspace access remain required; CLI device authorization pending. Resources not provisioned; production role/catalog/runtime activation remains a later exact gate. Current app production12327c7 matches reviewed4181062, anonymous4/4/main CI6/6 and prior human FIMMICK/admin confirmation. Agent authenticated full continuity, provider/policy/pilot/R2, T29 assistive/non-text and T28 external journal custody remain open; delivery disabled.",
   "deployed_source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6"
 }

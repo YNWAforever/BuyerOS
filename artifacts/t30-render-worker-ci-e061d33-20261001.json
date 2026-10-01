@@ -1,0 +1,196 @@
+{
+  "observed_at_utc": "2026-10-01T03:03:54.8415945Z",
+  "run_id": 36807776580,
+  "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36807776580",
+  "source_sha": "e061d33a32a46502a084d5a5c26d9262904a7b60",
+  "status": "completed",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "browser-continuity",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-01T02:51:16Z",
+      "completedAt": "2026-10-01T02:57:19Z"
+    },
+    {
+      "name": "browser-zoom",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-01T02:51:16Z",
+      "completedAt": "2026-10-01T02:52:56Z"
+    },
+    {
+      "name": "api",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-01T02:51:16Z",
+      "completedAt": "2026-10-01T02:53:50Z"
+    },
+    {
+      "name": "browser-smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-01T02:51:17Z",
+      "completedAt": "2026-10-01T02:53:02Z"
+    },
+    {
+      "name": "frontend",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-01T02:51:16Z",
+      "completedAt": "2026-10-01T02:52:41Z"
+    },
+    {
+      "name": "worker",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-01T02:51:16Z",
+      "completedAt": "2026-10-01T02:52:14Z"
+    }
+  ],
+  "required_junit_gates": {
+    "api": [
+      {
+        "passed": 577,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "worker": [
+      {
+        "passed": 174,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "browser-continuity": [
+      {
+        "passed": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "passed": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "passed": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "passed": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "passed": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "browser-zoom": [
+      {
+        "passed": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ]
+  },
+  "standalone_launcher": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 0.006,
+    "evidence": "Actual completed worker job stdout"
+  },
+  "linux_standby_sigterm": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "Real separate Linux worker/dispatcher standby processes and graceful SIGTERM; no database/broker/provider connections"
+  },
+  "browser_smoke": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "duration": "20.1s",
+    "scope": "Disposable DB/fake identity CI smoke; not production staff acceptance"
+  },
+  "production_package_steps": [
+    {
+      "name": "Run uv run --frozen python -m unittest discover -s ../../tests -p test_render_worker_launch.py",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run uv run --frozen python ../../tests/render-worker-process-check.py",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run python scripts/check-required-tests.py --junit services/worker/artifacts/tests.xml",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run python -m pip install uv==0.11.27 && uv sync --project services/worker --frozen --no-dev --python 3.12",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run services/worker/.venv/bin/python scripts/run-render-worker.py worker --check",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run services/worker/.venv/bin/python scripts/run-render-worker.py dispatcher --check",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run services/worker/.venv/bin/python -m celery -A buyeros_worker.app:celery_app worker --help",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run services/worker/.venv/bin/python -m buyeros_worker.cli dispatch --help",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "python_version": "3.12.14",
+  "uv_version": "0.11.27",
+  "official_schema_validation": {
+    "valid": true,
+    "schema_url": "https://render.com/schema/render.yaml.json",
+    "schema_sha256": "57aa0a1ff9c3b2d0fcb91b790b7b285aef6397adb0c92930e6e601054444cfe5",
+    "blueprint_sha256": "fd2338626775471566930ddc0faeb2e6f2a4ec1ed20b0e88a0ebb5c5a320968e"
+  },
+  "pytest_summaries": {
+    "api": "577 passed, 78 warnings in 129.79s",
+    "worker": "174 passed, 1 warning in 22.33s"
+  },
+  "existing_application_reviewed_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+  "observed_app_production_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+  "migrations_added": 0,
+  "agent_provisioned_resources": [],
+  "live_render_integration_verified": false,
+  "tool_preparation": {
+    "cli_version": "2.28.0",
+    "archive_sha256": "15eae402a24bbcd03c50f6b9283ee34407a090b53a84c3b788bd337eeb978b1d",
+    "source": "Official render-oss/cli GitHub release asset; digest verified before safe extraction into ignored checkout-local tool storage",
+    "authentication": "Device authorization started; workspace identity/credential not yet verified"
+  },
+  "scope": "Source-bound fixture CI and production-packaging/standby process evidence. Fictional identity/search/contact; actual disposable PostgreSQL/Valkey/dispatcher/Celery for existing required suites. No live Render worker/broker, provider, runtime role or pilot verification; production app deployment is separate."
+}
