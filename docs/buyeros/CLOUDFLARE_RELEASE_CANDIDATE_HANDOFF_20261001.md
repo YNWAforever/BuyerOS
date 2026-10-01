@@ -6,28 +6,47 @@
 | --- | --- |
 | Code implemented | CF00 local and CF01–CF08 local implementation complete. One API-owned Python execution engine, strict signed bridge and TypeScript Cron/Queue/Workflow controller; compatible thin Celery adapters remain. Default selector is Celery/off/epoch1. |
 | Fixture verified | English/zh-HK at1280×800 and390×844: UI login/scope → create/edit offer → current ICP approval → bounded research → review/list/assign → grounded addressed draft → exact approval/export → manual outcome/refresh. OIDC, search and contact inputs are fictional. Optional unknown contact holds and101-row bulk/restart/page2 are additional cases. |
-| Local integration verified | Actual Miniflare Cron/Queue/Workflow → machine HMAC → native FastAPI/SQLAlchemy → owned PostgreSQL. Full API650, worker186, seven current Cloudflare UI cases, six preserved legacy suites, and PG18 compatibility29 have zero required failures/errors/skips. |
-| Hosted integration | CF00 hosted package/PDF/checkpoint/protection and both-hop enforcement remain NOT RUN. No fixture/mock is counted as live provider proof. |
-| Externally blocked | Exact preview setup authorization; later production plan/quota/privacy and selector scope; independent review; external deletion journal/R2, policy/provider economics/pilot, full authenticated staff trace and assistive accessibility. |
-| Deployed | Cloudflare controller/schema/selector remain undeployed. Last observed Git integration app/API **preview** dpl_2mtfFRQNvQqrkFizapMMjFRdujKk at source91b1f9b is READY/targetnull/iad1, branch alias only. This is not protected native-job feasibility or production cutover; historical production12327c7 is not a refreshed live readback. |
+| Local integration verified | Latest full CI79d6caf: actual Miniflare Cron/Queue/Workflow → HMAC → native FastAPI/SQLAlchemy → owned PostgreSQL. API686, worker186, staff7, PG18compat29, operating2, legacy4/8/1/3/1, zoom2 and smoke1; all required suites zero failures/errors/skips. Eight jobs SUCCESS. |
+| Hosted integration | Approved isolated CF00 native/PDF/checkpoint/protection and actual61-second two-hop checks pass at595865f. One real Queue-created Workflow completed its signed API operational probe and matching Neon receipt. All payloads fictional/ID-only; no live provider verification. |
+| Externally blocked | Production plan/quota/privacy, role/schema/drain/selector scope and alert routing; independent review; external deletion journal/R2, policy/provider economics/pilot, full authenticated staff trace and assistive accessibility. |
+| Deployed | Isolated protected Vercel native dpl_HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP and release API dpl_2ZzGXSXkfERBYyYzxufCoVCvH1FD at595865f were READY/preview/iad1. Private Cloudflare preview now executionfalse/noCron/epoch3, version992537e3-7d93-402a-8c98-dafb110958a4. Neon is idle and restricted logins NOLOGIN; bypass revoked. No production Cloudflare cutover; historical production12327c7 is not a refreshed live readback. |
 
-**Reviewed code/configuration source:** `d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8`.
+**Current deployed preview code source:** `595865f5e4dce418e2b96d4819f72633378eba2b`.
+The shared PDF child now receives only installed code/package metadata paths,
+with no inherited credentials or PYTHONPATH. This changes production parser
+source from the historical RCd6c2849. The stronger legacy regression successor
+is `93de21f8201f9ddb9f481f061a579a59d50efc37`. Current reviewed source including
+the screenshot collection fix is `79d6caf8b51aac00560cf6d69b0198c8614df528`;
+[CI36893525903](https://github.com/YNWAforever/BuyerOS/actions/runs/36893525903)
+is8/8 SUCCESS. Its19 source hashes and synthetic test-merge tree match the source.
+API686/0/0/0 in261.25s (97warnings), worker186/0/0/0 in25.60s (1warning),
+controller27, PG18compat29 in37.54s, operating2 in38.12s, staff7,
+legacy4/8/1/3/1, zoom2 and smoke1 pass; strict skip checkers all succeed.
+[Current CI manifest](../../artifacts/cloudflare/ci-79d6caf-hosted-successor/manifest.json)
+records every exact command/result, raw log hashes and official9,017,076-byte
+artifact digest45b17aa6…3421eaa. Twelve fresh journey PNGs plus two fresh special
+cases are preserved; four locale/layout captures visually inspected. Full
+assistive accessibility and live staff/provider evidence remain open.
+Author review is not independent approval.
 **Reviewed temporary-preview preparation source:** `07a7537befbf1e2290ee7079e18a258083615ed6`.
-Fresh [CI36875943355](https://github.com/YNWAforever/BuyerOS/actions/runs/36875943355)
+Historical [CI36875943355](https://github.com/YNWAforever/BuyerOS/actions/runs/36875943355)
 at91b1f9b/test-merge d78fcadf is8/8 SUCCESS, with matching Git trees.
 API679/0/0/0 includes29 preparation checks; actual local Linux native PDF limit
 assertions pass. Worker186, controller27, PG18compat29, operating2, staff7,
 zoom2, smoke1 and legacy4/8/1/3/1 pass with required skip gates enforced.
-[Current evidence manifest](../../artifacts/cloudflare/ci-91b1f9b/manifest.json)
+[Historical91b1f9b evidence manifest](../../artifacts/cloudflare/ci-91b1f9b/manifest.json)
 verifies official artifact digest,19 source hashes and fresh7/29/2 XML counts.
 Two fresh special-case screenshots are visually inspected; twelve retained
-bilingual local PNGs are historical because current journey PNGs were written
+bilingual local PNGs at that checkpoint were historical because journey PNGs were written
 outside the upload selection. Eleven anonymous built-fixture Error messages
 remain unattributed and retained; test assertion passes do not erase them.
 See `CF00-preview-remote-ci-91b1f9b.json` for exact job commands, times, warnings,
 raw decoded-log hashes and the last observed app/API preview metadata.
-No hosted/controller/production feasibility is implied by these local CI results.
-Its48 zero-skip local checks do not verify hosted packaging or Vercel hop limits.
+No hosted/controller/production feasibility is implied by those historical local CI results.
+Current isolated hosted evidence is in
+[CF00 final checkpoint](../../artifacts/cloudflare/CF00-hosted-preview-checkpoint.json).
+The earlier48 zero-skip local preparation checks alone did not verify hosting;
+current actual hosted evidence is recorded separately above.
 Release routes/schema are unchanged. Prior RC CI36861185237 at229a76c/
 test-merge57b8560 is8/8 SUCCESS; it predates this preparation source.
 CF07 comprehensive source commit `14fcb37d36bf00e65c8d7ab319002cd71fbeee99`.
@@ -44,9 +63,12 @@ implementation approval does not authorize paid resources or production rollout.
 
 ## Changed files and ownership
 
-[Complete migration file list](../../artifacts/cloudflare/CF08-changed-files.json)
+[Historical migration file list](../../artifacts/cloudflare/CF08-changed-files.json)
 records the baseline/reviewed SHA and176 source/config/test paths, plus retained
-evidence and documentation. The PR also retains earlier deployment and Render
+evidence and documentation. [Current Git changed-file inventory](../../artifacts/cloudflare/CF00-hosted-changed-files.json)
+records692 total tracked delta paths and21 committed session paths at79d6caf;
+it includes evidence/documentation, and does not relabel every path a code change.
+The PR also retains earlier deployment and Render
 standby proposals; no Render resources were created, and Cloudflare is now the
 selected proposed job host.
 
@@ -164,7 +186,7 @@ required because this existing project is not a dedicated empty test target.
 | Finding | Classification | Current evidence / remaining limit |
 | --- | --- | --- |
 | A01 login/workspace | already fixed with evidence | Historical approved FIMMICK/admin setup readback and human sign-in confirmation. Local fictional OIDC journeys pass; agent-authenticated full hosted API trace remains open. |
-| A02 API domain | source changed | One same-origin app proxy with runtime app→API binding; actual emitted frontend and native integration verified. Historical deployed anonymous401/bootstrap only, not this migration rollout. |
+| A02 API domain | source changed | One same-origin app proxy with runtime app→API binding; actual emitted frontend/native integration and protected hosted61-second two-hop transport verified in isolated preview. Full production staff trace remains open. |
 | A03 ICP replay/numbering | already fixed with evidence | Existing actual-PG immutable/idempotent numbering races retained; four complete UI-created current-version approvals. |
 | A04 typed validation | already fixed with evidence | Strict public and private contracts; malformed/extra/oversize payload denial, sanitized errors, generated78+5 current. |
 | A05 offer persistence | already fixed with evidence | Four UI-created offers edited/reloaded and then used through research, draft, export and outcome. |
@@ -176,11 +198,11 @@ required because this existing project is not a dedicated empty test target.
 | A11 demo controls | source changed | Actual API/PG/Queue/Workflow staff journey, durable assignments/lists/notes/drafts/exports/outcomes. OIDC/providers remain explicit fixture seams. |
 | A12 maintenance/bulk | already fixed with evidence |101 rows in50-row units, restart/receipt conservation, real second page, retry/cancel/export/current actor and viewer negatives retained. |
 | A13 operations/recovery | still open | Local process kill, restart, platform expiry, epoch fencing, older-backup replay and unknown0.300000 hold conservation pass. External journal custody/completeness, physical object deletion and hosted recovery remain open. |
-| A14 worker completion | source changed | Actual Cron/Queue/Workflow/HMAC/nativePG; retained actual Celery/Valkey continuity. No deployed controller/provider completion is inferred. |
-| A15 performance/cost | still open | Two local10-job repetitions meet first-step P95 target;100-workspace fairness and10k late SQL page measured. Hosted latency, actual billing and all-day Neon quota decision remain open. |
+| A14 worker completion | source changed | Actual local Cron/Queue/Workflow/HMAC/nativePG and retained Celery/Valkey continuity. Isolated hosted Queue-created Workflow completed one signed operational step with matching Neon receipt; no customer/provider completion claimed. |
+| A15 performance/cost | still open | Two local10-job repetitions,100-workspace fairness and10k late SQL page measured. Isolated native request28.74s,61-second two-hop65.91s, one Workflow step12.06s observed; these are single samples, not workload P95. Actual billing and all-day Neon quota decision remain open. |
 | A16 locale/a11y | still open | English/zh-HK at390/1280, negative roles, current screenshots and actual200% Chromium zoom over six routes verified. Manual screen reader/non-text elements remain unverified. |
 | A17 evidence truth | still open | All required local suites zero skip; full journey/state/hold/restart proof and red artifacts retained. Live identity/provider/pilot and new remote CI/hosted acceptance remain separate. |
-| A18 activation | still open | Current actor/RLS/approval, intent/holds, private transport, paused readiness, CAS/drain/refusal verified. No new cloud resources/production migration/provider activation; preview and later production approval still required. |
+| A18 activation | still open | Specifically approved isolated resources and0035 initialization verified; native and operational probes pass. Preview now fenced epoch3/NOLOGIN/controlleroff/Cronoff/bypassrevoked/Neonidle. Production migration/roles/selector/providers/pilot and independent review still require the exact later decision. |
 
 Totals:10 already fixed with evidence,3 source changed,5 still open;0 classified
 not reproducible. This classification does not close a hosted/owner/provider gate.
@@ -203,19 +225,19 @@ provider submissions/status reads are not live provider acceptance.
 
 ## UI screenshots
 
-Four final fixture journeys share the real emitted Vercel function/static assets
-and runtime service proxy. [Fourteen current screenshots](../../artifacts/cloudflare/screenshots/)
-include exports/outcomes/readback plus bulk/restart/unknown hold; legacy/zoom
-screenshots remain [separate](../../artifacts/cloudflare/legacy-screenshots/).
-Current en/zh-HK desktop/mobile captures were visually inspected, including:
+Four current fixture journeys use the actual emitted Vercel function/static
+assets and runtime service proxy. [Fourteen fresh79d6caf screenshots](../../artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/)
+include approved exports, manual outcomes/readback, bulk/restart and unknown hold.
+Official artifact digest/source/XML counts and every PNG hash are verified.
+Four en/zh-HK desktop/mobile captures were visually inspected:
 
-- [English desktop outcome](../../artifacts/cloudflare/screenshots/cloudflare-continuity-en-desktop-outcome-fixture.png)
-- [English mobile outcome](../../artifacts/cloudflare/screenshots/cloudflare-continuity-en-mobile-outcome-fixture.png)
-- [zh-HK desktop outcome](../../artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-desktop-outcome-fixture.png)
-- [zh-HK mobile approved export](../../artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-mobile-approved-export-fixture.png)
-- [101-row restart/pagination](../../artifacts/cloudflare/screenshots/CF07-bulk-restart-zh-HK-mobile.png)
-- [unknown acceptance/retained hold](../../artifacts/cloudflare/screenshots/CF07-unknown-contact-hold-en.png)
+- [English desktop outcome](../../artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-en-desktop-outcome-fixture.png)
+- [English mobile approved export](../../artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-en-mobile-approved-export-fixture.png)
+- [zh-HK desktop outcome](../../artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-zh-HK-desktop-outcome-fixture.png)
+- [zh-HK mobile approved export](../../artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-zh-HK-mobile-approved-export-fixture.png)
 
+[Author visual evidence](../../artifacts/cloudflare/CF00-current-ui-visual-review.json).
+Earlier local/legacy/zoom screenshots remain separate historical evidence.
 No screen-reader or real Auth0/provider screenshot is implied by these fixtures.
 
 ## Migrations, rollback and operating conditions
@@ -258,50 +280,83 @@ suspended endpoint. It does not measure remaining quota or approve an upgrade.
 The US$5 Workers Paid base excludes shared account overages, Neon, Vercel, tax
 and providers. No promised all-in saving or automatic production scheduling change.
 
-## Single next activation decision: protected feasibility preview only
+## Approved isolated hosted preview and shutdown
 
-**Requested, not received:** authorize the following bounded setup and fictional
-machine-only tests. Local architecture/code approval is already received.
-This decision does not activate production customer jobs, providers or delivery.
+Direct human approval covered the exact named preview for at most two hours:
+2026-10-01T14:48:41Z to16:48:41Z, conditional Workers Paid US$5/month base if
+needed plus shared metered overages. No billing plan was changed. This approval
+did not cover production cutover, customer jobs, providers, R2 or delivery.
 
-| Target | Exact proposal / verified fact |
+| Target | Actual identity and result |
 | --- | --- |
-| Source | Release code d6c2849; separately reviewed prepared overlay source `07a7537befbf1e2290ee7079e18a258083615ed6`, tested48/0/0/0. Release API has no diagnostic endpoint. Exact new-target manifest/overlay hashes required before deployment. |
-| Cloudflare account | Read-only identity: `Laichiwillyjp@gmail.com's Account`, ID `e387dfbeded3deb5b8f0023a78a660b5`. Subscription GET403; account setting standard does not prove Paid. No BuyerOS names in13Workers/4Queues/2Workflows. Workers Paid US$5/month base if needed; metered shared-account overages additional. Stop before any other paid plan/resource. |
-| Cloudflare resources | Private Worker/Queue `buyeros-jobs-preview`; DLQ `buyeros-jobs-preview-dlq`; Workflow `buyeros-job-preview`. Root production names distinct/off. No fetch route, workers.dev or public preview URL. Queue batch1/concurrency1/retries5, DB permit1 is the true execution limit. |
-| Vercel | New dedicated protected project `buyeros-cf-preview` in existing team `team_qvzlsFmfCsLkgItSypqHjw3z`. Retain app/API service names, app public catch-all and runtime app→internalAPI binding. No new paid Vercel plan included; stop if required. Read generated project ID/domain/actual budgets back before secrets. Existing `buyer-os` project unchanged. |
-| Neon | New **empty** project `BuyerOS-CF-preview-20261001`, existing organization `org-soft-sunset-25251479`, Singapore `aws-ap-southeast-1`, PG18, Free, fixed0.25CU if account permits. No production branch/data/roles/DSN clone. Read project/branch/host IDs and quota back before migration. No paid Neon upgrade included. |
-| Schema/roles | Initialize only that verified empty target through sole API Alembic0035; dedicated nonowner/NOBYPASSRLS API and worker logins inherit only existing canonical roles. Current catalog/RLS/checkpoint ownership must be verified. No destructive test fixture, production migration, owner-credential runtime or invented approval row. |
-| Scope/window | Native imports, harmless PDF/8-second child isolation, fictional ID-only interrupted checkpoint/cross-tenant negative, signed private hop/protection and60-plus-second diagnostic to verify both90-second budgets; actual operational probe/receipt if packaging succeeds. No staff/user records or providers. Maximum2h, then pause/fence preview selector and disable Cron/execution; retain evidence, do not purge uncertain work. Fixed0.25CU implies0.5CU-hours plus startup/tail, not a hard bill cap. |
-| Locality/privacy | CF stores UUID/epoch orchestration only; no customer payload, identity token, provider/database secret or document. PG stays in Singapore; record actual Vercel placement before deploying. Preview contains fictional data only. Production locality/privacy review remains separate. |
+| Cloudflare | Account e387dfbeded3deb5b8f0023a78a660b5; private Worker/Queue buyeros-jobs-preview, DLQ buyeros-jobs-preview-dlq, Workflow buyeros-job-preview. Queue retention3600s, batch/concurrency1, retries5. No public route or Cron during any hosted phase. Subscription GET403 remains unverified; deployment success does not prove Paid. |
+| Vercel | Dedicated protected prj_YfIdLRKWvBjomGG56RhwEmqyxRRR in team_qvzlsFmfCsLkgItSypqHjw3z; actual preview targetnull, Node24/Python3.12.14, iad1, Fluid/default90. App public catch-all, API internal, app→API BUYEROS_INTERNAL_API_URL binding injected at runtime. No custom domains or production secrets copied. Standard function-memory tier observed; physical memory/CPU not independently measured. |
+| Neon | Fresh empty rapid-night-21766635 / br-old-shape-b3eel1kb / ep-little-lab-b3rk8fx5, host ep-little-lab-b3rk8fx5.c-4.ap-southeast-1.aws.neon.tech. Singapore PG18.6 Free fixed0.25CU, database buyeros_cf_preview. Zero public tables before sole owner-only Alembic upgrade through0035. Nonowner API/worker logins NOSUPERUSER/NOBYPASSRLS/NOCREATEDB/NOCREATEROLE; worker catalog prooftrue. Runtime schema setup absent. |
+| Native source |595865f5e4dce418e2b96d4819f72633378eba2b plus four hashed temporary overlay files, dpl_HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP. Linux imports/PDF/8-second child kill/AS536870912/CPU6/file1048576 caps/ID-only checkpoint interrupt-resume/cross-tenant denial pass. |
+| Actual bundle |8664 regular files,186540543 uncompressed bytes,0symlinks, all native package roots in task, pytest absent. Measurement0.322s. Actual ZIP transport size unavailable; build-cache281.83MB and uploaded source521nodes are different measurements. |
+| Actual hop/security |No bypass401; bypass without HMAC401; valid native200; nonce replay409; valid duration200 with API61.00048s/client65.91246s. Native client28.73526s/API21.97781s, cold imports0.77252s/warm0.00579s; parent/child reported peak RSS131051520bytes. Single samples, not P95/account maximum proof. |
+| Operational source |Same595865f fresh Git archive with diagnostic overlay removed, dpl_2ZzGXSXkfERBYyYzxufCoVCvH1FD. Privileged dry-run then CAS epoch1→2 enabled only this empty preview. One JSON ID-only Queue publish HTTP200 created Workflow bop1-691e21aea5f642dcae8265fb5701537e-e2 through binding. One step12.056s, complete/done/OK; receipt UUID/epoch2 at16:22:45.364297Z. Operator never called maintenance directly. Source verifies acknowledgement after Workflow existence; no separate hosted ack telemetry was collected. |
+| Data boundary |users/workspaces/memberships/outbox_events/provider_operations/worker_steps all0 before and after. Only fictional checkpoint/replay/probe operational evidence. No Auth0 staff/provider/R2/paid admission/delivery activation. |
+| Shutdown |Completed16:26:11.821617Z before expiry. CAS epoch2→3/cloudflarefalse; both new runtime logins NOLOGIN; six preview gatesfalse; bypass revoked and former bypassHTTP401; private Worker executionfalse/noCron/invalidorigin/epoch3; Neon endpoint idle. Receipt and queues retained, no purge/downgrade. |
 
-### Variable-to-source map (no values or secret creation yet)
+Vercel pause API returned400, “Active production deployment does not
+exist”. It cannot pause these preview-only deployments. No production deployment
+was created to satisfy it; the independently verified DB, credential, controller,
+protection and compute fences provide the shutdown. Old deployment env values
+are immutable, and the diagnostic also rejects requests after compiled expiry.
 
-| Location | Variable/binding | Exact source/rule |
-| --- | --- | --- |
-| App function | `BUYEROS_INTERNAL_API_URL` | Vercel-injected api service URL; binding on calling app. Never set manually, no build/middleware usage. |
-| Worker | `WORKER_API_ORIGIN` / `WORKER_API_ALLOWED_ORIGINS` | Read-back protected preview HTTPS origin, exact JSON allowlist. No credentials/path/query/redirect. Invalid defaults remain in Git. |
-| Worker | `WORKER_CURRENT_KEY_ID` / `WORKER_CURRENT_SECRET` | New dedicated machine identity, key ID1..64 and secret32..4096bytes; server-only Wrangler secret. No value in vars/Git/browser/logs. |
-| API | `BUYEROS_WORKER_CURRENT_KEY_ID` / `BUYEROS_WORKER_CURRENT_SECRET` | Same newly generated dedicated pair in API runtime secret store; optional prior pair only for separately reviewed rotation. HMAC/replay/application authorization remain required with bypass. |
-| Worker only | `WORKER_API_PROTECTION_BYPASS` | New preview-project Vercel automation secret; optional server-only header1..4096 printable bytes, never query/cookie/redirect. App proxy strips it. Dedicated project prevents production-project reuse. |
-| API only | `BUYEROS_DATABASE_URL` | Restricted pooled TLS preview API login DSN; no owner/production DSN. |
-| API only | `BUYEROS_EXECUTION_DATABASE_URL` / `BUYEROS_CHECKPOINT_DATABASE_URL` | Dedicated verified preview worker login; session-safe TLS connection for forcedRLS tenant/checkpoint/permit transactions. Never put DB credentials in Cloudflare/browser. |
-| Operator only | `BUYEROS_DATABASE_MIGRATION_URL` / `BUYEROS_RUNTIME_ADMIN_DATABASE_URL` | Explicit approved empty preview target only, ephemeral owner/operator connection, not runtime secrets. No production fixture override. |
-| Runtime | `EXECUTION_ENABLED`, `RUNTIME_EPOCH`, `BUYEROS_CLOUDFLARE_EXECUTION_ENABLED` | Initially false/current DB epoch from readback. Only bounded fictional preview probe may temporarily enable after packaging/security proof; pause at end. No production selector cutover. |
-| API | `BUYEROS_PAID_ADMISSION_ENABLED`, `BUYEROS_PAID_DISPATCH_ENABLED`, `BUYEROS_R2_ENABLED` | false throughout. Production adapters unconfigured. No provider/R2/Auth0 tenant change; mailbox/CRM/sending disabled and delivery403 always. |
+### Exact commands and retained failures
 
-[Exact hosted proof recipe](runbooks/cloudflare-preview-probe.md) now includes
-the prepared source, overlay and runtime map. It has not run remotely.
-Existing local probe/harness rejects
-remote DSNs/preview mode. Before publishing the approved temporary diagnostic,
-review its exact diff and exact new target; keep production/other projects out.
-Run the protected probe through the actual gateway and internal API. Verify
-missing bypass denied, missing/invalid HMAC401, replay409, and private API denial.
-Collect deployed SHA, actual Linux/native import/PDF/checkpoint/limits/timing,
-then remove the diagnostic and leave execution off. Failure requires a design
-revision, not a waived hosted gate.
+Commands actually ran from repository root with PYTHONUTF8=1:
+`services/api/.venv/Scripts/python.exe .sites-runtime/cf-preview-session-20261001/hosted_probes.py`
+returned exit0, five strong status/source/duration assertions. Preparation,
+release deployment, single Queue publication/receipt inspection, shutdown and
+sanitization scripts in that same ignored operator directory are recorded with
+source/overlay/config hashes and platform identities in the checkpoint. Private
+credential files are excluded from Git and all public output.
 
-Production activation is a later exact decision after hosted CF00 proof,
-independent review, production drain/role/schema/epoch inspection, account
-quotas/alerts/locality, and the applicable policy/provider/R2/pilot approvals.
-No deployed SHA or product-live claim follows from passing local tests.
+Focused actual-process regression command (services/api):
+`uv run --frozen pytest -q tests/test_cloudflare_local_steps_db.py::test_pdf_child_keeps_sanitized_env_and_eight_second_timeout tests/test_pdf_subprocess_runtime.py --junitxml=../../artifacts/cloudflare/CF00-legacy-isolation-green.xml`
+returned2/0/0/0 in4.23s,5warnings. Prior vendor-path meaningful red1failure;
+green44/0/0/0 in45.69s with1deselected before bundle-measurement addition.
+Fresh full CI595865f observed685passed/1failed/0errors/0skipped: the legacy
+blanket PYTHONPATH prohibition was stale. Required XML checker did not run after
+that suite failure. Its successor93de21f asserts independently enumerated code/
+installed metadata roots, exact environment, malicious inherited path/secret
+rejection, temporary directory and eight-second timeout. Successor93de21f subsequently passed8/8; current79d6caf also passed8/8 with
+API686 zero required skips and all14 current UI screenshots retained.
+
+Failed native deployments, initial ASGI handler discovery failure, missing
+psycopg vendor imports, the canceled misclassified first deployment, metadata
+KeyError before activation and pause400 remain retained. Automatic approval
+review rejected removing the native success assertion; that patch was not applied.
+Independent duration evidence retained the failed native gate until the fix passed.
+
+- [Final checkpoint](../../artifacts/cloudflare/CF00-hosted-preview-checkpoint.json)
+- [Native/protection/duration](../../artifacts/cloudflare/CF00-hosted-native-and-duration.json)
+- [Actual Queue/Workflow/API/PG](../../artifacts/cloudflare/CF00-hosted-operational.json)
+- [Shutdown and platform pause limit](../../artifacts/cloudflare/CF00-hosted-shutdown.json)
+- [Source/deployment/overlay manifest](../../artifacts/cloudflare/CF00-hosted-deployment-manifest.json)
+- [Failed full-CI assertion](../../artifacts/cloudflare/CF00-legacy-isolation-ci-red.json)
+
+### Variable placement used, with no secret values
+
+| Location | Variables/binding and verified rule |
+| --- | --- |
+| App function |BUYEROS_INTERNAL_API_URL injected by runtime app→api service binding; never manually set or used during builds/middleware. |
+| Worker |WORKER_API_ORIGIN/WORKER_API_ALLOWED_ORIGINS exact protected release-preview origin; WORKER_CURRENT_KEY_ID and newly generated server-only WORKER_CURRENT_SECRET. Optional WORKER_API_PROTECTION_BYPASS is header-only to that exact origin, stripped by gateway. No database/provider/identity secret in Worker. After shutdown origin invalid, allowlist empty, executionfalse. |
+| API |BUYEROS_WORKER_CURRENT_KEY_ID/SECRET match distinct operational identity. Distinct preview diagnostic key/secret used only during native phase; diagnostic absent in release API. No browser/public secret. |
+| API/PG |BUYEROS_DATABASE_URL restricted API DSN; BUYEROS_EXECUTION_DATABASE_URL and BUYEROS_CHECKPOINT_DATABASE_URL restricted worker TLS DSN. Exact compiled host/database/role validation; runtime roles now NOLOGIN. No migration/admin DSN remotely. |
+| Operator only |Owner DSN only in ignored private local file and short-lived initialization/CAS process. One migration owner; no production/shared test override. |
+| Gates |Paid admission/dispatch, R2 and Celeryfalse throughout; Cloudflare only briefly enabled at selected preview epoch2 for one ID-only probe. Cron always empty. All gatesoff/epoch3 afterward. Delivery remains403 DELIVERY_DISABLED. |
+
+## Remaining production activation decision
+
+CF00 isolated hosted fixture feasibility is complete. Production remains pending
+independent review and an exact inspected role/schema/drain/epoch, quota/plan,
+locality, alert/stop and rollback proposal. The continuous minute polling model
+still exceeds the observed Neon Free monthly compute allowance; the two-hour
+preview result does not approve a production upgrade or prove live provider
+economics. Provider/R2/policy/pilot and real staff/accessibility checks remain
+separate gates. Retain one API/migration owner and unknown holds; never infer
+production authority from this preview approval. No merge/product-live claim.

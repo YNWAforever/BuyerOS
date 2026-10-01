@@ -1,7 +1,8 @@
 # Cloudflare execution setup and recovery
 
-Status: local implementation/fixtures only. No Cloudflare resources, production
-migration, paid providers or delivery have been activated by this migration.
+Status: local implementation and explicitly approved isolated hosted fictional
+preview verified, now fenced/suspended. No production migration, paid providers
+or delivery activated. Hosted proof is in CF00-hosted-preview-checkpoint.json.
 Architecture exception and local implementation approval are in TASKS.json;
 they do not authorize production activation. Auth0, Neon, R2 and the one native
 FastAPI domain owner remain. Celery is a compatible optional adapter.
@@ -15,7 +16,7 @@ FastAPI domain owner remain. Celery is a compatible optional adapter.
 | Worker | `RUNTIME_EPOCH` | Current DB selector epoch, never guessed or reset. |
 | Worker | `WORKER_API_ORIGIN`, `WORKER_API_ALLOWED_ORIGINS` | Exact approved HTTPS origin and JSON allowlist, no path/query/userinfo. Production URL/protection still to be verified. |
 | Worker + API | current key ID/secret; optional previous pair | Newly generated machine key in server-only secret stores. Do not put in Git/browser/public env. API uses `BUYEROS_WORKER_*`; Worker uses `WORKER_*`. |
-| Worker only | `WORKER_API_PROTECTION_BYPASS` (optional) | Dedicated preview project automation bypass secret. Header only after HTTPS origin approval; never URL/query/cookie/browser. Proxy strips it before the internal API. No value committed/configured. |
+| Worker only | `WORKER_API_PROTECTION_BYPASS` (optional) | Dedicated preview project automation bypass secret. Header only after HTTPS origin approval; never URL/query/cookie/browser. Proxy strips it before the internal API. No value committed; the approved dedicated preview secret was configured server-only, then revoked at completion. |
 | API | `BUYEROS_EXECUTION_DATABASE_URL` | Dedicated nonowner NOBYPASSRLS member of `buyeros_worker`; inspect current role catalog. No production migration connection. |
 | API | `BUYEROS_CLOUDFLARE_EXECUTION_ENABLED` | `false` by default; selector and environment must both agree. |
 | API | `BUYEROS_RETENTION_POLICY_VERSION` | Explicit reviewed current retention policy, maximum64 characters; absent means no invented automatic retention policy. |
@@ -44,8 +45,10 @@ query/page/time counters and approvals are not reset on restart.
 Both local budget mechanisms are validated: API service functions use the resolved
 `buyeros_api/api/vercel.py` with maxDuration90; Nitro emits the app gateway
 `.vc-config.json` with maxDuration90. These are schema/build proofs. Actual hosted
-plan enforcement, native bundle, parser, checkpoint and protected signed hop remain
-unverified activation gates; local timing does not establish account capability.
+configured budgets, native bundle, parser, checkpoint and protected signed hop
+are verified in the isolated hosted preview only. The actual61-second two-hop
+sample passes; it does not measure the90-second maximum or establish production
+plan capacity or workload percentiles.
 
 ## Readiness and alerts
 
@@ -121,7 +124,7 @@ Mailbox/CRM/sending remain off. Approved draft delivery still returns403
 `DELIVERY_DISABLED`. Hosted resources, production schema/selector, provider scope,
 R2 policy and pilot activation require the exact later reviewed proposal.
 
-## Isolated preview target (prepared, not created)
+## Isolated preview target (created, verified, now fenced)
 
 `wrangler.jsonc` defines `--env preview`: private Worker/Queue
 `buyeros-jobs-preview`, DLQ `buyeros-jobs-preview-dlq`, Workflow

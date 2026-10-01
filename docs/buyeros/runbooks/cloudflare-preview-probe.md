@@ -43,19 +43,19 @@ There is intentionally no remote-execution switch in the local probe. A hosted
 runner must use the separately reviewed machine-authenticated bridge and exact
 approved new project/branch/origin. Actual generated IDs must be read back
 before secrets or migrations. Budget config and optional header are locally
-verified in CF08; no hosted diagnostic/remote fixture has been executed.
+verified in CF08. The specifically approved isolated hosted session now passed and is fenced/suspended; see the final CF00 checkpoint. No destructive fixture was redirected remotely.
 The temporary diagnostic is prepared at source
 `07a7537befbf1e2290ee7079e18a258083615ed6`, in
 `scripts/cloudflare-preview/runtime_probe.py` and
 `scripts/prepare-cloudflare-preview.py`. The release API does not import it.
-Deployment still requires exact new-target readback and specific hosted setup
-authorization. Default-off, HMAC, role and expiry guards are locally verified.
+A new session still requires exact new-target readback and specific hosted setup
+authorization; the2026-10-01 approval has ended and cannot be reused. Default-off, HMAC, role and expiry guards are locally verified.
 Create/run that bounded diagnostic only within the specifically approved preview
 session, then remove it; preserve the five internal operation contract.
 Require protection denial without the bypass and application401 without valid
 HMAC even with the bypass, no redirect forwarding, exact source readback and
 private API binding. Collect actual60-plus-second two-hop output before claiming
-90-second account support. Do not run local destructive fixtures remotely. No deployment or paid resource was created for CF00.
+90-second account support. Do not run local destructive fixtures remotely. The approved preview created isolated resources; no billing plan was changed and no production cutover occurred.
 
 ## Prepared overlay
 
@@ -109,7 +109,7 @@ DSN on bounded stdin, matching compiled target, sanitized environment and
 8192byte output bound. Actual pinned imports, production PDF/8-second kill,
 interrupted/resumed saver and cross-tenant negative run without setup/schema
 creation. Linux checks observe installed AS/CPU/file caps. Error responses retain
-only an error class. `development_dependencies_present=true` is not frozen
+only a closed error class and allowlisted missing-module name, never an exception message or DSN. `development_dependencies_present=true` is not frozen
 no-dev bundle proof. Reports deliberately leave hosted_feasible=false until
 deployed bundle/protection/private binding/two-hop evidence is collected.
 
@@ -121,7 +121,31 @@ Windows Linux caps remain NOT RUN. Initial red checks and two Git status-cache
 fixture setup failures are retained; the corrected fixture verifies committed
 content with git diff, not timing-sensitive stat-cache output.
 
-Read-only preflight: Vercel team Pro/active and target lookup404; Neon
+Historical read-only preflight before resource creation: Vercel team Pro/active and target lookup404; Neon
 Free/PG18/Singapore and fresh name absent from22-project inventory; no BuyerOS
 names in13Workers/4Queues/2Workflows. Workers account setting standard does not
-prove Paid: subscriptions GET returned403. Billing and hosted setup are pending.
+prove Paid: subscriptions GET returned403. Subscription status remains unverified; the bounded hosted setup later completed without a billing-plan mutation.
+
+
+## Completed hosted session and child import rule
+
+Source595865f: installed package metadata roots plus API code directory are
+explicitly supplied to a fresh PDF/native child. No inherited PYTHONPATH,
+sys.path or credentials. The actual-S child regression injects a malicious
+package directory and requires real PDF output. Legacy isolation separately
+requires the exact independently enumerated environment and unchanged8s timeout.
+Vercel builder requires module-level app assignment in the temporary entrypoint;
+the guarded child exits before that assignment. Singapore Neon accepts an
+optional current numeric c-* host label, with exact manifest DSN pin retained.
+
+Actual native/protection/replay/61s two-hop, Linux caps, no-dev186540543-byte
+runtime measurement and restricted hosted PG checkpoint interruption/tenant
+denial passed. The diagnostic overlay was removed before a real ID-only Queue
+publication→Workflow→signed API→Neon receipt. This did not verify customer jobs,
+staff identity or providers. See CF00-hosted-preview-checkpoint.json.
+
+At completion: selectorfalse/epoch3, runtime loginsNOLOGIN, controllerfalse,
+noCron, bypassrevoked/HTTP401 and computeidle. PauseAPI400 onpreview-onlyproject
+is retained; never create an unapprovedproductiondeployment to make pause work.
+Compiled expiry16:48:41Z and credential/DB fences close old immutable deployments.
+No purge or populated downgrade. A later preview requires a new bounded decision.

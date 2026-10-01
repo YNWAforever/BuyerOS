@@ -1,0 +1,60 @@
+{
+  "mode": "local",
+  "baseUrl": "http://localhost:5173",
+  "sourceHead": "7481748b3c982cf257d0d871a5f025920cd7cc11",
+  "sourceFiles": {
+    "services/cloudflare-jobs/src/dispatcher.ts": "2d9c2f9e790900e77057f0fa2f77c1fb733182e96bae2747e83f582d7a9b3b1b",
+    "services/cloudflare-jobs/src/api-client.ts": "7a393e26faa972230b7423d6058b767c7a5e7b8878db5c5d548f1fb701375cc3",
+    "services/cloudflare-jobs/src/protocol.ts": "69357aea02779ed86582b9a4b2775abcaac3204cdb68f4634ffd31519090828e",
+    "services/cloudflare-jobs/src/queue.ts": "ee4d0a488aa990548844840b336e0895be43189b27fc289d0793621e1b42b757",
+    "vite.config.ts": "1708260fc7251cf9b06b9b1c97b279c424dd97555b276932a93b0a5cfed7dc64",
+    "package.json": "d845cbde72e4d5095cce844f14281bcaa64e49d523fd564c042b92c2058802ad",
+    "pnpm-lock.yaml": "45ae2e627ea5e67e25e3c61391d414578028d16b25c3b7c2ce0df85141d92282",
+    "services/api/uv.lock": "9d3a362a303d6da7bd241d3adbab02257a82358c5f1b83be7b85b22c97a3fab4",
+    "services/cloudflare-jobs/src/index.ts": "38396d184614c1887ad6d50701a70cbb7fae815b8704e7e72d614b26668c0875",
+    "services/cloudflare-jobs/src/workflow.ts": "3c0c8070a4f52c1cccaf0377c62d8f01801a92953dfd41478418917256edd995",
+    "services/cloudflare-jobs/wrangler.jsonc": "260de724a05da34258bb127dd4d11c6edcda746b06009da819ff0eb2463b5955",
+    "services/api/tools/serve_cloudflare_e2e.py": "09941b979e1cb9fd7e6a628bde8bbd41a01f7017b7887d86e0afd39545a0eba5",
+    "services/api/tools/serve_e2e_fixture.py": "15b7bc7edd0a30cf41f6b401c6c7b24a8c6e28e0d88d808812eefbcb8bc7ea2b",
+    "scripts/serve-cloudflare-fixture.mjs": "46293e68a16432fb4ef6f02009e23f629c1aa94b6254ebd83631a879edfc06e1",
+    "scripts/serve-built-ui-fixture.mjs": "ade01c4986ecee5259c2a1195a78c8e27829bfd37e91c350f7b1ca35b732fe4f",
+    "scripts/run-cloudflare-acceptance.mjs": "3365325bcfa6f7eb117773dc7eafe6a521367ed52140dc56d6cc12d5b2f972c7",
+    "tests/e2e/cloudflare-journey.spec.ts": "4a213a02adbb8a04b7899186d6ef00a5d41d6570fd176c7b9fcb0d00076855c8",
+    "tests/e2e/fixtures/staff-journey.ts": "7629b8e7b89f1ea5525e2f458b1061a58820c0c3d4804a986e9a16d232a56e6d",
+    "playwright.cloudflare.config.ts": "17ddc084aacabf18998f24a3826f845eef90f625f50939bd9bf909eba5b32c3e"
+  },
+  "started": "2026-10-01T16:32:05.257Z",
+  "finished": "2026-10-01T16:33:15.830Z",
+  "buildCommand": [
+    "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+    "scripts/run-vercel.mjs",
+    "build"
+  ],
+  "buildExitCode": 0,
+  "command": [
+    "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    "--config",
+    "playwright.cloudflare.config.ts",
+    "--reporter=line,junit"
+  ],
+  "exitCode": 0,
+  "counts": {
+    "passed": 7,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "total": 7
+  },
+  "evidence": {
+    "identity": "fictional OIDC/machine identity",
+    "provider": "fictional bounded search and unknown lookup acceptance",
+    "transport": "actual local Queue/Workflow -> HMAC native API -> owned PostgreSQL16",
+    "frontend": "actual emitted Vercel function/static assets; runtime loopback app-to-API binding",
+    "scheduledIntervalMilliseconds": 1000,
+    "productionCronSeconds": 60,
+    "hosted": "not run",
+    "deployed": false
+  }
+}

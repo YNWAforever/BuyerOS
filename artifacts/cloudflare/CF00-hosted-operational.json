@@ -1,0 +1,292 @@
+{
+  "publish": {
+    "published_at": "2026-10-01T16:22:24.236309+00:00",
+    "http_status": 200,
+    "response": {
+      "success": true,
+      "errors": [],
+      "messages": [],
+      "result": {
+        "metadata": {
+          "metrics": {
+            "backlog_count": 1,
+            "backlog_bytes": 90,
+            "oldest_message_timestamp_ms": 0
+          }
+        }
+      }
+    },
+    "envelope": {
+      "v": 1,
+      "kind": "probe",
+      "probe_id": "691e21ae-a5f6-42dc-ae82-65fb5701537e",
+      "runtime_epoch": 2
+    },
+    "workflow_id": "bop1-691e21aea5f642dcae8265fb5701537e-e2",
+    "api_deployment": {
+      "id": "dpl_2ZzGXSXkfERBYyYzxufCoVCvH1FD",
+      "url": "https://buyeros-cf-preview-mgwz994a6-ynwaforevers-projects.vercel.app",
+      "inspectorUrl": "https://vercel.com/ynwaforevers-projects/buyeros-cf-preview/2ZzGXSXkfERBYyYzxufCoVCvH1FD",
+      "readyState": "INITIALIZING",
+      "target": null,
+      "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_2ZzGXSXkfERBYyYzxufCoVCvH1FD"
+    },
+    "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+    "crons": [],
+    "providers_delivery_r2": false
+  },
+  "observed": {
+    "observed_at": "2026-10-01T16:24:54.262748+00:00",
+    "workflow_id": "bop1-691e21aea5f642dcae8265fb5701537e-e2",
+    "workflow": {
+      "id": "bop1-691e21aea5f642dcae8265fb5701537e-e2",
+      "params": {
+        "v": 1,
+        "kind": "probe",
+        "probe_id": "691e21ae-a5f6-42dc-ae82-65fb5701537e",
+        "runtime_epoch": 2
+      },
+      "trigger": {
+        "source": "binding"
+      },
+      "versionId": "58d47421-337a-43e2-8bae-70510bb34206",
+      "queued": "2026-10-01T16:22:35.372Z",
+      "start": "2026-10-01T16:22:38.735Z",
+      "end": "2026-10-01T16:22:50.860Z",
+      "success": true,
+      "error": null,
+      "output": {
+        "state": "done",
+        "code": "OK",
+        "next_step_key": null,
+        "retry_at": null
+      },
+      "rollback": null,
+      "status": "complete",
+      "step_count": 1,
+      "steps": [
+        {
+          "name": "operational-probe-1",
+          "start": "2026-10-01T16:22:38.776Z",
+          "end": "2026-10-01T16:22:50.832Z",
+          "attempts": [
+            {
+              "start": "2026-10-01T16:22:38.776Z",
+              "end": "2026-10-01T16:22:50.832Z",
+              "success": true,
+              "error": null
+            }
+          ],
+          "config": {
+            "retries": {
+              "limit": 0,
+              "delay": "1 second",
+              "backoff": "exponential"
+            },
+            "timeout": "90 seconds"
+          },
+          "output": "{\"runtime_epoch\":2,\"recovered\":0,\"enabled\":true,\"alerts\":[]}",
+          "success": true,
+          "type": "step"
+        }
+      ]
+    },
+    "selector": [
+      "cloudflare",
+      true,
+      2
+    ],
+    "postgres_receipt": [
+      2,
+      "691e21ae-a5f6-42dc-ae82-65fb5701537e",
+      "2026-10-01 16:22:45.364297+00:00",
+      2
+    ],
+    "domain_counts": {
+      "users": 0,
+      "workspaces": 0,
+      "memberships": 0,
+      "outbox_events": 0,
+      "provider_operations": 0,
+      "worker_steps": 0
+    },
+    "queue_readback": {
+      "result": {
+        "queue_id": "a7abef331d014874949a698c555c0f11",
+        "queue_name": "buyeros-jobs-preview",
+        "settings": {
+          "delivery_delay": 0,
+          "message_retention_period": 3600
+        },
+        "created_on": "2026-10-01T15:03:54.872541Z",
+        "modified_on": "2026-10-01T15:03:54.872541Z",
+        "producers_total_count": 1,
+        "producers": [
+          {
+            "script": "buyeros-jobs-preview",
+            "type": "worker"
+          }
+        ],
+        "consumers_total_count": 1,
+        "consumers": [
+          {
+            "script": "buyeros-jobs-preview",
+            "dead_letter_queue": "buyeros-jobs-preview-dlq",
+            "settings": {
+              "batch_size": 1,
+              "max_retries": 5,
+              "max_wait_time_ms": 1000,
+              "max_concurrency": 1,
+              "retry_delay": 5
+            },
+            "consumer_id": "c70752985b074cb694c90292c6befe8c",
+            "type": "worker"
+          }
+        ]
+      },
+      "success": true,
+      "errors": [],
+      "messages": []
+    },
+    "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+    "direct_api_maintenance_called_by_operator": false
+  },
+  "selector_change": [
+    {
+      "applied": false,
+      "backend": "cloudflare",
+      "enabled": true,
+      "epoch": 1,
+      "reason": "Approved bounded CF00 ID-only operational probe; no customer jobs"
+    },
+    {
+      "applied": true,
+      "backend": "cloudflare",
+      "enabled": true,
+      "epoch": 2,
+      "reason": "Approved bounded CF00 ID-only operational probe; no customer jobs"
+    }
+  ],
+  "release_deployment": {
+    "deployment": {
+      "id": "dpl_2ZzGXSXkfERBYyYzxufCoVCvH1FD",
+      "url": "https://buyeros-cf-preview-mgwz994a6-ynwaforevers-projects.vercel.app",
+      "inspectorUrl": "https://vercel.com/ynwaforevers-projects/buyeros-cf-preview/2ZzGXSXkfERBYyYzxufCoVCvH1FD",
+      "readyState": "INITIALIZING",
+      "target": null,
+      "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_2ZzGXSXkfERBYyYzxufCoVCvH1FD"
+    },
+    "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+    "diagnostic_overlay_removed": true,
+    "git_archive_sha256": "b4c6f70b3f3b945a3edf5645398a4bd2243fb661e99807cd9492af34a66770d1",
+    "environment": "preview",
+    "provider_delivery_r2_paid_admission": false
+  },
+  "runtime_metadata": {
+    "id": "dpl_2ZzGXSXkfERBYyYzxufCoVCvH1FD",
+    "url": "buyeros-cf-preview-mgwz994a6-ynwaforevers-projects.vercel.app",
+    "target": null,
+    "readyState": "READY",
+    "config": {
+      "version": 1,
+      "secureComputePrimaryRegion": null,
+      "secureComputeFallbackRegion": null,
+      "functionTimeout": 90,
+      "functionType": "fluid",
+      "functionMemoryType": "standard",
+      "isUsingActiveCPU": true,
+      "resourceConfig": {
+        "buildMachine": {
+          "defaultPurchaseType": "standard",
+          "purchaseType": "basic",
+          "machineSelectionType": "fixed",
+          "selectionSource": "project-setting"
+        },
+        "buildQueue": {
+          "configuration": "SKIP_NAMESPACE_QUEUE"
+        },
+        "elasticConcurrency": "PROJECT_SETTING"
+      }
+    },
+    "services": [
+      {
+        "schema": "experimentalServicesV2",
+        "name": "app",
+        "root": ".",
+        "framework": "nitro",
+        "builder": {
+          "src": "package.json",
+          "use": "@vercel/static-build",
+          "config": {
+            "zeroConfig": true,
+            "framework": "nitro"
+          }
+        },
+        "buildCommand": "node scripts/run-vercel.mjs build",
+        "devCommand": "node scripts/run-vercel.mjs dev",
+        "bindings": [
+          {
+            "type": "service",
+            "service": "api",
+            "format": "url",
+            "env": "BUYEROS_INTERNAL_API_URL"
+          }
+        ]
+      },
+      {
+        "schema": "experimentalServicesV2",
+        "name": "api",
+        "root": "services/api",
+        "framework": "fastapi",
+        "runtime": "python",
+        "entrypoint": "buyeros_api/api/vercel.py",
+        "builder": {
+          "src": "services/api/buyeros_api/api/vercel.py",
+          "use": "@vercel/python",
+          "config": {
+            "zeroConfig": true,
+            "framework": "fastapi",
+            "workspace": "services/api",
+            "handlerFunction": "app"
+          }
+        },
+        "functions": {
+          "buyeros_api/api/vercel.py": {
+            "maxDuration": 90
+          }
+        }
+      }
+    ],
+    "lambdas": [
+      {
+        "id": "bld_51vwkfx8o",
+        "createdAt": 1790871515940,
+        "entrypoint": ".",
+        "readyState": "READY",
+        "readyStateAt": 1790871515940,
+        "output": [
+          {
+            "path": "__fn_team_qvzlsFmfCsLkgItSypqHjw3z-8ac92b9807765790e24d9dde36cd99fdbc__",
+            "functionName": "team_qvzlsFmfCsLkgItSypqHjw3z-8ac92b9807765790e24d9dde36cd99fdbc"
+          },
+          {
+            "path": "__fn_team_qvzlsFmfCsLkgItSypqHjw3z-892baeafd297c95c174f1e4c2e88bec345__",
+            "functionName": "team_qvzlsFmfCsLkgItSypqHjw3z-892baeafd297c95c174f1e4c2e88bec345"
+          }
+        ]
+      }
+    ],
+    "regions": [
+      "iad1"
+    ],
+    "meta": {
+      "gitCommitAuthorName": "YNWAforever",
+      "gitCommitAuthorEmail": "laichiwillyjp@gmail.com",
+      "gitCommitMessage": "fix: retain installed packages in isolated native children",
+      "gitCommitRef": "codex/fix-vercel-tslib-ssr",
+      "gitCommitSha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+      "gitDirty": "1",
+      "lambdaRuntimeStats": "{\"nodejs\":1,\"python\":1}"
+    }
+  }
+}

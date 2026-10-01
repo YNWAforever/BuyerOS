@@ -1783,9 +1783,9 @@
   ],
   "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "CF00 protected hosted feasibility using prepared temporary overlay source07a7537 after exact isolated-preview setup authorization; CF08 production activation remains pending. Do not restart completed tasks.",
+  "next_eligible_task": "Independent review and current production role/schema/drain/epoch, quota/locality/alerts inspection to prepare the exact production activation proposal. Provider/R2/pilot gates separate; do not restart completed tasks.",
   "hosting_migration_proposal": {
-    "status": "local_release_candidate_complete_external_activation_pending",
+    "status": "local_release_candidate_and_isolated_hosted_fixture_verified_production_activation_pending",
     "date_hk": "2026-10-01",
     "source_sha": "aed7a7eb2b7370c10cd7a41306eecf09d378ad42",
     "design": "docs/superpowers/specs/2026-10-01-cloudflare-job-migration-design.md",
@@ -1794,14 +1794,15 @@
     "architecture_exception_approved": true,
     "implementation_approved": true,
     "approval_evidence": "Direct user message approve after the Cloudflare design/implementation plan handoff, 2026-10-01 HK. Authorizes local CF00-CF08 implementation and the transport architecture exception only; no owner/provider or production activation record is inferred.",
-    "paid_resources_approved": false,
+    "paid_resources_approved": true,
     "production_activation_approved": false,
     "tasks": [
       {
         "id": "CF00",
         "depends_on": [],
-        "status": "complete_local_hosted_gate_pending",
-        "evidence": "artifacts/cloudflare/CF00-checkpoint.json"
+        "status": "complete_local_and_isolated_hosted_fixture_verified_production_pending",
+        "evidence": "artifacts/cloudflare/CF00-checkpoint.json",
+        "hosted_evidence": "artifacts/cloudflare/CF00-hosted-preview-checkpoint.json"
       },
       {
         "id": "CF01",
@@ -1868,13 +1869,13 @@
         "evidence": "artifacts/cloudflare/CF08-checkpoint.json"
       }
     ],
-    "reviewed_source_sha": "d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8",
+    "reviewed_source_sha": "79d6caf8b51aac00560cf6d69b0198c8614df528",
     "handoff": "docs/buyeros/CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md",
-    "hosted_integration_verified": false,
-    "deployed_source_sha": null,
-    "preview_setup_approved": false,
+    "hosted_integration_verified": true,
+    "deployed_source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+    "preview_setup_approved": true,
     "preview_preparation": {
-      "status": "complete_local_hosted_setup_pending",
+      "status": "complete_local_and_bounded_hosted_preview_verified_now_fenced",
       "reviewed_source_sha": "07a7537befbf1e2290ee7079e18a258083615ed6",
       "evidence": "artifacts/cloudflare/CF00-preview-preparation-checkpoint.json",
       "test_counts": {
@@ -1890,7 +1891,8 @@
       "runtime_diagnostic_in_release_api": false,
       "billing_inspection": "Cloudflare subscriptions GET403; standard account setting is not Paid proof. Vercel team Pro active, Neon owner Free. No plan upgrade.",
       "linux_ci_verified": true,
-      "retained_fixture_log_issue": "11 anonymous built-fixture Error messages, not attributed expected;7 asserted cases passed.12 new journey PNGs outside upload path; prior local PNGs retained and2 current fresh special-case PNGs verified."
+      "retained_fixture_log_issue": "11 anonymous built-fixture Error messages, not attributed expected;7 asserted cases passed.12 new journey PNGs outside upload path; prior local PNGs retained and2 current fresh special-case PNGs verified.",
+      "hosted_evidence": "artifacts/cloudflare/CF00-hosted-preview-checkpoint.json"
     },
     "remote_ci": {
       "branch_head": "91b1f9b09ff7635d7967342f7b5577da881d91b5",
@@ -1922,9 +1924,59 @@
       ],
       "scope": "Last observed existing-project Git app/API branch preview only. Prepared diagnostic outside release entrypoint. No protected native/controller/schema/selector/production proof."
     },
-    "deployed_source_sha_scope": "Cloudflare job stack not deployed; automatic existing-project app/API preview recorded separately."
+    "deployed_source_sha_scope": "Approved isolated native and ID-only operational preview only, now selectorfalse/epoch3, loginsNOLOGIN, controller/Cronoff, bypassrevoked, Neonidle; noproductionCloudflarecutover",
+    "paid_resources_approval_scope": "Conditional Workers Paid US$5/month account base plus shared metered overages only if required for the maximum2hour isolated preview. No new paid Neon/Vercel plan or production/provider activation.",
+    "preview_setup_approval_evidence": "Direct human approve after exact bounded protected-preview/conditional Workers Paid question, recorded2026-10-01T14:48:41Z; expires16:48:41Z. Not an independent reviewer or provider-owner record.",
+    "hosted_preview_session": {
+      "status": "isolated_hosted_preview_complete_fenced_and_suspended",
+      "evidence": "artifacts/cloudflare/CF00-hosted-preview-checkpoint.json",
+      "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+      "expires_at": "2026-10-01T16:48:41Z",
+      "shutdown_completed_at": "2026-10-01T16:26:11.821617+00:00",
+      "native_verified": true,
+      "two_hop_61_seconds_verified": true,
+      "operational_receipt_verified": true,
+      "production_activation": false,
+      "billing_plan_changed": false,
+      "session_closed": true
+    },
+    "reviewed_source_sha_scope": "Author-reviewed source including vendor-path fix, exact isolation regression and screenshot-upload selection. Independent review still pending. Hosted deployed source595865f distinct.",
+    "hosted_integration_verified_scope": "Isolated approved fictional native/PDF/checkpoint/protection/61-second two-hop and one ID-only Queue/Workflow/HMAC/API/Neon receipt only; no staff/customer/provider/production verification",
+    "post_hosted_regression_ci": {
+      "run_id": 36893525903,
+      "source_sha": "79d6caf8b51aac00560cf6d69b0198c8614df528",
+      "status": "success",
+      "jobs": 8,
+      "evidence": "artifacts/cloudflare/ci-79d6caf-hosted-successor/manifest.json",
+      "manifest_sha256": "6545ce70409d4e18e8c56a026b255c8dafd60952f7c15934023184f8eb98a865",
+      "counts": {
+        "api": 686,
+        "worker": 186,
+        "controller": 27,
+        "pg18": 29,
+        "operating": 2,
+        "staff_journey": 7,
+        "legacy": [
+          4,
+          8,
+          1,
+          3,
+          1
+        ],
+        "zoom": 2,
+        "smoke": 1
+      },
+      "required_failures": 0,
+      "required_errors": 0,
+      "required_skips": 0,
+      "fresh_ui_screenshots": 14,
+      "source_files_verified": 19,
+      "test_merge_sha": "d3a72bfc68d80e1b788ba6ded65075d61242f270",
+      "test_merge_tree_equals_source": true,
+      "scope": "Actual local runtime/PG/UI with fictional identity/providers; hosted native and operational proof at595865f separate"
+    }
   },
   "deployed_source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
   "reviewed_source_sha_scope": "Historical T30 application; hosting_migration_proposal.reviewed_source_sha is current Cloudflare RC.",
-  "deployed_source_sha_scope": "Historical verified main app deployment, not refreshed for this migration; no Cloudflare deployed SHA."
+  "deployed_source_sha_scope": "Historical verifiedmain app12327c7, notrefreshed; hosting_migration_proposal records approvedisolatedpreview595865f andshutdown, noCloudflareproductioncutover"
 }

@@ -1,0 +1,25 @@
+{
+  "reviewed_at": "2026-10-01T16:52:04.417516+00:00",
+  "review_type": "Author visual inspection, not independent or assistive accessibility approval",
+  "source_sha": "79d6caf8b51aac00560cf6d69b0198c8614df528",
+  "artifact_id": 11178875806,
+  "screenshots": [
+    {
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-en-desktop-outcome-fixture.png",
+      "sha256": "61be2b2b22aa40ca74bc53da8c9e998be7dff0643114de61ca2dcd8edd63d1a2"
+    },
+    {
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-en-mobile-approved-export-fixture.png",
+      "sha256": "90c31179c03b09860c8ef363ad84b913595c513ad8412452adeea6dcc67d4413"
+    },
+    {
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-zh-HK-desktop-outcome-fixture.png",
+      "sha256": "7e08769997a303a34d8f1c3670ca35eb6558da077bd9128f1e1124b42d586b7e"
+    },
+    {
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-zh-HK-mobile-approved-export-fixture.png",
+      "sha256": "99782e41c3d829452b11abc72439afb34c3f9a18ef1f89d9a0c7fb814af4c560"
+    }
+  ],
+  "observations": "English and zh-HK desktop manual outcome/readback and mobile approved export are visible, with role/policy/recipient contexts and delivery disabled; bounded viewport fixtures pass. No live Auth0/provider/assistive review implied."
+}

@@ -1137,3 +1137,48 @@ Performance conditions/results are in runbooks/cloudflare-operating-conditions.m
   hosted native feasibility proof. Cloudflare stack deployed SHA remains null.
 - Following updates are documentation/evidence only; code remains reviewed
   d6c2849. No paid resource/production migration/provider/pilot activation.
+
+
+## Approved isolated hosted preview checkpoint — 2026-10-01
+
+Direct human approval now covers the named protected preview for at most2hours, ending2026-10-01T16:48:41Z; conditional Workers Paid$5/month base if required. No billing-plan change has been made. Production/provider/R2/delivery/pilot and independent-review gates remain.
+
+New empty Neon rapid-night-21766635/br-old-shape-b3eel1kb was verified0public tables before owner-only Alembic upgrade to0035. Dedicated API/worker logins are non-owner/NOSUPERUSER/NOBYPASSRLS/NOCREATEDB/NOCREATEROLE; worker catalog prooftrue. Domain user/workspace/membership/outbox counts0; selectorcelery/false/1. Free0.25CU, SingaporePG18.6; account rejects suspend interval changes.
+
+Protected Vercel prj_YfIdLRKWvBjomGG56RhwEmqyxRRR has14preview-only variables; migration/admin DSN absent, app→API URL bound by platform. First CLI deployment was misclassifiedproduction despite--targetpreview and canceled before readiness, with no preview secrets exposed to that environment. Subsequent targetnull preview builder rejected conditional app assignment. Meaningful red1/0errors, handler fix40/0/0/0(3deselected); hostname fix41/0/0/0(1deselected) and strict exactDSN binding retained. Corrected archived source973ef26f4879ee561ff21377077c8c97077343d7 plus four-file temporary overlay is building; native/two-hop hosted proof pending.
+
+Private Cloudflare preview Worker versionad6f1ed8-8a30-4161-9c6d-7946b2fd17d8 and Workflowbuyeros-job-preview are deployed with executionfalse, noCron/public URLs. One actual ID-only Workflow returnedblocked/EXECUTION_DISABLED, zero steps; no API/customer/provider execution. Two private queues use3600second retention. No new Paid plan was needed by this disabled deployment; billing subscription remains unverified. Exact nonsecret target/state evidence is CF00-hosted-preview-checkpoint.json.
+
+
+## CF00 completed isolated hosted preview — 2026-10-02 HK
+
+- Approved exact two-hour session ends2026-10-01T16:48:41Z. Source595865f
+  deployed native overlay and then pure release API on protected new Vercel
+  project. Actual native imports/PDF/8s kill/Linux caps/checkpoint interrupt-resume/
+  tenant denial/no-dev bundle186540543bytes pass;61-second actual two-hop200,
+  native200, protection401/HMAC401/replay409. One real Queue-created Workflow
+  ID-only probe completes/done/OK with matching Neon epoch2 receipt. No direct
+  operator maintenance call and no customer/provider rows. Detailed identities,
+  source/overlay hashes, commands/failures and single-sample timings in the handoff.
+- Shutdown before expiry: selectorfalse/epoch3, both runtime loginsNOLOGIN,
+  controllerfalse/noCron/invalidorigin, six Vercel preview gatesfalse, bypass
+  revoked/former bypass401, new Neonidle. Vercelpause400 noactiveproduction;
+  effective alternative fences proven, no unapprovedproductiondeployment.
+  Receipts/queues retained; no purge/downgrade. No billing-plan mutation.
+- Codefix595865f derives isolated child paths only from installed package
+  metadata/API root, no inherited paths/secrets; meaningful red1failure and
+  green44/0/0/0. Fresh CI595865f API685pass/1failure identifies old blanket
+  PYTHONPATHban. Stronger exact independent allowlist + malicious path/secret
+  rejection and unchanged8s/temp assertions successor93de21f focused2/0/0/0
+  in4.23s. Failed CI and approval-review rejection retained, no waived test gate.
+  Latest full CI pending; historical passes not relabeled current.
+- TaskCF00 hosted fictional feasibility complete; CF08 production remains open.
+  One API/Alembic owner, public70+8/private5 unchanged. Audit10fixed/3changed/5open.
+  Next: independent review and inspected production role/schema/drain/epoch,
+  quotas/locality/alerts/rollback proposal; provider/R2/pilot/staff/a11y gates
+  separate. No new production deployed SHA or product-live claim.
+
+
+### Final pushed source and current UI evidence
+
+Source79d6caf8b51aac00560cf6d69b0198c8614df528 CI36893525903:8/8SUCCESS; API686/0/0/0 (261.25s,97warnings), worker186/0/0/0 (25.60s,1warning), controller27, PG18compat29/operating2/staff7, legacy4/8/1/3/1, zoom2/smoke1. Exact current official artifactdigest45b17aa6…3421eaa,19 sourcehashes and syntheticmerge tree verified;12 fresh root journeyPNG +2special cases retained after confirmed one-line upload selection fix. Four en/zh-HK desktop/mobile captures visually inspected; no assistive/live-provider claim. Current final manifest/visualreview and hosted checkpoint linked in handoff. Preview idle rechecked via control-plane GET at16:48:01Z, no runtime connect. Earlier685pass1failure retained; stronger exactpath/secret negatives pass. No production/schema/provider/billing/merge action. Following commit is documentation/evidence only, with current sourceCI proof retained; any automatically triggered new CI status remains separate.

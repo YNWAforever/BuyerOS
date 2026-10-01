@@ -1,0 +1,127 @@
+{
+  "started_at": "2026-10-01T16:25:13.756410+00:00",
+  "production_touched": false,
+  "purged": false,
+  "steps": [
+    {
+      "step": "database_fence_and_runtime_nologin",
+      "state": "verified",
+      "details": {
+        "selector_before": [
+          "cloudflare",
+          true,
+          2
+        ],
+        "dry_run": {
+          "backend": "cloudflare",
+          "enabled": false,
+          "epoch": 2,
+          "applied": false,
+          "reason": "Approved bounded preview complete; fence all late work and preserve evidence"
+        },
+        "applied": {
+          "backend": "cloudflare",
+          "enabled": false,
+          "epoch": 3,
+          "applied": true,
+          "reason": "Approved bounded preview complete; fence all late work and preserve evidence"
+        },
+        "runtime_roles": [
+          [
+            "buyeros_cf_preview_api",
+            false
+          ],
+          [
+            "buyeros_cf_preview_worker",
+            false
+          ]
+        ],
+        "runtime_connections_terminated": 0,
+        "domain_counts": {
+          "users": 0,
+          "workspaces": 0,
+          "memberships": 0,
+          "outbox_events": 0,
+          "provider_operations": 0,
+          "worker_steps": 0
+        },
+        "probe_receipt_preserved": [
+          2,
+          "691e21ae-a5f6-42dc-ae82-65fb5701537e",
+          "2026-10-01 16:22:45.364297+00:00"
+        ]
+      }
+    },
+    {
+      "step": "vercel_preview_environment_off",
+      "state": "verified",
+      "details": {
+        "preview_keys_false": [
+          "BUYEROS_PREVIEW_PROBE_ENABLED",
+          "BUYEROS_CLOUDFLARE_EXECUTION_ENABLED",
+          "BUYEROS_CELERY_EXECUTION_ENABLED",
+          "BUYEROS_PAID_ADMISSION_ENABLED",
+          "BUYEROS_PAID_DISPATCH_ENABLED",
+          "BUYEROS_R2_ENABLED"
+        ],
+        "old_deployment_envs_immutable": true,
+        "database_fence_is_authority": true
+      }
+    },
+    {
+      "step": "revoke_project_automation_bypass",
+      "state": "verified",
+      "details": {
+        "bypass_revoked": true,
+        "replacement_created": false
+      }
+    },
+    {
+      "step": "pause_vercel_project",
+      "state": "failed",
+      "error_type": "AssertionError"
+    },
+    {
+      "step": "cloudflare_controller_off_no_cron",
+      "state": "verified",
+      "details": {
+        "execution_enabled": false,
+        "crons": [],
+        "public_urls": false,
+        "epoch": "3",
+        "config_sha256": "b45faf2544bd690697ef9a6c4429384a8da6ebbf9a86302309866400108c0b4a",
+        "deployment_log_sha256": "7d584d7e5f14b20026bd906ca8d882edf48ed5f221fa7520fdf3f4abdf2e7f64"
+      }
+    },
+    {
+      "step": "verify_revoked_bypass_access",
+      "state": "verified",
+      "details": {
+        "revoked_bypass_http_status": 401,
+        "response_sha256": "7a7299e672dcd022d9bb07d88b9343a88ec5ea4949a7f9af5026ec95b0302d30",
+        "no_valid_machine_signature_sent": true
+      }
+    },
+    {
+      "step": "suspend_new_neon_compute",
+      "state": "verified",
+      "details": {
+        "id": "ep-little-lab-b3rk8fx5",
+        "project_id": "rapid-night-21766635",
+        "current_state": "idle",
+        "pending_state": null,
+        "last_active": "2026-10-01T16:22:06Z",
+        "suspend_timeout_seconds": 0
+      }
+    }
+  ],
+  "completed_at": "2026-10-01T16:26:11.821617+00:00",
+  "before_approval_deadline": true,
+  "platform_pause_limit": {
+    "status": 400,
+    "reason": "Active production deployment does not exist",
+    "raw_pause_attempt_preserved": true,
+    "no_production_deployment_created_to_make_pause_work": true,
+    "effective_fences": "selector disabled epoch3, API/worker roles NOLOGIN, controller/Cron off, bypass revoked and HTTP401, Neon idle; compiled diagnostic expires16:48:41Z"
+  }
+}

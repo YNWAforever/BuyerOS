@@ -1,0 +1,3495 @@
+{
+  "baseline": "aed7a7eb2b7370c10cd7a41306eecf09d378ad42",
+  "reviewed_source_sha": "79d6caf8b51aac00560cf6d69b0198c8614df528",
+  "review_type": "author inspection; independent approval absent",
+  "hosted_deployed_source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+  "git_changed_paths": 692,
+  "files": [
+    {
+      "status": "M",
+      "path": ".github/workflows/buyeros-ci.yml",
+      "git_blob_oid": "b857907351a20f673fefa40abefae30177943013"
+    },
+    {
+      "status": "M",
+      "path": "app/v1/[...path]/route.ts",
+      "git_blob_oid": "226f6c150c3cdda1bb5f13a978a2f2fb052d3f2d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF-platform-pg.txt",
+      "git_blob_oid": "b26a916a41322e24b136e5f7c16468ae2e726ded"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF-platform-pg.xml",
+      "git_blob_oid": "6712ded059472dad14ec9a2ffe873bd2616d4728"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-checkpoint.json",
+      "git_blob_oid": "a3b22b057b802c2de6e5026562f120bd16ae7c3b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-child-error-green.xml",
+      "git_blob_oid": "b52b513ea95ba8c64392e13cde5ecbe86984dba3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-child-error-red.xml",
+      "git_blob_oid": "08ac540a044257563cbfb3ed863e0fdc210bcceb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-fixture-migration.txt",
+      "git_blob_oid": "b64b45af4b2d3d6583ddcac0f9551fcf40d7f852"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-handler-green.xml",
+      "git_blob_oid": "f1e7d03e1ed619e8900f47b890b5ae609575df31"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-handler-red.xml",
+      "git_blob_oid": "a664115114dcaabc073e827e14e0aa658ddcc2f6"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-hostname-duration-local.json",
+      "git_blob_oid": "fb21feb89d04315d41e799ce6a18e70f8ab4b01c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-hostname-green.xml",
+      "git_blob_oid": "aa1b762da451672316d19bf4711f7a007b63711a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-hostname-red.xml",
+      "git_blob_oid": "74f49f61ee72e5c5af17c86c37e4b753fd3bc4d3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-legacy-isolation-green.xml",
+      "git_blob_oid": "a5c756a4d2319159f58a4260928a9d0decc7a2ea"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-linux-build.txt",
+      "git_blob_oid": "9bd21927c43e9d16215ade4438a9cea490d138de"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-linux-probe.txt",
+      "git_blob_oid": "972ec5f3df09a4cef7dd7a97f5d930bbd5f45557"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-linux-runtime-matrix.json",
+      "git_blob_oid": "3e33ce7441bab5e220fafacbef5b6d104567e68d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-missing-module-green.xml",
+      "git_blob_oid": "2ebacde2be9a136cdf5114b50a4f6bc6e69c849d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-node-green.txt",
+      "git_blob_oid": "f13023a4afef6b9ff3f3644a8678bbc025e8f112"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-node-red.txt",
+      "git_blob_oid": "a67c45b48960f66104335317bb310a7362a1c358"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-additional-red.xml",
+      "git_blob_oid": "d5a5274859bb6e6f845f0de29163d7ecd8714809"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-child-red.xml",
+      "git_blob_oid": "f90999078c54eda066b45307ba12e8ec7a7c8d1b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-duration-local.json",
+      "git_blob_oid": "b28a09f412308da3e0052a8f06d47aa37ee53601"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-guards-final.xml",
+      "git_blob_oid": "f882c10094d2d042e57cdcdfb100d069da5614d0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-native-local.json",
+      "git_blob_oid": "9a1629922f98f5edb2710797614c495ec632fff2"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-preparation-checkpoint.json",
+      "git_blob_oid": "528b0ff884819144b5e7baec8f6c86fd4fd398cd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-preparation-final.xml",
+      "git_blob_oid": "e6f11bf48cde52563ccf6092096b0b08921d670a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-preparation-green.xml",
+      "git_blob_oid": "611dd075cf60530466cb7e9019a155a937c14179"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-preparation-red.xml",
+      "git_blob_oid": "415939fb7b5c2f3b330ef1bd56e7b0bd6433466e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-remote-ci-229.json",
+      "git_blob_oid": "a2b239d46ec31063739c8f70896b5cdd0032984a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-remote-ci-91b1f9b.json",
+      "git_blob_oid": "2f91993e24d938b5a2c2b47cadf049c0eeef5df7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-windows-fixture-red-2.xml",
+      "git_blob_oid": "8a41a817fda1deec6983d6c3c5abfecda19c551a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-windows-fixture-red.xml",
+      "git_blob_oid": "124f9bf464ce92b520b2e76d1a56d84bf3ce6b2d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-preview-windows-source-red.xml",
+      "git_blob_oid": "28738a7aadf1f9ef7f97807ca4b9c00c98c69c29"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-probe.txt",
+      "git_blob_oid": "f3644e2c41145a75d78133271d0feb926a4bad36"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-red.txt",
+      "git_blob_oid": "356d4c75720c5f4f2b893a9d64cacf8436c6ca35"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-runtime-matrix.json",
+      "git_blob_oid": "777ecd23fe6e48ad6716216d7273846410b3d4d5"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-unit-green.txt",
+      "git_blob_oid": "90b2928ab10c741d1e802ec1c375bb92de9da49c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-unit.xml",
+      "git_blob_oid": "b8b0bf2044ac91641cd2e83d204ad5ce2eb89a51"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-vendor-native-local.json",
+      "git_blob_oid": "51e30fe31519771413a01c06f4c6fce2b03a0011"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-vendor-path-green.xml",
+      "git_blob_oid": "3a82ba034b07d8cf9cfc9b90bb7114d95b284cdd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF00-vendor-path-red.xml",
+      "git_blob_oid": "8cf14dd8e576364a1da063e92ed25f324e0d4bb4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF01-celery-help.txt",
+      "git_blob_oid": "e2605c8247cda9c9381d61d246e041d5650017fe"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF01-checkpoint.json",
+      "git_blob_oid": "88bb4bbf0ba90edba63d368bdbfac0c2c47db207"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF01-claim-red.txt",
+      "git_blob_oid": "ac3848674adf550e3a2e93077026c809369f13c3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF01-contracts.txt",
+      "git_blob_oid": "574529c036345ebd6c1ca442ec180566d1ce0350"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF01-envelope-red.txt",
+      "git_blob_oid": "b5ff7a621ade35cc6613e27d339bbe3be294a85c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF01-linux-build.txt",
+      "git_blob_oid": "c274ce75adb0bea0b8c0c79913c6dbcfb957fc73"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF01-red.txt",
+      "git_blob_oid": "5abda95194fd1329387a00e110d79e010f0ed30e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF01-tests.txt",
+      "git_blob_oid": "291dd1936fb885048e3ef11c762559fe13ec9789"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF01-tests.xml",
+      "git_blob_oid": "161917851da2511021640f983f59d4d155cd6eca"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF01-worker-full.txt",
+      "git_blob_oid": "b2d55dfc9675fffb73e7e0718962972049a7e7e6"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF01-worker-full.xml",
+      "git_blob_oid": "ce1ab5ac4c00d54260a800d5b84f139150c63ac7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-api-full.txt",
+      "git_blob_oid": "b8a756bbe14dc3bea266bbfe93f5bf076fa9c585"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-api-full.xml",
+      "git_blob_oid": "b8fcab9d4f9462c498eb162e795e89b1a76d01ae"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-auth-red.txt",
+      "git_blob_oid": "0941f3420675388fb9194cfa875af2cbf7960b4e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-checkpoint.json",
+      "git_blob_oid": "14a8c23a526550cc61bc587203aaf2025d17e474"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-claim-red.txt",
+      "git_blob_oid": "95913a3bcd4c3da33dfee9fccc683aee2bfd587c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-contracts.txt",
+      "git_blob_oid": "cfcc7d20cba4f2794cb52bcc09af37fa7b696cd7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-control-red.txt",
+      "git_blob_oid": "f462cc2d3c57ab508c931718dd7847fe0721d378"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-dispatcher.txt",
+      "git_blob_oid": "068fd4d4f10e459603bf2cf2c9fc6af3f43e6850"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-final-focused.txt",
+      "git_blob_oid": "54da634dcb3caa73a011cb08993545e125a3062d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-final-focused.xml",
+      "git_blob_oid": "c1f1c55eb52469e1da98f9d10d7b32270f994e89"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-focused.txt",
+      "git_blob_oid": "77caa92cea1fe0442b6133e64cefc3496d2b093b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-focused.xml",
+      "git_blob_oid": "5127b4ba181c31e25c5c4e7d84bbfd9addf19cf8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-gateway-green.txt",
+      "git_blob_oid": "b72c952ba5863d00249d14b56dc46b5f4eb2fdf0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-gateway-red.txt",
+      "git_blob_oid": "b2b5e8ff5e55647d851b16b4abcf2e674be6b3a5"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-lint.txt",
+      "git_blob_oid": "64508ff14349975698da8ca205515d34226825e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-outcome-green.txt",
+      "git_blob_oid": "5b8818b2fdfcd2ea43ec6f1d55e80544ae881224"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-outcome-red.txt",
+      "git_blob_oid": "fd581a2ccff954f6eec8d70a1e64ca6069c94cba"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-publication-red.txt",
+      "git_blob_oid": "f9cbd7de76fcc59f2cea36cc6a629e51d5131b18"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-tsc.txt",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-worker-full.txt",
+      "git_blob_oid": "f60f98ed02bff56e0739e0a05852696e61024523"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-worker-full.xml",
+      "git_blob_oid": "2f13cdcc3baa5f8531d70968db5939e0210ba7a1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF02-worker-role-red.txt",
+      "git_blob_oid": "6350bea437c5e058ea99bac43e2801c9a89a3d77"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-api-affected.txt",
+      "git_blob_oid": "b1e5594e28882ab703ad086e2fa3b79f6b7d9257"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-api-affected.xml",
+      "git_blob_oid": "0bd1041fbdc745c3acb718f68a4139f67b58716a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-checkpoint.json",
+      "git_blob_oid": "fbfd48bf93cbe0156588eb5f4845b26516841416"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-final-focused.txt",
+      "git_blob_oid": "02f8847edca52e717e879e5e033f512344c973c9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-final-focused.xml",
+      "git_blob_oid": "988eab9ced5db8a4f49b1fd26b14ee14493c2eeb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-final-green.txt",
+      "git_blob_oid": "0487d4adc77f1c350479879f4d090199c825bc1c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-final-green.xml",
+      "git_blob_oid": "230bf6e635da08e197e4ea2dd2c17ed49261c1b9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-final-worker.txt",
+      "git_blob_oid": "53bb7bba5c1222df274824a1cf0afa81ee4e6f07"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-final-worker.xml",
+      "git_blob_oid": "ec200666513efa770a2248a35c0eade1e9e2f27c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-first-green.txt",
+      "git_blob_oid": "fc8f673bb117fe59fb53c603b43dc491efb0463a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-first-green.xml",
+      "git_blob_oid": "748fe1dc9567ac3bcfd845a7ba9ad0b164578629"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-focused.txt",
+      "git_blob_oid": "d781edcc1a733406a47bd1c4e2b562e312b5e2d1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-focused.xml",
+      "git_blob_oid": "4bb3a41b53997fc8d91fbe85691ada69a2345c29"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-linux-build.txt",
+      "git_blob_oid": "e3efa922e7318afcefa196b24566ade03dce49af"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-native-probe.json",
+      "git_blob_oid": "31e4c5845948257c655dfe1beb9baf1c9e82d774"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-native-probe.py",
+      "git_blob_oid": "f8507670e97e7cebfe38626843b58a734d866f89"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-red.txt",
+      "git_blob_oid": "fef80eaa6c9d3f1c29969b9dfba9d675a8503239"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-reviewer-red.txt",
+      "git_blob_oid": "60bee88be3800fc77b02e877989a96657b668b43"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-worker-full.txt",
+      "git_blob_oid": "4fcba5aa64f63c4f6411025187c11c5afa5c7af2"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF03-worker-full.xml",
+      "git_blob_oid": "74dbcd66c234e999bb8e9617b0ff746de3f84d67"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-api-full.txt",
+      "git_blob_oid": "9c012e4a9c638e1ab5fbe9e4e9c059789c9b7da9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-api-full.xml",
+      "git_blob_oid": "7c8a9afbdf10a1c1eff4f72f096ee4f2b482f0ad"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-boundaries-green.txt",
+      "git_blob_oid": "405d36d1465b0a0ae5246cdbc8889513555f69f5"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-boundaries-green.xml",
+      "git_blob_oid": "fee32142f5328b7d8ed01d9b3d733ab7e581ce23"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-boundaries-red.txt",
+      "git_blob_oid": "ab8840d46307874a54f0e257d2da157adbdb396d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-checkpoint.json",
+      "git_blob_oid": "ca85198fc127a5d086c3cf7df7962d70ebc244e8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-final-green.txt",
+      "git_blob_oid": "912b516cb1b969f55241347ad848db506a010ab7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-final-green.xml",
+      "git_blob_oid": "19e22614c1f384abbf74c37288e94f6868384502"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-final-provider.txt",
+      "git_blob_oid": "d67333a07d9fd5a089c1b770db3b12e649a1def0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-final-provider.xml",
+      "git_blob_oid": "1ce0b8a128e6039b4b853c2100e06693c5c7849d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-final-worker.txt",
+      "git_blob_oid": "2310dea063153df904d6d3505ef1278e7edd3d55"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-final-worker.xml",
+      "git_blob_oid": "24af526c469777a12435e5125840b91bd69c0046"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-first-green.txt",
+      "git_blob_oid": "83b98c07de22764837e15f2f3085f827ccb7ff72"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-first-green.xml",
+      "git_blob_oid": "f97cb0ad4b3408a400a2f0c3ed68c8cf93b1e9fd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-fit-red.txt",
+      "git_blob_oid": "2ce955beaa4cacb285faf8ac43f288e661068dd2"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-focused.txt",
+      "git_blob_oid": "f495e42d007e8c108a3d6e23a5ba8540793541f5"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-focused.xml",
+      "git_blob_oid": "9dfdfd4679cca6fba08919299e86c9713f608fd0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-native-build.txt",
+      "git_blob_oid": "f0d42abcd15f21baea05d240db0864bcba79c052"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-native-final-build.txt",
+      "git_blob_oid": "2c16c0f7a84bd124f041a917b1041ae587a4e3e8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-native-final-probe.json",
+      "git_blob_oid": "3623735e6f36ac94305e251c5fac434d9fcc261c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-native-probe.json",
+      "git_blob_oid": "17730914530764538152fb3971a49c1138b4f4fb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-native-probe.py",
+      "git_blob_oid": "7785b12a029761861ae87c31f7854167a0379eed"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-red.txt",
+      "git_blob_oid": "272cac6ab1c897d193e7041400b9c2c130e13652"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-verified-provider.txt",
+      "git_blob_oid": "3466ba30689c2a83da6fb12d5fa19b6bbb64c68a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-verified-provider.xml",
+      "git_blob_oid": "174406a3d47cdf701bbf38d5830edd88e27f2369"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-worker-full.txt",
+      "git_blob_oid": "46a6f7d0f3da27de40dbc74c2da3564debd3dfb8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF04-worker-full.xml",
+      "git_blob_oid": "fff7638958b3c5382507bd6504a9c77ffda79239"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-bindings-check.txt",
+      "git_blob_oid": "709c13d55547749a40f42eea9ae53f394b371eec"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-bindings.txt",
+      "git_blob_oid": "0958405a89438c41fab4a1aaf6fbd68a699e68d2"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-checkpoint.json",
+      "git_blob_oid": "0f83438a002c318169951e049b304af7375ac353"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-controller-expanded-failure.txt",
+      "git_blob_oid": "bf86fd896f017d81bc414dba72377f8bdce25b0a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-controller-expanded-failure.xml",
+      "git_blob_oid": "29f53df5b25f60a32be9f82833215b990fd16b9c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-controller-final.txt",
+      "git_blob_oid": "2f6fee783e160edc34216c6b04a5396edd94ff81"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-controller-final.xml",
+      "git_blob_oid": "c62066d313ca3ebe2f69fe4249edbb3c3c0fb0c9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-controller-verified.txt",
+      "git_blob_oid": "3c21da88d8807700c9eadd04c13c9cff473a02c3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-controller-verified.xml",
+      "git_blob_oid": "b6807b800e286037611246c187cbbe8cb9b15017"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-dry-run.txt",
+      "git_blob_oid": "76423acd9bed0f62d96fab0c923d2892b04a87e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-first-green.txt",
+      "git_blob_oid": "dfe49c499fe1651f372fb5f07556d90cf903cba5"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-first-green.xml",
+      "git_blob_oid": "80f28d0299a5660ed16fe2db0b2aa2398168921f"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-frontend-lint.txt",
+      "git_blob_oid": "64508ff14349975698da8ca205515d34226825e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-frontend-types.txt",
+      "git_blob_oid": "8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-frozen-install.txt",
+      "git_blob_oid": "3bb9c29b39af323e1fffe111bf9b042f7387d928"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-gate-0.txt",
+      "git_blob_oid": "d354d7c82b3016601ec20062622b1cb14b15fe9b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-gate-1.txt",
+      "git_blob_oid": "9074a81c24ee1b9077fb67fb714c0aa039b7fa6b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-gate-2.txt",
+      "git_blob_oid": "d2cdf63f761bd0484342b1311464936173c4cfbb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-gate-3.txt",
+      "git_blob_oid": "442f4091b396e207cfe782c2a184bbcd05553322"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-gate-4.txt",
+      "git_blob_oid": "b86eb3e0440465618a4fadc59012bb9fe3eba841"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-gate-5.txt",
+      "git_blob_oid": "2b7d6736c84651b8840bfb430639ab43ff143bfd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-heads.txt",
+      "git_blob_oid": "69f3a4c9ca3c1f8d231108fa3016fce3ecba4f27"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-lint-clean.txt",
+      "git_blob_oid": "b76393e45f82172426b1a989688bd5a3d24aecbd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-lint-final.txt",
+      "git_blob_oid": "b75c1c556f3de3f4f2042516d52b64752b165bf6"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-lint-first.txt",
+      "git_blob_oid": "02a04dc6958055937acd1af8643525905b78da67"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-lint-verified.txt",
+      "git_blob_oid": "b76393e45f82172426b1a989688bd5a3d24aecbd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-msw.txt",
+      "git_blob_oid": "04c0d99c26b5bd1d5a99143ff4ecbe41c9b30513"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-msw.xml",
+      "git_blob_oid": "b7134b8c906d619a3a796f63df25b3a36a6a60a5"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-pg-final.txt",
+      "git_blob_oid": "ca14a750a4244b66805f02e1b78afe8ef754caa5"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-pg-final.xml",
+      "git_blob_oid": "5d88bc22c8bccd7dd97e12b69af572509a331776"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-pg-first.txt",
+      "git_blob_oid": "a8e6aa976f3898683fc77b9abfb0e741015d18e9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-pg-first.xml",
+      "git_blob_oid": "e6bd0dc2c9b7ada5749ac37f78ba3e84e4fe284f"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-pg-required.txt",
+      "git_blob_oid": "404eb5939470da86745a1b5d610dc74404f1276a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-pg-second.txt",
+      "git_blob_oid": "3bd3520c2dbba08314a6a2967078e14cd43125a3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-pg-second.xml",
+      "git_blob_oid": "3d22f7370fb39f3e21ca9f842f48b88f0a285a55"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-pg-third.txt",
+      "git_blob_oid": "17e645404b4b2d74c9df4b4d4614fa38fcb7a205"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-pg-third.xml",
+      "git_blob_oid": "b585466807f59c1defe4a010a31499882975ab41"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-pg-verified.txt",
+      "git_blob_oid": "01cf6f52663fa4cdc82aab517f6501f049da5e2e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-pg-verified.xml",
+      "git_blob_oid": "4af6d076c4c71a5b2212fe2f4cdcaa66bf1eb7cd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-platform-green.txt",
+      "git_blob_oid": "8b76cba7354d9628c4d882f160d6bf939c631a46"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-platform-green.xml",
+      "git_blob_oid": "816e05570dbc97035d6ba8c0d2d4b317673beee8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-platform-pg-second.txt",
+      "git_blob_oid": "f1bdddb53cd94270150cf9607098ca2d494df17e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-platform-pg-second.xml",
+      "git_blob_oid": "6b5b3bfb974200136e5e08f37097fe51f6855ef0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-platform-pg-third.txt",
+      "git_blob_oid": "56cde8532003dcd46f71cc4a342bbdb1cededbd7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-platform-pg-third.xml",
+      "git_blob_oid": "9dadce768fed322d1e82359a69c035a1f990bea1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-platform-pg.txt",
+      "git_blob_oid": "31ca0832302df01ea747404ec487ff7535e6b488"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-platform-pg.xml",
+      "git_blob_oid": "36540eb0e6f05c9c3930ff501b2f7f4b3361ffe3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-protocol-green.txt",
+      "git_blob_oid": "25e2dc9ff5b309642909976de1ffd7281e3dbeb9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-protocol-green.xml",
+      "git_blob_oid": "aa5bbc457824ead7c35b1011025218a5010c2ee9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-red.txt",
+      "git_blob_oid": "5413aec5ea0aca1705c7ef12e934b6b1590dfc4e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-red.xml",
+      "git_blob_oid": "ea5bf484f887ae58a60fd1224042e59040d89912"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-tooling-install.txt",
+      "git_blob_oid": "0d735410ec6ed5bc9086f72176db2c1ea8c658dd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-tooling-mature.txt",
+      "git_blob_oid": "5f8e7d20fc1bfecb46d41325ba3507e545261a7c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-tooling-metadata.json",
+      "git_blob_oid": "3efb162fb656295a54cb3d46293147407461d1e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-tooling-msw-compatible.txt",
+      "git_blob_oid": "3b4b8be65dcb35ffaace47187ff81873ac38954b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-tooling-msw.txt",
+      "git_blob_oid": "e53b03ca9ef6c56fe234624e6612e24bc138dd04"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-tooling-resolved.txt",
+      "git_blob_oid": "af4992fbec1ac49f3e6ca276aef72bd03dd5c8cb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-tooling-types.txt",
+      "git_blob_oid": "d33b178274c9551abbf7dbdc7ff354d7e4302b21"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-ts-tests.txt",
+      "git_blob_oid": "8f0bcf10ecd559ac6f859d3612ff1d86601a967b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-types-expanded.txt",
+      "git_blob_oid": "56ba61faf322d5fbd17ad1f80bfeaf4ba7551ec0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-types-final.txt",
+      "git_blob_oid": "d29949e61865d04f2a765e4eb688a0e30eb338ff"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF05-types-verified.txt",
+      "git_blob_oid": "d29949e61865d04f2a765e4eb688a0e30eb338ff"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-basic-green.txt",
+      "git_blob_oid": "72e6c999dfc785494d562d71b22c11e5946df00d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-basic-green.xml",
+      "git_blob_oid": "b610c1c00bd7b522d2a3081130177aa7fe705618"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-bindings.txt",
+      "git_blob_oid": "e2a25f48b5be48fc169038c846f5876c0dddcf7e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-boundaries-final.txt",
+      "git_blob_oid": "ec7631e52163f0a5bf9a328e23de359703adf295"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-boundaries-final.xml",
+      "git_blob_oid": "bf528a09e4c32a424de48ddde809250ac1a58166"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-boundaries-first.txt",
+      "git_blob_oid": "942fada510d52119d4d24df74099704dd0dc01d7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-boundaries-first.xml",
+      "git_blob_oid": "8de92bb87a4a47c24312691aa06eb17aa0ef2fbd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-checkpoint.json",
+      "git_blob_oid": "952e8b0f867c25f878bca7d9253d42108dfeddef"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-conservation-first-green.txt",
+      "git_blob_oid": "c8a9a83984a9617d454e1822cc1d25af97ebb2e1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-conservation-first-green.xml",
+      "git_blob_oid": "0f4b4b013d25a84e1d60a7b88d4693f0d3321239"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-conservation-green.txt",
+      "git_blob_oid": "68cd9331b9ea04d3ce6a758c9557f70e65dfac73"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-conservation-green.xml",
+      "git_blob_oid": "c14aedad042b4caf04d5dec5c88312eb04910a6e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-conservation-red.txt",
+      "git_blob_oid": "304cf993e9160f5f4ce4a6c04c72a2d579368f5d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-conservation-red.xml",
+      "git_blob_oid": "59b1da5a6e21f18b30ed9ad84de24e45ae57ab0a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-conservation-second-green.txt",
+      "git_blob_oid": "dad063cb6dc8ff74d43486030839b6d465d35441"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-conservation-second-green.xml",
+      "git_blob_oid": "31a40426cca211ea92b0ab0e0cdd46d956f45583"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-controller.txt",
+      "git_blob_oid": "91b3f63ae23b1c3304f5d11d6eace577c3e5d946"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-controller.xml",
+      "git_blob_oid": "c8d71b29fad6feb7316060eb581dff5e4171fd1e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-diff-first.txt",
+      "git_blob_oid": "b264ac2e8b9b5d09d2f599f05e7c22e9b165bbf7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-dry-run.txt",
+      "git_blob_oid": "8c5325c9ef722b4d8f22043e1084d12348d21f72"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-final-db.txt",
+      "git_blob_oid": "a22ff23d8c8416daf02059665adb62f24a5bd2cf"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-final-db.xml",
+      "git_blob_oid": "bb34bbae6b7decd22903cadca32008821401b9a0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-first-green.txt",
+      "git_blob_oid": "65b8beb56826256c8b41574008fef68884476d7d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-first-green.xml",
+      "git_blob_oid": "5d40f095d77811d311d8f2ed56d9e0029e2bed82"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-heads.txt",
+      "git_blob_oid": "84430d5e0ff477da2437b16fd78c2f189d767141"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-internal-contract.txt",
+      "git_blob_oid": "9074a81c24ee1b9077fb67fb714c0aa039b7fa6b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-node.xml.txt",
+      "git_blob_oid": "02ff8edb9e27ceb33368068bc19aa48f52b3ed9e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-platform-pg.txt",
+      "git_blob_oid": "287b45cdff5e56b75142e053fa35aa19e78bd822"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-platform-pg.xml",
+      "git_blob_oid": "6fcfa08828bf7785fa4355e449d9ffea31171af2"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-predecessors.txt",
+      "git_blob_oid": "cf7b2b15c7efc06c11041baa12b5cd61ee2fb1eb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-predecessors.xml",
+      "git_blob_oid": "c3a26ba72e228a62c5ad6159e6df890b3d50087d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-red.txt",
+      "git_blob_oid": "249506ef2967044a8e4b95ad50e15db632fd6e33"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-red.xml",
+      "git_blob_oid": "cbb1f8b69b3034420a569c2eb4b0ec9e8f011145"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-root-lint.txt",
+      "git_blob_oid": "64508ff14349975698da8ca205515d34226825e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-root-types.txt",
+      "git_blob_oid": "8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-step-key-red.txt",
+      "git_blob_oid": "ddf79ca3e8acfd74cf393daf7c735b5787496e07"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-step-key-red.xml",
+      "git_blob_oid": "b19bacdef37765da8a1f58332b4f979f0853f667"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-type-generation.txt",
+      "git_blob_oid": "d2cdf63f761bd0484342b1311464936173c4cfbb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-types-first.txt",
+      "git_blob_oid": "d29949e61865d04f2a765e4eb688a0e30eb338ff"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-worker-lint.txt",
+      "git_blob_oid": "b76393e45f82172426b1a989688bd5a3d24aecbd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-worker-types.txt",
+      "git_blob_oid": "d29949e61865d04f2a765e4eb688a0e30eb338ff"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-workflow-authority-red.txt",
+      "git_blob_oid": "3121e442ec9d8cfbeea5f64242665ce2c7268fa3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-workflow-authority-red.xml",
+      "git_blob_oid": "ecff6843dd1ff3c38bafb5864e118464f3d02ddb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-workflow-green.txt",
+      "git_blob_oid": "7193bb2b6c266aac428c89d84f8f68541854c0dc"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-workflow-green.xml",
+      "git_blob_oid": "600fe560ce6c045614f95b62c8826a26d7bcf6be"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-workflow-red.txt",
+      "git_blob_oid": "64a944bac1bc6c0e97ec7b727042b51992730c16"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF06-workflow-red.xml",
+      "git_blob_oid": "d3871a7fe98cb0036d8373c21eba6f50a2663d2b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-acceptance-eighth-final.txt",
+      "git_blob_oid": "d4e3a673797f5a4d931da730167d10b9745d6dbb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-acceptance-fifth-final.txt",
+      "git_blob_oid": "4704fc7656106a1ca5327e94c304b4d3cfe8d806"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-acceptance-final.txt",
+      "git_blob_oid": "1f31a1898c2d3da32bb2e7a68e45da104fffb83c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-acceptance-fourth-final.txt",
+      "git_blob_oid": "7060568af9089b4022fd9b566a4fdf30a35df748"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-acceptance-ninth-final.txt",
+      "git_blob_oid": "b1f5d73c6173d34f30b2afb0a36e144e5366c642"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-acceptance-runner-green.txt",
+      "git_blob_oid": "50a1a28584cbb73056d32d2622a32415c3e441e2"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-acceptance-runner-red.txt",
+      "git_blob_oid": "e926d3bd32dbfdfb3c242d9885d26c74496f4507"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-acceptance-second-final.txt",
+      "git_blob_oid": "ca19e9b350448b84cbec325d7ae09b0225d6592d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-acceptance-seventh-final.txt",
+      "git_blob_oid": "a2f12f292f6567809389afe201f55ff16d21f4cb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-acceptance-sixth-final.txt",
+      "git_blob_oid": "549873f104715ce7b10aae75d15e6f6a5f60b0df"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-acceptance-third-final.txt",
+      "git_blob_oid": "c76cb896f7721dcba315307c0d877eba4df4c30a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-api-final.txt",
+      "git_blob_oid": "8dd2aa98ebb5c78588d45dcbc2b08e7371a92d15"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-api-final.xml",
+      "git_blob_oid": "3bb8704d251655364b6756a77a896fc7273419f9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-api-full.txt",
+      "git_blob_oid": "8d6725bf014169f0a96c0c302e37e7dd35074919"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-api-full.xml",
+      "git_blob_oid": "bbec6b4c49c6a95c8906d3158b4b15d5ce394ec1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-bindings.txt",
+      "git_blob_oid": "e2a25f48b5be48fc169038c846f5876c0dddcf7e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-boundaries-third.txt",
+      "git_blob_oid": "291250cfdec3f1b3cc0f8d812b862d0781179c9b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-boundaries-third.xml",
+      "git_blob_oid": "61f9af3924a8b69ee2df64aac7de279a3c02ccaa"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-built-ui-green.txt",
+      "git_blob_oid": "0c62009e96eb2e39a51f18b2e39f791f7b8212e2"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-built-ui-red.txt",
+      "git_blob_oid": "360b818f68886813d8cc292de6111966caa905e0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-bundle-schema-preflight.txt",
+      "git_blob_oid": "8a1f815386198bc8c2cac79f32eecedc57775f16"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-checkpoint.json",
+      "git_blob_oid": "c4ad28f8f43868b2a297e5ee18b95e1e0444838d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-controller-final.txt",
+      "git_blob_oid": "bf032255cccc043a8ce5e4c1570ec20b04e12083"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-controller-final.xml",
+      "git_blob_oid": "2d416dbf2ace6a24779ce7a0a1a39efa0c4e7174"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-controller-lint-last.txt",
+      "git_blob_oid": "b76393e45f82172426b1a989688bd5a3d24aecbd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-controller-test-types-final-corrected.txt",
+      "git_blob_oid": "d29949e61865d04f2a765e4eb688a0e30eb338ff"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-controller-test-types-final.txt",
+      "git_blob_oid": "feadaac43d640fe017bb673b0f7f0f7bc7c799a8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-controller-test-types-last.txt",
+      "git_blob_oid": "d29949e61865d04f2a765e4eb688a0e30eb338ff"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-controller-types-final.txt",
+      "git_blob_oid": "8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-controller.txt",
+      "git_blob_oid": "a2f94ba1ec2389a753b607d3daa7d31f01db1b19"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-controller.xml",
+      "git_blob_oid": "8e717be77f3c0b909047c9de4f86cd57146c87fb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-domain.txt",
+      "git_blob_oid": "2fbfa5b55c4026b058584d5f6819b6834cdf089d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-dry-run-last.txt",
+      "git_blob_oid": "7a28f8cf2bc915049748d8dc8faff803e5ddc8cd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-dry-run.txt",
+      "git_blob_oid": "ba85c70bdbe257267c3948d1f5b88d91f116dcb6"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-expanded-first.txt",
+      "git_blob_oid": "460edd76f5bd744641331dd98b46063afc99aaf3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-expanded-first.xml",
+      "git_blob_oid": "adcb06433a180c8842cfdf89d9654f614985001c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-expanded-second.txt",
+      "git_blob_oid": "c7e7b24470d531d206510bd39375ca5e879b5e1c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-expanded-second.xml",
+      "git_blob_oid": "c7d09d5236cab59ce406488915d88e0748ab90c3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-fixture-vercel-build.txt",
+      "git_blob_oid": "f07948b6054bc3a38f7b0f9d59d1d2660cf47dc0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-frozen-install.txt",
+      "git_blob_oid": "75efac30cb38ca59d716f4d9ef7a40c9c3feb9d4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-full-platform-pg.txt",
+      "git_blob_oid": "04e5db211f93cfcef11ac6567bde4e1183c3dc9d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-full-platform-pg.xml",
+      "git_blob_oid": "975201f43b6be9c41bc2996c23ca052ff4c85bc7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-internal-types-last.txt",
+      "git_blob_oid": "d2cdf63f761bd0484342b1311464936173c4cfbb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-internal-types.txt",
+      "git_blob_oid": "d2cdf63f761bd0484342b1311464936173c4cfbb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-fifth-green.txt",
+      "git_blob_oid": "2ba1b15e2b7cd27d03e5438f5109509b0805eae1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-fifth-green.xml",
+      "git_blob_oid": "d2cd5f3180fad73d6d49e2cf958eb11b322f80c1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-first-green.txt",
+      "git_blob_oid": "acd0dd36a5415143faf7cc648b7f5b6bc34d028c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-first-green.xml",
+      "git_blob_oid": "d0a89ed8abda8e696945f440419a001ad7a6f0fa"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-fourth-green.txt",
+      "git_blob_oid": "ba5762689c31b864538bcbbee589f4a019b5ecfb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-fourth-green.xml",
+      "git_blob_oid": "a2726125d5b13a88eaacd1dea8503eb5c404357b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-green.txt",
+      "git_blob_oid": "2c5bd86ecf850e1dd87d6ba940f1cf1773998087"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-green.xml",
+      "git_blob_oid": "3dbe3c10499011c7418b89afe53213403a9fb6ac"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-red.txt",
+      "git_blob_oid": "55e73e246dcbf5031a0522033393d5861b400d53"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-red.xml",
+      "git_blob_oid": "e0e2c55182a056a99057431bd60fb1dbb5e78ef7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-second-green.txt",
+      "git_blob_oid": "6a882e64152cf52054e63482b16390e9658bc809"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-second-green.xml",
+      "git_blob_oid": "4fde66c985ba9b584b265b6ac1f923fcefb69053"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-third-green.txt",
+      "git_blob_oid": "a39b93fc4ee5bb72d31574a53aa11a9bd87b3e89"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-journey-third-green.xml",
+      "git_blob_oid": "7a64e2ec4cb0aaec6c5634e26877c80fb8179750"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-buyers.txt",
+      "git_blob_oid": "8231de16f5767a3bd245fbaaadf1848882bfbd5c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-buyers.xml",
+      "git_blob_oid": "e74725bd85dba68d7248bd4234dacf279ff9801e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-management.txt",
+      "git_blob_oid": "eef3633cd4af110d569b65aa730d44f94c94b670"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-management.xml",
+      "git_blob_oid": "44cd87b3524f74d35fb85bd95aa70772b7986596"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-mvp.txt",
+      "git_blob_oid": "3a3575070c76531ca66c390db906c67b1e5565eb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-mvp.xml",
+      "git_blob_oid": "71c75dfdaed6ea9957bbeb3bc9dba653e605afa1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-research.txt",
+      "git_blob_oid": "c3e8e7aad6d541179d0bb8e052b85280ec67a405"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-research.xml",
+      "git_blob_oid": "5572158d3cb71ce48f1a1fca612bb8700958c425"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-role-red.txt",
+      "git_blob_oid": "b0bfd62925d5a5210c1875e07ced19145ff9ac5d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-role-red.xml",
+      "git_blob_oid": "a63b67bc8117bda3d80aa2dcc30a92d77fc8c8d5"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-selector-red.txt",
+      "git_blob_oid": "e151e988a6810fbd04f8b625fe9aec33309cf54b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-selector-red.xml",
+      "git_blob_oid": "a4404026052a0142b027b0f4190c0038887ce052"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-selector-second-red.txt",
+      "git_blob_oid": "69b743cb21872eb76c0424ae5959384e50ba8fe1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-selector-second-red.xml",
+      "git_blob_oid": "045a7a883d41a733b98621066e8c115ace96ef1a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-selector-third-red.txt",
+      "git_blob_oid": "031cdde2ef12a20b671fed22c43d9b98a1582213"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-selector-third-red.xml",
+      "git_blob_oid": "e21111aff2b72da47436db14591e07bd2f444848"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-workbench.txt",
+      "git_blob_oid": "f76c227bbca89ef37fbb66b24ddbee5e99c2b1a4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-workbench.xml",
+      "git_blob_oid": "1643d08fd91a6651c0f217be6170d656a07645c2"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-zoom.txt",
+      "git_blob_oid": "0c7b6019ddbec8536fa19fd6dacce2f051a380c1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-legacy-zoom.xml",
+      "git_blob_oid": "4e42e4419343ba82c0cafe6d0e253b8666e14c48"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-lint-built-final.txt",
+      "git_blob_oid": "64508ff14349975698da8ca205515d34226825e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-lint-built-fixture.txt",
+      "git_blob_oid": "64508ff14349975698da8ca205515d34226825e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-lint-evidence-final.txt",
+      "git_blob_oid": "64508ff14349975698da8ca205515d34226825e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-lint-final.txt",
+      "git_blob_oid": "64508ff14349975698da8ca205515d34226825e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-lint-last.txt",
+      "git_blob_oid": "64508ff14349975698da8ca205515d34226825e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-lint.txt",
+      "git_blob_oid": "64508ff14349975698da8ca205515d34226825e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-live-adapter.txt",
+      "git_blob_oid": "01e2d3ceee4af6f446271416fbb4ff8260fd2840"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-live-auth.txt",
+      "git_blob_oid": "82fb9739ed484903c4fdc2368b48e4f74edb1390"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-node-built-final.txt",
+      "git_blob_oid": "083e0ecaa902c91291e2b0a23579d3cdfb274ba8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-node-contracts.txt",
+      "git_blob_oid": "1e0e5bb64f28a801eb118cb4ae2f168ddde333c1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-node-evidence-final.txt",
+      "git_blob_oid": "7dc2ec49df13338164c8ae095eef2fc8614c2393"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-node-final.txt",
+      "git_blob_oid": "e20a40d1815ad18b49b2dda686028017b2367033"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-node-last.txt",
+      "git_blob_oid": "32f5e2266983c02e111b32587c2f3a015ca2d669"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-benchmark-final-repeat1.json",
+      "git_blob_oid": "9664d12def3ed7d89f8027c622420854ca80ac55"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-benchmark-final-repeat2.json",
+      "git_blob_oid": "cff740af103f0fcdfc9dad37a05612768e855ea0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-benchmark-repeat1.json",
+      "git_blob_oid": "4d49bb5433db32950c3af494d08c42c6692c1005"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-benchmark.json",
+      "git_blob_oid": "b733c13b3c57a2e1701908a0e35ac635d8d4e450"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-final.txt",
+      "git_blob_oid": "bd844de15b98e3ff24143580f19196a0d395648f"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-final.xml",
+      "git_blob_oid": "aec6e5c40d33cecd275962b977d3ce1b5d655f25"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-first-green.txt",
+      "git_blob_oid": "ac89de083e4861c0989cb176c13f922abd54b385"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-first-green.xml",
+      "git_blob_oid": "f6dbfa08b1dab6ebd7c8d322c18143341d6f0520"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-platform-final-repeat1.txt",
+      "git_blob_oid": "9b55deb19f175891112879939fac5371a3d831d1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-platform-final-repeat1.xml",
+      "git_blob_oid": "3ae40fec5a64d535a6448605d949b7dafb543397"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-platform-final-repeat2.txt",
+      "git_blob_oid": "8d56cbbd0c7c0c2feac936aaac2869af24d24bdd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-platform-final-repeat2.xml",
+      "git_blob_oid": "d2f5f9082341ef94ff2f4d60a6f245d4fcb4c32b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-platform-repeat1.txt",
+      "git_blob_oid": "a1d4d542f2e8fdf231b0f7efc1026df3bdd844eb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-platform-repeat1.xml",
+      "git_blob_oid": "2231f10037c9bf36a468d6b55e7f924c4d196d9e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-platform-repeat2.txt",
+      "git_blob_oid": "31251338871c5723e8cc09c1f8679e9704689f6f"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-platform-repeat2.xml",
+      "git_blob_oid": "5b2a53b781caf11f70fd6244dc89768642eb9dba"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-platform.txt",
+      "git_blob_oid": "0ea368cd91bad4ae11792d34214e459ab3c18c6b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-platform.xml",
+      "git_blob_oid": "5001c7da15fbf738e564c3868f09beda4734af47"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-red.txt",
+      "git_blob_oid": "e4ebafb572480dc90d75529fbd7ed96b448442eb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-red.xml",
+      "git_blob_oid": "3bc7f3eb2b2326312a19672f84fabe42aeec0dfb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-repeat.txt",
+      "git_blob_oid": "78fbe7731ddc93c410ecd34a1e171a9ab9c31075"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-operating-repeat.xml",
+      "git_blob_oid": "d23587767b80545baa159af0b6cb4108d8690470"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-paused-readiness-red.txt",
+      "git_blob_oid": "6d74583968444c977de3d6fc0236fcfd55ecbf8b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-paused-readiness-red.xml",
+      "git_blob_oid": "86e24ce0d79223d7b1a047b83e9874048fc88771"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-platform-last.txt",
+      "git_blob_oid": "4b8e572550ebb0f865d4f8b04097a590f7308490"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-platform-last.xml",
+      "git_blob_oid": "abb98777dad5162fc4207ae21a759ff551ef439b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-public-types.txt",
+      "git_blob_oid": "442f4091b396e207cfe782c2a184bbcd05553322"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-publication-timeout-red.txt",
+      "git_blob_oid": "0dbe045db8882f0d765d60ce63c6abdacf3d52ac"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-publication-timeout-red.xml",
+      "git_blob_oid": "21b41152bb7ce4a4d721f5c4ab7c64d0796f9a36"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-read-benchmark.json",
+      "git_blob_oid": "b99e584873c4d700f65baa6923da58425ea44450"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-read-benchmark.txt",
+      "git_blob_oid": "4d3aacb02b0fb55488bb217e9c42f855eed880b0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-read-benchmark.xml",
+      "git_blob_oid": "f19d798fdf4a2c4063b3b07193197aa26c02ed92"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-readiness-final.txt",
+      "git_blob_oid": "3b69adf657735bc3d854023fa40fd3059cfa15cb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-readiness-final.xml",
+      "git_blob_oid": "79063bf1ca0cf3a78f060635f12776eb44720c8e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-readiness-green.txt",
+      "git_blob_oid": "155f60a59cb12bf77cabfb846a4733c5387d14c2"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-readiness-green.xml",
+      "git_blob_oid": "e36c802919420d8e50378b8ee3940beef29b3829"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-runner-path-green.txt",
+      "git_blob_oid": "461624d1fcb97cb4636a2243965af09a29a1bc0e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-runner-path-red.txt",
+      "git_blob_oid": "48b3ef8fc30f2f6d4ad817f94d721c064ff6d461"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-stale-report-green.txt",
+      "git_blob_oid": "e659cd8517aa53fa7917106991213682c70b3b08"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-stale-report-red.txt",
+      "git_blob_oid": "90dc59b56f06248448bc7bb9ffc9131499014f8e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-tooling-install.txt",
+      "git_blob_oid": "60e284ce027613201df45da541d565c0eec0f584"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-types-built-final.txt",
+      "git_blob_oid": "8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-types-built-fixture.txt",
+      "git_blob_oid": "8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-types-evidence-final.txt",
+      "git_blob_oid": "8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-types-final.txt",
+      "git_blob_oid": "8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-types-last.txt",
+      "git_blob_oid": "8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-types.txt",
+      "git_blob_oid": "8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-vercel-build.txt",
+      "git_blob_oid": "1b780ce35e3d541b690cc67ac862056d78b2634e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-vercel-render.txt",
+      "git_blob_oid": "c62cffe4f6b60fbc626df0e616403b6b4b00ede5"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-vinext-build-green.txt",
+      "git_blob_oid": "cf4f886511944bcd4be2bc8e4afc4b2cd76bf892"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-vinext-build.txt",
+      "git_blob_oid": "2b7147eb8bd4cabb57ddda580f99491a54532005"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-worker-final.txt",
+      "git_blob_oid": "0169ddf160a32d8f9562de1e90a18285c198d3bb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-worker-final.xml",
+      "git_blob_oid": "fcefc8a4418569252f45ac695d22063e4cd572b4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-worker-full.txt",
+      "git_blob_oid": "519227c2d705cb1e12eda25009e75e5efcd2bec8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF07-worker-full.xml",
+      "git_blob_oid": "df0c3f3380c0974af2f99aa456ce73b5d64c8ae7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-alembic-heads.txt",
+      "git_blob_oid": "84430d5e0ff477da2437b16fd78c2f189d767141"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-bindings-final.txt",
+      "git_blob_oid": "d7f7cfbca2bde6140e7427bdb364d7a3819c2e8b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-bindings-generate.txt",
+      "git_blob_oid": "19f41fe0fe4f5b4ad1f6f58cd2cdf8d7ce602e5b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-bindings-green.txt",
+      "git_blob_oid": "d7f7cfbca2bde6140e7427bdb364d7a3819c2e8b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-bindings.txt",
+      "git_blob_oid": "9ba3150976c08aeb89742d0232965f4e90f0275d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-bundle-scan.json",
+      "git_blob_oid": "6dc6fafa096380c951d5eedd483225b20434827d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-changed-files.json",
+      "git_blob_oid": "6f7935589f7aaa00e84a5743de096930447742d8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-checkpoint.json",
+      "git_blob_oid": "a22456546b3b7103d27401a7c8e33ba1028b6c66"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-ci-yaml.txt",
+      "git_blob_oid": "9a1b69c7bed98796a9cba29ec15d5d7a8e9b8200"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-config-red.txt",
+      "git_blob_oid": "316c29633f4a1106640c0ec30668bfeb757a3be9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-config-render-green.txt",
+      "git_blob_oid": "bdaa279155c6ea187ea3606dd4c8e58a89a0a2e6"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-controller-green.txt",
+      "git_blob_oid": "a7d3db1746a60c296a5b01e17bb511d77f5da576"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-controller-lint.txt",
+      "git_blob_oid": "b76393e45f82172426b1a989688bd5a3d24aecbd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-controller-required.txt",
+      "git_blob_oid": "b810184b794307858e03bfd6bdaa07482a993b22"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-controller-types-final.txt",
+      "git_blob_oid": "d29949e61865d04f2a765e4eb688a0e30eb338ff"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-controller-types.txt",
+      "git_blob_oid": "d29949e61865d04f2a765e4eb688a0e30eb338ff"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-controller.xml",
+      "git_blob_oid": "01ab1009a5ec29224bbe2b10e83b60868e64f641"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-handoff-check.txt",
+      "git_blob_oid": "13179669aa14414253d7d43c2f5ef235dbe13fb3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-handoff-initial-check.txt",
+      "git_blob_oid": "e185ec89385fe99ce4d9e5740d1f4c50626fbee8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-internal-types.txt",
+      "git_blob_oid": "d2cdf63f761bd0484342b1311464936173c4cfbb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-lint-final.txt",
+      "git_blob_oid": "64508ff14349975698da8ca205515d34226825e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-lint.txt",
+      "git_blob_oid": "64508ff14349975698da8ca205515d34226825e4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-log-normalization.json",
+      "git_blob_oid": "cfd33335f6ff1ecee6ccc7acaa963e7f361144b6"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-neon-metadata.json",
+      "git_blob_oid": "69d07f40d37b5c68433609dae6ced90f15ebe149"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-node-final.txt",
+      "git_blob_oid": "57f8701c749c7435052b99d997d626bb211c09ef"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-node-green.txt",
+      "git_blob_oid": "c69895381a8243ea09b8b6b7a1b5ea3282fd3876"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-operation-coverage.json",
+      "git_blob_oid": "86094420fbeccc5dd304bbedc0466d1fff6ad407"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-pg18-platform.txt",
+      "git_blob_oid": "09084e427e81f535575db35f71e763f183af9717"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-pg18-platform.xml",
+      "git_blob_oid": "c342d2a35f6c209e938a61102895c331beb50ffd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-pg18.txt",
+      "git_blob_oid": "f117bf2d5eaf50265246fcda077031f5a7a29668"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-pg18.xml",
+      "git_blob_oid": "8c927bbcea8829e9534637b5caa14b4c370fdf83"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-preview-dry-run-final.txt",
+      "git_blob_oid": "d529a91407e211bf86dc51a0c355fa700e84052a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-preview-dry-run.txt",
+      "git_blob_oid": "9156fec79358efb15816203ab8521601bdd1bce2"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-protection-red.txt",
+      "git_blob_oid": "0c302ddb4ffdabaf3dbc10bb12676e4aa8eeb175"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-public-types.txt",
+      "git_blob_oid": "442f4091b396e207cfe782c2a184bbcd05553322"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-remote-ci.json",
+      "git_blob_oid": "64a0d8794e735546878623015f7e30404378d1a0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-review-rulings.md",
+      "git_blob_oid": "bf7b4d147a5da24974527a9dc02cea0163fad092"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-route-contract.txt",
+      "git_blob_oid": "d354d7c82b3016601ec20062622b1cb14b15fe9b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-types-final.txt",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-types.txt",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-vercel-build.txt",
+      "git_blob_oid": "6bafaa7ea3e22270379d5989054aafe9696d6b3e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/CF08-vercel-schema-budget.json",
+      "git_blob_oid": "d79bee8eec1e2c26ac6ace31d9451cdaf3dcd14f"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-before-timeout-fix/build.txt",
+      "git_blob_oid": "96604969576eb6e00de6137f4c2d4c2c0c94ac0e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-before-timeout-fix/journey.txt",
+      "git_blob_oid": "cfe61c5ceb2f0a2f27b0dcf377fbe5006a94f576"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-before-timeout-fix/journey.xml",
+      "git_blob_oid": "2c29457d7cb946437b79fa3e159daf894c085d9e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-before-timeout-fix/report.json",
+      "git_blob_oid": "b68c46fb977a696dd9d4ce0da443a57f33a13cb3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-built-scope-failed/build.txt",
+      "git_blob_oid": "39357b9e86c2099c0785459a977b5c9c4b3d7317"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-built-scope-failed/journey.txt",
+      "git_blob_oid": "e32a15426f2320f86eb18783439edb10bef5a2f7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-built-scope-failed/journey.xml",
+      "git_blob_oid": "f2ac14178bde21a1521575f53fe3a37f072deea5"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-route-teardown-failed/build.txt",
+      "git_blob_oid": "b6ad43b2691bdc91217d4ac5374a8bac8f84af2c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-route-teardown-failed/journey.txt",
+      "git_blob_oid": "3f3e826be83eff06189ab7591a0a8a01f68a5a83"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-route-teardown-failed/journey.xml",
+      "git_blob_oid": "aef670df0773efde9246ef63acb7c251c4360623"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-route-teardown-failed/report.json",
+      "git_blob_oid": "b68c46fb977a696dd9d4ce0da443a57f33a13cb3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-six-pass-failed/journey.txt",
+      "git_blob_oid": "81f8f981c64ef3207161e24f11b7e9999962f150"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-six-pass-failed/journey.xml",
+      "git_blob_oid": "88cedc1614ebc98d8ea28870cb69dbee05144fed"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-six-pass-reviewer-failed/journey.txt",
+      "git_blob_oid": "974a7047e41fa39ba04f75bb12fd24e69c74f5c0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-six-pass-reviewer-failed/journey.xml",
+      "git_blob_oid": "cd2dd8f2689f9be1d07b3e955f78371614b5863e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-six-pass-reviewer-failed/ui-errors/.last-run.json",
+      "git_blob_oid": "0a590517479b3d67fae1dee80124d1556f4e324b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-six-pass-reviewer-failed/ui-errors/cloudflare-journey-CF07-en-e2fb5--and-outcome-on-one-dataset/error-context.md",
+      "git_blob_oid": "cbddcefd0ee529924a52a6adc7d70e5e3cbe1950"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-startup-failed/journey.txt",
+      "git_blob_oid": "705da27210d0c7f774ac19d3a5ba0c0146ceffca"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-startup-failed/journey.xml",
+      "git_blob_oid": "df450a3a3796499b11897c0118f390bd8bf284d3"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-timeout-failed/journey.txt",
+      "git_blob_oid": "a87eabeb9019cc41cf98ebccd48b05b11be5a14b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-timeout-failed/journey.xml",
+      "git_blob_oid": "dec0f34f2c6587d4b8236ac524cf5700fb6ff282"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-vinext-reset-failed/journey.txt",
+      "git_blob_oid": "4df36b2c0ab8ccc85b8085a04a367186f5bfcb49"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance-vinext-reset-failed/journey.xml",
+      "git_blob_oid": "899404860ad89c15fe43399983d2e0d57ef008d4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance/build.txt",
+      "git_blob_oid": "667bff033a7352a0c42d0b1ce8ebe3e5b5f34860"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance/journey.txt",
+      "git_blob_oid": "51293c3540baf526e212238e7578ab10dd648c7b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance/journey.xml",
+      "git_blob_oid": "0f3373f4b315a966984b1cd0aece331fac7493c8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/acceptance/report.json",
+      "git_blob_oid": "1192e56fd3d56e73bfbceb403188a264ce17f899"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-91b1f9b/CF08-pg18.xml",
+      "git_blob_oid": "c4b40368710a252f873d6cf1da75837eaa1a5e8d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-91b1f9b/acceptance-report.json",
+      "git_blob_oid": "afd467ab4727c63a4127d42ee360ddb04bca5347"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-91b1f9b/ci-operating.xml",
+      "git_blob_oid": "3f6b3d58ac2e9820e5ae52b7f7d290a471755d01"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-91b1f9b/journey.xml",
+      "git_blob_oid": "d90957b94426824d72babdde35112af69c40a018"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-91b1f9b/manifest.json",
+      "git_blob_oid": "355cae3281898601fe4dcdb3ce065444404b99bd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-91b1f9b/screenshots/CF07-bulk-restart-zh-HK-mobile.png",
+      "git_blob_oid": "9675876042e0f9a5d51733e0145f4d5315ead7ab"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-91b1f9b/screenshots/CF07-unknown-contact-hold-en.png",
+      "git_blob_oid": "ba22292a34b5d0e64fc1181cbc0aada733af4fbf"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-d8ca315/CF08-pg18.xml",
+      "git_blob_oid": "87774444c30b58457dc8df9442c6a30f1bccc70c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-d8ca315/acceptance-report.json",
+      "git_blob_oid": "be5b4b07c5ee05ff1a7267dadb67fd7de4fbe902"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-d8ca315/ci-controller.xml",
+      "git_blob_oid": "0167c15130f4e103b3f4d94fb9d4ef12b3030cd2"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-d8ca315/ci-operating.xml",
+      "git_blob_oid": "85327e51b9cb06e43a7e390135ec88c72e3498d7"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-d8ca315/journey.xml",
+      "git_blob_oid": "4f3928cdf90953de23fe8197916bed3c9f7e53c0"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/ci-d8ca315/manifest.json",
+      "git_blob_oid": "b1ee5779d4ddcbfc155532f3da32b8eb8ce1f606"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/buyers/t08-buyer-dossier-disposable-db.png",
+      "git_blob_oid": "197980dee3227a529dfe5f0e664b1e595013518b"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/buyers/t08-buyer-results-disposable-db.png",
+      "git_blob_oid": "c0aa261c9769bca786d421faac30d613c4d9bcf8"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/buyers/t17-expired-buyer-evidence-fixture.png",
+      "git_blob_oid": "c2e04019fd52ef4293484289a466208972e85c8e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/management/t09-buyer-management-disposable-db.png",
+      "git_blob_oid": "70c3b039b4e6693f6602ab7ed5fb76086ef83e5a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/mvp/t30-partial-en-fixture.png",
+      "git_blob_oid": "461d8c60ccabb09bcecf7f041d4c4869ae2e7bcb"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/mvp/t30-partial-zh-mobile-fixture.png",
+      "git_blob_oid": "f6f3edad467dd0efcb10d15cdc35649632dfeb0c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-en-desktop-approved-export-fixture.png",
+      "git_blob_oid": "8ad8fd5e385e521651a69f7039d4b3cca8d478fa"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-en-desktop-mobile-readback-fixture.png",
+      "git_blob_oid": "07240d63d8aa3aa7c7e927dde864d04b375e0b71"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-en-desktop-outcome-fixture.png",
+      "git_blob_oid": "2ef2d0cedb1787916902e954d279c0c351c7276d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-en-mobile-approved-export-fixture.png",
+      "git_blob_oid": "ca3eec3d420b520a84dc19f70b137e862a36b5dd"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-en-mobile-mobile-readback-fixture.png",
+      "git_blob_oid": "6a915a316f55d39688cb0b3232599e59c2a4718e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-en-mobile-outcome-fixture.png",
+      "git_blob_oid": "6a915a316f55d39688cb0b3232599e59c2a4718e"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-zh-HK-desktop-approved-export-fixture.png",
+      "git_blob_oid": "99b29ad7b24b98e2fcb8e09ce1f9efa9dd413758"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-zh-HK-desktop-mobile-readback-fixture.png",
+      "git_blob_oid": "d57c6c56f30b9b1aa35346c543675a809cb904e9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-zh-HK-desktop-outcome-fixture.png",
+      "git_blob_oid": "e02d131efd9635619b675dc0066df40979ac0edf"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-zh-HK-mobile-approved-export-fixture.png",
+      "git_blob_oid": "4943f3f4a3d74a4e959c56ef0bf131def3a0c28a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-zh-HK-mobile-mobile-readback-fixture.png",
+      "git_blob_oid": "2be699045b8aa4c45be40b22fe34e67145aecbbe"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/research/celery-continuity-zh-HK-mobile-outcome-fixture.png",
+      "git_blob_oid": "bbeb6802dce95ddf43c1c5c85ab91b582f4f03ae"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/workbench/t27-workbench-en-fixture.png",
+      "git_blob_oid": "afc8a6bad40e38a535e565edfb4cff8344928b20"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/workbench/t27-workbench-zh-mobile-fixture.png",
+      "git_blob_oid": "e5c4e5576268623801e608abcc5b05dc6bd66177"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/workbench/t29-live-fixture-en-1440.png",
+      "git_blob_oid": "770170e089ea3e70872cc8afd78adf5ccb4f89d9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/workbench/t29-live-fixture-en-390.png",
+      "git_blob_oid": "a7c3920258d18d73d622900f17fbfb6eca2a306a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/workbench/t29-live-fixture-zh-HK-1440.png",
+      "git_blob_oid": "aa59a830034165b1397096bd885f402830de3ea4"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/workbench/t29-live-fixture-zh-HK-390.png",
+      "git_blob_oid": "a611532b15b7e932b616a1972f576005e5162c6f"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/zoom/t29-api-actual-zoom-en-buyers.png",
+      "git_blob_oid": "35c5f2ddcf33757f93b1ec7499c5af3837da5859"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/zoom/t29-api-actual-zoom-en-operations.png",
+      "git_blob_oid": "f9b1e19b81ed8ba1d2d63234661996e7fa47bce1"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/zoom/t29-api-actual-zoom-zh-HK-buyers.png",
+      "git_blob_oid": "7d7b10c4f5a6e7fe60d317c932e6dbe452ea9b90"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/legacy-screenshots/zoom/t29-api-actual-zoom-zh-HK-operations.png",
+      "git_blob_oid": "182d8a87051d0ac791ce810acaaab2724d66262c"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/migration-plan-validation-20261001.json",
+      "git_blob_oid": "fdf4f7d3c15b466b93020090bc2f7e49711b822d"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/CF07-bulk-restart-zh-HK-mobile.png",
+      "git_blob_oid": "0098e35a3f7990a94ccb323c3e0865244118ad85"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/CF07-unknown-contact-hold-en.png",
+      "git_blob_oid": "ea86123ecb47c4fff247718bc58b9e7cb079ef47"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-desktop-approved-export-fixture.png",
+      "git_blob_oid": "dde051ebcb174c17164bc4f1f7deffc827fed1a9"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-desktop-mobile-readback-fixture.png",
+      "git_blob_oid": "9372318d29730ca8a6f428db5e964831b67695ff"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-desktop-outcome-fixture.png",
+      "git_blob_oid": "0cc480b52feba1d5c2e7fc3021f674f767be16fe"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-mobile-approved-export-fixture.png",
+      "git_blob_oid": "2ac43246f7f01aee4dd3a124ebf40a4b98513d74"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-mobile-mobile-readback-fixture.png",
+      "git_blob_oid": "dd5eba5a04170915ee4a846638b0ac57c6e3ab70"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-mobile-outcome-fixture.png",
+      "git_blob_oid": "dd5eba5a04170915ee4a846638b0ac57c6e3ab70"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-desktop-approved-export-fixture.png",
+      "git_blob_oid": "9b4eaeb875ef43d7f8236449bee02f3ede2cbe39"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-desktop-mobile-readback-fixture.png",
+      "git_blob_oid": "4f61acbab2475622c17159a53b1e8cadf1ef0061"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-desktop-outcome-fixture.png",
+      "git_blob_oid": "b0687ecd74f37c5e2db3a28102476f1b1fae9e3a"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-mobile-approved-export-fixture.png",
+      "git_blob_oid": "a806575c4d49c67a6d0a198a0dc8afd5d2103d29"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-mobile-mobile-readback-fixture.png",
+      "git_blob_oid": "f3709884a9641c4e3a9dfa2d6ef2f18558495910"
+    },
+    {
+      "status": "A",
+      "path": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-mobile-outcome-fixture.png",
+      "git_blob_oid": "171602dabaa20f299dd01306c4ca473829831c6a"
+    },
+    {
+      "status": "A",
+      "path": "docs/buyeros/CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md",
+      "git_blob_oid": "a5c4cf9c6a3982481bf853d1fd80cc173ae65bf6"
+    },
+    {
+      "status": "M",
+      "path": "docs/buyeros/HANDOFF_INDEX.md",
+      "git_blob_oid": "7cccc96fc38b342180dd4d3db9c15a7139891e1f"
+    },
+    {
+      "status": "M",
+      "path": "docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md",
+      "git_blob_oid": "8f92662a66bf797c9e0cc5c718c084f3ba85b069"
+    },
+    {
+      "status": "M",
+      "path": "docs/buyeros/T30_RELEASE_CANDIDATE_HANDOFF_20261001.md",
+      "git_blob_oid": "620acd55aa39a6353148e2c8f513d4ea21ea2806"
+    },
+    {
+      "status": "M",
+      "path": "docs/buyeros/remaining/API_OPERATION_STATUS.csv",
+      "git_blob_oid": "ef9f49fcad552f7d13c81f5ac62e075a6403a346"
+    },
+    {
+      "status": "M",
+      "path": "docs/buyeros/remaining/TASKS.json",
+      "git_blob_oid": "11191dadc2001a328a4ab0e6532fa70c0f9cb605"
+    },
+    {
+      "status": "A",
+      "path": "docs/buyeros/runbooks/cloudflare-operating-conditions.md",
+      "git_blob_oid": "172c9308081746cb9e8588b8f5696c512007be1e"
+    },
+    {
+      "status": "A",
+      "path": "docs/buyeros/runbooks/cloudflare-preview-probe.md",
+      "git_blob_oid": "b294c1c6395f7e736ad58451b23e8ce16e43c889"
+    },
+    {
+      "status": "A",
+      "path": "docs/buyeros/runbooks/cloudflare-worker-setup.md",
+      "git_blob_oid": "461fdb921ec42bc7b5e1e4df921ad459d449aa5e"
+    },
+    {
+      "status": "A",
+      "path": "docs/superpowers/plans/2026-10-01-cloudflare-job-migration.md",
+      "git_blob_oid": "1e43ca035f6d45a38d18a0e385779c4f8cce4e9b"
+    },
+    {
+      "status": "A",
+      "path": "docs/superpowers/specs/2026-10-01-cloudflare-job-migration-design.md",
+      "git_blob_oid": "84dcb1f26be13fd05a291ec70c30dbc000e76e29"
+    },
+    {
+      "status": "M",
+      "path": "eslint.config.mjs",
+      "git_blob_oid": "a9f48222e491e1593bc0db435aa3131ba924e1a5"
+    },
+    {
+      "status": "M",
+      "path": "package.json",
+      "git_blob_oid": "14a38d647c989a916e7e1c2f18f3da149e788a4b"
+    },
+    {
+      "status": "M",
+      "path": "playwright.buyer-management.config.ts",
+      "git_blob_oid": "2c2201643a104938ecf9930e6757ef8cf8954c02"
+    },
+    {
+      "status": "M",
+      "path": "playwright.buyer.config.ts",
+      "git_blob_oid": "bcc5ec73a1292304fe541b1d60dc9b2a64b0a60e"
+    },
+    {
+      "status": "A",
+      "path": "playwright.cloudflare.config.ts",
+      "git_blob_oid": "b213fd506ffcb94e71d848b5c518e0a361aa73be"
+    },
+    {
+      "status": "M",
+      "path": "playwright.mvp-research.config.ts",
+      "git_blob_oid": "f75877e9590d994c59bd31a74099b60f17bd4995"
+    },
+    {
+      "status": "M",
+      "path": "playwright.mvp.config.ts",
+      "git_blob_oid": "b574a5760a84eea041a782c401b454ea210228d2"
+    },
+    {
+      "status": "M",
+      "path": "playwright.workbench.config.ts",
+      "git_blob_oid": "e26867a7742c5784d4ab0a52aa3c927b852673e3"
+    },
+    {
+      "status": "M",
+      "path": "pnpm-lock.yaml",
+      "git_blob_oid": "fd1522ac2f2cc940abe4a196b9725742c2df5623"
+    },
+    {
+      "status": "M",
+      "path": "pnpm-workspace.yaml",
+      "git_blob_oid": "e82202b35c28f53cc932c50cc912cb76252f7822"
+    },
+    {
+      "status": "A",
+      "path": "scripts/cloudflare-preview/runtime_probe.py",
+      "git_blob_oid": "5133ba92435aa8ff0629047b7083afe3ca2f96a4"
+    },
+    {
+      "status": "A",
+      "path": "scripts/generate-worker-api-types.mjs",
+      "git_blob_oid": "348b9038953af9d550a3d896ff1788606970dda8"
+    },
+    {
+      "status": "A",
+      "path": "scripts/prepare-cloudflare-preview.py",
+      "git_blob_oid": "645e8e9b41aa1be7d2248e1dda368fee1cac6804"
+    },
+    {
+      "status": "A",
+      "path": "scripts/run-cloudflare-acceptance.mjs",
+      "git_blob_oid": "3841722c348d4143b85933692fc9923dc427e374"
+    },
+    {
+      "status": "A",
+      "path": "scripts/run-cloudflare-pg18-proof.py",
+      "git_blob_oid": "3c3c2f4217436c9b3c61f5f5ef0a37533989b700"
+    },
+    {
+      "status": "A",
+      "path": "scripts/serve-built-ui-fixture.mjs",
+      "git_blob_oid": "5b64a73e2812bf9474078997a8cd46a5b9d82798"
+    },
+    {
+      "status": "A",
+      "path": "scripts/serve-cloudflare-fixture.mjs",
+      "git_blob_oid": "52bf5952ec0d0698e7cd22f457cc62d44b360580"
+    },
+    {
+      "status": "A",
+      "path": "services/api/alembic/versions/0034_worker_execution.py",
+      "git_blob_oid": "3b813d1e12b34816778d15c71648b9c4000e994a"
+    },
+    {
+      "status": "A",
+      "path": "services/api/alembic/versions/0035_worker_recovery_probe.py",
+      "git_blob_oid": "3bafa3bbf0971d38d54bc551430f35db34fce12a"
+    },
+    {
+      "status": "M",
+      "path": "services/api/buyeros_api/api/app.py",
+      "git_blob_oid": "8a9a1fc6926e32f902a59427df39d58f9dee0698"
+    },
+    {
+      "status": "M",
+      "path": "services/api/buyeros_api/api/routes/documents.py",
+      "git_blob_oid": "317254f7aab4f96e261f088b339e2d0f3b4bbbe1"
+    },
+    {
+      "status": "M",
+      "path": "services/api/buyeros_api/api/routes/health.py",
+      "git_blob_oid": "48591fac22e26be67a543112a3438961b9287324"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/api/routes/worker_internal.py",
+      "git_blob_oid": "ca909b9277a4a64f4cf5fc76b76578aeaa459347"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/api/worker_auth.py",
+      "git_blob_oid": "a5161a8c2fb96cbace663f30099e168ce9d55ec2"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/api/worker_schemas.py",
+      "git_blob_oid": "2ab91354baf31e1a881715389c30dd27ccac5dcf"
+    },
+    {
+      "status": "M",
+      "path": "services/api/buyeros_api/db/__init__.py",
+      "git_blob_oid": "4cc1b3ac667dba367d491d3808740fa651b422a4"
+    },
+    {
+      "status": "M",
+      "path": "services/api/buyeros_api/db/outbox.py",
+      "git_blob_oid": "6afe8029c8b8907c2e7ca129e6e8e49d51484ce8"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/db/worker_execution.py",
+      "git_blob_oid": "f42a72a605d79a6a8e63a77a597896cafe5d20f5"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/__init__.py",
+      "git_blob_oid": "a58293d6190c06bcde9d26268b54c2723bf4a7c3"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/checkpoints.py",
+      "git_blob_oid": "7020c5e2e693fc621d7a89382b354140b50a1c5a"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/config.py",
+      "git_blob_oid": "db07a7edc5c86c5a2af51d08badb66677d62de51"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/discovery_runner.py",
+      "git_blob_oid": "a56c07e6324f947a946db9cc1864342b6242f16b"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/dispatcher.py",
+      "git_blob_oid": "bd27ac95b6ff7fcc9b680789c22fd12d6e6f2e14"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/document_runner.py",
+      "git_blob_oid": "b9b5f333de8385649a94c9a3d4651b6e0ee2634a"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/domain_executor.py",
+      "git_blob_oid": "39a20d07e20690c3bba6d3469759255f412f0447"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/engine.py",
+      "git_blob_oid": "62ee81815af667c1c29393b568efafc105713f22"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/external_runner.py",
+      "git_blob_oid": "41c8e382d1b30733568e6e6d98859db1ffc1b8f6"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/fetch_runner.py",
+      "git_blob_oid": "37a18e46e1b0f36d00b6fb5751e686625acf9b90"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/fit_execution.py",
+      "git_blob_oid": "b1e3722a954632a3a409fdf66366ce4e1260bb00"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/fit_runner.py",
+      "git_blob_oid": "d51e8603dba5dacbb310dfe1dc64eee22c945cf6"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/handlers/__init__.py",
+      "git_blob_oid": "2fd46a31003491df89e4ee05042af798eebffefa"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/handlers/bulk_mutate.py",
+      "git_blob_oid": "26c96a68ffb7cd0036a201320ccc03175e30d080"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/handlers/capability_blocked.py",
+      "git_blob_oid": "1949a3085cc256eda101b0bd03d36dd8e117880c"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/handlers/contact_submit.py",
+      "git_blob_oid": "b3cc99ce0c43b20d7a55695fac8dbebab3adc39a"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/handlers/draft_generate.py",
+      "git_blob_oid": "8bc064cf9d6b5a496eb3ad9260c47e82f502e558"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/handlers/fetch_evidence.py",
+      "git_blob_oid": "1b1bfd2bde2ebc7a007a92e2609c3e1498ff4009"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/handlers/reconcile.py",
+      "git_blob_oid": "9986a95b29d15fd5e911077a1836b191d9fb5a69"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/handlers/retention.py",
+      "git_blob_oid": "62c19bd05a73f36cb06c40204b84cfde86500ede"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/leases.py",
+      "git_blob_oid": "256ec9ac1dcc7ab21c3ebdf3dd092d76c210a698"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/pdf_parser.py",
+      "git_blob_oid": "f558a413532920d0b236ada33372a91fc80a5760"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/pdf_parser_child.py",
+      "git_blob_oid": "9a88aeb0170639ec2470c840a3d669bcf1c4a333"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/provider_context.py",
+      "git_blob_oid": "508baf78035390a974c8daac465d3f207a2cd6f7"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/provider_dispatch.py",
+      "git_blob_oid": "33257b959217868fe7666589500985de36cbfa11"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/registry.py",
+      "git_blob_oid": "baec808c1610a2aa3a941d84d178865849c3c33f"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/research_graph.py",
+      "git_blob_oid": "0d9c69473f58c610f42ab89250f2091efde619e2"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/run_emitter.py",
+      "git_blob_oid": "9a129be709969e660d24f55d84ff457220f9978f"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/run_lifecycle.py",
+      "git_blob_oid": "a66afd5f64d270e5975b5246f1abb93a648f921f"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/step_runner.py",
+      "git_blob_oid": "edfbb9f0ca048005706aa0d560c8acb6af836bb3"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/execution/subprocess_runtime.py",
+      "git_blob_oid": "11a10f643e0fda836441a417c1245162cac0151d"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/services/worker_execution.py",
+      "git_blob_oid": "f2b12d4c010cee51cb2d2a4cd903f21ad3a119f3"
+    },
+    {
+      "status": "A",
+      "path": "services/api/buyeros_api/services/worker_recovery.py",
+      "git_blob_oid": "248d7869aee1316b5abab3c6fea0fcc4df1c9766"
+    },
+    {
+      "status": "M",
+      "path": "services/api/buyeros_api/settings.py",
+      "git_blob_oid": "c8d1693251e141810f3cf34889eee2600a2f34cb"
+    },
+    {
+      "status": "A",
+      "path": "services/api/contracts/worker.openapi.json",
+      "git_blob_oid": "c20112d7d326915cd46c2506e31a07a5cf489970"
+    },
+    {
+      "status": "M",
+      "path": "services/api/pyproject.toml",
+      "git_blob_oid": "9c0920b49c587fb61847f5bab3e5164b6e21cd39"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/benchmark_cloudflare_case.py",
+      "git_blob_oid": "373a4745f16cf03efaa6f675bc922019734348ad"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/cloudflare_fixtures.py",
+      "git_blob_oid": "defc340af83ea9463af7afcf85fb1ae1b2efb193"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_admin_operations_db.py",
+      "git_blob_oid": "f5acc1c09925f8e968f3baee5ed51e8a3e2e0d15"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_backup_restore_t28.py",
+      "git_blob_oid": "2151761f5696359a378badbac651dda8b56acdf5"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_budget_atomicity_db.py",
+      "git_blob_oid": "757408b8e72add84f8e209b967b4a3a376308716"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_bulk_jobs_db.py",
+      "git_blob_oid": "8e8548b0811313f0b4c0e0dbea54865c019a4827"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_buyer_management_db.py",
+      "git_blob_oid": "51af82629f49403a6bce0639e4f14bc959684529"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_cloudflare_bridge_db.py",
+      "git_blob_oid": "fc95e011c9a3b031b91f5ae634f0c11ce9c2507e"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_cloudflare_local_steps_db.py",
+      "git_blob_oid": "2683496ca0da3172a0edab16732f55cf9a70b924"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_cloudflare_migration_db.py",
+      "git_blob_oid": "cd86d0e3ca709c47475abfa78b35f4b968ad49a3"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_cloudflare_platform_db.py",
+      "git_blob_oid": "fef6e6f99388f06198e339100a56bf9cba4a4c27"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_cloudflare_preview_diagnostic.py",
+      "git_blob_oid": "88a8abe673ce44ba007de5194c7e49544bc7b64c"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_cloudflare_provider_steps_db.py",
+      "git_blob_oid": "40d00f222131ab18559461cd95f7a01ecdbc4b95"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_cloudflare_recovery_boundaries_db.py",
+      "git_blob_oid": "3947a62210ca25e45f5d36602870e0200182c2f4"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_cloudflare_recovery_db.py",
+      "git_blob_oid": "70851d7edfe0ffb310c1fd8873d3d6b4b75250b9"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_cloudflare_runtime_control_db.py",
+      "git_blob_oid": "88c8caa39a461e6fc7fd6244d356134ca03506ff"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_cloudflare_runtime_probe.py",
+      "git_blob_oid": "e20eb626cc6a3ef0a19439a4792cb7133949ed8d"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_contact_job_migration.py",
+      "git_blob_oid": "6fe26badb5dee77c7eec843c3c9a497d6b01032f"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_contact_quote_migration.py",
+      "git_blob_oid": "658776febbeb38d8f7f4ee7fcf5c39615c1452b7"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_draft_approval_migration.py",
+      "git_blob_oid": "971c8d6aa5a0367ca7fc1518892f3f2b70cbf5b7"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_draft_integrity_migration.py",
+      "git_blob_oid": "95cd27f0f50dd56256da5af9cda889f56306dfe1"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_export_migration.py",
+      "git_blob_oid": "02fab8b8a740b3900afedd2252ce50f3df5e203d"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_outcome_migration.py",
+      "git_blob_oid": "feede5d7f285e8bfcc3f98bb364d7680a573f755"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_pdf_subprocess_runtime.py",
+      "git_blob_oid": "37463ff3e6bf9f1614d851f5aa571f30f4d85be5"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_policy_lifecycle_db.py",
+      "git_blob_oid": "038c440ed1ab27918acce97fe9738f4a8767a077"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_project_constraints_db.py",
+      "git_blob_oid": "faa2ecce2e76014c1540e91fb046cd1cc66eb5b0"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_research_checkpoint_migration.py",
+      "git_blob_oid": "962effd391c55cd285168d8ce87961f28a96aefa"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_retention_authorization_db.py",
+      "git_blob_oid": "7498a04588c0d3a5cf02d80111a071fb76aaeee7"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tests/test_runtime_readiness_db.py",
+      "git_blob_oid": "b6a08e374ed4e36452d7db0b11d466a7e836d62f"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tests/test_sender_identity_migration.py",
+      "git_blob_oid": "f2f611492ccf87c9cdcd4c1bb7353da16bb3e648"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tools/export_worker_openapi.py",
+      "git_blob_oid": "d4e2b95d3f2affd3d11da4bde9cef15a338aff2b"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tools/probe_worker_runtime.py",
+      "git_blob_oid": "68bbbd4225a2dad2f757fab824cb685389b06134"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tools/serve_cloudflare_e2e.py",
+      "git_blob_oid": "a0440c8082158490136005ade407c46416f6b082"
+    },
+    {
+      "status": "M",
+      "path": "services/api/tools/serve_e2e_fixture.py",
+      "git_blob_oid": "1d8d0f5cdee080962a133612c43bf242c763a727"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tools/set_execution_runtime.py",
+      "git_blob_oid": "e4ec9caca6832b70c77551a7ce377dcefbad09b1"
+    },
+    {
+      "status": "A",
+      "path": "services/api/tools/worker-runtime-probe.Dockerfile",
+      "git_blob_oid": "ab51ca85105189f371397bc5eaa2acc26c53567a"
+    },
+    {
+      "status": "M",
+      "path": "services/api/uv.lock",
+      "git_blob_oid": "8413c939f2630b6fee19b7a3b8910760ade1a5a3"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/.gitignore",
+      "git_blob_oid": "bd92275f0c29069cf999cf082eb7395d6071aeb2"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/src/api-client.ts",
+      "git_blob_oid": "becac8c8c4384c22e365d77dc9b45a4257cad5dc"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/src/dispatcher.ts",
+      "git_blob_oid": "46f474d4f34849cda24164800897179d37f8284a"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/src/index.ts",
+      "git_blob_oid": "01ce3e34a976f497cbb3a5fb6210609f7c58f5a3"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/src/protocol.ts",
+      "git_blob_oid": "539e342a7a9aca5fced65ff771d80b87362854d8"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/src/queue.ts",
+      "git_blob_oid": "1dd53eef92a3dc0062fa7c82aea8a76b1203bd0f"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/src/worker-api.generated.ts",
+      "git_blob_oid": "8109e0e9af63ba3a8dd8dc49dd0d79bfa6dcebe8"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/src/workflow.ts",
+      "git_blob_oid": "a744a13135d879cb8b62b85a280f85b5f0627b02"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/api-client.test.ts",
+      "git_blob_oid": "e5d7ae84e300859c22075de6fb06e53dc61388e5"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/dispatcher.test.ts",
+      "git_blob_oid": "c2331f49ddd1234622a15532ccbdd7f44e494a3d"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/handler.test.ts",
+      "git_blob_oid": "62d6e9a82b9173eb10855e626a502391c6b574b2"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/network.ts",
+      "git_blob_oid": "222b4960f6c4ad82f228e14ac39bc7982c60e665"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/operating.integration.ts",
+      "git_blob_oid": "487622c06459dec2e5d120083156906d4579a713"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/platform-pg.integration.ts",
+      "git_blob_oid": "f025988dbd11c2d4c62ab62f61b232be11b6eeb9"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/platform.test.ts",
+      "git_blob_oid": "17403b0a09605d60a81c0144af1d65226218eb98"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/protocol.test.ts",
+      "git_blob_oid": "b6231f920a963f7aeb0f86d8f90011238f704dfc"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/queue.test.ts",
+      "git_blob_oid": "d154864f22b0d780dccac82c9904ce39affee948"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/setup.ts",
+      "git_blob_oid": "a876df868df203e4118aae0f7677304ef01a141b"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/tsconfig.json",
+      "git_blob_oid": "e80497e0e3d9ab7dcfec1a45d028127326ce60f9"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tests/workflow.test.ts",
+      "git_blob_oid": "cf7118fab59715a690c6a55e6ff0535ff6347a87"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/tsconfig.json",
+      "git_blob_oid": "bba78199766508ecbaaa55a9b7ff572e8dd5757d"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/vitest.config.ts",
+      "git_blob_oid": "915afe7476adde3078ca069d7eb7353a993b947d"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/vitest.operating.config.ts",
+      "git_blob_oid": "b372e5732acb271968b7c30f8beef826fbaecc22"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/vitest.pg.config.ts",
+      "git_blob_oid": "7fa2969e0ece22294d75ed909077a14b1c07542a"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/worker-configuration.d.ts",
+      "git_blob_oid": "a356cb4bc22a8a866bf22d0c05a691de09d61c6d"
+    },
+    {
+      "status": "A",
+      "path": "services/cloudflare-jobs/wrangler.jsonc",
+      "git_blob_oid": "e41c8e4a2045a17234f0c2b8ee343c68cd1be4b9"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/checkpoints.py",
+      "git_blob_oid": "b4f1d55a2da56c60cdab12aad45decd80a710039"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/config.py",
+      "git_blob_oid": "6c55a64399828c83ea47c2aaec3108d31774e0d4"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/discovery_runner.py",
+      "git_blob_oid": "d003bc0e86b929e91dbc6acdeacc60f41d8e6d69"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/dispatcher.py",
+      "git_blob_oid": "42d460fd5020097e64535e699424262d1158dbb6"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/document_runner.py",
+      "git_blob_oid": "e3223207959253f4d5d050514d8538c191d71375"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/engine.py",
+      "git_blob_oid": "d1f409f54adf678ff8d7317814f0b8fa0df9b458"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/external_runner.py",
+      "git_blob_oid": "fd4f5812e0cc918f25973f8bb101ecb3ef333040"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/fetch_runner.py",
+      "git_blob_oid": "c23bb9148a7df7fe8eab402540a286865b33eb1c"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/fit_execution.py",
+      "git_blob_oid": "e8fe472f6a12d5ea10e3a6eb65eecdeef4a4cd2f"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/fit_runner.py",
+      "git_blob_oid": "23ca050205e745a1c1f7fbefafb6f4ceeb114eb4"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/handlers/bulk_mutate.py",
+      "git_blob_oid": "d349cbe2e122a1648f80d4da79fb150968c25135"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/handlers/capability_blocked.py",
+      "git_blob_oid": "912c072d335837b9f4f59a08c4fb86685e3c7895"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/handlers/contact_submit.py",
+      "git_blob_oid": "e36e587cb6dcaadbf2fa2db64fdeb24825ffc7d6"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/handlers/draft_generate.py",
+      "git_blob_oid": "452651e92533d92a92ea5f80d1baab9e17cac387"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/handlers/fetch_evidence.py",
+      "git_blob_oid": "3c5356fb6d6fe62af9fc0a29c113b3ed8f3c706c"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/handlers/reconcile.py",
+      "git_blob_oid": "07e17a983503c52123594b92e470697d8d94d280"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/handlers/retention.py",
+      "git_blob_oid": "fe46bc4b21cb7db1ec3cef27629561880aadab8f"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/leases.py",
+      "git_blob_oid": "42fc3782c9a39e0af16c86f361b903fa84e2aba0"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/pdf_parser.py",
+      "git_blob_oid": "e47f8a40af68fc00f0e6d0b26a0427cd01d11d91"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/pdf_parser_child.py",
+      "git_blob_oid": "7a5d600f26853a7d7a044cb373a59f043fddd443"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/registry.py",
+      "git_blob_oid": "095240412794e6e18b4e8be610314c81a807a5a5"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/research_graph.py",
+      "git_blob_oid": "3fcce8dbc4293ba4903a142d7d6f2bd259fa9a0c"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/run_emitter.py",
+      "git_blob_oid": "09282f3556c014922b1374f2db24d298c9735d79"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/run_lifecycle.py",
+      "git_blob_oid": "689a4f09997f908af21e91d768940d3cf3b1d955"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/buyeros_worker/tasks.py",
+      "git_blob_oid": "9fec354391abf3ded31874382d38c61bea8c19a5"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/pyproject.toml",
+      "git_blob_oid": "5ef6c2ec5671d907eaa427948813d1e9be409b41"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/tests/conftest.py",
+      "git_blob_oid": "e3e2dd4a90e660fb515145b094a7e8b11a08b656"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/tests/fixtures/run_browser_research.py",
+      "git_blob_oid": "986c5036085179813fa38d183fec3708bf28d78b"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/tests/fixtures/t30_celery.py",
+      "git_blob_oid": "45f1e884eee4110e794204c807a2080e3d7be883"
+    },
+    {
+      "status": "A",
+      "path": "services/worker/tests/test_browser_worker_runtime_fixture.py",
+      "git_blob_oid": "4b52803623601a6199aee8b10af617386b120bb7"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/tests/test_dispatcher.py",
+      "git_blob_oid": "355f9c4959aaded6e778f42a6fc54d786b996bd0"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/tests/test_grounded_drafts.py",
+      "git_blob_oid": "3825fd68dcf67af94d2dc0d9b5cd6939f74c50c7"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/tests/test_tasks.py",
+      "git_blob_oid": "78a7750a8dc2d30a4c0c0bd2be9a7185c28f7c15"
+    },
+    {
+      "status": "A",
+      "path": "services/worker/tests/test_transport_independence.py",
+      "git_blob_oid": "23e041e1850b6dc064b254bc3165ae153015eb61"
+    },
+    {
+      "status": "M",
+      "path": "services/worker/uv.lock",
+      "git_blob_oid": "b001c32c7d713aa04cb5b00dca88c1ba072f63d1"
+    },
+    {
+      "status": "A",
+      "path": "tests/deployment/built-ui-fixture.test.mjs",
+      "git_blob_oid": "4b37b9d1ddacf4b41e4269ff551ec55e93dd9232"
+    },
+    {
+      "status": "A",
+      "path": "tests/deployment/cloudflare-acceptance.test.mjs",
+      "git_blob_oid": "922ff4a649241d4cc796bd4a0c043c0eabdd343e"
+    },
+    {
+      "status": "A",
+      "path": "tests/deployment/cloudflare-python-runtime.test.mjs",
+      "git_blob_oid": "602484d5c7b44f87135a53a335aa352da804feab"
+    },
+    {
+      "status": "A",
+      "path": "tests/deployment/cloudflare-release-config.test.mjs",
+      "git_blob_oid": "938b22e51f4633fbd16073f87db1e63d1c678b00"
+    },
+    {
+      "status": "M",
+      "path": "tests/e2e/buyer-results.spec.ts",
+      "git_blob_oid": "b95521f5dff25fd0cda79640313563584c01327d"
+    },
+    {
+      "status": "A",
+      "path": "tests/e2e/cloudflare-journey.spec.ts",
+      "git_blob_oid": "ddeb96bb9015df51318479890f11db9e17048320"
+    },
+    {
+      "status": "M",
+      "path": "tests/e2e/daily-workbench.spec.ts",
+      "git_blob_oid": "9ec17e87450fd2707f8ff4980d88985f8cc4263a"
+    },
+    {
+      "status": "A",
+      "path": "tests/e2e/fixtures/cloudflare-stack.ts",
+      "git_blob_oid": "77a3d17469efe219e969aa0b537f53101c7ab783"
+    },
+    {
+      "status": "A",
+      "path": "tests/e2e/fixtures/cloudflare-teardown.ts",
+      "git_blob_oid": "65e969fdf0a646aeccb01d9c0c4b80a1ac4bf785"
+    },
+    {
+      "status": "A",
+      "path": "tests/e2e/fixtures/staff-journey.ts",
+      "git_blob_oid": "1dc42d75a618df228d15d6a983e7d75bc2365ecd"
+    },
+    {
+      "status": "M",
+      "path": "tests/e2e/mvp-a-research.spec.ts",
+      "git_blob_oid": "65858edddb311b3f4837ebd5c4793f2f221088b9"
+    },
+    {
+      "status": "A",
+      "path": "tests/integration/cloudflare-recovery.test.ts",
+      "git_blob_oid": "299e8b2a5db52819bb6afcfb81e20687b3c1fe2f"
+    },
+    {
+      "status": "M",
+      "path": "tests/vercel-services.test.mjs",
+      "git_blob_oid": "57a329dfe38e8b59c7dfed5bc4ab87685da9264b"
+    },
+    {
+      "status": "A",
+      "path": "tests/worker-gateway.test.mjs",
+      "git_blob_oid": "5b21ddd73c36f9037f27e0338ae78a28b54f40c9"
+    },
+    {
+      "status": "M",
+      "path": "tsconfig.json",
+      "git_blob_oid": "03950df02388c86cccd6217e718e416a0a4b503f"
+    },
+    {
+      "status": "M",
+      "path": "vercel.json",
+      "git_blob_oid": "e6d573a1ef7d84d1d6b2894da8fe0006a74a9058"
+    },
+    {
+      "status": "M",
+      "path": "vite.config.ts",
+      "git_blob_oid": "d7548f9c9bd26277256f6224fac2c64ed1482984"
+    }
+  ],
+  "current_session_committed_delta": [
+    "M\t.github/workflows/buyeros-ci.yml",
+    "A\tartifacts/cloudflare/CF00-child-error-green.xml",
+    "A\tartifacts/cloudflare/CF00-child-error-red.xml",
+    "A\tartifacts/cloudflare/CF00-handler-green.xml",
+    "A\tartifacts/cloudflare/CF00-handler-red.xml",
+    "A\tartifacts/cloudflare/CF00-hostname-duration-local.json",
+    "A\tartifacts/cloudflare/CF00-hostname-green.xml",
+    "A\tartifacts/cloudflare/CF00-hostname-red.xml",
+    "A\tartifacts/cloudflare/CF00-legacy-isolation-green.xml",
+    "A\tartifacts/cloudflare/CF00-missing-module-green.xml",
+    "A\tartifacts/cloudflare/CF00-vendor-native-local.json",
+    "A\tartifacts/cloudflare/CF00-vendor-path-green.xml",
+    "A\tartifacts/cloudflare/CF00-vendor-path-red.xml",
+    "M\tscripts/cloudflare-preview/runtime_probe.py",
+    "M\tscripts/prepare-cloudflare-preview.py",
+    "M\tservices/api/buyeros_api/execution/pdf_parser.py",
+    "A\tservices/api/buyeros_api/execution/subprocess_runtime.py",
+    "M\tservices/api/tests/test_cloudflare_local_steps_db.py",
+    "M\tservices/api/tests/test_cloudflare_preview_diagnostic.py",
+    "A\tservices/api/tests/test_pdf_subprocess_runtime.py",
+    "M\tservices/api/tools/probe_worker_runtime.py"
+  ],
+  "uncommitted_documentation_and_evidence": "Following evidence-only commit records hosted proofs without changing deployed source",
+  "schema": "No new revision; fresh preview initialized through existing sole Alembic0035 only; no production migration",
+  "production_deployed_sha": "No new Cloudflare production source proven"
+}
