@@ -13,4 +13,4 @@ assert fixtures.POSTGRES_IMAGE=='postgres:16'
 fixtures.POSTGRES_IMAGE='postgres:18'
 print('Owned PG18 compatibility: fresh loopback postgres:18; inherited DB rejected; no cloud credentials; fixtures clean their own containers')
 import pytest
-raise SystemExit(pytest.main(['tests/test_cloudflare_migration_db.py','tests/test_cloudflare_bridge_db.py','tests/test_cloudflare_runtime_control_db.py','tests/test_cloudflare_recovery_db.py','tests/test_cloudflare_platform_db.py','-q','--junitxml=../../artifacts/cloudflare/CF08-pg18.xml']))
+raise SystemExit(pytest.main(['tests/test_checkpoint_schema_privileges_db.py','tests/test_cloudflare_migration_db.py','tests/test_cloudflare_bridge_db.py','tests/test_cloudflare_runtime_control_db.py','tests/test_cloudflare_recovery_db.py','tests/test_cloudflare_platform_db.py','-q','--junitxml=../../artifacts/cloudflare/CF08-pg18.xml']))

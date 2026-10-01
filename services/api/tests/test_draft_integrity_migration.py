@@ -10,7 +10,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import api
 from tests.test_lookup_quotes_db import PROJECT, WORKSPACE_A, quote_case
 
-HEAD = "0035_worker_recovery_probe"
+HEAD = "0036_checkpoint_schema_grants"
 
 
 def _config():

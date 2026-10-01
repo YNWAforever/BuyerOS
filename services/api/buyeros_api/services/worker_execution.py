@@ -17,6 +17,9 @@ from buyeros_api.settings import get_settings
 
 WORKER_ROLE_CATALOG_SQL = (
     "SELECT NOT rolsuper AND NOT rolbypassrls AND pg_has_role(current_user,'buyeros_worker','MEMBER') "
+    "AND has_table_privilege(current_user,'buyeros_graph.checkpoint_migrations','SELECT') "
+    "AND NOT has_table_privilege(current_user,'buyeros_graph.checkpoint_migrations',"
+    "'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') "
     "AND NOT EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
     "WHERE n.nspname IN ('public','buyeros_graph') AND c.relkind IN ('r','p') "
     "AND c.relowner=pg_roles.oid) "

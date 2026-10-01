@@ -1182,3 +1182,37 @@ Private Cloudflare preview Worker versionad6f1ed8-8a30-4161-9c6d-7946b2fd17d8 an
 ### Final pushed source and current UI evidence
 
 Source79d6caf8b51aac00560cf6d69b0198c8614df528 CI36893525903:8/8SUCCESS; API686/0/0/0 (261.25s,97warnings), worker186/0/0/0 (25.60s,1warning), controller27, PG18compat29/operating2/staff7, legacy4/8/1/3/1, zoom2/smoke1. Exact current official artifactdigest45b17aa6…3421eaa,19 sourcehashes and syntheticmerge tree verified;12 fresh root journeyPNG +2special cases retained after confirmed one-line upload selection fix. Four en/zh-HK desktop/mobile captures visually inspected; no assistive/live-provider claim. Current final manifest/visualreview and hosted checkpoint linked in handoff. Preview idle rechecked via control-plane GET at16:48:01Z, no runtime connect. Earlier685pass1failure retained; stronger exactpath/secret negatives pass. No production/schema/provider/billing/merge action. Following commit is documentation/evidence only, with current sourceCI proof retained; any automatically triggered new CI status remains separate.
+
+## CF08 production inspection and checkpoint permission correction — 2026-10-02 HK
+
+Completed checkpoint8ffd91f CI36895867947 is now SUCCESS8/8: API686/0/0/0 in272.48s,
+worker186/0/0/0 in36.11s, controller27, PG18compat29, operating2, staff7,
+legacy4/8/1/3/1, zoom2, smoke1. This predates the new permission correction below.
+
+GET-only platform inspection confirms production still12327c7/READY, Vercel Pro/active,
+iad1 and the app-to-internal-api binding. Neon remains Free/PG18/Singapore,0.25..2CU.
+Two bounded READ ONLY/REPEATABLE READ catalog/aggregate transactions (3s statement,
+15s transaction limit; no fixtures/customer identifiers) confirm production0033,
+users/workspaces/memberships1 each, projects0, outbox/provider/holds0, workerNOLOGIN,
+no runtime connections and no selector. Existing checkpoint schema is0..9, owner-held,
+with tenant ENABLE/FORCE RLS; worker lacks schema CREATE. Subsequent control-plane GET
+at2026-10-02 01:36:45HK confirms computeidle. No production row/schema/role changed.
+
+Inspection exposed worker DML on checkpoint_migrations from0022's broad table grant.
+Fresh-owned regression RED4failed/2passed/1deselected/0errors/0skips in74.53s;
+version rows are rolled back even during RED. Verified0035 sole head before allocating
+0036_checkpoint_schema_grants. It revokes worker version-table privileges and grants
+only SELECT; the runtime catalog rejects reintroduced writes. Downgrade intentionally
+retains read-only hardening and every checkpoint row. The operator's exact-head gate
+then failed1/7passed in95.92s; compatible0035/0036 markers are now accepted, with the
+strict runtime catalog still required. Eighteen existing test files advance only
+current-head expectations; original downgrade targets and business assertions remain.
+
+Current correction: focused23/0/0/0 in65.02s (24warnings), actual ownedPG18
+37/0/0/0 in83.82s (15warnings), full shared worker186/0/0/0 in67.18s
+(4warnings), gateway/release4/0/0 and78-operation contract check pass. PG18 now includes
+the eight new regressions. Original CF08/platform evidence is preserved; fresh reports
+use CF08-checkpoint-grants-* paths. Full current API/UI/Linux CI remains pending.
+No new hosted verification or production0036 application is claimed. Next: publish
+the current correction and exact bounded production setup proposal for review;
+production/provider/R2/pilot/independent-review gates remain separate.

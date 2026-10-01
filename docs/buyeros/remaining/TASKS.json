@@ -1974,6 +1974,30 @@
       "test_merge_sha": "d3a72bfc68d80e1b788ba6ded65075d61242f270",
       "test_merge_tree_equals_source": true,
       "scope": "Actual local runtime/PG/UI with fictional identity/providers; hosted native and operational proof at595865f separate"
+    },
+    "production_preflight": {
+      "status": "permission_correction_local_verified_current_ci_pending",
+      "production_schema": "0033_api_rate_windows",
+      "current_repository_head": "0036_checkpoint_schema_grants",
+      "production_mutations": false,
+      "production_runtime_login_configured": false,
+      "current_permission_tests": {
+        "focused": 23,
+        "pg18": 37,
+        "worker": 186,
+        "gateway_release": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "ci_before_correction": {
+        "source_sha": "8ffd91fccee5d9fad25b108759c39686a5dac171",
+        "run_id": 36895867947,
+        "status": "success",
+        "jobs": 8
+      },
+      "production_activation_approved": false,
+      "next_eligible_task": "Current-source CI and exact guarded production setup proposal; retain expired preview fences and independent-review/provider/policy gates"
     }
   },
   "deployed_source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
