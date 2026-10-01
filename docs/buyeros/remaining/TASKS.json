@@ -1940,7 +1940,7 @@
       "billing_plan_changed": false,
       "session_closed": true
     },
-    "reviewed_source_sha_scope": "Author-reviewed permission correction23 source files; local focused23/PG18compat37/worker186/gateway4 verified. Current full CI pending; independent review pending. Prior hosted595865f at0035 remains separate.",
+    "reviewed_source_sha_scope": "Author-reviewed permission correction23 source files; local focused23/PG18compat37/worker186/gateway4 and current full CI36905204388 eight jobs SUCCESS at identical-code a50ce72 verified. Independent review pending. Prior hosted595865f at0035 remains separate.",
     "hosted_integration_verified_scope": "Isolated approved fictional native/PDF/checkpoint/protection/61-second two-hop and one ID-only Queue/Workflow/HMAC/API/Neon receipt only; no staff/customer/provider/production verification",
     "post_hosted_regression_ci": {
       "run_id": 36893525903,
@@ -1976,7 +1976,7 @@
       "scope": "Actual local runtime/PG/UI with fictional identity/providers; hosted native and operational proof at595865f separate"
     },
     "production_preflight": {
-      "status": "permission_correction_local_verified_current_ci_pending",
+      "status": "permission_correction_local_and_ci_verified_exact_production_setup_approval_pending",
       "production_schema": "0033_api_rate_windows",
       "current_repository_head": "0036_checkpoint_schema_grants",
       "production_mutations": false,
@@ -1997,16 +1997,53 @@
         "jobs": 8
       },
       "production_activation_approved": false,
-      "next_eligible_task": "Current-source CI and exact guarded production setup proposal; retain expired preview fences and independent-review/provider/policy gates",
+      "next_eligible_task": "Human source-review disposition and exact guarded production setup decision; keep expired preview fenced and independent provider/policy gates separate.",
       "source_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
       "evidence": "artifacts/cloudflare/CF08-production-preparation-checkpoint.json",
       "proposal": "docs/buyeros/runbooks/cloudflare-production-setup-proposal-20261002.md",
       "controller_config": "artifacts/cloudflare/CF08-production-controller-proposal.json",
       "production_setup_proposal_approved": false,
-      "continuous_dispatch_proposed_in_this_stage": false
+      "continuous_dispatch_proposed_in_this_stage": false,
+      "current_source_ci": {
+        "run_id": 36905204388,
+        "source_sha": "a50ce72809518925a6c6c1f7e0e643fef5d37c49",
+        "implementation_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
+        "status": "success",
+        "jobs": 8,
+        "counts": {
+          "api": 694,
+          "worker": 186,
+          "controller": 27,
+          "pg18": 37,
+          "operating": 2,
+          "staff_journey": 7,
+          "legacy": [
+            4,
+            8,
+            1,
+            3,
+            1
+          ],
+          "zoom": 2,
+          "smoke": 1
+        },
+        "required_failures": 0,
+        "required_errors": 0,
+        "required_skips": 0,
+        "evidence": "artifacts/cloudflare/ci-a50ce72-hosted-successor/manifest.json",
+        "manifest_sha256": "1be37764ef1820b93901f32a49b57f5190263d6446d3f6a70506b52863fdf29c",
+        "test_merge_sha": "9815444778731425c0dd6646b5485322cf9f7c63",
+        "test_merge_tree_equals_source": true,
+        "acceptance_source_files_verified": 19,
+        "permission_correction_source_files_verified": 23,
+        "fresh_ui_screenshots": 14,
+        "scope": "Actual Linux local Workers/native FastAPI/owned PostgreSQL and built UI; fictional identity/provider inputs. No production or live-provider verification."
+      },
+      "current_ci_checkpoint": "artifacts/cloudflare/CF08-production-current-ci-checkpoint.json",
+      "ui_visual_review": "artifacts/cloudflare/CF08-production-preparation-ui-review.json"
     }
   },
   "deployed_source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
   "reviewed_source_sha_scope": "Historical T30 application; hosting_migration_proposal.reviewed_source_sha is current Cloudflare RC.",
-  "deployed_source_sha_scope": "Historical verifiedmain app12327c7, notrefreshed; hosting_migration_proposal records approvedisolatedpreview595865f andshutdown, noCloudflareproductioncutover"
+  "deployed_source_sha_scope": "Existing main app12327c7 freshly read-only verified2026-10-02HK; production remains0033 and unchanged. hosting_migration_proposal separately records approved isolatedpreview595865f/0035 and shutdown; noCloudflare productioncutover."
 }

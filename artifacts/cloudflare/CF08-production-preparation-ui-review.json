@@ -1,0 +1,41 @@
+{
+  "observed_at": "2026-10-01T18:33:41.923219+00:00",
+  "source_sha": "a50ce72809518925a6c6c1f7e0e643fef5d37c49",
+  "run_id": 36905204388,
+  "method": "Author viewed the four actual downloaded PNGs using view_image; automated journey seven cases is separate evidence.",
+  "screenshots": [
+    {
+      "locale": "en",
+      "layout": "desktop",
+      "path": "artifacts/cloudflare/ci-a50ce72-hosted-successor/screenshots/cloudflare-continuity-en-desktop-approved-export-fixture.png",
+      "sha256": "1a0f9871fc4318b037c77c9a714c7e3314463f22978204e780f8c2d1ef6439ed",
+      "observation": "Localized navigation and approval/export state visible; mobile sender/form controls stacked, long review identifiers wrapped, delivery disabled. Fictional business facts keep their entered language."
+    },
+    {
+      "locale": "zh-HK",
+      "layout": "desktop",
+      "path": "artifacts/cloudflare/ci-a50ce72-hosted-successor/screenshots/cloudflare-continuity-zh-HK-desktop-approved-export-fixture.png",
+      "sha256": "876466fcf7b6a7873b3ffbc6a9058161b1a824c8b66b2b62957e0a7a3282ea67",
+      "observation": "Localized navigation and approval/export state visible; mobile sender/form controls stacked, long review identifiers wrapped, delivery disabled. Fictional business facts keep their entered language."
+    },
+    {
+      "locale": "en",
+      "layout": "mobile",
+      "path": "artifacts/cloudflare/ci-a50ce72-hosted-successor/screenshots/cloudflare-continuity-en-mobile-approved-export-fixture.png",
+      "sha256": "fa6bad00673165300249547a8f3c45ed0a4bf617741b21028cb3dc84f00f40c9",
+      "observation": "Localized navigation and approval/export state visible; mobile sender/form controls stacked, long review identifiers wrapped, delivery disabled. Fictional business facts keep their entered language."
+    },
+    {
+      "locale": "zh-HK",
+      "layout": "mobile",
+      "path": "artifacts/cloudflare/ci-a50ce72-hosted-successor/screenshots/cloudflare-continuity-zh-HK-mobile-approved-export-fixture.png",
+      "sha256": "11fb4ab3d4557127eb6351c30a4410a601600f52fd96bbdccdd2edd09d2b9312",
+      "observation": "Localized navigation and approval/export state visible; mobile sender/form controls stacked, long review identifiers wrapped, delivery disabled. Fictional business facts keep their entered language."
+    }
+  ],
+  "limitations": [
+    "Screenshots are fictional-auth/provider fixtures, not the production staff session.",
+    "Visual inspection is not a screen-reader or manual assistive accessibility approval.",
+    "Twelve fresh journey captures and two additional bulk/unknown-hold captures retained; four locale/layout exports visually inspected."
+  ]
+}

@@ -4,35 +4,63 @@
 
 **2026-10-02 HK update:** reviewed implementation6ef38d1 adds0036 checkpoint
 schema-version permissions and a fail-closed catalog proof. Focused23, ownedPG18
-37, full worker186 and gateway/release4 pass; current full CI is pending.
-The preceding8ffd91f checkpoint CI now passes8/8. Production was freshly
+37, full worker186 and gateway/release4 pass. Current full
+[CI36905204388](https://github.com/YNWAforever/BuyerOS/actions/runs/36905204388)
+at `a50ce72809518925a6c6c1f7e0e643fef5d37c49` is **8/8 SUCCESS**: API694,
+worker186, controller27, PG18compat37, operating2, staff7, legacy4/8/1/3/1,
+zoom2 and smoke1, zero required failures/errors/skips. Implementation6ef38d1
+has identical source blobs at this CI head; intervening changes are docs/evidence.
+The preceding8ffd91f checkpoint CI also passes8/8. Production was freshly
 read-only inspected at source12327c7/schema0033, with no work/holds/runtime login.
 No production mutation or new hosted verification occurred.
 See [the exact guarded setup proposal](runbooks/cloudflare-production-setup-proposal-20261002.md)
-and [current preparation checkpoint](../../artifacts/cloudflare/CF08-production-preparation-checkpoint.json).
+and [current CI checkpoint](../../artifacts/cloudflare/CF08-production-current-ci-checkpoint.json).
+The [earlier preparation checkpoint](../../artifacts/cloudflare/CF08-production-preparation-checkpoint.json)
+retains the meaningful red/green history and preflight; its CI-pending state is historical.
 Earlier source-bound test/hosted tables below remain historical to their named source.
 
 | Fact | Evidence and practical limit |
 | --- | --- |
 | Code implemented | CF00 local and CF01–CF08 local implementation complete. One API-owned Python execution engine, strict signed bridge and TypeScript Cron/Queue/Workflow controller; compatible thin Celery adapters remain. Default selector is Celery/off/epoch1. |
 | Fixture verified | English/zh-HK at1280×800 and390×844: UI login/scope → create/edit offer → current ICP approval → bounded research → review/list/assign → grounded addressed draft → exact approval/export → manual outcome/refresh. OIDC, search and contact inputs are fictional. Optional unknown contact holds and101-row bulk/restart/page2 are additional cases. |
-| Local integration verified | Latest full CI79d6caf: actual Miniflare Cron/Queue/Workflow → HMAC → native FastAPI/SQLAlchemy → owned PostgreSQL. API686, worker186, staff7, PG18compat29, operating2, legacy4/8/1/3/1, zoom2 and smoke1; all required suites zero failures/errors/skips. Eight jobs SUCCESS. |
+| Local integration verified | Current full CIa50ce72: actual Miniflare Cron/Queue/Workflow → HMAC → native FastAPI/SQLAlchemy → owned PostgreSQL. API694, worker186, controller27, staff7, PG18compat37, operating2, legacy4/8/1/3/1, zoom2 and smoke1; all required suites zero failures/errors/skips. Eight jobs SUCCESS. |
 | Hosted integration | Approved isolated CF00 native/PDF/checkpoint/protection and actual61-second two-hop checks pass at595865f. One real Queue-created Workflow completed its signed API operational probe and matching Neon receipt. All payloads fictional/ID-only; no live provider verification. |
 | Externally blocked | Production plan/quota/privacy, role/schema/drain/selector scope and alert routing; independent review; external deletion journal/R2, policy/provider economics/pilot, full authenticated staff trace and assistive accessibility. |
-| Deployed | Isolated protected Vercel native dpl_HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP and release API dpl_2ZzGXSXkfERBYyYzxufCoVCvH1FD at595865f were READY/preview/iad1. Private Cloudflare preview now executionfalse/noCron/epoch3, version992537e3-7d93-402a-8c98-dafb110958a4. Neon is idle and restricted logins NOLOGIN; bypass revoked. No production Cloudflare cutover; historical production12327c7 is not a refreshed live readback. |
+| Deployed | Isolated protected Vercel native dpl_HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP and release API dpl_2ZzGXSXkfERBYyYzxufCoVCvH1FD at595865f were READY/preview/iad1. Closed private preview is executionfalse/noCron/epoch3, version992537e3-7d93-402a-8c98-dafb110958a4, restricted logins NOLOGIN and bypass revoked. Production12327c7/0033 was freshly read-only verified2026-10-02HK; its compute returnedidle. No production Cloudflare cutover or hosted0036 proof. |
 
-**Current deployed preview code source:** `595865f5e4dce418e2b96d4819f72633378eba2b`.
+### Current permission correction and Linux/UI evidence
+
+Current author-reviewed implementation is `6ef38d184023163b8b671350ad151e25f72e3e84`.
+CIa50ce72/test-merge98154447 has the identical source tree and all23 correction
+source files match both commits. API694/0/0/0 in263.77s (100warnings), worker186
+in26.13s (1warning), PG18compat37 in37.38s (12warnings), operating2 in39.34s
+(1warning), controller27 and staff7 pass. Legacy4/8/1/3/1, zoom2 and smoke1
+also pass; actual strict checker outputs and commands are preserved in the
+[current CI manifest](../../artifacts/cloudflare/ci-a50ce72-hosted-successor/manifest.json).
+Four official ZIP digests/safe member manifests,19 acceptance source hashes and
+the synthetic test-merge tree are verified. Staff ZIP is12,893,695bytes,
+digest10399c5b…73439764. Current controller/legacy/zoom JUnit reports are retained,
+with original member and canonical Git-byte hashes separate. Four en/zh-HK
+desktop/mobile export images are [visually inspected](../../artifacts/cloudflare/CF08-production-preparation-ui-review.json);
+all14 fresh staff/bulk/unknown-hold PNGs are retained. Fictional identity/providers
+remain fixture evidence, not live staff/provider or assistive approval. Production
+0036 application and independent review remain pending; exact guarded setup is
+proposed only. Delivery remains403 `DELIVERY_DISABLED`.
+
+### Historical isolated-preview source and predecessor evidence
+
+**Closed deployed preview code source:** `595865f5e4dce418e2b96d4819f72633378eba2b`.
 The shared PDF child now receives only installed code/package metadata paths,
 with no inherited credentials or PYTHONPATH. This changes production parser
 source from the historical RCd6c2849. The stronger legacy regression successor
-is `93de21f8201f9ddb9f481f061a579a59d50efc37`. Current reviewed source including
+is `93de21f8201f9ddb9f481f061a579a59d50efc37`. Historical reviewed source including
 the screenshot collection fix is `79d6caf8b51aac00560cf6d69b0198c8614df528`;
 [CI36893525903](https://github.com/YNWAforever/BuyerOS/actions/runs/36893525903)
 is8/8 SUCCESS. Its19 source hashes and synthetic test-merge tree match the source.
 API686/0/0/0 in261.25s (97warnings), worker186/0/0/0 in25.60s (1warning),
 controller27, PG18compat29 in37.54s, operating2 in38.12s, staff7,
 legacy4/8/1/3/1, zoom2 and smoke1 pass; strict skip checkers all succeed.
-[Current CI manifest](../../artifacts/cloudflare/ci-79d6caf-hosted-successor/manifest.json)
+[Historical79d6caf CI manifest](../../artifacts/cloudflare/ci-79d6caf-hosted-successor/manifest.json)
 records every exact command/result, raw log hashes and official9,017,076-byte
 artifact digest45b17aa6…3421eaa. Twelve fresh journey PNGs plus two fresh special
 cases are preserved; four locale/layout captures visually inspected. Full
@@ -78,6 +106,11 @@ records the baseline/reviewed SHA and176 source/config/test paths, plus retained
 evidence and documentation. [Current Git changed-file inventory](../../artifacts/cloudflare/CF00-hosted-changed-files.json)
 records692 total tracked delta paths and21 committed session paths at79d6caf;
 it includes evidence/documentation, and does not relabel every path a code change.
+The current permission correction changes23 source/test/runner files, listed with
+verified6ef38d1/a50ce72 Git hashes in the
+[current checkpoint](../../artifacts/cloudflare/CF08-production-current-ci-checkpoint.json).
+Its18 existing migration tests only advance current-head expectations; business,
+hold and rollback assertions are unchanged. Subsequent changes are evidence/docs.
 The PR also retains earlier deployment and Render
 standby proposals; no Render resources were created, and Cloudflare is now the
 selected proposed job host.
@@ -86,7 +119,7 @@ selected proposed job host.
 | --- | --- |
 | Domain owner | `services/api/buyeros_api/execution/`: extracted checkpoints/research/fit/document/PDF/provider/bulk/draft/retention/reconcile engine. `services/worker/buyeros_worker/`: import-compatible adapters and selector guards, no second domain API. |
 | Security/protocol | `api/worker_auth.py`, `worker_schemas.py`, `routes/worker_internal.py`, `services/worker_execution.py`, `services/worker_recovery.py`; current actor/policy, bounded ID-only payloads, replay/epoch/lease fences and one global DB permit. |
-| Schema | API Alembic0034/0035, `db/worker_execution.py`, outbox backend/epoch. No overwritten revisions, D1 or Worker-owned business database. |
+| Schema | API Alembic0034/0035/0036, `db/worker_execution.py`, outbox backend/epoch.0036 restricts checkpoint schema-version records to worker SELECT, including compatibility downgrade. No overwritten revisions, D1 or Worker-owned business database. |
 | Controller | `services/cloudflare-jobs/src/`: scheduled claims/publication, verified Queue handoff, deterministic Workflow/status-first recovery and HMAC client. Optional protected-preview bypass stays at the approved origin and is stripped at the app proxy. |
 | Deployment | Root `vercel.json`, Nitro budget in `vite.config.ts`, isolated disabled `wrangler.jsonc --env preview`, generated contracts/binding types, mature pinned toolchain and strict CI gates. |
 | Verification | New actual-PG/Workers/platform/recovery tests, shared staff journey, guarded emitted-Vercel frontend fixture, source/evidence manifest, PG18 owned-cluster reproducer and operating benchmarks. Legacy assertion/required-skip gates remain. |
@@ -235,7 +268,20 @@ provider submissions/status reads are not live provider acceptance.
 
 ## UI screenshots
 
-Four current fixture journeys use the actual emitted Vercel function/static
+Current [fourteen fresha50ce72 screenshots](../../artifacts/cloudflare/ci-a50ce72-hosted-successor/screenshots/)
+use actual emitted Vercel function/static assets and the runtime service proxy.
+Current four en/zh-HK desktop/mobile approved-export captures were visually
+inspected; source/digest/PNG hashes are in the current manifest/review:
+
+- [English desktop](../../artifacts/cloudflare/ci-a50ce72-hosted-successor/screenshots/cloudflare-continuity-en-desktop-approved-export-fixture.png)
+- [English mobile](../../artifacts/cloudflare/ci-a50ce72-hosted-successor/screenshots/cloudflare-continuity-en-mobile-approved-export-fixture.png)
+- [zh-HK desktop](../../artifacts/cloudflare/ci-a50ce72-hosted-successor/screenshots/cloudflare-continuity-zh-HK-desktop-approved-export-fixture.png)
+- [zh-HK mobile](../../artifacts/cloudflare/ci-a50ce72-hosted-successor/screenshots/cloudflare-continuity-zh-HK-mobile-approved-export-fixture.png)
+
+[Current author visual evidence](../../artifacts/cloudflare/CF08-production-preparation-ui-review.json).
+Fictional inputs and manual assistive/live verification limits remain unchanged.
+
+Historical79d6caf fixture journeys use the actual emitted Vercel function/static
 assets and runtime service proxy. [Fourteen fresh79d6caf screenshots](../../artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/)
 include approved exports, manual outcomes/readback, bulk/restart and unknown hold.
 Official artifact digest/source/XML counts and every PNG hash are verified.
@@ -252,18 +298,24 @@ No screen-reader or real Auth0/provider screenshot is implied by these fixtures.
 
 ## Migrations, rollback and operating conditions
 
-One current local Alembic head: `0035_worker_recovery_probe`.0034 was allocated
-after inspecting0033;0035 after0034.0034 adds the selector/step receipts/nonces and
-outbox fence;0035 adds minimal global probe/recovery cursor and restricted API
-selector reads. Defaults are off. No production schema query/migration was run
-for this migration; historical production0033 is not a new live readback.
+One current local Alembic head: `0036_checkpoint_schema_grants`.0034 was allocated
+after inspecting0033;0035 after0034;0036 after verifying sole0035.0034 adds the
+selector/step receipts/nonces and outbox fence;0035 adds minimal global probe/
+recovery cursor and restricted API selector reads.0036 revokes worker mutation
+rights on checkpoint_migrations, keeping SELECT and every checkpoint row.
+Runtime catalog verification rejects reintroduced writes. Its compatibility
+downgrade retains this restriction; local actual interrupted/resumed saver,
+cross-tenant denial and downgrade/re-upgrade pass. Defaults are off.
+Production was bounded read-only inspected at0033 and remains unmigrated;
+the existing closed isolated preview hosted through0035 only.
 
 CF02/CF06 owned-PG empty downgrade/re-upgrade succeeds; populated replay/probe/
 recovery evidence refuses downgrade atomically without deleting receipts,
 operations or unknown0.300000 hold. Real process-kill after receipt yields one
 business write/audit; older backup replay keeps reads closed and preserves
-RLS/ledger conservation. PG18 compatibility29 applies current chain and covers
-security/control/recovery/native transport; detailed0035 round-trip/process
+RLS/ledger conservation. Current PG18 compatibility37 applies the current chain
+and covers security/control/recovery/native transport plus the eight0036 cases;
+detailed0035 round-trip/process
 boundaries are retained PG16 evidence.
 
 [Setup/pause/drain/rollback runbook](runbooks/cloudflare-worker-setup.md) uses
@@ -362,11 +414,15 @@ Independent duration evidence retained the failed native gate until the fix pass
 
 ## Remaining production activation decision
 
-CF00 isolated hosted fixture feasibility is complete. Production remains pending
-independent review and an exact inspected role/schema/drain/epoch, quota/plan,
-locality, alert/stop and rollback proposal. The continuous minute polling model
-still exceeds the observed Neon Free monthly compute allowance; the two-hour
-preview result does not approve a production upgrade or prove live provider
-economics. Provider/R2/policy/pilot and real staff/accessibility checks remain
-separate gates. Retain one API/migration owner and unknown holds; never infer
-production authority from this preview approval. No merge/product-live claim.
+CF00 isolated hosted fixture feasibility and current local/CI preparation are
+complete. Production remains pending a human source-review disposition and
+approval of the [exact guarded setup](runbooks/cloudflare-production-setup-proposal-20261002.md):
+existing buyer-os/Neon, owner-only0034–0036, dedicated restricted login/private
+controller, at most two attended hours, one ID-only probe, Cron empty and
+mandatory fence. No billing-plan upgrade or business/provider/R2/sending is
+included. Recheck exact identities/drain/catalog/epoch/quota before acting.
+Continuous minute polling would exceed the published Neon Free allowance;
+ongoing dispatch still needs a cost/locality/alerts/policy decision. Provider/R2/
+pilot and real staff/accessibility checks remain separate gates. Retain one API/
+migration owner and unknown holds; expired preview approval grants no production
+authority. No merge/product-live claim.

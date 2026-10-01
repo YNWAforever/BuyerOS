@@ -4,6 +4,12 @@
 Reviewed implementation source: `6ef38d184023163b8b671350ad151e25f72e3e84`.
 Author review is recorded; independent review remains pending. Review draft
 [PR10](https://github.com/YNWAforever/BuyerOS/pull/10) before this decision.
+Current source-bound [CI36905204388](https://github.com/YNWAforever/BuyerOS/actions/runs/36905204388)
+at a50ce72 is8/8 SUCCESS, including694 API/186 worker/37 PG18/27 controller
+and seven fictional staff journey cases, with zero required failures/errors/skips.
+All23 correction source files match reviewed6ef38d1; the intervening commit adds
+only docs/evidence. [Final preparation evidence](../../../artifacts/cloudflare/CF08-production-current-ci-checkpoint.json)
+and14 fresh UI captures are reviewable. No new production or hosted0036 proof.
 
 ## Decision requested
 

@@ -1,0 +1,107 @@
+{
+  "task": "CF08 production setup preparation, current-source CI completion",
+  "observed_at": "2026-10-01T18:33:41.923219+00:00",
+  "source_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
+  "ci": {
+    "run_id": 36905204388,
+    "source_sha": "a50ce72809518925a6c6c1f7e0e643fef5d37c49",
+    "implementation_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
+    "status": "success",
+    "jobs": 8,
+    "counts": {
+      "api": 694,
+      "worker": 186,
+      "controller": 27,
+      "pg18": 37,
+      "operating": 2,
+      "staff_journey": 7,
+      "legacy": [
+        4,
+        8,
+        1,
+        3,
+        1
+      ],
+      "zoom": 2,
+      "smoke": 1
+    },
+    "required_failures": 0,
+    "required_errors": 0,
+    "required_skips": 0,
+    "evidence": "artifacts/cloudflare/ci-a50ce72-hosted-successor/manifest.json",
+    "manifest_sha256": "1be37764ef1820b93901f32a49b57f5190263d6446d3f6a70506b52863fdf29c",
+    "test_merge_sha": "9815444778731425c0dd6646b5485322cf9f7c63",
+    "test_merge_tree_equals_source": true,
+    "acceptance_source_files_verified": 19,
+    "permission_correction_source_files_verified": 23,
+    "fresh_ui_screenshots": 14,
+    "scope": "Actual Linux local Workers/native FastAPI/owned PostgreSQL and built UI; fictional identity/provider inputs. No production or live-provider verification."
+  },
+  "status": "local_and_current_ci_verified_production_setup_approval_pending",
+  "earlier_preparation_checkpoint": {
+    "path": "artifacts/cloudflare/CF08-production-preparation-checkpoint.json",
+    "sha256": "1eaedb84d60c172b5d92b27808d307248cec13ee4fefae2cfca00f8dfb16319c",
+    "scope": "Earlier meaningful red/green results and read-only production preflight; its CI-pending statement is historical."
+  },
+  "source_files_sha256": {
+    "scripts/run-cloudflare-pg18-proof.py": "866c7849936ca025f046152a88c29f9fa2ba60521b68419a58c4ecfd08a9b809",
+    "services/api/alembic/versions/0036_checkpoint_schema_grants.py": "103a68938853b08cf497009eaec94b0e452e620895ae906fab07bd230d1ab04b",
+    "services/api/buyeros_api/services/worker_execution.py": "e9b9bc7d325b90d03a7efafcb58d25f795bf49cf6596669acceae8feed9f5f19",
+    "services/api/buyeros_api/services/worker_recovery.py": "9db75008a069ce8eb5f01734e2d8a72f838da5fc2b5530129680c8ef3ae0a9b1",
+    "services/api/tests/test_admin_operations_db.py": "95e0167cd253138e7b6182834a11ca5c0540ed81dadb3a5ccdacccc487a118fb",
+    "services/api/tests/test_backup_restore_t28.py": "1b11938ef4924e31fba0e77699f218fb5d0117e08e3a33e12a5f5926d2d0acb6",
+    "services/api/tests/test_budget_atomicity_db.py": "e77e8a6c7f9bb1cb79e7007bd6e300a74c76288d4be5913dc0b93c53731ad775",
+    "services/api/tests/test_bulk_jobs_db.py": "73ccf6f3f4324c8421ab9661232c1575dea47b46eb9c8ffc723161454e7d153c",
+    "services/api/tests/test_buyer_management_db.py": "0b403c76ee4d561ff2a4c8eb3751455d9c243ec51bdca5552f413b08ca877fda",
+    "services/api/tests/test_checkpoint_schema_privileges_db.py": "0a2b790c3baa72feb53f16e15e8bd1be68cde387d9564c258d5b9cafbf0ccc9b",
+    "services/api/tests/test_cloudflare_migration_db.py": "5860c8bbf7b9bd7494b5f628ed08a2f36a1a0a73d93afd18a05e949cd6dfa605",
+    "services/api/tests/test_cloudflare_recovery_boundaries_db.py": "a1e613b390a7b1848acc463bbe5929340ce04c8c37cbd0afeeda9570a3d94dbe",
+    "services/api/tests/test_contact_job_migration.py": "e5974b20f45b42306c8351e5036b392d40767313c6ccac54ea32c4e42cf6797d",
+    "services/api/tests/test_contact_quote_migration.py": "8b02654654892b014f69861a43f796e381226b0fcce0fd3b4035ba75bc9a6815",
+    "services/api/tests/test_draft_approval_migration.py": "45a9e7598d25f475c8addf9fbaebe96a31ed9241417bc04df4e50d0be93b1ee6",
+    "services/api/tests/test_draft_integrity_migration.py": "d3e04a6d480a0bf75143b8c4252b936294a2cd760f1125c0ff2743f56873456a",
+    "services/api/tests/test_export_migration.py": "349139e582c519040f7966680447790cdd9b2b2e25e8344ce1040dca4eb30673",
+    "services/api/tests/test_outcome_migration.py": "510c3df40a9775d7013a919b86edcb1cd7743c770f1455b4abacfce77077f5f6",
+    "services/api/tests/test_policy_lifecycle_db.py": "2bb7dc6a179cd34667964b3cf02ce69ce7111ae4da1bf02b61828f7b0b130ca8",
+    "services/api/tests/test_project_constraints_db.py": "e33785713520db30f3cb92f7ce4d4e4948af8dc53d9ca365b9034a8dadd34ed4",
+    "services/api/tests/test_research_checkpoint_migration.py": "20187265d1ad819fa69d19a28ce69878c9505293996abe301f927184608f72e4",
+    "services/api/tests/test_retention_authorization_db.py": "59c36b0a5ebc5d99cf68317bfa13dd52be81480586922b05bcb1a31c3617e790",
+    "services/api/tests/test_sender_identity_migration.py": "baa34c14d0b48db6547bb24271ad03d99a71ec47c5153ca719d3819415f7e399"
+  },
+  "ui_visual_review": {
+    "path": "artifacts/cloudflare/CF08-production-preparation-ui-review.json",
+    "sha256": "ebc16df2ea43eb1822d24d91c3f824125b148ff4df6e9741a11abb95e7d8b269"
+  },
+  "implementation_to_ci_delta": "Only documentation/artifacts after6ef38d1; all23 permission-correction source blobs identical at both commits.",
+  "deployed": {
+    "production_sha_observed_read_only": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+    "production_schema_observed_read_only": "0033_api_rate_windows",
+    "isolated_hosted_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+    "isolated_hosted_schema": "0035_worker_recovery_probe",
+    "new_hosted_0036_verification": false,
+    "production_change_applied": false
+  },
+  "approval": {
+    "production_setup_received": false,
+    "independent_review_received": false,
+    "prior_preview_approval_expired": true,
+    "agents_spawned": 0
+  },
+  "coverage": {
+    "original_public_operations": 70,
+    "extensions": 8,
+    "internal_bridge_operations": 5,
+    "live_per_operation_verified": false
+  },
+  "audit": {
+    "fixed_with_evidence": 10,
+    "source_changed": 3,
+    "open": 5,
+    "closure_changed_by_this_checkpoint": false
+  },
+  "collector_history": [
+    "Initial targeted log read referenced a nonexistent ci.yml and overly broad numeric pattern; corrected to buyeros-ci.yml and exact checker summaries. No test was rerun or waived.",
+    "Additional collector first rejected a historical ci-controller.xml suffix duplicate. Selected the exact current upload-root member from the inspected workflow, preserving both artifact hashes and history. No assertion or test result was weakened."
+  ],
+  "next_eligible_task": "Human source-review disposition and exact approval for the guarded at-most-two-hour production setup, one ID-only probe and mandatory fence; no continuous business dispatch or paid-plan upgrade."
+}

@@ -10,7 +10,7 @@
 
 **Spec:** [2026-10-01-cloudflare-job-migration-design.md](../specs/2026-10-01-cloudflare-job-migration-design.md).
 
-**Current status (2026-10-02 HK):** local CF00–CF08 and the specifically approved isolated hosted preview are complete; that preview is fenced and its approval expired. Source6ef38d1 adds the production-preflight permission correction at newly allocated0036, verified on owned PostgreSQL16/18 with full worker186; current full CI remains pending. Production is read-only inspected at0033/source12327c7. The exact guarded production setup proposal is prepared, not approved/applied. Earlier Git authority permits push/update existing draft PR10, no merge. Original planning baseline/expected commands and earlier checkpoints retain their historical scope.
+**Current status (2026-10-02 HK):** local CF00–CF08 and the specifically approved isolated hosted preview are complete; that preview is fenced and its approval expired. Source6ef38d1 adds the production-preflight permission correction at newly allocated0036, verified on owned PostgreSQL16/18. Current CI36905204388 at identical-code a50ce72 is8/8 SUCCESS: API694/worker186/controller27/PG18compat37/operating2/staff7, required0fail/error/skip; legacy/zoom/smoke also pass. Production is read-only inspected at0033/source12327c7. The exact guarded production setup proposal is prepared, not approved/applied. Next: human source-review disposition and this exact production setup decision. Earlier Git authority permits push/update existing draft PR10, no merge. Original planning baseline/expected commands and earlier checkpoints retain their historical scope.
 
 ## Global constraints
 

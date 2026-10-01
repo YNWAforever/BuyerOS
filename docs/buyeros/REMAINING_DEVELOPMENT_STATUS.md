@@ -1216,3 +1216,39 @@ use CF08-checkpoint-grants-* paths. Full current API/UI/Linux CI remains pending
 No new hosted verification or production0036 application is claimed. Next: publish
 the current correction and exact bounded production setup proposal for review;
 production/provider/R2/pilot/independent-review gates remain separate.
+
+### Current permission correction CI and final preparation checkpoint
+
+[CI36905204388](https://github.com/YNWAforever/BuyerOS/actions/runs/36905204388)
+at a50ce72809518925a6c6c1f7e0e643fef5d37c49 is **SUCCESS8/8**. All23 correction
+source blobs match author-reviewed6ef38d1; intervening changes are docs/evidence.
+Actual `check-required-tests.py` outputs report zero failures/errors/skips:
+
+| Executed gate | Current result |
+| --- | --- |
+| services/api: `uv run --frozen pytest -q --junitxml=artifacts/tests.xml` |694passed,100warnings,263.77s; strict checker694/0/0/0 |
+| services/worker: same full pytest command |186passed,1warning,26.13s; strict checker186/0/0/0 |
+| `.venv/bin/python ../../scripts/run-cloudflare-pg18-proof.py` |37/0/0/0,12warnings,37.38s, fresh owned PG18 only |
+| `uv run --frozen pytest -q tests/benchmark_cloudflare_case.py` |2/0/0/0,1warning,39.34s, local integration only |
+| `pnpm cloudflare:test` |27/0/0/0 in actual local Workers runtime; controller types/lint/bindings/dry-run pass |
+| `node scripts/run-cloudflare-acceptance.mjs` |7/0/0/0, built UI/Workers/native/owned PG; fictional identities/providers |
+| Legacy continuity / actual zoom / smoke |4/8/1/3/1;2;1 pass, required0fail/error/skip |
+| Frontend and contracts |Frozen install, generated78-operation check, strict TS/lint, Vinext and emitted Vercel builds/tests SUCCESS |
+
+Exact commands/checker outputs/log hashes and four official verified ZIP digests
+are in [the current manifest](../../artifacts/cloudflare/ci-a50ce72-hosted-successor/manifest.json).
+All19 acceptance source hashes and synthetic merge98154447 tree match the CI
+head. XML reports retain original archive and canonical Git-byte hashes;
+four en/zh-HK desktop/mobile exports visually inspected, all14 fresh captures
+retained. A collector guard rejected a historical same-suffix controller XML;
+the exact inspected upload-root member was selected. No test/result was changed.
+
+[Current checkpoint](../../artifacts/cloudflare/CF08-production-current-ci-checkpoint.json)
+and [setup proposal](runbooks/cloudflare-production-setup-proposal-20261002.md)
+are complete for review. Production remains source12327c7/schema0033, unchanged;
+hosted595865f/0035 proof stays separate. Next: human source-review disposition
+and exact guarded production setup approval. At most two attended hours, one
+ID-only Queue/Workflow/API probe, Cron off and mandatory fence; no paid-plan
+upgrade/customer/provider/R2/delivery activation. Independent review and the five
+open audits remain open. Following evidence-only commits keep this named source
+proof; their automatically triggered CI status is reported separately.
