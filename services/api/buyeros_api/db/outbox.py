@@ -12,7 +12,7 @@ so a duplicate broker delivery after completion is a no-op.
 from datetime import datetime
 import uuid
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKeyConstraint, Integer, String, UniqueConstraint
+from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKeyConstraint, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -42,6 +42,8 @@ class OutboxEvent(Base, TenantMixin):
     lease_owner: Mapped[str | None] = mapped_column(String(128), nullable=True)
     lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     fencing_generation: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    runtime_backend: Mapped[str] = mapped_column(String(16), nullable=False, default="celery")
+    runtime_epoch: Mapped[int] = mapped_column(BigInteger, nullable=False, default=1)
 
 
 

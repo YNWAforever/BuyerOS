@@ -26,7 +26,7 @@ def _wire(monkeypatch, rows, workspaces=("ws-1",)):
 
     released = []
 
-    async def fake_release(session, intent_key):
+    async def fake_release(session, intent_key, *, generation):
         released.append(intent_key)
 
     monkeypatch.setattr(dispatcher, "_workspace_ids", fake_workspace_ids)

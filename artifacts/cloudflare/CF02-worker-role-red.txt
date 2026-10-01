@@ -1,0 +1,83 @@
+.F                                                                       [100%]
+================================== FAILURES ===================================
+___ test_source_delete_uses_checkpoint_worker_role_and_retries_idempotently ___
+
+worker_database_url = 'postgresql://buyeros_worker_runtime_fixture:test-only@127.0.0.1:49829/buyeros_test_worker'
+pg_dsn = 'postgresql://buyeros:buyeros@127.0.0.1:49829/buyeros_test_worker'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001FAFF564E90>
+
+    def test_source_delete_uses_checkpoint_worker_role_and_retries_idempotently(
+        worker_database_url, pg_dsn, monkeypatch,
+    ):
+        from buyeros_worker.config import get_settings
+        from tests.conftest import ICP_A
+    
+        run_id, source_id, checkpoint_id = str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())
+        thread = f"{WS_A}:{run_id}:fit-v1:1"
+        intent = f"source.delete:{source_id}"
+        worker_dsn = worker_database_url.replace("buyeros_api:test-only", "buyeros_worker:test-only", 1)
+        with psycopg.connect(pg_dsn, autocommit=True) as conn:
+            reset_tenant(conn)
+            conn.execute("ALTER ROLE buyeros_worker LOGIN PASSWORD 'test-only'")
+            conn.execute("INSERT INTO search_runs(id,workspace_id,project_id,icp_version_id,status,"
+                         "limits,target_companies,raw_result_count) "
+                         "VALUES (%s,%s,%s,%s,'completed','{}'::jsonb,1,1)",
+                         (run_id, WS_A, PROJECT_A, ICP_A))
+            conn.execute("INSERT INTO source_documents(id,workspace_id,project_id,run_id,canonical_url,"
+                         "digest,storage_mode,excerpt,retention_until) "
+                         "VALUES (%s,%s,%s,%s,%s,%s,'excerpt_only',NULL,now()-interval '1 second')",
+                         (source_id, WS_A, PROJECT_A, run_id,
+                          f"https://redacted.invalid/{source_id}", "a" * 64))
+            seed_outbox(conn, intent_key=intent, event_type="source.delete",
+                        payload={"source_document_id": source_id}, state="dispatched", generation=1)
+            conn.execute("INSERT INTO buyeros_graph.checkpoints(thread_id,checkpoint_ns,checkpoint_id,"
+                         "checkpoint,metadata) VALUES (%s,'',%s,%s::jsonb,'{}'::jsonb)",
+                         (thread, checkpoint_id, '{"canary":"SECRET_CHECKPOINT"}'))
+            conn.execute("INSERT INTO buyeros_graph.checkpoint_blobs(thread_id,checkpoint_ns,channel,"
+                         "version,type,blob) VALUES (%s,'','source','v1','bytes',%s)",
+                         (thread, b"SECRET_CHECKPOINT_BLOB"))
+            conn.execute("INSERT INTO buyeros_graph.checkpoint_writes(thread_id,checkpoint_ns,"
+                         "checkpoint_id,task_id,idx,channel,type,blob,task_path) "
+                         "VALUES (%s,'',%s,%s,0,'source','bytes',%s,'')",
+                         (thread, checkpoint_id, str(uuid.uuid4()), b"SECRET_CHECKPOINT_WRITE"))
+            assert conn.execute("SELECT has_schema_privilege('buyeros_api',"
+                                "'buyeros_graph','USAGE')").fetchone()[0] is False
+        monkeypatch.delenv("BUYEROS_CHECKPOINT_DATABASE_URL", raising=False)
+        get_settings.cache_clear()
+        try:
+            assert execute_intent_sync(intent, WS_A, 1) == "checkpoint_unavailable"
+            with psycopg.connect(pg_dsn) as conn:
+                assert conn.execute("SELECT state FROM outbox_events WHERE intent_key=%s",
+                                    (intent,)).fetchone()[0] == "dispatched"
+                assert conn.execute("SELECT count(*) FROM buyeros_graph.checkpoints WHERE thread_id=%s",
+                                    (thread,)).fetchone()[0] == 1
+            monkeypatch.setenv("BUYEROS_CHECKPOINT_DATABASE_URL", worker_dsn)
+            get_settings.cache_clear()
+>           assert execute_intent_sync(intent, WS_A, 1) == "done"
+E           AssertionError: assert 'checkpoint_unavailable' == 'done'
+E             
+E             - done
+E             + checkpoint_unavailable
+
+services\worker\tests\test_crash_recovery_matrix.py:297: AssertionError
+============================== warnings summary ===============================
+services\worker\tests\conftest.py:27
+  C:\Users\laich\Documents\BuyerOS\services\worker\tests\conftest.py:27: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\worker\tests\conftest.py:27
+  C:\Users\laich\Documents\BuyerOS\services\worker\tests\conftest.py:27: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_crash_recovery_matrix.py::test_source_delete_retries_after_object_delete_before_database_finalize
+  C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_crash_recovery_matrix.py::test_source_delete_retries_after_object_delete_before_database_finalize
+  C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED services\worker\tests\test_crash_recovery_matrix.py::test_source_delete_uses_checkpoint_worker_role_and_retries_idempotently
+1 failed, 1 passed, 7 deselected, 4 warnings in 11.70s

@@ -25,8 +25,12 @@ async def _delete_run_checkpoints(dsn: str, workspace_id: uuid.UUID, run_id: uui
     prefix = f"{workspace_id}:{run_id}:%"
     async with await psycopg.AsyncConnection.connect(dsn, autocommit=True) as connection:
         async with connection.transaction():
-            role = await connection.execute("SELECT current_user")
-            if (await role.fetchone())[0] != "buyeros_worker":
+            role = await connection.execute(
+                "SELECT NOT rolsuper AND NOT rolbypassrls "
+                "AND pg_has_role(current_user,'buyeros_worker','MEMBER') "
+                "FROM pg_roles WHERE rolname=current_user"
+            )
+            if (await role.fetchone())[0] is not True:
                 raise ValueError("checkpoint cleanup requires the dedicated worker role")
             await connection.execute("SELECT set_config('app.workspace_id', %s, true)",
                                      (str(workspace_id),))

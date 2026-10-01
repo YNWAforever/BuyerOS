@@ -1,0 +1,35 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+____________ test_envelope_is_strict_and_rejects_unsafe_generation ____________
+
+    def test_envelope_is_strict_and_rejects_unsafe_generation():
+        executor_module()
+        from buyeros_api.api.worker_schemas import ClaimBatch, JobEnvelope
+        from pydantic import ValidationError
+        envelope = dict(v=1, workspace_id=WS_A, outbox_id=str(uuid.uuid4()), generation=1, runtime_epoch=1)
+        assert json.loads(ClaimBatch(items=[JobEnvelope(**envelope)], next_cursor=None,
+                                    runtime_epoch=1).model_dump_json())["items"][0]["v"] == 1
+        for changes in ({"url": "https://provider.invalid"}, {"generation": True},
+                        {"generation": 2**53}, {"generation": 0}, {"runtime_epoch": -1}, {"v": True}):
+>           with pytest.raises(ValidationError):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE <class 'pydantic_core._pydantic_core.ValidationError'>
+
+services\worker\tests\test_transport_independence.py:82: Failed
+============================== warnings summary ===============================
+services\worker\tests\conftest.py:27
+  C:\Users\laich\Documents\BuyerOS\services\worker\tests\conftest.py:27: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\worker\tests\conftest.py:27
+  C:\Users\laich\Documents\BuyerOS\services\worker\tests\conftest.py:27: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_transport_independence.py::test_envelope_is_strict_and_rejects_unsafe_generation
+  C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED services\worker\tests\test_transport_independence.py::test_envelope_is_strict_and_rejects_unsafe_generation
+1 failed, 8 deselected, 3 warnings in 0.99s

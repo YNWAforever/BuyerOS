@@ -192,7 +192,7 @@ def test_0013_preflight_reports_legacy_conflict_without_deleting_it(seeded, monk
             assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0014_buyer_management"
         command.upgrade(config, "head")
         with psycopg.connect(seeded) as owner:
-            assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0033_api_rate_windows"
+            assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0034_worker_execution"
     finally:
         with psycopg.connect(seeded, autocommit=True) as owner:
             owner.execute("UPDATE projects SET active_icp_version_id=NULL WHERE id=%s", (PROJECT_A,))

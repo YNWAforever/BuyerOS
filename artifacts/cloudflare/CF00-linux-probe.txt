@@ -1,0 +1,7 @@
+   Building buyeros-worker @ file:///app/services/worker
+   Building buyeros-api @ file:///app/services/api
+      Built buyeros-worker @ file:///app/services/worker
+      Built buyeros-api @ file:///app/services/api
+Uninstalled 2 packages in 2ms
+Installed 2 packages in 1ms
+{"environment": "local", "local_feasible": true, "hosted_feasible": false, "counts": {"verified": 9, "failed": 0, "not_run": 4}}

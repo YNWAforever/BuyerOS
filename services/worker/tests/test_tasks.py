@@ -1,4 +1,5 @@
 import asyncio
+from types import SimpleNamespace
 from contextlib import asynccontextmanager
 
 import pytest
@@ -34,11 +35,15 @@ def _patch_engine(monkeypatch):
     async def fake_load(session, intent_key):
         return _row()
     monkeypatch.setattr(tasks, "load_intent", fake_load)
+    async def fake_runtime(session):
+        return SimpleNamespace(epoch=1)
+    monkeypatch.setattr(tasks, "legacy_runtime_control", fake_runtime)
     return created
 
 
 def _row(state="dispatched", generation=1, event_type="fetch.evidence", payload=None):
-    return {"state": state, "event_type": event_type, "payload": payload or {}, "fencing_generation": generation}
+    return {"state": state, "event_type": event_type, "payload": payload or {}, "fencing_generation": generation,
+            "runtime_backend": "celery", "runtime_epoch": 1}
 
 
 def test_each_invocation_creates_and_disposes_its_own_engine(monkeypatch):

@@ -33,6 +33,8 @@ async def load_intent(session, intent_key: str) -> dict | None:
         "event_type": row.event_type,
         "payload": row.payload,
         "fencing_generation": row.fencing_generation,
+        "runtime_backend": row.runtime_backend,
+        "runtime_epoch": row.runtime_epoch,
     }
 
 

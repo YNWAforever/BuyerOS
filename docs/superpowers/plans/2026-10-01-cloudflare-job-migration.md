@@ -10,7 +10,7 @@
 
 **Spec:** [2026-10-01-cloudflare-job-migration-design.md](../specs/2026-10-01-cloudflare-job-migration-design.md).
 
-**Status:** Local implementation approved by direct user reply, 2026-10-01 HK. CF00 local and CF01 completed; hosted/paid/production activation is not approved. Initial planning snapshot: Source `aed7a7eb2b7370c10cd7a41306eecf09d378ad42`, initial diff clean. Implementation/architecture change and external activation are not approved by requesting this plan. All future tests and commands below are **NOT RUN**; expected results describe acceptance, not evidence.
+**Status:** Local implementation approved by direct user reply, 2026-10-01 HK. CF00 local, CF01 and CF02 completed; hosted/paid/production activation is not approved. Initial planning snapshot: Source `aed7a7eb2b7370c10cd7a41306eecf09d378ad42`, initial diff clean. Implementation/architecture change and external activation are not approved by requesting this plan. All future tests and commands below are **NOT RUN**; expected results describe acceptance, not evidence.
 
 ## Global constraints
 
@@ -125,11 +125,11 @@ Additional existing browser commands are retained verbatim from `.github/workflo
 
 Extend CF01's existing `worker_schemas.py`; do not recreate it. Export the internal schema to `services/api/contracts/worker.openapi.json` and generate `services/cloudflare-jobs/src/worker-api.generated.ts`. `InternalOperation`, `InternalRequest<K>` and `InternalResponse<K>` in later tasks are aliases of those generated five operations, not hand-maintained duplicate types.
 
-- [ ] Add named tests: `test_user_token_cannot_call_internal_worker`, `test_signature_binds_raw_body_path_timestamp_and_nonce`, `test_same_generation_has_one_execution_owner`, `test_selector_rejects_other_backend_and_old_epoch`, `test_internal_headers_forward_only_on_allowlisted_paths`. Assert nonce replay409, invalid machine auth401, unknown fields422, body>8192 rejected, no customer reads before authentication, and one durable bulk mutation under 20 simultaneous same-step requests.
-- [ ] Observe red with `uv run --frozen --project services/api pytest services/api/tests/test_cloudflare_bridge_db.py services/api/tests/test_cloudflare_runtime_control_db.py -q` and `node --test tests/worker-gateway.test.mjs`.
-- [ ] Inspect heads, allocate additive revision, implement control/receipts/nonces, default disabled and consistent Celery/CF guards. Register the five POST operations. Implement raw signed gateway forwarding and closed status-code enums. Generate internal schemas/types; keep all 78 public operations distinct from these five internal operations.
-- [ ] Run focused security/concurrency tests on owned PostgreSQL; empty upgrade/downgrade/re-upgrade, populated downgrade refusal, non-owner/NOBYPASSRLS and cross-project/tenant negatives. Run `node scripts/generate-worker-api-types.mjs --check`, existing route/public type checks and gateway tests. Record actual revision, grants and rollback output; no production migration.
-- [ ] Checkpoint and proposed `feat: fence machine-authenticated BuyerOS execution steps` commit.
+- [x] Add named tests: `test_user_token_cannot_call_internal_worker`, `test_signature_binds_raw_body_path_timestamp_and_nonce`, `test_same_generation_has_one_execution_owner`, `test_selector_rejects_other_backend_and_old_epoch`, `test_internal_headers_forward_only_on_allowlisted_paths`. Assert nonce replay409, invalid machine auth401, unknown fields422, body>8192 rejected, no customer reads before authentication, and one durable bulk mutation under 20 simultaneous same-step requests.
+- [x] Observe red with `uv run --frozen --project services/api pytest services/api/tests/test_cloudflare_bridge_db.py services/api/tests/test_cloudflare_runtime_control_db.py -q` and `node --test tests/worker-gateway.test.mjs`.
+- [x] Inspect heads, allocate additive revision, implement control/receipts/nonces, default disabled and consistent Celery/CF guards. Register the five POST operations. Implement raw signed gateway forwarding and closed status-code enums. Generate internal schemas/types; keep all 78 public operations distinct from these five internal operations.
+- [x] Run focused security/concurrency tests on owned PostgreSQL; empty upgrade/downgrade/re-upgrade, populated downgrade refusal, non-owner/NOBYPASSRLS and cross-project/tenant negatives. Run `node scripts/generate-worker-api-types.mjs --check`, existing route/public type checks and gateway tests. Record actual revision, grants and rollback output; no production migration.
+- [x] Checkpoint and proposed `feat: fence machine-authenticated BuyerOS execution steps` commit.
 
 ### CF03: Complete bounded bulk, document, draft and retention slices
 

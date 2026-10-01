@@ -20,6 +20,7 @@ from buyeros_api.db.outbox import DISPATCHED_STATE, TERMINAL_STATES, OutboxEvent
 from buyeros_api.db.worker import WorkerHeartbeat
 from buyeros_api.db.session import tenant_session
 from buyeros_api.providers.base import ProviderAdapter, ProviderIntent
+from buyeros_api.services.worker_execution import legacy_runtime_control
 
 from . import handlers  # noqa: F401  (import registers handlers)
 from .app import celery_app
@@ -85,6 +86,9 @@ def execute_intent_sync(intent_key: str, workspace_id: str, generation: int, *,
                         checkpoint_dsn: str | None = None) -> str:
     async def body(engine):
         async with tenant_session(engine, workspace_id) as session:
+            control = await legacy_runtime_control(session)
+            if control is None:
+                return "execution_disabled"
             row = await load_intent(session, intent_key)
             if row is None:
                 return "unknown_intent"
@@ -92,6 +96,8 @@ def execute_intent_sync(intent_key: str, workspace_id: str, generation: int, *,
                 return "duplicate"
             if row["state"] != DISPATCHED_STATE:
                 return "not_dispatched"
+            if row["runtime_backend"] != "celery" or row["runtime_epoch"] != control.epoch:
+                return "stale"
             if not fence_ok(generation, row["fencing_generation"]):
                 return "stale"
             if row["event_type"] in {"provider.reconcile", "research.reconcile", "contact.reconcile"}:

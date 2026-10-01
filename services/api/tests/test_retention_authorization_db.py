@@ -393,7 +393,7 @@ def test_contact_retention_migration_rolls_back_and_forward_on_empty_disposable_
     finally:
         command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0033_api_rate_windows"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0034_worker_execution"
         assert conn.execute("SELECT count(*) FROM information_schema.columns "
                             "WHERE table_name='contact_points' AND column_name='retention_expires_at'").fetchone()[0] == 1
 
@@ -456,7 +456,7 @@ def test_rate_window_migration_empty_rollback_and_rls(migrated):
     finally:
         command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0033_api_rate_windows"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0034_worker_execution"
         assert conn.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class "
                             "WHERE relname='api_rate_windows'").fetchone() == (True, True)
         assert conn.execute("SELECT has_table_privilege('buyeros_api','api_rate_windows','DELETE')").fetchone()[0] is False
@@ -479,7 +479,7 @@ def test_rate_window_migration_refuses_populated_rollback(migrated):
         with pytest.raises(RuntimeError, match="retained API rate windows"):
             command.downgrade(config, "0032_contact_retention")
         with psycopg.connect(migrated) as conn:
-            assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0033_api_rate_windows"
+            assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0034_worker_execution"
     finally:
         with psycopg.connect(migrated, autocommit=True) as conn:
             conn.execute("DELETE FROM api_rate_windows WHERE workspace_id=%s AND actor_id=%s",

@@ -17,6 +17,7 @@ class WorkerSettings(BaseSettings):
     reconciliation_enabled: bool = True
     retention_policy_version: str | None = None
     cloudflare_execution_enabled: bool = False
+    celery_execution_enabled: bool = False
 
 
 @lru_cache

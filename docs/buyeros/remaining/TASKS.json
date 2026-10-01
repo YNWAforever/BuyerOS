@@ -1783,7 +1783,7 @@
   ],
   "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "Continue CF02 fenced internal bridge from the observed red tests; CF00 local and CF01 complete. Hosted CF00 proof, paid Cloudflare/deployment/production/provider activation remain gated. No agents; preserve remaining T28/T29/T30 findings.",
+  "next_eligible_task": "CF03 bounded local execution; CF02 complete. CF00 hosted proof and all paid/production/provider activation remain gated. No agents.",
   "hosting_migration_proposal": {
     "status": "local_implementation_in_progress",
     "date_hk": "2026-10-01",
@@ -1816,14 +1816,15 @@
         "depends_on": [
           "CF01"
         ],
-        "status": "in_progress"
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF02-checkpoint.json"
       },
       {
         "id": "CF03",
         "depends_on": [
           "CF02"
         ],
-        "status": "proposed_not_started"
+        "status": "in_progress"
       },
       {
         "id": "CF04",

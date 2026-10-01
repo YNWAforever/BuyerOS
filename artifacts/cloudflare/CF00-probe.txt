@@ -1,0 +1,5 @@
+C:\Users\laich\Documents\BuyerOS\services\api\tools\probe_worker_runtime.py:250: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\laich\Documents\BuyerOS\services\api\tools\probe_worker_runtime.py:250: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+{"environment": "local", "local_feasible": true, "hosted_feasible": false, "counts": {"verified": 8, "failed": 0, "not_run": 5}}

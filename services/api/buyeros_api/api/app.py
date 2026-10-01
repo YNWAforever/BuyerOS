@@ -30,6 +30,7 @@ from .routes.runs import detail_router as run_detail_router, router as runs_rout
 from .routes.settings import router as settings_router
 from .routes.workspaces import router as workspaces_router
 from .routes.usage import router as usage_router
+from .routes.worker_internal import router as worker_internal_router
 from .unimplemented import router as unimplemented_router
 from buyeros_api.settings import get_settings
 
@@ -75,6 +76,7 @@ def create_app() -> FastAPI:
     app.include_router(quotes_router)
     app.include_router(quote_detail_router)
     app.include_router(unimplemented_router)
+    app.include_router(worker_internal_router)
 
     @app.middleware("http")
     async def request_id_middleware(request: Request, call_next):

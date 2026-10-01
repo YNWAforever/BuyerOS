@@ -966,3 +966,12 @@ Direct user **approve** after the design/plan handoff approves local CF00–CF08
 - **Next CF02 in progress:** named machine-auth tests red7 failed; signed gateway regression red1. Alembic heads inspected fromservices/api:0033_api_rate_windows(head), exit0; candidate0034 not overwritten/created yet. Internal bridge, selector/epoch/permit, migration and generated internal5 contracts remain to implement.
 
 Code/fixture proof is separate from deployment: no Cloudflare resource, remote configuration, provider call, production schema change or new deployed SHA. Authenticated hosted staff continuity, remaining A13/A15/A16/A17/A18, provider/policy/R2/pilot and actual hosted budgets remain open. Delivery stays403 DELIVERY_DISABLED.
+
+
+## Cloudflare CF02 checkpoint (2026-10-01 HK)
+
+CF02 complete locally. Final focused security/concurrency/migration tests **19 passed/0 failed/errors/skips in18.28s**. Complete API603/0/0/0 in347.10s was collected before the final stale-publication and required-four-field regressions; those pass in final focused19. Complete worker183/0/0/0 in143.09s precedes the generation release guard; affected dispatcher7/0/0/0 passes afterward. Node gateway/public contracts7/0/0/0; strict TS/lint, public78/internal5 generated checks and diff check exit0. Exact commands/red results in artifacts/cloudflare/CF02-checkpoint.json and associated logs/XML. No count extrapolation.
+
+Additive0034 allocated after inspected0033 head, applied only to fresh owned PostgreSQL. Empty upgrade/downgrade/re-upgrade succeeds; populated downgrade refuses while retaining version/steps/nonces/business truth. One global permit and tenant forced RLS, catalog-tested non-owner/NOBYPASSRLS inherited worker login; worker cannot activate selector/epoch. Twenty simultaneous requests produce one buyer update/audit/receipt. Default off, signed raw-body/path/time/nonce HMAC, replay409, staff bearer401, fields422, oversized413, rotation and cross-tenant negatives pass. Fixture role isolation preserves existing intentional role revocation tests; no production fixture/hidden skips or weakened assertion.
+
+Next CF03: bounded documents/fetch/bulk/draft/retention and one native owner. CF00 hosted4 remain not_run; no remote schema/secret/resource/deployment/provider change and no deployed SHA inferred. Remaining A13/A15/A16/A17/A18 and external gates stay open.

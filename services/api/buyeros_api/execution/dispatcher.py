@@ -20,6 +20,7 @@ from datetime import datetime
 from datetime import timezone
 from time import monotonic
 import uuid
+import asyncio
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -57,9 +58,19 @@ async def list_workspace_ids(session) -> list:
 
 
 async def claim_outbox_rows(
-    session, owner: str, limit: int, now: datetime, lease_seconds: int, *, expired_only: bool = False
+    session, owner: str, limit: int, now: datetime, lease_seconds: int, *, expired_only: bool = False,
+    backend: str = "celery", epoch: int | None = None,
 ) -> list[dict]:
     """Claim ready (or expired in-progress) rows, bumping the fencing generation."""
+    from buyeros_api.services.worker_execution import control_row
+    from buyeros_api.settings import get_settings as api_settings
+    control = await control_row(session, lock=True)
+    allowed = (api_settings().cloudflare_execution_enabled if backend == "cloudflare"
+               else get_settings().celery_execution_enabled)
+    if (not allowed or not control.enabled or control.backend != backend
+            or (epoch is not None and epoch != control.epoch)):
+        return []
+    epoch = control.epoch
     predicate = _EXPIRED_PREDICATE if expired_only else _CLAIMABLE_PREDICATE
     result = await session.execute(
         text(
@@ -70,10 +81,15 @@ async def claim_outbox_rows(
                    dispatched_at = :now,
                    attempts = attempts + 1,
                    fencing_generation = fencing_generation + 1,
+                   runtime_backend = :backend,
+                   runtime_epoch = :epoch,
                    state = 'dispatched'
              WHERE id IN (
                    SELECT id FROM outbox_events
                     WHERE ({predicate})
+                      AND (state='ready' OR (runtime_backend=:backend AND runtime_epoch=:epoch))
+                      AND NOT EXISTS (SELECT 1 FROM worker_steps s WHERE s.outbox_id=outbox_events.id
+                                      AND s.state IN ('running','reconcile'))
                       AND (:paid_dispatch_enabled OR event_type NOT IN
                            ('provider.external', 'run.discover', 'contact.lookup'))
                       AND (:reconciliation_enabled OR event_type NOT IN
@@ -87,19 +103,21 @@ async def claim_outbox_rows(
         ),
         {"owner": owner, "expires": lease_expiry(now, lease_seconds), "now": now,
          "limit": limit, "paid_dispatch_enabled": get_settings().paid_dispatch_enabled,
-         "reconciliation_enabled": get_settings().reconciliation_enabled},
+         "reconciliation_enabled": get_settings().reconciliation_enabled, "backend": backend, "epoch": epoch},
     )
     return [dict(r._mapping) for r in result]
 
 
-async def release_claim(session, intent_key: str) -> None:
+async def release_claim(session, intent_key: str, *, generation: int) -> None:
     """Return a claimed row to the claimable pool (publish failure recovery)."""
     await session.execute(
         text(
             "UPDATE outbox_events SET state = 'ready', lease_owner = NULL, lease_expires_at = NULL"
-            " WHERE intent_key = :key AND state = 'dispatched'"
+            " WHERE intent_key = :key AND state = 'dispatched' AND fencing_generation = :generation"
+            " AND NOT EXISTS(SELECT 1 FROM worker_steps s WHERE s.outbox_id=outbox_events.id "
+            " AND s.state IN ('running','reconcile'))"
         ),
-        {"key": intent_key},
+        {"key": intent_key, "generation": generation},
     )
 
 
@@ -126,7 +144,7 @@ async def _dispatch_workspace(
             publish(message)
         except Exception:
             async with tenant_session(engine, workspace_id) as session:
-                await release_claim(session, row["intent_key"])
+                await release_claim(session, row["intent_key"], generation=row["fencing_generation"])
             raise
         published.append(row["intent_key"])
     return published
@@ -196,28 +214,42 @@ async def dispatch_cycle(
 
 async def claim_cycle(engine, *, backend: str, epoch: int, max_total: int = 10,
                       time_budget_seconds: float = 10):
-    """Bounded ID-only claim interface; persistent selector/fairness lands CF02.
-
-    This new transport is off by default. Legacy broker publishing continues
-    through its compatibility adapter; this function never publishes messages.
-    """
+    """Claim atomically with persistent workspace rotation; never publish here."""
     from buyeros_api.api.worker_schemas import ClaimBatch, JobEnvelope
+    from buyeros_api.services.worker_execution import control_row
     if (backend not in {"celery", "cloudflare"} or isinstance(epoch, bool) or epoch < 1
             or not 1 <= max_total <= 10 or not 0 < time_budget_seconds <= 10):
         raise ValueError("claim cycle requires a valid runtime and bounded count/time")
-    if not get_settings().cloudflare_execution_enabled:
+    async def cycle():
+        maker = async_sessionmaker(engine, expire_on_commit=False)
+        async with maker() as session, session.begin():
+            control = await control_row(session, lock=True)
+            from buyeros_api.settings import get_settings as api_settings
+            enabled = (api_settings().cloudflare_execution_enabled if backend == "cloudflare"
+                       else get_settings().celery_execution_enabled)
+            if not enabled or not control.enabled or control.backend != backend or control.epoch != epoch:
+                return ClaimBatch(items=[], next_cursor=control.cursor, runtime_epoch=control.epoch)
+            await session.execute(text("SELECT set_config('statement_timeout',:timeout,true)"),
+                                  {"timeout": str(int(time_budget_seconds * 1000))})
+            query = "SELECT id FROM workspaces WHERE (CAST(:cursor AS uuid) IS NULL OR id>CAST(:cursor AS uuid)) ORDER BY id LIMIT 1000"
+            workspaces = (await session.execute(text(query), {"cursor": control.cursor})).scalars().all()
+            if not workspaces:
+                workspaces = (await session.execute(text(query), {"cursor": None})).scalars().all()
+            items = []
+            started = monotonic()
+            now = datetime.now(timezone.utc)
+            for workspace in workspaces:
+                if len(items) >= max_total or monotonic() - started >= time_budget_seconds:
+                    break
+                await session.execute(text("SELECT set_config('app.workspace_id',:ws,true)"), {"ws": str(workspace)})
+                rows = await claim_outbox_rows(session, f"{backend}:{epoch}:{uuid.uuid4()}", 1, now,
+                                              get_settings().lease_seconds, backend=backend, epoch=epoch)
+                control.cursor = workspace
+                items.extend(JobEnvelope(v=1, workspace_id=row["workspace_id"], outbox_id=row["id"],
+                                         generation=row["fencing_generation"], runtime_epoch=epoch) for row in rows)
+            return ClaimBatch(items=items, next_cursor=control.cursor, runtime_epoch=epoch)
+    try:
+        return await asyncio.wait_for(cycle(), timeout=time_budget_seconds)
+    except TimeoutError:
+        # The whole transaction rolls back; no partial acceptance is returned.
         return ClaimBatch(items=[], next_cursor=None, runtime_epoch=epoch)
-    items = []
-    cursor = None
-    started = monotonic()
-    now = datetime.now(timezone.utc)
-    for workspace in await _workspace_ids(engine):
-        if len(items) >= max_total or monotonic() - started >= time_budget_seconds:
-            break
-        async with tenant_session(engine, workspace) as session:
-            rows = await claim_outbox_rows(session, f"{backend}:{epoch}:{uuid.uuid4()}",
-                                          1, now, get_settings().lease_seconds)
-        cursor = workspace
-        items.extend(JobEnvelope(v=1, workspace_id=row["workspace_id"], outbox_id=row["id"],
-                                 generation=row["fencing_generation"], runtime_epoch=epoch) for row in rows)
-    return ClaimBatch(items=items, next_cursor=cursor, runtime_epoch=epoch)
