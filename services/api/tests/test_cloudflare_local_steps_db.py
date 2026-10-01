@@ -77,7 +77,11 @@ def test_bulk_restart_resumes_next_chunk_without_repeat(migrated, worker_runtime
         assert db.execute("SELECT count(*) FROM audit_events WHERE workspace_id=%s AND action='buyer.owner_assigned'", (envelope.workspace_id,)).fetchone()[0] == count-1
 
 
-def test_pdf_child_keeps_sanitized_env_and_eight_second_timeout(monkeypatch):
+def test_pdf_child_keeps_sanitized_env_and_eight_second_timeout(monkeypatch, tmp_path):
+    from importlib.metadata import distribution
+    import os
+    from pathlib import Path
+    import sys
     from buyeros_api.execution import pdf_parser
     from buyeros_api.services.ingestion_service import validate_upload
     from pypdf import PdfWriter
@@ -87,15 +91,32 @@ def test_pdf_child_keeps_sanitized_env_and_eight_second_timeout(monkeypatch):
     writer.write(output)
     body = output.getvalue()
     upload = validate_upload('fixture.pdf', 'application/pdf', body, hashlib.sha256(body).hexdigest())
+    # Independently enumerate only our code and installed package metadata.
+    # A hosted parent has vendor packages absent from a fresh interpreter.
+    expected_roots = [Path(pdf_parser.__file__).resolve().parents[2]]
+    for package in ('psycopg', 'sqlalchemy', 'pypdf', 'langgraph', 'langgraph-checkpoint-postgres'):
+        root = Path(distribution(package).locate_file('')).resolve()
+        if root not in expected_roots:
+            expected_roots.append(root)
+    expected_env = {'PYTHONIOENCODING': 'utf-8', 'PYTHONDONTWRITEBYTECODE': '1',
+                    'PYTHONPATH': os.pathsep.join(str(root) for root in expected_roots)}
+    if sys.platform == 'win32':
+        expected_env['SystemRoot'] = os.environ.get('SystemRoot', r'C:\Windows')
+    malicious = tmp_path / 'untrusted-pythonpath'
+    malicious.mkdir()
+    (malicious / 'pypdf.py').write_text("raise RuntimeError('untrusted inherited package')\n")
     original = pdf_parser.subprocess.run
     def observe(command, **kwargs):
         assert command[-1] == 'buyeros_api.execution.pdf_parser_child'
         assert kwargs['timeout'] == 8
         assert 'BUYEROS_WORKER_CURRENT_SECRET' not in kwargs['env']
-        assert 'PYTHONPATH' not in kwargs['env']
+        assert kwargs['env'] == expected_env
+        assert str(malicious) not in kwargs['env']['PYTHONPATH']
+        assert 'fixture-secret-must-not-be-inherited' not in kwargs['env'].values()
         assert 'buyeros-pdf-' in kwargs['cwd']
         return original(command, **kwargs)
     monkeypatch.setenv('BUYEROS_WORKER_CURRENT_SECRET', 'fixture-secret-must-not-be-inherited')
+    monkeypatch.setenv('PYTHONPATH', str(malicious))
     monkeypatch.setattr(pdf_parser.subprocess, 'run', observe)
     assert pdf_parser.parse_pdf_candidates(upload) == []
     def timeout(*args, **kwargs):
