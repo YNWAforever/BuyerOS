@@ -1,0 +1,158 @@
+{
+  "branch_head_sha": "91b1f9b09ff7635d7967342f7b5577da881d91b5",
+  "github_ci_test_merge_sha": "d78fcadf5f938502a606c4c1865ade4a4215d06b",
+  "equal_tree_sha": "296c6b3379c734a0c6a0679c9d6b93c6a1d1b6da",
+  "workflow_run_id": 36875943355,
+  "artifact_id": 11169407075,
+  "archive_sha256": "1d714d446c572262e8e70064cd381a481097ffddab7106bcfd8e0c242ffd6a34",
+  "artifact_digest_verified": true,
+  "junit": [
+    {
+      "member": "artifacts/cloudflare/acceptance/journey.xml",
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "original_sha256": "3a1afa7f999069f0c0fb7dffad73e9f2f080cdca08b687d91f777fe5024259d0",
+      "saved_sha256": "3a1afa7f999069f0c0fb7dffad73e9f2f080cdca08b687d91f777fe5024259d0",
+      "saved": "artifacts/cloudflare/ci-91b1f9b/journey.xml",
+      "normalization": "Trailing horizontal whitespace/CRLF only; raw copy retained locally; test counts and failures unchanged"
+    },
+    {
+      "member": "artifacts/cloudflare/CF08-pg18.xml",
+      "passed": 29,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "original_sha256": "df3a9504ccb249a0ea1fc728f1509f65479a6446d5852667ca86385a8f3732f9",
+      "saved_sha256": "df3a9504ccb249a0ea1fc728f1509f65479a6446d5852667ca86385a8f3732f9",
+      "saved": "artifacts/cloudflare/ci-91b1f9b/CF08-pg18.xml",
+      "normalization": "Trailing horizontal whitespace/CRLF only; raw copy retained locally; test counts and failures unchanged"
+    },
+    {
+      "member": "artifacts/cloudflare/ci-operating.xml",
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "original_sha256": "d14c525c2ceac876f46856077ee0f54388c558004b26866b6b58b15e7d88a919",
+      "saved_sha256": "d14c525c2ceac876f46856077ee0f54388c558004b26866b6b58b15e7d88a919",
+      "saved": "artifacts/cloudflare/ci-91b1f9b/ci-operating.xml",
+      "normalization": "Trailing horizontal whitespace/CRLF only; raw copy retained locally; test counts and failures unchanged"
+    }
+  ],
+  "screenshots": [
+    {
+      "member": "artifacts/cloudflare/screenshots/CF07-bulk-restart-zh-HK-mobile.png",
+      "sha256": "add9f6398b8eebd205d82d3a0de479496a4cad2e4ca004399a74c4c129b88203",
+      "archive_time_utc": [
+        2026,
+        10,
+        1,
+        14,
+        27,
+        28
+      ],
+      "saved": "artifacts/cloudflare/ci-91b1f9b/screenshots/CF07-bulk-restart-zh-HK-mobile.png",
+      "fresh_current_run": true,
+      "visual_inspection": true,
+      "visual_notes": "zh-HK390px completed101-row bulk/restart card; buyer list currently loading"
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/CF07-unknown-contact-hold-en.png",
+      "sha256": "b45dc26a3bda7d99b4b418e002ec78911b6e4eacba6c5046605ae0df1944a929",
+      "archive_time_utc": [
+        2026,
+        10,
+        1,
+        14,
+        27,
+        32
+      ],
+      "saved": "artifacts/cloudflare/ci-91b1f9b/screenshots/CF07-unknown-contact-hold-en.png",
+      "fresh_current_run": true,
+      "visual_inspection": true,
+      "visual_notes": "en1280px lookup unknown/reconciliation pending, held USD0.300000, settled0; actual paginated fixture table visible"
+    }
+  ],
+  "historical_screenshots": [
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-desktop-approved-export-fixture.png",
+      "sha256": "1975a63969eb0f226f986156881a5e71b4e39292897e34eb723cf2db087dc6a9",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-desktop-mobile-readback-fixture.png",
+      "sha256": "bbd13649eb8260149d0a541a81e434b62abaae0de47a5b4883d9f4cb1e01e5b7",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-desktop-outcome-fixture.png",
+      "sha256": "394c03d1ba49d1d71232bcfc1659df208dae5e804860f095d3c6998c855fc483",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-mobile-approved-export-fixture.png",
+      "sha256": "8dd23b8d5c17ae0b122056593434bf436abda57848ee3c716ed2010e20e64d8a",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-mobile-mobile-readback-fixture.png",
+      "sha256": "1c6822f59c2467c596b8c2103e6dc85cfba141123db29614c9af70bdb9d12894",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-en-mobile-outcome-fixture.png",
+      "sha256": "1c6822f59c2467c596b8c2103e6dc85cfba141123db29614c9af70bdb9d12894",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-desktop-approved-export-fixture.png",
+      "sha256": "08ad9ef37bed59cf0c73beb3e6ed7404b0cf4b6d7bfe9ce81922de04e34114a4",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-desktop-outcome-fixture.png",
+      "sha256": "e732fd9b7da247e511bd392a76cd346c84837d05f8256acae6855c3e0b144b53",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-desktop-mobile-readback-fixture.png",
+      "sha256": "962b6ab5d619070bc0e713b2259c8870a2365461146d4e7a5a3404c06160f8ce",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-mobile-approved-export-fixture.png",
+      "sha256": "3d896af830bc9930594d08636a9e2f8ab75ffb703a4037ef58235e355163f1d3",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-mobile-mobile-readback-fixture.png",
+      "sha256": "4ca313d5c14d0a5d8237d6068bec21a3e43fda49afe7c1fa7a3dd80dbe1b7318",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    },
+    {
+      "member": "artifacts/cloudflare/screenshots/cloudflare-continuity-zh-HK-mobile-outcome-fixture.png",
+      "sha256": "3f6cf8c01d15852a7dbf0ff6a3dd46de1b6bb638f8e36f1d748488e326cace66",
+      "fresh_current_run": false,
+      "classification": "Matches previously checked-in local screenshot. Current journey wrote new PNGs to test-results root, outside this CI upload selection."
+    }
+  ],
+  "scope": "Fresh CI local owned integration and fictional identities/providers; no hosted Cloudflare/Vercel two-hop acceptance",
+  "retained_fixture_log_issue": "11 anonymous Error messages in handler/pipeline catch. Seven staff assertions passed; no trace/route attribution, not relabelled expected.",
+  "safe_members": 480,
+  "acceptance_source_files_equal_pushed_head_git_blobs": true,
+  "acceptance_report_original_sha256": "53be475dc9baa695f29e619730a15ab72c5e45fa2bfad6534981d8750d89ce32",
+  "acceptance_report_saved_sha256": "53be475dc9baa695f29e619730a15ab72c5e45fa2bfad6534981d8750d89ce32"
+}

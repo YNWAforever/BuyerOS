@@ -55,6 +55,34 @@ Next is the same single bounded protected-preview setup decision, now with
 concrete code/test/configuration evidence. Architecture approval is preserved;
 no paid/deployment/owner approval is inferred from this local checkpoint.
 
+### Fresh pushed-source verification
+
+[CI36875943355](https://github.com/YNWAforever/BuyerOS/actions/runs/36875943355)
+completed with **8/8 successful jobs** at branch `91b1f9b` and synthetic test merge
+`d78fcadf5f938502a606c4c1865ade4a4215d06b`; both have identical Git tree
+`296c6b3379c734a0c6a0679c9d6b93c6a1d1b6da`.
+API **679/0/0/0 in270.26s** includes all29 new preparation checks; worker186,
+controller27, PG18 compatibility29, operating2, staff7, zoom2, smoke1 and
+legacy4/8/1/3/1 passed. Required no-skip checkers passed. Linux native PDF caps
+are now checked by the actual local CI helper assertions; the earlier Windows
+record remains NOT RUN for Linux. Hosted child packaging/protection/both-hop
+limits remain unverified.
+
+Current staff artifact digest and19 source-file hashes verified against pushed
+Git blobs; fresh7/29/2 JUnit reports and2 screenshots retained under
+`artifacts/cloudflare/ci-91b1f9b/`. Twelve earlier checked-in bilingual local
+screenshots remain historical: new journey PNGs were written at test-results
+root outside the upload selection. Eleven anonymous fixture handler/pipeline
+Error messages are retained with no route/stack attribution; they are not
+relabeled expected or counted as a clean error-free live session.
+
+Read-only Vercel metadata confirms existing-project Git preview
+`dpl_2mtfFRQNvQqrkFizapMMjFRdujKk` at source91b1f9b, READY/targetnull/iad1,
+branch alias only. No prepared diagnostic is imported by that release API;
+no protected job deployment or production cutover follows from READY.
+Evidence-only commits after91b1f9b do not change this verified source tree's
+application/config/tests and have separately triggered CI/deployments.
+
 ## Task state
 
 | Task | State | Evidence and remaining gate |

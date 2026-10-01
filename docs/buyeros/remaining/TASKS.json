@@ -1877,34 +1877,50 @@
       "status": "complete_local_hosted_setup_pending",
       "reviewed_source_sha": "07a7537befbf1e2290ee7079e18a258083615ed6",
       "evidence": "artifacts/cloudflare/CF00-preview-preparation-checkpoint.json",
-      "test_counts": {"passed": 48, "failed": 0, "errors": 0, "skipped": 0},
+      "test_counts": {
+        "passed": 48,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
       "actual_duration_seconds": 61,
       "schema_change": false,
       "hosted_verified": false,
       "resource_created": false,
       "runtime_diagnostic_in_release_api": false,
-      "billing_inspection": "Cloudflare subscriptions GET403; standard account setting is not Paid proof. Vercel team Pro active, Neon owner Free. No plan upgrade."
+      "billing_inspection": "Cloudflare subscriptions GET403; standard account setting is not Paid proof. Vercel team Pro active, Neon owner Free. No plan upgrade.",
+      "linux_ci_verified": true,
+      "retained_fixture_log_issue": "11 anonymous built-fixture Error messages, not attributed expected;7 asserted cases passed.12 new journey PNGs outside upload path; prior local PNGs retained and2 current fresh special-case PNGs verified."
     },
     "remote_ci": {
-      "branch_head": "229a76c2d1ad6d608d3afba70b86b6dcc863f03c",
-      "test_merge": "57b8560f4cfec4bcaf5fcb130951a5b30f8433a1",
-      "run_id": 36861185237,
-      "scope": "Prior RC checkpoint, before temporary-preview preparation source07a7537.",
-      "successful_jobs": 8
+      "branch_head": "91b1f9b09ff7635d7967342f7b5577da881d91b5",
+      "test_merge": "d78fcadf5f938502a606c4c1865ade4a4215d06b",
+      "equal_tree_sha": "296c6b3379c734a0c6a0679c9d6b93c6a1d1b6da",
+      "run_id": 36875943355,
+      "scope": "Reviewed preview preparation07a7537 plus checkpoint91b1f9b; actual local Linux integration and fictional identities/providers, not protected hosted proof. Subsequent evidence-only commits are separate.",
+      "successful_jobs": 8,
+      "api_counts": {
+        "passed": 679,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "evidence": "artifacts/cloudflare/CF00-preview-remote-ci-91b1f9b.json"
     },
     "git_triggered_app_api_preview": {
-      "id": "dpl_EPr4wsjaMNcgo3XA2itL1NxDGsc7",
-      "url": "buyer-qzwxlwr6n-ynwaforevers-projects.vercel.app",
+      "id": "dpl_2mtfFRQNvQqrkFizapMMjFRdujKk",
+      "url": "buyer-lmxv6y27g-ynwaforevers-projects.vercel.app",
       "state": "READY",
       "target": null,
       "source": "git",
-      "sha": "d8ca3150e620f6f7f978a420852dd4ac9f024712",
+      "sha": "91b1f9b09ff7635d7967342f7b5577da881d91b5",
       "regions": [
         "iad1"
       ],
       "alias": [
         "buyer-os-git-codex-fix-vercel-tslib-ssr-ynwaforevers-projects.vercel.app"
-      ]
+      ],
+      "scope": "Last observed existing-project Git app/API branch preview only. Prepared diagnostic outside release entrypoint. No protected native/controller/schema/selector/production proof."
     },
     "deployed_source_sha_scope": "Cloudflare job stack not deployed; automatic existing-project app/API preview recorded separately."
   },

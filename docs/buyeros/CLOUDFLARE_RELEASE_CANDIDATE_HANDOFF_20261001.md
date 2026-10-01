@@ -9,10 +9,24 @@
 | Local integration verified | Actual Miniflare Cron/Queue/Workflow → machine HMAC → native FastAPI/SQLAlchemy → owned PostgreSQL. Full API650, worker186, seven current Cloudflare UI cases, six preserved legacy suites, and PG18 compatibility29 have zero required failures/errors/skips. |
 | Hosted integration | CF00 hosted package/PDF/checkpoint/protection and both-hop enforcement remain NOT RUN. No fixture/mock is counted as live provider proof. |
 | Externally blocked | Exact preview setup authorization; later production plan/quota/privacy and selector scope; independent review; external deletion journal/R2, policy/provider economics/pilot, full authenticated staff trace and assistive accessibility. |
-| Deployed | Cloudflare controller/schema/selector remain undeployed. Existing Git integration automatically published app/API **preview** dpl_EPr4wsjaMNcgo3XA2itL1NxDGsc7 at source d8ca315 (READY, targetnull, iad1, branch alias only). This is not protected native-job feasibility or production cutover; historical production12327c7 is not a refreshed live readback. |
+| Deployed | Cloudflare controller/schema/selector remain undeployed. Last observed Git integration app/API **preview** dpl_2mtfFRQNvQqrkFizapMMjFRdujKk at source91b1f9b is READY/targetnull/iad1, branch alias only. This is not protected native-job feasibility or production cutover; historical production12327c7 is not a refreshed live readback. |
 
 **Reviewed code/configuration source:** `d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8`.
 **Reviewed temporary-preview preparation source:** `07a7537befbf1e2290ee7079e18a258083615ed6`.
+Fresh [CI36875943355](https://github.com/YNWAforever/BuyerOS/actions/runs/36875943355)
+at91b1f9b/test-merge d78fcadf is8/8 SUCCESS, with matching Git trees.
+API679/0/0/0 includes29 preparation checks; actual local Linux native PDF limit
+assertions pass. Worker186, controller27, PG18compat29, operating2, staff7,
+zoom2, smoke1 and legacy4/8/1/3/1 pass with required skip gates enforced.
+[Current evidence manifest](../../artifacts/cloudflare/ci-91b1f9b/manifest.json)
+verifies official artifact digest,19 source hashes and fresh7/29/2 XML counts.
+Two fresh special-case screenshots are visually inspected; twelve retained
+bilingual local PNGs are historical because current journey PNGs were written
+outside the upload selection. Eleven anonymous built-fixture Error messages
+remain unattributed and retained; test assertion passes do not erase them.
+See `CF00-preview-remote-ci-91b1f9b.json` for exact job commands, times, warnings,
+raw decoded-log hashes and the last observed app/API preview metadata.
+No hosted/controller/production feasibility is implied by these local CI results.
 Its48 zero-skip local checks do not verify hosted packaging or Vercel hop limits.
 Release routes/schema are unchanged. Prior RC CI36861185237 at229a76c/
 test-merge57b8560 is8/8 SUCCESS; it predates this preparation source.
