@@ -1,0 +1,62 @@
+{
+  "observed_at_utc": "2026-10-01T02:09:33.444Z",
+  "origin": "https://buyer-os-nu.vercel.app",
+  "source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+  "deployment_id": "dpl_wdPCQmzg7EkFusgFknHAA2tXdKth",
+  "command": "node artifacts/t30-production-acceptance-12327c7-20261001.mjs",
+  "passed": 4,
+  "failed": 0,
+  "skipped": 0,
+  "checks": [
+    {
+      "name": "production root initial HTML",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 9724,
+      "body_sha256": "0875e6b6305a0411dfd2033907a512ff4bca173390095cc8d6ecb648999663c1",
+      "passed": true,
+      "duration_ms": 2125
+    },
+    {
+      "name": "app HTML and public Auth0 bootstrap",
+      "method": "GET",
+      "path": "/app",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 9863,
+      "body_sha256": "b4ba8ce1c99470a50de44aa2cc57c14f41229026df6bca824fd39b8808b847bc",
+      "public_auth0_bootstrap_present": true,
+      "passed": true,
+      "duration_ms": 1806
+    },
+    {
+      "name": "anonymous same-origin API rejection",
+      "method": "GET",
+      "path": "/v1/workspaces",
+      "status": 401,
+      "content_type": "application/json",
+      "bytes": 129,
+      "body_sha256": "62a70a3432d87ed9496006fa36df604d63e94e2f0125090f71a9574b74ad803e",
+      "error_code": "UNAUTHENTICATED",
+      "request_id": "a300481f-a838-4de0-a329-aa8b97b5c742",
+      "passed": true,
+      "duration_ms": 1098
+    },
+    {
+      "name": "malformed bearer rejection",
+      "method": "GET",
+      "path": "/v1/workspaces",
+      "status": 401,
+      "content_type": "application/json",
+      "bytes": 123,
+      "body_sha256": "c24c4887608d13d1d1d1d38114aa03c05ce0e0367f761a6438cbfb71a23f40b8",
+      "error_code": "UNAUTHENTICATED",
+      "request_id": "0f7defc4-8e3f-4bce-9376-f071a4601c84",
+      "passed": true,
+      "duration_ms": 1077
+    }
+  ],
+  "scope": "Actual anonymous production HTTP and public bootstrap checks only. No authenticated UI, database write, live provider, external worker, delivery or complete staff journey verification."
+}

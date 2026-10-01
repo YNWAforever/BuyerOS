@@ -1,0 +1,14 @@
+{
+  "observed_at_utc": "2026-10-01T02:09:38.8873342Z",
+  "deployment_id": "dpl_wdPCQmzg7EkFusgFknHAA2tXdKth",
+  "source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+  "command": "vercel.cmd logs dpl_wdPCQmzg7EkFusgFknHAA2tXdKth --level error --since 10m --no-follow --json --no-branch --limit 100 --scope ynwaforevers-projects",
+  "exit_code": 0,
+  "verified": true,
+  "returned_error_log_records": 0,
+  "unparsed_output_lines": 0,
+  "maximum_records": 100,
+  "window": "10m before observation",
+  "truncated_possible": false,
+  "scope": "Bounded error-level query for the owner-merged main successor only. No raw messages or credentials retained; continuous monitoring/drains not established."
+}

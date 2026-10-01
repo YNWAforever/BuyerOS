@@ -553,3 +553,14 @@ docs/buyeros/remaining/CHANGED_FILES.md
 docs/buyeros/remaining/TASKS.json
 docs/buyeros/runbooks/release.md
 ```
+
+## Current main successor after external owner merge
+
+Original PR9 merged at a594219; deployment-evidence5e89eb1 is newer. The same feature branch has merge base a594219 with main, so its follow-up diff is the eleven deployment documentation/evidence paths above plus these four successor artifacts: fifteen unique paths. Application/CI content equals reviewed4181062 and current deployed main12327c7.
+
+```text
+artifacts/t30-external-merge-production-12327c7-20261001.json
+artifacts/t30-production-acceptance-12327c7-20261001.mjs
+artifacts/t30-production-acceptance-12327c7-20261001.json
+artifacts/t30-production-error-scan-12327c7-20261001.json
+```
