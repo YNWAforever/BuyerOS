@@ -107,8 +107,10 @@ def _pdf_probe(records: list[dict]) -> None:
     observed = []
 
     def inspect_child(*args, **kwargs):
-        allowed = {"PYTHONIOENCODING", "PYTHONDONTWRITEBYTECODE", "SystemRoot"}
+        from buyeros_api.execution.subprocess_runtime import child_environment
+        allowed = {"PYTHONIOENCODING", "PYTHONDONTWRITEBYTECODE", "PYTHONPATH", "SystemRoot"}
         assert set(kwargs["env"]) <= allowed
+        assert kwargs["env"] == child_environment()
         assert kwargs["timeout"] == 8
         assert Path(kwargs["cwd"]).is_dir()
         observed.append({"environment_keys": sorted(kwargs["env"]), "timeout_seconds": 8,

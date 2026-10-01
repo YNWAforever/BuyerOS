@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.194" timestamp="2026-10-01T23:59:48.029265+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_pdf_subprocess_runtime" name="test_pdf_child_uses_vendor_dependencies_without_inheriting_credentials" time="0.958"><failure message="ValueError: PDF parser rejected document">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001EBCAB8C770&gt;
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-218/test_pdf_child_uses_vendor_dep0')
+
+    def test_pdf_child_uses_vendor_dependencies_without_inheriting_credentials(monkeypatch, tmp_path):
+        # -S removes the interpreter's automatic site initialization, reproducing
+        # the host's packages being present only in the API process's import path.
+        original = subprocess.run
+        observed = []
+        malicious = tmp_path / "untrusted"
+        malicious.mkdir()
+        (malicious / "pypdf.py").write_text("raise RuntimeError('untrusted inherited import path')\n")
+        monkeypatch.setenv("PYTHONPATH", str(malicious))
+        monkeypatch.setenv("BUYEROS_PROVIDER_SECRET", "fictional-secret-must-not-reach-child")
+        def isolated(command, **kwargs):
+            observed.append(kwargs["env"])
+            assert kwargs["timeout"] == 8
+            return original([command[0], "-S", *command[1:]], **kwargs)
+        monkeypatch.setattr(pdf_parser.subprocess, "run", isolated)
+        body = sample_pdf()
+        upload = validate_upload("fictional.pdf", "application/pdf", body, hashlib.sha256(body).hexdigest())
+&gt;       rows = pdf_parser.parse_pdf_candidates(upload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_pdf_subprocess_runtime.py:27:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+upload = ValidatedUpload(filename='fictional.pdf', media_type='application/pdf', kind='pdf', sha256='56698f27c3989f9977ac9193fb...00115 00000 n \n0000000241 00000 n \n0000000311 00000 n \ntrailer\n&lt;&lt; /Size 6 /Root 1 0 R &gt;&gt;\nstartxref\n407\n%%EOF\n')
+
+    def parse_pdf_candidates(upload: ValidatedUpload) -&gt; list[dict]:
+        if upload.kind != "pdf" or upload.media_type != "application/pdf":
+            raise ValueError("PDF upload required")
+        # No object key, bearer token, cloud credential or inherited provider env is
+        # passed to the parser. The child accepts only validated bytes on stdin.
+        env = {"PYTHONIOENCODING": "utf-8", "PYTHONDONTWRITEBYTECODE": "1"}
+        if sys.platform == "win32":
+            env["SystemRoot"] = os.environ.get("SystemRoot", r"C:\Windows")
+        with tempfile.TemporaryDirectory(prefix="buyeros-pdf-") as workdir:
+            try:
+                process = subprocess.run(
+                    [sys.executable, "-B", "-m", "buyeros_api.execution.pdf_parser_child"],
+                    input=upload.body, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    timeout=PARSER_TIMEOUT_SECONDS, check=False, cwd=workdir, env=env,
+                    creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+                )
+            except subprocess.TimeoutExpired as exc:
+                raise PdfParserTimeout("PDF parser timeout") from exc
+        if process.returncode or len(process.stdout) &gt; MAX_PARSER_OUTPUT_BYTES:
+&gt;           raise ValueError("PDF parser rejected document")
+E           ValueError: PDF parser rejected document
+
+buyeros_api\execution\pdf_parser.py:41: ValueError</failure></testcase></testsuite></testsuites>

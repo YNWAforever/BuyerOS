@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 import subprocess
 import sys
@@ -10,6 +9,7 @@ import tempfile
 from dataclasses import replace
 
 from buyeros_api.services.ingestion_service import ValidatedUpload, parse_candidate_facts
+from buyeros_api.execution.subprocess_runtime import child_environment
 
 PARSER_TIMEOUT_SECONDS = 8
 MAX_PARSER_OUTPUT_BYTES = 128 * 1024
@@ -24,9 +24,7 @@ def parse_pdf_candidates(upload: ValidatedUpload) -> list[dict]:
         raise ValueError("PDF upload required")
     # No object key, bearer token, cloud credential or inherited provider env is
     # passed to the parser. The child accepts only validated bytes on stdin.
-    env = {"PYTHONIOENCODING": "utf-8", "PYTHONDONTWRITEBYTECODE": "1"}
-    if sys.platform == "win32":
-        env["SystemRoot"] = os.environ.get("SystemRoot", r"C:\Windows")
+    env = child_environment()
     with tempfile.TemporaryDirectory(prefix="buyeros-pdf-") as workdir:
         try:
             process = subprocess.run(

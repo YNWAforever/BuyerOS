@@ -161,6 +161,32 @@ def native_checks(dsn):
         "python": sys.version.split()[0], "platform": sys.platform,
         "development_dependencies_present": any(d.metadata["Name"] == "pytest"
                                                  for d in importlib.metadata.distributions())}})
+    # Measure the actual deployed uncompressed task files, without reading any
+    # file contents. Local paths and external layers cannot become hosted proof.
+    task = Path("/var/task")
+    package_roots = [Path(importlib.metadata.distribution(name).locate_file("")).resolve() for name in PACKAGES]
+    if sys.platform == "linux" and task.is_dir() and Path(__file__).resolve().is_relative_to(task) and all(root.is_relative_to(task) for root in package_roots):
+        count, size, links = 0, 0, 0
+        measured = time.perf_counter()
+        for folder, directories, files in os.walk(task, followlinks=False):
+            links += sum((Path(folder) / name).is_symlink() for name in directories)
+            for name in files:
+                file = Path(folder) / name
+                if file.is_symlink():
+                    links += 1
+                    continue
+                count += 1
+                if count > 50000 or time.perf_counter() - measured > 10:
+                    raise ValueError("hosted file measurement exceeded its bound")
+                size += file.stat().st_size
+        records.append({"check": "vercel_api_bundle", "state": "verified", "details": {
+            "measurement": "actual uncompressed Lambda task regular files; ZIP transport size unavailable",
+            "regular_files": count, "regular_file_bytes": size, "symlinks": links,
+            "all_native_package_roots_in_task": True, "wall_seconds": time.perf_counter() - measured,
+            "development_dependencies_present": records[0]["details"]["development_dependencies_present"]}})
+    else:
+        records.append({"check": "vercel_api_bundle", "state": "not_run", "details": {
+            "reason": "not a fully observable Vercel task bundle"}})
     _pdf_probe(records)
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -170,12 +196,13 @@ def native_checks(dsn):
         records.append({"check": "linux_caps", "state": "not_run", "details": {"platform": sys.platform}})
     else:
         import resource
+        from buyeros_api.execution.subprocess_runtime import child_environment
         command = ("from buyeros_api.execution.pdf_parser_child import main; import resource,json; "
                    "assert main()==0; print(); print(json.dumps([resource.getrlimit(x) for x in "
                    "(resource.RLIMIT_AS,resource.RLIMIT_CPU,resource.RLIMIT_FSIZE)]))")
         process = subprocess.run([sys.executable, "-B", "-c", command], input=sample_pdf(),
                                  capture_output=True, check=True, timeout=8,
-                                 env={"PYTHONIOENCODING": "utf-8", "PYTHONDONTWRITEBYTECODE": "1"})
+                                 env=child_environment())
         limits = json.loads(process.stdout.splitlines()[-1])
         assert limits == [[536870912] * 2, [6] * 2, [1048576] * 2]
         parent, child = resource.getrusage(resource.RUSAGE_SELF), resource.getrusage(resource.RUSAGE_CHILDREN)
@@ -191,9 +218,8 @@ def native_checks(dsn):
 def run_native_probe(dsn, service_root, target):
     """DSN on stdin only; no inherited credentials, console traceback or shell."""
     validate_dsn(dsn, target, target["worker_role"])
-    env = {"PYTHONIOENCODING": "utf-8", "PYTHONDONTWRITEBYTECODE": "1"}
-    if sys.platform == "win32":
-        env["SystemRoot"] = os.environ.get("SystemRoot", r"C:\Windows")
+    from buyeros_api.execution.subprocess_runtime import child_environment
+    env = child_environment()
     with tempfile.TemporaryFile() as output:
         process = subprocess.run([sys.executable, "-B", str(Path(__file__).resolve()), "--native-child"],
                                  input=json.dumps({"dsn": dsn, "target": target}).encode(), stdout=output,
