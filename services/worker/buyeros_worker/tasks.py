@@ -56,28 +56,9 @@ async def _with_engine(body: Callable):
 EXTERNAL_EVENTS = frozenset({"provider.external", "provider.reconcile"})
 
 
-def resolve_provider_adapter(service: str) -> ProviderAdapter | None:
-    """Live activation is empty until one named provider passes T14 evidence."""
-    return None
-
-
-def _provider_command(intent_key: str, event_type: str, payload: object):
-    if not isinstance(payload, dict):
-        return None
-    try:
-        operation_id = uuid.UUID(payload["operation_id"])
-        original_key = (payload["original_intent_key"] if event_type == "provider.reconcile"
-                        else intent_key)
-        if (event_type == "provider.reconcile"
-                and intent_key != reconcile_intent_key(operation_id)):
-            return None
-        intent = ProviderIntent(original_key, payload["service"], payload["market"],
-                                payload["language"], payload["role"])
-        if intent.service not in {"search", "model", "contact"}:
-            return None
-        return operation_id, intent
-    except (KeyError, TypeError, ValueError):
-        return None
+from buyeros_api.execution.provider_dispatch import resolve_provider_adapter, _provider_command
+from buyeros_api.execution.provider_context import execution_scope, LegacyExecution
+from buyeros_api.api.worker_schemas import JobEnvelope
 
 
 def execute_intent_sync(intent_key: str, workspace_id: str, generation: int, *,
@@ -131,70 +112,75 @@ def execute_intent_sync(intent_key: str, workspace_id: str, generation: int, *,
                 return await run_intent(session, {"workspace_id": workspace_id},
                                         intent_key, generation)
             command = _provider_command(intent_key, row["event_type"], row["payload"])
-        # The tenant transaction has committed before any object or provider network call.
-        if discovery_event:
-            return await execute_discovery(
-                engine, uuid.UUID(workspace_id), intent_key, generation,
-                adapter=search_adapter, environment=environment,
-            )
-        if discovery_reconcile_event:
-            return await execute_discovery_reconcile(
-                engine, uuid.UUID(workspace_id), intent_key, generation,
-                adapter=search_adapter, environment=environment,
-            )
-        if fit_event:
-            return await execute_fit(engine, uuid.UUID(workspace_id), intent_key,
-                                     generation, checkpoint_dsn=checkpoint_dsn)
-        if fetch_event:
-            return await execute_offer_fetch(
-                engine, uuid.UUID(workspace_id), intent_key, generation,
-                private_store=private_store, transport=fetch_transport,
-            )
-        if document_event:
-            return await execute_document(
-                engine, uuid.UUID(workspace_id), intent_key, generation,
-                private_store=private_store,
-            )
-        if source_delete_event:
-            return await execute_source_delete(
-                engine, uuid.UUID(workspace_id), intent_key, generation,
-                private_store=private_store,
-            )
-        if contact_event:
-            chosen_adapter = adapter or resolve_provider_adapter("contact")
+        # The transaction committed before IO; every native transaction now
+        # rechecks this same selector/epoch through the shared context.
+        envelope = JobEnvelope(v=1, workspace_id=uuid.UUID(workspace_id),
+                               outbox_id=uuid.UUID(row["id"]), generation=generation,
+                               runtime_epoch=control.epoch)
+        with execution_scope(LegacyExecution(envelope)):
+            if discovery_event:
+                return await execute_discovery(
+                    engine, uuid.UUID(workspace_id), intent_key, generation,
+                    adapter=search_adapter, environment=environment,
+                )
+            if discovery_reconcile_event:
+                return await execute_discovery_reconcile(
+                    engine, uuid.UUID(workspace_id), intent_key, generation,
+                    adapter=search_adapter, environment=environment,
+                )
+            if fit_event:
+                return await execute_fit(engine, uuid.UUID(workspace_id), intent_key,
+                                         generation, checkpoint_dsn=checkpoint_dsn)
+            if fetch_event:
+                return await execute_offer_fetch(
+                    engine, uuid.UUID(workspace_id), intent_key, generation,
+                    private_store=private_store, transport=fetch_transport,
+                )
+            if document_event:
+                return await execute_document(
+                    engine, uuid.UUID(workspace_id), intent_key, generation,
+                    private_store=private_store,
+                )
+            if source_delete_event:
+                return await execute_source_delete(
+                    engine, uuid.UUID(workspace_id), intent_key, generation,
+                    private_store=private_store,
+                )
+            if contact_event:
+                chosen_adapter = adapter or resolve_provider_adapter("contact")
+                if chosen_adapter is None:
+                    return "provider_unavailable"
+                if environment != "test":
+                    from .config import get_settings
+                    if not get_settings().paid_dispatch_enabled:
+                        return "dispatch_disabled"
+                return await execute_contact_lookup(
+                    engine, uuid.UUID(workspace_id), contact_job_id, generation,
+                    chosen_adapter, environment=environment,
+                )
+            if contact_reconcile_event:
+                chosen_adapter = adapter or resolve_provider_adapter("contact")
+                if chosen_adapter is None:
+                    return "provider_unavailable"
+                return await execute_contact_reconcile(
+                    engine, uuid.UUID(workspace_id), contact_job_id, contact_operation_id,
+                    intent_key, generation, chosen_adapter, environment=environment,
+                )
+            if command is None:
+                return "invalid_provider_intent"
+            operation_id, intent = command
+            chosen_adapter = adapter or resolve_provider_adapter(intent.service)
             if chosen_adapter is None:
                 return "provider_unavailable"
-            if environment != "test":
+            if row["event_type"] == "provider.external" and environment != "test":
                 from .config import get_settings
                 if not get_settings().paid_dispatch_enabled:
                     return "dispatch_disabled"
-            return await execute_contact_lookup(
-                engine, uuid.UUID(workspace_id), contact_job_id, generation,
-                chosen_adapter, environment=environment,
+            return await execute_external(
+                engine, uuid.UUID(workspace_id), operation_id, generation,
+                chosen_adapter, intent, environment=environment,
+                outbox_intent_key=intent_key,
             )
-        if contact_reconcile_event:
-            chosen_adapter = adapter or resolve_provider_adapter("contact")
-            if chosen_adapter is None:
-                return "provider_unavailable"
-            return await execute_contact_reconcile(
-                engine, uuid.UUID(workspace_id), contact_job_id, contact_operation_id,
-                intent_key, generation, chosen_adapter, environment=environment,
-            )
-        if command is None:
-            return "invalid_provider_intent"
-        operation_id, intent = command
-        chosen_adapter = adapter or resolve_provider_adapter(intent.service)
-        if chosen_adapter is None:
-            return "provider_unavailable"
-        if row["event_type"] == "provider.external" and environment != "test":
-            from .config import get_settings
-            if not get_settings().paid_dispatch_enabled:
-                return "dispatch_disabled"
-        return await execute_external(
-            engine, uuid.UUID(workspace_id), operation_id, generation,
-            chosen_adapter, intent, environment=environment,
-            outbox_intent_key=intent_key,
-        )
 
     try:
         return run_async(_with_engine(body))

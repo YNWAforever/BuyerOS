@@ -12,7 +12,7 @@ from buyeros_api.db.ingestion import OfferDocument
 from buyeros_api.db.buyers import SourceDocument
 from buyeros_api.db.models import Membership
 from buyeros_api.db.outbox import AsyncJob, OutboxEvent
-from buyeros_api.db.session import tenant_session
+from .provider_context import execution_session as tenant_session
 from buyeros_api.services.object_store import StoreUnavailable, get_private_store
 from buyeros_api.services.offer_source_policy import current_offer_source_permission
 from buyeros_api.services.pinned_transport import PinnedHttpsTransport

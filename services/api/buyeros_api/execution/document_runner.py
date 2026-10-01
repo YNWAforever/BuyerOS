@@ -11,7 +11,7 @@ from buyeros_api.db.buyers import SourceDocument
 from buyeros_api.db.outbox import OutboxEvent
 from buyeros_api.db.models import Membership
 from buyeros_api.api.deps import permission_for_roles
-from buyeros_api.db.session import tenant_session
+from .provider_context import execution_session as tenant_session
 from buyeros_api.services.ingestion_service import parse_candidate_facts, validate_upload
 from buyeros_api.services.object_store import StoreUnavailable, get_private_store
 

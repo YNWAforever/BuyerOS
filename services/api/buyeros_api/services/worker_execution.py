@@ -15,6 +15,15 @@ from buyeros_api.db.worker_execution import WorkerRuntimeControl, WorkerStep
 from buyeros_api.execution.engine import async_database_url
 from buyeros_api.settings import get_settings
 
+WORKER_ROLE_CATALOG_SQL = (
+    "SELECT NOT rolsuper AND NOT rolbypassrls AND pg_has_role(current_user,'buyeros_worker','MEMBER') "
+    "AND NOT EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
+    "WHERE n.nspname IN ('public','buyeros_graph') AND c.relkind IN ('r','p') "
+    "AND c.relowner=pg_roles.oid) "
+    "AND NOT EXISTS(SELECT 1 FROM pg_namespace n WHERE n.nspname IN ('public','buyeros_graph') "
+    "AND n.nspowner=pg_roles.oid) FROM pg_roles WHERE rolname=current_user"
+)
+
 
 def create_execution_engine():
     dsn = get_settings().execution_database_url
@@ -26,12 +35,7 @@ def create_execution_engine():
 async def consume_machine_nonce(engine, principal, now: datetime) -> None:
     """Catalog proof and committed replay guard before any customer query."""
     async with engine.begin() as connection:
-        role = (await connection.execute(text(
-            "SELECT NOT rolsuper AND NOT rolbypassrls AND pg_has_role(current_user,'buyeros_worker','MEMBER') "
-            "AND NOT EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
-            "WHERE n.nspname IN ('public','buyeros_graph') AND c.relkind IN ('r','p') "
-            "AND c.relowner=pg_roles.oid) FROM pg_roles WHERE rolname=current_user"
-        ))).scalar_one()
+        role = (await connection.execute(text(WORKER_ROLE_CATALOG_SQL))).scalar_one()
         if not role:
             raise ApiError(503, "SERVICE_UNAVAILABLE", "worker role catalog proof failed")
         row = (await connection.execute(text(
@@ -98,6 +102,13 @@ async def claim_execution_step(session, envelope: JobEnvelope, step_key: str, no
         return StepClaim("cached", outcome=outcome("blocked", "EXECUTION_DISABLED"))
     if row.state != "dispatched":
         return StepClaim("stale", outcome=outcome("stale", "STALE_FENCE"))
+    if receipt is None and step_key != "start":
+        predecessor = (await session.execute(select(WorkerStep.id).where(
+            WorkerStep.outbox_id == row.id, WorkerStep.generation == envelope.generation,
+            WorkerStep.runtime_epoch == envelope.runtime_epoch, WorkerStep.state != "running",
+            WorkerStep.outcome["next_step_key"].astext == step_key).limit(1))).first()
+        if predecessor is None:
+            return StepClaim("stale", outcome=outcome("blocked", "INVALID_INTENT"))
     if receipt is not None:
         # Lease expiry never means a potentially accepted operation is safe to
         # repeat. Recovery must inspect permanent business/provider state.
@@ -135,7 +146,7 @@ async def _owned_step(session, envelope, step_key, owner):
 
 
 def finish_receipt(control, receipt, result: StepOutcome):
-    receipt.state = "done" if result.state == "done" else ("reconcile" if result.state == "reconcile" else "blocked")
+    receipt.state = "done" if result.state in {"done", "continue", "retry_later"} else ("reconcile" if result.state == "reconcile" else "blocked")
     receipt.outcome = result.model_dump(mode="json")
     if len(json_bytes(receipt.outcome)) > 2048:
         raise ValueError("worker outcome exceeds safe state bound")
@@ -147,11 +158,10 @@ def json_bytes(value) -> bytes:
     return json.dumps(value, separators=(",", ":")).encode()
 
 
-async def execute_step(engine, envelope: JobEnvelope, step_key: str, *, timeout_seconds: float = 60) -> StepOutcome:
+async def execute_step(engine, envelope: JobEnvelope, step_key: str, *, timeout_seconds: float = 60,
+                       adapter=None, checkpoint_dsn=None, environment="production") -> StepOutcome:
     # Cloudflare selects only a key supplied by the server. One local outbox is
     # one unit; bulk creates its next 50-row outbox in the same transaction.
-    if step_key != "start":
-        return outcome("blocked", "INVALID_INTENT")
     now = datetime.now(timezone.utc)
     async with tenant_session(engine, envelope.workspace_id) as session:
         claim = await claim_execution_step(session, envelope, step_key, now)
@@ -160,15 +170,18 @@ async def execute_step(engine, envelope: JobEnvelope, step_key: str, *, timeout_
 
     try:
         from buyeros_api.execution.step_runner import execute_claimed
-        return await asyncio.wait_for(execute_claimed(engine, envelope, step_key, claim.owner), timeout=min(60, timeout_seconds))
+        return await asyncio.wait_for(execute_claimed(engine, envelope, step_key, claim.owner,
+            adapter=adapter, checkpoint_dsn=checkpoint_dsn, environment=environment), timeout=min(60, timeout_seconds))
     except Exception:
         # Do not swallow failure as success or release any financial hold. DB-only
         # work rolled back; this inspectable receipt must be explicitly recovered.
         async with tenant_session(engine, envelope.workspace_id) as session:
-            control, _row, receipt, valid = await _owned_step(session, envelope, step_key, claim.owner)
+            control, row, receipt, valid = await _owned_step(session, envelope, step_key, claim.owner)
             if not valid:
                 return outcome("stale", "STALE_FENCE")
-            result = outcome("blocked", "STEP_FAILED")
+            from buyeros_api.execution.provider_context import terminal_business_outcome
+            result = await terminal_business_outcome(session, row, include_running=True)
+            result = result or outcome("blocked", "STEP_FAILED")
             finish_receipt(control, receipt, result)
         return result
 

@@ -29,6 +29,7 @@ async def load_intent(session, intent_key: str) -> dict | None:
     if row is None:
         return None
     return {
+        "id": str(row.id),
         "state": row.state,
         "event_type": row.event_type,
         "payload": row.payload,

@@ -1,0 +1,115 @@
+........................................................................ [ 11%]
+........................................................................ [ 22%]
+........................................................................ [ 34%]
+........................................................................ [ 45%]
+........................................................................ [ 56%]
+........................................................................ [ 68%]
+........................................................................ [ 79%]
+........................................................................ [ 91%]
+........................................................                 [100%]
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_admin_operations_db.py::test_0017_preferences_rls_and_empty_rollback
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_admin_operations_db.py: 3 warnings
+tests/test_api_projects_db.py: 3 warnings
+tests/test_backup_restore_t28.py: 1 warning
+tests/test_budget_atomicity_db.py: 3 warnings
+tests/test_bulk_jobs_db.py: 2 warnings
+tests/test_buyer_management_db.py: 3 warnings
+tests/test_buyer_review_db.py: 3 warnings
+tests/test_cloudflare_bridge_db.py: 1 warning
+tests/test_cloudflare_local_steps_db.py: 1 warning
+tests/test_cloudflare_migration_db.py: 4 warnings
+tests/test_cloudflare_provider_steps_db.py: 1 warning
+tests/test_cloudflare_runtime_control_db.py: 1 warning
+tests/test_contact_job_migration.py: 5 warnings
+tests/test_contact_quote_migration.py: 4 warnings
+tests/test_draft_approval_migration.py: 4 warnings
+tests/test_draft_integrity_migration.py: 3 warnings
+tests/test_export_migration.py: 3 warnings
+tests/test_icp_write_integrity_db.py: 3 warnings
+tests/test_ingestion_migration.py: 4 warnings
+tests/test_outcome_migration.py: 3 warnings
+tests/test_policy_lifecycle_db.py: 3 warnings
+tests/test_project_constraints_db.py: 6 warnings
+tests/test_research_checkpoint_migration.py: 4 warnings
+tests/test_research_migration.py: 4 warnings
+tests/test_retention_authorization_db.py: 5 warnings
+tests/test_run_migration.py: 4 warnings
+tests/test_sender_identity_migration.py: 3 warnings
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+tests/test_provider_contracts.py::test_timeout_after_acceptance_remains_unknown_and_duplicate_intent_does_not_submit_twice
+tests/test_search_adapter.py::test_fixture_adapter_is_deterministic_and_bounded
+tests/test_search_adapter.py::test_fixture_adapter_respects_limit
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:874: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    _restore_event_loop_policy(asyncio.get_event_loop_policy()),
+
+tests/test_provider_contracts.py::test_timeout_after_acceptance_remains_unknown_and_duplicate_intent_does_not_submit_twice
+tests/test_search_adapter.py::test_fixture_adapter_is_deterministic_and_bounded
+tests/test_search_adapter.py::test_fixture_adapter_respects_limit
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:772: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    old_loop_policy = asyncio.get_event_loop_policy()
+
+tests/test_provider_contracts.py::test_timeout_after_acceptance_remains_unknown_and_duplicate_intent_does_not_submit_twice
+tests/test_search_adapter.py::test_fixture_adapter_is_deterministic_and_bounded
+tests/test_search_adapter.py::test_fixture_adapter_respects_limit
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:777: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(policy)
+
+tests/test_provider_contracts.py::test_timeout_after_acceptance_remains_unknown_and_duplicate_intent_does_not_submit_twice
+tests/test_search_adapter.py::test_fixture_adapter_is_deterministic_and_bounded
+tests/test_search_adapter.py::test_fixture_adapter_respects_limit
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1183: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+
+tests/test_provider_contracts.py::test_timeout_after_acceptance_remains_unknown_and_duplicate_intent_does_not_submit_twice
+tests/test_search_adapter.py::test_fixture_adapter_is_deterministic_and_bounded
+tests/test_search_adapter.py::test_fixture_adapter_respects_limit
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:889: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+tests/test_provider_contracts.py::test_timeout_after_acceptance_remains_unknown_and_duplicate_intent_does_not_submit_twice
+tests/test_search_adapter.py::test_fixture_adapter_is_deterministic_and_bounded
+tests/test_search_adapter.py::test_fixture_adapter_respects_limit
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:794: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(old_loop_policy)
+
+tests/test_provider_contracts.py::test_timeout_after_acceptance_remains_unknown_and_duplicate_intent_does_not_submit_twice
+tests/test_search_adapter.py::test_fixture_adapter_is_deterministic_and_bounded
+tests/test_search_adapter.py::test_fixture_adapter_respects_limit
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:942: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+tests/test_provider_contracts.py::test_timeout_after_acceptance_remains_unknown_and_duplicate_intent_does_not_submit_twice
+tests/test_search_adapter.py::test_fixture_adapter_is_deterministic_and_bounded
+tests/test_search_adapter.py::test_fixture_adapter_respects_limit
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:966: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(previous_policy)
+
+tests/test_provider_contracts.py::test_timeout_after_acceptance_remains_unknown_and_duplicate_intent_does_not_submit_twice
+tests/test_search_adapter.py::test_fixture_adapter_is_deterministic_and_bounded
+tests/test_search_adapter.py::test_fixture_adapter_respects_limit
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:978: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\Documents\BuyerOS\artifacts\cloudflare\CF04-api-full.xml -
+632 passed, 117 warnings in 486.00s (0:08:05)

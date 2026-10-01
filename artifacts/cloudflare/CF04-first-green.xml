@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="7" time="14.515" timestamp="2026-10-01T13:52:45.645619+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_provider_steps_db" name="test_accepted_then_lost_response_keeps_hold_and_uses_status_only" time="6.232"><failure message="psycopg.errors.UndefinedColumn: column &quot;actual_cost&quot; does not exist&#10;LINE 1: SELECT state,upper_bound,actual_cost FROM budget_reservation...&#10;                                 ^">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:62642/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:62642/buyeros_test_api', 2)
+
+    def test_accepted_then_lost_response_keeps_hold_and_uses_status_only(migrated, worker_runtime):
+        provider_module()
+        case = seed_research(migrated, worker_runtime[1])
+        adapter = SearchFixture(case, timeout=True)
+        result = run_provider(case['envelope'], adapter=adapter)
+        assert result.state == 'reconcile' and result.code == 'PROVIDER_UNKNOWN'
+        assert run_provider(case['envelope'], adapter=adapter) == result
+        with psycopg.connect(migrated) as db:
+&gt;           assert db.execute("SELECT state,upper_bound,actual_cost FROM budget_reservations WHERE workspace_id=%s", (case['envelope'].workspace_id,)).fetchone() == ('active', Decimal('0.100000'), None)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+services\api\tests\test_cloudflare_provider_steps_db.py:121:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1969aba7240&gt;
+query = 'SELECT state,upper_bound,actual_cost FROM budget_reservations WHERE workspace_id=%s'
+params = (UUID('b1545c15-4aa9-4ae8-bf66-47a3457f3b77'),)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UndefinedColumn: column "actual_cost" does not exist
+E           LINE 1: SELECT state,upper_bound,actual_cost FROM budget_reservation...
+E                                            ^
+
+services\api\.venv\Lib\site-packages\psycopg\connection.py:300: UndefinedColumn</failure></testcase><testcase classname="tests.test_cloudflare_provider_steps_db" name="test_new_generation_cannot_resubmit_unknown_operation" time="0.384" /><testcase classname="tests.test_cloudflare_provider_steps_db" name="test_restart_shares_twelve_query_two_hundred_page_and_original_deadline_limits" time="0.454" /><testcase classname="tests.test_cloudflare_provider_steps_db" name="test_changed_icp_membership_or_policy_blocks_next_provider_step[icp]" time="0.197" /><testcase classname="tests.test_cloudflare_provider_steps_db" name="test_changed_icp_membership_or_policy_blocks_next_provider_step[membership]" time="0.192" /><testcase classname="tests.test_cloudflare_provider_steps_db" name="test_changed_icp_membership_or_policy_blocks_next_provider_step[policy]" time="0.185" /><testcase classname="tests.test_cloudflare_provider_steps_db" name="test_fit_checkpoint_resumes_one_buyer_and_stops_for_review" time="5.949"><failure message="AssertionError: assert ('completed', 'review') == ('complete', 'review')&#10;  &#10;  At index 0 diff: 'completed' != 'complete'&#10;  Use -v to get more diff">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:62642/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:62642/buyeros_test_api', 8)
+
+    def test_fit_checkpoint_resumes_one_buyer_and_stops_for_review(migrated, worker_runtime):
+        provider_module()
+        case = seed_research(migrated, worker_runtime[1])
+        adapter = SearchFixture(case, hits=3)
+        assert run_provider(case['envelope'], adapter=adapter).state == 'done'
+        fit = claim_ready(migrated, case['envelope'], 'run.fit')
+        first = run_provider(fit, checkpoint_dsn=worker_runtime[0])
+        assert first.state == 'continue' and first.next_step_key is not None
+        assert run_provider(fit, checkpoint_dsn=worker_runtime[0]) == first
+        with psycopg.connect(migrated) as db:
+            assert db.execute("SELECT count(*) FROM fit_assessments WHERE run_id=%s", (case['run'],)).fetchone()[0] == 1
+        current = first
+        units = 1
+        while current.state == 'continue':
+            current = run_provider(fit, key=current.next_step_key, checkpoint_dsn=worker_runtime[0])
+            units += 1
+            assert units &lt;= 3
+        assert current.state == 'done' and adapter.calls == 1
+        with psycopg.connect(migrated) as db:
+            assert db.execute("SELECT count(*) FROM fit_assessments WHERE run_id=%s", (case['run'],)).fetchone()[0] == 3
+&gt;           assert db.execute("SELECT status,stage FROM search_runs WHERE id=%s", (case['run'],)).fetchone() == ('complete', 'review')
+E           AssertionError: assert ('completed', 'review') == ('complete', 'review')
+E
+E             At index 0 diff: 'completed' != 'complete'
+E             Use -v to get more diff
+
+services\api\tests\test_cloudflare_provider_steps_db.py:199: AssertionError</failure></testcase></testsuite></testsuites>

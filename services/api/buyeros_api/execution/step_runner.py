@@ -28,6 +28,7 @@ class LocalExecution:
         from buyeros_api.services.worker_execution import finish_receipt
         finish_receipt(self.control, self.receipt, result)
         self.finished = True
+        self.result = result
 
     def finish_done(self):
         from buyeros_api.services.worker_execution import outcome
@@ -43,7 +44,7 @@ async def execute_local_step(engine, envelope: JobEnvelope, step_key: str,
     return await execute_step(engine, envelope, step_key, timeout_seconds=min(60, remaining))
 
 
-async def execute_claimed(engine, envelope, step_key, owner):
+async def execute_claimed(engine, envelope, step_key, owner, *, adapter=None, checkpoint_dsn=None, environment='production'):
     from buyeros_api.services.worker_execution import outcome
     from .domain_executor import run_intent
     execution = LocalExecution(envelope, step_key, owner)
@@ -53,17 +54,20 @@ async def execute_claimed(engine, envelope, step_key, owner):
         row = execution.row
         event_type, intent_key = row.event_type, row.intent_key
         if event_type not in LOCAL_EVENTS:
-            # CF04 supplies bounded provider execution. Unsupported capabilities
-            # must not manufacture rows or mark an external operation successful.
-            result = outcome('blocked', 'CAPABILITY_UNAVAILABLE')
-            execution.finish(result)
-            return result
+            provider_event = True
+        else:
+            provider_event = False
         if event_type in {'bulk.mutate', 'draft.generate', 'fetch.evidence'}:
             state = await run_intent(session, {'workspace_id': str(envelope.workspace_id)},
                                      intent_key, envelope.generation)
             result = outcome('done', 'OK') if state in {'done', 'duplicate'} else outcome('blocked', 'INVALID_INTENT')
             execution.finish(result)
             return result
+
+    if provider_event:
+        from .provider_dispatch import execute_provider_claimed
+        return await execute_provider_claimed(engine, execution, adapter=adapter,
+            checkpoint_dsn=checkpoint_dsn, environment=environment)
 
     # Each native runner checks the same owner/epoch before prepare/finalize.
     # No transaction, permit row lock or customer lock spans object/network IO.
@@ -80,7 +84,7 @@ async def execute_claimed(engine, envelope, step_key, owner):
         state = await execute_source_delete(engine, envelope.workspace_id, intent_key,
                                             envelope.generation, execution=execution)
     if execution.finished:
-        return outcome('done', 'OK')
+        return execution.result
     async with tenant_session(engine, envelope.workspace_id) as session:
         if not await execution.guard(session):
             return outcome('stale', 'STALE_FENCE')
@@ -90,3 +94,13 @@ async def execute_claimed(engine, envelope, step_key, owner):
         result = outcome('blocked', code)
         execution.finish(result)
         return result
+
+
+async def execute_provider_step(engine, envelope: JobEnvelope, step_key: str, *, deadline: datetime,
+                                adapter=None, checkpoint_dsn=None, environment='production') -> StepOutcome:
+    from buyeros_api.services.worker_execution import execute_step, outcome
+    remaining = (deadline-datetime.now(timezone.utc)).total_seconds()
+    if remaining <= 0:
+        return outcome('blocked', 'LIMIT_EXCEEDED')
+    return await execute_step(engine, envelope, step_key, timeout_seconds=min(60, remaining),
+                              adapter=adapter, checkpoint_dsn=checkpoint_dsn, environment=environment)
