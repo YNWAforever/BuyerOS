@@ -289,3 +289,24 @@ def test_preview_native_pdf_interruption_and_cross_tenant_checkpoint(local_probe
     output = ROOT / "artifacts/cloudflare/CF00-preview-native-local.json"
     output.write_text(json.dumps({"environment": "local_owned_fixture", "guard_override": "loopback fixture only",
                                   "child_wrapper_hosted": False, "result": report}, indent=2) + "\n", encoding="utf-8")
+
+
+@pytest.mark.parametrize("host, accepted", [
+    ("ep-fictional-preview.c-4.ap-southeast-1.aws.neon.tech", True),
+    ("ep-fictional-preview.ap-southeast-1.aws.neon.tech", True),
+    ("ep-fictional-preview.c-4.us-east-1.aws.neon.tech", False),
+    ("ep-fictional-preview.c-4.ap-southeast-1.aws.neon.tech.evil.example", False),
+])
+def test_preview_target_current_regional_hostname_keeps_exact_dsn_binding(host, accepted):
+    module = load_module(TEMPLATE, "cf_preview_diagnostic")
+    pinned = target() | {"neon_host": host}
+    env = {key: value.replace(target()["neon_host"], host) for key, value in environment().items()}
+    if not accepted:
+        with pytest.raises(ValueError):
+            module.require_preview(pinned, env, NOW)
+        return
+    assert module.require_preview(pinned, env, NOW) == env["BUYEROS_CHECKPOINT_DATABASE_URL"]
+    env["BUYEROS_CHECKPOINT_DATABASE_URL"] = environment()["BUYEROS_CHECKPOINT_DATABASE_URL"]
+    if host != target()["neon_host"]:
+        with pytest.raises(ValueError):
+            module.require_preview(pinned, env, NOW)

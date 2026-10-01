@@ -45,7 +45,7 @@ def validate_target(target, now):
             and re.fullmatch(r"[a-z][a-z0-9-]+-[0-9]+", target["neon_project_id"])
             and target["neon_project_id"] != PRODUCTION_NEON
             and re.fullmatch(r"br-[a-zA-Z0-9-]+", target["neon_branch_id"])
-            and re.fullmatch(r"ep-[a-z0-9-]+\.ap-southeast-1\.aws\.neon\.tech", target["neon_host"])
+            and re.fullmatch(r"ep-[a-z0-9-]+\.(?:c-[0-9]+\.)?ap-southeast-1\.aws\.neon\.tech", target["neon_host"])
             and target["database"] == "buyeros_cf_preview"
             and target["worker_role"] == "buyeros_cf_preview_worker"
             and target["api_role"] == "buyeros_cf_preview_api"

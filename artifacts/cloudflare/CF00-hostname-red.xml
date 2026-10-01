@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="0.504" timestamp="2026-10-01T23:00:24.045660+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_current_regional_hostname_keeps_exact_dsn_binding[ep-fictional-preview.c-4.ap-southeast-1.aws.neon.tech-True]" time="0.051"><failure message="ValueError: isolated preview target or session window invalid">host = 'ep-fictional-preview.c-4.ap-southeast-1.aws.neon.tech', accepted = True
+
+    @pytest.mark.parametrize("host, accepted", [
+        ("ep-fictional-preview.c-4.ap-southeast-1.aws.neon.tech", True),
+        ("ep-fictional-preview.ap-southeast-1.aws.neon.tech", True),
+        ("ep-fictional-preview.c-4.us-east-1.aws.neon.tech", False),
+        ("ep-fictional-preview.c-4.ap-southeast-1.aws.neon.tech.evil.example", False),
+    ])
+    def test_preview_target_current_regional_hostname_keeps_exact_dsn_binding(host, accepted):
+        module = load_module(TEMPLATE, "cf_preview_diagnostic")
+        pinned = target() | {"neon_host": host}
+        env = {key: value.replace(target()["neon_host"], host) for key, value in environment().items()}
+        if not accepted:
+            with pytest.raises(ValueError):
+                module.require_preview(pinned, env, NOW)
+            return
+&gt;       assert module.require_preview(pinned, env, NOW) == env["BUYEROS_CHECKPOINT_DATABASE_URL"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_preview_diagnostic.py:308:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\scripts\cloudflare-preview\runtime_probe.py:81: in require_preview
+    validate_target(target, now)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+target = {'api_role': 'buyeros_cf_preview_api', 'database': 'buyeros_cf_preview', 'expires_at': '2026-10-01T17:00:24.194489+00:00', 'neon_branch_id': 'br-fictional-preview', ...}
+now = datetime.datetime(2026, 10, 1, 15, 0, 24, 194489, tzinfo=datetime.timezone.utc)
+
+    def validate_target(target, now):
+        """Validate exact resource identities supplied from operator readback."""
+        try:
+            start = datetime.fromisoformat(target["session_started_at"])
+            expiry = datetime.fromisoformat(target["expires_at"])
+            valid = (
+                set(target) == TARGET_KEYS
+                and target["vercel_project_name"] == "buyeros-cf-preview"
+                and target["neon_project_name"] == "BuyerOS-CF-preview-20261001"
+                and re.fullmatch(r"prj_[A-Za-z0-9_]+", target["vercel_project_id"])
+                and target["vercel_project_id"] != PRODUCTION_VERCEL
+                and re.fullmatch(r"[a-z][a-z0-9-]+-[0-9]+", target["neon_project_id"])
+                and target["neon_project_id"] != PRODUCTION_NEON
+                and re.fullmatch(r"br-[a-zA-Z0-9-]+", target["neon_branch_id"])
+                and re.fullmatch(r"ep-[a-z0-9-]+\.ap-southeast-1\.aws\.neon\.tech", target["neon_host"])
+                and target["database"] == "buyeros_cf_preview"
+                and target["worker_role"] == "buyeros_cf_preview_worker"
+                and target["api_role"] == "buyeros_cf_preview_api"
+                and re.fullmatch(r"[0-9a-f]{40}", target["source_sha"])
+                and start.tzinfo is not None and expiry.tzinfo is not None
+                and start &lt;= now &lt; expiry and 0 &lt; (expiry - start).total_seconds() &lt;= 7200
+            )
+        except (KeyError, TypeError, ValueError):
+            valid = False
+        if not valid:
+&gt;           raise ValueError("isolated preview target or session window invalid")
+E           ValueError: isolated preview target or session window invalid
+
+..\..\scripts\cloudflare-preview\runtime_probe.py:59: ValueError</failure></testcase><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_current_regional_hostname_keeps_exact_dsn_binding[ep-fictional-preview.ap-southeast-1.aws.neon.tech-True]" time="0.003" /><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_current_regional_hostname_keeps_exact_dsn_binding[ep-fictional-preview.c-4.us-east-1.aws.neon.tech-False]" time="0.002" /><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_target_current_regional_hostname_keeps_exact_dsn_binding[ep-fictional-preview.c-4.ap-southeast-1.aws.neon.tech.evil.example-False]" time="0.002" /></testsuite></testsuites>
