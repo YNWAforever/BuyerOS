@@ -1,0 +1,11 @@
+✔ local acceptance rejects shared targets, preview activation and inherited credentials (1.3918ms)
+✔ acceptance counts actual executed cases and fails closed on empty, skipped or failed reports (1.5168ms)
+✔ a new acceptance attempt invalidates old success and old JUnit before any command (17.4092ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 103.7773

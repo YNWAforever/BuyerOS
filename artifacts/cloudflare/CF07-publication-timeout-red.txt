@@ -1,0 +1,33 @@
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+Using secrets defined in process.env
+ ❯ services/cloudflare-jobs/tests/dispatcher.test.ts (6 tests | 1 failed) 209ms
+   ✓ dispatch off performs no API or binding calls 165ms
+   ✓ claims at most ten IDs for ten seconds and records only accepted publication 4ms
+   ✓ publish-before-receipt crash keeps the original opaque generation for recovery 3ms
+   ✓ does not publish after the ten-second claim cycle expires 1ms
+   ✓ rejects an over-limit batch or changed epoch before any binding side effect 3ms
+   × a hung queue acceptance expires the cycle without a failure receipt or late publication 23ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  services/cloudflare-jobs/tests/dispatcher.test.ts > a hung queue acceptance expires the cycle without a failure receipt or late publication
+AssertionError: expected undefined to be an instance of Error
+ ❯ services/cloudflare-jobs/tests/dispatcher.test.ts:65:19
+     63|     const running=dispatchTick({enabled:true,epoch:1,api,send}).catch(…
+     64|     await vi.advanceTimersByTimeAsync(10_001);
+     65|     expect(error).toBeInstanceOf(Error);
+       |                   ^
+     66|     expect((error as Error).message).toBe('queue publication acceptanc…
+     67|     expect(api).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  18:46:47
+   Duration  6.39s (transform 2.75s, setup 3.87s, import 15ms, tests 209ms, environment 1ms)
+
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF07-publication-timeout-red.xml

@@ -1,0 +1,18 @@
+<testsuites id="" name="" tests="7" failures="0" skipped="0" errors="0" time="111.864637">
+<testsuite name="cloudflare-journey.spec.ts" timestamp="2026-10-01T10:57:43.425Z" hostname="" tests="7" failures="0" skipped="0" time="86.309" errors="0">
+<testcase name="CF07 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="21.02">
+</testcase>
+<testcase name="CF07 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="17.79">
+</testcase>
+<testcase name="CF07 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="17.468">
+</testcase>
+<testcase name="CF07 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="19.024">
+</testcase>
+<testcase name="CF07 real second page, 101-row native bulk and persistent Workflow restart" classname="cloudflare-journey.spec.ts" time="5.574">
+</testcase>
+<testcase name="CF07 optional lookup unknown acceptance retains one hold and never blindly resubmits" classname="cloudflare-journey.spec.ts" time="4.018">
+</testcase>
+<testcase name="CF07 viewer and reviewer negative roles; a late real buyer response cannot overwrite another project" classname="cloudflare-journey.spec.ts" time="1.415">
+</testcase>
+</testsuite>
+</testsuites>

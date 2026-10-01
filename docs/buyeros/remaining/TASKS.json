@@ -1783,7 +1783,7 @@
   ],
   "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "CF07 actual local Cloudflare staff UI journey, operating conditions and full gates; no agents or production activation.",
+  "next_eligible_task": "CF08 disabled release configuration, author review, coverage and exact protected-preview activation proposal.",
   "hosting_migration_proposal": {
     "status": "local_implementation_in_progress",
     "date_hk": "2026-10-01",
@@ -1856,14 +1856,15 @@
         "depends_on": [
           "CF06"
         ],
-        "status": "in_progress"
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF07-checkpoint.json"
       },
       {
         "id": "CF08",
         "depends_on": [
           "CF07"
         ],
-        "status": "proposed_not_started"
+        "status": "in_progress"
       }
     ]
   },

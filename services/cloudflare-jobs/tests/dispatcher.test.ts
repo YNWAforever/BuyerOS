@@ -51,3 +51,22 @@ it('rejects an over-limit batch or changed epoch before any binding side effect'
     expect(send).not.toHaveBeenCalled();
   }
 });
+
+it('a hung queue acceptance expires the cycle without a failure receipt or late publication', async () => {
+  const {dispatchTick} = await import('../src/dispatcher');
+  vi.useFakeTimers();
+  try {
+    const api=vi.fn().mockResolvedValue({runtime_epoch:1,items:[job],next_cursor:null});
+    let accept!:()=>void;
+    const send=vi.fn(()=>new Promise<void>(resolve=>{accept=resolve;}));
+    let error:unknown;
+    const running=dispatchTick({enabled:true,epoch:1,api,send}).catch(value=>{error=value;});
+    await vi.advanceTimersByTimeAsync(10_001);
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toBe('queue publication acceptance timed out');
+    expect(api).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledTimes(1);
+    accept();await running;await vi.advanceTimersByTimeAsync(1);
+    expect(api).toHaveBeenCalledTimes(1);
+  } finally {vi.useRealTimers();}
+});

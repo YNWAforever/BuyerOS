@@ -1,0 +1,13 @@
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+Using secrets defined in process.env
+ ✓ services/cloudflare-jobs/tests/operating.integration.ts (1 test) 14604ms
+   ✓ ten real Queue/Workflow jobs complete under the one global PostgreSQL permit  14603ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  17:11:21
+   Duration  17.19s (transform 264ms, setup 0ms, import 416ms, tests 14.60s, environment 0ms)
+
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF07-operating-platform-repeat2.xml

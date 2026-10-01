@@ -1,0 +1,17 @@
+
+ ⛅️ wrangler 4.137.0 (update available 4.145.0)
+───────────────────────────────────────────────
+Total Upload: 136.94 KiB / gzip: 24.28 KiB
+Your Worker has access to the following bindings:
+Binding                                                         Resource
+env.JOB_WORKFLOW (BuyerOSJobWorkflow)                           Workflow
+env.JOBS (buyeros-jobs)                                         Queue
+env.QUARANTINE (buyeros-jobs-dlq)                               Queue
+env.EXECUTION_ENABLED ("false")                                 Environment Variable
+env.RUNTIME_EPOCH ("1")                                         Environment Variable
+env.WORKER_API_ORIGIN ("https://invalid.example")               Environment Variable
+env.WORKER_API_ALLOWED_ORIGINS ("[]")                           Environment Variable
+env.WORKER_CURRENT_KEY_ID ("unconfigured")                      Environment Variable
+env.LOCAL_TEST_MODE ("false")                                   Environment Variable
+
+--dry-run: exiting now.

@@ -1,0 +1,6 @@
+
+[WebServer]   File "C:\Users\laich\Documents\BuyerOS\services\api\tools\serve_cloudflare_e2e.py", line 93
+[WebServer]     draft = db.execute('SELECT d.id,r.content->>'grounding_status' FROM outreach_drafts d JOIN draft_revisions r ON r.draft_id=d.id AND r.workspace_id=d.workspace_id AND r.revision_number=1 WHERE d.id=%s AND d.project_id=%s',
+[WebServer]                                                  ^^^^^^^^^^^^^^^^
+[WebServer] SyntaxError: invalid syntax. Is this intended to be part of the string?
+Error: Process from config.webServer was not able to start. Exit code: 1

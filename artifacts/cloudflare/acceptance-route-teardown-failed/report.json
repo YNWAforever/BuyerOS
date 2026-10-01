@@ -1,0 +1,52 @@
+{
+  "mode": "local",
+  "baseUrl": "http://localhost:5173",
+  "sourceHead": "a48d90f4ae7ea9681026c05ddf83a7e4af10d864",
+  "sourceFiles": {
+    "services/cloudflare-jobs/src/index.ts": "38396d184614c1887ad6d50701a70cbb7fae815b8704e7e72d614b26668c0875",
+    "services/cloudflare-jobs/src/workflow.ts": "3c0c8070a4f52c1cccaf0377c62d8f01801a92953dfd41478418917256edd995",
+    "services/cloudflare-jobs/wrangler.jsonc": "ea3f87af512395a2837ee44b3287c27a94d0f4142d9b42e978421473fee22604",
+    "services/api/tools/serve_cloudflare_e2e.py": "aeafb1ca1f6f2c559615ca2cf9f5dc5cd36bd0a161cac56fa3c5f6abfda63936",
+    "services/api/tools/serve_e2e_fixture.py": "e7eb5d7bf616717b6b2d25682d81c19e57e7a4cae833c77db667bbfb18b98bc9",
+    "scripts/serve-cloudflare-fixture.mjs": "9968fc95c909b11775766d027c3532f8bc7d7631b554ae02371e00679b38e4f7",
+    "scripts/serve-built-ui-fixture.mjs": "ade01c4986ecee5259c2a1195a78c8e27829bfd37e91c350f7b1ca35b732fe4f",
+    "scripts/run-cloudflare-acceptance.mjs": "11fd6af076b8ca90467178a5df35c3649f4fee3d5d3bf71a8783f022cc9a68cb",
+    "tests/e2e/cloudflare-journey.spec.ts": "4947aedbb9a20f19ccb729e90f89b9c418535bfefdeb54b9d81ea071b9d260d6",
+    "tests/e2e/fixtures/staff-journey.ts": "cf8b307b077566014cde8f6ca3edc7993e5f0248109fa877bd1bd7bdb1be5189",
+    "playwright.cloudflare.config.ts": "68485c3ebb292d6fbc8add21dcac6cb2113e806629f33037069e32805b851ab2"
+  },
+  "started": "2026-10-01T10:42:35.694Z",
+  "finished": "2026-10-01T10:44:19.413Z",
+  "buildCommand": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "scripts/run-vercel.mjs",
+    "build"
+  ],
+  "buildExitCode": 0,
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    "--config",
+    "playwright.cloudflare.config.ts",
+    "--reporter=line,junit"
+  ],
+  "exitCode": 0,
+  "counts": {
+    "passed": 7,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "total": 7
+  },
+  "evidence": {
+    "identity": "fictional OIDC/machine identity",
+    "provider": "fictional bounded search and unknown lookup acceptance",
+    "transport": "actual local Queue/Workflow -> HMAC native API -> owned PostgreSQL16",
+    "frontend": "actual emitted Vercel function/static assets; runtime loopback app-to-API binding",
+    "scheduledIntervalMilliseconds": 1000,
+    "productionCronSeconds": 60,
+    "hosted": "not run",
+    "deployed": false
+  }
+}

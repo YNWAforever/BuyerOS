@@ -81,9 +81,9 @@ async def readiness(workspace_id: uuid.UUID, request: Request, principal: Princi
         if not permission_for_roles(member["roles"], "getReadiness"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
         from ...db.worker_execution import WorkerRuntimeControl
-        backend = (await session.execute(select(WorkerRuntimeControl.backend))).scalar_one()
+        backend, enabled = (await session.execute(select(WorkerRuntimeControl.backend, WorkerRuntimeControl.enabled))).one()
         heartbeat = (await session.execute(select(WorkerHeartbeat)
-            .order_by(WorkerHeartbeat.observed_at.desc()).limit(1))).scalar_one_or_none() if backend == 'celery' else None
+            .order_by(WorkerHeartbeat.observed_at.desc()).limit(1))).scalar_one_or_none() if backend == 'celery' and enabled else None
         worker, queue = "unavailable", "unavailable"
         if backend == 'cloudflare':
             from ...services.worker_recovery import read_execution_health

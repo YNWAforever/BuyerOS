@@ -1,0 +1,48 @@
+{
+  "repeat": 1,
+  "source_sha": "a48d90f4ae7ea9681026c05ddf83a7e4af10d864",
+  "machine": "Windows-11-10.0.26200-SP0",
+  "conditions": {
+    "transport": "actual local Cloudflare Queue and Workflow -> loopback native API -> owned PostgreSQL16",
+    "identity": "fictional machine key and staff membership",
+    "provider": "none",
+    "queued_jobs": 10,
+    "parallel_python_steps": 1,
+    "non_provider_step_ceiling_seconds": 1,
+    "fair_workspaces": 100,
+    "cold_engine_every_tick": true,
+    "cron": "jobs injected together; claim ticks invoked immediately, no 60-second production wait"
+  },
+  "first_step_seconds": {
+    "p50": 11.363312,
+    "p95": 15.708769349999999,
+    "max": 16.758168
+  },
+  "step_seconds": {
+    "p50": 0.07669655000790954,
+    "p95": 0.15574582000263032,
+    "max": 0.16666750000149477
+  },
+  "max_observed_active_steps": 1,
+  "actual_native_intervals_no_overlap": true,
+  "peak_active_native_bodies": 1,
+  "peak_database_connections": 11,
+  "observer_samples": 765,
+  "observer_interval_ms": 20,
+  "fairness": {
+    "workspaces_served": 100,
+    "cold_ticks": 10,
+    "tick_ms_p50": 114.63884999830043,
+    "tick_ms_p95": 166.30225000189964
+  },
+  "api_process_cpu_seconds": 3.875,
+  "wall_seconds": 24.529473700007657,
+  "queue_age_seconds_conservative": {
+    "p50": 11.363312,
+    "p95": 15.708769349999999
+  },
+  "actual_probe_receipt_age_seconds": 7.856501,
+  "oldest_unexecuted_fairness_fixture_seconds": 7.354882,
+  "api_fixture_peak_rss_bytes": 165236736,
+  "memory_conditions": "entire API fixture process peak; excludes Node/workerd/Docker child memory; no hosted memory inference"
+}

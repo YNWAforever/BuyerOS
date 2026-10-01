@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="24" failures="0" errors="0" time="3.032">
+    <testsuite name="tests/integration/cloudflare-recovery.test.ts" timestamp="2026-10-01T09:19:11.665Z" hostname="DESKTOP-30TFME5" tests="2" failures="0" errors="0" skipped="0" time="0.187">
+        <testcase classname="tests/integration/cloudflare-recovery.test.ts" name="the probe Workflow carries its opaque probe ID into the committed receipt request" time="0.122">
+        </testcase>
+        <testcase classname="tests/integration/cloudflare-recovery.test.ts" name="a probe cannot report success when the durable selector is paused" time="0.061">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/api-client.test.ts" timestamp="2026-10-01T09:19:11.668Z" hostname="DESKTOP-30TFME5" tests="4" failures="0" errors="0" skipped="0" time="0.565">
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="signs exact POST path and raw bytes with a fixed protocol vector and no redirect" time="0.511">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="refuses credentials, origin mismatch, URL prefix/query and non-HTTPS outside isolated loopback mode" time="0.003">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="rejects a redirect response without sending signed headers to its destination" time="0.038">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="bounds API response bytes before parsing or persisting its outcome" time="0.008">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/dispatcher.test.ts" timestamp="2026-10-01T09:19:11.669Z" hostname="DESKTOP-30TFME5" tests="5" failures="0" errors="0" skipped="0" time="0.53">
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="dispatch off performs no API or binding calls" time="0.508">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="claims at most ten IDs for ten seconds and records only accepted publication" time="0.008">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="publish-before-receipt crash keeps the original opaque generation for recovery" time="0.004">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="does not publish after the ten-second claim cycle expires" time="0.002">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="rejects an over-limit batch or changed epoch before any binding side effect" time="0.003">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/handler.test.ts" timestamp="2026-10-01T09:19:11.670Z" hostname="DESKTOP-30TFME5" tests="2" failures="0" errors="0" skipped="0" time="0.016">
+        <testcase classname="services/cloudflare-jobs/tests/handler.test.ts" name="quarantines only opaque metadata and ACKs invalid data after quarantine accepts" time="0.01">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/handler.test.ts" name="disabled handoff retains messages for retry and has no public fetch entrypoint" time="0.001">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/platform.test.ts" timestamp="2026-10-01T09:19:11.670Z" hostname="DESKTOP-30TFME5" tests="1" failures="0" errors="0" skipped="0" time="0.141">
+        <testcase classname="services/cloudflare-jobs/tests/platform.test.ts" name="real queue handler creates a durable Workflow; duplicate handoff keeps the same instance" time="0.137">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/protocol.test.ts" timestamp="2026-10-01T09:19:11.671Z" hostname="DESKTOP-30TFME5" tests="3" failures="0" errors="0" skipped="0" time="0.548">
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; rejects extra customer fields, URLs and unsafe numbers before scheduling" time="0.536">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; separates operational probes and deterministic workflow IDs" time="0.003">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; requires the four-field bounded outcome and server-issued step key" time="0.003">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/queue.test.ts" timestamp="2026-10-01T09:19:11.672Z" hostname="DESKTOP-30TFME5" tests="2" failures="0" errors="0" skipped="0" time="0.524">
+        <testcase classname="services/cloudflare-jobs/tests/queue.test.ts" name="ACK requires verified creation or inspection of the deterministic instance" time="0.514">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/queue.test.ts" name="does not ACK an unverified handoff or restart an existing failed workflow" time="0.002">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/workflow.test.ts" timestamp="2026-10-01T09:19:11.672Z" hostname="DESKTOP-30TFME5" tests="5" failures="0" errors="0" skipped="0" time="0.521">
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="HTTP timeout reads committed status before any repeated execution" time="0.494">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="busy permits wait without consuming the transient error budget" time="0.004">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="unknown acceptance stops the controller without a new submit" time="0.001">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="a failed status read is retried as status, never another execution request" time="0.003">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="halts a cyclic continuation at the persisted receipt ceiling" time="0.011">
+        </testcase>
+    </testsuite>
+</testsuites>

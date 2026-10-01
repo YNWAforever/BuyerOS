@@ -1,0 +1,50 @@
+<testsuites id="" name="" tests="7" failures="1" skipped="0" errors="0" time="486.84716499999996">
+<testsuite name="cloudflare-journey.spec.ts" timestamp="2026-10-01T09:37:53.582Z" hostname="" tests="7" failures="1" skipped="0" time="144.678" errors="0">
+<testcase name="CF07 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="33.952">
+</testcase>
+<testcase name="CF07 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="30.892">
+</testcase>
+<testcase name="CF07 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="34.055">
+</testcase>
+<testcase name="CF07 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="19.383">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\..\test-results\cloudflare\cloudflare-journey-CF07-zh-aa315--and-outcome-on-one-dataset\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  fixtures\staff-journey.ts:102:1 › CF07 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText(/狀態:\s*排隊中/)
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText(/狀態:\s*排隊中/) with timeout 5000ms
+      - waiting for getByText(/狀態:\s*排隊中/)
+
+
+      182 |   await expect(page).toHaveURL(/\/app\/discover\/[0-9a-f-]{36}/);
+      183 |   const runId=new URL(page.url()).pathname.split('/').at(-1)!;
+    > 184 |   await expect(page.getByText(locale==='en'?/Status:\s*queued/:/狀態:\s*排隊中/)).toBeVisible();
+          |                                                                              ^
+      185 |   await fits(page);
+      186 |   const {stdout}=transport==='cloudflare'?await awaitCloudflareIntent(runId,project):await execFileAsync(python,['tests/fixtures/run_browser_research.py',runId,project],
+      187 |     {cwd:workerRoot,timeout:180_000,maxBuffer:1024*1024});
+        at C:\Users\laich\Documents\BuyerOS\tests\e2e\fixtures\staff-journey.ts:184:78
+
+    Error Context: ..\..\test-results\cloudflare\cloudflare-journey-CF07-zh-aa315--and-outcome-on-one-dataset\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="CF07 real second page, 101-row native bulk and persistent Workflow restart" classname="cloudflare-journey.spec.ts" time="14.282">
+</testcase>
+<testcase name="CF07 optional lookup unknown acceptance retains one hold and never blindly resubmits" classname="cloudflare-journey.spec.ts" time="6.045">
+</testcase>
+<testcase name="CF07 viewer and reviewer negative roles; a late real buyer response cannot overwrite another project" classname="cloudflare-journey.spec.ts" time="6.069">
+</testcase>
+</testsuite>
+</testsuites>

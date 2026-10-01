@@ -45,7 +45,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.37.1",
+    "@cloudflare/vite-plugin": "1.58.0",
     "@cloudflare/vitest-plugin": "1.2.4",
     "@cloudflare/workers-types": "5.20260921.1",
     "@msw/cloudflare": "0.0.1",

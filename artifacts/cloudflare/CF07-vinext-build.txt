@@ -1,0 +1,14 @@
+$ node scripts/run-framework.mjs build
+
+  vinext build  (Vite 8.0.13)
+
+TypeError: wrangler.unstable_getWorkerNameFromProject is not a function
+    at resolveWorkerConfig (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/@cloudflare+vite-plugin@1.3_724e437beb01bf241a7100a4f95e818f/node_modules/@cloudflare/vite-plugin/dist/index.mjs:41398:52)
+    at resolvePluginConfig (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/@cloudflare+vite-plugin@1.3_724e437beb01bf241a7100a4f95e818f/node_modules/@cloudflare/vite-plugin/dist/index.mjs:41429:36)
+    at BasicMinimalPluginContext.config (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/@cloudflare+vite-plugin@1.3_724e437beb01bf241a7100a4f95e818f/node_modules/@cloudflare/vite-plugin/dist/index.mjs:54044:33)
+    at runConfigHook (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:34918:42)
+    at async resolveConfig (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:34370:11)
+    at async Module.createBuilder (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:33530:17)
+    at async file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/cli.js:330:11
+    at async buildApp (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/cli.js:327:2)
+[ELIFECYCLE] Command failed with exit code 1.

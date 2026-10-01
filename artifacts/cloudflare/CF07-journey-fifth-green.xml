@@ -1,0 +1,12 @@
+<testsuites id="" name="" tests="4" failures="0" skipped="0" errors="0" time="195.82850399999998">
+<testsuite name="cloudflare-journey.spec.ts" timestamp="2026-10-01T08:56:46.577Z" hostname="" tests="4" failures="0" skipped="0" time="96.231" errors="0">
+<testcase name="CF07 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="26.247">
+</testcase>
+<testcase name="CF07 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="23.773">
+</testcase>
+<testcase name="CF07 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="24.535">
+</testcase>
+<testcase name="CF07 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="21.676">
+</testcase>
+</testsuite>
+</testsuites>

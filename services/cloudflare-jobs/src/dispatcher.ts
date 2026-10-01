@@ -14,7 +14,17 @@ export async function dispatchTick(ports: {
     if (now() >= deadline) break;
     // Acceptance and a lost response are ambiguous. Never reset the generation
     // or report failed publication to make the API claim the same work blindly.
-    await ports.send(item);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        ports.send(item),
+        new Promise<never>((_resolve, reject) => {
+          timer = setTimeout(() => reject(new Error('queue publication acceptance timed out')), Math.max(1, deadline - now()));
+        }),
+      ]);
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
     published += 1;
     await ports.api('workerRecordPublication', { envelope: item, state: 'published' }, Math.max(1, deadline - now()));
   }

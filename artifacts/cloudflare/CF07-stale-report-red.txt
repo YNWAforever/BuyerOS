@@ -1,0 +1,20 @@
+✔ local acceptance rejects shared targets, preview activation and inherited credentials (0.959ms)
+✔ acceptance counts actual executed cases and fails closed on empty, skipped or failed reports (1.0462ms)
+✖ a new acceptance attempt invalidates old success and old JUnit before any command (12.0716ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 92.786
+
+✖ failing tests:
+
+test at tests\deployment\cloudflare-acceptance.test.mjs:18:1
+✖ a new acceptance attempt invalidates old success and old JUnit before any command (12.0716ms)
+  TypeError: beginAcceptanceEvidence is not a function
+      at TestContext.<anonymous> (file:///C:/Users/laich/Documents/BuyerOS/tests/deployment/cloudflare-acceptance.test.mjs:25:11)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)

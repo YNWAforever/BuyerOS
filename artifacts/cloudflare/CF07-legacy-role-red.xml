@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="120.739" timestamp="2026-10-01T18:23:36.971262+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_browser_worker_runtime_fixture" name="test_browser_fixture_uses_worker_catalog_proof_and_cannot_activate_selector" time="114.573"><failure message="ImportError: cannot import name 'prepare_browser_runtime' from 'tests.fixtures.run_browser_research' (C:\Users\laich\Documents\BuyerOS\services\worker\tests\fixtures\run_browser_research.py)">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:59864/buyeros_test_worker'
+
+    def test_browser_fixture_uses_worker_catalog_proof_and_cannot_activate_selector(migrated):
+&gt;       from tests.fixtures.run_browser_research import prepare_browser_runtime
+E       ImportError: cannot import name 'prepare_browser_runtime' from 'tests.fixtures.run_browser_research' (C:\Users\laich\Documents\BuyerOS\services\worker\tests\fixtures\run_browser_research.py)
+
+tests\test_browser_worker_runtime_fixture.py:7: ImportError</failure></testcase><testcase classname="tests.test_browser_worker_runtime_fixture" name="test_browser_runtime_fixture_rejects_nonowned_or_remote_database_before_connection" time="3.934"><failure message="ImportError: cannot import name 'prepare_browser_runtime' from 'tests.fixtures.run_browser_research' (C:\Users\laich\Documents\BuyerOS\services\worker\tests\fixtures\run_browser_research.py)">def test_browser_runtime_fixture_rejects_nonowned_or_remote_database_before_connection():
+&gt;       from tests.fixtures.run_browser_research import prepare_browser_runtime
+E       ImportError: cannot import name 'prepare_browser_runtime' from 'tests.fixtures.run_browser_research' (C:\Users\laich\Documents\BuyerOS\services\worker\tests\fixtures\run_browser_research.py)
+
+tests\test_browser_worker_runtime_fixture.py:18: ImportError</failure></testcase></testsuite></testsuites>

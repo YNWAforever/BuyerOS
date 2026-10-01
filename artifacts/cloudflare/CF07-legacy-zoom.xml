@@ -1,0 +1,8 @@
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="0" time="24.786117">
+<testsuite name="api-browser-zoom.spec.ts" timestamp="2026-10-01T10:49:48.979Z" hostname="" tests="2" failures="0" skipped="0" time="10.207" errors="0">
+<testcase name="T29 actual Chromium 200% zoom preserves API workbench content in en" classname="api-browser-zoom.spec.ts" time="5.42">
+</testcase>
+<testcase name="T29 actual Chromium 200% zoom preserves API workbench content in zh-HK" classname="api-browser-zoom.spec.ts" time="4.787">
+</testcase>
+</testsuite>
+</testsuites>

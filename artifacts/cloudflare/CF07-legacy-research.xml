@@ -1,0 +1,12 @@
+<testsuites id="" name="" tests="4" failures="0" skipped="0" errors="0" time="149.372192">
+<testsuite name="mvp-a-research.spec.ts" timestamp="2026-10-01T10:45:22.452Z" hostname="" tests="4" failures="0" skipped="0" time="132.982" errors="0">
+<testcase name="T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="mvp-a-research.spec.ts" time="36.964">
+</testcase>
+<testcase name="T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="mvp-a-research.spec.ts" time="28.961">
+</testcase>
+<testcase name="T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="mvp-a-research.spec.ts" time="31.329">
+</testcase>
+<testcase name="T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="mvp-a-research.spec.ts" time="35.728">
+</testcase>
+</testsuite>
+</testsuites>

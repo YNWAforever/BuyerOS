@@ -43,13 +43,40 @@ def owner_dsn() -> str:
     return f"postgresql://buyeros:buyeros@127.0.0.1:{port}/buyeros_test_api"
 
 
+def prepare_browser_runtime(dsn: str) -> str:
+    """Explicit fixture operator setup after the caller proves container ownership."""
+    from tests.conftest import _require_disposable_test_dsn
+    from buyeros_api.services.worker_recovery import set_execution_runtime
+    from buyeros_api.services.worker_execution import WORKER_ROLE_CATALOG_SQL
+    from urllib.parse import urlsplit, urlunsplit
+    _require_disposable_test_dsn(dsn)
+    with psycopg.connect(dsn, autocommit=True) as owner:
+        backend, enabled, epoch = owner.execute('SELECT backend,enabled,epoch FROM worker_runtime_control').fetchone()
+        if backend != 'celery':
+            raise ValueError('legacy fixture must not change another selected backend')
+        owner.execute("""DO $$ BEGIN
+          IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='buyeros_browser_worker_fixture') THEN
+            CREATE ROLE buyeros_browser_worker_fixture NOBYPASSRLS IN ROLE buyeros_worker;
+          END IF;
+        END $$""")
+        owner.execute("ALTER ROLE buyeros_browser_worker_fixture LOGIN PASSWORD 'test-only'")
+    parts = urlsplit(dsn)
+    runtime = urlunsplit(parts._replace(netloc=f'buyeros_browser_worker_fixture:test-only@127.0.0.1:{parts.port}'))
+    with psycopg.connect(runtime) as db:
+        if db.execute(WORKER_ROLE_CATALOG_SQL).fetchone() != (True,):
+            raise ValueError('fixture worker catalog proof failed')
+    if not enabled:
+        set_execution_runtime(dsn, expected_epoch=epoch, backend='celery', enabled=True,
+                              reason='Explicit owned compatibility browser fixture', apply=True)
+    return runtime
+
+
 def main() -> None:
     if len(sys.argv) not in {3, 4}:
         raise SystemExit("usage: run_browser_research.py RUN_ID PROJECT_ID [DRAFT_JOB_ID]")
     run_id, project_id = (uuid.UUID(value) for value in sys.argv[1:3])
     draft_job_id = uuid.UUID(sys.argv[3]) if len(sys.argv) == 4 else None
     dsn = owner_dsn()
-    runtime_dsn = dsn.replace("buyeros:buyeros", "buyeros_api:test-only", 1)
     with psycopg.connect(dsn) as db:
         row = db.execute("SELECT project_id FROM search_runs WHERE id=%s AND workspace_id=%s",
                          (run_id, WORKSPACE)).fetchone()
@@ -61,6 +88,7 @@ def main() -> None:
                              (draft_job_id, WORKSPACE)).fetchone()
             if job is None or job != (project_id, "generateDraft"):
                 raise RuntimeError("UI draft job is absent or belongs to another fixture project")
+    runtime_dsn = prepare_browser_runtime(dsn)
     broker_name = f"buyeros-t30-valkey-{uuid.uuid4().hex[:8]}"
     broker_created = False
     worker = None
@@ -79,9 +107,11 @@ def main() -> None:
                     "BUYEROS_TEST_OWNER_DSN": dsn,
                     "BUYEROS_BROKER_URL": broker_url,
                     "BUYEROS_PAID_DISPATCH_ENABLED": "true",
+                    "BUYEROS_CELERY_EXECUTION_ENABLED": "true",
+                    "BUYEROS_CHECKPOINT_DATABASE_URL": runtime_dsn,
                     "BUYEROS_T30_GENERIC_SEARCH": "1",
                     "BUYEROS_EAGER": "false"})
-        os.environ.update({key: env[key] for key in ("BUYEROS_DATABASE_URL", "BUYEROS_BROKER_URL", "BUYEROS_PAID_DISPATCH_ENABLED")})
+        os.environ.update({key: env[key] for key in ("BUYEROS_DATABASE_URL", "BUYEROS_BROKER_URL", "BUYEROS_PAID_DISPATCH_ENABLED", "BUYEROS_CELERY_EXECUTION_ENABLED")})
         from buyeros_worker.config import get_settings
         from buyeros_worker.dispatcher import dispatch_cycle
         from buyeros_worker.engine import create_engine

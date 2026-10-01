@@ -1,0 +1,970 @@
+{
+  "task": "CF07",
+  "status": "complete_local",
+  "base_sha": "a48d90f4ae7ea9681026c05ddf83a7e4af10d864",
+  "environment": "Windows Node24.18/pnpm11.25/Python3.14; owned PostgreSQL16; actual local Cloudflare Queue/Workflow and emitted Vercel handler; fictional OIDC/providers",
+  "commands": [
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest tests -q --junitxml=../../artifacts\\cloudflare\\CF07-api-final.xml",
+      "junit": "artifacts\\cloudflare\\CF07-api-final.xml",
+      "exit": 0,
+      "passed": 650,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 344.842
+    },
+    {
+      "cwd": "services/worker",
+      "command": "uv run --frozen pytest tests -q --junitxml=../../artifacts\\cloudflare\\CF07-worker-final.xml",
+      "junit": "artifacts\\cloudflare\\CF07-worker-final.xml",
+      "exit": 0,
+      "passed": 186,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 214.031
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest tests/test_runtime_readiness_db.py tests/test_admin_operations_db.py tests/test_cloudflare_recovery_db.py tests/test_cloudflare_platform_db.py -q --junitxml=../../artifacts\\cloudflare\\CF07-readiness-final.xml",
+      "junit": "artifacts\\cloudflare\\CF07-readiness-final.xml",
+      "exit": 0,
+      "passed": 20,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 72.472
+    },
+    {
+      "cwd": ".",
+      "command": "pnpm.cmd exec vitest run --config services/cloudflare-jobs/vitest.config.ts --reporter=default --reporter=junit --outputFile.junit=artifacts\\cloudflare\\CF07-controller-final.xml",
+      "junit": "artifacts\\cloudflare\\CF07-controller-final.xml",
+      "exit": 0,
+      "passed": 25,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 5.216
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest tests/test_cloudflare_platform_db.py -q --junitxml=../../artifacts\\cloudflare\\CF07-platform-last.xml",
+      "junit": "artifacts\\cloudflare\\CF07-platform-last.xml",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 18.874
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest tests/benchmark_cloudflare_case.py -q --junitxml=../../artifacts\\cloudflare\\CF07-operating-final.xml",
+      "junit": "artifacts\\cloudflare\\CF07-operating-final.xml",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 46.507
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest tests/benchmark_buyeros_case.py -q --junitxml=../../artifacts/cloudflare/CF07-read-benchmark.xml",
+      "junit": "artifacts\\cloudflare\\CF07-read-benchmark.xml",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 17.305
+    },
+    {
+      "cwd": ".",
+      "environment": "strict=1; no inherited DB/reuse; BUYEROS_E2E_FRONTEND=vercel-built",
+      "command": "pnpm.cmd exec playwright test --config playwright.mvp-research.config.ts tests/e2e/mvp-a-research.spec.ts --workers=1 --reporter=line,junit",
+      "junit": "artifacts\\cloudflare\\CF07-legacy-research.xml",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 132.982
+    },
+    {
+      "cwd": ".",
+      "environment": "strict=1; no inherited DB/reuse; BUYEROS_E2E_FRONTEND=vercel-built",
+      "command": "pnpm.cmd exec playwright test --config playwright.workbench.config.ts tests/e2e/daily-workbench.spec.ts --workers=1 --reporter=line,junit",
+      "junit": "artifacts\\cloudflare\\CF07-legacy-workbench.xml",
+      "exit": 0,
+      "passed": 8,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 42.552
+    },
+    {
+      "cwd": ".",
+      "environment": "strict=1; no inherited DB/reuse; BUYEROS_E2E_FRONTEND=vercel-built",
+      "command": "pnpm.cmd exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --workers=1 --reporter=line,junit",
+      "junit": "artifacts\\cloudflare\\CF07-legacy-buyers.xml",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 3.28
+    },
+    {
+      "cwd": ".",
+      "environment": "strict=1; no inherited DB/reuse; BUYEROS_E2E_FRONTEND=vercel-built",
+      "command": "pnpm.cmd exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --reporter=line,junit",
+      "junit": "artifacts\\cloudflare\\CF07-legacy-management.xml",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 5.748
+    },
+    {
+      "cwd": ".",
+      "environment": "strict=1; no inherited DB/reuse; BUYEROS_E2E_FRONTEND=vercel-built",
+      "command": "pnpm.cmd exec playwright test --config playwright.mvp.config.ts tests/e2e/mvp-a-journey.spec.ts --workers=1 --reporter=line,junit",
+      "junit": "artifacts\\cloudflare\\CF07-legacy-mvp.xml",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 5.548
+    },
+    {
+      "cwd": ".",
+      "environment": "strict=1; no inherited DB/reuse; BUYEROS_E2E_FRONTEND=vercel-built",
+      "command": "pnpm.cmd exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --workers=1 --reporter=line,junit",
+      "junit": "artifacts\\cloudflare\\CF07-legacy-zoom.xml",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time_seconds": 10.207
+    }
+  ],
+  "acceptance": {
+    "mode": "local",
+    "baseUrl": "http://localhost:5173",
+    "sourceHead": "a48d90f4ae7ea9681026c05ddf83a7e4af10d864",
+    "sourceFiles": {
+      "services/cloudflare-jobs/src/dispatcher.ts": "283d78846cabc818df0f1fb18f5ef82fb916802a77e3dda5b367cb064954fe45",
+      "services/cloudflare-jobs/src/api-client.ts": "6c14c07b48ed9ce14e6c34239b94d1761f0a194a841c39374b5b197bd1d97e3d",
+      "services/cloudflare-jobs/src/protocol.ts": "69357aea02779ed86582b9a4b2775abcaac3204cdb68f4634ffd31519090828e",
+      "services/cloudflare-jobs/src/queue.ts": "ee4d0a488aa990548844840b336e0895be43189b27fc289d0793621e1b42b757",
+      "vite.config.ts": "24b575f05334fd25c028cecd552b61c1435fe2756ad05a405054d7e34d1af479",
+      "package.json": "d845cbde72e4d5095cce844f14281bcaa64e49d523fd564c042b92c2058802ad",
+      "pnpm-lock.yaml": "45ae2e627ea5e67e25e3c61391d414578028d16b25c3b7c2ce0df85141d92282",
+      "services/api/uv.lock": "9d3a362a303d6da7bd241d3adbab02257a82358c5f1b83be7b85b22c97a3fab4",
+      "services/cloudflare-jobs/src/index.ts": "38396d184614c1887ad6d50701a70cbb7fae815b8704e7e72d614b26668c0875",
+      "services/cloudflare-jobs/src/workflow.ts": "3c0c8070a4f52c1cccaf0377c62d8f01801a92953dfd41478418917256edd995",
+      "services/cloudflare-jobs/wrangler.jsonc": "ea3f87af512395a2837ee44b3287c27a94d0f4142d9b42e978421473fee22604",
+      "services/api/tools/serve_cloudflare_e2e.py": "aeafb1ca1f6f2c559615ca2cf9f5dc5cd36bd0a161cac56fa3c5f6abfda63936",
+      "services/api/tools/serve_e2e_fixture.py": "e7eb5d7bf616717b6b2d25682d81c19e57e7a4cae833c77db667bbfb18b98bc9",
+      "scripts/serve-cloudflare-fixture.mjs": "9968fc95c909b11775766d027c3532f8bc7d7631b554ae02371e00679b38e4f7",
+      "scripts/serve-built-ui-fixture.mjs": "ade01c4986ecee5259c2a1195a78c8e27829bfd37e91c350f7b1ca35b732fe4f",
+      "scripts/run-cloudflare-acceptance.mjs": "ba403ecef1dbe4815bdf97e1b60d5b2a436a9d7d5162b49da14c812dbbe751a0",
+      "tests/e2e/cloudflare-journey.spec.ts": "3aa6bd67d7dba7868680289b002e45ce33fdcd2e8352afa89ac4eecb0418fcfd",
+      "tests/e2e/fixtures/staff-journey.ts": "cf8b307b077566014cde8f6ca3edc7993e5f0248109fa877bd1bd7bdb1be5189",
+      "playwright.cloudflare.config.ts": "68485c3ebb292d6fbc8add21dcac6cb2113e806629f33037069e32805b851ab2"
+    },
+    "started": "2026-10-01T10:56:09.851Z",
+    "finished": "2026-10-01T10:59:12.881Z",
+    "buildCommand": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "scripts/run-vercel.mjs",
+      "build"
+    ],
+    "buildExitCode": 0,
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "node_modules/@playwright/test/cli.js",
+      "test",
+      "--config",
+      "playwright.cloudflare.config.ts",
+      "--reporter=line,junit"
+    ],
+    "exitCode": 0,
+    "counts": {
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "total": 7
+    },
+    "evidence": {
+      "identity": "fictional OIDC/machine identity",
+      "provider": "fictional bounded search and unknown lookup acceptance",
+      "transport": "actual local Queue/Workflow -> HMAC native API -> owned PostgreSQL16",
+      "frontend": "actual emitted Vercel function/static assets; runtime loopback app-to-API binding",
+      "scheduledIntervalMilliseconds": 1000,
+      "productionCronSeconds": 60,
+      "hosted": "not run",
+      "deployed": false
+    }
+  },
+  "node": {
+    "command": "node --test tests/api-types-generation.test.mjs tests/vercel-services.test.mjs tests/deployment/cloudflare-python-runtime.test.mjs tests/deployment/cloudflare-acceptance.test.mjs tests/deployment/built-ui-fixture.test.mjs",
+    "log": "CF07-node-evidence-final.txt",
+    "exit": 0,
+    "passed": 12,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "other_exit_zero": [
+    "frozen pnpm install",
+    "pnpm exec tsc --noEmit",
+    "pnpm lint",
+    "cloudflare source/test strict TypeScript",
+    "cloudflare lint",
+    "Wrangler binding check",
+    "public78 and internal5 generation checks",
+    "Vinext build after mature Vite plugin fix",
+    "actual Vercel build and emitted SSR3",
+    "disabled Wrangler dry-run137.24KiB/gzip24.38KiB"
+  ],
+  "screenshots": [
+    "artifacts\\cloudflare\\screenshots\\CF07-bulk-restart-zh-HK-mobile.png",
+    "artifacts\\cloudflare\\screenshots\\CF07-unknown-contact-hold-en.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-en-desktop-approved-export-fixture.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-en-desktop-mobile-readback-fixture.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-en-desktop-outcome-fixture.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-en-mobile-approved-export-fixture.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-en-mobile-mobile-readback-fixture.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-en-mobile-outcome-fixture.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-zh-HK-desktop-approved-export-fixture.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-zh-HK-desktop-mobile-readback-fixture.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-zh-HK-desktop-outcome-fixture.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-zh-HK-mobile-approved-export-fixture.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-zh-HK-mobile-mobile-readback-fixture.png",
+    "artifacts\\cloudflare\\screenshots\\cloudflare-continuity-zh-HK-mobile-outcome-fixture.png"
+  ],
+  "legacy_screenshots": "artifacts\\cloudflare\\legacy-screenshots",
+  "new_migrations": [],
+  "current_local_head": "0035_worker_recovery_probe",
+  "rollback": "CF02/CF06 empty downgrade/re-upgrade and populated refusal, pause/drain/CAS epoch proof retained; no production change",
+  "source_sha256": {
+    "services/api/buyeros_api/execution/checkpoints.py": "7a658e1f21225681a5b8370b1a91ab62f54365d1b6ba63fcfdd39105f3fe324c",
+    "services/api/buyeros_api/execution/config.py": "bcf9c106090ed367ee1c96cca55003addaab00034b8fc9c8c1dcb2c35e6ece65",
+    "services/api/buyeros_api/execution/discovery_runner.py": "c8daa2dc0c11348e7c4040ba8959c031d98579b3909f38010b7de2066d709441",
+    "services/api/buyeros_api/execution/dispatcher.py": "c95542f596587a4db535dea86464d96f69f8bf7c8c3f490d63ef6ccb2841f243",
+    "services/api/buyeros_api/execution/document_runner.py": "a84b24231fe13b6875a8dde4fa225a4032d9120de9a61f77076d3d2ac15ad412",
+    "services/api/buyeros_api/execution/domain_executor.py": "3737ba162fd17cdaf9d5ddf27f2c0b3a1f4b1badb882453ca2a38255cd33933e",
+    "services/api/buyeros_api/execution/engine.py": "5911f72131198b424cca3b16517f30d19db07629516dfb0acf0cadecbfb50460",
+    "services/api/buyeros_api/execution/external_runner.py": "02b115d9411943a07eb8c4d0083652e5d7ff694ed709bea92a1c95aeb52a2fba",
+    "services/api/buyeros_api/execution/fetch_runner.py": "234623db1856b5d5211c5a64f051eabdaad7cf68cf0a7c22f8b63cf85acc11f1",
+    "services/api/buyeros_api/execution/fit_execution.py": "6c45535696a6910072755634739a0fad3bd87297796b3d352ec959276c215187",
+    "services/api/buyeros_api/execution/fit_runner.py": "77c5804eb8adcf210bf6dc25be3e3f73a66ee47bed9a433117f87643449e7f31",
+    "services/api/buyeros_api/execution/leases.py": "1682646583e8a1d615604bf09f719eb7d0f3f56a3e5f657de68b0619c9df3c26",
+    "services/api/buyeros_api/execution/pdf_parser.py": "3c4a8e4e8d2f05fd591d4a3e73f636528ecedafeecfe1290a8b7e3f3965745b5",
+    "services/api/buyeros_api/execution/pdf_parser_child.py": "2b71c8f98b0e4160bb9b92e49d52f35590a8318a640371f81f6d8c2b96b8483f",
+    "services/api/buyeros_api/execution/provider_context.py": "f05af2e86e1d31aec7388300819faa6838af2bcb524593dc223b6d29f1670856",
+    "services/api/buyeros_api/execution/provider_dispatch.py": "9118d9f2e9badbab5349cd7f621dad1908150b45c992f1c46cca7a3f10d63340",
+    "services/api/buyeros_api/execution/registry.py": "2b5f89632490dffa68b53f677871f5a5cabdd38dbd7d71a2ca3b4ff7c43411cf",
+    "services/api/buyeros_api/execution/research_graph.py": "278b96e17815b0fcc78831fca5bcb8de6abc18aad80452b600095a845ed5d94c",
+    "services/api/buyeros_api/execution/run_emitter.py": "09c676564ad15940428bcdcab96d33f3186ac139bab34d6f30892399983e69f7",
+    "services/api/buyeros_api/execution/run_lifecycle.py": "3523f11295019bf2305d7a95580f7ad8d31c322ad1be0d92555be500b7eff56d",
+    "services/api/buyeros_api/execution/step_runner.py": "0b62b1019b0afb46fa0f72c476760b1701d0cc1506135c4687034d79273748cd",
+    "services/api/buyeros_api/execution/__init__.py": "f0171b60278545c99910d19d7cdcac73d3946e7cf65504037d20c5c309c17d42",
+    "services/api/buyeros_api/execution/handlers/bulk_mutate.py": "6fb5c12cc91a9251fa89b58df61fbe577e5890c353cc402ec2ca8d003a6e5048",
+    "services/api/buyeros_api/execution/handlers/capability_blocked.py": "3dd0b13d0fc36b0b3cacef03a59028122f653a9fb8504038b780e3aabd58d573",
+    "services/api/buyeros_api/execution/handlers/contact_submit.py": "205d23a44aae9f57f4701255a7af26d0887439e524889c103bb405be196b8012",
+    "services/api/buyeros_api/execution/handlers/draft_generate.py": "f958b431147e4801294341dd2d8fea275e02996362cfc84889e325b457a74c64",
+    "services/api/buyeros_api/execution/handlers/fetch_evidence.py": "857b75dfb0717fa0c942916b62552077c476952eca7c496327edd76387995d8d",
+    "services/api/buyeros_api/execution/handlers/reconcile.py": "0d6829bac794a278b50910b929853ba88f4ab09ed7f404758ac9a78f8973252f",
+    "services/api/buyeros_api/execution/handlers/retention.py": "20a2947029cd824d6923581c5d8a61c632bfb7abcf682212e9e9187e20fdccf7",
+    "services/api/buyeros_api/execution/handlers/__init__.py": "7ac292acb34d8e3291b75230033340c1a48a0a85a01196755fa154d43499ee91",
+    "services/cloudflare-jobs/src/api-client.ts": "6c14c07b48ed9ce14e6c34239b94d1761f0a194a841c39374b5b197bd1d97e3d",
+    "services/cloudflare-jobs/src/dispatcher.ts": "283d78846cabc818df0f1fb18f5ef82fb916802a77e3dda5b367cb064954fe45",
+    "services/cloudflare-jobs/src/index.ts": "38396d184614c1887ad6d50701a70cbb7fae815b8704e7e72d614b26668c0875",
+    "services/cloudflare-jobs/src/protocol.ts": "69357aea02779ed86582b9a4b2775abcaac3204cdb68f4634ffd31519090828e",
+    "services/cloudflare-jobs/src/queue.ts": "ee4d0a488aa990548844840b336e0895be43189b27fc289d0793621e1b42b757",
+    "services/cloudflare-jobs/src/worker-api.generated.ts": "8d94d11e048dedaae1e2847e02802a5af16bf4746a88aa8cd321e39ced335f91",
+    "services/cloudflare-jobs/src/workflow.ts": "3c0c8070a4f52c1cccaf0377c62d8f01801a92953dfd41478418917256edd995",
+    "services/api/buyeros_api/api/routes/health.py": "cd2cfab2fec0924a7cc108957b3ef56177c3a1bc123e1a8467b015fb10fdd70e",
+    "services/api/buyeros_api/services/worker_execution.py": "dfa522e6081386978eb755404a48fb571d6368ac81022e63971a9372ea6cd575",
+    "services/api/buyeros_api/services/worker_recovery.py": "68358c010f096ec341e2b6546d3f2836d611965fa79510e57e927116394a586c"
+  },
+  "fixture_verified": true,
+  "actual_local_integration_verified": true,
+  "hosted_verified": false,
+  "deployed": false,
+  "resources_provisioned": false,
+  "providers_invoked": false,
+  "risks": [
+    "CF00 hosted4 still not_run; both90-second hop capability not proven",
+    "Windows dev/HMR failures retained; emitted build is the chosen target proof",
+    "No independent reviewer; author review only per no-agent instruction",
+    "PG18 Neon compatibility and exact disabled activation proposal belong to CF08",
+    "Paid/provider/R2/policy/external journal and live pilot remain independent"
+  ],
+  "failure_evidence": [
+    "artifacts\\cloudflare\\CF07-acceptance-runner-red.txt",
+    "artifacts\\cloudflare\\CF07-built-ui-red.txt",
+    "artifacts\\cloudflare\\CF07-journey-red.txt",
+    "artifacts\\cloudflare\\CF07-journey-red.xml",
+    "artifacts\\cloudflare\\CF07-legacy-role-red.txt",
+    "artifacts\\cloudflare\\CF07-legacy-role-red.xml",
+    "artifacts\\cloudflare\\CF07-legacy-selector-red.txt",
+    "artifacts\\cloudflare\\CF07-legacy-selector-red.xml",
+    "artifacts\\cloudflare\\CF07-legacy-selector-second-red.txt",
+    "artifacts\\cloudflare\\CF07-legacy-selector-second-red.xml",
+    "artifacts\\cloudflare\\CF07-legacy-selector-third-red.txt",
+    "artifacts\\cloudflare\\CF07-legacy-selector-third-red.xml",
+    "artifacts\\cloudflare\\CF07-operating-red.txt",
+    "artifacts\\cloudflare\\CF07-operating-red.xml",
+    "artifacts\\cloudflare\\CF07-paused-readiness-red.txt",
+    "artifacts\\cloudflare\\CF07-paused-readiness-red.xml",
+    "artifacts\\cloudflare\\CF07-publication-timeout-red.txt",
+    "artifacts\\cloudflare\\CF07-publication-timeout-red.xml",
+    "artifacts\\cloudflare\\CF07-runner-path-red.txt",
+    "artifacts\\cloudflare\\CF07-stale-report-red.txt",
+    "artifacts\\cloudflare\\acceptance-built-scope-failed",
+    "artifacts\\cloudflare\\acceptance-route-teardown-failed",
+    "artifacts\\cloudflare\\acceptance-six-pass-failed",
+    "artifacts\\cloudflare\\acceptance-six-pass-reviewer-failed",
+    "artifacts\\cloudflare\\acceptance-startup-failed",
+    "artifacts\\cloudflare\\acceptance-timeout-failed",
+    "artifacts\\cloudflare\\acceptance-vinext-reset-failed"
+  ],
+  "outside_test_error_run": "CF07-acceptance-eighth-final.txt exit1 despite seven passing cases; preserved; explicit wait fixed; final ninth exit0",
+  "next_eligible": "CF08",
+  "artifact_normalization": {
+    "original_byte_copies": ".superpowers\\sdd\\2026-10-01-cloudflare-job-migration\\raw-cf07",
+    "changes": "trailing whitespace only for Git; test counts, errors and timestamps retained",
+    "original_hashes": {
+      "artifacts/cloudflare/CF-platform-pg.txt": {
+        "original_sha256": "bc60ccd819f678645fbe3f457becaae5105f0c7e77f99a3062bb758d5bc8fca2",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-acceptance-eighth-final.txt": {
+        "original_sha256": "8588b2e7b06b4d253bbc553e32536d27a81d9e5a51f593c9a2f4eeb3a4267c55",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-acceptance-fifth-final.txt": {
+        "original_sha256": "764695901c0065bceb7a601bfb81dace3650871c5dcd3d3b21c97dd9ab68b8d5",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-acceptance-final.txt": {
+        "original_sha256": "520d67af68828d9b8f5c08e6f1303c12ed43d0774ee18c1562d9b3dd52468cbe",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-acceptance-fourth-final.txt": {
+        "original_sha256": "67d7f07282ff8d53d65cda48128fecaf4271bd2a5e107f023951f18bdb86b4bd",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-acceptance-ninth-final.txt": {
+        "original_sha256": "e4d7c6f796165c7a245184adba733a6d79583fe87bf0e9ccd990a161fd291e3c",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-acceptance-runner-green.txt": {
+        "original_sha256": "47dcbe99e0d96a402ea7fe3d3120fe9567ab3a0adb07f510360da3d15b6431a5",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-acceptance-runner-red.txt": {
+        "original_sha256": "6b0756d222ea62ce52884548c77edaa38af1e25a07b33671841f4c882e4a9bec",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-acceptance-second-final.txt": {
+        "original_sha256": "46c939f2c52bbdbbd1eafe15df09d57155d59d87dd5e093550dbdce845289ac1",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-acceptance-seventh-final.txt": {
+        "original_sha256": "d4efb30a69cf6274acd3f90b01877f8d78879336359b748e81b82cedaf21ac3f",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-acceptance-sixth-final.txt": {
+        "original_sha256": "d5a9865757c076b38932e3f91045aa4eeb363450f8afd6a5d2735f6c800fc746",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-acceptance-third-final.txt": {
+        "original_sha256": "605bb50e15b348eba77fba94842972d8d48da29113107ff4bd0b625b7e7878de",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-api-final.txt": {
+        "original_sha256": "49300b4c0b610b3319806d79dcfffeba570ba49f61adc4ea3c0f4cdb187628b1",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-api-final.xml": {
+        "original_sha256": "699e53bbb7d488b22a57ff86722da7a431e4159091eea02976ec6e5b14b9fddf",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-api-full.txt": {
+        "original_sha256": "aae7ba492731bb9a9d1cdb0d435177f718aafaec8b6c15520416a42a125dbd07",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-api-full.xml": {
+        "original_sha256": "e4d5fa829c7b659dba979402e9f368e2a1afc1af6897045784eb9bec9b69748c",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-bindings.txt": {
+        "original_sha256": "b636c4af09f0697179f8814355c01b5cbb116ed15809d2d94be29b513e51fbe8",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-boundaries-third.txt": {
+        "original_sha256": "6826b83de44a593b766aba463199b7f6765378d005ed82026a8a1de483883ef6",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-boundaries-third.xml": {
+        "original_sha256": "9056799e19b482fe5e8f8969b7a133b1839d9521ff580540fccc276e05e4e14a",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-built-ui-green.txt": {
+        "original_sha256": "c3dfb1638971e9d26da9c7afb1b34b89f584a896a859c1d1cc917ab470d821a3",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-built-ui-red.txt": {
+        "original_sha256": "f373753a0209ac90f09205248e14a09672362b75a84baba9174c9c74b135d6b8",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-bundle-schema-preflight.txt": {
+        "original_sha256": "90c1023802df22652ef54354b8afc54efc62f10e6ceb4a4e29af776f300e9efe",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-controller-final.txt": {
+        "original_sha256": "4120a432e96cb19f4ff91fbaa64bfbe720fabc206bbbb3bf8abd7e85515e66a8",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-controller-lint-last.txt": {
+        "original_sha256": "a382044023bed5641b3544286575370e282991e2eebdd05857e1c7c96a890029",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-controller-test-types-final-corrected.txt": {
+        "original_sha256": "6a3459af78e2cc2769cdc1ee031a84ce1dd7e666f71eeeac183b9050773b2b00",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-controller-test-types-final.txt": {
+        "original_sha256": "e5a506555dbcafa9efdf4ff412233d74021161c9ede2c94bd0a6176a75a1fd5b",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-controller-test-types-last.txt": {
+        "original_sha256": "6a3459af78e2cc2769cdc1ee031a84ce1dd7e666f71eeeac183b9050773b2b00",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-controller-types-final.txt": {
+        "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-controller.txt": {
+        "original_sha256": "92b8eef16b317e1a695d36e1685e7058287922f6083ab5051a861604c7161886",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-domain.txt": {
+        "original_sha256": "8026b7513778ef15e951ea5154455e6a2ab9cc20d4ef36539b92285cf8564252",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-dry-run-last.txt": {
+        "original_sha256": "83084c1f4ac20b650ae22f9ecaaa664fda9a0525e3439b7697061360de8365e4",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-dry-run.txt": {
+        "original_sha256": "2bd4e212da5a1220e3ca38093c4c455ac0ed4ea9c02f994eab89f0e0ee6e5a36",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-expanded-first.txt": {
+        "original_sha256": "21c303207d8a40d58e93033406da2ad004c87ac8a3feecc4e0f813d3082aeb30",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-expanded-first.xml": {
+        "original_sha256": "589abe3a82e7f34bee2409f6c107c3f460555905043fdf87a9f1ce8ab4f4eea7",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-expanded-second.txt": {
+        "original_sha256": "c977ab28a2923e72ad1950426ec2eb75664458b984d9d26c4a4817322ef16235",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-expanded-second.xml": {
+        "original_sha256": "d74e439200041d73d1254702d257264a65be8e4a35f0d2a980622c40ad76218f",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-fixture-vercel-build.txt": {
+        "original_sha256": "eaac92c857c374e0d6683ee5efd7de9fd1ba0c3666e7320de4d6fa0ee74c91c0",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-frozen-install.txt": {
+        "original_sha256": "7d448df8e49c50df5dbbc7f7df57a9e72592745de82a121b2508ff3b44edde36",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-full-platform-pg.txt": {
+        "original_sha256": "b39304a7ef3b1226aea2b1046779e954128ac623a6adac69a99d324c44f79a0c",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-internal-types-last.txt": {
+        "original_sha256": "196d413c598237e6f20e53691effb2eb9ffaf82a8e96b015c1c33744297ceae9",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-internal-types.txt": {
+        "original_sha256": "196d413c598237e6f20e53691effb2eb9ffaf82a8e96b015c1c33744297ceae9",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-fifth-green.txt": {
+        "original_sha256": "f63ed906000af9111729ff4519e354c9d4226f502a58842ddd1c2bbddd6d5ed3",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-fifth-green.xml": {
+        "original_sha256": "13cfdf4f8cb3f723e3ae7f198af27c5e6ec2270665b4428fd07c917c62c5c14b",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-first-green.txt": {
+        "original_sha256": "c7c91005ae4048beb89ef6077e1c4b2201862685897813c7de4c0f2b63d632f2",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-first-green.xml": {
+        "original_sha256": "381df85290860c49da4cdcdb156ee2de33f71555f83ab263418a01834a30ab91",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-fourth-green.txt": {
+        "original_sha256": "7e29322cf2ad2d15d085b245bbb96a392157252e30de5dcd3c3779885a26096b",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-fourth-green.xml": {
+        "original_sha256": "5fc1da14ab9c7ff8720ade220c8265861dbe99b041ddcb486867138e745ab01e",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-green.txt": {
+        "original_sha256": "7d650086b0aa05f85946d587a5224cdd3fb7d364baaccc3a07ac7399b6926cde",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-green.xml": {
+        "original_sha256": "1b9713f6064450153b193b5bd1f2bdad200d0dd44aee8fd50128e243c657ca4b",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-red.txt": {
+        "original_sha256": "c7c01accde3e395d4a20ff7a88737da2fc56837960d8df66ff16ca247cbc8ee0",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-red.xml": {
+        "original_sha256": "6a7de4fe9403ea7749db0d54a62fab43f9798b67fd251a364f2130ede89ebfe9",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-second-green.txt": {
+        "original_sha256": "43cc54f8bc5e18793588a029a7d471f7f46fda0c36a2a3e8aa1db2b9500d5db8",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-second-green.xml": {
+        "original_sha256": "06fb96f7465091d02ece83e3df611f2dcf1a6c16d86cec4b6b867d9ec8cd6ccf",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-third-green.txt": {
+        "original_sha256": "12249d00edf760ea9a28a04a3b33f3e4a51be5d3a2e14ff84e0b07a6ef22330b",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-journey-third-green.xml": {
+        "original_sha256": "6e37d3486a90d1e10ea42c6499a80c41c2395999af082f6e511f86176af6c7d2",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-buyers.txt": {
+        "original_sha256": "fbad716b856c00c71337a9a599552e130c770b2d6fc80f5b384630cf9ef87b95",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-buyers.xml": {
+        "original_sha256": "e1e62f9ede23b5ab4f340d2e16aa8a49e525e62e139c0fe940f8adc6697a9967",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-management.txt": {
+        "original_sha256": "149e1f70e0a53448c2747c196a5e5959a2318ae8580562befd5832e44144588f",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-management.xml": {
+        "original_sha256": "154bfea380638a39ed2c247ea7bfbb5ca6d4d741855f1b6f94a884c57a12665f",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-mvp.txt": {
+        "original_sha256": "1abf6f05e6905a876ea52f61ded3f1036c67d15554e4b747e18698ee020c3dc0",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-mvp.xml": {
+        "original_sha256": "113d7758e435a1df4d6caa90f3b40780e522845e5bda482ba412fa4b5810d08f",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-research.txt": {
+        "original_sha256": "311a9bbd494d9e1f84258ee692513b13b067a49c8a1e2acdb3b057cb70f0b0d2",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-research.xml": {
+        "original_sha256": "e65172ed573aa09b0c8f17f89f6f7e578c99ea493ad650ee7912921f5ea9bb0e",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-role-red.txt": {
+        "original_sha256": "e70bbc832d1230fbef5cfc1835adfc250c2dcf262f4a71ec9cd50e9ece376853",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-role-red.xml": {
+        "original_sha256": "ee01b23dbf4a8fbfa857c423bedd8db04e4d75904c8363794bca589e5fb298c1",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-selector-red.txt": {
+        "original_sha256": "6bd397c7b863a949da1e2ed14b1952507662b55156166b3e86455fbb34f25cae",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-selector-red.xml": {
+        "original_sha256": "d9d22d735f123295f954eb8946842a33785488e94983e2910112564e69c99bdd",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-selector-second-red.txt": {
+        "original_sha256": "b0370932a76747207a3c1269a836a1fefc8813da33d620eab5b2cbf2511614db",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-selector-second-red.xml": {
+        "original_sha256": "ba6c16a85d0f6ccb97edaedfd9ec02018aaa99a735aa143117a493b70b72f493",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-selector-third-red.txt": {
+        "original_sha256": "ac14762e02f45beea0a98516580ec2beece83b64db9c5d76268370c18e65e4dc",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-selector-third-red.xml": {
+        "original_sha256": "57f213af10fcdbadf69f7bea7b25da20580dbccb6b1e20c9786f4f4d20fec759",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-workbench.txt": {
+        "original_sha256": "cd14ea44440cb2d7970e70af217fce22196e397e49680a292833bc7b3979b208",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-workbench.xml": {
+        "original_sha256": "b68a6991a39d7979c81b69f24c91c32011c7a62dd25e77d03bfd9069d77320cb",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-zoom.txt": {
+        "original_sha256": "6115f787f09de819e62026f5ac09427bd3f0df28f265e1e94cdc72626ee72c53",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-legacy-zoom.xml": {
+        "original_sha256": "6e6a850fa02cb7c54b1b7eea9c6084c11eb641b54ea6d85407ea1d0330080527",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-lint-built-final.txt": {
+        "original_sha256": "90d908d3cf05ac40440aeecf0b4e5614dc7775b47a82a5af3d2101348f10b5a9",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-lint-built-fixture.txt": {
+        "original_sha256": "90d908d3cf05ac40440aeecf0b4e5614dc7775b47a82a5af3d2101348f10b5a9",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-lint-evidence-final.txt": {
+        "original_sha256": "90d908d3cf05ac40440aeecf0b4e5614dc7775b47a82a5af3d2101348f10b5a9",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-lint-final.txt": {
+        "original_sha256": "90d908d3cf05ac40440aeecf0b4e5614dc7775b47a82a5af3d2101348f10b5a9",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-lint-last.txt": {
+        "original_sha256": "90d908d3cf05ac40440aeecf0b4e5614dc7775b47a82a5af3d2101348f10b5a9",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-lint.txt": {
+        "original_sha256": "90d908d3cf05ac40440aeecf0b4e5614dc7775b47a82a5af3d2101348f10b5a9",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-live-adapter.txt": {
+        "original_sha256": "4d75094611a17c8fb42948f73da0b77eb31d108c6e99b7b7eec2f997541f1bc0",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-live-auth.txt": {
+        "original_sha256": "04d0e5bb240b2381a9616f0489af45b641e787bb5ca13256e2cfab2efae4cc1b",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-node-built-final.txt": {
+        "original_sha256": "c6c75d15d6dc4a9ccd10d16f25e15671c805401f7384cfbd185e22fbdcd7d2d0",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-node-contracts.txt": {
+        "original_sha256": "1e08aa8f5d6efc7def4086c97a7687c282284549438d6a32d248af29048fe5e7",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-node-evidence-final.txt": {
+        "original_sha256": "8e5446d1cf1a12180e917301ac5557cd57c63707bf8710c01045359cc9fbfe80",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-node-final.txt": {
+        "original_sha256": "5aad9aaad22295bce1361aeacae438c3b21a1f465aa07eb507a39e5036699636",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-node-last.txt": {
+        "original_sha256": "04ca4731923b81cb275574de584d8a83701893e3a5c46172d5735e5668175099",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-final.txt": {
+        "original_sha256": "54e577afab2172cab67da98e3a4a44db773932076058cd2c8f9dc918656622e3",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-final.xml": {
+        "original_sha256": "4a75a5a92829f202d327ab44f9aa4dbdf5f5c200150fee10138465b63cec95e8",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-first-green.txt": {
+        "original_sha256": "fd536f3b7f35689e9b96a910967b8158a6a57ba161885bf77b1092ae8111ce99",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-first-green.xml": {
+        "original_sha256": "5f0d67190ea88c485d216528ff60dc1cc523e23401083b1d7923d70a78610250",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-platform-final-repeat1.txt": {
+        "original_sha256": "f4dbc96edacd083ac9fd724422a649d7ea275ad2a21e3b844ff85fd8c7cbb767",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-platform-final-repeat2.txt": {
+        "original_sha256": "b3e16f0d8c9cf38280e13407d54918e222c0da6e49692a2c357915be3cf23ff2",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-platform-repeat1.txt": {
+        "original_sha256": "3bf7d9e075784c96bc0de7895a6ff66df403e6e5bb3b93eb07b0b9a80ad5779b",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-platform-repeat2.txt": {
+        "original_sha256": "d4227c83336ee0eba86354ce9b597346304f4567424914509f28848907a2941b",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-platform.txt": {
+        "original_sha256": "2be00b9660148c0426f720e5ebebe5d49bef57ef6cdd38c556188102995ab52f",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-red.txt": {
+        "original_sha256": "0f14c6bfabe3fa81272d4392beb32b52cc9ad316fa8fb1e67bb4dbe9a9992563",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-red.xml": {
+        "original_sha256": "dfbe2d94386279f7917e6bad342e648dc8fd4bef644b57e9019c4671a0ec0150",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-repeat.txt": {
+        "original_sha256": "3e54f7b0fb79325ed1a67477c6829d036b886648c5ab4c7cf7323fcb85d09c7c",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-operating-repeat.xml": {
+        "original_sha256": "4e407af353c41d15bc136ecc5fc113636c234ab3db4ce535369e838592719534",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-paused-readiness-red.txt": {
+        "original_sha256": "d14aabc14975f07a0ddc9dbb21f41a7156e5f5aeabf25f56b1f0f31f8d4ba946",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-paused-readiness-red.xml": {
+        "original_sha256": "c1d317bab49d51d5c205ad0fa4988a4679912213fa7825ee6d769741eec86269",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-platform-last.txt": {
+        "original_sha256": "d9e5fa75aa3d9f98ab93ed136a9e44d8903e6359c29aefac10068ad59b295fa3",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-platform-last.xml": {
+        "original_sha256": "69adbc94f5e1052ec5330de8e74fa18403d35c941e7f129807cb679ca7961658",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-public-types.txt": {
+        "original_sha256": "4ad0a086f797ff95d7d5cf98dca236237e3c4fe1967ab5165ea7ef1ed64c18d8",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-publication-timeout-red.txt": {
+        "original_sha256": "ad1e7e50ee30f4245fa83df15fcf6648657431a531ec94705e8582c982851556",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-read-benchmark.txt": {
+        "original_sha256": "78c0f0149cb49531655750c7d3f24c8496399fb109cb5f7961159f816a8d842b",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-read-benchmark.xml": {
+        "original_sha256": "ba35d4509d4f58492d304d66c45fde9bde6d387b460aef528769e40324422c9a",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-readiness-final.txt": {
+        "original_sha256": "09195a555f07fd69e0e071298f3c6ba46ad71bafc672018aaa3c2adcbfc7c2c0",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-readiness-final.xml": {
+        "original_sha256": "6fd6bad3315be26ec76610d9387a8a89e9f681d9d77f9019e5d702373749b818",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-readiness-green.txt": {
+        "original_sha256": "6baa0ee49ed37a70bffe9231fb8328f0cd4c66672165724ae7db316584a0793e",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-readiness-green.xml": {
+        "original_sha256": "9bdbcd724e6be6d71b5cec2d5454ed73ba20633c6f618f7fc0504fdbd38b90d5",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-runner-path-green.txt": {
+        "original_sha256": "f633e4564160a9b1816c522a6765a33515e6c8878fb862ef1a9aead1492c2a25",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-runner-path-red.txt": {
+        "original_sha256": "cbc4e47d02ed1cadd4929075ced20b7ef9c92f6c85b30d8a0772e5a60c9ef196",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-stale-report-green.txt": {
+        "original_sha256": "242c12f0c885fa322b45bb9c10486bb21a8a4304f3338b75e4d4e16a85e5f20b",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-stale-report-red.txt": {
+        "original_sha256": "f08d43281097da6ec785be4c7aa5bbeb7af87cd97094fd4c0be722c408975772",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-tooling-install.txt": {
+        "original_sha256": "4cf74a45d9688a5a1e414daa08eaccc826897ca63486149b2cd2ded3e1ddb836",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-types-built-final.txt": {
+        "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-types-built-fixture.txt": {
+        "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-types-evidence-final.txt": {
+        "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-types-final.txt": {
+        "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-types-last.txt": {
+        "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-types.txt": {
+        "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-vercel-build.txt": {
+        "original_sha256": "32691cb88c6b372174b47c854dfeef6a1405d3aa31cd90ed54d9dfe9fc7b4d98",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-vercel-render.txt": {
+        "original_sha256": "7881b76411ab6e93c4262c2f75ddf96bfdae4e243d3d74d192ace39dd81fafb6",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-vinext-build-green.txt": {
+        "original_sha256": "3637b20b01a8557e1eb361566e17bf20cfb3f2f7a9daf568d7f17e1a01d54ce9",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-vinext-build.txt": {
+        "original_sha256": "7a00e2c91ede6b9354f3f663b39dfc649eebefde351178d3b3643b18f81a126c",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-worker-final.txt": {
+        "original_sha256": "3965b97b65a53c37db28dada75a3541dabc62a61cf6f0a0a2f3fadfd289b6945",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-worker-final.xml": {
+        "original_sha256": "3e7a18caffb1a6710826f9ee05ca00828e8effd47df7795f3f7ed03ce88f33e4",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-worker-full.txt": {
+        "original_sha256": "60b5930981b316de40eb8f566dcf4b8863e42d7d2d4d90e34d06463772b58962",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/CF07-worker-full.xml": {
+        "original_sha256": "f2633cb755e0c5aac64ceb5e47f6000e088eed73b55415cbc046765a8d9fc80d",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-before-timeout-fix/build.txt": {
+        "original_sha256": "50df39505ac7bd03162cd29b4098f13c88156267347953187c24263a3b28ea72",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-before-timeout-fix/journey.txt": {
+        "original_sha256": "f1aa432c9374e688ccb75dd990b87ca1a21f0886032b88bb7d6ca797bed0c959",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-before-timeout-fix/journey.xml": {
+        "original_sha256": "58e6bc7459660692cff0a1dd4f10b01b4c5654fbaea1e9bf32d79a8f75bb944e",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-built-scope-failed/build.txt": {
+        "original_sha256": "41d683822f42a97914d9bcf9f8c61346bf6934b6adb52775683705eff8bf6f60",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-built-scope-failed/journey.txt": {
+        "original_sha256": "fedb8a87a6a8daf9038cb466a85fcef0931afd58140a810c8cac329fc3fb6969",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-built-scope-failed/journey.xml": {
+        "original_sha256": "7d62def1eb90d6ce1e56dd5e06bc63cce5808196d74f7bc56042c5f5e0bb9b02",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-route-teardown-failed/build.txt": {
+        "original_sha256": "6a677af53a247c7eebd89d9e2b6e8f67e36f9d0913379aabc4fb303fa4680ce4",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-route-teardown-failed/journey.txt": {
+        "original_sha256": "a7af811921df1a0d349d8b527ee0c5ea6986ce7fe953c0c0f5e4bbc0f90d8d70",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-route-teardown-failed/journey.xml": {
+        "original_sha256": "83b0d6f168d7ab8e7eefe4ed546892b91c84ea570c75805f0dc93c71b610dfff",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-six-pass-failed/journey.txt": {
+        "original_sha256": "cf9dd2d6dc4961492b529c6de5f0f3e4851c194577faae40842e06f7a10f0a6d",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-six-pass-failed/journey.xml": {
+        "original_sha256": "49940c03f19cbf120eeb9055526b03b7b2f21bf44d78490879faf7fc31cf055f",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-six-pass-reviewer-failed/journey.txt": {
+        "original_sha256": "079a28b0427997baed89a40ff15d4444678d88cd0ab811ed00610c4ed8ceae0f",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-six-pass-reviewer-failed/journey.xml": {
+        "original_sha256": "10580eba44a1fc996d9749ce9c18cc8730ae0168a341dec89bd8fee373574816",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-six-pass-reviewer-failed/ui-errors/cloudflare-journey-CF07-en-e2fb5--and-outcome-on-one-dataset/error-context.md": {
+        "original_sha256": "0f07e5e3ef8574ddc45014ce23e4ea54ad3f2666c3f5e8f844cbf89b2bab29a7",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-startup-failed/journey.txt": {
+        "original_sha256": "4953d4957e2d9bb021fd185ec0a82f65ad63aa87b9c079621e17c2cfa61a9332",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-startup-failed/journey.xml": {
+        "original_sha256": "91e6d0d88b801459cf0eb41659a9843928d070c0b6542b515d69feb49d05e7b4",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-timeout-failed/journey.txt": {
+        "original_sha256": "6c0fc8c7806f4cb872759c8d19d9a7f662fac5203f4088461760566e4d007513",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-timeout-failed/journey.xml": {
+        "original_sha256": "b4628afdbdc4007d9b850eb8cbc6e2ddc88c1fe32bc847a88049c901186ddb8c",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-vinext-reset-failed/journey.txt": {
+        "original_sha256": "117713f11ee3881828e818707f122ee46a06a7b9e9c792c02c1979ef4545ff3f",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance-vinext-reset-failed/journey.xml": {
+        "original_sha256": "d40a6faaa3da8dde790ad13a923b88ccc40386270e77dd215f724cdf2ed5be80",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance/build.txt": {
+        "original_sha256": "bdbf68033d4f9976add2817d8f8b9c5f682d3d7328f8418e9ea57771085e78d1",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance/journey.txt": {
+        "original_sha256": "65ef970f3a83b0127576557f2403f0ddda1c30fed85823ae038259bc6457fa34",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      },
+      "artifacts/cloudflare/acceptance/journey.xml": {
+        "original_sha256": "9e229e5b3415b92876f15692bdae95d3aee5554e211603d3f59ef12808201dc8",
+        "change": "trailing whitespace and EOF only; counts/errors/timestamps unchanged"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="1" failures="0" errors="0" time="12.142">
+    <testsuite name="services/cloudflare-jobs/tests/operating.integration.ts" timestamp="2026-10-01T09:11:12.328Z" hostname="DESKTOP-30TFME5" tests="1" failures="0" errors="0" skipped="0" time="12.142">
+        <testcase classname="services/cloudflare-jobs/tests/operating.integration.ts" name="ten real Queue/Workflow jobs complete under the one global PostgreSQL permit" time="12.14">
+        </testcase>
+    </testsuite>
+</testsuites>
