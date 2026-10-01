@@ -32,9 +32,10 @@ def render_overlay(root, target):
     assert route.count(needle) == 1, "gateway shape changed; review overlay before preparation"
     route = route.replace(needle, needle + "\n  '/v1/internal/runtime-probe',", 1)
     runtime = (root / TEMPLATE).read_text(encoding="utf-8") + (
-        '\nif __name__ != "__main__":\n'
-        '    manifest = Path(__file__).with_name("preview_target.json")\n'
-        '    app = create_preview_app(json.loads(manifest.read_text(encoding="utf-8")) if manifest.is_file() else {})\n'
+        '\n# Vercel discovers the ASGI handler as a module-level assignment.\n'
+        '# The guarded native-child entrypoint above exits before these lines.\n'
+        'manifest = Path(__file__).with_name("preview_target.json")\n'
+        'app = create_preview_app(json.loads(manifest.read_text(encoding="utf-8")) if manifest.is_file() else {})\n'
     )
     return {"vercel.json": json.dumps(config, indent=2) + "\n",
             "app/v1/[...path]/route.ts": route,

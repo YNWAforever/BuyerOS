@@ -310,3 +310,21 @@ def test_preview_target_current_regional_hostname_keeps_exact_dsn_binding(host, 
     if host != target()["neon_host"]:
         with pytest.raises(ValueError):
             module.require_preview(pinned, env, NOW)
+
+
+def test_preview_entrypoint_has_statically_discoverable_top_level_app():
+    """Vercel's Python builder rejects an app defined only inside an if block."""
+    import ast
+    module = load_module(PREPARER, "cf_preview_preparer_static_handler")
+    files = module.render_overlay(ROOT, target())
+    entrypoint = files["services/api/buyeros_api/api/preview_vercel.py"]
+    tree = ast.parse(entrypoint)
+    assigned = {value.id for statement in tree.body if isinstance(statement, ast.Assign)
+                for value in statement.targets if isinstance(value, ast.Name)}
+    assert "app" in assigned, "Vercel requires the ASGI handler at module top level"
+    # The bounded native child exits before the ASGI app is created.
+    child = next(i for i, statement in enumerate(tree.body) if isinstance(statement, ast.If)
+                 and "__name__" in ast.unparse(statement.test))
+    app = next(i for i, statement in enumerate(tree.body) if isinstance(statement, ast.Assign)
+               and any(isinstance(value, ast.Name) and value.id == "app" for value in statement.targets))
+    assert child < app

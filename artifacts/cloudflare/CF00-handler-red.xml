@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.824" timestamp="2026-10-01T23:29:08.105674+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_preview_diagnostic" name="test_preview_entrypoint_has_statically_discoverable_top_level_app" time="0.120"><failure message="AssertionError: Vercel requires the ASGI handler at module top level&#10;assert 'app' in {'DURATION_SECONDS', 'MAX_BODY_BYTES', 'MAX_OUTPUT_BYTES', 'PROBE_PATH', 'PRODUCTION_NEON', 'PRODUCTION_VERCEL', ...}">def test_preview_entrypoint_has_statically_discoverable_top_level_app():
+        """Vercel's Python builder rejects an app defined only inside an if block."""
+        import ast
+        module = load_module(PREPARER, "cf_preview_preparer_static_handler")
+        files = module.render_overlay(ROOT, target())
+        entrypoint = files["services/api/buyeros_api/api/preview_vercel.py"]
+        tree = ast.parse(entrypoint)
+        assigned = {value.id for statement in tree.body if isinstance(statement, ast.Assign)
+                    for value in statement.targets if isinstance(value, ast.Name)}
+&gt;       assert "app" in assigned, "Vercel requires the ASGI handler at module top level"
+E       AssertionError: Vercel requires the ASGI handler at module top level
+E       assert 'app' in {'DURATION_SECONDS', 'MAX_BODY_BYTES', 'MAX_OUTPUT_BYTES', 'PROBE_PATH', 'PRODUCTION_NEON', 'PRODUCTION_VERCEL', ...}
+
+tests\test_cloudflare_preview_diagnostic.py:324: AssertionError</failure></testcase></testsuite></testsuites>
