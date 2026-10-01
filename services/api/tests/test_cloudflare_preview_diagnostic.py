@@ -333,17 +333,19 @@ def test_preview_entrypoint_has_statically_discoverable_top_level_app():
 def test_native_child_failure_reports_only_allowlisted_error_class(monkeypatch):
     module = load_module(TEMPLATE, "cf_preview_diagnostic_safe_child_error")
     def fail(_args, **kwargs):
-        kwargs["stdout"].write(b'{"error_type":"ModuleNotFoundError"}')
+        kwargs["stdout"].write(b'{"error_type":"ModuleNotFoundError","missing_module":"psycopg"}')
         return type("Result", (), {"returncode": 1})()
     monkeypatch.setattr(module.subprocess, "run", fail)
     with pytest.raises(RuntimeError) as caught:
         module.run_native_probe(environment()["BUYEROS_CHECKPOINT_DATABASE_URL"], ROOT, target())
     assert getattr(caught.value, "native_error_type", None) == "ModuleNotFoundError"
+    assert caught.value.missing_module == "psycopg"
     def unsafe(_args, **kwargs):
-        kwargs["stdout"].write(b'{"error_type":"secret-dsn-password"}')
+        kwargs["stdout"].write(b'{"error_type":"secret-dsn-password","missing_module":"secret-dsn-password"}')
         return type("Result", (), {"returncode": 1})()
     monkeypatch.setattr(module.subprocess, "run", unsafe)
     with pytest.raises(RuntimeError) as caught:
         module.run_native_probe(environment()["BUYEROS_CHECKPOINT_DATABASE_URL"], ROOT, target())
     assert caught.value.native_error_type == "NativeProbeFailed"
+    assert caught.value.missing_module is None
     assert "secret" not in str(caught.value)

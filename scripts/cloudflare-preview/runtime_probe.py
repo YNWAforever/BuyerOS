@@ -33,11 +33,14 @@ TARGET_KEYS = frozenset(("vercel_project_id", "vercel_project_name", "neon_proje
 
 class NativeProbeFailure(RuntimeError):
     """Closed error-class metadata only; no child traceback or exception message."""
-    def __init__(self, error_type):
+    def __init__(self, error_type, missing_module=None):
         allowed = {"ModuleNotFoundError", "ImportError", "FileNotFoundError", "PermissionError", "OSError",
                    "AssertionError", "OperationalError", "UndefinedTable", "InsufficientPrivilege",
                    "ValueError", "RuntimeError", "TypeError", "KeyError", "TimeoutExpired", "CalledProcessError"}
         self.native_error_type = error_type if isinstance(error_type, str) and error_type in allowed else "NativeProbeFailed"
+        modules = {"tools", "tools.probe_worker_runtime", "psycopg", "psycopg_binary", "sqlalchemy", "pypdf",
+                   "langgraph", "langgraph.checkpoint.postgres", "buyeros_api", "fastapi", "pydantic"}
+        self.missing_module = missing_module if isinstance(missing_module, str) and missing_module in modules else None
         super().__init__("native preview probe failed")
 
 
@@ -202,7 +205,7 @@ def run_native_probe(dsn, service_root, target):
         raise ValueError("preview diagnostic output exceeded its bound")
     result = json.loads(raw)
     if process.returncode:
-        raise NativeProbeFailure(result.get("error_type"))
+        raise NativeProbeFailure(result.get("error_type"), result.get("missing_module"))
     return result
 
 
@@ -250,6 +253,8 @@ def create_preview_app(target):
             failure = {"code": "PROBE_FAILED", "error_type": type(exc).__name__}
             if isinstance(exc, NativeProbeFailure):
                 failure["native_error_type"] = exc.native_error_type
+                if exc.missing_module is not None:
+                    failure["missing_module"] = exc.missing_module
             return JSONResponse(failure, status_code=503,
                                 headers={"Cache-Control": "private, no-store"})
         return JSONResponse(result | {"source_sha": target["source_sha"], "wall_seconds": time.perf_counter() - start},
@@ -275,6 +280,10 @@ def main_child():
         status = 0
     except Exception as exc:
         result, status = {"error_type": type(exc).__name__}, 1
+        if isinstance(exc, ModuleNotFoundError):
+            missing = NativeProbeFailure(type(exc).__name__, exc.name).missing_module
+            if missing is not None:
+                result["missing_module"] = missing
     print(json.dumps(result))
     return status
 
