@@ -259,6 +259,7 @@ jobs:
           path: |
             artifacts/cloudflare/
             test-results/cloudflare/
+            test-results/cloudflare-continuity-*-fixture.png
           if-no-files-found: error
 
   browser-continuity:
