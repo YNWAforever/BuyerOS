@@ -1,0 +1,53 @@
+
+ ⛅️ wrangler 4.137.0 (update available 4.145.0)
+───────────────────────────────────────────────
+Generating project types...
+
+interface __BaseEnv_Env {
+	JOBS: Queue;
+	QUARANTINE: Queue;
+	EXECUTION_ENABLED: string;
+	RUNTIME_EPOCH: string;
+	WORKER_API_ORIGIN: string;
+	WORKER_API_ALLOWED_ORIGINS: string;
+	WORKER_CURRENT_KEY_ID: string;
+	LOCAL_TEST_MODE: string;
+	WORKER_CURRENT_SECRET: string;
+	JOB_WORKFLOW: Workflow<Parameters<import("./src/index").BuyerOSJobWorkflow['run']>[0]['payload']>;
+}
+declare namespace Cloudflare {
+	interface GlobalProps {
+		mainModule: typeof import("./src/index");
+	}
+	interface PreviewEnv {
+		JOBS: Queue;
+		QUARANTINE: Queue;
+		EXECUTION_ENABLED: string;
+		RUNTIME_EPOCH: string;
+		WORKER_API_ORIGIN: string;
+		WORKER_API_ALLOWED_ORIGINS: string;
+		WORKER_CURRENT_KEY_ID: string;
+		LOCAL_TEST_MODE: string;
+		WORKER_CURRENT_SECRET: string;
+		JOB_WORKFLOW: Workflow<Parameters<import("./src/index").BuyerOSJobWorkflow['run']>[0]['payload']>;
+	}
+	interface Env extends __BaseEnv_Env {}
+}
+interface Env extends __BaseEnv_Env {}
+type StringifyValues<EnvType extends Record<string, unknown>> = {
+	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
+};
+declare namespace NodeJS {
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "EXECUTION_ENABLED" | "RUNTIME_EPOCH" | "WORKER_API_ORIGIN" | "WORKER_API_ALLOWED_ORIGINS" | "WORKER_CURRENT_KEY_ID" | "LOCAL_TEST_MODE" | "WORKER_CURRENT_SECRET">> {}
+}
+
+Generating runtime types...
+
+Runtime types generated.
+
+
+✨ Types written to services/cloudflare-jobs/worker-configuration.d.ts
+
+📖 Read about runtime types
+https://developers.cloudflare.com/workers/languages/typescript/#generate-types
+📣 Remember to rerun 'wrangler types' after you change your wrangler.jsonc file.

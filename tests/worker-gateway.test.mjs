@@ -17,10 +17,11 @@ test('test_internal_headers_forward_only_on_allowlisted_paths', async () => {
         }
         assert.equal(await new Response(options.body).text(), '{"v":1}');
         assert.equal(options.redirect, 'manual');
+        assert.equal(new Headers(options.headers).get('x-vercel-protection-bypass'), null);
         assert.equal(new URL(target).pathname, path);
         return Response.json({ok: true});
       };
-      const headers = {'content-type': 'application/json'};
+      const headers = {'content-type': 'application/json', 'x-vercel-protection-bypass': 'fictional-preview-bypass-only'};
       for (const name of ['key-id', 'timestamp', 'nonce', 'signature']) headers[`x-buyeros-worker-${name}`] = 'fixture';
       const response = await POST(new Request(`https://app.fixture${path}`, {method: 'POST', headers, body: '{"v":1}'}));
       assert.equal(response.status, 200);

@@ -27,7 +27,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm build
       - run: node scripts/run-vercel.mjs build
-      - run: node --test tests/vercel-render.test.mjs
+      - run: node --test tests/vercel-render.test.mjs tests/deployment/cloudflare-release-config.test.mjs
 
   cloudflare-controller:
     runs-on: ubuntu-latest
@@ -245,6 +245,9 @@ jobs:
       - run: uv sync --frozen
         working-directory: services/worker
       - run: pnpm exec playwright install --with-deps chromium
+      - run: .venv/bin/python ../../scripts/run-cloudflare-pg18-proof.py
+        working-directory: services/api
+      - run: python scripts/check-required-tests.py --junit artifacts/cloudflare/CF08-pg18.xml
       - run: uv run --frozen pytest -q tests/benchmark_cloudflare_case.py --junitxml=../../artifacts/cloudflare/ci-operating.xml
         working-directory: services/api
       - run: python scripts/check-required-tests.py --junit artifacts/cloudflare/ci-operating.xml

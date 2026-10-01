@@ -74,7 +74,7 @@ export default defineConfig(async () => {
       ...(isCodexSeatbeltSandbox ? { watch: { useFsEvents: false, usePolling: true } } : {}),
     },
     plugins: vercelTarget
-      ? [vinext(), (await import("nitro/vite")).nitro()]
+      ? [vinext(), (await import("nitro/vite")).nitro({ vercel: { functions: { maxDuration: 90 } } })]
       : [
           vinext(),
           sites({ mockAuth: !managedLinux }),

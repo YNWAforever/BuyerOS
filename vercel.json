@@ -18,13 +18,20 @@
     "api": {
       "root": "services/api",
       "framework": "fastapi",
-      "entrypoint": "buyeros_api.api.vercel:app"
+      "entrypoint": "buyeros_api.api.vercel:app",
+      "functions": {
+        "buyeros_api/api/vercel.py": {
+          "maxDuration": 90
+        }
+      }
     }
   },
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": { "service": "app" }
+      "destination": {
+        "service": "app"
+      }
     }
   ]
 }

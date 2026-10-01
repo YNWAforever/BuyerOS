@@ -1,0 +1,54 @@
+✖ native API budget applies to the resolved Python entrypoint inside its service (1.5876ms)
+✖ the actual emitted Nitro gateway carries the ninety-second budget (2.0914ms)
+✖ the isolated preview controller has distinct private resources and execution off (2.6794ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 134.0412
+
+✖ failing tests:
+
+test at tests\deployment\cloudflare-release-config.test.mjs:5:1
+✖ native API budget applies to the resolved Python entrypoint inside its service (1.5876ms)
+  TypeError: Cannot read properties of undefined (reading 'buyeros_api/api/vercel.py')
+      at TestContext.<anonymous> (file:///C:/Users/laich/Documents/BuyerOS/tests/deployment/cloudflare-release-config.test.mjs:7:45)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17)
+
+test at tests\deployment\cloudflare-release-config.test.mjs:10:1
+✖ the actual emitted Nitro gateway carries the ninety-second budget (2.0914ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  undefined !== 90
+
+      at TestContext.<anonymous> (file:///C:/Users/laich/Documents/BuyerOS/tests/deployment/cloudflare-release-config.test.mjs:12:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 90,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\deployment\cloudflare-release-config.test.mjs:14:1
+✖ the isolated preview controller has distinct private resources and execution off (2.6794ms)
+  TypeError: Cannot read properties of undefined (reading 'preview')
+      at TestContext.<anonymous> (file:///C:/Users/laich/Documents/BuyerOS/tests/deployment/cloudflare-release-config.test.mjs:16:28)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)

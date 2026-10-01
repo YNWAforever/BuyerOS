@@ -1,0 +1,100 @@
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+Using secrets defined in process.env
+stderr | services/cloudflare-jobs/tests/api-client.test.ts > rejects a redirect response without sending signed headers to its destination
+AssertionError: expected null to be 'fictional-preview-bypass-only' // Object.is equality
+    at C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/api-client.test.ts:36:65
+    at C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/msw@2.14.7_@types+node@22.19.19_typescript@5.9.3/node_modules/msw/src/core/handlers/RequestHandler.ts:416:26
+    at HttpHandler.run (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/msw@2.14.7_@types+node@22.19.19_typescript@5.9.3/node_modules/msw/src/core/handlers/RequestHandler.ts:368:7)
+    at executeHandlers (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/msw@2.14.7_@types+node@22.19.19_typescript@5.9.3/node_modules/msw/src/core/utils/executeHandlers.ts:40:14)
+    at until (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/until-async@3.0.2/node_modules/until-async/src/index.ts:19:18)
+    at InterceptorHttpNetworkFrame.resolve (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/msw@2.14.7_@types+node@22.19.19_typescript@5.9.3/node_modules/msw/src/core/experimental/frames/http-frame.ts:156:41)
+    at Emitter.<anonymous> (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/msw@2.14.7_@types+node@22.19.19_typescript@5.9.3/node_modules/msw/src/core/experimental/define-network.ts:204:11)
+    at Emitter.emitAsPromise (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/rettime@0.11.11/node_modules/rettime/src/index.ts:615:27)
+    at InterceptorSource.queue (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/msw@2.14.7_@types+node@22.19.19_typescript@5.9.3/node_modules/msw/src/core/experimental/sources/network-source.ts:39:5)
+    at InterceptorSource.#handleRequest (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/msw@2.14.7_@types+node@22.19.19_typescript@5.9.3/node_modules/msw/src/core/experimental/sources/interceptor-source.ts:73:5) {
+  actual: null,
+  expected: 'fictional-preview-bypass-only',
+  showDiff: true,
+  operator: 'strictEqual'
+}
+[MSW] Encountered an unhandled exception during the handler lookup for "POST https://fixture.invalid/v1/internal/worker/claim". Please see the original error above.
+
+ ❯ services/cloudflare-jobs/tests/api-client.test.ts (6 tests | 3 failed) 458ms
+   ✓ signs exact POST path and raw bytes with a fixed protocol vector and no redirect  391ms
+   ✓ refuses credentials, origin mismatch, URL prefix/query and non-HTTPS outside isolated loopback mode 4ms
+   × rejects a redirect response without sending signed headers to its destination 45ms
+   ✓ bounds API response bytes before parsing or persisting its outcome 7ms
+   × adds optional protection bypass only as a header at the approved origin without changing application HMAC 2ms
+   × refuses empty, control-character or oversized optional protection secrets without exposing their contents 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  services/cloudflare-jobs/tests/api-client.test.ts > rejects a redirect response without sending signed headers to its destination
+AssertionError: expected Error: worker API request failed { status: … } to deeply equal Error: worker API request failed { status: … }
+
+- Expected
++ Received
+
+  WorkerApiError {
+    "message": "worker API request failed",
+-   "status": 302,
++   "status": 500,
+  }
+
+ ❯ services/cloudflare-jobs/tests/api-client.test.ts:41:188
+     39|     http.all('https://attacker.invalid/steal', () => { leaked++; retur…
+     40|   );
+     41|     await expect(callWorkerApi({ ...settings, WORKER_API_PROTECTION_BY…
+       |                                                                                                                                                                                            ^
+     42|       .rejects.toEqual(new WorkerApiError(302));
+     43|   expect(leaked).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  services/cloudflare-jobs/tests/api-client.test.ts > adds optional protection bypass only as a header at the approved origin without changing application HMAC
+AssertionError: expected null to be 'fictional-preview-bypass-only' // Object.is equality
+
+- Expected:
+"fictional-preview-bypass-only"
+
++ Received:
+null
+
+ ❯ services/cloudflare-jobs/tests/api-client.test.ts:61:61
+     59|   expect(request.url).toBe('https://fixture.invalid/v1/internal/worker…
+     60|   expect(request.redirect).toBe('manual');
+     61|   expect(request.headers.get('x-vercel-protection-bypass')).toBe(prote…
+       |                                                             ^
+     62|   expect(request.headers.get('cookie')).toBeNull();
+     63|   expect(request.headers.get('authorization')).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  services/cloudflare-jobs/tests/api-client.test.ts > refuses empty, control-character or oversized optional protection secrets without exposing their contents
+AssertionError: promise resolved "Request{}" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
+- }
++ Request {}
+
+ ❯ services/cloudflare-jobs/tests/api-client.test.ts:73:68
+     71|     const protectedSettings = { ...settings, WORKER_API_PROTECTION_BYP…
+     72|     await expect(buildSignedRequest(protectedSettings, 'workerClaim',
+     73|       { runtime_epoch: 1, max_total: 10, time_budget_seconds: 10 }))
+       |                                                                    ^
+     74|       .rejects.toThrow('invalid worker protection configuration');
+     75|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 3 passed (6)
+   Start at  19:34:13
+   Duration  8.02s (transform 2.22s, setup 2.81s, import 18ms, tests 458ms, environment 0ms)

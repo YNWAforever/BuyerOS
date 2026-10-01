@@ -1,0 +1,27 @@
+✔ checked-in API types match the current OpenAPI contract (1115.7642ms)
+✔ built UI fixture refuses inherited databases, credentials and nonfixture API targets (1.9124ms)
+✔ built UI static assets cannot escape their emitted public directory (0.5304ms)
+✔ local acceptance rejects shared targets, preview activation and inherited credentials (1.8948ms)
+✔ acceptance counts actual executed cases and fails closed on empty, skipped or failed reports (1.6519ms)
+✔ a new acceptance attempt invalidates old success and old JUnit before any command (21.3434ms)
+✔ CF00 reports measured local feasibility separately from hosted Vercel evidence (2.8134ms)
+✔ native API budget applies to the resolved Python entrypoint inside its service (6.0843ms)
+✔ the actual emitted Nitro gateway carries the ninety-second budget (2.24ms)
+✔ the isolated preview controller has distinct private resources and execution off (0.5575ms)
+✔ the built Vercel function renders / without a workspace import failure (169.9468ms)
+✔ the built Vercel function renders /app without a workspace import failure (13.3221ms)
+✔ the built Vercel function renders /auth/callback without a workspace import failure (14.5158ms)
+✔ Vercel exposes only the app and binds its API call to the internal API service (4.1278ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (81.4606ms)
+✔ the app proxy fails closed when the binding is absent (3.8992ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (3.7655ms)
+✔ FastAPI redirects stay on the public app path (2.5911ms)
+✔ test_internal_headers_forward_only_on_allowlisted_paths (54.2683ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1214.8411

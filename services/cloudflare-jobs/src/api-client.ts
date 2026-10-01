@@ -1,6 +1,6 @@
 import { requestSchemas, parseResponse, type InternalOperation, type InternalRequest, type InternalResponse } from './protocol';
 
-type ApiSettings = Pick<Env, 'WORKER_API_ORIGIN' | 'WORKER_API_ALLOWED_ORIGINS' | 'WORKER_CURRENT_KEY_ID' | 'WORKER_CURRENT_SECRET'> & Partial<Pick<Env, 'LOCAL_TEST_MODE'>>;
+type ApiSettings = Pick<Env, 'WORKER_API_ORIGIN' | 'WORKER_API_ALLOWED_ORIGINS' | 'WORKER_CURRENT_KEY_ID' | 'WORKER_CURRENT_SECRET'> & Partial<Pick<Env, 'LOCAL_TEST_MODE'>> & { WORKER_API_PROTECTION_BYPASS?: string };
 const paths = {
   workerClaim: '/v1/internal/worker/claim', workerExecuteStep: '/v1/internal/worker/step',
   workerStepStatus: '/v1/internal/worker/status', workerRecordPublication: '/v1/internal/worker/publication',
@@ -39,11 +39,17 @@ export async function buildSignedRequest<K extends InternalOperation>(settings: 
   const canonical = new TextEncoder().encode(`POST\n${path}\n${timestamp}\n${nonce}\n${digest}`);
   const key = await crypto.subtle.importKey('raw', secret, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   const signature = hex(await crypto.subtle.sign('HMAC', key, canonical));
+  const headers = new Headers({ 'content-type': 'application/json', 'x-buyeros-worker-key-id': settings.WORKER_CURRENT_KEY_ID,
+    'x-buyeros-worker-timestamp': String(timestamp), 'x-buyeros-worker-nonce': nonce, 'x-buyeros-worker-signature': signature });
+  const protectionBypass = settings.WORKER_API_PROTECTION_BYPASS;
+  if (protectionBypass !== undefined) {
+    if (!/^[\x21-\x7E]{1,4096}$/.test(protectionBypass)) throw new Error('invalid worker protection configuration');
+    headers.set('x-vercel-protection-bypass', protectionBypass);
+  }
   return new Request(origin + path, {
     method: 'POST', body: payload, redirect: 'manual',
     signal: AbortSignal.timeout(Math.max(1, Math.min(75_000, options.timeoutMs ?? 75_000))),
-    headers: { 'content-type': 'application/json', 'x-buyeros-worker-key-id': settings.WORKER_CURRENT_KEY_ID,
-      'x-buyeros-worker-timestamp': String(timestamp), 'x-buyeros-worker-nonce': nonce, 'x-buyeros-worker-signature': signature },
+    headers,
   });
 }
 
