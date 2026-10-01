@@ -141,7 +141,7 @@ async def upload_offer_document(
                 await session.flush()
                 session.add(OutboxEvent(
                     workspace_id=workspace_id, intent_key=f"offer.parse:{row.id}",
-                    event_type="offer.parse", payload={"document_id": str(row.id)},
+                    event_type="offer.parse", payload={"document_id": str(row.id), "actor_user_id": str(member["user_id"])},
                 ))
                 data = _data(row)
                 complete_idempotency(outcome, str(row.id), response={"version": row.version, "data": data})

@@ -137,11 +137,11 @@ Extend CF01's existing `worker_schemas.py`; do not recreate it. Export the inter
 
 **Interfaces:** `async execute_local_step(engine, envelope: JobEnvelope, step_key: str, *, deadline: datetime) -> StepOutcome`. Stable server-selected step keys: bulk chunk (50 rows), document parse/delete, one permitted fetch, one grounded draft revision or retention page (<=50 items). Progress/outcome and successor step commit together; arbitrary event/body/URL instructions are never accepted from Cloudflare.
 
-- [ ] Add `test_bulk_restart_resumes_next_chunk_without_repeat`, `test_pdf_child_keeps_sanitized_env_and_eight_second_timeout`, `test_document_delete_during_parse_blocks_exposure`, `test_member_removal_blocks_draft_after_enqueue`, `test_retention_runtime_role_membership_is_verified`. Assert 101/1000-row partial results survive restarts and no synthetic text/contacts appear on live failure.
-- [ ] Observe red with `uv run --frozen --project services/api pytest services/api/tests/test_cloudflare_local_steps_db.py -q` under strict disposable integration.
-- [ ] Extract native runners/handlers into API ownership and implement one bounded unit per call; preserve SSRF, parser subprocess and R2 capability checks. Replace the retention helper's login-name assumption with actual verified worker-role membership and tenant transactions. No fixture provider factory outside explicit test mode.
-- [ ] Run focused tests plus existing document/parser/retention/bulk/draft regressions and API packaging import. Assert <=60-second units, safe expired/incomplete step state, exact receipts and current authorization; object mocks are fixture proof only.
-- [ ] Checkpoint and proposed `feat: execute bounded BuyerOS local jobs through the shared engine` commit. Paid/R2 gates stay disabled.
+- [x] Add `test_bulk_restart_resumes_next_chunk_without_repeat`, `test_pdf_child_keeps_sanitized_env_and_eight_second_timeout`, `test_document_delete_during_parse_blocks_exposure`, `test_member_removal_blocks_draft_after_enqueue`, `test_retention_runtime_role_membership_is_verified`. Assert 101/1000-row partial results survive restarts and no synthetic text/contacts appear on live failure.
+- [x] Observe red with `uv run --frozen --project services/api pytest services/api/tests/test_cloudflare_local_steps_db.py -q` under strict disposable integration.
+- [x] Extract native runners/handlers into API ownership and implement one bounded unit per call; preserve SSRF, parser subprocess and R2 capability checks. Replace the retention helper's login-name assumption with actual verified worker-role membership and tenant transactions. No fixture provider factory outside explicit test mode.
+- [x] Run focused tests plus existing document/parser/retention/bulk/draft regressions and API packaging import. Assert <=60-second units, safe expired/incomplete step state, exact receipts and current authorization; object mocks are fixture proof only.
+- [x] Checkpoint and proposed `feat: execute bounded BuyerOS local jobs through the shared engine` commit. Paid/R2 gates stay disabled.
 
 ### CF04: Make research, fit, contact and reconciliation resumable without duplicate spend
 

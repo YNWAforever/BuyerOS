@@ -147,31 +147,20 @@ def json_bytes(value) -> bytes:
     return json.dumps(value, separators=(",", ":")).encode()
 
 
-async def execute_step(engine, envelope: JobEnvelope, step_key: str) -> StepOutcome:
+async def execute_step(engine, envelope: JobEnvelope, step_key: str, *, timeout_seconds: float = 60) -> StepOutcome:
+    # Cloudflare selects only a key supplied by the server. One local outbox is
+    # one unit; bulk creates its next 50-row outbox in the same transaction.
+    if step_key != "start":
+        return outcome("blocked", "INVALID_INTENT")
     now = datetime.now(timezone.utc)
     async with tenant_session(engine, envelope.workspace_id) as session:
         claim = await claim_execution_step(session, envelope, step_key, now)
     if claim.state != "claimed":
         return claim.outcome
 
-    async def execute_atomic_local():
-        from buyeros_api.execution.domain_executor import run_intent
-        async with tenant_session(engine, envelope.workspace_id) as session:
-            control, row, receipt, valid = await _owned_step(session, envelope, step_key, claim.owner)
-            if not valid:
-                return outcome("stale", "STALE_FENCE")
-            if not control.enabled or not get_settings().cloudflare_execution_enabled:
-                result = outcome("blocked", "EXECUTION_DISABLED")
-            elif row.event_type not in {"bulk.mutate", "fetch.evidence", "run.discover", "run.fit", "contact.submit"}:
-                result = outcome("blocked", "CAPABILITY_UNAVAILABLE")
-            else:
-                state = await run_intent(session, {"workspace_id": str(envelope.workspace_id)},
-                                         row.intent_key, envelope.generation)
-                result = outcome("done", "OK") if state in {"done", "duplicate"} else outcome("blocked", "CAPABILITY_UNAVAILABLE")
-            finish_receipt(control, receipt, result)
-            return result
     try:
-        return await asyncio.wait_for(execute_atomic_local(), timeout=60)
+        from buyeros_api.execution.step_runner import execute_claimed
+        return await asyncio.wait_for(execute_claimed(engine, envelope, step_key, claim.owner), timeout=min(60, timeout_seconds))
     except Exception:
         # Do not swallow failure as success or release any financial hold. DB-only
         # work rolled back; this inspectable receipt must be explicitly recovered.

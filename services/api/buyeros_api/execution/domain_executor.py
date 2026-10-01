@@ -108,6 +108,6 @@ async def run_domain_intent(engine, workspace_id: uuid.UUID, outbox_id: uuid.UUI
             return "not_dispatched"
         if not fence_ok(generation, row.fencing_generation):
             return "stale"
-        if row.event_type not in {"bulk.mutate", "fetch.evidence", "run.discover", "run.fit", "contact.submit"}:
+        if row.event_type not in {"bulk.mutate", "draft.generate", "fetch.evidence", "run.discover", "run.fit", "contact.submit"}:
             return "unsupported_event"
         return await run_intent(session, {"workspace_id": str(workspace_id)}, row.intent_key, generation)
