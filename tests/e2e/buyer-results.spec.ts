@@ -1,5 +1,6 @@
 import {expect,test,type Page} from '@playwright/test';
 import {webcrypto} from 'node:crypto';
+const browserApiOrigin=process.env.BUYEROS_E2E_FRONTEND==='vercel-built'?'http://localhost:5173':'http://127.0.0.1:8000';
 
 const workspace='e0000000-0000-4000-8000-000000000001';
 const project='e1000000-0000-4000-8000-000000000001';
@@ -36,7 +37,7 @@ test('T08 real snapshot pages, selection scope, URL filters and dossier',async({
   await page.getByRole('checkbox',{name:'Select Buyer Fixture 02'}).uncheck();
   await expect(page.getByText('23 selected across this snapshot')).toBeVisible();
   let selection:unknown=null;
-  await page.route('http://127.0.0.1:8000/v1/workspaces/*/projects/*/buyer-reviews',async route=>{
+  await page.route(`${browserApiOrigin}/v1/workspaces/*/projects/*/buyer-reviews`,async route=>{
     if(route.request().method()==='POST'){selection=(route.request().postDataJSON() as {selection:unknown}).selection;await route.abort('failed');}
     else await route.continue();
   });

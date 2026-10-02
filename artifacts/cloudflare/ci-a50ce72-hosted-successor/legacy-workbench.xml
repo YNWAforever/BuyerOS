@@ -1,0 +1,20 @@
+<testsuites id="" name="" tests="8" failures="0" skipped="0" errors="0" time="68.29412">
+<testsuite name="daily-workbench.spec.ts" timestamp="2026-10-01T18:17:55.529Z" hostname="" tests="8" failures="0" skipped="0" time="45.217" errors="0">
+<testcase name="T27 usage, queue filters and manual outcome history survive refresh in both locales" classname="daily-workbench.spec.ts" time="7.476">
+</testcase>
+<testcase name="T29 API-backed workbench reflows across routes and widths in en" classname="daily-workbench.spec.ts" time="4.38">
+</testcase>
+<testcase name="T29 API-backed workbench reflows across routes and widths in zh-HK" classname="daily-workbench.spec.ts" time="4.4">
+</testcase>
+<testcase name="T29 locale waits for current preference version and survives a fresh sign-in" classname="daily-workbench.spec.ts" time="4.963">
+</testcase>
+<testcase name="T29 operations resolves a failed profile lookup without a permanent spinner" classname="daily-workbench.spec.ts" time="3.018">
+</testcase>
+<testcase name="T29 live operations and results text meets measured AA contrast in both locales" classname="daily-workbench.spec.ts" time="3.761">
+</testcase>
+<testcase name="T29 scope list timeout offers a bounded retry with current identity" classname="daily-workbench.spec.ts" time="13.131">
+</testcase>
+<testcase name="T29 live form controls have a visible three-to-one boundary in both locales" classname="daily-workbench.spec.ts" time="4.088">
+</testcase>
+</testsuite>
+</testsuites>

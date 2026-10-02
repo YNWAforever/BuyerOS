@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="17.305" timestamp="2026-10-01T16:50:31.846404+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.benchmark_buyeros_case" name="test_representative_buyer_read_baseline" time="15.516" /></testsuite></testsuites>

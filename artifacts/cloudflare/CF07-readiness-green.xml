@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="20" time="74.413" timestamp="2026-10-01T17:34:38.859856+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_admin_operations_db" name="test_0017_preferences_rls_and_empty_rollback" time="13.057" /><testcase classname="tests.test_admin_operations_db" name="test_admin_only_memberships_and_last_admin_guard" time="1.709" /><testcase classname="tests.test_admin_operations_db" name="test_versioned_role_change_revokes_existing_session_immediately" time="0.733" /><testcase classname="tests.test_admin_operations_db" name="test_preferences_zh_hk_persist_and_are_actor_workspace_scoped" time="0.763" /><testcase classname="tests.test_admin_operations_db" name="test_audit_archive_reason_is_redacted_and_tenant_scoped" time="1.168" /><testcase classname="tests.test_admin_operations_db" name="test_readiness_uses_observed_worker_heartbeat_not_environment_flag" time="0.406"><failure message="psycopg.errors.RaiseException: runtime selector changes require a newer epoch&#10;CONTEXT:  PL/pgSQL function enforce_worker_runtime_epoch() line 4 at RAISE">api = &lt;starlette.testclient.TestClient object at 0x000001CA0C1048A0&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:52724/buyeros_test_api'
+
+    def test_readiness_uses_observed_worker_heartbeat_not_environment_flag(api, seeded):
+        from datetime import datetime, timedelta, timezone
+        path=f"{ROOT}/readiness"
+        with psycopg.connect(seeded,autocommit=True) as owner:
+            previously_enabled=owner.execute('SELECT enabled FROM worker_runtime_control').fetchone()[0]
+            # Owned fixture setup only: a real selected runtime must be enabled.
+&gt;           owner.execute('UPDATE worker_runtime_control SET enabled=true')
+
+tests\test_admin_operations_db.py:110:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1ca0c06c230&gt;
+query = 'UPDATE worker_runtime_control SET enabled=true', params = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.RaiseException: runtime selector changes require a newer epoch
+E           CONTEXT:  PL/pgSQL function enforce_worker_runtime_epoch() line 4 at RAISE
+
+.venv\Lib\site-packages\psycopg\connection.py:300: RaiseException</failure></testcase><testcase classname="tests.test_admin_operations_db" name="test_capability_page_is_contract_valid_and_never_secret_bearing" time="0.312" /><testcase classname="tests.test_admin_operations_db" name="test_operations_list_jobs_is_actor_scoped_and_paged" time="0.830" /><testcase classname="tests.test_admin_operations_db" name="test_existing_project_write_adds_one_redacted_audit_event_on_replay" time="0.569" /><testcase classname="tests.test_admin_operations_db" name="test_paused_celery_selector_cannot_report_ready_from_a_fresh_legacy_heartbeat" time="0.374" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_environment_flag_cannot_make_readiness_ready" time="4.849" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_probe_epoch_freshness_duplicate_and_pause_fail_closed" time="0.400" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_queue_or_workflow_retention_does_not_reexecute_terminal_step" time="0.164" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_expired_local_step_can_resume_only_after_atomic_receipt_fence" time="0.318" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_oldest_work_alert_is_durable_and_cross_tenant_reads_remain_closed" time="0.266" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_uncertain_inventory_is_bounded_and_all_status_intents_survive" time="22.852" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_malformed_provider_intent_does_not_abort_independent_recovery" time="0.190" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_configured_periodic_retention_is_bounded_and_idempotent" time="0.996" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_celery_cloudflare_overlap_has_one_owner" time="0.719" /><testcase classname="tests.test_cloudflare_platform_db" name="test_actual_local_queue_workflow_api_postgres" time="15.272" /></testsuite></testsuites>

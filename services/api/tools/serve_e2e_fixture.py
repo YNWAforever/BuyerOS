@@ -448,6 +448,9 @@ def main() -> None:
         get_settings.cache_clear()
         app = create_app()
         app.dependency_overrides[get_principal] = fake_principal
+        @app.get('/fixture/frontend', include_in_schema=False)
+        def frontend_fixture_proof():
+            return {'fixture_only': True, 'origin': 'http://127.0.0.1:8000', 'issuer': ISSUER}
         if os.environ.get("BUYEROS_E2E_SEED_DRAFT_APPROVAL") == "1":
             @app.get("/fixture/approval-counts", include_in_schema=False)
             def approval_counts():

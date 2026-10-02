@@ -1,10 +1,12 @@
 import asyncio
+from types import SimpleNamespace
 from contextlib import asynccontextmanager
 
 import pytest
 
 import buyeros_worker.engine as engine_mod
 import buyeros_worker.tasks as tasks
+from buyeros_api.execution import domain_executor as domain
 from buyeros_worker.registry import HandlerResult, UnknownHandler
 
 
@@ -33,11 +35,15 @@ def _patch_engine(monkeypatch):
     async def fake_load(session, intent_key):
         return _row()
     monkeypatch.setattr(tasks, "load_intent", fake_load)
+    async def fake_runtime(session):
+        return SimpleNamespace(epoch=1)
+    monkeypatch.setattr(tasks, "legacy_runtime_control", fake_runtime)
     return created
 
 
 def _row(state="dispatched", generation=1, event_type="fetch.evidence", payload=None):
-    return {"state": state, "event_type": event_type, "payload": payload or {}, "fencing_generation": generation}
+    return {"state": state, "event_type": event_type, "payload": payload or {}, "fencing_generation": generation,
+            "runtime_backend": "celery", "runtime_epoch": 1}
 
 
 def test_each_invocation_creates_and_disposes_its_own_engine(monkeypatch):
@@ -69,8 +75,8 @@ def test_run_intent_is_a_noop_for_a_terminal_row(monkeypatch):
         return _row(state="done")
 
     called = []
-    monkeypatch.setattr(tasks, "load_intent", fake_load)
-    monkeypatch.setattr(tasks, "get_handler", lambda event_type: lambda *args: called.append(event_type))
+    monkeypatch.setattr(domain, "load_intent", fake_load)
+    monkeypatch.setattr(domain, "get_handler", lambda event_type: lambda *args: called.append(event_type))
     assert asyncio.run(tasks.run_intent(object(), {}, "job:1", 1)) == "duplicate"
     assert called == []
 
@@ -80,8 +86,8 @@ def test_run_intent_rejects_a_stale_generation_without_running_the_handler(monke
         return _row(generation=9)
 
     called = []
-    monkeypatch.setattr(tasks, "load_intent", fake_load)
-    monkeypatch.setattr(tasks, "get_handler", lambda event_type: lambda *args: called.append(event_type))
+    monkeypatch.setattr(domain, "load_intent", fake_load)
+    monkeypatch.setattr(domain, "get_handler", lambda event_type: lambda *args: called.append(event_type))
     assert asyncio.run(tasks.run_intent(object(), {}, "job:1", 1)) == "stale"
     assert called == []
 
@@ -96,9 +102,9 @@ def test_run_intent_marks_the_row_done(monkeypatch):
         terminal.append((intent_key, generation, state))
         return 1
 
-    monkeypatch.setattr(tasks, "load_intent", fake_load)
-    monkeypatch.setattr(tasks, "mark_outbox_terminal", fake_mark)
-    monkeypatch.setattr(tasks, "get_handler", lambda event_type: lambda s, c, p: HandlerResult(state="done"))
+    monkeypatch.setattr(domain, "load_intent", fake_load)
+    monkeypatch.setattr(domain, "mark_outbox_terminal", fake_mark)
+    monkeypatch.setattr(domain, "get_handler", lambda event_type: lambda s, c, p: HandlerResult(state="done"))
     assert asyncio.run(tasks.run_intent(object(), {}, "job:1", 1)) == "done"
     assert terminal == [("job:1", 1, "done")]
 
@@ -116,9 +122,9 @@ def test_run_intent_marks_blocked_as_terminal_failed(monkeypatch):
     async def handler(session, context, payload):
         return HandlerResult(state="blocked")
 
-    monkeypatch.setattr(tasks, "load_intent", fake_load)
-    monkeypatch.setattr(tasks, "mark_outbox_terminal", fake_mark)
-    monkeypatch.setattr(tasks, "get_handler", lambda event_type: handler)
+    monkeypatch.setattr(domain, "load_intent", fake_load)
+    monkeypatch.setattr(domain, "mark_outbox_terminal", fake_mark)
+    monkeypatch.setattr(domain, "get_handler", lambda event_type: handler)
     assert asyncio.run(tasks.run_intent(object(), {}, "job:1", 1)) == "blocked"
     assert terminal == ["failed"]
 
@@ -133,9 +139,9 @@ def test_run_intent_requests_a_retry_without_a_terminal_write(monkeypatch):
         called.append(args)
         return 1
 
-    monkeypatch.setattr(tasks, "load_intent", fake_load)
-    monkeypatch.setattr(tasks, "mark_outbox_terminal", fake_mark)
-    monkeypatch.setattr(tasks, "get_handler", lambda event_type: lambda s, c, p: HandlerResult(state="retry"))
+    monkeypatch.setattr(domain, "load_intent", fake_load)
+    monkeypatch.setattr(domain, "mark_outbox_terminal", fake_mark)
+    monkeypatch.setattr(domain, "get_handler", lambda event_type: lambda s, c, p: HandlerResult(state="retry"))
     with pytest.raises(tasks.RetryRequested):
         asyncio.run(tasks.run_intent(object(), {}, "job:1", 1))
     assert called == []
@@ -154,9 +160,9 @@ def test_run_intent_marks_unknown_handlers_terminal(monkeypatch):
     def fake_get_handler(event_type):
         raise UnknownHandler(event_type)
 
-    monkeypatch.setattr(tasks, "load_intent", fake_load)
-    monkeypatch.setattr(tasks, "mark_outbox_terminal", fake_mark)
-    monkeypatch.setattr(tasks, "get_handler", fake_get_handler)
+    monkeypatch.setattr(domain, "load_intent", fake_load)
+    monkeypatch.setattr(domain, "mark_outbox_terminal", fake_mark)
+    monkeypatch.setattr(domain, "get_handler", fake_get_handler)
     assert asyncio.run(tasks.run_intent(object(), {}, "job:1", 1)) == "unknown_handler"
     assert terminal == ["failed"]
 
@@ -165,7 +171,7 @@ def test_run_intent_reports_unknown_intent(monkeypatch):
     async def fake_load(session, intent_key):
         return None
 
-    monkeypatch.setattr(tasks, "load_intent", fake_load)
+    monkeypatch.setattr(domain, "load_intent", fake_load)
     assert asyncio.run(tasks.run_intent(object(), {}, "job:1", 1)) == "unknown_intent"
 
 
@@ -185,9 +191,9 @@ def test_run_intent_passes_the_db_event_type_into_context(monkeypatch):
     async def fake_mark(session, intent_key, generation, state):
         return 1
 
-    monkeypatch.setattr(tasks, "load_intent", fake_load)
-    monkeypatch.setattr(tasks, "mark_outbox_terminal", fake_mark)
-    monkeypatch.setattr(tasks, "get_handler", fake_get_handler)
+    monkeypatch.setattr(domain, "load_intent", fake_load)
+    monkeypatch.setattr(domain, "mark_outbox_terminal", fake_mark)
+    monkeypatch.setattr(domain, "get_handler", fake_get_handler)
     asyncio.run(tasks.run_intent(object(), {"workspace_id": "ws"}, "job:1", 1))
     assert seen["context"] == {"workspace_id": "ws", "event_type": "fetch.evidence"}
 

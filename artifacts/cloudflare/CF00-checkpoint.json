@@ -1,0 +1,47 @@
+{
+  "date_hk": "2026-10-01",
+  "base_sha": "aed7a7eb2b7370c10cd7a41306eecf09d378ad42",
+  "source_identity": "Native report includes working-file SHA256 manifest; base commit alone does not include this diff.",
+  "production_schema_changed": false,
+  "deployed": false,
+  "providers_called": false,
+  "resources_provisioned": false,
+  "delivery_enabled": false,
+  "new_migrations": [],
+  "task": "CF00",
+  "status": "complete_local_hosted_gate_pending",
+  "unit": {
+    "passed": 9,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "node": {
+    "passed": 1,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "commands": [
+    "uv run --frozen --project services/api pytest services/api/tests/test_cloudflare_runtime_probe.py -q --junitxml=artifacts/cloudflare/CF00-unit.xml",
+    "uv run --frozen --project services/worker python services/api/tools/probe_worker_runtime.py --output artifacts/cloudflare/CF00-runtime-matrix.json (owned loopback worker DSN)",
+    "docker build -f services/api/tools/worker-runtime-probe.Dockerfile -t buyeros-cf-runtime-probe:20261001 .",
+    "docker run --rm --network container:buyeros-cf-test-20261001 (owned loopback worker DSN/source SHA/evidence mount) buyeros-cf-runtime-probe:20261001 --output /evidence/CF00-linux-runtime-matrix.json",
+    "node --test tests/deployment/cloudflare-python-runtime.test.mjs"
+  ],
+  "all_final_command_exit_codes": 0,
+  "native_windows": {
+    "verified": 8,
+    "failed": 0,
+    "not_run": 5
+  },
+  "native_linux": {
+    "verified": 9,
+    "failed": 0,
+    "not_run": 4
+  },
+  "risks": [
+    "Actual Vercel bundle, app/API >=90s budgets and preview protection not_run; required before activation.",
+    "Windows cannot prove Linux resource caps; real frozen Linux container report covers them."
+  ]
+}

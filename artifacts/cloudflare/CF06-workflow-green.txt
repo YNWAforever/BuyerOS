@@ -1,0 +1,12 @@
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+Using secrets defined in process.env
+ ✓ tests/integration/cloudflare-recovery.test.ts (2 tests) 193ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  15:42:15
+   Duration  6.14s (transform 2.02s, setup 3.17s, import 247ms, tests 193ms, environment 0ms)
+
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF06-workflow-green.xml

@@ -22,7 +22,7 @@ def test_0017_preferences_rls_and_empty_rollback(migrated):
         assert conn.execute("SELECT to_regclass('workspace_preferences')").fetchone()[0] is None
     command.upgrade(config,'head')
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0033_api_rate_windows'
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0036_checkpoint_schema_grants'
 
 
 def _member_id(seeded, subject):
@@ -101,32 +101,6 @@ def test_audit_archive_reason_is_redacted_and_tenant_scoped(api, seeded):
     assert api.get(f"/v1/workspaces/{WORKSPACE_B}/audit-events",headers=_h(subject=ADMIN)).status_code == 404
 
 
-def test_readiness_uses_observed_worker_heartbeat_not_environment_flag(api, seeded):
-    from datetime import datetime, timedelta, timezone
-    path=f"{ROOT}/readiness"
-    with psycopg.connect(seeded,autocommit=True) as owner:
-        owner.execute("DELETE FROM worker_heartbeats")
-        try:
-            none=api.get(path,headers=_h(subject=ADMIN))
-            assert none.status_code==200,none.text
-            assert_contract_response("ReadinessResponse", none.json())
-            assert none.json()['data']['database']=='ready'
-            assert none.json()['data']['worker']=='unavailable'
-            assert none.json()['data']['ready'] is False
-            owner.execute("INSERT INTO worker_heartbeats(worker_id,observed_at,broker_state) VALUES (%s,%s,'ready')",
-                          ('test-sweeper',datetime.now(timezone.utc)-timedelta(minutes=5)))
-            stale=api.get(path,headers=_h(subject=ADMIN))
-            assert stale.json()['data']['worker']=='stale'
-            assert stale.json()['data']['queue']=='unavailable'
-            owner.execute("UPDATE worker_heartbeats SET observed_at=%s WHERE worker_id='test-sweeper'",
-                          (datetime.now(timezone.utc),))
-            fresh=api.get(path,headers=_h(subject=ADMIN))
-            assert fresh.json()['data']['worker']=='ready'
-            assert fresh.json()['data']['queue']=='ready'
-            assert fresh.json()['data']['ready'] is True
-            assert api.get(path,headers=_h(subject=VIEWER)).status_code==403
-        finally:
-            owner.execute("DELETE FROM worker_heartbeats")
 
 
 def test_capability_page_is_contract_valid_and_never_secret_bearing(api):

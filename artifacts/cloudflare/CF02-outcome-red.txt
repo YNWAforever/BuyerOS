@@ -1,0 +1,35 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_____________ test_step_outcome_requires_all_four_protocol_fields _____________
+
+    def test_step_outcome_requires_all_four_protocol_fields():
+        from pydantic import ValidationError
+        from buyeros_api.api.worker_schemas import StepOutcome
+>       with pytest.raises(ValidationError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'pydantic_core._pydantic_core.ValidationError'>
+
+services\api\tests\test_cloudflare_bridge_db.py:131: Failed
+============================== warnings summary ===============================
+services\api\tests\conftest.py:24
+services\api\tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\api\tests\conftest.py:24
+services\api\tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\api\.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_cloudflare_bridge_db.py::test_step_outcome_requires_all_four_protocol_fields
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED services\api\tests\test_cloudflare_bridge_db.py::test_step_outcome_requires_all_four_protocol_fields
+1 failed, 9 deselected, 6 warnings in 1.78s

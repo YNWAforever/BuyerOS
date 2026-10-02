@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="13" failures="1" errors="0" time="3.841">
+    <testsuite name="services/cloudflare-jobs/tests/api-client.test.ts" timestamp="2026-10-01T06:46:38.672Z" hostname="DESKTOP-30TFME5" tests="2" failures="1" errors="0" skipped="0" time="0.808">
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="signs exact POST path and raw bytes with a fixed protocol vector and no redirect" time="0.802">
+            <failure message="Invalid redirect value, must be one of &quot;follow&quot; or &quot;manual&quot; (&quot;error&quot; won&apos;t be implemented since it does not make sense at the edge; use &quot;manual&quot; and check the response status code)." type="TypeError">
+TypeError: Invalid redirect value, must be one of &quot;follow&quot; or &quot;manual&quot; (&quot;error&quot; won&apos;t be implemented since it does not make sense at the edge; use &quot;manual&quot; and check the response status code).
+ ❯ buildSignedRequest services/cloudflare-jobs/src/api-client.ts:42:10
+ ❯ services/cloudflare-jobs/tests/api-client.test.ts:10:19
+            </failure>
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="refuses credentials, origin mismatch, URL prefix/query and non-HTTPS outside isolated loopback mode" time="0.005">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/dispatcher.test.ts" timestamp="2026-10-01T06:46:38.681Z" hostname="DESKTOP-30TFME5" tests="3" failures="0" errors="0" skipped="0" time="0.803">
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="dispatch off performs no API or binding calls" time="0.792">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="claims at most ten IDs for ten seconds and records only accepted publication" time="0.005">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="publish-before-receipt crash keeps the original opaque generation for recovery" time="0.003">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/protocol.test.ts" timestamp="2026-10-01T06:46:38.686Z" hostname="DESKTOP-30TFME5" tests="3" failures="0" errors="0" skipped="0" time="0.769">
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; rejects extra customer fields, URLs and unsafe numbers before scheduling" time="0.761">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; separates operational probes and deterministic workflow IDs" time="0.002">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; requires the four-field bounded outcome and server-issued step key" time="0.003">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/queue.test.ts" timestamp="2026-10-01T06:46:38.715Z" hostname="DESKTOP-30TFME5" tests="2" failures="0" errors="0" skipped="0" time="0.668">
+        <testcase classname="services/cloudflare-jobs/tests/queue.test.ts" name="ACK requires verified creation or inspection of the deterministic instance" time="0.664">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/queue.test.ts" name="does not ACK an unverified handoff or restart an existing failed workflow" time="0.001">
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/workflow.test.ts" timestamp="2026-10-01T06:46:38.732Z" hostname="DESKTOP-30TFME5" tests="3" failures="0" errors="0" skipped="0" time="0.793">
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="HTTP timeout reads committed status before any repeated execution" time="0.786">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="busy permits wait without consuming the transient error budget" time="0.003">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="unknown acceptance stops the controller without a new submit" time="0.001">
+        </testcase>
+    </testsuite>
+</testsuites>

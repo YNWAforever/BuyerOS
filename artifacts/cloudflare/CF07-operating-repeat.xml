@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="51.654" timestamp="2026-10-01T17:10:49.024423+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.benchmark_cloudflare_case" name="test_ten_actual_queue_jobs_one_permit_and_hundred_workspace_cold_claims[1]" time="30.394" /><testcase classname="tests.benchmark_cloudflare_case" name="test_ten_actual_queue_jobs_one_permit_and_hundred_workspace_cold_claims[2]" time="19.951"><failure message="assert 20 == 10">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:56151/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:56151/buyeros_test_api', 3)
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000280FC0AF230&gt;
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-197/test_ten_actual_queue_jobs_one1')
+repeat = 2
+
+    @pytest.mark.parametrize("repeat", [1, 2])
+    def test_ten_actual_queue_jobs_one_permit_and_hundred_workspace_cold_claims(migrated, worker_runtime, monkeypatch, tmp_path, repeat):
+        from buyeros_api.api.app import create_app
+        from buyeros_api.settings import get_settings
+        from buyeros_api.services.worker_execution import create_execution_engine
+        from buyeros_api.execution.dispatcher import claim_cycle
+        from buyeros_api.execution import step_runner
+        original_execute = step_runner.execute_claimed
+        execution_intervals = []
+        active = 0
+        peak_active = 0
+        async def observed_execute(*args, **kwargs):
+            nonlocal active, peak_active
+            started = time.perf_counter()
+            active += 1
+            peak_active = max(peak_active, active)
+            try:
+                return await original_execute(*args, **kwargs)
+            finally:
+                execution_intervals.append((started, time.perf_counter()))
+                active -= 1
+        monkeypatch.setattr(step_runner, 'execute_claimed', observed_execute)
+        envelopes = []
+        for _ in range(10):
+            envelope = seed_envelope(migrated, worker_runtime[1])
+            project, actor, member = seed_project(migrated, envelope.workspace_id)
+            job, company, buyer = (uuid.uuid4() for _ in range(3))
+            with psycopg.connect(migrated, autocommit=True) as db:
+                db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES(%s,%s,'Fictional CF07','Fictional CF07')", (company,envelope.workspace_id))
+                db.execute('INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES(%s,%s,%s,%s)',(buyer,envelope.workspace_id,project,company))
+                db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested) VALUES(%s,%s,%s,%s,'bulk_mutation','assignBuyerOwners',%s::jsonb,'queued',1)", (job,envelope.workspace_id,project,actor,json.dumps({'owner_membership_id':str(member),'reason':'Fictional ten-job operating fixture'})))
+                db.execute("INSERT INTO async_job_items(id,workspace_id,job_id,buyer_id,ordinal,expected_version,status) VALUES(%s,%s,%s,%s,0,1,'pending')",(uuid.uuid4(),envelope.workspace_id,job,buyer))
+                db.execute('UPDATE outbox_events SET payload=%s::jsonb WHERE id=%s',(json.dumps({'job_id':str(job)}),envelope.outbox_id))
+            envelopes.append(envelope)
+        monkeypatch.setenv('BUYEROS_WORKER_CURRENT_KEY_ID','fictional-key')
+        monkeypatch.setenv('BUYEROS_WORKER_CURRENT_SECRET','fictional-cf05-secret-32-bytes-only')
+        get_settings.cache_clear()
+        sock=socket.socket();sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
+        server=uvicorn.Server(uvicorn.Config(create_app(),log_level='error',access_log=False))
+        def serve():
+            asyncio.run(server.serve(sockets=[sock]),loop_factory=asyncio.SelectorEventLoop if sys.platform=='win32' else None)
+        thread=threading.Thread(target=serve,daemon=True);thread.start()
+        stop=threading.Event(); samples=[]
+        def observe():
+            with psycopg.connect(migrated,autocommit=True) as db:
+                while not stop.is_set():
+                    active=db.execute("SELECT count(*) FROM worker_steps WHERE state='running'").fetchone()[0]
+                    connections=db.execute('SELECT count(*) FROM pg_stat_activity WHERE datname=current_database()').fetchone()[0]
+                    samples.append((active,connections))
+                    stop.wait(.02)
+        observer=threading.Thread(target=observe,daemon=True)
+        cpu_started=time.process_time();wall_started=time.perf_counter()
+        try:
+            deadline=time.monotonic()+10
+            while not server.started and thread.is_alive() and time.monotonic()&lt;deadline: time.sleep(.05)
+            assert server.started
+            context=tmp_path/'opaque-operating-context.json'
+            context.write_text(json.dumps({'origin':f'http://127.0.0.1:{port}','jobs':[e.model_dump(mode='json') for e in envelopes]}),encoding='utf8')
+            env={k:v for k,v in os.environ.items() if not k.startswith(('BUYEROS_','AUTH0_','R2_','VERCEL_','CLOUDFLARE_'))}
+            env['BUYEROS_CF_TEST_CONTEXT']=str(context)
+            observer.start()
+            result=subprocess.run(['node','node_modules/vitest/vitest.mjs','run','--config','services/cloudflare-jobs/vitest.operating.config.ts','--reporter=default','--reporter=junit',f'--outputFile.junit=artifacts/cloudflare/CF07-operating-platform-repeat{repeat}.xml'],cwd=ROOT,env=env,capture_output=True,text=True,encoding='utf8',timeout=180)
+            (ROOT/f'artifacts/cloudflare/CF07-operating-platform-repeat{repeat}.txt').write_text(result.stdout+result.stderr,encoding='utf8')
+            assert result.returncode==0,result.stdout+result.stderr
+            with psycopg.connect(migrated) as db:
+&gt;               assert db.execute("SELECT count(*) FROM async_jobs WHERE status='completed'").fetchone()[0]==10
+E               assert 20 == 10
+
+tests\benchmark_cloudflare_case.py:98: AssertionError</failure></testcase></testsuite></testsuites>

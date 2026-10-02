@@ -1,0 +1,419 @@
+{
+  "native_target": {
+    "vercel_project_id": "prj_YfIdLRKWvBjomGG56RhwEmqyxRRR",
+    "vercel_project_name": "buyeros-cf-preview",
+    "neon_project_id": "rapid-night-21766635",
+    "neon_project_name": "BuyerOS-CF-preview-20261001",
+    "neon_branch_id": "br-old-shape-b3eel1kb",
+    "neon_host": "ep-little-lab-b3rk8fx5.c-4.ap-southeast-1.aws.neon.tech",
+    "database": "buyeros_cf_preview",
+    "worker_role": "buyeros_cf_preview_worker",
+    "api_role": "buyeros_cf_preview_api",
+    "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+    "session_started_at": "2026-10-01T14:48:41+00:00",
+    "expires_at": "2026-10-01T16:48:41+00:00"
+  },
+  "native_deployment": {
+    "id": "dpl_HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP",
+    "url": "https://buyeros-cf-preview-oqbboak66-ynwaforevers-projects.vercel.app",
+    "inspectorUrl": "https://vercel.com/ynwaforevers-projects/buyeros-cf-preview/HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP",
+    "readyState": "INITIALIZING",
+    "target": null,
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP"
+  },
+  "native_overlay": {
+    "kind": "temporary_overlay_only",
+    "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+    "expires_at": "2026-10-01T16:48:41+00:00",
+    "hosted_verified": false,
+    "files_sha256": {
+      "vercel.json": "4baa70906080fcc0a820c868fb37f061e7a15a0b81e9b30551ac37967c3dd06f",
+      "app/v1/[...path]/route.ts": "68b85d7da01226f24893fe1a9da27aced30e6d48083a7fd4ff3d0f7b9121147e",
+      "services/api/buyeros_api/api/preview_vercel.py": "ff4fc96bd84ada22f2d25df1eb0f8ca5101c5511e779c2af7277790a87b68ea5",
+      "services/api/buyeros_api/api/preview_target.json": "f0912bc8cc41f2053f58a5cf7c31372262e94c078f4ea521e4b228efe8265b93"
+    },
+    "archive": ".sites-runtime\\cf-preview-deployment-595865f",
+    "git_archive_sha256": "b4c6f70b3f3b945a3edf5645398a4bd2243fb661e99807cd9492af34a66770d1",
+    "vercelignore_sha256": "f173c7a8740f806e14631459e6bc75a5d6c9e1574f684837d385fdaa31c65599",
+    "project_id": "prj_YfIdLRKWvBjomGG56RhwEmqyxRRR",
+    "protection": "all_except_custom_domains",
+    "preview_envs": [
+      {
+        "id": "QQlr5BT6kq8J1CEz",
+        "key": "BUYEROS_WORKER_CURRENT_SECRET",
+        "target": [
+          "preview"
+        ],
+        "type": "sensitive"
+      },
+      {
+        "id": "OVLcOLeW5jp8faZI",
+        "key": "BUYEROS_WORKER_CURRENT_KEY_ID",
+        "target": [
+          "preview"
+        ],
+        "type": "plain"
+      },
+      {
+        "id": "OSbvTRRGz9Vd7nPP",
+        "key": "BUYEROS_CELERY_EXECUTION_ENABLED",
+        "target": [
+          "preview"
+        ],
+        "type": "plain"
+      },
+      {
+        "id": "zcBk3ivBRDUQd4Pc",
+        "key": "BUYEROS_CLOUDFLARE_EXECUTION_ENABLED",
+        "target": [
+          "preview"
+        ],
+        "type": "plain"
+      },
+      {
+        "id": "8z6ukYqB7zgYQbBf",
+        "key": "BUYEROS_R2_ENABLED",
+        "target": [
+          "preview"
+        ],
+        "type": "plain"
+      },
+      {
+        "id": "dMyVDHgCou4pYcao",
+        "key": "BUYEROS_PAID_DISPATCH_ENABLED",
+        "target": [
+          "preview"
+        ],
+        "type": "plain"
+      },
+      {
+        "id": "WXBFhLKfWN0bbicv",
+        "key": "BUYEROS_PAID_ADMISSION_ENABLED",
+        "target": [
+          "preview"
+        ],
+        "type": "plain"
+      },
+      {
+        "id": "S8puX8FkNFP188cD",
+        "key": "BUYEROS_PREVIEW_PROBE_ENABLED",
+        "target": [
+          "preview"
+        ],
+        "type": "plain"
+      },
+      {
+        "id": "qGSQZCpur89PARJI",
+        "key": "BUYEROS_PREVIEW_PROBE_SOURCE_SHA",
+        "target": [
+          "preview"
+        ],
+        "type": "plain"
+      },
+      {
+        "id": "VbKBsqxDOIPJtZaq",
+        "key": "BUYEROS_PREVIEW_PROBE_KEY_ID",
+        "target": [
+          "preview"
+        ],
+        "type": "plain"
+      },
+      {
+        "id": "So3lZXwvOAJRwZCd",
+        "key": "BUYEROS_PREVIEW_PROBE_SECRET",
+        "target": [
+          "preview"
+        ],
+        "type": "sensitive"
+      },
+      {
+        "id": "GYI3SnsgX2dVpX1R",
+        "key": "BUYEROS_CHECKPOINT_DATABASE_URL",
+        "target": [
+          "preview"
+        ],
+        "type": "sensitive"
+      },
+      {
+        "id": "kTLFUQB1mTAFz0uv",
+        "key": "BUYEROS_EXECUTION_DATABASE_URL",
+        "target": [
+          "preview"
+        ],
+        "type": "sensitive"
+      },
+      {
+        "id": "Kpb1EH5dRBCAhiPM",
+        "key": "BUYEROS_DATABASE_URL",
+        "target": [
+          "preview"
+        ],
+        "type": "sensitive"
+      }
+    ]
+  },
+  "native_runtime": {
+    "id": "dpl_HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP",
+    "url": "buyeros-cf-preview-oqbboak66-ynwaforevers-projects.vercel.app",
+    "target": null,
+    "readyState": "READY",
+    "regions": [
+      "iad1"
+    ],
+    "meta": {
+      "gitCommitAuthorName": "YNWAforever",
+      "gitCommitAuthorEmail": "laichiwillyjp@gmail.com",
+      "gitCommitMessage": "fix: retain installed packages in isolated native children",
+      "gitCommitRef": "codex/fix-vercel-tslib-ssr",
+      "gitCommitSha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+      "gitDirty": "1",
+      "lambdaRuntimeStats": "{\"nodejs\":1,\"python\":1}"
+    },
+    "lambdas": [
+      {
+        "id": "bld_boevnbv1l",
+        "createdAt": 1790870759102,
+        "entrypoint": ".",
+        "readyState": "READY",
+        "readyStateAt": 1790870759102,
+        "output": [
+          {
+            "path": "__fn_team_qvzlsFmfCsLkgItSypqHjw3z-620fcca6e2008d0df591bccf7be4fa11fc__",
+            "functionName": "team_qvzlsFmfCsLkgItSypqHjw3z-620fcca6e2008d0df591bccf7be4fa11fc"
+          },
+          {
+            "path": "__fn_team_qvzlsFmfCsLkgItSypqHjw3z-d8399bab83fedd020abc32dda76bb911d3__",
+            "functionName": "team_qvzlsFmfCsLkgItSypqHjw3z-d8399bab83fedd020abc32dda76bb911d3"
+          }
+        ]
+      }
+    ],
+    "services": [
+      {
+        "schema": "experimentalServicesV2",
+        "name": "app",
+        "root": ".",
+        "framework": "nitro",
+        "builder": {
+          "src": "package.json",
+          "use": "@vercel/static-build",
+          "config": {
+            "zeroConfig": true,
+            "framework": "nitro"
+          }
+        },
+        "buildCommand": "node scripts/run-vercel.mjs build",
+        "devCommand": "node scripts/run-vercel.mjs dev",
+        "bindings": [
+          {
+            "type": "service",
+            "service": "api",
+            "format": "url",
+            "env": "BUYEROS_INTERNAL_API_URL"
+          }
+        ]
+      },
+      {
+        "schema": "experimentalServicesV2",
+        "name": "api",
+        "root": "services/api",
+        "framework": "fastapi",
+        "runtime": "python",
+        "entrypoint": "buyeros_api/api/preview_vercel.py",
+        "builder": {
+          "src": "services/api/buyeros_api/api/preview_vercel.py",
+          "use": "@vercel/python",
+          "config": {
+            "zeroConfig": true,
+            "framework": "fastapi",
+            "workspace": "services/api",
+            "handlerFunction": "app"
+          }
+        },
+        "functions": {
+          "buyeros_api/api/preview_vercel.py": {
+            "maxDuration": 90
+          }
+        }
+      }
+    ],
+    "config": {
+      "version": 1,
+      "secureComputePrimaryRegion": null,
+      "secureComputeFallbackRegion": null,
+      "functionTimeout": 90,
+      "functionType": "fluid",
+      "functionMemoryType": "standard",
+      "isUsingActiveCPU": true,
+      "resourceConfig": {
+        "buildMachine": {
+          "defaultPurchaseType": "standard",
+          "purchaseType": "basic",
+          "machineSelectionType": "fixed",
+          "selectionSource": "project-setting"
+        },
+        "buildQueue": {
+          "configuration": "SKIP_NAMESPACE_QUEUE"
+        },
+        "elasticConcurrency": "PROJECT_SETTING"
+      }
+    },
+    "routes": null,
+    "nodeVersion": "24.x"
+  },
+  "uploaded_source": {
+    "deployment_id": "dpl_HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP",
+    "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+    "uploaded_nodes": 521,
+    "selected_source_files": [
+      {
+        "path": "src/services/api/tools/probe_worker_runtime.py",
+        "uid": "188ecc782e6e1a352bee4d6716e224bae8a58e89",
+        "type": "file"
+      },
+      {
+        "path": "src/services/api/buyeros_api/api/preview_vercel.py",
+        "uid": "8cf20256e1a49ba76e35780401f704967a518462",
+        "type": "file"
+      },
+      {
+        "path": "src/services/api/buyeros_api/api/preview_target.json",
+        "uid": "c5a4484ff5383c4f7be4b0024c33bf6becda3b53",
+        "type": "file"
+      }
+    ],
+    "scope": "Source upload metadata only, not deployed dependency bundle size",
+    "overlay_manifest": {
+      "kind": "temporary_overlay_only",
+      "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+      "expires_at": "2026-10-01T16:48:41+00:00",
+      "hosted_verified": false,
+      "files_sha256": {
+        "vercel.json": "4baa70906080fcc0a820c868fb37f061e7a15a0b81e9b30551ac37967c3dd06f",
+        "app/v1/[...path]/route.ts": "68b85d7da01226f24893fe1a9da27aced30e6d48083a7fd4ff3d0f7b9121147e",
+        "services/api/buyeros_api/api/preview_vercel.py": "ff4fc96bd84ada22f2d25df1eb0f8ca5101c5511e779c2af7277790a87b68ea5",
+        "services/api/buyeros_api/api/preview_target.json": "f0912bc8cc41f2053f58a5cf7c31372262e94c078f4ea521e4b228efe8265b93"
+      },
+      "archive": ".sites-runtime\\cf-preview-deployment-595865f",
+      "git_archive_sha256": "b4c6f70b3f3b945a3edf5645398a4bd2243fb661e99807cd9492af34a66770d1",
+      "vercelignore_sha256": "f173c7a8740f806e14631459e6bc75a5d6c9e1574f684837d385fdaa31c65599",
+      "project_id": "prj_YfIdLRKWvBjomGG56RhwEmqyxRRR",
+      "protection": "all_except_custom_domains",
+      "preview_envs": [
+        {
+          "id": "QQlr5BT6kq8J1CEz",
+          "key": "BUYEROS_WORKER_CURRENT_SECRET",
+          "target": [
+            "preview"
+          ],
+          "type": "sensitive"
+        },
+        {
+          "id": "OVLcOLeW5jp8faZI",
+          "key": "BUYEROS_WORKER_CURRENT_KEY_ID",
+          "target": [
+            "preview"
+          ],
+          "type": "plain"
+        },
+        {
+          "id": "OSbvTRRGz9Vd7nPP",
+          "key": "BUYEROS_CELERY_EXECUTION_ENABLED",
+          "target": [
+            "preview"
+          ],
+          "type": "plain"
+        },
+        {
+          "id": "zcBk3ivBRDUQd4Pc",
+          "key": "BUYEROS_CLOUDFLARE_EXECUTION_ENABLED",
+          "target": [
+            "preview"
+          ],
+          "type": "plain"
+        },
+        {
+          "id": "8z6ukYqB7zgYQbBf",
+          "key": "BUYEROS_R2_ENABLED",
+          "target": [
+            "preview"
+          ],
+          "type": "plain"
+        },
+        {
+          "id": "dMyVDHgCou4pYcao",
+          "key": "BUYEROS_PAID_DISPATCH_ENABLED",
+          "target": [
+            "preview"
+          ],
+          "type": "plain"
+        },
+        {
+          "id": "WXBFhLKfWN0bbicv",
+          "key": "BUYEROS_PAID_ADMISSION_ENABLED",
+          "target": [
+            "preview"
+          ],
+          "type": "plain"
+        },
+        {
+          "id": "S8puX8FkNFP188cD",
+          "key": "BUYEROS_PREVIEW_PROBE_ENABLED",
+          "target": [
+            "preview"
+          ],
+          "type": "plain"
+        },
+        {
+          "id": "qGSQZCpur89PARJI",
+          "key": "BUYEROS_PREVIEW_PROBE_SOURCE_SHA",
+          "target": [
+            "preview"
+          ],
+          "type": "plain"
+        },
+        {
+          "id": "VbKBsqxDOIPJtZaq",
+          "key": "BUYEROS_PREVIEW_PROBE_KEY_ID",
+          "target": [
+            "preview"
+          ],
+          "type": "plain"
+        },
+        {
+          "id": "So3lZXwvOAJRwZCd",
+          "key": "BUYEROS_PREVIEW_PROBE_SECRET",
+          "target": [
+            "preview"
+          ],
+          "type": "sensitive"
+        },
+        {
+          "id": "GYI3SnsgX2dVpX1R",
+          "key": "BUYEROS_CHECKPOINT_DATABASE_URL",
+          "target": [
+            "preview"
+          ],
+          "type": "sensitive"
+        },
+        {
+          "id": "kTLFUQB1mTAFz0uv",
+          "key": "BUYEROS_EXECUTION_DATABASE_URL",
+          "target": [
+            "preview"
+          ],
+          "type": "sensitive"
+        },
+        {
+          "id": "Kpb1EH5dRBCAhiPM",
+          "key": "BUYEROS_DATABASE_URL",
+          "target": [
+            "preview"
+          ],
+          "type": "sensitive"
+        }
+      ]
+    }
+  },
+  "scope": "Source/overlay hashes, platform metadata and measured runtime files are distinct; ZIP transport size unavailable"
+}

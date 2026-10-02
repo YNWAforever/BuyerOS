@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="20.105392000000002">
+<testsuite name="buyer-results.spec.ts" timestamp="2026-10-01T10:48:51.095Z" hostname="" tests="1" failures="0" skipped="0" time="3.28" errors="0">
+<testcase name="T08 real snapshot pages, selection scope, URL filters and dossier" classname="buyer-results.spec.ts" time="3.28">
+</testcase>
+</testsuite>
+</testsuites>

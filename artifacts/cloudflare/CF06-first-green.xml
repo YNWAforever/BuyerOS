@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="5" time="9.795" timestamp="2026-10-01T15:42:16.485610+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_cloudflare_recovery_db" name="test_environment_flag_cannot_make_readiness_ready" time="6.506" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_probe_epoch_freshness_duplicate_and_pause_fail_closed" time="0.422" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_queue_or_workflow_retention_does_not_reexecute_terminal_step" time="0.206" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_expired_local_step_can_resume_only_after_atomic_receipt_fence" time="0.213" /><testcase classname="tests.test_cloudflare_recovery_db" name="test_oldest_work_alert_is_durable_and_cross_tenant_reads_remain_closed" time="0.802"><failure message="psycopg.errors.UndefinedObject: unrecognized configuration parameter &quot;app.workspace_id&quot;">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:52575/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:52575/buyeros_test_api', 7)
+
+    def test_oldest_work_alert_is_durable_and_cross_tenant_reads_remain_closed(migrated, worker_runtime):
+        module = recovery_module()
+        envelope = seed_envelope(migrated, worker_runtime[1])
+        now = datetime.now(timezone.utc)
+        with psycopg.connect(migrated, autocommit=True) as db:
+            db.execute("UPDATE outbox_events SET state='ready',created_at=%s WHERE id=%s", (now - timedelta(seconds=301), envelope.outbox_id))
+        call_worker(lambda engine: module.recover_execution(engine, now=now, limit=10))
+        assert 'WORK_BACKLOG' in health(now)['alerts']
+        with psycopg.connect(worker_runtime[0]) as db:
+&gt;           assert db.execute('SELECT count(*) FROM outbox_events').fetchone()[0] == 0
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:102:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x25460e57890&gt;
+query = 'SELECT count(*) FROM outbox_events', params = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UndefinedObject: unrecognized configuration parameter "app.workspace_id"
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UndefinedObject</failure></testcase></testsuite></testsuites>

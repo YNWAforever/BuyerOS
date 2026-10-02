@@ -1,0 +1,10 @@
+✔ built UI fixture refuses inherited databases, credentials and nonfixture API targets (2.1175ms)
+✔ built UI static assets cannot escape their emitted public directory (0.4957ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 778.7809

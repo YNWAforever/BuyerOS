@@ -1,0 +1,668 @@
+{
+  "run_id": 36895867947,
+  "head_sha": "8ffd91fccee5d9fad25b108759c39686a5dac171",
+  "status": "completed",
+  "conclusion": "success",
+  "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36895867947",
+  "updated_at": "2026-10-01T17:11:55Z",
+  "jobs": [
+    {
+      "id": 110482589521,
+      "name": "cloudflare-controller",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:57:56Z",
+      "completed_at": "2026-10-01T16:58:48Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36895867947/job/110482589521",
+      "log_sha256": "dbd07df016b94648e931f5cba7fa68c318a2d4a778291947784cf79b829e4c12",
+      "exact_result_lines": [
+        "2026-10-01T16:58:42.7163656Z  Test Files  8 passed (8)",
+        "2026-10-01T16:58:42.7164457Z       Tests  27 passed (27)"
+      ],
+      "checks": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm cloudflare:types",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm cloudflare:lint",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm cloudflare:bindings",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm cloudflare:test --reporter=default --reporter=junit --outputFile.junit=artifacts/cloudflare/ci-controller.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec wrangler deploy --dry-run --config services/cloudflare-jobs/wrangler.jsonc --outdir .sites-runtime/cloudflare-dry-run",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110482589595,
+      "name": "worker",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:57:56Z",
+      "completed_at": "2026-10-01T16:59:17Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36895867947/job/110482589595",
+      "log_sha256": "b2981b3bff6d85eb501581df6156af6087174eaf0f972a72cb2295cf9aa47a65",
+      "exact_result_lines": [
+        "2026-10-01T16:58:33.3763032Z Linux standby integration: 2 passed, 0 failed/skipped; no database/broker/provider",
+        "2026-10-01T16:59:11.7589772Z 186 passed, 1 warning in 36.11s"
+      ],
+      "checks": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen python -m unittest discover -s ../../tests -p test_render_worker_launch.py",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen python ../../tests/render-worker-process-check.py",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run mkdir -p artifacts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit services/worker/artifacts/tests.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27 && uv sync --project services/worker --frozen --no-dev --python 3.12",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python scripts/run-render-worker.py worker --check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python scripts/run-render-worker.py dispatcher --check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python -m celery -A buyeros_worker.app:celery_app worker --help",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python -m buyeros_worker.cli dispatch --help",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110482589625,
+      "name": "browser-continuity",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:57:56Z",
+      "completed_at": "2026-10-01T17:11:55Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36895867947/job/110482589625",
+      "log_sha256": "2c0bb55a06af42627524ab36da0971a58d39f6614d63e84a52bc743418f5aea5",
+      "exact_result_lines": [
+        "2026-10-01T17:08:59.6487055Z   4 passed (2.7m)",
+        "2026-10-01T17:10:11.7059635Z   8 passed (1.2m)",
+        "2026-10-01T17:10:44.1559912Z   1 passed (31.3s)",
+        "2026-10-01T17:11:18.1608526Z   3 passed (32.8s)",
+        "2026-10-01T17:11:51.5938323Z   1 passed (32.3s)"
+      ],
+      "checks": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.mvp-research.config.ts tests/e2e/mvp-a-research.spec.ts --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/t30-browser.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run mkdir -p artifacts/ci-t30/continuity",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.workbench.config.ts tests/e2e/daily-workbench.spec.ts --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/workbench.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --workers=1 --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/buyers.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/buyer-management.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.mvp.config.ts tests/e2e/mvp-a-journey.spec.ts --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/mvp-acceptance.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110482589765,
+      "name": "browser-zoom",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:57:56Z",
+      "completed_at": "2026-10-01T17:00:03Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36895867947/job/110482589765",
+      "log_sha256": "321334ce61c38f6ff00c25e16a26155f5a3d827db6b40817d04920fb686c1f16",
+      "exact_result_lines": [
+        "2026-10-01T16:59:58.3359395Z   2 passed (33.4s)"
+      ],
+      "checks": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/zoom.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110482589767,
+      "name": "cloudflare-staff-acceptance",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:57:56Z",
+      "completed_at": "2026-10-01T17:04:32Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36895867947/job/110482589767",
+      "log_sha256": "50272a7e48e72b9d578edc684a5a42798f425ac73b1fa96f178a454971e9cec9",
+      "exact_result_lines": [
+        "2026-10-01T17:02:23.7599561Z 29 passed, 9 warnings in 41.36s",
+        "2026-10-01T17:03:06.1890230Z 2 passed, 1 warning in 40.69s",
+        "2026-10-01T17:04:28.9275157Z   7 passed (1.1m)",
+        "2026-10-01T17:04:28.9538095Z {\"passed\":7,\"failed\":0,\"errors\":0,\"skipped\":0,\"total\":7}"
+      ],
+      "checks": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run .venv/bin/python ../../scripts/run-cloudflare-pg18-proof.py",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit artifacts/cloudflare/CF08-pg18.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen pytest -q tests/benchmark_cloudflare_case.py --junitxml=../../artifacts/cloudflare/ci-operating.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit artifacts/cloudflare/ci-operating.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node scripts/run-cloudflare-acceptance.mjs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110482589844,
+      "name": "frontend",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:57:56Z",
+      "completed_at": "2026-10-01T16:59:20Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36895867947/job/110482589844",
+      "log_sha256": "1c54d6d3c3cf46b98736a29a0c87a4a3aa1aa08cfe5498d07b422bb465be6af0",
+      "exact_result_lines": [],
+      "checks": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node tests/domain-checks.mjs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node tests/live-adapter-checks.mjs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node tests/live-auth-checks.mjs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node --test tests/api-types-generation.test.mjs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node --test tests/vercel-services.test.mjs tests/deployment/cloudflare-python-runtime.test.mjs tests/deployment/cloudflare-acceptance.test.mjs tests/deployment/built-ui-fixture.test.mjs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec tsc --noEmit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm lint",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node scripts/run-vercel.mjs build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node --test tests/vercel-render.test.mjs tests/deployment/cloudflare-release-config.test.mjs",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110482589866,
+      "name": "api",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:58:32Z",
+      "completed_at": "2026-10-01T17:03:58Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36895867947/job/110482589866",
+      "log_sha256": "c57526f5a44b08f41dca165e57bcd1b14be35d1e7e306b5afa10edaec3276009",
+      "exact_result_lines": [
+        "2026-10-01T17:03:54.1878007Z 686 passed, 96 warnings in 272.48s (0:04:32)"
+      ],
+      "checks": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen python ../../scripts/generate-operation-routes.py --check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen python ../../scripts/verify-render-blueprint.py",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run mkdir -p artifacts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit services/api/artifacts/tests.xml",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110482589897,
+      "name": "browser-smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:57:57Z",
+      "completed_at": "2026-10-01T17:00:16Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36895867947/job/110482589897",
+      "log_sha256": "bfc6f5f6739fb413da3bb338e7eaaf9dee17d94d0834cf45c06df33ff52b389c",
+      "exact_result_lines": [
+        "2026-10-01T17:00:09.9382720Z   1 passed (20.9s)"
+      ],
+      "checks": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test tests/e2e/harness.spec.ts",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "code_and_ci_configuration_equals_verified_79d6caf": true
+}

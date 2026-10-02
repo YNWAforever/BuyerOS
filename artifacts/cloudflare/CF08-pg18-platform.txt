@@ -1,0 +1,13 @@
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+Using secrets defined in process.env
+ ✓ services/cloudflare-jobs/tests/platform-pg.integration.ts (2 tests) 835ms
+   ✓ actual Queue binding commits one API-owned mutation; duplicate delivery keeps its receipt  614ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  19:17:20
+   Duration  5.61s (transform 189ms, setup 0ms, import 333ms, tests 835ms, environment 0ms)
+
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF-platform-pg.xml

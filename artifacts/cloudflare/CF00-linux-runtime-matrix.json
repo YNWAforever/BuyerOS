@@ -1,0 +1,152 @@
+{
+  "environment": "local",
+  "source_sha": "aed7a7eb2b7370c10cd7a41306eecf09d378ad42",
+  "local_feasible": true,
+  "hosted_feasible": false,
+  "records": [
+    {
+      "check": "native_imports",
+      "state": "verified",
+      "details": {
+        "versions": {
+          "psycopg": "3.3.5",
+          "sqlalchemy": "2.0.53",
+          "pypdf": "6.19.0",
+          "langgraph": "1.2.12",
+          "langgraph-checkpoint-postgres": "3.1.2"
+        },
+        "cold_subprocess_wall_seconds": 2.3417500930081587,
+        "parent_cold_import_wall_seconds": 0.6265675050090067,
+        "warm_import_wall_seconds": 0.0023813300067558885,
+        "warm_parent_cpu_seconds": 0.002381560000000005,
+        "platform": "linux",
+        "python": "3.12.14"
+      }
+    },
+    {
+      "check": "pdf_native",
+      "state": "verified",
+      "details": {
+        "wall_seconds": 0.12169317601365037,
+        "parent_cpu_seconds": 0.0015707310000000474,
+        "sample_sha256": "56698f27c3989f9977ac9193fb8cbb3ab80579851ab94419a577d32e32c397a1",
+        "facts": 1
+      }
+    },
+    {
+      "check": "pdf_isolation",
+      "state": "verified",
+      "details": {
+        "environment_keys": [
+          "PYTHONDONTWRITEBYTECODE",
+          "PYTHONIOENCODING"
+        ],
+        "timeout_seconds": 8,
+        "temporary_workdir": true,
+        "stdin_bytes_only": true
+      }
+    },
+    {
+      "check": "pdf_timeout",
+      "state": "verified",
+      "details": {
+        "timeout_seconds": 8,
+        "child_killed": true,
+        "fixture": "sleeping child",
+        "wall_seconds": 8.009310113004176
+      }
+    },
+    {
+      "check": "postgres_role",
+      "state": "verified",
+      "details": {
+        "superuser": false,
+        "bypassrls": false,
+        "checkpoint_owner": false,
+        "worker_role_membership": true,
+        "environment": "disposable fixture role"
+      }
+    },
+    {
+      "check": "postgres_checkpoint",
+      "state": "verified",
+      "details": {
+        "committed_node_replayed": false,
+        "interrupted_node_resumed": true,
+        "cross_tenant_read_closed": true,
+        "schema_created_at_runtime": false
+      }
+    },
+    {
+      "check": "installed_environment_size",
+      "state": "verified",
+      "details": {
+        "bytes": 154199611,
+        "production_bundle_proof": false,
+        "includes_development_dependencies": false
+      }
+    },
+    {
+      "check": "source_manifest",
+      "state": "verified",
+      "details": {
+        "base_commit": "aed7a7eb2b7370c10cd7a41306eecf09d378ad42",
+        "working_files_sha256": {
+          "services/api/tools/probe_worker_runtime.py": "b5165252a97f1d79645547a85db81e74c20a05ebb6fa5b4a1b34f5d7a6df41f1",
+          "services/api/pyproject.toml": "5e4b1508ec500ed7ef82d2b9bd026b7322cd6a64d20977babaf89a4425506758",
+          "services/api/uv.lock": "9d3a362a303d6da7bd241d3adbab02257a82358c5f1b83be7b85b22c97a3fab4",
+          "services/worker/pyproject.toml": "5c7ed773c3fb7416333189562f217f540b75e70c126f8ee3bd7016a7e6d53501",
+          "services/worker/uv.lock": "1a1a1efda9168c33e4d572b8395e4ffdd1a16ebf51564c88fe5a51e7554ec0a2",
+          "services/worker/buyeros_worker/pdf_parser.py": "cd5901275a760a4f8540d951bf612d3f47656fd8bcbbbc07da5b3334b72aa242",
+          "services/worker/buyeros_worker/pdf_parser_child.py": "6dee1407d77a230eef9fb0c0d3c174dca7e3b4e54169eb5371de9ce4273790f1",
+          "services/worker/buyeros_worker/checkpoints.py": "224cd6b11716629722286af16085ac9fb4298d21ddf16fe471e9ba4f0c371e0f"
+        },
+        "base_commit_alone_is_not_working_diff_proof": true
+      }
+    },
+    {
+      "check": "process_usage",
+      "state": "verified",
+      "details": {
+        "parent_peak_rss_bytes": 118312960,
+        "child_peak_rss_bytes": 107532288,
+        "parent_cpu_seconds": 3.0368489999999997,
+        "child_cpu_seconds": 2.466608,
+        "native_linux_caps": true
+      }
+    },
+    {
+      "check": "vercel_api_bundle",
+      "state": "not_run",
+      "details": {
+        "reason": "protected disposable preview and account-specific budget authorization required"
+      }
+    },
+    {
+      "check": "vercel_app_90s",
+      "state": "not_run",
+      "details": {
+        "reason": "protected disposable preview and account-specific budget authorization required"
+      }
+    },
+    {
+      "check": "vercel_api_90s",
+      "state": "not_run",
+      "details": {
+        "reason": "protected disposable preview and account-specific budget authorization required"
+      }
+    },
+    {
+      "check": "preview_protection",
+      "state": "not_run",
+      "details": {
+        "reason": "protected disposable preview and account-specific budget authorization required"
+      }
+    }
+  ],
+  "counts": {
+    "verified": 9,
+    "failed": 0,
+    "not_run": 4
+  }
+}

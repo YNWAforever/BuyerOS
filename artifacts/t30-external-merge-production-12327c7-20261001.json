@@ -1,0 +1,69 @@
+{
+  "observed_at_utc": "2026-10-01T02:06:44.4215677Z",
+  "id": "dpl_wdPCQmzg7EkFusgFknHAA2tXdKth",
+  "ready_state": "READY",
+  "target": "production",
+  "source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+  "reviewed_application_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+  "production_alias": "https://buyer-os-nu.vercel.app",
+  "url": "buyer-h23obpifd-ynwaforevers-projects.vercel.app",
+  "project_id": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw",
+  "created_at": 1790819572558,
+  "building_at": 1790819573760,
+  "ready_at": 1790819626971,
+  "external_merge": {
+    "pr": 9,
+    "url": "https://github.com/YNWAforever/BuyerOS/pull/9",
+    "head_sha": "a5942192434bb48dc86a6870d0d3c9c75dcf6a67",
+    "merge_commit_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+    "merged_at_utc": "2026-10-01T01:52:49Z",
+    "merged_by": "YNWAforever"
+  },
+  "saved_environment_count": 9,
+  "saved_environment_metadata_unchanged": true,
+  "paid_admission_enabled": false,
+  "r2_enabled": false,
+  "application_tree_equivalence": "git diff --quiet 41810627540dd52c4567f853ae65d51e2bb6365d origin/main -- . ':(exclude)docs/**' ':(exclude)artifacts/**' exit0; origin/main12327c7",
+  "agent_performed_merge": false,
+  "agent_submitted_new_deployment": false,
+  "scope": "Existing Git integration deployed externally merged main. This supersedes the earlier specifically authorized4181062 deployment. The agent performed read-only verification and preserves both source-bound records.",
+  "main_ci": {
+    "run_id": 36803187816,
+    "source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+    "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36803187816",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "worker",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "browser-continuity",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "browser-zoom",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "api",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "browser-smoke",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "frontend",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
+  }
+}

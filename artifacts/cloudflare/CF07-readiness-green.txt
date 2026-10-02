@@ -1,0 +1,81 @@
+.....F..............                                                     [100%]
+================================== FAILURES ===================================
+_____ test_readiness_uses_observed_worker_heartbeat_not_environment_flag ______
+
+api = <starlette.testclient.TestClient object at 0x000001CA0C1048A0>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:52724/buyeros_test_api'
+
+    def test_readiness_uses_observed_worker_heartbeat_not_environment_flag(api, seeded):
+        from datetime import datetime, timedelta, timezone
+        path=f"{ROOT}/readiness"
+        with psycopg.connect(seeded,autocommit=True) as owner:
+            previously_enabled=owner.execute('SELECT enabled FROM worker_runtime_control').fetchone()[0]
+            # Owned fixture setup only: a real selected runtime must be enabled.
+>           owner.execute('UPDATE worker_runtime_control SET enabled=true')
+
+tests\test_admin_operations_db.py:110:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <psycopg.Connection [BAD] at 0x1ca0c06c230>
+query = 'UPDATE worker_runtime_control SET enabled=true', params = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -> Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.RaiseException: runtime selector changes require a newer epoch
+E           CONTEXT:  PL/pgSQL function enforce_worker_runtime_epoch() line 4 at RAISE
+
+.venv\Lib\site-packages\psycopg\connection.py:300: RaiseException
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_admin_operations_db.py::test_0017_preferences_rls_and_empty_rollback
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_admin_operations_db.py::test_0017_preferences_rls_and_empty_rollback
+tests/test_admin_operations_db.py::test_0017_preferences_rls_and_empty_rollback
+tests/test_admin_operations_db.py::test_0017_preferences_rls_and_empty_rollback
+tests/test_cloudflare_recovery_db.py::test_environment_flag_cannot_make_readiness_ready
+tests/test_cloudflare_platform_db.py::test_actual_local_queue_workflow_api_postgres
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\Documents\BuyerOS\artifacts\cloudflare\CF07-readiness-green.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_admin_operations_db.py::test_readiness_uses_observed_worker_heartbeat_not_environment_flag
+1 failed, 19 passed, 11 warnings in 74.42s (0:01:14)

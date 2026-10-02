@@ -1,6 +1,87 @@
 # BuyerOS execution status — 2026-10-01
 
-This is the current execution ledger for the 2026-09-27 implementation pack. The older `PROGRESS.md` and `tasks/index.json` contain historical plan and BO approval records; their approval states are not changed here. At execution start the checked-out source was `f43a9d88b334c2c4029fa06fa71624ed52efe4a2` on `p14-buyer-lists`, with origin `https://github.com/YNWAforever/BuyerOS.git`. Current application/deployment and production configuration evidence is in the final 2026-09-30 checkpoint below; earlier entries retain their historical scope. The working tree was clean before T00. The audit baseline `5e61f401bf1bcdf80ea1ce254dd9c62e8eedbab0` was fetched for comparison; it is not an ancestor of this branch, so findings require current-source verification.
+This is the current execution ledger for the 2026-09-27 implementation pack. The older `PROGRESS.md` and `tasks/index.json` contain historical plan and BO approval records; their approval states are not changed here. At execution start the checked-out source was `f43a9d88b334c2c4029fa06fa71624ed52efe4a2` on `p14-buyer-lists`, with origin `https://github.com/YNWAforever/BuyerOS.git`. Current application/deployment and production configuration evidence is in the latest 2026-10-01 rollout checkpoint below; earlier entries retain their historical scope. The working tree was clean before T00. The audit baseline `5e61f401bf1bcdf80ea1ce254dd9c62e8eedbab0` was fetched for comparison; it is not an ancestor of this branch, so findings require current-source verification.
+
+## Current Cloudflare release candidate
+
+Reviewed code/configuration `d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8`;
+temporary-preview preparation `07a7537befbf1e2290ee7079e18a258083615ed6`;
+[complete current handoff](CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md).
+CF01–CF07 complete; CF00 local complete/hosted pending; CF08 local RC complete/
+external activation pending. Code implemented and fictional fixture verified;
+actual local Queue/Workflow/HMAC/native PostgreSQL integration verified.
+Required API650/worker186, UI7 and retained legacy4/8/1/3/1/2 are zero-skip CF07
+proof; CF08 controller27, Node19 and owned PG18 compatibility29 pass. No backend/
+business/UI route changes after CF07; its UI suite was not rerun after the CF08
+configuration/optional protection-header deltas; subsequent Linux CI8/8 at
+d8ca315/test-merge8634fba reran the full7-case journey successfully. Both90-second budget mechanisms
+are locally schema/build verified; hosted enforcement/native package/protection
+is NOT RUN. No Cloudflare resource, production migration/provider call or
+Cloudflare controller/schema/selector deployment occurred. Existing Git automation
+published a READY branch app/API preview dpl_EPr4wsjaMNcgo3XA2itL1NxDGsc7 at d8ca315
+(iad1/targetnull); no hosted job proof follows. Historical app deployment facts below retain
+only their earlier scope; no migration deployed SHA exists.
+
+Next eligible decision is the exact two-hour private protected-preview setup
+in the handoff, including fresh empty Neon and dedicated Vercel project;
+production cutover, all-day Neon quota/plan, providers/R2/policy/pilot and
+independent/assistive review remain separate. Do not restart completed tasks.
+
+### Current CF00 preparation checkpoint
+
+Prepared an overlay-only, default-off diagnostic and source/target renderer;
+release API/gateway/selector/schema unchanged. Final committed-source focused
+suite48 passed/0 failed/errors/skips in93.90s,46 retained deprecation warnings.
+Actual loopback61-second wait/replay after app recreation, native PDF/8-second
+kill, restricted worker and interrupted/resumed/cross-tenant checkpoint pass.
+No test fixture points remotely; only its host guard is substituted locally.
+Windows Linux caps and the positive deployed child/package/two-hop/protection
+checks remain NOT RUN. Current runbook has exact inputs, guards and SHA.
+
+Root TS exit0, release config Node9/0/0/0, public78 contract and Alembic0035 head
+verified. No migration added/applied remotely. Source/destination/CRLF regressions
+observed before fixes; expected reds and two Windows stat-cache fixture setup
+failures retained. No weakened assertions or ignored required DB skips.
+Latest prior RC CI36861185237 at229a76c/test-merge57b8560 has8 successful jobs:
+API650, worker186, controller27, PG18 compatibility29, operating2, staff7 and
+legacy4/8/1/3/1, all required0fail/error/skip; it predates preparation source07a7537.
+
+Read-only target preflight confirms Vercel Pro/active, exact new-project404;
+Neon Free/PG18/Singapore, proposed fresh name absent from22projects;
+Cloudflare13Workers/4Queues/2Workflows with no BuyerOS names. Subscription read403
+means billing plan remains unknown, not Free/Paid proof. No new resource,
+hosted diagnostic/deployment, secret write or production/provider action.
+Next is the same single bounded protected-preview setup decision, now with
+concrete code/test/configuration evidence. Architecture approval is preserved;
+no paid/deployment/owner approval is inferred from this local checkpoint.
+
+### Fresh pushed-source verification
+
+[CI36875943355](https://github.com/YNWAforever/BuyerOS/actions/runs/36875943355)
+completed with **8/8 successful jobs** at branch `91b1f9b` and synthetic test merge
+`d78fcadf5f938502a606c4c1865ade4a4215d06b`; both have identical Git tree
+`296c6b3379c734a0c6a0679c9d6b93c6a1d1b6da`.
+API **679/0/0/0 in270.26s** includes all29 new preparation checks; worker186,
+controller27, PG18 compatibility29, operating2, staff7, zoom2, smoke1 and
+legacy4/8/1/3/1 passed. Required no-skip checkers passed. Linux native PDF caps
+are now checked by the actual local CI helper assertions; the earlier Windows
+record remains NOT RUN for Linux. Hosted child packaging/protection/both-hop
+limits remain unverified.
+
+Current staff artifact digest and19 source-file hashes verified against pushed
+Git blobs; fresh7/29/2 JUnit reports and2 screenshots retained under
+`artifacts/cloudflare/ci-91b1f9b/`. Twelve earlier checked-in bilingual local
+screenshots remain historical: new journey PNGs were written at test-results
+root outside the upload selection. Eleven anonymous fixture handler/pipeline
+Error messages are retained with no route/stack attribution; they are not
+relabeled expected or counted as a clean error-free live session.
+
+Read-only Vercel metadata confirms existing-project Git preview
+`dpl_2mtfFRQNvQqrkFizapMMjFRdujKk` at source91b1f9b, READY/targetnull/iad1,
+branch alias only. No prepared diagnostic is imported by that release API;
+no protected job deployment or production cutover follows from READY.
+Evidence-only commits after91b1f9b do not change this verified source tree's
+application/config/tests and have separately triggered CI/deployments.
 
 ## Task state
 
@@ -36,7 +117,7 @@ This is the current execution ledger for the 2026-09-27 implementation pack. The
 | T27 | Implemented; disposable integration verified; live activation blocked | Strict API 553 and worker 159 passed with zero skips; T27 workbench browser 1 passed with fake OIDC and disposable PostgreSQL. Revision 0030 rollback tests passed. |
 | T28 | Implemented; disposable older-backup replay verified; external gates open | Strict T28 restore/retention focus 10/10 passed with zero skips. A pre-tombstone dump restored readable fixture text; a separate fixture journal drove idempotent redaction with API reads disabled, RLS and ledger checks. External journal custody/completeness, object cleanup, alert thresholds and live activation remain open. |
 | T29 | Partial; responsive fixture and local performance verified; assistive/live gates open | Current workbench8/8 passes with zero skips across en/zh-HK routes, preference/scope races, partial failures and measured contrast. Complete initial390px/1280px T30 journeys4/4 pass. Prior T29 actual browser zoom and 10k/100-workspace benchmarks retain their stated source/environment boundaries. Manual screen-reader and unmeasured non-text review remain open; current actual Chromium200% API zoom2/2 passes; application source4181062 published; six-job hosted CI passes; documentation checkpoint follows. |
-| T30 | Full continuous fixture journey verified; release activation open | Current required API577/577, worker174/174, rollback3/3 and continuous UI-created same-project journey4/4 pass with zero skips. Current workbench8/8 passes; dependent zoom2/2, pagination1/1 and list3/3 pass; original seeded acceptance1/1 passes; application source4181062 published; six-job hosted CI passes; documentation checkpoint follows. Fake identity/search/contact input; real owned PostgreSQL/Valkey/dispatcher/Celery. Production remains approved62d40bc; FIMMICK/admin visibility is human-confirmed. Authenticated deployed trace, accessibility, external recovery and provider/pilot activation remain open. |
+| T30 | Full fixture journey and deployed app/API boundaries verified; live gates open | Required API577/worker174, rollback3 and complete fixture journey4/4 have zero skips; workbench8, zoom2, pagination1, list3 and original acceptance1 pass. Authorized4181062 rollout/human FIMMICK/admin visibility are recorded. Owner subsequently merged PR9; current main12327c7 has identical app/CI content, READY deployment, main CI6/6 and current-source HTTP/bootstrap4/4. Fictional identity/search/contact and actual owned DB/broker/worker integration remain distinct from production. Agent authenticated trace/full production continuity, external worker/policy/provider/R2/pilot, accessibility and recovery remain open. |
 
 The detailed task registry is `remaining/TASKS.json`. `remaining/API_OPERATION_STATUS.csv` tracks all 70 contracted operations and eight plan extensions, separating handler presence from integration, test, and deployment proof. No operation is marked deployed. Current coverage ledger records handlers for all 70 original operations and all eight extensions (78 of 78 total); this does not establish live provider or deployed verification. The older audit observed 56 returning 501 at its own baseline, and the five differences are current P13 buyer handlers, not evidence that the complete staff journey works.
 
@@ -44,28 +125,32 @@ The detailed task registry is `remaining/TASKS.json`. `remaining/API_OPERATION_S
 
 The three audit documents in the supplied pack, including its HTML rendering, describe one audit; the reproduction scripts use fake identity or persistence. They were inspected but not treated as live Auth0, RLS, or browser evidence. Pack outer checksums passed 43/43 and evidence ZIP inner checksums passed 12/12. No unsafe archive path or link was extracted.
 
-| Finding | Current classification | Evidence / next owner |
+| Finding | Classification | Current evidence / remaining limit |
 | --- | --- | --- |
-| A01 login/workspace | already fixed with evidence — approved setup readback and human UI confirmation; agent API trace open | Exact approved Neon FIMMICK/User/active workspace_admin/AuditEvent readback passed. The user confirmed FIMMICK and admin role visible on2026-10-01 HK after sign-in. Auth0 public SPA/API/PKCE configuration and deployed entry are verified; the authenticated bearer trace/full live staff journey was not observed by the agent. |
-| A02 cross-domain API | source changed — Same-origin bound API proxy deployed; authenticated round trip open | T06 disposable browser CORS/bearer checks passed3/3. Vercel app now proxies same-origin /v1 to its internal FastAPI binding; live anonymous /v1/workspaces401 is verified on deployed62d40bc. No authenticated staff API/database round trip is proven. |
-| A03 ICP replay/numbering | already fixed with evidence — Already fixed with fixture evidence | T02 retried save returns one immutable version; two different-key concurrent saves allocate numbers 1 and 2 under the Project lock. |
-| A04 ICP validation | already fixed with evidence — Already fixed with fixture evidence | T02 typed body rejects malformed/nested/oversize fields with zero rows; malformed JSON and unexpected 500 use sanitized request-ID envelopes. |
-| A05 offer persistence | already fixed with evidence | T07 offer creation/edit/reload/partial-save recovery and current T30 four en/zh-HK desktop/mobile UI-created projects preserve actual typed product/value facts. Fake OIDC is used for fixture journeys; real FIMMICK/admin visibility is human-confirmed, full deployed continuity unverified. |
-| A06 approval context/version | already fixed with evidence | T03 exact version/hash/basis guards and current T30 reviewer approvals of edited v2 pass in all four locale/layout cases. Same-project researched buyer is later recipient-bound and approved at its exact context; expiry/policy/member races fail closed. Full deployed journey unverified. |
-| A07 scope races | already fixed with evidence — Disposable fixture and UI verified; live activation open | T05 A→B→A discard, T06 immutable write context, and T07 response-lost same-action replay plus reload/project-only recovery passed. Real network interruption in a deployed environment remains unverified. |
-| A08 project idempotency fingerprint | already fixed with evidence — Already fixed with evidence | T01 real-DB tests prove same-key different target and changed If-Match return 409; first result replay and 20 concurrent requests pass. |
-| A09 lock order/stale profile | already fixed with evidence — Already fixed with fixture evidence | T03 repeats approve/update/archive races over independent PostgreSQL connections; Project→ICP lock order, stale rejection and one active pointer pass. |
-| A10 snapshot and pagination | already fixed with evidence — Fixed in disposable integration; live activation open | T08 actor/project/expiry/filter guards, bounded SQL snapshot and page reads, 8/12/24 browser pagination, stable insert/tie ordering and dossier source tabs passed. Fake identity and fictional evidence; no deployed claim. |
-| A11 demo-only controls | source changed | Current T30 four full API/DB/Valkey/Celery fixture journeys create/edit offer, approve ICP, research and use persisted review/list/assignment, grounded addressed draft, exact approval, authorized export, outcome and refresh. Optional contact input/search/OIDC are fictional; live provider and deployed full-journey proof remain open. |
-| A12 maintenance/bulk | already fixed with evidence | T09/T10 durable note/list/review/policy and T11 101-row assignment/progress/retry/cancel browser evidence are recorded. T26 failure reports use audited expiring export authorization; 50-row crash/resume/current-version retry/actor-access/pending-cancel are DB verified. Current T30 list/assignment and viewer denial pass4/4. Live worker/provider and deployed authorization remain open. |
-| A13 operations/recovery | still open — Disposable recovery verified; deployed recovery open | T11/T12 durable jobs, pagination, audit and heartbeat, T15 Celery/Valkey broker delivery, T19/T20 checkpoint/restart and T23 unknown-hold reconciliation have local crash/retry evidence. T28 retention/backup intent replay and switches are implemented; a two-container older-backup fixture journal replay passed 10/10 with reads disabled, RLS and ledger checks. External journal custody/completeness, physical deletion and deployed recovery remain open. |
-| A14 worker completion/dispatch | source changed — Fixture integration fixed; deployed proof open | T15 dispatcher cycle, ready claim, lease/fence and separate Celery/Valkey delivery passed on disposable services. T16–T20 add persisted retrieval, evidence/fit graph, checkpoint and restart recovery. No live provider or deployed worker claim follows from these fixture tests. |
-| A15 performance | still open — disposable measurements and pool fix; release proof open | Post-rate-pool T29 10k/100 ASGI read P95 39.377ms sequential and 244.895ms across ten distinct fixture staff, 11 SQL/request and 10 DB connections. Persisted buyer PATCH/admission P95 60.865/168.524ms; 100-workspace Valkey broker publish P95 2.280s. One-slot 500 red then 2/2 green; hosted PR CI strict API 569/569 passed on `f8eaec7`, and current T30 local strict API577/577 and worker174/174 passed with zero skips after Docker recovery; these gates are not new performance measurements. Worker consumption and production latency remain unverified. |
-| A16 locale/routes/a11y | still open | Current workbench8/8 and continuous journey4/4 pass with fake OIDC/owned PostgreSQL: en/zh-HK desktop/mobile, translated scope/list/dossier controls, locale and scope recovery, partial failure, no page overflow and measured text/control contrast. Eight final export/outcome screenshots were visually inspected. Current actual Chromium200% API-backed zoom passes2/2 over six routes in en/zh-HK. Manual screen-reader and remaining non-text elements are unverified. |
-| A17 progress/test truth | still open | Current local required API577/577, worker174/174, rollback3/3 and full fixture continuity4/4 have retained zero-skip JUnit evidence; workbench8/8 passes. Current six-job CI on4181062 passes; required API577/worker174 and all continuous/dependent browser gates have0 failures/errors/skips; earlier479141f five-job CI remains historical. Production source62d40bc and anonymous acceptance4/4 are proven; authenticated deployed full staff/provider/pilot evidence remains open. |
-| A18 activation safety | still open — fixture guards and specifically approved initial setup verified; live pilot activation open | Membership/RLS, fail-closed policy, unknown holds, exact approval/export revocation, permanent delivery403 and recovery switches have fixture evidence. Approved Neon/Auth0/source62d40bc deployment and exact four-row FIMMICK administrator setup are verified; the user confirmed workspace/admin visibility. No provider spend/pilot approval was inferred; policy, provider, continuous worker/Valkey and R2 activation remain open. |
+| A01 login/workspace | already fixed with evidence | Historical approved FIMMICK/admin setup readback and human sign-in confirmation. Local fictional OIDC journeys pass; agent-authenticated full hosted API trace remains open. |
+| A02 API domain | source changed | One same-origin app proxy with runtime app→API binding; actual emitted frontend and native integration verified. Historical deployed anonymous401/bootstrap only, not this migration rollout. |
+| A03 ICP replay/numbering | already fixed with evidence | Existing actual-PG immutable/idempotent numbering races retained; four complete UI-created current-version approvals. |
+| A04 typed validation | already fixed with evidence | Strict public and private contracts; malformed/extra/oversize payload denial, sanitized errors, generated78+5 current. |
+| A05 offer persistence | already fixed with evidence | Four UI-created offers edited/reloaded and then used through research, draft, export and outcome. |
+| A06 exact approval | already fixed with evidence | Edited offer/ICPv2 and recipient-bound exact-context approval; member/policy/expiry changes deny. Approved delivery remains403. |
+| A07 scope races | already fixed with evidence | Held actual proxy reply A→B→A; old A absent in B and durable A rows restored; local negative roles and partial failures retained. |
+| A08 idempotency | already fixed with evidence | Same-key target/body/precondition fingerprint races;20 concurrent requests and actor checks retained. |
+| A09 locking/stale profile | already fixed with evidence | Project→ICP ordering/races, one active pointer, stale/version rejection; no lock during provider I/O. |
+| A10 snapshots/pagination | already fixed with evidence | Actor/current-scope/expiry guards; actual page2 for101 bulk, bounded late SQL page at10k buyers, persisted filters/list and finite limits. |
+| A11 demo controls | source changed | Actual API/PG/Queue/Workflow staff journey, durable assignments/lists/notes/drafts/exports/outcomes. OIDC/providers remain explicit fixture seams. |
+| A12 maintenance/bulk | already fixed with evidence |101 rows in50-row units, restart/receipt conservation, real second page, retry/cancel/export/current actor and viewer negatives retained. |
+| A13 operations/recovery | still open | Local process kill, restart, platform expiry, epoch fencing, older-backup replay and unknown0.300000 hold conservation pass. External journal custody/completeness, physical object deletion and hosted recovery remain open. |
+| A14 worker completion | source changed | Actual Cron/Queue/Workflow/HMAC/nativePG; retained actual Celery/Valkey continuity. No deployed controller/provider completion is inferred. |
+| A15 performance/cost | still open | Two local10-job repetitions meet first-step P95 target;100-workspace fairness and10k late SQL page measured. Hosted latency, actual billing and all-day Neon quota decision remain open. |
+| A16 locale/a11y | still open | English/zh-HK at390/1280, negative roles, current screenshots and actual200% Chromium zoom over six routes verified. Manual screen reader/non-text elements remain unverified. |
+| A17 evidence truth | still open | All required local suites zero skip; full journey/state/hold/restart proof and red artifacts retained. Live identity/provider/pilot and protected hosted acceptance remain separate; new CI8/8 is source-recorded in the handoff. |
+| A18 activation | still open | Current actor/RLS/approval, intent/holds, private transport, paused readiness, CAS/drain/refusal verified. No new cloud resources/production migration/provider activation; preview and later production approval still required. |
 
-## Verification categories
+Totals:10 already fixed with evidence,3 source changed,5 still open;0 classified
+not reproducible. This classification does not close a hosted/owner/provider gate.
+
+
+## Historical verification categories — early T30 checkpoint
 
 - **Code implemented:** T00–T28 are published in the reviewable source candidate; T29/T30 remain partial. The SSR fix is published in draft PR9, reviewed code5317749 and tested/deployed source62d40bc. Historical BO approval records are unchanged.
 - **Fixture verified:** Hosted CI on source62d40bc passed strict API569/569 and worker169/169 with required zero skips, browser smoke1/1 and emitted renderer3/3. An earlier local Docker setup failure remains historical evidence; it is not counted as a passing run. Fake identity/provider fixtures do not establish live providers or staff identity.
@@ -73,7 +158,7 @@ The three audit documents in the supplied pack, including its HTML rendering, de
 - **Externally blocked/unverified:** Human staff Auth0 sign-in/token/callback, exact workspace membership owner, continuous worker/Valkey, R2, named provider/account/price acceptance, policy, full staff continuity, external restore custody and pilot remain open. Delivery is disabled by design. No owner approval or membership seed is inferred from the setup/deploy approvals.
 - **Deployed:** Approved production `dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3` at proven source62d40bc serves initial frontend HTML200 and anonymous API401; live acceptance4/4 and actual Auth0 Universal Login entry passed. Nine saved production variables apply. Earlier separately approved Neon initialization reached0033; this deploy added no migration or paid/provider/delivery activation. No live-pilot claim.
 
-The current Alembic head is `0033_api_rate_windows` (one head); T00–T01 added no schema revision. T02 allocated 0012 after checking 0011, and T04 allocated 0013 after checking the single 0012 head. The migration names in the external plan are proposals, and Alembic remains the single schema owner.
+At that historical checkpoint the local/approved production initialization head was `0033_api_rate_windows` (one head); current migration local head is `0035_worker_recovery_probe`, with no new production schema readback; T00–T01 added no schema revision. T02 allocated 0012 after checking 0011, and T04 allocated 0013 after checking the single 0012 head. The migration names in the external plan are proposals, and Alembic remains the single schema owner.
 
 ## T00 checkpoint
 
@@ -898,3 +983,272 @@ Fresh `gh run view 36775490988 --json databaseId,headSha,conclusion,status,url,j
 Corrected the stale A17 handoff row that still described CI as unpublished, and the current T29 remaining-work summary that still described the completed T30 fixture journey as open. Historical checkpoints retain their original scope. Read-only `vercel.cmd api /v13/deployments/buyer-os-nu.vercel.app --scope ynwaforevers-projects --raw` again verifies READY production deployment dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3/source62d40bc. No production deployment, setting, database row, provider call or owner approval changed. The next eligible action remains the specific candidate-deployment decision; bare continuation does not supply that authorization under the original execution instruction.
 
 Checkpoint checks: JSON parsing/source attribution passed; `git diff --quiet 41810627540dd52c4567f853ae65d51e2bb6365d -- . ':(exclude)docs/**' ':(exclude)artifacts/**'` exited0, proving application/CI content unchanged from the tested source; `git diff --check` exited0. This correction has no new application test count or migration. The five documentation/evidence paths were reviewed explicitly; publication is covered by the existing push/PR authorization.
+
+### Authorized production app/API rollout and refreshed human scope — 2026-10-01 HK
+
+Ruling: execute the exact source4181062/existing-production-project deployment proposed in the final question when the user replied continue; that interpretation was announced before execution. This authorizes the app/API rollout only. Remaining pilot/accessibility/recovery gates were kept open; no provider spend, external worker/R2 provisioning, direct database mutation/migration or BO owner approval was inferred. The earlier candidate-deployment decision is now resolved.
+
+Preflight reread current production62d40bc, READY reviewed preview4181062, exact project/team, six successful source-bound CI jobs and nine saved production variable records. Paid admission and R2 values were verified false; no manual binding variable was configured. `vercel.cmd redeploy dpl_9vrsNEUsyzfGjbr745ersK6XWEVF --target production --scope ynwaforevers-projects --no-wait` exited0. `vercel.cmd inspect buyer-9teghmcy6-ynwaforevers-projects.vercel.app --wait` reports READY; production-alias API readback independently proves dpl_5Yt2v611QZwJntN8sBnwyWojJQvT/source41810627540dd52c4567f853ae65d51e2bb6365d. App/API build74.433s. All nine variable IDs/names/types/update timestamps remain identical after rollout; disabled flags remain false.
+
+The complete read-only acceptance artifact was reviewed before execution and aligned with the current flat API error contract before its first run. `node artifacts/t30-production-acceptance-4181062-20261001.mjs` exited0: **4 passed, 0 failed/skipped**, observed2026-10-01T01:39:58.079Z. GET root/app200 and expected public Auth0 issuer/client ID/audience; GET workspaces with missing/malformed bearer401 UNAUTHENTICATED, exact missing-token/token-rejected messages, request IDs, nonretryable and no data rows. No fake identity/data or production write was used. Artifact includes response hashes/byte counts, not raw HTML, tokens or personal data. Those four HTTP timings are not a new performance baseline.
+
+Deployment-filtered error query `vercel.cmd logs dpl_5Yt2v611QZwJntN8sBnwyWojJQvT --level error --since 10m --no-follow --json --no-branch --limit 100 --scope ynwaforevers-projects` exited0: **0 returned error records/0 unparsed lines**. This bounded query does not prove continuous monitoring/drains. The user answered **FIMMICK and workspace_admin are visible** after refreshing/signing in on the updated deployment. Human UI evidence is distinct from the still-unobserved authenticated domain API trace and complete production staff journey.
+
+Five new deployment/acceptance/preflight/error artifacts are listed in remaining/CHANGED_FILES.md; current handoff/readiness/task registry now reflect deployed4181062. No migration or direct database mutation command, external worker activation, paid provider call, delivery activation, merge or production rollback occurred. Keep pending recipient_context commands on the reviewed compatible worker. First external execution prerequisite is an exact compatible Render worker/dispatcher and existing one-Valkey target/configuration; provider/policy/R2/pilot and manual accessibility/external recovery remain open. Per-operation positive deployment acceptance remains unverified for all78 operations; anonymous auth rejection alone does not establish authorized operation success.
+
+Final checkpoint checks: `node --check artifacts/t30-production-acceptance-4181062-20261001.mjs` exit0; UTF-8 JSON5 parsed and source/state/result-count assertions passed; services/api `.venv/Scripts/python.exe ../../scripts/generate-operation-routes.py --check` exit0: **78 operations match OpenAPI**. `git diff --quiet 41810627540dd52c4567f853ae65d51e2bb6365d -- . ':(exclude)docs/**' ':(exclude)artifacts/**'` and `git diff --check` exit0. Domain application/CI content remains identical to reviewed/deployed4181062; this following commit contains only the eleven explicitly reviewed documentation/evidence paths. No additional full API/worker results are inferred or fabricated.
+
+### Owner's external PR merge and current main deployment — 2026-10-01 HK
+
+A guarded PR-body update stopped because GitHub now reported PR9 MERGED at head a594219 rather than the newer deployment-evidence5e89eb1. Fresh readback proves merged_by YNWAforever, merged_at2026-10-01T01:52:49Z, merge_commit12327c7ac98849b90b0bd08f63872be7dd302ac6. The agent did not merge. Existing Git integration automatically deployed that main source as dpl_wdPCQmzg7EkFusgFknHAA2tXdKth; current production-alias readback proves READY/source12327c7. Earlier manual4181062 rollout evidence is preserved rather than relabeled.
+
+`git fetch origin main` and `git diff --quiet 41810627540dd52c4567f853ae65d51e2bb6365d origin/main -- . ':(exclude)docs/**' ':(exclude)artifacts/**'` verify identical application/worker/contract/CI content; origin/main was12327c7. Main source-bound CI36803187816 completed6/6 jobs SUCCESS. Current nine production variable IDs/names/types/update timestamps still match initial preflight, paid admission/R2 false, binding preserved. No additional agent deployment or configuration change occurred.
+
+The successor acceptance script was reviewed before execution. `node artifacts/t30-production-acceptance-12327c7-20261001.mjs` exit0: **4 passed/0 failed/skipped**, observed2026-10-01T02:09:33.444Z. Root/app200 with exact public Auth0 bootstrap; missing/malformed bearer401 exact UNAUTHENTICATED contract/no data rows. `vercel.cmd logs dpl_wdPCQmzg7EkFusgFknHAA2tXdKth --level error --since 10m --no-follow --json --no-branch --limit 100 --scope ynwaforevers-projects` exit0:0 records/0 unparsed lines. This repeats four boundaries at a newly observed deployment; it is not eight distinct staff journeys, provider verification or a production performance benchmark. Human FIMMICK/admin confirmation was on preceding4181062; successor application/configuration equivalence is independently verified.
+
+Four additional sanitized artifacts preserve external merge/CI/production identity, reviewed HTTP script/results and error counts. Original PR9's merge base a594219 means the subsequent follow-up diff is documentation/evidence only. No reset/rebase or user change was discarded, and no new owner approval record was created. Current deployed_source_sha is12327c7; reviewed application source remains4181062. After initially selecting existing services, the user asked the agent to create the worker. Prepare exact Render worker/dispatcher/one-Valkey configuration and verified costs for review before paid provisioning. Providers and delivery remain inactive pending their own exact gates.
+
+Checkpoint verification: both standalone acceptance scripts pass `node --check`; eight UTF-8 JSON files parse with exact reviewed/deployed source attribution, four HTTP checks/zero failures/skips and six main CI successes. `git diff --quiet 41810627540dd52c4567f853ae65d51e2bb6365d -- . ':(exclude)docs/**' ':(exclude)artifacts/**'` and `git diff --check` exit0. The earlier current-source route check still reports78 operations matching OpenAPI. These checks verify documentation/evidence attribution; no new application test count is claimed.
+
+### Requested Render worker preparation — 2026-10-01 HK
+
+The user requested worker creation after the existing-target question. Prepared root render.yaml for buyer-os-worker and buyer-os-dispatcher (one0.5c-512mb instance each) plus one buyer-os-broker (256mb Valkey), all Singapore, current base priceUS$24/month before tax/workspace/usage extras. Exact configuration, variable-to-source mapping, creation/rollback order and missing runtime role are in runbooks/render-worker-setup.md. No Render CLI/credential is available; target account/workspace is not verified. Paid resources have not been created. This preparation creates no owner approval record.
+
+The standalone launch gate defaults both processes to standby without importing BuyerOS, connecting to Neon/Valkey or executing queued jobs. Enabling requires explicit production environment, intended dedicated buyeros_worker_runtime login, TLS and remote database/broker URLs. Login-name checks do not prove catalog privileges; the existing non-bypass buyeros_worker role and transaction-local tenant contract still need exact production credential/catalog verification before activation. Consumer uses the canonical Celery app with concurrency1/prefetch1 and existing recovery beat; dispatcher uses its bounded continuous outbox CLI. Automatic service deploys and paid previews are off; no public Render route, second broker/backend/migration owner or Vercel broker secret is introduced. Paid dispatch/R2 stayfalse; delivery remains403.
+
+Regression command: services/worker/.venv/Scripts/python.exe -m unittest discover -s tests -p test_render_worker_launch.py. Red:0 passed/9 failed/0 skipped, exit1 against the missing launcher (0.002s). Green:9 passed/0 failed/skipped, exit0 (0.023s). Retained artifacts/t30-tests/render-worker-launch-red/green-20261001.txt. Official-schema validation initially failed because unquoted YAML off became boolean; quoted enum values fixed the manifest, with the same validator. Green command: services/api/.venv/Scripts/python.exe scripts/verify-render-blueprint.py --schema <temporary official-schema file>, exit0; schema SHA25657aa0a1ff9c3b2d0fcb91b790b7b285aef6397adb0c92930e6e601054444cfe5 and manifest hash retained in artifacts/t30-render-blueprint-validation-20261001.json. Worker and dispatcher --check each exit0/standby/no connections; both canonical module help imports exit0. These are local Windows unit/configuration checks, not deployed worker or live provider evidence.
+
+Worker setup committed/pushed as e061d33a32a46502a084d5a5c26d9262904a7b60 in draft PR10. Source-bound CI36807776580 completed6/6 SUCCESS. Actual required JUnit stdout: API passed577/failed0/errors0/skipped0 (78 warnings129.79s); worker174/0/0/0 (1 warning22.33s); continuity suites4+8+1+3+1 and zoom2, each required no-skip gate passes; smoke1. Launcher9/0/0 in0.006s and real Linux standby/SIGTERM2/0/0 pass. All eight worker launch/production-package steps succeed, including the exact frozen no-dev build, both standby --check commands and canonical Celery/dispatcher help imports. Python3.12.14/uv0.11.27; official schema and manifest hashes equal local validation. Actual fixture DB/broker/worker and fictional identity/search/contact remain separate from live Render/provider evidence. Sanitized metadata/counts/steps are retained in artifacts/t30-render-worker-ci-e061d33-20261001.json. The count collector initially used an OrderedDictionary incompatible with its property-sum assertion; correcting collection objects after inspecting actual unchanged gate stdout fixed the evidence collector, without changing tests/results.
+
+Official Render CLI2.28.0 Windows archive digest15eae402a24bbcd03c50f6b9283ee34407a090b53a84c3b788bd337eeb978b1d verified before bounded safe extraction into ignored .sites-runtime storage. Version/login/Blueprint-validation help probes exit0. No prior CLI login file or credential was available; device authorization started and the user was asked to finish sign-in and identify the workspace. No credential/device code is retained in committed evidence. Authenticated workspace/API semantic-conflict validation remains pending; local official-schema success does not prove it.
+
+Current Vercel production-alias readback still proves READY/dpl_wdPCQmzg7EkFusgFknHAA2tXdKth/source12327c7. Existing app/domain handlers/contracts/UI tests equal reviewed4181062; the candidate adds only the separate infrastructure launch/configuration/CI layer. `alembic heads` reports sole0033_api_rate_windows; route map matches78 OpenAPI operations. No migrations, direct production database mutation commands, paid-resource creation, provider spend or worker dispatch occurred. The next concrete decision is the exactUS$24/month standby Render resources; authenticated Render workspace access is also required. Prior35eb899 CI6/6 remains historical and is not used as new-launch proof.
+
+### Requested Cloudflare migration plan — 2026-10-01 HK
+
+The user asked whether Cloudflare Workers could replace the proposed Render worker, then requested preparation of the migration plan. Render provisioning is on hold; no paid resources have been created by this work. Prepared [design](../superpowers/specs/2026-10-01-cloudflare-job-migration-design.md) and [CF00–CF08 implementation plan](../superpowers/plans/2026-10-01-cloudflare-job-migration.md), both explicitly proposed/plan-only. The request authorizes these planning artifacts, not the Celery/Valkey architecture exception, implementation, paid resources, production migration, new deployments, queued-job activation or paid providers. No owner approval record is fabricated.
+
+Verified origin YNWAforever/BuyerOS, clean starting diff, branch codex/fix-vercel-tslib-ssr and HEAD aed7a7eb2b7370c10cd7a41306eecf09d378ad42. Preferred the existing codebase graph, then targeted source/config reads when graph results were insufficient. Read current contracts, runtime decisions, selected BO-011/020/026/027, source/locks/gateway/handler models and relevant supplied SPEC constraints. Memory lookup had no relevant BuyerOS hit and contributed no design evidence. Cloudflare runtime/pricing/Queue/Workflow docs and Vercel function limits were read as current primary sources; links are in the design.
+
+Recommended scope: Cloudflare owns scheduling, one active job Queue plus a quarantine DLQ, and Workflow orchestration; the existing FastAPI API owns native Python execution in bounded/resumable steps. PostgreSQL outbox, worker leases, new fenced step receipts, current memberships/RLS, immutable basis, policy, Decimal money and provider-operation records retain authority. A native CPython/PDF/checkpoint probe, actual Vercel app+API budgets, secure raw-body HMAC bridge, selector/epoch guards for both runtimes, unknown-hold reconciliation, cold-start fairness, real local Queue/Workflow integration, bilingual staff journey and guarded rollback are named acceptance work. Ordinary Workers are not claimed to run the current Celery/native process unchanged.
+
+Planning proposes five internal operations while preserving public70+8. Alembic heads, run from services/api with its existing Python environment, returned0033_api_rate_windows(head), exit0. An initial root invocation failed due to relative alembic script location; no migration or database connection occurred. The next revision must be allocated at implementation, not assumed0034. Defaults remain execution/paid/R2 disabled; delivery403 persists. Additive populated rollback must preserve provider/financial truth; an old unguarded Celery release is not a compatible fallback, and Render resources are not already available.
+
+Cloudflare Paid baseUS$5/month is not a total BuyerOS cost or saving. The plan includes Queue/Workflow usage, 43,200 one-minute ticks per30-day month, API calls/probe overhead, Vercel Python compute and potential always-awake Neon compute. Account/plan, private resource names, locality/privacy disposition, runtime role/catalog proof, hosted packaging and exact usage estimate must be reviewed before activation. No live account metadata was refreshed during this planning turn; earlier production source/CI/human confirmations stay historical evidence. No new application test/fixture/hosted/provider pass is claimed. TASKS.json links the pending proposal and CF dependencies without changing any T00–T30 state.
+
+Next eligible decision: review the two planning artifacts, including the proposed Celery/Valkey exception and continued bounded Python execution on Vercel. After explicit migration implementation approval, start CF00 in this session using executing-plans; no agents. Missing hosted/provider approvals do not stop independent local work. Planning verification output is recorded in artifacts/cloudflare/migration-plan-validation-20261001.json; it validates documentation consistency only, not runtime feasibility.
+
+Planning verification: inline Python documentation assertions returned8 passed/0 failed, nine CF task entries in dependency order, all46 proposed checkboxes incomplete, and all31 original programme task records/historical registry fields unchanged. `git diff --check` exit0; `git diff --quiet HEAD -- . ':(exclude)docs/**' ':(exclude)artifacts/**'` exit0. Scoped changes are the design, plan, status/registry and one sanitized validation JSON. Application tests run0, fixture runs0, Cloudflare platform checks0, hosted runtime proof absent; no migrations/resources/deployment/provider activation. Planning diff remains uncommitted for review.
+
+
+## Approved Cloudflare implementation — CF00/CF01 checkpoint (2026-10-01 HK)
+
+Direct user **approve** after the design/plan handoff approves local CF00–CF08 and the transport architecture exception. No new owner/provider approval or paid/production activation is inferred. Continue inline without agents; existing T00–T30 and deployed/reviewed SHA facts remain historical.
+
+- **CF00 local complete; hosted gate pending:** Python red9 failed then green9 passed/0 failures/errors/skips; Node red1 then green1/0/0/0. Final Windows probe verified8/failed0/not_run5 (Linux memory caps not_run locally); frozen no-dev Linux probe verified9/failed0/not_run4. Real native parser, 8-second child kill, sanitized temporary child environment, non-owner/NOBYPASSRLS worker catalog, interrupted checkpoint resume and cross-tenant negative pass. Four hosted Vercel/protection checks remain not_run. Exact commands, counts and working source hashes: `artifacts/cloudflare/CF00-checkpoint.json`, both native matrices and logs. Existing schema through0033 applied only in an owned disposable Docker database; no new revision or production migration.
+- **CF01 complete:** One async API domain owner and strict ID-only protocol; legacy import aliases share registry/globals. Native dependencies now install from API, with no circular worker dependency. Focused29 passed/0 failed/errors/skips; complete worker183 passed/0/0/0 in55.31s (4 existing warnings), strict JUnit count gate pass. Actual bulk ownership mutation/duplicate and revoked-actor behavior agree through async and legacy wrappers. Public78 routes/types unchanged; Node contract/routing6/0/0/0. Independent frozen no-dev API import verifies no Celery/Redis/worker package, legacy Celery help succeeds without broker calls. Exact commands/outputs: `artifacts/cloudflare/CF01-checkpoint.json` and logs/XML.
+- Setup failures retained: reusing an earlier fixture encountered workspace FK cleanup; a fresh database in the same cluster encountered baseline cluster-global CREATE ROLE collisions. Final suites use the existing inspected fixture's fresh owned container and strict mode. Test SQL seed then needed explicit queued/pending states; assertions/FKs/migrations retained. No hidden DB skips.
+- **Next CF02 in progress:** named machine-auth tests red7 failed; signed gateway regression red1. Alembic heads inspected fromservices/api:0033_api_rate_windows(head), exit0; candidate0034 not overwritten/created yet. Internal bridge, selector/epoch/permit, migration and generated internal5 contracts remain to implement.
+
+Code/fixture proof is separate from deployment: no Cloudflare resource, remote configuration, provider call, production schema change or new deployed SHA. Authenticated hosted staff continuity, remaining A13/A15/A16/A17/A18, provider/policy/R2/pilot and actual hosted budgets remain open. Delivery stays403 DELIVERY_DISABLED.
+
+
+## Cloudflare CF02 checkpoint (2026-10-01 HK)
+
+CF02 complete locally. Final focused security/concurrency/migration tests **19 passed/0 failed/errors/skips in18.28s**. Complete API603/0/0/0 in347.10s was collected before the final stale-publication and required-four-field regressions; those pass in final focused19. Complete worker183/0/0/0 in143.09s precedes the generation release guard; affected dispatcher7/0/0/0 passes afterward. Node gateway/public contracts7/0/0/0; strict TS/lint, public78/internal5 generated checks and diff check exit0. Exact commands/red results in artifacts/cloudflare/CF02-checkpoint.json and associated logs/XML. No count extrapolation.
+
+Additive0034 allocated after inspected0033 head, applied only to fresh owned PostgreSQL. Empty upgrade/downgrade/re-upgrade succeeds; populated downgrade refuses while retaining version/steps/nonces/business truth. One global permit and tenant forced RLS, catalog-tested non-owner/NOBYPASSRLS inherited worker login; worker cannot activate selector/epoch. Twenty simultaneous requests produce one buyer update/audit/receipt. Default off, signed raw-body/path/time/nonce HMAC, replay409, staff bearer401, fields422, oversized413, rotation and cross-tenant negatives pass. Fixture role isolation preserves existing intentional role revocation tests; no production fixture/hidden skips or weakened assertion.
+
+Next CF03: bounded documents/fetch/bulk/draft/retention and one native owner. CF00 hosted4 remain not_run; no remote schema/secret/resource/deployment/provider change and no deployed SHA inferred. Remaining A13/A15/A16/A17/A18 and external gates stay open.
+
+
+## Cloudflare CF03 checkpoint (2026-10-01 HK)
+
+CF03 locally complete: focused30/0/0/0 in38.17s, affected public API62/0/0/0 in37.62s, full worker184/0/0/0 in38.69s, required count gates pass; Node contracts7/0/0/0, public78/internal5 current. Six modules have one native API owner with legacy aliases. Each local intent is one bounded unit; bulk50-row successor, progress and receipt commit atomically. Real101/1000-row partial restart, parser8-second child boundary, delete/member/epoch races, disabled R2/no synthetic facts, retention50 and catalog membership pass. Reproduced reviewer mismatch fixed through the canonical API permission rule; existing negative roles remain. Logs include all initial failures and fixture corrections.
+
+Frozen no-dev Linux API-only probe verifies4/failed0: imports without worker/Celery/dev dependencies, actual PDF extraction, sanitized child environment and actual8-second child kill. This is local package proof, not Vercel deployment or live R2/provider evidence. Exact commands/counts/hashes in artifacts/cloudflare/CF03-checkpoint.json. No new migration; no production/cloud/provider action. Older actorless parse intents fail closed on the new transport and require verified re-admission. Next CF04 provider units/reconciliation; CF00 hosted4 and prior external audit gates stay open.
+
+
+## Cloudflare CF04 checkpoint (2026-10-01 HK)
+
+CF04 locally complete: final focused48/0/0/0, full API632/0/0/0 and legacy worker184/0/0/0. Full API collected before the last three fit-authority regressions; those pass in final48. Node contracts7/0/0, public78/internal5 current; strict count gates pass. Native frozen no-dev Linux API-only final-source probe4 verified/0failed, no Celery/worker package and actual sanitized8-second parser kill. No new migration, head0034 unchanged. Exact commands, output artifacts, source hashes and failures retained in artifacts/cloudflare/CF04-checkpoint.json.
+
+Eight provider/graph modules have one API owner with legacy aliases. Query, contact and fit execution are bounded persisted units; selector/epoch rechecked around native transactions; no tenant lock across provider awaits. Unknown acceptance/API expiry holds money and produces reconciliation receipts. Current contact admitting actor, fit profile/membership/policy and predecessor-issued keys enforced. Existing price/callback/cancel/money/limit tests retained. All provider evidence fictional, not live verification. Production adapters empty; no cloud resources, deployment or production changes. Deadline or epoch-interrupted submitting work requires CF06 recovery scheduling. Historical actorless contact intents fail closed under bounded/production execution. Next CF05 controller; hosted and external audit gates remain open.
+
+
+## CF05 checkpoint — 2026-10-01 HK
+
+Code implemented: disabled Cloudflare Cron/Queue/Workflow controller with strict generated internal5 types, raw HMAC, origin allowlist/no redirects, deterministic IDs, verified ACK, status-before-repeat,512/2048 limits, busy waits separate from five transport failures, opaque quarantine and mandatory Worker TS/lint/bindings/test/dry-run CI gates. One domain API remains. No new migration.
+
+Verification: controller22 passed/0 failed/0 errors/0 skipped; actual local Queue→Workflow→loopback API→owned PG1 passed/0 failed/0 errors/0 skipped (81.39s, separate nested platform1 pass). Duplicate calls produce one buyer update/audit/receipt. HTTP fixture tests use mature MSW explicitly; fictional identity is not live Auth0/provider verification. Public78/internal5 contracts current, Node7/0/0, frontend/Worker TS/lint and bindings exit0; dry-run136.56KiB/gzip24.19KiB. Head0034 unchanged. Raw failed and final outputs retained; only trailing whitespace normalized in committed logs. Exact commands/source hashes: `artifacts/cloudflare/CF05-checkpoint.json`.
+
+CF06 is next: durable end-to-end probe/readiness, orphan/reconcile/deletion and restart/rollback. Hosted packaging/both-hop90/protection, paid resources, production schema/credentials, live providers and CF07 UI/performance remain separately unverified/unactivated. No push/deploy/provision/production mutation/provider calls occurred in this task.
+
+## CF06 checkpoint — 2026-10-01
+
+Local recovery/readiness/retention/operator controls implemented. Exact commands/counts/environment/failure history and source hashes: `artifacts/cloudflare/CF06-checkpoint.json`. Strict final DB15/0/0/0 (87.75s), predecessor48/0/0/0 (58.70s), controller24/0/0/0 (10.65s), nested actual Queue/Workflow/HMAC/PG2/0/0/0, sanitized killed-process/restore/rollback rerun4/0/0/0, Node7/0/0. Worker/root types/lint, generated contracts/bindings and disabled dry-run exit0 (136.94KiB/gzip24.28KiB). Public78/internal5 current. Migration0035 allocated after0034 verification; empty downgrade/re-upgrade and populated refusal preserve unknown hold. No production migration or provider/resource/deployment activation. CF07 remains required: actual full staff journey, browser continuity, both builds, performance, and final full API/worker suites.
+
+## CF07 current checkpoint (local verification in progress)
+
+Full API650/0/0/0 (344.842s), worker186/0/0/0 (214.031s), required JUnit gates passed. Readiness/recovery/platform20 and controller24 passed without skips; local repeated ten-job and10k-row measured results are recorded separately. Emitted Vercel frontend acceptance6 passed/1 scope-interception timeout; final seven-case and legacy browser gates remain pending. Default Windows dev startup failures retained; emitted build does not prove dev/HMR. Hosted package/parser/checkpoint, both90-second hops, paid resources, providers, R2 and production activation remain not run/unapproved.
+
+## CF07 final checkpoint — 2026-10-01 HK
+
+Code and local fixture integration complete. Exact commands, counts, source hashes, failures and screenshots: artifacts/cloudflare/CF07-checkpoint.json. Full API650/0/0/0 and worker186/0/0/0; readiness/recovery20; controller25; final actual-PG platform1 wrapping two real Workers cases. Guarded actual emitted frontend + Cron/Queue/Workflow/HMAC/API/owned-PG staff acceptance7/0/0/0 in1.9m. Existing Celery continuity4, workbench8, buyer pagination1, management3, partial MVP1 and actual200% zoom2 all pass with required zero skips. Node12 pass; root/controller/source/test types/lint, generated public78/internal5, bindings/frozen install/both builds and disabled dry-run pass.
+
+Regressions observed then fixed: paused-Celery readiness; non-owner legacy fixture selector setup; hung Queue publication; public proxy scope interception; outside-test route teardown error; stale acceptance success/JUnit. Failed attempts are retained and not counted green. Windows dev/HMR itself remains unreliable; the chosen Vercel emitted handler and runtime binding pass. Four locale/layout flows, real page2,101-row bulk restart, unknown0.300000 hold/one submit, scope race and negative roles are verified only with fictional identity/providers.
+
+Performance conditions/results are in runbooks/cloudflare-operating-conditions.md; actual Queue ten-job repetitions P95 first-step9.85/14.07s and one global native body,100 cold workspaces in10 ticks each;10k-row ASGI late-page P9558.60ms sequential/258.65ms ten distinct actors. No hosted/provider latency inference. No migration added in CF07; current local head0035 with prior empty rollback and populated refusal. CF00 hosted4, paid resource/production/provider/R2/policy/pilot and independent review gates remain open. Next CF08; no external activation.
+
+## CF08 final local release checkpoint — 2026-10-01 HK
+
+- Reviewed code/configuration commit d6c2849; exact baseline/path/source manifest,
+  author rulings, commands, failure artifacts and current audit18 table are in the
+  linked Cloudflare handoff and `artifacts/cloudflare/CF08-checkpoint.json`.
+- Red: missing budgets/private preview3 failures; stale bindings exit1;
+  optional protection3 failures. Green: Node19/0/0/0, controller27/0/0/0,
+  strict owned PG18 compatibility29/0/0/0 (426.51s), types/lint/bindings0.
+  Vercel build/emitted90, official schema validation and preview dry-run0;
+ 137.54KiB/gzip24.49KiB. Static scan2333 frontend artifacts plus Worker:
+  listed credential shapes/test secrets absent, not a hosted secret-store audit.
+- Public original70+8 extension IDs match78 handler rows; internal5 separate.
+  Per-operation deployed statuses remain unverified. Delivery403 retained.
+- No new schema in CF08. One local head0035; additive0034/35 allocated properly
+  and rollback/empty roundtrip/populated refusal/unknown-hold evidence retained.
+  Production Neon metadata only: PG18/Singapore/Free0.25..2CU, suspended compute.
+  Minute polling minimum180CU-hours/month exceeds published Free100; no upgrade.
+- Requested, not approved: exact isolated preview Worker/Queue/DLQ/Workflow,
+  dedicated protected Vercel project and fresh empty Neon Free project, max2h
+  fictional machine proof. Workers Paid US$5/month base if needed plus shared
+  metered overages; no new Neon/Vercel paid plan or production/provider scope.
+- CF00 hosted remains NOT RUN; CF08 activation/deployed fields remain pending.
+  Next eligible: bounded hosted feasibility after that exact authorization.
+
+## CF08 pushed-source verification checkpoint
+
+- CI36859284850 at branch d8ca315/test-merge8634fba: eight/eight SUCCESS.
+  Actual Linux API650/0/0/0 (195.27s), worker186/0/0/0 (24.81s), controller27,
+  PG18compatibility29, operating2, full staff7, legacy4/8/1/3/1 plus zoom/smoke
+  and frontend gates. Exact current archive digests, XML counts/source manifests
+  and decoded checker outputs retained in `CF08-remote-ci.json`/`ci-d8ca315/`.
+- Existing Git/Vercel automation published app/API preview d8ca315, READY
+  dpl_EPr4wsjaMNcgo3XA2itL1NxDGsc7, iad1/targetnull/branch alias. It is not the
+  approved dedicated empty preview, CF job deployment, production cutover or
+  hosted native feasibility proof. Cloudflare stack deployed SHA remains null.
+- Following updates are documentation/evidence only; code remains reviewed
+  d6c2849. No paid resource/production migration/provider/pilot activation.
+
+
+## Approved isolated hosted preview checkpoint — 2026-10-01
+
+Direct human approval now covers the named protected preview for at most2hours, ending2026-10-01T16:48:41Z; conditional Workers Paid$5/month base if required. No billing-plan change has been made. Production/provider/R2/delivery/pilot and independent-review gates remain.
+
+New empty Neon rapid-night-21766635/br-old-shape-b3eel1kb was verified0public tables before owner-only Alembic upgrade to0035. Dedicated API/worker logins are non-owner/NOSUPERUSER/NOBYPASSRLS/NOCREATEDB/NOCREATEROLE; worker catalog prooftrue. Domain user/workspace/membership/outbox counts0; selectorcelery/false/1. Free0.25CU, SingaporePG18.6; account rejects suspend interval changes.
+
+Protected Vercel prj_YfIdLRKWvBjomGG56RhwEmqyxRRR has14preview-only variables; migration/admin DSN absent, app→API URL bound by platform. First CLI deployment was misclassifiedproduction despite--targetpreview and canceled before readiness, with no preview secrets exposed to that environment. Subsequent targetnull preview builder rejected conditional app assignment. Meaningful red1/0errors, handler fix40/0/0/0(3deselected); hostname fix41/0/0/0(1deselected) and strict exactDSN binding retained. Corrected archived source973ef26f4879ee561ff21377077c8c97077343d7 plus four-file temporary overlay is building; native/two-hop hosted proof pending.
+
+Private Cloudflare preview Worker versionad6f1ed8-8a30-4161-9c6d-7946b2fd17d8 and Workflowbuyeros-job-preview are deployed with executionfalse, noCron/public URLs. One actual ID-only Workflow returnedblocked/EXECUTION_DISABLED, zero steps; no API/customer/provider execution. Two private queues use3600second retention. No new Paid plan was needed by this disabled deployment; billing subscription remains unverified. Exact nonsecret target/state evidence is CF00-hosted-preview-checkpoint.json.
+
+
+## CF00 completed isolated hosted preview — 2026-10-02 HK
+
+- Approved exact two-hour session ends2026-10-01T16:48:41Z. Source595865f
+  deployed native overlay and then pure release API on protected new Vercel
+  project. Actual native imports/PDF/8s kill/Linux caps/checkpoint interrupt-resume/
+  tenant denial/no-dev bundle186540543bytes pass;61-second actual two-hop200,
+  native200, protection401/HMAC401/replay409. One real Queue-created Workflow
+  ID-only probe completes/done/OK with matching Neon epoch2 receipt. No direct
+  operator maintenance call and no customer/provider rows. Detailed identities,
+  source/overlay hashes, commands/failures and single-sample timings in the handoff.
+- Shutdown before expiry: selectorfalse/epoch3, both runtime loginsNOLOGIN,
+  controllerfalse/noCron/invalidorigin, six Vercel preview gatesfalse, bypass
+  revoked/former bypass401, new Neonidle. Vercelpause400 noactiveproduction;
+  effective alternative fences proven, no unapprovedproductiondeployment.
+  Receipts/queues retained; no purge/downgrade. No billing-plan mutation.
+- Codefix595865f derives isolated child paths only from installed package
+  metadata/API root, no inherited paths/secrets; meaningful red1failure and
+  green44/0/0/0. Fresh CI595865f API685pass/1failure identifies old blanket
+  PYTHONPATHban. Stronger exact independent allowlist + malicious path/secret
+  rejection and unchanged8s/temp assertions successor93de21f focused2/0/0/0
+  in4.23s. Failed CI and approval-review rejection retained, no waived test gate.
+  Latest full CI pending; historical passes not relabeled current.
+- TaskCF00 hosted fictional feasibility complete; CF08 production remains open.
+  One API/Alembic owner, public70+8/private5 unchanged. Audit10fixed/3changed/5open.
+  Next: independent review and inspected production role/schema/drain/epoch,
+  quotas/locality/alerts/rollback proposal; provider/R2/pilot/staff/a11y gates
+  separate. No new production deployed SHA or product-live claim.
+
+
+### Final pushed source and current UI evidence
+
+Source79d6caf8b51aac00560cf6d69b0198c8614df528 CI36893525903:8/8SUCCESS; API686/0/0/0 (261.25s,97warnings), worker186/0/0/0 (25.60s,1warning), controller27, PG18compat29/operating2/staff7, legacy4/8/1/3/1, zoom2/smoke1. Exact current official artifactdigest45b17aa6…3421eaa,19 sourcehashes and syntheticmerge tree verified;12 fresh root journeyPNG +2special cases retained after confirmed one-line upload selection fix. Four en/zh-HK desktop/mobile captures visually inspected; no assistive/live-provider claim. Current final manifest/visualreview and hosted checkpoint linked in handoff. Preview idle rechecked via control-plane GET at16:48:01Z, no runtime connect. Earlier685pass1failure retained; stronger exactpath/secret negatives pass. No production/schema/provider/billing/merge action. Following commit is documentation/evidence only, with current sourceCI proof retained; any automatically triggered new CI status remains separate.
+
+## CF08 production inspection and checkpoint permission correction — 2026-10-02 HK
+
+Completed checkpoint8ffd91f CI36895867947 is now SUCCESS8/8: API686/0/0/0 in272.48s,
+worker186/0/0/0 in36.11s, controller27, PG18compat29, operating2, staff7,
+legacy4/8/1/3/1, zoom2, smoke1. This predates the new permission correction below.
+
+GET-only platform inspection confirms production still12327c7/READY, Vercel Pro/active,
+iad1 and the app-to-internal-api binding. Neon remains Free/PG18/Singapore,0.25..2CU.
+Two bounded READ ONLY/REPEATABLE READ catalog/aggregate transactions (3s statement,
+15s transaction limit; no fixtures/customer identifiers) confirm production0033,
+users/workspaces/memberships1 each, projects0, outbox/provider/holds0, workerNOLOGIN,
+no runtime connections and no selector. Existing checkpoint schema is0..9, owner-held,
+with tenant ENABLE/FORCE RLS; worker lacks schema CREATE. Subsequent control-plane GET
+at2026-10-02 01:36:45HK confirms computeidle. No production row/schema/role changed.
+
+Inspection exposed worker DML on checkpoint_migrations from0022's broad table grant.
+Fresh-owned regression RED4failed/2passed/1deselected/0errors/0skips in74.53s;
+version rows are rolled back even during RED. Verified0035 sole head before allocating
+0036_checkpoint_schema_grants. It revokes worker version-table privileges and grants
+only SELECT; the runtime catalog rejects reintroduced writes. Downgrade intentionally
+retains read-only hardening and every checkpoint row. The operator's exact-head gate
+then failed1/7passed in95.92s; compatible0035/0036 markers are now accepted, with the
+strict runtime catalog still required. Eighteen existing test files advance only
+current-head expectations; original downgrade targets and business assertions remain.
+
+Current correction: focused23/0/0/0 in65.02s (24warnings), actual ownedPG18
+37/0/0/0 in83.82s (15warnings), full shared worker186/0/0/0 in67.18s
+(4warnings), gateway/release4/0/0 and78-operation contract check pass. PG18 now includes
+the eight new regressions. Original CF08/platform evidence is preserved; fresh reports
+use CF08-checkpoint-grants-* paths. Full current API/UI/Linux CI remains pending.
+No new hosted verification or production0036 application is claimed. Next: publish
+the current correction and exact bounded production setup proposal for review;
+production/provider/R2/pilot/independent-review gates remain separate.
+
+### Current permission correction CI and final preparation checkpoint
+
+[CI36905204388](https://github.com/YNWAforever/BuyerOS/actions/runs/36905204388)
+at a50ce72809518925a6c6c1f7e0e643fef5d37c49 is **SUCCESS8/8**. All23 correction
+source blobs match author-reviewed6ef38d1; intervening changes are docs/evidence.
+Actual `check-required-tests.py` outputs report zero failures/errors/skips:
+
+| Executed gate | Current result |
+| --- | --- |
+| services/api: `uv run --frozen pytest -q --junitxml=artifacts/tests.xml` |694passed,100warnings,263.77s; strict checker694/0/0/0 |
+| services/worker: same full pytest command |186passed,1warning,26.13s; strict checker186/0/0/0 |
+| `.venv/bin/python ../../scripts/run-cloudflare-pg18-proof.py` |37/0/0/0,12warnings,37.38s, fresh owned PG18 only |
+| `uv run --frozen pytest -q tests/benchmark_cloudflare_case.py` |2/0/0/0,1warning,39.34s, local integration only |
+| `pnpm cloudflare:test` |27/0/0/0 in actual local Workers runtime; controller types/lint/bindings/dry-run pass |
+| `node scripts/run-cloudflare-acceptance.mjs` |7/0/0/0, built UI/Workers/native/owned PG; fictional identities/providers |
+| Legacy continuity / actual zoom / smoke |4/8/1/3/1;2;1 pass, required0fail/error/skip |
+| Frontend and contracts |Frozen install, generated78-operation check, strict TS/lint, Vinext and emitted Vercel builds/tests SUCCESS |
+
+Exact commands/checker outputs/log hashes and four official verified ZIP digests
+are in [the current manifest](../../artifacts/cloudflare/ci-a50ce72-hosted-successor/manifest.json).
+All19 acceptance source hashes and synthetic merge98154447 tree match the CI
+head. XML reports retain original archive and canonical Git-byte hashes;
+four en/zh-HK desktop/mobile exports visually inspected, all14 fresh captures
+retained. A collector guard rejected a historical same-suffix controller XML;
+the exact inspected upload-root member was selected. No test/result was changed.
+
+[Current checkpoint](../../artifacts/cloudflare/CF08-production-current-ci-checkpoint.json)
+and [setup proposal](runbooks/cloudflare-production-setup-proposal-20261002.md)
+are complete for review. Production remains source12327c7/schema0033, unchanged;
+hosted595865f/0035 proof stays separate. Next: human source-review disposition
+and exact guarded production setup approval. At most two attended hours, one
+ID-only Queue/Workflow/API probe, Cron off and mandatory fence; no paid-plan
+upgrade/customer/provider/R2/delivery activation. Independent review and the five
+open audits remain open. Following evidence-only commits keep this named source
+proof; their automatically triggered CI status is reported separately.

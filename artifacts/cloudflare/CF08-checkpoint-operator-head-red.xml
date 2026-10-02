@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="8" time="95.919" timestamp="2026-10-02T01:39:32.481858+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_worker_cannot_mutate_checkpoint_schema_versions[INSERT INTO buyeros_graph.checkpoint_migrations(v) VALUES(99)]" time="89.036" /><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_worker_cannot_mutate_checkpoint_schema_versions[UPDATE buyeros_graph.checkpoint_migrations SET v=99 WHERE v=9]" time="0.036" /><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_worker_cannot_mutate_checkpoint_schema_versions[DELETE FROM buyeros_graph.checkpoint_migrations WHERE v=9]" time="0.029" /><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_worker_cannot_mutate_checkpoint_schema_versions[TRUNCATE buyeros_graph.checkpoint_migrations]" time="0.040" /><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_runtime_catalog_rejects_reintroduced_checkpoint_version_write" time="0.461" /><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_schema_read_only_worker_resumes_actual_checkpoint_without_replaying" time="1.386" /><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_0036_round_trip_keeps_schema_version_grants_read_only" time="0.819" /><testcase classname="tests.test_checkpoint_schema_privileges_db" name="test_operator_previews_current_head_without_mutating_selector" time="1.056"><failure message="ValueError: compatible 0035 build and migration required">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:50544/buyeros_test_api'
+
+    def test_operator_previews_current_head_without_mutating_selector(migrated):
+        from buyeros_api.services.worker_recovery import set_execution_runtime
+        with psycopg.connect(migrated) as owner:
+            before = owner.execute('SELECT backend,enabled,epoch FROM worker_runtime_control').fetchone()
+&gt;       result = set_execution_runtime(migrated, expected_epoch=before[2], backend='cloudflare',
+                                       enabled=False, reason='Owned permission regression dry run')
+
+tests\test_checkpoint_schema_privileges_db.py:91:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+dsn = 'postgresql://buyeros:buyeros@127.0.0.1:50544/buyeros_test_api'
+
+    def set_execution_runtime(dsn: str, *, expected_epoch: int, backend: str, enabled: bool,
+                              reason: str, apply: bool = False) -&gt; dict:
+        """Operator-only compare-and-swap. Dry run by default; no cloud activation."""
+        import psycopg
+        if (type(expected_epoch) is not int or not 1 &lt;= expected_epoch &lt; 9007199254740991
+                or backend not in {'celery', 'cloudflare'} or type(enabled) is not bool
+                or not isinstance(reason, str) or not 1 &lt;= len(reason.strip()) &lt;= 200):
+            raise ValueError('invalid runtime change')
+        with psycopg.connect(dsn) as db:
+            if db.execute('SELECT version_num FROM alembic_version').fetchone()[0] != '0035_worker_recovery_probe':
+&gt;               raise ValueError('compatible 0035 build and migration required')
+E               ValueError: compatible 0035 build and migration required
+
+buyeros_api\services\worker_recovery.py:216: ValueError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,470 @@
+{
+  "status": "isolated_hosted_preview_complete_fenced_and_suspended",
+  "recorded_at": "2026-10-01T16:31:14.064906+00:00",
+  "authorization": {
+    "source": "Direct human approve following exact protected-preview/conditional Workers Paid question",
+    "recorded_utc": "2026-10-01T14:48:41Z",
+    "preview_setup": true,
+    "workers_paid_if_needed": true,
+    "production_activation": false
+  },
+  "window": {
+    "started_at": "2026-10-01T14:48:41Z",
+    "expires_at": "2026-10-01T16:48:41Z",
+    "shutdown_completed_at": "2026-10-01T16:26:11.821617+00:00"
+  },
+  "resources": {
+    "cloudflare_account": "e387dfbeded3deb5b8f0023a78a660b5",
+    "vercel_team": "team_qvzlsFmfCsLkgItSypqHjw3z",
+    "neon_org": "org-soft-sunset-25251479",
+    "neon_project_id": "rapid-night-21766635",
+    "neon_branch_id": "br-old-shape-b3eel1kb",
+    "neon_endpoint_id": "ep-little-lab-b3rk8fx5",
+    "neon_host": "ep-little-lab-b3rk8fx5.c-4.ap-southeast-1.aws.neon.tech",
+    "vercel_project_id": "prj_YfIdLRKWvBjomGG56RhwEmqyxRRR"
+  },
+  "release_code_source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+  "regression_test_successor_source_sha": "93de21f8201f9ddb9f481f061a579a59d50efc37",
+  "native_deployed_source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+  "operational_deployed_source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+  "native_overlay_removed_before_operational": true,
+  "database": {
+    "revision": "0035_worker_recovery_probe",
+    "roles": [
+      {
+        "role": "buyeros_cf_preview_api",
+        "superuser": false,
+        "bypassrls": false,
+        "createdb": false,
+        "createrole": false,
+        "owned_relations": 0,
+        "worker_catalog_proof": null
+      },
+      {
+        "role": "buyeros_cf_preview_worker",
+        "superuser": false,
+        "bypassrls": false,
+        "createdb": false,
+        "createrole": false,
+        "owned_relations": 0,
+        "worker_catalog_proof": true
+      }
+    ],
+    "runtime_selector": [
+      "celery",
+      false,
+      1
+    ],
+    "domain_counts": {
+      "users": 0,
+      "workspaces": 0,
+      "memberships": 0,
+      "outbox_events": 0
+    },
+    "production_touched": false
+  },
+  "database_initial_identity": {
+    "identity": [
+      "buyeros_cf_preview",
+      "buyeros_cf_preview_owner",
+      "18.6 (4e955f5)"
+    ],
+    "public_tables": 0
+  },
+  "controller_versions": {
+    "controller-deploy-log.txt": {
+      "sha256": "fbc38ad8348dd97ba1d907daa7ba7115bcba11482a94115c1c230409df9ac51f",
+      "version_id": [
+        "ad6f1ed8-8a30-4161-9c6d-7946b2fd17d8"
+      ]
+    },
+    "operational-controller-log.txt": {
+      "sha256": "a7ad5ec5952ea38be3f140216e9c3b70ecada6c2df5470a3af2b8652e8ba26d0",
+      "version_id": [
+        "d0c22a4c-fd49-4124-a525-f6e269e375ab"
+      ]
+    },
+    "paused-controller-log.txt": {
+      "sha256": "69679e3247b2113fb3059e824d51cd9dd151753a211180d44ffaf62d8a5cdf36",
+      "version_id": [
+        "992537e3-7d93-402a-8c98-dafb110958a4"
+      ]
+    }
+  },
+  "disabled_workflow_negative": {
+    "id": "cf00-disabled-20261001",
+    "params": {
+      "v": 1,
+      "kind": "probe",
+      "probe_id": "8a6f2c7d-b43b-4d12-8724-b7e682cd2d20",
+      "runtime_epoch": 1
+    },
+    "trigger": {
+      "source": "api"
+    },
+    "versionId": "c6ec98c8-ebb1-4660-bde9-f1ea618e88ab",
+    "queued": "2026-10-01T15:34:18.826Z",
+    "start": "2026-10-01T15:34:22.827Z",
+    "end": "2026-10-01T15:34:22.901Z",
+    "success": true,
+    "error": null,
+    "output": {
+      "state": "blocked",
+      "code": "EXECUTION_DISABLED",
+      "next_step_key": null,
+      "retry_at": null
+    },
+    "rollback": null,
+    "status": "complete",
+    "step_count": 0,
+    "steps": []
+  },
+  "hosted_native_verified": true,
+  "hosted_two_hop_duration_verified": true,
+  "hosted_operational_queue_workflow_api_receipt_verified": true,
+  "scope_limit": "Fictional native/PDF/ID-only checks only; no real customer/provider/staff journey verified by this session",
+  "plan_changes": {
+    "cloudflare": false,
+    "neon": false,
+    "vercel": false
+  },
+  "cloudflare_billing_subscription": "GET403/unverified; successful deploy not evidence of paid plan",
+  "production_activation": false,
+  "provider_verification": false,
+  "delivery_enabled": false,
+  "public_operations": 78,
+  "private_operations": 5,
+  "diagnostic_is_release_operation": false,
+  "evidence": [
+    {
+      "path": "artifacts/cloudflare/CF00-hosted-native-and-duration.json",
+      "sha256": "0ffbd44a15a3b5534e6f58c98e908ad6b11679e29f33d269ff270ca2a7a497c1",
+      "original_local_sha256": "f7f4c6a256a8d940bf2b383cf9339cd4222cfb2c71cd42c87067520e228494d6"
+    },
+    {
+      "path": "artifacts/cloudflare/CF00-hosted-operational.json",
+      "sha256": "44de6f3e63f3451cfa002d842d22bbf5fc30c88bdd3a07c98bc5836dba7c716c",
+      "original_local_sha256": "cb7a952048509c0a170515934994f7c7a9d3adabc545dd8dd835282bad8880a8"
+    },
+    {
+      "path": "artifacts/cloudflare/CF00-hosted-shutdown.json",
+      "sha256": "90f1627ef83cec76aaad124c039e1f0e31394b43ac9dd09821815590c22198e1",
+      "original_local_sha256": "8b7c6432477b6bd75fee956487a704118e999a81548a993a7d066117d13a4f0a"
+    },
+    {
+      "path": "artifacts/cloudflare/CF00-hosted-deployment-manifest.json",
+      "sha256": "4f4c69063e45993d279e73e43e46289fcb0c7f29842a5e5a30dd098be7208404",
+      "original_local_sha256": "81d48f82990b898d7b41e85f0d4914d1f4ba5a2d17d49d7ab0134fdc48603940"
+    },
+    {
+      "path": "artifacts/cloudflare/CF00-legacy-isolation-ci-red.json",
+      "sha256": "880e69e4411537c6d33dcf9d3c3de9a17795604317b728f3d4505d2ab69e1f63",
+      "original_local_sha256": "e031ca48e27a6f693b7d20c1b016de43b99da001a99fb913cb0e661e7180ec96"
+    }
+  ],
+  "tests": {
+    "hostname_green": {
+      "passed": 41,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 1,
+      "seconds": 71.9
+    },
+    "handler_green": {
+      "passed": 40,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 3,
+      "seconds": 4.23
+    },
+    "closed_error_green": {
+      "passed": 42,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 2,
+      "seconds": 52.52
+    },
+    "vendor_path_red": {
+      "passed": 0,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.58
+    },
+    "vendor_path_green": {
+      "passed": 44,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 1,
+      "seconds": 45.69,
+      "limit": "Before runtime bundle measurement addition; actual measurement verified hosted later"
+    },
+    "legacy_isolation_green": {
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.23
+    }
+  },
+  "failed_hosted_native_attempts": [
+    {
+      "source_sha": "973ef26f4879ee561ff21377077c8c97077343d7",
+      "deployment_id": "dpl_5uE6fUuXLYZ1K5eVqg7k3YaR7hJV",
+      "native_results": [
+        {
+          "operation": "native",
+          "bypass": true,
+          "signed": true,
+          "replay": false,
+          "status": 503,
+          "wall_seconds": 6.5990011999965645,
+          "response_sha256": "b0749a72629e1073bb4a8659da43b9bc2b39ece40ece5b6ba4e1b99357ca227c",
+          "response_bytes": 51,
+          "cache_control": "private, no-store",
+          "vercel_id": "sin1::iad1::lzn8l-1790869063456-633cd00ee9a0",
+          "result": {
+            "code": "PROBE_FAILED",
+            "error_type": "RuntimeError"
+          }
+        }
+      ]
+    },
+    {
+      "source_sha": "deee34a38ce57a4b50ebd3163191a08afda8203d",
+      "deployment_id": "dpl_GyPhLaoch1iSmqUyEgPhVEXG8uCD",
+      "native_results": [
+        {
+          "operation": "native",
+          "bypass": true,
+          "signed": true,
+          "replay": false,
+          "status": 503,
+          "wall_seconds": 6.42658629998914,
+          "response_sha256": "00455107312b8910d69f4308d6bad386f654cc0430974fb0c7d904b53aeadf98",
+          "response_bytes": 99,
+          "cache_control": "private, no-store",
+          "vercel_id": "sin1::iad1::d4nzf-1790869816087-69aeb126451d",
+          "result": {
+            "code": "PROBE_FAILED",
+            "error_type": "NativeProbeFailure",
+            "native_error_type": "ModuleNotFoundError"
+          }
+        }
+      ]
+    },
+    {
+      "source_sha": "fa7a65e5bcb528f10dd079ac49bc9d053d01216d",
+      "deployment_id": "dpl_3GfotuC2yQEfHPKbBsyhbNLm6eau",
+      "native_results": [
+        {
+          "operation": "native",
+          "bypass": true,
+          "signed": true,
+          "replay": false,
+          "status": 503,
+          "wall_seconds": 6.45431319999625,
+          "response_sha256": "b048d324a6602a04159dcee2ec2ec31299701898d07d1012385dbca94308d379",
+          "response_bytes": 126,
+          "cache_control": "private, no-store",
+          "vercel_id": "sin1::iad1::pz4k5-1790870162404-015e4dc1bb40",
+          "result": {
+            "code": "PROBE_FAILED",
+            "error_type": "NativeProbeFailure",
+            "native_error_type": "ModuleNotFoundError",
+            "missing_module": "psycopg"
+          }
+        }
+      ]
+    }
+  ],
+  "failures_retained": [
+    "Initial new-project CLI target misclassifiedproduction despite explicitpreview; canceled before readiness/alias, no preview secrets inproductionenv",
+    "Conditional ASGI handler rejected bybuilder, reproduced1failure thenmodule-level assignment",
+    "Initial regression placement collectionIndentationError corrected before meaningfulred",
+    "Automaticapproval rejected attempt to continue after failednativeassertion; patchnotapplied; originalnativeassert retained and separate durationproof recorded",
+    "Hostedmissingpsycopg reproduced; installed package paths added to isolatedchildren without inherited secrets",
+    "Legacy CI685pass/1failure onblanketPYTHONPATH ban; exact independentmetadata allowlist andmalicious inherited import rejection now2focusedpasses",
+    "Operational metadata config.services KeyError stoppedbefore activation; exact actualtop-level services/handler representationchecked",
+    "Vercelpause400 noactiveproductiondeployment; alternativefencesverified, no syntheticproductiondeploymentcreated"
+  ],
+  "shutdown": {
+    "started_at": "2026-10-01T16:25:13.756410+00:00",
+    "production_touched": false,
+    "purged": false,
+    "steps": [
+      {
+        "step": "database_fence_and_runtime_nologin",
+        "state": "verified",
+        "details": {
+          "selector_before": [
+            "cloudflare",
+            true,
+            2
+          ],
+          "dry_run": {
+            "backend": "cloudflare",
+            "enabled": false,
+            "epoch": 2,
+            "applied": false,
+            "reason": "Approved bounded preview complete; fence all late work and preserve evidence"
+          },
+          "applied": {
+            "backend": "cloudflare",
+            "enabled": false,
+            "epoch": 3,
+            "applied": true,
+            "reason": "Approved bounded preview complete; fence all late work and preserve evidence"
+          },
+          "runtime_roles": [
+            [
+              "buyeros_cf_preview_api",
+              false
+            ],
+            [
+              "buyeros_cf_preview_worker",
+              false
+            ]
+          ],
+          "runtime_connections_terminated": 0,
+          "domain_counts": {
+            "users": 0,
+            "workspaces": 0,
+            "memberships": 0,
+            "outbox_events": 0,
+            "provider_operations": 0,
+            "worker_steps": 0
+          },
+          "probe_receipt_preserved": [
+            2,
+            "691e21ae-a5f6-42dc-ae82-65fb5701537e",
+            "2026-10-01 16:22:45.364297+00:00"
+          ]
+        }
+      },
+      {
+        "step": "vercel_preview_environment_off",
+        "state": "verified",
+        "details": {
+          "preview_keys_false": [
+            "BUYEROS_PREVIEW_PROBE_ENABLED",
+            "BUYEROS_CLOUDFLARE_EXECUTION_ENABLED",
+            "BUYEROS_CELERY_EXECUTION_ENABLED",
+            "BUYEROS_PAID_ADMISSION_ENABLED",
+            "BUYEROS_PAID_DISPATCH_ENABLED",
+            "BUYEROS_R2_ENABLED"
+          ],
+          "old_deployment_envs_immutable": true,
+          "database_fence_is_authority": true
+        }
+      },
+      {
+        "step": "revoke_project_automation_bypass",
+        "state": "verified",
+        "details": {
+          "bypass_revoked": true,
+          "replacement_created": false
+        }
+      },
+      {
+        "step": "pause_vercel_project",
+        "state": "failed",
+        "error_type": "AssertionError"
+      },
+      {
+        "step": "cloudflare_controller_off_no_cron",
+        "state": "verified",
+        "details": {
+          "execution_enabled": false,
+          "crons": [],
+          "public_urls": false,
+          "epoch": "3",
+          "config_sha256": "b45faf2544bd690697ef9a6c4429384a8da6ebbf9a86302309866400108c0b4a",
+          "deployment_log_sha256": "7d584d7e5f14b20026bd906ca8d882edf48ed5f221fa7520fdf3f4abdf2e7f64"
+        }
+      },
+      {
+        "step": "verify_revoked_bypass_access",
+        "state": "verified",
+        "details": {
+          "revoked_bypass_http_status": 401,
+          "response_sha256": "7a7299e672dcd022d9bb07d88b9343a88ec5ea4949a7f9af5026ec95b0302d30",
+          "no_valid_machine_signature_sent": true
+        }
+      },
+      {
+        "step": "suspend_new_neon_compute",
+        "state": "verified",
+        "details": {
+          "id": "ep-little-lab-b3rk8fx5",
+          "project_id": "rapid-night-21766635",
+          "current_state": "idle",
+          "pending_state": null,
+          "last_active": "2026-10-01T16:22:06Z",
+          "suspend_timeout_seconds": 0
+        }
+      }
+    ],
+    "completed_at": "2026-10-01T16:26:11.821617+00:00",
+    "before_approval_deadline": true,
+    "platform_pause_limit": {
+      "status": 400,
+      "reason": "Active production deployment does not exist",
+      "raw_pause_attempt_preserved": true,
+      "no_production_deployment_created_to_make_pause_work": true,
+      "effective_fences": "selector disabled epoch3, API/worker roles NOLOGIN, controller/Cron off, bypass revoked and HTTP401, Neon idle; compiled diagnostic expires16:48:41Z"
+    }
+  },
+  "next_eligible": "Independent review/currentproductionrole/schema/drain/quotas/locality/alert inspection and exact production activation proposal; provider/R2/pilot gates separate",
+  "final_source_ci": {
+    "run_id": 36893525903,
+    "source_sha": "79d6caf8b51aac00560cf6d69b0198c8614df528",
+    "status": "success",
+    "jobs": 8,
+    "evidence": "artifacts/cloudflare/ci-79d6caf-hosted-successor/manifest.json",
+    "manifest_sha256": "6545ce70409d4e18e8c56a026b255c8dafd60952f7c15934023184f8eb98a865",
+    "counts": {
+      "api": 686,
+      "worker": 186,
+      "controller": 27,
+      "pg18": 29,
+      "operating": 2,
+      "staff_journey": 7,
+      "legacy": [
+        4,
+        8,
+        1,
+        3,
+        1
+      ],
+      "zoom": 2,
+      "smoke": 1
+    },
+    "required_failures": 0,
+    "required_errors": 0,
+    "required_skips": 0,
+    "fresh_ui_screenshots": 14,
+    "source_files_verified": 19,
+    "test_merge_sha": "d3a72bfc68d80e1b788ba6ded65075d61242f270",
+    "test_merge_tree_equals_source": true,
+    "scope": "Actual local runtime/PG/UI with fictional identity/providers; hosted native and operational proof at595865f separate"
+  },
+  "current_reviewed_source_sha": "79d6caf8b51aac00560cf6d69b0198c8614df528",
+  "ui_visual_review": "artifacts/cloudflare/CF00-current-ui-visual-review.json",
+  "preview_idle_rechecked_at": "2026-10-01T16:48:01Z",
+  "preview_idle_readback": {
+    "endpoint_id": "ep-little-lab-b3rk8fx5",
+    "project_id": "rapid-night-21766635",
+    "current_state": "idle",
+    "pending_state": null,
+    "fixed_cu": 0.25,
+    "disabled": false,
+    "scope": "Control-plane GET only; no connection that would resume compute"
+  },
+  "evidence_sha256_scope": "Canonical LF Git file bytes; original local bytes retained separately; no result/count change",
+  "normalization_evidence": "artifacts/cloudflare/CF00-hosted-evidence-normalization.json"
+}

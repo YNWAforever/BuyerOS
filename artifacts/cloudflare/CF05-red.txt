@@ -1,0 +1,74 @@
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+ ❯ services/cloudflare-jobs/tests/dispatcher.test.ts (3 tests | 3 failed) 75ms
+   × dispatch off performs no API or binding calls 41ms
+   × claims at most ten IDs for ten seconds and records only accepted publication 12ms
+   × publish-before-receipt crash keeps the original opaque generation for recovery 21ms
+ ❯ services/cloudflare-jobs/tests/protocol.test.ts (3 tests | 3 failed) 74ms
+     × rejects extra customer fields, URLs and unsafe numbers before scheduling 39ms
+     × separates operational probes and deterministic workflow IDs 10ms
+     × requires the four-field bounded outcome and server-issued step key 21ms
+ ❯ services/cloudflare-jobs/tests/api-client.test.ts (2 tests | 2 failed) 96ms
+   × signs exact POST path and raw bytes with a fixed protocol vector and no redirect 61ms
+   × refuses credentials, origin mismatch, URL prefix/query and non-HTTPS outside isolated loopback mode 33ms
+ ❯ services/cloudflare-jobs/tests/queue.test.ts (2 tests | 2 failed) 63ms
+   × ACK requires verified creation or inspection of the deterministic instance 47ms
+   × does not ACK an unverified handoff or restart an existing failed workflow 14ms
+ ❯ services/cloudflare-jobs/tests/workflow.test.ts (3 tests | 3 failed) 120ms
+   × HTTP timeout reads committed status before any repeated execution 91ms
+   × busy permits wait without consuming the transient error budget 5ms
+   × unknown acceptance stops the controller without a new submit 23ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 13 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  services/cloudflare-jobs/tests/api-client.test.ts > signs exact POST path and raw bytes with a fixed protocol vector and no redirect
+ FAIL  services/cloudflare-jobs/tests/api-client.test.ts > refuses credentials, origin mismatch, URL prefix/query and non-HTTPS outside isolated loopback mode
+Error: Cannot find module '/services/cloudflare-jobs/src/api-client' imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/api-client.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
+
+ FAIL  services/cloudflare-jobs/tests/dispatcher.test.ts > dispatch off performs no API or binding calls
+ FAIL  services/cloudflare-jobs/tests/dispatcher.test.ts > claims at most ten IDs for ten seconds and records only accepted publication
+ FAIL  services/cloudflare-jobs/tests/dispatcher.test.ts > publish-before-receipt crash keeps the original opaque generation for recovery
+Error: Cannot find module '/services/cloudflare-jobs/src/dispatcher' imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/dispatcher.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯
+
+ FAIL  services/cloudflare-jobs/tests/protocol.test.ts > opaque worker protocol > rejects extra customer fields, URLs and unsafe numbers before scheduling
+ FAIL  services/cloudflare-jobs/tests/protocol.test.ts > opaque worker protocol > separates operational probes and deterministic workflow IDs
+ FAIL  services/cloudflare-jobs/tests/protocol.test.ts > opaque worker protocol > requires the four-field bounded outcome and server-issued step key
+Error: Cannot find module '/services/cloudflare-jobs/src/protocol' imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/protocol.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯
+
+ FAIL  services/cloudflare-jobs/tests/queue.test.ts > ACK requires verified creation or inspection of the deterministic instance
+ FAIL  services/cloudflare-jobs/tests/queue.test.ts > does not ACK an unverified handoff or restart an existing failed workflow
+Error: Cannot find module '/services/cloudflare-jobs/src/queue' imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/queue.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯
+
+ FAIL  services/cloudflare-jobs/tests/workflow.test.ts > HTTP timeout reads committed status before any repeated execution
+ FAIL  services/cloudflare-jobs/tests/workflow.test.ts > busy permits wait without consuming the transient error budget
+ FAIL  services/cloudflare-jobs/tests/workflow.test.ts > unknown acceptance stops the controller without a new submit
+Error: Cannot find module '/services/cloudflare-jobs/src/workflow' imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/workflow.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯
+
+
+ Test Files  5 failed (5)
+      Tests  13 failed (13)
+   Start at  14:35:25
+   Duration  8.63s (transform 448ms, setup 0ms, import 835ms, tests 428ms, environment 0ms)
+
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF05-red.xml

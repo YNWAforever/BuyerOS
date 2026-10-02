@@ -1,0 +1,228 @@
+{
+  "target": {
+    "vercel_project_id": "prj_YfIdLRKWvBjomGG56RhwEmqyxRRR",
+    "vercel_project_name": "buyeros-cf-preview",
+    "neon_project_id": "rapid-night-21766635",
+    "neon_project_name": "BuyerOS-CF-preview-20261001",
+    "neon_branch_id": "br-old-shape-b3eel1kb",
+    "neon_host": "ep-little-lab-b3rk8fx5.c-4.ap-southeast-1.aws.neon.tech",
+    "database": "buyeros_cf_preview",
+    "worker_role": "buyeros_cf_preview_worker",
+    "api_role": "buyeros_cf_preview_api",
+    "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+    "session_started_at": "2026-10-01T14:48:41+00:00",
+    "expires_at": "2026-10-01T16:48:41+00:00"
+  },
+  "deployment": {
+    "id": "dpl_HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP",
+    "url": "https://buyeros-cf-preview-oqbboak66-ynwaforevers-projects.vercel.app",
+    "inspectorUrl": "https://vercel.com/ynwaforevers-projects/buyeros-cf-preview/HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP",
+    "readyState": "INITIALIZING",
+    "target": null,
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_HP2YJ8NpPWPhZr6Gz6CQMZDt2xCP"
+  },
+  "records": [
+    {
+      "operation": "native",
+      "bypass": false,
+      "signed": false,
+      "replay": false,
+      "status": 401,
+      "wall_seconds": 0.737784199998714,
+      "response_sha256": "03b31582cf903434ffbb1b3cdccd2cbf3dee208932e635d8d6ce9ec1c2ff17e0",
+      "response_bytes": 626,
+      "cache_control": "no-store, max-age=0",
+      "vercel_id": "sin1::6mvq4-1790871298594-7c98caf5ab2a",
+      "result": {
+        "error": {
+          "code": "401"
+        },
+        "vercel_auth_enabled": true
+      }
+    },
+    {
+      "operation": "native",
+      "bypass": true,
+      "signed": false,
+      "replay": false,
+      "status": 401,
+      "wall_seconds": 5.430234100000234,
+      "response_sha256": "1ba720aa4073041ae578a7cb5fa1d88a7f05f371b964a53678b077367e8c4673",
+      "response_bytes": 145,
+      "cache_control": "private, no-store",
+      "vercel_id": "sin1::iad1::74bts-1790871299153-eadd9296aa8f",
+      "result": {
+        "code": "UNAUTHORIZED",
+        "message": "preview machine authentication required",
+        "request_id": "824978c1-863a-4e2f-9c04-999187e568a1",
+        "retryable": false
+      }
+    },
+    {
+      "operation": "native",
+      "bypass": true,
+      "signed": true,
+      "replay": false,
+      "status": 200,
+      "wall_seconds": 28.735259599983692,
+      "response_sha256": "2774aabbc5b16e85a000f0bf145008780c532ab3885c29d094ee065e8691f993",
+      "response_bytes": 2130,
+      "cache_control": "private, no-store",
+      "vercel_id": "sin1::iad1::lgd9p-1790871304580-fb2fd7084d02",
+      "result": {
+        "records": [
+          {
+            "check": "native_imports",
+            "state": "verified",
+            "details": {
+              "versions": {
+                "psycopg": "3.3.5",
+                "sqlalchemy": "2.0.53",
+                "pypdf": "6.19.0",
+                "langgraph": "1.2.12",
+                "langgraph-checkpoint-postgres": "3.1.2"
+              },
+              "cold_import_seconds": 0.7725197329999993,
+              "warm_import_seconds": 0.0057856220000012115,
+              "python": "3.12.14",
+              "platform": "linux",
+              "development_dependencies_present": false
+            }
+          },
+          {
+            "check": "vercel_api_bundle",
+            "state": "verified",
+            "details": {
+              "measurement": "actual uncompressed Lambda task regular files; ZIP transport size unavailable",
+              "regular_files": 8664,
+              "regular_file_bytes": 186540543,
+              "symlinks": 0,
+              "all_native_package_roots_in_task": true,
+              "wall_seconds": 0.32165354599999674,
+              "development_dependencies_present": false
+            }
+          },
+          {
+            "check": "pdf_native",
+            "state": "verified",
+            "details": {
+              "wall_seconds": 0.18256115699999853,
+              "parent_cpu_seconds": 0.003191321999999941,
+              "sample_sha256": "56698f27c3989f9977ac9193fb8cbb3ab80579851ab94419a577d32e32c397a1",
+              "facts": 1
+            }
+          },
+          {
+            "check": "pdf_isolation",
+            "state": "verified",
+            "details": {
+              "environment_keys": [
+                "PYTHONDONTWRITEBYTECODE",
+                "PYTHONIOENCODING",
+                "PYTHONPATH"
+              ],
+              "timeout_seconds": 8,
+              "temporary_workdir": true,
+              "stdin_bytes_only": true
+            }
+          },
+          {
+            "check": "pdf_timeout",
+            "state": "verified",
+            "details": {
+              "timeout_seconds": 8,
+              "child_killed": true,
+              "fixture": "sleeping child",
+              "wall_seconds": 8.008007164000002
+            }
+          },
+          {
+            "check": "postgres_role",
+            "state": "verified",
+            "details": {
+              "superuser": false,
+              "bypassrls": false,
+              "checkpoint_owner": false,
+              "worker_role_membership": true,
+              "environment": "disposable fixture role"
+            }
+          },
+          {
+            "check": "postgres_checkpoint",
+            "state": "verified",
+            "details": {
+              "committed_node_replayed": false,
+              "interrupted_node_resumed": true,
+              "cross_tenant_read_closed": true,
+              "schema_created_at_runtime": false
+            }
+          },
+          {
+            "check": "linux_caps",
+            "state": "verified",
+            "details": {
+              "limits": [
+                [
+                  536870912,
+                  536870912
+                ],
+                [
+                  6,
+                  6
+                ],
+                [
+                  1048576,
+                  1048576
+                ]
+              ],
+              "parent_peak_rss_bytes": 131051520,
+              "child_peak_rss_bytes": 131051520,
+              "parent_cpu_seconds": 2.479001,
+              "child_cpu_seconds": 0.3622679999999999
+            }
+          }
+        ],
+        "hosted_feasible": false,
+        "hosted_feasible_reason": "deployment protection, bundle and two-hop duration evidence collected separately",
+        "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+        "wall_seconds": 21.977811769
+      }
+    },
+    {
+      "operation": "native",
+      "bypass": true,
+      "signed": true,
+      "replay": true,
+      "status": 409,
+      "wall_seconds": 4.782251700002234,
+      "response_sha256": "a61754cc748780bb49f48148ab6270dd11ab18e93fa836dca18d56976a751777",
+      "response_bytes": 131,
+      "cache_control": "private, no-store",
+      "vercel_id": "sin1::iad1::6r7v6-1790871333348-7959e63464ba",
+      "result": {
+        "code": "CONFLICT",
+        "message": "worker nonce already consumed",
+        "request_id": "55f51b1d-ed8d-4948-a8ba-3d2f19d9d61b",
+        "retryable": false
+      }
+    },
+    {
+      "operation": "duration",
+      "bypass": true,
+      "signed": true,
+      "replay": false,
+      "status": 200,
+      "wall_seconds": 65.91246180000599,
+      "response_sha256": "4acca782d12869e53502a803094e7a6ded4eac7917999711262dc2e7482188f8",
+      "response_bytes": 134,
+      "cache_control": "private, no-store",
+      "vercel_id": "sin1::iad1::9x27v-1790871338133-c88a02150c6a",
+      "result": {
+        "slept_seconds": 61,
+        "hosted_feasible": false,
+        "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+        "wall_seconds": 61.000482313999996
+      }
+    }
+  ]
+}

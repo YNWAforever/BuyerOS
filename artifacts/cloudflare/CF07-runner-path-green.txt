@@ -1,0 +1,10 @@
+✔ local acceptance rejects shared targets, preview activation and inherited credentials (1.5203ms)
+✔ acceptance counts actual executed cases and fails closed on empty, skipped or failed reports (1.3631ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 81.1387

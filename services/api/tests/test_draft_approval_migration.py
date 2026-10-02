@@ -14,7 +14,7 @@ from tests.test_api_projects_db import api
 from tests.test_draft_approval_context_db import _addressed_case, _approval_payload, _approve, _review
 from tests.test_lookup_quotes_db import quote_case
 
-HEAD = "0033_api_rate_windows"
+HEAD = "0036_checkpoint_schema_grants"
 
 
 def _config():

@@ -1,0 +1,14 @@
+{
+  "schema": "https://openapi.vercel.sh/vercel.json",
+  "schema_sha256": "7ae6353e731682d99516bd124737d286e491c79286f936cfa3ece765b43a8c14",
+  "root_services_configuration_valid": true,
+  "api_entrypoint": "buyeros_api/api/vercel.py",
+  "api_configured_max_duration": 90,
+  "actual_emitted_app_max_duration": 90,
+  "top_level_functions": false,
+  "public_service": "app catch-all",
+  "binding": "app -> api / BUYEROS_INTERNAL_API_URL runtime only",
+  "api_public_rewrite": false,
+  "hosted_both_hop_verification": "not_run",
+  "account_plan_duration_proof": "not_run"
+}

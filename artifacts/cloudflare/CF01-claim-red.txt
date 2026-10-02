@@ -1,0 +1,31 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+__________ test_claim_cycle_interface_is_bounded_and_not_a_publisher __________
+
+    def test_claim_cycle_interface_is_bounded_and_not_a_publisher():
+        executor_module()
+        from buyeros_api.execution import dispatcher
+>       assert callable(getattr(dispatcher, "claim_cycle", None)), "CF01 ID-only async claim interface missing"
+E       AssertionError: CF01 ID-only async claim interface missing
+E       assert False
+E        +  where False = callable(None)
+E        +    where None = getattr(<module 'buyeros_api.execution.dispatcher' from 'C:\\Users\\laich\\Documents\\BuyerOS\\services\\api\\buyeros_api\\execution\\dispatcher.py'>, 'claim_cycle', None)
+
+services\worker\tests\test_transport_independence.py:89: AssertionError
+============================== warnings summary ===============================
+services\worker\tests\conftest.py:27
+  C:\Users\laich\Documents\BuyerOS\services\worker\tests\conftest.py:27: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\worker\tests\conftest.py:27
+  C:\Users\laich\Documents\BuyerOS\services\worker\tests\conftest.py:27: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_transport_independence.py::test_claim_cycle_interface_is_bounded_and_not_a_publisher
+  C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED services\worker\tests\test_transport_independence.py::test_claim_cycle_interface_is_bounded_and_not_a_publisher
+1 failed, 8 deselected, 3 warnings in 1.02s

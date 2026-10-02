@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="1" failures="0" errors="0" time="0.86">
+    <testsuite name="services/cloudflare-jobs/tests/platform-pg.integration.ts" timestamp="2026-10-01T07:11:13.790Z" hostname="DESKTOP-30TFME5" tests="1" failures="0" errors="0" skipped="0" time="0.86">
+        <testcase classname="services/cloudflare-jobs/tests/platform-pg.integration.ts" name="actual Queue binding commits one API-owned mutation; duplicate delivery keeps its receipt" time="0.858">
+        </testcase>
+    </testsuite>
+</testsuites>

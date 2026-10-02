@@ -1,0 +1,44 @@
+{
+  "date_hk": "2026-10-01",
+  "base_sha": "aed7a7eb2b7370c10cd7a41306eecf09d378ad42",
+  "source_identity": "Native report includes working-file SHA256 manifest; base commit alone does not include this diff.",
+  "production_schema_changed": false,
+  "deployed": false,
+  "providers_called": false,
+  "resources_provisioned": false,
+  "delivery_enabled": false,
+  "new_migrations": [],
+  "task": "CF01",
+  "status": "complete",
+  "worker_suite": {
+    "passed": 183,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "focused": {
+    "passed": 29,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "commands": [
+    "uv lock --project services/api",
+    "uv lock --project services/worker",
+    "BUYEROS_STRICT_INTEGRATION=1 uv run --frozen --project services/worker pytest services/worker/tests -q --junitxml=artifacts/cloudflare/CF01-worker-full.xml",
+    "uv run --frozen --project services/api python scripts/check-required-tests.py --junit artifacts/cloudflare/CF01-worker-full.xml",
+    "uv run --frozen --project services/api python scripts/generate-operation-routes.py --check",
+    "node scripts/generate-api-types.mjs --check",
+    "node --test tests/api-types-generation.test.mjs tests/vercel-services.test.mjs",
+    "docker run --rm --entrypoint /app/services/api/.venv/bin/python buyeros-cf-runtime-probe:20261001 -c <API-only clean import assertions>",
+    "docker run --rm --entrypoint /app/services/worker/.venv/bin/python buyeros-cf-runtime-probe:20261001 -m celery -A buyeros_worker.app:celery_app --help"
+  ],
+  "all_final_command_exit_codes": 0,
+  "public_operations": 78,
+  "contract_node_passed": 6,
+  "fixture_scope": "Real disposable PostgreSQL bulk buyer ownership updates and role-revocation negatives. Complete legacy worker suite fictional providers; not live provider verification.",
+  "risks": [
+    "Selector and persistent fairness are CF02; new claim interface remains disabled by default.",
+    "Specialized native/provider handlers remain legacy adapters until CF03/CF04; API reports unsupported events."
+  ]
+}

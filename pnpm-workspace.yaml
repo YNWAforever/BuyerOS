@@ -6,6 +6,8 @@ strictDepBuilds: true
 allowBuilds:
   esbuild: true
   fsevents: true
+  # Cloudflare tests use setupNetwork; no browser service-worker asset is needed.
+  msw: false
   sharp: true
   unrs-resolver: true
   workerd: true

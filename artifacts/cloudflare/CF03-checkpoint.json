@@ -1,0 +1,80 @@
+{
+  "task": "CF03",
+  "status": "complete",
+  "date_hk": "2026-10-01",
+  "base_sha": "7663d7c",
+  "deployed": false,
+  "production_schema_changed": false,
+  "resources_provisioned": false,
+  "providers_called": false,
+  "delivery_enabled": false,
+  "new_migrations": [],
+  "public_operations": 78,
+  "internal_operations": 5,
+  "focused": {
+    "passed": 30,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 38.17
+  },
+  "affected_api": {
+    "passed": 62,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 37.62
+  },
+  "full_worker": {
+    "passed": 184,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 38.69
+  },
+  "node_contracts": {
+    "passed": 7,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "native_api_only_linux": {
+    "verified": 4,
+    "failed": 0,
+    "artifact": "artifacts/cloudflare/CF03-native-probe.json"
+  },
+  "commands": [
+    "Unset BUYEROS_TEST_DATABASE_URL; BUYEROS_STRICT_INTEGRATION=1 uv run --frozen --project services/api pytest services/api/tests/test_cloudflare_local_steps_db.py services/api/tests/test_cloudflare_runtime_control_db.py services/api/tests/test_cloudflare_bridge_db.py -q --junitxml=artifacts/cloudflare/CF03-final-green.xml",
+    "cwd services/api: uv run --frozen pytest tests/test_offer_document_routes_db.py tests/test_ingestion_security.py tests/test_safe_fetch.py tests/test_bulk_jobs_db.py tests/test_draft_persistence_db.py tests/test_retention_authorization_db.py -q --junitxml=../../artifacts/cloudflare/CF03-api-affected.xml",
+    "uv run --frozen --project services/worker pytest services/worker/tests -q --junitxml=artifacts/cloudflare/CF03-final-worker.xml",
+    "uv run --frozen --project services/api python scripts/check-required-tests.py --junit <each of the three final XML artifacts>",
+    "docker build -f services/api/tools/worker-runtime-probe.Dockerfile -t buyeros-cf-runtime-probe:20261001-cf03 .",
+    "docker run --rm --mount type=bind,source=<absolute CF03-native-probe.py>,target=/probe/verify.py,readonly --entrypoint /app/services/api/.venv/bin/python buyeros-cf-runtime-probe:20261001-cf03 /probe/verify.py",
+    "uv run --frozen --project services/api python services/api/tools/export_worker_openapi.py --check",
+    "node scripts/generate-worker-api-types.mjs --check",
+    "uv run --frozen --project services/api python scripts/generate-operation-routes.py --check",
+    "node scripts/generate-api-types.mjs --check",
+    "node --test tests/worker-gateway.test.mjs tests/vercel-services.test.mjs tests/api-types-generation.test.mjs",
+    "git diff --check"
+  ],
+  "all_final_command_exit_codes": 0,
+  "red_evidence": "Initial7 failed. First implementation5 passed/2 failed: incorrect SQL role string during extraction and test reason differing from preserved domain code, both corrected. Reviewer permission regression1 failed before canonical permission fix. Additional29 passed/1 failed retention fixture had no private object/checkpoint to delete; adding private-object metadata preserved the50-successor assertion. All failing logs retained.",
+  "fixture_evidence": "101/1000-row partial bulk jobs survive a new engine for each unit;50-row business writes/receipt/successor atomic. Deleted or revoked/old-epoch parse never exposes facts. R2 disabled gives blocked receipt/no synthetic facts. Fifty expired private objects redact and persist50 deletion intents. Catalog membership checked; owner denied. Grounded native reviewer admitted consistently with API. No live R2/provider verification.",
+  "ownership": "Six native modules moved to API; legacy sys.modules aliases. Actual API-only frozen Linux imports no Celery, worker package or pytest; real PDF parse, sanitized environment and8-second sleeping-child kill pass.",
+  "risks": [
+    "Historical parse intents without actor metadata blocked on Cloudflare; no actor guessed.",
+    "Hosted API bundle/both-hop budgets remain unverified.",
+    "CF04 bounded provider state and CF06 recovery/operational sweeps remain to implement."
+  ],
+  "next_eligible_task": "CF04",
+  "working_source_sha256": {
+    "services/api/buyeros_api/execution/document_runner.py": "e16bc4bbe02376b65aad0b0fa4826369706c96028eb81497878e39fa4f88230c",
+    "services/api/buyeros_api/execution/fetch_runner.py": "cfe0e00a221f3c8aac7b363e85d093183c3947eaebcdde79d7b84c3f1ffa3afe",
+    "services/api/buyeros_api/execution/pdf_parser.py": "3c4a8e4e8d2f05fd591d4a3e73f636528ecedafeecfe1290a8b7e3f3965745b5",
+    "services/api/buyeros_api/execution/pdf_parser_child.py": "2b71c8f98b0e4160bb9b92e49d52f35590a8318a640371f81f6d8c2b96b8483f",
+    "services/api/buyeros_api/execution/step_runner.py": "559d2d3d3108ebead4583fc98e1af454ae362b09107de0ad1d37b7b18ac3091d",
+    "services/api/buyeros_api/execution/handlers/draft_generate.py": "f958b431147e4801294341dd2d8fea275e02996362cfc84889e325b457a74c64",
+    "services/api/buyeros_api/execution/handlers/retention.py": "969eb37be21358d3479d7acf87243f74137986aa67081108f2ab02117d5a0d2b"
+  },
+  "log_normalization": "Four failing logs strip trailing whitespace only for git diff check; counts, errors, commands and text preserved. Raw bytes retained in ignored local ledger."
+}

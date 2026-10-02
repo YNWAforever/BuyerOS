@@ -1,0 +1,162 @@
+FFFFFFF                                                                  [100%]
+================================== FAILURES ===================================
+_________________ test_user_token_cannot_call_internal_worker _________________
+
+    def test_user_token_cannot_call_internal_worker():
+        from buyeros_api.api.app import create_app
+        with TestClient(create_app()) as client:
+            for suffix in ("claim", "step", "status", "publication", "maintenance"):
+                response = client.post(f"/v1/internal/worker/{suffix}", json={},
+                                       headers={"Authorization": "Bearer fixture-user-token"})
+>               assert response.status_code == 401, (suffix, response.text)
+E               AssertionError: ('claim', '{"code":"NOT_FOUND","message":"request failed","request_id":"975a5fe6-1235-4acc-9ce9-6f499c878665","retryable":false}')
+E               assert 404 == 401
+E                +  where 404 = <Response [404 Not Found]>.status_code
+
+services\api\tests\test_cloudflare_bridge_db.py:49: AssertionError
+________ test_signature_binds_raw_body_path_timestamp_and_nonce[body] _________
+
+machine_keys = None, tamper = 'body'
+
+    @pytest.mark.parametrize("tamper", ["body", "path", "timestamp", "nonce", "method"])
+    def test_signature_binds_raw_body_path_timestamp_and_nonce(machine_keys, tamper):
+>       auth = auth_module()
+               ^^^^^^^^^^^^^
+
+services\api\tests\test_cloudflare_bridge_db.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def auth_module():
+>       assert AUTH.is_file(), "CF02 request-bound worker authentication missing"
+E       AssertionError: CF02 request-bound worker authentication missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/api/worker_auth.py').is_file
+
+services\api\tests\test_cloudflare_bridge_db.py:20: AssertionError
+________ test_signature_binds_raw_body_path_timestamp_and_nonce[path] _________
+
+machine_keys = None, tamper = 'path'
+
+    @pytest.mark.parametrize("tamper", ["body", "path", "timestamp", "nonce", "method"])
+    def test_signature_binds_raw_body_path_timestamp_and_nonce(machine_keys, tamper):
+>       auth = auth_module()
+               ^^^^^^^^^^^^^
+
+services\api\tests\test_cloudflare_bridge_db.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def auth_module():
+>       assert AUTH.is_file(), "CF02 request-bound worker authentication missing"
+E       AssertionError: CF02 request-bound worker authentication missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/api/worker_auth.py').is_file
+
+services\api\tests\test_cloudflare_bridge_db.py:20: AssertionError
+______ test_signature_binds_raw_body_path_timestamp_and_nonce[timestamp] ______
+
+machine_keys = None, tamper = 'timestamp'
+
+    @pytest.mark.parametrize("tamper", ["body", "path", "timestamp", "nonce", "method"])
+    def test_signature_binds_raw_body_path_timestamp_and_nonce(machine_keys, tamper):
+>       auth = auth_module()
+               ^^^^^^^^^^^^^
+
+services\api\tests\test_cloudflare_bridge_db.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def auth_module():
+>       assert AUTH.is_file(), "CF02 request-bound worker authentication missing"
+E       AssertionError: CF02 request-bound worker authentication missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/api/worker_auth.py').is_file
+
+services\api\tests\test_cloudflare_bridge_db.py:20: AssertionError
+________ test_signature_binds_raw_body_path_timestamp_and_nonce[nonce] ________
+
+machine_keys = None, tamper = 'nonce'
+
+    @pytest.mark.parametrize("tamper", ["body", "path", "timestamp", "nonce", "method"])
+    def test_signature_binds_raw_body_path_timestamp_and_nonce(machine_keys, tamper):
+>       auth = auth_module()
+               ^^^^^^^^^^^^^
+
+services\api\tests\test_cloudflare_bridge_db.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def auth_module():
+>       assert AUTH.is_file(), "CF02 request-bound worker authentication missing"
+E       AssertionError: CF02 request-bound worker authentication missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/api/worker_auth.py').is_file
+
+services\api\tests\test_cloudflare_bridge_db.py:20: AssertionError
+_______ test_signature_binds_raw_body_path_timestamp_and_nonce[method] ________
+
+machine_keys = None, tamper = 'method'
+
+    @pytest.mark.parametrize("tamper", ["body", "path", "timestamp", "nonce", "method"])
+    def test_signature_binds_raw_body_path_timestamp_and_nonce(machine_keys, tamper):
+>       auth = auth_module()
+               ^^^^^^^^^^^^^
+
+services\api\tests\test_cloudflare_bridge_db.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def auth_module():
+>       assert AUTH.is_file(), "CF02 request-bound worker authentication missing"
+E       AssertionError: CF02 request-bound worker authentication missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/api/worker_auth.py').is_file
+
+services\api\tests\test_cloudflare_bridge_db.py:20: AssertionError
+________ test_signature_expiry_body_limit_and_unknown_key_fail_closed _________
+
+machine_keys = None
+
+    def test_signature_expiry_body_limit_and_unknown_key_fail_closed(machine_keys):
+>       auth = auth_module()
+               ^^^^^^^^^^^^^
+
+services\api\tests\test_cloudflare_bridge_db.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def auth_module():
+>       assert AUTH.is_file(), "CF02 request-bound worker authentication missing"
+E       AssertionError: CF02 request-bound worker authentication missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/api/worker_auth.py').is_file
+
+services\api\tests\test_cloudflare_bridge_db.py:20: AssertionError
+============================== warnings summary ===============================
+services\api\tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\api\tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\api\.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_cloudflare_bridge_db.py::test_user_token_cannot_call_internal_worker
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED services\api\tests\test_cloudflare_bridge_db.py::test_user_token_cannot_call_internal_worker
+FAILED services\api\tests\test_cloudflare_bridge_db.py::test_signature_binds_raw_body_path_timestamp_and_nonce[body]
+FAILED services\api\tests\test_cloudflare_bridge_db.py::test_signature_binds_raw_body_path_timestamp_and_nonce[path]
+FAILED services\api\tests\test_cloudflare_bridge_db.py::test_signature_binds_raw_body_path_timestamp_and_nonce[timestamp]
+FAILED services\api\tests\test_cloudflare_bridge_db.py::test_signature_binds_raw_body_path_timestamp_and_nonce[nonce]
+FAILED services\api\tests\test_cloudflare_bridge_db.py::test_signature_binds_raw_body_path_timestamp_and_nonce[method]
+FAILED services\api\tests\test_cloudflare_bridge_db.py::test_signature_expiry_body_limit_and_unknown_key_fail_closed
+7 failed, 4 warnings in 1.47s

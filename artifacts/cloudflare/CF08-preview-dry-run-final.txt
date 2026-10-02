@@ -1,0 +1,19 @@
+
+ ⛅️ wrangler 4.137.0
+────────────────────
+
+Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more at https://github.com/cloudflare/workers-sdk/tree/main/packages/wrangler/telemetry.md
+Total Upload: 137.54 KiB / gzip: 24.49 KiB
+Your Worker has access to the following bindings:
+Binding                                                         Resource
+env.JOB_WORKFLOW (BuyerOSJobWorkflow)                           Workflow
+env.JOBS (buyeros-jobs-preview)                                 Queue
+env.QUARANTINE (buyeros-jobs-preview-dlq)                       Queue
+env.EXECUTION_ENABLED ("false")                                 Environment Variable
+env.RUNTIME_EPOCH ("1")                                         Environment Variable
+env.WORKER_API_ORIGIN ("https://invalid.example")               Environment Variable
+env.WORKER_API_ALLOWED_ORIGINS ("[]")                           Environment Variable
+env.WORKER_CURRENT_KEY_ID ("unconfigured")                      Environment Variable
+env.LOCAL_TEST_MODE ("false")                                   Environment Variable
+
+--dry-run: exiting now.

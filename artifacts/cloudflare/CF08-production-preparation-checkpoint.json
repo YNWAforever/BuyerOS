@@ -1,0 +1,232 @@
+{
+  "task": "CF08 production preflight and schema-version permission correction",
+  "source_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
+  "observed_at": "2026-10-01T18:02:07.013720+00:00",
+  "status": "local_integration_verified_current_remote_ci_pending",
+  "source_files_sha256": {
+    "scripts/run-cloudflare-pg18-proof.py": "866c7849936ca025f046152a88c29f9fa2ba60521b68419a58c4ecfd08a9b809",
+    "services/api/alembic/versions/0036_checkpoint_schema_grants.py": "103a68938853b08cf497009eaec94b0e452e620895ae906fab07bd230d1ab04b",
+    "services/api/buyeros_api/services/worker_execution.py": "e9b9bc7d325b90d03a7efafcb58d25f795bf49cf6596669acceae8feed9f5f19",
+    "services/api/buyeros_api/services/worker_recovery.py": "9db75008a069ce8eb5f01734e2d8a72f838da5fc2b5530129680c8ef3ae0a9b1",
+    "services/api/tests/test_admin_operations_db.py": "95e0167cd253138e7b6182834a11ca5c0540ed81dadb3a5ccdacccc487a118fb",
+    "services/api/tests/test_backup_restore_t28.py": "1b11938ef4924e31fba0e77699f218fb5d0117e08e3a33e12a5f5926d2d0acb6",
+    "services/api/tests/test_budget_atomicity_db.py": "e77e8a6c7f9bb1cb79e7007bd6e300a74c76288d4be5913dc0b93c53731ad775",
+    "services/api/tests/test_bulk_jobs_db.py": "73ccf6f3f4324c8421ab9661232c1575dea47b46eb9c8ffc723161454e7d153c",
+    "services/api/tests/test_buyer_management_db.py": "0b403c76ee4d561ff2a4c8eb3751455d9c243ec51bdca5552f413b08ca877fda",
+    "services/api/tests/test_checkpoint_schema_privileges_db.py": "0a2b790c3baa72feb53f16e15e8bd1be68cde387d9564c258d5b9cafbf0ccc9b",
+    "services/api/tests/test_cloudflare_migration_db.py": "5860c8bbf7b9bd7494b5f628ed08a2f36a1a0a73d93afd18a05e949cd6dfa605",
+    "services/api/tests/test_cloudflare_recovery_boundaries_db.py": "a1e613b390a7b1848acc463bbe5929340ce04c8c37cbd0afeeda9570a3d94dbe",
+    "services/api/tests/test_contact_job_migration.py": "e5974b20f45b42306c8351e5036b392d40767313c6ccac54ea32c4e42cf6797d",
+    "services/api/tests/test_contact_quote_migration.py": "8b02654654892b014f69861a43f796e381226b0fcce0fd3b4035ba75bc9a6815",
+    "services/api/tests/test_draft_approval_migration.py": "45a9e7598d25f475c8addf9fbaebe96a31ed9241417bc04df4e50d0be93b1ee6",
+    "services/api/tests/test_draft_integrity_migration.py": "d3e04a6d480a0bf75143b8c4252b936294a2cd760f1125c0ff2743f56873456a",
+    "services/api/tests/test_export_migration.py": "349139e582c519040f7966680447790cdd9b2b2e25e8344ce1040dca4eb30673",
+    "services/api/tests/test_outcome_migration.py": "510c3df40a9775d7013a919b86edcb1cd7743c770f1455b4abacfce77077f5f6",
+    "services/api/tests/test_policy_lifecycle_db.py": "2bb7dc6a179cd34667964b3cf02ce69ce7111ae4da1bf02b61828f7b0b130ca8",
+    "services/api/tests/test_project_constraints_db.py": "e33785713520db30f3cb92f7ce4d4e4948af8dc53d9ca365b9034a8dadd34ed4",
+    "services/api/tests/test_research_checkpoint_migration.py": "20187265d1ad819fa69d19a28ce69878c9505293996abe301f927184608f72e4",
+    "services/api/tests/test_retention_authorization_db.py": "59c36b0a5ebc5d99cf68317bfa13dd52be81480586922b05bcb1a31c3617e790",
+    "services/api/tests/test_sender_identity_migration.py": "baa34c14d0b48db6547bb24271ad03d99a71ec47c5153ca719d3819415f7e399"
+  },
+  "reports": {
+    "CF08-checkpoint-privileges-red.xml": {
+      "path": "artifacts/cloudflare/CF08-checkpoint-privileges-red.xml",
+      "sha256": "1bd59a8e060505cba3309394c3a05cfe07c79ab1da2fca4ccd470a3a97d03f30",
+      "counts": {
+        "failed": 4,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 2,
+        "seconds": 74.525
+      },
+      "raw_local_sha256": "dad47abaa41d96aeb10d739ea09fc5550644ef338e847c52f1f83f3135e1782e"
+    },
+    "CF08-checkpoint-operator-head-red.xml": {
+      "path": "artifacts/cloudflare/CF08-checkpoint-operator-head-red.xml",
+      "sha256": "ff344a1c9f58b2f12ab787c3215e946f02d342b4009164358daf9d84553632d9",
+      "counts": {
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 7,
+        "seconds": 95.919
+      },
+      "raw_local_sha256": "1d562a710d9fc4a79e145537f47b4f9e99b347ca8269ddfb17cce989352569ff"
+    },
+    "CF08-checkpoint-privileges-green.xml": {
+      "path": "artifacts/cloudflare/CF08-checkpoint-privileges-green.xml",
+      "sha256": "ca81a6c37eafca013233b4a66935cc22172716cc7707e1f734d94f1bd5724ccf",
+      "counts": {
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 23,
+        "seconds": 65.014
+      },
+      "raw_local_sha256": "18e0911ca33cd596c55e2acc55a71952a6d1e7e63b8fd7869670131c38832922"
+    },
+    "CF08-checkpoint-grants-pg18.xml": {
+      "path": "artifacts/cloudflare/CF08-checkpoint-grants-pg18.xml",
+      "sha256": "f85c893bdc544e6f9c66dd6c01a66df2b97f2c03d8bca8b1aabf834607034f2d",
+      "counts": {
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 37,
+        "seconds": 83.824
+      },
+      "raw_local_sha256": "45878662ddc1a4eab9dab439cb64209ba1af8acc1b488174c36695d868ce3eea"
+    },
+    "CF08-checkpoint-grants-worker.xml": {
+      "path": "artifacts/cloudflare/CF08-checkpoint-grants-worker.xml",
+      "sha256": "ed60e0069d6cc14631a686024bdb2c61b8928dfac9e83cc328bbd1d0514a44e5",
+      "counts": {
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 186,
+        "seconds": 67.183
+      },
+      "raw_local_sha256": "6b5b9674fb0c4f0c25232c3689185a58c0c566ef5b0ffb780a6d2d8130dc5a43"
+    }
+  },
+  "evidence": [
+    {
+      "path": "artifacts/cloudflare/CF08-production-control-plane-inspection-20261002.json",
+      "sha256": "c3d6a078ac05c7cfd3df11495a380a5b278cd3609e98bdad77d6ba0c9a0d3233"
+    },
+    {
+      "path": "artifacts/cloudflare/CF08-production-database-read-only-20261002.json",
+      "sha256": "fd55fda9ec5e217010504528bb6db9e3975565987318c82f15d8e237856383e3"
+    },
+    {
+      "path": "artifacts/cloudflare/CF08-production-checkpoint-catalog-20261002.json",
+      "sha256": "533e7e803d6f26b2c75cdbaa33776ad443390801a6f629532cb7e48bebd5aecc"
+    },
+    {
+      "path": "artifacts/cloudflare/CF08-production-configuration-readback-20261002.json",
+      "sha256": "0227ecfa28cd64c2dc1a4e2fb3e8963e84067f173690baf398922ed34be05626"
+    },
+    {
+      "path": "artifacts/cloudflare/CF08-checkpoint-8ffd91f-ci-completion.json",
+      "sha256": "e8fb9248f01feb3f3d727b66827ca7f1c294872c4a9416328624a830ff367dc3"
+    },
+    {
+      "path": "artifacts/cloudflare/CF08-production-controller-proposal.json",
+      "sha256": "d52d11a9a32e31117821074bb574a7a870893b5ad94ac95c0dc335f903d30cb1"
+    },
+    {
+      "path": "artifacts/cloudflare/CF08-production-migration-proposal.sql",
+      "sha256": "0230107f48dc240b5bae453165a392d8f3e52d79a9c26ff78e02bf6982aa159a"
+    },
+    {
+      "path": "artifacts/cloudflare/CF08-production-role-proposal.sql",
+      "sha256": "05f771dad89776c49377d0d0d29cca7585c2f86ea633f655597d242b6e18bfce"
+    }
+  ],
+  "gateway_release_counts": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "contracts": {
+    "public_original": 70,
+    "extensions": 8,
+    "private_release_operations": 5,
+    "changed": false
+  },
+  "migrations": {
+    "previous_repository_head": "0035_worker_recovery_probe",
+    "current_repository_head": "0036_checkpoint_schema_grants",
+    "actual_production_head": "0033_api_rate_windows",
+    "production_applied": false,
+    "data_or_table_changes_in_0036": false,
+    "rollback": "0036 marker downgrade deliberately retains SELECT-only privileges and checkpoint rows;0035/0034 populated refusals verified"
+  },
+  "approval": {
+    "production_setup_received": false,
+    "independent_review_received": false,
+    "expired_preview_reused": false,
+    "paid_plan_changed": false,
+    "providers_r2_delivery_enabled": false
+  },
+  "proposal": "docs/buyeros/runbooks/cloudflare-production-setup-proposal-20261002.md",
+  "hosted_source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+  "hosted_scope": "Previously approved isolated preview at0035 only, now fenced; current0036 permission correction has no new hosted proof",
+  "next_eligible": "Current-source CI and real review of guarded production setup proposal; one separate human production decision",
+  "commands": [
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest -q tests/test_checkpoint_schema_privileges_db.py -k \"not round_trip\" --junitxml=../../artifacts/cloudflare/CF08-checkpoint-privileges-red.xml",
+      "exit_code": 1
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest -q tests/test_checkpoint_schema_privileges_db.py --junitxml=../../artifacts/cloudflare/CF08-checkpoint-operator-head-red.xml",
+      "exit_code": 1
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest -q tests/test_checkpoint_schema_privileges_db.py tests/test_cloudflare_runtime_control_db.py tests/test_cloudflare_migration_db.py tests/test_cloudflare_recovery_boundaries_db.py tests/test_research_checkpoint_migration.py tests/test_pdf_subprocess_runtime.py --junitxml=../../artifacts/cloudflare/CF08-checkpoint-privileges-green.xml",
+      "exit_code": 0
+    },
+    {
+      "cwd": "services/api",
+      "command": ".venv/Scripts/python.exe ../../scripts/run-cloudflare-pg18-proof.py",
+      "exit_code": 0
+    },
+    {
+      "cwd": "services/worker",
+      "command": "uv run --frozen pytest -q --junitxml=../../artifacts/cloudflare/CF08-checkpoint-grants-worker.xml",
+      "exit_code": 0
+    },
+    {
+      "cwd": ".",
+      "command": "node --test tests/worker-gateway.test.mjs tests/deployment/cloudflare-release-config.test.mjs",
+      "exit_code": 0
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen alembic heads",
+      "exit_code": 0
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen python ../../scripts/generate-operation-routes.py --check",
+      "exit_code": 0
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen alembic upgrade 0033_api_rate_windows:0036_checkpoint_schema_grants --sql",
+      "exit_code": 0
+    },
+    {
+      "cwd": ".",
+      "command": "pnpm.cmd exec wrangler deploy --dry-run --config artifacts/cloudflare/CF08-production-controller-proposal.json --outdir .sites-runtime/cf-production-preflight-20261002/controller-dry-run",
+      "exit_code": 0
+    }
+  ],
+  "test_environment": {
+    "strict_integration": true,
+    "inherited_test_and_migration_dsns_unset": true,
+    "databases": "fresh owned loopback buyeros_test_* only",
+    "providers": "fictional fixtures",
+    "production_fixtures_executed": false
+  },
+  "controller_dry_run": {
+    "exit_code": 0,
+    "upload_kib": 137.73,
+    "gzip_kib": 24.51,
+    "resource_created": false,
+    "deployed": false,
+    "execution_enabled": false,
+    "crons": [],
+    "local_output_path_guard": "existing intended output directory caused a guarded move refusal; generated files moved to a new verified ignored controller-dry-run-collected directory, no overwrite"
+  },
+  "normalization": {
+    "basis": "canonical LF Git blob bytes",
+    "sql_original_sha256": "8958d4f6745f176b839e326d511fed540a55abc18bbf5baf7d5d6eb1e436f215",
+    "changes": "CRLF to LF and one extra SQL EOF blank line only; SQL statements, test cases and all red failures retained",
+    "raw_xml_hashes_recorded": true
+  }
+}

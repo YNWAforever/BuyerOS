@@ -1,0 +1,2 @@
+{"schema_url": "https://openapi.vercel.sh/vercel.json", "sha256": "7ae6353e731682d99516bd124737d286e491c79286f936cfa3ece765b43a8c14", "service_functions_allowed": true, "service_root_required": ["root"], "bytes": 453658}
+{"bundle": "services\\cloudflare-jobs\\.sites-runtime\\cloudflare-dry-run\\index.js", "sha256": "e312bf84acd7df55918fd2b48de194180e4c2ce8de4a35314525ac53a48bc26b", "bytes": 140537, "forbidden_customer_database_identity_provider_literals": 0}

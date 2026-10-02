@@ -1,0 +1,87 @@
+
+ RUN  v4.1.0 C:/Users/laich/Documents/BuyerOS
+
+Using secrets defined in process.env
+uncaught exception; source = Uncaught (in promise); stack = ZodError: [
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "alerts"
+    ],
+    "path": [],
+    "message": "Unrecognized key(s) in object: 'alerts'"
+  }
+]
+    at Object.get error [as error] (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/types.js:114:22)
+    at parseResponse (C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/src/protocol.ts:71:61)
+    at callWorkerApi (C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/src/api-client.ts:80:10)
+uncaught exception; source = Uncaught (in promise); stack = Error: ZodError
+    at async doWrapper (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:2468:53)
+    at async Context.do (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:2732:17)
+uncaught exception; source = Uncaught (in promise); stack = Error: ZodError
+    at async doWrapper (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:2468:53)
+    at async Context.do (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:2732:17)
+uncaught exception; source = Uncaught (in promise); stack = Error: [WorkflowIntrospector] The Workflow instance bop1-9d3b0d576cc64c178da13fe5f30be14e-e1 has reached status 'errored'. This is a finite status that prevents it from ever reaching the expected status of 'complete'.
+    at Engine.rejectUnreachableStatus (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:4020:13)
+    at Engine.handleStatusWaiter (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:3991:14)
+    at Engine.setStatus (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:3969:10)
+    at async file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:4452:9
+uncaught exception; source = Uncaught (in promise); stack = Error: [WorkflowIntrospector] The Workflow instance bop1-9d3b0d576cc64c178da13fe5f30be14e-e1 has reached status 'errored'. This is a finite status that prevents it from ever reaching the expected status of 'complete'.
+    at async WorkflowBinding.unsafeWaitForStatus (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:4736:12)
+uncaught exception; exception = workerd/io/io-context.c++:1684: failed: jsg.Error: The Workers runtime canceled this request because it detected that your Worker's code had hung and would never generate a response. Refer to: https://developers.cloudflare.com/workers/observability/errors/
+stack: 7ff7803b5700
+uncaught exception; source = Uncaught (in promise); stack = ZodError: [
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "alerts"
+    ],
+    "path": [],
+    "message": "Unrecognized key(s) in object: 'alerts'"
+  }
+]
+    at Object.get error [as error] (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/types.js:114:22)
+    at parseResponse (C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/src/protocol.ts:71:61)
+    at callWorkerApi (C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/src/api-client.ts:80:10)
+uncaught exception; source = Uncaught (in promise); stack = Error: ZodError
+    at async doWrapper (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:2468:53)
+    at async Context.do (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:2732:17)
+uncaught exception; source = Uncaught (in promise); stack = Error: ZodError
+    at async doWrapper (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:2468:53)
+    at async Context.do (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:2732:17)
+uncaught exception; source = Uncaught (in promise); stack = Error: [WorkflowIntrospector] The Workflow instance bop1-aeecad30cce543088d6c9657f0b31b05-e1 has reached status 'errored'. This is a finite status that prevents it from ever reaching the expected status of 'complete'.
+    at Engine.rejectUnreachableStatus (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:4020:13)
+    at Engine.handleStatusWaiter (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:3991:14)
+    at Engine.setStatus (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:3969:10)
+    at async file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:4452:9
+uncaught exception; source = Uncaught (in promise); stack = Error: [WorkflowIntrospector] The Workflow instance bop1-aeecad30cce543088d6c9657f0b31b05-e1 has reached status 'errored'. This is a finite status that prevents it from ever reaching the expected status of 'complete'.
+    at async WorkflowBinding.unsafeWaitForStatus (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/miniflare/dist/src/workers/workflows/binding.worker.js:4736:12)
+uncaught exception; exception = workerd/io/io-context.c++:1684: failed: jsg.Error: The Workers runtime canceled this request because it detected that your Worker's code had hung and would never generate a response. Refer to: https://developers.cloudflare.com/workers/observability/errors/
+stack: 7ff7803b5700
+ ❯ tests/integration/cloudflare-recovery.test.ts (2 tests | 2 failed) 526ms
+   × the probe Workflow carries its opaque probe ID into the committed receipt request 387ms
+   × a probe cannot report success when the durable selector is paused 123ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/cloudflare-recovery.test.ts > the probe Workflow carries its opaque probe ID into the committed receipt request
+Error: [WorkflowIntrospector] The Workflow instance bop1-9d3b0d576cc64c178da13fe5f30be14e-e1 has reached status 'errored'. This is a finite status that prevents it from ever reaching the expected status of 'complete'.
+ ❯ WorkflowBinding.unsafeWaitForStatus node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/workflows-shared/src/binding.ts:495:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/integration/cloudflare-recovery.test.ts > a probe cannot report success when the durable selector is paused
+Error: [WorkflowIntrospector] The Workflow instance bop1-aeecad30cce543088d6c9657f0b31b05-e1 has reached status 'errored'. This is a finite status that prevents it from ever reaching the expected status of 'complete'.
+ ❯ WorkflowBinding.unsafeWaitForStatus node_modules/.pnpm/miniflare@5.20260921.0-alpha_@types+node@22.19.19/node_modules/workflows-shared/src/binding.ts:495:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  15:31:32
+   Duration  32.98s (transform 12.19s, setup 15.53s, import 1.11s, tests 526ms, environment 0ms)
+
+JUNIT report written to C:/Users/laich/Documents/BuyerOS/artifacts/cloudflare/CF06-workflow-red.xml

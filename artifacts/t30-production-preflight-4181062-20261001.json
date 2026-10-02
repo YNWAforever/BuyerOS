@@ -1,0 +1,100 @@
+{
+  "observed_at_utc": "2026-10-01T01:31:51.7142217Z",
+  "approved_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+  "source_preview_id": "dpl_9vrsNEUsyzfGjbr745ersK6XWEVF",
+  "previous_production_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+  "previous_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+  "project_id": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw",
+  "project_name": "buyer-os",
+  "team_id": "team_qvzlsFmfCsLkgItSypqHjw3z",
+  "production_environment": [
+    {
+      "id": "2D5MxO3Upiex6DUO",
+      "key": "BUYEROS_API_BASE_URL",
+      "type": "plain",
+      "target": [
+        "production"
+      ],
+      "updated_at": 1790707222641
+    },
+    {
+      "id": "2Adbofp83LJIZ7Wb",
+      "key": "BUYEROS_AUTH0_ISSUER",
+      "type": "plain",
+      "target": [
+        "production"
+      ],
+      "updated_at": 1790707243709
+    },
+    {
+      "id": "VeK9kE27g1lggDjB",
+      "key": "BUYEROS_AUTH0_CLIENT_ID",
+      "type": "plain",
+      "target": [
+        "production"
+      ],
+      "updated_at": 1790707246515
+    },
+    {
+      "id": "WR3kI2ttKmk2NOsz",
+      "key": "BUYEROS_ENVIRONMENT",
+      "type": "plain",
+      "target": [
+        "production"
+      ],
+      "updated_at": 1790707248914
+    },
+    {
+      "id": "vhfxtLi8Q2myjoPo",
+      "key": "BUYEROS_PAID_ADMISSION_ENABLED",
+      "type": "plain",
+      "target": [
+        "production"
+      ],
+      "updated_at": 1790707251949
+    },
+    {
+      "id": "InV2ZaTSSTXKsCe8",
+      "key": "BUYEROS_R2_ENABLED",
+      "type": "plain",
+      "target": [
+        "production"
+      ],
+      "updated_at": 1790707254496
+    },
+    {
+      "id": "Ugqd4zcoYkxz00vi",
+      "key": "BUYEROS_CORS_ORIGINS",
+      "type": "plain",
+      "target": [
+        "production"
+      ],
+      "updated_at": 1790707257640
+    },
+    {
+      "id": "AAE98xIpcWKZU60j",
+      "key": "BUYEROS_DATABASE_URL",
+      "type": "sensitive",
+      "target": [
+        "production"
+      ],
+      "updated_at": 1790709220039
+    },
+    {
+      "id": "5mx5E1w6boqup6Vu",
+      "key": "BUYEROS_AUTH0_AUDIENCE",
+      "type": "plain",
+      "target": [
+        "production"
+      ],
+      "updated_at": 1790731097765
+    }
+  ],
+  "paid_admission_enabled": false,
+  "r2_enabled": false,
+  "manually_configured_binding": false,
+  "ci_run": 36772517309,
+  "ci_successful_jobs": 6,
+  "authorization": "User replied continue immediately after the final explicit proposal to deploy4181062 to the existing production Vercel project; interpreted and announced as approval of that exact action in this turn. No worker/provider/pilot/database migration authority is inferred.",
+  "command": "vercel.cmd redeploy dpl_9vrsNEUsyzfGjbr745ersK6XWEVF --target production --scope ynwaforevers-projects --no-wait"
+}

@@ -20,6 +20,7 @@ from . import (  # noqa: F401
     rate,
     runs,
     worker,
+    worker_execution,
 )
 
 __all__ = [
@@ -36,4 +37,5 @@ __all__ = [
     "rate",
     "runs",
     "worker",
+    "worker_execution",
 ]

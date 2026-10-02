@@ -1,0 +1,51 @@
+<testsuites id="" name="" tests="7" failures="1" skipped="0" errors="0" time="301.058634">
+<testsuite name="cloudflare-journey.spec.ts" timestamp="2026-10-01T09:58:58.164Z" hostname="" tests="7" failures="1" skipped="0" time="138.05" errors="0">
+<testcase name="CF07 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="38.24">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\..\test-results\cloudflare\cloudflare-journey-CF07-en-e2fb5--and-outcome-on-one-dataset\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveValue(expected) failed" type="expect.toHaveValue">
+<![CDATA[  fixtures\staff-journey.ts:102:1 › CF07 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator: getByRole('combobox', { name: /^(Project|專案)$/ })
+    Expected: "57574602-cdd3-4b94-8fe9-e47c16f73288"
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveValue" getByRole('combobox', { name: /^(Project|專案)$/ }) with timeout 30000ms
+      - waiting for getByRole('combobox', { name: /^(Project|專案)$/ })
+
+
+      28 |   await page.goto(initialPath);
+      29 |   await page.getByRole('button',{name:'Sign in'}).click();
+    > 30 |   await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(new URL(initialPath,'http://localhost:5173').searchParams.get('project')!,{timeout:30_000});
+         |                                                                    ^
+      31 |   await page.locator('header select').selectOption(locale);
+      32 |   await expect(page.locator('html')).toHaveAttribute('lang',locale);
+      33 | }
+        at signIn (C:\Users\laich\Documents\BuyerOS\tests\e2e\fixtures\staff-journey.ts:30:68)
+        at C:\Users\laich\Documents\BuyerOS\tests\e2e\fixtures\staff-journey.ts:157:3
+
+    Error Context: ..\..\test-results\cloudflare\cloudflare-journey-CF07-en-e2fb5--and-outcome-on-one-dataset\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="CF07 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="29.365">
+</testcase>
+<testcase name="CF07 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="27.122">
+</testcase>
+<testcase name="CF07 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="23.757">
+</testcase>
+<testcase name="CF07 real second page, 101-row native bulk and persistent Workflow restart" classname="cloudflare-journey.spec.ts" time="10.049">
+</testcase>
+<testcase name="CF07 optional lookup unknown acceptance retains one hold and never blindly resubmits" classname="cloudflare-journey.spec.ts" time="4.132">
+</testcase>
+<testcase name="CF07 viewer and reviewer negative roles; a late real buyer response cannot overwrite another project" classname="cloudflare-journey.spec.ts" time="5.385">
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,0 +1,113 @@
+....FF.                                                                  [100%]
+================================== FAILURES ===================================
+_______________ test_member_removal_blocks_draft_after_enqueue ________________
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:56523/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:56523/buyeros_test_api', 5)
+
+    def test_member_removal_blocks_draft_after_enqueue(migrated, worker_runtime):
+        local_module()
+        envelope = seed_envelope(migrated, worker_runtime[1], event_type='draft.generate')
+        project, actor, member = seed_project(migrated, envelope.workspace_id)
+        job, buyer, company = uuid.uuid4(), uuid.uuid4(), uuid.uuid4()
+        with psycopg.connect(migrated, autocommit=True) as db:
+            db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES(%s,%s,'Fixture','Fixture')", (company, envelope.workspace_id))
+            db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES(%s,%s,%s,%s)", (buyer, envelope.workspace_id, project, company))
+            db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested) "
+                       "VALUES(%s,%s,%s,%s,'draft_generation','generateDraft','{" + '"route":"grounded-template.v1","max_cost":"0.000000"' + "}'::jsonb,'queued',1)", (job, envelope.workspace_id, project, actor))
+            db.execute("INSERT INTO async_job_items(id,workspace_id,job_id,buyer_id,ordinal,expected_version,status) VALUES(%s,%s,%s,%s,0,1,'pending')", (uuid.uuid4(), envelope.workspace_id, job, buyer))
+            db.execute("UPDATE outbox_events SET payload=%s::jsonb WHERE id=%s", (json.dumps({'job_id': str(job)}), envelope.outbox_id))
+            db.execute("UPDATE memberships SET active=false WHERE id=%s", (member,))
+        assert run_local(envelope).state == 'done'
+        with psycopg.connect(migrated) as db:
+            assert db.execute("SELECT status,blocked FROM async_jobs WHERE id=%s", (job,)).fetchone() == ('failed', 1)
+>           assert db.execute("SELECT reason_code FROM async_job_items WHERE job_id=%s", (job,)).fetchone()[0] == 'actor_role_revoked'
+E           AssertionError: assert 'membership_changed' == 'actor_role_revoked'
+E
+E             - actor_role_revoked
+E             + membership_changed
+
+services\api\tests\test_cloudflare_local_steps_db.py:161: AssertionError
+_____________ test_retention_runtime_role_membership_is_verified ______________
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:56523/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:56523/buyeros_test_api', 6)
+
+    def test_retention_runtime_role_membership_is_verified(migrated, worker_runtime):
+        from buyeros_api.execution.handlers.retention import _delete_run_checkpoints
+        workspace = uuid.uuid4()
+>       asyncio.run(_delete_run_checkpoints(worker_runtime[0], workspace, uuid.uuid4()))
+
+services\api\tests\test_cloudflare_local_steps_db.py:169:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:205: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py:128: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\base_events.py:719: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+services\api\buyeros_api\execution\handlers\retention.py:29: in _delete_run_checkpoints
+    role = await connection.execute(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <psycopg.AsyncConnection [BAD] at 0x17a7dddc7d0>
+query = "SELECT NOT rolsuper AND NOT rolbypassrls AND pg_has_role(current_user,'buyeros_api.execution','MEMBER') FROM pg_roles WHERE rolname=current_user"
+params = None
+
+    async def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -> AsyncCursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query"
+                        " doesn't support parameters"
+                    )
+                return await cur.execute(query, prepare=prepare)
+            else:
+                return await cur.execute(query, params, prepare=prepare)
+
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.UndefinedObject: role "buyeros_api.execution" does not exist
+
+services\api\.venv\Lib\site-packages\psycopg\connection_async.py:327: UndefinedObject
+============================== warnings summary ===============================
+services\api\tests\conftest.py:24
+services\api\tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\api\tests\conftest.py:24
+services\api\tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_cloudflare_local_steps_db.py::test_bulk_restart_resumes_next_chunk_without_repeat[101]
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_cloudflare_local_steps_db.py::test_bulk_restart_resumes_next_chunk_without_repeat[101]
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\Documents\BuyerOS\artifacts\cloudflare\CF03-focused.xml -
+=========================== short test summary info ===========================
+FAILED services\api\tests\test_cloudflare_local_steps_db.py::test_member_removal_blocks_draft_after_enqueue
+FAILED services\api\tests\test_cloudflare_local_steps_db.py::test_retention_runtime_role_membership_is_verified
+2 failed, 5 passed, 6 warnings in 20.19s

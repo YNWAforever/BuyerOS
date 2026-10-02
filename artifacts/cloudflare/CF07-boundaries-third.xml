@@ -1,0 +1,35 @@
+<testsuites id="" name="" tests="3" failures="1" skipped="0" errors="0" time="165.36687700000002">
+<testsuite name="cloudflare-journey.spec.ts" timestamp="2026-10-01T09:18:40.807Z" hostname="" tests="3" failures="1" skipped="0" time="19.362" errors="0">
+<testcase name="CF07 real second page, 101-row native bulk and persistent Workflow restart" classname="cloudflare-journey.spec.ts" time="10.129">
+</testcase>
+<testcase name="CF07 optional lookup unknown acceptance retains one hold and never blindly resubmits" classname="cloudflare-journey.spec.ts" time="4.989">
+</testcase>
+<testcase name="CF07 viewer and reviewer negative roles; a late real buyer response cannot overwrite another project" classname="cloudflare-journey.spec.ts" time="4.244">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\cloudflare\cloudflare-journey-CF07-vi-305e8-t-overwrite-another-project\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  cloudflare-journey.spec.ts:69:1 › CF07 viewer and reviewer negative roles; a late real buyer response cannot overwrite another project
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 400
+
+      75 |   const denied=await request.patch(`http://127.0.0.1:8000/v1/workspaces/${workspace}/memberships/e0000000-0000-4000-8000-000000000007`,{
+      76 |     headers:{Authorization:'Bearer fixture-reviewer','Idempotency-Key':'cf07-role-denied','If-Match':'1'},data:{roles:['workspace_admin'],active:true,reason:'Fictional denied grant'}});
+    > 77 |   expect(denied.status()).toBe(403);
+         |                           ^
+      78 |   await viewerContext.close();
+      79 |   await signIn(page,'fixture-access',`/app/discover?${scope}`);
+      80 |   let release:()=>void=()=>{};let seen:()=>void=()=>{};
+        at C:\Users\laich\Documents\BuyerOS\tests\e2e\cloudflare-journey.spec.ts:77:27
+
+    Error Context: ..\..\test-results\cloudflare\cloudflare-journey-CF07-vi-305e8-t-overwrite-another-project\error-context.md
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

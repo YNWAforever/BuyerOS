@@ -1,0 +1,648 @@
+{
+  "task": "CF00 guarded preview preparation: pushed-source Linux CI",
+  "branch_head": "91b1f9b09ff7635d7967342f7b5577da881d91b5",
+  "preparation_source_sha": "07a7537befbf1e2290ee7079e18a258083615ed6",
+  "release_source_sha": "d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8",
+  "test_merge": "d78fcadf5f938502a606c4c1865ade4a4215d06b",
+  "equal_tree_sha": "296c6b3379c734a0c6a0679c9d6b93c6a1d1b6da",
+  "run_id": 36875943355,
+  "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36875943355",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "id": 110415276045,
+      "name": "frontend",
+      "status": "completed",
+      "conclusion": "success",
+      "commands": [
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node tests/domain-checks.mjs",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node tests/live-adapter-checks.mjs",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node tests/live-auth-checks.mjs",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node --test tests/api-types-generation.test.mjs",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node --test tests/vercel-services.test.mjs tests/deployment/cloudflare-python-runtime.test.mjs tests/deployment/cloudflare-acceptance.test.mjs tests/deployment/built-ui-fixture.test.mjs",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec tsc --noEmit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm lint",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm build",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node scripts/run-vercel.mjs build",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node --test tests/vercel-render.test.mjs tests/deployment/cloudflare-release-config.test.mjs",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110415276363,
+      "name": "browser-smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "commands": [
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test tests/e2e/harness.spec.ts",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110415276394,
+      "name": "browser-zoom",
+      "status": "completed",
+      "conclusion": "success",
+      "commands": [
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --reporter=line,junit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/zoom.xml",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110415276407,
+      "name": "api",
+      "status": "completed",
+      "conclusion": "success",
+      "commands": [
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen python ../../scripts/generate-operation-routes.py --check",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen python ../../scripts/verify-render-blueprint.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run mkdir -p artifacts",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit services/api/artifacts/tests.xml",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110415276447,
+      "name": "cloudflare-controller",
+      "status": "completed",
+      "conclusion": "success",
+      "commands": [
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm cloudflare:types",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm cloudflare:lint",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm cloudflare:bindings",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm cloudflare:test --reporter=default --reporter=junit --outputFile.junit=artifacts/cloudflare/ci-controller.xml",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec wrangler deploy --dry-run --config services/cloudflare-jobs/wrangler.jsonc --outdir .sites-runtime/cloudflare-dry-run",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110415276490,
+      "name": "cloudflare-staff-acceptance",
+      "status": "completed",
+      "conclusion": "success",
+      "commands": [
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run .venv/bin/python ../../scripts/run-cloudflare-pg18-proof.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit artifacts/cloudflare/CF08-pg18.xml",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen pytest -q tests/benchmark_cloudflare_case.py --junitxml=../../artifacts/cloudflare/ci-operating.xml",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit artifacts/cloudflare/ci-operating.xml",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node scripts/run-cloudflare-acceptance.mjs",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110415276553,
+      "name": "worker",
+      "status": "completed",
+      "conclusion": "success",
+      "commands": [
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen python -m unittest discover -s ../../tests -p test_render_worker_launch.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen python ../../tests/render-worker-process-check.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run mkdir -p artifacts",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit services/worker/artifacts/tests.xml",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27 && uv sync --project services/worker --frozen --no-dev --python 3.12",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python scripts/run-render-worker.py worker --check",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python scripts/run-render-worker.py dispatcher --check",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python -m celery -A buyeros_worker.app:celery_app worker --help",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python -m buyeros_worker.cli dispatch --help",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110415276618,
+      "name": "browser-continuity",
+      "status": "completed",
+      "conclusion": "success",
+      "commands": [
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.mvp-research.config.ts tests/e2e/mvp-a-research.spec.ts --reporter=line,junit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/t30-browser.xml",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run mkdir -p artifacts/ci-t30/continuity",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.workbench.config.ts tests/e2e/daily-workbench.spec.ts --reporter=line,junit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/workbench.xml",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --workers=1 --reporter=line,junit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/buyers.xml",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --reporter=line,junit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/buyer-management.xml",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.mvp.config.ts tests/e2e/mvp-a-journey.spec.ts --reporter=line,junit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/mvp-acceptance.xml",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "exact_counts": {
+    "api": {
+      "passed": 679,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 270.26,
+      "warnings": 96,
+      "includes_preparation_tests": 29
+    },
+    "worker": {
+      "passed": 186,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 24.11,
+      "warnings": 1
+    },
+    "controller": {
+      "passed": 27,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "test_files": 8
+    },
+    "pg18": {
+      "passed": 29,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 40.72,
+      "warnings": 9
+    },
+    "operating": {
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 40.26,
+      "warnings": 1
+    },
+    "staff": {
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reported_minutes": 1.3
+    },
+    "zoom": {
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 33.2
+    },
+    "smoke": {
+      "passed": 1,
+      "failed": 0,
+      "reported_seconds": 23.2,
+      "source": "Playwright decoded summary, not uploaded JUnit"
+    },
+    "legacy": {
+      "research": {
+        "passed": 4,
+        "seconds_text": "2.6m"
+      },
+      "workbench": {
+        "passed": 8,
+        "seconds_text": "1.2m"
+      },
+      "buyers": {
+        "passed": 1,
+        "seconds": 30
+      },
+      "management": {
+        "passed": 3,
+        "seconds": 33.6
+      },
+      "mvp": {
+        "passed": 1,
+        "seconds": 30.9
+      },
+      "all_required_failed_errors_skipped": 0
+    }
+  },
+  "artifacts": [
+    {
+      "id": 11169686945,
+      "name": "buyeros-bilingual-continuity-fixture",
+      "digest": "sha256:8b0db0a04a1b75938a94eeff02498f520117d651d665eea9d4b3d80372bd13bf",
+      "bytes": 5485562,
+      "head_sha": "91b1f9b09ff7635d7967342f7b5577da881d91b5"
+    },
+    {
+      "id": 11169590954,
+      "name": "buyeros-cloudflare-local-controller",
+      "digest": "sha256:04cb079d53a8a2ee293d83ede9975e341dad4a43f083bc156918d7765910a506",
+      "bytes": 5483742,
+      "head_sha": "91b1f9b09ff7635d7967342f7b5577da881d91b5"
+    },
+    {
+      "id": 11169407075,
+      "name": "buyeros-cloudflare-local-staff-and-operating",
+      "digest": "sha256:1d714d446c572262e8e70064cd381a481097ffddab7106bcfd8e0c242ffd6a34",
+      "bytes": 5687330,
+      "head_sha": "91b1f9b09ff7635d7967342f7b5577da881d91b5"
+    },
+    {
+      "id": 11169086636,
+      "name": "buyeros-api-actual-zoom",
+      "digest": "sha256:200d3d0ce92bf15f0fa705f3466c79a10b58befc744caf475edfc720ed4ad75c",
+      "bytes": 347745,
+      "head_sha": "91b1f9b09ff7635d7967342f7b5577da881d91b5"
+    }
+  ],
+  "linux_native_caps": {
+    "verified_by_assertions": true,
+    "record_uploaded": false,
+    "evidence": "679 no-skip API suite includes test_preview_native_pdf_interruption_and_cross_tenant_checkpoint; native_checks Linux branch executes production PDF child and asserts AS512MiB/CPU6s/file1MiB installed limits. This is Linux CI owned local integration, not hosted packaging."
+  },
+  "retained_log_issues": {
+    "fixture_error_count": 11,
+    "classification": "Anonymous Error from built fixture handler/pipeline catch; logs contain no route/stack and no retained trace. Not attributed as expected or silently erased; seven staff assertions passed. No claim of a clean error-free live browser session."
+  },
+  "automatic_existing_project_preview": {
+    "id": "dpl_2mtfFRQNvQqrkFizapMMjFRdujKk",
+    "name": "buyer-os",
+    "url": "buyer-lmxv6y27g-ynwaforevers-projects.vercel.app",
+    "type": "LAMBDAS",
+    "state": "READY",
+    "createdAt": 1790864600853,
+    "creator": {
+      "uid": "8Rl9NWViWvJleb3PGhaUPvWz",
+      "username": "ynwaforever"
+    },
+    "project": {
+      "id": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw",
+      "name": "buyer-os",
+      "framework": "services"
+    },
+    "meta": {
+      "githubCommitRef": "codex/fix-vercel-tslib-ssr",
+      "githubCommitSha": "91b1f9b09ff7635d7967342f7b5577da881d91b5",
+      "githubCommitMessage": "docs: checkpoint guarded Cloudflare preview preparation",
+      "githubRepo": "BuyerOS",
+      "githubOrg": "YNWAforever"
+    },
+    "alias": [
+      "buyer-os-git-codex-fix-vercel-tslib-ssr-ynwaforevers-projects.vercel.app"
+    ],
+    "target": null,
+    "regions": [
+      "iad1"
+    ],
+    "buildingAt": 1790864602456,
+    "ready": 1790864671483,
+    "readyState": "READY",
+    "source": "git",
+    "aliasError": null
+  },
+  "scope": "Actual Linux runner local/owned PG/Miniflare/emitted frontend; fictional identities and providers. Not a protected hosted controller, remote DB migration, provider acceptance or production cutover.",
+  "hosted_feasible": false,
+  "production_deployed_source_sha": null,
+  "decoded_logs_sha256": {
+    "110415276045": "ff976126e82ab887cec0771cdddb0f896ad7a623cb91f44be6d443174c19f08f",
+    "110415276363": "ef53c81a7788725b2d0d39dc65603aa35fa377be29aff3b084effcff5665a2fb",
+    "110415276394": "b013c8fb163b3e4276f935e7f83bf328b1120f0eafe00f551bb315a3077d8f38",
+    "110415276407": "d69aa73da2fa028a521cd9e3280a2a9aca6e0a21e4d9c1ab55bd9a674aec0913",
+    "110415276447": "64c13609bca48f9c0430a48adc04555de5001719d303993afc8286c7c788b3ef",
+    "110415276490": "4c50300c262b6da35b001e1d30403cef9284bee9c8671b009a53345ff63372cb",
+    "110415276553": "c55897d9ab4fa8a1cf0845cc100c539a012ec36f6d074187f92a1e767db9b280",
+    "110415276618": "9694ff9b91e17671568a1f143c761d17edc141f4fe53d1e35615e0f3b66694ed"
+  },
+  "selected_output_lines": {
+    "110415276045": [
+      "2026-10-01T14:23:31.1535738Z HEAD is now at d78fcad Merge 91b1f9b09ff7635d7967342f7b5577da881d91b5 into 12327c7ac98849b90b0bd08f63872be7dd302ac6"
+    ],
+    "110415276363": [
+      "2026-10-01T14:23:42.9601045Z HEAD is now at d78fcad Merge 91b1f9b09ff7635d7967342f7b5577da881d91b5 into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+      "2026-10-01T14:25:51.0796639Z   1 passed (23.2s)"
+    ],
+    "110415276394": [
+      "2026-10-01T14:23:46.8248619Z HEAD is now at d78fcad Merge 91b1f9b09ff7635d7967342f7b5577da881d91b5 into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+      "2026-10-01T14:25:16.0826313Z   2 passed (33.2s)",
+      "2026-10-01T14:25:16.1650318Z passed=2 failed=0 errors=0 skipped=0",
+      "2026-10-01T14:25:17.1742644Z SHA256 digest of uploaded artifact zip is 200d3d0ce92bf15f0fa705f3466c79a10b58befc744caf475edfc720ed4ad75c",
+      "2026-10-01T14:25:17.4417409Z Artifact buyeros-api-actual-zoom.zip successfully finalized. Artifact ID 11169086636",
+      "2026-10-01T14:25:17.4419379Z Artifact buyeros-api-actual-zoom has been successfully uploaded! Final size is 347745 bytes. Artifact ID is 11169086636"
+    ],
+    "110415276407": [
+      "2026-10-01T14:23:50.9558878Z HEAD is now at d78fcad Merge 91b1f9b09ff7635d7967342f7b5577da881d91b5 into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+      "2026-10-01T14:28:56.2949849Z 679 passed, 96 warnings in 270.26s (0:04:30)",
+      "2026-10-01T14:28:57.9449652Z passed=679 failed=0 errors=0 skipped=0"
+    ],
+    "110415276447": [
+      "2026-10-01T14:23:29.6348919Z HEAD is now at d78fcad Merge 91b1f9b09ff7635d7967342f7b5577da881d91b5 into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+      "2026-10-01T14:24:13.6027424Z  Test Files  8 passed (8)",
+      "2026-10-01T14:24:13.6028606Z       Tests  27 passed (27)",
+      "2026-10-01T14:24:16.5573306Z SHA256 digest of uploaded artifact zip is 04cb079d53a8a2ee293d83ede9975e341dad4a43f083bc156918d7765910a506",
+      "2026-10-01T14:24:16.7613519Z Artifact buyeros-cloudflare-local-controller.zip successfully finalized. Artifact ID 11169590954",
+      "2026-10-01T14:24:16.7615754Z Artifact buyeros-cloudflare-local-controller has been successfully uploaded! Final size is 5483742 bytes. Artifact ID is 11169590954"
+    ],
+    "110415276490": [
+      "2026-10-01T14:23:32.1680832Z HEAD is now at d78fcad Merge 91b1f9b09ff7635d7967342f7b5577da881d91b5 into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+      "2026-10-01T14:25:10.1048545Z 29 passed, 9 warnings in 40.72s",
+      "2026-10-01T14:25:10.7596744Z passed=29 failed=0 errors=0 skipped=0",
+      "2026-10-01T14:25:52.2118166Z 2 passed, 1 warning in 40.26s",
+      "2026-10-01T14:25:52.5135956Z passed=2 failed=0 errors=0 skipped=0",
+      "2026-10-01T14:26:40.5907241Z [WebServer] built fixture request failed: Error",
+      "2026-10-01T14:26:55.4598209Z [WebServer] built fixture request failed: Error",
+      "2026-10-01T14:27:09.2737056Z [WebServer] built fixture request failed: Error",
+      "2026-10-01T14:27:23.6890753Z [WebServer] built fixture request failed: Error",
+      "2026-10-01T14:27:28.9786032Z [WebServer] built fixture request failed: Error",
+      "2026-10-01T14:27:33.6544814Z [WebServer] built fixture request failed: Error",
+      "2026-10-01T14:27:33.6944581Z [WebServer] built fixture request failed: Error",
+      "2026-10-01T14:27:33.6951869Z [WebServer] built fixture request failed: Error",
+      "2026-10-01T14:27:33.6968748Z [WebServer] built fixture request failed: Error",
+      "2026-10-01T14:27:33.6974635Z [WebServer] built fixture request failed: Error",
+      "2026-10-01T14:27:33.6987604Z [WebServer] built fixture request failed: Error",
+      "2026-10-01T14:27:34.4415660Z   7 passed (1.3m)",
+      "2026-10-01T14:27:36.4307310Z SHA256 digest of uploaded artifact zip is 1d714d446c572262e8e70064cd381a481097ffddab7106bcfd8e0c242ffd6a34",
+      "2026-10-01T14:27:36.6607414Z Artifact buyeros-cloudflare-local-staff-and-operating.zip successfully finalized. Artifact ID 11169407075",
+      "2026-10-01T14:27:36.6609268Z Artifact buyeros-cloudflare-local-staff-and-operating has been successfully uploaded! Final size is 5687330 bytes. Artifact ID is 11169407075"
+    ],
+    "110415276553": [
+      "2026-10-01T14:23:44.3099674Z HEAD is now at d78fcad Merge 91b1f9b09ff7635d7967342f7b5577da881d91b5 into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+      "2026-10-01T14:23:47.8555446Z Linux standby integration: 2 passed, 0 failed/skipped; no database/broker/provider",
+      "2026-10-01T14:24:14.4223779Z 186 passed, 1 warning in 24.11s",
+      "2026-10-01T14:24:15.1294297Z passed=186 failed=0 errors=0 skipped=0"
+    ],
+    "110415276618": [
+      "2026-10-01T14:23:31.0049285Z HEAD is now at d78fcad Merge 91b1f9b09ff7635d7967342f7b5577da881d91b5 into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+      "2026-10-01T14:26:58.2836156Z   4 passed (2.6m)",
+      "2026-10-01T14:26:58.3578221Z passed=4 failed=0 errors=0 skipped=0",
+      "2026-10-01T14:28:08.8282002Z   8 passed (1.2m)",
+      "2026-10-01T14:28:08.9127166Z passed=8 failed=0 errors=0 skipped=0",
+      "2026-10-01T14:28:40.0078896Z   1 passed (30.0s)",
+      "2026-10-01T14:28:40.0931095Z passed=1 failed=0 errors=0 skipped=0",
+      "2026-10-01T14:29:14.7869207Z   3 passed (33.6s)",
+      "2026-10-01T14:29:14.8703065Z passed=3 failed=0 errors=0 skipped=0",
+      "2026-10-01T14:29:46.7805787Z   1 passed (30.9s)",
+      "2026-10-01T14:29:46.8584918Z passed=1 failed=0 errors=0 skipped=0",
+      "2026-10-01T14:29:48.0327212Z SHA256 digest of uploaded artifact zip is 8b0db0a04a1b75938a94eeff02498f520117d651d665eea9d4b3d80372bd13bf",
+      "2026-10-01T14:29:48.2835246Z Artifact buyeros-bilingual-continuity-fixture.zip successfully finalized. Artifact ID 11169686945",
+      "2026-10-01T14:29:48.2837831Z Artifact buyeros-bilingual-continuity-fixture has been successfully uploaded! Final size is 5485562 bytes. Artifact ID is 11169686945"
+    ]
+  }
+}

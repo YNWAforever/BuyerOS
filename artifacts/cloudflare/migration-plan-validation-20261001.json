@@ -1,0 +1,75 @@
+{
+  "kind": "documentation_consistency_only",
+  "date_hk": "2026-10-01",
+  "checked_at_hk": "2026-10-01T11:51:36.627183+08:00",
+  "source_sha": "aed7a7eb2b7370c10cd7a41306eecf09d378ad42",
+  "plan_sha256": "008e00402042e9d1009a98f4e1f1c10807f2774bffa31ff3b353246ba2930e9c",
+  "design_sha256": "11de9cff98f31fd4bd28af5d53944ddc4b457d95b6a1d2c3bc9f79206f4b9fb5",
+  "checks": [
+    {
+      "name": "source identity matches proposal",
+      "status": "passed"
+    },
+    {
+      "name": "all 31 prior task states and historical registry fields preserved",
+      "status": "passed"
+    },
+    {
+      "name": "all four approval flags false; proposed migration only",
+      "status": "passed"
+    },
+    {
+      "name": "CF00-CF08 dependency order matches plan headings; all tasks unstarted",
+      "status": "passed"
+    },
+    {
+      "name": "all plan checkboxes incomplete and future checks labelled NOT RUN",
+      "status": "passed"
+    },
+    {
+      "name": "design/plan/checkpoint links resolve; no placeholders/trailing whitespace",
+      "status": "passed"
+    },
+    {
+      "name": "23 named existing source/test/tooling paths exist",
+      "status": "passed"
+    },
+    {
+      "name": "changed files limited to planning and sanitized validation evidence",
+      "status": "passed"
+    }
+  ],
+  "documentation_checks": {
+    "passed": 8,
+    "failed": 0
+  },
+  "migration_tasks": 9,
+  "prior_programme_tasks_preserved": 31,
+  "proposed_checkboxes": 46,
+  "application_tests_run_this_turn": 0,
+  "cloudflare_platform_tests_run": 0,
+  "fixture_runs": 0,
+  "hosted_runtime_verified": false,
+  "resources_created": false,
+  "deployment_performed": false,
+  "production_database_mutations": false,
+  "provider_calls": false,
+  "alembic_head": "0033_api_rate_windows",
+  "git_diff_check": { "command": "git diff --check", "exit_code": 0 },
+  "application_diff_check": { "command": "git diff --quiet HEAD -- . ':(exclude)docs/**' ':(exclude)artifacts/**'", "exit_code": 0 },
+  "alembic_commands": [
+    {
+      "cwd": "repo",
+      "command": "services/api/.venv/Scripts/python.exe -m alembic -c services/api/alembic.ini heads",
+      "exit_code": 1,
+      "reason": "relative script directory alembic not found"
+    },
+    {
+      "cwd": "services/api",
+      "command": ".venv/Scripts/python.exe -m alembic heads",
+      "exit_code": 0,
+      "output": "0033_api_rate_windows (head)"
+    }
+  ],
+  "validation_method": "inline Python assertions: git source/diff, immutable previous registry fields, pending flags, 9 dependency entries/headings, incomplete checkboxes, relative links, 23 existing source paths, scoped change list; no application execution"
+}

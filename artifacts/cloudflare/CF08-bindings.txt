@@ -1,0 +1,10 @@
+$ wrangler types services/cloudflare-jobs/worker-configuration.d.ts --config services/cloudflare-jobs/wrangler.jsonc --strict-vars=false --check
+
+ ⛅️ wrangler 4.137.0 (update available 4.145.0)
+───────────────────────────────────────────────
+
+X [ERROR] Types at services/cloudflare-jobs/worker-configuration.d.ts are out of date. Run `wrangler types` to regenerate.
+
+
+🪵  Logs were written to "C:\Users\laich\AppData\Roaming\xdg.config\.wrangler\logs\wrangler-2026-10-01_11-13-44_096.log"
+[ELIFECYCLE] Command failed with exit code 1.

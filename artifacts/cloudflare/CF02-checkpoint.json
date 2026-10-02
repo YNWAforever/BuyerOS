@@ -1,0 +1,78 @@
+{
+  "task": "CF02",
+  "status": "complete",
+  "date_hk": "2026-10-01",
+  "base_sha": "dda1fed25904cafd49b808f036b149004f073053",
+  "source_identity": "Working diff before CF02 commit; exact command logs and JUnit retained.",
+  "production_schema_changed": false,
+  "deployed": false,
+  "providers_called": false,
+  "resources_provisioned": false,
+  "delivery_enabled": false,
+  "new_migrations": [
+    "0034_worker_execution"
+  ],
+  "migration_evidence": "0033 sole head inspected first. Empty upgrade/downgrade/re-upgrade and populated refusal preserve permanent receipts, replay state, version and business tables. Fresh owned PostgreSQL only.",
+  "role_evidence": "Worker login inherits buyeros_worker; non-owner/NOBYPASSRLS and catalog membership checked. Selector activation/epoch update denied. Forced tenant RLS on worker_steps.",
+  "tests": {
+    "final_focused": {
+      "passed": 19,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 18.28
+    },
+    "api_full_before_last_two_regressions": {
+      "passed": 603,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 347.1
+    },
+    "worker_full_before_generation_guard": {
+      "passed": 183,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 143.09
+    },
+    "affected_dispatcher_after_generation_guard": {
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "node_gateway_public_contracts": {
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "commands": [
+    "Unset BUYEROS_TEST_DATABASE_URL; set BUYEROS_STRICT_INTEGRATION=1; uv run --frozen --project services/api pytest services/api/tests/test_cloudflare_bridge_db.py services/api/tests/test_cloudflare_runtime_control_db.py services/api/tests/test_cloudflare_migration_db.py -q --junitxml=artifacts/cloudflare/CF02-final-focused.xml",
+    "cwd services/api: uv run --frozen pytest tests -q --junitxml=../../artifacts/cloudflare/CF02-api-full.xml",
+    "uv run --frozen --project services/worker pytest services/worker/tests -q --junitxml=artifacts/cloudflare/CF02-worker-full.xml",
+    "uv run --frozen --project services/worker pytest services/worker/tests/test_dispatcher.py -q",
+    "uv run --frozen --project services/api python scripts/check-required-tests.py --junit <each corresponding XML>",
+    "uv run --frozen --project services/api python services/api/tools/export_worker_openapi.py --check",
+    "node scripts/generate-worker-api-types.mjs --check",
+    "uv run --frozen --project services/api python scripts/generate-operation-routes.py --check",
+    "node scripts/generate-api-types.mjs --check",
+    "node --test tests/worker-gateway.test.mjs tests/vercel-services.test.mjs tests/api-types-generation.test.mjs",
+    "pnpm.cmd exec tsc --noEmit",
+    "pnpm.cmd lint",
+    "git diff --check"
+  ],
+  "all_final_command_exit_codes": 0,
+  "public_operations": 78,
+  "internal_operations": 5,
+  "failure_evidence": "Auth red7; gateway red1; control red1 failed/3 setup errors; cursor red1; inherited-role red1/1 pass; publication red1; four-field protocol red1. Fixture role/control isolation issues recorded in progress.md; assertions retained.",
+  "fixture_evidence": "Twenty simultaneous actual step calls: one buyer update, one audit event, one receipt. Replay409, staff bearer401, unknown fields422, body8193->413, key rotation and foreign tenant negatives.",
+  "risks": [
+    "Hosted CF00 proof remains not_run.",
+    "Bounded specialized local/domain paths are CF03; providers CF04; Worker transport CF05; recovery CF06.",
+    "No live provider or deployed service verification inferred from fixtures."
+  ],
+  "next_eligible_task": "CF03"
+}

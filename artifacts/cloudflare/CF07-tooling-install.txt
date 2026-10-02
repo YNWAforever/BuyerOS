@@ -1,0 +1,18 @@
+✓ Lockfile passes supply-chain policies (verified 1h ago)
+Progress: resolved 1, reused 0, downloaded 0, added 0
+[WARN] deprecated eslint@9.39.4: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+Progress: resolved 50, reused 44, downloaded 0, added 0
+Progress: resolved 275, reused 170, downloaded 0, added 0
+Progress: resolved 541, reused 353, downloaded 1, added 0
+Progress: resolved 749, reused 581, downloaded 1, added 0
+Progress: resolved 926, reused 741, downloaded 1, added 0
+[WARN] 2 deprecated subdependencies found: @esbuild-kit/core-utils@3.3.2, @esbuild-kit/esm-loader@2.6.5
+Packages: +1 -7
++-------
+Progress: resolved 926, reused 741, downloaded 1, added 1, done
+
+devDependencies:
+- @cloudflare/vite-plugin 1.37.1
++ @cloudflare/vite-plugin 1.58.0
+
+Done in 7.5s using pnpm v11.25.0

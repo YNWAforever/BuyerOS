@@ -34,7 +34,7 @@ POSTGRES_IMAGE = "postgres:16"
 DB_USER = "buyeros"
 DB_PASSWORD = "buyeros"
 DB_NAME = "buyeros_test_worker"
-API_ROLE = "buyeros_api"
+API_ROLE = "buyeros_worker_runtime_fixture"
 API_ROLE_PASSWORD = "test-only"
 
 WS_A = "11111111-1111-4111-8111-111111111111"
@@ -42,6 +42,21 @@ WS_B = "22222222-2222-4222-8222-222222222222"
 PROJECT_A = "a0000000-0000-4000-8000-000000000001"
 ICP_A = "b0000000-0000-4000-8000-0000000000a1"
 RUN_A = "d0000000-0000-4000-8000-0000000000a1"
+
+
+@pytest.fixture(scope="session", autouse=True)
+def approved_local_legacy_runtime():
+    """Explicit local-fixture enablement; production defaults remain off."""
+    from buyeros_api.execution.config import get_settings as worker_settings
+    previous = os.environ.get("BUYEROS_CELERY_EXECUTION_ENABLED")
+    os.environ["BUYEROS_CELERY_EXECUTION_ENABLED"] = "true"
+    worker_settings.cache_clear()
+    yield
+    if previous is None:
+        os.environ.pop("BUYEROS_CELERY_EXECUTION_ENABLED", None)
+    else:
+        os.environ["BUYEROS_CELERY_EXECUTION_ENABLED"] = previous
+    worker_settings.cache_clear()
 
 
 def _require_disposable_test_dsn(dsn: str) -> None:
@@ -147,6 +162,11 @@ def migrated(pg_dsn):
     import psycopg
 
     with psycopg.connect(pg_dsn, autocommit=True) as conn:
+        conn.execute("CREATE ROLE buyeros_worker_runtime_fixture NOBYPASSRLS IN ROLE buyeros_worker")
+        # Fixture starts an already-running legacy epoch1. This is direct owned
+        # test data, not the production activation tool/approval transition.
+        conn.execute("DELETE FROM worker_runtime_control")
+        conn.execute("INSERT INTO worker_runtime_control(singleton,backend,enabled,epoch) VALUES(1,'celery',true,1)")
         conn.execute("DELETE FROM workspaces WHERE id IN (%s, %s)", (WS_A, WS_B))
         conn.execute(
             "INSERT INTO workspaces(id, name, data_mode) VALUES (%s, 'A', 'live'), (%s, 'B', 'live')",
@@ -179,9 +199,13 @@ def worker_database_url(migrated, runtime_dsn, monkeypatch):
     from buyeros_api.settings import get_settings
 
     monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_dsn)
+    monkeypatch.setenv("BUYEROS_CELERY_EXECUTION_ENABLED", "true")
+    from buyeros_api.execution.config import get_settings as worker_settings
+    worker_settings.cache_clear()
     get_settings.cache_clear()
     yield runtime_dsn
     get_settings.cache_clear()
+    worker_settings.cache_clear()
 
 
 def reset_tenant(conn, workspace_id: str = WS_A) -> None:

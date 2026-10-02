@@ -1,0 +1,61 @@
+...........F..................                                           [100%]
+================================== FAILURES ===================================
+___ test_retention_page_redacts_only_fifty_sources_and_persists_successors ____
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:58811/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:58811/buyeros_test_api', 13)
+
+    def test_retention_page_redacts_only_fifty_sources_and_persists_successors(migrated, worker_runtime):
+        from buyeros_api.execution.handlers.retention import expire_due_sources
+        from buyeros_api.services.worker_execution import create_execution_engine
+        envelope = seed_envelope(migrated, worker_runtime[1], event_type='source.delete')
+        project, actor, member = seed_project(migrated, envelope.workspace_id)
+        with psycopg.connect(migrated, autocommit=True) as db:
+            for _ in range(60):
+                source = uuid.uuid4()
+                db.execute("INSERT INTO source_documents(id,workspace_id,project_id,permission_purpose,canonical_url,digest,retrieved_at,language,excerpt,retention_until) "
+                           "VALUES(%s,%s,%s,'account_research',%s,%s,now(),'en','Fictional excerpt',now()-interval '1 minute')",
+                           (source, envelope.workspace_id, project, f'https://fixture.invalid/{source}', 'a'*64))
+        async def run():
+            engine = create_execution_engine()
+            try:
+                assert len(await expire_due_sources(engine, datetime.now(timezone.utc), policy_version='fictional-test-only', limit=50)) == 50
+            finally:
+                await engine.dispose()
+        asyncio.run(run())
+        with psycopg.connect(migrated) as db:
+            assert db.execute("SELECT count(*) FROM source_documents WHERE workspace_id=%s AND excerpt IS NULL", (envelope.workspace_id,)).fetchone()[0] == 50
+>           assert db.execute("SELECT count(*) FROM outbox_events WHERE workspace_id=%s AND state='ready' AND event_type='source.delete'", (envelope.workspace_id,)).fetchone()[0] == 50
+E           assert 0 == 50
+
+services\api\tests\test_cloudflare_local_steps_db.py:248: AssertionError
+============================== warnings summary ===============================
+services\api\tests\conftest.py:24
+services\api\tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\api\tests\conftest.py:24
+services\api\tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\api\.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_cloudflare_local_steps_db.py::test_bulk_restart_resumes_next_chunk_without_repeat[101]
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_cloudflare_local_steps_db.py::test_bulk_restart_resumes_next_chunk_without_repeat[101]
+tests/test_cloudflare_runtime_control_db.py::test_same_generation_has_one_execution_owner
+tests/test_cloudflare_bridge_db.py::test_authenticated_nonce_replay_and_unknown_fields_are_rejected
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\Documents\BuyerOS\artifacts\cloudflare\CF03-final-focused.xml -
+=========================== short test summary info ===========================
+FAILED services\api\tests\test_cloudflare_local_steps_db.py::test_retention_page_redacts_only_fifty_sources_and_persists_successors
+1 failed, 29 passed, 9 warnings in 33.10s

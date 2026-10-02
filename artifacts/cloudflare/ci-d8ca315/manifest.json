@@ -1,0 +1,77 @@
+{
+  "branch_head_sha": "d8ca3150e620f6f7f978a420852dd4ac9f024712",
+  "github_ci_test_merge_sha": "8634fba98e2e455a516e4f707058255ccdf4aced",
+  "workflow_run_id": 36859284850,
+  "artifact_id": 11161196074,
+  "artifact_digest_verified": true,
+  "archive_sha256": "afd25f3251e7be001cef1bb77e0086387ee60a5a80fc3f7ce2f77ca4620c271e",
+  "safe_members": 460,
+  "acceptance_source_files_equal_branch_head_git_blobs": true,
+  "acceptance_report_sha256": "c42fd68afe461d513f486cdfa9a75d3a4465e104ebbf5736c02ae65c48aae7d7",
+  "junit": [
+    {
+      "member": "artifacts/cloudflare/acceptance/journey.xml",
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "4d774c74dd4b3df11d1c751fea32fcef8a7abf21d3f995f175a3d816b267e99f",
+      "saved": "artifacts/cloudflare/ci-d8ca315/journey.xml"
+    },
+    {
+      "member": "artifacts/cloudflare/CF08-pg18.xml",
+      "passed": 29,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "0f0667622b85377cdc23cb772f30f6b517ce53e546ab8f6bbd61993cb4e5d6e4",
+      "saved": "artifacts/cloudflare/ci-d8ca315/CF08-pg18.xml"
+    },
+    {
+      "member": "artifacts/cloudflare/ci-operating.xml",
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "70f8eb17deab01b8c255ccf8754b2684ac86199aa29f5b8bdabfdaaf76de723c",
+      "saved": "artifacts/cloudflare/ci-d8ca315/ci-operating.xml"
+    }
+  ],
+  "scope": "GitHub Linux runner actual local platform/owned PG; fictional identity/providers. Not protected hosted Vercel job proof. GitHub CI test merge is not a merged PR.",
+  "historical_artifacts": "Archive also includes retained checked-in earlier failures/reports. None relabelled as fresh CI results. Only exact current namespaces verified.",
+  "collector_corrections": "Initial selection wrongly required one report in an archive retaining historical reports; next guard rejected branch SHA because checkout used GitHub test-merge SHA. Both checks failed closed; precise namespace/test-merge provenance now verified.",
+  "controller_artifact": {
+    "artifact_id": 11161795153,
+    "archive_sha256": "490d9a0ac27c5de6018fd596360508b47923ef3e6fdc9989d127c568ed7194b9",
+    "digest_verified": true,
+    "member": "ci-controller.xml",
+    "junit_sha256": "4fb1c874a1b501bf0f611be21f7a120f843cfa91a2cd4eb6e5afcfe48a8416fc",
+    "passed": 27,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "git_xml_normalization": {
+    "CF08-pg18.xml": {
+      "original_sha256": "0f0667622b85377cdc23cb772f30f6b517ce53e546ab8f6bbd61993cb4e5d6e4",
+      "saved_sha256": "90bdf91f97670e86e78278f1ecd0c5fff3819703bd2eacecfedc6401ad2c9f9a",
+      "change": "Trailing whitespace/newline only; XML test results unchanged"
+    },
+    "ci-controller.xml": {
+      "original_sha256": "4fb1c874a1b501bf0f611be21f7a120f843cfa91a2cd4eb6e5afcfe48a8416fc",
+      "saved_sha256": "7746243d0981e751470454a6faf0701ebf2f6ec2c3f327ea5480dc5e5f33e140",
+      "change": "Trailing whitespace/newline only; XML test results unchanged"
+    },
+    "ci-operating.xml": {
+      "original_sha256": "70f8eb17deab01b8c255ccf8754b2684ac86199aa29f5b8bdabfdaaf76de723c",
+      "saved_sha256": "cfff8cfaac8b12450815a51bb261e09d0a6c13079b1c4398e8658f0b80cf749b",
+      "change": "Trailing whitespace/newline only; XML test results unchanged"
+    },
+    "journey.xml": {
+      "original_sha256": "4d774c74dd4b3df11d1c751fea32fcef8a7abf21d3f995f175a3d816b267e99f",
+      "saved_sha256": "366dc7746fe5e9c92180424a9fb7c94e4b275dd6c1e03e22ae39fef795b1a249",
+      "change": "Trailing whitespace/newline only; XML test results unchanged"
+    }
+  },
+  "raw_xml_copies": ".superpowers/sdd/2026-10-01-cloudflare-job-migration/raw-cf08-ci"
+}

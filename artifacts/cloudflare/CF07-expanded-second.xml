@@ -1,0 +1,95 @@
+<testsuites id="" name="" tests="7" failures="3" skipped="0" errors="0" time="300.90654">
+<testsuite name="cloudflare-journey.spec.ts" timestamp="2026-10-01T09:12:06.902Z" hostname="" tests="7" failures="3" skipped="0" time="145.468" errors="0">
+<testcase name="CF07 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="37.342">
+</testcase>
+<testcase name="CF07 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="33.767">
+</testcase>
+<testcase name="CF07 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="33.876">
+</testcase>
+<testcase name="CF07 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="32.147">
+</testcase>
+<testcase name="CF07 real second page, 101-row native bulk and persistent Workflow restart" classname="cloudflare-journey.spec.ts" time="2.262">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\cloudflare\cloudflare-journey-CF07-re-db764-persistent-Workflow-restart\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toMatch(expected)" type="expect.toMatch">
+<![CDATA[  cloudflare-journey.spec.ts:8:1 › CF07 real second page, 101-row native bulk and persistent Workflow restart
+
+    TypeError: expect(received).toMatch(expected)
+
+    Matcher error: received value must be a string
+
+    Received has value: null
+
+      21 |     await page.getByRole('button',{name:'Assign selected buyers'}).click();
+      22 |     const jobId=new URL(page.url()).searchParams.get('bulk_job');
+    > 23 |     expect(jobId).toMatch(/^[0-9a-f-]{36}$/);
+         |                   ^
+      24 |     const state=async()=>{
+      25 |       const response=await request.get(`http://127.0.0.1:8000/fixture/cloudflare/bulk/${jobId}`);
+      26 |       expect(response.ok()).toBe(true);return response.json();
+        at C:\Users\laich\Documents\BuyerOS\tests\e2e\cloudflare-journey.spec.ts:23:19
+
+    Error Context: ..\..\test-results\cloudflare\cloudflare-journey-CF07-re-db764-persistent-Workflow-restart\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="CF07 optional lookup unknown acceptance retains one hold and never blindly resubmits" classname="cloudflare-journey.spec.ts" time="3.295">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\cloudflare\cloudflare-journey-CF07-op-99857-and-never-blindly-resubmits\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toMatch(expected)" type="expect.toMatch">
+<![CDATA[  cloudflare-journey.spec.ts:46:1 › CF07 optional lookup unknown acceptance retains one hold and never blindly resubmits
+
+    TypeError: expect(received).toMatch(expected)
+
+    Matcher error: received value must be a string
+
+    Received has value: null
+
+      53 |   await preview.getByRole('button',{name:'Confirm lookup'}).click();
+      54 |   const jobId=new URL(page.url()).searchParams.get('contact_job');
+    > 55 |   expect(jobId).toMatch(/^[0-9a-f-]{36}$/);
+         |                 ^
+      56 |   const state=async()=>{const r=await request.get(`http://127.0.0.1:8000/fixture/cloudflare/contact/${jobId}`);expect(r.ok()).toBe(true);return r.json();};
+      57 |   await expect.poll(async()=>(await state()).status,{timeout:60_000}).toBe('unknown');
+      58 |   expect(await state()).toMatchObject({hold:'0.300000',hold_state:'active',operations:['unknown'],fixture_submit_count:1});
+        at C:\Users\laich\Documents\BuyerOS\tests\e2e\cloudflare-journey.spec.ts:55:17
+
+    Error Context: ..\..\test-results\cloudflare\cloudflare-journey-CF07-op-99857-and-never-blindly-resubmits\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="CF07 viewer and reviewer negative roles; a late real buyer response cannot overwrite another project" classname="cloudflare-journey.spec.ts" time="2.779">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\cloudflare\cloudflare-journey-CF07-vi-305e8-t-overwrite-another-project\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  cloudflare-journey.spec.ts:67:1 › CF07 viewer and reviewer negative roles; a late real buyer response cannot overwrite another project
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 422
+
+      73 |   const denied=await request.patch(`http://127.0.0.1:8000/v1/workspaces/${workspace}/memberships/e0000000-0000-4000-8000-000000000007`,{
+      74 |     headers:{Authorization:'Bearer fixture-reviewer','Idempotency-Key':'cf07-role-denied'},data:{expected_version:1,roles:['workspace_admin'],active:true,reason:'Fictional denied grant'}});
+    > 75 |   expect(denied.status()).toBe(403);
+         |                           ^
+      76 |   await viewerContext.close();
+      77 |   await signIn(page,'fixture-access',`/app/discover?${scope}`);
+      78 |   let release:()=>void=()=>{};let seen:()=>void=()=>{};
+        at C:\Users\laich\Documents\BuyerOS\tests\e2e\cloudflare-journey.spec.ts:75:27
+
+    Error Context: ..\..\test-results\cloudflare\cloudflare-journey-CF07-vi-305e8-t-overwrite-another-project\error-context.md
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

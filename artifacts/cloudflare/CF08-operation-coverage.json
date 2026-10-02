@@ -1,0 +1,30 @@
+{
+  "public_count": 78,
+  "original_operations": 70,
+  "extensions": 8,
+  "handler_rows": 78,
+  "contract_ids_equal_status_rows": true,
+  "internal_count": 5,
+  "internal_operations": [
+    "workerClaim",
+    "workerMaintenance",
+    "workerRecordPublication",
+    "workerStepStatus",
+    "workerExecuteStep"
+  ],
+  "coverage_truth": "Whole strict650 API and186 worker suites; per-operation evidence retained as recorded; no claim all78 individually browser/live verified",
+  "public_contract_sha256": "48bbf301a3b8cbc632fa4d5e89e0008e342ec9a1c1ce547c0b1ab0d1c60e66a8",
+  "internal_contract_sha256": "0633cbeb1b2bf11f03343a89e9fbd0cbc21f932144babeb30e5ff2b2c01ef430",
+  "deployed_verification": "not_run for Cloudflare RC",
+  "extension_operations": [
+    "assignBuyerOwners",
+    "cancelAsyncJob",
+    "exportBulkFailures",
+    "listAsyncJobs",
+    "listMemberships",
+    "listOfferDocuments",
+    "retryFailedAsyncJob",
+    "updateMembership"
+  ],
+  "baseline_coverage_sha256": "0aeddf1cebcbd29a8a68c9a4f3c8f5f7d720c17642613cf09c424cd99b80272a"
+}

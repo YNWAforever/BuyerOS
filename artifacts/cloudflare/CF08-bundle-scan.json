@@ -1,0 +1,19 @@
+{
+  "status": "verified_local_static_scope",
+  "worker_bundle": "services/cloudflare-jobs/.sites-runtime/cloudflare-preview-dry-run/index.js",
+  "worker_sha256": "04cb88ad990ea091b2100e386f0329639615b04d38b66bd9b92a909fc6e06cea",
+  "worker_bytes": 140845,
+  "frontend_files_scanned": 2333,
+  "credential_shape_and_known_test_literal_matches": {
+    "embedded_postgres_dsn": [],
+    "fictional_test_secret": [],
+    "private_key_material": [],
+    "cloudflare_api_token_assignment": [],
+    "access_token_assignment": [],
+    "production_account_email": []
+  },
+  "controller_excludes_database_auth0_r2_provider_credential_dependencies": true,
+  "source_vars_execution_enabled": "false",
+  "runtime_secrets_embedded": false,
+  "limitations": "Static checks cover listed credential shapes/literals and dependency exclusions; not a hosted environment/secret-store audit. Build/dry-run do not resolve runtime bindings."
+}

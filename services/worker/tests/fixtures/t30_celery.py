@@ -50,4 +50,4 @@ def execute_fixture_intent(intent_key: str, workspace_id: str, generation: int) 
     adapter = BrowserSearchFixture() if browser else SearchFixture(os.environ["BUYEROS_TEST_OWNER_DSN"])
     return execute_intent_sync(intent_key, workspace_id, generation,
                                search_adapter=adapter, environment="test",
-                               checkpoint_dsn=os.environ["BUYEROS_TEST_OWNER_DSN"] if browser else None)
+                               checkpoint_dsn=os.environ["BUYEROS_CHECKPOINT_DATABASE_URL"] if browser else None)

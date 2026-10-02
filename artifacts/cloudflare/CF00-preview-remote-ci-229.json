@@ -1,0 +1,135 @@
+{
+  "branch_head": "229a76c2d1ad6d608d3afba70b86b6dcc863f03c",
+  "test_merge": "57b8560f4cfec4bcaf5fcb130951a5b30f8433a1",
+  "run_id": 36861185237,
+  "run_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36861185237",
+  "jobs": [
+    {
+      "name": "frontend",
+      "id": 110365506663,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "api",
+      "id": 110365506836,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "browser-smoke",
+      "id": 110365506902,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "worker",
+      "id": 110365506991,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "browser-zoom",
+      "id": 110365506996,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "cloudflare-staff-acceptance",
+      "id": 110365507073,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "cloudflare-controller",
+      "id": 110365507127,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "browser-continuity",
+      "id": 110365507251,
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "logs": [
+    {
+      "name": "api",
+      "source": "decoded GitHub workflow job logs",
+      "lines": [
+        "2026-10-01T12:21:31.0118466Z HEAD is now at 57b8560 Merge 229a76c2d1ad6d608d3afba70b86b6dcc863f03c into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+        "2026-10-01T12:21:31.0213488Z 57b8560f4cfec4bcaf5fcb130951a5b30f8433a1",
+        "2026-10-01T12:25:17.4752346Z 650 passed, 96 warnings in 194.34s (0:03:14)",
+        "2026-10-01T12:25:19.2342438Z passed=650 failed=0 errors=0 skipped=0"
+      ]
+    },
+    {
+      "name": "staff",
+      "source": "decoded GitHub workflow job logs",
+      "lines": [
+        "2026-10-01T12:21:21.2226249Z HEAD is now at 57b8560 Merge 229a76c2d1ad6d608d3afba70b86b6dcc863f03c into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+        "2026-10-01T12:21:21.2295174Z 57b8560f4cfec4bcaf5fcb130951a5b30f8433a1",
+        "2026-10-01T12:23:21.1475247Z 29 passed, 9 warnings in 48.24s",
+        "2026-10-01T12:23:21.7380021Z passed=29 failed=0 errors=0 skipped=0",
+        "2026-10-01T12:23:59.8168001Z 2 passed, 1 warning in 37.03s",
+        "2026-10-01T12:24:00.1281530Z passed=2 failed=0 errors=0 skipped=0",
+        "2026-10-01T12:24:41.2693002Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:24:55.0648334Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:25:08.4173230Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:25:21.9982237Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:25:30.0136068Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:25:30.0139306Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:25:30.8191076Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:25:30.8210596Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:25:30.8216813Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:25:30.8223903Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:25:30.8232165Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:25:30.8236561Z [WebServer] built fixture request failed: Error",
+        "2026-10-01T12:25:32.0306528Z   7 passed (1.2m)",
+        "2026-10-01T12:25:32.0565850Z {\"passed\":7,\"failed\":0,\"errors\":0,\"skipped\":0,\"total\":7}"
+      ]
+    },
+    {
+      "name": "worker",
+      "source": "decoded GitHub workflow job logs",
+      "lines": [
+        "2026-10-01T12:21:44.0576659Z HEAD is now at 57b8560 Merge 229a76c2d1ad6d608d3afba70b86b6dcc863f03c into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+        "2026-10-01T12:21:44.0635699Z 57b8560f4cfec4bcaf5fcb130951a5b30f8433a1",
+        "2026-10-01T12:21:48.8234395Z Linux standby integration: 2 passed, 0 failed/skipped; no database/broker/provider",
+        "2026-10-01T12:22:13.6119609Z 186 passed, 1 warning in 22.29s",
+        "2026-10-01T12:22:14.0093974Z passed=186 failed=0 errors=0 skipped=0"
+      ]
+    },
+    {
+      "name": "controller",
+      "source": "decoded GitHub workflow job logs",
+      "lines": [
+        "2026-10-01T12:21:20.9668951Z HEAD is now at 57b8560 Merge 229a76c2d1ad6d608d3afba70b86b6dcc863f03c into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+        "2026-10-01T12:21:20.9775107Z 57b8560f4cfec4bcaf5fcb130951a5b30f8433a1",
+        "2026-10-01T12:22:05.3094865Z  Test Files  8 passed (8)",
+        "2026-10-01T12:22:05.3095857Z       Tests  27 passed (27)"
+      ]
+    },
+    {
+      "name": "continuity",
+      "source": "decoded GitHub workflow job logs",
+      "lines": [
+        "2026-10-01T12:21:22.3106109Z HEAD is now at 57b8560 Merge 229a76c2d1ad6d608d3afba70b86b6dcc863f03c into 12327c7ac98849b90b0bd08f63872be7dd302ac6",
+        "2026-10-01T12:21:22.3171837Z 57b8560f4cfec4bcaf5fcb130951a5b30f8433a1",
+        "2026-10-01T12:25:49.7933091Z   4 passed (2.9m)",
+        "2026-10-01T12:25:49.8641440Z passed=4 failed=0 errors=0 skipped=0",
+        "2026-10-01T12:27:05.5382059Z   8 passed (1.2m)",
+        "2026-10-01T12:27:05.6120834Z passed=8 failed=0 errors=0 skipped=0",
+        "2026-10-01T12:27:35.6427950Z   1 passed (29.2s)",
+        "2026-10-01T12:27:35.7154682Z passed=1 failed=0 errors=0 skipped=0",
+        "2026-10-01T12:28:09.3755177Z   3 passed (32.8s)",
+        "2026-10-01T12:28:09.4460926Z passed=3 failed=0 errors=0 skipped=0",
+        "2026-10-01T12:28:40.5058984Z   1 passed (30.3s)",
+        "2026-10-01T12:28:40.5792878Z passed=1 failed=0 errors=0 skipped=0"
+      ]
+    }
+  ],
+  "scope": "Previous RC checkpoint commit, not the new preview-preparation source.",
+  "cloudflare_hosted_verified": false
+}

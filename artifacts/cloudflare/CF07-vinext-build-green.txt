@@ -1,0 +1,58 @@
+$ node scripts/run-framework.mjs build
+
+  vinext build  (Vite 8.0.13)
+
+[1/5] analyze client references...
+[2K
+transforming...✓ 232 modules transformed.
+rendering chunks...
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vinext:jsx-in-js (35%)
+  - alias (29%)
+  - vinext:ignore-dynamic-requests (8%)
+  - vinext:validate-middleware-exports (6%)
+  - rsc:virtual-client-package (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 5.04s
+[2/5] analyze server references...
+[2K
+transforming...✓ 319 modules transformed.
+rendering chunks...
+✓ built in 716ms
+[3/5] build rsc environment...
+[2K
+transforming...✓ 229 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 609ms
+[4/5] build client environment...
+[2K
+transforming...✓ 2097 modules transformed.
+rendering chunks...
+computing gzip size...
+[plugin builtin:vite-reporter]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.69s
+[5/5] build ssr environment...
+[2K
+transforming...✓ 324 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 787ms
+[0m
+  Route (app)
+  ┌ ? /
+  ├ ƒ /:slug+
+  ├ ? /auth/callback
+  └ λ /v1/:path+
+
+  λ API  ƒ Dynamic  ? Unknown
+
+  ? Some routes could not be classified. vinext currently uses static analysis
+    and cannot detect dynamic API usage (headers(), cookies(), etc.) at build time.
+    Automatic classification will be improved in a future release.
+  Build complete. Run `vinext start` to start the production server.

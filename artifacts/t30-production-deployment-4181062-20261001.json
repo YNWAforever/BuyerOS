@@ -1,0 +1,46 @@
+{
+  "observed_at_utc": "2026-10-01T01:35:41.5411093Z",
+  "id": "dpl_5Yt2v611QZwJntN8sBnwyWojJQvT",
+  "ready_state": "READY",
+  "target": "production",
+  "source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+  "project_id": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw",
+  "production_alias": "https://buyer-os-nu.vercel.app",
+  "url": "buyer-9teghmcy6-ynwaforevers-projects.vercel.app",
+  "created_at": 1790818347618,
+  "building_at": 1790818348933,
+  "ready_at": 1790818423366,
+  "services": [
+    {
+      "name": "app",
+      "root": ".",
+      "framework": "nitro",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "api",
+          "format": "url",
+          "env": "BUYEROS_INTERNAL_API_URL"
+        }
+      ]
+    },
+    {
+      "name": "api",
+      "root": "services/api",
+      "framework": "fastapi",
+      "bindings": null
+    }
+  ],
+  "saved_production_environment_count": 9,
+  "saved_environment_metadata_unchanged": true,
+  "paid_admission_enabled": false,
+  "r2_enabled": false,
+  "database_migrations_run": 0,
+  "external_worker_activated": false,
+  "paid_provider_requests": 0,
+  "delivery_activated": false,
+  "previous_production_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+  "previous_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+  "redeploy_command": "vercel.cmd redeploy dpl_9vrsNEUsyzfGjbr745ersK6XWEVF --target production --scope ynwaforevers-projects --no-wait",
+  "scope": "Actual production alias and source verified using Vercel API. No authenticated staff journey, paid-provider, external worker or pilot verification is implied."
+}

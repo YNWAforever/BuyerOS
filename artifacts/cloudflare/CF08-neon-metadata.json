@@ -1,0 +1,25 @@
+{
+  "project": {
+    "id": "nameless-bar-15324691",
+    "name": "BuyerOS",
+    "region": "aws-ap-southeast-1",
+    "pgVersion": 18,
+    "plan": "free_v3",
+    "minCU": 0.25,
+    "maxCU": 2,
+    "historyRetentionSeconds": 21600
+  },
+  "compute": [
+    {
+      "id": "ep-dark-dawn-b3au2rn1",
+      "branch": "br-autumn-block-b3exsqii",
+      "region": "aws-ap-southeast-1",
+      "state": "idle",
+      "minCU": 0.25,
+      "maxCU": 2,
+      "suspendedAt": "2026-10-01T02:28:16Z",
+      "suspendTimeout": 0
+    }
+  ],
+  "scope": "read-only metadata; no database query or production mutation"
+}

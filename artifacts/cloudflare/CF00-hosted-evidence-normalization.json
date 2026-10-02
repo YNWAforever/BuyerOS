@@ -1,0 +1,100 @@
+{
+  "purpose": "Cross-platform Git evidence hashes only; original archive/local hashes retained",
+  "changes": [
+    {
+      "path": "artifacts/cloudflare/CF00-current-ui-visual-review.json",
+      "original_local_sha256": "c2382e45396083aef7b53425b5ab9b6d4fa56bb86592561c52ddbf43483efdd5",
+      "canonical_git_sha256_before_reference_updates": "c5c3f97bddae9eccb856e808ee954865a3082bd5a4ff06e6cbcc4dd2d5bf73d2",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "artifacts/cloudflare/CF00-hosted-changed-files.json",
+      "original_local_sha256": "3803e033dacb6c14e5c465dcabfa6ed7d85431dc175b8c17377fe0e663009e0e",
+      "canonical_git_sha256_before_reference_updates": "1c30b372bde6a84f0a5150cbf39fc1c0f2629ea90b53e2d4e6e7ec5e6126c8bc",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "artifacts/cloudflare/CF00-hosted-deployment-manifest.json",
+      "original_local_sha256": "81d48f82990b898d7b41e85f0d4914d1f4ba5a2d17d49d7ab0134fdc48603940",
+      "canonical_git_sha256_before_reference_updates": "4f4c69063e45993d279e73e43e46289fcb0c7f29842a5e5a30dd098be7208404",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "artifacts/cloudflare/CF00-hosted-native-and-duration.json",
+      "original_local_sha256": "f7f4c6a256a8d940bf2b383cf9339cd4222cfb2c71cd42c87067520e228494d6",
+      "canonical_git_sha256_before_reference_updates": "0ffbd44a15a3b5534e6f58c98e908ad6b11679e29f33d269ff270ca2a7a497c1",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "artifacts/cloudflare/CF00-hosted-operational.json",
+      "original_local_sha256": "cb7a952048509c0a170515934994f7c7a9d3adabc545dd8dd835282bad8880a8",
+      "canonical_git_sha256_before_reference_updates": "44de6f3e63f3451cfa002d842d22bbf5fc30c88bdd3a07c98bc5836dba7c716c",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "artifacts/cloudflare/CF00-hosted-preview-checkpoint.json",
+      "original_local_sha256": "60b39cfa131cf366a81e356c21634c68cdbae432dcbf7ab55a403085602c3d58",
+      "canonical_git_sha256_before_reference_updates": "9200a1ace360a6d90f64506f06cd50df3aed5951e942a8036f798e6f4a968e99",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "artifacts/cloudflare/CF00-hosted-shutdown.json",
+      "original_local_sha256": "8b7c6432477b6bd75fee956487a704118e999a81548a993a7d066117d13a4f0a",
+      "canonical_git_sha256_before_reference_updates": "90f1627ef83cec76aaad124c039e1f0e31394b43ac9dd09821815590c22198e1",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "artifacts/cloudflare/CF00-legacy-isolation-ci-red.json",
+      "original_local_sha256": "e031ca48e27a6f693b7d20c1b016de43b99da001a99fb913cb0e661e7180ec96",
+      "canonical_git_sha256_before_reference_updates": "880e69e4411537c6d33dcf9d3c3de9a17795604317b728f3d4505d2ab69e1f63",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/manifest.json",
+      "original_local_sha256": "683631b30d0b6cc69c1d9cc3d867b70f990abe2bd60966fcc87ab648bc68adf0",
+      "canonical_git_sha256_before_reference_updates": "acefe87c9e57f4d6f4f1cc3d85b22858adcf4d5d2eb0bf565bd5500b6a6f183b",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "artifacts/cloudflare/ci-93de21f-hosted-successor/manifest.json",
+      "original_local_sha256": "3ebc05cbd4afd604f3a553046d283703ff49c8008d5f62989dc22b0487f54b11",
+      "canonical_git_sha256_before_reference_updates": "02a96cd71e72dac2f63bb4d80b25ecd96794a5267351abe75d24867f5215ad39",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "docs/buyeros/CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md",
+      "original_local_sha256": "36acb4eb3cb0a8edbd6140c7d9d063dcfaa574682574c00a3ded64c468d848d6",
+      "canonical_git_sha256_before_reference_updates": "1573670db646ee388be13a93513499d356e0ce37f3e48219cd001df71801f7f4",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md",
+      "original_local_sha256": "c1d9bc10883ad3cb6ef5978bc36862a283910b83b90ec0bfc720db7a0610e4fd",
+      "canonical_git_sha256_before_reference_updates": "803b1fcd14b683553a1a313cb03f8de04f6ac800eb70ee8faa5ba560831e932d",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "docs/buyeros/remaining/TASKS.json",
+      "original_local_sha256": "35fee08e3c6aa5e4bd2dea2b0d94f038b0e3b7b2aec14d0be261ef79b8452f8a",
+      "canonical_git_sha256_before_reference_updates": "8de8d4d547d7cc569e0befcdd75659d403c3f03adba06a78ff09a5c12371d9ea",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "docs/buyeros/runbooks/cloudflare-preview-probe.md",
+      "original_local_sha256": "abb098f3d7e9400937779b3249a82758bf3cae1016fed2520f757c8238242961",
+      "canonical_git_sha256_before_reference_updates": "9213b56eb406207036d0aadbc816c1893707de1e654f406bfff95ea4859d820b",
+      "change": "CRLF to LF only"
+    },
+    {
+      "path": "docs/buyeros/runbooks/cloudflare-worker-setup.md",
+      "original_local_sha256": "52369338f5e8382726a18f9938037fdff45e3a3ef9afb082c89ae875ca8b1286",
+      "canonical_git_sha256_before_reference_updates": "ca3883744053a6bcb58d061bd7f709a813dbe7b09cfb112e127e7774ff191e9f",
+      "change": "CRLF to LF only"
+    }
+  ],
+  "test_counts_changed": false,
+  "failures_removed": false,
+  "source_changed": false,
+  "ci_archive_digest_changed": false,
+  "note": "JSON references updated after LF normalization; their final hashes are in the checkpoint. Actual deployment/archive/config and raw CI-log hashes remain original bytes."
+}

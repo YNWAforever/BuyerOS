@@ -1,0 +1,10 @@
+{
+  "environment": "local_owned_fixture",
+  "two_hop_hosted": false,
+  "result": {
+    "slept_seconds": 61,
+    "hosted_feasible": false,
+    "source_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "wall_seconds": 61.00461119998363
+  }
+}

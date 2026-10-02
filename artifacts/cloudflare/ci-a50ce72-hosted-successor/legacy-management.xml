@@ -1,0 +1,10 @@
+<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="0" time="32.576702000000004">
+<testsuite name="buyer-management.spec.ts" timestamp="2026-10-01T18:19:36.018Z" hostname="" tests="3" failures="0" skipped="0" time="9.594" errors="0">
+<testcase name="T09 durable list, preset, note, owner and individual review journey" classname="buyer-management.spec.ts" time="5.049">
+</testcase>
+<testcase name="T09 viewer cannot mutate buyers or lists" classname="buyer-management.spec.ts" time="2.053">
+</testcase>
+<testcase name="T29 zh-HK list and saved filter actions use localized accessible names and feedback" classname="buyer-management.spec.ts" time="2.492">
+</testcase>
+</testsuite>
+</testsuites>

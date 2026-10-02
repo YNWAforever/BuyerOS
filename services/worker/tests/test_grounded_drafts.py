@@ -198,6 +198,17 @@ def test_suppression_before_worker_prevents_draft_materialization(draft_job):
                           (case["workspace"],)).fetchone()[0] == 0
 
 
+def test_current_reviewer_can_materialize_admitted_grounded_draft(draft_job):
+    import psycopg
+    from buyeros_worker.tasks import execute_intent_sync
+    with psycopg.connect(draft_job['dsn'], autocommit=True) as db:
+        db.execute("UPDATE memberships SET roles='{reviewer}' WHERE user_id=%s", (draft_job['actor'],))
+    assert execute_intent_sync(draft_job['intent_key'], draft_job['workspace'], 1) == 'done'
+    with psycopg.connect(draft_job['dsn']) as db:
+        assert db.execute("SELECT status,updated,blocked FROM async_jobs WHERE id=%s", (draft_job['job'],)).fetchone() == ('completed', 1, 0)
+        assert db.execute("SELECT count(*) FROM outreach_drafts WHERE workspace_id=%s", (draft_job['workspace'],)).fetchone()[0] == 1
+
+
 def _address_job(case):
     import hashlib
     import json

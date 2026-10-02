@@ -1,0 +1,560 @@
+{
+  "components": {
+    "schemas": {
+      "ClaimBatch": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/JobEnvelope"
+            },
+            "maxItems": 10,
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "runtime_epoch": {
+            "maximum": 9007199254740991.0,
+            "minimum": 1.0,
+            "title": "Runtime Epoch",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor",
+          "runtime_epoch"
+        ],
+        "title": "ClaimBatch",
+        "type": "object"
+      },
+      "ClaimRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "max_total": {
+            "default": 10,
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Max Total",
+            "type": "integer"
+          },
+          "runtime_epoch": {
+            "maximum": 9007199254740991.0,
+            "minimum": 1.0,
+            "title": "Runtime Epoch",
+            "type": "integer"
+          },
+          "time_budget_seconds": {
+            "default": 10,
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Time Budget Seconds",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "runtime_epoch"
+        ],
+        "title": "ClaimRequest",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "JobEnvelope": {
+        "additionalProperties": false,
+        "properties": {
+          "generation": {
+            "maximum": 9007199254740991.0,
+            "minimum": 1.0,
+            "title": "Generation",
+            "type": "integer"
+          },
+          "outbox_id": {
+            "format": "uuid",
+            "title": "Outbox Id",
+            "type": "string"
+          },
+          "runtime_epoch": {
+            "maximum": 9007199254740991.0,
+            "minimum": 1.0,
+            "title": "Runtime Epoch",
+            "type": "integer"
+          },
+          "v": {
+            "const": 1,
+            "title": "V",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "v",
+          "workspace_id",
+          "outbox_id",
+          "generation",
+          "runtime_epoch"
+        ],
+        "title": "JobEnvelope",
+        "type": "object"
+      },
+      "MaintenanceRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "probe_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Probe Id"
+          },
+          "runtime_epoch": {
+            "maximum": 9007199254740991.0,
+            "minimum": 1.0,
+            "title": "Runtime Epoch",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "runtime_epoch"
+        ],
+        "title": "MaintenanceRequest",
+        "type": "object"
+      },
+      "MaintenanceResult": {
+        "additionalProperties": false,
+        "properties": {
+          "alerts": {
+            "items": {
+              "enum": [
+                "PROBE_STALE",
+                "WORK_BACKLOG"
+              ],
+              "type": "string"
+            },
+            "maxItems": 2,
+            "title": "Alerts",
+            "type": "array"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "recovered": {
+            "maximum": 10.0,
+            "minimum": 0.0,
+            "title": "Recovered",
+            "type": "integer"
+          },
+          "runtime_epoch": {
+            "maximum": 9007199254740991.0,
+            "minimum": 1.0,
+            "title": "Runtime Epoch",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "runtime_epoch",
+          "recovered",
+          "enabled",
+          "alerts"
+        ],
+        "title": "MaintenanceResult",
+        "type": "object"
+      },
+      "PublicationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "envelope": {
+            "$ref": "#/components/schemas/JobEnvelope"
+          },
+          "state": {
+            "enum": [
+              "published",
+              "unknown",
+              "failed"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "envelope",
+          "state"
+        ],
+        "title": "PublicationRequest",
+        "type": "object"
+      },
+      "StepOutcome": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "enum": [
+              "OK",
+              "EXECUTION_DISABLED",
+              "CAPABILITY_UNAVAILABLE",
+              "POLICY_CHANGED",
+              "ACTOR_CHANGED",
+              "INVALID_INTENT",
+              "STALE_FENCE",
+              "IN_PROGRESS",
+              "TRANSIENT_UNAVAILABLE",
+              "PROVIDER_UNKNOWN",
+              "LIMIT_EXCEEDED",
+              "STEP_FAILED"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "next_step_key": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "pattern": "^[a-z0-9][a-z0-9:_-]{0,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Step Key"
+          },
+          "retry_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry At"
+          },
+          "state": {
+            "enum": [
+              "done",
+              "continue",
+              "retry_later",
+              "reconcile",
+              "blocked",
+              "stale"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "code",
+          "next_step_key",
+          "retry_at"
+        ],
+        "title": "StepOutcome",
+        "type": "object"
+      },
+      "StepRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "envelope": {
+            "$ref": "#/components/schemas/JobEnvelope"
+          },
+          "step_key": {
+            "maxLength": 64,
+            "pattern": "^[a-z0-9][a-z0-9:_-]{0,63}$",
+            "title": "Step Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "envelope",
+          "step_key"
+        ],
+        "title": "StepRequest",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "BuyerOS internal worker protocol",
+    "version": "1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/internal/worker/claim": {
+      "post": {
+        "operationId": "workerClaim",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimBatch"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Claim",
+        "tags": [
+          "worker-internal"
+        ]
+      }
+    },
+    "/v1/internal/worker/maintenance": {
+      "post": {
+        "operationId": "workerMaintenance",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaintenanceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaintenanceResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Maintenance",
+        "tags": [
+          "worker-internal"
+        ]
+      }
+    },
+    "/v1/internal/worker/publication": {
+      "post": {
+        "operationId": "workerRecordPublication",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StepOutcome"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Publication",
+        "tags": [
+          "worker-internal"
+        ]
+      }
+    },
+    "/v1/internal/worker/status": {
+      "post": {
+        "operationId": "workerStepStatus",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StepOutcome"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Status",
+        "tags": [
+          "worker-internal"
+        ]
+      }
+    },
+    "/v1/internal/worker/step": {
+      "post": {
+        "operationId": "workerExecuteStep",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StepOutcome"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Step",
+        "tags": [
+          "worker-internal"
+        ]
+      }
+    }
+  }
+}

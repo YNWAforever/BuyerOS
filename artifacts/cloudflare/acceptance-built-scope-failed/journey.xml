@@ -1,0 +1,31 @@
+<testsuites id="" name="" tests="7" failures="0" skipped="0" errors="1" time="288.948672">
+<testsuite name="cloudflare-journey.spec.ts" timestamp="2026-10-01T10:36:18.371Z" hostname="" tests="7" failures="0" skipped="0" time="265.806" errors="1">
+<testcase name="CF07 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="20.997">
+</testcase>
+<testcase name="CF07 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="17.025">
+</testcase>
+<testcase name="CF07 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="16.583">
+</testcase>
+<testcase name="CF07 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="16.485">
+</testcase>
+<testcase name="CF07 real second page, 101-row native bulk and persistent Workflow restart" classname="cloudflare-journey.spec.ts" time="10.011">
+</testcase>
+<testcase name="CF07 optional lookup unknown acceptance retains one hold and never blindly resubmits" classname="cloudflare-journey.spec.ts" time="4.656">
+</testcase>
+<testcase name="CF07 viewer and reviewer negative roles; a late real buyer response cannot overwrite another project" classname="cloudflare-journey.spec.ts" time="180.049">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\..\test-results\cloudflare\cloudflare-journey-CF07-vi-305e8-t-overwrite-another-project\error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 180000ms exceeded." type="Error">
+<![CDATA[  cloudflare-journey.spec.ts:69:1 › CF07 viewer and reviewer negative roles; a late real buyer response cannot overwrite another project
+
+    Test timeout of 180000ms exceeded.
+
+    Error Context: ..\..\test-results\cloudflare\cloudflare-journey-CF07-vi-305e8-t-overwrite-another-project\error-context.md
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

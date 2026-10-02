@@ -1,0 +1,940 @@
+{
+  "run_id": 36893525903,
+  "source_sha": "79d6caf8b51aac00560cf6d69b0198c8614df528",
+  "observed_at": "2026-10-01T16:49:30.930314+00:00",
+  "run_status": "completed",
+  "run_conclusion": "success",
+  "jobs": [
+    {
+      "id": 110474722518,
+      "name": "frontend",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:38:40Z",
+      "completed_at": "2026-10-01T16:40:09Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36893525903/job/110474722518",
+      "commands": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run node tests/domain-checks.mjs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run node tests/live-adapter-checks.mjs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run node tests/live-auth-checks.mjs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Run node --test tests/api-types-generation.test.mjs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run node --test tests/vercel-services.test.mjs tests/deployment/cloudflare-python-runtime.test.mjs tests/deployment/cloudflare-acceptance.test.mjs tests/deployment/built-ui-fixture.test.mjs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run pnpm exec tsc --noEmit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run pnpm lint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run pnpm build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Run node scripts/run-vercel.mjs build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Run node --test tests/vercel-render.test.mjs tests/deployment/cloudflare-release-config.test.mjs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        }
+      ],
+      "log_sha256": "844b3aa7fe2c44aff3acb69396f9c2de3eea6974d31a5c008ef438df66eb08cf",
+      "exact_outputs": [],
+      "retained_pipeline_error_lines": []
+    },
+    {
+      "id": 110474722711,
+      "name": "browser-smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:38:40Z",
+      "completed_at": "2026-10-01T16:40:18Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36893525903/job/110474722711",
+      "commands": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run pnpm exec playwright test tests/e2e/harness.spec.ts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        }
+      ],
+      "log_sha256": "e2b598276aa07f185b8bd7e12b05fbc89b7de1faca1dc1f8d38e1980254a604c",
+      "exact_outputs": [
+        "2026-10-01T16:40:13.9870023Z   1 passed (22.3s)"
+      ],
+      "retained_pipeline_error_lines": []
+    },
+    {
+      "id": 110474722831,
+      "name": "api",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:38:40Z",
+      "completed_at": "2026-10-01T16:44:04Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36893525903/job/110474722831",
+      "commands": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run uv run --frozen python ../../scripts/generate-operation-routes.py --check",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run uv run --frozen python ../../scripts/verify-render-blueprint.py",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run mkdir -p artifacts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit services/api/artifacts/tests.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        }
+      ],
+      "log_sha256": "72bf6e5b02c58288bff1594d2bd3a14e0f46ca7cf87c74ae3175bb90b86c4806",
+      "exact_outputs": [
+        "2026-10-01T16:44:00.0689956Z 686 passed, 97 warnings in 261.25s (0:04:21)"
+      ],
+      "retained_pipeline_error_lines": []
+    },
+    {
+      "id": 110474722842,
+      "name": "browser-continuity",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:38:41Z",
+      "completed_at": "2026-10-01T16:45:17Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36893525903/job/110474722842",
+      "commands": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.mvp-research.config.ts tests/e2e/mvp-a-research.spec.ts --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/t30-browser.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run mkdir -p artifacts/ci-t30/continuity",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.workbench.config.ts tests/e2e/daily-workbench.spec.ts --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/workbench.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --workers=1 --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/buyers.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/buyer-management.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.mvp.config.ts tests/e2e/mvp-a-journey.spec.ts --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/mvp-acceptance.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22
+        }
+      ],
+      "log_sha256": "844cc2ad99b6ec86ee5bf2b7657b97ec998611e98bd7840566822ccd3acd3948",
+      "exact_outputs": [
+        "2026-10-01T16:42:20.8443484Z   4 passed (2.7m)",
+        "2026-10-01T16:43:30.8854775Z   8 passed (1.1m)",
+        "2026-10-01T16:44:03.2744160Z   1 passed (31.2s)",
+        "2026-10-01T16:44:38.4226612Z   3 passed (34.0s)",
+        "2026-10-01T16:45:11.5249561Z   1 passed (31.9s)"
+      ],
+      "retained_pipeline_error_lines": []
+    },
+    {
+      "id": 110474722857,
+      "name": "worker",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:38:39Z",
+      "completed_at": "2026-10-01T16:39:36Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36893525903/job/110474722857",
+      "commands": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run uv run --frozen python -m unittest discover -s ../../tests -p test_render_worker_launch.py",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run uv run --frozen python ../../tests/render-worker-process-check.py",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Run mkdir -p artifacts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit services/worker/artifacts/tests.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27 && uv sync --project services/worker --frozen --no-dev --python 3.12",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python scripts/run-render-worker.py worker --check",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python scripts/run-render-worker.py dispatcher --check",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python -m celery -A buyeros_worker.app:celery_app worker --help",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Run services/worker/.venv/bin/python -m buyeros_worker.cli dispatch --help",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        }
+      ],
+      "log_sha256": "906368a6dfd588dd8ed532568055cb1b4a2e2e85ca7468da64070cb6d3aeb069",
+      "exact_outputs": [
+        "2026-10-01T16:39:03.2830208Z Linux standby integration: 2 passed, 0 failed/skipped; no database/broker/provider",
+        "2026-10-01T16:39:31.4416068Z 186 passed, 1 warning in 25.60s"
+      ],
+      "retained_pipeline_error_lines": []
+    },
+    {
+      "id": 110474722918,
+      "name": "cloudflare-staff-acceptance",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:38:40Z",
+      "completed_at": "2026-10-01T16:44:07Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36893525903/job/110474722918",
+      "commands": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run .venv/bin/python ../../scripts/run-cloudflare-pg18-proof.py",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit artifacts/cloudflare/CF08-pg18.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run uv run --frozen pytest -q tests/benchmark_cloudflare_case.py --junitxml=../../artifacts/cloudflare/ci-operating.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit artifacts/cloudflare/ci-operating.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Run node scripts/run-cloudflare-acceptance.mjs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        }
+      ],
+      "log_sha256": "2c689e1b81d820f299045f13a489b0f68ec2d022a5dd80b9363e5f15c1d7aceb",
+      "exact_outputs": [
+        "2026-10-01T16:41:54.0676102Z 29 passed, 9 warnings in 37.54s",
+        "2026-10-01T16:42:33.3290830Z 2 passed, 1 warning in 38.12s",
+        "2026-10-01T16:44:01.4521656Z   7 passed (1.1m)",
+        "2026-10-01T16:44:01.4730039Z {\"passed\":7,\"failed\":0,\"errors\":0,\"skipped\":0,\"total\":7}"
+      ],
+      "retained_pipeline_error_lines": []
+    },
+    {
+      "id": 110474722922,
+      "name": "browser-zoom",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:38:39Z",
+      "completed_at": "2026-10-01T16:42:15Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36893525903/job/110474722922",
+      "commands": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run python -m pip install uv==0.11.27",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Run uv sync --frozen",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run pnpm exec playwright install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run pnpm exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --reporter=line,junit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run python scripts/check-required-tests.py --junit test-results/zoom.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ],
+      "log_sha256": "0a3b8dfef504cd4089745f3ead96967e38f50277beddd1af6d0a6923bb5b6c6d",
+      "exact_outputs": [
+        "2026-10-01T16:42:09.1733761Z   2 passed (26.3s)"
+      ],
+      "retained_pipeline_error_lines": []
+    },
+    {
+      "id": 110474723080,
+      "name": "cloudflare-controller",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-01T16:38:39Z",
+      "completed_at": "2026-10-01T16:39:28Z",
+      "html_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36893525903/job/110474723080",
+      "commands": [
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run pnpm cloudflare:types",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run pnpm cloudflare:lint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run pnpm cloudflare:bindings",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Run pnpm cloudflare:test --reporter=default --reporter=junit --outputFile.junit=artifacts/cloudflare/ci-controller.xml",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run pnpm exec wrangler deploy --dry-run --config services/cloudflare-jobs/wrangler.jsonc --outdir .sites-runtime/cloudflare-dry-run",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        }
+      ],
+      "log_sha256": "8a7112ade73b585fc986e88d3f61558cd1c648db9dfbd10e3ffc4db2a3985b30",
+      "exact_outputs": [
+        "2026-10-01T16:39:22.9960092Z  Test Files  8 passed (8)",
+        "2026-10-01T16:39:22.9961209Z       Tests  27 passed (27)"
+      ],
+      "retained_pipeline_error_lines": []
+    }
+  ],
+  "staff_artifact": {
+    "id": 11178875806,
+    "name": "buyeros-cloudflare-local-staff-and-operating",
+    "digest": "sha256:45b17aa69c5cdd7655817e25351abc326ca411b3f450792604f137afe3421eaa",
+    "size_in_bytes": 9017076,
+    "created_at": "2026-10-01T16:44:03Z"
+  },
+  "extracted": [
+    {
+      "archive_path": "artifacts/cloudflare/acceptance/report.json",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/report.json",
+      "sha256": "5fdf27c7fc4f7347a8949bab83d59b3c30739a94ac922d30a4da38213905f284",
+      "bytes": 3232,
+      "original_archive_member_sha256": "5fdf27c7fc4f7347a8949bab83d59b3c30739a94ac922d30a4da38213905f284"
+    },
+    {
+      "archive_path": "artifacts/cloudflare/acceptance/journey.xml",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/journey.xml",
+      "sha256": "6493d177c2573a5709d5c649be9c85cbdd5e80c56bfd5fee031a635f7730bde0",
+      "bytes": 1570,
+      "counts": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "original_archive_member_sha256": "6493d177c2573a5709d5c649be9c85cbdd5e80c56bfd5fee031a635f7730bde0"
+    },
+    {
+      "archive_path": "artifacts/cloudflare/CF08-pg18.xml",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/CF08-pg18.xml",
+      "sha256": "ffe4c3b348029ef7e8558f0b65f1b6a51d7b998b6cf2cf2f201d473d7987562a",
+      "bytes": 4218,
+      "counts": {
+        "tests": 29,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "original_archive_member_sha256": "ffe4c3b348029ef7e8558f0b65f1b6a51d7b998b6cf2cf2f201d473d7987562a"
+    },
+    {
+      "archive_path": "artifacts/cloudflare/ci-operating.xml",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/ci-operating.xml",
+      "sha256": "5ca2ea246095a0061ba140912857ab432e0ff72ee36750fe0075d80905afa276",
+      "bytes": 554,
+      "counts": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "original_archive_member_sha256": "5ca2ea246095a0061ba140912857ab432e0ff72ee36750fe0075d80905afa276"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-en-desktop-approved-export-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-en-desktop-approved-export-fixture.png",
+      "sha256": "d7e56c98f8939e91ecf5901103a6df4a129ef2d51c0a0110b50ea024677f8661",
+      "bytes": 250793,
+      "original_archive_member_sha256": "d7e56c98f8939e91ecf5901103a6df4a129ef2d51c0a0110b50ea024677f8661"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-en-desktop-mobile-readback-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-en-desktop-mobile-readback-fixture.png",
+      "sha256": "64d5a5ed252d3be0930fd9cca10bc90c6d7eae506a1ca902d9cfd9a442f25b83",
+      "bytes": 234044,
+      "original_archive_member_sha256": "64d5a5ed252d3be0930fd9cca10bc90c6d7eae506a1ca902d9cfd9a442f25b83"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-en-desktop-outcome-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-en-desktop-outcome-fixture.png",
+      "sha256": "61be2b2b22aa40ca74bc53da8c9e998be7dff0643114de61ca2dcd8edd63d1a2",
+      "bytes": 236015,
+      "original_archive_member_sha256": "61be2b2b22aa40ca74bc53da8c9e998be7dff0643114de61ca2dcd8edd63d1a2"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-en-mobile-approved-export-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-en-mobile-approved-export-fixture.png",
+      "sha256": "90c31179c03b09860c8ef363ad84b913595c513ad8412452adeea6dcc67d4413",
+      "bytes": 241910,
+      "original_archive_member_sha256": "90c31179c03b09860c8ef363ad84b913595c513ad8412452adeea6dcc67d4413"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-en-mobile-mobile-readback-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-en-mobile-mobile-readback-fixture.png",
+      "sha256": "8ff8ef2d6ec72e67292cae554e4d974f93a6ba617028a1398d9d6a3044e4b07b",
+      "bytes": 234730,
+      "original_archive_member_sha256": "8ff8ef2d6ec72e67292cae554e4d974f93a6ba617028a1398d9d6a3044e4b07b"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-zh-HK-desktop-approved-export-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-zh-HK-desktop-approved-export-fixture.png",
+      "sha256": "77bca4d16d9c2f12dd1cb3ee71b89939f664d815394d7840272c2cbcaf0fa036",
+      "bytes": 270236,
+      "original_archive_member_sha256": "77bca4d16d9c2f12dd1cb3ee71b89939f664d815394d7840272c2cbcaf0fa036"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-zh-HK-desktop-mobile-readback-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-zh-HK-desktop-mobile-readback-fixture.png",
+      "sha256": "a692cb803f6e2f57bbaed6eb0b47e85960f0d026c02f55093e03410811877755",
+      "bytes": 269257,
+      "original_archive_member_sha256": "a692cb803f6e2f57bbaed6eb0b47e85960f0d026c02f55093e03410811877755"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-en-mobile-outcome-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-en-mobile-outcome-fixture.png",
+      "sha256": "8ff8ef2d6ec72e67292cae554e4d974f93a6ba617028a1398d9d6a3044e4b07b",
+      "bytes": 234730,
+      "original_archive_member_sha256": "8ff8ef2d6ec72e67292cae554e4d974f93a6ba617028a1398d9d6a3044e4b07b"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-zh-HK-desktop-outcome-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-zh-HK-desktop-outcome-fixture.png",
+      "sha256": "7e08769997a303a34d8f1c3670ca35eb6558da077bd9128f1e1124b42d586b7e",
+      "bytes": 271030,
+      "original_archive_member_sha256": "7e08769997a303a34d8f1c3670ca35eb6558da077bd9128f1e1124b42d586b7e"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-zh-HK-mobile-approved-export-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-zh-HK-mobile-approved-export-fixture.png",
+      "sha256": "99782e41c3d829452b11abc72439afb34c3f9a18ef1f89d9a0c7fb814af4c560",
+      "bytes": 252616,
+      "original_archive_member_sha256": "99782e41c3d829452b11abc72439afb34c3f9a18ef1f89d9a0c7fb814af4c560"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-zh-HK-mobile-mobile-readback-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-zh-HK-mobile-mobile-readback-fixture.png",
+      "sha256": "35e2823919e681191b8ba7cc0b0010a55bebec82d6ca0049564c938beafabc33",
+      "bytes": 268959,
+      "original_archive_member_sha256": "35e2823919e681191b8ba7cc0b0010a55bebec82d6ca0049564c938beafabc33"
+    },
+    {
+      "archive_path": "test-results/cloudflare-continuity-zh-HK-mobile-outcome-fixture.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/cloudflare-continuity-zh-HK-mobile-outcome-fixture.png",
+      "sha256": "35e2823919e681191b8ba7cc0b0010a55bebec82d6ca0049564c938beafabc33",
+      "bytes": 268959,
+      "original_archive_member_sha256": "35e2823919e681191b8ba7cc0b0010a55bebec82d6ca0049564c938beafabc33"
+    },
+    {
+      "archive_path": "artifacts/cloudflare/screenshots/CF07-bulk-restart-zh-HK-mobile.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/CF07-bulk-restart-zh-HK-mobile.png",
+      "sha256": "add9f6398b8eebd205d82d3a0de479496a4cad2e4ca004399a74c4c129b88203",
+      "bytes": 144579,
+      "original_archive_member_sha256": "add9f6398b8eebd205d82d3a0de479496a4cad2e4ca004399a74c4c129b88203"
+    },
+    {
+      "archive_path": "artifacts/cloudflare/screenshots/CF07-unknown-contact-hold-en.png",
+      "path": "artifacts/cloudflare/ci-79d6caf-hosted-successor/screenshots/CF07-unknown-contact-hold-en.png",
+      "sha256": "5c3e8a0b2fb6c0d6df4ee52104f83dd235cd4df3d9c1dd0768d630dbdf3974ed",
+      "bytes": 306470,
+      "original_archive_member_sha256": "5c3e8a0b2fb6c0d6df4ee52104f83dd235cd4df3d9c1dd0768d630dbdf3974ed"
+    }
+  ],
+  "source_files_verified": 19,
+  "test_merge_sha": "d3a72bfc68d80e1b788ba6ded65075d61242f270",
+  "test_merge_tree_equals_source": true,
+  "fresh_journey_screenshots": 12,
+  "archive_member_count": 512,
+  "archive_safe_inspection": true,
+  "extracted_sha256_scope": "Canonical LF Git file bytes; original archive member digest preserved separately; ZIP digest unchanged"
+}

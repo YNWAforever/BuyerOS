@@ -1,0 +1,17 @@
+✔ checked-in API types match the current OpenAPI contract (5427.0474ms)
+✔ local acceptance rejects shared targets, preview activation and inherited credentials (1.596ms)
+✔ acceptance counts actual executed cases and fails closed on empty, skipped or failed reports (1.7199ms)
+✔ CF00 reports measured local feasibility separately from hosted Vercel evidence (3.4359ms)
+✔ Vercel exposes only the app and binds its API call to the internal API service (3.8921ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (84.2422ms)
+✔ the app proxy fails closed when the binding is absent (1.6237ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (1.6007ms)
+✔ FastAPI redirects stay on the public app path (1.6011ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5537.332

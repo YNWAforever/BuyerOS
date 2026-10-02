@@ -1,0 +1,129 @@
+{
+  "observed_at": "2026-10-01T17:21:55.802422+00:00",
+  "project_id": "nameless-bar-15324691",
+  "branch_id": "br-autumn-block-b3exsqii",
+  "endpoint_id": "ep-dark-dawn-b3au2rn1",
+  "database": "neondb",
+  "mode": "repeatable_read_read_only_catalog_and_aggregates",
+  "production_mutations": false,
+  "fixture_executed": false,
+  "credentials_persisted": false,
+  "queries": {
+    "identity": "93b9b827a235d814a6b4f2eaff2068f727ff064a7ff6ec82d7525810f6af8cb5",
+    "heads": "a0843c38ad90ce0ff6520ad46d9b8d223ba5ee6fcd3a208b342d3da383dd4f4f",
+    "roles": "2cf40949aea8131511f8ae78ade5102cd0b9864ae486d560ac7cc79c143265db",
+    "roles_membership": "a866673764038e638c32306a9717dee91089d60c22baf347a0fec8e000f0d935",
+    "table_security": "fe2c294381d040df96c55caeb0438bf11243ae6a26d3b75cee3fc20a212dcd8d",
+    "domain_counts": "4dfc12917e540fbff8c046a8e6fe046e01b2068f38697fb6d89ca17420dabcab",
+    "outbox_states": "bc96a8b913b4bf52badadb08d8f6952466acdf3085b386496d1be94a946783ea",
+    "leases": "1d3912cf5a4db2b0926b78ced99c3108e9d3562cacdba5c9b10dfe0400c9ca4d",
+    "provider_states": "6b4f590094b330600ce62301ffed4f34f0881cc054b4d80e19de850e68ec6fbf",
+    "holds": "a803bc4e6a2d29f746d919bed18633e54ce7df3a247874e43df145903bc8ce4d",
+    "runtime_table_presence": "a63017ae03069136d24384e8089458f349e93f791fe431059e675bf4f9ea9bde",
+    "runtime_connections": "57ca3dc0b3eb2d050a0c93dbee80ed10bc09801c3ccefa1c9e70729fe4e4f995"
+  },
+  "results": {
+    "identity": [
+      {
+        "database": "neondb",
+        "operator_role": "neondb_owner",
+        "read_only": "on",
+        "isolation": "repeatable read",
+        "statement_timeout": "3s",
+        "transaction_timeout": "15s",
+        "row_security": "off"
+      }
+    ],
+    "heads": [
+      {
+        "version_num": "0033_api_rate_windows"
+      }
+    ],
+    "roles": [
+      {
+        "rolname": "buyeros_api",
+        "rolcanlogin": true,
+        "rolsuper": false,
+        "rolbypassrls": false,
+        "rolcreatedb": false,
+        "rolcreaterole": false,
+        "rolinherit": true
+      },
+      {
+        "rolname": "buyeros_worker",
+        "rolcanlogin": false,
+        "rolsuper": false,
+        "rolbypassrls": false,
+        "rolcreatedb": false,
+        "rolcreaterole": false,
+        "rolinherit": true
+      },
+      {
+        "rolname": "neondb_owner",
+        "rolcanlogin": true,
+        "rolsuper": false,
+        "rolbypassrls": true,
+        "rolcreatedb": true,
+        "rolcreaterole": true,
+        "rolinherit": true
+      }
+    ],
+    "roles_membership": [],
+    "table_security": [
+      {
+        "relname": "budget_reservations",
+        "owner": "neondb_owner",
+        "relrowsecurity": true,
+        "relforcerowsecurity": true
+      },
+      {
+        "relname": "memberships",
+        "owner": "neondb_owner",
+        "relrowsecurity": true,
+        "relforcerowsecurity": true
+      },
+      {
+        "relname": "outbox_events",
+        "owner": "neondb_owner",
+        "relrowsecurity": true,
+        "relforcerowsecurity": true
+      },
+      {
+        "relname": "provider_operations",
+        "owner": "neondb_owner",
+        "relrowsecurity": true,
+        "relforcerowsecurity": true
+      }
+    ],
+    "domain_counts": [
+      {
+        "users": 1,
+        "workspaces": 1,
+        "memberships": 1,
+        "projects": 0
+      }
+    ],
+    "outbox_states": [],
+    "leases": [
+      {
+        "active_dispatched": 0,
+        "expired_or_missing_lease": 0,
+        "ready": 0
+      }
+    ],
+    "provider_states": [],
+    "holds": [],
+    "runtime_table_presence": [
+      {
+        "selector": false,
+        "steps": false,
+        "nonces": false,
+        "probe": false
+      }
+    ],
+    "runtime_connections": []
+  },
+  "status": "verified",
+  "transaction_rolled_back": true,
+  "seconds": 6.774
+}

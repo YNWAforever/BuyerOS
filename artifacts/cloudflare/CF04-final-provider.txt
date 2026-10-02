@@ -1,0 +1,128 @@
+.....FF........                                                          [100%]
+================================== FAILURES ===================================
+_____ test_api_deadline_after_possible_acceptance_requires_reconciliation _____
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:64698/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:64698/buyeros_test_api', 7)
+
+    def test_api_deadline_after_possible_acceptance_requires_reconciliation(migrated, worker_runtime):
+        case = seed_research(migrated, worker_runtime[1])
+        class SlowAcceptance(SearchFixture):
+            async def search(self, *args, **kwargs):
+                batch = await super().search(*args, **kwargs)
+                await asyncio.sleep(5)
+                return batch
+        adapter = SlowAcceptance(case)
+        result = run_provider(case['envelope'], adapter=adapter, seconds=0.5)
+>       assert (result.state, result.code) == ('reconcile', 'PROVIDER_UNKNOWN')
+E       AssertionError: assert ('blocked', 'STEP_FAILED') == ('reconcile',...IDER_UNKNOWN')
+E
+E         At index 0 diff: 'blocked' != 'reconcile'
+E         Use -v to get more diff
+
+services\api\tests\test_cloudflare_provider_steps_db.py:206: AssertionError
+_____________ test_legacy_finalize_is_fenced_after_runtime_switch _____________
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:64698/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:64698/buyeros_test_api', 8)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B674D36350>
+
+    def test_legacy_finalize_is_fenced_after_runtime_switch(migrated, worker_runtime, monkeypatch):
+        from buyeros_api.api.worker_schemas import JobEnvelope
+        from buyeros_api.execution.config import get_settings
+        from buyeros_api.execution.domain_executor import StaleFenced
+        from buyeros_api.execution.provider_context import execution_scope, LegacyExecution
+        from buyeros_api.execution.discovery_runner import execute_discovery
+        from buyeros_api.services.worker_execution import create_execution_engine
+        case = seed_research(migrated, worker_runtime[1])
+        monkeypatch.setenv('BUYEROS_CELERY_EXECUTION_ENABLED', 'true')
+        get_settings.cache_clear()
+        with psycopg.connect(migrated, autocommit=True) as db:
+            epoch = db.execute("UPDATE worker_runtime_control SET backend='celery',epoch=epoch+1 RETURNING epoch").fetchone()[0]
+            db.execute("UPDATE outbox_events SET runtime_backend='celery',runtime_epoch=%s WHERE id=%s", (epoch, case['envelope'].outbox_id))
+            intent = db.execute("SELECT intent_key FROM outbox_events WHERE id=%s", (case['envelope'].outbox_id,)).fetchone()[0]
+        class SwitchDuringAcceptance(SearchFixture):
+            async def search(self, *args, **kwargs):
+                batch = await super().search(*args, **kwargs)
+                with psycopg.connect(migrated, autocommit=True) as db:
+                    db.execute("UPDATE worker_runtime_control SET backend='cloudflare',epoch=epoch+1,active_owner=NULL,active_until=NULL")
+                return batch
+        adapter = SwitchDuringAcceptance(case)
+        async def run():
+            engine = create_execution_engine()
+            try:
+                legacy = LegacyExecution(JobEnvelope(**{**case['envelope'].model_dump(), 'runtime_epoch': epoch}))
+                with execution_scope(legacy), pytest.raises(StaleFenced):
+                    await execute_discovery(engine, case['envelope'].workspace_id, intent, 1, adapter=adapter, environment='test')
+            finally:
+                await engine.dispose()
+        try:
+            asyncio.run(run())
+        finally:
+            get_settings.cache_clear()
+        assert adapter.calls == 1
+        with psycopg.connect(migrated) as db:
+>           assert db.execute("SELECT count(*) FROM evidence_sources WHERE workspace_id=%s", (case['envelope'].workspace_id,)).fetchone()[0] == 0
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+services\api\tests\test_cloudflare_provider_steps_db.py:247:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <psycopg.Connection [BAD] at 0x1b672f594f0>
+query = 'SELECT count(*) FROM evidence_sources WHERE workspace_id=%s'
+params = (UUID('bad150c8-5056-4f1c-8720-8b0a22a31f06'),)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -> Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.UndefinedTable: relation "evidence_sources" does not exist
+E           LINE 1: SELECT count(*) FROM evidence_sources WHERE workspace_id=$1
+E                                        ^
+
+services\api\.venv\Lib\site-packages\psycopg\connection.py:300: UndefinedTable
+============================== warnings summary ===============================
+services\api\tests\conftest.py:24
+services\api\tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\api\tests\conftest.py:24
+services\api\tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_cloudflare_provider_steps_db.py::test_checkpoint_saver_rejects_owner_login
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_cloudflare_provider_steps_db.py::test_checkpoint_saver_rejects_owner_login
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\Documents\BuyerOS\artifacts\cloudflare\CF04-final-provider.xml -
+=========================== short test summary info ===========================
+FAILED services\api\tests\test_cloudflare_provider_steps_db.py::test_api_deadline_after_possible_acceptance_requires_reconciliation
+FAILED services\api\tests\test_cloudflare_provider_steps_db.py::test_legacy_finalize_is_fenced_after_runtime_switch
+2 failed, 13 passed, 6 warnings in 94.23s (0:01:34)

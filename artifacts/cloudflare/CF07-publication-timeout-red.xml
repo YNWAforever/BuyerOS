@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="6" failures="1" errors="0" time="0.209">
+    <testsuite name="services/cloudflare-jobs/tests/dispatcher.test.ts" timestamp="2026-10-01T10:46:53.989Z" hostname="DESKTOP-30TFME5" tests="6" failures="1" errors="0" skipped="0" time="0.209">
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="dispatch off performs no API or binding calls" time="0.165">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="claims at most ten IDs for ten seconds and records only accepted publication" time="0.004">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="publish-before-receipt crash keeps the original opaque generation for recovery" time="0.003">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="does not publish after the ten-second claim cycle expires" time="0.001">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="rejects an over-limit batch or changed epoch before any binding side effect" time="0.003">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="a hung queue acceptance expires the cycle without a failure receipt or late publication" time="0.023">
+            <failure message="expected undefined to be an instance of Error" type="AssertionError">
+AssertionError: expected undefined to be an instance of Error
+ ❯ services/cloudflare-jobs/tests/dispatcher.test.ts:65:19
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

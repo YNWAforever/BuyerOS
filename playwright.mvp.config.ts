@@ -11,7 +11,7 @@ export default defineConfig({
       env:{BUYEROS_STRICT_INTEGRATION:'1',BUYEROS_E2E_SEED_BUYERS:'1',
         BUYEROS_E2E_SEED_DRAFTS:'1',BUYEROS_E2E_SEED_DRAFT_APPROVAL:'1',BUYEROS_E2E_SEED_EXPORTS:'1',
         BUYEROS_CORS_ORIGINS:'["http://localhost:5173"]'}},
-    {command:'pnpm dev',url:'http://localhost:5173',timeout:600_000,reuseExistingServer:reuse,
+    {command:process.env.BUYEROS_E2E_FRONTEND==='vercel-built'?'node scripts/serve-built-ui-fixture.mjs':'pnpm dev',url:'http://localhost:5173',timeout:600_000,reuseExistingServer:reuse,
       env:{BUYEROS_API_BASE_URL:'http://127.0.0.1:8000',
         BUYEROS_AUTH0_ISSUER:'https://oidc.buyeros.test/',
         BUYEROS_AUTH0_CLIENT_ID:'fixture-public-client',BUYEROS_AUTH0_AUDIENCE:'fixture-api'}},

@@ -1,0 +1,112 @@
+<testsuites id="" name="" tests="4" failures="4" skipped="0" errors="0" time="212.983516">
+<testsuite name="cloudflare-journey.spec.ts" timestamp="2026-10-01T08:52:00.129Z" hostname="" tests="4" failures="4" skipped="0" time="86.575" errors="0">
+<testcase name="CF07 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="26.71">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\cloudflare\cloudflare-journey-CF07-en-e2fb5--and-outcome-on-one-dataset\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  fixtures\staff-journey.ts:102:1 › CF07 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "grounded"
+    Received: null
+
+      244 |   expect(draftReport.job_id).toBe(draftJobId);
+      245 |   expect(draftReport.status).toBe('completed');
+    > 246 |   expect(draftReport.grounding_status).toBe('grounded');
+          |                                        ^
+      247 |   await page.getByRole('button',{name:ui('Refresh job')}).click();
+      248 |   await expect(page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')})).toHaveCount(1);
+      249 |   await page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')}).click();
+        at C:\Users\laich\Documents\BuyerOS\tests\e2e\fixtures\staff-journey.ts:246:40
+
+    Error Context: ..\..\test-results\cloudflare\cloudflare-journey-CF07-en-e2fb5--and-outcome-on-one-dataset\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="CF07 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="20.628">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\cloudflare\cloudflare-journey-CF07-en-2eb96--and-outcome-on-one-dataset\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  fixtures\staff-journey.ts:102:1 › CF07 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "grounded"
+    Received: null
+
+      244 |   expect(draftReport.job_id).toBe(draftJobId);
+      245 |   expect(draftReport.status).toBe('completed');
+    > 246 |   expect(draftReport.grounding_status).toBe('grounded');
+          |                                        ^
+      247 |   await page.getByRole('button',{name:ui('Refresh job')}).click();
+      248 |   await expect(page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')})).toHaveCount(1);
+      249 |   await page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')}).click();
+        at C:\Users\laich\Documents\BuyerOS\tests\e2e\fixtures\staff-journey.ts:246:40
+
+    Error Context: ..\..\test-results\cloudflare\cloudflare-journey-CF07-en-2eb96--and-outcome-on-one-dataset\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="CF07 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="20.51">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\cloudflare\cloudflare-journey-CF07-zh-05acd--and-outcome-on-one-dataset\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  fixtures\staff-journey.ts:102:1 › CF07 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "grounded"
+    Received: null
+
+      244 |   expect(draftReport.job_id).toBe(draftJobId);
+      245 |   expect(draftReport.status).toBe('completed');
+    > 246 |   expect(draftReport.grounding_status).toBe('grounded');
+          |                                        ^
+      247 |   await page.getByRole('button',{name:ui('Refresh job')}).click();
+      248 |   await expect(page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')})).toHaveCount(1);
+      249 |   await page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')}).click();
+        at C:\Users\laich\Documents\BuyerOS\tests\e2e\fixtures\staff-journey.ts:246:40
+
+    Error Context: ..\..\test-results\cloudflare\cloudflare-journey-CF07-zh-05acd--and-outcome-on-one-dataset\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="CF07 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="cloudflare-journey.spec.ts" time="18.727">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\cloudflare\cloudflare-journey-CF07-zh-aa315--and-outcome-on-one-dataset\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  fixtures\staff-journey.ts:102:1 › CF07 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "grounded"
+    Received: null
+
+      244 |   expect(draftReport.job_id).toBe(draftJobId);
+      245 |   expect(draftReport.status).toBe('completed');
+    > 246 |   expect(draftReport.grounding_status).toBe('grounded');
+          |                                        ^
+      247 |   await page.getByRole('button',{name:ui('Refresh job')}).click();
+      248 |   await expect(page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')})).toHaveCount(1);
+      249 |   await page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')}).click();
+        at C:\Users\laich\Documents\BuyerOS\tests\e2e\fixtures\staff-journey.ts:246:40
+
+    Error Context: ..\..\test-results\cloudflare\cloudflare-journey-CF07-zh-aa315--and-outcome-on-one-dataset\error-context.md
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

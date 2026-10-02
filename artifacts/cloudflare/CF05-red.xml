@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="13" failures="13" errors="0" time="0.428">
+    <testsuite name="services/cloudflare-jobs/tests/api-client.test.ts" timestamp="2026-10-01T06:35:34.223Z" hostname="DESKTOP-30TFME5" tests="2" failures="2" errors="0" skipped="0" time="0.096">
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="signs exact POST path and raw bytes with a fixed protocol vector and no redirect" time="0.061">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/api-client&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/api-client.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/api-client&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/api-client.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/api-client.test.ts" name="refuses credentials, origin mismatch, URL prefix/query and non-HTTPS outside isolated loopback mode" time="0.033">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/api-client&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/api-client.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/api-client&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/api-client.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/dispatcher.test.ts" timestamp="2026-10-01T06:35:34.230Z" hostname="DESKTOP-30TFME5" tests="3" failures="3" errors="0" skipped="0" time="0.075">
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="dispatch off performs no API or binding calls" time="0.041">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/dispatcher&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/dispatcher.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/dispatcher&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/dispatcher.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="claims at most ten IDs for ten seconds and records only accepted publication" time="0.012">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/dispatcher&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/dispatcher.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/dispatcher&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/dispatcher.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/dispatcher.test.ts" name="publish-before-receipt crash keeps the original opaque generation for recovery" time="0.021">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/dispatcher&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/dispatcher.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/dispatcher&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/dispatcher.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/protocol.test.ts" timestamp="2026-10-01T06:35:34.235Z" hostname="DESKTOP-30TFME5" tests="3" failures="3" errors="0" skipped="0" time="0.074">
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; rejects extra customer fields, URLs and unsafe numbers before scheduling" time="0.039">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/protocol&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/protocol.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/protocol&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/protocol.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; separates operational probes and deterministic workflow IDs" time="0.01">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/protocol&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/protocol.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/protocol&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/protocol.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/protocol.test.ts" name="opaque worker protocol &gt; requires the four-field bounded outcome and server-issued step key" time="0.021">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/protocol&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/protocol.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/protocol&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/protocol.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/queue.test.ts" timestamp="2026-10-01T06:35:34.243Z" hostname="DESKTOP-30TFME5" tests="2" failures="2" errors="0" skipped="0" time="0.063">
+        <testcase classname="services/cloudflare-jobs/tests/queue.test.ts" name="ACK requires verified creation or inspection of the deterministic instance" time="0.047">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/queue&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/queue.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/queue&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/queue.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/queue.test.ts" name="does not ACK an unverified handoff or restart an existing failed workflow" time="0.014">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/queue&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/queue.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/queue&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/queue.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="services/cloudflare-jobs/tests/workflow.test.ts" timestamp="2026-10-01T06:35:34.246Z" hostname="DESKTOP-30TFME5" tests="3" failures="3" errors="0" skipped="0" time="0.12">
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="HTTP timeout reads committed status before any repeated execution" time="0.091">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/workflow&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/workflow.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/workflow&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/workflow.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="busy permits wait without consuming the transient error budget" time="0.005">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/workflow&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/workflow.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/workflow&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/workflow.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/workflow.test.ts" name="unknown acceptance stops the controller without a new submit" time="0.023">
+            <failure message="Cannot find module &apos;/services/cloudflare-jobs/src/workflow&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/workflow.test.ts" type="Error">
+Error: Cannot find module &apos;/services/cloudflare-jobs/src/workflow&apos; imported from C:/Users/laich/Documents/BuyerOS/services/cloudflare-jobs/tests/workflow.test.ts
+ ❯ maybeHandleRunRequest node_modules/.pnpm/@cloudflare+vitest-plugin@1_430ec0fdad6eae110961c702f15aba48/node_modules/@cloudflare/vitest-plugin/src/worker/durable-objects.ts:226:17
+ ❯ __VITEST_POOL_WORKERS_RUNNER_DURABLE_OBJECT__.fetch index.mjs:884:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_MODULE_NOT_FOUND&apos; }
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

@@ -1,0 +1,3 @@
+$ tsc --noEmit -p services/cloudflare-jobs/tests/tsconfig.json
+services/cloudflare-jobs/tests/handler.test.ts(11,80): error TS2739: Type '{ create: Mock<Procedure>; }' is missing the following properties from type 'Workflow<Readonly<QueueEnvelope>>': get, createBatch, deleteBatch
+[ELIFECYCLE] Command failed with exit code 2.

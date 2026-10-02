@@ -1,0 +1,19 @@
+{
+  "run_id": 36891166028,
+  "job_id": 110466864026,
+  "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+  "passed": 685,
+  "failed": 1,
+  "errors": 0,
+  "skipped": 0,
+  "warnings": 96,
+  "seconds": 274.36,
+  "required_xml_checker_step": "skipped after suite failure; not reported as pass",
+  "raw_log_sha256": "a52ef0a9caa670b3518277d787b15cd46ce18fa05f455b3ef5d0dc2de5aa1519",
+  "summary": [
+    "2026-10-01T16:25:19.1864688Z FAILED tests/test_cloudflare_local_steps_db.py::test_pdf_child_keeps_sanitized_env_and_eight_second_timeout - AssertionError: assert 'PYTHONPATH' not in {'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONIOENCODING': 'utf-8', 'PYTHONPATH': '/home/runner/work/BuyerOS/BuyerOS/services/api:/home/runner/work/BuyerOS/BuyerOS/services/api/.venv/lib/python3.12/site-packages'}",
+    "2026-10-01T16:25:19.1867007Z 1 failed, 685 passed, 96 warnings in 274.36s (0:04:34)"
+  ],
+  "correction": "Exact independent code/package metadata path allowlist plus injected malicious PYTHONPATH/secret rejection; original8s/temp/stdin behavior and separate actual-S regression retained",
+  "focused_green": "CF00-legacy-isolation-green.xml:2passed/0failed/errors/skips,4.23s,5warnings"
+}

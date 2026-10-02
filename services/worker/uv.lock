@@ -105,10 +105,13 @@ dependencies = [
     { name = "boto3" },
     { name = "fastapi" },
     { name = "httpx" },
+    { name = "langgraph" },
+    { name = "langgraph-checkpoint-postgres" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "pyjwt", extra = ["crypto"] },
+    { name = "pypdf" },
     { name = "python-multipart" },
     { name = "sqlalchemy" },
     { name = "uvicorn" },
@@ -120,10 +123,13 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.35,<2" },
     { name = "fastapi", specifier = ">=0.115,<1" },
     { name = "httpx", specifier = ">=0.27,<1" },
+    { name = "langgraph", specifier = "==1.2.12" },
+    { name = "langgraph-checkpoint-postgres", specifier = "==3.1.2" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2,<4" },
     { name = "pydantic", specifier = ">=2.9,<3" },
     { name = "pydantic-settings", specifier = ">=2.5,<3" },
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.9,<3" },
+    { name = "pypdf", specifier = "==6.19.0" },
     { name = "python-multipart", specifier = ">=0.0.20,<1" },
     { name = "sqlalchemy", specifier = ">=2.0,<2.1" },
     { name = "uvicorn", specifier = ">=0.30,<1" },
@@ -144,11 +150,6 @@ source = { editable = "." }
 dependencies = [
     { name = "buyeros-api" },
     { name = "celery" },
-    { name = "langgraph" },
-    { name = "langgraph-checkpoint-postgres" },
-    { name = "psycopg", extra = ["binary"] },
-    { name = "pydantic-settings" },
-    { name = "pypdf" },
     { name = "redis" },
 ]
 
@@ -162,11 +163,6 @@ dev = [
 requires-dist = [
     { name = "buyeros-api", editable = "../api" },
     { name = "celery", specifier = ">=5.4,<6" },
-    { name = "langgraph", specifier = "==1.2.12" },
-    { name = "langgraph-checkpoint-postgres", specifier = "==3.1.2" },
-    { name = "psycopg", extras = ["binary"], specifier = ">=3.2,<4" },
-    { name = "pydantic-settings", specifier = ">=2.5,<3" },
-    { name = "pypdf", specifier = "==6.19.0" },
     { name = "redis", specifier = ">=5,<6" },
 ]
 

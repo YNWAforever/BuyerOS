@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="8.161" timestamp="2026-10-01T16:57:41.961059+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.benchmark_cloudflare_case" name="test_ten_actual_queue_jobs_one_permit_and_hundred_workspace_cold_claims" time="7.112"><failure message="AssertionError: failed to load config from C:\Users\laich\Documents\BuyerOS\services\cloudflare-jobs\vitest.operating.config.ts&#10;  &#10;  ⎯⎯⎯⎯⎯⎯⎯ Startup Error ⎯⎯⎯⎯⎯⎯⎯⎯&#10;  Error: Build failed with 1 error:&#10;  &#10;  #x1B[31m[UNRESOLVED_ENTRY] #x1B[0mCannot resolve entry module services/cloudflare-jobs/vitest.operating.config.ts.&#10;  &#10;      at aggregateBindingErrorsIntoJsError (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/rolldown@1.0.1/node_modules/rolldown/dist/shared/error-CkdMJ9ps.mjs:48:18)&#10;      at unwrapBindingResult (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/rolldown@1.0.1/node_modules/rolldown/dist/shared/error-CkdMJ9ps.mjs:18:128)&#10;      at #build (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/rolldown@1.0.1/node_modules/rolldown/dist/shared/rolldown-build-BVD3dIdE.mjs:3275:34)&#10;      at async bundleConfigFile (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:34842:17)&#10;      at async bundleAndLoadConfigFile (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:34750:18)&#10;      at async loadConfigFromFile (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:34719:42)&#10;      at async resolveConfig (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:34345:22)&#10;      at async _createServer (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:26080:65)&#10;      at async createViteServer (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vitest@4.1.0_@types+node@22_5d3983904ad4b8ef8c46f7186c308744/node_modules/vitest/dist/chunks/cli-api.DuT9iuvY.js:8825:17)&#10;      at async createVitest (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vitest@4.1.0_@types+node@22_5d3983904ad4b8ef8c46f7186c308744/node_modules/vitest/dist/chunks/cli-api.DuT9iuvY.js:14047:18) {&#10;    errors: [Getter/Setter]&#10;  }&#10;  &#10;  &#10;  &#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['node', 'node_modules/vitest/vitest.mjs', 'run', '--config', 'services/cloudflare-jobs/vitest.o...c46f7186c308744/node_modules/vitest/dist/chunks/cli-api.DuT9iuvY.js:14047:18) {\n  errors: [Getter/Setter]\n}\n\n\n\n').returncode">migrated = 'postgresql://buyeros:buyeros@127.0.0.1:51318/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:51318/buyeros_test_api', 2)
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001E2F49C6FD0&gt;
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-195/test_ten_actual_queue_jobs_one0')
+
+    def test_ten_actual_queue_jobs_one_permit_and_hundred_workspace_cold_claims(migrated, worker_runtime, monkeypatch, tmp_path):
+        from buyeros_api.api.app import create_app
+        from buyeros_api.settings import get_settings
+        from buyeros_api.services.worker_execution import create_execution_engine
+        from buyeros_api.execution.dispatcher import claim_cycle
+        envelopes = []
+        for _ in range(10):
+            envelope = seed_envelope(migrated, worker_runtime[1])
+            project, actor, member = seed_project(migrated, envelope.workspace_id)
+            job, company, buyer = (uuid.uuid4() for _ in range(3))
+            with psycopg.connect(migrated, autocommit=True) as db:
+                db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES(%s,%s,'Fictional CF07','Fictional CF07')", (company,envelope.workspace_id))
+                db.execute('INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES(%s,%s,%s,%s)',(buyer,envelope.workspace_id,project,company))
+                db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested) VALUES(%s,%s,%s,%s,'bulk_mutation','assignBuyerOwners',%s::jsonb,'queued',1)", (job,envelope.workspace_id,project,actor,json.dumps({'owner_membership_id':str(member),'reason':'Fictional ten-job operating fixture'})))
+                db.execute("INSERT INTO async_job_items(id,workspace_id,job_id,buyer_id,ordinal,expected_version,status) VALUES(%s,%s,%s,%s,0,1,'pending')",(uuid.uuid4(),envelope.workspace_id,job,buyer))
+                db.execute('UPDATE outbox_events SET payload=%s::jsonb WHERE id=%s',(json.dumps({'job_id':str(job)}),envelope.outbox_id))
+            envelopes.append(envelope)
+        monkeypatch.setenv('BUYEROS_WORKER_CURRENT_KEY_ID','fictional-key')
+        monkeypatch.setenv('BUYEROS_WORKER_CURRENT_SECRET','fictional-cf05-secret-32-bytes-only')
+        get_settings.cache_clear()
+        sock=socket.socket();sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
+        server=uvicorn.Server(uvicorn.Config(create_app(),log_level='error',access_log=False))
+        def serve():
+            asyncio.run(server.serve(sockets=[sock]),loop_factory=asyncio.SelectorEventLoop if sys.platform=='win32' else None)
+        thread=threading.Thread(target=serve,daemon=True);thread.start()
+        stop=threading.Event(); samples=[]
+        def observe():
+            with psycopg.connect(migrated,autocommit=True) as db:
+                while not stop.is_set():
+                    active=db.execute("SELECT count(*) FROM worker_steps WHERE state='running'").fetchone()[0]
+                    connections=db.execute('SELECT count(*) FROM pg_stat_activity WHERE datname=current_database()').fetchone()[0]
+                    samples.append((active,connections))
+                    stop.wait(.02)
+        observer=threading.Thread(target=observe,daemon=True)
+        cpu_started=time.process_time();wall_started=time.perf_counter()
+        try:
+            deadline=time.monotonic()+10
+            while not server.started and thread.is_alive() and time.monotonic()&lt;deadline: time.sleep(.05)
+            assert server.started
+            context=tmp_path/'opaque-operating-context.json'
+            context.write_text(json.dumps({'origin':f'http://127.0.0.1:{port}','jobs':[e.model_dump(mode='json') for e in envelopes]}),encoding='utf8')
+            env={k:v for k,v in os.environ.items() if not k.startswith(('BUYEROS_','AUTH0_','R2_','VERCEL_','CLOUDFLARE_'))}
+            env['BUYEROS_CF_TEST_CONTEXT']=str(context)
+            observer.start()
+            result=subprocess.run(['node','node_modules/vitest/vitest.mjs','run','--config','services/cloudflare-jobs/vitest.operating.config.ts','--reporter=default','--reporter=junit','--outputFile.junit=artifacts/cloudflare/CF07-operating-platform.xml'],cwd=ROOT,env=env,capture_output=True,text=True,encoding='utf8',timeout=180)
+            (ROOT/'artifacts/cloudflare/CF07-operating-platform.txt').write_text(result.stdout+result.stderr,encoding='utf8')
+&gt;           assert result.returncode==0,result.stdout+result.stderr
+E           AssertionError: failed to load config from C:\Users\laich\Documents\BuyerOS\services\cloudflare-jobs\vitest.operating.config.ts
+E
+E             ⎯⎯⎯⎯⎯⎯⎯ Startup Error ⎯⎯⎯⎯⎯⎯⎯⎯
+E             Error: Build failed with 1 error:
+E
+E             #x1B[31m[UNRESOLVED_ENTRY] #x1B[0mCannot resolve entry module services/cloudflare-jobs/vitest.operating.config.ts.
+E
+E                 at aggregateBindingErrorsIntoJsError (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/rolldown@1.0.1/node_modules/rolldown/dist/shared/error-CkdMJ9ps.mjs:48:18)
+E                 at unwrapBindingResult (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/rolldown@1.0.1/node_modules/rolldown/dist/shared/error-CkdMJ9ps.mjs:18:128)
+E                 at #build (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/rolldown@1.0.1/node_modules/rolldown/dist/shared/rolldown-build-BVD3dIdE.mjs:3275:34)
+E                 at async bundleConfigFile (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:34842:17)
+E                 at async bundleAndLoadConfigFile (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:34750:18)
+E                 at async loadConfigFromFile (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:34719:42)
+E                 at async resolveConfig (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:34345:22)
+E                 at async _createServer (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vite@8.0.13_@types+node@22._16a350bf9b94f26e5fd1a60e3428d616/node_modules/vite/dist/node/chunks/node.js:26080:65)
+E                 at async createViteServer (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vitest@4.1.0_@types+node@22_5d3983904ad4b8ef8c46f7186c308744/node_modules/vitest/dist/chunks/cli-api.DuT9iuvY.js:8825:17)
+E                 at async createVitest (file:///C:/Users/laich/Documents/BuyerOS/node_modules/.pnpm/vitest@4.1.0_@types+node@22_5d3983904ad4b8ef8c46f7186c308744/node_modules/vitest/dist/chunks/cli-api.DuT9iuvY.js:14047:18) {
+E               errors: [Getter/Setter]
+E             }
+E
+E
+E
+E
+E           assert 1 == 0
+E            +  where 1 = CompletedProcess(args=['node', 'node_modules/vitest/vitest.mjs', 'run', '--config', 'services/cloudflare-jobs/vitest.o...c46f7186c308744/node_modules/vitest/dist/chunks/cli-api.DuT9iuvY.js:14047:18) {\n  errors: [Getter/Setter]\n}\n\n\n\n').returncode
+
+services\api\tests\benchmark_cloudflare_case.py:78: AssertionError</failure></testcase></testsuite></testsuites>

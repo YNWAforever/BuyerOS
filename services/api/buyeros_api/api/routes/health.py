@@ -80,10 +80,16 @@ async def readiness(workspace_id: uuid.UUID, request: Request, principal: Princi
         member = await load_membership(session, principal=principal, workspace_id=workspace_id)
         if not permission_for_roles(member["roles"], "getReadiness"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+        from ...db.worker_execution import WorkerRuntimeControl
+        backend, enabled = (await session.execute(select(WorkerRuntimeControl.backend, WorkerRuntimeControl.enabled))).one()
         heartbeat = (await session.execute(select(WorkerHeartbeat)
-            .order_by(WorkerHeartbeat.observed_at.desc()).limit(1))).scalar_one_or_none()
+            .order_by(WorkerHeartbeat.observed_at.desc()).limit(1))).scalar_one_or_none() if backend == 'celery' and enabled else None
         worker, queue = "unavailable", "unavailable"
-        if heartbeat is not None:
+        if backend == 'cloudflare':
+            from ...services.worker_recovery import read_execution_health
+            health = await read_execution_health(session, now=datetime.now(timezone.utc))
+            worker, queue = health['worker'], health['queue']
+        elif heartbeat is not None:
             age = (datetime.now(timezone.utc) - heartbeat.observed_at).total_seconds()
             if 0 <= age <= get_settings().worker_heartbeat_max_age_seconds:
                 worker, queue = "ready", heartbeat.broker_state

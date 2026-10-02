@@ -32,6 +32,7 @@ test('the app proxy forwards the bearer and original API path to the bound servi
     assert.equal(String(input), 'https://internal-api.test/base/v1/workspaces/abc?offset=2');
     assert.equal(new Headers(init.headers).get('Authorization'), 'Bearer fixture-access');
     assert.equal(new Headers(init.headers).get('Cookie'), null);
+    assert.equal(new Headers(init.headers).get('x-vercel-protection-bypass'), null);
     return new Response(JSON.stringify({data_mode: 'live', data: {items: []}}), {
       status: 200,
       headers: {'Content-Type': 'application/json', 'X-Request-ID': 'fixture-request'},
@@ -39,7 +40,7 @@ test('the app proxy forwards the bearer and original API path to the bound servi
   };
   try {
     const response = await GET(new Request('https://app.test/v1/workspaces/abc?offset=2', {
-      headers: {Authorization: 'Bearer fixture-access', Cookie: 'session=do-not-forward'},
+      headers: {Authorization: 'Bearer fixture-access', Cookie: 'session=do-not-forward', 'x-vercel-protection-bypass': 'fictional-preview-bypass-only'},
     }));
     assert.equal(called, 1);
     assert.equal(response.status, 200);
@@ -76,6 +77,7 @@ test('the app proxy streams writes and preserves API conflicts without forwardin
     assert.equal(new Headers(init.headers).get('If-Match'), 'version-2');
     assert.equal(new Headers(init.headers).get('Idempotency-Key'), 'edit-123');
     assert.equal(new Headers(init.headers).get('Cookie'), null);
+    assert.equal(new Headers(init.headers).get('x-vercel-protection-bypass'), null);
     assert.equal(await new Response(init.body).text(), '{"name":"Revised"}');
     return Response.json({code: 'VERSION_CONFLICT', request_id: 'req-1'},
       {status: 409, headers: {'X-Request-ID': 'req-1'}});
@@ -84,7 +86,7 @@ test('the app proxy streams writes and preserves API conflicts without forwardin
     const response = await PATCH(new Request('https://app.test/v1/projects/p1', {
       method: 'PATCH', body: JSON.stringify({name: 'Revised'}),
       headers: {'Content-Type': 'application/json', 'If-Match': 'version-2',
-        'Idempotency-Key': 'edit-123', Cookie: 'session=do-not-forward'},
+        'Idempotency-Key': 'edit-123', Cookie: 'session=do-not-forward', 'x-vercel-protection-bypass': 'fictional-preview-bypass-only'},
     }));
     assert.equal(response.status, 409);
     assert.equal(response.headers.get('Cache-Control'), 'private, no-store');

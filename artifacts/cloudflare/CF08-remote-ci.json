@@ -1,0 +1,122 @@
+{
+  "branch_head_sha": "d8ca3150e620f6f7f978a420852dd4ac9f024712",
+  "reviewed_code_sha": "d6c2849d50b5851cd24bcab24ce0db4b73ecc3e8",
+  "github_ci_test_merge_sha": "8634fba98e2e455a516e4f707058255ccdf4aced",
+  "workflow_run_id": 36859284850,
+  "workflow_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36859284850",
+  "workflow_status": {
+    "id": 36859284850,
+    "name": "BuyerOS CI",
+    "status": "completed",
+    "conclusion": "success",
+    "run_number": 23,
+    "jobs_url": "https://api.github.com/repos/YNWAforever/BuyerOS/actions/runs/36859284850/jobs",
+    "logs_url": "https://api.github.com/repos/YNWAforever/BuyerOS/actions/runs/36859284850/logs",
+    "workflow_id": 370343039
+  },
+  "jobs": [
+    {
+      "id": 110359221028,
+      "name": "browser-continuity",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110359221031,
+      "name": "worker",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110359221066,
+      "name": "cloudflare-controller",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110359221138,
+      "name": "browser-smoke",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110359221174,
+      "name": "api",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110359221183,
+      "name": "cloudflare-staff-acceptance",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110359221216,
+      "name": "frontend",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110359221242,
+      "name": "browser-zoom",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "exact_log_summaries": {
+    "api": [
+      "2026-10-01T12:07:54.1254241Z 650 passed, 96 warnings in 195.27s (0:03:15)",
+      "2026-10-01T12:07:56.0907361Z passed=650 failed=0 errors=0 skipped=0"
+    ],
+    "worker": [
+      "2026-10-01T12:04:03.0869934Z Linux standby integration: 2 passed, 0 failed/skipped; no database/broker/provider",
+      "2026-10-01T12:04:30.3730046Z 186 passed, 1 warning in 24.81s",
+      "2026-10-01T12:04:30.8939919Z passed=186 failed=0 errors=0 skipped=0"
+    ],
+    "cloudflare-controller": [
+      "2026-10-01T12:04:30.8703828Z  Test Files  8 passed (8)",
+      "2026-10-01T12:04:30.8704738Z       Tests  27 passed (27)",
+      "2026-10-01T12:04:32.1966028Z Total Upload: 137.54 KiB / gzip: 24.49 KiB"
+    ],
+    "cloudflare-staff-acceptance": [
+      "2026-10-01T12:05:38.1975418Z 29 passed, 9 warnings in 41.06s",
+      "2026-10-01T12:05:38.6245499Z passed=29 failed=0 errors=0 skipped=0",
+      "2026-10-01T12:06:21.5846819Z 2 passed, 1 warning in 41.71s",
+      "2026-10-01T12:06:21.9754436Z passed=2 failed=0 errors=0 skipped=0",
+      "2026-10-01T12:07:57.6156487Z   7 passed (1.2m)"
+    ],
+    "browser-continuity": [
+      "2026-10-01T12:07:23.1093632Z   4 passed (2.7m)",
+      "2026-10-01T12:07:23.1958492Z passed=4 failed=0 errors=0 skipped=0",
+      "2026-10-01T12:08:32.2034270Z   8 passed (1.1m)",
+      "2026-10-01T12:08:32.2929254Z passed=8 failed=0 errors=0 skipped=0",
+      "2026-10-01T12:09:02.2552101Z   1 passed (28.9s)",
+      "2026-10-01T12:09:02.3444580Z passed=1 failed=0 errors=0 skipped=0",
+      "2026-10-01T12:09:35.2490080Z   3 passed (31.9s)",
+      "2026-10-01T12:09:35.3391628Z passed=3 failed=0 errors=0 skipped=0",
+      "2026-10-01T12:10:06.1273098Z   1 passed (29.7s)",
+      "2026-10-01T12:10:06.2177405Z passed=1 failed=0 errors=0 skipped=0"
+    ]
+  },
+  "artifact_manifest": "artifacts/cloudflare/ci-d8ca315/manifest.json",
+  "automatic_vercel_app_api_preview": {
+    "id": "dpl_EPr4wsjaMNcgo3XA2itL1NxDGsc7",
+    "url": "buyer-qzwxlwr6n-ynwaforevers-projects.vercel.app",
+    "state": "READY",
+    "target": null,
+    "source": "git",
+    "sha": "d8ca3150e620f6f7f978a420852dd4ac9f024712",
+    "regions": [
+      "iad1"
+    ],
+    "alias": [
+      "buyer-os-git-codex-fix-vercel-tslib-ssr-ynwaforevers-projects.vercel.app"
+    ]
+  },
+  "cloudflare_resources_created": false,
+  "production_selector_changed": false,
+  "production_migration_run": false,
+  "protected_isolated_hosted_job_proof": "not_run",
+  "scope": "Existing Git integration automatically publishes an app/API preview. READY metadata is not Cloudflare job/protected native feasibility verification."
+}

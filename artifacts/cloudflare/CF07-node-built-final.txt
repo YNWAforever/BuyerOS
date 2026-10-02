@@ -1,0 +1,19 @@
+✔ checked-in API types match the current OpenAPI contract (4821.9122ms)
+✔ built UI fixture refuses inherited databases, credentials and nonfixture API targets (0.8318ms)
+✔ built UI static assets cannot escape their emitted public directory (0.3479ms)
+✔ local acceptance rejects shared targets, preview activation and inherited credentials (1.4679ms)
+✔ acceptance counts actual executed cases and fails closed on empty, skipped or failed reports (1.5046ms)
+✔ CF00 reports measured local feasibility separately from hosted Vercel evidence (1.906ms)
+✔ Vercel exposes only the app and binds its API call to the internal API service (2.1511ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (47.5741ms)
+✔ the app proxy fails closed when the binding is absent (0.9095ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (1.0685ms)
+✔ FastAPI redirects stay on the public app path (1.2585ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4902.7576

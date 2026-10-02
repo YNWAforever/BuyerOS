@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="158.113" timestamp="2026-10-01T17:29:38.927618+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_admin_operations_db" name="test_paused_celery_selector_cannot_report_ready_from_a_fresh_legacy_heartbeat" time="148.890"><failure message="assert True is False">api = &lt;starlette.testclient.TestClient object at 0x000001ABBEFC3230&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:62165/buyeros_test_api'
+
+    def test_paused_celery_selector_cannot_report_ready_from_a_fresh_legacy_heartbeat(api, seeded):
+        from datetime import datetime, timezone
+        with psycopg.connect(seeded, autocommit=True) as owner:
+            assert owner.execute("SELECT backend,enabled FROM worker_runtime_control").fetchone() == ('celery',False)
+            owner.execute("INSERT INTO worker_heartbeats(worker_id,observed_at,broker_state) VALUES('paused-fixture',%s,'ready')",(datetime.now(timezone.utc),))
+            try:
+                response=api.get(f"{ROOT}/readiness",headers=_h(subject=ADMIN))
+                assert response.status_code==200,response.text
+                assert_contract_response('ReadinessResponse',response.json())
+&gt;               assert response.json()['data']['ready'] is False
+E               assert True is False
+
+tests\test_admin_operations_db.py:190: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,6 @@
+$ wrangler types services/cloudflare-jobs/worker-configuration.d.ts --config services/cloudflare-jobs/wrangler.jsonc --strict-vars=false --check
+
+ ⛅️ wrangler 4.137.0 (update available 4.145.0)
+───────────────────────────────────────────────
+✨ Types at services/cloudflare-jobs/worker-configuration.d.ts are up to date.
+

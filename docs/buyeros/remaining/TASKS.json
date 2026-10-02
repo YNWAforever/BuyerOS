@@ -1254,10 +1254,10 @@
       "command": "根目錄：pnpm exec playwright test tests/e2e/mvp-a-journey.spec.ts；執行 T00 全套 CI＋required no-skip gates；照 release.md 在明確target核對 readiness/部署SHA。此處不是一條可無條件執行的 production deploy 指令。",
       "rollback": "先關admission/dispatch，保留reconciliation；回退compatibleapp或rollforward資料，保留ledger/history。不得為回退重置DB或清queue。",
       "operations": [],
-      "status": "implemented_full_fixture_journey_verified_release_activation_open",
+      "status": "implemented_full_fixture_journey_verified_production_anonymous_and_human_scope_verified_live_gates_open",
       "verification": {
         "release_preparation": "RELEASE_READINESS.md, runbooks/release.md, PILOT_EXECUTION_RECORD.md and pilot/evaluation-protocol.md drafted without external action",
-        "full_staff_journey": "PARTIAL: one disposable project passes UI offer edit, saved ICP v2 exact reviewer approval, browser-created bounded research, broker/worker fit, reviewer list/assignment and worker-generated grounded unaddressed draft. Offer creation and addressed exact approval/export/outcome are verified in separate fixtures; full continuity and external activation remain open",
+        "full_staff_journey": "Complete fixture continuity4/4 on reviewed source4181062: UI offer creation/edit, exact ICP approval, bounded research via real disposable DB/broker/worker, review/list/assignment, grounded addressed generation, exact approval, authorized export, manual outcome and refresh in en/zh-HK desktop/mobile. Test OIDC/search/contact remain fictional. Deployed4181062 has anonymous/bootstrap4/4 and refreshed human FIMMICK/admin visibility; full authenticated production staff/provider/worker continuity remains unverified.",
         "deployment": "2026-09-30 HK: user specifically approved redeploying tested source 62d40bc7687477f42e971ae5143485806630f1a6 with the nine saved production variables. vercel redeploy exited 0; dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3 READY, target production, exact source SHA verified. Public frontend routes /, /app, /auth/callback HTTP200, /v1/workspaces HTTP401 UNAUTHENTICATED. Anonymous acceptance 4 passed/0 failed/cancelled/skipped in 5271.2125ms. Actual Sign in reaches Auth0 Universal Login with approved public parameters and PKCE S256. No real staff session, membership seed, migration or paid/provider activation.",
         "partial_ui_journey": "1 passed, 0 failed/skipped in 2.7m: same seeded project/buyer evidence, list, assignment, exact approval, authorized export, manual outcome, refresh, zh-HK mobile; viewer export 403 and delivery 403; fixture OIDC/disposable PostgreSQL only",
         "screenshots": "artifacts/t30-screenshots/en-fixture.png and zh-mobile-fixture.png visually inspected with SHA256 recorded in REMAINING_DEVELOPMENT_STATUS.md",
@@ -1529,9 +1529,9 @@
           "current_initial_setup_state": "Four approved rows persisted and read back; the user confirmed FIMMICK and admin role visible on 2026-10-01 HK. Full staff continuity and agent-observed authenticated API trace remain unverified."
         },
         "ongoing_continuity_slice_20261001": {
-          "status": "reviewed_candidate_pushed_hosted_six_job_ci_verified_activation_open",
+          "status": "reviewed_source_deployed_anonymous_and_human_scope_verified_live_gates_open",
           "base_source_sha": "479141f5f04455cdc19c786cb40a3a0fd9f4b4d2",
-          "working_tree": "Reviewed application/test/evidence source4181062 published to draft PR9. Local required gates and hosted six-job CI all pass with zero required skips. This following checkpoint changes documentation/evidence only. No migration, merge or new production deployment.",
+          "working_tree": "Reviewed application/test source4181062 was deployed under exact authorization, with actual anonymous4/4 and refreshed human FIMMICK/admin visibility. The owner subsequently merged PR9; existing Git integration deployed main12327c7 with identical app/CI content, main CI6/6 and current-source HTTP4/4. Following checkpoints change documentation/evidence only. The agent performed no merge, migration, direct database mutation or external worker/provider activation.",
           "observed_red": [
             "Addressed API admission 5 failed against current 503 boundary",
             "Worker addressed recipient/race 4 failed against ignored context",
@@ -1559,7 +1559,7 @@
           ],
           "new_source_scope": "Stored retained recipient/purpose/suppression binding for zero-cost templates; worker current recipient/policy/member recheck; eligible contact detail on existing getBuyer; raw fit hash projection; wizard canonical buyer type roundtrip; synchronous approval recipient expiry; continuous UI-created project, edits, approvals, real fixture broker/worker research and generated addressed draft/export/outcome test.",
           "fixture_boundary": "Fresh owned loopback PostgreSQL16 and Valkey8; fake OIDC/search. Guarded helper supplies only fictional policy/budget prerequisites and existing valid fictional contact input to a UI-created project. Independent cases initialize only their named fake actors rate counters before research/login; production limiter and all limits within each case remain active. No project/buyer/ICP/review/draft/approval/outcome seed in this helper; no live lookup/provider verification.",
-          "remaining": "Human source review, specific newer candidate deployment approval and authenticated deployed acceptance. Actual assistive/non-text accessibility, external recovery journal custody, continuous worker/Valkey/R2 and named policy/provider/pilot activation remain open.",
+          "remaining": "Human source review, agent-observed authenticated domain API acceptance and complete production staff continuity remain open. Current owner-merged12327c7 has identical application/CI content to reviewed4181062, main CI6/6 and current-source HTTP4/4. Refreshed human FIMMICK/admin visibility was confirmed on4181062. Actual assistive/non-text accessibility, external recovery journal custody, compatible continuous worker/Valkey/R2 and named policy/provider/pilot activation remain open.",
           "diagnostic_failures": [
             "Final API preceding repair: 576 passed/1 failed/0 errors/skips; valid retention caused0032 rollback guard to fire before0028. Fixed test to assert both without deleting dates.",
             "First bilingual fixture repeat: 1 passed/1 failed at duplicate known contact input for shared canonical company; fixture now reuses and verifies its unchanged valid input.",
@@ -1687,6 +1687,64 @@
             "evidence": "artifacts/t30-ci-head-checkpoint-20261001.json",
             "scope": "Fresh metadata verifies all six jobs and PR checks at this source. Exact test counts remain attributed to reviewed code4181062/run36772517309; no new deployment or owner approval is claimed.",
             "checkpoint_checks": "JSON/source attribution checks passed; git diff --quiet from4181062 excluding docs/artifacts exit0; git diff --check exit0. Documentation/evidence only; no additional application test results claimed."
+          },
+          "production_deployment_20261001": {
+            "source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+            "deployment_id": "dpl_5Yt2v611QZwJntN8sBnwyWojJQvT",
+            "target": "production",
+            "state": "READY",
+            "url": "https://buyer-os-nu.vercel.app",
+            "project_id": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw",
+            "command": "vercel.cmd redeploy dpl_9vrsNEUsyzfGjbr745ersK6XWEVF --target production --scope ynwaforevers-projects --no-wait",
+            "authorization": "User continued immediately after the explicit final question naming4181062 and the existing production project; exact deployment authorization was announced before execution. BO owner approval records were not changed.",
+            "build_duration_seconds": 74.433,
+            "saved_production_variables": "All nine IDs/names/types/update timestamps unchanged; paid admission false, R2 false, binding URL platform-injected.",
+            "http_acceptance": "node artifacts/t30-production-acceptance-4181062-20261001.mjs exited0:4 passed/0 failed/skipped. Root/app200 and public Auth0 bootstrap; missing/malformed bearer401 exact UNAUTHENTICATED contract, request IDs and no data rows.",
+            "error_scan": "Deployment-filtered error-level10m query exited0:0 returned records/0 unparsed lines; max100. Does not establish continuous monitoring or drains.",
+            "human_scope_confirmation": "User confirmed FIMMICK and workspace_admin visible after refreshing/signing in on the updated production deployment. Human UI evidence, not an agent-observed API trace or full journey.",
+            "checkpoint_checks": "node --check acceptance artifact exit0; UTF-8 JSON5 parsed/source-state-count assertions pass; API generate-operation-routes.py --check matches78 operations; application/CI diff from4181062 excluding docs/artifacts empty; git diff --check exit0. No new API/worker fixture count is claimed.",
+            "evidence_prefix": "artifacts/t30-production-*-4181062-20261001.*",
+            "previous_deployment_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+            "previous_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+            "migrations_run": 0,
+            "direct_database_mutation_commands": 0,
+            "paid_provider_requests": 0,
+            "external_worker_activated": false,
+            "delivery_activated": false,
+            "scope": "App/API deployment and bounded anonymous production checks only. No live pilot or full deployed staff/provider/worker verification."
+          },
+          "external_main_successor_20261001": {
+            "source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+            "reviewed_application_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+            "deployment_id": "dpl_wdPCQmzg7EkFusgFknHAA2tXdKth",
+            "state": "READY",
+            "url": "https://buyer-os-nu.vercel.app",
+            "external_merge": "GitHub records PR9/head a594219 merged by YNWAforever at2026-10-01T01:52:49Z into12327c7. Existing Git integration deployed main. Agent performed no merge or additional deployment.",
+            "application_equivalence": "git diff --quiet reviewed4181062 origin/main excluding docs/artifacts exit0; origin/main12327c7. No domain/worker/CI/contract change.",
+            "main_ci": "Run36803187816 source12327c7:6 jobs completed SUCCESS; metadata retained in external-merge artifact.",
+            "http_acceptance": "node artifacts/t30-production-acceptance-12327c7-20261001.mjs exit0:4 passed/0 failed/skipped at2026-10-01T02:09:33.444Z; exact same anonymous/bootstrap boundary checks at successor source.",
+            "error_scan": "Current deployment-filtered10m error query exit0:0 records/0 unparsed lines; bounded query, not continuous monitoring.",
+            "configuration": "Nine saved production variable records unchanged; paid admission and R2 false; platform binding preserved.",
+            "evidence": "artifacts/t30-external-merge-production-12327c7-20261001.json and t30-production-acceptance/error-scan-12327c7-20261001.*",
+            "human_scope": "Human FIMMICK/admin confirmation pertains to preceding4181062; current successor has identical app/CI content and unchanged configuration. Agent authenticated domain trace/full staff journey remain unverified.",
+            "follow_up_review": "5e89eb1 deployment evidence is newer than merged PR9 head. The checkpoint through35eb899 contains documentation/evidence only; subsequent requested Render preparation is separately tracked. Preserve original source records."
+          },
+          "render_worker_setup_20261001": {
+            "status": "prepared_local_and_hosted_verified_not_provisioned_paid_resource_and_account_gates_open",
+            "reviewed_source_sha": "e061d33a32a46502a084d5a5c26d9262904a7b60",
+            "request": "User asked the agent to create the worker after the existing-target question; no priced provisioning or production worker role grant is fabricated.",
+            "proposal": "root render.yaml: buyer-os-worker and buyer-os-dispatcher, one0.5c-512mb instance each; one buyer-os-broker256mb; allSingapore. BaseUS$24/month before tax/workspace/usage extras, current primary pricing verified2026-10-01. Paid previews/autodeployoff.",
+            "runtime": "Both callers bind the same internal broker. WORKER_RUNTIME_ENABLEDfalse starts standby without BuyerOS imports, connections or queued jobs. Activation requires production, dedicated buyeros_worker_runtime login/TLS and remote broker; name checks do not verify catalog privileges. Canonical Celery concurrency1/prefetch1/recoverybeat and existing bounded dispatcher CLI remain owners.",
+            "local_checks": "Named unittest red0/9/0 exit1 (0.002s); green9/0/0 exit0 (0.023s). Official schema first rejected unquoted YAMLoff; quoted enums pass unchanged validator. Worker/dispatcher --check2/2 standby; canonical module help imports2/2. No database/broker/provider contacted by these checks.",
+            "evidence": "artifacts/t30-tests/render-worker-launch-red/green-20261001.txt; artifacts/t30-render-blueprint-validation-20261001.json; artifacts/t30-render-worker-ci-e061d33-20261001.json; runbooks/render-worker-setup.md exact variables/cost/rollback.",
+            "hosted_checks": "Run36807776580 at e061d33 completed6/6 SUCCESS. Required API577/0/0/0 (78 warnings129.79s), worker174/0/0/0 (1 warning22.33s), browser continuity4+8+1+3+1 and zoom2 required no-skip gates pass; smoke1. Launcher9/0/0 in0.006s, real Linux standby/SIGTERM2/0/0, official schema and exact frozen no-dev production build/two standby CLI checks/two canonical imports pass on Python3.12.14/uv0.11.27. Actual fixture containers, fictional identity/search/contact; no deployed Render integration claimed.",
+            "configuration_missing": "Authenticated Render account/workspace and concreteUS$24/month standby-resource decision. Official CLI2.28.0 archive digest verified and safely extracted in ignored checkout-local storage; device authorization is pending. Later runtime activation needs exact production worker role/credential/catalog/queue approval; no migration/source seed or paid provider is part of this proposal.",
+            "provisioned": false,
+            "worker_activated": false,
+            "broker_live_verified": false,
+            "production_schema_changed": false,
+            "paid_provider_enabled": false,
+            "delivery_enabled": false
           }
         }
       }
@@ -1725,6 +1783,267 @@
   ],
   "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
   "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
-  "next_eligible_task": "T30 specific reviewed-candidate deployment decision for existing BuyerOS Vercel project; source4181062 has six-job CI success. Earlier production approval applied to62d40bc. Independent T29 actual assistive/non-text review and T28 external recovery-journal custody remain open; provider/policy/worker/R2/pilot activation needs actual named owners/configuration and delivery stays disabled.",
-  "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6"
+  "next_eligible_task": "Independent review and current production role/schema/drain/epoch, quota/locality/alerts inspection to prepare the exact production activation proposal. Provider/R2/pilot gates separate; do not restart completed tasks.",
+  "hosting_migration_proposal": {
+    "status": "local_release_candidate_and_isolated_hosted_fixture_verified_production_activation_pending",
+    "date_hk": "2026-10-01",
+    "source_sha": "aed7a7eb2b7370c10cd7a41306eecf09d378ad42",
+    "design": "docs/superpowers/specs/2026-10-01-cloudflare-job-migration-design.md",
+    "plan": "docs/superpowers/plans/2026-10-01-cloudflare-job-migration.md",
+    "execution_method": "same_session_executing_plans_no_agents",
+    "architecture_exception_approved": true,
+    "implementation_approved": true,
+    "approval_evidence": "Direct user message approve after the Cloudflare design/implementation plan handoff, 2026-10-01 HK. Authorizes local CF00-CF08 implementation and the transport architecture exception only; no owner/provider or production activation record is inferred.",
+    "paid_resources_approved": true,
+    "production_activation_approved": false,
+    "tasks": [
+      {
+        "id": "CF00",
+        "depends_on": [],
+        "status": "complete_local_and_isolated_hosted_fixture_verified_production_pending",
+        "evidence": "artifacts/cloudflare/CF00-checkpoint.json",
+        "hosted_evidence": "artifacts/cloudflare/CF00-hosted-preview-checkpoint.json"
+      },
+      {
+        "id": "CF01",
+        "depends_on": [
+          "CF00"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF01-checkpoint.json"
+      },
+      {
+        "id": "CF02",
+        "depends_on": [
+          "CF01"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF02-checkpoint.json"
+      },
+      {
+        "id": "CF03",
+        "depends_on": [
+          "CF02"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF03-checkpoint.json"
+      },
+      {
+        "id": "CF04",
+        "depends_on": [
+          "CF03"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF04-checkpoint.json"
+      },
+      {
+        "id": "CF05",
+        "depends_on": [
+          "CF04"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF05-checkpoint.json"
+      },
+      {
+        "id": "CF06",
+        "depends_on": [
+          "CF05"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF06-checkpoint.json"
+      },
+      {
+        "id": "CF07",
+        "depends_on": [
+          "CF06"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF07-checkpoint.json"
+      },
+      {
+        "id": "CF08",
+        "depends_on": [
+          "CF07"
+        ],
+        "status": "complete_local_external_activation_pending",
+        "evidence": "artifacts/cloudflare/CF08-checkpoint.json"
+      }
+    ],
+    "reviewed_source_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
+    "handoff": "docs/buyeros/CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md",
+    "hosted_integration_verified": true,
+    "deployed_source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+    "preview_setup_approved": true,
+    "preview_preparation": {
+      "status": "complete_local_and_bounded_hosted_preview_verified_now_fenced",
+      "reviewed_source_sha": "07a7537befbf1e2290ee7079e18a258083615ed6",
+      "evidence": "artifacts/cloudflare/CF00-preview-preparation-checkpoint.json",
+      "test_counts": {
+        "passed": 48,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "actual_duration_seconds": 61,
+      "schema_change": false,
+      "hosted_verified": false,
+      "resource_created": false,
+      "runtime_diagnostic_in_release_api": false,
+      "billing_inspection": "Cloudflare subscriptions GET403; standard account setting is not Paid proof. Vercel team Pro active, Neon owner Free. No plan upgrade.",
+      "linux_ci_verified": true,
+      "retained_fixture_log_issue": "11 anonymous built-fixture Error messages, not attributed expected;7 asserted cases passed.12 new journey PNGs outside upload path; prior local PNGs retained and2 current fresh special-case PNGs verified.",
+      "hosted_evidence": "artifacts/cloudflare/CF00-hosted-preview-checkpoint.json"
+    },
+    "remote_ci": {
+      "branch_head": "91b1f9b09ff7635d7967342f7b5577da881d91b5",
+      "test_merge": "d78fcadf5f938502a606c4c1865ade4a4215d06b",
+      "equal_tree_sha": "296c6b3379c734a0c6a0679c9d6b93c6a1d1b6da",
+      "run_id": 36875943355,
+      "scope": "Reviewed preview preparation07a7537 plus checkpoint91b1f9b; actual local Linux integration and fictional identities/providers, not protected hosted proof. Subsequent evidence-only commits are separate.",
+      "successful_jobs": 8,
+      "api_counts": {
+        "passed": 679,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "evidence": "artifacts/cloudflare/CF00-preview-remote-ci-91b1f9b.json"
+    },
+    "git_triggered_app_api_preview": {
+      "id": "dpl_2mtfFRQNvQqrkFizapMMjFRdujKk",
+      "url": "buyer-lmxv6y27g-ynwaforevers-projects.vercel.app",
+      "state": "READY",
+      "target": null,
+      "source": "git",
+      "sha": "91b1f9b09ff7635d7967342f7b5577da881d91b5",
+      "regions": [
+        "iad1"
+      ],
+      "alias": [
+        "buyer-os-git-codex-fix-vercel-tslib-ssr-ynwaforevers-projects.vercel.app"
+      ],
+      "scope": "Last observed existing-project Git app/API branch preview only. Prepared diagnostic outside release entrypoint. No protected native/controller/schema/selector/production proof."
+    },
+    "deployed_source_sha_scope": "Approved isolated native and ID-only operational preview only, now selectorfalse/epoch3, loginsNOLOGIN, controller/Cronoff, bypassrevoked, Neonidle; noproductionCloudflarecutover",
+    "paid_resources_approval_scope": "Conditional Workers Paid US$5/month account base plus shared metered overages only if required for the maximum2hour isolated preview. No new paid Neon/Vercel plan or production/provider activation.",
+    "preview_setup_approval_evidence": "Direct human approve after exact bounded protected-preview/conditional Workers Paid question, recorded2026-10-01T14:48:41Z; expires16:48:41Z. Not an independent reviewer or provider-owner record.",
+    "hosted_preview_session": {
+      "status": "isolated_hosted_preview_complete_fenced_and_suspended",
+      "evidence": "artifacts/cloudflare/CF00-hosted-preview-checkpoint.json",
+      "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+      "expires_at": "2026-10-01T16:48:41Z",
+      "shutdown_completed_at": "2026-10-01T16:26:11.821617+00:00",
+      "native_verified": true,
+      "two_hop_61_seconds_verified": true,
+      "operational_receipt_verified": true,
+      "production_activation": false,
+      "billing_plan_changed": false,
+      "session_closed": true
+    },
+    "reviewed_source_sha_scope": "Author-reviewed permission correction23 source files; local focused23/PG18compat37/worker186/gateway4 and current full CI36905204388 eight jobs SUCCESS at identical-code a50ce72 verified. Independent review pending. Prior hosted595865f at0035 remains separate.",
+    "hosted_integration_verified_scope": "Isolated approved fictional native/PDF/checkpoint/protection/61-second two-hop and one ID-only Queue/Workflow/HMAC/API/Neon receipt only; no staff/customer/provider/production verification",
+    "post_hosted_regression_ci": {
+      "run_id": 36893525903,
+      "source_sha": "79d6caf8b51aac00560cf6d69b0198c8614df528",
+      "status": "success",
+      "jobs": 8,
+      "evidence": "artifacts/cloudflare/ci-79d6caf-hosted-successor/manifest.json",
+      "manifest_sha256": "6545ce70409d4e18e8c56a026b255c8dafd60952f7c15934023184f8eb98a865",
+      "counts": {
+        "api": 686,
+        "worker": 186,
+        "controller": 27,
+        "pg18": 29,
+        "operating": 2,
+        "staff_journey": 7,
+        "legacy": [
+          4,
+          8,
+          1,
+          3,
+          1
+        ],
+        "zoom": 2,
+        "smoke": 1
+      },
+      "required_failures": 0,
+      "required_errors": 0,
+      "required_skips": 0,
+      "fresh_ui_screenshots": 14,
+      "source_files_verified": 19,
+      "test_merge_sha": "d3a72bfc68d80e1b788ba6ded65075d61242f270",
+      "test_merge_tree_equals_source": true,
+      "scope": "Actual local runtime/PG/UI with fictional identity/providers; hosted native and operational proof at595865f separate"
+    },
+    "production_preflight": {
+      "status": "permission_correction_local_and_ci_verified_exact_production_setup_approval_pending",
+      "production_schema": "0033_api_rate_windows",
+      "current_repository_head": "0036_checkpoint_schema_grants",
+      "production_mutations": false,
+      "production_runtime_login_configured": false,
+      "current_permission_tests": {
+        "focused": 23,
+        "pg18": 37,
+        "worker": 186,
+        "gateway_release": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "ci_before_correction": {
+        "source_sha": "8ffd91fccee5d9fad25b108759c39686a5dac171",
+        "run_id": 36895867947,
+        "status": "success",
+        "jobs": 8
+      },
+      "production_activation_approved": false,
+      "next_eligible_task": "Human source-review disposition and exact guarded production setup decision; keep expired preview fenced and independent provider/policy gates separate.",
+      "source_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
+      "evidence": "artifacts/cloudflare/CF08-production-preparation-checkpoint.json",
+      "proposal": "docs/buyeros/runbooks/cloudflare-production-setup-proposal-20261002.md",
+      "controller_config": "artifacts/cloudflare/CF08-production-controller-proposal.json",
+      "production_setup_proposal_approved": false,
+      "continuous_dispatch_proposed_in_this_stage": false,
+      "current_source_ci": {
+        "run_id": 36905204388,
+        "source_sha": "a50ce72809518925a6c6c1f7e0e643fef5d37c49",
+        "implementation_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
+        "status": "success",
+        "jobs": 8,
+        "counts": {
+          "api": 694,
+          "worker": 186,
+          "controller": 27,
+          "pg18": 37,
+          "operating": 2,
+          "staff_journey": 7,
+          "legacy": [
+            4,
+            8,
+            1,
+            3,
+            1
+          ],
+          "zoom": 2,
+          "smoke": 1
+        },
+        "required_failures": 0,
+        "required_errors": 0,
+        "required_skips": 0,
+        "evidence": "artifacts/cloudflare/ci-a50ce72-hosted-successor/manifest.json",
+        "manifest_sha256": "1be37764ef1820b93901f32a49b57f5190263d6446d3f6a70506b52863fdf29c",
+        "test_merge_sha": "9815444778731425c0dd6646b5485322cf9f7c63",
+        "test_merge_tree_equals_source": true,
+        "acceptance_source_files_verified": 19,
+        "permission_correction_source_files_verified": 23,
+        "fresh_ui_screenshots": 14,
+        "scope": "Actual Linux local Workers/native FastAPI/owned PostgreSQL and built UI; fictional identity/provider inputs. No production or live-provider verification."
+      },
+      "current_ci_checkpoint": "artifacts/cloudflare/CF08-production-current-ci-checkpoint.json",
+      "ui_visual_review": "artifacts/cloudflare/CF08-production-preparation-ui-review.json"
+    }
+  },
+  "deployed_source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+  "reviewed_source_sha_scope": "Historical T30 application; hosting_migration_proposal.reviewed_source_sha is current Cloudflare RC.",
+  "deployed_source_sha_scope": "Existing main app12327c7 freshly read-only verified2026-10-02HK; production remains0033 and unchanged. hosting_migration_proposal separately records approved isolatedpreview595865f/0035 and shutdown; noCloudflare productioncutover."
 }

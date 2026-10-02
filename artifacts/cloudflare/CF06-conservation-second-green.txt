@@ -1,0 +1,85 @@
+.....F..F                                                                [100%]
+================================== FAILURES ===================================
+_____ test_uncertain_inventory_is_bounded_and_all_status_intents_survive ______
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:50519/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:50519/buyeros_test_api', 8)
+
+    def test_uncertain_inventory_is_bounded_and_all_status_intents_survive(migrated, worker_runtime):
+        module = recovery_module()
+        case = uncertain_contact(migrated, worker_runtime[1], historical_count=101)
+        now = datetime.now(timezone.utc)
+        for tick in range(101):
+            call_worker(lambda engine: module.recover_execution(engine, now=now + timedelta(seconds=61 * tick), limit=1))
+            with psycopg.connect(migrated) as db:
+                count = db.execute("SELECT count(*) FROM outbox_events WHERE workspace_id=%s AND event_type='contact.reconcile'",
+                                   (case['envelope'].workspace_id,)).fetchone()[0]
+>               assert count == tick + 1, 'one bounded child per parent; never truncate accepted inventory'
+E               AssertionError: one bounded child per parent; never truncate accepted inventory
+E               assert 1 == (1 + 1)
+
+tests\test_cloudflare_recovery_db.py:130: AssertionError
+________________ test_celery_cloudflare_overlap_has_one_owner _________________
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:50519/buyeros_test_api'
+worker_runtime = ('postgresql://buyeros_worker:test-only@127.0.0.1:50519/buyeros_test_api', 11)
+
+    def test_celery_cloudflare_overlap_has_one_owner(migrated, worker_runtime):
+        module = recovery_module()
+        assert hasattr(module, 'set_execution_runtime'), 'guarded operator runtime change missing'
+        epoch = worker_runtime[1]
+>       before = module.set_execution_runtime(migrated, expected_epoch=epoch, backend='cloudflare', enabled=True, reason='Fictional dry run')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cloudflare_recovery_db.py:186:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+dsn = 'postgresql://buyeros:buyeros@127.0.0.1:50519/buyeros_test_api'
+
+    def set_execution_runtime(dsn: str, *, expected_epoch: int, backend: str, enabled: bool,
+                              reason: str, apply: bool = False) -> dict:
+        """Operator-only compare-and-swap. Dry run by default; no cloud activation."""
+        import psycopg
+        if (type(expected_epoch) is not int or not 1 <= expected_epoch < 9007199254740991
+                or backend not in {'celery', 'cloudflare'} or type(enabled) is not bool
+                or not isinstance(reason, str) or not 1 <= len(reason.strip()) <= 200):
+            raise ValueError('invalid runtime change')
+        with psycopg.connect(dsn) as db:
+            if db.execute('SELECT version_num FROM alembic_version').fetchone()[0] != '0035_worker_recovery_probe':
+                raise ValueError('compatible 0035 build and migration required')
+            current = db.execute('SELECT backend,enabled,epoch,active_until FROM worker_runtime_control WHERE singleton=1 FOR UPDATE').fetchone()
+            if current[2] != expected_epoch:
+                raise ValueError('runtime epoch changed; inspect current state')
+            if enabled:
+                running = db.execute("SELECT EXISTS(SELECT 1 FROM outbox_events WHERE state='dispatched' AND lease_expires_at>now())").fetchone()[0]
+                active = db.execute('SELECT active_until>now() FROM worker_runtime_control').fetchone()[0]
+                if running or active:
+>                   raise ValueError('pause and drain active leases before enabling either runtime')
+E                   ValueError: pause and drain active leases before enabling either runtime
+
+buyeros_api\services\worker_recovery.py:224: ValueError
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\Documents\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_cloudflare_recovery_db.py::test_environment_flag_cannot_make_readiness_ready
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_cloudflare_recovery_db.py::test_environment_flag_cannot_make_readiness_ready
+  C:\Users\laich\Documents\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\Documents\BuyerOS\artifacts\cloudflare\CF06-conservation-second-green.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_cloudflare_recovery_db.py::test_uncertain_inventory_is_bounded_and_all_status_intents_survive
+FAILED tests/test_cloudflare_recovery_db.py::test_celery_cloudflare_overlap_has_one_owner
+2 failed, 7 passed, 6 warnings in 11.81s

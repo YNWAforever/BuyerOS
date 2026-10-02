@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+# Review artifact: provisioning requires the exact paid-resource approval.
+# Initial processes wait in standby and do not connect to Neon or execute jobs.
+previews:
+  generation: "off"
+
+services:
+  - type: worker
+    name: buyer-os-worker
+    runtime: python
+    region: singapore
+    plan: 0.5c-512mb
+    numInstances: 1
+    repo: https://github.com/YNWAforever/BuyerOS
+    branch: codex/fix-vercel-tslib-ssr
+    autoDeployTrigger: "off"
+    maxShutdownDelaySeconds: 300
+    buildCommand: python -m pip install uv==0.11.27 && uv sync --project services/worker --frozen --no-dev --python 3.12
+    startCommand: services/worker/.venv/bin/python scripts/run-render-worker.py worker
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: BUYEROS_ENVIRONMENT
+        value: production
+      - key: BUYEROS_WORKER_RUNTIME_ENABLED
+        value: "false"
+      - key: BUYEROS_EAGER
+        value: "false"
+      - key: BUYEROS_PAID_DISPATCH_ENABLED
+        value: "false"
+      - key: BUYEROS_RECONCILIATION_ENABLED
+        value: "true"
+      - key: BUYEROS_R2_ENABLED
+        value: "false"
+      - key: BUYEROS_BROKER_URL
+        fromService:
+          type: keyvalue
+          name: buyer-os-broker
+          property: connectionString
+
+  - type: worker
+    name: buyer-os-dispatcher
+    runtime: python
+    region: singapore
+    plan: 0.5c-512mb
+    numInstances: 1
+    repo: https://github.com/YNWAforever/BuyerOS
+    branch: codex/fix-vercel-tslib-ssr
+    autoDeployTrigger: "off"
+    maxShutdownDelaySeconds: 300
+    buildCommand: python -m pip install uv==0.11.27 && uv sync --project services/worker --frozen --no-dev --python 3.12
+    startCommand: services/worker/.venv/bin/python scripts/run-render-worker.py dispatcher
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: BUYEROS_ENVIRONMENT
+        value: production
+      - key: BUYEROS_WORKER_RUNTIME_ENABLED
+        value: "false"
+      - key: BUYEROS_EAGER
+        value: "false"
+      - key: BUYEROS_PAID_DISPATCH_ENABLED
+        value: "false"
+      - key: BUYEROS_RECONCILIATION_ENABLED
+        value: "true"
+      - key: BUYEROS_R2_ENABLED
+        value: "false"
+      - key: BUYEROS_BROKER_URL
+        fromService:
+          type: keyvalue
+          name: buyer-os-broker
+          property: connectionString
+
+  - type: keyvalue
+    name: buyer-os-broker
+    region: singapore
+    plan: 256mb
+    maxmemoryPolicy: noeviction
+    persistenceMode: journal-snapshot
+    ipAllowList: []

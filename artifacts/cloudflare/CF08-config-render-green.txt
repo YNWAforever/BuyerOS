@@ -1,0 +1,19 @@
+✔ native API budget applies to the resolved Python entrypoint inside its service (1.8408ms)
+✔ the actual emitted Nitro gateway carries the ninety-second budget (0.756ms)
+✔ the isolated preview controller has distinct private resources and execution off (1.0724ms)
+✔ the built Vercel function renders / without a workspace import failure (330.4049ms)
+✔ the built Vercel function renders /app without a workspace import failure (82.3781ms)
+✔ the built Vercel function renders /auth/callback without a workspace import failure (21.3141ms)
+✔ Vercel exposes only the app and binds its API call to the internal API service (2.6735ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (62.8584ms)
+✔ the app proxy fails closed when the binding is absent (1.0571ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (1.0395ms)
+✔ FastAPI redirects stay on the public app path (1.2467ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 565.8539

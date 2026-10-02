@@ -1,5 +1,6 @@
 import {expect,test} from '@playwright/test';
 import {signInWorkbench as signIn,resetWorkbenchFixtureRateWindows,workspace,project} from './fixtures/workbench-auth';
+const browserApiOrigin=process.env.BUYEROS_E2E_FRONTEND==='vercel-built'?'http://localhost:5173':'http://127.0.0.1:8000';
 
 test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
 
@@ -44,7 +45,7 @@ test('T27 usage, queue filters and manual outcome history survive refresh in bot
   await expect(page.getByRole('region',{name:'人手記錄成果'})).toContainText('2 項成果紀錄');
   await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await page.screenshot({path:'test-results/t27-workbench-zh-mobile-fixture.png',fullPage:true});
-  const usagePath='http://127.0.0.1:8000/v1/workspaces/*/projects/*/usage*';
+  const usagePath=`${browserApiOrigin}/v1/workspaces/*/projects/*/usage*`;
   await page.route(usagePath,route=>route.fulfill({status:503,contentType:'application/json',
     headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},
     body:JSON.stringify({code:'METRIC_UNAVAILABLE',message:'fixture outage',request_id:'11111111-1111-4111-8111-111111111111',retryable:true})}));
@@ -121,7 +122,7 @@ test('T29 locale waits for current preference version and survives a fresh sign-
   test.setTimeout(120_000);
   let releasePreference:()=>void=()=>{};
   const heldPreference=new Promise<void>(resolve=>{releasePreference=resolve;});
-  await page.route(`http://127.0.0.1:8000/v1/workspaces/${workspace}/preferences`,async route=>{
+  await page.route(`${browserApiOrigin}/v1/workspaces/${workspace}/preferences`,async route=>{
     if(route.request().method()==='GET') await heldPreference;
     await route.continue();
   });
@@ -160,14 +161,14 @@ test('T29 operations resolves a failed profile lookup without a permanent spinne
   await page.locator('header select').selectOption('en');
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   const requestId='22222222-2222-4222-8222-222222222222';
-  await page.route(`http://127.0.0.1:8000/v1/workspaces/${workspace}/projects/${project}`,route=>{
+  await page.route(`${browserApiOrigin}/v1/workspaces/${workspace}/projects/${project}`,route=>{
     if(route.request().method()!=='GET')return route.continue();
     return route.fulfill({status:503,contentType:'application/json',
       headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},
       body:JSON.stringify({code:'FIXTURE_OUTAGE',message:'fixture project read failed',
         request_id:requestId,retryable:true})});
   });
-  await page.route(`http://127.0.0.1:8000/v1/workspaces/${workspace}/jobs**`,route=>{
+  await page.route(`${browserApiOrigin}/v1/workspaces/${workspace}/jobs**`,route=>{
     const url=new URL(route.request().url());
     if(url.searchParams.get('status')!=='failed')return route.continue();
     return route.fulfill({status:503,contentType:'application/json',
@@ -257,7 +258,7 @@ test('T29 scope list timeout offers a bounded retry with current identity',async
   let releaseFirst:()=>void=()=>{};
   const held=new Promise<void>(resolve=>{releaseFirst=resolve;});
   let first=true;
-  await page.route('http://127.0.0.1:8000/v1/workspaces?**',async route=>{
+  await page.route(`${browserApiOrigin}/v1/workspaces?**`,async route=>{
     if(first){first=false;await held;}
     try{await route.continue();}catch{ /* The first request may have timed out. */ }
   });

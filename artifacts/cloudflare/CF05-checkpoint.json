@@ -1,0 +1,101 @@
+{
+  "task": "CF05",
+  "status": "complete",
+  "date_hk": "2026-10-01",
+  "base_sha": "55eed975e93dc45a83ed7fb29e538c3a6797f140",
+  "controller": {
+    "tests": 22,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 22
+  },
+  "owned_postgres_integration": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 1
+  },
+  "actual_local_queue_workflow_http": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 1
+  },
+  "node_contracts": {
+    "passed": 7,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "migrations": [],
+  "alembic_head": "0034_worker_execution",
+  "public_operations": 78,
+  "internal_operations": 5,
+  "deployed": false,
+  "resources_provisioned": false,
+  "production_schema_changed": false,
+  "providers_called": false,
+  "delivery_enabled": false,
+  "fixture_identity": "Fictional local identity only; no live Auth0 session/provider/R2 verification.",
+  "actual_integration": "Actual JOBS binding -> durable Workflow -> signed loopback HTTP API -> owned PostgreSQL. One buyer version increment, one audit, one committed step receipt, done outbox; duplicate status/execution reads retain truth. DB URL and all operator/provider credentials excluded from Worker bindings.",
+  "tooling": "Mature pinned vitest-plugin1.2.4/Wrangler4.137.0/Vitest4.1.0/Workers-types5.20260921.1. Mature @msw/cloudflare0.0.1 + msw2.14.7 for explicitly mocked unit/platform HTTP tests. Seven-day policy unchanged; inspected MSW browser-asset postinstall disabled explicitly.",
+  "dry_run": {
+    "upload_kib": 136.56,
+    "gzip_kib": 24.19,
+    "exit": 0,
+    "activation": false
+  },
+  "commands": [
+    "pnpm cloudflare:test --reporter=default --reporter=junit --outputFile.junit=artifacts/cloudflare/CF05-controller-verified.xml",
+    "cwd services/api; unset BUYEROS_TEST_DATABASE_URL; BUYEROS_STRICT_INTEGRATION=1 uv run --frozen pytest tests/test_cloudflare_platform_db.py -q -ra --junitxml=../../artifacts/cloudflare/CF05-pg-verified.xml",
+    "Internal fixture subprocess: node node_modules/vitest/vitest.mjs run --config services/cloudflare-jobs/vitest.pg.config.ts --reporter=default --reporter=junit --outputFile.junit=artifacts/cloudflare/CF05-platform-pg.xml",
+    "pnpm install --frozen-lockfile",
+    "pnpm cloudflare:types",
+    "pnpm cloudflare:lint",
+    "pnpm cloudflare:bindings",
+    "pnpm exec tsc --noEmit",
+    "pnpm lint",
+    "WRANGLER_SEND_METRICS=false pnpm exec wrangler deploy --dry-run --config services/cloudflare-jobs/wrangler.jsonc --outdir .sites-runtime/cloudflare-dry-run",
+    "uv run --frozen --project services/api python scripts/generate-operation-routes.py --check",
+    "uv run --frozen --project services/api python services/api/tools/export_worker_openapi.py --check",
+    "node scripts/generate-worker-api-types.mjs --check",
+    "node scripts/generate-api-types.mjs --check",
+    "node --test tests/worker-gateway.test.mjs tests/vercel-services.test.mjs tests/api-types-generation.test.mjs",
+    "cwd services/api: uv run --frozen python ../../scripts/check-required-tests.py --junit ../../artifacts/cloudflare/CF05-pg-verified.xml",
+    "cwd services/api: uv run --frozen alembic heads",
+    "git diff --check; git diff --cached --check"
+  ],
+  "final_gates_exit_codes": 0,
+  "failure_evidence": [
+    "13 controller failures before source implementation; initial12/1 actual Workers rejected redirect:error, fixed manual plus explicit 3xx refusal.",
+    "Expanded15/3: retired fetchMock unavailable; official current MSW transport installed without release-age exception.",
+    "Dependency attempts: unsupported add flag, minimum release-age refusal, inspected MSW postinstall strict-build refusal; final frozen install passes with browser-asset script disabled.",
+    "PG first: Windows cp950 capture; second: actual HTTP reached API but Proactor incompatible with psycopg. Local fixture now explicit Selector loop and UTF8.",
+    "PG third and final-before-verified: actual platform/business receipt passed, fixture guessed owner column and terminal completed. Assertions reconciled to existing owner_user_id and done; no schema/test weakening.",
+    "Expanded21/1: SDK QueueResult omits retry delay. Assert actual retry argument60 plus platform retry message. Final22/0.",
+    "Strict test fixture missing full Workflow interface; fixed with complete typed mocks, no unknown/any casts."
+  ],
+  "risks": [
+    "Hosted native package/both-hop90/protection proof pending before activation.",
+    "CF06 durable probe receipt/readiness and orphan recovery remain next; maintenance probe alone cannot mark ready.",
+    "CF07 required UI journey/performance/both frontend builds pending; local tests are not live provider proof."
+  ],
+  "next_eligible_task": "CF06",
+  "working_source_sha256": {
+    "services/cloudflare-jobs/src/api-client.ts": "6c14c07b48ed9ce14e6c34239b94d1761f0a194a841c39374b5b197bd1d97e3d",
+    "services/cloudflare-jobs/src/dispatcher.ts": "d801dc289ef57b37ee95bb58d30f9bf7442f9db9e00192dc96abdf197e416621",
+    "services/cloudflare-jobs/src/index.ts": "38396d184614c1887ad6d50701a70cbb7fae815b8704e7e72d614b26668c0875",
+    "services/cloudflare-jobs/src/protocol.ts": "d45a110b6e1ea56ad81ac2ca7d2ae969df51d5ab0a0235f2ec1d2158ce65d21e",
+    "services/cloudflare-jobs/src/queue.ts": "ee4d0a488aa990548844840b336e0895be43189b27fc289d0793621e1b42b757",
+    "services/cloudflare-jobs/src/worker-api.generated.ts": "96cce396749d79663365d95049e7ba401f99f5b70e24a662e7b118a30811db71",
+    "services/cloudflare-jobs/src/workflow.ts": "a87c94dd7728f73df4130daf5887f6c9faabb8a39563e24c4cab370caad65023",
+    "services/api/tests/test_cloudflare_platform_db.py": "d51ba1cd47f2883fab8f3a5bb92d66c8edf60bb1fffb1968f68d0ee61d461989",
+    "services/cloudflare-jobs/wrangler.jsonc": "ea3f87af512395a2837ee44b3287c27a94d0f4142d9b42e978421473fee22604",
+    ".github/workflows/buyeros-ci.yml": "96bd5e8dc0dbff2bcaf6fc66248f6160de5ea409eb877642318476ed840b9c90",
+    "package.json": "247043d87f6ddd82a48c45a65e9c95534d4487eab3f839dc8820092c9c030002",
+    "pnpm-lock.yaml": "301ed50f2d58f5e621dce708fbb04ad23feaf842ef4f578ca4d7fcfc9c384767"
+  }
+}

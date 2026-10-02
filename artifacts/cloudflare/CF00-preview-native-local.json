@@ -1,0 +1,91 @@
+{
+  "environment": "local_owned_fixture",
+  "guard_override": "loopback fixture only",
+  "child_wrapper_hosted": false,
+  "result": {
+    "records": [
+      {
+        "check": "native_imports",
+        "state": "verified",
+        "details": {
+          "versions": {
+            "psycopg": "3.3.5",
+            "sqlalchemy": "2.0.53",
+            "pypdf": "6.19.0",
+            "langgraph": "1.2.12",
+            "langgraph-checkpoint-postgres": "3.1.2"
+          },
+          "cold_import_seconds": 1.0033131000236608,
+          "warm_import_seconds": 0.05406029999721795,
+          "python": "3.14.6",
+          "platform": "win32",
+          "development_dependencies_present": true
+        }
+      },
+      {
+        "check": "pdf_native",
+        "state": "verified",
+        "details": {
+          "wall_seconds": 0.4653311000147369,
+          "parent_cpu_seconds": 0.0,
+          "sample_sha256": "56698f27c3989f9977ac9193fb8cbb3ab80579851ab94419a577d32e32c397a1",
+          "facts": 1
+        }
+      },
+      {
+        "check": "pdf_isolation",
+        "state": "verified",
+        "details": {
+          "environment_keys": [
+            "PYTHONDONTWRITEBYTECODE",
+            "PYTHONIOENCODING",
+            "SystemRoot"
+          ],
+          "timeout_seconds": 8,
+          "temporary_workdir": true,
+          "stdin_bytes_only": true
+        }
+      },
+      {
+        "check": "pdf_timeout",
+        "state": "verified",
+        "details": {
+          "timeout_seconds": 8,
+          "child_killed": true,
+          "fixture": "sleeping child",
+          "wall_seconds": 8.0154857999878
+        }
+      },
+      {
+        "check": "postgres_role",
+        "state": "verified",
+        "details": {
+          "superuser": false,
+          "bypassrls": false,
+          "checkpoint_owner": false,
+          "worker_role_membership": true,
+          "environment": "disposable fixture role"
+        }
+      },
+      {
+        "check": "postgres_checkpoint",
+        "state": "verified",
+        "details": {
+          "committed_node_replayed": false,
+          "interrupted_node_resumed": true,
+          "cross_tenant_read_closed": true,
+          "schema_created_at_runtime": false
+        }
+      },
+      {
+        "check": "linux_caps",
+        "state": "not_run",
+        "details": {
+          "platform": "win32"
+        }
+      }
+    ],
+    "hosted_feasible": false,
+    "hosted_feasible_reason": "deployment protection, bundle and two-hop duration evidence collected separately"
+  }
+}

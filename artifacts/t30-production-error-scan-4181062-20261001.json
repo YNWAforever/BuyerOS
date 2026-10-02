@@ -1,0 +1,15 @@
+{
+  "observed_at_utc": "2026-10-01T01:41:17.4217709Z",
+  "deployment_id": "dpl_5Yt2v611QZwJntN8sBnwyWojJQvT",
+  "source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+  "command": "vercel.cmd logs dpl_5Yt2v611QZwJntN8sBnwyWojJQvT --level error --since 10m --no-follow --json --no-branch --limit 100 --scope ynwaforevers-projects",
+  "exit_code": 0,
+  "verified": true,
+  "returned_error_log_records": 0,
+  "unparsed_output_lines": 0,
+  "maximum_records": 100,
+  "window": "10m before observation",
+  "truncated_possible": false,
+  "record_field_names": [],
+  "scope": "Bounded deployment-filtered error-level query only. Raw runtime messages, credentials and personal data are not retained. Does not establish continuous monitoring, drains or an error-free future."
+}

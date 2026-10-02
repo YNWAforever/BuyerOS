@@ -1,0 +1,176 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="1" time="29.041139">
+<testsuite name="mvp-a-research.spec.ts" timestamp="2026-10-01T10:20:37.094Z" hostname="" tests="1" failures="0" skipped="0" time="11.599" errors="1">
+<testcase name="T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="mvp-a-research.spec.ts" time="11.599">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\mvp-a-research-T30-en-desk-d2a85--and-outcome-on-one-dataset\error-context.md]]
+]]>
+</system-out>
+<error message="Command failed: C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/run_browser_research.py eb0befa4-75b9-403d-a17f-1b34e0dab753 d0e295a1-b46d-4e5d-bbeb-d34aa5be891f" type="Error">
+<![CDATA[  fixtures\staff-journey.ts:102:1 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+
+    Error: Command failed: C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/run_browser_research.py eb0befa4-75b9-403d-a17f-1b34e0dab753 d0e295a1-b46d-4e5d-bbeb-d34aa5be891f
+    Traceback (most recent call last):
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+        self.dialect.do_execute(
+        ~~~~~~~~~~~~~~~~~~~~~~~^
+            cursor, str_statement, effective_parameters, context
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+        ^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+        cursor.execute(statement, parameters)
+        ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\psycopg.py", line 642, in execute
+        result = self.await_(self._cursor.execute(query, params, **kw))
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+        return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+        value = await result
+                ^^^^^^^^^^^^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\psycopg\cursor_async.py", line 117, in execute
+        raise ex.with_traceback(None)
+    psycopg.errors.InsufficientPrivilege: permission denied for table worker_runtime_control
+
+    The above exception was the direct cause of the following exception:
+
+    Traceback (most recent call last):
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\tests\fixtures\run_browser_research.py", line 177, in <module>
+        main()
+        ~~~~^^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\tests\fixtures\run_browser_research.py", line 112, in main
+        result = (asyncio.run(cycle(), loop_factory=asyncio.SelectorEventLoop)
+                  ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "C:\Users\laich\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py", line 205, in run
+        return runner.run(main)
+               ~~~~~~~~~~^^^^^^
+      File "C:\Users\laich\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\runners.py", line 128, in run
+        return self._loop.run_until_complete(task)
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+      File "C:\Users\laich\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\asyncio\base_events.py", line 719, in run_until_complete
+        return future.result()
+               ~~~~~~~~~~~~~^^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\tests\fixtures\run_browser_research.py", line 104, in cycle
+        return await dispatch_cycle(engine, publish, "t30-browser-fixture",
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                    datetime.now(timezone.utc), max_total=5,
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                    time_budget_seconds=5.0)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^
+      File "C:\Users\laich\Documents\BuyerOS\services\api\buyeros_api\execution\dispatcher.py", line 204, in dispatch_cycle
+        batch = await _dispatch_workspace(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ...<2 lines>...
+        )
+        ^
+      File "C:\Users\laich\Documents\BuyerOS\services\api\buyeros_api\execution\dispatcher.py", line 134, in _dispatch_workspace
+        claimed = await claim_outbox_rows(session, owner, limit, now, lease_seconds, expired_only=expired_only)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "C:\Users\laich\Documents\BuyerOS\services\api\buyeros_api\execution\dispatcher.py", line 67, in claim_outbox_rows
+        control = await control_row(session, lock=True)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "C:\Users\laich\Documents\BuyerOS\services\api\buyeros_api\services\worker_execution.py", line 69, in control_row
+        return (await session.execute(query)).scalar_one()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py", line 449, in execute
+        result = await greenlet_spawn(
+                 ^^^^^^^^^^^^^^^^^^^^^
+        ...<6 lines>...
+        )
+        ^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 201, in greenlet_spawn
+        result = context.throw(*sys.exc_info())
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2373, in execute
+        return self._execute_internal(
+               ~~~~~~~~~~~~~~~~~~~~~~^
+            statement,
+            ^^^^^^^^^^
+        ...<4 lines>...
+            _add_event=_add_event,
+            ^^^^^^^^^^^^^^^^^^^^^^
+        )
+        ^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2271, in _execute_internal
+        result: Result[Any] = compile_state_cls.orm_execute_statement(
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+            self,
+            ^^^^^
+        ...<4 lines>...
+            conn,
+            ^^^^^
+        )
+        ^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+        result = conn.execute(
+            statement, params or {}, execution_options=execution_options
+        )
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1421, in execute
+        return meth(
+            self,
+            distilled_parameters,
+            execution_options or NO_OPTIONS,
+        )
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+        return connection._execute_clauseelement(
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+            self, distilled_params, execution_options
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+        ^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1643, in _execute_clauseelement
+        ret = self._execute_context(
+            dialect,
+        ...<8 lines>...
+            cache_hit=cache_hit,
+        )
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1848, in _execute_context
+        return self._exec_single_context(
+               ~~~~~~~~~~~~~~~~~~~~~~~~~^
+            dialect, context, statement, parameters
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+        ^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1988, in _exec_single_context
+        self._handle_dbapi_exception(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+            e, str_statement, effective_parameters, cursor, context
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+        ^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2365, in _handle_dbapi_exception
+        raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+        self.dialect.do_execute(
+        ~~~~~~~~~~~~~~~~~~~~~~~^
+            cursor, str_statement, effective_parameters, context
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+        ^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+        cursor.execute(statement, parameters)
+        ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\psycopg.py", line 642, in execute
+        result = self.await_(self._cursor.execute(query, params, **kw))
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+        return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+        value = await result
+                ^^^^^^^^^^^^
+      File "C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\psycopg\cursor_async.py", line 117, in execute
+        raise ex.with_traceback(None)
+    sqlalchemy.exc.ProgrammingError: (psycopg.errors.InsufficientPrivilege) permission denied for table worker_runtime_control
+    [SQL: SELECT worker_runtime_control.singleton, worker_runtime_control.backend, worker_runtime_control.enabled, worker_runtime_control.epoch, worker_runtime_control.cursor, worker_runtime_control.recovery_cursor, worker_runtime_control.active_owner, worker_runtime_control.active_until
+    FROM worker_runtime_control
+    WHERE worker_runtime_control.singleton = %(singleton_1)s::INTEGER FOR UPDATE]
+    [parameters: {'singleton_1': 1}]
+    (Background on this error at: https://sqlalche.me/e/20/f405)
+
+
+    Error Context: ..\..\test-results\mvp-a-research-T30-en-desk-d2a85--and-outcome-on-one-dataset\error-context.md
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

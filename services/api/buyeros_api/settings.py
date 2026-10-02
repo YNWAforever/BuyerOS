@@ -1,7 +1,7 @@
 from functools import lru_cache
 from urllib.parse import urlsplit
 
-from pydantic import Field, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -33,6 +33,19 @@ class Settings(BaseSettings):
     r2_access_key_id: str | None = None
     r2_secret_access_key: str | None = Field(default=None, repr=False, exclude=True)
     r2_jurisdiction: str | None = None
+    execution_database_url: str | None = Field(default=None, repr=False, exclude=True)
+    cloudflare_execution_enabled: bool = False
+    worker_current_key_id: str | None = None
+    worker_current_secret: SecretStr | None = Field(default=None, repr=False, exclude=True)
+    worker_previous_key_id: str | None = None
+    worker_previous_secret: SecretStr | None = Field(default=None, repr=False, exclude=True)
+
+    @field_validator("execution_database_url")
+    @classmethod
+    def _execution_postgres_only(cls, value: str | None) -> str | None:
+        if value is not None and not value.startswith("postgresql://"):
+            raise ValueError("EXECUTION_DATABASE_URL must be a PostgreSQL worker DSN")
+        return value
 
     @field_validator("database_url")
     @classmethod

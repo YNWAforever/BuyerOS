@@ -9,6 +9,11 @@ const responseHeaders = [
   'allow', 'cache-control', 'content-disposition', 'content-type', 'etag',
   'retry-after', 'vary', 'x-request-id',
 ];
+const internalWorkerPaths = new Set([
+  '/v1/internal/worker/claim', '/v1/internal/worker/step', '/v1/internal/worker/status',
+  '/v1/internal/worker/publication', '/v1/internal/worker/maintenance',
+]);
+const workerHeaders = ['key-id', 'timestamp', 'nonce', 'signature'].map(name => `x-buyeros-worker-${name}`);
 
 async function proxy(request: Request): Promise<Response> {
   const binding = process.env.BUYEROS_INTERNAL_API_URL;
@@ -36,6 +41,12 @@ async function proxy(request: Request): Promise<Response> {
   for (const name of requestHeaders) {
     const value = request.headers.get(name);
     if (value !== null) headers.set(name, value);
+  }
+  if (request.method === 'POST' && internalWorkerPaths.has(new URL(request.url).pathname)) {
+    for (const name of workerHeaders) {
+      const value = request.headers.get(name);
+      if (value !== null) headers.set(name, value);
+    }
   }
   try {
     const upstream = await fetch(target, {

@@ -1,0 +1,158 @@
+FFFFFF                                                                   [100%]
+================================== FAILURES ===================================
+_________ test_clean_api_import_does_not_load_celery_redis_or_worker __________
+
+    def test_clean_api_import_does_not_load_celery_redis_or_worker():
+>       executor_module()
+
+services\worker\tests\test_transport_independence.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def executor_module():
+>       assert EXECUTOR.is_file(), "CF01 transport-independent executor missing"
+E       AssertionError: CF01 transport-independent executor missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/execution/domain_executor.py').is_file
+
+services\worker\tests\test_transport_independence.py:18: AssertionError
+_ test_async_entrypoint_rejects_terminal_stale_and_unclaimed_intents[done-1-duplicate] _
+
+migrated = 'postgresql://buyeros:test-only@127.0.0.1:56859/buyeros_test_cf00'
+worker_database_url = 'postgresql://buyeros:test-only@127.0.0.1:56859/buyeros_test_cf00'
+state = 'done', generation = 1, expected = 'duplicate'
+
+    @pytest.mark.parametrize("state,generation,expected", [
+        ("done", 1, "duplicate"), ("dispatched", 2, "stale"), ("ready", 1, "not_dispatched"),
+    ])
+    def test_async_entrypoint_rejects_terminal_stale_and_unclaimed_intents(
+            migrated, worker_database_url, state, generation, expected):
+>       executor = executor_module()
+                   ^^^^^^^^^^^^^^^^^
+
+services\worker\tests\test_transport_independence.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def executor_module():
+>       assert EXECUTOR.is_file(), "CF01 transport-independent executor missing"
+E       AssertionError: CF01 transport-independent executor missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/execution/domain_executor.py').is_file
+
+services\worker\tests\test_transport_independence.py:18: AssertionError
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ test_async_entrypoint_rejects_terminal_stale_and_unclaimed_intents[dispatched-2-stale] _
+
+migrated = 'postgresql://buyeros:test-only@127.0.0.1:56859/buyeros_test_cf00'
+worker_database_url = 'postgresql://buyeros:test-only@127.0.0.1:56859/buyeros_test_cf00'
+state = 'dispatched', generation = 2, expected = 'stale'
+
+    @pytest.mark.parametrize("state,generation,expected", [
+        ("done", 1, "duplicate"), ("dispatched", 2, "stale"), ("ready", 1, "not_dispatched"),
+    ])
+    def test_async_entrypoint_rejects_terminal_stale_and_unclaimed_intents(
+            migrated, worker_database_url, state, generation, expected):
+>       executor = executor_module()
+                   ^^^^^^^^^^^^^^^^^
+
+services\worker\tests\test_transport_independence.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def executor_module():
+>       assert EXECUTOR.is_file(), "CF01 transport-independent executor missing"
+E       AssertionError: CF01 transport-independent executor missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/execution/domain_executor.py').is_file
+
+services\worker\tests\test_transport_independence.py:18: AssertionError
+_ test_async_entrypoint_rejects_terminal_stale_and_unclaimed_intents[ready-1-not_dispatched] _
+
+migrated = 'postgresql://buyeros:test-only@127.0.0.1:56859/buyeros_test_cf00'
+worker_database_url = 'postgresql://buyeros:test-only@127.0.0.1:56859/buyeros_test_cf00'
+state = 'ready', generation = 1, expected = 'not_dispatched'
+
+    @pytest.mark.parametrize("state,generation,expected", [
+        ("done", 1, "duplicate"), ("dispatched", 2, "stale"), ("ready", 1, "not_dispatched"),
+    ])
+    def test_async_entrypoint_rejects_terminal_stale_and_unclaimed_intents(
+            migrated, worker_database_url, state, generation, expected):
+>       executor = executor_module()
+                   ^^^^^^^^^^^^^^^^^
+
+services\worker\tests\test_transport_independence.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def executor_module():
+>       assert EXECUTOR.is_file(), "CF01 transport-independent executor missing"
+E       AssertionError: CF01 transport-independent executor missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/execution/domain_executor.py').is_file
+
+services\worker\tests\test_transport_independence.py:18: AssertionError
+_____________ test_async_entrypoint_does_not_read_another_tenant ______________
+
+migrated = 'postgresql://buyeros:test-only@127.0.0.1:56859/buyeros_test_cf00'
+worker_database_url = 'postgresql://buyeros:test-only@127.0.0.1:56859/buyeros_test_cf00'
+
+    def test_async_entrypoint_does_not_read_another_tenant(migrated, worker_database_url):
+>       executor = executor_module()
+                   ^^^^^^^^^^^^^^^^^
+
+services\worker\tests\test_transport_independence.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def executor_module():
+>       assert EXECUTOR.is_file(), "CF01 transport-independent executor missing"
+E       AssertionError: CF01 transport-independent executor missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/execution/domain_executor.py').is_file
+
+services\worker\tests\test_transport_independence.py:18: AssertionError
+____________ test_envelope_is_strict_and_rejects_unsafe_generation ____________
+
+    def test_envelope_is_strict_and_rejects_unsafe_generation():
+>       executor_module()
+
+services\worker\tests\test_transport_independence.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def executor_module():
+>       assert EXECUTOR.is_file(), "CF01 transport-independent executor missing"
+E       AssertionError: CF01 transport-independent executor missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/Documents/BuyerOS/services/api/buyeros_api/execution/domain_executor.py').is_file
+
+services\worker\tests\test_transport_independence.py:18: AssertionError
+============================== warnings summary ===============================
+services\worker\tests\conftest.py:27
+  C:\Users\laich\Documents\BuyerOS\services\worker\tests\conftest.py:27: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\worker\tests\conftest.py:27
+  C:\Users\laich\Documents\BuyerOS\services\worker\tests\conftest.py:27: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_transport_independence.py::test_clean_api_import_does_not_load_celery_redis_or_worker
+  C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_transport_independence.py::test_async_entrypoint_rejects_terminal_stale_and_unclaimed_intents[done-1-duplicate]
+  C:\Users\laich\Documents\BuyerOS\services\worker\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED services\worker\tests\test_transport_independence.py::test_clean_api_import_does_not_load_celery_redis_or_worker
+FAILED services\worker\tests\test_transport_independence.py::test_async_entrypoint_rejects_terminal_stale_and_unclaimed_intents[done-1-duplicate]
+FAILED services\worker\tests\test_transport_independence.py::test_async_entrypoint_rejects_terminal_stale_and_unclaimed_intents[dispatched-2-stale]
+FAILED services\worker\tests\test_transport_independence.py::test_async_entrypoint_rejects_terminal_stale_and_unclaimed_intents[ready-1-not_dispatched]
+FAILED services\worker\tests\test_transport_independence.py::test_async_entrypoint_does_not_read_another_tenant
+FAILED services\worker\tests\test_transport_independence.py::test_envelope_is_strict_and_rejects_unsafe_generation
+6 failed, 4 warnings in 1.33s
