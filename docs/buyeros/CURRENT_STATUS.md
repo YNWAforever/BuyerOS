@@ -25,7 +25,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 | F05 | fixed with local integration/UI evidence (Q03) | Q03 |
 | F06 | still open (audit-source code unchanged) | outside selected first round |
 | F07 | still open (audit-source code unchanged) | outside selected first round |
-| F08 | still open (audit-source code unchanged) | Q04 |
+| F08 | fixed with local durability/UI evidence (Q04) | Q04 |
 | F09 | still open (audit-source code unchanged) | outside selected first round |
 | F10 | still open (external evidence gate) | outside selected first round |
 | F11 | still open (audit-source code unchanged) | outside selected first round |
@@ -57,3 +57,9 @@ RED: render 1 fail; UI 1 pass/5 fail. GREEN: render 1 pass; UI 7 pass/0 fail/0 s
 Operations uses generated AsyncJob/BulkItemResult.id and typed getAsyncJob with offset/limit=20. Complete IDs can be copied; zero results show 0–0. Per-request sequence, cancellation and session generation reject late job/page/workspace A-B-A responses. Filter changes clear result selection.
 
 RED UI: 3 failures, 0 skips. GREEN UI: 4 pass/0 fail/0 skip, actual PostgreSQL/API producer payloads for 21/101 rows fully traversed without repeats. Different actor/tenant reads return 404. Strict bulk DB suite 10 pass/0 fail/0 skip includes real producer persistence and migration downgrade/upgrade in an empty disposable database. Generated check, tsc and focused lint exit 0. No schema or server changes. Rollback: revert Q03 consumer/test commit; persisted jobs remain. Next: Q04.
+
+## Q04 repair
+
+Research starts use existing ActionIntent and the complete normalized generated RunCreate body plus actor/mode/workspace/project/ICP. Fixed-point caps use six decimals; token and UI generation are excluded from durable fingerprint. UI generation still rejects stale results. Session-owned memory keeps key/body across route remounts; unknown results permit explicit same-intent Retry, with separate explicit confirmed reset for a new intent. Hard refresh has no trustworthy handle, displays a check-existing-runs instruction and never auto POSTs.
+
+RED UI: same request used a different key; actual DB grew to 2 runs/outboxes/economic intents after committed lost 202. GREEN UI: 1 pass/0 fail/0 skip; original target 35/cap 2 restored after a settled route remount, exact same key/body/run ID on Retry, DB 1 run/1 admission outbox/1 bounded run budget account. Admission creates no provider operation/hold: 0 operations/0 reservations, not a claimed provider acceptance check. Strict admission validation+integration: 14 pass/0 fail/0 skip, including durable restart checks and new lost-response economic ceiling assertion. New unit 3/3 covers token renewal, full-body changes, double-start and A-B-A; existing adapter 74/74; tsc/lint exit 0. Backend admission/worker/hold semantics and schema unchanged. Rollback: disable new admission UI or revert consumer, preserving runs/outbox/ceilings and never replaying unknown operations. Next: Q15.

@@ -1,0 +1,68 @@
+{
+  "posted": [
+    {
+      "key": "fcd8d418-77bb-4d33-b9ff-4a1baf779165",
+      "body": {
+        "icp_version_id": "e9200000-0000-4000-8000-000000000001",
+        "target_companies": 35,
+        "max_cost": {
+          "amount": "2.000000",
+          "currency": "USD"
+        },
+        "limits": {
+          "query_rounds": 3,
+          "max_queries_per_run": 12,
+          "max_results": 300,
+          "max_pages": 200,
+          "max_page_bytes": 2097152,
+          "max_duration_seconds": 1800,
+          "max_model_tokens": 100000,
+          "provider_concurrency": 4
+        }
+      },
+      "id": "11ccc18b-08f4-4b8e-a37b-d0495b8d0c2e"
+    },
+    {
+      "key": "fcd8d418-77bb-4d33-b9ff-4a1baf779165",
+      "body": {
+        "icp_version_id": "e9200000-0000-4000-8000-000000000001",
+        "target_companies": 35,
+        "max_cost": {
+          "amount": "2.000000",
+          "currency": "USD"
+        },
+        "limits": {
+          "query_rounds": 3,
+          "max_queries_per_run": 12,
+          "max_results": 300,
+          "max_pages": 200,
+          "max_page_bytes": 2097152,
+          "max_duration_seconds": 1800,
+          "max_model_tokens": 100000,
+          "provider_concurrency": 4
+        }
+      },
+      "id": "11ccc18b-08f4-4b8e-a37b-d0495b8d0c2e"
+    }
+  ],
+  "committed": {
+    "runs": 1,
+    "run_ids": [
+      "11ccc18b-08f4-4b8e-a37b-d0495b8d0c2e"
+    ],
+    "admission_outbox": 1,
+    "economic_intents": 1,
+    "provider_operations": 0,
+    "reservations": 0
+  },
+  "recovered": {
+    "runs": 1,
+    "run_ids": [
+      "11ccc18b-08f4-4b8e-a37b-d0495b8d0c2e"
+    ],
+    "admission_outbox": 1,
+    "economic_intents": 1,
+    "provider_operations": 0,
+    "reservations": 0
+  }
+}

@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="117.933092">
+<testsuite name="audit-research-intent.spec.ts" timestamp="2026-10-03T05:18:39.581Z" hostname="" tests="1" failures="0" skipped="0" time="29.26" errors="0">
+<testcase name="B05 B06 committed lost 202 and manual Retry share one durable research intent" classname="audit-research-intent.spec.ts" time="29.26">
+</testcase>
+</testsuite>
+</testsuites>

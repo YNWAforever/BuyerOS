@@ -1258,3 +1258,5 @@ proof; their automatically triggered CI status is reported separately.
 2026-10-03 Q01: fixture UI 7/7, strict auth/contracts 13/13, no skips. Current scope/evidence: CURRENT_STATUS.md. Next eligible: Q03.
 
 2026-10-03 Q03: UI 4/4, strict bulk DB 10/10, zero skips; generated/type/lint gates exit 0. Next eligible Q04.
+
+2026-10-03 Q04: committed lost-202 UI 1/1, strict admission 14/14, intent unit 3/3, adapter 74/74, zero skips. Next eligible Q15.
