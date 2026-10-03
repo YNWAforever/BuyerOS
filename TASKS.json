@@ -8,9 +8,10 @@
     "Q02",
     "Q05",
     "Q06",
-    "Q07"
+    "Q07",
+    "Q12"
   ],
-  "next_eligible": "Q12",
+  "next_eligible": "Q08",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -253,7 +254,49 @@
     },
     {
       "id": "Q12",
-      "status": "outside-current-scope"
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "required-task-local-fixture-and-integration-pass; broader-dev-transport-flakiness-open",
+      "release_status": "not-deployed",
+      "base_sha": "c7136fbceb1567bca87215b57d142e8137b8968d",
+      "source_sha": "70d2e54ef613910ce5a684d90c4afce32f504e66",
+      "domain_commit": "63d140b4b5d4636b1fe9125ec3885d1e69bbecb4",
+      "ui_commit": "70d2e54ef613910ce5a684d90c4afce32f504e66",
+      "cases": [
+        "D01",
+        "D03",
+        "U09 (draft slice only; whole journey partial)"
+      ],
+      "test_counts": {
+        "strict_api_db": {
+          "pass": 85,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "named_q12_ui": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        },
+        "related_node": {
+          "pass": 14,
+          "fail": 0,
+          "skip": 0,
+          "adapter_checks": 74,
+          "auth_checks": 8
+        },
+        "broader_ui_transport_preserved": {
+          "pass": 14,
+          "fail": 2,
+          "skip": 0
+        }
+      },
+      "migrations": "none; source head0036_checkpoint_schema_grants",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q12/RESULTS.md",
+      "rollback": "q12-grounding-pause-rollback.patch; keep shared proof/context guards and all immutable history; applicability checked only",
+      "limits": "fake OIDC/contact/source/purpose; fixture-staged zero-cost handler; no live auth/provider/continuous transport/build/production proof; U09 full staff journey partial; broader UI dev transport failure unresolved; independent review pending",
+      "next_eligible": "Q08"
     },
     {
       "id": "Q13",
@@ -290,10 +333,10 @@
     }
   ],
   "future_eligible": [
-    "Q06",
+    "Q08",
     "Q16 evidence collection",
     "N00 built compatibility proof"
   ],
-  "reviewed_source_sha": "4cd0f484814be7d4333ca265c9637de940d398fa",
+  "reviewed_source_sha": "70d2e54ef613910ce5a684d90c4afce32f504e66",
   "deployed_sha": null
 }

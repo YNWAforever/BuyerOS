@@ -1,0 +1,48 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="299.5471">
+<testsuite name="audit-draft-reground.spec.ts" timestamp="2026-10-03T11:53:58.269Z" hostname="" tests="1" failures="1" skipped="0" time="25.481" errors="0">
+<testcase name="D01/D03 manual Unicode draft exposes a source review and operator cannot attest" classname="audit-draft-reground.spec.ts" time="25.481">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-draft-reground-D01-D-2d49b--and-operator-cannot-attest\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-draft-reground-D01-D-2d49b--and-operator-cannot-attest\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  audit-draft-reground.spec.ts:23:1 › D01/D03 manual Unicode draft exposes a source review and operator cannot attest 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: 'Open draft', exact: true }).getByRole('region', { name: 'Manual source review', exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('region', { name: 'Open draft', exact: true }).getByRole('region', { name: 'Manual source review', exact: true }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Open draft', exact: true }).getByRole('region', { name: 'Manual source review', exact: true })
+
+
+      23 | test('D01/D03 manual Unicode draft exposes a source review and operator cannot attest',async({page})=>{
+      24 |  const {editor}=await editedDraft(page);await expect(editor).toContainText('Human edits require a new grounding review before approval.');
+    > 25 |  const grounding=editor.getByRole('region',{name:'Manual source review',exact:true});await expect(grounding).toBeVisible();
+         |                                                                                                              ^
+      26 |  await expect(grounding).toContainText('A reviewer must submit this source review.');
+      27 |  await expect(grounding.getByRole('button',{name:'Submit source review',exact:true})).toHaveCount(0);
+      28 |  await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue(body);
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:25:110
+
+    Error Context: ..\..\test-results\audit-fixes\audit-draft-reground-D01-D-2d49b--and-operator-cannot-attest\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-draft-reground-D01-D-2d49b--and-operator-cannot-attest\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-draft-reground-D01-D-2d49b--and-operator-cannot-attest\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,0 +1,71 @@
+﻿operation_id,method,path,baseline_status,primary_task,required_disposition
+getLiveness,GET,/health/live,handler present; integration not implied,T12,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getReadiness,GET,/v1/workspaces/{workspace_id}/readiness,handler present; integration not implied,T12,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listWorkspaces,GET,/v1/workspaces,handler present; integration not implied,T05,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getCapabilities,GET,/v1/workspaces/{workspace_id}/capabilities,handler present; integration not implied,T12,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getPreferences,GET,/v1/workspaces/{workspace_id}/preferences,501 registry,T12,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+updatePreferences,PATCH,/v1/workspaces/{workspace_id}/preferences,501 registry,T12,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listProjects,GET,/v1/workspaces/{workspace_id}/projects,handler present; integration not implied,T03,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+createProject,POST,/v1/workspaces/{workspace_id}/projects,handler present; integration not implied,T01,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getProject,GET,/v1/workspaces/{workspace_id}/projects/{project_id},handler present; integration not implied,T03,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+updateProject,PATCH,/v1/workspaces/{workspace_id}/projects/{project_id},handler present; integration not implied,T01,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+archiveProject,DELETE,/v1/workspaces/{workspace_id}/projects/{project_id},handler present; integration not implied,T01,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+uploadOfferDocument,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/offer-documents,501 registry,T16,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+ingestOfferUrl,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/offer-ingestions,501 registry,T16,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getOfferDocument,GET,/v1/workspaces/{workspace_id}/offer-documents/{document_id},501 registry,T16,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+deleteOfferDocument,DELETE,/v1/workspaces/{workspace_id}/offer-documents/{document_id},501 registry,T16,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listICPVersions,GET,/v1/workspaces/{workspace_id}/projects/{project_id}/icp-versions,handler present; integration not implied,T03,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+saveICPVersion,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/icp-versions,handler present; integration not implied,T02,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+approveICPVersion,POST,/v1/workspaces/{workspace_id}/icp-versions/{icp_version_id}/approve,handler present; integration not implied,T03,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listRuns,GET,/v1/workspaces/{workspace_id}/projects/{project_id}/runs,501 registry,T20,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+startRun,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/runs,501 registry,T18,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getRun,GET,/v1/workspaces/{workspace_id}/runs/{run_id},501 registry,T20,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+cancelRun,POST,/v1/workspaces/{workspace_id}/runs/{run_id}/cancel,501 registry,T20,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+retryRun,POST,/v1/workspaces/{workspace_id}/runs/{run_id}/retry,501 registry,T20,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getRunEvents,GET,/v1/workspaces/{workspace_id}/runs/{run_id}/events,501 registry,T20,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+createBuyerSnapshot,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-snapshots,501 registry,T08,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listBuyers,GET,/v1/workspaces/{workspace_id}/projects/{project_id}/buyers,handler present; integration not implied,T08,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getBuyer,GET,/v1/workspaces/{workspace_id}/buyers/{buyer_id},handler present; integration not implied,T08,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+updateBuyer,PATCH,/v1/workspaces/{workspace_id}/buyers/{buyer_id},501 registry,T09,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listBuyerEvidence,GET,/v1/workspaces/{workspace_id}/buyers/{buyer_id}/evidence,501 registry,T08,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getEvidence,GET,/v1/workspaces/{workspace_id}/evidence/{evidence_id},501 registry,T08,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+reviewBuyers,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-reviews,501 registry,T09,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listBuyerLists,GET,/v1/workspaces/{workspace_id}/projects/{project_id}/lists,501 registry,T09,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+createBuyerList,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/lists,501 registry,T09,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getBuyerList,GET,/v1/workspaces/{workspace_id}/lists/{list_id},501 registry,T09,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+renameBuyerList,PATCH,/v1/workspaces/{workspace_id}/lists/{list_id},501 registry,T09,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+changeListMemberships,POST,/v1/workspaces/{workspace_id}/lists/{list_id}/memberships,501 registry,T09,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listFilterPresets,GET,/v1/workspaces/{workspace_id}/projects/{project_id}/filter-presets,501 registry,T09,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+saveFilterPreset,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/filter-presets,501 registry,T09,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+quoteLookup,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/enrichment-quotes,501 registry,T21,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getLookupQuote,GET,/v1/workspaces/{workspace_id}/enrichment-quotes/{quote_id},501 registry,T21,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+cancelLookupQuote,POST,/v1/workspaces/{workspace_id}/enrichment-quotes/{quote_id}/cancel,501 registry,T21,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+confirmLookup,POST,/v1/workspaces/{workspace_id}/enrichment-quotes/{quote_id}/confirm,501 registry,T22,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getEnrichmentJob,GET,/v1/workspaces/{workspace_id}/enrichment-jobs/{job_id},501 registry,T23,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+cancelEnrichmentJob,POST,/v1/workspaces/{workspace_id}/enrichment-jobs/{job_id}/cancel,501 registry,T23,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+reconcileEnrichmentJob,POST,/v1/workspaces/{workspace_id}/enrichment-jobs/{job_id}/reconcile,501 registry,T23,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+receiveProviderCallback,POST,/v1/provider-callbacks/{provider},501 registry,T23,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listPolicyDecisions,GET,/v1/workspaces/{workspace_id}/policy-decisions,501 registry,T10,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+recordPolicyDecision,POST,/v1/workspaces/{workspace_id}/policy-decisions,501 registry,T10,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listSuppressions,GET,/v1/workspaces/{workspace_id}/suppressions,501 registry,T10,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+createSuppression,POST,/v1/workspaces/{workspace_id}/suppressions,501 registry,T10,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+removeSuppression,POST,/v1/workspaces/{workspace_id}/suppressions/{suppression_id}/remove,501 registry,T10,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listBudgets,GET,/v1/workspaces/{workspace_id}/budgets,501 registry,T13,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+updateBudget,PATCH,/v1/workspaces/{workspace_id}/budgets/{budget_id},501 registry,T13,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getUsage,GET,/v1/workspaces/{workspace_id}/projects/{project_id}/usage,501 registry,T27,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listDrafts,GET,/v1/workspaces/{workspace_id}/projects/{project_id}/drafts,501 registry,T24,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+generateDraft,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/drafts,501 registry,T24,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getAsyncJob,GET,/v1/workspaces/{workspace_id}/jobs/{job_id},501 registry,T11,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getDraft,GET,/v1/workspaces/{workspace_id}/drafts/{draft_id},501 registry,T24,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+editDraft,PATCH,/v1/workspaces/{workspace_id}/drafts/{draft_id},501 registry,T24,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+requestDraftReview,POST,/v1/workspaces/{workspace_id}/drafts/{draft_id}/review,501 registry,T25,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+approveDraft,POST,/v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals,501 registry,T25,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+exportBuyers,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/exports,501 registry,T26,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+exportDraft,POST,/v1/workspaces/{workspace_id}/drafts/{draft_id}/exports,501 registry,T26,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+getExport,GET,/v1/workspaces/{workspace_id}/exports/{export_id},501 registry,T26,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+downloadExport,GET,/v1/workspaces/{workspace_id}/exports/{export_id}/content,501 registry,T26,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listOutcomes,GET,/v1/workspaces/{workspace_id}/projects/{project_id}/outcomes,501 registry,T27,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+recordOutcome,POST,/v1/workspaces/{workspace_id}/projects/{project_id}/outcomes,501 registry,T27,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+correctOutcome,POST,/v1/workspaces/{workspace_id}/outcomes/{outcome_id}/corrections,501 registry,T27,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+listAuditEvents,GET,/v1/workspaces/{workspace_id}/audit-events,501 registry,T12,implemented + contract/authz/domain/UI evidence; external capability may remain explicitly blocked
+disabledDeliveryBoundary,POST,/v1/workspaces/{workspace_id}/drafts/{draft_id}/deliver,501 registry,T25,403 DELIVERY_DISABLED; zero dispatch

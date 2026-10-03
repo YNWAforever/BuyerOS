@@ -1,0 +1,20 @@
+--- a/services/api/buyeros_api/api/routes/drafts.py
++++ b/services/api/buyeros_api/api/routes/drafts.py
+@@ -287,6 +287,7 @@
+                                 principal: Principal = Depends(get_principal),
+                                 idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+                                 if_match: str | None = Header(default=None, alias="If-Match")) -> dict:
++    raise ApiError(403, "PERMISSION_DENIED", "manual source review is paused")
+     from ...services.draft_grounding import review_manual_grounding
+     from ...services.draft_service import draft_data
+     if not idempotency_key:
+--- a/features/live/draft-grounding-review.tsx
++++ b/features/live/draft-grounding-review.tsx
+@@ -55,6 +55,6 @@
+   </fieldset>)}
+   <label>{t('Overall review reason')} <input maxLength={400} value={reason} disabled={busy||dirty} onChange={e=>{setReason(e.target.value);setConfirmed(false);}}/></label>
+   <label><input type="checkbox" disabled={busy||dirty||!valid||!sources} checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>{t('I read the entire exact message and every cited source, including all non-factual classifications.')}</label>
+-  {canReview&&<button type="button" disabled={busy||dirty||!valid||!confirmed||!sources||reason.trim().length<3} onClick={()=>void submit()}>{t('Submit source review')}</button>}
++  {canReview&&<button type="button" disabled={true} onClick={()=>void submit()}>{t('Submit source review')}</button>}
+  </section>;
+ }

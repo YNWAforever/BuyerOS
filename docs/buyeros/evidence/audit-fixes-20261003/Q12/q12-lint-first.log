@@ -1,0 +1,17 @@
+
+C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\features\live\draft-grounding-review.tsx
+  19:242  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\features\live\draft-grounding-review.tsx:19:242
+  17 |  }).catch(cause=>{if(active&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));});return()=>{active=false;};},[client,session,draft.buyer_id]);
+  18 |  useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
+> 19 |  const evidence=(sources?.evidence||[]).filter(e=>draft.evidence_refs.some(r=>r.id===e.id&&r.version===e.version)&&e.status==='available'&&e.relationship==='supports'&&e.kind==='observation'&&e.retention_until&&Date.parse(e.retention_until)>Date.now());
+     |                                                                                                                                                                                                                                                  ^^^^^^^^^^ Cannot call impure function
+  20 |  const icp=sources?.icp;const facts=icp?.offer_facts.filter(f=>f.approved&&draft.value_proposition_fact_ids.includes(f.id))||[];
+  21 |  function update(index:number,change:Partial<SegmentPreparation>){setConfirmed(false);setSegments(rows=>rows.map((row,i)=>i===index?{...row,...change}:row));}
+  22 |  const valid=segments.length>=2&&segments.length<=200&&segments.every(s=>s.classification&&s.reason.trim().length>=3&&(s.classification==='non_factual'||s.evidence_refs.length+s.offer_fact_refs.length>0));  react-hooks/purity
+
+✖ 1 problem (1 error, 0 warnings)
+

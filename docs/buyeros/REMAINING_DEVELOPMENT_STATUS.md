@@ -1314,3 +1314,15 @@ Strict API/DB/contracts24, full audit UI44, related units29 and manual rollback3
 - **Deployed:** none; deployed SHA null. Local commits/PR description only, no remote PR/push. Author review done; independent review pending.
 
 [Exact task evidence/commands/screenshots/hashes](evidence/audit-fixes-20261003/Q07/RESULTS.md) and [local PR-14](review/2026-10-03-audit-fixes/Q07-pr.md). Original input31/98-case fields/25-task CSV and destructive guards preserved; owner-labelled fixtures cleaned. Next eligible local task **Q12**, manual grounding review, with Q15 complete.
+
+## Q12 / PR-15 current checkpoint — 2026-10-03
+
+Reviewed source `70d2e54ef613910ce5a684d90c4afce32f504e66`, base `c7136fbceb1567bca87215b57d142e8137b8968d`. API/contract commit `63d140b4b5d4636b1fe9125ec3885d1e69bbecb4` and UI/test commit `70d2e54ef613910ce5a684d90c4afce32f504e66`; local only. F16/D01/D03 manual review binds exact Unicode segments, qualified selected versioned sources, reviewer actor/reason/time and whole-message confirmation; creates one unchanged-text immutable successor, clears previous review/approval, then uses shared current exact review/approval/export guards. Operator cannot attest; editing clears the new proof. Canonical identity/membership/actor and Auth0/Cloudflare separation retained; delivery403.
+
+Strict API/DB/contracts85pass/0fail/0error/0skip, required actual Q12 UI4pass/0fail/0skip and related Node14pass/0fail/0skip (two file tests include74adapter+8auth checks); generated81=70original+11extensions/type/lint pass. New strict DB suite31cases includes separate-interpreter proof read and concurrent replay. en/zh-HK390px UI verifies same key/body after committed response loss, refresh+reauth, stale412 preservation, scope race and exact approval/export.
+
+Broader16-case run retained14pass/2fail/0skip: initial unstructured500 at local dev transport with ECONNRESET/socket hang up; exact cause unproven, no Neon/Q16 inference. Prior same-code Q15/Q07 subset12pass sits inside a15/1 report, not a full passing16run. U09/F14 remains partial; no whole staff/8-module live acceptance.
+
+No schema revision; Alembic0036head. Pause-entry rollback patch applicability checked, runtime/production rehearsal not run; keep proof/context guards and all revisions/audit. Original31input hashes/98case original fields/other24task records/three destructive guards preserved. Labelled UI fixture/cache cleaned; unlabelled `buyeros-test-d9323d06` remains untouched without established ownership. Author review only; independent review pending.
+
+[Exact commands, reports, screenshots and rollback](evidence/audit-fixes-20261003/Q12/RESULTS.md), [local PR-15](review/2026-10-03-audit-fixes/Q12-pr.md). Code implemented, fixture verified, local integration verified; deployed SHA null. External auth/provider/worker/build/production/performance gates unverified. Next eligible local task **Q08** (Q05/Q06 complete); Q13 waits N02, Q16 root cause and Q17 remain blocked.

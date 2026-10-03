@@ -1,0 +1,17 @@
+{
+  "base_sha": "c7136fbceb1567bca87215b57d142e8137b8968d",
+  "domain_sha": "63d140b4b5d4636b1fe9125ec3885d1e69bbecb4",
+  "reviewed_source_sha": "70d2e54ef613910ce5a684d90c4afce32f504e66",
+  "deployed_sha": null,
+  "tested_source_files": 17,
+  "original_input_hashes_pass": 31,
+  "original_case_fields_pass": 98,
+  "other_task_records_unchanged": 24,
+  "guards_unchanged": 3,
+  "operation_tracker_rows": 81,
+  "pause_patch_check": 0,
+  "full_patch_reverse_check": 0,
+  "local_only": true,
+  "independent_review": "pending",
+  "external_actions": []
+}

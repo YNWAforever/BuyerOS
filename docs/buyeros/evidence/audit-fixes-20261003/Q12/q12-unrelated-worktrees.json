@@ -1,0 +1,15 @@
+{
+  "original": {
+    "path": "C:\\Users\\laich\\Documents\\BuyerOS",
+    "head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+    "status_lines": 0,
+    "read_only": true
+  },
+  "neon": {
+    "path": "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-migration\\BuyerOS",
+    "head": "a78859fe474f5722be3755b10e2586436b53bf97",
+    "status_lines": 193,
+    "read_only": true,
+    "raw_diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0"
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "basis": "captured after final task tests; no application code changes between verified runs and this capture",
+  "files": [
+    {
+      "path": "docs/buyeros/03_DATA_API_AND_STATE_CONTRACTS.md",
+      "bytes": 70503,
+      "sha256": "f35c26f67072802dc461677dfae4f9ec67b9108ccb3c985d2fe538a13c54d1cc",
+      "normalized_sha256": "11b73dd1fb743289268e02c77ab601a35b2e611c103be2c2229b18bbf2b77c67"
+    },
+    {
+      "path": "docs/buyeros/contracts/openapi.proposed.yaml",
+      "bytes": 415245,
+      "sha256": "47e01e876a98ccc046764da8c35fb9cef09646051325d5e368a41be3f646a6b3",
+      "normalized_sha256": "31a4bdea28f0f425745c38d5a68cb77d02ccdc1430b6e0de1b739963caa27a1d"
+    },
+    {
+      "path": "services/api/buyeros_api/api/deps.py",
+      "bytes": 8037,
+      "sha256": "ead5b86f7f770c0efa6ece7b178b91a8eb0c329fad43ee24c592f7d5ca2e6b4e",
+      "normalized_sha256": "63b71bc2777288127849153db2809261a9af10cf7e20a0f2f2f55d5e135f772b"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/drafts.py",
+      "bytes": 20432,
+      "sha256": "146df1c094d26f688dab73bbeb1da0926e286a19690d9c0fcaf31d8564544e2a",
+      "normalized_sha256": "9a8be3d8fcc5f6be7ef9409aecbbca83057f6e2422f173e2a6cfb56b745d1eb5"
+    },
+    {
+      "path": "services/api/buyeros_api/api/schemas.py",
+      "bytes": 22186,
+      "sha256": "cad1b416852b57d85e419a8c177f8a0b3c115f7592355abba49ca9e36f7da828",
+      "normalized_sha256": "ebf8e9fa1f7276b1c42e3fec8f4c0ca84ad13c3148ccc5ea2cba9045573d9190"
+    },
+    {
+      "path": "services/api/buyeros_api/services/draft_service.py",
+      "bytes": 22838,
+      "sha256": "96db1f2e0b4bc40cf11a99007f7ebf0bd8429ad6e792552993c241268acf81e0",
+      "normalized_sha256": "e09b3008dca1ea7758932b10eef0a53e3a6a37c49422967e2a85f0da6aa04969"
+    },
+    {
+      "path": "services/api/buyeros_api/services/approval_service.py",
+      "bytes": 24551,
+      "sha256": "22358786def26f26829834574ca1021319ea6c97fa6116656163dd05c9edb9fe",
+      "normalized_sha256": "2f05dd90e0e9750ac53121fb05c661ab8f25611adde26ac0a2f400c79cc4f504"
+    },
+    {
+      "path": "services/api/buyeros_api/services/draft_grounding.py",
+      "bytes": 6650,
+      "sha256": "8ab14c4c3b4a902fbbe0a68fa96c16bbb0241cee9aa2f76890470d8a89f09bdf",
+      "normalized_sha256": "7ce09ecb634a64cc1c64d5c78570643ceb053a77b35df4ee730f507d1f45ae1c"
+    },
+    {
+      "path": "services/api/tests/test_manual_grounding_db.py",
+      "bytes": 15774,
+      "sha256": "73f0bea32fe58d91e2ac393b15d381997d76792b42f502595b3959815d3ab2ed",
+      "normalized_sha256": "0a48d177115202da3ddf4a557643374341ca18af550391dff088a102ac3775ef"
+    },
+    {
+      "path": "services/generated/buyeros-api.ts",
+      "bytes": 258376,
+      "sha256": "3e4755e3634c73b0b6f1cff3574515098de385e31b097d86814bccd4896445d5",
+      "normalized_sha256": "9b0d179f8b3570aee56f22521c5a6600a2b4c1ea6833780a8753933fab3c3c4a"
+    },
+    {
+      "path": "services/generated/operation-routes.ts",
+      "bytes": 8484,
+      "sha256": "189afc0f19ee2a31d171e3d2cb7851750ca9755d97a4cf7f857bd5d9270cf0c4",
+      "normalized_sha256": "346cbf681447be578461420c3647f73251cee0e6ad0b9580de80ed9898ffdcf9"
+    },
+    {
+      "path": "features/live/drafts.tsx",
+      "bytes": 32050,
+      "sha256": "18a470adf025b9ac86056ea62ee17d8b63ffefaabc79943498576b196eb0ccdd",
+      "normalized_sha256": "18b1a45b290073045a04cbbedcfa5c0bf6f55fd49d5e4163b88f2bd96085e91d"
+    },
+    {
+      "path": "features/live/draft-grounding-review.tsx",
+      "bytes": 7327,
+      "sha256": "55388326e84abff080887558811a2f5a8616ab5c37022d2f3df3764f3492cbb8",
+      "normalized_sha256": "a8ad13353225634bf619a48570966d04a515c0f9b08eb4b5a1db237bd086c78d"
+    },
+    {
+      "path": "services/live/drafts.ts",
+      "bytes": 6377,
+      "sha256": "dba438fbff0f44bd1980933ebe9ba63743553cc98eb8feae8d6eed43c9d62b40",
+      "normalized_sha256": "0a3509c71f500dd7b71eb3f04eeb5e62c0e876389787ab3c48ab2b1886a2dbe3"
+    },
+    {
+      "path": "services/live/draft-grounding.ts",
+      "bytes": 1606,
+      "sha256": "68916698ff86544fd9877d816fab6c2f016e032be69bfceeb295a6320a4eca66",
+      "normalized_sha256": "9a4ff328b71f6e6ca5507259972d6c2c66a46f4235ded50d344b3f605005a081"
+    },
+    {
+      "path": "tests/audit-draft-grounding.test.mjs",
+      "bytes": 1600,
+      "sha256": "e5c39feb8ade4a7f500c67886e3532d0e41e47cba9d517768a3f552e90544a00",
+      "normalized_sha256": "c170eb957b048f776eb1f53bec1e8b33faaaf53ad2b2bbeb84a68a289deb3899"
+    },
+    {
+      "path": "tests/e2e/audit-draft-reground.spec.ts",
+      "bytes": 13801,
+      "sha256": "ea30e02e6f467e37ed7563cf9f30eac61f1cc256637b814813e7c54a819592e3",
+      "normalized_sha256": "ba23f8b4b53210e7fe10f22a0dad5422c6d9efc19d364989eb1a0202ea35c6d1"
+    }
+  ]
+}

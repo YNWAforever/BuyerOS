@@ -1,0 +1,106 @@
+<testsuites id="" name="" tests="4" failures="2" skipped="0" errors="0" time="122.90394599999999">
+<testsuite name="audit-draft-reground.spec.ts" timestamp="2026-10-03T12:07:39.545Z" hostname="" tests="4" failures="2" skipped="0" time="66.845" errors="0">
+<testcase name="D01/D03 manual Unicode draft exposes a source review and operator cannot attest" classname="audit-draft-reground.spec.ts" time="17.342">
+</testcase>
+<testcase name="D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export" classname="audit-draft-reground.spec.ts" time="19.171">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-draft-reground-D01-U-5bf71--then-exact-approval-export\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-draft-reground-D01-U-5bf71--then-exact-approval-export\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toContainText(expected) failed" type="expect.toContainText">
+<![CDATA[  audit-draft-reground.spec.ts:63:1 › D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('region', { name: /^(Open draft|開啟草稿)$/ })
+    Timeout: 5000ms
+    - Expected substring  - 1
+    + Received string     + 4
+
+    - Source review recorded; request a new exact review.
+    + 邀請😀了解產品Revision: 3 · draft · zh-HKDelivery is disabled.Subject Body 您好👩‍💻
+    + Fictional industrial sensors
+    + Fixture public catalog lists industrial sensors.
+    + 謝謝！Language English繁體中文Save revisionClaims and sources邀請😀了解產品 ·  您好👩‍💻 ·  Fictional industrial sensors · eb000000-0000-4000-8000-000000000001 Fixture public catalog lists industrial sensors. ·  e5000000-0000-4000-8000-000000000001謝謝！ ·  Reviewed by: e0000000-0000-4000-8000-000000000004 · 2026-10-03T12:08:12.360191+00:00 · Full message and every versioned source readExact revision reviewRevision: 3 · 7631f43aeddc6fe9ca3325ea834766f4e41c879fa54c03f973ad0494f3658fbdAn eligible addressed draft and current policy are required before review.Refresh draftRequest exact review
+
+    Call log:
+      - Expect "toContainText" getByRole('region', { name: /^(Open draft|開啟草稿)$/ }) with timeout 5000ms
+      - waiting for getByRole('region', { name: /^(Open draft|開啟草稿)$/ })
+        3 × locator resolved to <section class="panel" aria-label="Open draft" data-baseline-version="2" data-baseline-revision="9e22a6f0-dc58-46ed-8f61-588917181a05">…</section>
+          - unexpected value "邀請😀了解產品Revision: 2 · draft · zh-HKDelivery is disabled.Subject Body 您好👩‍💻
+    Fictional industrial sensors
+    Fixture public catalog lists industrial sensors.
+    謝謝！Language English繁體中文Save revisionClaims and sourcesHuman edits require a new grounding review before approval.Manual source reviewClassify every segment, read each cited source and the whole message. This records your source review; it does not verify semantic truth.Revision: 2 · 378b9d6d0730ec3fc0e34b351d1fa1dbb74ca06d3aeae5492d33b754c49cf048Segment 1 · Subject · [0, 7)邀請😀了解產品Classification Choose classificationFactual — cite a sourceNon-factual — explain whySegment reason Split position (code points) Split segmentSegment 2 · Body · [0, 5)您好👩‍💻Classification Choose classificationFactual — cite a sourceNon-factual — explain whySegment reason Split position (code points) Split segmentSegment 3 · Body · [6, 34)Fictional industrial sensorsClassification Choose classificationFactual — cite a sourceNon-factual — explain whySegment reason Evidence v1: Fixture public catalog lists industrial sensors.Offer fact: Fictional industrial sensors · e6000000-0000-4000-8000-000000000001Split position (code points) Split segmentSegment 4 · Body · [35, 83)Fixture public catalog lists industrial sensors.Classification Choose classificationFactual — cite a sourceNon-factual — explain whySegment reason Evidence v1: Fixture public catalog lists industrial sensors.Offer fact: Fictional industrial sensors · e6000000-0000-4000-8000-000000000001Split position (code points) Split segmentSegment 5 · Body · [84, 87)謝謝！Classification Choose classificationFactual — cite a sourceNon-factual — explain whySegment reason Split position (code points) Split segmentOverall review reason I read the entire exact message and every cited source, including all non-factual classifications.Submit source reviewExact revision reviewRevision: 2 · 378b9d6d0730ec3fc0e34b351d1fa1dbb74ca06d3aeae5492d33b754c49cf048An eligible addressed draft and current policy are required before review.Refresh draft"
+        11 × locator resolved to <section class="panel" aria-label="Open draft" data-baseline-version="3" data-baseline-revision="f7871d3b-831b-4977-9afa-4741319498f0">…</section>
+           - unexpected value "邀請😀了解產品Revision: 3 · draft · zh-HKDelivery is disabled.Subject Body 您好👩‍💻
+    Fictional industrial sensors
+    Fixture public catalog lists industrial sensors.
+    謝謝！Language English繁體中文Save revisionClaims and sources邀請😀了解產品 ·  您好👩‍💻 ·  Fictional industrial sensors · eb000000-0000-4000-8000-000000000001 Fixture public catalog lists industrial sensors. ·  e5000000-0000-4000-8000-000000000001謝謝！ ·  Reviewed by: e0000000-0000-4000-8000-000000000004 · 2026-10-03T12:08:12.360191+00:00 · Full message and every versioned source readExact revision reviewRevision: 3 · 7631f43aeddc6fe9ca3325ea834766f4e41c879fa54c03f973ad0494f3658fbdAn eligible addressed draft and current policy are required before review.Refresh draftRequest exact review"
+
+
+      71 |   await reviewer.route(path,async route=>{requests.push({key:route.request().headers()['idempotency-key'],body:route.request().postDataJSON()});if(!first)return route.continue();first=false;const committed=await route.fetch();expect(committed.status(),await committed.text()).toBe(200);await route.abort('failed');});
+      72 |   await submit.click();await expect(grounding.getByRole('alert')).toBeVisible();await expect(submit).toBeEnabled();await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue(body);
+    > 73 |   await submit.click();await expect(editor).toContainText('Source review recorded; request a new exact review.');expect(requests).toHaveLength(2);expect(requests[1]).toEqual(requests[0]);await reviewer.unroute(path);
+         |                                             ^
+      74 |   await reviewer.reload();await expect(editor).toContainText('Reviewed by');await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue(body);await approveExport(reviewer,editor,created.id,'en');
+      75 |   await reviewer.screenshot({path:'test-results/q12-en-approved-export.png',fullPage:true});await writeFile('test-results/q12-en-retry.json',JSON.stringify({fixture_only:true,synthetic_503:true,actual_committed_response_dropped:true,requests,materialization:created.materialized},null,2));
+      76 |  }finally{await resetLocale(reviewer);await ctx.close();}
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:73:45
+
+    Error Context: ..\..\test-results\audit-fixes\audit-draft-reground-D01-U-5bf71--then-exact-approval-export\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-draft-reground-D01-U-5bf71--then-exact-approval-export\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-draft-reground-D01-U-5bf71--then-exact-approval-export\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="D03 zh-HK mobile code-point split reads every source and exports exact Unicode message" classname="audit-draft-reground.spec.ts" time="16.535">
+</testcase>
+<testcase name="U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result" classname="audit-draft-reground.spec.ts" time="13.797">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-draft-reground-U09-r-578a3-jects-delayed-review-result\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-draft-reground-U09-r-578a3-jects-delayed-review-result\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  audit-draft-reground.spec.ts:90:1 › U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 5
+    Received: 0
+
+      38 |  const grounding=page.getByRole('region',{name:/^(Manual source review|人工來源覆核)$/,exact:true});await expect(grounding.getByRole('status')).toHaveCount(0);
+      39 |  if(split){const first=grounding.getByRole('group').first();await first.getByRole('spinbutton').fill('2');await first.getByRole('button',{name:'分開段落',exact:true}).click();}
+    > 40 |  const groups=grounding.getByRole('group');const count=await groups.count();expect(count).toBe(split?6:5);
+         |                                                                                           ^
+      41 |  for(let i=0;i<count;i++){
+      42 |   const group=groups.nth(i),text=await group.locator('pre').innerText();const factual=text==='Fictional industrial sensors'||text.startsWith('Fixture public');
+      43 |   await group.getByRole('combobox').selectOption(factual?'factual':'non_factual');await group.getByRole('textbox').fill(factual?'Read original retained source':'Greeting, invitation or closing; no factual assertion');
+        at classify (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:40:91)
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:93:69
+
+    Error Context: ..\..\test-results\audit-fixes\audit-draft-reground-U09-r-578a3-jects-delayed-review-result\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-draft-reground-U09-r-578a3-jects-delayed-review-result\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-draft-reground-U09-r-578a3-jects-delayed-review-result\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

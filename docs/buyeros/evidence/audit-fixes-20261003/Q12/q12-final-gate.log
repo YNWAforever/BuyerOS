@@ -1,0 +1,118 @@
+PASS fresh task report test-results/q12-api-final.xml 85/0/0/0
+PASS fresh task report test-results/q12-ui-named-final.xml 4/0/0/0
+PASS same-application predecessor12/0/0/0 within prior16 report; that full report15/1/0/0 is NOT a passing run
+PRESERVED broader dev transport14pass/2fail/0skip; no completion or live claim for it
+PASS exact Unicode stored proof/download, actor, same key/body and zero paid holds/operations
+✔ D03 Unicode code-point offsets retain emoji, CRLF, Chinese and unmodified text (1.0974ms)
+✔ D03 split code-point ranges reclassify both pieces without destroying text (1.4882ms)
+✔ D02 save has the required transition order (2.1956ms)
+✔ D02 discard has the required transition order (0.3612ms)
+✔ D02 cancel has the required transition order (0.2016ms)
+✔ D02 rejected save 412 cannot proceed (0.8194ms)
+✔ D02 rejected save 503 cannot proceed (0.2695ms)
+✔ D02 clean transition does not prompt or write (0.2024ms)
+✔ D02 asynchronous Save completes before proceeding (6.6702ms)
+✔ B05 token renewal and route remount retain lost-response key; double start shares work (18.3934ms)
+✔ B06 full normalized payload and actor/scope define intent; generation and key order do not (2.2009ms)
+✔ B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent (6.1327ms)
+PASS apiBaseUrl absent or blank resolves to demo
+PASS a configured apiBaseUrl resolves to live
+PASS demo mode makes every section available, live mode does not
+PASS live without a ready session reports not_configured, never available
+PASS unavailable and not_configured are distinct states
+PASS workspaces map to the narrow model
+PASS projects map to the narrow model
+PASS icp versions map approved_at to approvedAt and keep the hash
+PASS a missing required field raises instead of becoming an empty value
+PASS every mapper enforces its required fields
+PASS a workspace missing roles raises rather than defaulting to an empty list
+PASS a version without an approval date maps to null, not an error
+PASS an empty page is empty, not an error
+PASS a success unwraps data and sends the bearer only when a token is present
+PASS an error envelope becomes a typed LiveError keyed by code
+PASS a non-envelope body still yields a typed error, never a crash
+PASS an aborted request surfaces as LiveCancelled, not as an error toast
+PASS a network failure is a retryable error, not a cancellation
+PASS scopeKey encodes mode, actor, workspace and project
+PASS changing workspace advances the identity and aborts the previous controller
+PASS a stale identity is not current, so a late response can be discarded
+PASS returning to a previously visited workspace is a NEW scope, not the old one
+PASS the token lives in the session and survives a scope change
+PASS live failure surfaces the error with zero data and never touches the demo store
+PASS a 501 from a supported section marks it unavailable rather than failing
+PASS a section with no backing operation is unavailable without a request
+PASS a response whose scope changed underneath is discarded
+PASS no token means not_configured and no request is sent
+PASS each API failure code maps to its own state
+PASS a 401 is a sign-in requirement, never not_configured
+PASS a 404 is not_found, never denied
+PASS a cancelled request is discarded, not an error
+PASS the read attaches to the session controller signal
+PASS live mode refuses to read or write any demo storage key
+PASS demo mode still reads and writes its own keys
+PASS no token-shaped value is ever written to storage
+PASS live requests are addressed to the configured API base URL
+PASS with no base URL the path is used as-is
+PASS demo-only effects are enabled only in demo mode
+PASS the empty live store contains no companies and no demo identifiers
+PASS the banner label states the real mode and cannot be made to claim live
+PASS a write sends a JSON body and the mutation headers
+PASS If-Match is sent only when supplied
+PASS a stale write surfaces as a typed STALE_REVISION
+PASS markets resolve from names and codes, case-insensitively
+PASS an unknown market is returned, never dropped
+PASS languages resolve from names
+PASS an unresolvable value makes the mapper raise, naming it
+PASS toProjectCreate maps the contract fields without inventing values
+PASS toIcpSaveRequest maps requirements with their categories
+PASS ICP payload carries user-entered product and value facts before any write
+PASS canonical buyer types remain selected when editing and saving a profile
+PASS saveProfile creates the project then saves a version, in order
+PASS saveProfile explicitly creates a new project even if another is selected
+PASS explicit edit patches the offer under If-Match before saving a new ICP version
+PASS edit conflict stops before ICP write
+PASS approveProfile sends the version number as If-Match and the hash
+PASS buyers map to the versioned review model
+PASS a buyer without a fit or review maps those to null, not an error
+PASS a buyer page keeps the snapshot id and paging
+PASS a buyer page maps the snapshot expiry, null when absent
+PASS evidence maps provenance and does not expose a stale source link
+PASS an explicit selection carries the frozen versions
+PASS a snapshot selection excludes the removed ids
+PASS scope changed between project creation and ICP save sends no second write
+PASS generated operation route builds scoped path and bearer request
+PASS operation rejects cross-workspace path before sending
+PASS operation rejects scope change during token acquisition before request
+PASS live client rejects demo or malformed success envelopes
+PASS error keeps response header request ID when body omits it
+PASS live error guidance distinguishes reauth, stale revision and key conflict with request ID
+PASS double click shares one immutable action and one inflight promise
+PASS lost response reuses the key; changed payload uses a new key
+PASS multipart upload keeps the browser-generated boundary and bearer in memory
+74 live adapter checks passed
+✔ tests\live-adapter-checks.mjs (681.3033ms)
+PASS scope snapshot stable until change and observer sees each generation
+PASS write context is captured and unauthenticated writes fail closed
+PASS OIDC return path rejects off-origin redirects
+PASS public auth config never accepts client secret or non-HTTPS issuer
+4 live auth checks passed
+PASS PKCE callback verifies state, nonce and signature, holds only access token in memory
+PASS callback rejects mismatched state and cannot replay transaction
+PASS callback rejects wrong nonce even with signed ID token
+PASS logout drops the token and uses an allowlisted origin return URL
+8 live auth checks passed including OIDC crypto
+✔ tests\live-auth-checks.mjs (625.6169ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 841.6408
+PASS node --test tests/audit-draft-grounding.test.mjs tests/audit-draft-guard.test.mjs tests/audit-research-intent.test.mjs tests/live-adapter-checks.mjs tests/live-auth-checks.mjs
+API types match the OpenAPI contract
+PASS node scripts/generate-api-types.mjs --check
+PASS node node_modules/typescript/bin/tsc --noEmit
+PASS node node_modules/eslint/bin/eslint.js features/live/drafts.tsx features/live/draft-grounding-review.tsx services/live/draft-grounding.ts services/live/drafts.ts tests/e2e/audit-draft-reground.spec.ts
+PASS grounding-pause rollback applicability; no runtime/deployment rollback rehearsal

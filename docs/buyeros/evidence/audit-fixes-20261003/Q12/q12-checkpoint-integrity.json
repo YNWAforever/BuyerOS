@@ -1,0 +1,74 @@
+{
+  "base_sha": "c7136fbceb1567bca87215b57d142e8137b8968d",
+  "domain_sha": "63d140b4b5d4636b1fe9125ec3885d1e69bbecb4",
+  "reviewed_source_sha": "70d2e54ef613910ce5a684d90c4afce32f504e66",
+  "deployed_sha": null,
+  "tested_source_files": 17,
+  "original_input_hashes_pass": 31,
+  "original_case_fields_pass": 98,
+  "other_task_records_unchanged": 24,
+  "guards_unchanged": 3,
+  "operation_tracker_rows": 81,
+  "pause_patch_check": 0,
+  "full_patch_reverse_check": 0,
+  "local_only": true,
+  "independent_review": "pending",
+  "external_actions": [],
+  "reports": {
+    "q12-api-final.xml": {
+      "totals": {
+        "tests": 85,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "checker_command": [
+        "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        "scripts/check-required-tests.py",
+        "--junit",
+        "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\docs\\buyeros\\evidence\\audit-fixes-20261003\\Q12\\q12-api-final.xml"
+      ],
+      "checker_exit": 0,
+      "checker_stdout": "passed=85 failed=0 errors=0 skipped=0\n",
+      "suite_seconds": 83.205
+    },
+    "q12-ui-named-final.xml": {
+      "totals": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "checker_command": [
+        "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        "scripts/check-required-tests.py",
+        "--junit",
+        "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\docs\\buyeros\\evidence\\audit-fixes-20261003\\Q12\\q12-ui-named-final.xml"
+      ],
+      "checker_exit": 0,
+      "checker_stdout": "passed=4 failed=0 errors=0 skipped=0\n",
+      "suite_seconds": 54.378
+    }
+  },
+  "unrelated_worktrees_preserved": true,
+  "operation_coverage": {
+    "original": 70,
+    "extensions": [
+      "assignBuyerOwners",
+      "cancelAsyncJob",
+      "exportBulkFailures",
+      "getAsyncJobSummary",
+      "listAsyncJobs",
+      "listEligibleAssignees",
+      "listMemberships",
+      "listOfferDocuments",
+      "retryFailedAsyncJob",
+      "reviewDraftGrounding",
+      "updateMembership"
+    ],
+    "total": 81,
+    "original_missing": [],
+    "release_live_coverage_not_asserted": true
+  },
+  "raw_artifact_byte_checks": "manifest then staged/committed verification; .gitattributes * -text"
+}

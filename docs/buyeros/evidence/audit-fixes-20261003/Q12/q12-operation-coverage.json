@@ -1,0 +1,19 @@
+{
+  "original": 70,
+  "extensions": [
+    "assignBuyerOwners",
+    "cancelAsyncJob",
+    "exportBulkFailures",
+    "getAsyncJobSummary",
+    "listAsyncJobs",
+    "listEligibleAssignees",
+    "listMemberships",
+    "listOfferDocuments",
+    "retryFailedAsyncJob",
+    "reviewDraftGrounding",
+    "updateMembership"
+  ],
+  "total": 81,
+  "original_missing": [],
+  "release_live_coverage_not_asserted": true
+}

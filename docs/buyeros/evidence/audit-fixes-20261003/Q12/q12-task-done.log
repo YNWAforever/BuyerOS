@@ -1,0 +1,6 @@
+API types match the OpenAPI contract
+PASS node scripts/generate-api-types.mjs --check
+PASS node node_modules/typescript/bin/tsc --noEmit
+PASS node node_modules/eslint/bin/eslint.js features/live/drafts.tsx features/live/draft-grounding-review.tsx services/live/draft-grounding.ts services/live/drafts.ts tests/e2e/audit-draft-reground.spec.ts
+PASS grounding-pause rollback applicability; no runtime/deployment rollback rehearsal
+ledger: Task 1: complete (commits c7136fb..70d2e54, tests: node test-results/q12-final-gate.mjs → PASS grounding-pause rollback applicability; no runtime/deployment rollback rehearsal)

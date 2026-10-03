@@ -1,0 +1,168 @@
+{
+  "fixture_only": true,
+  "synthetic_503": true,
+  "actual_committed_response_dropped": true,
+  "requests": [
+    {
+      "key": "837b3f26-e2b1-4035-abba-7a406bfdfec9",
+      "body": {
+        "revision_id": "77ba1086-8937-472f-a806-91fb334e2ab7",
+        "content_hash": "378b9d6d0730ec3fc0e34b351d1fa1dbb74ca06d3aeae5492d33b754c49cf048",
+        "segments": [
+          {
+            "field": "subject",
+            "start": 0,
+            "end": 7,
+            "exact_text": "邀請😀了解產品",
+            "classification": "non_factual",
+            "evidence_refs": [],
+            "offer_fact_refs": [],
+            "reason": "Greeting, invitation or closing; no factual assertion"
+          },
+          {
+            "field": "body",
+            "start": 0,
+            "end": 5,
+            "exact_text": "您好👩‍💻",
+            "classification": "non_factual",
+            "evidence_refs": [],
+            "offer_fact_refs": [],
+            "reason": "Greeting, invitation or closing; no factual assertion"
+          },
+          {
+            "field": "body",
+            "start": 6,
+            "end": 34,
+            "exact_text": "Fictional industrial sensors",
+            "classification": "factual",
+            "evidence_refs": [],
+            "offer_fact_refs": [
+              {
+                "id": "eb000000-0000-4000-8000-000000000001",
+                "icp_version_id": "e6000000-0000-4000-8000-000000000001",
+                "icp_content_hash": "326e0a52aade3b431513ecb475d4446b61afdb0f4da92bbf8a1f5d2461213cb5"
+              }
+            ],
+            "reason": "Read original retained source"
+          },
+          {
+            "field": "body",
+            "start": 35,
+            "end": 83,
+            "exact_text": "Fixture public catalog lists industrial sensors.",
+            "classification": "factual",
+            "evidence_refs": [
+              {
+                "id": "e5000000-0000-4000-8000-000000000001",
+                "version": 1
+              }
+            ],
+            "offer_fact_refs": [],
+            "reason": "Read original retained source"
+          },
+          {
+            "field": "body",
+            "start": 84,
+            "end": 87,
+            "exact_text": "謝謝！",
+            "classification": "non_factual",
+            "evidence_refs": [],
+            "offer_fact_refs": [],
+            "reason": "Greeting, invitation or closing; no factual assertion"
+          }
+        ],
+        "reason": "Full message and every versioned source read",
+        "confirmation": true
+      }
+    },
+    {
+      "key": "837b3f26-e2b1-4035-abba-7a406bfdfec9",
+      "body": {
+        "revision_id": "77ba1086-8937-472f-a806-91fb334e2ab7",
+        "content_hash": "378b9d6d0730ec3fc0e34b351d1fa1dbb74ca06d3aeae5492d33b754c49cf048",
+        "segments": [
+          {
+            "field": "subject",
+            "start": 0,
+            "end": 7,
+            "exact_text": "邀請😀了解產品",
+            "classification": "non_factual",
+            "evidence_refs": [],
+            "offer_fact_refs": [],
+            "reason": "Greeting, invitation or closing; no factual assertion"
+          },
+          {
+            "field": "body",
+            "start": 0,
+            "end": 5,
+            "exact_text": "您好👩‍💻",
+            "classification": "non_factual",
+            "evidence_refs": [],
+            "offer_fact_refs": [],
+            "reason": "Greeting, invitation or closing; no factual assertion"
+          },
+          {
+            "field": "body",
+            "start": 6,
+            "end": 34,
+            "exact_text": "Fictional industrial sensors",
+            "classification": "factual",
+            "evidence_refs": [],
+            "offer_fact_refs": [
+              {
+                "id": "eb000000-0000-4000-8000-000000000001",
+                "icp_version_id": "e6000000-0000-4000-8000-000000000001",
+                "icp_content_hash": "326e0a52aade3b431513ecb475d4446b61afdb0f4da92bbf8a1f5d2461213cb5"
+              }
+            ],
+            "reason": "Read original retained source"
+          },
+          {
+            "field": "body",
+            "start": 35,
+            "end": 83,
+            "exact_text": "Fixture public catalog lists industrial sensors.",
+            "classification": "factual",
+            "evidence_refs": [
+              {
+                "id": "e5000000-0000-4000-8000-000000000001",
+                "version": 1
+              }
+            ],
+            "offer_fact_refs": [],
+            "reason": "Read original retained source"
+          },
+          {
+            "field": "body",
+            "start": 84,
+            "end": 87,
+            "exact_text": "謝謝！",
+            "classification": "non_factual",
+            "evidence_refs": [],
+            "offer_fact_refs": [],
+            "reason": "Greeting, invitation or closing; no factual assertion"
+          }
+        ],
+        "reason": "Full message and every versioned source read",
+        "confirmation": true
+      }
+    }
+  ],
+  "materialization": {
+    "fixture_only": true,
+    "dispatch_fixture_staged": true,
+    "job": "fe32ea9b-e1e3-4880-8ef4-f440b823fd2a",
+    "draft": "82880902-d031-465c-8be5-99d97d9d1f72",
+    "result": "done",
+    "duplicate": "duplicate",
+    "revisions": 1,
+    "paid_before": [
+      0,
+      0
+    ],
+    "paid_after": [
+      0,
+      0
+    ]
+  }
+}

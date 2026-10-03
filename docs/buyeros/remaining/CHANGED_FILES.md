@@ -585,3 +585,7 @@ docs/buyeros/runbooks/release.md
 docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
 docs/buyeros/remaining/TASKS.json
 ```
+
+## Q12 / PR-15 local source commits
+
+Base `c7136fbceb1567bca87215b57d142e8137b8968d` → API `63d140b4b5d4636b1fe9125ec3885d1e69bbecb4` → UI `70d2e54ef613910ce5a684d90c4afce32f504e66`. Exact17 tested source paths and committed hashes: `../evidence/audit-fixes-20261003/Q12/q12-committed-source.json`; full binary-capable diff `Q12/Q12.patch`. Separate checkpoint updates TASKS/status/case and81-operation trackers, evidence and local PR/review descriptions. No production/auth/provider/schema changes.

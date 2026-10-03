@@ -1,0 +1,1174 @@
+diff --git a/docs/buyeros/03_DATA_API_AND_STATE_CONTRACTS.md b/docs/buyeros/03_DATA_API_AND_STATE_CONTRACTS.md
+index 4a32115..2a3c4c7 100644
+--- a/docs/buyeros/03_DATA_API_AND_STATE_CONTRACTS.md
++++ b/docs/buyeros/03_DATA_API_AND_STATE_CONTRACTS.md
+@@ -455,4 +455,44 @@ The existing `getBuyer` detail may expose up to100 retained non-quarantined cont
+ 
+ ### Q07 fixed-template presentation contract (2026-10-03)
+ 
+-`grounded-template.v1` remains a free deterministic route. `objective` and `tone` are retained in the API/job/revision compatibility metadata and exact context; they do not change subject/body. The UI has no tone selector, explicitly sends `professional`, and labels objective as internal work only. Template language supports en/zh-HK framing (heading, opening, closing); approved offer facts and source citations stay in their original language. Generation promises no automatic translation or configurable CTA. Manual edits retain Q15 Save/Discard/Cancel protection and require a fresh grounding review before exact approval; Q12 remains the separate review implementation gate. No paid model, delivery or authentication cutover is activated by this repair.
++`grounded-template.v1` remains a free deterministic route. `objective` and `tone` are retained in the API/job/revision compatibility metadata and exact context; they do not change subject/body. The UI has no tone selector, explicitly sends `professional`, and labels objective as internal work only. Template language supports en/zh-HK framing (heading, opening, closing); approved offer facts and source citations stay in their original language. Generation promises no automatic translation or configurable CTA. Manual edits retain Q15 Save/Discard/Cancel protection and require a fresh grounding review before exact approval; Q12 supplies the separate local human source review described below; external rollout remains unverified. No paid model, delivery or authentication cutover is activated by this repair.
++
++
++### Q12 local manual source review contract (2026-10-03)
++
++`reviewDraftGrounding` is the single domain operation for edited `needs_review` revisions:
++`POST /v1/workspaces/{workspace_id}/drafts/{draft_id}/grounding-reviews`, with strong
++`If-Match` and an actor/tenant/target/body/precondition-bound `Idempotency-Key`.
++Only a current reviewer/workspace_admin may attest; the actor and timestamp are resolved
++server-side. Ordinary operators may edit and prepare segment classifications. No role,
++recipient, identity or email linking change is implied.
++
++Every non-whitespace subject/body code point must be classified once. Ranges are
++Unicode code points, exclusive at the end; JS callers use `Array.from`, never UTF-16
++string offsets. Exact segment text, factual/non_factual classification and a reason
++are required; factual segments cite selected Evidence id/version and/or an approved
++offer fact id bound to the exact ICP id/content hash. Non-factual segments require
++explicit reasons and cannot claim sources. The reviewer confirms reading the entire
++message and all sources. This records human source qualification, not semantic truth.
++
++The transaction shares existing policy/membership/project/draft locking and current
++recipient/sender/ICP/accepted fit/evidence/retention/purpose/suppression guards. It
++appends an immutable successor retaining subject/body/language byte-for-byte as strings,
++with reviewed_by/time, based-on revision/hash, all segment reasons/references and an
++internal exact source digest/retention/ICP snapshot. The redacted AuditEvent binds the
++successor content digest to the real canonical actor. It clears prior exact review and
++invalidates any remaining approval. No database model/migration was added (head0036).
++
++Manual proof is rechecked at exact review/approval/export and idempotent replay,
++including source contents/digests changing without an Evidence version increment.
++Every later edit removes proof/claims on its new successor and returns to needs_review;
++history stays immutable. Same-key retries after lost committed responses create no
++second revision. UI failure/412 keeps message and review preparation; scope generation
++rejects late responses. Hard refresh drops bearer tokens and requires sign-in again;
++stored proof then comes from the API, never browser token storage.
++
++Rollback pauses only the new grounding entrance, preserving proof validation, old
++needs_review revisions and audit/history. Never replace the shared approval guard or
++set grounded=true manually. Delivery continues to return403 DELIVERY_DISABLED.
++Local fictional HTTP/DB/browser verification does not prove a live provider, policy
++approval, production migration, Auth0/Neon account rollout or deployment.
+diff --git a/docs/buyeros/contracts/openapi.proposed.yaml b/docs/buyeros/contracts/openapi.proposed.yaml
+index 1ef08b1..920bafd 100644
+--- a/docs/buyeros/contracts/openapi.proposed.yaml
++++ b/docs/buyeros/contracts/openapi.proposed.yaml
+@@ -6816,6 +6816,55 @@ paths:
+                   revision_id: 10000000-0000-4000-8000-000000000001
+                   content_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                   context_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
++  /v1/workspaces/{workspace_id}/drafts/{draft_id}/grounding-reviews:
++    post:
++      operationId: reviewDraftGrounding
++      summary: Attest every segment of an exact edited message against current sources
++      description: Human source qualification; does not verify semantic truth. Appends an immutable successor without changing subject/body. Current recipient, profile, sender, fit, evidence and policy are rechecked in the locked transaction. No delivery.
++      tags: [BO-021, BO-022, Q12]
++      security:
++      - BearerAuth: []
++      parameters:
++      - {name: workspace_id, in: path, required: true, schema: *id001}
++      - {name: draft_id, in: path, required: true, schema: *id001}
++      - $ref: '#/components/parameters/IdempotencyKey'
++      - $ref: '#/components/parameters/IfMatch'
++      requestBody:
++        required: true
++        content:
++          application/json:
++            schema:
++              $ref: '#/components/schemas/DraftGroundingReviewRequest'
++      responses:
++        '200':
++          description: Exact text retained in one grounded successor; replay rechecks current eligibility.
++          headers:
++            ETag: {schema: {type: string}, description: Current draft state version}
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/DraftResponse'
++        '400': {$ref: '#/components/responses/Error'}
++        '401': {$ref: '#/components/responses/Error'}
++        '403': {$ref: '#/components/responses/Error'}
++        '404': {$ref: '#/components/responses/Error'}
++        '409': {$ref: '#/components/responses/Error'}
++        '412': {$ref: '#/components/responses/Error'}
++        '422': {$ref: '#/components/responses/Error'}
++        '429': {$ref: '#/components/responses/Error'}
++        '500': {$ref: '#/components/responses/Error'}
++        '503': {$ref: '#/components/responses/Error'}
++      x-implementation-status: LOCAL_IMPLEMENTED
++      x-work-package: BO-022
++      x-contract-extension: Q12
++      x-tenant-authorization: Current membership, tenant RLS and exact project/company source scope; actor is server resolved.
++      x-permitted-roles: [reviewer, workspace_admin]
++      x-policy: Current draft preparation, outreach and export contact purposes, suppression and retention required.
++      x-cost: none
++      x-idempotency: Required; exact actor/tenant/target/body/precondition; unknown response retries same key.
++      x-version-precondition: If-Match
++      x-validation: Strict schema and Unicode code-point full coverage; all factual segments require versioned eligible sources.
++      x-errors: [INVALID_REQUEST, PERMISSION_DENIED, STALE_REVISION, EVIDENCE_STALE, IDEMPOTENCY_CONFLICT, INVALID_STATE, POLICY_BLOCKED]
+   /v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals:
+     post:
+       operationId: approveDraft
+@@ -10225,6 +10274,8 @@ components:
+           type: array
+           items:
+             $ref: '#/components/schemas/GroundedClaim'
++        grounding_review:
++          $ref: '#/components/schemas/ManualGroundingReview'
+         approval_review:
+           $ref: '#/components/schemas/DraftApprovalReview'
+         approval_id:
+@@ -10285,6 +10336,7 @@ components:
+           - observation
+           - offer_fact
+           - labelled_inference
++          - non_factual
+       required:
+       - text
+       - evidence_ids
+@@ -10357,6 +10409,62 @@ components:
+       - review_id
+       - icp_version_id
+       - context_hash
++    GroundingOfferFactRef:
++      type: object
++      additionalProperties: false
++      properties:
++        id: *id001
++        icp_version_id: *id001
++        icp_content_hash: *id015
++      required: [id, icp_version_id, icp_content_hash]
++    GroundingSegment:
++      type: object
++      additionalProperties: false
++      properties:
++        field: {type: string, enum: [subject, body]}
++        start: {type: integer, minimum: 0, maximum: 20000, description: Unicode code-point offset; not UTF-16 code units}
++        end: {type: integer, minimum: 1, maximum: 20000, description: Exclusive Unicode code-point offset}
++        exact_text: {type: string, minLength: 1, maxLength: 20000}
++        classification: {type: string, enum: [factual, non_factual]}
++        evidence_refs:
++          type: array
++          maxItems: 50
++          items: {$ref: '#/components/schemas/VersionedId'}
++        offer_fact_refs:
++          type: array
++          maxItems: 20
++          items: {$ref: '#/components/schemas/GroundingOfferFactRef'}
++        reason: {type: string, minLength: 3, maxLength: 400}
++      required: [field, start, end, exact_text, classification, evidence_refs, offer_fact_refs, reason]
++    DraftGroundingReviewRequest:
++      type: object
++      additionalProperties: false
++      properties:
++        revision_id: *id001
++        content_hash: *id015
++        segments:
++          type: array
++          minItems: 2
++          maxItems: 200
++          items: {$ref: '#/components/schemas/GroundingSegment'}
++        reason: {type: string, minLength: 3, maxLength: 400}
++        confirmation: {type: boolean, const: true}
++      required: [revision_id, content_hash, segments, reason, confirmation]
++    ManualGroundingReview:
++      type: object
++      additionalProperties: false
++      properties:
++        based_on_revision_id: *id001
++        based_on_content_hash: *id015
++        reviewed_by: *id001
++        reviewed_at: *id004
++        reason: {type: string, minLength: 3, maxLength: 400}
++        segments:
++          type: array
++          minItems: 2
++          maxItems: 200
++          items: {$ref: '#/components/schemas/GroundingSegment'}
++      required: [based_on_revision_id, based_on_content_hash, reviewed_by, reviewed_at, reason, segments]
+     DraftReviewRequest:
+       type: object
+       additionalProperties: false
+diff --git a/features/live/draft-grounding-review.tsx b/features/live/draft-grounding-review.tsx
+new file mode 100644
+index 0000000..3c1acc0
+--- /dev/null
++++ b/features/live/draft-grounding-review.tsx
+@@ -0,0 +1,60 @@
++"use client";
++import {useEffect,useRef,useState} from 'react';
++import {useWorkspaceSession} from '@/features/providers/workspace-session';
++import {ActionIntent} from '@/services/live/action-intent';
++import {LiveCancelled,describeLiveError} from '@/services/live/client';
++import {loadDraftContext,reviewDraftGrounding,type Draft,type Evidence,type Icp} from '@/services/live/drafts';
++import {prepareGroundingSegments,splitGroundingSegment,type SegmentPreparation,type GroundingSegment} from '@/services/live/draft-grounding';
++export function DraftGroundingReview({draft,canReview,busy,dirty,t,onBusy,onReviewed}:{draft:Draft;canReview:boolean;busy:boolean;dirty:boolean;t:(value:string)=>string;onBusy:(value:boolean)=>void;onReviewed:(value:Draft,identity:string)=>void}){
++ const {client,session}=useWorkspaceSession();
++ const [segments,setSegments]=useState(()=>prepareGroundingSegments(draft.subject,draft.body));
++ const [sources,setSources]=useState<{evidence:Evidence[];icp:Icp|null;asOf:number}|null>(null);
++ const [reason,setReason]=useState(''),[confirmed,setConfirmed]=useState(false),[error,setError]=useState('');
++ const [splits,setSplits]=useState<Record<number,number>>({}),[sourceEpoch,setSourceEpoch]=useState(0);
++ const intent=useRef(new ActionIntent<Draft>()),errorRef=useRef<HTMLParagraphElement>(null);
++ useEffect(()=>{let active=true;const identity=session.identity();void loadDraftContext(client,session,draft.buyer_id).then(c=>{
++  if(active&&session.isCurrent(identity))setSources({icp:c.icp,evidence:c.evidence,asOf:Date.now()});
++ }).catch(cause=>{if(active&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));});return()=>{active=false;};},[client,session,draft.buyer_id,sourceEpoch]);
++ useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
++ const evidence=(sources?.evidence||[]).filter(e=>draft.evidence_refs.some(r=>r.id===e.id&&r.version===e.version)&&e.status==='available'&&e.relationship==='supports'&&e.kind==='observation'&&e.retention_until&&Date.parse(e.retention_until)>(sources?.asOf??0));
++ const icp=sources?.icp;const facts=icp?.offer_facts.filter(f=>f.approved&&draft.value_proposition_fact_ids.includes(f.id))||[];
++ function update(index:number,change:Partial<SegmentPreparation>){setConfirmed(false);setSegments(rows=>rows.map((row,i)=>i===index?{...row,...change}:row));}
++ const valid=segments.length>=2&&segments.length<=200&&segments.every(s=>s.classification&&s.reason.trim().length>=3&&(s.classification==='non_factual'||s.evidence_refs.length+s.offer_fact_refs.length>0));
++ async function submit(){
++  if(!canReview||busy||dirty||!valid||!confirmed||!sources||reason.trim().length<3)return;
++  const identity=session.identity();onBusy(true);setError('');
++  const classified=segments.filter((s):s is GroundingSegment=>s.classification==='factual'||s.classification==='non_factual');
++  if(classified.length!==segments.length){onBusy(false);return;}
++  const body={revision_id:draft.revision_id,content_hash:draft.content_hash,segments:classified,reason,confirmation:true as const};
++  try{const result=await intent.current.run(JSON.stringify({identity,version:draft.version,body}),key=>reviewDraftGrounding(client,session,draft,body,key));
++   if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');onReviewed(result,identity);
++  }catch(cause){if(session.isCurrent(identity)&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
++  finally{if(session.isCurrent(identity))onBusy(false);}
++ }
++ return <section className="panel" aria-label={t('Manual source review')}>
++  <h4>{t('Manual source review')}</h4><p>{t('Classify every segment, read each cited source and the whole message. This records your source review; it does not verify semantic truth.')}</p>
++  <p>{t('Revision')}: {draft.revision_number} · {draft.content_hash}</p>
++  {dirty&&<p>{t('Save the message before preparing its source review.')}</p>}
++  {!canReview&&<p>{t('A reviewer must submit this source review.')}</p>}
++  {error&&<p ref={errorRef} role="alert" tabIndex={-1}>{error}</p>}
++  {!sources&&<p role="status">{t('Loading current sources...')}</p>}
++  {!sources&&error&&<button type="button" disabled={busy} onClick={()=>{setError('');setSourceEpoch(v=>v+1);}}>{t('Reload current sources')}</button>}
++  {segments.map((s,index)=><fieldset key={`${s.field}:${s.start}:${s.end}`} disabled={busy||dirty} aria-label={`${t('Segment')} ${index+1}`}>
++   <legend>{t('Segment')} {index+1} · {t(s.field==='subject'?'Subject':'Body')} · [{s.start}, {s.end})</legend>
++   <pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{s.exact_text}</pre>
++   <label>{t('Classification')} <select value={s.classification} onChange={e=>update(index,{classification:e.target.value as SegmentPreparation['classification'],evidence_refs:[],offer_fact_refs:[]})}>
++    <option value="">{t('Choose classification')}</option><option value="factual">{t('Factual — cite a source')}</option><option value="non_factual">{t('Non-factual — explain why')}</option>
++   </select></label>
++   <label>{t('Segment reason')} <input maxLength={400} value={s.reason} onChange={e=>update(index,{reason:e.target.value})}/></label>
++   {s.classification==='factual'&&<>
++    {evidence.map(e=><label key={e.id} className="live-draft-option"><input type="checkbox" checked={s.evidence_refs.some(r=>r.id===e.id)} onChange={event=>update(index,{evidence_refs:event.target.checked?[...s.evidence_refs,{id:e.id,version:e.version}]:s.evidence_refs.filter(r=>r.id!==e.id)})}/>{t('Evidence')} v{e.version}: {e.excerpt}</label>)}
++    {facts.map(f=><label key={f.id} className="live-draft-option"><input type="checkbox" checked={s.offer_fact_refs.some(r=>r.id===f.id)} onChange={event=>{if(icp)update(index,{offer_fact_refs:event.target.checked?[...s.offer_fact_refs,{id:f.id,icp_version_id:icp.id,icp_content_hash:icp.content_hash.replace(/^sha256:/,'')}]:s.offer_fact_refs.filter(r=>r.id!==f.id)});}}/>{t('Offer fact')}: {f.value} · {icp?.id}</label>)}
++   </>}
++   <label>{t('Split position (code points)')} <input type="number" min={1} max={Array.from(s.exact_text).length-1} value={splits[index]??''} onChange={e=>setSplits(v=>({...v,[index]:Number(e.target.value)}))}/></label>
++   <button type="button" disabled={!Number.isInteger(splits[index])||splits[index]<=0||splits[index]>=Array.from(s.exact_text).length||segments.length>=200} onClick={()=>{try{const parts=splitGroundingSegment(s,splits[index]);setSegments(rows=>[...rows.slice(0,index),...parts,...rows.slice(index+1)]);setSplits({});setConfirmed(false);setError('');}catch(cause){setError(describeLiveError(cause));}}}>{t('Split segment')}</button>
++  </fieldset>)}
++  <label>{t('Overall review reason')} <input maxLength={400} value={reason} disabled={busy||dirty} onChange={e=>{setReason(e.target.value);setConfirmed(false);}}/></label>
++  <label><input type="checkbox" disabled={busy||dirty||!valid||!sources} checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>{t('I read the entire exact message and every cited source, including all non-factual classifications.')}</label>
++  {canReview&&<button type="button" disabled={busy||dirty||!valid||!confirmed||!sources||reason.trim().length<3} onClick={()=>void submit()}>{t('Submit source review')}</button>}
++ </section>;
++}
+diff --git a/features/live/drafts.tsx b/features/live/drafts.tsx
+index d85a470..e5ef9cf 100644
+--- a/features/live/drafts.tsx
++++ b/features/live/drafts.tsx
+@@ -5,10 +5,33 @@ import {LiveCancelled,LiveError,describeLiveError} from '@/services/live/client'
+ import {ActionIntent} from '@/services/live/action-intent';
+ import {DraftDirtyDialog,guardDraftTransition,type DirtyDecision} from './draft-dirty-guard';
+ import {ExportDialog} from './export-dialog';
++import {DraftGroundingReview} from './draft-grounding-review';
+ import {approveExactDraft,editDraft,generateDraft,getDraft,getDraftJob,getProject,listDrafts,loadDraftContext,requestDraftReview,saveSender,
+   type Draft,type DraftJob,type Evidence,type Icp,type Project,type Buyer} from '@/services/live/drafts';
+ 
+ const words:Record<string,string>={
++  "Reload current sources":"重新載入目前來源",
++  "Manual source review":"人工來源覆核",
++  "Classify every segment, read each cited source and the whole message. This records your source review; it does not verify semantic truth.":"請分類每個段落，閱讀引用來源及整篇訊息。這會記錄你的來源覆核，不代表系統已驗證語義真確。",
++  "Save the message before preparing its source review.":"請先儲存訊息，再準備來源覆核。",
++  "A reviewer must submit this source review.":"此來源覆核須由審核員提交。",
++  "Loading current sources...":"正在載入目前來源…",
++  "Segment":"段落",
++  "Classification":"分類",
++  "Choose classification":"請選擇分類",
++  "Factual — cite a source":"事實陳述：須引用來源",
++  "Non-factual — explain why":"非事實陳述：請說明理由",
++  "Segment reason":"段落理由",
++  "Evidence":"證據",
++  "Offer fact":"產品事實",
++  "Split position (code points)":"分段位置（Unicode 字元）",
++  "Split segment":"分開段落",
++  "Overall review reason":"整體覆核理由",
++  "I read the entire exact message and every cited source, including all non-factual classifications.":"我已閱讀整篇精確訊息及所有引用來源，包括每項非事實分類。",
++  "Submit source review":"提交來源覆核",
++  "Source review recorded; request a new exact review.":"來源覆核已記錄；請重新要求精確審核。",
++  "Reviewed by":"覆核員",
++
+   'Unsaved draft changes':'草稿有未儲存的更改','Save your changes, discard them, or stay with this draft.':'請儲存或捨棄更改，或繼續編輯此草稿。',
+   'Save':'儲存','Discard':'捨棄','Cancel':'取消','Draft conflict comparison':'草稿衝突比對',
+   'Local unsaved content':'本地未儲存內容','Latest persisted content':'最新已儲存內容','Copy local content':'複製本地內容',
+@@ -297,6 +320,8 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
+       </section>}
+       <h4>{t('Claims and sources')}</h4>{draft.claims.map((claim,index)=><p key={index}>{claim.text} · {claim.offer_fact_ids.join(', ')} {claim.evidence_ids.join(', ')}</p>)}
+       {draft.claims.length===0&&<p>{t('Human edits require a new grounding review before approval.')}</p>}
++      {draft.claims.length===0&&<DraftGroundingReview key={`grounding:${draft.id}:${draft.revision_id}`} draft={draft} canReview={canApprove} busy={busy} dirty={unsaved} t={t} onBusy={setBusy} onReviewed={(updated,identity)=>{applyDraft(updated,identity);setNotice(t('Source review recorded; request a new exact review.'));void refreshList(offset);}}/>}
++      {draft.grounding_review&&<p>{t('Reviewed by')}: {draft.grounding_review.reviewed_by} · {draft.grounding_review.reviewed_at} · {draft.grounding_review.reason}</p>}
+       <section className="panel" aria-label={t('Exact revision review')}>
+         <h4>{t('Exact revision review')}</h4>
+         <p>{t('Revision')}: {draft.revision_number} · {draft.content_hash}</p>
+diff --git a/services/api/buyeros_api/api/deps.py b/services/api/buyeros_api/api/deps.py
+index f974bb4..f06e4f1 100644
+--- a/services/api/buyeros_api/api/deps.py
++++ b/services/api/buyeros_api/api/deps.py
+@@ -57,6 +57,7 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
+     "getDraft": _VIEWERS,
+     "editDraft": frozenset({"operator", "reviewer", "workspace_admin"}),
+     "requestDraftReview": frozenset({"operator", "reviewer", "workspace_admin"}),
++    "reviewDraftGrounding": frozenset({"reviewer", "workspace_admin"}),
+     "approveDraft": frozenset({"reviewer", "workspace_admin"}),
+     "getUsage": _VIEWERS,
+     "listOutcomes": _VIEWERS,
+diff --git a/services/api/buyeros_api/api/routes/drafts.py b/services/api/buyeros_api/api/routes/drafts.py
+index ba2d031..fb8cac2 100644
+--- a/services/api/buyeros_api/api/routes/drafts.py
++++ b/services/api/buyeros_api/api/routes/drafts.py
+@@ -7,7 +7,7 @@ from ..auth import Principal, get_principal
+ from ..deps import load_membership, permission_for_roles, tenant_scoped
+ from ..errors import ApiError, envelope
+ from ..idempotency import begin_idempotency, complete_idempotency, if_match_version
+-from ..schemas import DraftApproveRequest, DraftGenerateRequest, DraftReviewRequest, DraftUpdate
++from ..schemas import DraftApproveRequest, DraftGroundingReviewRequest, DraftGenerateRequest, DraftReviewRequest, DraftUpdate
+ 
+ router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["drafts"])
+ 
+@@ -279,3 +279,44 @@ async def disabled_delivery_boundary(workspace_id: uuid.UUID, draft_id: uuid.UUI
+                                      principal: Principal = Depends(get_principal)) -> dict:
+     # This endpoint must remain side-effect free even for an approved draft.
+     raise ApiError(403, "DELIVERY_DISABLED", "delivery is disabled")
++
++
++@router.post("/drafts/{draft_id}/grounding-reviews")
++async def review_draft_grounding(workspace_id: uuid.UUID, draft_id: uuid.UUID,
++                                payload: DraftGroundingReviewRequest, request: Request, response: Response,
++                                principal: Principal = Depends(get_principal),
++                                idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
++                                if_match: str | None = Header(default=None, alias="If-Match")) -> dict:
++    from ...services.draft_grounding import review_manual_grounding
++    from ...services.draft_service import draft_data
++    if not idempotency_key:
++        raise ApiError(400, "INVALID_REQUEST", "Idempotency-Key header is required")
++    expected_version = if_match_version(if_match)
++    async with tenant_scoped(workspace_id) as session:
++        member = await load_membership(session, principal=principal, workspace_id=workspace_id)
++        if not permission_for_roles(member["roles"], "reviewDraftGrounding"):
++            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
++        outcome = await begin_idempotency(session, workspace_id=workspace_id,
++            actor_id=member["user_id"], operation_id="reviewDraftGrounding", key=idempotency_key,
++            body=payload.model_dump(mode="json"),
++            target={"workspace_id": str(workspace_id), "draft_id": str(draft_id)}, precondition=if_match)
++        if outcome.replay:
++            from ...services.approval_service import _locked_draft, current_approval_context
++            if outcome.response is None:
++                raise ApiError(409, "IDEMPOTENCY_CONFLICT", "legacy replay requires a new key")
++            project, draft, revision = await _locked_draft(session, workspace_id=workspace_id,
++                draft_id=draft_id, actor_id=member["user_id"], roles={"reviewer", "workspace_admin"})
++            if str(revision.id) != outcome.response["data"]["revision_id"]:
++                raise ApiError(412, "STALE_REVISION", "reviewed draft was edited again")
++            await current_approval_context(session, workspace_id=workspace_id,
++                project=project, draft=draft, revision=revision)
++            data = outcome.response["data"]
++            response.headers["ETag"] = f'"{outcome.response["version"]}"'
++            return envelope(data, request.state.request_id)
++        draft, revision = await review_manual_grounding(session, workspace_id=workspace_id,
++            actor_id=member["user_id"], draft_id=draft_id, expected_version=expected_version, payload=payload)
++        data = draft_data(draft, revision)
++        complete_idempotency(outcome, str(draft.id),
++            response={"http_status": 200, "version": draft.state_version, "data": data})
++        response.headers["ETag"] = f'"{draft.state_version}"'
++    return envelope(data, request.state.request_id)
+diff --git a/services/api/buyeros_api/api/schemas.py b/services/api/buyeros_api/api/schemas.py
+index 8031e3d..87e3a55 100644
+--- a/services/api/buyeros_api/api/schemas.py
++++ b/services/api/buyeros_api/api/schemas.py
+@@ -468,6 +468,38 @@ class DraftUpdate(_Strict):
+         return self
+ 
+ 
++class GroundingOfferFactRef(_Strict):
++    id: uuid.UUID
++    icp_version_id: uuid.UUID
++    icp_content_hash: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
++
++
++class GroundingSegment(_Strict):
++    field: Literal["subject", "body"]
++    start: StrictInt = Field(ge=0, le=20000)
++    end: StrictInt = Field(ge=1, le=20000)
++    exact_text: StrictStr = Field(min_length=1, max_length=20000)
++    classification: Literal["factual", "non_factual"]
++    evidence_refs: list[VersionedId] = Field(max_length=50)
++    offer_fact_refs: list[GroundingOfferFactRef] = Field(max_length=20)
++    reason: StrictStr = Field(min_length=3, max_length=400)
++
++
++class DraftGroundingReviewRequest(_Strict):
++    revision_id: uuid.UUID
++    content_hash: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
++    segments: list[GroundingSegment] = Field(min_length=2, max_length=200)
++    reason: StrictStr = Field(min_length=3, max_length=400)
++    confirmation: StrictBool
++
++    @field_validator("confirmation")
++    @classmethod
++    def _read_whole_message(cls, value: bool) -> bool:
++        if not value:
++            raise ValueError("whole-message source review confirmation is required")
++        return value
++
++
+ class DraftReviewRequest(_Strict):
+     revision_id: uuid.UUID
+     content_hash: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
+diff --git a/services/api/buyeros_api/services/approval_service.py b/services/api/buyeros_api/services/approval_service.py
+index 6566d97..db17a75 100644
+--- a/services/api/buyeros_api/services/approval_service.py
++++ b/services/api/buyeros_api/services/approval_service.py
+@@ -118,7 +118,8 @@ def _check_preconditions(draft, revision, *, expected_version, binding):
+         raise ApiError(412, "STALE_REVISION", "draft content changed")
+ 
+ 
+-async def current_approval_context(session, *, workspace_id, project, draft, revision):
++async def current_approval_context(session, *, workspace_id, project, draft, revision,
++                                   pending_grounding_review=False):
+     """Resolve all material inputs from current tenant data inside the locked transaction."""
+     now = datetime.now(timezone.utc)
+     content = revision.content
+@@ -212,6 +213,14 @@ async def current_approval_context(session, *, workspace_id, project, draft, rev
+         raise ApiError(412, "EVIDENCE_STALE", "unique current supporting evidence required")
+     evidence_context.sort(key=lambda row: row["id"])
+     claims = content.get("claims", [])
++    proof = content.get("grounding_review")
++    if proof:
++        source_binding = {"evidence": evidence_context, "icp_id": str(icp.id), "icp_hash": icp.content_hash}
++        if not pending_grounding_review and content.get("grounding_source_context") != source_binding:
++            raise ApiError(412, "EVIDENCE_STALE", "manual review source contents changed")
++        from .draft_grounding import validate_manual_segments
++        if claims != validate_manual_segments(content, proof["segments"], icp_id=icp.id, icp_hash=icp.content_hash):
++            raise ApiError(412, "STALE_REVISION", "manual source review changed")
+     for claim in claims:
+         if not isinstance(claim, dict) or not claim.get("text"):
+             raise ApiError(412, "STALE_REVISION", "invalid grounded claim")
+@@ -219,6 +228,8 @@ async def current_approval_context(session, *, workspace_id, project, draft, rev
+             raise ApiError(412, "EVIDENCE_STALE", "claim cites unselected evidence")
+         if not set(map(str, claim.get("offer_fact_ids", []))) <= set(selected_facts):
+             raise ApiError(412, "STALE_REVISION", "claim cites unapproved offer fact")
++        if proof and claim.get("kind") == "non_factual":
++            continue
+         if not claim.get("evidence_ids") and not claim.get("offer_fact_ids"):
+             raise ApiError(412, "STALE_REVISION", "uncited claim")
+     subject = {"workspace_id": workspace_id, "project_id": project.id,
+diff --git a/services/api/buyeros_api/services/draft_grounding.py b/services/api/buyeros_api/services/draft_grounding.py
+new file mode 100644
+index 0000000..05492d6
+--- /dev/null
++++ b/services/api/buyeros_api/services/draft_grounding.py
+@@ -0,0 +1,104 @@
++"""Human source qualification, not automated semantic truth verification (Q12)."""
++from datetime import datetime, timezone
++from types import SimpleNamespace
++
++from sqlalchemy import select, update
++from ..api.errors import ApiError
++from ..db.drafts import Approval, DraftRevision
++from ..db.icp import IcpVersion
++from .draft_service import _digest
++
++
++def validate_manual_segments(content, segments, *, icp_id, icp_hash):
++    """Python string offsets are Unicode code points; cover all non-whitespace exactly once."""
++    covered = {field: set() for field in ("subject", "body")}
++    evidence = {(str(ref["id"]), ref["version"]) for ref in content.get("evidence_refs", [])}
++    facts = set(map(str, content.get("value_proposition_fact_ids", [])))
++    claims = []
++    for segment in segments:
++        field, start, end = segment["field"], segment["start"], segment["end"]
++        text = content[field]
++        if (start >= end or end > len(text) or text[start:end] != segment["exact_text"]
++                or not segment["exact_text"].strip() or len(segment["reason"].strip()) < 3):
++            raise ApiError(422, "INVALID_REQUEST", "invalid Unicode segment or review reason")
++        positions = set(range(start, end))
++        if covered[field].intersection(positions):
++            raise ApiError(422, "INVALID_REQUEST", "overlapping review segments")
++        covered[field].update(positions)
++        er, fr = segment["evidence_refs"], segment["offer_fact_refs"]
++        if len({str(r["id"]) for r in er}) != len(er) or len({str(r["id"]) for r in fr}) != len(fr):
++            raise ApiError(422, "INVALID_REQUEST", "duplicate segment sources")
++        if segment["classification"] == "non_factual":
++            if er or fr:
++                raise ApiError(422, "INVALID_REQUEST", "non-factual classification cannot cite sources")
++            kind = "non_factual"
++        else:
++            if not er and not fr:
++                raise ApiError(422, "INVALID_REQUEST", "factual segment requires a versioned source")
++            if not {(str(r["id"]), r["version"]) for r in er} <= evidence:
++                raise ApiError(412, "EVIDENCE_STALE", "segment evidence is outside the selected source versions")
++            if any(str(r["id"]) not in facts or str(r["icp_version_id"]) != str(icp_id)
++                   or r["icp_content_hash"] != icp_hash.removeprefix("sha256:") for r in fr):
++                raise ApiError(412, "STALE_REVISION", "segment offer fact version changed")
++            kind = "observation" if er else "offer_fact"
++        claims.append({"text": segment["exact_text"], "kind": kind,
++                       "evidence_ids": [str(r["id"]) for r in er],
++                       "offer_fact_ids": [str(r["id"]) for r in fr]})
++    for field, positions in covered.items():
++        if any(i not in positions for i, point in enumerate(content[field]) if not point.isspace()):
++            raise ApiError(422, "INVALID_REQUEST", "every non-whitespace code point must be classified")
++    return claims
++
++
++async def review_manual_grounding(session, *, workspace_id, actor_id, draft_id,
++                                  expected_version, payload):
++    from .approval_service import _locked_draft, current_approval_context
++    project, draft, revision = await _locked_draft(session, workspace_id=workspace_id,
++        draft_id=draft_id, actor_id=actor_id, roles={"reviewer", "workspace_admin"})
++    if (draft.state_version != expected_version or revision.id != payload.revision_id
++            or revision.content_hash != payload.content_hash or _digest(revision.content) != revision.content_hash):
++        raise ApiError(412, "STALE_REVISION", "exact edited revision changed")
++    if revision.content.get("grounding_status") != "needs_review":
++        raise ApiError(409, "INVALID_STATE", "only an edited draft needs manual source review")
++    if len(payload.reason.strip()) < 3:
++        raise ApiError(422, "INVALID_REQUEST", "review reason required")
++    icp = (await session.execute(select(IcpVersion).where(
++        IcpVersion.workspace_id == workspace_id, IcpVersion.project_id == project.id,
++        IcpVersion.id == project.active_icp_version_id))).scalar_one_or_none()
++    if icp is None:
++        raise ApiError(412, "STALE_REVISION", "approved profile changed")
++    content = dict(revision.content)
++    segments = [row.model_dump(mode="json") for row in payload.segments]
++    content["claims"] = validate_manual_segments(content, segments, icp_id=icp.id, icp_hash=icp.content_hash)
++    content["grounding_status"] = "grounded"
++    now = datetime.now(timezone.utc)
++    content["grounding_review"] = {"based_on_revision_id": str(revision.id),
++        "based_on_content_hash": revision.content_hash, "reviewed_by": str(actor_id),
++        "reviewed_at": now.isoformat(), "reason": payload.reason, "segments": segments}
++    # An in-memory candidate is qualified by the SAME current approval guard before any write.
++    candidate = SimpleNamespace(id=revision.id, revision_number=revision.revision_number,
++        content=content, content_hash=_digest(content))
++    context, _ = await current_approval_context(session, workspace_id=workspace_id, project=project,
++        draft=draft, revision=candidate, pending_grounding_review=True)
++    content["grounding_source_context"] = {"evidence": context["evidence"],
++        "icp_id": str(icp.id), "icp_hash": icp.content_hash}
++    successor = DraftRevision(workspace_id=workspace_id, draft_id=draft.id,
++        revision_number=revision.revision_number + 1, content=content, content_hash=_digest(content),
++        evidence_ids=[r["id"] for r in content["evidence_refs"]],
++        offer_fact_ids=content["value_proposition_fact_ids"])
++    session.add(successor)
++    draft.current_revision += 1
++    draft.state_version += 1
++    draft.state = "draft"
++    draft.review_revision_id = draft.review_context_hash = draft.review_context = None
++    await session.execute(update(Approval).where(Approval.workspace_id == workspace_id,
++        Approval.draft_id == draft.id, Approval.invalidated_reason.is_(None)).values(
++            invalidated_reason="manual_grounding_review", invalidated_at=now))
++    await session.flush()
++    await session.refresh(draft)
++    await session.refresh(successor)
++    from .audit_service import append_audit
++    append_audit(session, workspace_id=workspace_id, actor_id=actor_id,
++        action="reviewDraftGrounding", entity_type="draft_revision", entity_id=successor.id,
++        reason=payload.reason, detail_digest="sha256:" + successor.content_hash)
++    return draft, successor
+diff --git a/services/api/buyeros_api/services/draft_service.py b/services/api/buyeros_api/services/draft_service.py
+index fe962c5..f1b765a 100644
+--- a/services/api/buyeros_api/services/draft_service.py
++++ b/services/api/buyeros_api/services/draft_service.py
+@@ -253,6 +253,8 @@ def draft_data(draft, revision, approval=None, *, include_review_context=False,
+         "delivery_enabled": False,
+         "value_proposition_fact_ids": content["value_proposition_fact_ids"],
+     }
++    if content.get("grounding_review"):
++        data["grounding_review"] = content["grounding_review"]
+     if include_review_context and context_current and draft.review_context and draft.review_revision_id == revision.id:
+         context = draft.review_context
+         data["approval_review"] = {
+@@ -347,6 +349,8 @@ async def edit_draft(session, *, workspace_id, draft, expected_version: int, cha
+     for key, value in changes.items():
+         content[key] = value
+     # Human edits are retained but lose machine grounding until separately reviewed.
++    content.pop("grounding_review", None)
++    content.pop("grounding_source_context", None)
+     content["claims"] = []
+     content["grounding_status"] = "needs_review"
+     context = {key: content.get(key) for key in (
+diff --git a/services/api/tests/test_manual_grounding_db.py b/services/api/tests/test_manual_grounding_db.py
+new file mode 100644
+index 0000000..f06ca0d
+--- /dev/null
++++ b/services/api/tests/test_manual_grounding_db.py
+@@ -0,0 +1,243 @@
++"""Q12 D01/D03/U09: actual guarded HTTP + persistent revisions, fictional inputs only."""
++import copy
++import json
++import os
++import subprocess
++import sys
++import uuid
++from concurrent.futures import ThreadPoolExecutor
++
++import psycopg
++import pytest
++from tests.test_draft_approval_context_db import _addressed_case, _review, _approval_payload
++from tests.test_lookup_quotes_db import quote_case, WORKSPACE_A, PROJECT, ICP, OPERATOR, REVIEWER, _h
++from tests.test_api_projects_db import api
++from tests.icp_fixtures import FACT_ID
++from tests.contract_validation import assert_contract_response
++
++SUBJECT = "邀請😀了解產品"
++BODY = "您好👩‍💻\nIndustrial sensors\nFixture public catalog lists industrial sensors.\n謝謝！"
++
++
++def _case(quote_case):
++    api, dsn, buyers = quote_case
++    draft_id, _ = _addressed_case(api, dsn, buyers)
++    base = f"/v1/workspaces/{WORKSPACE_A}/drafts/{draft_id}"
++    review = _review(api, draft_id)
++    assert review.status_code == 200, review.text
++    old = api.post(base + "/approvals", json=_approval_payload(review),
++        headers=_h(REVIEWER, key="before-manual-approval", **{"If-Match": '"2"'}))
++    assert old.status_code == 201, old.text
++    edit = api.patch(base, json={"subject": SUBJECT, "body": BODY, "language": "zh-HK"},
++        headers=_h(OPERATOR, key="manual-edit", **{"If-Match": '"3"'}))
++    assert edit.status_code == 200, edit.text
++    edited = edit.json()["data"]
++    with psycopg.connect(dsn) as db:
++        icp_hash = db.execute("SELECT content_hash FROM icp_versions WHERE id=%s", (ICP,)).fetchone()[0]
++    segments = []
++    for field, text in (("subject", SUBJECT), ("body", BODY)):
++        offset = 0
++        for line in text.splitlines(keepends=True):
++            exact = line.rstrip("\n")
++            factual = exact in {"Industrial sensors", "Fixture public catalog lists industrial sensors."}
++            segments.append({"field": field, "start": offset, "end": offset + len(exact),
++                "exact_text": exact, "classification": "factual" if factual else "non_factual",
++                "evidence_refs": edited["evidence_refs"] if exact.startswith("Fixture") else [],
++                "offer_fact_refs": [{"id": FACT_ID, "icp_version_id": ICP, "icp_content_hash": icp_hash.removeprefix("sha256:")}]
++                    if exact == "Industrial sensors" else [],
++                "reason": "Greeting or invitation; no factual assertion" if not factual else "Source read"})
++            offset += len(line)
++    return api, dsn, base, edited, {"revision_id": edited["revision_id"],
++        "content_hash": edited["content_hash"], "segments": segments,
++        "reason": "Read full original message and each cited source", "confirmation": True}
++
++
++def _submit(api, base, edited, payload, key="grounding-001", actor=REVIEWER):
++    return api.post(base + "/grounding-reviews", json=payload,
++        headers=_h(actor, key=key, **{"If-Match": f'"{edited["version"]}"'}))
++
++
++def _counts(dsn, base):
++    with psycopg.connect(dsn) as db:
++        return db.execute("SELECT current_revision,state_version,state FROM outreach_drafts WHERE id=%s",
++            (base.split("/")[-1],)).fetchone(), db.execute(
++            "SELECT count(*) FROM draft_revisions WHERE draft_id=%s", (base.split("/")[-1],)).fetchone()[0]
++
++
++def test_manual_review_preserves_unicode_text_appends_proof_then_exact_approval_export(quote_case):
++    api, dsn, base, edited, payload = _case(quote_case)
++    assert edited["claims"] == [] and edited["approval_id"] is None
++    denied = _review(api, base.split("/")[-1], key="edited-not-grounded")
++    assert denied.status_code == 412
++    response = _submit(api, base, edited, payload)
++    assert response.status_code == 200, response.text
++    assert_contract_response("DraftResponse", response.json())
++    grounded = response.json()["data"]
++    assert (grounded["subject"], grounded["body"], grounded["language"]) == (SUBJECT, BODY, "zh-HK")
++    assert grounded["revision_id"] != edited["revision_id"] and grounded["revision_number"] == 3
++    proof = grounded["grounding_review"]
++    assert proof["segments"] == payload["segments"]
++    assert proof["reviewed_by"] == str(uuid.uuid5(uuid.NAMESPACE_URL, REVIEWER))
++    assert proof["based_on_revision_id"] == edited["revision_id"]
++    assert proof["based_on_content_hash"] == edited["content_hash"] and proof["reviewed_at"]
++    replay = _submit(api, base, edited, payload)
++    assert replay.status_code == 200 and replay.json()["data"]["revision_id"] == grounded["revision_id"]
++    with psycopg.connect(dsn) as db:
++        revisions = db.execute("SELECT content FROM draft_revisions WHERE draft_id=%s ORDER BY revision_number",
++            (grounded["id"],)).fetchall()
++        assert len(revisions) == 3 and revisions[1][0]["claims"] == []
++        assert revisions[1][0]["body"] == BODY and revisions[0][0]["body"] == "We offer Industrial sensors."
++        assert db.execute("SELECT invalidated_reason FROM approvals WHERE draft_id=%s", (grounded["id"],)).fetchone()[0] == "draft_edited"
++        assert db.execute("SELECT count(*),min(actor_id::text) FROM audit_events WHERE action='reviewDraftGrounding' AND subject_id=%s", (grounded["revision_id"],)).fetchone() == (1, proof["reviewed_by"])
++    review = _review(api, grounded["id"], key="manual-exact-review")
++    assert review.status_code == 200, review.text
++    approval = api.post(base + "/approvals", json=_approval_payload(review),
++        headers=_h(REVIEWER, key="manual-approve", **{"If-Match": f'"{review.json()["data"]["version"]}"'}))
++    assert approval.status_code == 201, approval.text
++    approved = api.get(base, headers=_h(REVIEWER)).json()["data"]
++    exported = api.post(base + "/exports", json={"revision_id": approved["revision_id"],
++        "approval_id": approved["approval_id"], "format": "text"},
++        headers=_h(REVIEWER, key="manual-export", **{"If-Match": f'"{approved["version"]}"'}))
++    assert exported.status_code == 202, exported.text
++    download = api.get(f"/v1/workspaces/{WORKSPACE_A}/exports/{exported.json()['data']['id']}/content", headers=_h(REVIEWER))
++    assert download.status_code == 200 and BODY in download.text
++    delivery = api.post(base + "/deliver", headers=_h(REVIEWER, key="manual-no-delivery"))
++    assert delivery.status_code == 403 and delivery.json()["code"] == "DELIVERY_DISABLED"
++
++
++@pytest.mark.parametrize("mutation", ["missing", "overlap", "utf16", "text", "uncited", "reason", "confirmation", "numeric_confirmation", "foreign_evidence", "foreign_company", "fact_version", "hash", "evidence_version", "expiry", "stance", "inference", "source_purpose", "policy", "recipient", "offer", "membership"])
++def test_bad_or_stale_review_rolls_back_without_grounded_successor(quote_case, mutation):
++    api, dsn, base, edited, original = _case(quote_case)
++    payload = copy.deepcopy(original)
++    if mutation == "missing": payload["segments"].pop()
++    elif mutation == "overlap": payload["segments"].append(payload["segments"][0])
++    elif mutation == "utf16": payload["segments"][0]["end"] += 1
++    elif mutation == "text": payload["segments"][0]["exact_text"] += "!"
++    elif mutation == "uncited": payload["segments"][2]["offer_fact_refs"] = []
++    elif mutation == "reason": payload["segments"][0]["reason"] = " "
++    elif mutation == "confirmation": payload["confirmation"] = False
++    elif mutation == "numeric_confirmation": payload["confirmation"] = 1
++    elif mutation == "foreign_evidence": payload["segments"][3]["evidence_refs"][0]["id"] = str(uuid.uuid4())
++    elif mutation == "fact_version": payload["segments"][2]["offer_fact_refs"][0]["icp_content_hash"] = "0" * 64
++    elif mutation == "hash": payload["content_hash"] = "0" * 64
++    else:
++        with psycopg.connect(dsn, autocommit=True) as db:
++            if mutation == "foreign_company": db.execute("UPDATE evidence SET company_id=%s WHERE id=%s", (quote_case[2][1][1], edited["evidence_refs"][0]["id"]))
++            elif mutation == "evidence_version": db.execute("UPDATE evidence SET version=version+1 WHERE id=%s", (edited["evidence_refs"][0]["id"],))
++            elif mutation == "expiry": db.execute("UPDATE source_documents SET retention_until=now()-interval '1 second' WHERE project_id=%s", (PROJECT,))
++            elif mutation == "stance": db.execute("UPDATE evidence SET stance='contradicts' WHERE id=%s", (edited["evidence_refs"][0]["id"],))
++            elif mutation == "inference": db.execute("UPDATE evidence SET is_inference=true WHERE id=%s", (edited["evidence_refs"][0]["id"],))
++            elif mutation == "source_purpose": db.execute("UPDATE source_documents SET permission_purpose='contact_research' WHERE project_id=%s", (PROJECT,))
++            elif mutation == "policy": db.execute("UPDATE policy_decisions SET status='blocked' WHERE purpose='outreach' AND workspace_id=%s", (WORKSPACE_A,))
++            elif mutation == "recipient": db.execute("UPDATE contact_points SET retention_expires_at=now()-interval '1 second' WHERE id=%s", (edited["recipient_contact_id"],))
++            elif mutation == "offer": db.execute("UPDATE projects SET offer_revision=offer_revision+1 WHERE id=%s", (PROJECT,))
++            elif mutation == "membership": db.execute("UPDATE memberships SET active=false WHERE workspace_id=%s AND user_id=%s", (WORKSPACE_A, uuid.uuid5(uuid.NAMESPACE_URL, REVIEWER)))
++    before = _counts(dsn, base)
++    response = _submit(api, base, edited, payload)
++    assert response.status_code in {403, 404, 412, 422}, (mutation, response.text)
++    assert _counts(dsn, base) == before
++    with psycopg.connect(dsn) as db:
++        assert db.execute("SELECT count(*) FROM audit_events WHERE action='reviewDraftGrounding'").fetchone()[0] == 0
++
++
++def test_operator_cannot_attest_and_key_cannot_bind_changed_body(quote_case):
++    api, dsn, base, edited, payload = _case(quote_case)
++    denied = _submit(api, base, edited, payload, actor=OPERATOR)
++    assert denied.status_code == 403, denied.text
++    good = _submit(api, base, edited, payload)
++    assert good.status_code == 200, good.text
++    changed = _submit(api, base, edited, {**payload, "reason": "Different intent"})
++    assert changed.status_code == 409 and changed.json()["code"] == "IDEMPOTENCY_CONFLICT"
++    assert _counts(dsn, base)[1] == 3
++
++
++def test_two_same_key_requests_create_one_revision_and_restart_reads_proof(quote_case):
++    api, dsn, base, edited, payload = _case(quote_case)
++    with ThreadPoolExecutor(max_workers=2) as pool:
++        results = list(pool.map(lambda _: _submit(api, base, edited, payload), range(2)))
++    assert [r.status_code for r in results] == [200, 200], [r.text for r in results]
++    assert len({r.json()["data"]["revision_id"] for r in results}) == 1
++    assert _counts(dsn, base)[1] == 3
++    with psycopg.connect(dsn) as db:
++        stored = db.execute("SELECT content FROM draft_revisions WHERE draft_id=%s AND revision_number=3", (edited["id"],)).fetchone()[0]
++    from tests.conftest import _require_disposable_test_dsn
++    _require_disposable_test_dsn(os.environ["BUYEROS_DATABASE_URL"])
++    # A separate interpreter creates a fresh app, verifier, engine and HTTP client. No in-memory proof.
++    child = """
++import asyncio, json, sys
++from tests.test_api_projects_db import _h, REVIEWER
++from tests import auth_fixtures as fx
++from buyeros_api.api import auth
++from buyeros_api.api.app import create_app
++from buyeros_api.api.jwks import JwksKeyCache
++from buyeros_api.api.verifier import TokenVerifier
++from fastapi.testclient import TestClient
++cache=JwksKeyCache(lambda: asyncio.sleep(0,result=fx.jwks_document()),cache_seconds=300)
++auth._verifier_from_settings=lambda:TokenVerifier(cache,issuer=fx.ISSUER,audience=fx.AUDIENCE)
++with TestClient(create_app(),raise_server_exceptions=False) as client:
++ response=client.get(sys.argv[1],headers=_h(REVIEWER))
++ assert response.status_code==200,response.text
++ print(json.dumps(response.json()["data"]))
++"""
++    restarted = subprocess.run([sys.executable, "-c", child, base], capture_output=True,
++        text=True, encoding="utf-8", timeout=30, check=True)
++    fresh = json.loads(restarted.stdout)
++    assert fresh["grounding_review"] == stored["grounding_review"]
++    assert fresh["subject"] == SUBJECT and fresh["body"] == BODY
++
++
++def test_edit_and_grounding_review_have_one_precondition_winner(quote_case):
++    api, dsn, base, edited, payload = _case(quote_case)
++    def edit():
++        return api.patch(base, json={"body": "A concurrent edit"}, headers=_h(OPERATOR,
++            key="grounding-race-edit", **{"If-Match": f'"{edited["version"]}"'}))
++    with ThreadPoolExecutor(max_workers=2) as pool:
++        a = pool.submit(_submit, api, base, edited, payload)
++        b = pool.submit(edit)
++        results = [a.result(), b.result()]
++    assert sorted(r.status_code for r in results) == [200, 412], [r.text for r in results]
++    assert _counts(dsn, base)[1] == 3
++
++
++@pytest.mark.parametrize("change", ["source_digest", "evidence_hash", "expiry", "edited_again"])
++def test_current_source_guard_applies_to_replay_and_exact_review_and_next_edit_clears_proof(quote_case, change):
++    api, dsn, base, edited, payload = _case(quote_case)
++    grounded = _submit(api, base, edited, payload)
++    assert grounded.status_code == 200, grounded.text
++    data = grounded.json()["data"]
++    if change == "edited_again":
++        changed = api.patch(base, json={"subject": "Next manual edit"}, headers=_h(OPERATOR,
++            key="after-grounding-edit", **{"If-Match": f'"{data["version"]}"'}))
++        assert changed.status_code == 200 and "grounding_review" not in changed.json()["data"]
++        assert changed.json()["data"]["claims"] == []
++    else:
++        with psycopg.connect(dsn, autocommit=True) as db:
++            if change == "source_digest": db.execute("UPDATE source_documents SET digest=%s WHERE project_id=%s", ("b"*64, PROJECT))
++            elif change == "evidence_hash": db.execute("UPDATE evidence SET content_hash=%s WHERE id=%s", ("c"*64, data["evidence_refs"][0]["id"]))
++            else: db.execute("UPDATE source_documents SET retention_until=now()-interval '1 second' WHERE project_id=%s", (PROJECT,))
++    before = _counts(dsn, base)
++    replay = _submit(api, base, edited, payload)
++    assert replay.status_code == 412, replay.text
++    review = _review(api, data["id"], key="stale-manual-source-review")
++    assert review.status_code == 412, review.text
++    assert _counts(dsn, base) == before
++
++
++def test_other_workspace_cannot_attest_foreign_draft(quote_case):
++    api, dsn, base, edited, payload = _case(quote_case)
++    with psycopg.connect(dsn) as db:
++        other = db.execute("SELECT id FROM workspaces WHERE id<>%s ORDER BY id LIMIT 1", (WORKSPACE_A,)).fetchone()
++    assert other is not None, "the guarded fixture must include its second tenant"
++    denied = _submit(api, base.replace(WORKSPACE_A,str(other[0])), edited, payload)
++    assert denied.status_code in {403,404}, denied.text
++    assert _counts(dsn, base)[1] == 2
++
++
++def test_current_workspace_admin_can_review_but_client_cannot_choose_actor(quote_case):
++    api, dsn, base, edited, payload = _case(quote_case)
++    from tests.test_api_projects_db import ADMIN
++    spoofed = _submit(api, base, edited, {**payload, "reviewed_by": str(uuid.uuid4())}, key="forged-actor", actor=ADMIN)
++    assert spoofed.status_code == 422 and _counts(dsn, base)[1] == 2
++    reviewed = _submit(api, base, edited, payload, actor=ADMIN)
++    assert reviewed.status_code == 200, reviewed.text
++    assert reviewed.json()["data"]["grounding_review"]["reviewed_by"] == str(uuid.uuid5(uuid.NAMESPACE_URL, ADMIN))
+diff --git a/services/generated/buyeros-api.ts b/services/generated/buyeros-api.ts
+index eb1a7f7..4f08b13 100644
+--- a/services/generated/buyeros-api.ts
++++ b/services/generated/buyeros-api.ts
+@@ -1113,6 +1113,26 @@ export interface paths {
+         patch?: never;
+         trace?: never;
+     };
++    "/v1/workspaces/{workspace_id}/drafts/{draft_id}/grounding-reviews": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get?: never;
++        put?: never;
++        /**
++         * Attest every segment of an exact edited message against current sources
++         * @description Human source qualification; does not verify semantic truth. Appends an immutable successor without changing subject/body. Current recipient, profile, sender, fit, evidence and policy are rechecked in the locked transaction. No delivery.
++         */
++        post: operations["reviewDraftGrounding"];
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
+     "/v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals": {
+         parameters: {
+             query?: never;
+@@ -2414,6 +2434,7 @@ export interface components {
+             /** Format: uuid */
+             parent_draft_id?: string;
+             claims: components["schemas"]["GroundedClaim"][];
++            grounding_review?: components["schemas"]["ManualGroundingReview"];
+             approval_review?: components["schemas"]["DraftApprovalReview"];
+             approval_id: string | null;
+             /** @constant */
+@@ -2425,7 +2446,7 @@ export interface components {
+             evidence_ids: string[];
+             offer_fact_ids: string[];
+             /** @enum {string} */
+-            kind: "observation" | "offer_fact" | "labelled_inference";
++            kind: "observation" | "offer_fact" | "labelled_inference" | "non_factual";
+         };
+         DraftApprovalReview: {
+             recipient: {
+@@ -2459,6 +2480,47 @@ export interface components {
+             icp_version_id: string;
+             context_hash: string;
+         };
++        GroundingOfferFactRef: {
++            /** Format: uuid */
++            id: string;
++            /** Format: uuid */
++            icp_version_id: string;
++            icp_content_hash: string;
++        };
++        GroundingSegment: {
++            /** @enum {string} */
++            field: "subject" | "body";
++            /** @description Unicode code-point offset; not UTF-16 code units */
++            start: number;
++            /** @description Exclusive Unicode code-point offset */
++            end: number;
++            exact_text: string;
++            /** @enum {string} */
++            classification: "factual" | "non_factual";
++            evidence_refs: components["schemas"]["VersionedId"][];
++            offer_fact_refs: components["schemas"]["GroundingOfferFactRef"][];
++            reason: string;
++        };
++        DraftGroundingReviewRequest: {
++            /** Format: uuid */
++            revision_id: string;
++            content_hash: string;
++            segments: components["schemas"]["GroundingSegment"][];
++            reason: string;
++            /** @constant */
++            confirmation: true;
++        };
++        ManualGroundingReview: {
++            /** Format: uuid */
++            based_on_revision_id: string;
++            based_on_content_hash: string;
++            /** Format: uuid */
++            reviewed_by: string;
++            /** Format: date-time */
++            reviewed_at: string;
++            reason: string;
++            segments: components["schemas"]["GroundingSegment"][];
++        };
+         DraftReviewRequest: {
+             /** Format: uuid */
+             revision_id: string;
+@@ -6048,6 +6110,50 @@ export interface operations {
+             503: components["responses"]["Error"];
+         };
+     };
++    reviewDraftGrounding: {
++        parameters: {
++            query?: never;
++            header: {
++                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
++                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
++                /** @description Strong version ETag, e.g. "4". Compare in mutation transaction; stale is 412 STALE_REVISION, missing is 400. */
++                "If-Match": components["parameters"]["IfMatch"];
++            };
++            path: {
++                workspace_id: string;
++                draft_id: string;
++            };
++            cookie?: never;
++        };
++        requestBody: {
++            content: {
++                "application/json": components["schemas"]["DraftGroundingReviewRequest"];
++            };
++        };
++        responses: {
++            /** @description Exact text retained in one grounded successor; replay rechecks current eligibility. */
++            200: {
++                headers: {
++                    /** @description Current draft state version */
++                    ETag?: string;
++                    [name: string]: unknown;
++                };
++                content: {
++                    "application/json": components["schemas"]["DraftResponse"];
++                };
++            };
++            400: components["responses"]["Error"];
++            401: components["responses"]["Error"];
++            403: components["responses"]["Error"];
++            404: components["responses"]["Error"];
++            409: components["responses"]["Error"];
++            412: components["responses"]["Error"];
++            422: components["responses"]["Error"];
++            429: components["responses"]["Error"];
++            500: components["responses"]["Error"];
++            503: components["responses"]["Error"];
++        };
++    };
+     approveDraft: {
+         parameters: {
+             query?: never;
+diff --git a/services/generated/operation-routes.ts b/services/generated/operation-routes.ts
+index b5dffa1..403139d 100644
+--- a/services/generated/operation-routes.ts
++++ b/services/generated/operation-routes.ts
+@@ -70,6 +70,7 @@ export const operationRoutes = {
+   "getDraft": {method: "GET", path: "/v1/workspaces/{workspace_id}/drafts/{draft_id}"},
+   "editDraft": {method: "PATCH", path: "/v1/workspaces/{workspace_id}/drafts/{draft_id}"},
+   "requestDraftReview": {method: "POST", path: "/v1/workspaces/{workspace_id}/drafts/{draft_id}/review"},
++  "reviewDraftGrounding": {method: "POST", path: "/v1/workspaces/{workspace_id}/drafts/{draft_id}/grounding-reviews"},
+   "approveDraft": {method: "POST", path: "/v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals"},
+   "exportBulkFailures": {method: "POST", path: "/v1/workspaces/{workspace_id}/jobs/{job_id}/exports"},
+   "exportBuyers": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/exports"},
+diff --git a/services/live/draft-grounding.ts b/services/live/draft-grounding.ts
+new file mode 100644
+index 0000000..ece4410
+--- /dev/null
++++ b/services/live/draft-grounding.ts
+@@ -0,0 +1,24 @@
++import type {components} from '@/services/generated/buyeros-api';
++export type GroundingSegment=components['schemas']['GroundingSegment'];
++export type SegmentPreparation=Omit<GroundingSegment,'classification'> & {classification:''|GroundingSegment['classification']};
++/** Array.from iterates Unicode code points, including emoji; never use JS string.length offsets. */
++export function prepareGroundingSegments(subject:string,body:string):SegmentPreparation[]{
++ const segments:SegmentPreparation[]=[];
++ for(const [field,text] of [['subject',subject],['body',body]] as const){
++  const points=Array.from(text);let start=0;
++  for(let i=0;i<=points.length;i++)if(i===points.length||points[i]==='\n'){
++   const exact=points.slice(start,i).join('');
++   if(exact.trim())segments.push({field,start,end:i,exact_text:exact,classification:'',evidence_refs:[],offer_fact_refs:[],reason:''});
++   start=i+1;
++  }
++ }
++ return segments;
++}
++export function splitGroundingSegment(segment:SegmentPreparation,position:number):SegmentPreparation[]{
++ const points=Array.from(segment.exact_text);
++ if(!Number.isInteger(position)||position<=0||position>=points.length)throw new Error('Invalid code-point split');
++ const parts=[{...segment,end:segment.start+position,exact_text:points.slice(0,position).join('')},
++  {...segment,start:segment.start+position,exact_text:points.slice(position).join('')}];
++ if(parts.some(part=>!part.exact_text.trim()))throw new Error('Each segment needs non-whitespace text');
++ return parts.map(part=>({...part,classification:'',reason:'',evidence_refs:[],offer_fact_refs:[]}));
++}
+diff --git a/services/live/drafts.ts b/services/live/drafts.ts
+index 686d816..08ffe31 100644
+--- a/services/live/drafts.ts
++++ b/services/live/drafts.ts
+@@ -96,3 +96,10 @@ export async function approveExactDraft(client:LiveClient,session:SessionScope,d
+       icp_version_id:draft.icp_version_id,policy_decision_ids:review.policy_decision_ids,
+       sender_identity_version:review.sender.version_key,confirmation:true}},ctx);
+ }
++
++export async function reviewDraftGrounding(client:LiveClient,session:SessionScope,draft:Draft,
++ body:components['schemas']['DraftGroundingReviewRequest'],key:string):Promise<Draft>{
++ const {api,ctx}=operation(client,session);
++ return api.requestOperation('reviewDraftGrounding',{path:{workspace_id:ctx.workspace,draft_id:draft.id},
++  header:{'If-Match':`"${draft.version}"`,'Idempotency-Key':key},body},ctx);
++}
+diff --git a/tests/audit-draft-grounding.test.mjs b/tests/audit-draft-grounding.test.mjs
+new file mode 100644
+index 0000000..721e2ed
+--- /dev/null
++++ b/tests/audit-draft-grounding.test.mjs
+@@ -0,0 +1,18 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {readFileSync} from 'node:fs';
++import ts from 'typescript';
++const js=ts.transpileModule(readFileSync('services/live/draft-grounding.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
++const {prepareGroundingSegments,splitGroundingSegment}=await import('data:text/javascript;base64,'+Buffer.from(js).toString('base64'));
++test('D03 Unicode code-point offsets retain emoji, CRLF, Chinese and unmodified text',()=>{
++ const subject='邀請😀',body='您好👩‍💻\r\n\n產品事實\n謝謝';
++ const segments=prepareGroundingSegments(subject,body);
++ assert.equal(segments[0].end,3);assert.equal(segments[1].end,6);assert.equal(segments[2].start,8);
++ for(const s of segments)assert.equal(Array.from(s.field==='subject'?subject:body).slice(s.start,s.end).join(''),s.exact_text);
++ assert.equal(segments.length,4);assert.ok(segments.every(s=>s.classification===''&&s.evidence_refs.length===0));
++});
++test('D03 split code-point ranges reclassify both pieces without destroying text',()=>{
++ const [s]=prepareGroundingSegments('😀甲乙','Body');const parts=splitGroundingSegment({...s,classification:'factual',reason:'old proof'},1);
++ assert.deepEqual(parts.map(p=>[p.start,p.end,p.exact_text,p.classification]),[[0,1,'😀',''],[1,3,'甲乙','']]);
++ assert.equal(parts.map(p=>p.exact_text).join(''),s.exact_text);assert.throws(()=>splitGroundingSegment(s,0));assert.throws(()=>splitGroundingSegment(s,3));assert.throws(()=>splitGroundingSegment(s,1.5));
++});
+diff --git a/tests/e2e/audit-draft-reground.spec.ts b/tests/e2e/audit-draft-reground.spec.ts
+new file mode 100644
+index 0000000..f1d2c6e
+--- /dev/null
++++ b/tests/e2e/audit-draft-reground.spec.ts
+@@ -0,0 +1,105 @@
++import {expect,test,type Page} from '@playwright/test';
++import {execFile} from 'node:child_process';
++import {promisify} from 'node:util';
++import {resolve} from 'node:path';
++import {readFile,writeFile} from 'node:fs/promises';
++import {signInWorkbench,workspace,project,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
++const buyer='e2000000-0000-4000-8000-000000000001';
++const subject='邀請😀了解產品';
++const body='您好👩‍💻\nFictional industrial sensors\nFixture public catalog lists industrial sensors.\n謝謝！';
++async function fixture(...args:string[]){const cwd=resolve('services/worker');return JSON.parse((await promisify(execFile)(resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python'),['tests/fixtures/audit_template.py',...args],{cwd,timeout:60_000})).stdout);}
++async function editedDraft(page:Page){
++ await resetWorkbenchFixtureRateWindows();const seed=await fixture('prepare');
++ await signInWorkbench(page,true,'access',`/app/outreach?workspace=${workspace}&project=${project}&buyer=${buyer}`);
++ await page.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}).first().selectOption('en');await expect(page.locator('html')).toHaveAttribute('lang','en');
++ const prepare=page.getByRole('region',{name:'Prepare grounded draft',exact:true});await prepare.getByRole('combobox',{name:'Recipient (optional)',exact:true}).selectOption(seed.contact);
++ const pending=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith(`/projects/${project}/drafts`));
++ await prepare.getByRole('button',{name:'Generate addressed draft',exact:true}).click();const response=await pending;expect(response.status()).toBe(202);
++ const materialized=await fixture('materialize',(await response.json()).data.id);expect(materialized.duplicate).toBe('duplicate');
++ await page.getByRole('button',{name:'Refresh job',exact:true}).click();const editor=page.getByRole('region',{name:'Open draft',exact:true});await expect(editor).toBeVisible();
++ await editor.getByRole('textbox',{name:'Subject',exact:true}).fill(subject);await editor.getByRole('textbox',{name:'Body',exact:true}).fill(body);await editor.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
++ await editor.getByRole('button',{name:'Save revision',exact:true}).click();await expect(editor).not.toHaveAttribute('data-live-unsaved','true');
++ return {id:materialized.draft,editor,materialized};
++}
++test('D01/D03 manual Unicode draft exposes a source review and operator cannot attest',async({page})=>{
++ const {editor}=await editedDraft(page);await expect(editor).toContainText('Human edits require a new grounding review before approval.');
++ const grounding=editor.getByRole('region',{name:'Manual source review',exact:true});await expect(grounding).toBeVisible();
++ await expect(grounding).toContainText('A reviewer must submit this source review.');
++ await expect(grounding.getByRole('button',{name:'Submit source review',exact:true})).toHaveCount(0);
++ await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue(body);
++});
++
++async function reviewerPage(page:Page,id:string,locale='en'){
++ await signInWorkbench(page,true,'reviewer',`/app/outreach?workspace=${workspace}&project=${project}&draft=${id}`);
++ await page.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}).first().selectOption(locale);await expect(page.locator('html')).toHaveAttribute('lang',locale);
++ return page.getByRole('region',{name:/^(Open draft|開啟草稿)$/,exact:true});
++}
++async function classify(page:Page,split=false){
++ const grounding=page.getByRole('region',{name:/^(Manual source review|人工來源覆核)$/,exact:true});await expect(grounding).toBeVisible();await expect(grounding.getByRole('group')).toHaveCount(5);await expect(grounding.getByRole('status')).toHaveCount(0);
++ if(split){const first=grounding.getByRole('group').first();await first.getByRole('spinbutton').fill('2');await first.getByRole('button',{name:'分開段落',exact:true}).click();}
++ const groups=grounding.getByRole('group');const count=await groups.count();expect(count).toBe(split?6:5);
++ for(let i=0;i<count;i++){
++  const group=groups.nth(i),text=await group.locator('pre').innerText();const factual=text==='Fictional industrial sensors'||text.startsWith('Fixture public');
++  await group.getByRole('combobox').selectOption(factual?'factual':'non_factual');await group.getByRole('textbox').fill(factual?'Read original retained source':'Greeting, invitation or closing; no factual assertion');
++  if(factual)await group.getByRole('checkbox',{name:text.startsWith('Fixture')?/^(Evidence|證據)/:/^(Offer fact|產品事實)/}).check();
++ }
++ await grounding.getByRole('textbox',{name:/^(Overall review reason|整體覆核理由)$/,exact:true}).fill('Full message and every versioned source read');
++ await grounding.getByRole('checkbox',{name:/^(I read the entire exact message|我已閱讀整篇精確訊息)/}).check();
++ const submit=grounding.getByRole('button',{name:/^(Submit source review|提交來源覆核)$/,exact:true});await expect(submit).toBeEnabled();return {grounding,submit};
++}
++async function approveExport(page:Page,editor:ReturnType<Page['getByRole']>,id:string,label:string){
++ await editor.getByRole('button',{name:/^(Request exact review|要求審核此版本)$/,exact:true}).click();
++ await editor.getByRole('checkbox',{name:/^(I confirm the exact recipient|我確認以上精確收件人)/}).check();await editor.getByRole('button',{name:/^(Approve exact revision|批准此精確版本)$/,exact:true}).click();
++ const exports=editor.getByRole('region',{name:/^(Authorized export|授權匯出)$/,exact:true});await exports.getByRole('button',{name:/^(Prepare approved copy|準備已批准副本)$/,exact:true}).click();
++ const downloading=page.waitForEvent('download');await exports.getByRole('button',{name:/^(Download text|下載文字)$/,exact:true}).click();const text=await readFile((await (await downloading).path())!,'utf8');expect(text).toContain(body);expect(text).toContain(subject);await writeFile(`test-results/q12-${label}-export.txt`,text);
++ const stored=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${id}`,{headers:{Authorization:'Bearer fixture-reviewer'}});expect(stored.status()).toBe(200);const draft=(await stored.json()).data;
++ expect(draft.revision_number).toBe(3);expect(draft.body).toBe(body);expect(draft.grounding_review.reviewed_by).toBe('e0000000-0000-4000-8000-000000000004');
++ const exportId=new URL(page.url()).searchParams.get('export');const viewer=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/exports/${exportId}/content`,{headers:{Authorization:'Bearer fixture-viewer'}});expect(viewer.status()).toBe(403);
++ const deliver=await page.request.post(`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${id}/deliver`,{headers:{Authorization:'Bearer fixture-reviewer','Idempotency-Key':`q12-${label}-delivery`}});expect(deliver.status()).toBe(403);expect((await deliver.json()).code).toBe('DELIVERY_DISABLED');
++ await writeFile(`test-results/q12-${label}-output.json`,JSON.stringify({fixture_only:true,draft,viewer_export:viewer.status(),delivery:deliver.status()},null,2));
++}
++async function resetLocale(page:Page){await page.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}).first().selectOption('en');await expect(page.locator('html')).toHaveAttribute('lang','en');}
++
++test('D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export',async({page,browser})=>{
++ const created=await editedDraft(page);const ctx=await browser.newContext();const reviewer=await ctx.newPage();
++ try{
++  const editor=await reviewerPage(reviewer,created.id);const {grounding,submit}=await classify(reviewer);
++  const path=`**/v1/workspaces/${workspace}/drafts/${created.id}/grounding-reviews`;let first=true;
++  await reviewer.route(path,async route=>{if(!first)return route.continue();first=false;await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({code:'PROVIDER_UNAVAILABLE',message:'Q12 isolated HTTP failure',request_id:'00000000-0000-4000-8000-000000000012',retryable:true})});});
++  await submit.click();await expect(grounding.getByRole('alert')).toBeVisible();await expect(submit).toBeEnabled();await expect(grounding.getByRole('checkbox',{name:/I read the entire/})).toBeChecked();await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue(body);await reviewer.unroute(path);
++  const requests:{key:string;body:unknown}[]=[];first=true;
++  await reviewer.route(path,async route=>{requests.push({key:route.request().headers()['idempotency-key'],body:route.request().postDataJSON()});if(!first)return route.continue();first=false;const committed=await route.fetch();expect(committed.status(),await committed.text()).toBe(200);await route.abort('failed');});
++  await submit.click();await expect(grounding.getByRole('alert')).toBeVisible();await expect(submit).toBeEnabled();await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue(body);
++  await submit.click();await expect(reviewer.getByText('Source review recorded; request a new exact review.',{exact:true})).toBeVisible();expect(requests).toHaveLength(2);expect(requests[1]).toEqual(requests[0]);await reviewer.unroute(path);
++  await reviewer.reload();await reviewerPage(reviewer,created.id);await expect(editor).toContainText('Reviewed by');await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue(body);await approveExport(reviewer,editor,created.id,'en');
++  await reviewer.screenshot({path:'test-results/q12-en-approved-export.png',fullPage:true});await writeFile('test-results/q12-en-retry.json',JSON.stringify({fixture_only:true,synthetic_503:true,actual_committed_response_dropped:true,requests,materialization:created.materialized},null,2));
++ }finally{await resetLocale(reviewer);await ctx.close();}
++});
++
++test('D03 zh-HK mobile code-point split reads every source and exports exact Unicode message',async({page,browser})=>{
++ const created=await editedDraft(page);const ctx=await browser.newContext({viewport:{width:390,height:844}});const reviewer=await ctx.newPage();
++ try{
++  const editor=await reviewerPage(reviewer,created.id,'zh-HK');const {submit}=await classify(reviewer,true);
++  await expect.poll(()=>reviewer.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await reviewer.screenshot({path:'test-results/q12-zh-mobile-review.png',fullPage:true});
++  const response=reviewer.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith('/grounding-reviews'));await submit.click();const reviewed=await response;expect(reviewed.status(),await reviewed.text()).toBe(200);
++  const proof=(await reviewed.json()).data.grounding_review;expect(proof.segments[0]).toMatchObject({start:0,end:2,exact_text:'邀請'});expect(proof.segments[1]).toMatchObject({start:2,end:Array.from(subject).length,exact_text:'😀了解產品'});expect(proof.segments[2].end).toBe(5);
++  await approveExport(reviewer,editor,created.id,'zh');await expect.poll(()=>reviewer.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await reviewer.screenshot({path:'test-results/q12-zh-mobile-approved-export.png',fullPage:true});
++ }finally{await resetLocale(reviewer);await ctx.close();}
++});
++
++test('U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result',async({page,browser})=>{
++ const created=await editedDraft(page);const ctx=await browser.newContext();const reviewer=await ctx.newPage();
++ try{
++  const editor=await reviewerPage(reviewer,created.id);let prepared=await classify(reviewer);
++  const base=`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${created.id}`;
++  const before=(await (await reviewer.request.get(base,{headers:{Authorization:'Bearer fixture-reviewer'}})).json()).data;
++  const edit=await reviewer.request.patch(base,{headers:{Authorization:'Bearer fixture-access','Idempotency-Key':'q12-real-stale-edit','If-Match':`"${before.version}"`},data:{subject}});expect(edit.status()).toBe(200);
++  await prepared.submit.click();await expect(prepared.grounding.getByRole('alert')).toBeVisible();await expect(prepared.grounding.getByRole('checkbox',{name:/I read the entire/})).toBeChecked();await expect(editor.getByRole('textbox',{name:'Subject',exact:true})).toHaveValue(subject);await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue(body);await expect(editor).not.toHaveAttribute('data-live-unsaved','true');
++  await editor.getByRole('button',{name:'Refresh draft',exact:true}).click();await expect(editor).toHaveAttribute('data-baseline-revision',(await edit.json()).data.revision_id);prepared=await classify(reviewer);
++  let release:()=>void=()=>{},received:()=>void=()=>{};const held=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);
++  const path=`**/v1/workspaces/${workspace}/drafts/${created.id}/grounding-reviews`;
++  await reviewer.route(path,async route=>{const response=await route.fetch();expect(response.status()).toBe(200);received();await held;await route.fulfill({response}).catch(()=>{});});
++  await prepared.submit.click();await started;await reviewer.getByRole('combobox',{name:'Project',exact:true}).selectOption('e9100000-0000-4000-8000-000000000001');release();
++  await expect(reviewer.getByRole('region',{name:'Open draft',exact:true})).toHaveCount(0);await reviewer.waitForTimeout(300);await expect(reviewer.getByRole('region',{name:'Open draft',exact:true})).toHaveCount(0);
++ }finally{await resetLocale(reviewer);await ctx.close();}
++});

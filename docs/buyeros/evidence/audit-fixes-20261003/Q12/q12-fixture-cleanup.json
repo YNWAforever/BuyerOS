@@ -1,0 +1,15 @@
+{
+  "owned_ui_containers_remaining": [],
+  "markers_absent": [
+    "test-results/e2e-db-container.txt",
+    "test-results/audit-ui-container.json"
+  ],
+  "removed_dependency_volume": "buyeros-audit-ui-deps-052d6a686de9",
+  "verified_owner_label": {
+    "buyeros.audit.owner": "052d6a686de9"
+  },
+  "untouched_unlabelled_db_container": "buyeros-test-d9323d06",
+  "unlabelled_db_ownership": "not established; may be interrupted API fixture; intentionally not deleted",
+  "other_resources": "untouched",
+  "production_actions": []
+}

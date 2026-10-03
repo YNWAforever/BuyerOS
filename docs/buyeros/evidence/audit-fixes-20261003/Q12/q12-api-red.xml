@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="30.113" timestamp="2026-10-03T19:47:33.681299+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_manual_grounding_db" name="test_manual_review_preserves_unicode_text_appends_proof_then_exact_approval_export" time="23.421"><failure message="AssertionError: {&quot;code&quot;:&quot;NOT_FOUND&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;53e28bcf-1b5f-478b-935a-554ab9baa1b9&quot;,&quot;retryable&quot;:false}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">quote_case = (&lt;starlette.testclient.TestClient object at 0x0000014FD50797F0&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:60556/buyeros...22764-2e6b-4738-8fc6-0295d648d239'), ('f0bafdc6-0e66-4eca-96dc-1b96a6bd690d', 'b635e683-e144-4d7a-9f2e-ef3c9806763e')])
+
+    def test_manual_review_preserves_unicode_text_appends_proof_then_exact_approval_export(quote_case):
+        api, dsn, base, edited, payload = _case(quote_case)
+        assert edited["claims"] == [] and edited["approval_id"] is None
+        denied = _review(api, base.split("/")[-1], key="edited-not-grounded")
+        assert denied.status_code == 412
+        response = _submit(api, base, edited, payload)
+&gt;       assert response.status_code == 200, response.text
+E       AssertionError: {"code":"NOT_FOUND","message":"request failed","request_id":"53e28bcf-1b5f-478b-935a-554ab9baa1b9","retryable":false}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+services\api\tests\test_manual_grounding_db.py:69: AssertionError</failure></testcase></testsuite></testsuites>
