@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {useSearchParams} from 'next/navigation';
+import {readLatestProfile} from '@/services/live/profile-read';
 import {buildJobQuery,jobQueryParams,readJobStatus,type JobScope} from '@/services/live/job-query';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
 import {LiveCancelled,describeLiveError} from '@/services/live/client';
@@ -82,12 +83,9 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
     if(!project)return()=>own.abort();
     void (async()=>{
       const current=await client.request<{status:string;offer_revision:number}>({path:`/v1/workspaces/${workspace}/projects/${project}`,token,scope:identity,signal});
-      const first=await client.request<Page<{approved_at:string|null;basis_offer_revision:number|null}>>({path:`/v1/workspaces/${workspace}/projects/${project}/icp-versions?offset=0&limit=1`,token,scope:identity,signal});
+      const latest=await readLatestProfile(client,session,project,signal);
       if(!session.isCurrent(identity)||own.signal.aborted)return;
-      if(first.total===0){setProfileQueue('none');return;}
-      const latest=first.total===1?first.items[0]:(await client.request<Page<{approved_at:string|null;basis_offer_revision:number|null}>>({
-        path:`/v1/workspaces/${workspace}/projects/${project}/icp-versions?offset=${first.total-1}&limit=1`,token,scope:identity,signal})).items[0];
-      if(!session.isCurrent(identity)||own.signal.aborted||!latest)return;
+      if(!latest){setProfileQueue('none');return;}
       setProfileQueue(current.status!=='active'||latest.basis_offer_revision!==current.offer_revision?'stale':latest.approved_at?'current':'pending');
     })().catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted&&session.isCurrent(identity)){setProfileQueue('unavailable');setError(describeLiveError(e));}});
     return()=>own.abort();
@@ -154,7 +152,7 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
       <label>{t('Job scope')} <select aria-label={t('Job scope')} value={jobScope.kind} onChange={e=>{setJobView(e.target.value as 'project'|'workspace');changeJob('');}}>
         <option value="project" disabled={!project}>{t('Project jobs')}</option><option value="workspace">{t('Workspace jobs')}</option>
       </select></label>
-      <p>{t(jobScope.kind==='project'?'Project jobs':'Workspace jobs')}: <code>{jobScope.kind==='project'?jobScope.projectId:jobScope.workspaceId}</code></p>
+      <p>{t(jobScope.kind==='project'?'Project jobs':'Workspace jobs')}</p><details><summary>{t('Technical details')}</summary><code>{jobScope.kind==='project'?jobScope.projectId:jobScope.workspaceId}</code></details>
       {!isAdmin&&<p>{t('Only jobs created by your account are included.')}</p>}
       <label>{t('Filter status')} <select aria-label={t('Filter status')} value={jobStatus??''} onChange={e=>{setJobStatus(readJobStatus(e.target.value));changeJob('');}}>
         <option value="">{t('All statuses')}</option>{['queued','running','cancel_requested','cancelled','completed','failed'].map(value=><option key={value} value={value}>{t(value)}</option>)}
@@ -172,7 +170,7 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
     </div>
     <div role="region" aria-label={t('Job lookup')}><h3>{t('Job lookup')}</h3><label>{t('Job ID')} <input aria-label={t('Job ID')} value={jobId} onChange={e=>changeJob(e.target.value)}/></label>
       <button onClick={()=>void loadJob()}>{t('Load job')}</button>
-      {job&&<div role="status"><p>{job.status}: {job.processed}/{job.requested} · {job.updated} {t('updated')} · {job.blocked} {t('blocked')} · {job.conflicts} {t('conflicts')}</p>
+      {job&&<div role="region" aria-label={t('Job details')}><p role="status" aria-atomic="true">{t(job.status)}</p><p>{job.processed}/{job.requested} · {job.updated} {t('updated')} · {job.blocked} {t('blocked')} · {job.conflicts} {t('conflicts')}</p>
         <p>{t('Retry eligibility follows each row’s persisted reason and current version.')}</p>
         {job.result_page?.items.map(resultRow)}
         {job.result_page&&<div className="inline" aria-busy={resultLoading}>

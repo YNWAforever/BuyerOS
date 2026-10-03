@@ -87,7 +87,7 @@ export function LiveWorkQueue({t,onNavigate}:{t:(value:string)=>string;onNavigat
     ['Unknown provider acceptance','/app/operations',''],
   ];
   return <section className="panel" aria-label={t('Daily work queue')}><h2>{t('Daily work queue')}</h2>
-    <p>{t('Project')}: <code>{scope.project}</code> · {t('As of')}: {asOf?new Date(asOf).toLocaleString(): '—'}</p>
+    <p>{t('As of')}: {asOf?new Date(asOf).toLocaleString(): '—'}</p><details><summary>{t('Technical details')}</summary><p>{t('Project')}: <code>{scope.project}</code></p></details>
     <div className="grid two-col">{cards.map(([label,path,count])=><div className="activity" key={label}>
       <div><b>{t(label)}</b>{count&&<p>{count}</p>}</div><button type="button" onClick={()=>onNavigate(path)}>{t('Open')}</button></div>)}</div>
     {error&&<p role="alert">{error}</p>}
