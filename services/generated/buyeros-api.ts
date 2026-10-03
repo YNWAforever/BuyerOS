@@ -2899,6 +2899,8 @@ export interface components {
             project_id: string;
             /** Format: uuid */
             actor_id: string;
+            /** @description Current display name of this event's canonical actor; never identity or role authority. */
+            actor_display_name: string | null;
             /** Format: date-time */
             recorded_at: string;
             /** Format: uuid */
