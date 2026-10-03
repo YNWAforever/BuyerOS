@@ -234,6 +234,7 @@ export const liveZh: Record<string,string> = {
   'Enter a valid job ID.':'請輸入有效工作識別碼。','updated':'已更新','conflicts':'衝突',
   'Retry eligibility follows each row’s persisted reason and current version.':'能否重試取決於每列已記錄的原因和目前版本。',
   'Audit trail':'審計紀錄','Previous':'上一頁','Next':'下一頁',
+  'Job scope':'工作範圍','Project jobs':'專案工作','Workspace jobs':'工作區工作','Only jobs created by your account are included.':'只包含由你帳戶建立的工作。','Loading jobs…':'正在載入工作…','Retry loading jobs':'重新載入工作',
   'Bulk jobs':'批量工作','Filter status':'篩選狀態','All statuses':'所有狀態','jobs in scope':'項範圍內工作','No jobs in this scope.':'此範圍沒有工作。',
   'queued':'排隊中','running':'進行中','cancel_requested':'取消待處理','cancelled':'已取消','completed':'已完成','failed':'失敗',
   'research':'研究','contact_enrichment':'聯絡資料增補',

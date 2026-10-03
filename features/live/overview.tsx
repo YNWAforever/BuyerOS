@@ -1,5 +1,6 @@
 'use client';
 import {useEffect,useState} from 'react';
+import {buildJobQuery,jobScopeLink,type JobScope} from '@/services/live/job-query';
 import type {Availability} from '@/services/live/mode';
 import {loadLive} from '@/services/live/read';
 import {toWorkspaces,MapError,type LiveWorkspace} from '@/services/live/mapping';
@@ -62,23 +63,26 @@ export function LiveOverview({t=(value:string)=>value}:{t?:(value:string)=>strin
 
 /** Navigation cards use exactly the same server filters as Results and Operations. */
 export function LiveWorkQueue({t,onNavigate}:{t:(value:string)=>string;onNavigate:(path:string)=>void}){
-  const {client,session}=useWorkspaceSession(),scope=useSessionSnapshot().scope;
-  const [failed,setFailed]=useState<number|null>(null),[error,setError]=useState('');
+  const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot(),scope=snapshot.scope;
+  const [result,setResult]=useState<{identity:string;count?:number;error?:string}>();
+  const failed=result?.identity===snapshot.identity?result.count:undefined,error=result?.identity===snapshot.identity?result.error:undefined;
   const [asOf]=useState(()=>new Date().toISOString());
   useEffect(()=>{
     if(!scope.workspace||!scope.project)return;
     const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
-    void client.request<{total:number}>({path:`/v1/workspaces/${encodeURIComponent(scope.workspace)}/jobs?status=failed&offset=0&limit=1`,
+    const selected:JobScope={kind:'project',workspaceId:scope.workspace,projectId:scope.project};
+    const query=buildJobQuery(selected,{status:'failed',offset:0,limit:1});
+    void client.request<{total:number}>({path:`/v1/workspaces/${encodeURIComponent(scope.workspace)}/jobs?${query}`,
       token,scope:identity,signal:AbortSignal.any([own.signal,session.controller().signal])})
-      .then(value=>{if(!own.signal.aborted&&session.isCurrent(identity))setFailed(value.total);})
-      .catch(cause=>{if(!own.signal.aborted&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));});
+      .then(value=>{if(!own.signal.aborted&&session.isCurrent(identity))setResult({identity,count:value.total});})
+      .catch(cause=>{if(!own.signal.aborted&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled))setResult({identity,error:describeLiveError(cause)});});
     return()=>own.abort();
-  },[client,session,scope.workspace,scope.project]);
+  },[client,session,scope.workspace,scope.project,snapshot.identity]);
   const cards:[string,string,string][]=[
     ['Awaiting review','/app/results?review=awaiting_review',''],
     ['Pending approvals','/app/operations',''],
     ['Unassigned buyers','/app/results?queue=unassigned',''],
-    ['Failed jobs','/app/operations?job_status=failed',failed===null?'—':String(failed)],
+    ['Failed jobs',scope.workspace&&scope.project?jobScopeLink({kind:'project',workspaceId:scope.workspace,projectId:scope.project},'failed'):'/app/operations',failed===undefined?'—':String(failed)],
     ['Unknown fit','/app/results?queue=unknown',''],
     ['Unknown provider acceptance','/app/operations',''],
   ];

@@ -1,5 +1,7 @@
 'use client';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
+import {useSearchParams} from 'next/navigation';
+import {buildJobQuery,jobQueryParams,readJobStatus,type JobScope} from '@/services/live/job-query';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
 import {LiveCancelled,describeLiveError} from '@/services/live/client';
 import type {components} from '@/services/generated/buyeros-api';
@@ -15,10 +17,22 @@ type Result=components['schemas']['BulkItemResult'];
 
 export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{workspace:string;project:string|null;isAdmin:boolean;onOpenBuyers:()=>void;t:(value:string)=>string}){
   const {client,session}=useWorkspaceSession();
-  const scope=useSessionSnapshot();
+  const scope=useSessionSnapshot(),searchParams=useSearchParams();
   const [readiness,setReadiness]=useState<Readiness|null>(null),[capabilities,setCapabilities]=useState<Capability[]>([]);
   const [jobId,setJobId]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('bulk_job')||'');
-  const [job,setJob]=useState<Job|null>(null),[jobs,setJobs]=useState<Page<Job>|null>(null),[jobOffset,setJobOffset]=useState(0),[jobStatus,setJobStatus]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('job_status')||'');
+  const [job,setJob]=useState<Job|null>(null);
+  const [statusChoice,setStatusChoice]=useState<{value:ReturnType<typeof readJobStatus>}>();
+  const jobStatus=statusChoice?statusChoice.value:readJobStatus(searchParams.get('job_status'));
+  const [viewChoice,setViewChoice]=useState<'project'|'workspace'>();
+  const jobView=viewChoice??(searchParams.get('job_scope')==='workspace'?'workspace':'project');
+  const waitingForProject=jobView==='project'&&!project&&searchParams.has('project');
+  const jobScope=useMemo<JobScope>(()=>jobView==='project'&&project?{kind:'project',workspaceId:workspace,projectId:project}:{kind:'workspace',workspaceId:workspace},[jobView,workspace,project]);
+  const scopeKey=`${scope.identity}:${jobScope.kind}`,viewKey=`${scopeKey}:${jobStatus??''}`;
+  const [offsetState,setOffset]=useState<{key:string;offset:number}>(),[listState,setList]=useState<{key:string;page?:Page<Job>;error?:string}>();
+  const jobOffset=offsetState?.key===viewKey?offsetState.offset:0,listKey=`${viewKey}:${jobOffset}`;
+  const jobs=listState?.key===listKey?listState.page:undefined,jobError=listState?.key===listKey?listState.error:undefined;
+  const [listReload,setListReload]=useState(0);
+  const setJobOffset=(offset:number)=>setOffset({key:viewKey,offset});
   const [audit,setAudit]=useState<Page<Audit>|null>(null),[auditOffset,setAuditOffset]=useState(0);
   const [pollError,setPollError]=useState('');
   const [error,setError]=useState(''),[resultLoading,setResultLoading]=useState(false);
@@ -26,7 +40,8 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
   const pageView=useRef(job);useEffect(()=>{pageView.current=job;},[job]);
   useEffect(()=>()=>{jobRequest.current.sequence++;jobRequest.current.controller.abort();},[scope.identity]);
   const [profileQueue,setProfileQueue]=useState<'loading'|'none'|'pending'|'current'|'stale'|'unavailable'>(project?'loading':'none');
-  const [failedCount,setFailedCount]=useState<number|null|'unavailable'>(null);
+  const [failedState,setFailed]=useState<{key:string;count:number|'unavailable'}>();
+  const failedCount=failedState?.key===scopeKey?failedState.count:null;
   useEffect(()=>{
     const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
     const signal=AbortSignal.any([own.signal,session.controller().signal]);
@@ -39,20 +54,31 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
     return()=>own.abort();
   },[client,session,workspace,isAdmin,scope.identity]);
   useEffect(()=>{
-    const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
-    const query=new URLSearchParams({offset:String(jobOffset),limit:'20'});if(jobStatus)query.set('status',jobStatus);
-    void client.request<Page<Job>>({path:`/v1/workspaces/${workspace}/jobs?${query}`,token,scope:identity,
-      signal:AbortSignal.any([own.signal,session.controller().signal])}).then(value=>{
-      if(session.isCurrent(identity)&&!own.signal.aborted)setJobs(value);
-    }).catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted)setError(describeLiveError(e));});
+    if(waitingForProject)return;
+    const own=new AbortController(),basis=session.captureWriteContext();
+    const ctx={...basis,signal:AbortSignal.any([own.signal,basis.signal]),getToken:async()=>session.token()||'',isCurrent:()=>session.isCurrent(basis.identity)&&!own.signal.aborted};
+    void createOperationClient(client).requestOperation('listAsyncJobs',{path:{workspace_id:workspace},query:jobQueryParams(jobScope,{offset:jobOffset,limit:20,status:jobStatus})},ctx)
+      .then(page=>{if(ctx.isCurrent())setList({key:listKey,page});})
+      .catch(cause=>{if(ctx.isCurrent()&&!(cause instanceof LiveCancelled))setList({key:listKey,error:describeLiveError(cause)});});
     return()=>own.abort();
-  },[client,session,workspace,jobOffset,jobStatus,scope.identity]);
+  },[client,session,workspace,jobScope,jobOffset,jobStatus,scope.identity,listKey,listReload,waitingForProject]);
+  // Router query state can settle before window.location during Vinext navigation.
+  // Persist only deliberate choices; never overwrite an incoming deep link on mount.
+  function updateJobUrl(kind:'project'|'workspace',status:ReturnType<typeof readJobStatus>){
+    const url=new URL(window.location.href);url.searchParams.set('job_scope',kind);
+    if(status)url.searchParams.set('job_status',status);else url.searchParams.delete('job_status');
+    url.searchParams.delete('job_offset');url.searchParams.delete('bulk_job');
+    window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);
+  }
+  function setJobStatus(value:ReturnType<typeof readJobStatus>){setStatusChoice({value});updateJobUrl(jobScope.kind,value);}
+  function setJobView(kind:'project'|'workspace'){setViewChoice(kind);updateJobUrl(kind,jobStatus);}
   useEffect(()=>{
     const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
     const signal=AbortSignal.any([own.signal,session.controller().signal,AbortSignal.timeout(10_000)]);
-    void client.request<Page<Job>>({path:`/v1/workspaces/${workspace}/jobs?status=failed&offset=0&limit=1`,token,scope:identity,signal}).then(value=>{
-      if(session.isCurrent(identity)&&!own.signal.aborted)setFailedCount(value.total);
-    }).catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted&&session.isCurrent(identity)){setFailedCount('unavailable');setError(describeLiveError(e));}});
+    if(waitingForProject)return()=>own.abort();
+    void client.request<Page<Job>>({path:`/v1/workspaces/${workspace}/jobs?${buildJobQuery(jobScope,{status:'failed',offset:0,limit:1})}`,token,scope:identity,signal}).then(value=>{
+      if(session.isCurrent(identity)&&!own.signal.aborted)setFailed({key:scopeKey,count:value.total});
+    }).catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted&&session.isCurrent(identity)){setFailed({key:scopeKey,count:'unavailable'});setError(describeLiveError(e));}});
     if(!project)return()=>own.abort();
     void (async()=>{
       const current=await client.request<{status:string;offer_revision:number}>({path:`/v1/workspaces/${workspace}/projects/${project}`,token,scope:identity,signal});
@@ -65,7 +91,7 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
       setProfileQueue(current.status!=='active'||latest.basis_offer_revision!==current.offer_revision?'stale':latest.approved_at?'current':'pending');
     })().catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted&&session.isCurrent(identity)){setProfileQueue('unavailable');setError(describeLiveError(e));}});
     return()=>own.abort();
-  },[client,session,workspace,project,scope.identity]);
+  },[client,session,workspace,project,scope.identity,jobScope,scopeKey,listReload,waitingForProject]);
   useEffect(()=>{
     if(!isAdmin)return;
     const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
@@ -125,9 +151,16 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
     {isAdmin&&<div role="region" aria-label={t('Readiness')}><h3>{t('Readiness')}</h3>{readiness?<p>{t('Database')}: {readiness.database} · {t('Queue')}: {readiness.queue} · {t('Worker')}: {readiness.worker} · {readiness.ready?t('Ready'):t('Not ready')}</p>:<p role="status">{t('Loading readiness…')}</p>}</div>}
     <div role="region" aria-label={t('Integrations')}><h3>{t('Integrations')}</h3>{capabilities.map(item=><p key={item.name}>{t(item.name)}: {t(item.status)} · {item.reason_codes.map(t).join(', ')}</p>)}</div>
     <div role="region" aria-label={t('Bulk jobs')}><h3>{t('Bulk jobs')}</h3>
-      <label>{t('Filter status')} <select aria-label={t('Filter status')} value={jobStatus} onChange={e=>{setJobOffset(0);setJobStatus(e.target.value);changeJob('');}}>
+      <label>{t('Job scope')} <select aria-label={t('Job scope')} value={jobScope.kind} onChange={e=>{setJobView(e.target.value as 'project'|'workspace');changeJob('');}}>
+        <option value="project" disabled={!project}>{t('Project jobs')}</option><option value="workspace">{t('Workspace jobs')}</option>
+      </select></label>
+      <p>{t(jobScope.kind==='project'?'Project jobs':'Workspace jobs')}: <code>{jobScope.kind==='project'?jobScope.projectId:jobScope.workspaceId}</code></p>
+      {!isAdmin&&<p>{t('Only jobs created by your account are included.')}</p>}
+      <label>{t('Filter status')} <select aria-label={t('Filter status')} value={jobStatus??''} onChange={e=>{setJobStatus(readJobStatus(e.target.value));changeJob('');}}>
         <option value="">{t('All statuses')}</option>{['queued','running','cancel_requested','cancelled','completed','failed'].map(value=><option key={value} value={value}>{t(value)}</option>)}
       </select></label>
+      {!jobs&&!jobError&&<p role="status">{t('Loading jobs…')}</p>}
+      {jobError&&<><p role="alert">{jobError}</p><button onClick={()=>setListReload(v=>v+1)}>{t('Retry loading jobs')}</button></>}
       {jobs&&<><p>{jobs.total} {t('jobs in scope')}</p>{jobs.items.length?jobs.items.map(item=><div key={item.id} className="inline" style={{flexWrap:'wrap'}}>
         <button onClick={()=>{changeJob(item.id);void loadJob(item.id);}}>{item.id}</button>
         <span>{t(item.status)} · {item.processed}/{item.requested}</span>
