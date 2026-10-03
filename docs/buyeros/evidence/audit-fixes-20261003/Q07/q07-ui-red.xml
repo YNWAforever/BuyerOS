@@ -1,0 +1,50 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="84.11441099999999">
+<testsuite name="audit-template-copy.spec.ts" timestamp="2026-10-03T10:59:23.895Z" hostname="" tests="1" failures="1" skipped="0" time="14.09" errors="0">
+<testcase name="A02 fixed-template promise matches two actual outputs; manual edits keep Q15 dirty protection" classname="audit-template-copy.spec.ts" time="14.09">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-template-copy-A02-fi-dabff-s-keep-Q15-dirty-protection\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-template-copy-A02-fi-dabff-s-keep-Q15-dirty-protection\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveCount(expected) failed" type="expect.toHaveCount">
+<![CDATA[  audit-template-copy.spec.ts:24:1 › A02 fixed-template promise matches two actual outputs; manual edits keep Q15 dirty protection 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('region', { name: 'Prepare grounded draft', exact: true }).getByRole('combobox', { name: 'Tone', exact: true })
+    Expected: 0
+    Received: 1
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('region', { name: 'Prepare grounded draft', exact: true }).getByRole('combobox', { name: 'Tone', exact: true }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Prepare grounded draft', exact: true }).getByRole('combobox', { name: 'Tone', exact: true })
+        14 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      24 | test('A02 fixed-template promise matches two actual outputs; manual edits keep Q15 dirty protection',async({page})=>{
+      25 |   const {prepare}=await enter(page);
+    > 26 |   await expect(prepare.getByRole('combobox',{name:'Tone',exact:true})).toHaveCount(0);
+         |                                                                        ^
+      27 |   await expect(prepare).toContainText('Free fixed template');
+      28 |   await expect(prepare).toContainText('Internal work objective — does not change the template body');
+      29 |   await expect(prepare).toContainText('Edit the draft manually after generation; changes need a new grounding review before approval.');
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-template-copy.spec.ts:26:72
+
+    Error Context: ..\..\test-results\audit-fixes\audit-template-copy-A02-fi-dabff-s-keep-Q15-dirty-protection\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-template-copy-A02-fi-dabff-s-keep-Q15-dirty-protection\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-template-copy-A02-fi-dabff-s-keep-Q15-dirty-protection\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

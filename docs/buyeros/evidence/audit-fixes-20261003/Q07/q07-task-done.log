@@ -1,0 +1,6 @@
+API types match the OpenAPI contract
+PASS node scripts/generate-api-types.mjs --check
+PASS node node_modules/typescript/bin/tsc --noEmit
+PASS node node_modules/eslint/bin/eslint.js features/live/drafts.tsx tests/e2e/audit-template-copy.spec.ts
+PASS generation-pause rollback applicability (no browser rehearsal)
+ledger: Task 1: complete (commits c09eec2..a2696e1, tests: node test-results/q07-final-gate.mjs → PASS generation-pause rollback applicability (no browser rehearsal))

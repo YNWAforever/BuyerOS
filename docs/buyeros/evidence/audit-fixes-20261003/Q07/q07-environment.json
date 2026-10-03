@@ -1,0 +1,14 @@
+{
+  "node": "v24.18.0",
+  "uv": "uv 0.11.27 (19fc8b03b 2026-07-06 x86_64-pc-windows-msvc)",
+  "api_python": "Python 3.14.6",
+  "worker_python": "Python 3.14.6",
+  "playwright": "Version 1.63.0",
+  "docker": "29.7.2",
+  "shell": "Windows PowerShell",
+  "pnpm": "11.25.0",
+  "ui": "owned Linux node22.23.2-bookworm-slim;4CPU/6GiB;Vinext/Nitro dev",
+  "database": "owned Docker PostgreSQL16; actual runtime/RLS role",
+  "identity": "fictional OIDC/PKCE, not Auth0 or Neon",
+  "worker": "shared handler with fixture-staged dispatch and replay; no continuous transport proof"
+}

@@ -1,0 +1,21 @@
+...........                                                              [100%]
+============================== warnings summary ===============================
+tests\conftest.py:27
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\tests\conftest.py:27: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:27
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\tests\conftest.py:27: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_grounded_drafts.py::test_template_uses_only_approved_fact_and_cited_observation
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_grounded_drafts.py::test_durable_worker_creates_one_immutable_draft_and_never_calls_provider
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q07-worker-final.xml -
+11 passed, 4 warnings in 9.54s

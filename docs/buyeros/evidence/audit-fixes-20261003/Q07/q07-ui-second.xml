@@ -1,0 +1,8 @@
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="0" time="80.198147">
+<testsuite name="audit-template-copy.spec.ts" timestamp="2026-10-03T11:06:12.268Z" hostname="" tests="2" failures="0" skipped="0" time="30.227" errors="0">
+<testcase name="A02 fixed-template promise matches two actual outputs; manual edits keep Q15 dirty protection" classname="audit-template-copy.spec.ts" time="17.521">
+</testcase>
+<testcase name="A07 zh-HK mobile template keeps original English citations through exact approval and authorized export" classname="audit-template-copy.spec.ts" time="12.706">
+</testcase>
+</testsuite>
+</testsuites>

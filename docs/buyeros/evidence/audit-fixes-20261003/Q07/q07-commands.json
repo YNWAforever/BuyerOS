@@ -1,0 +1,76 @@
+{
+  "root": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS",
+  "strict_db_environment": {
+    "BUYEROS_STRICT_INTEGRATION": "1",
+    "BUYEROS_TEST_DATABASE_URL": "removed",
+    "BUYEROS_DATABASE_URL": "removed"
+  },
+  "commands": [
+    {
+      "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts tests/e2e/audit-template-copy.spec.ts --grep A02",
+      "cwd": "root",
+      "evidence": "q07-ui-red.log",
+      "result": "1fail/0skip; actual misleading Tone selector"
+    },
+    {
+      "command": "uv run --frozen pytest -q tests/test_draft.py --junitxml=../../test-results/q07-api-baseline.xml",
+      "cwd": "services/api",
+      "evidence": "q07-api-baseline.log",
+      "result": "4pass/2fail/0skip; invalid test UUID construction, not product RED"
+    },
+    {
+      "command": "uv run --project services/api --frozen pytest -q services/api/tests/test_draft.py --junitxml=test-results/q07-api-behavior.xml",
+      "cwd": "root",
+      "evidence": "q07-api-behavior.log",
+      "result": "6pass/0skip before product fix; original deterministic behavior"
+    },
+    {
+      "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts tests/e2e/audit-template-copy.spec.ts",
+      "cwd": "root",
+      "evidence": "q07-ui-first.log; q07-ui-second.log",
+      "result": "first1pass/1fail/0skip (reviewer locale assumption); second2pass/0skip with same60s timeout"
+    },
+    {
+      "command": "uv run --frozen pytest -q tests/test_draft.py tests/test_draft_persistence_db.py tests/test_draft_approval_context_db.py tests/test_exports_authorization_db.py tests/test_api_routes_contract.py tests/test_contract_required_fields.py --junitxml=../../test-results/q07-api-final.xml",
+      "cwd": "services/api",
+      "evidence": "q07-api-final.log",
+      "result": "47pass/0fail/error/skip"
+    },
+    {
+      "command": "uv run --frozen pytest -q tests/test_grounded_drafts.py --junitxml=../../test-results/q07-worker-final.xml",
+      "cwd": "services/worker",
+      "evidence": "q07-worker-final.log",
+      "result": "11pass/0fail/error/skip"
+    },
+    {
+      "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts tests/e2e/audit-template-copy.spec.ts tests/e2e/audit-draft-dirty.spec.ts",
+      "cwd": "root",
+      "evidence": "q07-ui-final.log",
+      "result": "12pass/0fail/skip"
+    },
+    {
+      "command": "node --test tests/audit-draft-guard.test.mjs tests/audit-research-intent.test.mjs tests/live-adapter-checks.mjs tests/live-auth-checks.mjs",
+      "cwd": "root",
+      "evidence": "q07-unit-final.log",
+      "result": "12pass/0fail/skip;10unit+2file-tests,74adapter+8auth internal assertions"
+    },
+    {
+      "command": "node test-results/q07-final-gate.mjs",
+      "cwd": "root",
+      "evidence": "q07-final-gate.log; q07-task-done.log",
+      "result": "aggregate checks current JUnit/output and reruns units/generated/types/lint; does not rerun DB/UI"
+    },
+    {
+      "command": "uv run --frozen alembic heads",
+      "cwd": "services/api",
+      "evidence": "q07-alembic-heads.log",
+      "result": "0036_checkpoint_schema_grants (head);0 new migrations"
+    },
+    {
+      "command": "git apply --check docs/buyeros/evidence/audit-fixes-20261003/Q07/generation-pause-rollback.patch",
+      "cwd": "root",
+      "evidence": "q07-rollback-check.log",
+      "result": "exit0; applicability only; browser/deployment rollback not rehearsed"
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+....FF                                                                   [100%]
+================================== FAILURES ===================================
+_ test_fixed_template_preserves_sources_and_metadata_without_style_promises[en] _
+
+language = 'en'
+
+    @pytest.mark.parametrize("language", ["en", "zh-HK"])
+    def test_fixed_template_preserves_sources_and_metadata_without_style_promises(language):
+        from buyeros_api.execution.handlers.draft_generate import render_grounded_template, validate_grounded_output
+        facts = [{"id": "fact-1", "value": "Industrial sensors", "approved": True}]
+        evidence = [{"id": "evidence-1", "version": 1, "stance": "supports",
+                     "excerpt": "English public catalog excerpt."}]
+        common = dict(facts=facts, evidence=evidence, language=language, kind="initial")
+>       first = render_grounded_template(**common, objective="Request a demonstration", tone="professional")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_draft.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+buyeros_api\execution\handlers\draft_generate.py:29: in render_grounded_template
+    facts, evidence = _sources(facts, evidence)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+buyeros_api\execution\handlers\draft_generate.py:13: in _sources
+    uuid.UUID(str(fact["id"]))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <[AttributeError("'uuid.UUID' object has no attribute 'int'") raised in repr()] UUID object at 0x187cb123b50>
+hex = 'fact1', bytes = None, bytes_le = None, fields = None, int = None
+version = None
+
+    def __init__(self, hex=None, bytes=None, bytes_le=None, fields=None,
+                       int=None, version=None,
+                       *, is_safe=SafeUUID.unknown):
+        r"""Create a UUID from either a string of 32 hexadecimal digits,
+        a string of 16 bytes as the 'bytes' argument, a string of 16 bytes
+        in little-endian order as the 'bytes_le' argument, a tuple of six
+        integers (32-bit time_low, 16-bit time_mid, 16-bit time_hi_version,
+        8-bit clock_seq_hi_variant, 8-bit clock_seq_low, 48-bit node) as
+        the 'fields' argument, or a single 128-bit integer as the 'int'
+        argument.  When a string of hex digits is given, curly braces,
+        hyphens, and a URN prefix are all optional.  For example, these
+        expressions all yield the same UUID:
+    
+        UUID('{12345678-1234-5678-1234-567812345678}')
+        UUID('12345678123456781234567812345678')
+        UUID('urn:uuid:12345678-1234-5678-1234-567812345678')
+        UUID(bytes='\x12\x34\x56\x78'*4)
+        UUID(bytes_le='\x78\x56\x34\x12\x34\x12\x78\x56' +
+                      '\x12\x34\x56\x78\x12\x34\x56\x78')
+        UUID(fields=(0x12345678, 0x1234, 0x5678, 0x12, 0x34, 0x567812345678))
+        UUID(int=0x12345678123456781234567812345678)
+    
+        Exactly one of 'hex', 'bytes', 'bytes_le', 'fields', or 'int' must
+        be given.  The 'version' argument is optional; if given, the resulting
+        UUID will have its variant and version set according to RFC 4122,
+        overriding the given 'hex', 'bytes', 'bytes_le', 'fields', or 'int'.
+    
+        is_safe is an enum exposed as an attribute on the instance.  It
+        indicates whether the UUID has been generated in a way that is safe
+        for multiprocessing applications, via uuid_generate_time_safe(3).
+        """
+    
+        if [hex, bytes, bytes_le, fields, int].count(None) != 4:
+            raise TypeError('one of the hex, bytes, bytes_le, fields, '
+                            'or int arguments must be given')
+        if int is not None:
+            pass
+        elif hex is not None:
+            hex = hex.replace('urn:', '').replace('uuid:', '')
+            hex = hex.strip('{}').replace('-', '')
+            if len(hex) != 32:
+>               raise ValueError('badly formed hexadecimal UUID string')
+E               ValueError: badly formed hexadecimal UUID string
+
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\uuid.py:219: ValueError
+_ test_fixed_template_preserves_sources_and_metadata_without_style_promises[zh-HK] _
+
+language = 'zh-HK'
+
+    @pytest.mark.parametrize("language", ["en", "zh-HK"])
+    def test_fixed_template_preserves_sources_and_metadata_without_style_promises(language):
+        from buyeros_api.execution.handlers.draft_generate import render_grounded_template, validate_grounded_output
+        facts = [{"id": "fact-1", "value": "Industrial sensors", "approved": True}]
+        evidence = [{"id": "evidence-1", "version": 1, "stance": "supports",
+                     "excerpt": "English public catalog excerpt."}]
+        common = dict(facts=facts, evidence=evidence, language=language, kind="initial")
+>       first = render_grounded_template(**common, objective="Request a demonstration", tone="professional")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_draft.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+buyeros_api\execution\handlers\draft_generate.py:29: in render_grounded_template
+    facts, evidence = _sources(facts, evidence)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+buyeros_api\execution\handlers\draft_generate.py:13: in _sources
+    uuid.UUID(str(fact["id"]))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <[AttributeError("'uuid.UUID' object has no attribute 'int'") raised in repr()] UUID object at 0x187cf017890>
+hex = 'fact1', bytes = None, bytes_le = None, fields = None, int = None
+version = None
+
+    def __init__(self, hex=None, bytes=None, bytes_le=None, fields=None,
+                       int=None, version=None,
+                       *, is_safe=SafeUUID.unknown):
+        r"""Create a UUID from either a string of 32 hexadecimal digits,
+        a string of 16 bytes as the 'bytes' argument, a string of 16 bytes
+        in little-endian order as the 'bytes_le' argument, a tuple of six
+        integers (32-bit time_low, 16-bit time_mid, 16-bit time_hi_version,
+        8-bit clock_seq_hi_variant, 8-bit clock_seq_low, 48-bit node) as
+        the 'fields' argument, or a single 128-bit integer as the 'int'
+        argument.  When a string of hex digits is given, curly braces,
+        hyphens, and a URN prefix are all optional.  For example, these
+        expressions all yield the same UUID:
+    
+        UUID('{12345678-1234-5678-1234-567812345678}')
+        UUID('12345678123456781234567812345678')
+        UUID('urn:uuid:12345678-1234-5678-1234-567812345678')
+        UUID(bytes='\x12\x34\x56\x78'*4)
+        UUID(bytes_le='\x78\x56\x34\x12\x34\x12\x78\x56' +
+                      '\x12\x34\x56\x78\x12\x34\x56\x78')
+        UUID(fields=(0x12345678, 0x1234, 0x5678, 0x12, 0x34, 0x567812345678))
+        UUID(int=0x12345678123456781234567812345678)
+    
+        Exactly one of 'hex', 'bytes', 'bytes_le', 'fields', or 'int' must
+        be given.  The 'version' argument is optional; if given, the resulting
+        UUID will have its variant and version set according to RFC 4122,
+        overriding the given 'hex', 'bytes', 'bytes_le', 'fields', or 'int'.
+    
+        is_safe is an enum exposed as an attribute on the instance.  It
+        indicates whether the UUID has been generated in a way that is safe
+        for multiprocessing applications, via uuid_generate_time_safe(3).
+        """
+    
+        if [hex, bytes, bytes_le, fields, int].count(None) != 4:
+            raise TypeError('one of the hex, bytes, bytes_le, fields, '
+                            'or int arguments must be given')
+        if int is not None:
+            pass
+        elif hex is not None:
+            hex = hex.replace('urn:', '').replace('uuid:', '')
+            hex = hex.strip('{}').replace('-', '')
+            if len(hex) != 32:
+>               raise ValueError('badly formed hexadecimal UUID string')
+E               ValueError: badly formed hexadecimal UUID string
+
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\uuid.py:219: ValueError
+============================== warnings summary ===============================
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_draft.py::test_uncited_claim_rejected
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q07-api-baseline.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_draft.py::test_fixed_template_preserves_sources_and_metadata_without_style_promises[en]
+FAILED tests/test_draft.py::test_fixed_template_preserves_sources_and_metadata_without_style_promises[zh-HK]
+2 failed, 4 passed, 3 warnings in 2.29s

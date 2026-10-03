@@ -1,0 +1,2 @@
+# Preserve every captured artifact byte, including newline conventions.
+* -text

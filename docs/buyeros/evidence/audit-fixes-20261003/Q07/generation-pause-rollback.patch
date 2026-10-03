@@ -1,0 +1,20 @@
+--- a/features/live/drafts.tsx
++++ b/features/live/drafts.tsx
+@@ -36,6 +36,7 @@
+   'Save sender':'儲存寄件人','Prepare grounded draft':'準備有證據草稿','Approved offer facts':'已批准的產品事實',
+   'Supporting buyer evidence':'支持買家的證據','Language':'語言',
+   'Free fixed template':'免費固定模板',
++  'Template preparation is paused. Existing drafts can still be reviewed and edited.':'模板準備已暫停；現有草稿仍可審核及修改。',
+   'Internal work objective — does not change the template body':'內部工作目的，不會改變模板正文',
+   'Template language':'模板語言',
+   'Template language changes only fixed headings, opening and closing; offer facts and source citations stay in their original language and are not automatically translated.':'模板語言只改變固定標題、開場及結尾；產品事實與來源引用保留原語言，不會自動翻譯。',
+@@ -275,7 +276,8 @@
+       </select></label>
+       <div className="live-draft-fields"><label>{t('Internal work objective — does not change the template body')} <input value={objective} maxLength={1000} onChange={e=>setObjective(e.target.value)}/></label>
+         <label>{t('Template language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)} disabled={busy||!canGenerate}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
+-      <button type="button" disabled={busy||!canGenerate||!project?.sender_identity||!context.icp||(recipient!==''&&!recipients.some(contact=>contact.id===recipient))||(draftKind==='follow_up'&&!parentDraftId)||selectedFacts.length===0||selectedEvidence.length===0||objective.trim().length<3} onClick={()=>void startDraft()}>{t(recipient?'Generate addressed draft':'Generate unaddressed draft')}</button>
++      <p>{t('Template preparation is paused. Existing drafts can still be reviewed and edited.')}</p>
++      <button type="button" disabled onClick={()=>void startDraft()}>{t(recipient?'Generate addressed draft':'Generate unaddressed draft')}</button>
+     </section>}
+     {job&&<section className="panel" role="status"><h3>{t('Job status')}</h3><p>{job.id} · {t(job.status)}</p><button type="button" disabled={busy} onClick={()=>void refreshJob()}>{t('Refresh job')}</button></section>}
+     {project&&<section className="panel" aria-label={t('Draft list')}><h3>{t('Draft list')}</h3><p>{offset+1}–{Math.min(offset+8,total)} / {total}</p>

@@ -1,0 +1,9 @@
+{
+  "outer_sha256": "f11c2c079cd40692b7c1ccb059a3c83d02024fb0f19bfda99b860c388304ea3f",
+  "nested_sha256": "19369591a175edad7dd2e9f3ddb5bfdebc6cdc5130a2770243b1e9de2a42d35a",
+  "zip_CRC_pass": true,
+  "unsafe_paths": 0,
+  "nested_entries": 32,
+  "input_manifest_pass": 31,
+  "reproduction_script_read": "evidence/reproduce_audit.py; not rerun obsolete fake workspace query branch; selected real template tests instead"
+}

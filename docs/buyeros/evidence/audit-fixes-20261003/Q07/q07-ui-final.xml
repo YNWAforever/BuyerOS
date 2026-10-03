@@ -1,0 +1,30 @@
+<testsuites id="" name="" tests="12" failures="0" skipped="0" errors="0" time="137.48424">
+<testsuite name="audit-draft-dirty.spec.ts" timestamp="2026-10-03T11:10:01.672Z" hostname="" tests="10" failures="0" skipped="0" time="66.829" errors="0">
+<testcase name="D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="9.219">
+</testcase>
+<testcase name="D02 Open draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="6.279">
+</testcase>
+<testcase name="D02 Refresh job Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="6.982">
+</testcase>
+<testcase name="D02 Save is awaited before opening another draft and persists one revision" classname="audit-draft-dirty.spec.ts" time="6.281">
+</testcase>
+<testcase name="D02 failed Save 401 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.949">
+</testcase>
+<testcase name="D02 failed Save 412 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.587">
+</testcase>
+<testcase name="D02 failed Save 503 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="6.346">
+</testcase>
+<testcase name="D02 Refresh does not overwrite the unsaved buffer before a decision" classname="audit-draft-dirty.spec.ts" time="6.022">
+</testcase>
+<testcase name="D02 delayed refresh cannot materialize a draft into a new project scope" classname="audit-draft-dirty.spec.ts" time="7.355">
+</testcase>
+<testcase name="D02 zh-HK mobile dialog preserves content and keeps all choices visible" classname="audit-draft-dirty.spec.ts" time="6.809">
+</testcase>
+</testsuite>
+<testsuite name="audit-template-copy.spec.ts" timestamp="2026-10-03T11:10:01.672Z" hostname="" tests="2" failures="0" skipped="0" time="32.559" errors="0">
+<testcase name="A02 fixed-template promise matches two actual outputs; manual edits keep Q15 dirty protection" classname="audit-template-copy.spec.ts" time="17.798">
+</testcase>
+<testcase name="A07 zh-HK mobile template keeps original English citations through exact approval and authorized export" classname="audit-template-copy.spec.ts" time="14.761">
+</testcase>
+</testsuite>
+</testsuites>

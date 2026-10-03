@@ -1,0 +1,148 @@
+{
+  "base_sha": "c09eec2872b1fa73719c0894c14d01c23a13bbdc",
+  "reviewed_source_sha": "a2696e1a317342a64c9b9b29b0585ae8ddff54bf",
+  "deployed_sha": null,
+  "reports": {
+    "q07-api-final.xml": {
+      "totals": {
+        "tests": 47,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "suite_seconds": 47.793,
+      "checker_command": [
+        "services/api/.venv/Scripts/python.exe",
+        "scripts/check-required-tests.py",
+        "--junit",
+        "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\docs\\buyeros\\evidence\\audit-fixes-20261003\\Q07\\q07-api-final.xml"
+      ],
+      "checker_stdout": "passed=47 failed=0 errors=0 skipped=0\n",
+      "checker_exit": 0
+    },
+    "q07-worker-final.xml": {
+      "totals": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "suite_seconds": 9.538,
+      "checker_command": [
+        "services/api/.venv/Scripts/python.exe",
+        "scripts/check-required-tests.py",
+        "--junit",
+        "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\docs\\buyeros\\evidence\\audit-fixes-20261003\\Q07\\q07-worker-final.xml"
+      ],
+      "checker_stdout": "passed=11 failed=0 errors=0 skipped=0\n",
+      "checker_exit": 0
+    },
+    "q07-ui-final.xml": {
+      "totals": {
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "suite_seconds": 99.38799999999999,
+      "checker_command": [
+        "services/api/.venv/Scripts/python.exe",
+        "scripts/check-required-tests.py",
+        "--junit",
+        "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\docs\\buyeros\\evidence\\audit-fixes-20261003\\Q07\\q07-ui-final.xml"
+      ],
+      "checker_stdout": "passed=12 failed=0 errors=0 skipped=0\n",
+      "checker_exit": 0
+    }
+  },
+  "product_source": [
+    {
+      "path": "docs/buyeros/03_DATA_API_AND_STATE_CONTRACTS.md",
+      "tested_working_sha256": "06eaa53d1d4f08ac30fe25d59c9f81b04e7e63f97a90c35b4712c66644d8ceb6",
+      "committed_blob_sha256": "cee520bb2d3634e4747256281d2d1caab6edf43af0340d3aa49d9743eee55e85",
+      "byte_equal": false,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "features/live/drafts.tsx",
+      "tested_working_sha256": "85ae0cdddb5bc62119ab2035354cdbafedc20c19421c2b0315b16c4c32526610",
+      "committed_blob_sha256": "e169ae3c169a2eaf5f2ccb70a0807ca916112b674494d9afb7bee9e090b32b2d",
+      "byte_equal": false,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/api/buyeros_api/execution/handlers/draft_generate.py",
+      "tested_working_sha256": "6fcbff2ad0a8313b187a2d8b9ffc8f4b5692849ac95dd94755f86df6273a8beb",
+      "committed_blob_sha256": "a612e1ad618de46afaf47952a04abadaf421e0678d3fb2725fcdd50129b48759",
+      "byte_equal": false,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/api/tests/test_draft.py",
+      "tested_working_sha256": "f6da1f2132f48d31ef56e4b27dee846884c36941ba768b44c8134cb7e6549bd0",
+      "committed_blob_sha256": "fe6c09aadaff54b33f7bc545a549fe4dad33113e574f4c0dc2bbedc71afdd67e",
+      "byte_equal": false,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/api/tests/test_draft_persistence_db.py",
+      "tested_working_sha256": "0873a451e70f502cc5edf22e14f6faed298f9a66707f50be2c406150d03b9c9b",
+      "committed_blob_sha256": "88688f64a19159234ee5cd38e15c1de9bcc35f914df79ec0591a207769df8e48",
+      "byte_equal": false,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/worker/tests/fixtures/audit_template.py",
+      "tested_working_sha256": "78e20deaf35433d575bc40b966b65be0d429d62179dedbb028a56ad7ec1a4a16",
+      "committed_blob_sha256": "d48fb9dea2779db90bd2393c1855bbfb0b551a74434e981a111f8bd7489accf0",
+      "byte_equal": false,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "tests/e2e/audit-template-copy.spec.ts",
+      "tested_working_sha256": "e3942c617ff527f8b169458a1de633444a39b7aeeb1ad9927a261bdc1817f0d2",
+      "committed_blob_sha256": "1465d005481652d538813095a0cc49ca25a27ba1e0c344a1c753801a3e256d09",
+      "byte_equal": false,
+      "newline_normalized_equal": true
+    }
+  ],
+  "input_files_verified": 31,
+  "original_case_rows_and_columns_preserved": 98,
+  "changed_case_ids": [
+    "A02",
+    "A07"
+  ],
+  "operations": 80,
+  "original_operations": 70,
+  "extensions": 10,
+  "changed_existing_operation_ids": [
+    "generateDraft",
+    "getDraft",
+    "editDraft",
+    "requestDraftReview",
+    "approveDraft",
+    "exportDraft",
+    "downloadExport"
+  ],
+  "new_operation_ids": [],
+  "other_task_records_preserved": 24,
+  "new_migrations": 0,
+  "migration_source_head": "0036_checkpoint_schema_grants",
+  "source_reverse_patch_check_exit": 0,
+  "recommended_rollback": "generation-pause-rollback.patch; no full revert",
+  "rollback_patch_check_exit": 0,
+  "rollback_browser_rehearsal": "not-run",
+  "cleanup": {
+    "owner": "052d6a686de9",
+    "volume": "buyeros-audit-ui-deps-052d6a686de9",
+    "inspected_labels": {
+      "buyeros.audit.owner": "052d6a686de9"
+    },
+    "removed": true,
+    "ui_marker_absent": true,
+    "db_marker_absent": true,
+    "owned_audit_containers_absent": true,
+    "unrelated_resources": "untouched"
+  },
+  "independent_review": "pending"
+}

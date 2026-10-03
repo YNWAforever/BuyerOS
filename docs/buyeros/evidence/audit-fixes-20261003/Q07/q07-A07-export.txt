@@ -1,0 +1,13 @@
+To: recipient@fixture.example.test
+From: Fixture Alex <alex@example.test>
+Subject: 業務簡介：Fictional industrial sensors
+
+你好，
+
+我們提供：Fictional industrial sensors [offer_fact:eb000000-0000-4000-8000-000000000001]
+
+參考公開資料："Fixture public catalog lists industrial sensors." [evidence:e5000000-0000-4000-8000-000000000001:v1]
+
+如果合適，歡迎安排交流。
+
+Sources: e4000000-0000-4000-8000-000000000001

@@ -1,0 +1,79 @@
+{
+  "fixture_only": true,
+  "draft": {
+    "id": "d02b1aee-0d75-42d1-9f00-e6128cbfbe33",
+    "workspace_id": "e0000000-0000-4000-8000-000000000001",
+    "version": 1,
+    "created_at": "2026-10-03T11:11:37.384058+00:00",
+    "updated_at": "2026-10-03T11:11:37.384058+00:00",
+    "data_mode": "live",
+    "project_id": "e1000000-0000-4000-8000-000000000001",
+    "buyer_id": "e2000000-0000-4000-8000-000000000001",
+    "status": "draft",
+    "revision_id": "70427140-74ec-4b7d-bdfe-13a9e2a505e0",
+    "revision_number": 1,
+    "content_hash": "d41c134273e518e2e127e5c4d8153274020826c8954899d1b027d061e83a6c48",
+    "context_hash": "67d5638e87c55f449463030da811158f4a16c27d48148f47dd34920a79387df0",
+    "icp_version_id": "e6000000-0000-4000-8000-000000000001",
+    "evidence_set_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "policy_decision_ids": [
+      "ed000000-0000-4000-8000-000000000001"
+    ],
+    "kind": "initial",
+    "subject": "業務簡介：Fictional industrial sensors",
+    "body": "你好，\n\n我們提供：Fictional industrial sensors [offer_fact:eb000000-0000-4000-8000-000000000001]\n\n參考公開資料：\"Fixture public catalog lists industrial sensors.\" [evidence:e5000000-0000-4000-8000-000000000001:v1]\n\n如果合適，歡迎安排交流。",
+    "language": "zh-HK",
+    "evidence_refs": [
+      {
+        "id": "e5000000-0000-4000-8000-000000000001",
+        "version": 1
+      }
+    ],
+    "claims": [
+      {
+        "kind": "offer_fact",
+        "text": "Fictional industrial sensors",
+        "evidence_ids": [],
+        "offer_fact_ids": [
+          "eb000000-0000-4000-8000-000000000001"
+        ]
+      },
+      {
+        "kind": "observation",
+        "text": "Fixture public catalog lists industrial sensors.",
+        "evidence_ids": [
+          "e5000000-0000-4000-8000-000000000001"
+        ],
+        "offer_fact_ids": []
+      }
+    ],
+    "approval_id": null,
+    "delivery_enabled": false,
+    "value_proposition_fact_ids": [
+      "eb000000-0000-4000-8000-000000000001"
+    ],
+    "objective": "內部跟進工作",
+    "tone": "professional",
+    "sender_identity_version": "sender:ea000000-0000-4000-8000-000000000001:1",
+    "recipient_contact_id": "ef070000-0000-4000-8000-000000000001"
+  },
+  "materialization": {
+    "fixture_only": true,
+    "dispatch_fixture_staged": true,
+    "job": "bfdbf1b8-e027-4f5e-b463-75673542aea9",
+    "draft": "d02b1aee-0d75-42d1-9f00-e6128cbfbe33",
+    "result": "done",
+    "duplicate": "duplicate",
+    "revisions": 1,
+    "paid_before": [
+      0,
+      0
+    ],
+    "paid_after": [
+      0,
+      0
+    ]
+  },
+  "viewer_export": 403,
+  "delivery": 403
+}

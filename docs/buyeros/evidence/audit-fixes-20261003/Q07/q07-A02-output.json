@@ -1,0 +1,153 @@
+{
+  "fixture_only": true,
+  "first": {
+    "id": "eb8051bc-254e-4106-879c-bb26802d1378",
+    "workspace_id": "e0000000-0000-4000-8000-000000000001",
+    "version": 1,
+    "created_at": "2026-10-03T11:11:20.933352+00:00",
+    "updated_at": "2026-10-03T11:11:20.933352+00:00",
+    "data_mode": "live",
+    "project_id": "e1000000-0000-4000-8000-000000000001",
+    "buyer_id": "e2000000-0000-4000-8000-000000000001",
+    "status": "draft",
+    "revision_id": "2b7a5455-ab44-46d9-be88-362f2bf840d5",
+    "revision_number": 1,
+    "content_hash": "3c414f8cfd18917c3df41042e18728ea964325066f973fd9710b8679fdd9ebd9",
+    "context_hash": "935bbb6e6dac997327228acae7813d0baf9e0803a2067731c78ae8ae72989f9d",
+    "icp_version_id": "e6000000-0000-4000-8000-000000000001",
+    "evidence_set_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "policy_decision_ids": [
+      "ed000000-0000-4000-8000-000000000001"
+    ],
+    "kind": "initial",
+    "subject": "Introduction: Fictional industrial sensors",
+    "body": "Hello,\n\nWe offer: Fictional industrial sensors [offer_fact:eb000000-0000-4000-8000-000000000001]\n\nPublic source excerpt: \"Fixture public catalog lists industrial sensors.\" [evidence:e5000000-0000-4000-8000-000000000001:v1]\n\nWould a conversation be useful?",
+    "language": "en",
+    "evidence_refs": [
+      {
+        "id": "e5000000-0000-4000-8000-000000000001",
+        "version": 1
+      }
+    ],
+    "claims": [
+      {
+        "kind": "offer_fact",
+        "text": "Fictional industrial sensors",
+        "evidence_ids": [],
+        "offer_fact_ids": [
+          "eb000000-0000-4000-8000-000000000001"
+        ]
+      },
+      {
+        "kind": "observation",
+        "text": "Fixture public catalog lists industrial sensors.",
+        "evidence_ids": [
+          "e5000000-0000-4000-8000-000000000001"
+        ],
+        "offer_fact_ids": []
+      }
+    ],
+    "approval_id": null,
+    "delivery_enabled": false,
+    "value_proposition_fact_ids": [
+      "eb000000-0000-4000-8000-000000000001"
+    ],
+    "objective": "Request a demonstration",
+    "tone": "professional",
+    "sender_identity_version": "sender:ea000000-0000-4000-8000-000000000001:1",
+    "recipient_contact_id": null
+  },
+  "second": {
+    "id": "a1c2d8ea-bc7e-4d85-90d6-6a43cb414284",
+    "workspace_id": "e0000000-0000-4000-8000-000000000001",
+    "version": 1,
+    "created_at": "2026-10-03T11:11:25.709061+00:00",
+    "updated_at": "2026-10-03T11:11:25.709061+00:00",
+    "data_mode": "live",
+    "project_id": "e1000000-0000-4000-8000-000000000001",
+    "buyer_id": "e2000000-0000-4000-8000-000000000001",
+    "status": "draft",
+    "revision_id": "9fe336db-496f-4656-b11c-44162314eeee",
+    "revision_number": 1,
+    "content_hash": "c424d88f550afcc1b80ae298ef07d59473ccd9c1f3fbb8ae226580a3c479a858",
+    "context_hash": "c95468ed404b41e31f87eb3e8fd780d60eff029ddf27cd85a043d3df2dd99842",
+    "icp_version_id": "e6000000-0000-4000-8000-000000000001",
+    "evidence_set_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "policy_decision_ids": [
+      "ed000000-0000-4000-8000-000000000001"
+    ],
+    "kind": "initial",
+    "subject": "Introduction: Fictional industrial sensors",
+    "body": "Hello,\n\nWe offer: Fictional industrial sensors [offer_fact:eb000000-0000-4000-8000-000000000001]\n\nPublic source excerpt: \"Fixture public catalog lists industrial sensors.\" [evidence:e5000000-0000-4000-8000-000000000001:v1]\n\nWould a conversation be useful?",
+    "language": "en",
+    "evidence_refs": [
+      {
+        "id": "e5000000-0000-4000-8000-000000000001",
+        "version": 1
+      }
+    ],
+    "claims": [
+      {
+        "kind": "offer_fact",
+        "text": "Fictional industrial sensors",
+        "evidence_ids": [],
+        "offer_fact_ids": [
+          "eb000000-0000-4000-8000-000000000001"
+        ]
+      },
+      {
+        "kind": "observation",
+        "text": "Fixture public catalog lists industrial sensors.",
+        "evidence_ids": [
+          "e5000000-0000-4000-8000-000000000001"
+        ],
+        "offer_fact_ids": []
+      }
+    ],
+    "approval_id": null,
+    "delivery_enabled": false,
+    "value_proposition_fact_ids": [
+      "eb000000-0000-4000-8000-000000000001"
+    ],
+    "objective": "Discuss procurement",
+    "tone": "professional",
+    "sender_identity_version": "sender:ea000000-0000-4000-8000-000000000001:1",
+    "recipient_contact_id": null
+  },
+  "materialization": [
+    {
+      "fixture_only": true,
+      "dispatch_fixture_staged": true,
+      "job": "82f824be-2dbb-46fe-bb16-0569b84fe120",
+      "draft": "eb8051bc-254e-4106-879c-bb26802d1378",
+      "result": "done",
+      "duplicate": "duplicate",
+      "revisions": 1,
+      "paid_before": [
+        0,
+        0
+      ],
+      "paid_after": [
+        0,
+        0
+      ]
+    },
+    {
+      "fixture_only": true,
+      "dispatch_fixture_staged": true,
+      "job": "d942a3f4-7ab7-47e2-8554-ed76fa3a12fe",
+      "draft": "a1c2d8ea-bc7e-4d85-90d6-6a43cb414284",
+      "result": "done",
+      "duplicate": "duplicate",
+      "revisions": 1,
+      "paid_before": [
+        0,
+        0
+      ],
+      "paid_after": [
+        0,
+        0
+      ]
+    }
+  ]
+}

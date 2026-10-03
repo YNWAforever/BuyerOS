@@ -1,0 +1,41 @@
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="1" time="172.049221">
+<testsuite name="audit-template-copy.spec.ts" timestamp="2026-10-03T11:01:41.639Z" hostname="" tests="2" failures="0" skipped="0" time="108.375" errors="1">
+<testcase name="A02 fixed-template promise matches two actual outputs; manual edits keep Q15 dirty protection" classname="audit-template-copy.spec.ts" time="48.205">
+</testcase>
+<testcase name="A07 zh-HK mobile template keeps original English citations through exact approval and authorized export" classname="audit-template-copy.spec.ts" time="60.17">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-template-copy-A07-zh-ae804-roval-and-authorized-export\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-template-copy-A07-zh-ae804-roval-and-authorized-export\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  audit-template-copy.spec.ts:37:1 › A07 zh-HK mobile template keeps original English citations through exact approval and authorized export 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: browserContext.close: Target page, context or browser has been closed
+
+      53 |     const deliver=await reviewer.request.post(`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${generated.draft.id}/deliver`,{headers:{Authorization:'Bearer fixture-reviewer','Idempotency-Key':'q07-disabled-delivery'}});expect(deliver.status()).toBe(403);expect((await deliver.json()).code).toBe('DELIVERY_DISABLED');
+      54 |     await writeFile('test-results/q07-A07-output.json',JSON.stringify({fixture_only:true,draft:generated.draft,materialization:generated.materialized,viewer_export:denied.status(),delivery:deliver.status()},null,2));
+    > 55 |   }finally{await context.close();await page.getByRole('combobox',{name:'語言',exact:true}).first().selectOption('en');await expect(page.locator('html')).toHaveAttribute('lang','en');}
+         |            ^
+      56 | });
+      57 |
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-template-copy.spec.ts:55:12
+
+    Error Context: ..\..\test-results\audit-fixes\audit-template-copy-A07-zh-ae804-roval-and-authorized-export\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-template-copy-A07-zh-ae804-roval-and-authorized-export\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-template-copy-A07-zh-ae804-roval-and-authorized-export\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>
