@@ -1,0 +1,342 @@
+{
+  "mode": "keyboard",
+  "actions": [
+    {
+      "kind": "activate",
+      "name": "Sign in",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "2px solid"
+    },
+    {
+      "kind": "select",
+      "name": "語言",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "新增專案",
+      "tabs": 12,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 3,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "繼續",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 18,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "繼續",
+      "tabs": 8,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 19,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 3,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "繼續",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "儲存輪廓",
+      "tabs": 0,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "編輯產品資料",
+      "tabs": 35,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 3,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "Fictional monitoring lowers production downtime.",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "繼續",
+      "tabs": 4,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "繼續",
+      "tabs": 0,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 22,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "繼續",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "儲存輪廓",
+      "tabs": 0,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Sign in",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "2px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "研究進度",
+      "tabs": 7,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 8,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "開始研究",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "買家",
+      "tabs": 9,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "詳情",
+      "tabs": 21,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "證據",
+      "tabs": 3,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Sign in",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "2px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "買家",
+      "tabs": 5,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "詳情",
+      "tabs": 21,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "準備有證據草稿",
+      "tabs": 6,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "不指定收件人 — 未指定收件人的草稿recipient@fixture.example.test · v1",
+      "tabs": 4,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "English繁體中文",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "產生已指定收件人的草稿",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "重新整理工作",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "開啟草稿",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "你好，\n\n我們提供：Industrial sensor platform [offer_fact:d0000000-0000-4000-8000-000000000001]\n\n我們提供：Fictional monitoring lowers",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "儲存修訂",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "結果",
+      "tabs": 25,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "記錄成果",
+      "tabs": 21,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "成果備註",
+      "tabs": 32,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "記錄人手成果",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Sign in",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "2px solid"
+    }
+  ],
+  "trustedPointerEvents": []
+}

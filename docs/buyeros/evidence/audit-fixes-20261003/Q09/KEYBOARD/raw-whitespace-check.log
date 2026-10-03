@@ -1,0 +1,228 @@
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/Q09-keyboard.patch:240: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/Q09-keyboard.patch:244: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/Q09-keyboard.patch:269: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/Q09-keyboard.patch:273: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/Q09-keyboard.patch:325: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/Q09-keyboard.patch:577: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/Q09-keyboard.patch:581: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/58006ad0ffca-error-context.md:145: trailing whitespace.
++  2  | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/58006ad0ffca-error-context.md:148: trailing whitespace.
++  5  | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/58006ad0ffca-error-context.md:199: trailing whitespace.
++  55 | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/59ac6657d148-error-context.md:317: trailing whitespace.
++  8   | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/59ac6657d148-error-context.md:423: trailing whitespace.
++  113 | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/687321ed0222-error-context.md:178: trailing whitespace.
++  101 | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/687321ed0222-error-context.md:225: trailing whitespace.
++  148 | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/9dff616f2fcf-error-context.md:43: trailing whitespace.
++  2  | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/9dff616f2fcf-error-context.md:46: trailing whitespace.
++  5  | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/9dff616f2fcf-error-context.md:97: trailing whitespace.
++  55 | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/fd314294321e-error-context.md:84: trailing whitespace.
++  2  | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/fd314294321e-error-context.md:87: trailing whitespace.
++  5  | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/fd314294321e-error-context.md:138: trailing whitespace.
++  55 | 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-fourth.log:41: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-fourth.log:42: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-fourth.log:48: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-fourth.log:50: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-fourth.log:52: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-fourth.log:54: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-fourth.log:56: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-fourth.log:58: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-fourth.log:60: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-fourth.log:68: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-fourth.log:149: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-second.log:41: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:41: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:42: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:48: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:50: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:52: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:54: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:56: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:58: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:60: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:141: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:150: trailing whitespace.
++  1) tests\e2e\fixtures\staff-journey.ts:105:1 › T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.log:187: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:105:1 › T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline-third.xml:12: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:105:1 › T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-baseline.log:41: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:42: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:43: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:49: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:51: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:53: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:55: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:57: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:59: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:61: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:140: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:162: trailing whitespace.
++  1) tests\e2e\audit-keyboard-workbench.spec.ts:30:2 › U09 U10 keyboard zh-HK mobile task3 cross-page assignment, persisted conflict and exact failed-only manifest 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.log:196: trailing whitespace.
++    tests\e2e\audit-keyboard-workbench.spec.ts:30:2 › U09 U10 keyboard zh-HK mobile task3 cross-page assignment, persisted conflict and exact failed-only manifest 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-final.xml:26: trailing whitespace.
++<![CDATA[  audit-keyboard-workbench.spec.ts:30:2 › U09 U10 keyboard zh-HK mobile task3 cross-page assignment, persisted conflict and exact failed-only manifest 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:41: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:42: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:48: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:50: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:52: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:54: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:56: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:58: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:60: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:140: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:162: trailing whitespace.
++  1) tests\e2e\fixtures\staff-journey.ts:105:1 › T30 keyboard zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:199: trailing whitespace.
++  2) tests\e2e\fixtures\staff-journey.ts:105:1 › T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:237: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:105:1 › T30 keyboard zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.log:238: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:105:1 › T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.xml:36: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:105:1 › T30 keyboard zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-first.xml:84: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:105:1 › T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-observed.log:42: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-observed.log:43: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-observed.log:49: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-observed.log:51: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-observed.log:53: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-observed.log:55: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-observed.log:57: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-observed.log:59: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-observed.log:61: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:42: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:43: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:49: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:51: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:53: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:55: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:57: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:65: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:67: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:69: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:150: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:172: trailing whitespace.
++  1) tests\e2e\fixtures\staff-journey.ts:105:1 › T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.log:206: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:105:1 › T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-full-third.xml:34: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:105:1 › T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-proof-full.log:42: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-proof-full.log:43: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-proof-full.log:49: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-proof-full.log:51: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-proof-full.log:53: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-proof-full.log:55: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-proof-full.log:57: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-proof-full.log:59: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-proof-full.log:61: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-proof-full.log:140: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-sdd-startup-first.log:43: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-sdd-startup-first.log:45: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-sdd-startup-first.log:50: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-sdd-startup-first.log:53: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-task-done-final.log:5: trailing whitespace.
++    tests\e2e\audit-keyboard-workbench.spec.ts:30:2 › U09 U10 keyboard zh-HK mobile task3 cross-page assignment, persisted conflict and exact failed-only manifest 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-task-done-second.log:5: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:105:1 › T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/reports/q09-keyboard-task-done.log:2: trailing whitespace.
++[WebServer] 

@@ -1,0 +1,62 @@
+tests/e2e/fixtures/staff-journey.ts(19,48): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(19,56): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(19,59): error TS1005: '=>' expected.
+tests/e2e/fixtures/staff-journey.ts(19,69): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(19,76): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(27,92): error TS1005: '}' expected.
+tests/e2e/fixtures/staff-journey.ts(27,113): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(27,120): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(27,156): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(105,7): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(105,8): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(105,18): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(105,46): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(105,48): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(105,49): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(105,59): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(105,87): error TS1005: ',' expected.
+tests/e2e/fixtures/staff-journey.ts(105,88): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(105,98): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(105,119): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(105,125): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(105,152): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(105,172): error TS1109: Expression expected.
+tests/e2e/fixtures/staff-journey.ts(105,179): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(105,183): error TS1435: Unknown keyword or identifier. Did you mean 'out come'?
+tests/e2e/fixtures/staff-journey.ts(105,191): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(105,194): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(105,205): error TS1443: Module declaration names may only use ' or " quoted strings.
+tests/e2e/fixtures/staff-journey.ts(113,23): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(113,44): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(113,80): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(113,104): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(161,61): error TS1005: ':' expected.
+tests/e2e/fixtures/staff-journey.ts(161,72): error TS1109: Expression expected.
+tests/e2e/fixtures/staff-journey.ts(161,80): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(161,81): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(231,41): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(231,95): error TS1121: Octal literals are not allowed. Use the syntax '-0o0'.
+tests/e2e/fixtures/staff-journey.ts(231,110): error TS1121: Octal literals are not allowed. Use the syntax '-0o5'.
+tests/e2e/fixtures/staff-journey.ts(236,33): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(236,46): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(236,52): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(236,65): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(266,70): error TS1005: ':' expected.
+tests/e2e/fixtures/staff-journey.ts(266,81): error TS1109: Expression expected.
+tests/e2e/fixtures/staff-journey.ts(266,89): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(266,90): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(266,100): error TS1109: Expression expected.
+tests/e2e/fixtures/staff-journey.ts(266,106): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(266,107): error TS1434: Unexpected keyword or identifier.
+tests/e2e/fixtures/staff-journey.ts(276,36): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(276,50): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(276,74): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(276,84): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(276,102): error TS1109: Expression expected.
+tests/e2e/fixtures/staff-journey.ts(285,35): error TS1005: ';' expected.
+tests/e2e/fixtures/staff-journey.ts(286,54): error TS1128: Declaration or statement expected.
+tests/e2e/fixtures/staff-journey.ts(311,1): error TS1128: Declaration or statement expected.
+tests/e2e/fixtures/staff-journey.ts(311,2): error TS1128: Declaration or statement expected.
+tests/e2e/fixtures/staff-journey.ts(312,1): error TS1128: Declaration or statement expected.
+tests/e2e/fixtures/staff-journey.ts(313,1): error TS1128: Declaration or statement expected.
+tests/e2e/fixtures/staff-journey.ts(315,1): error TS1128: Declaration or statement expected.

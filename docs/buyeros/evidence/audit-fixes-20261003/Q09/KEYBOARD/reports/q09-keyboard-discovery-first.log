@@ -1,0 +1,19 @@
+
+SyntaxError: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts: Missing semicolon. (19:46)
+
+  17 |     publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
+  18 |   const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'research-fixture',use:'sig'};
+> 19 |   const encode=(value:unknown)=>input.function toString() { [native code] }(Buffer.from(JSON.stringify(value)),'base64url');let nonce='';
+     |                                               ^
+  20 |   await page.route('https://oidc.buyeros.test/authorize**',async route=>{const q=new URL(route.request().url()).searchParams;
+  21 |     nonce=q.get('nonce')||'';await route.fulfill({status:302,headers:{location:`http://localhost:5173/auth/callback?code=research-fixture&state=${q.get('state')}`},body:''});});
+  22 |   await page.route('https://oidc.buyeros.test/oauth/token',async route=>{
+
+   at audit-keyboard.spec.ts:19
+
+
+    at eval (<anonymous>:1:1)
+
+Error: No tests found
+Listing tests:
+Total: 0 tests in 0 files

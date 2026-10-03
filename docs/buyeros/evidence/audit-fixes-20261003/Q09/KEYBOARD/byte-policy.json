@@ -1,0 +1,21 @@
+{
+  "raw_whitespace_exit": 2,
+  "raw_findings": 115,
+  "all_findings_only_producer_bytes": true,
+  "raw_context_exact_exclusions": [
+    "docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/58006ad0ffca-error-context.md",
+    "docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/59ac6657d148-error-context.md",
+    "docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/687321ed0222-error-context.md",
+    "docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/9dff616f2fcf-error-context.md",
+    "docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/artifacts/fd314294321e-error-context.md"
+  ],
+  "other_raw_extensions_excluded": [
+    "log",
+    "xml",
+    "patch"
+  ],
+  "curated_whitespace_exit": 0,
+  "producer_bytes_normalized_or_stripped": false,
+  "test_assertions_or_DB_guards_changed": false,
+  "verification": "all raw producer hashes and staged SHA manifest matched; trailing numbered blank-source lines kept literally"
+}

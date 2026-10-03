@@ -1,0 +1,18 @@
+{
+  "name": "buyeros-audit-ui-052d6a686de9",
+  "volume": "buyeros-audit-ui-deps-052d6a686de9",
+  "owner": "052d6a686de9",
+  "mode": "http",
+  "runtime": "built",
+  "executionProfile": "managed-linux",
+  "image": "node:22.23.2-bookworm-slim",
+  "compiled_entry_sha256": "409d452e31df148667b106d4863801de71f71065fcbd34aa8184eff4dd77d01a",
+  "verified_while_alive": true,
+  "db": {
+    "name": "buyeros-test-c6f99de0",
+    "image": "postgres:16",
+    "loopback_only": true,
+    "port": "60796",
+    "proof": "current owned fixture marker and guarded fake-workbench helper"
+  }
+}

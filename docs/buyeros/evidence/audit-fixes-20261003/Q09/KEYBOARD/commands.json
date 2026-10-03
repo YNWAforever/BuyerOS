@@ -1,0 +1,63 @@
+{
+  "cwd": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS",
+  "shell": "Windows PowerShell",
+  "source": "f70501a174c641db65d06929ebd3b7e8b52ee3bb",
+  "application_source": "1953d615dc00e6920380dbb71be6a99b96e36488",
+  "environment": {
+    "BUYEROS_STRICT_INTEGRATION": "1",
+    "BUYEROS_AUDIT_UI_RUNTIME": "built",
+    "BUYEROS_DATABASE_URL": "unset",
+    "DATABASE_URL": "unset",
+    "TEST_DATABASE_URL": "unset",
+    "BUYEROS_KEYBOARD_REPORT": "test-results/q09-keyboard-proof-full.xml",
+    "BUYEROS_KEYBOARD_JSON_REPORT": "test-results/q09-keyboard-proof-full.json"
+  },
+  "commands": [
+    {
+      "name": "whole12",
+      "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-keyboard.config.ts",
+      "wrapper": "powershell.exe -NoProfile -File test-results/q09-keyboard-native-gate.ps1; existing System32 tar selected; exact command/exit preserved",
+      "exit": 0,
+      "reports": [
+        "q09-keyboard-proof-full.xml",
+        "q09-keyboard-proof-full.json"
+      ]
+    },
+    {
+      "name": "types",
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exit": 0,
+      "report": "q09-keyboard-types-proof.log"
+    },
+    {
+      "name": "six-file lint",
+      "command": "node node_modules/eslint/bin/eslint.js tests/e2e/fixtures/journey-input.ts tests/e2e/fixtures/staff-journey.ts tests/e2e/fixtures/workbench-auth.ts tests/e2e/audit-keyboard.spec.ts tests/e2e/audit-keyboard-workbench.spec.ts playwright.audit-keyboard.config.ts --max-warnings 0",
+      "exit": 0,
+      "report": "q09-keyboard-lint-proof.log"
+    },
+    {
+      "name": "generated types",
+      "command": "node scripts/generate-api-types.mjs --check",
+      "exit": 0,
+      "report": "q09-keyboard-generated-types-postcommit.log"
+    },
+    {
+      "name": "84operations",
+      "command": "uv run --frozen --directory services/api python ../../scripts/generate-operation-routes.py --check",
+      "exit": 0,
+      "report": "q09-keyboard-operation-postcommit.log"
+    },
+    {
+      "name": "source heads",
+      "command": "uv run --frozen --directory services/api alembic heads",
+      "exit": 0,
+      "report": "q09-keyboard-alembic-heads.log"
+    },
+    {
+      "name": "proof",
+      "command": "python test-results/q09-keyboard-verify-proof.py",
+      "exit": 0,
+      "raw_bodies": 14
+    }
+  ]
+}

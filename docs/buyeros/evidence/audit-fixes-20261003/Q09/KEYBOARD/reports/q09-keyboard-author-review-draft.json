@@ -1,0 +1,52 @@
+{
+  "fixture_only": true,
+  "base": "86014b03f2a7db48c90ecd1c52800b528679a220",
+  "source_files": [
+    {
+      "path": "tests/e2e/fixtures/journey-input.ts",
+      "lf_sha256": "d9c1f44e29efc541344d592c2bf05f623d7fe28a02b5727d505d196254e4aaca"
+    },
+    {
+      "path": "tests/e2e/fixtures/staff-journey.ts",
+      "lf_sha256": "82fb07854813a84a122d8f183c436e5c8e6babc62fb581000ab8bb2fedb9f85d"
+    },
+    {
+      "path": "tests/e2e/fixtures/workbench-auth.ts",
+      "lf_sha256": "1d6bcf091893eceb41d66243e45eec23fff22ef01f271154c36ddac2742e19e5"
+    },
+    {
+      "path": "tests/e2e/audit-keyboard.spec.ts",
+      "lf_sha256": "1a9515c00796d0defeb97aa7efce6de5a1533cb9fc1d9dac902ad6d077f02fd3"
+    },
+    {
+      "path": "tests/e2e/audit-keyboard-workbench.spec.ts",
+      "lf_sha256": "6d485dd35c5510e82d7e30d88384421680074638b56b53b70aa22dec65d5b173"
+    },
+    {
+      "path": "playwright.audit-keyboard.config.ts",
+      "lf_sha256": "15a7478b5db642994640c59a5b46076254e335630ae7779d946b86530db86afe"
+    }
+  ],
+  "application_prefixes_unchanged": [
+    "app",
+    "features",
+    "services",
+    "components",
+    "contracts",
+    "package.json",
+    "pnpm-lock.yaml"
+  ],
+  "keyboard_pointer_APIs_only_in_explicit_pointer_branch": true,
+  "keyboard_interactions": "Tab, Enter, Space, native select Home/ArrowDown/Enter; ControlOrMeta+A+insertText",
+  "DOM_evaluations": "read-only activeElement/focus-visible/outline/options/overflow/persisted-locale observation",
+  "request_observations": "actual HTTP and generated AsyncJob/result-page checks; no v1 fixture response substitutions",
+  "DB_helpers": "existing guarded audit_manifests/audit_memberships/audit_job_scopes and prepare_browser_project/run_browser_research; unchanged",
+  "original_pointer_flow": "default inputMode pointer, original Locator APIs and 360s whole-case bound; four-case gate required",
+  "keyboard_whole_bounds": "600s full journey; 300s tasks3/5; existing 30s/45s fixture helpers, 5s functional assertions",
+  "human_screen_reader": null,
+  "human_staff_UAT": null,
+  "independent_review": null,
+  "live_auth_provider": false,
+  "deployed_sha": null,
+  "reporting_risk": "list/JUnit omit successful JSON body attachments; JSON reporter required before final proof claim"
+}

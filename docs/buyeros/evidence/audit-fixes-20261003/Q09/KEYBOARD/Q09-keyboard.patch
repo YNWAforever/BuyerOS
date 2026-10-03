@@ -1,0 +1,606 @@
+diff --git a/playwright.audit-keyboard.config.ts b/playwright.audit-keyboard.config.ts
+new file mode 100644
+index 0000000..047d58d
+--- /dev/null
++++ b/playwright.audit-keyboard.config.ts
+@@ -0,0 +1,6 @@
++import {defineConfig} from '@playwright/test';
++import audit from './playwright.audit-fixes.config';
++// Exact keyboard audit discovery, owned HTTP/Postgres and optional compiled UI.
++export default defineConfig({...audit,testMatch:['audit-keyboard*.spec.ts','audit-daily-journey.spec.ts'],outputDir:'test-results/q09-keyboard',
++  reporter:[['list'],['junit',{outputFile:process.env.BUYEROS_KEYBOARD_REPORT??'test-results/q09-keyboard.xml'}],
++    ['json',{outputFile:process.env.BUYEROS_KEYBOARD_JSON_REPORT??'test-results/q09-keyboard.json'}]]});
+diff --git a/tests/e2e/audit-keyboard-workbench.spec.ts b/tests/e2e/audit-keyboard-workbench.spec.ts
+new file mode 100644
+index 0000000..4177302
+--- /dev/null
++++ b/tests/e2e/audit-keyboard-workbench.spec.ts
+@@ -0,0 +1,124 @@
++import {expect,test} from '@playwright/test';
++import {execFile} from 'node:child_process';
++import {promisify} from 'node:util';
++import {resolve} from 'node:path';
++import {readFile} from 'node:fs/promises';
++import type {components} from '../../services/generated/buyeros-api';
++import {createJourneyInput} from './fixtures/journey-input';
++import {workspace,project,signInWorkbench,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
++
++type Seed={fixture_only:boolean;ids:string[]};
++type State={fixture_only:boolean;buyers:{id:string;version:number;owner:string|null}[]};
++type Jobs={fixture_only:boolean;own_ids:string[];other_ids:string[]};
++async function fixture<T extends {fixture_only:boolean}>(script:string,...args:string[]):Promise<T>{
++ const cwd=resolve('services/worker'),python=resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
++ const {stdout}=await promisify(execFile)(python,[`tests/fixtures/${script}.py`,...args],{cwd,timeout:script==='audit_manifests'?45_000:30_000,maxBuffer:1024*1024});
++ const value=JSON.parse(stdout.trim().split(/\r?\n/).at(-1)!) as T;expect(value.fixture_only).toBe(true);return value;
++}
++const zh:Record<string,string>={
++ 'Buyers':'買家','Buyer results':'買家結果','Search buyers':'搜尋買家','Next page':'下一頁',
++ 'Assign buyer owners':'批量分派買家負責人','Assignment reason':'分派原因','Confirm owner assignment':'確認負責人分派','Assign selected buyers':'分派已選買家',
++ 'Segmented maintenance':'分段批量維護','Maintenance reason':'維護理由','Preview segmented maintenance':'預覽分段批量維護','Frozen manifest':'已凍結維護清單',
++ 'Confirm exact manifest':'確認精確維護清單','Execute confirmed manifest':'執行已確認維護清單','Bulk job progress':'批量工作進度','Refresh job':'更新工作進度',
++ 'Show job results':'顯示工作結果','Next job results':'下一頁工作結果','Export failed IDs and reasons':'匯出失敗買家 ID 與原因','Preview failed rows with current versions':'按目前版本預覽失敗列',
++ 'Settings':'設定','Member management':'成員管理','Search members':'搜尋成員','Search':'搜尋','Member':'成員','operator':'操作員','Change reason':'變更原因','Save member':'儲存成員',
++ 'Project':'專案','Overview':'總覽','Failed jobs':'失敗工作','Open':'開啟','Bulk jobs':'批量工作','Next':'下一頁','Job details':'工作詳情',
++};
++const ownActor='e0000000-0000-4000-8000-000000000002',projectB='e1140000-0000-4000-8000-000000000002';
++for(const [locale,layout] of [['en','desktop'],['zh-HK','mobile']] as const){
++ const t=(text:string)=>locale==='zh-HK'?(zh[text]??text):text;
++ const viewport=layout==='desktop'?{width:1280,height:800}:{width:390,height:844};
++ test(`U09 U10 keyboard ${locale} ${layout} task3 cross-page assignment, persisted conflict and exact failed-only manifest`,async({page})=>{
++  test.setTimeout(300_000);await page.setViewportSize(viewport);await resetWorkbenchFixtureRateWindows();
++  const seeded=await fixture<Seed>('audit_manifests','seed','101'),input=createJourneyInput('keyboard');
++  await signInWorkbench(page,true,'access',undefined,input);
++  await input.choose(page.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}),locale);
++  await input.activate(page.getByRole('button',{name:t('Buyers'),exact:true}));
++  const buyers=page.getByRole('region',{name:t('Buyer results'),exact:true});
++  await input.fill(buyers.getByRole('textbox',{name:t('Search buyers'),exact:true}),'Q08 Manifest Fixture');await page.keyboard.press('Enter');
++  const selected=buyers.getByRole('checkbox',{name:/^(Select |選取 )/});await expect(selected).toHaveCount(12);
++  await input.check(selected.first());await input.activate(buyers.getByRole('button',{name:t('Next page'),exact:true}));
++  await expect(selected.first()).toHaveAttribute('aria-label',locale==='en'?'Select Q08 Manifest Fixture 00012':'選取 Q08 Manifest Fixture 00012');await input.check(selected.first());
++  const panel=buyers.getByRole('region',{name:t('Assign buyer owners'),exact:true});await expect(panel).toContainText(locale==='en'?'Preview: 2 selected buyers':'預覽：已選 2 位買家');
++  await input.fill(panel.getByRole('textbox',{name:t('Assignment reason'),exact:true}),'Keyboard reviewed two pages');await input.check(panel.getByRole('checkbox',{name:t('Confirm owner assignment'),exact:true}));
++  const assigned=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith('/buyer-owner-assignments'));
++  await input.activate(panel.getByRole('button',{name:t('Assign selected buyers'),exact:true}));const response=await assigned;expect(response.status()).toBe(200);
++  const first=(await response.json()).data;expect([first.updated,first.conflicts,first.blocked]).toEqual([2,0,0]);
++  const initial=await fixture<State>('audit_manifests','inspect');expect(initial.buyers.filter(b=>b.owner===ownActor).map(b=>b.id)).toEqual([seeded.ids[0],seeded.ids[12]]);
++  expect(initial.buyers.filter(b=>b.version===2)).toHaveLength(2);expect(initial.buyers.filter(b=>b.version===1&&b.owner===null)).toHaveLength(99);
++  const maintenance=buyers.getByRole('region',{name:t('Segmented maintenance'),exact:true});
++  await input.fill(maintenance.getByRole('textbox',{name:t('Maintenance reason'),exact:true}),'Keyboard reviewed exact101 manifest');
++  async function preview(){
++   const pending=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith('/bulk-manifests'));
++   await input.activate(maintenance.getByRole('button',{name:t('Preview segmented maintenance'),exact:true}));const r=await pending;expect(r.status()).toBe(201);return (await r.json()).data as {id:string;count:number;digest:string};
++  }
++  async function execute(id:string){
++   await input.check(maintenance.getByRole('checkbox',{name:t('Confirm exact manifest'),exact:true}));
++   const pending=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith(`/bulk-manifests/${id}/execute`));
++   await input.activate(maintenance.getByRole('button',{name:t('Execute confirmed manifest'),exact:true}));return await pending;
++  }
++  const manifest=await preview();expect(manifest.count).toBe(101);await fixture<Seed>('audit_manifests','stale',seeded.ids[1]);
++  const executed=await execute(manifest.id);expect(executed.status()).toBe(202);const job=(await executed.json()).data;
++  const drained=await fixture<{fixture_only:boolean;total:number}>('audit_manifests','drain',job.id);expect(drained.total).toBe(101);
++  const progress=buyers.getByRole('region',{name:t('Bulk job progress'),exact:true});await input.activate(progress.getByRole('button',{name:t('Refresh job'),exact:true}));
++  const summary=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/jobs/${job.id}/summary`,{headers:{Authorization:'Bearer fixture-access'}});expect(summary.status()).toBe(200);
++  const result=(await summary.json()).data;expect([result.processed,result.updated,result.unchanged,result.conflicts,result.blocked]).toEqual([101,98,2,1,0]);
++  await expect(progress).toContainText(locale==='en'?'1 conflicts':'衝突 1');
++  const seen:string[]=[],resultReads:{offset:number;status:number;timing:ReturnType<import('@playwright/test').Request['timing']>}[]=[];
++  for(let offset=0;offset<101;offset+=20){
++   // Observe the actual read before the 5s rendering assertion. An incomplete
++   // request is a failed HTTP check, never a synthetic page or ignored failure.
++   const pending=page.waitForResponse(r=>{const url=new URL(r.url());return r.request().method()==='GET'&&url.pathname===`/v1/workspaces/${workspace}/jobs/${job.id}`&&url.searchParams.get('offset')===String(offset)&&url.searchParams.get('limit')==='20';});
++   await input.activate(progress.getByRole('button',{name:t(offset===0?'Show job results':'Next job results'),exact:true}));
++   const read=await pending;expect(read.status()).toBe(200);
++   const value=(await read.json()).data as components['schemas']['AsyncJob'];
++   expect(value.id).toBe(job.id);expect(value.result_page?.offset).toBe(offset);expect(value.result_page?.total).toBe(101);expect(value.result_page?.items).toHaveLength(Math.min(20,101-offset));
++   resultReads.push({offset,status:read.status(),timing:read.request().timing()});
++   await expect(progress.getByText(`${offset+1}–${Math.min(offset+20,101)} / 101`,{exact:true})).toBeVisible();
++   const rendered=await progress.locator('code').allTextContents();expect(rendered).toEqual(value.result_page!.items.map(item=>item.id));seen.push(...rendered);
++  }
++  expect(seen.length).toBe(101);expect(new Set(seen)).toEqual(new Set(seeded.ids));
++  const download=page.waitForEvent('download');await input.activate(progress.getByRole('button',{name:t('Export failed IDs and reasons'),exact:true}));
++  const csv=await readFile((await (await download).path())!,'utf8');expect(csv.trim().split(/\r?\n/)).toHaveLength(2);expect(csv).toContain(seeded.ids[1]);expect(csv).not.toContain(seeded.ids[0]);
++  const before=await fixture<State>('audit_manifests','inspect');
++  await input.activate(progress.getByRole('button',{name:t('Preview failed rows with current versions'),exact:true}));
++  const retry=await preview();expect(retry.count).toBe(1);expect(retry.digest).not.toBe(manifest.digest);const retried=await execute(retry.id);expect(retried.status()).toBe(200);expect((await retried.json()).data.updated).toBe(1);
++  const after=await fixture<State>('audit_manifests','inspect');expect(after.buyers.filter(b=>b.owner===ownActor)).toHaveLength(101);
++  expect(after.buyers.filter((b,i)=>b.version!==before.buyers[i].version).map(b=>b.id)).toEqual([seeded.ids[1]]);expect(after.buyers.find(b=>b.id===seeded.ids[1])?.version).toBe(3);
++  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
++  await page.screenshot({path:`test-results/q09-keyboard-task3-${locale}-${layout}.png`,fullPage:true});
++  await test.info().attach('keyboard-task3-proof',{body:JSON.stringify({fixture_only:true,manifest,retry,job:job.id,result,resultReads,csv,before,after,input:await input.verify(page)},null,2),contentType:'application/json'});
++ });
++ test(`U09 U10 keyboard ${locale} ${layout} task5 versioned member change, failed-job paging and scope recovery`,async({page,browser})=>{
++  test.setTimeout(300_000);await page.setViewportSize(viewport);await resetWorkbenchFixtureRateWindows();
++  await fixture<Seed>('audit_memberships');const jobs=await fixture<Jobs>('audit_job_scopes','21'),input=createJourneyInput('keyboard');
++  await signInWorkbench(page,true,'admin',undefined,input);await input.choose(page.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}),locale);
++  await input.activate(page.getByRole('button',{name:t('Settings'),exact:true}));const directory=page.getByRole('region',{name:t('Member management'),exact:true});
++  await input.fill(directory.getByRole('textbox',{name:t('Search members'),exact:true}),'Alex');await input.activate(directory.getByRole('button',{name:t('Search'),exact:true}));
++  const members=directory.getByRole('group',{name:`${t('Member')} Alex Chen`,exact:true});await expect(members).toHaveCount(2);
++  const first=members.filter({has:page.locator('code').filter({hasText:'71000001-0000-4000-8000-000000c011de'})});
++  await input.activate(first.getByText(locale==='en'?'Technical details':'技術資料',{exact:true}));await expect(first.locator('code')).toBeVisible();
++  await input.check(first.getByRole('checkbox',{name:t('operator'),exact:true}));await input.fill(directory.getByRole('textbox',{name:t('Change reason'),exact:true}),'Keyboard fixture duty rotation');
++  const pending=page.waitForResponse(r=>r.request().method()==='PATCH'&&new URL(r.url()).pathname.includes('/memberships/'));
++  await input.activate(first.getByRole('button',{name:t('Save member'),exact:true}));const changed=await pending;expect(changed.status()).toBe(200);expect(changed.request().headers()['if-match']).toBe('"1"');expect(changed.request().headers()['idempotency-key']).toBeTruthy();
++  const member=(await changed.json()).data;expect(member.user_id).toBe('71000001-0000-4000-8000-000000c011de');expect(member.version).toBe(2);
++  const read=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/memberships?q=Alex`,{headers:{Authorization:'Bearer fixture-admin'}});expect(read.status()).toBe(200);expect((await read.json()).data.items.map((m:{version:number})=>m.version)).toEqual([2,1]);
++  await input.choose(page.getByRole('combobox',{name:t('Project'),exact:true}),projectB);await input.activate(page.getByRole('button',{name:t('Overview'),exact:true}));
++  const card=page.locator('.activity').filter({has:page.getByText(t('Failed jobs'),{exact:true})});await expect(card.locator('p')).toHaveText('24');await input.activate(card.getByRole('button',{name:t('Open'),exact:true}));
++  const list=page.getByRole('region',{name:t('Bulk jobs'),exact:true});await expect(list).toContainText(locale==='en'?'24 jobs in scope':'24 項範圍內工作');
++  const seen=await list.getByRole('button').filter({hasText:/^[0-9a-f-]{36}$/}).allTextContents();expect(seen).toHaveLength(20);
++  await input.activate(list.getByRole('button',{name:t('Next'),exact:true}));await expect(list.getByText('21–24 / 24',{exact:true})).toBeVisible();seen.push(...await list.getByRole('button').filter({hasText:/^[0-9a-f-]{36}$/}).allTextContents());
++  expect(new Set(seen)).toEqual(new Set([...jobs.own_ids,...jobs.other_ids]));await input.activate(list.getByRole('button',{name:seen[20],exact:true}));
++  const details=page.getByRole('region',{name:t('Job details'),exact:true});await expect(details).toBeVisible();
++  const jobRead=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/jobs/${seen[20]}`,{headers:{Authorization:'Bearer fixture-admin'}});expect(jobRead.status()).toBe(200);expect((await jobRead.json()).data.project_id).toBe(projectB);
++  await input.choose(page.getByRole('combobox',{name:t('Project'),exact:true}),project);await expect(list).toContainText(locale==='en'?'0 jobs in scope':'0 項範圍內工作');await expect(details).toHaveCount(0);
++  const viewerContext=await browser.newContext({viewport}),viewer=await viewerContext.newPage();
++  try{await signInWorkbench(viewer,true,'viewer',undefined,input);await input.choose(viewer.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}),locale);await input.activate(viewer.getByRole('button',{name:t('Settings'),exact:true}));await expect(viewer.getByRole('region',{name:t('Member management'),exact:true})).toHaveCount(0);
++   expect((await viewer.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/memberships`,{headers:{Authorization:'Bearer fixture-viewer'}})).status()).toBe(403);
++   expect((await viewer.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/jobs/${jobs.own_ids[0]}`,{headers:{Authorization:'Bearer fixture-viewer'}})).status()).toBe(404);
++   await test.info().attach('keyboard-task5-viewer',{body:JSON.stringify(await input.verify(viewer),null,2),contentType:'application/json'});
++  }finally{await viewerContext.close();}
++  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`test-results/q09-keyboard-task5-${locale}-${layout}.png`,fullPage:true});
++  await test.info().attach('keyboard-task5-proof',{body:JSON.stringify({fixture_only:true,member,jobs:seen,input:await input.verify(page)},null,2),contentType:'application/json'});
++ });
++}
+diff --git a/tests/e2e/audit-keyboard.spec.ts b/tests/e2e/audit-keyboard.spec.ts
+new file mode 100644
+index 0000000..a5cee27
+--- /dev/null
++++ b/tests/e2e/audit-keyboard.spec.ts
+@@ -0,0 +1,2 @@
++import {registerStaffJourney} from './fixtures/staff-journey';
++registerStaffJourney('celery','keyboard');
+diff --git a/tests/e2e/fixtures/journey-input.ts b/tests/e2e/fixtures/journey-input.ts
+new file mode 100644
+index 0000000..f362f63
+--- /dev/null
++++ b/tests/e2e/fixtures/journey-input.ts
+@@ -0,0 +1,74 @@
++import {expect,type Locator,type Page,type Response} from '@playwright/test';
++
++export type JourneyInputMode='pointer'|'keyboard';
++type Action={kind:string;name:string;tabs:number;focusVisible:boolean;outline:string};
++
++/** Test driver: keyboard mode reaches controls through actual browser tab order. */
++export function createJourneyInput(mode:JourneyInputMode='pointer'){
++  const actions=new Map<Page,Action[]>(),pointers=new Map<Page,string[]>();
++  async function install(page:Page){
++    if(mode==='pointer'||pointers.has(page))return;
++    pointers.set(page,[]);actions.set(page,[]);
++    await page.exposeBinding('__buyerosKeyboardPointer',(_source,type:string)=>pointers.get(page)!.push(type));
++    await page.addInitScript(()=>{
++      for(const type of ['pointerdown','mousedown','touchstart'])document.addEventListener(type,event=>{
++        if(event.isTrusted)void (window as unknown as {__buyerosKeyboardPointer:(type:string)=>Promise<void>}).__buyerosKeyboardPointer(type);
++      },true);
++    });
++  }
++  async function reach(target:Locator,kind:string){
++    const page=target.page();await expect(target).toBeVisible();await expect(target).toBeEnabled();
++    const visited:string[]=[];const end=Date.now()+10_000;let tabs=0;
++    while(tabs<=250&&Date.now()<end){
++      if(await target.evaluate(element=>element===document.activeElement)){
++        const focus=await target.evaluate(element=>{const style=getComputedStyle(element);return {
++          name:element.getAttribute('aria-label')??element.textContent?.trim().slice(0,120)??element.tagName,
++          focusVisible:element.matches(':focus-visible'),outline:style.outlineStyle,outlineWidth:parseFloat(style.outlineWidth)};});
++        expect(focus.focusVisible,`Keyboard focus must be visible on ${focus.name}`).toBe(true);
++        expect(focus.outline!=='none'&&focus.outlineWidth>=2,`Visible outline on ${focus.name}`).toBe(true);
++        actions.get(page)!.push({kind,name:focus.name,tabs,focusVisible:focus.focusVisible,outline:`${focus.outlineWidth}px ${focus.outline}`});return;
++      }
++      visited.push(await page.evaluate(()=>{const element=document.activeElement;return `${element?.tagName}:${element?.getAttribute('aria-label')??element?.textContent?.trim().slice(0,80)??''}`;}));
++      await page.keyboard.press('Tab');tabs++;
++    }
++    throw new Error(`Control unreachable by Tab after ${tabs} steps: ${target}; last focus: ${visited.slice(-8).join(' | ')}`);
++  }
++  return {mode,install,
++    async activate(target:Locator){if(mode==='pointer')return target.click();await reach(target,'activate');await target.page().keyboard.press('Enter');},
++    async fill(target:Locator,value:string){if(mode==='pointer')return target.fill(value);await reach(target,'type');await target.page().keyboard.press('ControlOrMeta+A');await target.page().keyboard.insertText(value);await expect(target).toHaveValue(value);},
++    async check(target:Locator,checked=true){if(mode==='pointer')return checked?target.check():target.uncheck();await reach(target,'checkbox');if(await target.isChecked()!==checked)await target.page().keyboard.press('Space');if(checked)await expect(target).toBeChecked();else await expect(target).not.toBeChecked();},
++    async choose(target:Locator,value:string){
++      if(mode==='pointer')return target.selectOption(value);await reach(target,'select');
++      const options=await target.evaluate(element=>{if(!(element instanceof HTMLSelectElement))throw new Error('Keyboard choice requires a native select');return Array.from(element.options).map(option=>({value:option.value,disabled:option.disabled}));});
++      const index=options.findIndex(option=>option.value===value&&!option.disabled);expect(index,`Enabled option ${value}`).toBeGreaterThanOrEqual(0);
++      await target.page().keyboard.press('Space');await target.page().keyboard.press('Home');
++      const enabled=options.slice(0,index).filter(option=>!option.disabled).length;
++      for(let i=0;i<enabled;i++)await target.page().keyboard.press('ArrowDown');
++      await target.page().keyboard.press('Enter');await expect(target).toHaveValue(value);
++    },
++    async verify(page:Page){
++      if(mode==='pointer')return null;expect(pointers.get(page),'No trusted pointer input during keyboard journey').toEqual([]);
++      const result=actions.get(page)!;expect(result.length).toBeGreaterThan(0);return {mode,actions:result,trustedPointerEvents:pointers.get(page)};
++    },
++  };
++}
++
++/** Await the real persisted preference before choosing a native select value.
++ * A native unchanged selection does not emit change; initial English can precede
++ * an existing zh-HK preference. This observes HTTP/DOM only, never writes storage.
++ */
++export function observeWorkspaceLocale(page:Page,workspace:string){
++ const reads:Response[]=[];
++ const record=(response:Response)=>{if(response.request().method()==='GET'&&response.status()===200&&new URL(response.url()).pathname===`/v1/workspaces/${workspace}/preferences`)reads.push(response);};
++ page.on('response',record);
++ return {
++  async settle(){
++   await expect.poll(()=>reads.length,{timeout:30_000,message:'Real fixture workspace preference read must complete before native language choice'}).toBeGreaterThan(0);
++   const body=await reads.at(-1)!.json();expect(['en','zh-HK']).toContain(body.data.locale);
++   const saved=await page.evaluate(()=>{try{return localStorage.getItem('buyeros.locale');}catch{return null;}});
++   const expected=saved==='en'||saved==='zh-HK'?saved:body.data.locale;
++   await expect(page.locator('header select')).toHaveValue(expected,{timeout:30_000});
++  },
++  dispose(){page.off('response',record);},
++ };
++}
+diff --git a/tests/e2e/fixtures/staff-journey.ts b/tests/e2e/fixtures/staff-journey.ts
+index af742fe..6288086 100644
+--- a/tests/e2e/fixtures/staff-journey.ts
++++ b/tests/e2e/fixtures/staff-journey.ts
+@@ -5,12 +5,14 @@ import {promisify} from 'node:util';
+ import {resolve} from 'node:path';
+ import {readFile} from 'node:fs/promises';
+ import {awaitCloudflareIntent} from './cloudflare-stack';
++import {createJourneyInput,observeWorkspaceLocale,type JourneyInputMode} from './journey-input';
+ 
+ const execFileAsync=promisify(execFile);
+ const workspace='e0000000-0000-4000-8000-000000000001';
+ const project='e9100000-0000-4000-8000-000000000001';
+ 
+-export async function signIn(page:Page,accessToken='fixture-access',initialPath=`/app/runs?workspace=${workspace}&project=${project}`,locale:'en'|'zh-HK'='en'){
++export async function signIn(page:Page,accessToken='fixture-access',initialPath=`/app/runs?workspace=${workspace}&project=${project}`,locale:'en'|'zh-HK'='en',inputMode:JourneyInputMode='pointer',providedInput?:ReturnType<typeof createJourneyInput>){
++  const input=providedInput??createJourneyInput(inputMode);await input.install(page);
+   const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,
+     publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
+   const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'research-fixture',use:'sig'};
+@@ -25,10 +27,14 @@ export async function signIn(page:Page,accessToken='fixture-access',initialPath=
+       body:JSON.stringify({access_token:accessToken,id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:900})});});
+   await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,
+     contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[publicKey]})}));
+-  await page.goto(initialPath);
+-  await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
+-  await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(new URL(initialPath,'http://localhost:5173').searchParams.get('project')!,{timeout:30_000});
+-  await page.locator('header select').selectOption(locale);
++  const localeRead=inputMode==='keyboard'?observeWorkspaceLocale(page,workspace):null;
++  try{
++    await page.goto(initialPath);
++    await input.activate(page.getByRole('button',{name:/^(Sign in|登入)$/}));
++    await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(new URL(initialPath,'http://localhost:5173').searchParams.get('project')!,{timeout:30_000});
++    if(localeRead)await localeRead.settle();
++  }finally{localeRead?.dispose();}
++  await input.choose(page.locator('header select'),locale);
+   await expect(page.locator('html')).toHaveAttribute('lang',locale);
+ }
+ 
+@@ -97,11 +103,12 @@ const journeyZh:Record<string,string>={
+   "Value proposition": "價值主張"
+ };
+ 
+-export function registerStaffJourney(transport:'celery'|'cloudflare'='celery'){
++export function registerStaffJourney(transport:'celery'|'cloudflare'='celery',inputMode:JourneyInputMode='pointer'){
+ for(const locale of ['en','zh-HK'] as const){
+ for(const layout of ['desktop','mobile'] as const){
+-test(`${transport==='cloudflare'?'CF07':'T30'} ${locale} ${layout} UI-created offer through research, grounded addressed approval, export and outcome on one dataset`,async({page,browser,request})=>{
+-  test.setTimeout(360_000);
++test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboard ':''}${locale} ${layout} UI-created offer through research, grounded addressed approval, export and outcome on one dataset`,async({page,browser,request})=>{
++  test.setTimeout(inputMode==='keyboard'?600_000:360_000);
++  const input=createJourneyInput(inputMode);await input.install(page);
+   page.setDefaultTimeout(10_000);
+   const failedApi:string[]=[];
+   page.on('response',async response=>{
+@@ -115,21 +122,21 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${locale} ${layout} UI-created of
+   await page.setViewportSize(viewport);
+   const fits=async(target:Page)=>expect.poll(()=>target.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+   const ui=(text:string)=>locale==='zh-HK'?(journeyZh[text]??text):text;
+-  await signIn(page,'fixture-access',undefined,locale);
+-  await page.getByRole('region',{name:ui('Project selection')}).getByRole('button',{name:ui('New project'),exact:true}).click();
+-  await page.getByLabel(ui('Company name')).fill('T30 Fictional Seller');
+-  await page.getByLabel(ui('Product / service')).fill('Industrial sensors');
+-  await page.getByLabel(ui('Value proposition')).fill('Fictional monitoring lowers production downtime.');
++  await signIn(page,'fixture-access',undefined,locale,inputMode,input);
++  await input.activate(page.getByRole('region',{name:ui('Project selection')}).getByRole('button',{name:ui('New project'),exact:true}));
++  await input.fill(page.getByLabel(ui('Company name')),'T30 Fictional Seller');
++  await input.fill(page.getByLabel(ui('Product / service')),'Industrial sensors');
++  await input.fill(page.getByLabel(ui('Value proposition')),'Fictional monitoring lowers production downtime.');
+   await fits(page);
+-  await page.getByRole('button',{name:ui('Continue')}).click();
+-  await page.getByLabel(ui('Markets (country codes or names)')).fill('US');
+-  await page.getByLabel(ui('Languages (codes or names)')).fill('en');
+-  await page.getByRole('checkbox',{name:ui('Distributor'),exact:true}).check();
+-  await page.getByRole('button',{name:ui('Continue')}).click();
+-  await page.getByLabel(ui('Must have'),{exact:true}).fill('industrial sensors');
+-  await page.getByRole('checkbox',{name:locale==='en'?/I confirm these buyer requirements/:/我確認以上買家條件/}).check();
+-  await page.getByRole('button',{name:ui('Continue')}).click();
+-  await page.getByRole('button',{name:ui('Save profile')}).click();
++  await input.activate(page.getByRole('button',{name:ui('Continue')}));
++  await input.fill(page.getByLabel(ui('Markets (country codes or names)')),'US');
++  await input.fill(page.getByLabel(ui('Languages (codes or names)')),'en');
++  await input.check(page.getByRole('checkbox',{name:ui('Distributor'),exact:true}));
++  await input.activate(page.getByRole('button',{name:ui('Continue')}));
++  await input.fill(page.getByRole('textbox',{name:ui('Must have'),exact:true}),'industrial sensors');
++  await input.check(page.getByRole('checkbox',{name:locale==='en'?/I confirm these buyer requirements/:/我確認以上買家條件/}));
++  await input.activate(page.getByRole('button',{name:ui('Continue')}));
++  await input.activate(page.getByRole('button',{name:ui('Save profile')}));
+   await expect(page.getByRole('heading',{name:ui('Profile version 1')})).toBeVisible();
+   await fits(page);
+   const project=new URL(page.url()).searchParams.get('project')!;
+@@ -143,41 +150,42 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${locale} ${layout} UI-created of
+   expect(prepared.fixture_prerequisites).toBe(true);
+   expect(prepared.fixture_initial_rate_windows_reset).toBe(true);
+ 
+-  await page.getByRole('button',{name:ui('Edit offer')}).click();
++  await input.activate(page.getByRole('button',{name:ui('Edit offer')}));
+   await expect(page.getByLabel(ui('Product / service'))).toHaveValue('Industrial sensors');
+-  await page.getByLabel(ui('Product / service')).fill('Industrial sensor platform');
+-  await page.getByLabel(ui('Value proposition')).fill('Fictional monitoring lowers production downtime.');
+-  await page.getByRole('button',{name:ui('Continue')}).click();
+-  await page.getByRole('button',{name:ui('Continue')}).click();
+-  await page.getByRole('checkbox',{name:locale==='en'?/I confirm these buyer requirements/:/我確認以上買家條件/}).check();
+-  await page.getByRole('button',{name:ui('Continue')}).click();
+-  await page.getByRole('button',{name:ui('Save profile')}).click();
++  await input.fill(page.getByLabel(ui('Product / service')),'Industrial sensor platform');
++  await input.fill(page.getByLabel(ui('Value proposition')),'Fictional monitoring lowers production downtime.');
++  await input.activate(page.getByRole('button',{name:ui('Continue')}));
++  await input.activate(page.getByRole('button',{name:ui('Continue')}));
++  await input.check(page.getByRole('checkbox',{name:locale==='en'?/I confirm these buyer requirements/:/我確認以上買家條件/}));
++  await input.activate(page.getByRole('button',{name:ui('Continue')}));
++  await input.activate(page.getByRole('button',{name:ui('Save profile')}));
+   await expect(page.getByRole('heading',{name:ui('Profile version 2')})).toBeVisible();
+   const reviewerContext=await browser.newContext({viewport});
+-  const reviewer=await reviewerContext.newPage();
+-  await signIn(reviewer,'fixture-reviewer',`/app?workspace=${workspace}&project=${project}`,locale);
++  const reviewer=await reviewerContext.newPage();await input.install(reviewer);
++  await signIn(reviewer,'fixture-reviewer',`/app?workspace=${workspace}&project=${project}`,locale,inputMode,input);
+   await expect(reviewer.getByRole('heading',{name:ui('Profile version 2')})).toBeVisible();
+-  await reviewer.getByRole('checkbox',{name:locale==='en'?/Confirm approval of this exact version v2/:/確認批准此確切版本 v2/}).check();
+-  await reviewer.getByRole('button',{name:ui('Approve profile')}).click();
++  await input.check(reviewer.getByRole('checkbox',{name:locale==='en'?/Confirm approval of this exact version v2/:/確認批准此確切版本 v2/}));
++  await input.activate(reviewer.getByRole('button',{name:ui('Approve profile')}));
+   await expect(reviewer.getByText(locale==='en'?'Current approved: v2':'目前已批准: v2')).toBeVisible();
+-  await reviewer.getByRole('button',{name:ui('Drafts'),exact:true}).click();
++  await input.activate(reviewer.getByRole('button',{name:ui('Drafts'),exact:true}));
+   const sender=reviewer.getByRole('region',{name:ui('Sender identity')});
+-  await sender.getByLabel(ui('Display name')).fill('Fixture Alex');
+-  await sender.getByLabel(ui('Organization')).fill('T30 Fictional Seller');
+-  await sender.getByLabel(ui('Business email')).fill('alex@example.test');
+-  await sender.getByLabel(ui('Reason for change')).fill('Fictional sender reviewed for disposable journey');
+-  await sender.getByRole('checkbox',{name:ui('I confirm this sender identity')}).check();
+-  await sender.getByRole('button',{name:ui('Save sender')}).click();
++  await input.fill(sender.getByLabel(ui('Display name')),'Fixture Alex');
++  await input.fill(sender.getByLabel(ui('Organization')),'T30 Fictional Seller');
++  await input.fill(sender.getByLabel(ui('Business email')),'alex@example.test');
++  await input.fill(sender.getByLabel(ui('Reason for change')),'Fictional sender reviewed for disposable journey');
++  await input.check(sender.getByRole('checkbox',{name:ui('I confirm this sender identity')}));
++  await input.activate(sender.getByRole('button',{name:ui('Save sender')}));
+   await expect(sender.getByText(locale==='en'?/Reviewed sender:/:/已審核寄件人:/)).toBeVisible();
+   await page.reload();
+-  await page.getByRole('button',{name:locale==='zh-HK'?'登入':'Sign in',exact:true}).click();
++  await input.activate(page.getByRole('button',{name:/^(Sign in|登入)$/,exact:true}));
++  await expect(page.locator('html')).toHaveAttribute('lang',locale);
+   await expect(page.getByText(locale==='en'?'Current approved: v2':'目前已批准: v2')).toBeVisible();
+-  await page.getByRole('button',{name:ui('Research runs')}).click();
+-  await page.getByLabel(ui('Target companies')).fill('1');
+-  await page.getByLabel(ui('Maximum research cost (USD)')).fill('2.000000');
++  await input.activate(page.getByRole('button',{name:ui('Research runs')}));
++  await input.fill(page.getByLabel(ui('Target companies')),'1');
++  await input.fill(page.getByLabel(ui('Maximum research cost (USD)')),'2.000000');
+   const admissionResponse=page.waitForResponse(response=>response.request().method()==='POST'
+     &&new URL(response.url()).pathname.endsWith('/runs'));
+-  await page.getByRole('button',{name:ui('Start research')}).click();
++  await input.activate(page.getByRole('button',{name:ui('Start research')}));
+   const admission=await admissionResponse;
+   expect(admission.status(),await admission.text()).toBe(202);
+   expect((await admission.json()).data.status).toBe('queued');
+@@ -200,48 +208,48 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${locale} ${layout} UI-created of
+     {cwd:workerRoot,timeout:30_000});
+   const existingContact=JSON.parse(contactInput.stdout) as {buyer_id:string;contact_id:string;fixture_existing_contact:boolean};
+   expect(existingContact.fixture_existing_contact).toBe(true);
+-  await page.getByRole('button',{name:ui('Buyers'),exact:true}).click();
++  await input.activate(page.getByRole('button',{name:ui('Buyers'),exact:true}));
+   await expect(page.getByText('T30 Fictional Industrial Buyer',{exact:true})).toBeVisible({timeout:30_000});
+-  await page.getByRole('button',{name:ui('Details')}).first().click();
++  await input.activate(page.getByRole('button',{name:ui('Details')}).first());
+   const dossier=page.getByRole('dialog',{name:ui('Buyer details: T30 Fictional Industrial Buyer')});
+-  await dossier.getByRole('tab',{name:ui('Evidence')}).click();
++  await input.activate(dossier.getByRole('tab',{name:ui('Evidence')}));
+   await expect(dossier).toContainText('Fictional distributor lists industrial sensors');
+   await fits(page);
+-  await reviewer.getByRole('button',{name:ui('Buyers'),exact:true}).click();
++  await input.activate(reviewer.getByRole('button',{name:ui('Buyers'),exact:true}));
+   await expect(reviewer.getByText('T30 Fictional Industrial Buyer',{exact:true})).toBeVisible();
+-  await reviewer.getByRole('button',{name:ui('Details')}).first().click();
++  await input.activate(reviewer.getByRole('button',{name:ui('Details')}).first());
+   const reviewDossier=reviewer.getByRole('dialog',{name:ui('Buyer details: T30 Fictional Industrial Buyer')});
+   await expect(reviewDossier).toContainText(locale==='en'?'Fit: match':'配對: 符合');
+-  await reviewDossier.getByRole('textbox',{name:ui('Individual review reason')}).fill('Verified cited industrial buyer');
+-  await reviewDossier.getByRole('button',{name:locale==='en'?/^Save review/:/^儲存審閱/}).click();
+-  await reviewer.getByRole('checkbox',{name:ui('Select T30 Fictional Industrial Buyer')}).check();
+-  await reviewer.getByRole('textbox',{name:ui('List name')}).fill('T30 generated buyer');
+-  await reviewer.getByRole('button',{name:ui('Create list')}).click();
+-  await reviewer.getByRole('button',{name:ui('Add selected to list')}).click();
++  await input.fill(reviewDossier.getByRole('textbox',{name:ui('Individual review reason')}),'Verified cited industrial buyer');
++  await input.activate(reviewDossier.getByRole('button',{name:locale==='en'?/^Save review/:/^儲存審閱/}));
++  await input.check(reviewer.getByRole('checkbox',{name:ui('Select T30 Fictional Industrial Buyer')}));
++  await input.fill(reviewer.getByRole('textbox',{name:ui('List name')}),'T30 generated buyer');
++  await input.activate(reviewer.getByRole('button',{name:ui('Create list')}));
++  await input.activate(reviewer.getByRole('button',{name:ui('Add selected to list')}));
+   await expect(reviewer.getByRole('combobox',{name:ui('Buyer list')})).toContainText('T30 generated buyer (1)');
+-  await reviewer.getByRole('button',{name:ui('Show list buyers')}).click();
++  await input.activate(reviewer.getByRole('button',{name:ui('Show list buyers')}));
+   await expect(reviewer.getByText(locale==='en'?'1 in snapshot':'1 項快照')).toBeVisible();
+-  await reviewer.getByRole('button',{name:ui('Details')}).first().click();
++  await input.activate(reviewer.getByRole('button',{name:ui('Details')}).first());
+   const assigned=reviewer.getByRole('dialog',{name:ui('Buyer details: T30 Fictional Industrial Buyer')});
+   await expect(assigned).toContainText(locale==='en'?'Human review: accepted':'人手審閱: 已接納');
+-  await assigned.getByRole('button',{name:ui('Assign to me')}).click();
++  await input.activate(assigned.getByRole('button',{name:ui('Assign to me')}));
+   await expect(assigned).toContainText(`${locale==='en'?'Owner membership:':'負責人成員:'} e0000000-0000-4000-8000-000000000005`);
+   await page.reload();
+-  await page.getByRole('button',{name:locale==='zh-HK'?'登入':'Sign in',exact:true}).click();
+-  await page.getByRole('button',{name:ui('Buyers'),exact:true}).click();
++  await input.activate(page.getByRole('button',{name:/^(Sign in|登入)$/,exact:true}));
++  await input.activate(page.getByRole('button',{name:ui('Buyers'),exact:true}));
+   try{await expect(page.getByText('T30 Fictional Industrial Buyer',{exact:true})).toBeVisible();}
+   catch(cause){throw new Error(`Post-refresh buyer read failed: ${failedApi.join(' | ')}`,{cause});}
+-  await page.getByRole('button',{name:ui('Details')}).first().click();
++  await input.activate(page.getByRole('button',{name:ui('Details')}).first());
+   const operatorDossier=page.getByRole('dialog',{name:ui('Buyer details: T30 Fictional Industrial Buyer')});
+   await expect(operatorDossier).toContainText(locale==='en'?'Human review: accepted':'人手審閱: 已接納');
+-  await operatorDossier.getByRole('button',{name:ui('Prepare grounded draft')}).click();
++  await input.activate(operatorDossier.getByRole('button',{name:ui('Prepare grounded draft')}));
+   await expect(page).toHaveURL(/\/app\/outreach\?/);
+   await expect(page.getByText(locale==='en'?/Reviewed sender:/:/已審核寄件人:/)).toBeVisible();
+   await expect(page.getByText('Industrial sensor platform',{exact:true})).toBeVisible();
+   await expect(page.getByText(/Fictional distributor lists industrial sensors/)).toBeVisible();
+-  await page.getByRole('combobox',{name:ui('Recipient (optional)')}).selectOption(existingContact.contact_id);
+-  await page.getByRole('region',{name:ui('Prepare grounded draft')}).getByRole('combobox',{name:ui('Template language'),exact:true}).selectOption(locale);
+-  await page.getByRole('button',{name:ui('Generate addressed draft')}).click();
++  await input.choose(page.getByRole('combobox',{name:ui('Recipient (optional)')}),existingContact.contact_id);
++  await input.choose(page.getByRole('region',{name:ui('Prepare grounded draft')}).getByRole('combobox',{name:ui('Template language'),exact:true}),locale);
++  await input.activate(page.getByRole('button',{name:ui('Generate addressed draft')}));
+   await expect.poll(()=>new URL(page.url()).searchParams.get('draft_job'),{timeout:30_000}).toMatch(/^[0-9a-f-]{36}$/);
+   const draftJobId=new URL(page.url()).searchParams.get('draft_job')!;
+   const draftRun=transport==='cloudflare'?await awaitCloudflareIntent(runId,project,draftJobId):await execFileAsync(python,['tests/fixtures/run_browser_research.py',runId,project,draftJobId!],
+@@ -250,30 +258,62 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${locale} ${layout} UI-created of
+   expect(draftReport.job_id).toBe(draftJobId);
+   expect(draftReport.status).toBe('completed');
+   expect(draftReport.grounding_status).toBe('grounded');
+-  await page.getByRole('button',{name:ui('Refresh job')}).click();
++  await input.activate(page.getByRole('button',{name:ui('Refresh job')}));
+   await expect(page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')})).toHaveCount(1);
+-  await page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')}).click();
++  await input.activate(page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')}));
+   await expect(page.getByRole('textbox',{name:ui('Body'),exact:true})).toContainText('Industrial sensor platform');
+   await expect(page.getByRole('textbox',{name:ui('Body'),exact:true})).toContainText('Fictional distributor lists industrial sensors');
+   await fits(page);
+   const generatedDraft=new URL(page.url()).searchParams.get('draft')!;
+   expect(generatedDraft).toBe(draftReport.draft_id);
+-  await page.getByRole('button',{name:ui('Request exact review')}).click();
+-  await expect(page.getByRole('region',{name:ui('Exact revision review')}).getByText('recipient@fixture.example.test',{exact:false})).toBeVisible();
+-  await signIn(reviewer,'fixture-reviewer',`/app/outreach?workspace=${workspace}&project=${project}&draft=${generatedDraft}`,locale);
++  if(inputMode==='keyboard'){
++    const editor=page.getByRole('region',{name:ui('Open draft'),exact:true});
++    const manualBody=[locale==='en'?'Hello,':'你好，','Industrial sensor platform','Fictional distributor lists industrial sensors',locale==='en'?'Thank you.':'謝謝！'].join('\n');
++    await input.fill(editor.getByRole('textbox',{name:locale==='en'?'Subject':'主旨',exact:true}),'Keyboard invitation😀');
++    await input.fill(editor.getByRole('textbox',{name:ui('Body'),exact:true}),manualBody);
++    await expect(editor).toHaveAttribute('data-live-unsaved','true');
++    await input.activate(editor.getByRole('button',{name:locale==='en'?'Save revision':'儲存修訂',exact:true}));
++    await expect(editor).not.toHaveAttribute('data-live-unsaved','true');
++    const grounding=editor.getByRole('region',{name:locale==='en'?'Manual source review':'人工來源覆核',exact:true});
++    await expect(grounding).toBeVisible();
++    await expect(grounding.getByRole('button',{name:locale==='en'?'Submit source review':'提交來源覆核',exact:true})).toHaveCount(0);
++    await expect(editor.getByRole('textbox',{name:ui('Body'),exact:true})).toHaveValue(manualBody);
++  }else{
++    await input.activate(page.getByRole('button',{name:ui('Request exact review')}));
++    await expect(page.getByRole('region',{name:ui('Exact revision review')}).getByText('recipient@fixture.example.test',{exact:false})).toBeVisible();
++  }
++  await signIn(reviewer,'fixture-reviewer',`/app/outreach?workspace=${workspace}&project=${project}&draft=${generatedDraft}`,locale,inputMode,input);
++  if(inputMode==='keyboard'){
++    const grounding=reviewer.getByRole('region',{name:locale==='en'?'Manual source review':'人工來源覆核',exact:true});
++    const groups=grounding.getByRole('group');await expect(groups).toHaveCount(5);
++    for(let i=0;i<5;i++){
++      const group=groups.nth(i),text=await group.locator('pre').innerText();
++      const offer=text==='Industrial sensor platform',evidence=text==='Fictional distributor lists industrial sensors';
++      await input.choose(group.getByRole('combobox'),offer||evidence?'factual':'non_factual');
++      await input.fill(group.getByRole('textbox'),offer||evidence?'Read exact retained versioned source':'Greeting, invitation or closing without a factual claim');
++      if(offer)await input.check(group.getByRole('checkbox',{name:locale==='en'?/^Offer fact: Industrial sensor platform/:/^產品事實: Industrial sensor platform/}));
++      if(evidence)await input.check(group.getByRole('checkbox',{name:locale==='en'?/^Evidence.*Fictional distributor lists industrial sensors/:/^證據.*Fictional distributor lists industrial sensors/}));
++    }
++    await input.fill(grounding.getByRole('textbox',{name:locale==='en'?'Overall review reason':'整體覆核理由',exact:true}),'Reviewed the full keyboard-edited message and exact retained sources');
++    await input.check(grounding.getByRole('checkbox',{name:locale==='en'?/^I read the entire exact message/:/^我已閱讀整篇精確訊息/}));
++    const reviewed=reviewer.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith('/grounding-reviews'));
++    await input.activate(grounding.getByRole('button',{name:locale==='en'?'Submit source review':'提交來源覆核',exact:true}));expect((await reviewed).status()).toBe(200);
++    await expect(reviewer.getByRole('textbox',{name:ui('Body'),exact:true})).toHaveValue([locale==='en'?'Hello,':'你好，','Industrial sensor platform','Fictional distributor lists industrial sensors',locale==='en'?'Thank you.':'謝謝！'].join('\n'));
++    await input.activate(reviewer.getByRole('button',{name:ui('Request exact review'),exact:true}));
++  }
+   await expect(reviewer.getByRole('checkbox',{name:locale==='en'?/I confirm the exact recipient/:/我確認以上精確收件人/})).toBeVisible();
+-  await reviewer.getByRole('checkbox',{name:locale==='en'?/I confirm the exact recipient/:/我確認以上精確收件人/}).check();
+-  await reviewer.getByRole('button',{name:ui('Approve exact revision')}).click();
++  await input.check(reviewer.getByRole('checkbox',{name:locale==='en'?/I confirm the exact recipient/:/我確認以上精確收件人/}));
++  await input.activate(reviewer.getByRole('button',{name:ui('Approve exact revision')}));
+   await expect(reviewer.getByText(locale==='en'?/Approval recorded; delivery remains disabled/:/審批已記錄；發送功能仍停用/)).toBeVisible();
+   const exportRegion=reviewer.getByRole('region',{name:ui('Authorized export')});
+-  await exportRegion.getByRole('combobox',{name:ui('Draft copy format')}).selectOption('text');
+-  await exportRegion.getByRole('button',{name:ui('Prepare approved copy')}).click();
++  await input.choose(exportRegion.getByRole('combobox',{name:ui('Draft copy format')}),'text');
++  await input.activate(exportRegion.getByRole('button',{name:ui('Prepare approved copy')}));
+   await expect(exportRegion).toContainText(locale==='en'?'Allowed: 1':'允許: 1');
+   await fits(reviewer);
+-  await reviewer.screenshot({path:`test-results/${transport}-continuity-${locale}-${layout}-approved-export-fixture.png`,fullPage:true});
++  await reviewer.screenshot({path:`test-results/${transport}${inputMode==='keyboard'?'-keyboard':''}-continuity-${locale}-${layout}-approved-export-fixture.png`,fullPage:true});
+   const exportId=new URL(reviewer.url()).searchParams.get('export')!;
+   const downloadPromise=reviewer.waitForEvent('download');
+-  await exportRegion.getByRole('button',{name:ui('Download text')}).click();
++  await input.activate(exportRegion.getByRole('button',{name:ui('Download text')}));
+   const downloaded=await downloadPromise;
+   const copy=await readFile((await downloaded.path())!,'utf8');
+   expect(copy).toContain('recipient@fixture.example.test');
+@@ -286,21 +326,25 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${locale} ${layout} UI-created of
+     {headers:{Authorization:'Bearer fixture-reviewer','Idempotency-Key':'t30-continuity-delivery-disabled'}});
+   expect(deliver.status()).toBe(403);
+   expect((await deliver.json()).code).toBe('DELIVERY_DISABLED');
+-  await page.getByRole('button',{name:ui('Results'),exact:true}).click();
+-  await page.getByRole('button',{name:ui('Log outcome')}).first().click();
+-  await page.getByRole('textbox',{name:ui('Outcome notes')}).fill('T30 continuous fixture outcome after approved copy');
+-  await page.getByRole('button',{name:ui('Record manual outcome')}).click();
++  await input.activate(page.getByRole('button',{name:ui('Results'),exact:true}));
++  await input.activate(page.getByRole('button',{name:ui('Log outcome')}).first());
++  await input.fill(page.getByRole('textbox',{name:ui('Outcome notes')}),'T30 continuous fixture outcome after approved copy');
++  await input.activate(page.getByRole('button',{name:ui('Record manual outcome')}));
+   const outcomes=page.getByRole('region',{name:ui('Manual outcomes')});
+   await expect(outcomes).toContainText('T30 continuous fixture outcome after approved copy');
+-  await page.reload();await page.getByRole('button',{name:locale==='zh-HK'?'登入':'Sign in',exact:true}).click();
++  await page.reload();await input.activate(page.getByRole('button',{name:/^(Sign in|登入)$/,exact:true}));await expect(page.locator('html')).toHaveAttribute('lang',locale);
+   await expect(page.getByRole('region',{name:ui('Manual outcomes')})).toContainText('T30 continuous fixture outcome after approved copy');
+   await fits(page);
+-  await page.screenshot({path:`test-results/${transport}-continuity-${locale}-${layout}-outcome-fixture.png`,fullPage:true});
++  await page.screenshot({path:`test-results/${transport}${inputMode==='keyboard'?'-keyboard':''}-continuity-${locale}-${layout}-outcome-fixture.png`,fullPage:true});
++  if(inputMode==='keyboard'){
++    await test.info().attach('operator-keyboard-input',{body:JSON.stringify(await input.verify(page),null,2),contentType:'application/json'});
++    await test.info().attach('reviewer-keyboard-input',{body:JSON.stringify(await input.verify(reviewer),null,2),contentType:'application/json'});
++  }
+   await reviewerContext.close();
+   await page.setViewportSize({width:390,height:844});
+   await expect(page.locator('html')).toHaveAttribute('lang',locale);
+   await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+-  await page.screenshot({path:`test-results/${transport}-continuity-${locale}-${layout}-mobile-readback-fixture.png`,fullPage:true});
++  await page.screenshot({path:`test-results/${transport}${inputMode==='keyboard'?'-keyboard':''}-continuity-${locale}-${layout}-mobile-readback-fixture.png`,fullPage:true});
+ });
+ }
+ }
+diff --git a/tests/e2e/fixtures/workbench-auth.ts b/tests/e2e/fixtures/workbench-auth.ts
+index f4f1bc6..624d14e 100644
+--- a/tests/e2e/fixtures/workbench-auth.ts
++++ b/tests/e2e/fixtures/workbench-auth.ts
+@@ -4,6 +4,7 @@ import {webcrypto} from 'node:crypto';
+ import {execFile} from 'node:child_process';
+ import {promisify} from 'node:util';
+ import {resolve} from 'node:path';
++import {createJourneyInput,observeWorkspaceLocale} from './journey-input';
+ export const workspace='e0000000-0000-4000-8000-000000000001';
+ export const project='e1000000-0000-4000-8000-000000000001';
+ 
+@@ -16,7 +17,8 @@ export async function resetWorkbenchFixtureRateWindows(){
+   expect(JSON.parse(stdout).fixture_initial_rate_windows_reset).toBe(true);
+ }
+ 
+-export async function signInWorkbench(page:Page,waitForProject=true,actor:'reviewer'|'access'|'viewer'|'admin'='reviewer',entry=`/app?workspace=${workspace}&project=${project}`){
++export async function signInWorkbench(page:Page,waitForProject=true,actor:'reviewer'|'access'|'viewer'|'admin'='reviewer',entry=`/app?workspace=${workspace}&project=${project}`,input=createJourneyInput()){
++  await input.install(page);
+   const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,
+     publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
+   const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'workbench-fixture',use:'sig'};
+@@ -37,8 +39,10 @@ export async function signInWorkbench(page:Page,waitForProject=true,actor:'revie
+   page.on('requestfailed',request=>{if(new URL(request.url()).pathname.startsWith('/v1/'))apiEvents.push(`failed ${request.url()} ${request.failure()?.errorText}`);});
+   page.on('response',response=>{if(new URL(response.url()).pathname.startsWith('/v1/'))apiEvents.push(`${response.status()} ${response.url()}`);});
+   page.on('pageerror',error=>apiEvents.push(`pageerror ${error.name}: ${error.message}`));
++  const localeRead=input.mode==='keyboard'&&waitForProject?observeWorkspaceLocale(page,workspace):null;
++  try{
+   await page.goto(entry);
+-  await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
++  await input.activate(page.getByRole('button',{name:/^(Sign in|登入)$/}));
+   // The fake callback exchanges/verifies its token asynchronously. Negative-access
+   // cases must reach the authenticated workspace read before asserting its result.
+   await expect.poll(()=>apiEvents.some(event=>event.startsWith('request GET ')&&new URL(event.slice('request GET '.length)).pathname==='/v1/workspaces'),
+@@ -47,4 +51,6 @@ export async function signInWorkbench(page:Page,waitForProject=true,actor:'revie
+     try{await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});}
+     catch(error){throw new Error(`Project selection did not settle; API events: ${apiEvents.join(' | ')}`,{cause:error});}
+   }
++  if(localeRead)await localeRead.settle();
++  }finally{localeRead?.dispose();}
+ }

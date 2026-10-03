@@ -1,0 +1,27 @@
+{
+  "mode": "keyboard",
+  "actions": [
+    {
+      "kind": "activate",
+      "name": "Sign in",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "2px solid"
+    },
+    {
+      "kind": "select",
+      "name": "Language",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Settings",
+      "tabs": 7,
+      "focusVisible": true,
+      "outline": "3px solid"
+    }
+  ],
+  "trustedPointerEvents": []
+}

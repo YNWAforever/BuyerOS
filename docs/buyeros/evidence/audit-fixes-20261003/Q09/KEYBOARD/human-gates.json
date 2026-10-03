@@ -1,0 +1,14 @@
+{
+  "screen_reader_tool": null,
+  "screen_reader_operator": null,
+  "staff_participants": null,
+  "baseline_seconds": null,
+  "after_seconds": null,
+  "completion_rate": null,
+  "mistakes": null,
+  "wrong_scope_observations": null,
+  "independent_reviewer": null,
+  "owner_approval": null,
+  "deployed_sha": null,
+  "automated_keyboard_is_human_UAT": false
+}

@@ -1,0 +1,7 @@
+{
+  "command": "git revert f70501a174c641db65d06929ebd3b7e8b52ee3bb",
+  "applicability_command": "git apply --reverse --check docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/Q09-keyboard.patch",
+  "exit": 0,
+  "schema_changes": [],
+  "runtime_or_production_rehearsal": false
+}

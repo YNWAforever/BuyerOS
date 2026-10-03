@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="217.288065">
+<testsuite name="audit-keyboard.spec.ts" timestamp="2026-10-03T20:44:05.485Z" hostname="" tests="1" failures="0" skipped="0" time="81.536" errors="0">
+<testcase name="T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="81.536">
+</testcase>
+</testsuite>
+</testsuites>

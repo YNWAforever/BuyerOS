@@ -307,7 +307,7 @@
         "WF02"
       ],
       "release_status": "not-deployed",
-      "checkpoint": "2026-10-04 HKT: reviewable local Q09 candidate. 4 complete fixture journeys + actual native en/zh200% zoom passed; duplicate owner choice RED/GREEN and memberships9+bulk8 fresh. Original failed batches retained. U11 real screen reader, U12 human staff and full five-task pure keyboard rehearsal unobserved; independent review pending. No external action.",
+      "checkpoint": "2026-10-04 HKT: five-task selected keyboard fixture matrix verified; final12pass/0fail/error/skip+14rawproofs. Application unchanged; human screen-reader/staff/independent review open; earlier failures retained; no external action.",
       "tests": {
         "api": {
           "report": "q09-api-third.xml",
@@ -354,6 +354,16 @@
           "skipped": 0,
           "wall_seconds": 308.66396599999996,
           "zero_cases_is_pass": null
+        },
+        "keyboard_final": {
+          "report": "q09-keyboard-proof-full.xml",
+          "executed": 12,
+          "passed": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 568.761243,
+          "zero_case_is_pass": null
         }
       },
       "migrations": [],
@@ -366,13 +376,40 @@
         "offer_profile_reads": "3843623c934fba75a8a5bffe1db4175960444361",
         "buyer_member_results": "35e859161536bc2f6726c8b713c8006ec01cc43a",
         "scope_jobs": "6e7335b2d341167ddbc6fdfbad08d789e5c8972e",
-        "fixture_journeys": "1953d615dc00e6920380dbb71be6a99b96e36488"
+        "fixture_journeys": "1953d615dc00e6920380dbb71be6a99b96e36488",
+        "keyboard_fixtures": "f70501a174c641db65d06929ebd3b7e8b52ee3bb"
       },
       "source_sha": "1953d615dc00e6920380dbb71be6a99b96e36488",
       "code_status": "implemented",
-      "verification_status": "strict API21/Node34/current affected UI17/demo21 pass; full50 report48pass+2setup errors resolved by affected-suite reruns; human gates open",
+      "verification_status": "strict API21/Node34/current affected UI17/demo21 pass; full50 report48pass+2setup errors resolved by affected-suite reruns; human gates open; keyboard final12 with14rawproofs pass0fail/error/skip; human gates open",
       "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/RESULTS.md",
-      "rollback": "Q09.patch reverse applicability verified; no runtime/production rollback rehearsal"
+      "rollback": "Q09.patch reverse applicability verified; no runtime/production rollback rehearsal",
+      "keyboard_followup": {
+        "status": "local-fixture-integration-verified",
+        "base_sha": "86014b03f2a7db48c90ecd1c52800b528679a220",
+        "source_sha": "f70501a174c641db65d06929ebd3b7e8b52ee3bb",
+        "application_source_sha": "1953d615dc00e6920380dbb71be6a99b96e36488",
+        "tests": {
+          "report": "q09-keyboard-proof-full.xml",
+          "executed": 12,
+          "passed": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 568.761243,
+          "zero_case_is_pass": null
+        },
+        "keyboard_cases": 8,
+        "pointer_continuity_cases": 4,
+        "proof_bodies": 14,
+        "native_actions": 460,
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/RESULTS.md",
+        "human_uat": "unobserved",
+        "screen_reader": "unobserved",
+        "release_status": "not-deployed",
+        "migrations": [],
+        "rollback": "six-file test-source revert; reverse applicability0; no production rehearsal"
+      }
     },
     {
       "id": "Q10",
@@ -507,11 +544,11 @@
     }
   ],
   "future_eligible": [
-    "Q09 human screen-reader/staff UAT and complete keyboard rehearsal",
+    "Q09 human screen-reader/staff UAT",
     "Independent source review",
     "Q16 underlying evidence when available",
     "N00 separate auth compatibility scope"
   ],
-  "reviewed_source_sha": "1953d615dc00e6920380dbb71be6a99b96e36488",
+  "reviewed_source_sha": "f70501a174c641db65d06929ebd3b7e8b52ee3bb",
   "deployed_sha": null
 }

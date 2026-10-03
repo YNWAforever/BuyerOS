@@ -1,0 +1,275 @@
+{
+  "fixture_only": true,
+  "stats": {
+    "startTime": "2026-10-03T21:58:26.562Z",
+    "duration": 568761.243,
+    "expected": 12,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "junit": {
+    "id": "",
+    "name": "",
+    "tests": "12",
+    "failures": "0",
+    "skipped": "0",
+    "errors": "0",
+    "time": "568.761243"
+  },
+  "cases": [
+    {
+      "title": "T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "file": "fixtures/staff-journey.ts",
+      "line": 109,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 48656
+    },
+    {
+      "title": "T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "file": "fixtures/staff-journey.ts",
+      "line": 109,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 40652
+    },
+    {
+      "title": "T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "file": "fixtures/staff-journey.ts",
+      "line": 109,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 37438
+    },
+    {
+      "title": "T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "file": "fixtures/staff-journey.ts",
+      "line": 109,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 35968
+    },
+    {
+      "title": "U09 U10 keyboard en desktop task3 cross-page assignment, persisted conflict and exact failed-only manifest",
+      "file": "audit-keyboard-workbench.spec.ts",
+      "line": 31,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 33791
+    },
+    {
+      "title": "U09 U10 keyboard en desktop task5 versioned member change, failed-job paging and scope recovery",
+      "file": "audit-keyboard-workbench.spec.ts",
+      "line": 92,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 26693
+    },
+    {
+      "title": "U09 U10 keyboard zh-HK mobile task3 cross-page assignment, persisted conflict and exact failed-only manifest",
+      "file": "audit-keyboard-workbench.spec.ts",
+      "line": 31,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 30480
+    },
+    {
+      "title": "U09 U10 keyboard zh-HK mobile task5 versioned member change, failed-job paging and scope recovery",
+      "file": "audit-keyboard-workbench.spec.ts",
+      "line": 92,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 24916
+    },
+    {
+      "title": "T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "file": "fixtures/staff-journey.ts",
+      "line": 109,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 52484
+    },
+    {
+      "title": "T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "file": "fixtures/staff-journey.ts",
+      "line": 109,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 52057
+    },
+    {
+      "title": "T30 keyboard zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "file": "fixtures/staff-journey.ts",
+      "line": 109,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 49747
+    },
+    {
+      "title": "T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "file": "fixtures/staff-journey.ts",
+      "line": 109,
+      "pass": 1,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runtime_ms": 50984
+    }
+  ],
+  "proofs": [
+    {
+      "case": "U09 U10 keyboard en desktop task3 cross-page assignment, persisted conflict and exact failed-only manifest",
+      "name": "keyboard-task3-proof",
+      "path": "91b900e70f74-keyboard-task3-proof.json",
+      "bytes": 39694,
+      "sha256": "cd7df87913dce47b0ac0f76cb04fe24131f42989c53fbddfc05184d68b5a3fd9",
+      "native_actions": 26,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "U09 U10 keyboard en desktop task5 versioned member change, failed-job paging and scope recovery",
+      "name": "keyboard-task5-viewer",
+      "path": "4dd48668c7b5-keyboard-task5-viewer.json",
+      "bytes": 487,
+      "sha256": "589400f16228afd1398e1dcec31c3bdd6193f4404194ffd797688694c01fc0ed",
+      "native_actions": 3,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "U09 U10 keyboard en desktop task5 versioned member change, failed-job paging and scope recovery",
+      "name": "keyboard-task5-proof",
+      "path": "5f18cfda9956-keyboard-task5-proof.json",
+      "bytes": 3821,
+      "sha256": "ffce2565c235a71465594fb35836172da8cffb2960cc1602c4829fe61cbc5afb",
+      "native_actions": 15,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "U09 U10 keyboard zh-HK mobile task3 cross-page assignment, persisted conflict and exact failed-only manifest",
+      "name": "keyboard-task3-proof",
+      "path": "21d2743fc3ea-keyboard-task3-proof.json",
+      "bytes": 39982,
+      "sha256": "8a541b8a38d7d5c6ed90d1b032836c12a0c8694ece3b627071d3f96846cff38f",
+      "native_actions": 26,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "U09 U10 keyboard zh-HK mobile task5 versioned member change, failed-job paging and scope recovery",
+      "name": "keyboard-task5-viewer",
+      "path": "5e443c8dcb81-keyboard-task5-viewer.json",
+      "bytes": 485,
+      "sha256": "cd4901cbdcbf445d3aa45039cb770e4a6b89ed37c031bb116f2e1d412c9839b1",
+      "native_actions": 3,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "U09 U10 keyboard zh-HK mobile task5 versioned member change, failed-job paging and scope recovery",
+      "name": "keyboard-task5-proof",
+      "path": "cfb3faa5644c-keyboard-task5-proof.json",
+      "bytes": 3815,
+      "sha256": "5f3910b9959cc9096a586a7726dfe8cc61a538e7305525cdb6c893351b80b7ed",
+      "native_actions": 15,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "name": "operator-keyboard-input",
+      "path": "4792c11c47b8-operator-keyboard-input.json",
+      "bytes": 6894,
+      "sha256": "c9463d87aca5823237c623b26ba04127aa2a9a2d770df4c78c522ebf1ea1b6ec",
+      "native_actions": 48,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "name": "reviewer-keyboard-input",
+      "path": "bc36120a5f49-reviewer-keyboard-input.json",
+      "bytes": 6622,
+      "sha256": "07905fee68dd12c3fe828ecb0eeadfd9e4ee2cc83affe42cdb0d59ce7b9788ec",
+      "native_actions": 45,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "name": "operator-keyboard-input",
+      "path": "46b297f5c142-operator-keyboard-input.json",
+      "bytes": 6896,
+      "sha256": "48f617ce1ced1c89da3b8c243bba3f92fe6c016989ef90d47a81182c82c36cf9",
+      "native_actions": 48,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "name": "reviewer-keyboard-input",
+      "path": "825d82900a5b-reviewer-keyboard-input.json",
+      "bytes": 6624,
+      "sha256": "22e3261034bbe92c05faaf48a17b276b3ddb630743dd02f6916d9aea28bd6395",
+      "native_actions": 45,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "T30 keyboard zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "name": "operator-keyboard-input",
+      "path": "98129018685f-operator-keyboard-input.json",
+      "bytes": 6937,
+      "sha256": "904f280c0e288deaa95dd9c10c34d7add01b30622319188718f0fc91071622b1",
+      "native_actions": 48,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "T30 keyboard zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "name": "reviewer-keyboard-input",
+      "path": "84684e294abf-reviewer-keyboard-input.json",
+      "bytes": 6650,
+      "sha256": "82fa7ca6b9f3a04be5cf543d540934f7db7cad4d845baffb17ea00c2882767a4",
+      "native_actions": 45,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "name": "operator-keyboard-input",
+      "path": "f8243a2b77ff-operator-keyboard-input.json",
+      "bytes": 6938,
+      "sha256": "d157a304ce3dff1a43e4389ddf0f8ec07c8bde0294f6ec34b943213c457891ea",
+      "native_actions": 48,
+      "trusted_pointer_events": 0
+    },
+    {
+      "case": "T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "name": "reviewer-keyboard-input",
+      "path": "5b0d217cafe4-reviewer-keyboard-input.json",
+      "bytes": 6649,
+      "sha256": "4c9f5382a1a7e3f5767c1ae7c41394f3d5caeb8fcd632f383038a4ff8b09265d",
+      "native_actions": 45,
+      "trusted_pointer_events": 0
+    }
+  ],
+  "total_native_actions": 460,
+  "keyboard_proof_bodies": 14,
+  "human_screen_reader": null,
+  "human_staff_UAT": null,
+  "deployed_sha": null
+}

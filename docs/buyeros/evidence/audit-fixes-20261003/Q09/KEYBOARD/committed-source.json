@@ -1,0 +1,33 @@
+{
+  "base": "86014b03f2a7db48c90ecd1c52800b528679a220",
+  "test_source_commit": "f70501a174c641db65d06929ebd3b7e8b52ee3bb",
+  "application_source": "1953d615dc00e6920380dbb71be6a99b96e36488",
+  "files": [
+    {
+      "path": "tests/e2e/fixtures/journey-input.ts",
+      "lf_sha256": "d9c1f44e29efc541344d592c2bf05f623d7fe28a02b5727d505d196254e4aaca"
+    },
+    {
+      "path": "tests/e2e/fixtures/staff-journey.ts",
+      "lf_sha256": "82fb07854813a84a122d8f183c436e5c8e6babc62fb581000ab8bb2fedb9f85d"
+    },
+    {
+      "path": "tests/e2e/fixtures/workbench-auth.ts",
+      "lf_sha256": "1d6bcf091893eceb41d66243e45eec23fff22ef01f271154c36ddac2742e19e5"
+    },
+    {
+      "path": "tests/e2e/audit-keyboard.spec.ts",
+      "lf_sha256": "1a9515c00796d0defeb97aa7efce6de5a1533cb9fc1d9dac902ad6d077f02fd3"
+    },
+    {
+      "path": "tests/e2e/audit-keyboard-workbench.spec.ts",
+      "lf_sha256": "6d485dd35c5510e82d7e30d88384421680074638b56b53b70aa22dec65d5b173"
+    },
+    {
+      "path": "playwright.audit-keyboard.config.ts",
+      "lf_sha256": "c0865fb7a5667ec99f473fc4dc388d22eea5c58e815b2f64af36a725aac1cda3"
+    }
+  ],
+  "deployed_sha": null,
+  "author_review_only": true
+}

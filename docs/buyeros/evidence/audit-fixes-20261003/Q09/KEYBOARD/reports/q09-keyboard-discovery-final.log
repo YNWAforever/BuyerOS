@@ -1,0 +1,14 @@
+Listing tests:
+  fixtures\staff-journey.ts:105:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+  fixtures\staff-journey.ts:105:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+  fixtures\staff-journey.ts:105:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+  fixtures\staff-journey.ts:105:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+  audit-keyboard-workbench.spec.ts:30:2 › U09 U10 keyboard en desktop task3 cross-page assignment, persisted conflict and exact failed-only manifest
+  audit-keyboard-workbench.spec.ts:80:2 › U09 U10 keyboard en desktop task5 versioned member change, failed-job paging and scope recovery
+  audit-keyboard-workbench.spec.ts:30:2 › U09 U10 keyboard zh-HK mobile task3 cross-page assignment, persisted conflict and exact failed-only manifest
+  audit-keyboard-workbench.spec.ts:80:2 › U09 U10 keyboard zh-HK mobile task5 versioned member change, failed-job paging and scope recovery
+  fixtures\staff-journey.ts:105:1 › T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+  fixtures\staff-journey.ts:105:1 › T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+  fixtures\staff-journey.ts:105:1 › T30 keyboard zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+  fixtures\staff-journey.ts:105:1 › T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+Total: 12 tests in 2 files

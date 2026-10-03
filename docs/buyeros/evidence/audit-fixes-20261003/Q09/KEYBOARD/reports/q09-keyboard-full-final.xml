@@ -1,0 +1,74 @@
+<testsuites id="" name="" tests="12" failures="1" skipped="0" errors="0" time="597.682186">
+<testsuite name="audit-daily-journey.spec.ts" timestamp="2026-10-03T21:26:54.072Z" hostname="" tests="4" failures="0" skipped="0" time="155.303" errors="0">
+<testcase name="Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="41.304">
+</testcase>
+<testcase name="Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="36.936">
+</testcase>
+<testcase name="Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="43.077">
+</testcase>
+<testcase name="Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="33.986">
+</testcase>
+</testsuite>
+<testsuite name="audit-keyboard-workbench.spec.ts" timestamp="2026-10-03T21:26:54.072Z" hostname="" tests="4" failures="1" skipped="0" time="113.874" errors="0">
+<testcase name="U09 U10 keyboard en desktop task3 cross-page assignment, persisted conflict and exact failed-only manifest" classname="audit-keyboard-workbench.spec.ts" time="29.85">
+</testcase>
+<testcase name="U09 U10 keyboard en desktop task5 versioned member change, failed-job paging and scope recovery" classname="audit-keyboard-workbench.spec.ts" time="20.019">
+</testcase>
+<testcase name="U09 U10 keyboard zh-HK mobile task3 cross-page assignment, persisted conflict and exact failed-only manifest" classname="audit-keyboard-workbench.spec.ts" time="36.763">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|q09-keyboard\audit-keyboard-workbench-U-0c592--exact-failed-only-manifest\error-context.md]]
+
+[[ATTACHMENT|q09-keyboard\audit-keyboard-workbench-U-0c592--exact-failed-only-manifest\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  audit-keyboard-workbench.spec.ts:30:2 › U09 U10 keyboard zh-HK mobile task3 cross-page assignment, persisted conflict and exact failed-only manifest 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: '買家結果', exact: true }).getByRole('region', { name: '批量工作進度', exact: true }).getByText('61–80 / 101', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('region', { name: '買家結果', exact: true }).getByRole('region', { name: '批量工作進度', exact: true }).getByText('61–80 / 101', { exact: true }) with timeout 5000ms
+      - waiting for getByRole('region', { name: '買家結果', exact: true }).getByRole('region', { name: '批量工作進度', exact: true }).getByText('61–80 / 101', { exact: true })
+
+
+      65 |   await expect(progress).toContainText(locale==='en'?'1 conflicts':'衝突 1');await input.activate(progress.getByRole('button',{name:t('Show job results'),exact:true}));
+      66 |   const seen:string[]=[];
+    > 67 |   for(let offset=0;offset<101;offset+=20){await expect(progress.getByText(`${offset+1}–${Math.min(offset+20,101)} / 101`,{exact:true})).toBeVisible();seen.push(...await progress.locator('code').allTextContents());if(offset+20<101)await input.activate(progress.getByRole('button',{name:t('Next job results'),exact:true}));}
+         |                                                                                                                                         ^
+      68 |   expect(seen.length).toBe(101);expect(new Set(seen)).toEqual(new Set(seeded.ids));
+      69 |   const download=page.waitForEvent('download');await input.activate(progress.getByRole('button',{name:t('Export failed IDs and reasons'),exact:true}));
+      70 |   const csv=await readFile((await (await download).path())!,'utf8');expect(csv.trim().split(/\r?\n/)).toHaveLength(2);expect(csv).toContain(seeded.ids[1]);expect(csv).not.toContain(seeded.ids[0]);
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-keyboard-workbench.spec.ts:67:137
+
+    Error Context: ..\..\test-results\q09-keyboard\audit-keyboard-workbench-U-0c592--exact-failed-only-manifest\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q09-keyboard\audit-keyboard-workbench-U-0c592--exact-failed-only-manifest\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q09-keyboard\audit-keyboard-workbench-U-0c592--exact-failed-only-manifest\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="U09 U10 keyboard zh-HK mobile task5 versioned member change, failed-job paging and scope recovery" classname="audit-keyboard-workbench.spec.ts" time="27.242">
+</testcase>
+</testsuite>
+<testsuite name="audit-keyboard.spec.ts" timestamp="2026-10-03T21:26:54.072Z" hostname="" tests="4" failures="0" skipped="0" time="257.264" errors="0">
+<testcase name="T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="83.791">
+</testcase>
+<testcase name="T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="56.087">
+</testcase>
+<testcase name="T30 keyboard zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="55.138">
+</testcase>
+<testcase name="T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="62.248">
+</testcase>
+</testsuite>
+</testsuites>

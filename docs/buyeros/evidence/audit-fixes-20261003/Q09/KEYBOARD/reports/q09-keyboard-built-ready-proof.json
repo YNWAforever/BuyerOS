@@ -1,0 +1,11 @@
+{
+  "name": "buyeros-audit-ui-052d6a686de9",
+  "volume": "buyeros-audit-ui-deps-052d6a686de9",
+  "owner": "052d6a686de9",
+  "mode": "http",
+  "runtime": "built",
+  "executionProfile": "managed-linux",
+  "image": "node:22.23.2-bookworm-slim",
+  "compiled_entry_sha256": "32249e133cd9b8cd860a98be8108b35923c113a0a6007764cab97555ef4dda49",
+  "verified_while_alive": true
+}

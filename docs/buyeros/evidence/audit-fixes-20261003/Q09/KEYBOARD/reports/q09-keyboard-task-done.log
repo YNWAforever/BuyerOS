@@ -1,0 +1,6 @@
+[WebServer]     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+[WebServer] 
+[WebServer] Node.js v24.18.0
+Error: Process from config.webServer was not able to start. Exit code: 1
+
+task-done: test command exited 1; Task 1 NOT recorded (full output: /c/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/.superpowers/sdd/q09-keyboard-followup/task-1-tests.log)

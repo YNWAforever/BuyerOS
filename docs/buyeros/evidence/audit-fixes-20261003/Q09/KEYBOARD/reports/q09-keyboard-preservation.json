@@ -1,0 +1,10 @@
+{
+  "base_sha": "86014b03f2a7db48c90ecd1c52800b528679a220",
+  "application_code_unchanged": true,
+  "original_application_source_sha": "1953d615dc00e6920380dbb71be6a99b96e36488",
+  "primary_head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+  "primary_clean": true,
+  "neon_head": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "neon_dirty_paths": 193,
+  "neon_diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0"
+}

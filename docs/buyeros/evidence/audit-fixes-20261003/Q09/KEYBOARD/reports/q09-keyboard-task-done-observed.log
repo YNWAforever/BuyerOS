@@ -1,0 +1,6 @@
+  ok 12 tests\e2e\fixtures\staff-journey.ts:109:1 › T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset (57.1s)
+
+  Slow test file: tests\e2e\fixtures\staff-journey.ts (9.2m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  12 passed (13.9m)
+ledger: Task 1: complete (commits 86014b0..86014b0, tests: powershell.exe -NoProfile -File test-results/q09-keyboard-native-gate.ps1 →   12 passed (13.9m))

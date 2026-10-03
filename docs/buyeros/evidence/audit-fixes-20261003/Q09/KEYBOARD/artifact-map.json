@@ -1,0 +1,752 @@
+[
+  {
+    "source": "test-results/q09-keyboard-alembic-heads.log",
+    "target": "reports/q09-keyboard-alembic-heads.log",
+    "bytes": 28,
+    "sha256": "ee4f0b43bbf4117a8b56d619979ebbef0e2bf941fd97cca8813aa20e6c29c00e"
+  },
+  {
+    "source": "test-results/q09-keyboard-author-review-draft.json",
+    "target": "reports/q09-keyboard-author-review-draft.json",
+    "bytes": 2314,
+    "sha256": "9fa34df95d14e7c30fcd4ecc1dc8d0679557fab40ecc1fcf43f3cd1ab354ebd6"
+  },
+  {
+    "source": "test-results/q09-keyboard-baseline-fourth.log",
+    "target": "reports/q09-keyboard-baseline-fourth.log",
+    "bytes": 19737,
+    "sha256": "0a67382819955d0705f7e665f2be240dfaeb61ffc73ac277ac0b74c8e71bf8d6"
+  },
+  {
+    "source": "test-results/q09-keyboard-baseline-fourth.xml",
+    "target": "reports/q09-keyboard-baseline-fourth.xml",
+    "bytes": 469,
+    "sha256": "f730b42444457e638c10a14abe5947351648c2bb1ddab4f09a44ad3f11b15da6"
+  },
+  {
+    "source": "test-results/q09-keyboard-baseline-second.log",
+    "target": "reports/q09-keyboard-baseline-second.log",
+    "bytes": 6955,
+    "sha256": "5ef3d37ba9b4db304385c45835bf22b40d49c6b8f22c07dcfb125e68a6f81a25"
+  },
+  {
+    "source": "test-results/q09-keyboard-baseline-second.xml",
+    "target": "reports/q09-keyboard-baseline-second.xml",
+    "bytes": 112,
+    "sha256": "cb3667a009fd1cedc15bcd0e8b50f066c2e2dcc8849c7c138f8f85834bfc3c5b"
+  },
+  {
+    "source": "test-results/q09-keyboard-baseline-third.log",
+    "target": "reports/q09-keyboard-baseline-third.log",
+    "bytes": 22442,
+    "sha256": "fcf954e78ca239c3a9740b8bd5fd993b735f0052483fb112d607bbc501a308f8"
+  },
+  {
+    "source": "test-results/q09-keyboard-baseline-third.xml",
+    "target": "reports/q09-keyboard-baseline-third.xml",
+    "bytes": 3759,
+    "sha256": "8b87eb401a09314de562475fa0e4712a98999d28ecd18aa9555e5254a8896ea7"
+  },
+  {
+    "source": "test-results/q09-keyboard-baseline.log",
+    "target": "reports/q09-keyboard-baseline.log",
+    "bytes": 7044,
+    "sha256": "0adc5e0f27a06d364e2e1028c6be5fb45ead00ff58b9e243acb2789320451f8a"
+  },
+  {
+    "source": "test-results/q09-keyboard-built-final-proof.json",
+    "target": "reports/q09-keyboard-built-final-proof.json",
+    "bytes": 592,
+    "sha256": "1114fb4e0f38ac456afc80f009db7e66e4e3869bd2674269ae5a4a2d9f0bffd4"
+  },
+  {
+    "source": "test-results/q09-keyboard-built-first-proof.json",
+    "target": "reports/q09-keyboard-built-first-proof.json",
+    "bytes": 379,
+    "sha256": "208734307150db8178f01c9c78b345b20ecf96c960f5be1e2ccb40dd9691eae7"
+  },
+  {
+    "source": "test-results/q09-keyboard-built-observed-proof.json",
+    "target": "reports/q09-keyboard-built-observed-proof.json",
+    "bytes": 580,
+    "sha256": "800edde16337512a9ed05821c6822015d35d3c396946f531c58a95c0f02efd2e"
+  },
+  {
+    "source": "test-results/q09-keyboard-built-proof-final.json",
+    "target": "reports/q09-keyboard-built-proof-final.json",
+    "bytes": 580,
+    "sha256": "86bbcdd0b60cfcf45a2c42d2e8713f1bc124e6ae43389a4ec25c7b3a9a29927e"
+  },
+  {
+    "source": "test-results/q09-keyboard-built-ready-proof.json",
+    "target": "reports/q09-keyboard-built-ready-proof.json",
+    "bytes": 379,
+    "sha256": "d139e6d6289a5dad1cf405c88a8b88d58f254e4bf618a4bc998aa82641f3fce0"
+  },
+  {
+    "source": "test-results/q09-keyboard-discovery-final.log",
+    "target": "reports/q09-keyboard-discovery-final.log",
+    "bytes": 1942,
+    "sha256": "643c14f95cc0496de196bbc7b9db4f602522fabdb60fcfa4bf7d7f3aefd5a95d"
+  },
+  {
+    "source": "test-results/q09-keyboard-discovery-first.log",
+    "target": "reports/q09-keyboard-discovery-first.log",
+    "bytes": 1099,
+    "sha256": "7b8cf67cedc0aef12926d03de7871275dd977f4503b7f19ca12ae7438395472a"
+  },
+  {
+    "source": "test-results/q09-keyboard-discovery-second.log",
+    "target": "reports/q09-keyboard-discovery-second.log",
+    "bytes": 690,
+    "sha256": "66ed13bd38bf0799b31f59b6bd5a556fe58e8c8771ca80e944908639dd693605"
+  },
+  {
+    "source": "test-results/q09-keyboard-final-source.json",
+    "target": "reports/q09-keyboard-final-source.json",
+    "bytes": 1022,
+    "sha256": "a87452c0416de06b3aff0e8970868feb162dba9ed33aa5905320c23006902c86"
+  },
+  {
+    "source": "test-results/q09-keyboard-first-source.json",
+    "target": "reports/q09-keyboard-first-source.json",
+    "bytes": 1061,
+    "sha256": "d79ed6f57f8d89d032f9f947cb1c84cbc0bb77043896af65c04e9c40ab423489"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-final.log",
+    "target": "reports/q09-keyboard-full-final.log",
+    "bytes": 24542,
+    "sha256": "f79093ba57c0d3b817786820629327950a5d65c2d88024dbfe2c56ff44faf9d8"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-final.xml",
+    "target": "reports/q09-keyboard-full-final.xml",
+    "bytes": 6451,
+    "sha256": "241e7fe538d83683abe0082ca4f0aab04118a9f2c75c01dfa4f9a46848640f24"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-first.log",
+    "target": "reports/q09-keyboard-full-first.log",
+    "bytes": 26709,
+    "sha256": "7d4a8ece607ce32c83b7595937a435249f7d005fad35ae1635ba2687b9996e8a"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-first.xml",
+    "target": "reports/q09-keyboard-full-first.xml",
+    "bytes": 8570,
+    "sha256": "15d1447de4bf1254d5358522848ba5b7c6494a373d48e51f9d6a4bbfd22757af"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-observed.log",
+    "target": "reports/q09-keyboard-full-observed.log",
+    "bytes": 20975,
+    "sha256": "a05b8d7dc14ee520df699675ea9a2af67656ffb37c1fa6573669d3987c256b2e"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-observed.xml",
+    "target": "reports/q09-keyboard-full-observed.xml",
+    "bytes": 3027,
+    "sha256": "94a102ea407e44e02ece5161f407aae3e196170864b2ddba061dace1ed5ef50c"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-second.xml",
+    "target": "reports/q09-keyboard-full-second.xml",
+    "bytes": 103,
+    "sha256": "0dcc6f0171463235c2e3cc659e33783f4af01ce7c7e1817ab4a760f3656ad747"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-third.log",
+    "target": "reports/q09-keyboard-full-third.log",
+    "bytes": 24306,
+    "sha256": "94d08b87048956060823c225ebd0f8ed42278719d9f452da3672e03c9bca7040"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-third.xml",
+    "target": "reports/q09-keyboard-full-third.xml",
+    "bytes": 5728,
+    "sha256": "f6647637d68af36785a9e8c9746957a9042a4c1b7cce7c8c41e17f9f02cc75da"
+  },
+  {
+    "source": "test-results/q09-keyboard-generated-types.log",
+    "target": "reports/q09-keyboard-generated-types.log",
+    "bytes": 38,
+    "sha256": "4ad0a086f797ff95d7d5cf98dca236237e3c4fe1967ab5165ea7ef1ed64c18d8"
+  },
+  {
+    "source": "test-results/q09-keyboard-lint-final.log",
+    "target": "reports/q09-keyboard-lint-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard-lint-observed.log",
+    "target": "reports/q09-keyboard-lint-observed.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard-lint-proof.log",
+    "target": "reports/q09-keyboard-lint-proof.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard-lint-ready.log",
+    "target": "reports/q09-keyboard-lint-ready.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard-lint-second.log",
+    "target": "reports/q09-keyboard-lint-second.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard-native-gate.ps1",
+    "target": "reports/q09-keyboard-native-gate.ps1",
+    "bytes": 398,
+    "sha256": "332c74383e9d86099f34a35171296367a16d1d2d1a0fbf7ed335744c9a6fdaef"
+  },
+  {
+    "source": "test-results/q09-keyboard-observed-source.json",
+    "target": "reports/q09-keyboard-observed-source.json",
+    "bytes": 1024,
+    "sha256": "4e8757d8d9aa2f5465890b56d2254c0845d32fd59801f2047fd09337a3243644"
+  },
+  {
+    "source": "test-results/q09-keyboard-operation-check.log",
+    "target": "reports/q09-keyboard-operation-check.log",
+    "bytes": 52,
+    "sha256": "563c818fa90932775948dbae3d9075f1f5559b5844278315540ad94b1c2b0251"
+  },
+  {
+    "source": "test-results/q09-keyboard-preservation.json",
+    "target": "reports/q09-keyboard-preservation.json",
+    "bytes": 451,
+    "sha256": "ed7d69fc73e2612722a1ab30d68669fe57cb1e1d099852ef7b5aa218735955f2"
+  },
+  {
+    "source": "test-results/q09-keyboard-proof-full.json",
+    "target": "reports/q09-keyboard-proof-full.json",
+    "bytes": 209620,
+    "sha256": "f73717fa317c478f4f904044bc42031051d3fc594268123390be8db0c0354de4"
+  },
+  {
+    "source": "test-results/q09-keyboard-proof-full.log",
+    "target": "reports/q09-keyboard-proof-full.log",
+    "bytes": 21299,
+    "sha256": "6f838fb9882ccc34f698ed102e8b42a38685de10d90e399395e9e8a89aae984f"
+  },
+  {
+    "source": "test-results/q09-keyboard-proof-full.xml",
+    "target": "reports/q09-keyboard-proof-full.xml",
+    "bytes": 3027,
+    "sha256": "e8f555f033c64a5c6053b0a605856d80764d5e19d684663f9a08ea544599538e"
+  },
+  {
+    "source": "test-results/q09-keyboard-proof-source.json",
+    "target": "reports/q09-keyboard-proof-source.json",
+    "bytes": 1024,
+    "sha256": "44d856433e539d08bf2ae6c6a43fbb98cff757ac00a6c32c149feec66e1fa658"
+  },
+  {
+    "source": "test-results/q09-keyboard-sdd-startup-first.log",
+    "target": "reports/q09-keyboard-sdd-startup-first.log",
+    "bytes": 7602,
+    "sha256": "5f182b7ad68de734fb6fc7fd10861f8716909d11224af19fc43e2962a43d60db"
+  },
+  {
+    "source": "test-results/q09-keyboard-second-source.json",
+    "target": "reports/q09-keyboard-second-source.json",
+    "bytes": 1022,
+    "sha256": "6e2e84dd69623ca71324ccdbd6ac13b15d81ac71c5c35fc3772ffe55b6cf9558"
+  },
+  {
+    "source": "test-results/q09-keyboard-startup-cleanup.json",
+    "target": "reports/q09-keyboard-startup-cleanup.json",
+    "bytes": 223,
+    "sha256": "56c523601642d73f5758054a85365632937194dd015e88b3f30542d3d8caec64"
+  },
+  {
+    "source": "test-results/q09-keyboard-task-done-final.log",
+    "target": "reports/q09-keyboard-task-done-final.log",
+    "bytes": 683,
+    "sha256": "3adcc9ffdd03709d58561cbd5f1dcfb0ddee8a3c6d91ba2879f804be1f00e8f3"
+  },
+  {
+    "source": "test-results/q09-keyboard-task-done-observed.log",
+    "target": "reports/q09-keyboard-task-done-observed.log",
+    "bytes": 533,
+    "sha256": "7e148c7ab40915c0965eb3a3aae70f5a2d7a103757e4a4c3aabd552acc3e6119"
+  },
+  {
+    "source": "test-results/q09-keyboard-task-done-proof.log",
+    "target": "reports/q09-keyboard-task-done-proof.log",
+    "bytes": 531,
+    "sha256": "6fa914ce53a67c6c9907a488314b24c1b29a686275314ec2de6070aac31c552d"
+  },
+  {
+    "source": "test-results/q09-keyboard-task-done-second.log",
+    "target": "reports/q09-keyboard-task-done-second.log",
+    "bytes": 688,
+    "sha256": "2532dbbc64d3c6d53ffb59354d30df1f0bbe527c4aac490b5440dcecb2d52671"
+  },
+  {
+    "source": "test-results/q09-keyboard-task-done.log",
+    "target": "reports/q09-keyboard-task-done.log",
+    "bytes": 404,
+    "sha256": "d96b3249d2970aa18012e147067b1fa314bd1ce32896be27f516fd996a6629c7"
+  },
+  {
+    "source": "test-results/q09-keyboard-test-review-inventory.json",
+    "target": "reports/q09-keyboard-test-review-inventory.json",
+    "bytes": 1089,
+    "sha256": "fb27da4fc9a6698397936b4a991f2e435dac69e71ea5ad7d023d8d98ddb9ca8b"
+  },
+  {
+    "source": "test-results/q09-keyboard-types-fifth.log",
+    "target": "reports/q09-keyboard-types-fifth.log",
+    "bytes": 303,
+    "sha256": "53c1eadc091f3e04ed504d058a56c02fe637fdfbc199896a716c0f5ce6c0581c"
+  },
+  {
+    "source": "test-results/q09-keyboard-types-final.log",
+    "target": "reports/q09-keyboard-types-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard-types-first.log",
+    "target": "reports/q09-keyboard-types-first.log",
+    "bytes": 5223,
+    "sha256": "8d850e2e871a1a51e3d5337de56a2ae9bc7daf771b11c39b19ce89f28d460751"
+  },
+  {
+    "source": "test-results/q09-keyboard-types-fourth.log",
+    "target": "reports/q09-keyboard-types-fourth.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard-types-observed.log",
+    "target": "reports/q09-keyboard-types-observed.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard-types-proof.log",
+    "target": "reports/q09-keyboard-types-proof.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard-types-ready.log",
+    "target": "reports/q09-keyboard-types-ready.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard-types-second.log",
+    "target": "reports/q09-keyboard-types-second.log",
+    "bytes": 417,
+    "sha256": "9b966369a8283c95c13b1c81b9fbbcfaa3ac4e1a5e2a02230ec1406d17199af2"
+  },
+  {
+    "source": "test-results/q09-keyboard-types-sixth.log",
+    "target": "reports/q09-keyboard-types-sixth.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard-types-third.log",
+    "target": "reports/q09-keyboard-types-third.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/q09-keyboard.xml",
+    "target": "reports/q09-keyboard.xml",
+    "bytes": 3104,
+    "sha256": "027230f6f67c2bb9f692d7c08f2029da7948dda77f772101ec8d6f2d88e7d193"
+  },
+  {
+    "source": "test-results/q09-keyboard-baseline-fourth-artifacts/.last-run.json",
+    "target": "artifacts/18c778ff1704-.last-run.json",
+    "bytes": 45,
+    "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+  },
+  {
+    "source": "test-results/q09-keyboard-baseline-third-artifacts/.last-run.json",
+    "target": "artifacts/b44db3c934b9-.last-run.json",
+    "bytes": 96,
+    "sha256": "4ed58138f3c67ff2af4c8a0fd5735e88149a2c16da45d8185e33392358bfe450"
+  },
+  {
+    "source": "test-results/q09-keyboard-baseline-third-artifacts/audit-keyboard-T30-keyboar-2e1e6--and-outcome-on-one-dataset/error-context.md",
+    "target": "artifacts/fd314294321e-error-context.md",
+    "bytes": 7429,
+    "sha256": "b03409d2dbb6af9ec1679cae1932baf63f71d628b925b1678bbc14917bbf2a44"
+  },
+  {
+    "source": "test-results/q09-keyboard-baseline-third-artifacts/audit-keyboard-T30-keyboar-2e1e6--and-outcome-on-one-dataset/trace.zip",
+    "target": "artifacts/fecfb101343a-trace.zip",
+    "bytes": 2663674,
+    "sha256": "888e71407b7fe0d454a6901409bc6d1315a845364f5bd9d64bc2f8ea6abd13c2"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-final-artifacts/.last-run.json",
+    "target": "artifacts/41393e5ef4c0-.last-run.json",
+    "bytes": 96,
+    "sha256": "cbabbcdfd5e1315a829491221edb6b73a6f50e07775a887249a07692dee29ed9"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-final-artifacts/audit-keyboard-workbench-U-0c592--exact-failed-only-manifest/error-context.md",
+    "target": "artifacts/59ac6657d148-error-context.md",
+    "bytes": 28742,
+    "sha256": "59a3db7bf3e3623b75f6cb7e3b8ce9cc29411754bc3ffd84835fda553d2e5775"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-final-artifacts/audit-keyboard-workbench-U-0c592--exact-failed-only-manifest/trace.zip",
+    "target": "artifacts/4d8c2a5fba37-trace.zip",
+    "bytes": 9462250,
+    "sha256": "14f236171a20ca5ab3b6160cbebf2cffdaf064e1899cfea3f18c01d525451647"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-first-artifacts/.last-run.json",
+    "target": "artifacts/99c4914e2040-.last-run.json",
+    "bytes": 145,
+    "sha256": "b0787d369026f56a7ec884cc976ed895c23fee8b68dba50173a092bd8d579f63"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-first-artifacts/audit-keyboard-T30-keyboar-69e80--and-outcome-on-one-dataset/error-context.md",
+    "target": "artifacts/58006ad0ffca-error-context.md",
+    "bytes": 10855,
+    "sha256": "670ab53d23f2b30542a9f4907685bbd610d9299ad36e447419993ad844b0fbca"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-first-artifacts/audit-keyboard-T30-keyboar-69e80--and-outcome-on-one-dataset/trace.zip",
+    "target": "artifacts/98f98b2af528-trace.zip",
+    "bytes": 16554544,
+    "sha256": "e71a89314ed5ad76f7887c499b6974d507fdd190bb16ee70507b1321448ba9f7"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-first-artifacts/audit-keyboard-T30-keyboar-c6a9f--and-outcome-on-one-dataset/error-context.md",
+    "target": "artifacts/9dff616f2fcf-error-context.md",
+    "bytes": 5922,
+    "sha256": "947ffda320a2292542930ab20f1294f1d7c6fab6af1ea1a40bc90ff98b261ea4"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-first-artifacts/audit-keyboard-T30-keyboar-c6a9f--and-outcome-on-one-dataset/trace.zip",
+    "target": "artifacts/a6a5b94bd380-trace.zip",
+    "bytes": 6812439,
+    "sha256": "ab20934c0edff070d124f02adfa31c7d08cbe68ae1d32c7e0fb30c872e884e6a"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-observed-artifacts/.last-run.json",
+    "target": "artifacts/ab793504e31f-.last-run.json",
+    "bytes": 45,
+    "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-third-artifacts/.last-run.json",
+    "target": "artifacts/b393fbb46332-.last-run.json",
+    "bytes": 96,
+    "sha256": "c22894959ab6fa743c8755001ceb69be3eb141d280445c432453d956b120dc6a"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-third-artifacts/audit-keyboard-T30-keyboar-25451--and-outcome-on-one-dataset/error-context.md",
+    "target": "artifacts/687321ed0222-error-context.md",
+    "bytes": 21381,
+    "sha256": "6a28ca2a7268a6fa6b29b44fb259f32e72b9ef0bc907bb5d75d8a06f80017860"
+  },
+  {
+    "source": "test-results/q09-keyboard-full-third-artifacts/audit-keyboard-T30-keyboar-25451--and-outcome-on-one-dataset/trace.zip",
+    "target": "artifacts/f5dac7dc1dd2-trace.zip",
+    "bytes": 5030595,
+    "sha256": "351f22111633d27db3501f8811ed22bfaca008a096cf065ae8656a2050768c32"
+  },
+  {
+    "source": "test-results/q09-keyboard-proof-final-artifacts/.last-run.json",
+    "target": "artifacts/c8127809a6bc-.last-run.json",
+    "bytes": 45,
+    "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/21d2743fc3ea-keyboard-task3-proof.json",
+    "target": "proofs/21d2743fc3ea-keyboard-task3-proof.json",
+    "bytes": 39982,
+    "sha256": "8a541b8a38d7d5c6ed90d1b032836c12a0c8694ece3b627071d3f96846cff38f"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/46b297f5c142-operator-keyboard-input.json",
+    "target": "proofs/46b297f5c142-operator-keyboard-input.json",
+    "bytes": 6896,
+    "sha256": "48f617ce1ced1c89da3b8c243bba3f92fe6c016989ef90d47a81182c82c36cf9"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/4792c11c47b8-operator-keyboard-input.json",
+    "target": "proofs/4792c11c47b8-operator-keyboard-input.json",
+    "bytes": 6894,
+    "sha256": "c9463d87aca5823237c623b26ba04127aa2a9a2d770df4c78c522ebf1ea1b6ec"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/4dd48668c7b5-keyboard-task5-viewer.json",
+    "target": "proofs/4dd48668c7b5-keyboard-task5-viewer.json",
+    "bytes": 487,
+    "sha256": "589400f16228afd1398e1dcec31c3bdd6193f4404194ffd797688694c01fc0ed"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/5b0d217cafe4-reviewer-keyboard-input.json",
+    "target": "proofs/5b0d217cafe4-reviewer-keyboard-input.json",
+    "bytes": 6649,
+    "sha256": "4c9f5382a1a7e3f5767c1ae7c41394f3d5caeb8fcd632f383038a4ff8b09265d"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/5e443c8dcb81-keyboard-task5-viewer.json",
+    "target": "proofs/5e443c8dcb81-keyboard-task5-viewer.json",
+    "bytes": 485,
+    "sha256": "cd4901cbdcbf445d3aa45039cb770e4a6b89ed37c031bb116f2e1d412c9839b1"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/5f18cfda9956-keyboard-task5-proof.json",
+    "target": "proofs/5f18cfda9956-keyboard-task5-proof.json",
+    "bytes": 3821,
+    "sha256": "ffce2565c235a71465594fb35836172da8cffb2960cc1602c4829fe61cbc5afb"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/825d82900a5b-reviewer-keyboard-input.json",
+    "target": "proofs/825d82900a5b-reviewer-keyboard-input.json",
+    "bytes": 6624,
+    "sha256": "22e3261034bbe92c05faaf48a17b276b3ddb630743dd02f6916d9aea28bd6395"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/84684e294abf-reviewer-keyboard-input.json",
+    "target": "proofs/84684e294abf-reviewer-keyboard-input.json",
+    "bytes": 6650,
+    "sha256": "82fa7ca6b9f3a04be5cf543d540934f7db7cad4d845baffb17ea00c2882767a4"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/91b900e70f74-keyboard-task3-proof.json",
+    "target": "proofs/91b900e70f74-keyboard-task3-proof.json",
+    "bytes": 39694,
+    "sha256": "cd7df87913dce47b0ac0f76cb04fe24131f42989c53fbddfc05184d68b5a3fd9"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/98129018685f-operator-keyboard-input.json",
+    "target": "proofs/98129018685f-operator-keyboard-input.json",
+    "bytes": 6937,
+    "sha256": "904f280c0e288deaa95dd9c10c34d7add01b30622319188718f0fc91071622b1"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/bc36120a5f49-reviewer-keyboard-input.json",
+    "target": "proofs/bc36120a5f49-reviewer-keyboard-input.json",
+    "bytes": 6622,
+    "sha256": "07905fee68dd12c3fe828ecb0eeadfd9e4ee2cc83affe42cdb0d59ce7b9788ec"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/cfb3faa5644c-keyboard-task5-proof.json",
+    "target": "proofs/cfb3faa5644c-keyboard-task5-proof.json",
+    "bytes": 3815,
+    "sha256": "5f3910b9959cc9096a586a7726dfe8cc61a538e7305525cdb6c893351b80b7ed"
+  },
+  {
+    "source": "test-results/q09-keyboard-decoded-proof/f8243a2b77ff-operator-keyboard-input.json",
+    "target": "proofs/f8243a2b77ff-operator-keyboard-input.json",
+    "bytes": 6938,
+    "sha256": "d157a304ce3dff1a43e4389ddf0f8ec07c8bde0294f6ec34b943213c457891ea"
+  },
+  {
+    "source": "test-results/celery-continuity-en-desktop-approved-export-fixture.png",
+    "target": "screenshots/celery-continuity-en-desktop-approved-export-fixture.png",
+    "bytes": 140552,
+    "sha256": "d857d11511597e2535b22232e42491fc0b98b1ac535a61189aafcbd9e4442ca8"
+  },
+  {
+    "source": "test-results/celery-continuity-en-desktop-mobile-readback-fixture.png",
+    "target": "screenshots/celery-continuity-en-desktop-mobile-readback-fixture.png",
+    "bytes": 134538,
+    "sha256": "b85baa7bd2f53801b582bc50bcc7d674a81d805b08fdd0c4b4ffc480f33e0869"
+  },
+  {
+    "source": "test-results/celery-continuity-en-desktop-outcome-fixture.png",
+    "target": "screenshots/celery-continuity-en-desktop-outcome-fixture.png",
+    "bytes": 136160,
+    "sha256": "7e3862238706dc2d12c280d86fc1673cc54222e06c174796ebb3237f5c03ef16"
+  },
+  {
+    "source": "test-results/celery-continuity-en-mobile-approved-export-fixture.png",
+    "target": "screenshots/celery-continuity-en-mobile-approved-export-fixture.png",
+    "bytes": 142918,
+    "sha256": "719d62ebf79127e8dc66f03b70bc271a360a3416632741409ddf5cea86fea692"
+  },
+  {
+    "source": "test-results/celery-continuity-en-mobile-mobile-readback-fixture.png",
+    "target": "screenshots/celery-continuity-en-mobile-mobile-readback-fixture.png",
+    "bytes": 134449,
+    "sha256": "78a87fa3e0191e69af56d92d47ac1ad9fc66127fe1a2d40e6766945ca2289787"
+  },
+  {
+    "source": "test-results/celery-continuity-en-mobile-outcome-fixture.png",
+    "target": "screenshots/celery-continuity-en-mobile-outcome-fixture.png",
+    "bytes": 134449,
+    "sha256": "78a87fa3e0191e69af56d92d47ac1ad9fc66127fe1a2d40e6766945ca2289787"
+  },
+  {
+    "source": "test-results/celery-continuity-zh-HK-desktop-approved-export-fixture.png",
+    "target": "screenshots/celery-continuity-zh-HK-desktop-approved-export-fixture.png",
+    "bytes": 143917,
+    "sha256": "6d3e46ba3751c401d5c58b4b4ea69faf53d1802bdcf7da3428448a3850cb1e8d"
+  },
+  {
+    "source": "test-results/celery-continuity-zh-HK-desktop-mobile-readback-fixture.png",
+    "target": "screenshots/celery-continuity-zh-HK-desktop-mobile-readback-fixture.png",
+    "bytes": 136769,
+    "sha256": "77d14f54f22bb8f828ec57ccb55db94ee0a9c4c9c686b09e00a94cd5811b46e3"
+  },
+  {
+    "source": "test-results/celery-continuity-zh-HK-desktop-outcome-fixture.png",
+    "target": "screenshots/celery-continuity-zh-HK-desktop-outcome-fixture.png",
+    "bytes": 141633,
+    "sha256": "19dfca1bfd8e2c6ddc520ffdd32f377ec7effdb4435904fa4773e4f6e9e25ee4"
+  },
+  {
+    "source": "test-results/celery-continuity-zh-HK-mobile-approved-export-fixture.png",
+    "target": "screenshots/celery-continuity-zh-HK-mobile-approved-export-fixture.png",
+    "bytes": 142615,
+    "sha256": "28722942d6ace4a60c2b5d289dcc39a415bc8942d2ccb1fd511da7aef9ed39f2"
+  },
+  {
+    "source": "test-results/celery-continuity-zh-HK-mobile-mobile-readback-fixture.png",
+    "target": "screenshots/celery-continuity-zh-HK-mobile-mobile-readback-fixture.png",
+    "bytes": 136830,
+    "sha256": "88daae5f5c0d24295dcef3b6e53a14c73245da7344d9f83d0aa4eb2010430d78"
+  },
+  {
+    "source": "test-results/celery-continuity-zh-HK-mobile-outcome-fixture.png",
+    "target": "screenshots/celery-continuity-zh-HK-mobile-outcome-fixture.png",
+    "bytes": 136830,
+    "sha256": "88daae5f5c0d24295dcef3b6e53a14c73245da7344d9f83d0aa4eb2010430d78"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-en-desktop-approved-export-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-en-desktop-approved-export-fixture.png",
+    "bytes": 140927,
+    "sha256": "dd60fa4f6709b2cf0f6db4299e0c7300442ed54dfdb3907cc65b6f665e8837e3"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-en-desktop-mobile-readback-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-en-desktop-mobile-readback-fixture.png",
+    "bytes": 134814,
+    "sha256": "162a4f1c9cacb411757cf85f5e9b849e3ef80d0d90566da1611b6bd97b8fdb82"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-en-desktop-outcome-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-en-desktop-outcome-fixture.png",
+    "bytes": 137083,
+    "sha256": "49496c97bd5e65b924364b988bd32a319355e1b52ae6703fda7cf3ea5217cade"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-en-mobile-approved-export-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-en-mobile-approved-export-fixture.png",
+    "bytes": 140789,
+    "sha256": "cdbb1a985feb8287178ef4833853b16fa0e825a687ec00765b5f059c81c14052"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-en-mobile-mobile-readback-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-en-mobile-mobile-readback-fixture.png",
+    "bytes": 134669,
+    "sha256": "2170866db3dd9143e133c18bed602beb778379f84de21210661abcb9972958cd"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-en-mobile-outcome-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-en-mobile-outcome-fixture.png",
+    "bytes": 134669,
+    "sha256": "2170866db3dd9143e133c18bed602beb778379f84de21210661abcb9972958cd"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-zh-HK-desktop-approved-export-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-zh-HK-desktop-approved-export-fixture.png",
+    "bytes": 142704,
+    "sha256": "2a8a85d7ff62b2784665f611be6a7d0d3dbc852e0e48cc23ac1767f9dcaaee0e"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-zh-HK-desktop-mobile-readback-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-zh-HK-desktop-mobile-readback-fixture.png",
+    "bytes": 137659,
+    "sha256": "4271fefea30dadeff059a2f0b576d6a9bce69d73ece7a5b55e9a387c43da6e9c"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-zh-HK-desktop-outcome-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-zh-HK-desktop-outcome-fixture.png",
+    "bytes": 142725,
+    "sha256": "30a9d8e01e47437b444db836ed70b96356d9fa12d3799bcf78ccb044c86c62b1"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-zh-HK-mobile-approved-export-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-zh-HK-mobile-approved-export-fixture.png",
+    "bytes": 139029,
+    "sha256": "74ac50b4f2793e312f8881529dc9b205c372dffcf6d1f803ad29b31d98638cda"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-zh-HK-mobile-mobile-readback-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-zh-HK-mobile-mobile-readback-fixture.png",
+    "bytes": 137631,
+    "sha256": "c62f47d3e60438b58ffe0781de9ee1cd0aaf2f9780fcd9f8adf084aeadd6df20"
+  },
+  {
+    "source": "test-results/celery-keyboard-continuity-zh-HK-mobile-outcome-fixture.png",
+    "target": "screenshots/celery-keyboard-continuity-zh-HK-mobile-outcome-fixture.png",
+    "bytes": 128359,
+    "sha256": "c4546487cb38c6f18d3dcba2344f1a129927e8ca4972546e730e03f1816067a0"
+  },
+  {
+    "source": "test-results/q09-keyboard-task3-en-desktop.png",
+    "target": "screenshots/q09-keyboard-task3-en-desktop.png",
+    "bytes": 183750,
+    "sha256": "c571a86752601dc7f39f5b9ed45a918585a45ef7a0fed7da444a291d5a67d59f"
+  },
+  {
+    "source": "test-results/q09-keyboard-task3-zh-HK-mobile.png",
+    "target": "screenshots/q09-keyboard-task3-zh-HK-mobile.png",
+    "bytes": 182959,
+    "sha256": "b0415e9d5f546aae76cf0b5246154c2f632188d7b4a31e8acf9725c53aebf18c"
+  },
+  {
+    "source": "test-results/q09-keyboard-task5-en-desktop.png",
+    "target": "screenshots/q09-keyboard-task5-en-desktop.png",
+    "bytes": 176488,
+    "sha256": "7cf9be02350b708768f0ab4f253696d672b802f022c6f195f2f2f01a9c74a318"
+  },
+  {
+    "source": "test-results/q09-keyboard-task5-zh-HK-mobile.png",
+    "target": "screenshots/q09-keyboard-task5-zh-HK-mobile.png",
+    "bytes": 172945,
+    "sha256": "1ad634094df7ceaf2ce3a6d31acdc4cfcce9f0038eba785cdf47b55e1bf6166a"
+  },
+  {
+    "source": "test-results/q09-keyboard-verify-proof.py",
+    "target": "verify-proof.py",
+    "bytes": 2752,
+    "sha256": "9a564dd4e856e38bb088820e5c4b17a199225c8857991fe8c571918bbdd2f934"
+  },
+  {
+    "source": "docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-human-uat-template.csv",
+    "target": "human-uat-template.csv",
+    "bytes": 2533,
+    "sha256": "3804e2612fe34b2a862b70fc068c73a01a88f3b512c3fd9fde1bd8d87904d6b2"
+  },
+  {
+    "source": "test-results/q09-keyboard-generated-types-postcommit.log",
+    "target": "reports/q09-keyboard-generated-types-postcommit.log",
+    "bytes": 38,
+    "sha256": "4ad0a086f797ff95d7d5cf98dca236237e3c4fe1967ab5165ea7ef1ed64c18d8"
+  },
+  {
+    "source": "test-results/q09-keyboard-operation-postcommit.log",
+    "target": "reports/q09-keyboard-operation-postcommit.log",
+    "bytes": 52,
+    "sha256": "563c818fa90932775948dbae3d9075f1f5559b5844278315540ad94b1c2b0251"
+  }
+]

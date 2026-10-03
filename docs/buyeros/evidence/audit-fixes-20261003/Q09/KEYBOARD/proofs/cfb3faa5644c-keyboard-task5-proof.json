@@ -1,0 +1,152 @@
+{
+  "fixture_only": true,
+  "member": {
+    "id": "f1000000-0000-4000-8000-000000000000",
+    "workspace_id": "e0000000-0000-4000-8000-000000000001",
+    "user_id": "71000001-0000-4000-8000-000000c011de",
+    "display_name": "Alex Chen",
+    "roles": [
+      "viewer",
+      "operator"
+    ],
+    "active": true,
+    "version": 2
+  },
+  "jobs": [
+    "e8493400-ed2a-47c2-9d9f-9383035fe01d",
+    "c5f8362e-16a1-44f1-a448-8b0ebff6ce65",
+    "c42383b0-855f-40bf-860a-03d810d51088",
+    "bb971dbb-464b-4af8-b813-35026ccd7756",
+    "b8066e85-7d9d-4b15-8466-85491100a6d4",
+    "b1fb4599-5747-416d-8aa8-ac8459b084ae",
+    "b0c62378-0a83-4436-a2c9-12c9fdcb8c0d",
+    "a3858664-38ea-4d2c-91c7-d98f8c36a3ec",
+    "993fd283-cadf-44c6-8539-f42f33d6693b",
+    "95c23b5a-5c9c-439b-b1ab-33ce241931ce",
+    "7f24a604-8397-4859-bf60-d37768c9a962",
+    "79dd5044-56a8-40d5-ba13-7d2cad735959",
+    "70df9997-4fab-4d58-b555-133c91132e25",
+    "6610062c-8f25-47bf-ac3f-3632c264c9da",
+    "544fdc2c-a049-4fcf-8ae6-8a8e82f14e19",
+    "4dbcdef9-6d8a-46c1-b2e1-f45faeb749a7",
+    "4beefcc9-0429-40a0-8c27-0bea67cb599a",
+    "48eae2f0-728b-44e5-a58b-9483ffafd05b",
+    "3de86dbc-bbba-4a32-b39e-5a37e79a6386",
+    "37738c54-c361-43fc-9aca-4dec5a924abe",
+    "3088ccb5-20cb-400b-a147-f6d60d89a4df",
+    "1f500283-587d-4516-9313-569cf3468a17",
+    "0bce6025-99b2-42cb-b465-1a47b3fe08fc",
+    "04320d21-e1ce-442c-9625-15e824285038"
+  ],
+  "input": {
+    "mode": "keyboard",
+    "actions": [
+      {
+        "kind": "activate",
+        "name": "Sign in",
+        "tabs": 2,
+        "focusVisible": true,
+        "outline": "2px solid"
+      },
+      {
+        "kind": "select",
+        "name": "Language",
+        "tabs": 1,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "設定",
+        "tabs": 8,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "type",
+        "name": "搜尋成員",
+        "tabs": 8,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "搜尋",
+        "tabs": 1,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "技術資料",
+        "tabs": 2,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "checkbox",
+        "name": "",
+        "tabs": 2,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "type",
+        "name": "變更原因",
+        "tabs": 86,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "儲存成員",
+        "tabs": 7,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "select",
+        "name": "專案",
+        "tabs": 40,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "總覽",
+        "tabs": 188,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "開啟",
+        "tabs": 16,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "下一頁",
+        "tabs": 25,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "3088ccb5-20cb-400b-a147-f6d60d89a4df",
+        "tabs": 1,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "select",
+        "name": "專案",
+        "tabs": 20,
+        "focusVisible": true,
+        "outline": "3px solid"
+      }
+    ],
+    "trustedPointerEvents": []
+  }
+}

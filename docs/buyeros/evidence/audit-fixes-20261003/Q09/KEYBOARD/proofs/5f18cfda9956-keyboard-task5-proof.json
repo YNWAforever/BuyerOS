@@ -1,0 +1,152 @@
+{
+  "fixture_only": true,
+  "member": {
+    "id": "f1000000-0000-4000-8000-000000000000",
+    "workspace_id": "e0000000-0000-4000-8000-000000000001",
+    "user_id": "71000001-0000-4000-8000-000000c011de",
+    "display_name": "Alex Chen",
+    "roles": [
+      "viewer",
+      "operator"
+    ],
+    "active": true,
+    "version": 2
+  },
+  "jobs": [
+    "f5e222c9-3695-4887-a3e4-c2baac09178e",
+    "cb8c41ba-cb2b-4224-8e04-34b348ec1d4a",
+    "b6944893-a776-409d-9435-4fb32491b928",
+    "ab2d4520-bfa0-419f-9640-2ad8b6053039",
+    "9c45c590-81f6-4427-9e51-e881b832ff3e",
+    "905d3c3d-9d42-40bf-b6a6-3b0d01b5e10c",
+    "7d2c9583-474c-4ea2-b97d-071f755d549b",
+    "72c8d3f3-1093-4c81-b804-b62e30dd3c5e",
+    "64768650-2985-477c-b966-720e8ddce5e9",
+    "603697e7-bf52-4f98-aa3c-2b6198073757",
+    "5463899c-2d31-49bb-ba24-21f24028e28c",
+    "51c38eb4-74eb-48f1-ad97-cf661e6de4b6",
+    "4e06bdfa-2cd7-4a59-87ec-36e191822212",
+    "4df9471c-3422-4b04-8725-062887212726",
+    "4a2f24fb-d84a-40bd-b92e-d681c8ea6b09",
+    "45793827-2fa7-4108-81ff-363ab8ce26bb",
+    "3bd1f4d2-89c2-4fef-b657-10f8ef3e9962",
+    "2ef08814-784f-433e-8c8b-31265837d43d",
+    "20c10ca3-4551-4f7f-8258-e250c89f3136",
+    "19d4db70-114a-4763-9d4c-73731845ad5c",
+    "14895821-0749-44c1-997a-efcd04cbd5a1",
+    "0f631cca-4605-4dfb-8162-9b800aca5af2",
+    "092b2f57-6a88-4511-acf3-4fa866886b71",
+    "073ad340-4c20-4b1f-9460-d4f5e4b8e1ed"
+  ],
+  "input": {
+    "mode": "keyboard",
+    "actions": [
+      {
+        "kind": "activate",
+        "name": "Sign in",
+        "tabs": 2,
+        "focusVisible": true,
+        "outline": "2px solid"
+      },
+      {
+        "kind": "select",
+        "name": "Language",
+        "tabs": 1,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "Settings",
+        "tabs": 8,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "type",
+        "name": "Search members",
+        "tabs": 7,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "Search",
+        "tabs": 1,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "Technical details",
+        "tabs": 2,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "checkbox",
+        "name": "",
+        "tabs": 2,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "type",
+        "name": "Change reason",
+        "tabs": 86,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "Save member",
+        "tabs": 7,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "select",
+        "name": "Project",
+        "tabs": 40,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "Overview",
+        "tabs": 188,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "Open",
+        "tabs": 16,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "Next",
+        "tabs": 25,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "activate",
+        "name": "14895821-0749-44c1-997a-efcd04cbd5a1",
+        "tabs": 1,
+        "focusVisible": true,
+        "outline": "3px solid"
+      },
+      {
+        "kind": "select",
+        "name": "Project",
+        "tabs": 20,
+        "focusVisible": true,
+        "outline": "3px solid"
+      }
+    ],
+    "trustedPointerEvents": []
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "fixture_only": true,
+  "owner": "052d6a686de9",
+  "name": "buyeros-audit-ui-052d6a686de9",
+  "image": "node:22.23.2-bookworm-slim",
+  "image_id": "sha256:48e4b67d85f87bd551df43704e24d252f56cc5f8e9718841aace50f19948f0f9",
+  "runtime": "built",
+  "entrypoint": "/src/.output/server/index.mjs",
+  "entrypoint_sha256": "f5d2a6b96de8ff78f88c62f27854e26c6242a976eef179a0b284eb14cfa2a82a",
+  "cpus": 4.0,
+  "memory_bytes": 6442450944,
+  "host_only_ports": {
+    "3000/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "5173"
+      }
+    ]
+  }
+}

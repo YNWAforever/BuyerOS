@@ -1,0 +1,43 @@
+{
+  "review": "author-only; read input implementation: pointer APIs are confined to explicit pointer branch; evaluate callbacks only read browser DOM",
+  "paths": [
+    {
+      "path": "tests/e2e/fixtures/journey-input.ts",
+      "lines": 54,
+      "evaluate_dom_mutation_tokens": [
+        ".click(",
+        ".fill(",
+        ".selectOption("
+      ]
+    },
+    {
+      "path": "tests/e2e/fixtures/staff-journey.ts",
+      "lines": 347,
+      "evaluate_dom_mutation_tokens": [
+        ".fill("
+      ]
+    },
+    {
+      "path": "tests/e2e/fixtures/workbench-auth.ts",
+      "lines": 52,
+      "evaluate_dom_mutation_tokens": []
+    },
+    {
+      "path": "tests/e2e/audit-keyboard.spec.ts",
+      "lines": 2,
+      "evaluate_dom_mutation_tokens": []
+    },
+    {
+      "path": "tests/e2e/audit-keyboard-workbench.spec.ts",
+      "lines": 112,
+      "evaluate_dom_mutation_tokens": [
+        ".fill("
+      ]
+    },
+    {
+      "path": "playwright.audit-keyboard.config.ts",
+      "lines": 5,
+      "evaluate_dom_mutation_tokens": []
+    }
+  ]
+}

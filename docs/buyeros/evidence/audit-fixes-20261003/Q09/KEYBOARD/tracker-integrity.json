@@ -1,0 +1,18 @@
+{
+  "original_cases": 98,
+  "historical_fields_preserved": 15,
+  "repair_rows_updated": [
+    "U09",
+    "U10",
+    "U11",
+    "U12"
+  ],
+  "other_case_rows_unchanged": 94,
+  "other_task_records_unchanged": 24,
+  "all_operation_records_unchanged": 84,
+  "original_operations": 70,
+  "extensions": 14,
+  "application_source": "1953d615dc00e6920380dbb71be6a99b96e36488",
+  "test_source": "f70501a174c641db65d06929ebd3b7e8b52ee3bb",
+  "deployed_sha": null
+}

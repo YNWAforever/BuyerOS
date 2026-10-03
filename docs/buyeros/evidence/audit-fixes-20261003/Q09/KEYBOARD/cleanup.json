@@ -1,0 +1,10 @@
+{
+  "fixture_only": true,
+  "whole_gate_exit": 0,
+  "normal_global_teardown_completed": true,
+  "owned_UI_containers_remaining": [],
+  "UI_marker_exists": false,
+  "owned_dependency_cache_retained": "buyeros-audit-ui-deps-052d6a686de9",
+  "cache_owner": "052d6a686de9",
+  "unrelated_resources_removed": []
+}

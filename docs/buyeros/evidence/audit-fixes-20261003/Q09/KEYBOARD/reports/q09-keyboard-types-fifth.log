@@ -1,0 +1,2 @@
+test-results/q09-keyboard-extra.pending.ts(6,34): error TS2307: Cannot find module './fixtures/journey-input' or its corresponding type declarations.
+test-results/q09-keyboard-extra.pending.ts(7,82): error TS2307: Cannot find module './fixtures/workbench-auth' or its corresponding type declarations.

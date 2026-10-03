@@ -1,0 +1,9 @@
+{
+  "name": "buyeros-audit-ui-052d6a686de9",
+  "owner": "052d6a686de9",
+  "verified_label": true,
+  "reason": "interrupted startup left owned UI port5173",
+  "mode": "http",
+  "runtime": "built",
+  "removed": true
+}

@@ -1,0 +1,74 @@
+<testsuites id="" name="" tests="12" failures="1" skipped="0" errors="0" time="536.771901">
+<testsuite name="audit-daily-journey.spec.ts" timestamp="2026-10-03T21:12:33.010Z" hostname="" tests="4" failures="0" skipped="0" time="156.473" errors="0">
+<testcase name="Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="39.91">
+</testcase>
+<testcase name="Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="38.029">
+</testcase>
+<testcase name="Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="40.216">
+</testcase>
+<testcase name="Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="38.318">
+</testcase>
+</testsuite>
+<testsuite name="audit-keyboard-workbench.spec.ts" timestamp="2026-10-03T21:12:33.010Z" hostname="" tests="4" failures="0" skipped="0" time="103.704" errors="0">
+<testcase name="U09 U10 keyboard en desktop task3 cross-page assignment, persisted conflict and exact failed-only manifest" classname="audit-keyboard-workbench.spec.ts" time="31.094">
+</testcase>
+<testcase name="U09 U10 keyboard en desktop task5 versioned member change, failed-job paging and scope recovery" classname="audit-keyboard-workbench.spec.ts" time="21.588">
+</testcase>
+<testcase name="U09 U10 keyboard zh-HK mobile task3 cross-page assignment, persisted conflict and exact failed-only manifest" classname="audit-keyboard-workbench.spec.ts" time="29.724">
+</testcase>
+<testcase name="U09 U10 keyboard zh-HK mobile task5 versioned member change, failed-job paging and scope recovery" classname="audit-keyboard-workbench.spec.ts" time="21.298">
+</testcase>
+</testsuite>
+<testsuite name="audit-keyboard.spec.ts" timestamp="2026-10-03T21:12:33.010Z" hostname="" tests="4" failures="1" skipped="0" time="204.207" errors="0">
+<testcase name="T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="74.803">
+</testcase>
+<testcase name="T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="14.959">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|q09-keyboard\audit-keyboard-T30-keyboar-25451--and-outcome-on-one-dataset\error-context.md]]
+
+[[ATTACHMENT|q09-keyboard\audit-keyboard-T30-keyboar-25451--and-outcome-on-one-dataset\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  fixtures\staff-journey.ts:105:1 › T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Profile version 2' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Profile version 2' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: 'Profile version 2' })
+
+
+      160 |   const reviewer=await reviewerContext.newPage();await input.install(reviewer);
+      161 |   await signIn(reviewer,'fixture-reviewer',`/app?workspace=${workspace}&project=${project}`,locale,inputMode,input);
+    > 162 |   await expect(reviewer.getByRole('heading',{name:ui('Profile version 2')})).toBeVisible();
+          |                                                                              ^
+      163 |   await input.check(reviewer.getByRole('checkbox',{name:locale==='en'?/Confirm approval of this exact version v2/:/確認批准此確切版本 v2/}));
+      164 |   await input.activate(reviewer.getByRole('button',{name:ui('Approve profile')}));
+      165 |   await expect(reviewer.getByText(locale==='en'?'Current approved: v2':'目前已批准: v2')).toBeVisible();
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts:162:78
+
+    Error Context: ..\..\test-results\q09-keyboard\audit-keyboard-T30-keyboar-25451--and-outcome-on-one-dataset\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q09-keyboard\audit-keyboard-T30-keyboar-25451--and-outcome-on-one-dataset\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q09-keyboard\audit-keyboard-T30-keyboar-25451--and-outcome-on-one-dataset\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="T30 keyboard zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="60.142">
+</testcase>
+<testcase name="T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="54.303">
+</testcase>
+</testsuite>
+</testsuites>

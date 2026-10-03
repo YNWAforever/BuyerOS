@@ -1343,3 +1343,10 @@ Author-reviewed source 1953d615dc00e6920380dbb71be6a99b96e36488, base 38e88735b0
 U09/WF01/WF02 local evidence, U10 automated layout/partial keyboard, U11 actual screen reader and U12 human staff UAT unobserved NULL; full five-task pure keyboard rehearsal/independent review open. F04 existing-member UX only; U05 existing-page membership revocation case open.0schema migrations, head0037; reversepatch applicability only.31inputs/98originalfields/92othercases/24othertasks/81otheroperations/4guards/rootclean/unrelated193paths preserved. No push/remotePR/deploy/production/auth/provider/role/mail change; deployedSHA NULL. Auth0/delivery403 and Cloudflare separation retained.
 
 [Full reports/commands/screenshots/diff/rollback](evidence/audit-fixes-20261003/Q09/FINAL/RESULTS.md), [PR-19 description](review/2026-10-03-audit-fixes/Q09-pr.md). No further independent local task eligible in this execution scope; Q09human gates andQ16underlyingproof remainopen, Q13waitsN02, N00/Q10/Q17separatescope.
+
+
+## Q09 keyboard follow-up — 2026-10-04 local candidate
+
+Test/config source f70501a174c641db65d06929ebd3b7e8b52ee3bb, base 86014b03f2a7db48c90ecd1c52800b528679a220; application1953d615 unchanged. Final whole12 (8keyboard+4pointer) pass/0fail/error/skip,568.761243s;14raw JSON proofs/460visible-focus native actions/zero trusted pointer events. Actual101unique20-row result pages/exactfailed-only retry and24scoped jobs/member-version SQL verified. All5tasks en1280/zh390; tasks1/2/4 additionally en390/zh1280. Prior failures and831.079598s green12 retained. No five-task200% or human acceptance claim.
+
+U11real screen-reader/U12staff metricsNULL and independent review open; U05revocation/P09/P10SQL-RLS/Q16underlyingcause remainopen.0schema/API/auth/provider/Cloudflare/production changes; sourcehead0037/deployedNULL; test-source reverse applicability0, runtime rollback not rehearsed.31inputs/98historicalfields/94othercases/24other tasks/all84operations/4guards/rootclean/unrelated193paths preserved. [Commands/reports/screenshots/rollback](evidence/audit-fixes-20261003/Q09/KEYBOARD/RESULTS.md). No further independent local task eligible in current scope.

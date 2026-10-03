@@ -1,0 +1,321 @@
+{
+  "mode": "keyboard",
+  "actions": [
+    {
+      "kind": "activate",
+      "name": "Sign in",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "2px solid"
+    },
+    {
+      "kind": "select",
+      "name": "Language",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 32,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Approve profile",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Drafts",
+      "tabs": 7,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 5,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Save sender",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Buyers",
+      "tabs": 4,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Details",
+      "tabs": 19,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "Individual review reason",
+      "tabs": 10,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Save review",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "Select T30 Fictional Industrial Buyer",
+      "tabs": 35,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "List name",
+      "tabs": 13,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Create list",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Add selected to list",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Show list buyers",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Details",
+      "tabs": 27,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Assign to me",
+      "tabs": 9,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Sign in",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "2px solid"
+    },
+    {
+      "kind": "select",
+      "name": "Language",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "Choose classificationFactual — cite a sourceNon-factual — explain why",
+      "tabs": 19,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "Choose classificationFactual — cite a sourceNon-factual — explain why",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "Choose classificationFactual — cite a sourceNon-factual — explain why",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "Choose classificationFactual — cite a sourceNon-factual — explain why",
+      "tabs": 3,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "Choose classificationFactual — cite a sourceNon-factual — explain why",
+      "tabs": 4,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Submit source review",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Request exact review",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Approve exact revision",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "Download textCopy to clipboard",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Prepare approved copy",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "Download text",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    }
+  ],
+  "trustedPointerEvents": []
+}

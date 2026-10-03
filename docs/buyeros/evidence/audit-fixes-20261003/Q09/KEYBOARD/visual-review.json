@@ -1,0 +1,19 @@
+{
+  "fixture_only": true,
+  "inspected": [
+    {
+      "path": "screenshots/q09-keyboard-task3-en-desktop.png",
+      "sha256": "c571a86752601dc7f39f5b9ed45a918585a45ef7a0fed7da444a291d5a67d59f",
+      "author_observation": "101-101/101 last real page, exact1-row failed-only manifest and prior2-owner results visible",
+      "independent_visual_review": null
+    },
+    {
+      "path": "screenshots/q09-keyboard-task5-zh-HK-mobile.png",
+      "sha256": "1ad634094df7ceaf2ce3a6d31acdc4cfcce9f0038eba785cdf47b55e1bf6166a",
+      "author_observation": "390px stacked scope, visible focused Project selector, switchA0jobs/detail cleared; technical audit IDs retained",
+      "independent_visual_review": null
+    }
+  ],
+  "whole_site_review": false,
+  "human_UAT": null
+}

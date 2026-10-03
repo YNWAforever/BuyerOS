@@ -1,0 +1,321 @@
+{
+  "mode": "keyboard",
+  "actions": [
+    {
+      "kind": "activate",
+      "name": "Sign in",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "2px solid"
+    },
+    {
+      "kind": "select",
+      "name": "Language",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 32,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "批准輪廓",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "草稿",
+      "tabs": 7,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 5,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "儲存寄件人",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "買家",
+      "tabs": 4,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "詳情",
+      "tabs": 19,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "個別審閱原因",
+      "tabs": 10,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "儲存審閱",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "選取 T30 Fictional Industrial Buyer",
+      "tabs": 35,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "清單名稱",
+      "tabs": 13,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "建立清單",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "將已選買家加入清單",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "顯示清單買家",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "詳情",
+      "tabs": 27,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "指派給我",
+      "tabs": 9,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "登入",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "2px solid"
+    },
+    {
+      "kind": "select",
+      "name": "語言",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "請選擇分類事實陳述：須引用來源非事實陳述：請說明理由",
+      "tabs": 19,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "請選擇分類事實陳述：須引用來源非事實陳述：請說明理由",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "請選擇分類事實陳述：須引用來源非事實陳述：請說明理由",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "請選擇分類事實陳述：須引用來源非事實陳述：請說明理由",
+      "tabs": 3,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "請選擇分類事實陳述：須引用來源非事實陳述：請說明理由",
+      "tabs": 4,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "type",
+      "name": "",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "提交來源覆核",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "要求審核此版本",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "checkbox",
+      "name": "",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "批准此精確版本",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "select",
+      "name": "下載文字複製到剪貼簿",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "準備已批准副本",
+      "tabs": 1,
+      "focusVisible": true,
+      "outline": "3px solid"
+    },
+    {
+      "kind": "activate",
+      "name": "下載文字",
+      "tabs": 2,
+      "focusVisible": true,
+      "outline": "3px solid"
+    }
+  ],
+  "trustedPointerEvents": []
+}

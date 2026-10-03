@@ -177,7 +177,7 @@ StrictAPI21/Node34/freshaffectedUI17/demo21 pass0fail/error/skip,types/lint/cont
 | F11 | Q08 durable manifest/results/restart/cancel local verified; B14 original broader scenario partial |
 | F12 | Performance/goldset/production workload suites not executed; open |
 | F13 | Q11 baseline/current records prepared; production schema/role/selector/epoch readback gate open |
-| F14 | Q09/U09/U10/WF01/WF02 local UX/journeys/nativezoom verified; screen-reader/staff/fullkeyboard/WF03 live open |
+| F14 | Q09 local UX/journeys/nativezoom + selected five-task keyboard fixture matrix verified; real screen-reader/staff/WF03 live open |
 | F15 | Q01 hydration render local verified |
 | F16 | Q12 exact manual grounding review/approval/export local verified; liveprovider separate |
 | F17 | Q14 same scope/count/list/deeplink/role/paging local verified |
@@ -187,3 +187,10 @@ StrictAPI21/Node34/freshaffectedUI17/demo21 pass0fail/error/skip,types/lint/cont
 | F21 | Q16 incident underlying evidence blocked; no pool/cold-start/Q17 inference |
 
 All21 F-ID rows use current tracker/source evidence; “local verified” does not mean deployed or whole98case closed. Earlier four original PR task commits/descriptions remain independent local review boundaries.
+
+
+## Q09 keyboard follow-up — 2026-10-04 local candidate
+
+Test/config source f70501a174c641db65d06929ebd3b7e8b52ee3bb, base 86014b03f2a7db48c90ecd1c52800b528679a220; application1953d615 unchanged. Final whole12 (8keyboard+4pointer) pass/0fail/error/skip,568.761243s;14raw JSON proofs/460visible-focus native actions/zero trusted pointer events. Actual101unique20-row result pages/exactfailed-only retry and24scoped jobs/member-version SQL verified. All5tasks en1280/zh390; tasks1/2/4 additionally en390/zh1280. Prior failures and831.079598s green12 retained. No five-task200% or human acceptance claim.
+
+U11real screen-reader/U12staff metricsNULL and independent review open; U05revocation/P09/P10SQL-RLS/Q16underlyingcause remainopen.0schema/API/auth/provider/Cloudflare/production changes; sourcehead0037/deployedNULL; test-source reverse applicability0, runtime rollback not rehearsed.31inputs/98historicalfields/94othercases/24other tasks/all84operations/4guards/rootclean/unrelated193paths preserved. [Commands/reports/screenshots/rollback](../../evidence/audit-fixes-20261003/Q09/KEYBOARD/RESULTS.md). No further independent local task eligible in current scope.

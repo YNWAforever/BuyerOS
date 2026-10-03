@@ -1,0 +1,2 @@
+tests/e2e/fixtures/journey-input.ts(42,64): error TS2352: Conversion of type 'SVGElement | HTMLElement' to type 'HTMLSelectElement' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'HTMLElement' is missing the following properties from type 'HTMLSelectElement': autocomplete, disabled, form, labels, and 21 more.
