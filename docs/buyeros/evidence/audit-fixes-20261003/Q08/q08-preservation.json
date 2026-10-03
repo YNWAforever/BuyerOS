@@ -1,0 +1,9 @@
+{
+  "base_sha": "80ecfc762a6b1aeb5ce6c205d0a641539aff54c1",
+  "origin": "https://github.com/YNWAforever/BuyerOS.git",
+  "branch": "codex/audit-fixes-20261003",
+  "original_checkout_clean": true,
+  "neon_unrelated_dirty_paths": 193,
+  "neon_diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0",
+  "external_actions": []
+}

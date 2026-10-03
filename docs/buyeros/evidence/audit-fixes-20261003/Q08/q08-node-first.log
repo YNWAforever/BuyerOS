@@ -1,0 +1,16 @@
+✔ B02 confirmation is stable for row ordering but binds every material field (13.2798ms)
+✔ B02 snapshot confirmation binds snapshot identity and normalized exclusions (0.2831ms)
+✔ B03 frozen payload preserves confirmed rows and trimmed audit reason (1.4176ms)
+✔ B16 unknown assignment survives route remount and token renewal with the same key (1.5524ms)
+✔ B16 an unresolved assignment cannot be replaced with a materially different intent (0.3209ms)
+✔ B15 pending body is immutable and retry/token renewal uses same frozen body/key (22.762ms)
+✔ B16 A-B-A keeps actor intent while stale response is cancelled; other actor/scope are independent (3.2894ms)
+✔ B15 execution binds exact manifest/version/digest and retains key on unknown acceptance (1.6017ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 543.2644

@@ -1,0 +1,71 @@
+............................F.                                           [100%]
+================================== FAILURES ===================================
+________ test_operator_previews_current_head_without_mutating_selector ________
+
+migrated = 'postgresql://buyeros:buyeros@127.0.0.1:57259/buyeros_test_api'
+
+    def test_operator_previews_current_head_without_mutating_selector(migrated):
+        from buyeros_api.services.worker_recovery import set_execution_runtime
+        with psycopg.connect(migrated) as owner:
+            before = owner.execute('SELECT backend,enabled,epoch FROM worker_runtime_control').fetchone()
+>       result = set_execution_runtime(migrated, expected_epoch=before[2], backend='cloudflare',
+                                       enabled=False, reason='Owned permission regression dry run')
+
+tests\test_checkpoint_schema_privileges_db.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+dsn = 'postgresql://buyeros:buyeros@127.0.0.1:57259/buyeros_test_api'
+
+    def set_execution_runtime(dsn: str, *, expected_epoch: int, backend: str, enabled: bool,
+                              reason: str, apply: bool = False) -> dict:
+        """Operator-only compare-and-swap. Dry run by default; no cloud activation."""
+        import psycopg
+        if (type(expected_epoch) is not int or not 1 <= expected_epoch < 9007199254740991
+                or backend not in {'celery', 'cloudflare'} or type(enabled) is not bool
+                or not isinstance(reason, str) or not 1 <= len(reason.strip()) <= 200):
+            raise ValueError('invalid runtime change')
+        with psycopg.connect(dsn) as db:
+            if db.execute('SELECT version_num FROM alembic_version').fetchone()[0] not in {
+                    '0035_worker_recovery_probe', '0036_checkpoint_schema_grants'}:
+>               raise ValueError('compatible 0035/0036 build and migration required')
+E               ValueError: compatible 0035/0036 build and migration required
+
+buyeros_api\services\worker_recovery.py:217: ValueError
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_contact_job_migration.py::test_0024_0025_empty_roundtrip_preserves_one_head
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_contact_job_migration.py: 6 warnings
+tests/test_contact_quote_migration.py: 4 warnings
+tests/test_draft_approval_migration.py: 4 warnings
+tests/test_draft_integrity_migration.py: 3 warnings
+tests/test_export_migration.py: 3 warnings
+tests/test_outcome_migration.py: 3 warnings
+tests/test_sender_identity_migration.py: 3 warnings
+tests/test_cloudflare_migration_db.py: 4 warnings
+tests/test_cloudflare_recovery_boundaries_db.py: 6 warnings
+tests/test_checkpoint_schema_privileges_db.py: 3 warnings
+tests/test_research_checkpoint_migration.py: 4 warnings
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q08-migrations-first.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_checkpoint_schema_privileges_db.py::test_operator_previews_current_head_without_mutating_selector
+1 failed, 29 passed, 49 warnings in 123.18s (0:02:03)

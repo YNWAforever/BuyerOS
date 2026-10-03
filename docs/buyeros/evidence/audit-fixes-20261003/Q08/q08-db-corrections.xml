@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="3" time="11.657" timestamp="2026-10-03T22:02:36.896688+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_bulk_manifest_db" name="test_concurrent_same_preview_and_execute_key_produces_one_job_outbox" time="5.233" /><testcase classname="tests.test_bulk_manifest_db" name="test_cancel_manifest_retains_committed_chunk_and_cancels_only_pending" time="2.353"><failure message="psycopg.errors.UndefinedColumn: column &quot;cancelled&quot; does not exist&#10;LINE 1: SELECT status,updated,cancelled FROM async_jobs WHERE id=$1&#10;                              ^">api = &lt;starlette.testclient.TestClient object at 0x00000204C2C691D0&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:63546/buyeros_test_api'
+
+    def test_cancel_manifest_retains_committed_chunk_and_cancels_only_pending(api,seeded):
+        from buyeros_api.api.deps import tenant_scoped
+        from buyeros_api.services.bulk_service import apply_bulk_chunk
+        _seed_many(seeded,101);manifest=_preview(api,_admin_membership(seeded));job_id=uuid.UUID(_execute(api,manifest).json()['data']['id'])
+        async def chunk():
+            async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:return await apply_bulk_chunk(session,job_id)
+        assert asyncio.run(chunk())['processed']==50
+        response=api.post(f'/v1/workspaces/{WORKSPACE_A}/jobs/{job_id}/cancel',json={},headers=_h(key='q08-cancel'))
+        assert response.status_code==200,response.text
+        assert asyncio.run(chunk())['processed']==50
+        assert asyncio.run(chunk())['processed']==1
+        assert asyncio.run(chunk())['processed']==0
+        with psycopg.connect(seeded) as db:
+&gt;           assert db.execute('SELECT status,updated,cancelled FROM async_jobs WHERE id=%s',(job_id,)).fetchone()==('cancelled',50,51)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:225: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x204c2ce86e0&gt;
+query = 'SELECT status,updated,cancelled FROM async_jobs WHERE id=%s'
+params = (UUID('52ff895e-1873-4fc6-bac4-98536bd17409'),)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UndefinedColumn: column "cancelled" does not exist
+E           LINE 1: SELECT status,updated,cancelled FROM async_jobs WHERE id=$1
+E                                         ^
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UndefinedColumn</failure></testcase><testcase classname="tests.test_bulk_manifest_db" name="test_0037_empty_roundtrip_and_data_preserving_downgrade_refusal" time="1.165" /></testsuite></testsuites>

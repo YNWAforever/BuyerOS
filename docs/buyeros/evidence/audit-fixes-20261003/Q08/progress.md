@@ -1,0 +1,10 @@
+# Q08 execution ledger
+
+Pre-flight HEAD 80ecfc762a6b1aeb5ce6c205d0a641539aff54c1 origin https://github.com/YNWAforever/BuyerOS.git; branch codex/audit-fixes-20261003 clean. No agents authorized. Q12 checkpoint completed. Historical plan-only restriction overridden by actual local implementation request; external boundaries unchanged. Source discovery uses graph; first regex-like file filter returned no nodes, exact indexed qualified symbols succeeded. Schema head read0036; no schema edit/migration yet.
+
+## In-progress checkpoint
+0036 was the sole head before allocation; 0037_bulk_manifests is additive local/disposable only. API meaningful RED1 (404), UI meaningful RED1 (missing control). API first1pass; expanded22pass/10fail contract envelope; second27pass/5fail stream scalar bug; third31pass/1fail; diagnostic1fail proves local Postgres connection exhaustion due per-request test loops. New Q08 ASGI lifespan wrapper retained existing guard. Fourth30pass/2fail (incorrect repo-root CWD for two contracts), includes actual new-process restart and100-page10k reads. Fifth strict correct-CWD run pending. One shell preparation failed output path before pytest, not counted test pass. UI first0pass/6fail: Frozen manifest div lacks region semantics, then fixture snapshot FK cleanup absent; preserve traces. Fix named semantic section and bounded owned snapshot cleanup; no production, auth, provider, worker runtime, guard change. Type/lint second run pass.
+Task 1: complete (commits 80ecfc7..c98fb68, tests: node test-results/q08-verification.mjs → Q08 gate PASS: source hashes match; fresh Node22/type/generated/lint/rollback; required strict reports90/17/39 confirmed.)
+
+## Final Q08 checkpoint
+Strict API90, migrations39, actual Q08+Q05 UI17, Node22 pass/0 fail/error/skip;42 committed source normalized hashes match. 0037 allocated after0036head; empty downgrade/upgrade and populated refusal actual; pause patch applicability only. Original31 inputs/98 fields/92 unrelated cases/24 other task records/3 guards/193 unrelated worktree paths preserved. Author review only; independent pending. No external action. Next Q14.

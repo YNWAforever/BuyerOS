@@ -1,0 +1,2303 @@
+diff --git a/app/globals.css b/app/globals.css
+index ed653fc..a585db7 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -194,3 +194,11 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
+ /* Buyer search and visible desktop filter boundaries are distinguishable on white panels. */
+ .main-shell .results-panel .searchbox,
+ .main-shell .results-panel .desktop-filters .pick{border:1px solid #6d7c8f}
++
++/* Keep frozen manifest metadata and paginated targets usable on narrow staff screens. */
++.bulk-manifest-panel { min-width: 0; }
++.bulk-manifest-panel fieldset { min-inline-size: 0; }
++.bulk-manifest-panel label { display: block; min-width: 0; }
++.bulk-manifest-panel input:not([type="checkbox"]),
++.bulk-manifest-panel select,
++.bulk-manifest-panel textarea { width: 100%; min-width: 0; max-width: 100%; }
+diff --git a/docs/buyeros/contracts/openapi.proposed.yaml b/docs/buyeros/contracts/openapi.proposed.yaml
+index 920bafd..6f1220e 100644
+--- a/docs/buyeros/contracts/openapi.proposed.yaml
++++ b/docs/buyeros/contracts/openapi.proposed.yaml
+@@ -7886,6 +7886,172 @@ paths:
+         references. Timestamps, IDs, money limits and actor are server controlled unless explicitly input.
+       x-errors:
+       - DELIVERY_DISABLED
++  /v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests:
++    post:
++      operationId: previewBulkManifest
++      summary: Freeze an actor-bound maintenance selection up to10000
++      tags:
++      - BO-010
++      parameters:
++      - &q08p002
++        name: workspace_id
++        in: path
++        required: true
++        schema: &q08p001
++          type: string
++          format: uuid
++      - &q08p003
++        name: project_id
++        in: path
++        required: true
++        schema: *q08p001
++      - $ref: '#/components/parameters/IdempotencyKey'
++      responses:
++        '201':
++          description: Atomic current frozen selection or durable per-row execution
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/BulkManifestResponse'
++        '400':
++          $ref: '#/components/responses/Error'
++        '401':
++          $ref: '#/components/responses/Error'
++        '403':
++          $ref: '#/components/responses/Error'
++        '404':
++          $ref: '#/components/responses/Error'
++        '409':
++          $ref: '#/components/responses/Error'
++        '412':
++          $ref: '#/components/responses/Error'
++        '422':
++          $ref: '#/components/responses/Error'
++        '429':
++          $ref: '#/components/responses/Error'
++      x-permitted-roles:
++      - operator
++      - reviewer
++      - workspace_admin
++      x-cost: none
++      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
++        Unknown reply is explicit same-intent Retry.
++      x-tenant-authorization: Current membership and original actor; operation-specific
++        roles and target rechecked for admission and replay.
++      x-implementation-status: LOCAL_IMPLEMENTED
++      requestBody:
++        required: true
++        content:
++          application/json:
++            schema:
++              $ref: '#/components/schemas/BulkManifestCreate'
++  /v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}:
++    get:
++      operationId: getBulkManifest
++      summary: Restore an original actor manifest without executing it
++      tags:
++      - BO-010
++      parameters:
++      - *q08p002
++      - *q08p003
++      - name: manifest_id
++        in: path
++        required: true
++        schema: *q08p001
++      responses:
++        '200':
++          description: Atomic current frozen selection or durable per-row execution
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/BulkManifestResponse'
++        '400':
++          $ref: '#/components/responses/Error'
++        '401':
++          $ref: '#/components/responses/Error'
++        '403':
++          $ref: '#/components/responses/Error'
++        '404':
++          $ref: '#/components/responses/Error'
++        '409':
++          $ref: '#/components/responses/Error'
++        '412':
++          $ref: '#/components/responses/Error'
++        '422':
++          $ref: '#/components/responses/Error'
++        '429':
++          $ref: '#/components/responses/Error'
++      x-permitted-roles:
++      - viewer
++      - operator
++      - reviewer
++      - workspace_admin
++      x-cost: none
++      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
++        Unknown reply is explicit same-intent Retry.
++      x-tenant-authorization: Current membership and original actor; operation-specific
++        roles and target rechecked for admission and replay.
++      x-implementation-status: LOCAL_IMPLEMENTED
++  /v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}/execute:
++    post:
++      operationId: executeBulkManifest
++      summary: Confirm the exact frozen digest and current operation authority
++      tags:
++      - BO-010
++      parameters:
++      - *q08p002
++      - *q08p003
++      - name: manifest_id
++        in: path
++        required: true
++        schema: *q08p001
++      - $ref: '#/components/parameters/IdempotencyKey'
++      - $ref: '#/components/parameters/IfMatch'
++      responses:
++        '200':
++          description: Atomic current frozen selection or durable per-row execution
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/BulkResultResponse'
++        '202':
++          description: Atomic current frozen selection or durable per-row execution
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/AsyncJobResponse'
++        '400':
++          $ref: '#/components/responses/Error'
++        '401':
++          $ref: '#/components/responses/Error'
++        '403':
++          $ref: '#/components/responses/Error'
++        '404':
++          $ref: '#/components/responses/Error'
++        '409':
++          $ref: '#/components/responses/Error'
++        '412':
++          $ref: '#/components/responses/Error'
++        '422':
++          $ref: '#/components/responses/Error'
++        '429':
++          $ref: '#/components/responses/Error'
++      x-permitted-roles:
++      - operator
++      - reviewer
++      - workspace_admin
++      x-cost: none
++      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
++        Unknown reply is explicit same-intent Retry.
++      x-tenant-authorization: Current membership and original actor; operation-specific
++        roles and target rechecked for admission and replay.
++      x-implementation-status: LOCAL_IMPLEMENTED
++      requestBody:
++        required: true
++        content:
++          application/json:
++            schema:
++              $ref: '#/components/schemas/BulkManifestExecute'
+ components:
+   securitySchemes:
+     BearerAuth:
+@@ -10687,6 +10853,7 @@ components:
+         id: *id001
+         workspace_id: *id001
+         project_id: *id001
++        manifest_id: {type: string, format: uuid}
+         kind:
+           type: string
+           enum:
+@@ -10737,6 +10904,225 @@ components:
+       - blocked
+       - conflicts
+       - cancelled
++    BulkManifestCreate:
++      oneOf:
++      - type: object
++        additionalProperties: false
++        properties:
++          filters: &q08s002
++            $ref: '#/components/schemas/BuyerFilters'
++          excluded_ids: &q08s003
++            type: array
++            items: &q08s001
++              type: string
++              format: uuid
++            maxItems: 10000
++            uniqueItems: true
++          reason: &q08s004
++            type: string
++            minLength: 3
++            maxLength: 2000
++          source_job_id: *q08s001
++          operation:
++            type: string
++            enum:
++            - assignBuyerOwners
++          target:
++            type: object
++            additionalProperties: false
++            properties:
++              owner_membership_id:
++                type:
++                - string
++                - 'null'
++                format: uuid
++            required:
++            - owner_membership_id
++        required:
++        - filters
++        - excluded_ids
++        - reason
++        - operation
++        - target
++      - type: object
++        additionalProperties: false
++        properties:
++          filters: *q08s002
++          excluded_ids: *q08s003
++          reason: *q08s004
++          source_job_id: *q08s001
++          operation:
++            type: string
++            enum:
++            - reviewBuyers
++          target:
++            type: object
++            additionalProperties: false
++            properties:
++              status:
++                type: string
++                enum:
++                - accepted
++                - rejected
++                - needs_information
++            required:
++            - status
++        required:
++        - filters
++        - excluded_ids
++        - reason
++        - operation
++        - target
++      - type: object
++        additionalProperties: false
++        properties:
++          filters: *q08s002
++          excluded_ids: *q08s003
++          reason: *q08s004
++          source_job_id: *q08s001
++          operation:
++            type: string
++            enum:
++            - changeListMemberships
++          target:
++            type: object
++            additionalProperties: false
++            properties:
++              list_id: *q08s001
++              operation:
++                type: string
++                enum:
++                - add
++                - remove
++            required:
++            - list_id
++            - operation
++        required:
++        - filters
++        - excluded_ids
++        - reason
++        - operation
++        - target
++    BulkManifestExecute:
++      type: object
++      additionalProperties: false
++      properties:
++        digest: &q08s005
++          type: string
++          pattern: ^[a-f0-9]{64}$
++        confirmation:
++          type: boolean
++          const: true
++      required:
++      - digest
++      - confirmation
++    BulkManifest:
++      type: object
++      additionalProperties: false
++      properties:
++        id: *q08s001
++        workspace_id: *q08s001
++        project_id: *q08s001
++        actor_user_id: *q08s001
++        operation:
++          type: string
++          enum:
++          - assignBuyerOwners
++          - reviewBuyers
++          - changeListMemberships
++        target:
++          oneOf:
++          - type: object
++            additionalProperties: false
++            properties:
++              owner_membership_id:
++                type:
++                - string
++                - 'null'
++                format: uuid
++            required:
++            - owner_membership_id
++          - type: object
++            additionalProperties: false
++            properties:
++              status:
++                type: string
++                enum:
++                - accepted
++                - rejected
++                - needs_information
++            required:
++            - status
++          - type: object
++            additionalProperties: false
++            properties:
++              list_id: *q08s001
++              operation:
++                type: string
++                enum:
++                - add
++                - remove
++            required:
++            - list_id
++            - operation
++        filters:
++          $ref: '#/components/schemas/BuyerFilters'
++        excluded_ids: *q08s003
++        reason: *q08s004
++        count:
++          type: integer
++          minimum: 1
++          maximum: 10000
++        digest: *q08s005
++        expires_at:
++          type: string
++          format: date-time
++        status:
++          type: string
++          enum:
++          - ready
++          - executed
++        version:
++          type: integer
++          minimum: 1
++        created_at:
++          type: string
++          format: date-time
++        job_id: *q08s001
++        source_job_id: *q08s001
++        result:
++          $ref: '#/components/schemas/BulkResult'
++      required:
++      - id
++      - workspace_id
++      - project_id
++      - actor_user_id
++      - operation
++      - target
++      - filters
++      - excluded_ids
++      - reason
++      - count
++      - digest
++      - expires_at
++      - status
++      - version
++      - created_at
++    BulkManifestResponse:
++      type: object
++      additionalProperties: false
++      properties:
++        data:
++          $ref: '#/components/schemas/BulkManifest'
++        data_mode:
++          type: string
++          enum: [live]
++        request_id:
++          type: string
++      required:
++      - data
++      - request_id
++      - data_mode
+     AsyncJob:
+       type: object
+       additionalProperties: false
+@@ -10744,6 +11130,7 @@ components:
+         id: *id001
+         workspace_id: *id001
+         project_id: *id001
++        manifest_id: {type: string, format: uuid}
+         kind:
+           type: string
+           enum:
+diff --git a/features/live/bulk-actions.tsx b/features/live/bulk-actions.tsx
+index 9d2cba8..f5c34ff 100644
+--- a/features/live/bulk-actions.tsx
++++ b/features/live/bulk-actions.tsx
+@@ -27,7 +27,7 @@ const zhCopy:Record<string,string>={
+   'Assigning...':'正在分派…','Bulk job progress':'批量工作進度','Close job':'關閉工作',
+   'Loading job...':'正在載入工作…','Refresh job':'更新工作進度','Show job results':'顯示工作結果','Hide job results':'隱藏工作結果','Previous job results':'上一頁工作結果','Next job results':'下一頁工作結果',
+   'Export failed IDs and reasons':'匯出失敗買家 ID 與原因',
+-  'Retry failed only with current versions':'只按目前版本重試失敗列',
++  'Retry failed only with current versions':'只按目前版本重試失敗列','Preview failed rows with current versions':'按目前版本預覽失敗列',
+   'Retrying...':'正在重試…','Cancel pending rows':'取消未處理列','Cancelling...':'正在取消…','queued':'排隊中','running':'處理中',
+   'completed':'已完成','failed':'失敗','cancel_requested':'要求取消','cancelled':'已取消',
+ };
+@@ -124,7 +124,7 @@ function AssignmentConfirmation({preview,enabled,busy,locale,onAssign}:{preview:
+   <button type="button" disabled={!enabled||!confirmed||!preview} onClick={()=>{if(preview)void onAssign(preview);}}>{copy(busy?'Assigning...':'Assign selected buyers',locale)}</button></div>;
+ }
+ 
+-export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobId:string;onJob:(id:string)=>void;onCommitted:()=>void;onClose:()=>void;locale?:Locale}){
++export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en',onManifestRetry}:{jobId:string;onJob:(id:string)=>void;onCommitted:()=>void;onClose:()=>void;locale?:Locale;onManifestRetry?:(source:{id:string;manifest_id:string})=>void}){
+   const {session,client}=useWorkspaceSession(),snapshot=useSessionSnapshot(),{scope}=snapshot;
+   const [job,setJob]=useState<JobSummary|null>(null),[resultPage,setResultPage]=useState<ResultPage|null>(null);
+   const [error,setError]=useState(''),[busy,setBusy]=useState(false),[retryResult,setRetryResult]=useState<BulkResult|null>(null);
+@@ -197,6 +197,7 @@ export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobI
+   }
+   async function retry(){
+     if(!scope.workspace||busy||!failureCount)return;
++    if(job?.manifest_id){onManifestRetry?.({id:jobId,manifest_id:job.manifest_id});return;}
+     setBusy(true);setError('');
+     try{
+       const ctx=buyerOperationContext(session);
+@@ -217,7 +218,7 @@ export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobI
+       <div className="bulk-action-row"><button type="button" onClick={()=>{setTick(value=>value+1);if(resultsOpen){setResultBusy(true);setResultTick(v=>v+1);}}}>{copy('Refresh job',locale)}</button>
+       {['queued','running'].includes(job.status)&&<button type="button" disabled={busy} onClick={()=>void cancel()}>{copy(busy?'Cancelling...':'Cancel pending rows',locale)}</button>}
+       {failureCount>0&&<><button type="button" disabled={busy||!['completed','failed'].includes(job.status)} onClick={()=>void downloadFailures()}>{copy('Export failed IDs and reasons',locale)}</button>
+-        <button type="button" disabled={busy||!['completed','failed'].includes(job.status)} onClick={()=>void retry()}>{copy(busy?'Retrying...':'Retry failed only with current versions',locale)}</button></>}</div>
++        <button type="button" disabled={busy||!['completed','failed','cancelled'].includes(job.status)||(!!job.manifest_id&&!onManifestRetry)} onClick={()=>void retry()}>{copy(busy?'Retrying...':job.manifest_id?'Preview failed rows with current versions':'Retry failed only with current versions',locale)}</button></>}</div>
+       {failureCount>0&&<><p>{locale==='zh-HK'?`失敗列：${failureCount}。報告只包含買家 ID 和內部原因碼。`:`Failed rows: ${failureCount}. Reasons are limited to buyer IDs and internal codes.`}</p>
+         <ul>{failures.map(item=><li key={item.id}>{item.id}: {item.reason_code??item.status}</li>)}</ul></>}
+       <button type="button" onClick={()=>{setResultBusy(true);setResultsOpen(v=>!v);}}>{copy(resultsOpen?'Hide job results':'Show job results',locale)}</button>
+diff --git a/features/live/bulk-manifest.tsx b/features/live/bulk-manifest.tsx
+new file mode 100644
+index 0000000..aeecdad
+--- /dev/null
++++ b/features/live/bulk-manifest.tsx
+@@ -0,0 +1,81 @@
++"use client";
++import {useEffect,useState} from 'react';
++import {useWorkspaceSession} from '@/features/providers/workspace-session';
++import {LiveCancelled,describeLiveError} from '@/services/live/client';
++import {buyerFiltersForQuery,buyerOperationContext,type BuyerQuery} from '@/services/live/buyers';
++import {createOperationClient,type OperationOutput} from '@/services/live/operations';
++import {executeManifest,previewManifest,readManifest,startNewManifest,manifestRecovery,type Manifest,type ManifestBody,type ManifestResult} from '@/services/live/bulk-manifests';
++import type {components} from '@/services/generated/buyeros-api';
++import {isAsyncJob} from './bulk-actions';
++const zh:Record<string,string>={
++ 'Segmented maintenance':'分段批量維護','Preview segmented maintenance':'預覽分段批量維護','Operation':'操作','Assign owners':'指派負責人','Review buyers':'覆核買家','Change list membership':'更改清單成員',
++ 'Maintenance reason':'維護理由','Excluded buyer IDs (one per line)':'排除買家 ID（每行一個）','Owner':'負責人','Clear owner':'清除負責人','Me':'自己','Search colleagues':'搜尋同事','Search':'搜尋','Previous colleagues':'上一頁同事','Next colleagues':'下一頁同事',
++ 'Review status':'覆核狀態','List ID':'清單 ID','List change':'清單更改','add':'加入','remove':'移除','accepted':'接受','rejected':'拒絕','needs_information':'需要資料','Frozen manifest':'已凍結維護清單',
++ 'Confirm exact manifest':'確認精確維護清單','Execute confirmed manifest':'執行已確認維護清單','Recheck manifest':'重新查閱維護清單','Start a new preview':'開始新的預覽','Retry same preview':'重試同一預覽',
++ 'This preview freezes all matching IDs and versions, up to 10000. No buyer is changed until you confirm the exact digest.':'此預覽會凍結所有符合條件的 ID 及版本，上限 10000 筆。確認精確摘要前不會更改買家。',
++ 'The preview response is unknown. Retry uses the same frozen request and key.':'預覽結果未明；重試會使用相同凍結請求及 key。','Read the count, operation, target, reason and filters before confirming.':'確認前請核對筆數、操作、目標、理由及篩選條件。','Failed rows only; review a new digest before retrying.':'只包含失敗列；重試前須覆核新的摘要。',
++ 'The execution result is unknown. Retry the exact confirmation or recheck this manifest before starting another preview.':'執行結果未明；請重試精確確認或重新查閱此清單，確認後才開始另一份預覽。','updated':'已更新','blocked':'被阻止','conflicts':'版本衝突','count':'筆數','digest':'摘要','expires_at':'到期時間','target':'目標','filters':'篩選條件','reason':'理由','ready':'就緒','executed':'已執行',
++};
++export function BulkManifestMaintenance({query,canAssign,canReview,canManage,ownMembershipId,onJob,onCommitted,locale='en',sourceJob}:{query:BuyerQuery;canAssign:boolean;canReview:boolean;canManage:boolean;ownMembershipId:string|null;onJob:(id:string)=>void;onCommitted:()=>void;locale?:'en'|'zh-HK';sourceJob?:{id:string;manifest_id:string}}){
++ const {client,session}=useWorkspaceSession(),t=(s:string)=>locale==='zh-HK'?(zh[s]??s):s;
++ const [operation,setOperation]=useState<ManifestBody['operation']>(canAssign?'assignBuyerOwners':canReview?'reviewBuyers':'changeListMemberships');
++ const [owner,setOwner]=useState(ownMembershipId??''),[review,setReview]=useState<'accepted'|'rejected'|'needs_information'>('accepted'),[list,setList]=useState(query.listId),[change,setChange]=useState<'add'|'remove'>('add');
++ const [reason,setReason]=useState(''),[excluded,setExcluded]=useState(''),[search,setSearch]=useState(''),[q,setQ]=useState(''),[offset,setOffset]=useState(0);
++ const [lists,setLists]=useState<OperationOutput<'listBuyerLists'>|null>(null),[listOffset,setListOffset]=useState(0),[listEpoch,setListEpoch]=useState(0);
++ const [colleagues,setColleagues]=useState<components['schemas']['EligibleAssigneePage']|null>(null);
++ const [manifest,setManifest]=useState<Manifest|null>(null),[busy,setBusy]=useState(false),[confirmed,setConfirmed]=useState(false),[error,setError]=useState(''),[result,setResult]=useState<ManifestResult|null>(null),[pending,setPending]=useState(()=>!!manifestRecovery(session).body),[epoch,setEpoch]=useState(0),[source,setSource]=useState<Manifest|null>(null),[executionPending,setExecutionPending]=useState(false);
++ useEffect(()=>{let active=true;const identity=session.identity();if(!canAssign||sourceJob)return;
++  const ctx=buyerOperationContext(session);void createOperationClient(client).requestOperation('listEligibleAssignees',{path:{workspace_id:ctx.workspace},query:{q,offset,limit:20}},ctx).then(value=>{if(active&&session.isCurrent(identity))setColleagues(value);}).catch(cause=>{if(active&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));});return()=>{active=false;};
++ },[client,session,canAssign,q,offset,sourceJob]);
++ useEffect(()=>{let active=true;const identity=session.identity();const id=sourceJob?.manifest_id??new URLSearchParams(window.location.search).get('bulk_manifest');if(!id)return;
++  void readManifest(client,session,id).then(value=>{if(!active||!session.isCurrent(identity))return;
++   if(sourceJob){setSource(value);setOperation(value.operation);if('owner_membership_id' in value.target)setOwner(value.target.owner_membership_id??'');if('status' in value.target)setReview(value.target.status);if('list_id' in value.target){setList(value.target.list_id);setChange(value.target.operation);}setReason(value.reason);}
++   else {setManifest(value);setPending(false);setExecutionPending(false);setConfirmed(false);if(value.job_id)onJob(value.job_id);}
++  }).catch(cause=>{if(active&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));});return()=>{active=false;};
++ },[client,session,sourceJob,epoch,onJob]);
++ useEffect(()=>{let active=true;const identity=session.identity();if(!canManage||sourceJob)return;
++  const ctx=buyerOperationContext(session);void createOperationClient(client).requestOperation('listBuyerLists',{path:{workspace_id:ctx.workspace,project_id:ctx.project!},query:{offset:listOffset,limit:20}},ctx).then(value=>{if(active&&session.isCurrent(identity))setLists(value);}).catch(cause=>{if(active&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));});return()=>{active=false;};
++ },[client,session,canManage,sourceJob,listOffset,listEpoch]);
++ const locked=busy||!!manifest||pending;
++ function body():ManifestBody{
++  const common={filters:sourceJob?{}:buyerFiltersForQuery(query),excluded_ids:excluded.split(/\s+/).filter(Boolean),reason:reason.trim(),...(sourceJob?{source_job_id:sourceJob.id}:{})};
++  if(operation==='assignBuyerOwners')return {...common,operation,target:{owner_membership_id:owner||null}};
++  if(operation==='reviewBuyers')return {...common,operation,target:{status:review}};
++  return {...common,operation,target:{list_id:list,operation:change}};
++ }
++ async function prepare(){if(busy)return;const identity=session.identity();setBusy(true);setError('');setPending(true);
++  try{const value=await previewManifest(client,session,body());if(!session.isCurrent(identity))return;setManifest(value);setPending(false);setConfirmed(false);const url=new URL(window.location.href);url.searchParams.set('bulk_manifest',value.id);window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);}
++  catch(cause){if(session.isCurrent(identity)&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
++  finally{if(session.isCurrent(identity))setBusy(false);}
++ }
++ async function execute(){if(!manifest||busy||!confirmed)return;const identity=session.identity();setBusy(true);setExecutionPending(true);setError('');
++  try{const value=await executeManifest(client,session,manifest);if(!session.isCurrent(identity))return;setResult(value);setExecutionPending(false);setConfirmed(false);if(isAsyncJob(value))onJob(value.id);else onCommitted();setEpoch(v=>v+1);}
++  catch(cause){if(session.isCurrent(identity)&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
++  finally{if(session.isCurrent(identity))setBusy(false);}
++ }
++ function newPreview(){if(busy)return;startNewManifest(session);setManifest(null);setResult(null);setPending(false);setConfirmed(false);setError('');setEpoch(v=>v+1);const url=new URL(window.location.href);url.searchParams.delete('bulk_manifest');window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);}
++ return <section className="panel bulk-action-panel bulk-manifest-panel" aria-label={t('Segmented maintenance')}>
++  <h3>{t('Segmented maintenance')}</h3><p>{t('This preview freezes all matching IDs and versions, up to 10000. No buyer is changed until you confirm the exact digest.')}</p>
++  {sourceJob&&<p>{t('Failed rows only; review a new digest before retrying.')}</p>}
++  {error&&<p role="alert">{error}</p>}
++  <fieldset disabled={locked||!!sourceJob}><legend>{t('Operation')}</legend><select aria-label={t('Operation')} value={operation} onChange={e=>setOperation(e.target.value as ManifestBody['operation'])}>
++   {canAssign&&<option value="assignBuyerOwners">{t('Assign owners')}</option>}{canReview&&<option value="reviewBuyers">{t('Review buyers')}</option>}{canManage&&<option value="changeListMemberships">{t('Change list membership')}</option>}
++  </select>
++  {operation==='assignBuyerOwners'&&<><label>{t('Search colleagues')} <input aria-label={t('Search colleagues')} value={search} onChange={e=>setSearch(e.target.value)}/></label><button type="button" onClick={()=>{setQ(search.trim());setOffset(0);}}>{t('Search')}</button>
++   <label>{t('Owner')} <select aria-label={t('Owner')} value={owner} onChange={e=>setOwner(e.target.value)}><option value="">{t('Clear owner')}</option>{owner&&!colleagues?.items.some(item=>item.membership_id===owner)&&<option value={owner}>{owner===ownMembershipId?t('Me'):owner}</option>}{colleagues?.items.map(item=><option key={item.membership_id} value={item.membership_id}>{item.display_name} · {item.membership_id}</option>)}</select></label>
++   {colleagues&&<div>{offset+1}–{offset+colleagues.items.length} / {colleagues.total} <button disabled={offset===0} onClick={()=>setOffset(v=>Math.max(0,v-20))}>{t('Previous colleagues')}</button><button disabled={offset+20>=colleagues.total} onClick={()=>setOffset(v=>v+20)}>{t('Next colleagues')}</button></div>}</>}
++  {operation==='reviewBuyers'&&<label>{t('Review status')} <select aria-label={t('Review status')} value={review} onChange={e=>setReview(e.target.value as typeof review)}>{(['accepted','rejected','needs_information'] as const).map(s=><option key={s} value={s}>{t(s)}</option>)}</select></label>}
++  {operation==='changeListMemberships'&&<><label>{t('Target list')} <select aria-label={t('Target list')} value={list} onChange={e=>setList(e.target.value)}><option value="">{t('Choose list')}</option>{list&&!lists?.items.some(item=>item.id===list)&&<option value={list}>{list}</option>}{lists?.items.map(item=><option key={item.id} value={item.id}>{item.name} · {item.id}</option>)}</select></label><label>{t('List change')} <select aria-label={t('List change')} value={change} onChange={e=>setChange(e.target.value as typeof change)}>{(['add','remove'] as const).map(s=><option key={s} value={s}>{t(s)}</option>)}</select></label><button type="button" onClick={()=>setListEpoch(v=>v+1)}>{t('Reload lists')}</button>{lists&&<div>{lists.items.length?listOffset+1:0}–{listOffset+lists.items.length} / {lists.total}<button type="button" disabled={listOffset===0} onClick={()=>setListOffset(v=>Math.max(0,v-20))}>{t('Previous lists')}</button><button type="button" disabled={listOffset+20>=lists.total} onClick={()=>setListOffset(v=>v+20)}>{t('Next lists')}</button></div>}</>}
++  </fieldset>
++  <label>{t('Maintenance reason')} <input aria-label={t('Maintenance reason')} maxLength={2000} value={reason} disabled={locked} onChange={e=>setReason(e.target.value)}/></label>
++  <label>{t('Excluded buyer IDs (one per line)')} <textarea aria-label={t('Excluded buyer IDs (one per line)')} value={excluded} disabled={locked} onChange={e=>setExcluded(e.target.value)}/></label>
++  {!manifest&&<button type="button" disabled={busy||(!pending&&reason.trim().length<3)||(!!sourceJob&&!source)} onClick={()=>void prepare()}>{t(pending?'Retry same preview':'Preview segmented maintenance')}</button>}
++  {pending&&!manifest&&<p role="status">{t('The preview response is unknown. Retry uses the same frozen request and key.')}</p>}
++  {manifest&&<section className="panel" aria-label={t('Frozen manifest')}><h4>{t('Frozen manifest')}</h4><p style={{overflowWrap:'anywhere'}}>{manifest.id} · {t(manifest.status)} · {t('count')}: {manifest.count}</p><p style={{overflowWrap:'anywhere'}}>{t('digest')}: {manifest.digest}</p><p>{t('expires_at')}: {manifest.expires_at}</p><p>{t(manifest.operation==='assignBuyerOwners'?'Assign owners':manifest.operation==='reviewBuyers'?'Review buyers':'Change list membership')}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify({target:manifest.target,filters:manifest.filters,reason:manifest.reason,excluded_ids:manifest.excluded_ids},null,2)}</pre>
++   <p>{t('Read the count, operation, target, reason and filters before confirming.')}</p><label><input type="checkbox" aria-label={t('Confirm exact manifest')} checked={confirmed} disabled={busy||manifest.status!=='ready'} onChange={e=>setConfirmed(e.target.checked)}/>{t('Confirm exact manifest')}</label><button type="button" disabled={busy||!confirmed||manifest.status!=='ready'} onClick={()=>void execute()}>{t('Execute confirmed manifest')}</button>
++   <button type="button" disabled={busy} onClick={()=>{setConfirmed(false);setEpoch(v=>v+1);}}>{t('Recheck manifest')}</button></section>}
++  {executionPending&&<p role="status">{t('The execution result is unknown. Retry the exact confirmation or recheck this manifest before starting another preview.')}</p>}
++  {(manifest||pending)&&<button type="button" disabled={busy||executionPending} onClick={newPreview}>{t('Start a new preview')}</button>}
++  {result&&!isAsyncJob(result)&&<p role="status">{result.updated} {t('updated')} · {result.blocked} {t('blocked')} · {result.conflicts} {t('conflicts')}</p>}
++ </section>;
++}
+diff --git a/features/live/buyer-results.tsx b/features/live/buyer-results.tsx
+index a99bf4a..1025ecc 100644
+--- a/features/live/buyer-results.tsx
++++ b/features/live/buyer-results.tsx
+@@ -13,6 +13,8 @@ import {ExportDialog} from './export-dialog';
+ import {LiveBuyerManagementControls} from './buyer-management-controls';
+ import {BulkJobPanel,LiveBulkActions,isAsyncJob} from './bulk-actions';
+ import {liveZh} from './locale';
++import {BulkManifestMaintenance} from './bulk-manifest';
++import {startNewManifest} from '@/services/live/bulk-manifests';
+ 
+ const reviewStatuses=['accepted','rejected','needs_information'] as const;
+ const initial=():BuyerQuery=>readBuyerQuery(typeof window==='undefined'?'':window.location.search);
+@@ -45,11 +47,18 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
+   const [error,setError]=useState('');
+   const [reload,setReload]=useState(0);
+   const [reviewResult,setReviewResult]=useState<components['schemas']['BulkResult']|null>(null);
++  const [manifestSourceState,setManifestSource]=useState<{identity:string;value:{id:string;manifest_id:string}}|undefined>();
++  const manifestSource=manifestSourceState?.identity===sessionSnapshot.identity?manifestSourceState.value:undefined;
+   const [jobId,setJobId]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('bulk_job')??'');
+   const reviewIntent=useRef(new ActionIntent<components['schemas']['BulkResult']|components['schemas']['AsyncJob']>());
+   const onCommitted=useCallback(()=>setReload(value=>value+1),[]);
+   const onJob=useCallback((id:string)=>{setJobId(id);const url=new URL(window.location.href);url.searchParams.set('bulk_job',id);window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);},[]);
+   const closeJob=useCallback(()=>{setJobId('');const url=new URL(window.location.href);url.searchParams.delete('bulk_job');window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);},[]);
++  const previewFailedManifest=useCallback((source:{id:string;manifest_id:string})=>{
++    startNewManifest(session);setManifestSource({identity:session.identity(),value:source});
++    const url=new URL(window.location.href);url.searchParams.delete('bulk_manifest');
++    window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);
++  },[session]);
+   const lastDetailTrigger=useRef<HTMLButtonElement|null>(null);
+   const filterQuery=useMemo<BuyerQuery>(()=>({q:query.q,fit:query.fit,review:query.review,queue:query.queue,sort:query.sort,listId:query.listId,size:12,offset:0}),[query.q,query.fit,query.review,query.queue,query.sort,query.listId]);
+   const workspace=scope.workspace,project=scope.project;
+@@ -174,7 +183,8 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
+     {reviewResult&&<p role="status">{t('Review: {updated} updated; {blocked} blocked; {conflicts} conflicts.').replace('{updated}',String(reviewResult.updated)).replace('{blocked}',String(reviewResult.blocked)).replace('{conflicts}',String(reviewResult.conflicts))} {reviewResult.results.filter(row=>row.status==='blocked'||row.status==='conflict').map(row=>`${row.id}: ${row.reason_code??row.status}`).join('; ')}</p>}
+     {canEdit&&<ExportDialog key={`export:${workspace}:${project}`} locale={locale} selection={selection()} canExport={canEdit}/>}
+     <LiveBulkActions key={`bulk:${sessionSnapshot.identity}`} locale={locale} selection={selection()} count={selectedCount} canAssign={canAssign} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted}/>
+-    {jobId&&<BulkJobPanel key={`job:${sessionSnapshot.identity}:${jobId}`} locale={locale} jobId={jobId} onJob={onJob} onCommitted={onCommitted} onClose={closeJob}/>}
++    {(canAssign||canReview||canEdit)&&<BulkManifestMaintenance key={`manifest:${sessionSnapshot.identity}:${manifestSource?.id??''}`} locale={locale} query={filterQuery} canAssign={canAssign} canReview={canReview} canManage={canEdit} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted} sourceJob={manifestSource}/>}
++    {jobId&&<BulkJobPanel key={`job:${sessionSnapshot.identity}:${jobId}`} locale={locale} jobId={jobId} onManifestRetry={previewFailedManifest} onJob={onJob} onCommitted={onCommitted} onClose={closeJob}/>}
+     <LiveBuyerManagementControls key={`management:${workspace}:${project}`} locale={locale} onJob={onJob} query={query} onApplyQuery={patch=>{setSelected({});setAllFiltered(false);setExcluded([]);changeQuery(patch,true);setReload(value=>value+1);}} selection={selection()} canManage={canEdit}/>
+     {current&&<LiveBuyerDetail key={current.id} buyer={current} locale={locale} canEdit={canEdit} canQuote={canQuote} canReview={canReview} ownMembershipId={ownMembershipId}
+       onReviewAndNext={(nextStatus,nextReason)=>reviewOneAndNext(current.id,current.version,nextStatus,nextReason)}
+diff --git a/services/api/alembic/versions/0037_bulk_manifests.py b/services/api/alembic/versions/0037_bulk_manifests.py
+new file mode 100644
+index 0000000..48b8c72
+--- /dev/null
++++ b/services/api/alembic/versions/0037_bulk_manifests.py
+@@ -0,0 +1,87 @@
++"""Actor-bound frozen maintenance manifests, preserving ordinary snapshot bounds."""
++from alembic import op
++import sqlalchemy as sa
++from sqlalchemy.dialects import postgresql as pg
++revision = "0037_bulk_manifests"
++down_revision = "0036_checkpoint_schema_grants"
++branch_labels = depends_on = None
++UUID = pg.UUID(as_uuid=True)
++
++
++def _base():
++    return [sa.Column("id",UUID,primary_key=True),sa.Column("workspace_id",UUID,nullable=False),
++        sa.Column("created_at",sa.DateTime(timezone=True),nullable=False,server_default=sa.func.now()),
++        sa.Column("updated_at",sa.DateTime(timezone=True),nullable=False,server_default=sa.func.now())]
++
++
++def upgrade():
++    op.create_table("bulk_manifests",*_base(),
++        sa.Column("project_id",UUID,nullable=False),sa.Column("actor_user_id",UUID,nullable=False),
++        sa.Column("specification",pg.JSONB(),nullable=False),sa.Column("operation",sa.String(40),nullable=False),
++        sa.Column("command",pg.JSONB(),nullable=False),sa.Column("digest",sa.String(64),nullable=False),
++        sa.Column("count",sa.Integer,nullable=False),sa.Column("version",sa.Integer,nullable=False),
++        sa.Column("status",sa.String(16),nullable=False),sa.Column("expires_at",sa.DateTime(timezone=True),nullable=False),
++        sa.Column("job_id",UUID),sa.Column("result",pg.JSONB()),
++        sa.UniqueConstraint("workspace_id","id",name="uq_bulk_manifests_workspace_id"),
++        sa.ForeignKeyConstraint(["workspace_id"],["workspaces.id"],name="fk_bulk_manifests_workspace"),
++        sa.ForeignKeyConstraint(["workspace_id","project_id"],["projects.workspace_id","projects.id"],name="fk_bulk_manifests_project"),
++        sa.ForeignKeyConstraint(["actor_user_id"],["users.id"],name="fk_bulk_manifests_actor"),
++        sa.CheckConstraint("count BETWEEN 0 AND 10000",name="ck_bulk_manifests_count_range"),
++        sa.CheckConstraint("version > 0",name="ck_bulk_manifests_version_positive"),
++        sa.CheckConstraint("status IN ('preparing','ready','executed')",name="ck_bulk_manifests_status"))
++    op.create_table("bulk_manifest_items",*_base(),sa.Column("manifest_id",UUID,nullable=False),
++        sa.Column("buyer_id",UUID,nullable=False),sa.Column("ordinal",sa.Integer,nullable=False),sa.Column("expected_version",sa.Integer,nullable=False),
++        sa.UniqueConstraint("workspace_id","id",name="uq_bulk_manifest_items_workspace_id"),
++        sa.UniqueConstraint("workspace_id","manifest_id","buyer_id",name="uq_bulk_manifest_items_buyer"),
++        sa.UniqueConstraint("workspace_id","manifest_id","ordinal",name="uq_bulk_manifest_items_ordinal"),
++        sa.ForeignKeyConstraint(["workspace_id","manifest_id"],["bulk_manifests.workspace_id","bulk_manifests.id"],name="fk_bulk_manifest_items_manifest"),
++        sa.CheckConstraint("ordinal BETWEEN 0 AND 9999 AND expected_version > 0",name="ck_bulk_manifest_items_position_version"))
++    for table in ["bulk_manifests","bulk_manifest_items"]:
++        op.create_index(f"ix_{table}_workspace_id",table,["workspace_id"])
++        op.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
++        op.execute(f"ALTER TABLE {table} FORCE ROW LEVEL SECURITY")
++        op.execute(f"CREATE POLICY tenant_isolation ON {table} USING (workspace_id=current_setting('app.workspace_id')::uuid) WITH CHECK (workspace_id=current_setting('app.workspace_id')::uuid)")
++        op.execute(f"GRANT SELECT,INSERT ON {table} TO buyeros_api")
++        op.execute(f"GRANT SELECT ON {table} TO buyeros_worker")
++    op.execute("GRANT UPDATE ON bulk_manifests TO buyeros_api")
++    op.create_index("ix_bulk_manifests_actor_project","bulk_manifests",["workspace_id","actor_user_id","project_id","created_at"])
++    op.execute("""CREATE FUNCTION guard_bulk_manifest_item_insert() RETURNS trigger LANGUAGE plpgsql AS $$
++    BEGIN
++      IF NOT EXISTS (SELECT 1 FROM bulk_manifests WHERE workspace_id=NEW.workspace_id AND id=NEW.manifest_id AND status='preparing') THEN
++        RAISE EXCEPTION 'bulk manifest item can only be appended while preparing';
++      END IF;
++      RETURN NEW;
++    END $$""")
++    op.execute("CREATE TRIGGER bulk_manifest_item_insert BEFORE INSERT ON bulk_manifest_items FOR EACH ROW EXECUTE FUNCTION guard_bulk_manifest_item_insert()")
++    op.add_column("async_jobs",sa.Column("manifest_id",UUID))
++    op.create_foreign_key("fk_async_jobs_manifest","async_jobs","bulk_manifests",["workspace_id","manifest_id"],["workspace_id","id"])
++    op.drop_constraint("ck_async_jobs_requested_range","async_jobs",type_="check")
++    op.create_check_constraint("ck_async_jobs_requested_range","async_jobs","requested BETWEEN 1 AND 1000 OR (manifest_id IS NOT NULL AND requested BETWEEN 1 AND 10000)")
++    op.execute("""CREATE FUNCTION guard_bulk_manifest_frozen() RETURNS trigger LANGUAGE plpgsql AS $$
++    BEGIN
++      IF NEW.workspace_id <> OLD.workspace_id OR NEW.project_id <> OLD.project_id OR NEW.actor_user_id <> OLD.actor_user_id
++        OR NEW.specification <> OLD.specification OR NEW.command <> OLD.command OR NEW.operation <> OLD.operation OR NEW.expires_at <> OLD.expires_at
++        OR (OLD.status <> 'preparing' AND (NEW.digest <> OLD.digest OR NEW.count <> OLD.count)) THEN
++        RAISE EXCEPTION 'bulk manifest frozen basis is immutable';
++      END IF;
++      IF (OLD.status = 'ready' AND NEW.status NOT IN ('ready','executed')) OR (OLD.status = 'executed' AND NEW IS DISTINCT FROM OLD) THEN
++        RAISE EXCEPTION 'bulk manifest cannot be reopened or rewritten after execution';
++      END IF;
++      RETURN NEW;
++    END $$""")
++    op.execute("CREATE TRIGGER bulk_manifest_frozen BEFORE UPDATE ON bulk_manifests FOR EACH ROW EXECUTE FUNCTION guard_bulk_manifest_frozen()")
++
++
++def downgrade():
++    if op.get_bind().execute(sa.text("SELECT count(*) FROM bulk_manifests")).scalar_one():
++        raise RuntimeError("0037 downgrade blocked: durable manifests and outcomes must be retained")
++    op.drop_constraint("fk_async_jobs_manifest","async_jobs",type_="foreignkey")
++    op.drop_constraint("ck_async_jobs_requested_range","async_jobs",type_="check")
++    op.create_check_constraint("ck_async_jobs_requested_range","async_jobs","requested BETWEEN 1 AND 1000")
++    op.drop_column("async_jobs","manifest_id")
++    op.execute("DROP TRIGGER bulk_manifest_frozen ON bulk_manifests")
++    op.execute("DROP FUNCTION guard_bulk_manifest_frozen()")
++    op.execute("DROP TRIGGER bulk_manifest_item_insert ON bulk_manifest_items")
++    op.execute("DROP FUNCTION guard_bulk_manifest_item_insert()")
++    op.drop_table("bulk_manifest_items")
++    op.drop_table("bulk_manifests")
+diff --git a/services/api/buyeros_api/api/app.py b/services/api/buyeros_api/api/app.py
+index 8a9a1fc..1903aeb 100644
+--- a/services/api/buyeros_api/api/app.py
++++ b/services/api/buyeros_api/api/app.py
+@@ -12,6 +12,7 @@ from .routes.audit import router as audit_router
+ from .routes.buyers import router as buyers_router
+ from .routes.budgets import router as budgets_router
+ from .routes.buyer_management import router as buyer_management_router
++from .routes.bulk_manifests import router as bulk_manifests_router
+ from .routes.documents import router as documents_router
+ from .routes.drafts import router as drafts_router
+ from .routes.exports import router as exports_router
+@@ -61,6 +62,7 @@ def create_app() -> FastAPI:
+     app.include_router(icp_router)
+     app.include_router(buyers_router)
+     app.include_router(buyer_management_router)
++    app.include_router(bulk_manifests_router)
+     app.include_router(documents_router)
+     app.include_router(drafts_router)
+     app.include_router(exports_router)
+diff --git a/services/api/buyeros_api/api/deps.py b/services/api/buyeros_api/api/deps.py
+index f06e4f1..26ba0c2 100644
+--- a/services/api/buyeros_api/api/deps.py
++++ b/services/api/buyeros_api/api/deps.py
+@@ -24,6 +24,9 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
+     "getBuyerList": _VIEWERS,
+     "renameBuyerList": frozenset({"operator", "reviewer", "workspace_admin"}),
+     "changeListMemberships": frozenset({"operator", "reviewer", "workspace_admin"}),
++    "previewBulkManifest": frozenset({"operator", "reviewer", "workspace_admin"}),
++    "executeBulkManifest": frozenset({"operator", "reviewer", "workspace_admin"}),
++    "getBulkManifest": _VIEWERS,
+     "assignBuyerOwners": frozenset({"operator", "workspace_admin"}),
+     "getAsyncJob": _VIEWERS,
+     "getAsyncJobSummary": _VIEWERS,
+diff --git a/services/api/buyeros_api/api/routes/bulk_manifests.py b/services/api/buyeros_api/api/routes/bulk_manifests.py
+new file mode 100644
+index 0000000..47a7a2f
+--- /dev/null
++++ b/services/api/buyeros_api/api/routes/bulk_manifests.py
+@@ -0,0 +1,54 @@
++"""Actor-bound preview/read/execute; canonical domain API only."""
++import uuid
++from fastapi import APIRouter,Depends,Header,Request,Response
++from ..auth import Principal,get_principal
++from ..deps import load_membership,tenant_scoped
++from ..errors import ApiError,envelope
++from ..schemas import BulkManifestCreate,BulkManifestExecute
++from ..idempotency import begin_idempotency,complete_idempotency,if_match_version
++from ...services import bulk_manifest as service
++router=APIRouter(prefix="/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests",tags=["bulk-manifests"])
++
++
++def key(value):
++    if not value:raise ApiError(400,"INVALID_REQUEST","Idempotency-Key header is required")
++    return value
++
++
++@router.post("")
++async def preview_bulk_manifest(workspace_id:uuid.UUID,project_id:uuid.UUID,payload:BulkManifestCreate,request:Request,response:Response,principal:Principal=Depends(get_principal),idempotency_key:str|None=Header(default=None,alias="Idempotency-Key")):
++    async with tenant_scoped(workspace_id) as session:
++        member=await load_membership(session,principal=principal,workspace_id=workspace_id)
++        await service.authorize(session,workspace_id=workspace_id,project_id=project_id,actor_id=member["user_id"],operation=payload.operation,command=payload.target.model_dump(mode="json"))
++        outcome=await begin_idempotency(session,workspace_id=workspace_id,actor_id=member["user_id"],operation_id="previewBulkManifest",key=key(idempotency_key),body=payload.model_dump(mode="json"),target={"project_id":str(project_id)})
++        if outcome.replay:
++            row=await service.get(session,workspace_id=workspace_id,project_id=project_id,actor_id=member["user_id"],manifest_id=uuid.UUID(outcome.record.resource_id))
++        else:
++            row=await service.preview(session,workspace_id=workspace_id,project_id=project_id,actor_id=member["user_id"],payload=payload)
++            complete_idempotency(outcome,str(row.id),response={"data":service.data(row)})
++        response.status_code=201;response.headers["ETag"]=f'"{row.version}"';return envelope(service.data(row),request.state.request_id)
++
++
++@router.get("/{manifest_id}")
++async def get_bulk_manifest(workspace_id:uuid.UUID,project_id:uuid.UUID,manifest_id:uuid.UUID,request:Request,response:Response,principal:Principal=Depends(get_principal)):
++    async with tenant_scoped(workspace_id) as session:
++        member=await load_membership(session,principal=principal,workspace_id=workspace_id)
++        row=await service.get(session,workspace_id=workspace_id,project_id=project_id,actor_id=member["user_id"],manifest_id=manifest_id)
++        response.headers["ETag"]=f'"{row.version}"';return envelope(service.data(row),request.state.request_id)
++
++
++@router.post("/{manifest_id}/execute")
++async def execute_bulk_manifest(workspace_id:uuid.UUID,project_id:uuid.UUID,manifest_id:uuid.UUID,payload:BulkManifestExecute,request:Request,response:Response,principal:Principal=Depends(get_principal),idempotency_key:str|None=Header(default=None,alias="Idempotency-Key"),if_match:str|None=Header(default=None,alias="If-Match")):
++    version=if_match_version(if_match)
++    async with tenant_scoped(workspace_id) as session:
++        member=await load_membership(session,principal=principal,workspace_id=workspace_id)
++        row=await service.get(session,workspace_id=workspace_id,project_id=project_id,actor_id=member["user_id"],manifest_id=manifest_id,lock=True)
++        await service.authorize(session,workspace_id=workspace_id,project_id=project_id,actor_id=member["user_id"],operation=row.operation,command=row.command)
++        outcome=await begin_idempotency(session,workspace_id=workspace_id,actor_id=member["user_id"],operation_id="executeBulkManifest",key=key(idempotency_key),body=payload.model_dump(mode="json"),target={"project_id":str(project_id),"manifest_id":str(manifest_id)},precondition=if_match)
++        if outcome.replay:
++            if outcome.response is None:raise ApiError(409,"IDEMPOTENCY_CONFLICT","legacy execution cannot be replayed")
++            status,result=outcome.response["http_status"],outcome.response["data"]
++        else:
++            status,result=await service.execute(session,row=row,actor_id=member["user_id"],version=version,payload=payload)
++            complete_idempotency(outcome,str(row.id),response={"http_status":status,"data":result})
++        response.status_code=status;response.headers["ETag"]=f'"{row.version}"';return envelope(result,request.state.request_id)
+diff --git a/services/api/buyeros_api/api/schemas.py b/services/api/buyeros_api/api/schemas.py
+index 87e3a55..4820a58 100644
+--- a/services/api/buyeros_api/api/schemas.py
++++ b/services/api/buyeros_api/api/schemas.py
+@@ -585,3 +585,42 @@ class OutcomeCorrectionRequest(_Strict):
+     occurred_at: AwareDatetime
+     notes: StrictStr = Field(min_length=3, max_length=2000)
+     reason: StrictStr = Field(min_length=3, max_length=1000)
++
++
++class ManifestTarget(_Strict):
++    owner_membership_id: uuid.UUID | None = None
++    status: Literal["accepted", "rejected", "needs_information"] | None = None
++    list_id: uuid.UUID | None = None
++    operation: Literal["add", "remove"] | None = None
++
++
++class BulkManifestCreate(_Strict):
++    filters: BuyerFilters
++    excluded_ids: list[uuid.UUID] = Field(max_length=10000)
++    operation: Literal["assignBuyerOwners", "reviewBuyers", "changeListMemberships"]
++    target: ManifestTarget
++    reason: StrictStr = Field(min_length=3, max_length=2000)
++    source_job_id: uuid.UUID | None = None
++
++    @model_validator(mode="after")
++    def _target(self):
++        fields=self.target.model_fields_set
++        required={"assignBuyerOwners":{"owner_membership_id"},"reviewBuyers":{"status"},"changeListMemberships":{"list_id","operation"}}[self.operation]
++        if fields!=required or len(self.reason.strip())<3 or len(set(self.excluded_ids))!=len(self.excluded_ids):
++            raise ValueError("exact operation target, unique exclusions and reason required")
++        if self.operation=="reviewBuyers" and self.target.status is None:
++            raise ValueError("review status required")
++        if self.operation=="changeListMemberships" and (self.target.list_id is None or self.target.operation is None):
++            raise ValueError("list target required")
++        return self
++
++
++class BulkManifestExecute(_Strict):
++    digest: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
++    confirmation: StrictBool
++
++    @field_validator("confirmation")
++    @classmethod
++    def _confirmed(cls,value):
++        if not value:raise ValueError("exact manifest confirmation required")
++        return value
+diff --git a/services/api/buyeros_api/db/outbox.py b/services/api/buyeros_api/db/outbox.py
+index 6afe802..139832a 100644
+--- a/services/api/buyeros_api/db/outbox.py
++++ b/services/api/buyeros_api/db/outbox.py
+@@ -55,11 +55,13 @@ class AsyncJob(Base, TenantMixin):
+         ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_async_jobs_workspace"),
+         ForeignKeyConstraint(["workspace_id", "project_id"], ["projects.workspace_id", "projects.id"], name="fk_async_jobs_project"),
+         ForeignKeyConstraint(["actor_user_id"], ["users.id"], name="fk_async_jobs_actor"),
+-        CheckConstraint("requested BETWEEN 1 AND 1000", name="requested_range"),
++        ForeignKeyConstraint(["workspace_id", "manifest_id"], ["bulk_manifests.workspace_id", "bulk_manifests.id"], name="fk_async_jobs_manifest"),
++        CheckConstraint("requested BETWEEN 1 AND 1000 OR (manifest_id IS NOT NULL AND requested BETWEEN 1 AND 10000)", name="requested_range"),
+         CheckConstraint("processed >= 0 AND processed <= requested", name="processed_range"),
+         CheckConstraint("status IN ('queued','running','cancel_requested','cancelled','completed','failed')", name="status"),
+     )
+ 
++    manifest_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+     project_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+     actor_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+     kind: Mapped[str] = mapped_column(String(32), nullable=False, default="bulk_mutation")
+@@ -94,3 +96,44 @@ class AsyncJobItem(Base, TenantMixin):
+     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
+     reason_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+     resulting_version: Mapped[int | None] = mapped_column(Integer, nullable=True)
++
++
++class BulkManifest(Base, TenantMixin):
++    """Frozen actor-bound maintenance selection; readiness commits atomically."""
++    __tablename__ = "bulk_manifests"
++    __table_args__ = (
++        UniqueConstraint("workspace_id", "id", name="uq_bulk_manifests_workspace_id"),
++        ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_bulk_manifests_workspace"),
++        ForeignKeyConstraint(["workspace_id", "project_id"], ["projects.workspace_id", "projects.id"], name="fk_bulk_manifests_project"),
++        ForeignKeyConstraint(["actor_user_id"], ["users.id"], name="fk_bulk_manifests_actor"),
++        CheckConstraint("count BETWEEN 0 AND 10000", name="count_range"),
++        CheckConstraint("version > 0", name="version_positive"),
++        CheckConstraint("status IN ('preparing','ready','executed')", name="status"),
++    )
++    project_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
++    actor_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
++    specification: Mapped[dict] = mapped_column(JSONB, nullable=False)
++    operation: Mapped[str] = mapped_column(String(40), nullable=False)
++    command: Mapped[dict] = mapped_column(JSONB, nullable=False)
++    digest: Mapped[str] = mapped_column(String(64), nullable=False, default="")
++    count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
++    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
++    status: Mapped[str] = mapped_column(String(16), nullable=False, default="preparing")
++    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
++    job_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
++    result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
++
++
++class BulkManifestItem(Base, TenantMixin):
++    __tablename__ = "bulk_manifest_items"
++    __table_args__ = (
++        UniqueConstraint("workspace_id", "id", name="uq_bulk_manifest_items_workspace_id"),
++        UniqueConstraint("workspace_id", "manifest_id", "buyer_id", name="uq_bulk_manifest_items_buyer"),
++        UniqueConstraint("workspace_id", "manifest_id", "ordinal", name="uq_bulk_manifest_items_ordinal"),
++        ForeignKeyConstraint(["workspace_id", "manifest_id"], ["bulk_manifests.workspace_id", "bulk_manifests.id"], name="fk_bulk_manifest_items_manifest"),
++        CheckConstraint("ordinal BETWEEN 0 AND 9999 AND expected_version > 0", name="position_version"),
++    )
++    manifest_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
++    buyer_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
++    ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
++    expected_version: Mapped[int] = mapped_column(Integer, nullable=False)
+diff --git a/services/api/buyeros_api/services/bulk_manifest.py b/services/api/buyeros_api/services/bulk_manifest.py
+new file mode 100644
+index 0000000..11c50b3
+--- /dev/null
++++ b/services/api/buyeros_api/services/bulk_manifest.py
+@@ -0,0 +1,135 @@
++"""Bounded frozen maintenance, distinct from 1000-row browser snapshots."""
++import hashlib,json,uuid
++from datetime import datetime,timedelta,timezone
++from sqlalchemy import select,insert,func,literal
++from ..api.errors import ApiError
++from ..api.deps import permission_for_roles
++from ..db.icp import Project
++from ..db.models import Membership
++from ..db.buyers import ProjectBuyer
++from ..db.outbox import BulkManifest,BulkManifestItem,AsyncJob,AsyncJobItem,OutboxEvent
++from .buyer_selection import selection_query
++from .membership_directory import eligible_owner_predicate
++from .bulk_service import job_data,assign_owners,apply_reviews,change_memberships,get_list
++from .audit_service import append_audit
++from .outbox_service import build_intent
++MAX_ITEMS=10000
++PAGE=250
++TTL=timedelta(minutes=15)
++
++
++def data(row):
++    result={"id":str(row.id),"workspace_id":str(row.workspace_id),"project_id":str(row.project_id),
++        "actor_user_id":str(row.actor_user_id),"operation":row.operation,"target":row.specification["target"],
++        "filters":row.specification["filters"],"excluded_ids":row.specification["excluded_ids"],
++        "reason":row.specification["reason"],"count":row.count,"digest":row.digest,"expires_at":row.expires_at.isoformat(),
++        "status":row.status,"version":row.version,"created_at":row.created_at.isoformat()}
++    if row.job_id:result["job_id"]=str(row.job_id)
++    if row.result is not None:result["result"]=row.result
++    if row.specification.get("source_job_id"):result["source_job_id"]=row.specification["source_job_id"]
++    return result
++
++
++async def authorize(session,*,workspace_id,project_id,actor_id,operation,command):
++    project=(await session.execute(select(Project).where(Project.workspace_id==workspace_id,Project.id==project_id).with_for_update())).scalar_one_or_none()
++    if project is None:raise ApiError(404,"NOT_FOUND","project not found")
++    if project.status!="active":raise ApiError(409,"INVALID_STATE","project is not active")
++    member=(await session.execute(select(Membership).where(Membership.workspace_id==workspace_id,Membership.user_id==actor_id,Membership.active.is_(True)).with_for_update())).scalar_one_or_none()
++    if member is None or not permission_for_roles(member.roles,operation):raise ApiError(403,"PERMISSION_DENIED","current role does not permit this operation")
++    if operation=="assignBuyerOwners" and command.get("owner_membership_id"):
++        owner=(await session.execute(select(Membership.id).where(Membership.id==uuid.UUID(command["owner_membership_id"]),eligible_owner_predicate(workspace_id)).with_for_update())).scalar_one_or_none()
++        if owner is None:raise ApiError(422,"INVALID_REQUEST","owner membership is not active in this workspace")
++    if operation=="changeListMemberships":
++        item=await get_list(session,workspace_id=workspace_id,list_id=uuid.UUID(command["list_id"]),lock=True)
++        if item.project_id!=project_id:raise ApiError(404,"NOT_FOUND","buyer list not found")
++    return project
++
++
++def basis(row):
++    raw={"actor_id":str(row.actor_user_id),"workspace_id":str(row.workspace_id),"project_id":str(row.project_id),"specification":row.specification}
++    return hashlib.sha256(json.dumps(raw,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode())
++
++
++def add_digest(digest,ordinal,buyer_id,version):digest.update(f"\n{ordinal}:{buyer_id}:{version}".encode())
++
++
++async def get(session,*,workspace_id,project_id,actor_id,manifest_id,lock=False):
++    query=select(BulkManifest).where(BulkManifest.workspace_id==workspace_id,BulkManifest.project_id==project_id,BulkManifest.actor_user_id==actor_id,BulkManifest.id==manifest_id)
++    row=(await session.execute(query.with_for_update() if lock else query)).scalar_one_or_none()
++    if row is None:raise ApiError(404,"NOT_FOUND","manifest not found")
++    return row
++
++
++async def preview(session,*,workspace_id,project_id,actor_id,payload):
++    specification=payload.model_dump(mode="json",exclude_none=True)
++    # Explicit clear-owner null is material, even though optional unused target fields are absent.
++    specification["target"]=payload.target.model_dump(mode="json",include=payload.target.model_fields_set)
++    specification["excluded_ids"]=sorted(specification["excluded_ids"])
++    specification["reason"]=payload.reason.strip()
++    filters={k:v for k,v in specification["filters"].items() if v not in (None,[],False,"")}
++    if "q" in filters:filters["q"]=filters["q"].strip()
++    specification["filters"]=filters
++    command={**specification["target"],"reason":specification["reason"]}
++    await authorize(session,workspace_id=workspace_id,project_id=project_id,actor_id=actor_id,operation=payload.operation,command=command)
++    if payload.source_job_id:
++        source=(await session.execute(select(AsyncJob).where(AsyncJob.workspace_id==workspace_id,AsyncJob.project_id==project_id,AsyncJob.actor_user_id==actor_id,AsyncJob.id==payload.source_job_id).with_for_update())).scalar_one_or_none()
++        if source is None:raise ApiError(404,"NOT_FOUND","source job not found")
++        if source.status not in {"completed","failed","cancelled"}:raise ApiError(409,"JOB_IN_PROGRESS","wait until the job has finished")
++        if filters or source.operation!=payload.operation or any(source.command.get(k)!=v for k,v in specification["target"].items()):
++            raise ApiError(422,"INVALID_REQUEST","retry preview must preserve the source operation/target and use only failed rows")
++        query=select(AsyncJobItem.buyer_id,func.coalesce(ProjectBuyer.version,AsyncJobItem.expected_version)).outerjoin(ProjectBuyer,(ProjectBuyer.workspace_id==AsyncJobItem.workspace_id)&(ProjectBuyer.project_id==project_id)&(ProjectBuyer.id==AsyncJobItem.buyer_id)).where(AsyncJobItem.workspace_id==workspace_id,AsyncJobItem.job_id==source.id,AsyncJobItem.status.in_(["blocked","conflict"])).order_by(AsyncJobItem.ordinal)
++    else:
++        query=await selection_query(session,workspace_id=workspace_id,project_id=project_id,filters=filters,sort="name_asc")
++    if payload.excluded_ids:query=query.where((AsyncJobItem.buyer_id if payload.source_job_id else ProjectBuyer.id).not_in(payload.excluded_ids))
++    row=BulkManifest(workspace_id=workspace_id,project_id=project_id,actor_user_id=actor_id,specification=specification,operation=payload.operation,command=command,expires_at=datetime.now(timezone.utc)+TTL,status="preparing",version=1,count=0,digest="")
++    session.add(row);await session.flush()
++    digest=basis(row);count=0
++    # One server cursor has one PostgreSQL statement snapshot, not repeated LIMIT/OFFSET reads.
++    cursor=await session.stream(query.limit(MAX_ITEMS+1).execution_options(yield_per=PAGE))
++    try:
++        async for batch in cursor.partitions(PAGE):
++            if count+len(batch)>MAX_ITEMS:raise ApiError(422,"INVALID_REQUEST","more than 10000 buyers; narrow or segment filters; nothing was truncated")
++            values=[]
++            for buyer_id,version in batch:
++                add_digest(digest,count,buyer_id,version)
++                values.append({"id":uuid.uuid4(),"workspace_id":workspace_id,"manifest_id":row.id,"buyer_id":buyer_id,"ordinal":count,"expected_version":version});count+=1
++            if values:await session.execute(insert(BulkManifestItem),values)
++    finally:await cursor.close()
++    if not count:raise ApiError(422,"INVALID_REQUEST","selection has no buyer rows")
++    row.count=count;row.digest=digest.hexdigest();row.status="ready"
++    append_audit(session,workspace_id=workspace_id,actor_id=actor_id,action="previewBulkManifest",entity_type="bulk_manifest",entity_id=row.id,reason=command["reason"],detail_digest="sha256:"+row.digest)
++    await session.flush();await session.refresh(row);return row
++
++
++async def execute(session,*,row,actor_id,version,payload):
++    project=await authorize(session,workspace_id=row.workspace_id,project_id=row.project_id,actor_id=actor_id,operation=row.operation,command=row.command)
++    if row.status!="ready":raise ApiError(409,"INVALID_STATE","manifest is not ready for a new execution")
++    if row.expires_at<=datetime.now(timezone.utc):raise ApiError(412,"STALE_REVISION","manifest expired; preview current versions")
++    if row.version!=version or row.digest!=payload.digest:raise ApiError(412,"STALE_REVISION","exact manifest digest/version changed")
++    digest=basis(row);count=0;pairs=[]
++    cursor=await session.stream(select(BulkManifestItem).where(BulkManifestItem.workspace_id==row.workspace_id,BulkManifestItem.manifest_id==row.id).order_by(BulkManifestItem.ordinal).execution_options(yield_per=PAGE))
++    try:
++        async for batch in cursor.scalars().partitions(PAGE):
++            for item in batch:
++                if item.ordinal!=count:raise ApiError(412,"STALE_REVISION","manifest position changed")
++                add_digest(digest,count,item.buyer_id,item.expected_version);count+=1
++                if row.count<=100:pairs.append({"id":str(item.buyer_id),"version":item.expected_version})
++    finally:await cursor.close()
++    if count!=row.count or digest.hexdigest()!=row.digest:raise ApiError(412,"STALE_REVISION","frozen selection changed")
++    if row.count<=100:
++        selection={"kind":"explicit","buyers":pairs}
++        if row.operation=="assignBuyerOwners":
++            owner=row.command.get("owner_membership_id");result=await assign_owners(session,workspace_id=row.workspace_id,project_id=row.project_id,actor_user_id=actor_id,selection=selection,owner_membership_id=uuid.UUID(owner) if owner else None,reason=row.command["reason"])
++        elif row.operation=="reviewBuyers":result=await apply_reviews(session,workspace_id=row.workspace_id,project_id=row.project_id,actor_user_id=actor_id,active_icp_version_id=project.active_icp_version_id,selection=selection,status=row.command["status"],reason=row.command["reason"])
++        else:result=await change_memberships(session,item=await get_list(session,workspace_id=row.workspace_id,list_id=uuid.UUID(row.command["list_id"]),lock=True),actor_user_id=actor_id,selection=selection,operation=row.command["operation"])
++        row.result=result;status=200
++    else:
++        job=AsyncJob(workspace_id=row.workspace_id,project_id=row.project_id,actor_user_id=actor_id,manifest_id=row.id,kind="bulk_mutation",operation=row.operation,command=row.command,status="queued",requested=row.count,processed=0,updated=0,unchanged=0,blocked=0,conflicts=0)
++        session.add(job);await session.flush()
++        statement=select(func.gen_random_uuid(),BulkManifestItem.workspace_id,literal(job.id),BulkManifestItem.buyer_id,BulkManifestItem.ordinal,BulkManifestItem.expected_version,literal("pending")).where(BulkManifestItem.workspace_id==row.workspace_id,BulkManifestItem.manifest_id==row.id)
++        await session.execute(insert(AsyncJobItem).from_select(["id","workspace_id","job_id","buyer_id","ordinal","expected_version","status"],statement,include_defaults=False))
++        intent={"job_id":str(job.id)};session.add(OutboxEvent(workspace_id=row.workspace_id,intent_key=build_intent("bulk.mutate",intent,0),event_type="bulk.mutate",payload=intent,state="ready",attempts=0,fencing_generation=0))
++        await session.flush();await session.refresh(job);row.job_id=job.id;result=job_data(job);status=202
++    row.version+=1;row.status="executed"
++    append_audit(session,workspace_id=row.workspace_id,actor_id=actor_id,action="executeBulkManifest",entity_type="bulk_manifest",entity_id=row.id,reason=row.command["reason"],detail_digest="sha256:"+row.digest)
++    await session.flush();return status,result
+diff --git a/services/api/buyeros_api/services/bulk_service.py b/services/api/buyeros_api/services/bulk_service.py
+index 371450f..c8c961c 100644
+--- a/services/api/buyeros_api/services/bulk_service.py
++++ b/services/api/buyeros_api/services/bulk_service.py
+@@ -29,6 +29,8 @@ def job_data(job: AsyncJob, *, results: list[dict] | None = None, offset: int =
+         "cancelled": job.processed - job.updated - job.unchanged - job.blocked - job.conflicts,
+         "result_page": {"items": results or [], "offset": offset, "limit": limit, "total": total or 0},
+     }
++    if job.manifest_id:
++        data["manifest_id"] = str(job.manifest_id)
+     if job.kind == "draft_generation" and job.status == "completed":
+         draft_id = job.command.get("result_draft_id") if isinstance(job.command, dict) else None
+         if draft_id:
+@@ -211,6 +213,8 @@ async def retry_failed_only(session, *, workspace_id, job_id, actor_user_id, rol
+         raise ApiError(404, "NOT_FOUND", "bulk job not found")
+     if not permission_for_roles(roles, job.operation):
+         raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
++    if job.manifest_id:
++        raise ApiError(409, "MANIFEST_REVIEW_REQUIRED", "preview current failed rows and confirm a new manifest digest")
+     if job.status not in {"completed", "failed"}:
+         raise ApiError(409, "JOB_IN_PROGRESS", "wait until the job has finished")
+     failed = (await session.execute(select(AsyncJobItem).where(
+diff --git a/services/api/buyeros_api/services/buyer_selection.py b/services/api/buyeros_api/services/buyer_selection.py
+index 0564177..bf386f5 100644
+--- a/services/api/buyeros_api/services/buyer_selection.py
++++ b/services/api/buyeros_api/services/buyer_selection.py
+@@ -27,8 +27,8 @@ def filters_hash(filters: dict, sort: str) -> str:
+     return canonical_hash({"filters": normalized, "sort": sort})
+ 
+ 
+-async def materialize(session, *, workspace_id, project_id, filters: dict, sort: str, limit: int):
+-    """Materialize at most limit IDs plus one clip probe; filters and order run in SQL."""
++async def selection_query(session, *, workspace_id, project_id, filters: dict, sort: str):
++    """Build the same server-side selection for snapshots and manifest cursors."""
+     reject_unsupported_filters(filters)
+     fit_verdict = (
+         select(FitAssessment.verdict)
+@@ -132,6 +132,11 @@ async def materialize(session, *, workspace_id, project_id, filters: dict, sort:
+                     (fit_verdict == "needs_review", 1),
+                     (fit_verdict == "not_a_match", 2), else_=3)
+         query = query.order_by(rank, name_order, ProjectBuyer.id)
++    return query
++
++
++async def materialize(session, *, workspace_id, project_id, filters: dict, sort: str, limit: int):
++    query = await selection_query(session, workspace_id=workspace_id, project_id=project_id, filters=filters, sort=sort)
+     rows = (await session.execute(query.limit(limit + 1))).all()
+     clipped = len(rows) > limit
+     return [(buyer_id, version) for buyer_id, version in rows[:limit]], len(rows), clipped
+diff --git a/services/api/buyeros_api/services/worker_recovery.py b/services/api/buyeros_api/services/worker_recovery.py
+index 3e68870..4e60849 100644
+--- a/services/api/buyeros_api/services/worker_recovery.py
++++ b/services/api/buyeros_api/services/worker_recovery.py
+@@ -213,8 +213,8 @@ def set_execution_runtime(dsn: str, *, expected_epoch: int, backend: str, enable
+         raise ValueError('invalid runtime change')
+     with psycopg.connect(dsn) as db:
+         if db.execute('SELECT version_num FROM alembic_version').fetchone()[0] not in {
+-                '0035_worker_recovery_probe', '0036_checkpoint_schema_grants'}:
+-            raise ValueError('compatible 0035/0036 build and migration required')
++                '0035_worker_recovery_probe', '0036_checkpoint_schema_grants', '0037_bulk_manifests'}:
++            raise ValueError('compatible 0035/0036/0037 build and migration required')
+         current = db.execute('SELECT backend,enabled,epoch,active_until FROM worker_runtime_control WHERE singleton=1 FOR UPDATE').fetchone()
+         if current[2] != expected_epoch:
+             raise ValueError('runtime epoch changed; inspect current state')
+diff --git a/services/api/tests/test_admin_operations_db.py b/services/api/tests/test_admin_operations_db.py
+index b4dbf9e..680f5d7 100644
+--- a/services/api/tests/test_admin_operations_db.py
++++ b/services/api/tests/test_admin_operations_db.py
+@@ -22,7 +22,7 @@ def test_0017_preferences_rls_and_empty_rollback(migrated):
+         assert conn.execute("SELECT to_regclass('workspace_preferences')").fetchone()[0] is None
+     command.upgrade(config,'head')
+     with psycopg.connect(migrated) as conn:
+-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0036_checkpoint_schema_grants'
++        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0037_bulk_manifests'
+ 
+ 
+ def _member_id(seeded, subject):
+diff --git a/services/api/tests/test_backup_restore_t28.py b/services/api/tests/test_backup_restore_t28.py
+index 38d47bf..a94d71f 100644
+--- a/services/api/tests/test_backup_restore_t28.py
++++ b/services/api/tests/test_backup_restore_t28.py
+@@ -113,7 +113,7 @@ def test_disposable_restore_replays_older_backup_deletion_journal(monkeypatch, t
+                         "-d", DB_NAME, "--no-owner"], input_bytes=dump)
+         with psycopg.connect(target_dsn, autocommit=True) as db:
+             db.execute("GRANT USAGE ON SCHEMA public TO buyeros_api")
+-            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+             assert db.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class "
+                               "WHERE relname='source_documents'").fetchone() == (True, True)
+             account_spend = db.execute("SELECT settled_spend FROM budget_accounts WHERE id=%s",
+diff --git a/services/api/tests/test_budget_atomicity_db.py b/services/api/tests/test_budget_atomicity_db.py
+index 5c34ec4..7644b5d 100644
+--- a/services/api/tests/test_budget_atomicity_db.py
++++ b/services/api/tests/test_budget_atomicity_db.py
+@@ -211,7 +211,7 @@ def test_0018_empty_downgrade_upgrade_and_force_rls(migrated):
+         conn.execute("DELETE FROM workspaces WHERE id=%s", (legacy_workspace,))
+     command.upgrade(config, "head")
+     with psycopg.connect(migrated) as conn:
+-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+         assert conn.execute("SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname='budget_reservation_allocations'").fetchone() == (True, True)
+ 
+ 
+diff --git a/services/api/tests/test_bulk_jobs_db.py b/services/api/tests/test_bulk_jobs_db.py
+index eaca3fc..e94cafc 100644
+--- a/services/api/tests/test_bulk_jobs_db.py
++++ b/services/api/tests/test_bulk_jobs_db.py
+@@ -57,7 +57,7 @@ def test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback(migrated
+     config = Config(str(ALEMBIC_INI))
+     config.set_main_option("script_location", str(SERVICE_ROOT / "alembic"))
+     with psycopg.connect(migrated) as conn:
+-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+         for table in ("async_jobs", "async_job_items"):
+             assert conn.execute("SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname=%s",
+                                 (table,)).fetchone() == (True, True)
+diff --git a/services/api/tests/test_bulk_manifest_db.py b/services/api/tests/test_bulk_manifest_db.py
+new file mode 100644
+index 0000000..6024bb6
+--- /dev/null
++++ b/services/api/tests/test_bulk_manifest_db.py
+@@ -0,0 +1,295 @@
++"""Q08 actual manifest persistence; only existing guarded loopback PG fixtures."""
++import uuid
++import asyncio
++import pytest
++import psycopg
++import os,subprocess,sys,json
++from tests.test_buyer_review_db import WORKSPACE_A, PROJECT_A, _admin_membership, _h, api as buyer_api
++
++
++@pytest.fixture
++def api(buyer_api):
++    # Exercise one actual ASGI lifespan/event loop, as the running HTTP server does.
++    with buyer_api as client:
++        yield client
++
++
++def _seed_many(dsn,count,prefix="Q08"):
++    with psycopg.connect(dsn) as conn:
++        rows=conn.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) "
++            "SELECT gen_random_uuid(),%s,%s||i::text,%s||lpad(i::text,5,'0') "
++            "FROM generate_series(1,%s) i RETURNING id",(WORKSPACE_A,prefix,prefix,count)).fetchall()
++        conn.cursor().executemany("INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES (%s,%s,%s,%s)",
++            [(str(uuid.uuid4()),WORKSPACE_A,PROJECT_A,str(row[0])) for row in rows])
++
++
++def test_manifest_freezes_1001_current_versions_without_widening_snapshot(api,seeded):
++    _seed_many(seeded,1001)
++    owner=_admin_membership(seeded)
++    path=f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/bulk-manifests"
++    response=api.post(path,json={"filters":{"q":"Q08"},"excluded_ids":[],
++        "operation":"assignBuyerOwners","target":{"owner_membership_id":owner},"reason":"Bounded manifest review"},
++        headers=_h(key="q08-preview-1001"))
++    assert response.status_code==201,response.text
++    data=response.json()["data"]
++    assert data["count"]==1001 and data["status"]=="ready"
++    with psycopg.connect(seeded) as conn:
++        assert conn.execute("SELECT count(*),count(DISTINCT buyer_id),min(expected_version),max(expected_version) "
++            "FROM bulk_manifest_items WHERE manifest_id=%s",(data["id"],)).fetchone()==(1001,1001,1,1)
++        assert conn.execute("SELECT count(*) FROM async_jobs WHERE workspace_id=%s",(WORKSPACE_A,)).fetchone()[0]==0
++
++
++
++ROOT=f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/bulk-manifests"
++
++
++def _preview(api,owner,**patch):
++    body={"filters":{"q":"Q08"},"excluded_ids":[],"operation":"assignBuyerOwners",
++          "target":{"owner_membership_id":owner},"reason":"Bounded manifest review",**patch}
++    response=api.post(ROOT,json=body,headers=_h(key=str(uuid.uuid4())))
++    assert response.status_code==201,response.text
++    from tests.contract_validation import assert_contract_response
++    assert_contract_response("BulkManifestResponse",response.json())
++    return response.json()["data"]
++
++
++def _execute(api,manifest,key=None,**patch):
++    return api.post(ROOT+f"/{manifest['id']}/execute",json={"digest":manifest["digest"],"confirmation":True,**patch},headers=_h(key=key or str(uuid.uuid4()),**{"If-Match":f'"{manifest["version"]}"'}))
++
++
++@pytest.mark.parametrize("count",[100,101,1000,1001])
++def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
++    _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
++    first=_execute(api,manifest,key);again=_execute(api,manifest,key)
++    assert first.status_code==again.status_code==(200 if count==100 else 202),first.text
++    from tests.contract_validation import assert_contract_response
++    assert_contract_response('BulkResultResponse' if count==100 else 'AsyncJobResponse',first.json())
++    assert first.json()["data"]==again.json()["data"]
++    with psycopg.connect(seeded) as conn:
++        assert conn.execute("SELECT count(*) FROM async_jobs WHERE manifest_id=%s",(manifest["id"],)).fetchone()[0]==(0 if count==100 else 1)
++        assert conn.execute("SELECT count(*) FROM outbox_events WHERE event_type='bulk.mutate' AND payload->>'job_id'=%s",(first.json()["data"].get("id",""),)).fetchone()[0]==(0 if count==100 else 1)
++        assert conn.execute("SELECT count(*) FROM project_buyers WHERE version=2 AND workspace_id=%s",(WORKSPACE_A,)).fetchone()[0]==(100 if count==100 else 0)
++    assert _execute(api,manifest).status_code==409
++
++
++def test_10001_is_explicitly_rejected_and_no_partial_preview_or_job(api,seeded):
++    _seed_many(seeded,10001)
++    response=api.post(ROOT,json={"filters":{"q":"Q08"},"excluded_ids":[],"operation":"assignBuyerOwners","target":{"owner_membership_id":None},"reason":"Reject overflow"},headers=_h(key="q08-overflow-10001"))
++    assert response.status_code==422 and "10000" in response.text,response.text
++    with psycopg.connect(seeded) as conn:
++        assert conn.execute("SELECT count(*) FROM bulk_manifests").fetchone()[0]==0
++        assert conn.execute("SELECT count(*) FROM bulk_manifest_items").fetchone()[0]==0
++        assert conn.execute("SELECT count(*) FROM async_jobs").fetchone()[0]==0
++
++
++def test_10000_committed_crash_recovery_exact_results_and_failed_child_preview(api,seeded):
++    from buyeros_api.api.deps import tenant_scoped
++    from buyeros_api.services.bulk_service import apply_bulk_chunk
++    _seed_many(seeded,10000);owner=_admin_membership(seeded);manifest=_preview(api,owner)
++    assert manifest["count"]==10000
++    with psycopg.connect(seeded) as conn:
++        stale=conn.execute("SELECT buyer_id FROM bulk_manifest_items WHERE manifest_id=%s ORDER BY ordinal LIMIT 50",(manifest["id"],)).fetchall()
++        conn.cursor().executemany("UPDATE project_buyers SET version=version+1 WHERE id=%s",stale)
++    response=_execute(api,manifest);assert response.status_code==202,response.text
++    job=response.json()["data"];job_id=uuid.UUID(job["id"])
++    async def run():
++        async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:await apply_bulk_chunk(session,job_id)
++        try:
++            async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
++                await apply_bulk_chunk(session,job_id)
++                raise RuntimeError("crash before chunk commit")
++        except RuntimeError:pass
++        with psycopg.connect(seeded) as conn:
++            assert conn.execute("SELECT processed FROM async_jobs WHERE id=%s",(job_id,)).fetchone()[0]==50
++            assert conn.execute("SELECT count(*) FROM project_buyers WHERE owner_user_id IS NOT NULL AND workspace_id=%s",(WORKSPACE_A,)).fetchone()[0]==0
++        restart_script = """import asyncio,json,sys,os,uuid
++if sys.platform=='win32':asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
++from buyeros_api.api.deps import tenant_scoped,dispose_engines
++from buyeros_api.services.bulk_service import apply_bulk_chunk
++async def resume():
++ try:
++  async with tenant_scoped(uuid.UUID(sys.argv[2])) as session:
++   result=await apply_bulk_chunk(session,uuid.UUID(sys.argv[1]))
++  print(json.dumps({'pid':os.getpid(),'processed':result['processed']}))
++ finally:await dispose_engines()
++asyncio.run(resume())
++"""
++        restarted=subprocess.run([sys.executable,"-c",restart_script,str(job_id),WORKSPACE_A],capture_output=True,text=True,check=True)
++        receipt=json.loads(restarted.stdout);assert receipt["pid"]!=os.getpid() and receipt["processed"]==50
++        with psycopg.connect(seeded) as conn:
++            assert conn.execute("SELECT processed FROM async_jobs WHERE id=%s",(job_id,)).fetchone()[0]==100
++        for _ in range(198):
++            async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
++                result=await apply_bulk_chunk(session,job_id)
++                assert result["processed"]<=50
++        async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:assert (await apply_bulk_chunk(session,job_id))["processed"]==0
++    asyncio.run(run())
++    with psycopg.connect(seeded) as conn:
++        assert conn.execute("SELECT requested,processed,updated,conflicts,status FROM async_jobs WHERE id=%s",(job_id,)).fetchone()==(10000,10000,9950,50,"completed")
++        assert conn.execute("SELECT count(*),count(DISTINCT buyer_id) FROM async_job_items WHERE job_id=%s",(job_id,)).fetchone()==(10000,10000)
++    ids=[]
++    for offset in range(0,10000,100):
++        read=api.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job_id}?offset={offset}&limit=100",headers=_h())
++        assert read.status_code==200,read.text
++        page=read.json()["data"]["result_page"]
++        assert page["total"]==10000 and len(page["items"])==100;ids.extend(i["id"] for i in page["items"])
++    assert len(ids)==len(set(ids))==10000
++    old_retry=api.post(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job_id}/retry-failed",json={},headers=_h(key="q08-no-blind-retry"))
++    assert old_retry.status_code==409 and old_retry.json()["code"]=="MANIFEST_REVIEW_REQUIRED"
++    child=_preview(api,owner,filters={},source_job_id=str(job_id));assert child["count"]==50 and child["digest"]!=manifest["digest"]
++    retried=_execute(api,child);assert retried.status_code==200 and retried.json()["data"]["updated"]==50,retried.text
++    with psycopg.connect(seeded) as conn:
++        assert conn.execute("SELECT count(*) FROM project_buyers WHERE version=2 AND workspace_id=%s",(WORKSPACE_A,)).fetchone()[0]==9950
++        assert conn.execute("SELECT count(*) FROM project_buyers WHERE version=3 AND workspace_id=%s",(WORKSPACE_A,)).fetchone()[0]==50
++
++
++@pytest.mark.parametrize("bad",[{"digest":"0"*64},{"confirmation":False},{"confirmation":1},{"actor_user_id":str(uuid.uuid4())}])
++def test_exact_manifest_confirmation_is_required_and_denial_atomic(api,seeded,bad):
++    _seed_many(seeded,2);manifest=_preview(api,_admin_membership(seeded));response=_execute(api,manifest,**bad)
++    assert response.status_code in {412,422},response.text
++    with psycopg.connect(seeded) as conn:
++        assert conn.execute("SELECT status,version FROM bulk_manifests WHERE id=%s",(manifest["id"],)).fetchone()==("ready",1)
++        assert conn.execute("SELECT count(*) FROM project_buyers WHERE version>1").fetchone()[0]==0
++
++
++def test_other_actor_scope_current_roles_owner_and_expiry_cannot_execute(api,seeded,monkeypatch):
++    from tests.test_buyer_review_db import ADMIN,OPERATOR,VIEWER
++    import buyeros_api.services.bulk_manifest as service
++    from datetime import datetime,timezone,timedelta
++    _seed_many(seeded,2);owner=_admin_membership(seeded);manifest=_preview(api,owner)
++    assert api.get(ROOT+f"/{manifest['id']}",headers=_h(subject=ADMIN)).status_code==404
++    assert api.post(ROOT,json={"filters":{},"excluded_ids":[],"operation":"assignBuyerOwners","target":{"owner_membership_id":None},"reason":"Viewer cannot attest"},headers=_h(subject=VIEWER)).status_code==403
++    with psycopg.connect(seeded) as conn:conn.execute("UPDATE memberships SET active=false WHERE id=%s",(owner,))
++    assert _execute(api,manifest).status_code==422
++    with psycopg.connect(seeded) as conn:
++        conn.execute("UPDATE memberships SET active=true WHERE id=%s",(owner,))
++        conn.execute("UPDATE memberships SET roles='{viewer}' WHERE user_id=%s",(str(uuid.uuid5(uuid.NAMESPACE_URL,OPERATOR)),))
++    assert _execute(api,manifest).status_code==403
++    with psycopg.connect(seeded) as conn:conn.execute("UPDATE memberships SET roles='{operator}' WHERE user_id=%s",(str(uuid.uuid5(uuid.NAMESPACE_URL,OPERATOR)),))
++    class Expired(datetime):
++        @classmethod
++        def now(cls,tz=None):return datetime.now(timezone.utc)+timedelta(hours=1)
++    monkeypatch.setattr(service,'datetime',Expired)
++    assert _execute(api,manifest).status_code==412
++
++
++def test_exclusions_and_one_statement_snapshot_keep_exact_versions(api,seeded,monkeypatch):
++    import buyeros_api.services.bulk_manifest as service
++    _seed_many(seeded,1001)
++    with psycopg.connect(seeded) as db:
++        excluded=[str(r[0]) for r in db.execute('SELECT id FROM project_buyers WHERE workspace_id=%s ORDER BY id LIMIT 2',(WORKSPACE_A,)).fetchall()]
++    original=service.add_digest;changed=False
++    def concurrent_version_change(digest,ordinal,buyer_id,version):
++        nonlocal changed
++        if ordinal==249 and not changed:
++            changed=True
++            with psycopg.connect(seeded) as db:db.execute('UPDATE project_buyers SET version=2 WHERE workspace_id=%s',(WORKSPACE_A,))
++        original(digest,ordinal,buyer_id,version)
++    monkeypatch.setattr(service,'add_digest',concurrent_version_change)
++    manifest=_preview(api,_admin_membership(seeded),excluded_ids=excluded)
++    assert manifest['count']==999 and changed
++    with psycopg.connect(seeded) as db:
++        assert db.execute('SELECT count(*),min(expected_version),max(expected_version) FROM bulk_manifest_items WHERE manifest_id=%s',(manifest['id'],)).fetchone()==(999,1,1)
++        assert db.execute('SELECT count(*) FROM bulk_manifest_items WHERE manifest_id=%s AND buyer_id=ANY(%s::uuid[])',(manifest['id'],excluded)).fetchone()[0]==0
++        assert db.execute('SELECT min(version),max(version) FROM project_buyers WHERE workspace_id=%s',(WORKSPACE_A,)).fetchone()==(2,2)
++
++
++def test_concurrent_same_preview_and_execute_key_produces_one_job_outbox(api,seeded):
++    from concurrent.futures import ThreadPoolExecutor
++    _seed_many(seeded,101);owner=_admin_membership(seeded)
++    body={'filters':{'q':'Q08'},'excluded_ids':[],'operation':'assignBuyerOwners','target':{'owner_membership_id':owner},'reason':'Concurrent exact review'}
++    preview_headers=_h(key='q08-concurrent-preview')  # initialize fictional signing key before concurrent requests
++    with ThreadPoolExecutor(max_workers=2) as pool:
++        previews=list(pool.map(lambda _:api.post(ROOT,json=body,headers=preview_headers),range(2)))
++    assert [r.status_code for r in previews]==[201,201];assert previews[0].json()['data']==previews[1].json()['data'];manifest=previews[0].json()['data']
++    with ThreadPoolExecutor(max_workers=2) as pool:executions=list(pool.map(lambda _:_execute(api,manifest,'q08-concurrent-execute'),range(2)))
++    assert [r.status_code for r in executions]==[202,202];assert executions[0].json()['data']==executions[1].json()['data']
++    with psycopg.connect(seeded) as db:
++        assert db.execute('SELECT count(*) FROM bulk_manifests').fetchone()[0]==1
++        assert db.execute('SELECT count(*) FROM async_jobs WHERE manifest_id=%s',(manifest['id'],)).fetchone()[0]==1
++        assert db.execute("SELECT count(*) FROM outbox_events WHERE event_type='bulk.mutate'").fetchone()[0]==1
++        assert db.execute("SELECT count(*) FROM audit_events WHERE action='executeBulkManifest'").fetchone()[0]==1
++
++
++def test_cancel_manifest_retains_committed_chunk_and_cancels_only_pending(api,seeded):
++    from buyeros_api.api.deps import tenant_scoped
++    from buyeros_api.services.bulk_service import apply_bulk_chunk
++    _seed_many(seeded,101);manifest=_preview(api,_admin_membership(seeded));job_id=uuid.UUID(_execute(api,manifest).json()['data']['id'])
++    async def chunk():
++        async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:return await apply_bulk_chunk(session,job_id)
++    assert asyncio.run(chunk())['processed']==50
++    response=api.post(f'/v1/workspaces/{WORKSPACE_A}/jobs/{job_id}/cancel',json={},headers=_h(key='q08-cancel'))
++    assert response.status_code==200,response.text
++    assert asyncio.run(chunk())['processed']==50
++    assert asyncio.run(chunk())['processed']==1
++    assert asyncio.run(chunk())['processed']==0
++    with psycopg.connect(seeded) as db:
++        assert db.execute('SELECT status,processed,updated FROM async_jobs WHERE id=%s',(job_id,)).fetchone()==('cancelled',101,50)
++        assert db.execute('SELECT count(*) FROM project_buyers WHERE version=2').fetchone()[0]==50
++        assert db.execute('SELECT count(*) FROM async_job_items WHERE job_id=%s AND status=\'cancelled\'',(job_id,)).fetchone()[0]==51
++
++
++def test_manifest_forced_rls_frozen_basis_and_digest_tamper_denies_execute(api,seeded):
++    from tests.test_buyer_review_db import WORKSPACE_B
++    _seed_many(seeded,2);manifest=_preview(api,_admin_membership(seeded))
++    with psycopg.connect(seeded) as db:
++        for table in ['bulk_manifests','bulk_manifest_items']:
++            assert db.execute('SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE relname=%s',(table,)).fetchone()==(True,True)
++            assert db.execute("SELECT has_table_privilege('buyeros_worker',%s,'INSERT,UPDATE,DELETE')",(table,)).fetchone()==(False,)
++        with pytest.raises(psycopg.errors.RaiseException):
++            with db.transaction():db.execute("UPDATE bulk_manifests SET specification=specification||'{\"reason\":\"tamper\"}'::jsonb WHERE id=%s",(manifest['id'],))
++        db.execute('SET LOCAL ROLE buyeros_api');db.execute("SELECT set_config('app.workspace_id',%s,true)",(WORKSPACE_B,))
++        assert db.execute('SELECT count(*) FROM bulk_manifests').fetchone()[0]==0
++        db.execute("SELECT set_config('app.workspace_id',%s,true)",(WORKSPACE_A,))
++        assert db.execute('SELECT count(*) FROM bulk_manifest_items WHERE manifest_id=%s',(manifest['id'],)).fetchone()[0]==2
++        with pytest.raises(psycopg.errors.InsufficientPrivilege):
++            with db.transaction():db.execute('UPDATE bulk_manifest_items SET expected_version=2 WHERE manifest_id=%s',(manifest['id'],))
++    # Owner-only corruption rehearsal: digest revalidation must still fail closed.
++    with psycopg.connect(seeded) as db:db.execute('UPDATE bulk_manifest_items SET expected_version=2 WHERE manifest_id=%s',(manifest['id'],))
++    response=_execute(api,manifest);assert response.status_code==412,response.text
++    with psycopg.connect(seeded) as db:assert db.execute('SELECT count(*) FROM async_jobs').fetchone()[0]==0
++
++
++def test_0037_empty_roundtrip_and_data_preserving_downgrade_refusal(api,seeded,monkeypatch):
++    from alembic import command
++    from alembic.config import Config
++    from tests.test_buyer_review_db import ALEMBIC_INI,SERVICE_ROOT
++    monkeypatch.setenv('BUYEROS_DATABASE_URL',seeded)
++    from buyeros_api.settings import get_settings
++    get_settings.cache_clear()
++    config=Config(str(ALEMBIC_INI));config.set_main_option('script_location',str(SERVICE_ROOT/'alembic'))
++    command.downgrade(config,'0036_checkpoint_schema_grants')
++    with psycopg.connect(seeded) as db:
++        assert db.execute("SELECT to_regclass('bulk_manifests')").fetchone()[0] is None
++        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0036_checkpoint_schema_grants'
++    command.upgrade(config,'head')
++    from buyeros_api.settings import get_settings
++    from tests.test_buyer_review_db import runtime_role_dsn
++    monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(seeded));get_settings.cache_clear()
++    _seed_many(seeded,2);manifest=_preview(api,_admin_membership(seeded));monkeypatch.setenv('BUYEROS_DATABASE_URL',seeded);get_settings.cache_clear()
++    with pytest.raises(RuntimeError,match='durable manifests'):command.downgrade(config,'0036_checkpoint_schema_grants')
++    with psycopg.connect(seeded) as db:
++        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0037_bulk_manifests'
++        assert db.execute('SELECT count(*) FROM bulk_manifest_items WHERE manifest_id=%s',(manifest['id'],)).fetchone()[0]==2
++    monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(seeded));get_settings.cache_clear()
++
++
++@pytest.mark.parametrize("operation",["reviewBuyers","changeListMemberships"])
++def test_manifest_other_operations_use_current_canonical_review_and_lists(api,seeded,operation):
++    from tests.test_buyer_review_db import _seed_buyer,REVIEWER
++    from tests.test_buyer_management_db import _new_list
++    buyers=[_seed_buyer(seeded,name=f'Q08 Other {i}',fit='match') for i in range(2)]
++    if operation=='reviewBuyers':
++        target={'status':'accepted'};subject=REVIEWER
++    else:
++        target={'list_id':_new_list(api,key='q08-new-target'),'operation':'add'};subject=None
++    body={'filters':{'q':'Q08 Other'},'excluded_ids':[],'operation':operation,'target':target,'reason':'Exact domain operation review'}
++    headers=_h(subject=subject) if subject else _h()
++    if operation=='reviewBuyers':assert api.post(ROOT,json=body,headers=_h(key='q08-review-denial')).status_code==403
++    response=api.post(ROOT,json=body,headers=headers);assert response.status_code==201,response.text;manifest=response.json()['data']
++    execute_headers={**headers,'Idempotency-Key':'q08-other-execute','If-Match':'"1"'}
++    result=api.post(ROOT+f"/{manifest['id']}/execute",json={'digest':manifest['digest'],'confirmation':True},headers=execute_headers)
++    assert result.status_code==200 and result.json()['data']['updated']==2,result.text
++    with psycopg.connect(seeded) as db:
++        if operation=='reviewBuyers':assert db.execute('SELECT count(*) FROM human_reviews WHERE project_buyer_id=ANY(%s::uuid[]) AND state=%s',(buyers,'accepted')).fetchone()[0]==2
++        else:assert db.execute('SELECT count(*) FROM list_memberships WHERE list_id=%s AND buyer_id=ANY(%s::uuid[])',(target['list_id'],buyers)).fetchone()[0]==2
+diff --git a/services/api/tests/test_buyer_management_db.py b/services/api/tests/test_buyer_management_db.py
+index 3e22285..d70cbb5 100644
+--- a/services/api/tests/test_buyer_management_db.py
++++ b/services/api/tests/test_buyer_management_db.py
+@@ -260,7 +260,7 @@ def test_0014_migration_owns_preset_rls_and_disposable_rollback(migrated, monkey
+         ).fetchone()[0] == "0014_buyer_management"
+     command.upgrade(config, "head")
+     with psycopg.connect(migrated) as conn:
+-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+ 
+ 
+ def test_list_filter_freezes_membership_and_refreezes_after_remove(api, seeded):
+diff --git a/services/api/tests/test_buyer_review_db.py b/services/api/tests/test_buyer_review_db.py
+index d872697..873ac8f 100644
+--- a/services/api/tests/test_buyer_review_db.py
++++ b/services/api/tests/test_buyer_review_db.py
+@@ -164,6 +164,8 @@ def api(seeded, monkeypatch):
+             "DELETE FROM outbox_events WHERE workspace_id = %s",
+             "DELETE FROM async_job_items WHERE workspace_id = %s",
+             "DELETE FROM async_jobs WHERE workspace_id = %s",
++            "DELETE FROM bulk_manifest_items WHERE workspace_id = %s",
++            "DELETE FROM bulk_manifests WHERE workspace_id = %s",
+             "DELETE FROM filter_presets WHERE workspace_id = %s",
+             "DELETE FROM policy_decisions WHERE workspace_id = %s",
+             "DELETE FROM suppressions WHERE workspace_id = %s",
+diff --git a/services/api/tests/test_checkpoint_schema_privileges_db.py b/services/api/tests/test_checkpoint_schema_privileges_db.py
+index 585972f..f13c26c 100644
+--- a/services/api/tests/test_checkpoint_schema_privileges_db.py
++++ b/services/api/tests/test_checkpoint_schema_privileges_db.py
+@@ -71,7 +71,7 @@ def test_0036_round_trip_keeps_schema_version_grants_read_only(migrated, schema_
+     config = Config(str(ALEMBIC_INI))
+     config.set_main_option('script_location', str(SERVICE_ROOT / 'alembic'))
+     with psycopg.connect(migrated) as owner:
+-        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0036_checkpoint_schema_grants'
++        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0037_bulk_manifests'
+     # A compatibility downgrade retains security hardening and all checkpoint data.
+     command.downgrade(config, '0035_worker_recovery_probe')
+     with psycopg.connect(schema_worker) as worker:
+@@ -80,7 +80,7 @@ def test_0036_round_trip_keeps_schema_version_grants_read_only(migrated, schema_
+         assert worker.execute("SELECT max(v),count(*) FROM buyeros_graph.checkpoint_migrations").fetchone() == (9, 10)
+     command.upgrade(config, 'head')
+     with psycopg.connect(migrated) as owner:
+-        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0036_checkpoint_schema_grants'
++        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0037_bulk_manifests'
+         assert owner.execute('SELECT count(*) FROM buyeros_graph.checkpoints').fetchone()[0] > 0
+ 
+ 
+@@ -93,3 +93,14 @@ def test_operator_previews_current_head_without_mutating_selector(migrated):
+     assert result['applied'] is False and result['epoch'] == before[2]
+     with psycopg.connect(migrated) as owner:
+         assert owner.execute('SELECT backend,enabled,epoch FROM worker_runtime_control').fetchone() == before
++
++def test_runtime_selector_still_rejects_unknown_schema_head(migrated):
++    from buyeros_api.services.worker_recovery import set_execution_runtime
++    with psycopg.connect(migrated,autocommit=True) as db:
++        before=db.execute('SELECT backend,enabled,epoch FROM worker_runtime_control').fetchone()
++        db.execute("UPDATE alembic_version SET version_num='fixture_unknown_schema'")
++        try:
++            with pytest.raises(ValueError,match='compatible 0035/0036/0037'):
++                set_execution_runtime(migrated,expected_epoch=before[2],backend='cloudflare',enabled=False,reason='Owned unknown schema dry run')
++            assert db.execute('SELECT backend,enabled,epoch FROM worker_runtime_control').fetchone()==before
++        finally:db.execute("UPDATE alembic_version SET version_num='0037_bulk_manifests'")
+diff --git a/services/api/tests/test_cloudflare_migration_db.py b/services/api/tests/test_cloudflare_migration_db.py
+index 83fa2c9..93d1b5e 100644
+--- a/services/api/tests/test_cloudflare_migration_db.py
++++ b/services/api/tests/test_cloudflare_migration_db.py
+@@ -29,7 +29,7 @@ def test_0034_empty_upgrade_downgrade_reupgrade_and_populated_refusal(monkeypatc
+         with pytest.raises(RuntimeError, match="retained execution/replay/fencing state"):
+             command.downgrade(config, "0033_api_rate_windows")
+         with psycopg.connect(dsn) as db:
+-            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+             assert db.execute("SELECT count(*) FROM worker_bridge_nonces").fetchone()[0] == 1
+             assert db.execute("SELECT to_regclass('budget_reservations')").fetchone()[0] is not None
+     finally:
+diff --git a/services/api/tests/test_cloudflare_recovery_boundaries_db.py b/services/api/tests/test_cloudflare_recovery_boundaries_db.py
+index 960d2f9..83bde81 100644
+--- a/services/api/tests/test_cloudflare_recovery_boundaries_db.py
++++ b/services/api/tests/test_cloudflare_recovery_boundaries_db.py
+@@ -41,7 +41,7 @@ def test_0035_empty_round_trip_default_off_and_limited_api_privileges(monkeypatc
+             assert db.execute("SELECT to_regclass('worker_runtime_probe')").fetchone()[0] is None
+         command.upgrade(config(), 'head')
+         with psycopg.connect(dsn) as db:
+-            assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0036_checkpoint_schema_grants'
++            assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0037_bulk_manifests'
+     finally:
+         get_settings.cache_clear()
+         _docker('rm', '-f', name)
+@@ -56,7 +56,7 @@ def test_populated_rollback_preserves_unknown_holds(migrated, worker_runtime):
+     with pytest.raises(RuntimeError, match='retained operational recovery/probe evidence'):
+         command.downgrade(config(), '0034_worker_execution')
+     with psycopg.connect(migrated) as db:
+-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0036_checkpoint_schema_grants'
++        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0037_bulk_manifests'
+         assert db.execute('SELECT state,remaining_hold FROM budget_reservations WHERE operation_id=%s', (case['job'],)).fetchone() == before
+         assert db.execute("SELECT status FROM provider_operations WHERE job_id=%s", (case['job'],)).fetchone()[0] == 'submitting'
+         assert db.execute('SELECT count(*) FROM cost_events WHERE workspace_id=%s', (case['envelope'].workspace_id,)).fetchone()[0] == 0
+diff --git a/services/api/tests/test_contact_job_migration.py b/services/api/tests/test_contact_job_migration.py
+index 6a358d9..2de36aa 100644
+--- a/services/api/tests/test_contact_job_migration.py
++++ b/services/api/tests/test_contact_job_migration.py
+@@ -10,7 +10,7 @@ from alembic.config import Config
+ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
+ from tests.test_api_projects_db import WORKSPACE_A
+ 
+-HEAD = "0036_checkpoint_schema_grants"
++HEAD = "0037_bulk_manifests"
+ 
+ 
+ def _config():
+diff --git a/services/api/tests/test_contact_quote_migration.py b/services/api/tests/test_contact_quote_migration.py
+index 98e4b20..16ce58a 100644
+--- a/services/api/tests/test_contact_quote_migration.py
++++ b/services/api/tests/test_contact_quote_migration.py
+@@ -9,7 +9,7 @@ from alembic.config import Config
+ 
+ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
+ 
+-HEAD = "0036_checkpoint_schema_grants"
++HEAD = "0037_bulk_manifests"
+ PREVIOUS = "0022_research_checkpoints"
+ WORKSPACE = "11111111-1111-4111-8111-111111111111"
+ PROJECT = "a0000000-0000-4000-8000-000000000001"
+diff --git a/services/api/tests/test_draft_approval_migration.py b/services/api/tests/test_draft_approval_migration.py
+index 65a8e25..33f8c7e 100644
+--- a/services/api/tests/test_draft_approval_migration.py
++++ b/services/api/tests/test_draft_approval_migration.py
+@@ -14,7 +14,7 @@ from tests.test_api_projects_db import api
+ from tests.test_draft_approval_context_db import _addressed_case, _approval_payload, _approve, _review
+ from tests.test_lookup_quotes_db import quote_case
+ 
+-HEAD = "0036_checkpoint_schema_grants"
++HEAD = "0037_bulk_manifests"
+ 
+ 
+ def _config():
+diff --git a/services/api/tests/test_draft_integrity_migration.py b/services/api/tests/test_draft_integrity_migration.py
+index f17167f..4b65a97 100644
+--- a/services/api/tests/test_draft_integrity_migration.py
++++ b/services/api/tests/test_draft_integrity_migration.py
+@@ -10,7 +10,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
+ from tests.test_api_projects_db import api
+ from tests.test_lookup_quotes_db import PROJECT, WORKSPACE_A, quote_case
+ 
+-HEAD = "0036_checkpoint_schema_grants"
++HEAD = "0037_bulk_manifests"
+ 
+ 
+ def _config():
+diff --git a/services/api/tests/test_export_migration.py b/services/api/tests/test_export_migration.py
+index 68afba9..591d8ec 100644
+--- a/services/api/tests/test_export_migration.py
++++ b/services/api/tests/test_export_migration.py
+@@ -10,7 +10,7 @@ from tests.test_api_projects_db import api
+ from tests.test_exports_authorization_db import _buyer_body, _permit
+ from tests.test_lookup_quotes_db import OPERATOR, WORKSPACE_A, PROJECT, _h, quote_case
+ 
+-HEAD = "0036_checkpoint_schema_grants"
++HEAD = "0037_bulk_manifests"
+ 
+ 
+ def _config():
+diff --git a/services/api/tests/test_outcome_migration.py b/services/api/tests/test_outcome_migration.py
+index d89ce4f..9d6ec7b 100644
+--- a/services/api/tests/test_outcome_migration.py
++++ b/services/api/tests/test_outcome_migration.py
+@@ -11,7 +11,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
+ from tests.test_api_projects_db import api
+ from tests.test_lookup_quotes_db import OPERATOR, WORKSPACE_A, PROJECT, quote_case
+ 
+-HEAD = "0036_checkpoint_schema_grants"
++HEAD = "0037_bulk_manifests"
+ 
+ 
+ def _config():
+diff --git a/services/api/tests/test_policy_lifecycle_db.py b/services/api/tests/test_policy_lifecycle_db.py
+index 40d7442..b89a831 100644
+--- a/services/api/tests/test_policy_lifecycle_db.py
++++ b/services/api/tests/test_policy_lifecycle_db.py
+@@ -238,4 +238,4 @@ def test_0015_policy_upgrade_and_safe_downgrade_on_disposable_db(migrated, monke
+         assert conn.execute("SELECT count(*) FROM information_schema.columns WHERE table_name='policy_decisions' AND column_name='subject_id'").fetchone()[0] == 0
+     command.upgrade(config, "head")
+     with psycopg.connect(migrated) as conn:
+-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+diff --git a/services/api/tests/test_project_constraints_db.py b/services/api/tests/test_project_constraints_db.py
+index 29eb172..857f334 100644
+--- a/services/api/tests/test_project_constraints_db.py
++++ b/services/api/tests/test_project_constraints_db.py
+@@ -192,7 +192,7 @@ def test_0013_preflight_reports_legacy_conflict_without_deleting_it(seeded, monk
+             assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0014_buyer_management"
+         command.upgrade(config, "head")
+         with psycopg.connect(seeded) as owner:
+-            assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++            assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+     finally:
+         with psycopg.connect(seeded, autocommit=True) as owner:
+             owner.execute("UPDATE projects SET active_icp_version_id=NULL WHERE id=%s", (PROJECT_A,))
+diff --git a/services/api/tests/test_research_checkpoint_migration.py b/services/api/tests/test_research_checkpoint_migration.py
+index f10d7df..39a5c1d 100644
+--- a/services/api/tests/test_research_checkpoint_migration.py
++++ b/services/api/tests/test_research_checkpoint_migration.py
+@@ -22,7 +22,7 @@ def test_0022_empty_round_trip_and_retained_checkpoint_refusal():
+     try:
+         command.upgrade(config, "head")
+         with psycopg.connect(dsn) as db:
+-            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+             assert db.execute("SELECT max(v) FROM buyeros_graph.checkpoint_migrations").fetchone()[0] == 9
+             for table in ("checkpoints", "checkpoint_blobs", "checkpoint_writes"):
+                 assert db.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class "
+@@ -42,7 +42,7 @@ def test_0022_empty_round_trip_and_retained_checkpoint_refusal():
+         with pytest.raises(RuntimeError, match="retained research checkpoint state"):
+             command.downgrade(config, "0021_run_bounds")
+         with psycopg.connect(dsn) as db:
+-            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+             assert db.execute("SELECT count(*) FROM buyeros_graph.checkpoints").fetchone()[0] == 1
+     finally:
+         if previous is None:
+diff --git a/services/api/tests/test_retention_authorization_db.py b/services/api/tests/test_retention_authorization_db.py
+index 61b4ce4..d698d89 100644
+--- a/services/api/tests/test_retention_authorization_db.py
++++ b/services/api/tests/test_retention_authorization_db.py
+@@ -393,7 +393,7 @@ def test_contact_retention_migration_rolls_back_and_forward_on_empty_disposable_
+     finally:
+         command.upgrade(config, "head")
+     with psycopg.connect(migrated) as conn:
+-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+         assert conn.execute("SELECT count(*) FROM information_schema.columns "
+                             "WHERE table_name='contact_points' AND column_name='retention_expires_at'").fetchone()[0] == 1
+ 
+@@ -456,7 +456,7 @@ def test_rate_window_migration_empty_rollback_and_rls(migrated):
+     finally:
+         command.upgrade(config, "head")
+     with psycopg.connect(migrated) as conn:
+-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+         assert conn.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class "
+                             "WHERE relname='api_rate_windows'").fetchone() == (True, True)
+         assert conn.execute("SELECT has_table_privilege('buyeros_api','api_rate_windows','DELETE')").fetchone()[0] is False
+@@ -479,7 +479,7 @@ def test_rate_window_migration_refuses_populated_rollback(migrated):
+         with pytest.raises(RuntimeError, match="retained API rate windows"):
+             command.downgrade(config, "0032_contact_retention")
+         with psycopg.connect(migrated) as conn:
+-            assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
++            assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+     finally:
+         with psycopg.connect(migrated, autocommit=True) as conn:
+             conn.execute("DELETE FROM api_rate_windows WHERE workspace_id=%s AND actor_id=%s",
+diff --git a/services/api/tests/test_sender_identity_migration.py b/services/api/tests/test_sender_identity_migration.py
+index 0240fdd..aeb92b3 100644
+--- a/services/api/tests/test_sender_identity_migration.py
++++ b/services/api/tests/test_sender_identity_migration.py
+@@ -9,7 +9,7 @@ from alembic.config import Config
+ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
+ from tests.test_api_projects_db import WORKSPACE_A
+ 
+-HEAD = "0036_checkpoint_schema_grants"
++HEAD = "0037_bulk_manifests"
+ PROJECT_A = "a0000000-0000-4000-8000-000000000001"
+ 
+ 
+diff --git a/services/generated/buyeros-api.ts b/services/generated/buyeros-api.ts
+index 4f08b13..7c63f41 100644
+--- a/services/generated/buyeros-api.ts
++++ b/services/generated/buyeros-api.ts
+@@ -1337,6 +1337,57 @@ export interface paths {
+         patch?: never;
+         trace?: never;
+     };
++    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get?: never;
++        put?: never;
++        /** Freeze an actor-bound maintenance selection up to10000 */
++        post: operations["previewBulkManifest"];
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
++    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        /** Restore an original actor manifest without executing it */
++        get: operations["getBulkManifest"];
++        put?: never;
++        post?: never;
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
++    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}/execute": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get?: never;
++        put?: never;
++        /** Confirm the exact frozen digest and current operation authority */
++        post: operations["executeBulkManifest"];
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
+ }
+ export type webhooks = Record<string, never>;
+ export interface components {
+@@ -2656,6 +2707,8 @@ export interface components {
+             workspace_id: string;
+             /** Format: uuid */
+             project_id: string;
++            /** Format: uuid */
++            manifest_id?: string;
+             /** @enum {string} */
+             kind: "offer_ingestion" | "draft_generation" | "export" | "reconciliation" | "bulk_mutation";
+             /** @enum {string} */
+@@ -2677,6 +2730,97 @@ export interface components {
+             /** @enum {string} */
+             data_mode: "live";
+         };
++        BulkManifestCreate: {
++            filters: components["schemas"]["BuyerFilters"];
++            excluded_ids: string[];
++            reason: string;
++            /** Format: uuid */
++            source_job_id?: string;
++            /** @enum {string} */
++            operation: "assignBuyerOwners";
++            target: {
++                /** Format: uuid */
++                owner_membership_id: string | null;
++            };
++        } | {
++            filters: components["schemas"]["BuyerFilters"];
++            excluded_ids: string[];
++            reason: string;
++            /** Format: uuid */
++            source_job_id?: string;
++            /** @enum {string} */
++            operation: "reviewBuyers";
++            target: {
++                /** @enum {string} */
++                status: "accepted" | "rejected" | "needs_information";
++            };
++        } | {
++            filters: components["schemas"]["BuyerFilters"];
++            excluded_ids: string[];
++            reason: string;
++            /** Format: uuid */
++            source_job_id?: string;
++            /** @enum {string} */
++            operation: "changeListMemberships";
++            target: {
++                /** Format: uuid */
++                list_id: string;
++                /** @enum {string} */
++                operation: "add" | "remove";
++            };
++        };
++        BulkManifestExecute: {
++            digest: string;
++            /** @constant */
++            confirmation: true;
++        };
++        BulkManifest: {
++            /** Format: uuid */
++            id: string;
++            /** Format: uuid */
++            workspace_id: string;
++            /** Format: uuid */
++            project_id: string;
++            /** Format: uuid */
++            actor_user_id: string;
++            /** @enum {string} */
++            operation: "assignBuyerOwners" | "reviewBuyers" | "changeListMemberships";
++            target: {
++                /** Format: uuid */
++                owner_membership_id: string | null;
++            } | {
++                /** @enum {string} */
++                status: "accepted" | "rejected" | "needs_information";
++            } | {
++                /** Format: uuid */
++                list_id: string;
++                /** @enum {string} */
++                operation: "add" | "remove";
++            };
++            filters: components["schemas"]["BuyerFilters"];
++            excluded_ids: string[];
++            reason: string;
++            count: number;
++            digest: string;
++            /** Format: date-time */
++            expires_at: string;
++            /** @enum {string} */
++            status: "ready" | "executed";
++            version: number;
++            /** Format: date-time */
++            created_at: string;
++            /** Format: uuid */
++            job_id?: string;
++            /** Format: uuid */
++            source_job_id?: string;
++            result?: components["schemas"]["BulkResult"];
++        };
++        BulkManifestResponse: {
++            data: components["schemas"]["BulkManifest"];
++            /** @enum {string} */
++            data_mode: "live";
++            request_id: string;
++        };
+         AsyncJob: {
+             /** Format: uuid */
+             id: string;
+@@ -2684,6 +2828,8 @@ export interface components {
+             workspace_id: string;
+             /** Format: uuid */
+             project_id: string;
++            /** Format: uuid */
++            manifest_id?: string;
+             /** @enum {string} */
+             kind: "offer_ingestion" | "draft_generation" | "export" | "reconciliation" | "bulk_mutation";
+             /** @enum {string} */
+@@ -6594,4 +6740,124 @@ export interface operations {
+             503: components["responses"]["Error"];
+         };
+     };
++    previewBulkManifest: {
++        parameters: {
++            query?: never;
++            header: {
++                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
++                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
++            };
++            path: {
++                workspace_id: string;
++                project_id: string;
++            };
++            cookie?: never;
++        };
++        requestBody: {
++            content: {
++                "application/json": components["schemas"]["BulkManifestCreate"];
++            };
++        };
++        responses: {
++            /** @description Atomic current frozen selection or durable per-row execution */
++            201: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "application/json": components["schemas"]["BulkManifestResponse"];
++                };
++            };
++            400: components["responses"]["Error"];
++            401: components["responses"]["Error"];
++            403: components["responses"]["Error"];
++            404: components["responses"]["Error"];
++            409: components["responses"]["Error"];
++            412: components["responses"]["Error"];
++            422: components["responses"]["Error"];
++            429: components["responses"]["Error"];
++        };
++    };
++    getBulkManifest: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                workspace_id: string;
++                project_id: string;
++                manifest_id: string;
++            };
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description Atomic current frozen selection or durable per-row execution */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "application/json": components["schemas"]["BulkManifestResponse"];
++                };
++            };
++            400: components["responses"]["Error"];
++            401: components["responses"]["Error"];
++            403: components["responses"]["Error"];
++            404: components["responses"]["Error"];
++            409: components["responses"]["Error"];
++            412: components["responses"]["Error"];
++            422: components["responses"]["Error"];
++            429: components["responses"]["Error"];
++        };
++    };
++    executeBulkManifest: {
++        parameters: {
++            query?: never;
++            header: {
++                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
++                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
++                /** @description Strong version ETag, e.g. "4". Compare in mutation transaction; stale is 412 STALE_REVISION, missing is 400. */
++                "If-Match": components["parameters"]["IfMatch"];
++            };
++            path: {
++                workspace_id: string;
++                project_id: string;
++                manifest_id: string;
++            };
++            cookie?: never;
++        };
++        requestBody: {
++            content: {
++                "application/json": components["schemas"]["BulkManifestExecute"];
++            };
++        };
++        responses: {
++            /** @description Atomic current frozen selection or durable per-row execution */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "application/json": components["schemas"]["BulkResultResponse"];
++                };
++            };
++            /** @description Atomic current frozen selection or durable per-row execution */
++            202: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "application/json": components["schemas"]["AsyncJobResponse"];
++                };
++            };
++            400: components["responses"]["Error"];
++            401: components["responses"]["Error"];
++            403: components["responses"]["Error"];
++            404: components["responses"]["Error"];
++            409: components["responses"]["Error"];
++            412: components["responses"]["Error"];
++            422: components["responses"]["Error"];
++            429: components["responses"]["Error"];
++        };
++    };
+ }
+diff --git a/services/generated/operation-routes.ts b/services/generated/operation-routes.ts
+index 403139d..fba604c 100644
+--- a/services/generated/operation-routes.ts
++++ b/services/generated/operation-routes.ts
+@@ -82,4 +82,7 @@ export const operationRoutes = {
+   "correctOutcome": {method: "POST", path: "/v1/workspaces/{workspace_id}/outcomes/{outcome_id}/corrections"},
+   "listAuditEvents": {method: "GET", path: "/v1/workspaces/{workspace_id}/audit-events"},
+   "disabledDeliveryBoundary": {method: "POST", path: "/v1/workspaces/{workspace_id}/drafts/{draft_id}/deliver"},
++  "previewBulkManifest": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests"},
++  "getBulkManifest": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}"},
++  "executeBulkManifest": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}/execute"},
+ } as const satisfies Record<keyof operations, {method: string; path: string}>;
+diff --git a/services/live/bulk-manifests.ts b/services/live/bulk-manifests.ts
+new file mode 100644
+index 0000000..0da9a8e
+--- /dev/null
++++ b/services/live/bulk-manifests.ts
+@@ -0,0 +1,36 @@
++import type {components} from '@/services/generated/buyeros-api';
++import type {SessionScope} from './session';
++import {scopeKey} from './session';
++import type {LiveClient} from './client';
++import {buyerOperationContext} from './buyers';
++import {createOperationClient} from './operations';
++import {ActionIntent} from './action-intent';
++export type Manifest=components['schemas']['BulkManifest'];
++export type ManifestBody=components['schemas']['BulkManifestCreate'];
++export type ManifestResult=components['schemas']['BulkResult']|components['schemas']['AsyncJob'];
++export interface ManifestRecovery {body:ManifestBody|null;preview:ActionIntent<Manifest>;execute:ActionIntent<ManifestResult>}
++function freezeBody<T>(value:T):T{
++ if(value&&typeof value==='object'){for(const child of Object.values(value))freezeBody(child);Object.freeze(value);}return value;
++}
++const recoveries=new WeakMap<SessionScope,Map<string,ManifestRecovery>>();
++export function manifestRecovery(session:SessionScope):ManifestRecovery{
++ let records=recoveries.get(session);if(!records){records=new Map();recoveries.set(session,records);}
++ const id=scopeKey(session.current());let record=records.get(id);
++ if(!record){record={body:null,preview:new ActionIntent(),execute:new ActionIntent()};records.set(id,record);}return record;
++}
++export async function previewManifest(client:LiveClient,session:SessionScope,body:ManifestBody):Promise<Manifest>{
++ const ctx=buyerOperationContext(session),record=manifestRecovery(session);
++ record.body??=freezeBody(structuredClone(body));const frozen=record.body;
++ return record.preview.run(JSON.stringify({scope:scopeKey(session.current()),body:frozen}),key=>createOperationClient(client).requestOperation('previewBulkManifest',{
++  path:{workspace_id:ctx.workspace,project_id:ctx.project!},header:{'Idempotency-Key':key},body:frozen},ctx));
++}
++export async function readManifest(client:LiveClient,session:SessionScope,id:string):Promise<Manifest>{
++ const ctx=buyerOperationContext(session);return createOperationClient(client).requestOperation('getBulkManifest',{
++  path:{workspace_id:ctx.workspace,project_id:ctx.project!,manifest_id:id}},ctx);
++}
++export async function executeManifest(client:LiveClient,session:SessionScope,manifest:Manifest):Promise<ManifestResult>{
++ const ctx=buyerOperationContext(session),body={digest:manifest.digest,confirmation:true as const};
++ return manifestRecovery(session).execute.run(JSON.stringify({scope:scopeKey(session.current()),manifest:manifest.id,version:manifest.version,body}),key=>createOperationClient(client).requestOperation('executeBulkManifest',{
++  path:{workspace_id:ctx.workspace,project_id:ctx.project!,manifest_id:manifest.id},header:{'Idempotency-Key':key,'If-Match':`"${manifest.version}"`},body},ctx));
++}
++export function startNewManifest(session:SessionScope){const records=recoveries.get(session);records?.delete(scopeKey(session.current()));}
+diff --git a/services/worker/tests/fixtures/audit_manifests.py b/services/worker/tests/fixtures/audit_manifests.py
+new file mode 100644
+index 0000000..246e47f
+--- /dev/null
++++ b/services/worker/tests/fixtures/audit_manifests.py
+@@ -0,0 +1,86 @@
++"""Bounded fictional Q08 helper, owned Docker workbench only. No live/provider fallback."""
++import asyncio,json,os,sys,uuid
++from urllib.parse import urlsplit,urlunsplit
++import psycopg
++from tests.fixtures.run_browser_research import owner_dsn,WORKSPACE
++PROJECT='e1000000-0000-4000-8000-000000000001'
++PREFIX='Q08 Manifest Fixture'
++
++def main():
++ dsn=owner_dsn()
++ with psycopg.connect(dsn) as db:
++  if db.execute('SELECT name FROM workspaces WHERE id=%s',(WORKSPACE,)).fetchone()!=('E2E fixture workspace',):raise RuntimeError('unknown workbench')
++  db.execute("SET LOCAL lock_timeout='5s'")
++  command=sys.argv[1]
++  if command=='seed':
++   other='e0000000-0000-4000-8000-000000000101'
++   db.execute("INSERT INTO workspaces(id,name,data_mode) VALUES (%s,'Other audit fixture','live') ON CONFLICT DO NOTHING",(other,))
++   db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES ('e0050000-0000-4000-8000-000000000002',%s,'e0000000-0000-4000-8000-000000000002','{operator}',true) ON CONFLICT DO NOTHING",(other,))
++   db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,language_preferences,version) VALUES ('e1050000-0000-4000-8000-000000000001',%s,'Q08 other project','Fictional Seller','Fixture offer','{US}','{en}',1) ON CONFLICT DO NOTHING",(other,))
++   count=int(sys.argv[2])
++   if not 1<=count<=10001:raise ValueError('bounded fixture count')
++   old=db.execute("SELECT id FROM bulk_manifests WHERE workspace_id=%s AND project_id=%s AND specification->'filters'->>'q'=%s",(WORKSPACE,PROJECT,PREFIX)).fetchall()
++   # Only this helper's manifests/jobs/buyers; preserve normal workbench draft FKs.
++   for (manifest,) in old:
++    jobs=db.execute('SELECT id FROM async_jobs WHERE workspace_id=%s AND manifest_id=%s',(WORKSPACE,manifest)).fetchall()
++    for (job,) in jobs:
++     db.execute("DELETE FROM outbox_events WHERE workspace_id=%s AND payload->>'job_id'=%s",(WORKSPACE,str(job)))
++     db.execute('DELETE FROM async_job_items WHERE workspace_id=%s AND job_id=%s',(WORKSPACE,job))
++     db.execute('DELETE FROM async_jobs WHERE workspace_id=%s AND id=%s',(WORKSPACE,job))
++    db.execute('DELETE FROM bulk_manifest_items WHERE workspace_id=%s AND manifest_id=%s',(WORKSPACE,manifest))
++    db.execute('DELETE FROM bulk_manifests WHERE workspace_id=%s AND id=%s',(WORKSPACE,manifest))
++   snapshots=db.execute("SELECT DISTINCT si.snapshot_id FROM buyer_snapshot_items si JOIN project_buyers b ON b.id=si.buyer_id AND b.workspace_id=si.workspace_id JOIN companies c ON c.id=b.company_id AND c.workspace_id=b.workspace_id WHERE si.workspace_id=%s AND si.project_id=%s AND c.display_name LIKE %s",(WORKSPACE,PROJECT,PREFIX+'%')).fetchall()
++   for (snapshot,) in snapshots:
++    db.execute('DELETE FROM buyer_snapshot_items WHERE workspace_id=%s AND snapshot_id=%s',(WORKSPACE,snapshot))
++    db.execute('DELETE FROM buyer_snapshots WHERE workspace_id=%s AND id=%s',(WORKSPACE,snapshot))
++   companies=db.execute('SELECT id FROM companies WHERE workspace_id=%s AND display_name LIKE %s',(WORKSPACE,PREFIX+'%')).fetchall()
++   for (company,) in companies:
++    db.execute('DELETE FROM human_reviews WHERE workspace_id=%s AND project_buyer_id IN (SELECT id FROM project_buyers WHERE workspace_id=%s AND company_id=%s)',(WORKSPACE,WORKSPACE,company))
++    db.execute('DELETE FROM fit_assessments WHERE workspace_id=%s AND project_buyer_id IN (SELECT id FROM project_buyers WHERE workspace_id=%s AND company_id=%s)',(WORKSPACE,WORKSPACE,company))
++    db.execute('DELETE FROM list_memberships WHERE workspace_id=%s AND buyer_id IN (SELECT id FROM project_buyers WHERE workspace_id=%s AND company_id=%s)',(WORKSPACE,WORKSPACE,company))
++    db.execute('DELETE FROM project_buyers WHERE workspace_id=%s AND company_id=%s',(WORKSPACE,company))
++    db.execute('DELETE FROM companies WHERE workspace_id=%s AND id=%s',(WORKSPACE,company))
++   values=[(uuid.uuid5(uuid.NAMESPACE_URL,f'Q08-buyer-{i}'),uuid.uuid5(uuid.NAMESPACE_URL,f'Q08-company-{i}'),f'{PREFIX} {i:05d}') for i in range(count)]
++   db.cursor().executemany('INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES (%s,%s,%s,%s)',[(c,WORKSPACE,n,n) for b,c,n in values])
++   db.cursor().executemany('INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES (%s,%s,%s,%s)',[(b,WORKSPACE,PROJECT,c) for b,c,n in values])
++   print(json.dumps({'fixture_only':True,'count':count,'ids':[str(b) for b,c,n in values]}));return
++  if command=='assess':
++   icp=db.execute('SELECT active_icp_version_id FROM projects WHERE id=%s AND workspace_id=%s',(PROJECT,WORKSPACE)).fetchone()[0]
++   if icp is None:
++    icp=uuid.uuid4();number=db.execute('SELECT coalesce(max(number),0)+1 FROM icp_versions WHERE workspace_id=%s AND project_id=%s',(WORKSPACE,PROJECT)).fetchone()[0]
++    db.execute("INSERT INTO icp_versions(id,workspace_id,project_id,number,content,content_hash,basis_offer_revision) VALUES (%s,%s,%s,%s,'{}',%s,1)",(icp,WORKSPACE,PROJECT,number,'sha256:'+'0'*64))
++    db.execute('UPDATE projects SET active_icp_version_id=%s WHERE workspace_id=%s AND id=%s',(icp,WORKSPACE,PROJECT))
++   buyers=db.execute('SELECT b.id FROM project_buyers b JOIN companies c ON c.id=b.company_id AND c.workspace_id=b.workspace_id WHERE b.workspace_id=%s AND b.project_id=%s AND c.display_name LIKE %s',(WORKSPACE,PROJECT,PREFIX+'%')).fetchall()
++   db.cursor().executemany("INSERT INTO fit_assessments(id,workspace_id,project_id,project_buyer_id,icp_version_id,evidence_set_hash,verdict,rationale,evidence_ids) VALUES (%s,%s,%s,%s,%s,%s,'match','Fictional assessment, not live validation','[]')",[(uuid.uuid4(),WORKSPACE,PROJECT,b,icp,'a'*64) for b, in buyers])
++   print(json.dumps({'fixture_only':True,'assessed':len(buyers)}));return
++  if command=='stale':
++   buyer=uuid.UUID(sys.argv[2]);proof=db.execute('SELECT c.display_name FROM project_buyers b JOIN companies c ON c.id=b.company_id AND c.workspace_id=b.workspace_id WHERE b.id=%s AND b.workspace_id=%s AND b.project_id=%s',(buyer,WORKSPACE,PROJECT)).fetchone()
++   if not proof or not proof[0].startswith(PREFIX):raise RuntimeError('unknown Q08 buyer')
++   db.execute('UPDATE project_buyers SET version=version+1 WHERE id=%s AND workspace_id=%s',(buyer,WORKSPACE));print(json.dumps({'fixture_only':True,'stale':str(buyer)}));return
++  if command=='inspect':
++   buyers=db.execute('SELECT b.id,b.version,b.owner_user_id FROM project_buyers b JOIN companies c ON c.id=b.company_id AND c.workspace_id=b.workspace_id WHERE b.workspace_id=%s AND b.project_id=%s AND c.display_name LIKE %s ORDER BY c.display_name',(WORKSPACE,PROJECT,PREFIX+'%')).fetchall()
++   manifests=db.execute('SELECT id,count,status,job_id FROM bulk_manifests WHERE workspace_id=%s AND project_id=%s ORDER BY created_at',(WORKSPACE,PROJECT)).fetchall()
++   print(json.dumps({'fixture_only':True,'buyers':[{'id':str(b),'version':v,'owner':str(o) if o else None} for b,v,o in buyers],'manifests':[{'id':str(m),'count':n,'status':s,'job_id':str(j) if j else None} for m,n,s,j in manifests]}));return
++  if command not in {'drain','chunk'}:raise RuntimeError('unknown fixture command')
++  job=uuid.UUID(sys.argv[2]);proof=db.execute('SELECT project_id,manifest_id,requested FROM async_jobs WHERE workspace_id=%s AND id=%s',(WORKSPACE,job)).fetchone()
++  if not proof or str(proof[0])!=PROJECT or proof[1] is None or not 101<=proof[2]<=10000:raise RuntimeError('unknown Q08 job')
++  db.execute("DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='buyeros_manifest_fixture') THEN CREATE ROLE buyeros_manifest_fixture NOBYPASSRLS IN ROLE buyeros_worker; END IF; END $$")
++  db.execute("ALTER ROLE buyeros_manifest_fixture LOGIN PASSWORD 'test-only'")
++ parts=urlsplit(dsn);os.environ['BUYEROS_DATABASE_URL']=urlunsplit(parts._replace(netloc=f'buyeros_manifest_fixture:test-only@127.0.0.1:{parts.port}'))
++ if sys.platform=='win32':asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
++ from buyeros_api.settings import get_settings
++ from buyeros_api.api.deps import tenant_scoped,dispose_engines
++ from buyeros_api.services.bulk_service import apply_bulk_chunk
++ get_settings.cache_clear()
++ async def drain():
++  chunks=[]
++  try:
++   for _ in range(1 if command=='chunk' else 201):
++    async with tenant_scoped(WORKSPACE) as session:result=await apply_bulk_chunk(session,job)
++    assert result['processed']<=50;chunks.append(result['processed'])
++    if command=='chunk' or result['processed']==0:break
++   else:raise RuntimeError('bounded drain exhausted')
++   print(json.dumps({'fixture_only':True,'job_id':str(job),'chunks':chunks,'total':sum(chunks),'role':'buyeros_worker'}))
++  finally:await dispose_engines()
++ asyncio.run(drain())
++if __name__=='__main__':main()
+diff --git a/tests/audit-bulk-manifests.test.mjs b/tests/audit-bulk-manifests.test.mjs
+new file mode 100644
+index 0000000..223fa36
+--- /dev/null
++++ b/tests/audit-bulk-manifests.test.mjs
+@@ -0,0 +1,30 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {loadModule} from './ts-loader.mjs';
++const {SessionScope}=await loadModule('services/live/session.ts');
++const {createLiveClient}=await loadModule('services/live/client.ts');
++const {previewManifest,executeManifest,manifestRecovery,startNewManifest}=await loadModule('services/live/bulk-manifests.ts');
++const body={operation:'assignBuyerOwners',filters:{q:'Fixture'},excluded_ids:['buyer-a'],target:{owner_membership_id:'member-a'},reason:'confirmed reason'};
++function session(){const s=new SessionScope({mode:'live',actor:'actor-a',workspace:'workspace-a',project:'project-a'});s.setToken('first');return s;}
++const ok=data=>new Response(JSON.stringify({data,data_mode:'live',request_id:'fixture'}),{status:201,headers:{'Content-Type':'application/json'}});
++
++test('B15 pending body is immutable and retry/token renewal uses same frozen body/key',async()=>{
++ const s=session(),calls=[],source=structuredClone(body);let fail=true;
++ const client=createLiveClient(async(path,init)=>{calls.push({path,init});if(fail)throw Error('lost committed response');return ok({id:'manifest-a'});});
++ await assert.rejects(previewManifest(client,s,source));source.target.owner_membership_id='other';source.filters.q='changed';
++ assert.throws(()=>{manifestRecovery(s).body.target.owner_membership_id='other';},TypeError);
++ s.setToken('renewed');fail=false;await previewManifest(client,s,body);
++ assert.equal(calls[0].init.headers['Idempotency-Key'],calls[1].init.headers['Idempotency-Key']);assert.equal(calls[0].init.body,calls[1].init.body);assert.equal(calls[1].init.headers.Authorization,'Bearer renewed');
++});
++test('B16 A-B-A keeps actor intent while stale response is cancelled; other actor/scope are independent',async()=>{
++ const s=session(),record=manifestRecovery(s);let finish;const client=createLiveClient(()=>new Promise(resolve=>finish=()=>resolve(ok({id:'old'}))));
++ const pending=previewManifest(client,s,body);await new Promise(r=>setImmediate(r));s.next({project:'other'});assert.notEqual(manifestRecovery(s),record);s.next({project:'project-a'});assert.equal(manifestRecovery(s),record);finish();await assert.rejects(pending,/scope|cancel/i);
++ s.next({actor:'actor-b'});assert.notEqual(manifestRecovery(s),record);
++});
++test('B15 execution binds exact manifest/version/digest and retains key on unknown acceptance',async()=>{
++ const s=session(),manifest={id:'manifest-a',version:1,digest:'a'.repeat(64)},calls=[];let fail=true;
++ const client=createLiveClient(async(path,init)=>{calls.push({path,init});if(fail)throw Error('unknown 202');return ok({kind:'bulk_mutation',id:'job-a'});});
++ await assert.rejects(executeManifest(client,s,manifest));s.setToken('renewed');fail=false;await executeManifest(client,s,manifest);
++ assert.equal(calls[0].init.headers['Idempotency-Key'],calls[1].init.headers['Idempotency-Key']);assert.equal(calls[0].init.headers['If-Match'],'"1"');assert.deepEqual(JSON.parse(calls[1].init.body),{digest:manifest.digest,confirmation:true});assert.match(calls[1].path,/manifest-a\/execute$/);
++ const before=manifestRecovery(s);startNewManifest(s);assert.notEqual(manifestRecovery(s),before);
++});
+diff --git a/tests/e2e/audit-bulk-manifest.spec.ts b/tests/e2e/audit-bulk-manifest.spec.ts
+new file mode 100644
+index 0000000..297e334
+--- /dev/null
++++ b/tests/e2e/audit-bulk-manifest.spec.ts
+@@ -0,0 +1,88 @@
++import {expect,test,type Page} from '@playwright/test';
++import {execFile} from 'node:child_process';
++import {promisify} from 'node:util';
++import {resolve} from 'node:path';
++import {writeFileSync} from 'node:fs';
++import {signInWorkbench,workspace,project,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
++const root=`/v1/workspaces/${workspace}/projects/${project}/bulk-manifests`;
++const prefix='Q08 Manifest Fixture';
++async function fixture(command:string,...args:string[]):Promise<{fixture_only:boolean;count:number;ids:string[];buyers:{id:string;version:number;owner:string|null}[];manifests:{id:string;count:number;status:string;job_id:string|null}[];total:number}>{
++ const cwd=resolve('services/worker'),python=resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
++ const value=JSON.parse((await promisify(execFile)(python,['tests/fixtures/audit_manifests.py',command,...args],{cwd,timeout:45_000})).stdout);expect(value.fixture_only).toBe(true);return value;
++}
++async function open(page:Page,actor:'access'|'reviewer'|'viewer'='access',entry?:string){
++ await signInWorkbench(page,true,actor,entry);await page.getByRole('combobox',{name:/^(Language|語言)$/}).selectOption('en');await page.getByRole('button',{name:'Buyers',exact:true}).click();
++ const buyers=page.getByRole('region',{name:'Buyer results',exact:true});
++ await buyers.getByRole('textbox',{name:'Search buyers',exact:true}).fill(prefix);await buyers.getByRole('textbox',{name:'Search buyers',exact:true}).press('Enter');
++ await expect(buyers.getByRole('checkbox',{name:/^Select /})).toHaveCount(12);
++ return page.getByRole('region',{name:'Segmented maintenance',exact:true});
++}
++async function preview(page:Page,panel:ReturnType<Page['getByRole']>){
++ await panel.getByRole('textbox',{name:'Maintenance reason',exact:true}).fill('Q08 human reviewed maintenance');
++ const read=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===root);
++ await panel.getByRole('button',{name:'Preview segmented maintenance',exact:true}).click();const response=await read;expect(response.status()).toBe(201);
++ const data=(await response.json()).data;await expect(panel.getByRole('region',{name:'Frozen manifest'})).toContainText(`count: ${data.count}`);return data as {id:string;count:number;digest:string;version:number};
++}
++async function execute(page:Page,panel:ReturnType<Page['getByRole']>,id:string){
++ await panel.getByRole('checkbox',{name:'Confirm exact manifest'}).check();const response=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===root+`/${id}/execute`);
++ await panel.getByRole('button',{name:'Execute confirmed manifest'}).click();return await response;
++}
++test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
++for(const count of [100,101,1001])test(`B01 B14 ${count} actual rows require frozen preview and explicit execution`,async({page})=>{
++ const seed=await fixture('seed',String(count)),panel=await open(page);
++ await expect(panel.getByRole('button',{name:'Execute confirmed manifest'})).toHaveCount(0);
++ if(count===1001)await expect(page.getByRole('region',{name:'Buyer results',exact:true})).toContainText(/clipped|1000/i);
++ const manifest=await preview(page,panel);expect(manifest.count).toBe(count);expect((await fixture('inspect')).buyers.every(b=>b.version===1&&b.owner===null)).toBe(true);
++ await expect(panel.getByRole('button',{name:'Execute confirmed manifest'})).toBeDisabled();const response=await execute(page,panel,manifest.id);expect(response.status()).toBe(count===100?200:202);const result=(await response.json()).data;
++ if(count>100){const drain=await fixture('drain',result.id);expect(drain.total).toBe(count);const job=page.getByRole('region',{name:'Bulk job progress'});await job.getByRole('button',{name:'Refresh job'}).click();await expect(job).toContainText(`${count} of ${count}`);
++  await job.getByRole('button',{name:'Show job results'}).click();await expect(job.locator('code')).toHaveCount(20);const seen:string[]=[];
++  for(let offset=0;offset<count;offset+=20){await expect(job.getByText(`${offset+1}–${Math.min(offset+20,count)} / ${count}`,{exact:true})).toBeVisible();seen.push(...await job.locator('code').allTextContents());if(offset+20<count)await job.getByRole('button',{name:'Next job results'}).click();}
++  expect(new Set(seen).size).toBe(count);expect(seen.sort()).toEqual(seed.ids.sort());
++ }
++ const state=await fixture('inspect');expect(state.buyers).toHaveLength(count);expect(state.buyers.every(b=>b.version===2&&b.owner!==null)).toBe(true);
++ writeFileSync(`test-results/q08-ui-${count}.json`,JSON.stringify({fixture_only:true,manifest,result,state},null,2));await page.screenshot({path:`test-results/q08-en-${count}.png`,fullPage:true});
++});
++test('B15 lost preview and committed 202 retry one frozen body/key and restore after re-login',async({page})=>{
++ await fixture('seed','101');const panel=await open(page);const previews:{key:string;body:unknown}[]=[],executions:{key:string;body:unknown}[]=[];
++ await page.route(`**${root}`,async route=>{if(route.request().method()!=='POST')return route.continue();previews.push({key:route.request().headers()['idempotency-key'],body:route.request().postDataJSON()});const response=await route.fetch();if(previews.length===1)return route.abort('connectionfailed');await route.fulfill({response});});
++ await panel.getByRole('textbox',{name:'Maintenance reason'}).fill('Q08 frozen unknown preview');await panel.getByRole('button',{name:'Preview segmented maintenance'}).click();await expect(panel.getByRole('button',{name:'Retry same preview'})).toBeVisible();await expect(panel.getByRole('textbox',{name:'Maintenance reason'})).toBeDisabled();
++ await panel.getByRole('button',{name:'Retry same preview'}).click();await expect(panel.getByRole('region',{name:'Frozen manifest'})).toBeVisible();expect(previews).toHaveLength(2);expect(previews[1]).toEqual(previews[0]);
++ const id=new URL(page.url()).searchParams.get('bulk_manifest')!;
++ await page.route(`**${root}/${id}/execute`,async route=>{executions.push({key:route.request().headers()['idempotency-key'],body:route.request().postDataJSON()});const response=await route.fetch();expect(response.status()).toBe(202);if(executions.length===1)return route.abort('connectionfailed');await route.fulfill({response});});
++ await panel.getByRole('checkbox',{name:'Confirm exact manifest'}).check();await panel.getByRole('button',{name:'Execute confirmed manifest'}).click();await expect(panel.getByRole('alert')).toBeVisible();await expect(panel.getByRole('button',{name:'Start a new preview'})).toBeDisabled();await panel.getByRole('button',{name:'Execute confirmed manifest'}).click();await expect(page.getByRole('region',{name:'Bulk job progress'})).toBeVisible();expect(executions).toHaveLength(2);expect(executions[1]).toEqual(executions[0]);
++ const proof=await fixture('inspect');expect(proof.manifests.filter(m=>m.id===id)).toHaveLength(1);expect(proof.manifests.find(m=>m.id===id)?.status).toBe('executed');const entry=new URL(page.url()).pathname+new URL(page.url()).search;await signInWorkbench(page,true,'access',entry);await page.getByRole('button',{name:'Buyers',exact:true}).click();await expect(page.getByRole('region',{name:'Frozen manifest'})).toContainText('executed');expect(executions).toHaveLength(2);
++ writeFileSync('test-results/q08-ui-unknown-recovery.json',JSON.stringify({fixture_only:true,previews,executions,proof},null,2));
++});
++test('B08 failed rows get a new exact digest and current versions; successes are retained',async({page})=>{
++ const seed=await fixture('seed','101'),panel=await open(page),manifest=await preview(page,panel);await fixture('stale',seed.ids[0]);const response=await execute(page,panel,manifest.id),jobId=(await response.json()).data.id;await fixture('drain',jobId);
++ const job=page.getByRole('region',{name:'Bulk job progress'});await job.getByRole('button',{name:'Refresh job'}).click();await expect(job).toContainText('1 conflicts');let directRetry=0;page.on('request',r=>{if(new URL(r.url()).pathname.endsWith('/retry-failed'))directRetry++;});
++ await job.getByRole('button',{name:'Preview failed rows with current versions'}).click();const childPanel=page.getByRole('region',{name:'Segmented maintenance'});await expect(childPanel).toContainText('Failed rows only');const child=await preview(page,childPanel);expect(child.count).toBe(1);expect(child.digest).not.toBe(manifest.digest);expect(directRetry).toBe(0);const childResponse=await execute(page,childPanel,child.id);expect(childResponse.status()).toBe(200);const state=await fixture('inspect');expect(state.buyers.filter(b=>b.version===2)).toHaveLength(100);expect(state.buyers.find(b=>b.id===seed.ids[0])?.version).toBe(3);
++ writeFileSync('test-results/q08-ui-child.json',JSON.stringify({fixture_only:true,manifest,child,state},null,2));
++});
++test('B16 late preview cannot cross A-B-A; viewer has no maintenance; zh-HK mobile exact confirmation',async({page,browser})=>{
++ await fixture('seed','101');const panel=await open(page);let release:()=>void=()=>{},received:()=>void=()=>{};const held=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);
++ await page.route(`**${root}`,async route=>{if(route.request().method()!=='POST')return route.continue();const response=await route.fetch();received();await held;await route.fulfill({response}).catch(()=>{});});
++ await panel.getByRole('textbox',{name:'Maintenance reason'}).fill('Q08 old scope request');await panel.getByRole('button',{name:'Preview segmented maintenance'}).click();await started;await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption('e0000000-0000-4000-8000-000000000101');await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);release();await page.waitForTimeout(300);await expect(page.getByRole('region',{name:'Frozen manifest'})).toHaveCount(0);
++ const viewer=await browser.newPage();try{await signInWorkbench(viewer,true,'viewer');await viewer.getByRole('button',{name:'Buyers',exact:true}).click();await expect(viewer.getByRole('region',{name:'Segmented maintenance'})).toHaveCount(0);}finally{await viewer.close();}
++ await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);await page.getByRole('button',{name:'Buyers',exact:true}).click();await page.unroute(`**${root}`);await page.setViewportSize({width:390,height:844});await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');const zh=page.getByRole('region',{name:'分段批量維護'});await expect(zh).toBeVisible();await zh.getByRole('button',{name:'重試同一預覽'}).click();await expect(zh.getByRole('region',{name:'已凍結維護清單'})).toBeVisible();await expect(zh.getByRole('button',{name:'執行已確認維護清單'})).toBeDisabled();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:'test-results/q08-zh-mobile.png',fullPage:true});
++});
++
++test('B01 reviewer executes current fit-bound review',async({page})=>{
++ await fixture('seed','101');await fixture('assess');const panel=await open(page,'reviewer');await panel.getByRole('combobox',{name:'Operation',exact:true}).selectOption('reviewBuyers');const manifest=await preview(page,panel),response=await execute(page,panel,manifest.id);expect(response.status()).toBe(202);const job=(await response.json()).data;expect((await fixture('drain',job.id)).total).toBe(101);
++ const progress=page.getByRole('region',{name:'Bulk job progress'});await progress.getByRole('button',{name:'Refresh job'}).click();await expect(progress).toContainText('101 updated');await page.screenshot({path:'test-results/q08-review-en.png',fullPage:true});
++});
++test('B01 typed list target supports confirmed add and explicit new remove preview',async({page})=>{
++ await fixture('seed','100');const panel=await open(page),management=page.getByRole('region',{name:'Buyer lists and saved filters'});
++ await management.getByRole('textbox',{name:'List name'}).fill('Q08 reviewed list');const created=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith('/lists'));await management.getByRole('button',{name:'Create list',exact:true}).click();const list=(await (await created).json()).data;
++ await panel.getByRole('combobox',{name:'Operation',exact:true}).selectOption('changeListMemberships');await panel.getByRole('button',{name:'Reload lists'}).click();await expect(panel.getByRole('combobox',{name:'Target list'}).locator('option',{hasText:'Q08 reviewed list'})).toBeAttached();await panel.getByRole('combobox',{name:'Target list'}).selectOption(list.id);
++ const first=await preview(page,panel),added=await execute(page,panel,first.id);expect(added.status()).toBe(200);expect((await added.json()).data.updated).toBe(100);
++ await panel.getByRole('button',{name:'Start a new preview'}).click();await panel.getByRole('combobox',{name:'List change'}).selectOption('remove');const second=await preview(page,panel);expect(second.digest).not.toBe(first.digest);const removed=await execute(page,panel,second.id);expect(removed.status()).toBe(200);expect((await removed.json()).data.updated).toBe(100);expect((await fixture('inspect')).buyers.every(b=>b.version===1&&b.owner===null)).toBe(true);
++});
++
++
++test('B09 UI cancel preserves the committed first50 and cancels only pending51',async({page})=>{
++ await fixture('seed','101');const panel=await open(page),manifest=await preview(page,panel),response=await execute(page,panel,manifest.id),jobId=(await response.json()).data.id;
++ expect((await fixture('chunk',jobId)).total).toBe(50);const progress=page.getByRole('region',{name:'Bulk job progress'});await progress.getByRole('button',{name:'Refresh job'}).click();await expect(progress).toContainText('50 of 101');
++ const cancelled=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith(`/jobs/${jobId}/cancel`));await progress.getByRole('button',{name:'Cancel pending rows'}).click();expect((await cancelled).status()).toBe(200);expect((await fixture('drain',jobId)).total).toBe(51);await progress.getByRole('button',{name:'Refresh job'}).click();await expect(progress).toContainText('cancelled:');await expect(progress).toContainText('51 cancelled');const proof=await fixture('inspect');expect(proof.buyers.filter(b=>b.version===2&&b.owner!==null)).toHaveLength(50);expect(proof.buyers.filter(b=>b.version===1&&b.owner===null)).toHaveLength(51);
++ writeFileSync('test-results/q08-ui-cancel.json',JSON.stringify({fixture_only:true,manifest,jobId,proof},null,2));await page.screenshot({path:'test-results/q08-cancel-en.png',fullPage:true});
++});

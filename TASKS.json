@@ -9,9 +9,10 @@
     "Q05",
     "Q06",
     "Q07",
-    "Q12"
+    "Q12",
+    "Q08"
   ],
-  "next_eligible": "Q08",
+  "next_eligible": "Q14",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -232,7 +233,57 @@
     },
     {
       "id": "Q08",
-      "status": "outside-current-scope"
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "required-local-HTTP-DB-UI-pass; original-case-variant/live limitations recorded",
+      "release_status": "not-deployed",
+      "base_sha": "80ecfc762a6b1aeb5ce6c205d0a641539aff54c1",
+      "source_sha": "c98fb6860ce2d4f9ba1797abe919454edcb13204",
+      "depends_on": [
+        "Q05",
+        "Q06"
+      ],
+      "cases": [
+        "B01",
+        "B08",
+        "B09",
+        "B14",
+        "B15",
+        "B16"
+      ],
+      "finding_ids": [
+        "F11"
+      ],
+      "checks": {
+        "api": {
+          "pass": 90,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "ui": {
+          "pass": 17,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "migrations": {
+          "pass": 39,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        }
+      },
+      "node_checks": {
+        "pass": 22,
+        "fail": 0,
+        "skip": 0
+      },
+      "migrations": "0037_bulk_manifests allocated after sole0036head; disposable upgrade/empty roundtrip/populated refusal; production unapplied",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q08/RESULTS.md",
+      "rollback": "pause new admissions; preserve durable manifests/jobs/results; populated downgrade refused; patch applicability only",
+      "limits": "fake OIDC/fit; manual shared worker chunks; no live provider/continuous worker/production/whole staff journey",
+      "next_eligible": "Q14"
     },
     {
       "id": "Q09",

@@ -1,0 +1,12 @@
+{
+  "original_operations": 70,
+  "total_operations": 84,
+  "extensions": 14,
+  "missing_original": [],
+  "deployed": false,
+  "appended_operations": [
+    "previewBulkManifest",
+    "getBulkManifest",
+    "executeBulkManifest"
+  ]
+}

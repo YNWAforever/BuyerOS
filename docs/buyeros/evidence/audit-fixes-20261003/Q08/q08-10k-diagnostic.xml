@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="57.042" timestamp="2026-10-03T21:32:20.770974+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_bulk_manifest_db" name="test_10000_committed_crash_recovery_exact_results_and_failed_child_preview" time="53.659"><failure message="sqlalchemy.exc.OperationalError: (psycopg.OperationalError) connection failed: connection to server at &quot;127.0.0.1&quot;, port 57615 failed: FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute&#10;(Background on this error at: https://sqlalche.me/e/20/e3q8)">self = &lt;sqlalchemy.engine.base.Connection object at 0x000001E75C36B980&gt;
+engine = Engine(postgresql+psycopg://buyeros_api:***@127.0.0.1:57615/buyeros_test_api)
+connection = None, _has_events = None, _allow_revalidate = True
+_allow_autobegin = True
+
+    def __init__(
+        self,
+        engine: Engine,
+        connection: Optional[PoolProxiedConnection] = None,
+        _has_events: Optional[bool] = None,
+        _allow_revalidate: bool = True,
+        _allow_autobegin: bool = True,
+    ):
+        """Construct a new Connection."""
+        self.engine = engine
+        self.dialect = dialect = engine.dialect
+    
+        if connection is None:
+            try:
+&gt;               self._dbapi_connection = engine.raw_connection()
+                                         ^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:144: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:3319: in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:448: in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:1290: in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:712: in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\impl.py:178: in _do_get
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:122: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\pool\impl.py:176: in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:389: in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:674: in __init__
+    self.__connect()
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:900: in __connect
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:122: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:896: in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\create.py:667: in connect
+    return dialect.connect(*cargs_tup, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:630: in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\psycopg.py:796: in connect
+    await_only(creator_fn(*arg, **kw))
+.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+cls = &lt;class 'psycopg.AsyncConnection'&gt;
+conninfo = 'host=127.0.0.1 dbname=buyeros_test_api user=buyeros_api password=test-only port=57615 hostaddr=127.0.0.1'
+autocommit = False, prepare_threshold = 5
+context = &lt;psycopg.adapt.AdaptersMap object at 0x000001E75C358A70&gt;
+row_factory = None, cursor_factory = None
+kwargs = {'dbname': 'buyeros_test_api', 'host': '127.0.0.1', 'password': 'test-only', 'port': 57615, ...}
+loop = &lt;_WindowsSelectorEventLoop running=False closed=True debug=False&gt;
+
+    @classmethod
+    async def connect(
+        cls,
+        conninfo: str = "",
+        *,
+        autocommit: bool = False,
+        prepare_threshold: int | None = 5,
+        context: AdaptContext | None = None,
+        row_factory: AsyncRowFactory[Row] | None = None,
+        cursor_factory: type[AsyncCursor[Row]] | None = None,
+        **kwargs: ConnParam,
+    ) -&gt; Self:
+        """
+        Connect to a database server and return a new `AsyncConnection` instance.
+        """
+        if True:  # ASYNC
+            if sys.platform == "win32":
+                loop = asyncio.get_running_loop()
+                if isinstance(loop, asyncio.ProactorEventLoop):
+    
+                    from ._compat import _asyncio_run_snippet
+    
+                    raise e.InterfaceError(
+                        "Psycopg cannot use the 'ProactorEventLoop' to run in async"
+                        " mode. Please use a compatible event loop, for instance by"
+                        + f" {_asyncio_run_snippet}"
+                    )
+    
+        params = await cls._get_connection_params(conninfo, **kwargs)
+        timeout = timeout_from_conninfo(params)
+        rv = None
+        attempts = await conninfo_attempts_async(params)
+        conn_errors: list[tuple[e.Error, str]] = []
+        for attempt in attempts:
+            tdescr = (attempt.get("host"), attempt.get("port"), attempt.get("hostaddr"))
+            descr = "host: %r, port: %r, hostaddr: %r" % tdescr
+            logger.debug("connection attempt: %s", descr)
+            try:
+                conninfo = make_conninfo("", **attempt)
+                gen = cls._connect_gen(conninfo, timeout=timeout)
+                rv = await waiting.wait_conn_async(gen, interval=_WAIT_INTERVAL)
+            except e.Error as ex:
+                logger.debug("connection failed: %s: %s", descr, str(ex))
+                conn_errors.append((ex, descr))
+            except e._NO_TRACEBACK as ex:
+                raise ex.with_traceback(None)
+            else:
+                logger.debug("connection succeeded: %s", descr)
+                break
+    
+        if not rv:
+            last_ex = conn_errors[-1][0]
+            if len(conn_errors) == 1:
+&gt;               raise last_ex.with_traceback(None)
+E               psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 57615 failed: FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute
+
+.venv\Lib\site-packages\psycopg\connection_async.py:138: OperationalError
+
+The above exception was the direct cause of the following exception:
+
+api = &lt;starlette.testclient.TestClient object at 0x000001E756C6D010&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:57615/buyeros_test_api'
+
+    def test_10000_committed_crash_recovery_exact_results_and_failed_child_preview(api,seeded):
+        from buyeros_api.api.deps import tenant_scoped
+        from buyeros_api.services.bulk_service import apply_bulk_chunk
+        _seed_many(seeded,10000);owner=_admin_membership(seeded);manifest=_preview(api,owner)
+        assert manifest["count"]==10000
+        with psycopg.connect(seeded) as conn:
+            stale=conn.execute("SELECT buyer_id FROM bulk_manifest_items WHERE manifest_id=%s ORDER BY ordinal LIMIT 50",(manifest["id"],)).fetchall()
+            conn.cursor().executemany("UPDATE project_buyers SET version=version+1 WHERE id=%s",stale)
+        response=_execute(api,manifest);assert response.status_code==202,response.text
+        job=response.json()["data"];job_id=uuid.UUID(job["id"])
+        async def run():
+            async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:await apply_bulk_chunk(session,job_id)
+            try:
+                async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
+                    await apply_bulk_chunk(session,job_id)
+                    raise RuntimeError("crash before chunk commit")
+            except RuntimeError:pass
+            with psycopg.connect(seeded) as conn:
+                assert conn.execute("SELECT processed FROM async_jobs WHERE id=%s",(job_id,)).fetchone()[0]==50
+                assert conn.execute("SELECT count(*) FROM project_buyers WHERE owner_user_id IS NOT NULL AND workspace_id=%s",(WORKSPACE_A,)).fetchone()[0]==0
+            for _ in range(199):
+                async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
+                    result=await apply_bulk_chunk(session,job_id)
+                    assert result["processed"]&lt;=50
+            async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:assert (await apply_bulk_chunk(session,job_id))["processed"]==0
+        asyncio.run(run())
+        with psycopg.connect(seeded) as conn:
+            assert conn.execute("SELECT requested,processed,updated,conflicts,status FROM async_jobs WHERE id=%s",(job_id,)).fetchone()==(10000,10000,9950,50,"completed")
+            assert conn.execute("SELECT count(*),count(DISTINCT buyer_id) FROM async_job_items WHERE job_id=%s",(job_id,)).fetchone()==(10000,10000)
+        api._transport.raise_server_exceptions=True  # expose underlying error on this isolated reproduction
+        ids=[]
+        for offset in range(0,10000,100):
+&gt;           read=api.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job_id}?offset={offset}&amp;limit=100",headers=_h())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\starlette\testclient.py:483: in get
+    return super().get(
+.venv\Lib\site-packages\httpx2\_client.py:1113: in get
+    return self.request(
+.venv\Lib\site-packages\starlette\testclient.py:455: in request
+    return super().request(
+.venv\Lib\site-packages\httpx2\_client.py:797: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx2\_client.py:980: in send
+    response = self._send_handling_auth(
+.venv\Lib\site-packages\httpx2\_client.py:1008: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv\Lib\site-packages\httpx2\_client.py:1043: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx2\_client.py:1076: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\testclient.py:354: in handle_request
+    raise exc
+.venv\Lib\site-packages\starlette\testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+.venv\Lib\site-packages\anyio\from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\concurrent\futures\_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\concurrent\futures\_base.py:396: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:88: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+buyeros_api\api\app.py:105: in request_id_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\starlette\middleware\base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+.venv\Lib\site-packages\starlette\middleware\base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:2734: in app
+    await route.handle(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:1780: in handle
+    await self.original_router.handle(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:2789: in handle
+    await included_router._handle_selected(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:1800: in _handle_selected
+    await original_route.handle(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:1279: in handle
+    await app(scope, receive, send)
+.venv\Lib\site-packages\fastapi\routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv\Lib\site-packages\fastapi\routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\fastapi\routing.py:706: in app
+    raw_response = await run_endpoint_function(
+.venv\Lib\site-packages\fastapi\routing.py:352: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+buyeros_api\api\routes\jobs.py:68: in get_async_job
+    async with tenant_scoped(workspace_id) as session:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\contextlib.py:214: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+buyeros_api\api\deps.py:175: in tenant_scoped
+    async with tenant_session(get_engine(), workspace_id) as session:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\contextlib.py:214: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+buyeros_api\db\session.py:27: in tenant_session
+    await session.execute(
+.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:449: in execute
+    result = await greenlet_spawn(
+.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:2373: in execute
+    return self._execute_internal(
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:2261: in _execute_internal
+    conn = self._connection_for_bind(bind)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:2113: in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;string&gt;:2: in _connection_for_bind
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1191: in _connection_for_bind
+    conn = bind.connect()
+           ^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:3295: in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:146: in __init__
+    Connection._handle_dbapi_exception_noconnection(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2450: in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:144: in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:3319: in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:448: in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:1290: in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:712: in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\impl.py:178: in _do_get
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:122: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\pool\impl.py:176: in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:389: in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:674: in __init__
+    self.__connect()
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:900: in __connect
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:122: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\pool\base.py:896: in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\create.py:667: in connect
+    return dialect.connect(*cargs_tup, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:630: in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\psycopg.py:796: in connect
+    await_only(creator_fn(*arg, **kw))
+.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+cls = &lt;class 'psycopg.AsyncConnection'&gt;
+conninfo = 'host=127.0.0.1 dbname=buyeros_test_api user=buyeros_api password=test-only port=57615 hostaddr=127.0.0.1'
+autocommit = False, prepare_threshold = 5
+context = &lt;psycopg.adapt.AdaptersMap object at 0x000001E75C358A70&gt;
+row_factory = None, cursor_factory = None
+kwargs = {'dbname': 'buyeros_test_api', 'host': '127.0.0.1', 'password': 'test-only', 'port': 57615, ...}
+loop = &lt;_WindowsSelectorEventLoop running=False closed=True debug=False&gt;
+
+    @classmethod
+    async def connect(
+        cls,
+        conninfo: str = "",
+        *,
+        autocommit: bool = False,
+        prepare_threshold: int | None = 5,
+        context: AdaptContext | None = None,
+        row_factory: AsyncRowFactory[Row] | None = None,
+        cursor_factory: type[AsyncCursor[Row]] | None = None,
+        **kwargs: ConnParam,
+    ) -&gt; Self:
+        """
+        Connect to a database server and return a new `AsyncConnection` instance.
+        """
+        if True:  # ASYNC
+            if sys.platform == "win32":
+                loop = asyncio.get_running_loop()
+                if isinstance(loop, asyncio.ProactorEventLoop):
+    
+                    from ._compat import _asyncio_run_snippet
+    
+                    raise e.InterfaceError(
+                        "Psycopg cannot use the 'ProactorEventLoop' to run in async"
+                        " mode. Please use a compatible event loop, for instance by"
+                        + f" {_asyncio_run_snippet}"
+                    )
+    
+        params = await cls._get_connection_params(conninfo, **kwargs)
+        timeout = timeout_from_conninfo(params)
+        rv = None
+        attempts = await conninfo_attempts_async(params)
+        conn_errors: list[tuple[e.Error, str]] = []
+        for attempt in attempts:
+            tdescr = (attempt.get("host"), attempt.get("port"), attempt.get("hostaddr"))
+            descr = "host: %r, port: %r, hostaddr: %r" % tdescr
+            logger.debug("connection attempt: %s", descr)
+            try:
+                conninfo = make_conninfo("", **attempt)
+                gen = cls._connect_gen(conninfo, timeout=timeout)
+                rv = await waiting.wait_conn_async(gen, interval=_WAIT_INTERVAL)
+            except e.Error as ex:
+                logger.debug("connection failed: %s: %s", descr, str(ex))
+                conn_errors.append((ex, descr))
+            except e._NO_TRACEBACK as ex:
+                raise ex.with_traceback(None)
+            else:
+                logger.debug("connection succeeded: %s", descr)
+                break
+    
+        if not rv:
+            last_ex = conn_errors[-1][0]
+            if len(conn_errors) == 1:
+&gt;               raise last_ex.with_traceback(None)
+E               sqlalchemy.exc.OperationalError: (psycopg.OperationalError) connection failed: connection to server at "127.0.0.1", port 57615 failed: FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute
+E               (Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+.venv\Lib\site-packages\psycopg\connection_async.py:138: OperationalError</failure></testcase></testsuite></testsuites>

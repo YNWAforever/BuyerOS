@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="32" time="92.042" timestamp="2026-10-03T21:27:06.602420+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_freezes_1001_current_versions_without_widening_snapshot" time="5.763" /><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_sync_async_boundaries_and_replay_once[100]" time="1.529" /><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_sync_async_boundaries_and_replay_once[101]" time="0.571" /><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_sync_async_boundaries_and_replay_once[1000]" time="1.519" /><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_sync_async_boundaries_and_replay_once[1001]" time="1.852" /><testcase classname="tests.test_bulk_manifest_db" name="test_10001_is_explicitly_rejected_and_no_partial_preview_or_job" time="5.086" /><testcase classname="tests.test_bulk_manifest_db" name="test_10000_committed_crash_recovery_exact_results_and_failed_child_preview" time="54.077"><failure message="KeyError: 'data'">api = &lt;starlette.testclient.TestClient object at 0x0000022106EB6030&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:52123/buyeros_test_api'
+
+    def test_10000_committed_crash_recovery_exact_results_and_failed_child_preview(api,seeded):
+        from buyeros_api.api.deps import tenant_scoped
+        from buyeros_api.services.bulk_service import apply_bulk_chunk
+        _seed_many(seeded,10000);owner=_admin_membership(seeded);manifest=_preview(api,owner)
+        assert manifest["count"]==10000
+        with psycopg.connect(seeded) as conn:
+            stale=conn.execute("SELECT buyer_id FROM bulk_manifest_items WHERE manifest_id=%s ORDER BY ordinal LIMIT 50",(manifest["id"],)).fetchall()
+            conn.cursor().executemany("UPDATE project_buyers SET version=version+1 WHERE id=%s",stale)
+        response=_execute(api,manifest);assert response.status_code==202,response.text
+        job=response.json()["data"];job_id=uuid.UUID(job["id"])
+        async def run():
+            async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:await apply_bulk_chunk(session,job_id)
+            try:
+                async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
+                    await apply_bulk_chunk(session,job_id)
+                    raise RuntimeError("crash before chunk commit")
+            except RuntimeError:pass
+            with psycopg.connect(seeded) as conn:
+                assert conn.execute("SELECT processed FROM async_jobs WHERE id=%s",(job_id,)).fetchone()[0]==50
+                assert conn.execute("SELECT count(*) FROM project_buyers WHERE owner_user_id IS NOT NULL AND workspace_id=%s",(WORKSPACE_A,)).fetchone()[0]==0
+            for _ in range(199):
+                async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
+                    result=await apply_bulk_chunk(session,job_id)
+                    assert result["processed"]&lt;=50
+            async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:assert (await apply_bulk_chunk(session,job_id))["processed"]==0
+        asyncio.run(run())
+        with psycopg.connect(seeded) as conn:
+            assert conn.execute("SELECT requested,processed,updated,conflicts,status FROM async_jobs WHERE id=%s",(job_id,)).fetchone()==(10000,10000,9950,50,"completed")
+            assert conn.execute("SELECT count(*),count(DISTINCT buyer_id) FROM async_job_items WHERE job_id=%s",(job_id,)).fetchone()==(10000,10000)
+        ids=[]
+        for offset in range(0,10000,100):
+&gt;           page=api.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job_id}?offset={offset}&amp;limit=100",headers=_h()).json()["data"]["result_page"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'data'
+
+tests\test_bulk_manifest_db.py:106: KeyError</failure></testcase><testcase classname="tests.test_bulk_manifest_db" name="test_exact_manifest_confirmation_is_required_and_denial_atomic[bad0]" time="0.462" /><testcase classname="tests.test_bulk_manifest_db" name="test_exact_manifest_confirmation_is_required_and_denial_atomic[bad1]" time="0.414" /><testcase classname="tests.test_bulk_manifest_db" name="test_exact_manifest_confirmation_is_required_and_denial_atomic[bad2]" time="0.417" /><testcase classname="tests.test_bulk_manifest_db" name="test_exact_manifest_confirmation_is_required_and_denial_atomic[bad3]" time="0.399" /><testcase classname="tests.test_bulk_manifest_db" name="test_other_actor_scope_current_roles_owner_and_expiry_cannot_execute" time="0.782" /><testcase classname="tests.test_bulk_jobs_db" name="test_assign_owner_small_batch_is_durable_partial_and_role_scoped" time="0.568" /><testcase classname="tests.test_bulk_jobs_db" name="test_unknown_async_job_is_not_a_fake_success" time="0.392" /><testcase classname="tests.test_bulk_jobs_db" name="test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback" time="1.476" /><testcase classname="tests.test_bulk_jobs_db" name="test_bulk_partial_result_and_resume" time="3.827" /><testcase classname="tests.test_bulk_jobs_db" name="test_job_read_is_actor_bound_even_for_same_workspace" time="0.552" /><testcase classname="tests.test_bulk_jobs_db" name="test_t11_owner_assignment_is_a_strict_contract_extension" time="0.753" /><testcase classname="tests.test_bulk_jobs_db" name="test_async_owner_target_must_be_active_before_enqueue" time="0.272" /><testcase classname="tests.test_bulk_jobs_db" name="test_retry_failed_only_new_versions" time="0.469" /><testcase classname="tests.test_bulk_jobs_db" name="test_review_and_list_mutations_queue_101_rows_with_exact_replay" time="0.631" /><testcase classname="tests.test_bulk_jobs_db" name="test_cancel_bulk_job_preserves_committed_rows_and_stops_pending" time="0.830" /><testcase classname="tests.test_bulk_jobs_db" name="test_q05_b07_mixed_100_rows_match_durable_state_and_reason_digest" time="2.080" /><testcase classname="tests.test_bulk_jobs_db" name="test_q05_b04_owner_deactivated_after_preview_is_rejected_without_changes" time="0.324" /><testcase classname="tests.test_bulk_jobs_db" name="test_q05_b04_queued_owner_deactivation_blocks_each_row_and_survives_restart" time="0.811" /><testcase classname="tests.test_api_routes_contract" name="test_unauthenticated_requests_are_rejected" time="0.047" /><testcase classname="tests.test_api_routes_contract" name="test_implemented_routes_match_openapi_operation_ids" time="0.719" /><testcase classname="tests.test_api_routes_contract" name="test_the_app_actually_exposes_every_implemented_route" time="0.049" /><testcase classname="tests.test_api_routes_contract" name="test_implemented_response_fields_are_declared_by_the_contract" time="1.610" /><testcase classname="tests.test_api_routes_contract" name="test_approve_checks_auth_before_preconditions" time="0.029" /><testcase classname="tests.test_api_routes_contract" name="test_approve_rejects_a_missing_or_malformed_if_match" time="0.041" /><testcase classname="tests.test_contract_required_fields" name="test_contract_required_fields" time="1.236" /></testsuite></testsuites>

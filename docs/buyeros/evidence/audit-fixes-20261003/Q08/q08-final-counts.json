@@ -1,0 +1,759 @@
+{
+  "api": {
+    "report": "test-results/q08-api-sixth.xml",
+    "pass": 90,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "test_cases": [
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_manifest_freezes_1001_current_versions_without_widening_snapshot",
+        "seconds": "19.071"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_manifest_sync_async_boundaries_and_replay_once[100]",
+        "seconds": "3.592"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_manifest_sync_async_boundaries_and_replay_once[101]",
+        "seconds": "0.612"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_manifest_sync_async_boundaries_and_replay_once[1000]",
+        "seconds": "3.837"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_manifest_sync_async_boundaries_and_replay_once[1001]",
+        "seconds": "3.212"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_10001_is_explicitly_rejected_and_no_partial_preview_or_job",
+        "seconds": "10.279"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_10000_committed_crash_recovery_exact_results_and_failed_child_preview",
+        "seconds": "117.640"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_exact_manifest_confirmation_is_required_and_denial_atomic[bad0]",
+        "seconds": "0.487"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_exact_manifest_confirmation_is_required_and_denial_atomic[bad1]",
+        "seconds": "0.451"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_exact_manifest_confirmation_is_required_and_denial_atomic[bad2]",
+        "seconds": "0.553"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_exact_manifest_confirmation_is_required_and_denial_atomic[bad3]",
+        "seconds": "0.417"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_other_actor_scope_current_roles_owner_and_expiry_cannot_execute",
+        "seconds": "0.610"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_exclusions_and_one_statement_snapshot_keep_exact_versions",
+        "seconds": "1.294"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_concurrent_same_preview_and_execute_key_produces_one_job_outbox",
+        "seconds": "0.929"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_cancel_manifest_retains_committed_chunk_and_cancels_only_pending",
+        "seconds": "1.247"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_manifest_forced_rls_frozen_basis_and_digest_tamper_denies_execute",
+        "seconds": "0.504"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_0037_empty_roundtrip_and_data_preserving_downgrade_refusal",
+        "seconds": "0.754"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_manifest_other_operations_use_current_canonical_review_and_lists[reviewBuyers]",
+        "seconds": "0.479"
+      },
+      {
+        "class": "tests.test_bulk_manifest_db",
+        "name": "test_manifest_other_operations_use_current_canonical_review_and_lists[changeListMemberships]",
+        "seconds": "0.687"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_assign_owner_small_batch_is_durable_partial_and_role_scoped",
+        "seconds": "0.715"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_unknown_async_job_is_not_a_fake_success",
+        "seconds": "0.420"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback",
+        "seconds": "2.038"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_bulk_partial_result_and_resume",
+        "seconds": "8.530"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_job_read_is_actor_bound_even_for_same_workspace",
+        "seconds": "0.948"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_t11_owner_assignment_is_a_strict_contract_extension",
+        "seconds": "1.038"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_async_owner_target_must_be_active_before_enqueue",
+        "seconds": "0.361"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_retry_failed_only_new_versions",
+        "seconds": "0.701"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_review_and_list_mutations_queue_101_rows_with_exact_replay",
+        "seconds": "0.807"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_cancel_bulk_job_preserves_committed_rows_and_stops_pending",
+        "seconds": "1.358"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_q05_b07_mixed_100_rows_match_durable_state_and_reason_digest",
+        "seconds": "2.392"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_q05_b04_owner_deactivated_after_preview_is_rejected_without_changes",
+        "seconds": "0.491"
+      },
+      {
+        "class": "tests.test_bulk_jobs_db",
+        "name": "test_q05_b04_queued_owner_deactivation_blocks_each_row_and_survives_restart",
+        "seconds": "1.151"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_buyer_version_and_idempotency_response_columns_exist",
+        "seconds": "0.031"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_raw_project_buyer_insert_defaults_to_version_one",
+        "seconds": "0.099"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_buyer_update_rejects_an_empty_body_and_a_null_note",
+        "seconds": "0.002"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_snapshot_create_rejects_unknown_keys_and_bounds",
+        "seconds": "0.002"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_review_request_discriminates_the_selection_kind",
+        "seconds": "0.002"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_snapshot_selection_requires_excluded_ids",
+        "seconds": "0.001"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_create_snapshot_orders_filters_and_bounds",
+        "seconds": "0.444"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_deferred_filter_is_rejected_loudly",
+        "seconds": "0.342"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_malformed_owner_membership_is_rejected_not_a_server_error",
+        "seconds": "0.356"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_snapshot_replays_for_the_same_key_and_body",
+        "seconds": "0.802"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_the_same_snapshot_key_on_another_project_is_not_a_replay",
+        "seconds": "0.589"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_list_buyers_pages_the_frozen_snapshot",
+        "seconds": "1.018"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_list_buyers_returns_the_second_page_with_the_full_total",
+        "seconds": "0.710"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_an_expired_snapshot_is_not_found",
+        "seconds": "0.725"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_foreign_or_unknown_snapshot_is_a_404",
+        "seconds": "0.450"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_get_buyer_returns_the_contract_subset_and_404s_foreign",
+        "seconds": "0.554"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_update_buyer_bumps_the_version_and_sets_the_etag",
+        "seconds": "0.339"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_update_buyer_rejects_stale_and_missing_if_match",
+        "seconds": "0.280"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_update_buyer_replays_and_validates_the_owner",
+        "seconds": "0.504"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_update_buyer_404s_a_foreign_buyer_and_conflicts_on_reuse",
+        "seconds": "0.450"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_update_buyer_rejects_a_malformed_owner_not_a_server_error",
+        "seconds": "0.288"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_update_buyer_clears_the_owner_with_an_explicit_null",
+        "seconds": "0.457"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_update_buyer_denies_a_viewer",
+        "seconds": "0.358"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_review_updates_only_the_explicit_selection",
+        "seconds": "1.281"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_stale_review_version_conflicts_and_preserves_the_prior_record",
+        "seconds": "1.073"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_snapshot_review_expands_excluding_removed_ids",
+        "seconds": "1.942"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_review_requires_a_reviewer_and_replays",
+        "seconds": "2.498"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_long_review_reason_is_persisted",
+        "seconds": "0.875"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_malformed_snapshot_id_is_rejected_not_a_server_error",
+        "seconds": "0.447"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_malformed_excluded_id_is_rejected_not_a_server_error",
+        "seconds": "0.565"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_malformed_explicit_id_is_rejected_not_a_server_error",
+        "seconds": "0.427"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_review_without_a_fit_is_blocked_and_not_stored",
+        "seconds": "0.819"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_a_duplicate_explicit_id_is_processed_once",
+        "seconds": "0.907"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_buyer_evidence_is_scoped_and_404s_foreign",
+        "seconds": "0.714"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_expired_or_deleted_source_is_not_current_evidence",
+        "seconds": "0.744"
+      },
+      {
+        "class": "tests.test_buyer_review_db",
+        "name": "test_0011_downgrade_truncates_a_long_review_reason",
+        "seconds": "2.965"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_review_requires_an_assessment_and_never_hides_a_stored_acceptance",
+        "seconds": "0.403"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_create_and_read_list_are_durable_contract_responses",
+        "seconds": "0.528"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_buyer_note_accepts_the_contract_limit_and_returns_exact_replay",
+        "seconds": "0.400"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_stale_fit_cannot_be_accepted_as_a_current_review",
+        "seconds": "0.420"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_each_human_review_state_appends_exact_assessment_and_audit",
+        "seconds": "0.870"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_list_add_duplicate_remove_keeps_buyer_company_and_evidence",
+        "seconds": "0.716"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_list_rejects_foreign_project_buyer_and_stale_rename",
+        "seconds": "0.597"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_filter_presets_are_actor_scoped_and_reject_unsupported_filters",
+        "seconds": "0.508"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_buyer_update_replay_returns_first_version_after_later_edit",
+        "seconds": "1.687"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_note_does_not_revise_draft_and_material_review_invalidates_approval",
+        "seconds": "3.181"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_0014_migration_owns_preset_rls_and_disposable_rollback",
+        "seconds": "5.075"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_list_filter_freezes_membership_and_refreezes_after_remove",
+        "seconds": "1.409"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_preset_same_name_upserts_one_versioned_actor_record",
+        "seconds": "4.605"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_membership_change_requires_current_list_version",
+        "seconds": "0.902"
+      },
+      {
+        "class": "tests.test_buyer_management_db",
+        "name": "test_preset_rejects_nonexistent_list_filter_before_persisting",
+        "seconds": "0.538"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_unauthenticated_requests_are_rejected",
+        "seconds": "0.094"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_implemented_routes_match_openapi_operation_ids",
+        "seconds": "0.912"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_the_app_actually_exposes_every_implemented_route",
+        "seconds": "0.054"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_implemented_response_fields_are_declared_by_the_contract",
+        "seconds": "2.083"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_approve_checks_auth_before_preconditions",
+        "seconds": "0.046"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_approve_rejects_a_missing_or_malformed_if_match",
+        "seconds": "0.061"
+      },
+      {
+        "class": "tests.test_contract_required_fields",
+        "name": "test_contract_required_fields",
+        "seconds": "2.316"
+      }
+    ]
+  },
+  "ui": {
+    "report": "test-results/q08-ui-final.xml",
+    "pass": 17,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "test_cases": [
+      {
+        "class": "audit-bulk-confirmation.spec.ts",
+        "name": "B02 adding a sixth buyer clears the previously confirmed five",
+        "seconds": "18.074"
+      },
+      {
+        "class": "audit-bulk-confirmation.spec.ts",
+        "name": "B02 reason, target and exclusions clear confirmation; unchanged selection survives paging",
+        "seconds": "7.785"
+      },
+      {
+        "class": "audit-bulk-confirmation.spec.ts",
+        "name": "B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works",
+        "seconds": "15.932"
+      },
+      {
+        "class": "audit-bulk-confirmation.spec.ts",
+        "name": "B04 inactive owner is rejected and a stale buyer reports conflict without overwriting",
+        "seconds": "15.95"
+      },
+      {
+        "class": "audit-bulk-confirmation.spec.ts",
+        "name": "B16 committed response loss locks changes and reconciles the same key after a route remount",
+        "seconds": "8.706"
+      },
+      {
+        "class": "audit-bulk-confirmation.spec.ts",
+        "name": "B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link",
+        "seconds": "8.995"
+      },
+      {
+        "class": "audit-bulk-confirmation.spec.ts",
+        "name": "B03 zh-HK mobile colleague search recovers a failed read",
+        "seconds": "6.95"
+      },
+      {
+        "class": "audit-bulk-confirmation.spec.ts",
+        "name": "B03 viewer cannot assign through UI or direct API",
+        "seconds": "4.471"
+      },
+      {
+        "class": "audit-bulk-manifest.spec.ts",
+        "name": "B01 B14 100 actual rows require frozen preview and explicit execution",
+        "seconds": "10.432"
+      },
+      {
+        "class": "audit-bulk-manifest.spec.ts",
+        "name": "B01 B14 101 actual rows require frozen preview and explicit execution",
+        "seconds": "14.892"
+      },
+      {
+        "class": "audit-bulk-manifest.spec.ts",
+        "name": "B01 B14 1001 actual rows require frozen preview and explicit execution",
+        "seconds": "21.373"
+      },
+      {
+        "class": "audit-bulk-manifest.spec.ts",
+        "name": "B15 lost preview and committed 202 retry one frozen body/key and restore after re-login",
+        "seconds": "21.438"
+      },
+      {
+        "class": "audit-bulk-manifest.spec.ts",
+        "name": "B08 failed rows get a new exact digest and current versions; successes are retained",
+        "seconds": "19.206"
+      },
+      {
+        "class": "audit-bulk-manifest.spec.ts",
+        "name": "B16 late preview cannot cross A-B-A; viewer has no maintenance; zh-HK mobile exact confirmation",
+        "seconds": "9.107"
+      },
+      {
+        "class": "audit-bulk-manifest.spec.ts",
+        "name": "B01 reviewer executes current fit-bound review",
+        "seconds": "11.163"
+      },
+      {
+        "class": "audit-bulk-manifest.spec.ts",
+        "name": "B01 typed list target supports confirmed add and explicit new remove preview",
+        "seconds": "9.227"
+      },
+      {
+        "class": "audit-bulk-manifest.spec.ts",
+        "name": "B09 UI cancel preserves the committed first50 and cancels only pending51",
+        "seconds": "12.508"
+      }
+    ]
+  },
+  "migrations": {
+    "report": "test-results/q08-migrations-final.xml",
+    "pass": 39,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "test_cases": [
+      {
+        "class": "tests.test_contact_job_migration",
+        "name": "test_0024_0025_empty_roundtrip_preserves_one_head",
+        "seconds": "5.196"
+      },
+      {
+        "class": "tests.test_contact_job_migration",
+        "name": "test_0025_refuses_to_drop_a_retained_callback_route",
+        "seconds": "0.276"
+      },
+      {
+        "class": "tests.test_contact_job_migration",
+        "name": "test_0024_refuses_to_drop_a_retained_provider_reference",
+        "seconds": "0.372"
+      },
+      {
+        "class": "tests.test_contact_quote_migration",
+        "name": "test_0023_empty_quote_basis_roundtrip",
+        "seconds": "0.844"
+      },
+      {
+        "class": "tests.test_contact_quote_migration",
+        "name": "test_0023_refuses_downgrade_with_actor_bound_quote",
+        "seconds": "0.465"
+      },
+      {
+        "class": "tests.test_draft_approval_migration",
+        "name": "test_0028_empty_downgrade_and_reupgrade",
+        "seconds": "0.572"
+      },
+      {
+        "class": "tests.test_draft_approval_migration",
+        "name": "test_0028_refuses_populated_approval_downgrade",
+        "seconds": "1.372"
+      },
+      {
+        "class": "tests.test_draft_approval_migration",
+        "name": "test_0028_approval_material_and_invalidation_are_one_way",
+        "seconds": "1.488"
+      },
+      {
+        "class": "tests.test_draft_integrity_migration",
+        "name": "test_0027_empty_downgrade_and_reupgrade",
+        "seconds": "0.831"
+      },
+      {
+        "class": "tests.test_draft_integrity_migration",
+        "name": "test_0027_refuses_populated_downgrade",
+        "seconds": "0.920"
+      },
+      {
+        "class": "tests.test_export_migration",
+        "name": "test_0029_empty_downgrade_and_reupgrade",
+        "seconds": "0.641"
+      },
+      {
+        "class": "tests.test_export_migration",
+        "name": "test_0029_populated_history_refuses_downgrade",
+        "seconds": "0.748"
+      },
+      {
+        "class": "tests.test_outcome_migration",
+        "name": "test_0030_empty_downgrade_reupgrade_and_runtime_grants",
+        "seconds": "0.488"
+      },
+      {
+        "class": "tests.test_outcome_migration",
+        "name": "test_0030_retained_outcome_refuses_downgrade",
+        "seconds": "0.483"
+      },
+      {
+        "class": "tests.test_sender_identity_migration",
+        "name": "test_0026_empty_downgrade_and_reupgrade",
+        "seconds": "0.656"
+      },
+      {
+        "class": "tests.test_sender_identity_migration",
+        "name": "test_0026_refuses_to_drop_reviewed_sender",
+        "seconds": "0.363"
+      },
+      {
+        "class": "tests.test_cloudflare_migration_db",
+        "name": "test_0034_empty_upgrade_downgrade_reupgrade_and_populated_refusal",
+        "seconds": "6.949"
+      },
+      {
+        "class": "tests.test_cloudflare_recovery_boundaries_db",
+        "name": "test_0035_empty_round_trip_default_off_and_limited_api_privileges",
+        "seconds": "6.910"
+      },
+      {
+        "class": "tests.test_cloudflare_recovery_boundaries_db",
+        "name": "test_populated_rollback_preserves_unknown_holds",
+        "seconds": "6.711"
+      },
+      {
+        "class": "tests.test_cloudflare_recovery_boundaries_db",
+        "name": "test_killed_native_process_resumes_new_generation_once",
+        "seconds": "2.177"
+      },
+      {
+        "class": "tests.test_cloudflare_recovery_boundaries_db",
+        "name": "test_restore_then_deletion_replay_keeps_reads_closed",
+        "seconds": "13.780"
+      },
+      {
+        "class": "tests.test_checkpoint_schema_privileges_db",
+        "name": "test_worker_cannot_mutate_checkpoint_schema_versions[INSERT INTO buyeros_graph.checkpoint_migrations(v) VALUES(99)]",
+        "seconds": "4.733"
+      },
+      {
+        "class": "tests.test_checkpoint_schema_privileges_db",
+        "name": "test_worker_cannot_mutate_checkpoint_schema_versions[UPDATE buyeros_graph.checkpoint_migrations SET v=99 WHERE v=9]",
+        "seconds": "0.024"
+      },
+      {
+        "class": "tests.test_checkpoint_schema_privileges_db",
+        "name": "test_worker_cannot_mutate_checkpoint_schema_versions[DELETE FROM buyeros_graph.checkpoint_migrations WHERE v=9]",
+        "seconds": "0.028"
+      },
+      {
+        "class": "tests.test_checkpoint_schema_privileges_db",
+        "name": "test_worker_cannot_mutate_checkpoint_schema_versions[TRUNCATE buyeros_graph.checkpoint_migrations]",
+        "seconds": "0.024"
+      },
+      {
+        "class": "tests.test_checkpoint_schema_privileges_db",
+        "name": "test_runtime_catalog_rejects_reintroduced_checkpoint_version_write",
+        "seconds": "0.043"
+      },
+      {
+        "class": "tests.test_checkpoint_schema_privileges_db",
+        "name": "test_schema_read_only_worker_resumes_actual_checkpoint_without_replaying",
+        "seconds": "0.698"
+      },
+      {
+        "class": "tests.test_checkpoint_schema_privileges_db",
+        "name": "test_0036_round_trip_keeps_schema_version_grants_read_only",
+        "seconds": "0.274"
+      },
+      {
+        "class": "tests.test_checkpoint_schema_privileges_db",
+        "name": "test_operator_previews_current_head_without_mutating_selector",
+        "seconds": "0.047"
+      },
+      {
+        "class": "tests.test_checkpoint_schema_privileges_db",
+        "name": "test_runtime_selector_still_rejects_unknown_schema_head",
+        "seconds": "0.760"
+      },
+      {
+        "class": "tests.test_research_checkpoint_migration",
+        "name": "test_0022_empty_round_trip_and_retained_checkpoint_refusal",
+        "seconds": "5.861"
+      },
+      {
+        "class": "tests.test_admin_operations_db",
+        "name": "test_0017_preferences_rls_and_empty_rollback",
+        "seconds": "1.547"
+      },
+      {
+        "class": "tests.test_budget_atomicity_db",
+        "name": "test_0018_empty_downgrade_upgrade_and_force_rls",
+        "seconds": "1.249"
+      },
+      {
+        "class": "tests.test_policy_lifecycle_db",
+        "name": "test_0015_policy_upgrade_and_safe_downgrade_on_disposable_db",
+        "seconds": "1.582"
+      },
+      {
+        "class": "tests.test_project_constraints_db",
+        "name": "test_0013_preflight_reports_legacy_conflict_without_deleting_it",
+        "seconds": "2.238"
+      },
+      {
+        "class": "tests.test_retention_authorization_db",
+        "name": "test_contact_retention_migration_rolls_back_and_forward_on_empty_disposable_db",
+        "seconds": "0.373"
+      },
+      {
+        "class": "tests.test_retention_authorization_db",
+        "name": "test_rate_window_migration_empty_rollback_and_rls",
+        "seconds": "0.386"
+      },
+      {
+        "class": "tests.test_retention_authorization_db",
+        "name": "test_rate_window_migration_refuses_populated_rollback",
+        "seconds": "0.150"
+      },
+      {
+        "class": "tests.test_backup_restore_t28",
+        "name": "test_disposable_restore_replays_older_backup_deletion_journal",
+        "seconds": "13.492"
+      }
+    ]
+  }
+}

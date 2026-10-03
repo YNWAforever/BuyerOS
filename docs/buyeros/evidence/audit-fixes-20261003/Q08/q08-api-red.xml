@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="7.252" timestamp="2026-10-03T21:01:14.258327+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_freezes_1001_current_versions_without_widening_snapshot" time="5.655"><failure message="AssertionError: {&quot;code&quot;:&quot;NOT_FOUND&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;9452e9e5-8d9a-4d18-8980-3ded8b732666&quot;,&quot;retryable&quot;:false}&#10;assert 404 == 201&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">api = &lt;starlette.testclient.TestClient object at 0x000001B2DAD96A50&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:58025/buyeros_test_api'
+
+    def test_manifest_freezes_1001_current_versions_without_widening_snapshot(api,seeded):
+        _seed_many(seeded,1001)
+        owner=_admin_membership(seeded)
+        path=f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/bulk-manifests"
+        response=api.post(path,json={"filters":{"q":"Q08"},"excluded_ids":[],
+            "operation":"assignBuyerOwners","target":{"owner_membership_id":owner},"reason":"Bounded manifest review"},
+            headers=_h(key="q08-preview-1001"))
+&gt;       assert response.status_code==201,response.text
+E       AssertionError: {"code":"NOT_FOUND","message":"request failed","request_id":"9452e9e5-8d9a-4d18-8980-3ded8b732666","retryable":false}
+E       assert 404 == 201
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests\test_bulk_manifest_db.py:23: AssertionError</failure></testcase></testsuite></testsuites>

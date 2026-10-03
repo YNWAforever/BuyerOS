@@ -1,0 +1,148 @@
+.FFFF.F.........................                                         [100%]
+================================== FAILURES ===================================
+__________ test_manifest_sync_async_boundaries_and_replay_once[100] ___________
+
+api = <starlette.testclient.TestClient object at 0x0000019A6691FB10>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:49397/buyeros_test_api'
+count = 100
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+        _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+        first=_execute(api,manifest,key);again=_execute(api,manifest,key)
+>       assert first.status_code==again.status_code==(200 if count==100 else 202),first.text
+E       AssertionError: {"code":"INTERNAL_ERROR","message":"request failed","request_id":"709bf276-8663-4fde-b8f9-b279f384e2f6","retryable":true}
+E       assert 500 == 200
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+tests\test_bulk_manifest_db.py:56: AssertionError
+---------------------------- Captured stderr call -----------------------------
+ERROR [buyeros_api.api.errors] unexpected_api_error request_id=709bf276-8663-4fde-b8f9-b279f384e2f6 type=AttributeError
+ERROR [buyeros_api.api.errors] unexpected_api_error request_id=f2bc806b-9516-4949-b922-38a9c3a501ba type=AttributeError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=709bf276-8663-4fde-b8f9-b279f384e2f6 type=AttributeError
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=f2bc806b-9516-4949-b922-38a9c3a501ba type=AttributeError
+__________ test_manifest_sync_async_boundaries_and_replay_once[101] ___________
+
+api = <starlette.testclient.TestClient object at 0x0000019A667CA210>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:49397/buyeros_test_api'
+count = 101
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+        _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+        first=_execute(api,manifest,key);again=_execute(api,manifest,key)
+>       assert first.status_code==again.status_code==(200 if count==100 else 202),first.text
+E       AssertionError: {"code":"INTERNAL_ERROR","message":"request failed","request_id":"6361d69c-203d-4073-8a71-de3a7eb13987","retryable":true}
+E       assert 500 == 202
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+tests\test_bulk_manifest_db.py:56: AssertionError
+---------------------------- Captured stderr call -----------------------------
+ERROR [buyeros_api.api.errors] unexpected_api_error request_id=6361d69c-203d-4073-8a71-de3a7eb13987 type=AttributeError
+ERROR [buyeros_api.api.errors] unexpected_api_error request_id=dbd768b6-6df6-4d3f-ac8e-e72015fecea1 type=AttributeError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=6361d69c-203d-4073-8a71-de3a7eb13987 type=AttributeError
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=dbd768b6-6df6-4d3f-ac8e-e72015fecea1 type=AttributeError
+__________ test_manifest_sync_async_boundaries_and_replay_once[1000] __________
+
+api = <starlette.testclient.TestClient object at 0x0000019A678D8050>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:49397/buyeros_test_api'
+count = 1000
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+        _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+        first=_execute(api,manifest,key);again=_execute(api,manifest,key)
+>       assert first.status_code==again.status_code==(200 if count==100 else 202),first.text
+E       AssertionError: {"code":"INTERNAL_ERROR","message":"request failed","request_id":"bc4297e2-0388-4199-9e97-71a03bd0a809","retryable":true}
+E       assert 500 == 202
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+tests\test_bulk_manifest_db.py:56: AssertionError
+---------------------------- Captured stderr call -----------------------------
+ERROR [buyeros_api.api.errors] unexpected_api_error request_id=bc4297e2-0388-4199-9e97-71a03bd0a809 type=AttributeError
+ERROR [buyeros_api.api.errors] unexpected_api_error request_id=0f045866-0f1c-48f2-931b-da59d2f60433 type=AttributeError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=bc4297e2-0388-4199-9e97-71a03bd0a809 type=AttributeError
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=0f045866-0f1c-48f2-931b-da59d2f60433 type=AttributeError
+__________ test_manifest_sync_async_boundaries_and_replay_once[1001] __________
+
+api = <starlette.testclient.TestClient object at 0x0000019A6739FA80>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:49397/buyeros_test_api'
+count = 1001
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+        _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+        first=_execute(api,manifest,key);again=_execute(api,manifest,key)
+>       assert first.status_code==again.status_code==(200 if count==100 else 202),first.text
+E       AssertionError: {"code":"INTERNAL_ERROR","message":"request failed","request_id":"f12ff90b-337c-4448-bbdb-7bb52f8a7140","retryable":true}
+E       assert 500 == 202
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+tests\test_bulk_manifest_db.py:56: AssertionError
+---------------------------- Captured stderr call -----------------------------
+ERROR [buyeros_api.api.errors] unexpected_api_error request_id=f12ff90b-337c-4448-bbdb-7bb52f8a7140 type=AttributeError
+ERROR [buyeros_api.api.errors] unexpected_api_error request_id=cc025ab8-f7e7-4dc7-8beb-78b321135641 type=AttributeError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=f12ff90b-337c-4448-bbdb-7bb52f8a7140 type=AttributeError
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=cc025ab8-f7e7-4dc7-8beb-78b321135641 type=AttributeError
+_ test_10000_committed_crash_recovery_exact_results_and_failed_child_preview __
+
+api = <starlette.testclient.TestClient object at 0x0000019A667F28B0>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:49397/buyeros_test_api'
+
+    def test_10000_committed_crash_recovery_exact_results_and_failed_child_preview(api,seeded):
+        from buyeros_api.api.deps import tenant_scoped
+        from buyeros_api.services.bulk_service import apply_bulk_chunk
+        _seed_many(seeded,10000);owner=_admin_membership(seeded);manifest=_preview(api,owner)
+        assert manifest["count"]==10000
+        with psycopg.connect(seeded) as conn:
+            stale=conn.execute("SELECT buyer_id FROM bulk_manifest_items WHERE manifest_id=%s ORDER BY ordinal LIMIT 50",(manifest["id"],)).fetchall()
+            conn.cursor().executemany("UPDATE project_buyers SET version=version+1 WHERE id=%s",stale)
+>       response=_execute(api,manifest);assert response.status_code==202,response.text
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: {"code":"INTERNAL_ERROR","message":"request failed","request_id":"8414ca5b-9bcc-4147-9840-3dbed8445452","retryable":true}
+E       assert 500 == 202
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+tests\test_bulk_manifest_db.py:83: AssertionError
+---------------------------- Captured stderr call -----------------------------
+ERROR [buyeros_api.api.errors] unexpected_api_error request_id=8414ca5b-9bcc-4147-9840-3dbed8445452 type=AttributeError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=8414ca5b-9bcc-4147-9840-3dbed8445452 type=AttributeError
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_bulk_manifest_db.py::test_manifest_freezes_1001_current_versions_without_widening_snapshot
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_bulk_manifest_db.py::test_manifest_freezes_1001_current_versions_without_widening_snapshot
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q08-api-second.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_bulk_manifest_db.py::test_manifest_sync_async_boundaries_and_replay_once[100]
+FAILED tests/test_bulk_manifest_db.py::test_manifest_sync_async_boundaries_and_replay_once[101]
+FAILED tests/test_bulk_manifest_db.py::test_manifest_sync_async_boundaries_and_replay_once[1000]
+FAILED tests/test_bulk_manifest_db.py::test_manifest_sync_async_boundaries_and_replay_once[1001]
+FAILED tests/test_bulk_manifest_db.py::test_10000_committed_crash_recovery_exact_results_and_failed_child_preview
+5 failed, 27 passed, 9 warnings in 37.86s

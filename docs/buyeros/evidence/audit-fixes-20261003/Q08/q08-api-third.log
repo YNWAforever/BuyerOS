@@ -1,0 +1,77 @@
+......F.........................                                         [100%]
+================================== FAILURES ===================================
+_ test_10000_committed_crash_recovery_exact_results_and_failed_child_preview __
+
+api = <starlette.testclient.TestClient object at 0x0000022106EB6030>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:52123/buyeros_test_api'
+
+    def test_10000_committed_crash_recovery_exact_results_and_failed_child_preview(api,seeded):
+        from buyeros_api.api.deps import tenant_scoped
+        from buyeros_api.services.bulk_service import apply_bulk_chunk
+        _seed_many(seeded,10000);owner=_admin_membership(seeded);manifest=_preview(api,owner)
+        assert manifest["count"]==10000
+        with psycopg.connect(seeded) as conn:
+            stale=conn.execute("SELECT buyer_id FROM bulk_manifest_items WHERE manifest_id=%s ORDER BY ordinal LIMIT 50",(manifest["id"],)).fetchall()
+            conn.cursor().executemany("UPDATE project_buyers SET version=version+1 WHERE id=%s",stale)
+        response=_execute(api,manifest);assert response.status_code==202,response.text
+        job=response.json()["data"];job_id=uuid.UUID(job["id"])
+        async def run():
+            async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:await apply_bulk_chunk(session,job_id)
+            try:
+                async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
+                    await apply_bulk_chunk(session,job_id)
+                    raise RuntimeError("crash before chunk commit")
+            except RuntimeError:pass
+            with psycopg.connect(seeded) as conn:
+                assert conn.execute("SELECT processed FROM async_jobs WHERE id=%s",(job_id,)).fetchone()[0]==50
+                assert conn.execute("SELECT count(*) FROM project_buyers WHERE owner_user_id IS NOT NULL AND workspace_id=%s",(WORKSPACE_A,)).fetchone()[0]==0
+            for _ in range(199):
+                async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
+                    result=await apply_bulk_chunk(session,job_id)
+                    assert result["processed"]<=50
+            async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:assert (await apply_bulk_chunk(session,job_id))["processed"]==0
+        asyncio.run(run())
+        with psycopg.connect(seeded) as conn:
+            assert conn.execute("SELECT requested,processed,updated,conflicts,status FROM async_jobs WHERE id=%s",(job_id,)).fetchone()==(10000,10000,9950,50,"completed")
+            assert conn.execute("SELECT count(*),count(DISTINCT buyer_id) FROM async_job_items WHERE job_id=%s",(job_id,)).fetchone()==(10000,10000)
+        ids=[]
+        for offset in range(0,10000,100):
+>           page=api.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job_id}?offset={offset}&limit=100",headers=_h()).json()["data"]["result_page"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'data'
+
+tests\test_bulk_manifest_db.py:106: KeyError
+---------------------------- Captured stderr call -----------------------------
+ERROR [buyeros_api.api.errors] unexpected_api_error request_id=a7583970-5d03-4723-a9b3-280727656e17 type=OperationalError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=a7583970-5d03-4723-a9b3-280727656e17 type=OperationalError
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_bulk_manifest_db.py::test_manifest_freezes_1001_current_versions_without_widening_snapshot
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_bulk_manifest_db.py::test_manifest_freezes_1001_current_versions_without_widening_snapshot
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q08-api-third.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_bulk_manifest_db.py::test_10000_committed_crash_recovery_exact_results_and_failed_child_preview
+1 failed, 31 passed, 9 warnings in 92.05s (0:01:32)

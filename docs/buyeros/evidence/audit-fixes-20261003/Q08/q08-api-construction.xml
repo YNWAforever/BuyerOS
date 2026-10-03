@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="6.620" timestamp="2026-10-03T20:59:55.482806+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_freezes_1001_current_versions_without_widening_snapshot" time="4.256"><failure message="AttributeError: 'Connection' object has no attribute 'executemany'">api = &lt;starlette.testclient.TestClient object at 0x000002686E5A6A50&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:60730/buyeros_test_api'
+
+    def test_manifest_freezes_1001_current_versions_without_widening_snapshot(api,seeded):
+&gt;       _seed_many(seeded,1001)
+
+tests\test_bulk_manifest_db.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+dsn = 'postgresql://buyeros:buyeros@127.0.0.1:60730/buyeros_test_api'
+count = 1001, prefix = 'Q08'
+
+    def _seed_many(dsn,count,prefix="Q08"):
+        with psycopg.connect(dsn) as conn:
+            rows=conn.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) "
+                "SELECT gen_random_uuid(),%s,%s||i::text,%s||lpad(i::text,5,'0') "
+                "FROM generate_series(1,%s) i RETURNING id",(WORKSPACE_A,prefix,prefix,count)).fetchall()
+&gt;           conn.executemany("INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES (%s,%s,%s,%s)",
+            ^^^^^^^^^^^^^^^^
+                [(str(uuid.uuid4()),WORKSPACE_A,PROJECT_A,str(row[0])) for row in rows])
+E           AttributeError: 'Connection' object has no attribute 'executemany'
+
+tests\test_bulk_manifest_db.py:12: AttributeError</failure></testcase></testsuite></testsuites>

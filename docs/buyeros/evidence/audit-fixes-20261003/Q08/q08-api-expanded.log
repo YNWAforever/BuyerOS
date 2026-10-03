@@ -1,0 +1,603 @@
+.FFFF.FFFFFF....................                                         [100%]
+================================== FAILURES ===================================
+__________ test_manifest_sync_async_boundaries_and_replay_once[100] ___________
+
+api = <starlette.testclient.TestClient object at 0x0000015F20018F50>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:56390/buyeros_test_api'
+count = 100
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+>       _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_bulk_manifest_db.py:44: in _preview
+    assert_contract_response("BulkManifestResponse",response.json())
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...ifestResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'count': 100, 'created_at': '2026-10-03T13:20:51.7...1a3eab4542bfa5ed8baa22e35d75bb4a43', ...}, 'data_mode': 'live', 'request_id': '93a1df24-615f-4a69-a97a-bd11d9b47317'},)
+kwargs = {}
+error = <ValidationError: "Additional properties are not allowed ('data_mode' was unexpected)">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: Additional properties are not allowed ('data_mode' was unexpected)
+E           
+E           Failed validating 'additionalProperties' in schema:
+E               {'type': 'object',
+E                'additionalProperties': False,
+E                'properties': {'data': {'$ref': '#/components/schemas/BulkManifest'},
+E                               'request_id': {'type': 'string'}},
+E                'required': ['data', 'request_id']}
+E           
+E           On instance:
+E               {'data': {'id': '9d32e058-32a7-457a-8289-5801f2be04bb',
+E                         'workspace_id': '11111111-1111-4111-8111-111111111111',
+E                         'project_id': 'a0000000-0000-4000-8000-000000000001',
+E                         'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed',
+E                         'operation': 'assignBuyerOwners',
+E                         'target': {'owner_membership_id': 'a5fe9a72-7a39-41cc-8c53-d0b7bbe46b27'},
+E                         'filters': {'q': 'Q08'},
+E                         'excluded_ids': [],
+E                         'reason': 'Bounded manifest review',
+E                         'count': 100,
+E                         'digest': '3ac2eae838843bb431789c3e13bcc51a3eab4542bfa5ed8baa22e35d75bb4a43',
+E                         'expires_at': '2026-10-03T13:35:51.834206+00:00',
+E                         'status': 'ready',
+E                         'version': 1,
+E                         'created_at': '2026-10-03T13:20:51.798217+00:00'},
+E                'request_id': '93a1df24-615f-4a69-a97a-bd11d9b47317',
+E                'data_mode': 'live'}
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+__________ test_manifest_sync_async_boundaries_and_replay_once[101] ___________
+
+api = <starlette.testclient.TestClient object at 0x0000015F201D5E50>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:56390/buyeros_test_api'
+count = 101
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+>       _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_bulk_manifest_db.py:44: in _preview
+    assert_contract_response("BulkManifestResponse",response.json())
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...ifestResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'count': 101, 'created_at': '2026-10-03T13:20:53.4...2342c2a20e4ff42c955ea2aeed991bc040', ...}, 'data_mode': 'live', 'request_id': '81fb09e1-5e58-442d-be68-2c60e76ab851'},)
+kwargs = {}
+error = <ValidationError: "Additional properties are not allowed ('data_mode' was unexpected)">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: Additional properties are not allowed ('data_mode' was unexpected)
+E           
+E           Failed validating 'additionalProperties' in schema:
+E               {'type': 'object',
+E                'additionalProperties': False,
+E                'properties': {'data': {'$ref': '#/components/schemas/BulkManifest'},
+E                               'request_id': {'type': 'string'}},
+E                'required': ['data', 'request_id']}
+E           
+E           On instance:
+E               {'data': {'id': 'f60c3919-64dc-4409-b6e9-44fcf227bb00',
+E                         'workspace_id': '11111111-1111-4111-8111-111111111111',
+E                         'project_id': 'a0000000-0000-4000-8000-000000000001',
+E                         'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed',
+E                         'operation': 'assignBuyerOwners',
+E                         'target': {'owner_membership_id': '91f0ddfa-c35e-4147-95bc-b53bfe2a34f9'},
+E                         'filters': {'q': 'Q08'},
+E                         'excluded_ids': [],
+E                         'reason': 'Bounded manifest review',
+E                         'count': 101,
+E                         'digest': '366d5a517ce7bd124a89bba24c5b2b2342c2a20e4ff42c955ea2aeed991bc040',
+E                         'expires_at': '2026-10-03T13:35:53.541802+00:00',
+E                         'status': 'ready',
+E                         'version': 1,
+E                         'created_at': '2026-10-03T13:20:53.492063+00:00'},
+E                'request_id': '81fb09e1-5e58-442d-be68-2c60e76ab851',
+E                'data_mode': 'live'}
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+__________ test_manifest_sync_async_boundaries_and_replay_once[1000] __________
+
+api = <starlette.testclient.TestClient object at 0x0000015F1FFD9BA0>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:56390/buyeros_test_api'
+count = 1000
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+>       _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_bulk_manifest_db.py:44: in _preview
+    assert_contract_response("BulkManifestResponse",response.json())
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...ifestResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'count': 1000, 'created_at': '2026-10-03T13:20:53....aada90069099d47eaa91f1bda864ba5f23', ...}, 'data_mode': 'live', 'request_id': '86593f80-2c64-4336-b7dd-3bc459b79c32'},)
+kwargs = {}
+error = <ValidationError: "Additional properties are not allowed ('data_mode' was unexpected)">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: Additional properties are not allowed ('data_mode' was unexpected)
+E           
+E           Failed validating 'additionalProperties' in schema:
+E               {'type': 'object',
+E                'additionalProperties': False,
+E                'properties': {'data': {'$ref': '#/components/schemas/BulkManifest'},
+E                               'request_id': {'type': 'string'}},
+E                'required': ['data', 'request_id']}
+E           
+E           On instance:
+E               {'data': {'id': '976c24cc-7e9f-42c1-8978-6e94f9c7d755',
+E                         'workspace_id': '11111111-1111-4111-8111-111111111111',
+E                         'project_id': 'a0000000-0000-4000-8000-000000000001',
+E                         'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed',
+E                         'operation': 'assignBuyerOwners',
+E                         'target': {'owner_membership_id': '8258dfda-777e-4624-bbd7-3c0de72abe44'},
+E                         'filters': {'q': 'Q08'},
+E                         'excluded_ids': [],
+E                         'reason': 'Bounded manifest review',
+E                         'count': 1000,
+E                         'digest': 'e0ca319493c977cc491d79bbf0bcc2aada90069099d47eaa91f1bda864ba5f23',
+E                         'expires_at': '2026-10-03T13:35:54.048819+00:00',
+E                         'status': 'ready',
+E                         'version': 1,
+E                         'created_at': '2026-10-03T13:20:53.996283+00:00'},
+E                'request_id': '86593f80-2c64-4336-b7dd-3bc459b79c32',
+E                'data_mode': 'live'}
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+__________ test_manifest_sync_async_boundaries_and_replay_once[1001] __________
+
+api = <starlette.testclient.TestClient object at 0x0000015F20338D60>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:56390/buyeros_test_api'
+count = 1001
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+>       _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_bulk_manifest_db.py:44: in _preview
+    assert_contract_response("BulkManifestResponse",response.json())
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...ifestResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'count': 1001, 'created_at': '2026-10-03T13:20:55....991f453ad3838ade1df5d3730173c50b69', ...}, 'data_mode': 'live', 'request_id': '5e38c95c-b502-48e6-bfe2-05d09fb275b8'},)
+kwargs = {}
+error = <ValidationError: "Additional properties are not allowed ('data_mode' was unexpected)">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: Additional properties are not allowed ('data_mode' was unexpected)
+E           
+E           Failed validating 'additionalProperties' in schema:
+E               {'type': 'object',
+E                'additionalProperties': False,
+E                'properties': {'data': {'$ref': '#/components/schemas/BulkManifest'},
+E                               'request_id': {'type': 'string'}},
+E                'required': ['data', 'request_id']}
+E           
+E           On instance:
+E               {'data': {'id': '8d831b4d-a27b-4ed6-aadf-45c245570277',
+E                         'workspace_id': '11111111-1111-4111-8111-111111111111',
+E                         'project_id': 'a0000000-0000-4000-8000-000000000001',
+E                         'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed',
+E                         'operation': 'assignBuyerOwners',
+E                         'target': {'owner_membership_id': '57d63ee5-3abe-49a0-8735-a233cd3399f5'},
+E                         'filters': {'q': 'Q08'},
+E                         'excluded_ids': [],
+E                         'reason': 'Bounded manifest review',
+E                         'count': 1001,
+E                         'digest': '2706eaf5d5b8e1b0211d1f660050a3991f453ad3838ade1df5d3730173c50b69',
+E                         'expires_at': '2026-10-03T13:35:55.304460+00:00',
+E                         'status': 'ready',
+E                         'version': 1,
+E                         'created_at': '2026-10-03T13:20:55.261711+00:00'},
+E                'request_id': '5e38c95c-b502-48e6-bfe2-05d09fb275b8',
+E                'data_mode': 'live'}
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+_ test_10000_committed_crash_recovery_exact_results_and_failed_child_preview __
+
+api = <starlette.testclient.TestClient object at 0x0000015F202E0050>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:56390/buyeros_test_api'
+
+    def test_10000_committed_crash_recovery_exact_results_and_failed_child_preview(api,seeded):
+        from buyeros_api.api.deps import tenant_scoped
+        from buyeros_api.services.bulk_service import apply_bulk_chunk
+>       _seed_many(seeded,10000);owner=_admin_membership(seeded);manifest=_preview(api,owner)
+                                                                          ^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:78: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_bulk_manifest_db.py:44: in _preview
+    assert_contract_response("BulkManifestResponse",response.json())
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...ifestResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'count': 10000, 'created_at': '2026-10-03T13:21:01...cc1c07c5c6604e2409e5d5b28f9502cf6c', ...}, 'data_mode': 'live', 'request_id': 'e4a2ca75-68ac-422b-b67c-fb762418488a'},)
+kwargs = {}
+error = <ValidationError: "Additional properties are not allowed ('data_mode' was unexpected)">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: Additional properties are not allowed ('data_mode' was unexpected)
+E           
+E           Failed validating 'additionalProperties' in schema:
+E               {'type': 'object',
+E                'additionalProperties': False,
+E                'properties': {'data': {'$ref': '#/components/schemas/BulkManifest'},
+E                               'request_id': {'type': 'string'}},
+E                'required': ['data', 'request_id']}
+E           
+E           On instance:
+E               {'data': {'id': 'a4bebd16-204a-4744-a316-234c98c2720a',
+E                         'workspace_id': '11111111-1111-4111-8111-111111111111',
+E                         'project_id': 'a0000000-0000-4000-8000-000000000001',
+E                         'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed',
+E                         'operation': 'assignBuyerOwners',
+E                         'target': {'owner_membership_id': '902ccf72-fe80-4871-a626-9c7c13ef99b5'},
+E                         'filters': {'q': 'Q08'},
+E                         'excluded_ids': [],
+E                         'reason': 'Bounded manifest review',
+E                         'count': 10000,
+E                         'digest': '27795720526b35d2c5a49b7c2af59ccc1c07c5c6604e2409e5d5b28f9502cf6c',
+E                         'expires_at': '2026-10-03T13:36:01.575065+00:00',
+E                         'status': 'ready',
+E                         'version': 1,
+E                         'created_at': '2026-10-03T13:21:01.527480+00:00'},
+E                'request_id': 'e4a2ca75-68ac-422b-b67c-fb762418488a',
+E                'data_mode': 'live'}
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+____ test_exact_manifest_confirmation_is_required_and_denial_atomic[bad0] _____
+
+api = <starlette.testclient.TestClient object at 0x0000015F207FACF0>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:56390/buyeros_test_api'
+bad = {'digest': '0000000000000000000000000000000000000000000000000000000000000000'}
+
+    @pytest.mark.parametrize("bad",[{"digest":"0"*64},{"confirmation":False},{"confirmation":1},{"actor_user_id":str(uuid.uuid4())}])
+    def test_exact_manifest_confirmation_is_required_and_denial_atomic(api,seeded,bad):
+>       _seed_many(seeded,2);manifest=_preview(api,_admin_membership(seeded));response=_execute(api,manifest,**bad)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_bulk_manifest_db.py:44: in _preview
+    assert_contract_response("BulkManifestResponse",response.json())
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...ifestResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'count': 2, 'created_at': '2026-10-03T13:21:05.906...e792872fe79661f7e5500d57732961b7f7', ...}, 'data_mode': 'live', 'request_id': '88e4ec45-31df-4637-9d41-4df562994e8f'},)
+kwargs = {}
+error = <ValidationError: "Additional properties are not allowed ('data_mode' was unexpected)">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: Additional properties are not allowed ('data_mode' was unexpected)
+E           
+E           Failed validating 'additionalProperties' in schema:
+E               {'type': 'object',
+E                'additionalProperties': False,
+E                'properties': {'data': {'$ref': '#/components/schemas/BulkManifest'},
+E                               'request_id': {'type': 'string'}},
+E                'required': ['data', 'request_id']}
+E           
+E           On instance:
+E               {'data': {'id': '98939027-108c-4e57-af15-ff29981ddcd6',
+E                         'workspace_id': '11111111-1111-4111-8111-111111111111',
+E                         'project_id': 'a0000000-0000-4000-8000-000000000001',
+E                         'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed',
+E                         'operation': 'assignBuyerOwners',
+E                         'target': {'owner_membership_id': '457c56a5-c20f-4143-9105-5f019d2ed5e0'},
+E                         'filters': {'q': 'Q08'},
+E                         'excluded_ids': [],
+E                         'reason': 'Bounded manifest review',
+E                         'count': 2,
+E                         'digest': '854052482c0f1e8f6cd2761e93dbb7e792872fe79661f7e5500d57732961b7f7',
+E                         'expires_at': '2026-10-03T13:36:05.957634+00:00',
+E                         'status': 'ready',
+E                         'version': 1,
+E                         'created_at': '2026-10-03T13:21:05.906005+00:00'},
+E                'request_id': '88e4ec45-31df-4637-9d41-4df562994e8f',
+E                'data_mode': 'live'}
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+____ test_exact_manifest_confirmation_is_required_and_denial_atomic[bad1] _____
+
+api = <starlette.testclient.TestClient object at 0x0000015F207FB020>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:56390/buyeros_test_api'
+bad = {'confirmation': False}
+
+    @pytest.mark.parametrize("bad",[{"digest":"0"*64},{"confirmation":False},{"confirmation":1},{"actor_user_id":str(uuid.uuid4())}])
+    def test_exact_manifest_confirmation_is_required_and_denial_atomic(api,seeded,bad):
+>       _seed_many(seeded,2);manifest=_preview(api,_admin_membership(seeded));response=_execute(api,manifest,**bad)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_bulk_manifest_db.py:44: in _preview
+    assert_contract_response("BulkManifestResponse",response.json())
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...ifestResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'count': 2, 'created_at': '2026-10-03T13:21:06.236...57c5ed949bcd01871c2c17457853e375df', ...}, 'data_mode': 'live', 'request_id': '734687d1-ea47-4329-bcf9-b0dc9b244187'},)
+kwargs = {}
+error = <ValidationError: "Additional properties are not allowed ('data_mode' was unexpected)">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: Additional properties are not allowed ('data_mode' was unexpected)
+E           
+E           Failed validating 'additionalProperties' in schema:
+E               {'type': 'object',
+E                'additionalProperties': False,
+E                'properties': {'data': {'$ref': '#/components/schemas/BulkManifest'},
+E                               'request_id': {'type': 'string'}},
+E                'required': ['data', 'request_id']}
+E           
+E           On instance:
+E               {'data': {'id': '1a507017-61d3-4df4-ad80-d9700fb5ba2b',
+E                         'workspace_id': '11111111-1111-4111-8111-111111111111',
+E                         'project_id': 'a0000000-0000-4000-8000-000000000001',
+E                         'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed',
+E                         'operation': 'assignBuyerOwners',
+E                         'target': {'owner_membership_id': '50756c18-37c1-4d70-a179-81648e3007fd'},
+E                         'filters': {'q': 'Q08'},
+E                         'excluded_ids': [],
+E                         'reason': 'Bounded manifest review',
+E                         'count': 2,
+E                         'digest': '804d12edae09c781f42279e2381d2157c5ed949bcd01871c2c17457853e375df',
+E                         'expires_at': '2026-10-03T13:36:06.298754+00:00',
+E                         'status': 'ready',
+E                         'version': 1,
+E                         'created_at': '2026-10-03T13:21:06.236272+00:00'},
+E                'request_id': '734687d1-ea47-4329-bcf9-b0dc9b244187',
+E                'data_mode': 'live'}
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+____ test_exact_manifest_confirmation_is_required_and_denial_atomic[bad2] _____
+
+api = <starlette.testclient.TestClient object at 0x0000015F208B0380>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:56390/buyeros_test_api'
+bad = {'confirmation': 1}
+
+    @pytest.mark.parametrize("bad",[{"digest":"0"*64},{"confirmation":False},{"confirmation":1},{"actor_user_id":str(uuid.uuid4())}])
+    def test_exact_manifest_confirmation_is_required_and_denial_atomic(api,seeded,bad):
+>       _seed_many(seeded,2);manifest=_preview(api,_admin_membership(seeded));response=_execute(api,manifest,**bad)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_bulk_manifest_db.py:44: in _preview
+    assert_contract_response("BulkManifestResponse",response.json())
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...ifestResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'count': 2, 'created_at': '2026-10-03T13:21:06.537...19440239df28bacb722c03472b18ce1d9f', ...}, 'data_mode': 'live', 'request_id': 'c4455827-94be-42ff-8c3f-eda706b539f8'},)
+kwargs = {}
+error = <ValidationError: "Additional properties are not allowed ('data_mode' was unexpected)">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: Additional properties are not allowed ('data_mode' was unexpected)
+E           
+E           Failed validating 'additionalProperties' in schema:
+E               {'type': 'object',
+E                'additionalProperties': False,
+E                'properties': {'data': {'$ref': '#/components/schemas/BulkManifest'},
+E                               'request_id': {'type': 'string'}},
+E                'required': ['data', 'request_id']}
+E           
+E           On instance:
+E               {'data': {'id': '6d6e3a25-c1b1-40da-a925-97e62a37a30c',
+E                         'workspace_id': '11111111-1111-4111-8111-111111111111',
+E                         'project_id': 'a0000000-0000-4000-8000-000000000001',
+E                         'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed',
+E                         'operation': 'assignBuyerOwners',
+E                         'target': {'owner_membership_id': '7ac2d444-d296-41f0-8555-8f61dad2d269'},
+E                         'filters': {'q': 'Q08'},
+E                         'excluded_ids': [],
+E                         'reason': 'Bounded manifest review',
+E                         'count': 2,
+E                         'digest': 'b48840349e8766dd3aca6f362bb50919440239df28bacb722c03472b18ce1d9f',
+E                         'expires_at': '2026-10-03T13:36:06.598353+00:00',
+E                         'status': 'ready',
+E                         'version': 1,
+E                         'created_at': '2026-10-03T13:21:06.537395+00:00'},
+E                'request_id': 'c4455827-94be-42ff-8c3f-eda706b539f8',
+E                'data_mode': 'live'}
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+____ test_exact_manifest_confirmation_is_required_and_denial_atomic[bad3] _____
+
+api = <starlette.testclient.TestClient object at 0x0000015F20C99150>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:56390/buyeros_test_api'
+bad = {'actor_user_id': '6e1da421-7cb2-4658-9f79-d09814e49592'}
+
+    @pytest.mark.parametrize("bad",[{"digest":"0"*64},{"confirmation":False},{"confirmation":1},{"actor_user_id":str(uuid.uuid4())}])
+    def test_exact_manifest_confirmation_is_required_and_denial_atomic(api,seeded,bad):
+>       _seed_many(seeded,2);manifest=_preview(api,_admin_membership(seeded));response=_execute(api,manifest,**bad)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_bulk_manifest_db.py:44: in _preview
+    assert_contract_response("BulkManifestResponse",response.json())
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...ifestResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'count': 2, 'created_at': '2026-10-03T13:21:06.857...50d3e58a56b9d600417cc45675dce0618b', ...}, 'data_mode': 'live', 'request_id': '6bc354e7-d0c0-4812-9e21-c61f24cdd3c6'},)
+kwargs = {}
+error = <ValidationError: "Additional properties are not allowed ('data_mode' was unexpected)">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: Additional properties are not allowed ('data_mode' was unexpected)
+E           
+E           Failed validating 'additionalProperties' in schema:
+E               {'type': 'object',
+E                'additionalProperties': False,
+E                'properties': {'data': {'$ref': '#/components/schemas/BulkManifest'},
+E                               'request_id': {'type': 'string'}},
+E                'required': ['data', 'request_id']}
+E           
+E           On instance:
+E               {'data': {'id': '7c620d7e-c9cb-40c9-aec3-f50178bcfd31',
+E                         'workspace_id': '11111111-1111-4111-8111-111111111111',
+E                         'project_id': 'a0000000-0000-4000-8000-000000000001',
+E                         'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed',
+E                         'operation': 'assignBuyerOwners',
+E                         'target': {'owner_membership_id': 'f51ff4ad-2618-4e3b-83d6-57ce6d3d92c6'},
+E                         'filters': {'q': 'Q08'},
+E                         'excluded_ids': [],
+E                         'reason': 'Bounded manifest review',
+E                         'count': 2,
+E                         'digest': '7a804f877a096aff80e3460f20411150d3e58a56b9d600417cc45675dce0618b',
+E                         'expires_at': '2026-10-03T13:36:06.909065+00:00',
+E                         'status': 'ready',
+E                         'version': 1,
+E                         'created_at': '2026-10-03T13:21:06.857929+00:00'},
+E                'request_id': '6bc354e7-d0c0-4812-9e21-c61f24cdd3c6',
+E                'data_mode': 'live'}
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+____ test_other_actor_scope_current_roles_owner_and_expiry_cannot_execute _____
+
+api = <starlette.testclient.TestClient object at 0x0000015F20707240>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:56390/buyeros_test_api'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000015F20CDD090>
+
+    def test_other_actor_scope_current_roles_owner_and_expiry_cannot_execute(api,seeded,monkeypatch):
+        from tests.test_buyer_review_db import ADMIN,OPERATOR,VIEWER
+        import buyeros_api.services.bulk_manifest as service
+        from datetime import datetime,timezone,timedelta
+>       _seed_many(seeded,2);owner=_admin_membership(seeded);manifest=_preview(api,owner)
+                                                                      ^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_manifest_db.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_bulk_manifest_db.py:44: in _preview
+    assert_contract_response("BulkManifestResponse",response.json())
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...ifestResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'count': 2, 'created_at': '2026-10-03T13:21:07.170...3670bb1507fa5ab7ecefb407d9bc44ca0d', ...}, 'data_mode': 'live', 'request_id': '1a6fed41-2646-4fb6-8230-f5da6e5a86cb'},)
+kwargs = {}
+error = <ValidationError: "Additional properties are not allowed ('data_mode' was unexpected)">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: Additional properties are not allowed ('data_mode' was unexpected)
+E           
+E           Failed validating 'additionalProperties' in schema:
+E               {'type': 'object',
+E                'additionalProperties': False,
+E                'properties': {'data': {'$ref': '#/components/schemas/BulkManifest'},
+E                               'request_id': {'type': 'string'}},
+E                'required': ['data', 'request_id']}
+E           
+E           On instance:
+E               {'data': {'id': '64e3df46-3b95-43c2-9697-1c72157c1a54',
+E                         'workspace_id': '11111111-1111-4111-8111-111111111111',
+E                         'project_id': 'a0000000-0000-4000-8000-000000000001',
+E                         'actor_user_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed',
+E                         'operation': 'assignBuyerOwners',
+E                         'target': {'owner_membership_id': 'e1fecd7e-9e7c-4123-abd8-e39ab95cf3ea'},
+E                         'filters': {'q': 'Q08'},
+E                         'excluded_ids': [],
+E                         'reason': 'Bounded manifest review',
+E                         'count': 2,
+E                         'digest': '22ad7f52e43d741a35a5fa7c6b6de03670bb1507fa5ab7ecefb407d9bc44ca0d',
+E                         'expires_at': '2026-10-03T13:36:07.206928+00:00',
+E                         'status': 'ready',
+E                         'version': 1,
+E                         'created_at': '2026-10-03T13:21:07.170557+00:00'},
+E                'request_id': '1a6fed41-2646-4fb6-8230-f5da6e5a86cb',
+E                'data_mode': 'live'}
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_bulk_manifest_db.py::test_manifest_freezes_1001_current_versions_without_widening_snapshot
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_bulk_manifest_db.py::test_manifest_freezes_1001_current_versions_without_widening_snapshot
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q08-api-expanded.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_bulk_manifest_db.py::test_manifest_sync_async_boundaries_and_replay_once[100]
+FAILED tests/test_bulk_manifest_db.py::test_manifest_sync_async_boundaries_and_replay_once[101]
+FAILED tests/test_bulk_manifest_db.py::test_manifest_sync_async_boundaries_and_replay_once[1000]
+FAILED tests/test_bulk_manifest_db.py::test_manifest_sync_async_boundaries_and_replay_once[1001]
+FAILED tests/test_bulk_manifest_db.py::test_10000_committed_crash_recovery_exact_results_and_failed_child_preview
+FAILED tests/test_bulk_manifest_db.py::test_exact_manifest_confirmation_is_required_and_denial_atomic[bad0]
+FAILED tests/test_bulk_manifest_db.py::test_exact_manifest_confirmation_is_required_and_denial_atomic[bad1]
+FAILED tests/test_bulk_manifest_db.py::test_exact_manifest_confirmation_is_required_and_denial_atomic[bad2]
+FAILED tests/test_bulk_manifest_db.py::test_exact_manifest_confirmation_is_required_and_denial_atomic[bad3]
+FAILED tests/test_bulk_manifest_db.py::test_other_actor_scope_current_roles_owner_and_expiry_cannot_execute
+10 failed, 22 passed, 9 warnings in 37.54s

@@ -1,0 +1,10 @@
+{
+  "normal_teardown_markers_absent": true,
+  "owner_labelled_containers_absent": true,
+  "dependency_volume": "buyeros-audit-ui-deps-052d6a686de9",
+  "verified_owner_label": "buyeros.audit.owner=052d6a686de9",
+  "cache_retained_for_next_local_task": true,
+  "unlabelled_buyeros-test-d9323d06": "ownership unproven; untouched",
+  "other_resources": "untouched",
+  "worktree_retained": true
+}

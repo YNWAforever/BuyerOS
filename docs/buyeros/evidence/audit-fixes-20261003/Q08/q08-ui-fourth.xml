@@ -1,0 +1,20 @@
+<testsuites id="" name="" tests="8" failures="0" skipped="0" errors="0" time="209.797062">
+<testsuite name="audit-bulk-manifest.spec.ts" timestamp="2026-10-03T14:15:56.792Z" hostname="" tests="8" failures="0" skipped="0" time="142.675" errors="0">
+<testcase name="B01 B08 B14 100 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="20.413">
+</testcase>
+<testcase name="B01 B08 B14 101 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="20.529">
+</testcase>
+<testcase name="B01 B08 B14 1001 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="32.809">
+</testcase>
+<testcase name="B15 lost preview and committed 202 retry one frozen body/key and restore after re-login" classname="audit-bulk-manifest.spec.ts" time="18.208">
+</testcase>
+<testcase name="B09 failed rows get a new exact digest and current versions; successes are retained" classname="audit-bulk-manifest.spec.ts" time="14.023">
+</testcase>
+<testcase name="B16 late preview cannot cross A-B-A; viewer has no maintenance; zh-HK mobile exact confirmation" classname="audit-bulk-manifest.spec.ts" time="10.811">
+</testcase>
+<testcase name="B01 reviewer executes current fit-bound review while operator cannot select review" classname="audit-bulk-manifest.spec.ts" time="14.721">
+</testcase>
+<testcase name="B08 typed list target supports confirmed add and explicit new remove preview" classname="audit-bulk-manifest.spec.ts" time="11.161">
+</testcase>
+</testsuite>
+</testsuites>

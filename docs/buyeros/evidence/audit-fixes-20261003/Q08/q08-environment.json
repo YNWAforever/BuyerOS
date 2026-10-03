@@ -1,0 +1,15 @@
+{
+  "os": "Windows PowerShell",
+  "node": "24.18.0",
+  "pnpm": "11.25.0",
+  "uv": "0.11.27",
+  "python": "3.14.6",
+  "docker": "29.7.2",
+  "postgres": "16 disposable loopback guarded Docker",
+  "ui": "owned Linux Node22.23.2-bookworm-slim4CPU6GiB Vinext/Nitro dev localhost5173 -> FastAPI8000; fake OIDC; actual runtime RLS",
+  "strict_integration": 1,
+  "paid_providers": 0,
+  "live_auth_verified": false,
+  "production_actions": [],
+  "worker": "shared50-row fenced domain engine; worker role NOBYPASSRLS; manual fixture chunk/drain, separate Python process resume; no continuous delivery transport"
+}

@@ -1,0 +1,6 @@
+node: exit0
+generated: exit0
+type: exit0
+lint: exit0
+Completed actual JUnit readback: strict API90/UI17/migrations39; zero fail/error/skip. Readback is not a new DB/UI run.
+Q08 gate PASS: source hashes match; fresh Node22/type/generated/lint/rollback; required strict reports90/17/39 confirmed.

@@ -1,0 +1,110 @@
+<testsuites id="" name="" tests="6" failures="1" skipped="0" errors="1" time="185.29447600000003">
+<testsuite name="audit-bulk-manifest.spec.ts" timestamp="2026-10-03T13:57:26.644Z" hostname="" tests="6" failures="1" skipped="0" time="144.183" errors="1">
+<testcase name="B01 B08 B14 100 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="13.237">
+</testcase>
+<testcase name="B01 B08 B14 101 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="14.203">
+</testcase>
+<testcase name="B01 B08 B14 1001 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="25.555">
+</testcase>
+<testcase name="B15 lost preview and committed 202 retry one frozen body/key and restore after re-login" classname="audit-bulk-manifest.spec.ts" time="15.752">
+</testcase>
+<testcase name="B09 failed rows get a new exact digest and current versions; successes are retained" classname="audit-bulk-manifest.spec.ts" time="60.186">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-bulk-manifest-B09-fa-5718c-ions-successes-are-retained\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-bulk-manifest-B09-fa-5718c-ions-successes-are-retained\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  audit-bulk-manifest.spec.ts:56:1 › B09 failed rows get a new exact digest and current versions; successes are retained 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('region', { name: 'Segmented maintenance' }).getByRole('textbox', { name: 'Maintenance reason', exact: true })
+        - locator resolved to <input disabled value="" maxlength="2000" aria-label="Maintenance reason"/>
+        - fill("Q08 human reviewed maintenance")
+      - attempting fill action
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+          - waiting 100ms
+        96 × waiting for element to be visible, enabled and editable
+           - element is not enabled
+         - retrying fill action
+           - waiting 500ms
+
+
+      19 | }
+      20 | async function preview(page:Page,panel:ReturnType<Page['getByRole']>){
+    > 21 |  await panel.getByRole('textbox',{name:'Maintenance reason',exact:true}).fill('Q08 human reviewed maintenance');
+         |                                                                          ^
+      22 |  const read=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===root);
+      23 |  await panel.getByRole('button',{name:'Preview segmented maintenance',exact:true}).click();const response=await read;expect(response.status()).toBe(201);
+      24 |  const data=(await response.json()).data;await expect(panel.getByRole('region',{name:'Frozen manifest'})).toContainText(`count: ${data.count}`);return data as {id:string;count:number;digest:string;version:number};
+        at preview (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-manifest.spec.ts:21:74)
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-manifest.spec.ts:59:241
+
+    Error Context: ..\..\test-results\audit-fixes\audit-bulk-manifest-B09-fa-5718c-ions-successes-are-retained\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-bulk-manifest-B09-fa-5718c-ions-successes-are-retained\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-bulk-manifest-B09-fa-5718c-ions-successes-are-retained\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B16 late preview cannot cross A-B-A; viewer has no maintenance; zh-HK mobile exact confirmation" classname="audit-bulk-manifest.spec.ts" time="15.25">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-bulk-manifest-B16-la-99825-K-mobile-exact-confirmation\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-bulk-manifest-B16-la-99825-K-mobile-exact-confirmation\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  audit-bulk-manifest.spec.ts:62:1 › B16 late preview cannot cross A-B-A; viewer has no maintenance; zh-HK mobile exact confirmation 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: '分段維護' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('region', { name: '分段維護' }) with timeout 5000ms
+      - waiting for getByRole('region', { name: '分段維護' })
+
+
+      65 |  await panel.getByRole('textbox',{name:'Maintenance reason'}).fill('Q08 old scope request');await panel.getByRole('button',{name:'Preview segmented maintenance'}).click();await started;await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption('e0000000-0000-4000-8000-000000000101');await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);release();await page.waitForTimeout(300);await expect(page.getByRole('region',{name:'Frozen manifest'})).toHaveCount(0);
+      66 |  const viewer=await browser.newPage();try{await signInWorkbench(viewer,true,'viewer');await viewer.getByRole('button',{name:'Buyers',exact:true}).click();await expect(viewer.getByRole('region',{name:'Segmented maintenance'})).toHaveCount(0);}finally{await viewer.close();}
+    > 67 |  await page.unroute(`**${root}`);await page.setViewportSize({width:390,height:844});await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');const zh=page.getByRole('region',{name:'分段維護'});await expect(zh).toBeVisible();await zh.getByRole('button',{name:'重試同一預覽'}).click();await expect(zh.getByRole('region',{name:'已凍結維護清單'})).toBeVisible();await expect(zh.getByRole('button',{name:'執行已確認維護清單'})).toBeDisabled();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:'test-results/q08-zh-mobile.png',fullPage:true});
+         |                                                                                                                                                                                                                                          ^
+      68 | });
+      69 |
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-manifest.spec.ts:67:234
+
+    Error Context: ..\..\test-results\audit-fixes\audit-bulk-manifest-B16-la-99825-K-mobile-exact-confirmation\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-bulk-manifest-B16-la-99825-K-mobile-exact-confirmation\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-bulk-manifest-B16-la-99825-K-mobile-exact-confirmation\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,0 +1,40 @@
+<testsuites id="" name="" tests="17" failures="0" skipped="0" errors="0" time="264.638125">
+<testsuite name="audit-bulk-confirmation.spec.ts" timestamp="2026-10-03T14:33:44.777Z" hostname="" tests="8" failures="0" skipped="0" time="86.863" errors="0">
+<testcase name="B02 adding a sixth buyer clears the previously confirmed five" classname="audit-bulk-confirmation.spec.ts" time="18.074">
+</testcase>
+<testcase name="B02 reason, target and exclusions clear confirmation; unchanged selection survives paging" classname="audit-bulk-confirmation.spec.ts" time="7.785">
+</testcase>
+<testcase name="B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works" classname="audit-bulk-confirmation.spec.ts" time="15.932">
+</testcase>
+<testcase name="B04 inactive owner is rejected and a stale buyer reports conflict without overwriting" classname="audit-bulk-confirmation.spec.ts" time="15.95">
+</testcase>
+<testcase name="B16 committed response loss locks changes and reconciles the same key after a route remount" classname="audit-bulk-confirmation.spec.ts" time="8.706">
+</testcase>
+<testcase name="B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link" classname="audit-bulk-confirmation.spec.ts" time="8.995">
+</testcase>
+<testcase name="B03 zh-HK mobile colleague search recovers a failed read" classname="audit-bulk-confirmation.spec.ts" time="6.95">
+</testcase>
+<testcase name="B03 viewer cannot assign through UI or direct API" classname="audit-bulk-confirmation.spec.ts" time="4.471">
+</testcase>
+</testsuite>
+<testsuite name="audit-bulk-manifest.spec.ts" timestamp="2026-10-03T14:33:44.777Z" hostname="" tests="9" failures="0" skipped="0" time="129.346" errors="0">
+<testcase name="B01 B14 100 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="10.432">
+</testcase>
+<testcase name="B01 B14 101 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="14.892">
+</testcase>
+<testcase name="B01 B14 1001 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="21.373">
+</testcase>
+<testcase name="B15 lost preview and committed 202 retry one frozen body/key and restore after re-login" classname="audit-bulk-manifest.spec.ts" time="21.438">
+</testcase>
+<testcase name="B08 failed rows get a new exact digest and current versions; successes are retained" classname="audit-bulk-manifest.spec.ts" time="19.206">
+</testcase>
+<testcase name="B16 late preview cannot cross A-B-A; viewer has no maintenance; zh-HK mobile exact confirmation" classname="audit-bulk-manifest.spec.ts" time="9.107">
+</testcase>
+<testcase name="B01 reviewer executes current fit-bound review" classname="audit-bulk-manifest.spec.ts" time="11.163">
+</testcase>
+<testcase name="B01 typed list target supports confirmed add and explicit new remove preview" classname="audit-bulk-manifest.spec.ts" time="9.227">
+</testcase>
+<testcase name="B09 UI cancel preserves the committed first50 and cancels only pending51" classname="audit-bulk-manifest.spec.ts" time="12.508">
+</testcase>
+</testsuite>
+</testsuites>

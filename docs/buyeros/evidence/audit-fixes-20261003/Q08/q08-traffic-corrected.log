@@ -1,0 +1,1 @@
+[{"mode":"before","requests":1250,"max_in_flight":130,"max_per_view":13},{"mode":"after","requests":140,"max_in_flight":10,"max_per_view":1}]

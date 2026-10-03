@@ -132,3 +132,13 @@ Broader16-case run retained14pass/2fail/0skip: initial unstructured500 at local 
 No schema revision; Alembic0036head. Pause-entry rollback patch applicability checked, runtime/production rehearsal not run; keep proof/context guards and all revisions/audit. Original31input hashes/98case original fields/other24task records/three destructive guards preserved. Labelled UI fixture/cache cleaned; unlabelled `buyeros-test-d9323d06` remains untouched without established ownership. Author review only; independent review pending.
 
 [Exact commands, reports, screenshots and rollback](../../evidence/audit-fixes-20261003/Q12/RESULTS.md), [local PR-15](Q12-pr.md). Code implemented, fixture verified, local integration verified; deployed SHA null. External auth/provider/worker/build/production/performance gates unverified. Next eligible local task **Q08** (Q05/Q06 complete); Q13 waits N02, Q16 root cause and Q17 remain blocked.
+
+## Q08 / PR-18 current checkpoint — 2026-10-03
+
+Reviewed source `c98fb6860ce2d4f9ba1797abe919454edcb13204`, base `80ecfc762a6b1aeb5ce6c205d0a641539aff54c1`;42source paths in local commit. F11 canonical bounded actor-bound maintenance manifest implemented: complete frozen normalized body/IDs/versions/digest,10000max/10001atomicdenial, ordinarysnapshot1000 unchanged, currentroles/RLS/exactcontext, stableunknownintent, explicitnewfailed-onlychild,50-row sharedworker. en/zh-HK390px,20-row real results/eligiblecolleagues/lists, A-B-A/refresh+reauth/cancel/restart evidence.
+
+StrictAPI90, migration39, actualUI17(9Q08+8Q05),Node22 pass;0fail/error/skip, generated84=70original+14extensions/type/lint pass. B08/B09variant andB14partial recorded, not all98passed. Actual10k9950success/50conflict,200x50chunks, independentprocessresume,100APIpages; no continuousworker/liveprovider/productionSLAclaim.
+
+Sole0036head inspected before allocating0037_bulk_manifests; disposableemptyupgrade/downgrade/reupgrade andpopulatedrefusal pass, productionunapplied. Pause-admissionpatch applicability only, runtime/productionrollback notrehearsed; durablehistory/results/recovery retained. Original31inputs/98fields/92othercases/24othertasks/3guards/193unrelateddirtypaths preserved. Fixturescleaned; exactownerlabelleddependencycacheretainedforQ14. Authorreviewonly; independentpending.
+
+[Full evidence/commands/screenshots/rollback](../../evidence/audit-fixes-20261003/Q08/RESULTS.md), [local PR-18 description](Q08-pr.md). Codeimplemented,fixtureverified,localintegrationverified; deployedSHAnull. Auth0stays,delivery403, noexternalaction. Q16underlyingcauseblocked/Q17notguessed/Q13waitsN02. **Next eligible local task Q14** (Q03complete); fullstaff/auth/provider/build/continuousworker/production gates unverified.

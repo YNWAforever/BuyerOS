@@ -1,0 +1,26 @@
+✖ B15 pending body is immutable and retry/token renewal uses same frozen body/key (2.6645ms)
+✔ B16 A-B-A keeps actor intent while stale response is cancelled; other actor/scope are independent (26.5577ms)
+✔ B15 execution binds exact manifest/version/digest and retains key on unknown acceptance (1.5337ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 854.7773
+
+✖ failing tests:
+
+test at tests\audit-bulk-manifests.test.mjs:11:1
+✖ B15 pending body is immutable and retry/token renewal uses same frozen body/key (2.6645ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception (TypeError).
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/audit-bulk-manifests.test.mjs:15:9)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }

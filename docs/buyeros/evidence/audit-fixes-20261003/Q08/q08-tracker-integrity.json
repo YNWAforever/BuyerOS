@@ -1,0 +1,10 @@
+{
+  "original_inputs": 31,
+  "original_cases": 98,
+  "original_case_columns_unchanged": true,
+  "unchanged_other_case_rows": 92,
+  "unchanged_other_task_records": 24,
+  "API_operations": 84,
+  "original_operations_preserved": 70,
+  "added_operations": 3
+}

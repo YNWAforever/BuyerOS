@@ -589,3 +589,52 @@ docs/buyeros/remaining/TASKS.json
 ## Q12 / PR-15 local source commits
 
 Base `c7136fbceb1567bca87215b57d142e8137b8968d` → API `63d140b4b5d4636b1fe9125ec3885d1e69bbecb4` → UI `70d2e54ef613910ce5a684d90c4afce32f504e66`. Exact17 tested source paths and committed hashes: `../evidence/audit-fixes-20261003/Q12/q12-committed-source.json`; full binary-capable diff `Q12/Q12.patch`. Separate checkpoint updates TASKS/status/case and81-operation trackers, evidence and local PR/review descriptions. No production/auth/provider/schema changes.
+
+## Q08 local review inventory
+
+Source `c98fb6860ce2d4f9ba1797abe919454edcb13204`, base`80ecfc762a6b1aeb5ce6c205d0a641539aff54c1`;42sourcefiles. Exactdiff/evidence in ../evidence/audit-fixes-20261003/Q08. No deployedSHA.
+
+```text
+app/globals.css
+docs/buyeros/contracts/openapi.proposed.yaml
+features/live/bulk-actions.tsx
+features/live/bulk-manifest.tsx
+features/live/buyer-results.tsx
+services/api/alembic/versions/0037_bulk_manifests.py
+services/api/buyeros_api/api/app.py
+services/api/buyeros_api/api/deps.py
+services/api/buyeros_api/api/routes/bulk_manifests.py
+services/api/buyeros_api/api/schemas.py
+services/api/buyeros_api/db/outbox.py
+services/api/buyeros_api/services/bulk_manifest.py
+services/api/buyeros_api/services/bulk_service.py
+services/api/buyeros_api/services/buyer_selection.py
+services/api/buyeros_api/services/worker_recovery.py
+services/api/tests/test_admin_operations_db.py
+services/api/tests/test_backup_restore_t28.py
+services/api/tests/test_budget_atomicity_db.py
+services/api/tests/test_bulk_jobs_db.py
+services/api/tests/test_bulk_manifest_db.py
+services/api/tests/test_buyer_management_db.py
+services/api/tests/test_buyer_review_db.py
+services/api/tests/test_checkpoint_schema_privileges_db.py
+services/api/tests/test_cloudflare_migration_db.py
+services/api/tests/test_cloudflare_recovery_boundaries_db.py
+services/api/tests/test_contact_job_migration.py
+services/api/tests/test_contact_quote_migration.py
+services/api/tests/test_draft_approval_migration.py
+services/api/tests/test_draft_integrity_migration.py
+services/api/tests/test_export_migration.py
+services/api/tests/test_outcome_migration.py
+services/api/tests/test_policy_lifecycle_db.py
+services/api/tests/test_project_constraints_db.py
+services/api/tests/test_research_checkpoint_migration.py
+services/api/tests/test_retention_authorization_db.py
+services/api/tests/test_sender_identity_migration.py
+services/generated/buyeros-api.ts
+services/generated/operation-routes.ts
+services/live/bulk-manifests.ts
+services/worker/tests/fixtures/audit_manifests.py
+tests/audit-bulk-manifests.test.mjs
+tests/e2e/audit-bulk-manifest.spec.ts
+```

@@ -1,0 +1,18 @@
+--- a/services/api/buyeros_api/api/routes/bulk_manifests.py
++++ b/services/api/buyeros_api/api/routes/bulk_manifests.py
+@@ -17,6 +17,7 @@
+ 
+ @router.post("")
+ async def preview_bulk_manifest(workspace_id:uuid.UUID,project_id:uuid.UUID,payload:BulkManifestCreate,request:Request,response:Response,principal:Principal=Depends(get_principal),idempotency_key:str|None=Header(default=None,alias="Idempotency-Key")):
++    raise ApiError(403,"MANIFEST_ADMISSION_DISABLED","new manifest admission paused")
+     async with tenant_scoped(workspace_id) as session:
+         member=await load_membership(session,principal=principal,workspace_id=workspace_id)
+         await service.authorize(session,workspace_id=workspace_id,project_id=project_id,actor_id=member["user_id"],operation=payload.operation,command=payload.target.model_dump(mode="json"))
+@@ -40,6 +41,7 @@
+ @router.post("/{manifest_id}/execute")
+ async def execute_bulk_manifest(workspace_id:uuid.UUID,project_id:uuid.UUID,manifest_id:uuid.UUID,payload:BulkManifestExecute,request:Request,response:Response,principal:Principal=Depends(get_principal),idempotency_key:str|None=Header(default=None,alias="Idempotency-Key"),if_match:str|None=Header(default=None,alias="If-Match")):
+     version=if_match_version(if_match)
++    raise ApiError(403,"MANIFEST_ADMISSION_DISABLED","new manifest admission paused")
+     async with tenant_scoped(workspace_id) as session:
+         member=await load_membership(session,principal=principal,workspace_id=workspace_id)
+         row=await service.get(session,workspace_id=workspace_id,project_id=project_id,actor_id=member["user_id"],manifest_id=manifest_id,lock=True)

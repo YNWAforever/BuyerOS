@@ -2,12 +2,12 @@
 
 This file is the current first-round repair record. Earlier checkpoints are historical evidence.
 
-- Scope: Q11 baseline, Q01, Q03, Q04, Q15; local continuations Q02/Q05/Q06/Q07; Q16 read-only investigation.
+- Scope: Q11 baseline, Q01, Q03, Q04, Q15; local continuations Q02/Q05/Q06/Q07/Q12/Q08; Q16 read-only investigation.
 - Audit/initial main source: `a78859fe474f5722be3755b10e2586436b53bf97`; remote main checked at the initial repair baseline. Current reviewed repair source follows each task checkpoint below.
 - Isolated branch: `codex/audit-fixes-20261003`; original checkout and dirty Neon Auth worktree preserved.
 - Evidence ZIP SHA256: `19369591a175edad7dd2e9f3ddb5bfdebc6cdc5130a2770243b1e9de2a42d35a`; nested CRC and all 31 manifest hashes passed; outer manifest 8/8 passed.
 - Deployment: audit reports `dpl_7A95afQdDSUsaPRw2RnPFouQ1hEp`, source a78859f. No new deployment/readback in this repair round yet.
-- Schema source head verified: `0036_checkpoint_schema_grants (head)`. New migrations: 0. Production schema/runtime role/jobs selector/epoch: unverified this round.
+- Current schema source head: `0037_bulk_manifests`; one additive Q08 revision after verified0036. Only disposable migration checks; production schema/runtime role/jobs selector/epoch unverified.
 - Provider activation: blocked; selected live provider allowlist empty in reviewed source. Mailbox/CRM disabled; delivery remains 403.
 - Auth: Auth0 retained. Neon migration is outside this first round. No membership or identity mutation.
 - Staff journey/live verification: blocked, not inferred from fixture tests.
@@ -28,7 +28,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 | F08 | fixed with local durability/UI evidence (Q04) | Q04 |
 | F09 | fixed with local UI/output/DB evidence; production unverified | Q07 A02/A07, truthful free fixed template and original-language citations |
 | F10 | still open (external evidence gate) | outside selected first round |
-| F11 | still open (audit-source code unchanged) | outside selected first round |
+| F11 | fixed with local manifest HTTP/DB/UI evidence; live rollout unverified | Q08 B15, B14 partial; existing snapshot1000 preserved |
 | F12 | still open (external evidence gate) | outside selected first round |
 | F13 | still open (audit-source code unchanged) | Q11 baseline only |
 | F14 | partial draft journey verified; whole staff journey still open | Q12 U09 slice only; full eight-module release acceptance not asserted |
@@ -121,3 +121,13 @@ Broader16-case run retained14pass/2fail/0skip: initial unstructured500 at local 
 No schema revision; Alembic0036head. Pause-entry rollback patch applicability checked, runtime/production rehearsal not run; keep proof/context guards and all revisions/audit. Original31input hashes/98case original fields/other24task records/three destructive guards preserved. Labelled UI fixture/cache cleaned; unlabelled `buyeros-test-d9323d06` remains untouched without established ownership. Author review only; independent review pending.
 
 [Exact commands, reports, screenshots and rollback](evidence/audit-fixes-20261003/Q12/RESULTS.md), [local PR-15](review/2026-10-03-audit-fixes/Q12-pr.md). Code implemented, fixture verified, local integration verified; deployed SHA null. External auth/provider/worker/build/production/performance gates unverified. Next eligible local task **Q08** (Q05/Q06 complete); Q13 waits N02, Q16 root cause and Q17 remain blocked.
+
+## Q08 / PR-18 current checkpoint — 2026-10-03
+
+Reviewed source `c98fb6860ce2d4f9ba1797abe919454edcb13204`, base `80ecfc762a6b1aeb5ce6c205d0a641539aff54c1`;42source paths in local commit. F11 canonical bounded actor-bound maintenance manifest implemented: complete frozen normalized body/IDs/versions/digest,10000max/10001atomicdenial, ordinarysnapshot1000 unchanged, currentroles/RLS/exactcontext, stableunknownintent, explicitnewfailed-onlychild,50-row sharedworker. en/zh-HK390px,20-row real results/eligiblecolleagues/lists, A-B-A/refresh+reauth/cancel/restart evidence.
+
+StrictAPI90, migration39, actualUI17(9Q08+8Q05),Node22 pass;0fail/error/skip, generated84=70original+14extensions/type/lint pass. B08/B09variant andB14partial recorded, not all98passed. Actual10k9950success/50conflict,200x50chunks, independentprocessresume,100APIpages; no continuousworker/liveprovider/productionSLAclaim.
+
+Sole0036head inspected before allocating0037_bulk_manifests; disposableemptyupgrade/downgrade/reupgrade andpopulatedrefusal pass, productionunapplied. Pause-admissionpatch applicability only, runtime/productionrollback notrehearsed; durablehistory/results/recovery retained. Original31inputs/98fields/92othercases/24othertasks/3guards/193unrelateddirtypaths preserved. Fixturescleaned; exactownerlabelleddependencycacheretainedforQ14. Authorreviewonly; independentpending.
+
+[Full evidence/commands/screenshots/rollback](evidence/audit-fixes-20261003/Q08/RESULTS.md), [local PR-18 description](review/2026-10-03-audit-fixes/Q08-pr.md). Codeimplemented,fixtureverified,localintegrationverified; deployedSHAnull. Auth0stays,delivery403, noexternalaction. Q16underlyingcauseblocked/Q17notguessed/Q13waitsN02. **Next eligible local task Q14** (Q03complete); fullstaff/auth/provider/build/continuousworker/production gates unverified.

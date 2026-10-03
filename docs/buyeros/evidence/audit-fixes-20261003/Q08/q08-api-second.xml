@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="32" time="37.857" timestamp="2026-10-03T21:23:47.054026+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_freezes_1001_current_versions_without_widening_snapshot" time="5.554" /><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_sync_async_boundaries_and_replay_once[100]" time="1.268"><failure message="AssertionError: {&quot;code&quot;:&quot;INTERNAL_ERROR&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;709bf276-8663-4fde-b8f9-b279f384e2f6&quot;,&quot;retryable&quot;:true}&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">api = &lt;starlette.testclient.TestClient object at 0x0000019A6691FB10&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:49397/buyeros_test_api'
+count = 100
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+        _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+        first=_execute(api,manifest,key);again=_execute(api,manifest,key)
+&gt;       assert first.status_code==again.status_code==(200 if count==100 else 202),first.text
+E       AssertionError: {"code":"INTERNAL_ERROR","message":"request failed","request_id":"709bf276-8663-4fde-b8f9-b279f384e2f6","retryable":true}
+E       assert 500 == 200
+E        +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+tests\test_bulk_manifest_db.py:56: AssertionError</failure></testcase><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_sync_async_boundaries_and_replay_once[101]" time="0.628"><failure message="AssertionError: {&quot;code&quot;:&quot;INTERNAL_ERROR&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;6361d69c-203d-4073-8a71-de3a7eb13987&quot;,&quot;retryable&quot;:true}&#10;assert 500 == 202&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">api = &lt;starlette.testclient.TestClient object at 0x0000019A667CA210&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:49397/buyeros_test_api'
+count = 101
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+        _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+        first=_execute(api,manifest,key);again=_execute(api,manifest,key)
+&gt;       assert first.status_code==again.status_code==(200 if count==100 else 202),first.text
+E       AssertionError: {"code":"INTERNAL_ERROR","message":"request failed","request_id":"6361d69c-203d-4073-8a71-de3a7eb13987","retryable":true}
+E       assert 500 == 202
+E        +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+tests\test_bulk_manifest_db.py:56: AssertionError</failure></testcase><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_sync_async_boundaries_and_replay_once[1000]" time="1.347"><failure message="AssertionError: {&quot;code&quot;:&quot;INTERNAL_ERROR&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;bc4297e2-0388-4199-9e97-71a03bd0a809&quot;,&quot;retryable&quot;:true}&#10;assert 500 == 202&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">api = &lt;starlette.testclient.TestClient object at 0x0000019A678D8050&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:49397/buyeros_test_api'
+count = 1000
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+        _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+        first=_execute(api,manifest,key);again=_execute(api,manifest,key)
+&gt;       assert first.status_code==again.status_code==(200 if count==100 else 202),first.text
+E       AssertionError: {"code":"INTERNAL_ERROR","message":"request failed","request_id":"bc4297e2-0388-4199-9e97-71a03bd0a809","retryable":true}
+E       assert 500 == 202
+E        +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+tests\test_bulk_manifest_db.py:56: AssertionError</failure></testcase><testcase classname="tests.test_bulk_manifest_db" name="test_manifest_sync_async_boundaries_and_replay_once[1001]" time="1.257"><failure message="AssertionError: {&quot;code&quot;:&quot;INTERNAL_ERROR&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;f12ff90b-337c-4448-bbdb-7bb52f8a7140&quot;,&quot;retryable&quot;:true}&#10;assert 500 == 202&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">api = &lt;starlette.testclient.TestClient object at 0x0000019A6739FA80&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:49397/buyeros_test_api'
+count = 1001
+
+    @pytest.mark.parametrize("count",[100,101,1000,1001])
+    def test_manifest_sync_async_boundaries_and_replay_once(api,seeded,count):
+        _seed_many(seeded,count);manifest=_preview(api,_admin_membership(seeded));key=str(uuid.uuid4())
+        first=_execute(api,manifest,key);again=_execute(api,manifest,key)
+&gt;       assert first.status_code==again.status_code==(200 if count==100 else 202),first.text
+E       AssertionError: {"code":"INTERNAL_ERROR","message":"request failed","request_id":"f12ff90b-337c-4448-bbdb-7bb52f8a7140","retryable":true}
+E       assert 500 == 202
+E        +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+tests\test_bulk_manifest_db.py:56: AssertionError</failure></testcase><testcase classname="tests.test_bulk_manifest_db" name="test_10001_is_explicitly_rejected_and_no_partial_preview_or_job" time="4.262" /><testcase classname="tests.test_bulk_manifest_db" name="test_10000_committed_crash_recovery_exact_results_and_failed_child_preview" time="5.034"><failure message="AssertionError: {&quot;code&quot;:&quot;INTERNAL_ERROR&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;8414ca5b-9bcc-4147-9840-3dbed8445452&quot;,&quot;retryable&quot;:true}&#10;assert 500 == 202&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">api = &lt;starlette.testclient.TestClient object at 0x0000019A667F28B0&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:49397/buyeros_test_api'
+
+    def test_10000_committed_crash_recovery_exact_results_and_failed_child_preview(api,seeded):
+        from buyeros_api.api.deps import tenant_scoped
+        from buyeros_api.services.bulk_service import apply_bulk_chunk
+        _seed_many(seeded,10000);owner=_admin_membership(seeded);manifest=_preview(api,owner)
+        assert manifest["count"]==10000
+        with psycopg.connect(seeded) as conn:
+            stale=conn.execute("SELECT buyer_id FROM bulk_manifest_items WHERE manifest_id=%s ORDER BY ordinal LIMIT 50",(manifest["id"],)).fetchall()
+            conn.cursor().executemany("UPDATE project_buyers SET version=version+1 WHERE id=%s",stale)
+&gt;       response=_execute(api,manifest);assert response.status_code==202,response.text
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: {"code":"INTERNAL_ERROR","message":"request failed","request_id":"8414ca5b-9bcc-4147-9840-3dbed8445452","retryable":true}
+E       assert 500 == 202
+E        +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+tests\test_bulk_manifest_db.py:83: AssertionError</failure></testcase><testcase classname="tests.test_bulk_manifest_db" name="test_exact_manifest_confirmation_is_required_and_denial_atomic[bad0]" time="0.382" /><testcase classname="tests.test_bulk_manifest_db" name="test_exact_manifest_confirmation_is_required_and_denial_atomic[bad1]" time="0.302" /><testcase classname="tests.test_bulk_manifest_db" name="test_exact_manifest_confirmation_is_required_and_denial_atomic[bad2]" time="0.313" /><testcase classname="tests.test_bulk_manifest_db" name="test_exact_manifest_confirmation_is_required_and_denial_atomic[bad3]" time="0.323" /><testcase classname="tests.test_bulk_manifest_db" name="test_other_actor_scope_current_roles_owner_and_expiry_cannot_execute" time="0.805" /><testcase classname="tests.test_bulk_jobs_db" name="test_assign_owner_small_batch_is_durable_partial_and_role_scoped" time="0.458" /><testcase classname="tests.test_bulk_jobs_db" name="test_unknown_async_job_is_not_a_fake_success" time="0.294" /><testcase classname="tests.test_bulk_jobs_db" name="test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback" time="0.937" /><testcase classname="tests.test_bulk_jobs_db" name="test_bulk_partial_result_and_resume" time="3.594" /><testcase classname="tests.test_bulk_jobs_db" name="test_job_read_is_actor_bound_even_for_same_workspace" time="0.430" /><testcase classname="tests.test_bulk_jobs_db" name="test_t11_owner_assignment_is_a_strict_contract_extension" time="0.712" /><testcase classname="tests.test_bulk_jobs_db" name="test_async_owner_target_must_be_active_before_enqueue" time="0.253" /><testcase classname="tests.test_bulk_jobs_db" name="test_retry_failed_only_new_versions" time="0.470" /><testcase classname="tests.test_bulk_jobs_db" name="test_review_and_list_mutations_queue_101_rows_with_exact_replay" time="0.634" /><testcase classname="tests.test_bulk_jobs_db" name="test_cancel_bulk_job_preserves_committed_rows_and_stops_pending" time="0.940" /><testcase classname="tests.test_bulk_jobs_db" name="test_q05_b07_mixed_100_rows_match_durable_state_and_reason_digest" time="1.736" /><testcase classname="tests.test_bulk_jobs_db" name="test_q05_b04_owner_deactivated_after_preview_is_rejected_without_changes" time="0.313" /><testcase classname="tests.test_bulk_jobs_db" name="test_q05_b04_queued_owner_deactivation_blocks_each_row_and_survives_restart" time="0.666" /><testcase classname="tests.test_api_routes_contract" name="test_unauthenticated_requests_are_rejected" time="0.041" /><testcase classname="tests.test_api_routes_contract" name="test_implemented_routes_match_openapi_operation_ids" time="0.557" /><testcase classname="tests.test_api_routes_contract" name="test_the_app_actually_exposes_every_implemented_route" time="0.041" /><testcase classname="tests.test_api_routes_contract" name="test_implemented_response_fields_are_declared_by_the_contract" time="1.380" /><testcase classname="tests.test_api_routes_contract" name="test_approve_checks_auth_before_preconditions" time="0.036" /><testcase classname="tests.test_api_routes_contract" name="test_approve_rejects_a_missing_or_malformed_if_match" time="0.041" /><testcase classname="tests.test_contract_required_fields" name="test_contract_required_fields" time="1.056" /></testsuite></testsuites>

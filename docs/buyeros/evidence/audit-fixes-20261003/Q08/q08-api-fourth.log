@@ -1,0 +1,102 @@
+..........................F.F...                                         [100%]
+================================== FAILURES ===================================
+_____________ test_implemented_routes_match_openapi_operation_ids _____________
+
+    def test_implemented_routes_match_openapi_operation_ids():
+        import yaml
+        from pathlib import Path
+    
+>       spec = yaml.safe_load(Path("../../docs/buyeros/contracts/openapi.proposed.yaml").read_text(encoding="utf-8"))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+services\api\tests\test_api_routes_contract.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\pathlib\__init__.py:787: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('../../docs/buyeros/contracts/openapi.proposed.yaml')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '..\\..\\docs\\buyeros\\contracts\\openapi.proposed.yaml'
+
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\pathlib\__init__.py:771: FileNotFoundError
+________ test_implemented_response_fields_are_declared_by_the_contract ________
+
+    def test_implemented_response_fields_are_declared_by_the_contract():
+        """P9 returns a *documented subset* of each contract entity (see the plan's deliberate gaps:
+        the ORM models do not yet carry every filtered/sensitive field). This guard pins the shape we
+        do return: every emitted key must be declared by the contract schema, so a renamed or invented
+        field fails here instead of drifting silently. It does NOT assert full required-field coverage �X
+        that is the recorded BO-004/next-phase deferral."""
+        import yaml
+        from pathlib import Path
+    
+>       spec = yaml.safe_load(Path("../../docs/buyeros/contracts/openapi.proposed.yaml").read_text(encoding="utf-8"))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+services\api\tests\test_api_routes_contract.py:78: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\pathlib\__init__.py:787: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('../../docs/buyeros/contracts/openapi.proposed.yaml')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '..\\..\\docs\\buyeros\\contracts\\openapi.proposed.yaml'
+
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\pathlib\__init__.py:771: FileNotFoundError
+============================== warnings summary ===============================
+services\api\tests\conftest.py:24
+services\api\tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\api\tests\conftest.py:24
+services\api\tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\api\.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_bulk_manifest_db.py::test_manifest_freezes_1001_current_versions_without_widening_snapshot
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_bulk_manifest_db.py::test_manifest_freezes_1001_current_versions_without_widening_snapshot
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q08-api-fourth.xml -
+=========================== short test summary info ===========================
+FAILED services\api\tests\test_api_routes_contract.py::test_implemented_routes_match_openapi_operation_ids
+FAILED services\api\tests\test_api_routes_contract.py::test_implemented_response_fields_are_declared_by_the_contract
+2 failed, 30 passed, 9 warnings in 99.23s (0:01:39)
