@@ -1,0 +1,57 @@
+index,case_id,finding,priority,scenario,precondition_data,steps,expected_acceptance,audit_status,owner,evidence_required
+0,U01,F01,P1,正式登入與工作區,指定已授權會員；正式read-only,登入並開/app,看見正確workspace和role；否則有恢復路徑,BLOCKED_NO_MEMBERSHIP,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+1,U02,F01,P1,無會員恢復,0-membership fixture,登入；按重新檢查,不授權；可重新查詢；顯示聯絡方法,SOURCE_GAP,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+2,U03,F02,P2,無會員繁中,0-membership fixture,切en/zh-HK,兩種語言均可選且空狀態已翻譯,OBSERVED_DISABLED,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+3,U04,F01,P1,不同身份提供者,同email不同issuer/subject fixture,各自登入,不自動合併或提升權限,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+4,U05,F04,P1,角色撤回,operator已有頁面；撤回membership,再讀寫及切scope,拒絕新操作；清理舊scope UI,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+5,U06,F03,P1,成員分頁,250 members及admin,第1頁至第13頁；搜尋第101位,全部可達；總數正確；無重複,SOURCE_GAP,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+6,U07,F04,P2,辨識成員,同名及尾8碼碰撞,查看並選角色變更對象,可用授權名稱及完整ID辨識,SOURCE_GAP,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+7,U08,F04,P1,最後管理員競態,2 admins；disposable DB,兩人同時移除自己admin,至少1 active admin；衝突可理解,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+8,U09,F14,P2,完整員工任務,隔離完整fixture；operator/reviewer/admin,offer→ICP→research→review→draft→approve→export→outcome,版本、角色、狀態持續一致,HISTORICAL_CI_ONLY,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+9,U10,F14,P2,手機及縮放,390px/1280px；200% zoom；en/zh,鍵盤完成五項核心任務,焦點可見；操作不遮擋；無整頁水平捲動,HISTORICAL_IMAGES_ONLY,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+10,U11,F14,P2,輔助工具,螢幕閱讀器；已授權fixture,導航、選取、進度、錯誤恢復,控制項有名稱；焦點合理；狀態通知不洗版,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+11,U12,F14,P2,人員可用性,3–5員工；五項固定任務,計時並記錯誤；重設相同資料重測,完成率≥90%；錯scope操作0；比較前後時間,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+12,B01,F06,P1,批量100/101邊界,100及101 buyer fixture,相同action各提交一次,同步/非同步契約正確；每列只一次,HISTORICAL_CI_ONLY,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+13,B02,F06,P1,確認後改集合,5個buyers；已勾確認,增加第6個或取消1個,confirmation清除；要求重新預覽,SOURCE_RISK,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+14,B03,F06,P2,分派給同事,有資格active同事,選10位buyer；選同事並確認,10位owner正確；audit reason可追查,SOURCE_GAP,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+15,B04,F06,P1,owner失效,preview後停用owner,提交batch,server拒絕／逐列blocked；沒有越權分派,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+16,B05,F08,P1,建立研究回應遺失,fictional provider＋owned DB,commit後丟202；使用者重試,相同key/run/outbox；不重複經濟意圖,SOURCE_RISK,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+17,B06,F08,P1,研究雙擊,同body；同scope,同時按Start兩次,共用意圖；只有一工作,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+18,B07,F06,P1,混合逐列結果,成功/unchanged/conflict/blocked各25筆,提交batch,計數總和100；每列status與DB一致,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+19,B08,F06,P1,只重試失敗,100中20失敗；修改其中版本,failed-only retry,80成功列不重做；新版本重新判定,HISTORICAL_CI_ONLY,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+20,B09,F06,P1,取消及中途崩潰,101筆job正在執行,cancel；kill worker；重啟,已commit保留；未處理取消；無重複寫入,HISTORICAL_CI_ONLY,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+21,B10,F05,P1,Operations結果ID,真實契約fixture result.id,查job結果,完整buyer ID顯示；React key有效,SOURCE_DEFECT,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+22,B11,F05,P2,Operations結果第二頁,21和101 results,換頁及重開job,所有結果可達；page/total正確,SOURCE_GAP,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+23,B12,F07,P1,慢網路輪詢,1000已處理結果；job running；RTT2.5s,開10個actor view 60秒,每view最多1 in-flight；無全頁重讀,SOURCE_RISK,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+24,B13,F07,P2,隱藏頁及429,visible/hidden；Retry-After,切hidden；回visible；inject429,hidden不poll；退避；回來更新一次,SOURCE_RISK,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+25,B14,F11,P2,1000/1001上限,1001 matching buyers,select all filtered,現版清楚clipped並阻止誤選全部,SOURCE_BEHAVIOR,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+26,B15,F11,P1,10k維護manifest,新功能；10000 frozen ids/versions,分10chunks；更新其中50版本,總數完整；50衝突；成功列不重跑,NOT_RUN_NEW_FEATURE,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+27,B16,F06,P1,selection與scope切換,A/B workspace；inflight batch,換scope再返回,不顯示/寫入另一scope；正確resume link,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+28,A01,F12,P1,規則fit六案例,repo research-eval.json,執行test_fit_eval.py,6筆verdict一致；unsupported citation0,LOCAL_PASS_1_TEST,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+29,A02,F09,P2,tone及目的是否有效,同facts/evidence；2種tone/objective,執行reproduce_draft_controls.py,現況same_body=true；修復後UI承諾與行為一致,LOCAL_GAP_REPRODUCED,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+30,A03,F12,P1,真實gold set,至少200公司；雙人標註；holdout,比較match/not_match/needs_review,分層precision/recall/coverage及區間；暫定match precision≥95%,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+31,A04,F12,P1,同名公司與子公司,同名異國；集團/子公司；異域名,比對entity和evidence,不把另一實體證據附到買家,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+32,A05,F12,P1,過期/矛盾來源,dated/expired/contradicts fixture,refresh及fit再評分,過期不支持Match；矛盾需review,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+33,A06,F12,P1,引用及prompt injection,跨company/tenant/不存在ID；惡意頁面文字,生成fit/draft,拒絕假引用；不服從來源指令；untrusted只作資料,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+34,A07,F09,P2,雙語草稿與引用,英文excerpt；zh-HK route,生成及匯出,UI明示原語言引用；不聲稱已翻譯全文,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+35,A08,F12,P1,Contact實際正確性,已核准pilot；人工驗證身份/職務/來源日期,比對候選及suppression,錯公司/禁用contact輸出0；格式合法≠身份準確,NOT_RUN_PROVIDER_BLOCKED,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+36,P01,F12,P1,HK冷暖端到端,授權staging；冷暖各30samples,登入另計；打開buyers,暖p95≤2s；冷p95≤4s；報p99和錯誤,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+37,P02,F12,P1,API多actor負載,1k/10k買家；1/10/100ws；1/10/25actors,固定30samples及逐級load,暖p95≤800ms；p99≤1.5s；5xx<1%；tenant錯誤0,HISTORICAL_BASELINE_ONLY,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+38,P03,F12,P2,SQL及連線,同P02；SQL instrumentation,讀buyer page及深頁,記queries/bytes/pool/EXPLAIN；无隨頁size增長的N+1,HISTORICAL_BASELINE_ONLY,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+39,P04,F07,P1,Bulk流量前後比較,同B12固定fixture,記requests/bytes/SQL60秒,單in-flight；summary不含歷史results；實際改善可量化,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+40,P05,F12,P1,Worker公平性,10ws；短/長/timeout jobs,受控30分鐘mixed workload,記queue wait/oldest age/吞吐；無starvation,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+41,P06,F12,P2,UI核心指標,桌面/390px；固定網路及device,收LCP/INP/CLS,建議≤2.5s/200ms/0.1；記環境與樣本,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+42,P07,F12,P1,大量scope及名單,100workspaces/1000projects/lists,切workspace並搜尋list,分頁按需；不序列下載全部才顯示,SOURCE_RISK,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+43,P08,F10,P1,運行成本與idle,受控Cloudflare/DB環境,觀察空閒與有job兩窗,計實際requests/compute；無無意義輪詢；成本不超核准額,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+44,S01,F01,P1,JWT/JWKS行為,本地非DBfixtures,test_jwks_cache.py,rotation/cache/outage fail-closed assertions通過,LOCAL_PASS_SUBSET,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+45,S02,F12,P1,fetch邊界,本地private/loopback/public IP fixture,test_safe_fetch.py,拒絕private/local；不以此聲稱完整SSRF驗收,LOCAL_PASS_SUBSET,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+46,S03,F08,P1,provider未明結果帳本,本地settlement fixtures,test_settlement.py,unknown不釋放；proven-unsent才release,LOCAL_PASS_SUBSET,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+47,S04,F10,P1,fixture不得正式啟用,provider contract fixture,test_provider_contracts.py,production拒fixture；缺價目/能力拒絕,LOCAL_PASS_WITH_1_DB_SKIP,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+48,S05,F10,P1,跨服務gateway,本地mock fetch,node tests/vercel-services.test.mjs及worker-gateway.test.mjs,6 pass；cookie/保護header不誤傳；binding缺失failclosed,LOCAL_PASS_6_TESTS,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+49,S06,F04,P1,租戶隔離與last-admin DB,owned loopback PG；strict mode,目前RLS/admin integration suites,無跨租戶讀寫；必要DB case不skip,NOT_RUN_LOCAL_DB_MISSING,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+50,R01,F13,P1,部署對照,main/CI/Vercel/DB/worker readback,記SHA/schema/selector/epoch/time,每一層明確且可追查；不能以merge推migration,PARTIAL_METADATA_VERIFIED,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+51,R02,F10,P1,runtime權限0036,owned PG18及核准preview,SELECT checkpoint版本；試mutation,允許必要read；拒schema-version mutation,HISTORICAL_CI_ONLY,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+52,R03,F10,P1,outbox恢復與lease,owned PG/controller,duplicateQueue/leaseexpired/epochchange,無重複side effect；舊epoch拒絕,HISTORICAL_CI_ONLY,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+53,R04,F10,P1,restore及retention,隔離restore；外部journal副本,恢復舊backup再replay deletion,刪除不復活；ledger可核對；資料可用前完成,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+54,R05,F13,P2,單一現況文件,CURRENT_STATUS及舊handoff,比對PR狀態/時間/operation ledger,historical標清楚；部署狀態不捏造,SOURCE_GAP,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間
+55,R06,F10,P1,告警及rollback,核准staging；注入job stalled,查alert→負責人→drain→rollback,可操作；未知holds不誤釋放；証據有時間線,NOT_RUN,待分派,evidence/ 或執行時填入 artifact path；記 SHA、環境及時間

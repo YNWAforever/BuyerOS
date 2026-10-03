@@ -1,0 +1,56 @@
+{
+  "workspace_query_fanout": [
+    {
+      "database_workspace_count": 1,
+      "offset": 0,
+      "limit": 100,
+      "execute_calls": 4,
+      "returned_items": 1
+    },
+    {
+      "database_workspace_count": 10,
+      "offset": 0,
+      "limit": 100,
+      "execute_calls": 22,
+      "returned_items": 10
+    },
+    {
+      "database_workspace_count": 100,
+      "offset": 0,
+      "limit": 100,
+      "execute_calls": 202,
+      "returned_items": 100
+    },
+    {
+      "database_workspace_count": 1000,
+      "offset": 0,
+      "limit": 100,
+      "execute_calls": 2002,
+      "returned_items": 100
+    },
+    {
+      "database_workspace_count": 1000,
+      "offset": 100,
+      "limit": 100,
+      "execute_calls": 2002,
+      "returned_items": 100
+    }
+  ],
+  "draft_style_controls": {
+    "same_subject": true,
+    "same_body": true,
+    "different_metadata": true,
+    "sample_count": 2,
+    "route": "grounded-template.v1"
+  },
+  "edited_draft_approval_gate": {
+    "exception_type": "ApiError",
+    "message": "grounded nonempty draft required",
+    "scope": "Actual approval gate; supplied edited-state fixture. Not a persisted full journey."
+  },
+  "limitations": [
+    "No production traffic or PostgreSQL timing measured.",
+    "No browser component mutation or end-to-end persistence exercised.",
+    "These probes confirm existing behavior; they do not assert fixes are complete."
+  ]
+}

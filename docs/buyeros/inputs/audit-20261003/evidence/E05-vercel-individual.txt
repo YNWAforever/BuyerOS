@@ -1,0 +1,13 @@
+✔ Vercel exposes only the app and binds its API call to the internal API service (1.464867ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (53.926458ms)
+✔ the app proxy fails closed when the binding is absent (1.111302ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (1.152413ms)
+✔ FastAPI redirects stay on the public app path (0.63254ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 64.707138

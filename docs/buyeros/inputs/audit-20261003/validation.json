@@ -1,0 +1,27 @@
+{
+  "repo_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "operations": {
+    "pass": 3,
+    "fail": 4,
+    "blocked": 37
+  },
+  "cases": {
+    "blocked": 5,
+    "fail": 6,
+    "not-tested": 80,
+    "pass": 7
+  },
+  "tasks": 25,
+  "task_statuses": {
+    "待開始": 23,
+    "受阻": 2
+  },
+  "source_files_excerpted": 21,
+  "python": {
+    "passed": 61,
+    "skipped": 1
+  },
+  "javascript_checks_passed": 103,
+  "production_business_modules_completed": 0,
+  "production_business_modules_requested": 8
+}

@@ -1,0 +1,20 @@
+{
+  "audit_date_hk": "2026-10-03",
+  "repo": "YNWAforever/BuyerOS",
+  "branch": "main",
+  "sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "production": {
+    "id": "dpl_7A95afQdDSUsaPRw2RnPFouQ1hEp",
+    "state": "READY",
+    "target": "production",
+    "aliases": [
+      "buyer-os-nu.vercel.app",
+      "buyer-os-ynwaforevers-projects.vercel.app"
+    ],
+    "region": [
+      "iad1"
+    ]
+  },
+  "db_schema_current": "not-read",
+  "worker_selector_current": "not-read"
+}

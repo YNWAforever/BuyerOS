@@ -1,0 +1,99 @@
+﻿case_id,primary_task,finding_ids,scenario,source_result,source_evidence_state,new_execution_result,required_environment,acceptance
+U01,Q01,F01,正式登入與工作區,blocked,verified,not-run,本次正式read-only,看見正確workspace和role；否則有恢復路徑
+U02,Q01,F01,無會員恢復,fail,verified,not-run,本次正式read-only,不授權；可重新查詢；顯示聯絡方法
+U03,Q01,F02,無會員繁中,fail,verified,not-run,本次正式read-only,兩種語言均可選且空狀態已翻譯
+U04,N02,F01,不同身份提供者,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,不自動合併或提升權限
+U05,N05,F04,角色撤回,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,拒絕新操作；清理舊scope UI
+U06,Q02,F03,成員分頁,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,全部可達；總數正確；無重複
+U07,Q02,F04,辨識成員,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,可用授權名稱及完整ID辨識
+U08,Q02,F04,最後管理員競態,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,至少1 active admin；衝突可理解
+U09,Q09,F14,完整員工任務,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,版本、角色、狀態持續一致
+U10,Q09,F14,手機及縮放,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,焦點可見；操作不遮擋；無整頁水平捲動
+U11,Q09,F14,輔助工具,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,控制項有名稱；焦點合理；狀態通知不洗版
+U12,Q09,F14,人員可用性,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,完成率≥90%；錯scope操作0；比較前後時間
+B01,Q08,F06,批量100/101邊界,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,同步/非同步契約正確；每列只一次
+B02,Q05,F06,確認後改集合,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,confirmation清除；要求重新預覽
+B03,Q05,F06,分派給同事,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,10位owner正確；audit reason可追查
+B04,Q05,F06,owner失效,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,server拒絕／逐列blocked；沒有越權分派
+B05,Q04,F08,建立研究回應遺失,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,相同key/run/outbox；不重複經濟意圖
+B06,Q04,F08,研究雙擊,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,共用意圖；只有一工作
+B07,Q05,F06,混合逐列結果,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,計數總和100；每列status與DB一致
+B08,Q08,F06,只重試失敗,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,80成功列不重做；新版本重新判定
+B09,Q08,F06,取消及中途崩潰,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,已commit保留；未處理取消；無重複寫入
+B10,Q03,F05,Operations結果ID,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,完整buyer ID顯示；React key有效
+B11,Q03,F05,Operations結果第二頁,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,所有結果可達；page/total正確
+B12,Q06,F07,慢網路輪詢,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,每view最多1 in-flight；無全頁重讀
+B13,Q06,F07,隱藏頁及429,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,hidden不poll；退避；回來更新一次
+B14,Q08,F11,1000/1001上限,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,現版清楚clipped並阻止誤選全部
+B15,Q08,F11,10k維護manifest,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,總數完整；50衝突；成功列不重跑
+B16,Q05,F06,selection與scope切換,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,不顯示/寫入另一scope；正確resume link
+A01,Q10,F12,規則fit六案例,pass,verified,not-run,本地／隔離fixture；未執行者須依前置条件提供,6筆verdict一致；unsupported citation0
+A02,Q07,F09,tone及目的是否有效,fail,verified,not-run,本地／隔離fixture；未執行者須依前置条件提供,現況same_body=true；修復後UI承諾與行為一致
+A03,Q10,F12,真實gold set,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,分層precision/recall/coverage及區間；暫定match precision≥95%
+A04,Q10,F12,同名公司與子公司,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,不把另一實體證據附到買家
+A05,Q10,F12,過期/矛盾來源,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,過期不支持Match；矛盾需review
+A06,Q10,F12,引用及prompt injection,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,拒絕假引用；不服從來源指令；untrusted只作資料
+A07,Q07,F09,雙語草稿與引用,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,UI明示原語言引用；不聲稱已翻譯全文
+A08,Q10,F12,Contact實際正確性,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,錯公司/禁用contact輸出0；格式合法≠身份準確
+P01,Q10,F12,HK冷暖端到端,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,暖p95≤2s；冷p95≤4s；報p99和錯誤
+P02,Q10,F12,API多actor負載,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,暖p95≤800ms；p99≤1.5s；5xx<1%；tenant錯誤0
+P03,Q10,F12,SQL及連線,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,記queries/bytes/pool/EXPLAIN；无隨頁size增長的N+1
+P04,Q06,F07,Bulk流量前後比較,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,單in-flight；summary不含歷史results；實際改善可量化
+P05,Q10,F12,Worker公平性,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,記queue wait/oldest age/吞吐；無starvation
+P06,Q10,F12,UI核心指標,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,建議≤2.5s/200ms/0.1；記環境與樣本
+P07,Q10,F12,大量scope及名單,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,分頁按需；不序列下載全部才顯示
+P08,Q10,F10,運行成本與idle,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,計實際requests/compute；無無意義輪詢；成本不超核准額
+S01,N03,F01,JWT/JWKS行為,pass,verified,not-run,本地／隔離fixture；未執行者須依前置条件提供,rotation/cache/outage fail-closed assertions通過
+S02,N05,F12,fetch邊界,pass,verified,not-run,本地／隔離fixture；未執行者須依前置条件提供,拒絕private/local；不以此聲稱完整SSRF驗收
+S03,Q10,F08,provider未明結果帳本,pass,verified,not-run,本地／隔離fixture；未執行者須依前置条件提供,unknown不釋放；proven-unsent才release
+S04,Q10,F10,fixture不得正式啟用,pass,verified,not-run,本地／隔離fixture；未執行者須依前置条件提供,production拒fixture；缺價目/能力拒絕
+S05,N05,F10,跨服務gateway,pass,verified,not-run,本地／隔離fixture；未執行者須依前置条件提供,6 pass；cookie/保護header不誤傳；binding缺失failclosed
+S06,N05,F04,租戶隔離與last-admin DB,blocked,blocked,not-run,本地／隔離fixture；未執行者須依前置条件提供,無跨租戶讀寫；必要DB case不skip
+R01,Q11,F13,部署對照,blocked,verified,not-run,本地／隔離fixture；未執行者須依前置条件提供,每一層明確且可追查；不能以merge推migration
+R02,Q11,F10,runtime權限0036,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,允許必要read；拒schema-version mutation
+R03,Q11,F10,outbox恢復與lease,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,無重複side effect；舊epoch拒絕
+R04,Q11,F10,restore及retention,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,刪除不復活；ledger可核對；資料可用前完成
+R05,Q11,F13,單一現況文件,not-tested,code-only,not-run,本地／隔離fixture；未執行者須依前置条件提供,historical標清楚；部署狀態不捏造
+R06,Q11,F10,告警及rollback,not-tested,not-tested,not-run,本地／隔離fixture；未執行者須依前置条件提供,可操作；未知holds不誤釋放；証據有時間線
+U13,Q01,F15,Callback初始化不誤報,fail,verified,not-run,正式read-only,配置正確時不出現未設定alert
+U14,N04,F20,Neon刷新／新分頁與deep link,not-tested,code-only,not-run,隔離fixture／local,正確恢復scope；限次token renewal；不把token存localStorage
+U15,Q14,F17,專案統計與列表同範圍,not-tested,code-only,not-run,隔離fixture／local,A0、B5；或明確標全workspace，統計與列表一致
+U16,Q17,F21,正式workspace讀取錯誤恢復,fail,verified,not-run,正式read-only,正常read或可恢復錯誤；server log可定位原因
+D01,Q12,F16,人工改稿至重新審批,not-tested,code-only,not-run,隔離fixture／local,保留人工內容；新revision精確引用與審批；全鏈可完成
+D02,Q15,F19,Dirty稿件refresh不丟失,not-tested,code-only,not-run,隔離fixture／local,Cancel保留所有輸入；Save成功再換；Discard明確確認
+D03,Q12,F16,未覆核人工稿不得直接批准,pass,verified,not-run,隔離fixture／local,拒絕並保持未批准；不可自動grounded
+P09,Q13,F18,Workspace查詢量基線,fail,verified,not-run,隔離fixture／local,修復目標：不隨無關W線性掃描；只回有權限項目
+P10,Q13,F18,Workspace SQL分頁與租戶保護,blocked,blocked,not-run,隔離fixture／local,有界查詢；無漏列重複；撤回有效；RLS不放寬
+WF01,Q09,F14,Offer部分保存與lost response,not-tested,code-only,not-run,隔離fixture／local,不多建project；原輸入保留；ICP基於正確offer revision
+WF02,Q09,F14,過期Offer不得沿用舊ICP批准,not-tested,not-tested,not-run,隔離fixture／local,412／清楚差異；無stale批准／research副作用
+WF03,Q10,F14;F10,同一專案跨角色handoff,blocked,blocked,not-run,隔離fixture／local,每角色看到持久化正確scope／版本；只export不send；delivery403
+NA01,N00,F20,SDK與輸出相容,not-tested,not-tested,not-run,隔離Neon／preview；依N00,Vinext及Vercel輸出均可用；不只dev成功
+NA02,N01,F20,環境設定不完整,not-tested,not-tested,not-run,隔離Neon／preview；依N01,fail closed；沒有默認接production
+NA03,N01,F20,秘密不得進前端,not-tested,not-tested,not-run,隔離Neon／preview；依N01,沒有secret/password/token被輸出
+NA04,N04,F20,Email登入,not-tested,not-tested,not-run,隔離Neon／preview；依N04,canonical User與角色正確
+NA05,N04,F20,Google登入,not-tested,not-tested,not-run,隔離Neon／preview；依N04,沒有Auth0 callback；scope保持；無自動email提權
+NA06,N06,F20,舊密碼帳戶onboarding,not-tested,not-tested,not-run,隔離Neon／preview；依N06,不需要匯出密碼；Neon帳戶建立及link可核對
+NA07,N02,F20,保留使用者UUID,not-tested,not-tested,not-run,隔離Neon／preview；依N02,user/membership/歷史FK全不變
+NA08,N02,F20,同email不同身份,not-tested,not-tested,not-run,隔離Neon／preview；依N02,未有核實proof不能link或提權
+NA09,N02,F20,映射冲突與重跑,not-tested,not-tested,not-run,隔離Neon／preview；依N02,衝突拒絕；成功項不重複；audit可追查
+NA10,N02,F20,沒有membership,not-tested,not-tested,not-run,隔離Neon／preview；依N02,明確無權限；可切語言；不自動創admin
+NA11,N03,F20,EdDSA成功,not-tested,not-tested,not-run,隔離Neon／preview；依N03,驗簽成功後才解identity；按DB授權
+NA12,N03,F20,issuer/audience/branch,not-tested,not-tested,not-run,隔離Neon／preview；依N03,401；即使JWKS複製仍拒絕
+NA13,N03,F20,演算法混淆,not-tested,not-tested,not-run,隔離Neon／preview；依N03,全部拒絕；不動態跟jku/x5u
+NA14,N03,F20,過期及claim型別,not-tested,not-tested,not-run,隔離Neon／preview；依N03,可預期401；不把解析錯誤變500
+NA15,N03,F20,key rotation與outage,not-tested,not-tested,not-run,隔離Neon／preview；依N03,有界cache；rate-limit refresh；hard stale後拒絕
+NA16,N03,F20,跨issuer相同kid,not-tested,not-tested,not-run,隔離Neon／preview；依N03,cache隔離；provider只能用自己keys
+NA17,N04,F20,reload恢復session,not-tested,not-tested,not-run,隔離Neon／preview；依N04,讀session後恢复授權scope；无假無會員閃現
+NA18,N04,F20,token更新single-flight,not-tested,not-tested,not-run,隔離Neon／preview；依N04,只1 refresh；不把token存localStorage
+NA19,N04,F20,refresh與mutation重試,not-tested,not-tested,not-run,隔離Neon／preview；依N04,意圖key保留；不自動新key重送
+NA20,N04,F20,跨tab登出,not-tested,not-tested,not-run,隔離Neon／preview；依N04,兩邊清session UI/token/scope/poll；已發行JWT殘留時限另記
+NA21,N05,F20,cookie/Safari類路徑,not-tested,not-tested,not-run,隔離Neon／preview；依N05,同源cookie仍可用；記實機與runner差別
+NA22,N05,F20,CSRF與callback,not-tested,not-tested,not-run,隔離Neon／preview；依N05,拒絕非法请求；SDK防護保留
+NA23,N04,F20,returnTo open redirect,not-tested,not-tested,not-run,隔離Neon／preview；依N04,只能本網站允許相對路徑
+NA24,N05,F20,撤回權限及identity,not-tested,not-tested,not-run,隔離Neon／preview；依N05,拒絕新授權；已發行JWT不代表有workspace權限
+NA25,N05,F20,workspace roles真實來源,not-tested,not-tested,not-run,隔離Neon／preview；依N05,僅BuyerOS DB角色決定；不能靠claim獲admin
+NA26,N05,F20,業務gateway及serviceauth,not-tested,not-tested,not-run,隔離Neon／preview；依N05,業務proxy不轉cookie/secret；worker不靠userJWT
+NA27,N06,F20,完整角色journey,not-tested,not-tested,not-run,隔離Neon／preview；依N06,正確角色/版本/歷史；全部必要DB零skip
+NA28,N07,F20,Neon-only退役,not-tested,not-tested,not-run,隔離Neon／preview；依N07,Auth0拒絕；Neon按mapping授權
+NA29,N07,F20,rollback及Neon-only新戶,not-tested,not-tested,not-run,隔離Neon／preview；依N07,不丟寫入/刪mapping；新用戶有明確支援方案
+NA30,N07,F20,production前置readback,not-tested,not-tested,not-run,隔離Neon／preview；依N07,每層與預定一致；Auth0雙信任有限期；canary結果可追查

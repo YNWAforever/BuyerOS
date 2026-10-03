@@ -1,0 +1,73 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-8.4.2, pluggy-1.6.0 -- /workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api
+configfile: pyproject.toml
+plugins: langsmith-0.14.2, anyio-4.15.1, asyncio-0.26.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 62 items
+
+tests/test_api_app.py::test_error_envelope_shape Timeout (0:00:15)!
+Thread 0x00007f0b2c1206c0 (most recent call first):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/selectors.py", line 468 in select
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py", line 1961 in _run_once
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py", line 645 in run_forever
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py", line 678 in run_until_complete
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py", line 118 in run
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2548 in run
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/anyio/_core/_eventloop.py", line 83 in run
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/anyio/from_thread.py", line 538 in run_blocking_portal
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1012 in run
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1032 in _bootstrap
+
+Thread 0x00007f0b31e62740 (most recent call first):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 355 in wait
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/concurrent/futures/_base.py", line 451 in result
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2780 in run_sync_from_thread
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/anyio/from_thread.py", line 119 in run_sync
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/anyio/from_thread.py", line 303 in _spawn_task_from_thread
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/anyio/from_thread.py", line 384 in start_task_soon
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/anyio/from_thread.py", line 340 in call
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/starlette/testclient.py", line 350 in handle_request
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/httpx2/_client.py", line 1076 in _send_single_request
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/httpx2/_client.py", line 1043 in _send_handling_redirects
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/httpx2/_client.py", line 1008 in _send_handling_auth
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/httpx2/_client.py", line 980 in send
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/httpx2/_client.py", line 797 in request
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/starlette/testclient.py", line 455 in request
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/httpx2/_client.py", line 1113 in get
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/starlette/testclient.py", line 483 in get
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/tests/test_api_app.py", line 16 in test_error_envelope_shape
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/python.py", line 157 in pytest_pyfunc_call
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/python.py", line 1671 in runtest
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/runner.py", line 178 in pytest_runtest_call
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/runner.py", line 246 in <lambda>
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/runner.py", line 344 in from_call
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/runner.py", line 245 in call_and_report
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/runner.py", line 136 in runtestprotocol
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/runner.py", line 117 in pytest_runtest_protocol
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/main.py", line 367 in pytest_runtestloop
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/main.py", line 343 in _main
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/main.py", line 289 in wrap_session
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/main.py", line 336 in pytest_cmdline_main
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py", line 175 in main
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py", line 201 in console_main
+  File "/workspace/scratch/c5168c1ba5e0/buyeros-audit/services/api/.venv/lib/python3.12/site-packages/pytest/__main__.py", line 9 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main

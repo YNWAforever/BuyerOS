@@ -1,0 +1,45 @@
+﻿operation_id,section,route,role,control_action,precondition,expected,actual,case_ids,evidence_ids,result,source_review,scope
+OP01,公開入口,/,visitor,開首頁,none,顯示清楚登入入口,FIMMICK BuyerOS＋Sign in可見,U01,E07,pass,reviewed,代表性操作；不是所有DOM按鈕
+OP02,登入,/auth/callback,existing user,Sign in／SSO callback,既有登入session,完成登入返回指定workspace,見Sign out與Live workspace；已登入不等於已授權,U01,E01;E07,pass,reviewed,代表性操作；不是所有DOM按鈕
+OP03,登入,/auth/callback,existing user,初始化訊息,configured auth,先initializing，無錯誤config alert,短暫誤報未設定,U13,E03;E07,fail,reviewed,代表性操作；不是所有DOM按鈕
+OP04,存取,/app?workspace=…,existing user,首次載入workspaces,authenticated,成功取得資料或正確權限回應,GET workspaces500 OperationalError,U16,E07,fail,reviewed,代表性操作；不是所有DOM按鈕
+OP05,存取,/app?workspace=…,existing user,Retry loading workspaces,暫時錯誤,重讀並顯示真實結果,錯誤變ready-empty；無membership,U16,E01;E07,pass,reviewed,代表性操作；不是所有DOM按鈕
+OP06,存取,/app?workspace=…,member,選指定workspace,active membership,可進八模組,當前身份未有membership,U01,E01,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP07,存取,/app,no membership,空狀態恢復入口,no membership,可核對存取／聯絡admin,只有文字、無對應控制項,U02,E01,fail,reviewed,代表性操作；不是所有DOM按鈕
+OP08,存取,/app,no membership,Language,no membership,可選en／zh-HK,disabled,U03,E01,fail,reviewed,代表性操作；不是所有DOM按鈕
+OP09,Overview,/app,member,overview內容,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP10,Overview,/app,member,工作佇列統計及入口,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U15,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP11,Overview,/app,operator/reviewer,usage期間,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,P01,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP12,Overview,/app,reviewer,ICP精確批准,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,WF02,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP13,Offer,/app/discover/new; /app/discover/edit,operator,建立四步offer,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U09;WF01,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP14,Offer,/app/discover/new; /app/discover/edit,operator,編輯及衝突,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,WF02,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP15,Offer,/app/discover/new; /app/discover/edit,operator,文件／摘錄採納,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,WF01,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP16,Offer,/app/discover/new; /app/discover/edit,operator,部分保存／重試,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,WF01,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP17,Buyers,/app/discover,member,搜尋／篩選／分頁,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,B14,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP18,Buyers,/app/discover,reviewer,snapshot跨頁選取,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,B01;B14,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP19,Buyers,/app/discover,operator/reviewer,證據及notes詳情,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,A05,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP20,Buyers,/app/discover,reviewer,review及next,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP21,Buyers,/app/discover,operator,list／saved filter,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP22,Buyers,/app/discover,operator,bulk owner確認,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,B02;B03,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP23,Buyers,/app/discover,operator,bulk取消／失敗重試,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,B08;B09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP24,Buyers,/app/discover,operator,contact quote／confirm,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,A08,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP25,Results,/app/results,operator/reviewer,usage與cost denominator,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,P01,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP26,Results,/app/results,operator/reviewer,記錄manual outcome,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP27,Results,/app/results,operator/reviewer,append correction,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP28,Results,/app/results,member,queue filter一致,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U15,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP29,Research runs,/app/runs,operator,Start research／lost202,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,B05;B06,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP30,Research runs,/app/runs,member,status／事件／backfill,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP31,Research runs,/app/runs,operator,Stop new work,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,R03,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP32,Research runs,/app/runs,operator/admin,safe retry／unknown,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,R03;S03,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP33,Drafts,/app/outreach,reviewer,reviewed sender,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP34,Drafts,/app/outreach,operator,grounded addressed生成,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,A02;U09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP35,Drafts,/app/outreach,operator/reviewer,人工編輯／來源覆核,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,D01;D02,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP36,Drafts,/app/outreach,reviewer,精確approval,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,D01;D03,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP37,Drafts,/app/outreach,operator/reviewer,approved export／delivery gate,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP38,Settings,/app/settings,member/admin,locale／market／budget／policy,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP39,Settings,/app/settings,admin,member搜尋／第101位,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U06;U07,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP40,Settings,/app/settings,admin,roles／active／last admin,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U08;S06,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP41,Operations,/app/operations,member/admin,capabilities／readiness,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,R02,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP42,Operations,/app/operations,member/admin,job list／failed filter,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U15,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP43,Operations,/app/operations,member/admin,job lookup／全部results,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,B10;B11,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕
+OP44,Operations,/app/operations,admin,audit pagination,指定workspace active membership＋所需project／測試資料,依對應案例完成並讀回持久化結果,正式UI受workspace gate阻擋；本次僅source review,U09,E01;E03,blocked,reviewed,代表性操作；不是所有DOM按鈕

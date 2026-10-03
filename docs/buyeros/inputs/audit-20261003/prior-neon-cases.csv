@@ -1,0 +1,31 @@
+index,case_id,task,scenario,precondition,steps,expected,status,evidence
+0,NA01,N00,SDK與輸出相容,固定SDK版本；local fixture,跑兩種build及同源handler/session/token roundtrip,Vinext及Vercel輸出均可用；不只dev成功,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+1,NA02,N01,環境設定不完整,缺issuer/audience/JWKS或mode矛盾,啟動app/API,fail closed；沒有默認接production,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+2,NA03,N01,秘密不得進前端,preview cookie secret與runtime env,檢查build及logs,沒有secret/password/token被輸出,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+3,NA04,N04,Email登入,Neon測試帳戶；已核實mapping,登入並開workspace,canonical User與角色正確,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+4,NA05,N04,Google登入,自有測試OAuth config；受控callback,登入並返回deep link,沒有Auth0 callback；scope保持；無自動email提權,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+5,NA06,N06,舊密碼帳戶onboarding,核准測試收件人；舊Auth0帳戶,新帳戶設定/verification/reset演練,不需要匯出密碼；Neon帳戶建立及link可核對,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+6,NA07,N02,保留使用者UUID,1 User多workspace/owner/approval/job history,link Auth0及Neon identity,user/membership/歷史FK全不變,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+7,NA08,N02,同email不同身份,兩個不同subject；同email,提出link候選,未有核實proof不能link或提權,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+8,NA09,N02,映射冲突與重跑,duplicate/ambiguous/import已執行,dry-run及再執行,衝突拒絕；成功項不重複；audit可追查,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+9,NA10,N02,沒有membership,有效Neon identity但無active membership,登入切繁中並retry,明確無權限；可切語言；不自動創admin,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+10,NA11,N03,EdDSA成功,固定Ed25519測試keys；正確claims,呼叫API,驗簽成功後才解identity；按DB授權,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+11,NA12,N03,issuer/audience/branch,簽章有效但claims為另一環境,prod打preview及反向,401；即使JWKS複製仍拒絕,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+12,NA13,N03,演算法混淆,none/HS256/RSA假扮Neon/錯kty,驗證token,全部拒絕；不動態跟jku/x5u,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+13,NA14,N03,過期及claim型別,expired/缺exp/sub/錯型別/future nbf,驗證token,可預期401；不把解析錯誤變500,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+14,NA15,N03,key rotation與outage,known/unknown kid；JWKS timeout,併發驗證與輪換,有界cache；rate-limit refresh；hard stale後拒絕,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+15,NA16,N03,跨issuer相同kid,Auth0/Neon同kid不同key,交錯驗證,cache隔離；provider只能用自己keys,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+16,NA17,N04,reload恢復session,已登入Neon＋selectedscope,reload/deep link/newtab,讀session後恢复授權scope；无假無會員閃現,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+17,NA18,N04,token更新single-flight,快過期JWT；10個併發API,觸發ensureAccessToken,只1 refresh；不把token存localStorage,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+18,NA19,N04,refresh與mutation重試,commit遺失response；401另案,重試研究/批量工作,意圖key保留；不自動新key重送,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+19,NA20,N04,跨tab登出,兩tabs；有poll與cachedbuyer,一tab登出,兩邊清session UI/token/scope/poll；已發行JWT殘留時限另記,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+20,NA21,N05,cookie/Safari類路徑,WebKit及人工Safari；禁第三方cookie,登入/reload/logout,同源cookie仍可用；記實機與runner差別,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+21,NA22,N05,CSRF與callback,惡意Origin/state/replayedcallback,向authhandler提交,拒絕非法请求；SDK防護保留,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+22,NA23,N04,returnTo open redirect,absolute/protocolrelative/encoded URLs,登入帶returnTo,只能本網站允許相對路徑,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+23,NA24,N05,撤回權限及identity,已發行有效JWT；禁用mapping/member,下一個API及job domain step,拒絕新授權；已發行JWT不代表有workspace權限,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+24,NA25,N05,workspace roles真實來源,Neon role=admin/authenticated假fixture,呼叫admin API,僅BuyerOS DB角色決定；不能靠claim獲admin,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+25,NA26,N05,業務gateway及serviceauth,Neon cookie/bearer；Cloudflare HMAC,app/v1及workerinternal請求,業務proxy不轉cookie/secret；worker不靠userJWT,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+26,NA27,N06,完整角色journey,operator/reviewer/admin；隔離資料,offer→ICP→buyers→draft→approval→export→outcome,正確角色/版本/歷史；全部必要DB零skip,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+27,NA28,N07,Neon-only退役,Auth0和Neon未過期tokens,R3時分別打API,Auth0拒絕；Neon按mapping授權,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+28,NA29,N07,rollback及Neon-only新戶,已切換並有新業務寫入/新用戶,回復Auth0 UI/trust,不丟寫入/刪mapping；新用戶有明確支援方案,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact
+29,NA30,N07,production前置readback,核准target；read-only,比對SHA/schema/provider/branch/mapping及deadline,每層與預定一致；Auth0雙信任有限期；canary結果可追查,NOT_RUN_PLANNED,執行時填SHA/environment/command/result/artifact

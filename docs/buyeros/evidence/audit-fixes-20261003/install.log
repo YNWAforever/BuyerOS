@@ -1,0 +1,120 @@
+? Verifying lockfile against supply-chain policies (926 entries)...
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +734
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Packages are copied from the content-addressable store to the virtual store.
+  Content-addressable store is at: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\.sites-runtime\pnpm-store\v11
+  Virtual store is at:             node_modules/.pnpm
+Progress: resolved 734, reused 0, downloaded 12, added 9
+Progress: resolved 734, reused 0, downloaded 38, added 16
+Progress: resolved 734, reused 0, downloaded 57, added 17
+Progress: resolved 734, reused 0, downloaded 86, added 19
+Progress: resolved 734, reused 0, downloaded 121, added 22
+Progress: resolved 734, reused 0, downloaded 143, added 23
+Progress: resolved 734, reused 0, downloaded 153, added 24
+Progress: resolved 734, reused 0, downloaded 187, added 27
+Progress: resolved 734, reused 0, downloaded 227, added 30
+Progress: resolved 734, reused 0, downloaded 277, added 34
+Progress: resolved 734, reused 0, downloaded 362, added 47
+Progress: resolved 734, reused 0, downloaded 398, added 62
+Progress: resolved 734, reused 0, downloaded 460, added 74
+[WARN] Request took 10166ms: https://registry.npmjs.org/@next%2Fswc-darwin-x64
+Progress: resolved 734, reused 0, downloaded 531, added 89
+Progress: resolved 734, reused 0, downloaded 642, added 119
+[WARN] Request took 11541ms: https://registry.npmjs.org/@next%2Fenv
+[WARN] Request took 11761ms: https://registry.npmjs.org/@next%2Feslint-plugin-next
+Progress: resolved 734, reused 0, downloaded 732, added 146
+[WARN] Request took 12778ms: https://registry.npmjs.org/@playwright%2Ftest
+Progress: resolved 734, reused 0, downloaded 734, added 184
+Progress: resolved 734, reused 0, downloaded 734, added 205
+Progress: resolved 734, reused 0, downloaded 734, added 213
+Progress: resolved 734, reused 0, downloaded 734, added 216
+[WARN] Request took 10770ms: https://registry.npmjs.org/@typescript-eslint%2Ftypes
+Progress: resolved 734, reused 0, downloaded 734, added 227
+[WARN] Request took 11452ms: https://registry.npmjs.org/@typescript-eslint%2Fvisitor-keys
+[WARN] Request took 12282ms: https://registry.npmjs.org/@typescript-eslint%2Fscope-manager
+Progress: resolved 734, reused 0, downloaded 734, added 236
+[WARN] Request took 12905ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+[WARN] Request took 13041ms: https://registry.npmjs.org/@typescript-eslint%2Ftypescript-estree
+Progress: resolved 734, reused 0, downloaded 734, added 263
+[WARN] Request took 13591ms: https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin
+Progress: resolved 734, reused 0, downloaded 734, added 268
+Progress: resolved 734, reused 0, downloaded 734, added 276
+Progress: resolved 734, reused 0, downloaded 734, added 287
+✓ Lockfile passes supply-chain policies (926 entries in 27.8s)
+Progress: resolved 734, reused 0, downloaded 734, added 342
+Progress: resolved 734, reused 0, downloaded 734, added 405
+Progress: resolved 734, reused 0, downloaded 734, added 488
+Progress: resolved 734, reused 0, downloaded 734, added 567
+Progress: resolved 734, reused 0, downloaded 734, added 628
+Progress: resolved 734, reused 0, downloaded 734, added 686
+Progress: resolved 734, reused 0, downloaded 734, added 733
+Progress: resolved 734, reused 0, downloaded 734, added 734
+Progress: resolved 734, reused 0, downloaded 734, added 734, done
+.../esbuild@0.18.20/node_modules/esbuild postinstall$ node install.js
+.../esbuild@0.28.1/node_modules/esbuild postinstall$ node install.js
+.../node_modules/workerd postinstall$ node install.js
+.../esbuild@0.25.12/node_modules/esbuild postinstall$ node install.js
+.../node_modules/unrs-resolver postinstall$ napi-postinstall unrs-resolver 1.11.1 check
+.../node_modules/unrs-resolver postinstall: Done
+.../esbuild@0.28.1/node_modules/esbuild postinstall: Done
+.../esbuild@0.18.20/node_modules/esbuild postinstall: Done
+.../esbuild@0.25.12/node_modules/esbuild postinstall: Done
+.../node_modules/workerd postinstall: Done
+
+dependencies:
++ @base-ui/react 1.7.0
++ @hookform/resolvers 5.7.1
++ @shadcn/react 0.3.0
++ class-variance-authority 0.7.1
++ clsx 2.1.1
++ cmdk 1.1.1
++ date-fns 4.4.0
++ drizzle-orm 0.45.2
++ embla-carousel-react 8.6.0
++ input-otp 1.4.2
++ lucide-react 1.31.0
++ next 16.3.4
++ next-themes 0.4.6
++ radix-ui 1.6.7
++ react 19.2.6
++ react-day-picker 10.0.1
++ react-dom 19.2.6
++ react-hook-form 7.85.0
++ react-resizable-panels 4.12.2
++ recharts 3.8.0
++ sonner 2.0.8
++ tailwind-merge 3.6.0
++ tslib 2.8.1
++ vaul 1.1.2
++ zod 3.25.76
+
+devDependencies:
++ @cloudflare/vite-plugin 1.58.0
++ @cloudflare/vitest-plugin 1.2.4
++ @cloudflare/workers-types 5.20260921.1
++ @msw/cloudflare 0.0.1
++ @playwright/test 1.63.0
++ @tailwindcss/postcss 4.2.1
++ @types/node 22.19.19
++ @types/react 19.2.14
++ @types/react-dom 19.2.3
++ @vitejs/plugin-react 6.0.2
++ @vitejs/plugin-rsc 0.5.26
++ drizzle-kit 0.31.10
++ eslint 9.39.4
++ eslint-config-next 16.3.4
++ msw 2.14.7
++ nitro 3.0.260903-beta
++ openapi-typescript 7.13.0
++ react-server-dom-webpack 19.2.6
++ tailwindcss 4.2.1
++ tw-animate-css 1.4.0
++ typescript 5.9.3
++ vinext 1.0.0-beta.5
++ vite 8.0.13
++ vitest 4.1.0
++ wrangler 4.137.0
+
+Done in 47.5s using pnpm v11.25.0

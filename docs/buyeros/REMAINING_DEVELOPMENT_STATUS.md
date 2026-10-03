@@ -1,3 +1,5 @@
+> Historical programme checkpoints below. Current first-round audit repair status: [CURRENT_STATUS.md](CURRENT_STATUS.md). No prior passing fixture claim is a live acceptance result.
+
 # BuyerOS execution status — 2026-10-01
 
 This is the current execution ledger for the 2026-09-27 implementation pack. The older `PROGRESS.md` and `tasks/index.json` contain historical plan and BO approval records; their approval states are not changed here. At execution start the checked-out source was `f43a9d88b334c2c4029fa06fa71624ed52efe4a2` on `p14-buyer-lists`, with origin `https://github.com/YNWAforever/BuyerOS.git`. Current application/deployment and production configuration evidence is in the latest 2026-10-01 rollout checkpoint below; earlier entries retain their historical scope. The working tree was clean before T00. The audit baseline `5e61f401bf1bcdf80ea1ce254dd9c62e8eedbab0` was fetched for comparison; it is not an ancestor of this branch, so findings require current-source verification.
