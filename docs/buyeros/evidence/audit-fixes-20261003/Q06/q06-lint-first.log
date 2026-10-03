@@ -1,0 +1,59 @@
+
+C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\features\live\bulk-actions.tsx
+  132:66  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\features\live\bulk-actions.tsx:132:66
+  130 |   const [error,setError]=useState(''),[busy,setBusy]=useState(false),[retryResult,setRetryResult]=useState<BulkResult|null>(null);
+  131 |   const [tick,setTick]=useState(0),[resultsOpen,setResultsOpen]=useState(false),[resultOffset,setResultOffset]=useState(0),[resultTick,setResultTick]=useState(0),[resultBusy,setResultBusy]=useState(false);
+> 132 |   const settled=useRef(''),resultView=useRef({open:resultsOpen});resultView.current={open:resultsOpen};
+      |                                                                  ^^^^^^^^^^^^^^^^^^ Cannot update ref during render
+  133 |   const retryIntent=useRef(new ActionIntent<BulkOutcome>());
+  134 |   const cancelIntent=useRef(new ActionIntent<AsyncJob>());
+  135 |   const reportIntent=useRef(new ActionIntent<ExportJob>());                                                                                                                                                                                                                                                                              react-hooks/refs
+  156:73  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\features\live\bulk-actions.tsx:156:73
+  154 |   useEffect(()=>{
+  155 |     if(!resultsOpen||!scope.workspace)return;
+> 156 |     const own=new AbortController(),basis=session.captureWriteContext();setResultBusy(true);
+      |                                                                         ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  157 |     const current=()=>!own.signal.aborted&&session.isCurrent(basis.identity);
+  158 |     void createOperationClient(client).requestOperation('getAsyncJob',{path:{workspace_id:scope.workspace,job_id:jobId},query:{offset:resultOffset,limit:20}},
+  159 |       {...basis,signal:AbortSignal.any([own.signal,basis.signal]),getToken:async()=>session.token()||'',isCurrent:current})  react-hooks/set-state-in-effect
+
+C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\features\live\operations.tsx
+  25:30  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\features\live\operations.tsx:25:30
+  23 |   const [error,setError]=useState(''),[resultLoading,setResultLoading]=useState(false);
+  24 |   const jobRequest=useRef({sequence:0,controller:new AbortController()});
+> 25 |   const pageView=useRef(job);pageView.current=job;
+     |                              ^^^^^^^^^^^^^^^^ Cannot update ref during render
+  26 |   useEffect(()=>()=>{jobRequest.current.sequence++;jobRequest.current.controller.abort();},[scope.identity]);
+  27 |   const [profileQueue,setProfileQueue]=useState<'loading'|'none'|'pending'|'current'|'stale'|'unavailable'>(project?'loading':'none');
+  28 |   const [failedCount,setFailedCount]=useState<number|null|'unavailable'>(null);  react-hooks/refs
+  94:36  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\features\live\operations.tsx:94:36
+  92 |     finally{if(isCurrent())setResultLoading(false);}
+  93 |   }
+> 94 |   const loadJobRef=useRef(loadJob);loadJobRef.current=loadJob;
+     |                                    ^^^^^^^^^^^^^^^^^^ Cannot update ref during render
+  95 |   const loadedJobId=job?.id;
+  96 |   useEffect(()=>{
+  97 |     if(!loadedJobId||!pageView.current||['completed','failed','cancelled'].includes(pageView.current.status))return;                                                                                                                                                                                                                                                        react-hooks/refs
+
+✖ 4 problems (4 errors, 0 warnings)
+

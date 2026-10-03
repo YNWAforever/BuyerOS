@@ -1,0 +1,37 @@
+✔ B12 2.5s RTT has one in-flight and waits 2s after settlement; no result reads (5.088ms)
+✖ B13 hidden pauses/aborts quietly; repeated visibility signals resume once (1.8962ms)
+✔ B13 transient failures use 2/4/8/16/30/30s and reset after success (3.2502ms)
+✔ B13 429 honors Retry-After seconds and HTTP dates, invalid header uses backoff (1.4595ms)
+✔ B13 actual live client preserves Retry-After metadata without response secrets (31.7093ms)
+✔ B12 request timeout aborts before a retry and late value is ignored (0.907ms)
+✔ B12 cancel/unmount suppresses late values/errors and all later requests (0.4232ms)
+✔ B16 A-B-A lifetimes reject the obsolete result even with same scope IDs (0.9934ms)
+✔ B12 terminal summary is delivered once and stops through refresh/visibility changes (0.4966ms)
+✔ B13 access denied stops rather than polling a revoked account (0.5559ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 57.2404
+
+✖ failing tests:
+
+test at tests\job-poller-checks.mjs:26:1
+✖ B13 hidden pauses/aborts quietly; repeated visibility signals resume once (1.8962ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/job-poller-checks.mjs:29:198)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,6 @@
+PASS node --test tests/live-adapter-checks.mjs tests/live-auth-checks.mjs
+API types match the OpenAPI contract
+PASS node scripts/generate-api-types.mjs --check
+PASS node node_modules/typescript/bin/tsc --noEmit
+PASS node node_modules/eslint/bin/eslint.js features/live/bulk-actions.tsx features/live/buyer-results.tsx features/live/operations.tsx services/live/client.ts services/live/job-poller.ts tests/e2e/audit-operations.spec.ts
+ledger: Task 1: complete (commits b083ea4..b3477e3, tests: node test-results/q06-final-gate.mjs → PASS node node_modules/eslint/bin/eslint.js features/live/bulk-actions.tsx features/live/buyer-results.tsx features/live/operations.tsx services/live/client.ts services/live/job-poller.ts tests/e2e/audit-operations.spec.ts)

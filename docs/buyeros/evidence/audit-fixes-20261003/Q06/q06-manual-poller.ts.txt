@@ -1,0 +1,43 @@
+import {LiveCancelled,LiveError} from '@/services/live/client';
+
+type Clock={now:()=>number;setTimeout:(fn:()=>void,ms:number)=>ReturnType<typeof setTimeout>;clearTimeout:(id:ReturnType<typeof setTimeout>)=>void};
+export type JobPollerOptions<T extends {status:string}>={
+  fetchSummary:(signal:AbortSignal)=>Promise<T>;onValue:(value:T)=>void;onError:(error:unknown)=>void;
+  signal:AbortSignal;isVisible:()=>boolean;
+  visibilityTarget?:Pick<Document,'addEventListener'|'removeEventListener'>;
+  clock?:Clock;
+};
+/** One summary per explicit lifetime/Refresh. No automatic retries or result-page reads. */
+export function startJobPoller<T extends {status:string}>({fetchSummary,onValue,onError,signal,isVisible,
+  visibilityTarget=typeof document==='undefined'?undefined:document,
+  clock={now:Date.now,setTimeout:(fn,ms)=>setTimeout(fn,ms),clearTimeout:id=>clearTimeout(id)},
+}:JobPollerOptions<T>):()=>void{
+  let stopped=false,inFlight=false;
+  let timer:ReturnType<typeof setTimeout>|undefined,request:AbortController|undefined;
+  const clear=()=>{if(timer!==undefined)clock.clearTimeout(timer);timer=undefined;};
+  const stop=()=>{stopped=true;clear();request?.abort();signal.removeEventListener('abort',stop);visibilityTarget?.removeEventListener('visibilitychange',visibility);};
+  function visibility(){if(!isVisible())request?.abort();}
+  async function poll(){
+    if(stopped||inFlight||signal.aborted||!isVisible())return;
+    inFlight=true;const own=new AbortController();request=own;let timedOut=false;
+    const timeout=clock.setTimeout(()=>{timedOut=true;own.abort(new DOMException('Job summary timed out','TimeoutError'));},10_000);
+    try{
+      const value=await fetchSummary(own.signal);
+      if(stopped||signal.aborted||own.signal.aborted||!isVisible())return;
+      onValue(value);
+    }catch(cause){
+      if(stopped||signal.aborted)return;
+      if(!isVisible()||(own.signal.aborted&&!timedOut)){return;}
+      if(cause instanceof LiveCancelled&&!timedOut){stop();return;}
+      const error=timedOut?new LiveError('Job summary timed out','NETWORK_ERROR',0,'',true):cause;
+      onError(error);
+
+    }finally{
+      clock.clearTimeout(timeout);inFlight=false;if(request===own)request=undefined;
+      // Manual-refresh rollback: no follow-up timer or visibility restart.
+    }
+  }
+  if(signal.aborted)return stop;
+  signal.addEventListener('abort',stop,{once:true});visibilityTarget?.addEventListener('visibilitychange',visibility);
+  void poll();return stop;
+}

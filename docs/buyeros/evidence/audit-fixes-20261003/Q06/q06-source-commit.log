@@ -1,0 +1,7 @@
+[codex/audit-fixes-20261003 b3477e3] fix(Q06): bound actor-scoped job progress polling
+ 17 files changed, 738 insertions(+), 48 deletions(-)
+ create mode 100644 services/api/tests/test_job_summary_db.py
+ create mode 100644 services/live/job-poller.ts
+ create mode 100644 tests/fixtures/job-clock.mjs
+ create mode 100644 tests/job-poller-checks.mjs
+ create mode 100644 tests/job-poller-traffic.mjs

@@ -1,0 +1,66 @@
+<testsuites id="" name="" tests="10" failures="1" skipped="0" errors="0" time="189.393922">
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-03T09:46:59.196Z" hostname="" tests="10" failures="1" skipped="0" time="137.668" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="11.694">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="10.924">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="9.275">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="7.24">
+</testcase>
+<testcase name="B12 unopened 1000-result job reads summary only and never walks result pages" classname="audit-operations.spec.ts" time="16.246">
+</testcase>
+<testcase name="B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once" classname="audit-operations.spec.ts" time="29.781">
+</testcase>
+<testcase name="B13 hidden summary pause and double visibility resume produce exactly one refresh" classname="audit-operations.spec.ts" time="16.68">
+</testcase>
+<testcase name="B13 actual 429 Retry-After and 503 recover without result-page traffic" classname="audit-operations.spec.ts" time="14.71">
+</testcase>
+<testcase name="B16 old summary cannot overwrite another scope after A-B-A" classname="audit-operations.spec.ts" time="14.035">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toContainText(expected) failed" type="expect.toContainText">
+<![CDATA[  audit-operations.spec.ts:112:1 › B16 old summary cannot overwrite another scope after A-B-A ──────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('region', { name: 'Bulk job progress' })
+    Expected substring: "completed:"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" getByRole('region', { name: 'Bulk job progress' }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Bulk job progress' })
+
+
+      117 |   await expect(page.getByRole('region',{name:'Bulk job progress'})).toHaveCount(0);
+      118 |   await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);await page.getByRole('combobox',{name:'Project',exact:true}).selectOption('e1000000-0000-4000-8000-000000000001');await page.getByRole('button',{name:'Buyers',exact:true}).click();release();
+    > 119 |   const panel=page.getByRole('region',{name:'Bulk job progress'});await expect(panel).toContainText('completed:');await page.waitForTimeout(2500);await expect(panel).not.toContainText('running:');
+          |                                                                                       ^
+      120 | });
+      121 |
+      122 | test('B13 zh-HK 390px summary/results controls remain usable without overflow',async({page})=>{
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-operations.spec.ts:119:87
+
+    Error Context: ..\..\test-results\audit-fixes\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="B13 zh-HK 390px summary/results controls remain usable without overflow" classname="audit-operations.spec.ts" time="7.083">
+</testcase>
+</testsuite>
+</testsuites>

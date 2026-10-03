@@ -1,0 +1,124 @@
+{
+  "base_sha": "b083ea43988ed73e9d8e9ab112ba3d6305f2c941",
+  "files": [
+    {
+      "path": "docs/buyeros/contracts/openapi.proposed.yaml",
+      "sha256": "1c27213ed029682af71611a96207910bc180b81dd0516a0d49a4630c9ea04024",
+      "staged_blob_sha256": "1c27213ed029682af71611a96207910bc180b81dd0516a0d49a4630c9ea04024",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "features/live/bulk-actions.tsx",
+      "sha256": "6708355a96c634ddc297b19ffb13a4c909d364476fa29e89230a1f74e82f7946",
+      "staged_blob_sha256": "6708355a96c634ddc297b19ffb13a4c909d364476fa29e89230a1f74e82f7946",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "features/live/buyer-results.tsx",
+      "sha256": "c37953459b6c83199c02d88b1b2c06f23a246b51c679c8834e8010ba9767a543",
+      "staged_blob_sha256": "c37953459b6c83199c02d88b1b2c06f23a246b51c679c8834e8010ba9767a543",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "features/live/operations.tsx",
+      "sha256": "75025e1967d7405e02255c32ed40846e029f98da5b56fd03e99bcdfc5c5a3395",
+      "staged_blob_sha256": "75025e1967d7405e02255c32ed40846e029f98da5b56fd03e99bcdfc5c5a3395",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/api/buyeros_api/api/deps.py",
+      "sha256": "53071808a45af76be5143fe9d4dae11ccc543276bd91b6061b7ec722f5955b6f",
+      "staged_blob_sha256": "53071808a45af76be5143fe9d4dae11ccc543276bd91b6061b7ec722f5955b6f",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/jobs.py",
+      "sha256": "989014d7276e474c0f19987223fe223aa0fc1a35b110b1ffdfc79a6c6754da19",
+      "staged_blob_sha256": "989014d7276e474c0f19987223fe223aa0fc1a35b110b1ffdfc79a6c6754da19",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/api/buyeros_api/services/bulk_service.py",
+      "sha256": "7361c251ac64e6c24abb70f361b8983cdd813c17576a0a2a51e73d6c633aed58",
+      "staged_blob_sha256": "7361c251ac64e6c24abb70f361b8983cdd813c17576a0a2a51e73d6c633aed58",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/api/tests/test_job_summary_db.py",
+      "sha256": "104074d6be625c68463864aa75883ee2f5ba0c83e2e5bf46020fabf1a68adaa8",
+      "staged_blob_sha256": "104074d6be625c68463864aa75883ee2f5ba0c83e2e5bf46020fabf1a68adaa8",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/generated/buyeros-api.ts",
+      "sha256": "a129a7118b79259c19b5d2118179fd65b68412cacdc3077bae27eb58381cccdf",
+      "staged_blob_sha256": "b809d670ca00ad38f35f231ee42a443bb2bdc782972f5135a09394955094dc6c",
+      "byte_equal": false,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/generated/operation-routes.ts",
+      "sha256": "0d03babac13f48cedc565bb396143829098dea39da35fd474bab7e0fbf731748",
+      "staged_blob_sha256": "d0e4c93a48386a47fe6646591c75b682ba95dce1a0366c87f354cb6384253316",
+      "byte_equal": false,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/live/client.ts",
+      "sha256": "e298c72b2ed5fb224432a313404be4d2cb8ce8a05246fabf0bee5be161eccb82",
+      "staged_blob_sha256": "e298c72b2ed5fb224432a313404be4d2cb8ce8a05246fabf0bee5be161eccb82",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/live/job-poller.ts",
+      "sha256": "f6f5da4a51a0701c135ec72ef26f44e0fa0fda46a341c4e8c20495f48a26ae21",
+      "staged_blob_sha256": "f6f5da4a51a0701c135ec72ef26f44e0fa0fda46a341c4e8c20495f48a26ae21",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "services/worker/tests/fixtures/audit_jobs.py",
+      "sha256": "9b30053d84ba1618c85e0ba51a87d90207ba4f37040ef276b6fc66773220a88a",
+      "staged_blob_sha256": "9b30053d84ba1618c85e0ba51a87d90207ba4f37040ef276b6fc66773220a88a",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "tests/e2e/audit-operations.spec.ts",
+      "sha256": "730bc360abd86351d38f76803b39292674b33e86bbb0ae40dbffa0deebb03250",
+      "staged_blob_sha256": "6574c4b3d3275eb89e5970806282d9242d868381da830b490a9a10147b56d0a3",
+      "byte_equal": false,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "tests/fixtures/job-clock.mjs",
+      "sha256": "7f02857a8c4fc0d56163b828b8fd712d72bc74115494d27806fc406c71f25d82",
+      "staged_blob_sha256": "7f02857a8c4fc0d56163b828b8fd712d72bc74115494d27806fc406c71f25d82",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "tests/job-poller-checks.mjs",
+      "sha256": "3333f14b8e163081239de8b9de010185ceca52615df5b0bf7912560a6b5f6e3d",
+      "staged_blob_sha256": "3333f14b8e163081239de8b9de010185ceca52615df5b0bf7912560a6b5f6e3d",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    },
+    {
+      "path": "tests/job-poller-traffic.mjs",
+      "sha256": "1427dd26cf4fdea278fd697fcfcbe9bd7ef5a6e4e164e77f6562f0f7d4eafb28",
+      "staged_blob_sha256": "1427dd26cf4fdea278fd697fcfcbe9bd7ef5a6e4e164e77f6562f0f7d4eafb28",
+      "byte_equal": true,
+      "newline_normalized_equal": true
+    }
+  ]
+}

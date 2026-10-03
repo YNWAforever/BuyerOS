@@ -1,0 +1,11 @@
+{
+  "verified_files": 31,
+  "original_case_fields_preserved": 98,
+  "approved_plan_byte_equal": true,
+  "outer_zip_sha256": "f11c2c079cd40692b7c1ccb059a3c83d02024fb0f19bfda99b860c388304ea3f",
+  "evidence_zip_sha256": "19369591a175edad7dd2e9f3ddb5bfdebc6cdc5130a2770243b1e9de2a42d35a",
+  "nested_crc_ok": true,
+  "safe_entries": true,
+  "original_task_csv_immutable": true,
+  "external_identity_changes": false
+}

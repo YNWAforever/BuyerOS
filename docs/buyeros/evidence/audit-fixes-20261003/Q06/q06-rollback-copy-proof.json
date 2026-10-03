@@ -1,0 +1,8 @@
+{
+  "note": "Exact patch applied only to isolated scratch copy. Application working-source hash remains equal to tested source; test copy only relocates the import alias.",
+  "patch_sha256": "2dda6b8372932f903131f1438b14137d5dfe8b06bd0c76b85f3157939f75a822",
+  "scratch_patched_sha256": "ba8d8646f9ef15e16ad5c5c5aa75a6323c123ecf52abd4dcff34da1d9aa55050",
+  "test_copy_sha256": "c91d2bae4813af92a7ce7cb62c9ba44edc98b82e8d2697641b84a8c15ca1b4d0",
+  "test_copy_only_import_alias_relocated": true,
+  "production_working_source_sha256": "f6f5da4a51a0701c135ec72ef26f44e0fa0fda46a341c4e8c20495f48a26ae21"
+}

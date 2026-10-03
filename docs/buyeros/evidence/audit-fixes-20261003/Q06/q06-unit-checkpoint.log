@@ -1,0 +1,37 @@
+✔ U13 actual callback render during initializing is status, never configuration alert (8.9017ms)
+✔ B02 confirmation is stable for row ordering but binds every material field (23.951ms)
+✔ B02 snapshot confirmation binds snapshot identity and normalized exclusions (0.3932ms)
+✔ B03 frozen payload preserves confirmed rows and trimmed audit reason (2.4334ms)
+✔ B16 unknown assignment survives route remount and token renewal with the same key (2.209ms)
+✔ B16 an unresolved assignment cannot be replaced with a materially different intent (0.329ms)
+✔ D02 save has the required transition order (3.5638ms)
+✔ D02 discard has the required transition order (0.2466ms)
+✔ D02 cancel has the required transition order (0.1548ms)
+✔ D02 rejected save 412 cannot proceed (3.9651ms)
+✔ D02 rejected save 503 cannot proceed (0.5464ms)
+✔ D02 clean transition does not prompt or write (0.3957ms)
+✔ D02 asynchronous Save completes before proceeding (5.6254ms)
+✔ U06 generated member operation carries literal search and bounded page query (1.7498ms)
+✔ S06 generated eligible lookup and scope context reject foreign and A-B-A responses (1.1432ms)
+✔ B05 token renewal and route remount retain lost-response key; double start shares work (22.722ms)
+✔ B06 full normalized payload and actor/scope define intent; generation and key order do not (1.2367ms)
+✔ B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent (5.2186ms)
+✔ B12 2.5s RTT has one in-flight and waits 2s after settlement (6.3304ms)
+✔ B13 hidden pauses/aborts quietly; repeated visibility signals resume once (2.2469ms)
+✔ B13 transient failures use 2/4/8/16/30/30s and reset after success (6.6021ms)
+✔ B13 429 honors Retry-After seconds and HTTP dates, invalid header uses backoff (1.7545ms)
+✔ B13 actual live client preserves Retry-After metadata without response secrets (44.664ms)
+✔ B12 request timeout aborts before a retry and late value is ignored (1.1661ms)
+✔ B12 cancel/unmount suppresses late values/errors and all later requests (0.4755ms)
+✔ B16 A-B-A lifetimes reject the obsolete result even with same scope IDs (1.0221ms)
+✔ B12 terminal summary is delivered once and stops through refresh/visibility changes (0.5861ms)
+✔ B13 access denied stops rather than polling a revoked account (0.5182ms)
+✔ B13 rapid hidden-visible during abort settlement resumes once immediately (0.3091ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1242.1748

@@ -1,0 +1,1 @@
+exit_code=0; forensic boundary check only; do not revert to old full-page polling

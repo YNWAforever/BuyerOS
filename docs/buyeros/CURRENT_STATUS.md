@@ -2,8 +2,8 @@
 
 This file is the current first-round repair record. Earlier checkpoints are historical evidence.
 
-- Scope: Q11 baseline, Q01, Q03, Q04, Q15; Q16 read-only investigation.
-- Reviewed/main/audit source: `a78859fe474f5722be3755b10e2586436b53bf97`; remote main checked this session.
+- Scope: Q11 baseline, Q01, Q03, Q04, Q15; local continuations Q02/Q05/Q06; Q16 read-only investigation.
+- Audit/initial main source: `a78859fe474f5722be3755b10e2586436b53bf97`; remote main checked at the initial repair baseline. Current reviewed repair source follows each task checkpoint below.
 - Isolated branch: `codex/audit-fixes-20261003`; original checkout and dirty Neon Auth worktree preserved.
 - Evidence ZIP SHA256: `19369591a175edad7dd2e9f3ddb5bfdebc6cdc5130a2770243b1e9de2a42d35a`; nested CRC and all 31 manifest hashes passed; outer manifest 8/8 passed.
 - Deployment: audit reports `dpl_7A95afQdDSUsaPRw2RnPFouQ1hEp`, source a78859f. No new deployment/readback in this repair round yet.
@@ -24,7 +24,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 | F04 | fixed with local fixture + DB evidence | Q02 U07/U08/S06: names/full IDs, current/RLS roles, last-admin race, post-lock revocation, legacy replay and response-loss reconciliation |
 | F05 | fixed with local integration/UI evidence (Q03) | Q03 |
 | F06 | selected Q05 cases fixed with local UI/DB evidence; other F06 cases remain unverified | Q05 B02/B03/B04/B07/B16, exact confirmation and frozen assignment reconciliation |
-| F07 | still open (audit-source code unchanged) | outside selected first round |
+| F07 | fixed with local summary/UI/HTTP/DB evidence; live performance unverified | Q06 B12/B13/P04; additional B16 |
 | F08 | fixed with local durability/UI evidence (Q04) | Q04 |
 | F09 | still open (audit-source code unchanged) | outside selected first round |
 | F10 | still open (external evidence gate) | outside selected first round |
@@ -92,3 +92,11 @@ Next eligible local task Q05. N00 built compatibility and true Neon rehearsal re
 Reviewed source `4cd0f484814be7d4333ca265c9637de940d398fa`; base6e7a78c. Seven-file local product/test commit. Q05/F06 cases B02/B03/B04/B07/B16: exact normalized confirmation, generated eligible-colleague search/selection, frozen ActionIntent body/key on response loss, scope-safe replay and visible partial results. Existing domain backend checks retained; no schema or contract change.
 
 Strict DB13, combined audit UI37 and related unit18 pass; zero failures/errors/skips. Generated79-operation/type/lint gates pass. [Full evidence/commands/rollback/screenshots](evidence/audit-fixes-20261003/Q05/RESULTS.md), [local PR-12 description](review/2026-10-03-audit-fixes/Q05-pr.md). Inputs31hashes/98originalcase fields preserved; fixtures cleaned. Author review only; independent review pending. Hard-browser unknown assignment recovery, live identity/provider/Neon/production and full release gates remain unverified; no deployed SHA. Next eligible local task **Q06** (bounded summary polling), not an authorization for external activation.
+
+## Q06 final checkpoint — 2026-10-03
+
+Reviewed source `b3477e341c35807bcdcbb400edfed7cceaa46de4`, base `b083ea43988ed73e9d8e9ab112ba3d6305f2c941`; isolated branch codex/audit-fixes-20261003. F07 summary endpoint/shared actor guard and bounded one-in-flight poller implemented, selected20-row results only on demand, terminal refresh once, hidden/429/transient/scope recovery verified. No SQL schema/migration, current Auth0/Cloudflare HMAC/identity/delivery activation changes.
+
+Strict API/DB/contracts24, full audit UI44, related units29 and manual rollback3 pass, zero fail/error/skip;2 Node file tests include74 adapter+8 auth checks. Generated80 operations=original70+10 extensions; type/lint gates pass. Retained first full43/1 transport error and scratch TypeScript completion error, followed by unchanged positive gates. Controlled fake-clock10 views/60s/1000 results/RTT2.5s: requests1250→140, actual bytes9,293,390→69,440, SQL executes10,000→840, max per-view in-flight13→1; not a live/wall-clock SLA.
+
+[Exact evidence/commands/screenshots/rollback](evidence/audit-fixes-20261003/Q06/RESULTS.md), [local PR-13](review/2026-10-03-audit-fixes/Q06-pr.md). Original31 input hashes/98 case fields/plan bytes and3 destructive DB guards preserved; owned fixtures cleaned. ManualRefresh rollback patch checked/tested; full revert would re-enable old loop and is not recommended. Author review only, independent review pending. External live/provider/auth/built/production and full staff UAT remain unverified, Q16 root cause blocked, Q17 not guessed; deployed SHA null. Next eligible local task **Q07**, fixed-template controls/copy (Q15 satisfied).

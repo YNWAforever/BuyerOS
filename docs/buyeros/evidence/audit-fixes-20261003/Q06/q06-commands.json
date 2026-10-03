@@ -1,0 +1,59 @@
+{
+  "root": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS",
+  "api_cwd": "services/api",
+  "db_environment": {
+    "BUYEROS_STRICT_INTEGRATION": "1",
+    "BUYEROS_TEST_DATABASE_URL": "removed",
+    "BUYEROS_DATABASE_URL": "removed"
+  },
+  "commands": [
+    {
+      "command": "node --test tests/job-poller-checks.mjs tests/audit-bulk-confirmation.test.mjs tests/audit-member-contract.test.mjs tests/audit-research-intent.test.mjs tests/audit-draft-guard.test.mjs tests/audit-auth-render.test.mjs",
+      "evidence": "q06-unit-checkpoint.log"
+    },
+    {
+      "command": "node --test tests/live-adapter-checks.mjs tests/live-auth-checks.mjs",
+      "evidence": "q06-adapter-auth-checkpoint.log"
+    },
+    {
+      "command": "uv run --frozen pytest -q tests/test_job_summary_db.py tests/test_bulk_jobs_db.py tests/test_api_routes_contract.py tests/test_contract_required_fields.py --junitxml=../../test-results/q06-api-final.xml",
+      "cwd": "services/api",
+      "evidence": "q06-api-final.log"
+    },
+    {
+      "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts",
+      "evidence": "q06-ui-final.log"
+    },
+    {
+      "command": "node scripts/generate-api-types.mjs --check",
+      "evidence": "q06-contract-types-final.log"
+    },
+    {
+      "command": "uv run --frozen --project services/api python scripts/generate-operation-routes.py --check",
+      "evidence": "q06-contract-routes-final.log"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "evidence": "q06-types-final.log"
+    },
+    {
+      "command": "node node_modules/eslint/bin/eslint.js features/live/bulk-actions.tsx features/live/buyer-results.tsx features/live/operations.tsx services/live/client.ts services/live/job-poller.ts tests/e2e/audit-operations.spec.ts",
+      "evidence": "q06-lint-final.log"
+    },
+    {
+      "command": "uv run --frozen alembic heads",
+      "cwd": "services/api",
+      "evidence": "q06-alembic-heads.log"
+    },
+    {
+      "command": "git apply --check docs/buyeros/evidence/audit-fixes-20261003/Q06/manual-refresh-rollback.patch",
+      "evidence": "q06-rollback-applicability-final.log"
+    },
+    {
+      "command": "node --test test-results/q06-rollback-checks.mjs",
+      "evidence": "q06-rollback-tests.log"
+    }
+  ],
+  "rollback_test_conditions": "Source copy transpiled by existing ts-loader; only import alias rewritten for scratch location; actual product source never replaced. Not a rollback browser/build/deployment verification.",
+  "performance_denominator": "All requests started by deterministic logical60000ms in ten visible views; every recorded request replayed to completion via actual HTTP/runtime-role DB for bytes/SQL, including requests still pending at logical deadline. RTT2.5s is injected; no wall-clock/production latency/SLA."
+}

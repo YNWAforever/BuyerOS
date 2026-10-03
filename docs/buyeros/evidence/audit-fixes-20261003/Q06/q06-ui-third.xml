@@ -1,0 +1,24 @@
+<testsuites id="" name="" tests="10" failures="0" skipped="0" errors="0" time="145.44881300000003">
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-03T10:02:35.245Z" hostname="" tests="10" failures="0" skipped="0" time="108.981" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="7.776">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="6.925">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="7.092">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="5.649">
+</testcase>
+<testcase name="B12 unopened 1000-result job reads summary only and never walks result pages" classname="audit-operations.spec.ts" time="11.784">
+</testcase>
+<testcase name="B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once" classname="audit-operations.spec.ts" time="28.519">
+</testcase>
+<testcase name="B13 hidden summary pause and double visibility resume produce exactly one refresh" classname="audit-operations.spec.ts" time="12.718">
+</testcase>
+<testcase name="B13 actual 429 Retry-After and 503 recover without result-page traffic" classname="audit-operations.spec.ts" time="13.568">
+</testcase>
+<testcase name="B16 old summary cannot overwrite another scope after A-B-A" classname="audit-operations.spec.ts" time="9.224">
+</testcase>
+<testcase name="B13 zh-HK 390px summary/results controls remain usable without overflow" classname="audit-operations.spec.ts" time="5.726">
+</testcase>
+</testsuite>
+</testsuites>

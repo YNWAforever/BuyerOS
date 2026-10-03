@@ -1,0 +1,6 @@
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.18.0
+task-done: test command exited 1; Task 1 NOT recorded (full output: /c/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/.superpowers/sdd/q06-job-summary/task-1-tests.log)

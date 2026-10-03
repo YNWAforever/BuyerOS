@@ -1,0 +1,1088 @@
+diff --git a/docs/buyeros/contracts/openapi.proposed.yaml b/docs/buyeros/contracts/openapi.proposed.yaml
+index 4e32b00..1ef08b1 100644
+--- a/docs/buyeros/contracts/openapi.proposed.yaml
++++ b/docs/buyeros/contracts/openapi.proposed.yaml
+@@ -6225,6 +6225,46 @@ paths:
+       x-permitted-roles: [viewer, operator, reviewer, workspace_admin]
+       x-cost: none
+       x-idempotency: Read-only.
++  /v1/workspaces/{workspace_id}/jobs/{job_id}/summary:
++    get:
++      operationId: getAsyncJobSummary
++      summary: Read actor-bound job status and counters without result rows
++      description: Q06 read-only summary. Current membership, original actor or current workspace administrator are rechecked on every request. No result-page queries or writes.
++      tags: [BO-011]
++      security: [{BearerAuth: []}]
++      parameters:
++      - name: workspace_id
++        in: path
++        required: true
++        schema: *id001
++      - name: job_id
++        in: path
++        required: true
++        schema: *id001
++      responses:
++        '200':
++          description: Durable current summary, never an inferred completion.
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/AsyncJobSummaryResponse'
++        '401':
++          $ref: '#/components/responses/Error'
++        '403':
++          $ref: '#/components/responses/Error'
++        '404':
++          $ref: '#/components/responses/Error'
++        '429':
++          $ref: '#/components/responses/Error'
++          headers:
++            Retry-After:
++              schema: {type: string}
++      x-permitted-roles: [viewer, operator, reviewer, workspace_admin]
++      x-tenant-authorization: Original actor or current workspace administrator; same guard as getAsyncJob.
++      x-work-package: BO-011
++      x-cost: none
++      x-idempotency: Read-only.
++      x-implementation-status: IMPLEMENTED
+   /v1/workspaces/{workspace_id}/jobs/{job_id}:
+     get:
+       operationId: getAsyncJob
+@@ -10532,6 +10572,63 @@ components:
+       - offset
+       - limit
+       - total
++    AsyncJobSummary:
++      type: object
++      additionalProperties: false
++      properties:
++        id: *id001
++        workspace_id: *id001
++        project_id: *id001
++        kind:
++          type: string
++          enum:
++          - offer_ingestion
++          - draft_generation
++          - export
++          - reconciliation
++          - bulk_mutation
++        status:
++          type: string
++          enum:
++          - queued
++          - running
++          - cancel_requested
++          - cancelled
++          - completed
++          - failed
++          - unknown
++        requested: *id005
++        processed: *id005
++        updated: *id005
++        unchanged: *id005
++        blocked: *id005
++        conflicts: *id005
++        cancelled: *id005
++        result_id: *id001
++        failure_code:
++          type: string
++        created_at: *id004
++        updated_at: *id004
++        data_mode:
++          type: string
++          enum:
++          - live
++      required:
++      - id
++      - workspace_id
++      - project_id
++      - kind
++      - status
++      - created_at
++      - updated_at
++      - data_mode
++      - requested
++      - processed
++      - updated
++      - unchanged
++      - blocked
++      - conflicts
++      - cancelled
+     AsyncJob:
+       type: object
+       additionalProperties: false
+@@ -11017,6 +11114,21 @@ components:
+           type: string
+           enum: [live]
+       required: [data, request_id, data_mode]
++    AsyncJobSummaryResponse:
++      type: object
++      additionalProperties: false
++      properties:
++        data:
++          $ref: '#/components/schemas/AsyncJobSummary'
++        request_id: *id001
++        data_mode:
++          type: string
++          enum:
++          - live
++      required:
++      - data
++      - request_id
++      - data_mode
+     AsyncJobResponse:
+       type: object
+       additionalProperties: false
+diff --git a/features/live/bulk-actions.tsx b/features/live/bulk-actions.tsx
+index c52903f..9d2cba8 100644
+--- a/features/live/bulk-actions.tsx
++++ b/features/live/bulk-actions.tsx
+@@ -3,6 +3,7 @@ import {useEffect,useMemo,useRef,useState} from 'react';
+ import type {components} from '@/services/generated/buyeros-api';
+ import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
+ import {assignmentRecovery,freezeBulkAssignment,type FrozenBulkAssignment} from '@/services/live/bulk-confirmation';
++import {startJobPoller} from '@/services/live/job-poller';
+ import {ActionIntent} from '@/services/live/action-intent';
+ import {downloadText} from '@/services/live/download-text';
+ import {readExportContent,type ExportJob} from '@/services/live/exports';
+@@ -13,8 +14,10 @@ import {createOperationClient} from '@/services/live/operations';
+ 
+ type BulkResult=components['schemas']['BulkResult'];
+ type AsyncJob=components['schemas']['AsyncJob'];
+-type BulkOutcome=BulkResult|AsyncJob;
++type JobSummary=components['schemas']['AsyncJobSummary'];
++type ResultPage=components['schemas']['AsyncJobResultPage'];
+ type Item=components['schemas']['BulkItemResult'];
++type BulkOutcome=BulkResult|AsyncJob;
+ type Locale='en'|'zh-HK';
+ const zhCopy:Record<string,string>={
+   'Assign buyer owners':'批量分派買家負責人','Assignment reason':'分派原因',
+@@ -22,7 +25,7 @@ const zhCopy:Record<string,string>={
+   'Owner':'負責人','Me':'我','No owner':'沒有負責人','Search colleagues':'搜尋同事','Search':'搜尋','Previous colleagues':'上一頁同事','Next colleagues':'下一頁同事','Reload colleagues':'重新載入同事','Loading colleagues…':'正在載入同事…','Retry same assignment':'重試同一分派','Confirm this preview':'確認這份預覽','Scope':'工作區／專案','Reason':'原因',
+   'The assignment result is unknown. Retry the same frozen assignment to reconcile; changes are locked until its result is known.':'分派結果未明。請重試同一份已凍結分派以核對結果；確認結果前暫停更改。',
+   'Assigning...':'正在分派…','Bulk job progress':'批量工作進度','Close job':'關閉工作',
+-  'Loading job...':'正在載入工作…','Refresh job':'更新工作進度',
++  'Loading job...':'正在載入工作…','Refresh job':'更新工作進度','Show job results':'顯示工作結果','Hide job results':'隱藏工作結果','Previous job results':'上一頁工作結果','Next job results':'下一頁工作結果',
+   'Export failed IDs and reasons':'匯出失敗買家 ID 與原因',
+   'Retry failed only with current versions':'只按目前版本重試失敗列',
+   'Retrying...':'正在重試…','Cancel pending rows':'取消未處理列','Cancelling...':'正在取消…','queued':'排隊中','running':'處理中',
+@@ -122,39 +125,46 @@ function AssignmentConfirmation({preview,enabled,busy,locale,onAssign}:{preview:
+ }
+ 
+ export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobId:string;onJob:(id:string)=>void;onCommitted:()=>void;onClose:()=>void;locale?:Locale}){
+-  const {session,client}=useWorkspaceSession(),{scope}=useSessionSnapshot();
+-  const [job,setJob]=useState<AsyncJob|null>(null),[items,setItems]=useState<Item[]>([]);
++  const {session,client}=useWorkspaceSession(),snapshot=useSessionSnapshot(),{scope}=snapshot;
++  const [job,setJob]=useState<JobSummary|null>(null),[resultPage,setResultPage]=useState<ResultPage|null>(null);
+   const [error,setError]=useState(''),[busy,setBusy]=useState(false),[retryResult,setRetryResult]=useState<BulkResult|null>(null);
+-  const [tick,setTick]=useState(0),settled=useRef('');
++  const [tick,setTick]=useState(0),[resultsOpen,setResultsOpen]=useState(false),[resultOffset,setResultOffset]=useState(0),[resultTick,setResultTick]=useState(0),[resultBusy,setResultBusy]=useState(false);
++  const settled=useRef(''),resultView=useRef({open:resultsOpen});
++  useEffect(()=>{resultView.current={open:resultsOpen};},[resultsOpen]);
+   const retryIntent=useRef(new ActionIntent<BulkOutcome>());
+   const cancelIntent=useRef(new ActionIntent<AsyncJob>());
+   const reportIntent=useRef(new ActionIntent<ExportJob>());
+   useEffect(()=>{
+     if(!jobId||!scope.workspace)return;
+-    let active=true;
+-    void(async()=>{
+-      try{
+-        const ctx=buyerOperationContext(session),op=createOperationClient(client);
+-        const first=await op.requestOperation('getAsyncJob',{path:{workspace_id:scope.workspace!,job_id:jobId},query:{offset:0,limit:100}},ctx);
+-        const collected:Item[]=[...(first.result_page?.items??[])];
+-        const total=first.result_page?.total??0;
+-        for(let offset=collected.length;offset<total;){
+-          const page=await op.requestOperation('getAsyncJob',{path:{workspace_id:scope.workspace!,job_id:jobId},query:{offset,limit:100}},ctx);
+-          const rows=page.result_page?.items??[];
+-          if(!rows.length)throw new Error('Incomplete job result page');
+-          collected.push(...rows);offset+=rows.length;
++    const own=new AbortController(),basis=session.captureWriteContext(),op=createOperationClient(client);
++    const signal=AbortSignal.any([basis.signal,own.signal]);
++    return startJobPoller({signal,isVisible:()=>!document.hidden,
++      fetchSummary:requestSignal=>op.requestOperation('getAsyncJobSummary',{path:{workspace_id:scope.workspace!,job_id:jobId}},
++        {...basis,signal:AbortSignal.any([signal,requestSignal]),getToken:async()=>session.token()||'',isCurrent:()=>session.isCurrent(basis.identity)&&!own.signal.aborted}),
++      onValue:value=>{
++        if(!session.isCurrent(basis.identity)||own.signal.aborted)return;
++        setJob(value);setError('');
++        if(['completed','failed','cancelled'].includes(value.status)&&settled.current!==`${basis.identity}:${jobId}`){
++          settled.current=`${basis.identity}:${jobId}`;
++          if(resultView.current.open){setResultBusy(true);setResultTick(v=>v+1);}
++          if(value.updated)onCommitted();
+         }
+-        if(active){setJob(first);setItems(collected);setError('');
+-          if(first.status==='completed'&&first.updated&&settled.current!==jobId){settled.current=jobId;onCommitted();}}
+-      }catch(cause){if(active&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
+-    })();
+-    return()=>{active=false;};
+-  },[client,session,scope.workspace,scope.project,jobId,tick,onCommitted]);
+-  const jobStatus=job?.status;
+-  useEffect(()=>{if(!jobStatus||!['queued','running','cancel_requested'].includes(jobStatus))return;
+-    const timer=window.setInterval(()=>setTick(value=>value+1),2000);return()=>window.clearInterval(timer);
+-  },[jobStatus]);
+-  const failures=items.filter(item=>item.status==='blocked'||item.status==='conflict');
++      },onError:cause=>{if(session.isCurrent(basis.identity)&&!own.signal.aborted)setError(describeLiveError(cause));},
++    });
++  },[client,session,scope.workspace,scope.project,snapshot.identity,jobId,tick,onCommitted]);
++  useEffect(()=>{
++    if(!resultsOpen||!scope.workspace)return;
++    const own=new AbortController(),basis=session.captureWriteContext();
++    const current=()=>!own.signal.aborted&&session.isCurrent(basis.identity);
++    void createOperationClient(client).requestOperation('getAsyncJob',{path:{workspace_id:scope.workspace,job_id:jobId},query:{offset:resultOffset,limit:20}},
++      {...basis,signal:AbortSignal.any([own.signal,basis.signal]),getToken:async()=>session.token()||'',isCurrent:current})
++      .then(value=>{if(current()){setResultPage(value.result_page??null);setError('');}})
++      .catch(cause=>{if(current()&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));})
++      .finally(()=>{if(current())setResultBusy(false);});
++    return()=>own.abort();
++  },[client,session,scope.workspace,snapshot.identity,jobId,resultsOpen,resultOffset,resultTick]);
++  const failures=(resultPage?.items??[]).filter(item=>item.status==='blocked'||item.status==='conflict');
++  const failureCount=(job?.blocked??0)+(job?.conflicts??0);
+   async function downloadFailures(){
+     if(!scope.workspace||!scope.project||!job||busy||!['completed','failed'].includes(job.status))return;
+     setBusy(true);setError('');
+@@ -177,16 +187,16 @@ export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobI
+     setBusy(true);setError('');
+     try{
+       const ctx=buyerOperationContext(session);
+-      const result=await cancelIntent.current.run(JSON.stringify({ctx:ctx.identity,jobId}),key=>
++      await cancelIntent.current.run(JSON.stringify({ctx:ctx.identity,jobId}),key=>
+         createOperationClient(client).requestOperation('cancelAsyncJob',{
+           path:{workspace_id:scope.workspace!,job_id:jobId},header:{'Idempotency-Key':key},
+         },ctx));
+-      setJob(result);setTick(value=>value+1);
++      setTick(value=>value+1);
+     }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
+     finally{setBusy(false);}
+   }
+   async function retry(){
+-    if(!scope.workspace||busy||!failures.length)return;
++    if(!scope.workspace||busy||!failureCount)return;
+     setBusy(true);setError('');
+     try{
+       const ctx=buyerOperationContext(session);
+@@ -204,12 +214,21 @@ export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobI
+     {error&&<p role="alert">{error}</p>}
+     {!job&&!error&&<p role="status">{copy('Loading job...',locale)}</p>}
+     {job&&<><p role="status">{locale==='zh-HK'?`${copy(job.status,locale)}：已處理 ${job.processed??0}／${job.requested??0} 列；更新 ${job.updated??0}、不變 ${job.unchanged??0}、受阻 ${job.blocked??0}、衝突 ${job.conflicts??0}、取消 ${job.cancelled??0}。`:`${job.status}: ${job.processed??0} of ${job.requested??0} processed; ${job.updated??0} updated; ${job.unchanged??0} unchanged; ${job.blocked??0} blocked; ${job.conflicts??0} conflicts; ${job.cancelled??0} cancelled.`}</p>
+-      <div className="bulk-action-row"><button type="button" onClick={()=>setTick(value=>value+1)}>{copy('Refresh job',locale)}</button>
++      <div className="bulk-action-row"><button type="button" onClick={()=>{setTick(value=>value+1);if(resultsOpen){setResultBusy(true);setResultTick(v=>v+1);}}}>{copy('Refresh job',locale)}</button>
+       {['queued','running'].includes(job.status)&&<button type="button" disabled={busy} onClick={()=>void cancel()}>{copy(busy?'Cancelling...':'Cancel pending rows',locale)}</button>}
+-      {failures.length>0&&<><button type="button" disabled={busy||!['completed','failed'].includes(job.status)} onClick={()=>void downloadFailures()}>{copy('Export failed IDs and reasons',locale)}</button>
++      {failureCount>0&&<><button type="button" disabled={busy||!['completed','failed'].includes(job.status)} onClick={()=>void downloadFailures()}>{copy('Export failed IDs and reasons',locale)}</button>
+         <button type="button" disabled={busy||!['completed','failed'].includes(job.status)} onClick={()=>void retry()}>{copy(busy?'Retrying...':'Retry failed only with current versions',locale)}</button></>}</div>
+-      {failures.length>0&&<><p>{locale==='zh-HK'?`失敗列：${failures.length}。報告只包含買家 ID 和內部原因碼。`:`Failed rows: ${failures.length}. Reasons are limited to buyer IDs and internal codes.`}</p>
+-        <ul>{failures.slice(0,20).map(item=><li key={item.id}>{item.id}: {item.reason_code??item.status}</li>)}</ul></>}
++      {failureCount>0&&<><p>{locale==='zh-HK'?`失敗列：${failureCount}。報告只包含買家 ID 和內部原因碼。`:`Failed rows: ${failureCount}. Reasons are limited to buyer IDs and internal codes.`}</p>
++        <ul>{failures.map(item=><li key={item.id}>{item.id}: {item.reason_code??item.status}</li>)}</ul></>}
++      <button type="button" onClick={()=>{setResultBusy(true);setResultsOpen(v=>!v);}}>{copy(resultsOpen?'Hide job results':'Show job results',locale)}</button>
++      {resultsOpen&&<div aria-busy={resultBusy}>
++        {resultPage?.items.map(item=><p key={item.id}><code>{item.id}</code>: {copy(item.status,locale)} {item.reason_code??''}</p>)}
++        {resultPage&&<div className="bulk-action-row">
++          <button type="button" disabled={resultBusy||resultOffset===0} onClick={()=>{setResultBusy(true);setResultOffset(v=>Math.max(0,v-20));}}>{copy('Previous job results',locale)}</button>
++          <span>{resultPage.total?resultPage.offset+1:0}–{Math.min(resultPage.offset+resultPage.items.length,resultPage.total)} / {resultPage.total}</span>
++          <button type="button" disabled={resultBusy||resultOffset+20>=resultPage.total} onClick={()=>{setResultBusy(true);setResultOffset(v=>v+20);}}>{copy('Next job results',locale)}</button>
++        </div>}
++      </div>}
+       {retryResult&&<p role="status">{locale==='zh-HK'?`重試：更新 ${retryResult.updated}、受阻 ${retryResult.blocked}、衝突 ${retryResult.conflicts}。`:`Retry: ${retryResult.updated} updated; ${retryResult.blocked} blocked; ${retryResult.conflicts} conflicts.`}</p>}
+     </>}
+   </section>;
+diff --git a/features/live/buyer-results.tsx b/features/live/buyer-results.tsx
+index ab272ec..a99bf4a 100644
+--- a/features/live/buyer-results.tsx
++++ b/features/live/buyer-results.tsx
+@@ -174,7 +174,7 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
+     {reviewResult&&<p role="status">{t('Review: {updated} updated; {blocked} blocked; {conflicts} conflicts.').replace('{updated}',String(reviewResult.updated)).replace('{blocked}',String(reviewResult.blocked)).replace('{conflicts}',String(reviewResult.conflicts))} {reviewResult.results.filter(row=>row.status==='blocked'||row.status==='conflict').map(row=>`${row.id}: ${row.reason_code??row.status}`).join('; ')}</p>}
+     {canEdit&&<ExportDialog key={`export:${workspace}:${project}`} locale={locale} selection={selection()} canExport={canEdit}/>}
+     <LiveBulkActions key={`bulk:${sessionSnapshot.identity}`} locale={locale} selection={selection()} count={selectedCount} canAssign={canAssign} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted}/>
+-    {jobId&&<BulkJobPanel locale={locale} jobId={jobId} onJob={onJob} onCommitted={onCommitted} onClose={closeJob}/>}
++    {jobId&&<BulkJobPanel key={`job:${sessionSnapshot.identity}:${jobId}`} locale={locale} jobId={jobId} onJob={onJob} onCommitted={onCommitted} onClose={closeJob}/>}
+     <LiveBuyerManagementControls key={`management:${workspace}:${project}`} locale={locale} onJob={onJob} query={query} onApplyQuery={patch=>{setSelected({});setAllFiltered(false);setExcluded([]);changeQuery(patch,true);setReload(value=>value+1);}} selection={selection()} canManage={canEdit}/>
+     {current&&<LiveBuyerDetail key={current.id} buyer={current} locale={locale} canEdit={canEdit} canQuote={canQuote} canReview={canReview} ownMembershipId={ownMembershipId}
+       onReviewAndNext={(nextStatus,nextReason)=>reviewOneAndNext(current.id,current.version,nextStatus,nextReason)}
+diff --git a/features/live/operations.tsx b/features/live/operations.tsx
+index 7a500ec..f274eb0 100644
+--- a/features/live/operations.tsx
++++ b/features/live/operations.tsx
+@@ -3,6 +3,7 @@ import {useEffect,useRef,useState} from 'react';
+ import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
+ import {LiveCancelled,describeLiveError} from '@/services/live/client';
+ import type {components} from '@/services/generated/buyeros-api';
++import {startJobPoller} from '@/services/live/job-poller';
+ import {createOperationClient} from '@/services/live/operations';
+ 
+ type Capability={name:string;status:string;reason_codes:string[];checked_at:string;billable:boolean};
+@@ -19,8 +20,10 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+   const [jobId,setJobId]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('bulk_job')||'');
+   const [job,setJob]=useState<Job|null>(null),[jobs,setJobs]=useState<Page<Job>|null>(null),[jobOffset,setJobOffset]=useState(0),[jobStatus,setJobStatus]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('job_status')||'');
+   const [audit,setAudit]=useState<Page<Audit>|null>(null),[auditOffset,setAuditOffset]=useState(0);
++  const [pollError,setPollError]=useState('');
+   const [error,setError]=useState(''),[resultLoading,setResultLoading]=useState(false);
+   const jobRequest=useRef({sequence:0,controller:new AbortController()});
++  const pageView=useRef(job);useEffect(()=>{pageView.current=job;},[job]);
+   useEffect(()=>()=>{jobRequest.current.sequence++;jobRequest.current.controller.abort();},[scope.identity]);
+   const [profileQueue,setProfileQueue]=useState<'loading'|'none'|'pending'|'current'|'stale'|'unavailable'>(project?'loading':'none');
+   const [failedCount,setFailedCount]=useState<number|null|'unavailable'>(null);
+@@ -89,7 +92,27 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+     }catch(e){if(isCurrent()&&!(e instanceof LiveCancelled))setError(describeLiveError(e));}
+     finally{if(isCurrent())setResultLoading(false);}
+   }
+-  function changeJob(value:string){jobRequest.current.controller.abort();jobRequest.current.sequence++;setJobId(value);setJob(null);setResultLoading(false);}
++  const loadJobRef=useRef(loadJob);useEffect(()=>{loadJobRef.current=loadJob;});
++  const loadedJobId=job?.id;
++  useEffect(()=>{
++    if(!loadedJobId||!pageView.current||['completed','failed','cancelled'].includes(pageView.current.status))return;
++    const basis=session.captureWriteContext(),own=new AbortController();let terminalSeen=false;
++    const ctx={...basis,signal:AbortSignal.any([basis.signal,own.signal]),getToken:async()=>session.token()||'',isCurrent:()=>session.isCurrent(basis.identity)&&!own.signal.aborted};
++    return startJobPoller({signal:ctx.signal,isVisible:()=>!document.hidden,
++      fetchSummary:signal=>createOperationClient(client).requestOperation('getAsyncJobSummary',{path:{workspace_id:workspace,job_id:loadedJobId}}, {...ctx,signal:AbortSignal.any([ctx.signal,signal])}),
++      onValue:summary=>{
++        if(!ctx.isCurrent()||pageView.current?.id!==loadedJobId)return;
++        setPollError('');setJob(current=>current?.id===summary.id?{...current,...summary}:current);
++        if(!terminalSeen&&['completed','failed','cancelled'].includes(summary.status)){
++          terminalSeen=true;
++          const page=pageView.current?.result_page;
++          if(page)void loadJobRef.current(loadedJobId,page.offset);
++        }
++      },onError:cause=>{if(ctx.isCurrent())setPollError(describeLiveError(cause));},
++    });
++  // Page changes do not create another poller; the current page is read via pageView.
++  },[client,session,workspace,scope.identity,loadedJobId]);
++  function changeJob(value:string){jobRequest.current.controller.abort();jobRequest.current.sequence++;setJobId(value);setJob(null);setPollError('');setResultLoading(false);}
+   function resultRow(item:Result){return <p key={item.id}><code>{item.id}</code> · {t(item.status)} {item.reason_code||''} <button onClick={()=>void navigator.clipboard?.writeText(item.id)}>{t('Copy buyer ID')}</button></p>;}
+   return <section className="panel" aria-label={t('Operations')}><h2>{t('Operations')}</h2>
+     <p>{t('Live domain state only. Provider readiness remains blocked until verified.')}</p>
+@@ -130,6 +153,6 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+     {isAdmin&&<div role="region" aria-label={t('Audit trail')}><h3>{t('Audit trail')}</h3>{audit?.items.map(item=><p key={item.id}>{item.occurred_at} · {item.action} · {item.entity_type} {item.entity_id||''} · {item.reason_code||''} {item.request_id&&<code>{item.request_id}</code>}</p>)}
+       {audit&&<div className="inline"><button disabled={auditOffset===0} onClick={()=>setAuditOffset(Math.max(0,auditOffset-20))}>{t('Previous')}</button><span>{audit.total?auditOffset+1:0}–{Math.min(auditOffset+20,audit.total)} / {audit.total}</span><button disabled={auditOffset+20>=audit.total} onClick={()=>setAuditOffset(auditOffset+20)}>{t('Next')}</button></div>}
+     </div>}
+-    {error&&<p role="alert">{error}</p>}
++    {error&&<p role="alert">{error}</p>}{pollError&&<p role="alert">{pollError}</p>}
+   </section>;
+ }
+diff --git a/services/api/buyeros_api/api/deps.py b/services/api/buyeros_api/api/deps.py
+index 9b59316..f974bb4 100644
+--- a/services/api/buyeros_api/api/deps.py
++++ b/services/api/buyeros_api/api/deps.py
+@@ -26,6 +26,7 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
+     "changeListMemberships": frozenset({"operator", "reviewer", "workspace_admin"}),
+     "assignBuyerOwners": frozenset({"operator", "workspace_admin"}),
+     "getAsyncJob": _VIEWERS,
++    "getAsyncJobSummary": _VIEWERS,
+     "listAsyncJobs": _VIEWERS,
+     "listFilterPresets": _VIEWERS,
+     "saveFilterPreset": _VIEWERS,
+diff --git a/services/api/buyeros_api/api/routes/jobs.py b/services/api/buyeros_api/api/routes/jobs.py
+index 135960a..dcc7b56 100644
+--- a/services/api/buyeros_api/api/routes/jobs.py
++++ b/services/api/buyeros_api/api/routes/jobs.py
+@@ -10,7 +10,7 @@ from ..auth import Principal, get_principal
+ from ..deps import load_membership, permission_for_roles, tenant_scoped
+ from ..errors import ApiError, envelope
+ from ..idempotency import begin_idempotency, complete_idempotency
+-from ...services.bulk_service import cancel_bulk_job, job_data, read_job_page, retry_failed_only
++from ...services.bulk_service import cancel_bulk_job, job_data, read_job_page, read_job_summary, retry_failed_only
+ from ...db.outbox import AsyncJob
+ 
+ router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["jobs"])
+@@ -43,6 +43,22 @@ async def list_async_jobs(
+     return envelope(data, request.state.request_id)
+ 
+ 
++@router.get("/jobs/{job_id}/summary")
++async def get_async_job_summary(
++    workspace_id: uuid.UUID, job_id: uuid.UUID, request: Request,
++    principal: Principal = Depends(get_principal),
++):
++    async with tenant_scoped(workspace_id) as session:
++        member = await load_membership(session, principal=principal, workspace_id=workspace_id)
++        if not permission_for_roles(member["roles"], "getAsyncJobSummary"):
++            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
++        data = await read_job_summary(
++            session, workspace_id=workspace_id, job_id=job_id,
++            actor_user_id=member["user_id"], is_admin="workspace_admin" in member["roles"],
++        )
++    return envelope(data, request.state.request_id)
++
++
+ @router.get("/jobs/{job_id}")
+ async def get_async_job(
+     workspace_id: uuid.UUID, job_id: uuid.UUID, request: Request,
+diff --git a/services/api/buyeros_api/services/bulk_service.py b/services/api/buyeros_api/services/bulk_service.py
+index 1b2471c..371450f 100644
+--- a/services/api/buyeros_api/services/bulk_service.py
++++ b/services/api/buyeros_api/services/bulk_service.py
+@@ -165,13 +165,27 @@ async def apply_bulk_chunk(session, job_id: uuid.UUID, limit: int = CHUNK_SIZE)
+             "remaining": job.requested - job.processed}
+ 
+ 
+-async def read_job_page(session, *, workspace_id, job_id, actor_user_id, is_admin,
+-                        offset: int, limit: int) -> dict:
++async def _read_actor_job(session, *, workspace_id, job_id, actor_user_id, is_admin):
+     job = (await session.execute(select(AsyncJob).where(
+         AsyncJob.workspace_id == workspace_id, AsyncJob.id == job_id
+     ))).scalar_one_or_none()
+     if job is None or (job.actor_user_id != actor_user_id and not is_admin):
+         raise ApiError(404, "NOT_FOUND", "bulk job not found")
++    return job
++
++
++async def read_job_summary(session, *, workspace_id, job_id, actor_user_id, is_admin) -> dict:
++    job = await _read_actor_job(session, workspace_id=workspace_id, job_id=job_id,
++                                actor_user_id=actor_user_id, is_admin=is_admin)
++    data = job_data(job)
++    del data["result_page"]
++    return data
++
++
++async def read_job_page(session, *, workspace_id, job_id, actor_user_id, is_admin,
++                        offset: int, limit: int) -> dict:
++    job = await _read_actor_job(session, workspace_id=workspace_id, job_id=job_id,
++                                actor_user_id=actor_user_id, is_admin=is_admin)
+     total = (await session.execute(select(func.count()).select_from(AsyncJobItem).where(
+         AsyncJobItem.workspace_id == workspace_id, AsyncJobItem.job_id == job_id,
+         AsyncJobItem.status != "pending"
+diff --git a/services/api/tests/test_job_summary_db.py b/services/api/tests/test_job_summary_db.py
+new file mode 100644
+index 0000000..74c1bd3
+--- /dev/null
++++ b/services/api/tests/test_job_summary_db.py
+@@ -0,0 +1,126 @@
++"""Q06 actual actor-bound summary reads on guarded disposable PostgreSQL."""
++import json
++import uuid
++
++import psycopg
++from sqlalchemy import event
++from sqlalchemy.engine import Engine
++
++from tests.contract_validation import assert_contract_response
++from tests.test_buyer_review_db import ADMIN, OPERATOR, VIEWER, REVIEWER, WORKSPACE_A, WORKSPACE_B, PROJECT_A, _h, api
++
++
++def seed_job(seeded, actor=OPERATOR, count=1000, status="running"):
++    job=str(uuid.uuid4())
++    with psycopg.connect(seeded) as db:
++        db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,updated,unchanged,blocked,conflicts) VALUES (%s,%s,%s,%s,'bulk_mutation','owner_assign','{}',%s,%s,%s,%s,%s,%s,%s)",
++                   (job,WORKSPACE_A,PROJECT_A,uuid.uuid5(uuid.NAMESPACE_URL,actor),status,count,count,count//4,count//4,count//4,count//4))
++        companies=[(uuid.uuid4(),WORKSPACE_A,f"Q06 fixture {i}",f"Q06 fixture {i}") for i in range(count)]
++        buyers=[(uuid.uuid4(),WORKSPACE_A,PROJECT_A,c[0]) for c in companies]
++        with db.cursor() as cur:
++            cur.executemany("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES (%s,%s,%s,%s)",companies)
++            cur.executemany("INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES (%s,%s,%s,%s)",buyers)
++            cur.executemany("INSERT INTO async_job_items(id,workspace_id,job_id,buyer_id,ordinal,expected_version,status,resulting_version) VALUES (%s,%s,%s,%s,%s,1,%s,%s)",[(uuid.uuid4(),WORKSPACE_A,job,b[0],i,['updated','unchanged','blocked','conflict'][i%4],2 if i%4==0 else None) for i,b in enumerate(buyers)])
++    return job
++
++
++def test_q06_summary_has_exact_counters_and_no_item_queries(api,seeded):
++    job=seed_job(seeded)
++    statements=[]
++    def capture(conn,cursor,statement,parameters,context,executemany):statements.append(statement)
++    event.listen(Engine,'before_cursor_execute',capture)
++    try:response=api.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job}/summary",headers=_h(subject=OPERATOR))
++    finally:event.remove(Engine,'before_cursor_execute',capture)
++    assert response.status_code==200,response.text
++    assert_contract_response('AsyncJobSummaryResponse',response.json())
++    data=response.json()['data']
++    assert data['id']==job and data['status']=='running'
++    assert [data[k] for k in ['requested','processed','updated','unchanged','blocked','conflicts','cancelled']]==[1000,1000,250,250,250,250,0]
++    assert 'result_page' not in data and 'command' not in data and 'actor_user_id' not in data
++    assert not any('async_job_items' in s.lower() for s in statements),statements
++    assert len(response.content)<1500
++
++
++def test_q06_summary_detail_guards_match_current_actor_admin_and_tenant(api,seeded):
++    job=seed_job(seeded,count=4)
++    for suffix in ['', '/summary']:
++        path=f"/v1/workspaces/{WORKSPACE_A}/jobs/{job}{suffix}"
++        for actor,status in [(OPERATOR,200),(ADMIN,200),(REVIEWER,404),(VIEWER,404)]:
++            result=api.get(path,headers=_h(subject=actor));assert result.status_code==status,result.text
++        assert api.get(f"/v1/workspaces/{WORKSPACE_B}/jobs/{job}{suffix}",headers=_h(subject=OPERATOR)).status_code==404
++        assert api.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{uuid.uuid4()}{suffix}",headers=_h()).status_code==404
++    with psycopg.connect(seeded) as db:
++        db.execute("UPDATE memberships SET active=false WHERE workspace_id=%s AND user_id=%s",(WORKSPACE_A,uuid.uuid5(uuid.NAMESPACE_URL,OPERATOR)))
++    for suffix in ['', '/summary']:
++        assert api.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job}{suffix}",headers=_h(subject=OPERATOR)).status_code==404
++
++
++def test_q06_summary_terminal_state_and_draft_result_id_survive_read_restart(api,seeded):
++    job=seed_job(seeded,count=4,status='completed')
++    with psycopg.connect(seeded) as db:
++        db.execute("UPDATE async_jobs SET kind='draft_generation', command=%s WHERE id=%s",(json.dumps({'result_draft_id':str(uuid.uuid4())}),job))
++        draft=db.execute("SELECT command->>'result_draft_id' FROM async_jobs WHERE id=%s",(job,)).fetchone()[0]
++    response=api.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job}/summary",headers=_h())
++    assert response.status_code==200,response.text
++    first=response.json()
++    assert_contract_response('AsyncJobSummaryResponse',first)
++    second=api.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job}/summary",headers=_h()).json()
++    assert first['data']==second['data'] and first['data']['result_id']==draft
++
++
++def test_q06_60s_ten_view_traffic_replays_real_http_bytes_and_db_executes(api,seeded,monkeypatch):
++    """Fake-clock scheduling; every counted request/byte/SQL execute is replayed, not extrapolated."""
++    import subprocess
++    from collections import Counter
++    from datetime import datetime, timedelta, timezone
++    from pathlib import Path
++    from buyeros_api.services import api_rate_limit
++    from tests import auth_fixtures as fx
++    root=Path(__file__).resolve().parents[3];out=root/'test-results';out.mkdir(exist_ok=True)
++    job=seed_job(seeded)
++    with api as client:
++        samples={'pages':{}}
++        for offset in range(0,1000,100):
++            response=client.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job}?offset={offset}&limit=100",headers=_h())
++            assert response.status_code==200,response.text;samples['pages'][str(offset)]=response.json()
++        response=client.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job}/summary",headers=_h());assert response.status_code==200,response.text;samples['summary']=response.json()
++        sample_path=out/'q06-traffic-samples.json';sample_path.write_text(json.dumps(samples),encoding='utf-8')
++        trace_path=out/'q06-traffic-schedule.json'
++        scheduled=subprocess.run(['node','tests/job-poller-traffic.mjs',str(sample_path),str(trace_path)],cwd=root,capture_output=True,text=True,encoding='utf-8',check=True)
++        (out/'q06-traffic-node.log').write_text(scheduled.stdout+scheduled.stderr,encoding='utf-8')
++        trace=json.loads(trace_path.read_text(encoding='utf-8'));subjects=[f'auth0|q06-view-{i}' for i in range(10)]
++        with psycopg.connect(seeded) as db:
++            for subject in subjects:
++                user=uuid.uuid5(uuid.NAMESPACE_URL,subject)
++                db.execute('INSERT INTO users(id,issuer,subject) VALUES (%s,%s,%s)',(user,fx.ISSUER,subject))
++                db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES (%s,%s,%s,'{workspace_admin}',true)",(uuid.uuid4(),WORKSPACE_A,user))
++        class LogicalRateClock(datetime):
++            current=datetime(2026,10,3,0,0,30,tzinfo=timezone.utc)
++            @classmethod
++            def now(cls,tz=None):return cls.current if tz else cls.current.replace(tzinfo=None)
++        monkeypatch.setattr(api_rate_limit,'datetime',LogicalRateClock)
++        metrics=[]
++        try:
++            for run in trace['runs']:
++                with psycopg.connect(seeded) as db:
++                    db.execute('DELETE FROM api_rate_windows WHERE workspace_id=%s AND actor_id=ANY(%s)',(WORKSPACE_A,[uuid.uuid5(uuid.NAMESPACE_URL,v) for v in subjects]))
++                statements=[]
++                def capture(conn,cursor,statement,parameters,context,executemany):statements.append(statement)
++                event.listen(Engine,'before_cursor_execute',capture);bytes_total=0;statuses=Counter()
++                try:
++                    for call in run['requests']:
++                        LogicalRateClock.current=datetime(2026,10,3,0,0,30,tzinfo=timezone.utc)+timedelta(milliseconds=call['at_ms'])
++                        path=f"/v1/workspaces/{WORKSPACE_A}/jobs/{job}"
++                        path+='/summary' if call['kind']=='summary' else f"?offset={call['offset']}&limit={call['limit']}"
++                        response=client.get(path,headers=_h(subject=subjects[call['view']]))
++                        statuses[response.status_code]+=1;assert response.status_code==200,response.text;bytes_total+=len(response.content)
++                finally:event.remove(Engine,'before_cursor_execute',capture)
++                metrics.append({'mode':run['mode'],'requests':len(run['requests']),'response_body_bytes':bytes_total,'db_execute_count':len(statements),'result_table_execute_count':sum('async_job_items' in q.lower() for q in statements),'http_status_counts':dict(statuses),'max_per_view_in_flight':max(v['maxInFlight'] for v in run['per_view'])})
++            before,after=metrics;assert after['requests']<before['requests'];assert after['response_body_bytes']<before['response_body_bytes'];assert after['db_execute_count']<before['db_execute_count'];assert after['result_table_execute_count']==0;assert after['max_per_view_in_flight']==1
++            result={'fixture_only':True,'baseline_source_sha':trace['baseline_sha'],'conditions':{'logical_seconds':60,'views':10,'persisted_results':1000,'simulated_rtt_ms':2500,'wall_clock_performance':False,'database':'owned disposable PostgreSQL16; real runtime-role HTTP and executes','rate_limit':'unchanged120/minute per actor; ten fictional current admins; logical experiment starts30s before minute boundary; fresh fixture windows between independent runs','identity':'fictional signed principals; no live account/provider verification'},'measurements':metrics}
++            (out/'q06-traffic-results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
++        finally:
++            with psycopg.connect(seeded) as db:
++                for subject in subjects:
++                    user=uuid.uuid5(uuid.NAMESPACE_URL,subject)
++                    db.execute('DELETE FROM api_rate_windows WHERE actor_id=%s',(user,));db.execute('DELETE FROM memberships WHERE user_id=%s',(user,));db.execute('DELETE FROM users WHERE id=%s',(user,))
+diff --git a/services/generated/buyeros-api.ts b/services/generated/buyeros-api.ts
+index c7c1681..eb1a7f7 100644
+--- a/services/generated/buyeros-api.ts
++++ b/services/generated/buyeros-api.ts
+@@ -989,6 +989,26 @@ export interface paths {
+         patch?: never;
+         trace?: never;
+     };
++    "/v1/workspaces/{workspace_id}/jobs/{job_id}/summary": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        /**
++         * Read actor-bound job status and counters without result rows
++         * @description Q06 read-only summary. Current membership, original actor or current workspace administrator are rechecked on every request. No result-page queries or writes.
++         */
++        get: operations["getAsyncJobSummary"];
++        put?: never;
++        post?: never;
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
+     "/v1/workspaces/{workspace_id}/jobs/{job_id}": {
+         parameters: {
+             query?: never;
+@@ -2567,6 +2587,34 @@ export interface components {
+             limit: number;
+             total: number;
+         };
++        AsyncJobSummary: {
++            /** Format: uuid */
++            id: string;
++            /** Format: uuid */
++            workspace_id: string;
++            /** Format: uuid */
++            project_id: string;
++            /** @enum {string} */
++            kind: "offer_ingestion" | "draft_generation" | "export" | "reconciliation" | "bulk_mutation";
++            /** @enum {string} */
++            status: "queued" | "running" | "cancel_requested" | "cancelled" | "completed" | "failed" | "unknown";
++            requested: number;
++            processed: number;
++            updated: number;
++            unchanged: number;
++            blocked: number;
++            conflicts: number;
++            cancelled: number;
++            /** Format: uuid */
++            result_id?: string;
++            failure_code?: string;
++            /** Format: date-time */
++            created_at: string;
++            /** Format: date-time */
++            updated_at: string;
++            /** @enum {string} */
++            data_mode: "live";
++        };
+         AsyncJob: {
+             /** Format: uuid */
+             id: string;
+@@ -2802,6 +2850,13 @@ export interface components {
+             /** @enum {string} */
+             data_mode: "live";
+         };
++        AsyncJobSummaryResponse: {
++            data: components["schemas"]["AsyncJobSummary"];
++            /** Format: uuid */
++            request_id: string;
++            /** @enum {string} */
++            data_mode: "live";
++        };
+         AsyncJobResponse: {
+             data: components["schemas"]["AsyncJob"];
+             /** Format: uuid */
+@@ -5726,6 +5781,33 @@ export interface operations {
+             };
+         };
+     };
++    getAsyncJobSummary: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                workspace_id: string;
++                job_id: string;
++            };
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description Durable current summary, never an inferred completion. */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "application/json": components["schemas"]["AsyncJobSummaryResponse"];
++                };
++            };
++            401: components["responses"]["Error"];
++            403: components["responses"]["Error"];
++            404: components["responses"]["Error"];
++            429: components["responses"]["Error"];
++        };
++    };
+     getAsyncJob: {
+         parameters: {
+             query?: {
+diff --git a/services/generated/operation-routes.ts b/services/generated/operation-routes.ts
+index 1ba7225..b5dffa1 100644
+--- a/services/generated/operation-routes.ts
++++ b/services/generated/operation-routes.ts
+@@ -63,6 +63,7 @@ export const operationRoutes = {
+   "listDrafts": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/drafts"},
+   "generateDraft": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/drafts"},
+   "listAsyncJobs": {method: "GET", path: "/v1/workspaces/{workspace_id}/jobs"},
++  "getAsyncJobSummary": {method: "GET", path: "/v1/workspaces/{workspace_id}/jobs/{job_id}/summary"},
+   "getAsyncJob": {method: "GET", path: "/v1/workspaces/{workspace_id}/jobs/{job_id}"},
+   "cancelAsyncJob": {method: "POST", path: "/v1/workspaces/{workspace_id}/jobs/{job_id}/cancel"},
+   "retryFailedAsyncJob": {method: "POST", path: "/v1/workspaces/{workspace_id}/jobs/{job_id}/retry-failed"},
+diff --git a/services/live/client.ts b/services/live/client.ts
+index 06a27a2..1d4d1b2 100644
+--- a/services/live/client.ts
++++ b/services/live/client.ts
+@@ -1,5 +1,5 @@
+ export class LiveError extends Error {
+-  constructor(message: string, readonly code: string, readonly status: number, readonly requestId: string, readonly retryable: boolean) {
++  constructor(message: string, readonly code: string, readonly status: number, readonly requestId: string, readonly retryable: boolean, readonly retryAfter?: string) {
+     super(message);
+   }
+ }
+@@ -101,7 +101,7 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '')
+         const message = typeof errorBody.message === 'string' ? errorBody.message : 'request failed';
+         const headerId = response.headers?.get('X-Request-ID') || '';
+         const requestId = typeof errorBody.request_id === 'string' ? errorBody.request_id : headerId;
+-        throw new LiveError(message, code, response.status, requestId, errorBody.retryable === true);
++        throw new LiveError(message, code, response.status, requestId, errorBody.retryable === true, response.headers?.get('Retry-After') || undefined);
+       }
+       if (response.status === 204) return undefined as T;
+       const responseBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
+diff --git a/services/live/job-poller.ts b/services/live/job-poller.ts
+new file mode 100644
+index 0000000..d51b587
+--- /dev/null
++++ b/services/live/job-poller.ts
+@@ -0,0 +1,52 @@
++import {LiveCancelled,LiveError} from './client';
++
++type Clock={now:()=>number;setTimeout:(fn:()=>void,ms:number)=>ReturnType<typeof setTimeout>;clearTimeout:(id:ReturnType<typeof setTimeout>)=>void};
++export type JobPollerOptions<T extends {status:string}>={
++  fetchSummary:(signal:AbortSignal)=>Promise<T>;onValue:(value:T)=>void;onError:(error:unknown)=>void;
++  signal:AbortSignal;isVisible:()=>boolean;
++  visibilityTarget?:Pick<Document,'addEventListener'|'removeEventListener'>;
++  clock?:Clock;
++};
++const terminal=new Set(['completed','failed','cancelled']);
++/** One request per lifetime; only schedule after settlement. No result-page reads. */
++export function startJobPoller<T extends {status:string}>({fetchSummary,onValue,onError,signal,isVisible,
++  visibilityTarget=typeof document==='undefined'?undefined:document,
++  clock={now:Date.now,setTimeout:(fn,ms)=>setTimeout(fn,ms),clearTimeout:id=>clearTimeout(id)},
++}:JobPollerOptions<T>):()=>void{
++  let stopped=false,done=false,inFlight=false,failures=0,deadline=0;
++  let timer:ReturnType<typeof setTimeout>|undefined,request:AbortController|undefined;
++  const clear=()=>{if(timer!==undefined)clock.clearTimeout(timer);timer=undefined;};
++  const stop=()=>{stopped=true;clear();request?.abort();signal.removeEventListener('abort',stop);visibilityTarget?.removeEventListener('visibilitychange',visibility);};
++  function schedule(delay:number){clear();if(stopped||done||signal.aborted||!isVisible())return;
++    timer=clock.setTimeout(()=>{timer=undefined;void poll();},Math.max(0,delay));}
++  function visibility(){clear();if(!isVisible()){request?.abort();return;}if(!inFlight){if(deadline<=clock.now())void poll();else schedule(deadline-clock.now());}}
++  async function poll(){
++    if(stopped||done||inFlight||signal.aborted||!isVisible())return;
++    inFlight=true;const own=new AbortController();request=own;let timedOut=false,delay=2000;
++    const timeout=clock.setTimeout(()=>{timedOut=true;own.abort(new DOMException('Job summary timed out','TimeoutError'));},10_000);
++    try{
++      const value=await fetchSummary(own.signal);
++      if(stopped||signal.aborted||own.signal.aborted||!isVisible())return;
++      failures=0;done=terminal.has(value.status);onValue(value);
++    }catch(cause){
++      if(stopped||signal.aborted)return;
++      if(!isVisible()||(own.signal.aborted&&!timedOut)){delay=0;return;}
++      if(cause instanceof LiveCancelled&&!timedOut){stop();return;}
++      const error=timedOut?new LiveError('Job summary timed out','NETWORK_ERROR',0,'',true):cause;
++      onError(error);
++      if(error instanceof LiveError&&error.status>=400&&error.status<500&&error.status!==429){done=true;return;}
++      delay=Math.min(30_000,2000*2**Math.min(failures++,4));
++      if(error instanceof LiveError&&error.status===429&&error.retryAfter){
++        const raw=error.retryAfter.trim(),seconds=/^\d+$/.test(raw)?Number(raw):NaN;
++        const wait=Number.isFinite(seconds)?seconds*1000:Date.parse(raw)-clock.now();
++        if(Number.isFinite(wait))delay=Math.max(delay,wait);
++      }
++    }finally{
++      clock.clearTimeout(timeout);inFlight=false;if(request===own)request=undefined;
++      if(!stopped&&!done&&!signal.aborted){deadline=clock.now()+delay;if(delay===0&&isVisible())void poll();else schedule(delay);}
++    }
++  }
++  if(signal.aborted)return stop;
++  signal.addEventListener('abort',stop,{once:true});visibilityTarget?.addEventListener('visibilitychange',visibility);
++  void poll();return stop;
++}
+diff --git a/services/worker/tests/fixtures/audit_jobs.py b/services/worker/tests/fixtures/audit_jobs.py
+index 6a11e87..ed6a261 100644
+--- a/services/worker/tests/fixtures/audit_jobs.py
++++ b/services/worker/tests/fixtures/audit_jobs.py
+@@ -9,9 +9,22 @@ PROJECT = 'e1000000-0000-4000-8000-000000000001'
+ ACTOR = 'e0000000-0000-4000-8000-000000000004'
+ 
+ def main():
++    if sys.argv[1]=='status':
++        job=uuid.UUID(sys.argv[2]);state=sys.argv[3]
++        if state not in ('running','completed','failed','cancelled'):
++            raise ValueError('bounded fixture status only')
++        with psycopg.connect(owner_dsn()) as db:
++            row=db.execute('SELECT project_id,actor_user_id FROM async_jobs WHERE workspace_id=%s AND id=%s',(WORKSPACE,job)).fetchone()
++            if row!=(uuid.UUID(PROJECT),uuid.UUID(ACTOR)):
++                raise RuntimeError('unknown fictional job')
++            db.execute('UPDATE async_jobs SET status=%s WHERE workspace_id=%s AND id=%s',(state,WORKSPACE,job))
++        print(json.dumps({'fixture_only':True,'job_id':str(job),'status':state}));return
+     count = int(sys.argv[1])
+-    if count not in (0,21,101):
++    if count not in (0,21,101,1000):
+         raise ValueError('bounded audit fixture only')
++    state = sys.argv[2] if len(sys.argv)>2 else 'completed'
++    if state not in ('running','completed','failed','cancelled'):
++        raise ValueError('bounded fixture status only')
+     with psycopg.connect(owner_dsn()) as db:
+         if db.execute('SELECT company_name FROM projects WHERE workspace_id=%s AND id=%s',(WORKSPACE,PROJECT)).fetchone()!=('Fictional Seller',):
+             raise RuntimeError('unknown fixture project')
+@@ -19,8 +32,8 @@ def main():
+         db.execute("INSERT INTO workspaces(id,name,data_mode) VALUES (%s,'Other audit fixture','live') ON CONFLICT DO NOTHING",(other,))
+         db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES ('e0000000-0000-4000-8000-000000000105',%s,%s,'{reviewer}',true) ON CONFLICT DO NOTHING",(other,ACTOR))
+         job = str(uuid.uuid4())
+-        db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,updated,blocked,conflicts) VALUES (%s,%s,%s,%s,'bulk_mutation','bulkUpdateBuyers','{}','completed',%s,%s,%s,%s,%s)",
+-            (job,WORKSPACE,PROJECT,ACTOR,max(1,count),count,(count+2)//3,count//3,(count+1)//3))
++        db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,updated,blocked,conflicts) VALUES (%s,%s,%s,%s,'bulk_mutation','bulkUpdateBuyers','{}',%s,%s,%s,%s,%s,%s)",
++            (job,WORKSPACE,PROJECT,ACTOR,state,max(1,count),count,(count+2)//3,count//3,(count+1)//3))
+         ids=[]
+         for index in range(1,count+1):
+             buyer=f'e2000000-0000-4000-8000-{index:012x}'
+diff --git a/tests/e2e/audit-operations.spec.ts b/tests/e2e/audit-operations.spec.ts
+index 1d2c09a..835aff1 100644
+--- a/tests/e2e/audit-operations.spec.ts
++++ b/tests/e2e/audit-operations.spec.ts
+@@ -4,9 +4,9 @@ import {promisify} from 'node:util';
+ import {writeFileSync} from 'node:fs';
+ import {resolve} from 'node:path';
+ import {signInWorkbench,workspace,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
+-async function fixture(count:number):Promise<{job_id:string;ids:string[]}>{
++async function fixture(count:number,state='completed'):Promise<{job_id:string;ids:string[]}>{
+   const cwd=resolve('services/worker');const python=resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
+-  return JSON.parse((await promisify(execFile)(python,['tests/fixtures/audit_jobs.py',String(count)],{cwd,timeout:30_000})).stdout);
++  return JSON.parse((await promisify(execFile)(python,['tests/fixtures/audit_jobs.py',String(count),state],{cwd,timeout:30_000})).stdout);
+ }
+ test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
+ for(const count of [21,101])test(`B10 B11 all ${count} real producer result IDs are readable in pages of 20`,async({page})=>{
+@@ -52,3 +52,93 @@ test('B11 late result page is discarded after workspace A-B-A',async({page})=>{
+   await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);release();
+   await expect(lookup.locator('code')).toHaveCount(0);await page.waitForTimeout(300);await expect(lookup.locator('code')).toHaveCount(0);
+ });
++
++
++test('B12 unopened 1000-result job reads summary only and never walks result pages',async({page})=>{
++  const seeded=await fixture(1000,'running');
++  const calls:string[]=[];page.on('request',r=>{if(new URL(r.url()).pathname.includes(`/jobs/${seeded.job_id}`))calls.push(new URL(r.url()).pathname);});
++  await signInWorkbench(page,true,'reviewer',`/app?workspace=${workspace}&project=e1000000-0000-4000-8000-000000000001&bulk_job=${seeded.job_id}`);
++  await page.getByRole('button',{name:'Buyers',exact:true}).click();
++  await expect.poll(()=>calls.length).toBeGreaterThan(0);
++  expect(calls[0]).toBe(`/v1/workspaces/${workspace}/jobs/${seeded.job_id}/summary`);
++  await expect(page.getByRole('region',{name:'Bulk job progress'})).toContainText('1000 of 1000');
++  await page.waitForTimeout(4500);expect(calls.every(path=>path.endsWith('/summary'))).toBe(true);
++});
++
++async function statusFixture(job:string,state:string){
++  const cwd=resolve('services/worker'),python=resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
++  const result=await promisify(execFile)(python,['tests/fixtures/audit_jobs.py','status',job,state],{cwd,timeout:30_000});expect(JSON.parse(result.stdout).fixture_only).toBe(true);
++}
++async function openBulk(page:Parameters<typeof signInWorkbench>[0],job:string){
++  await signInWorkbench(page,true,'reviewer',`/app?workspace=${workspace}&project=e1000000-0000-4000-8000-000000000001&bulk_job=${job}`);
++  await page.getByRole('combobox',{name:/^(Language|語言)$/}).selectOption('en');
++  await page.getByRole('button',{name:'Buyers',exact:true}).click();
++  return page.getByRole('region',{name:'Bulk job progress'});
++}
++
++test('B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once',async({page})=>{
++  const seeded=await fixture(1000,'running');let active=0,max=0,calls=0;const results:string[]=[];
++  page.on('request',r=>{const u=new URL(r.url());if(u.pathname===`/v1/workspaces/${workspace}/jobs/${seeded.job_id}`)results.push(u.search);});
++  await page.route(`**/jobs/${seeded.job_id}/summary`,async route=>{calls++;max=Math.max(max,++active);try{const response=await route.fetch();await new Promise(r=>setTimeout(r,2500));await route.fulfill({response}).catch(()=>{});}finally{active--;}});
++  const panel=await openBulk(page,seeded.job_id);await expect(panel).toContainText('1000 of 1000');await page.waitForTimeout(6500);expect(calls).toBeGreaterThanOrEqual(2);expect(max).toBe(1);expect(results).toEqual([]);
++  await panel.getByRole('button',{name:'Show job results',exact:true}).click();await expect(panel.locator('code')).toHaveCount(20);expect(results).toHaveLength(1);
++  await panel.getByRole('button',{name:'Next job results',exact:true}).click();await expect(panel.getByText('21–40 / 1000',{exact:true})).toBeVisible();expect(results).toHaveLength(2);
++  const terminalResponse=page.waitForResponse(async r=>new URL(r.url()).pathname.endsWith(`/jobs/${seeded.job_id}/summary`)&&r.status()===200&&(await r.json()).data.status==='completed',{timeout:12_000});
++  await statusFixture(seeded.job_id,'completed');await terminalResponse;await expect(panel).toContainText('completed:');await expect.poll(()=>results.length).toBe(3);expect(results.at(-1)).toBe('?offset=20&limit=20');
++  const final=calls;await page.waitForTimeout(4500);expect(calls).toBe(final);expect(results).toHaveLength(3);expect(max).toBe(1);
++  writeFileSync('test-results/q06-slow-terminal.json',JSON.stringify({fixture_only:true,calls,max_in_flight:max,result_requests:results},null,2));await page.screenshot({path:'test-results/q06-bulk-en.png',fullPage:true});
++});
++
++test('B13 hidden summary pause and double visibility resume produce exactly one refresh',async({page})=>{
++  await page.addInitScript(()=>{let hidden=false;Object.defineProperty(document,'hidden',{configurable:true,get:()=>hidden});window.addEventListener('audit-hidden',()=>{hidden=true;document.dispatchEvent(new Event('visibilitychange'));});window.addEventListener('audit-visible',()=>{hidden=false;document.dispatchEvent(new Event('visibilitychange'));});});
++  const seeded=await fixture(21,'running');let calls=0;page.on('request',r=>{if(new URL(r.url()).pathname.endsWith(`/jobs/${seeded.job_id}/summary`))calls++;});
++  const panel=await openBulk(page,seeded.job_id);await expect(panel).toContainText('21 of 21');
++  await page.evaluate(()=>window.dispatchEvent(new Event('audit-hidden')));const before=calls;await page.waitForTimeout(4500);expect(calls).toBe(before);
++  await page.evaluate(()=>{window.dispatchEvent(new Event('audit-visible'));window.dispatchEvent(new Event('audit-visible'));});await expect.poll(()=>calls).toBe(before+1);
++  await page.evaluate(()=>window.dispatchEvent(new Event('audit-hidden')));await page.waitForTimeout(2500);expect(calls).toBe(before+1);await expect(panel.getByRole('alert')).toHaveCount(0);
++});
++
++test('B13 actual 429 Retry-After and 503 recover without result-page traffic',async({page})=>{
++  const seeded=await fixture(21,'running'),times:number[]=[];let details=0;
++  page.on('request',r=>{if(new URL(r.url()).pathname===`/v1/workspaces/${workspace}/jobs/${seeded.job_id}`)details++;});
++  await page.route(`**/jobs/${seeded.job_id}/summary`,async route=>{
++    times.push(Date.now());if(times.length<3)await route.fulfill({status:times.length===1?429:503,contentType:'application/json',headers:times.length===1?{'Retry-After':'3'}:{},body:JSON.stringify({code:times.length===1?'RATE_LIMITED':'INTERNAL_ERROR',message:'fixture failure',request_id:'e0000000-0000-4000-8000-000000000010',retryable:true})});else await route.continue();
++  });
++  const panel=await openBulk(page,seeded.job_id);await expect(panel.getByRole('alert')).toContainText('Service temporarily unavailable');await expect(panel).toContainText('21 of 21',{timeout:20_000});
++  expect(times[1]-times[0]).toBeGreaterThanOrEqual(3000);expect(times[2]-times[1]).toBeGreaterThanOrEqual(4000);expect(details).toBe(0);await expect(panel.getByRole('alert')).toHaveCount(0);
++  writeFileSync('test-results/q06-backoff.json',JSON.stringify({fixture_only:true,attempt_times:times,detail_requests:details},null,2));
++});
++
++test('B16 old summary cannot overwrite another scope after A-B-A',async({page})=>{
++  const seeded=await fixture(21,'running');let release:()=>void=()=>{};let received:()=>void=()=>{};const held=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);let calls=0;
++  await page.route(`**/jobs/${seeded.job_id}/summary`,async route=>{calls++;const response=await route.fetch();if(calls===1){received();await held;}await route.fulfill({response}).catch(()=>{});});
++  await signInWorkbench(page);await page.getByRole('button',{name:'Operations',exact:true}).click();
++  const lookup=page.getByRole('region',{name:'Job lookup'});
++  await lookup.getByRole('textbox',{name:'Job ID'}).fill(seeded.job_id);await lookup.getByRole('button',{name:'Load job',exact:true}).click();
++  await started;await statusFixture(seeded.job_id,'completed');
++  await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption('e0000000-0000-4000-8000-000000000101');
++  await expect(lookup.locator('code')).toHaveCount(0);
++  await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);
++  await lookup.getByRole('textbox',{name:'Job ID'}).fill(seeded.job_id);await lookup.getByRole('button',{name:'Load job',exact:true}).click();
++  await expect(lookup).toContainText('completed');await expect(lookup.locator('code').first()).toHaveText(seeded.ids[0]);release();
++  await page.waitForTimeout(2500);await expect(lookup).not.toContainText('running');await expect(lookup.locator('code').first()).toHaveText(seeded.ids[0]);
++});
++
++test('B13 zh-HK 390px summary/results controls remain usable without overflow',async({page})=>{
++  const seeded=await fixture(21);await page.setViewportSize({width:390,height:844});const panel=await openBulk(page,seeded.job_id);
++  await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');const zh=page.getByRole('region',{name:'批量工作進度'});await expect(zh).toContainText('已處理 21／21');
++  await zh.getByRole('button',{name:'顯示工作結果',exact:true}).click();await expect(zh.locator('code')).toHaveCount(20);await zh.getByRole('button',{name:'下一頁工作結果',exact:true}).click();await expect(zh.getByText('21–21 / 21',{exact:true})).toBeVisible();
++  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:'test-results/q06-bulk-zh-mobile.png',fullPage:true});
++  const saved=page.waitForResponse(r=>r.request().method()==='PATCH'&&new URL(r.url()).pathname.endsWith('/preferences'));await page.getByRole('combobox',{name:'語言',exact:true}).selectOption('en');expect((await saved).status()).toBe(200);
++  await expect(panel).toBeVisible();
++});
++
++test('B13 Operations clears a transient summary error after a valid recovery',async({page})=>{
++  const seeded=await fixture(21,'running');let calls=0;
++  await page.route(`**/jobs/${seeded.job_id}/summary`,async route=>{calls++;if(calls===1)await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({code:'INTERNAL_ERROR',message:'fixture failure',request_id:'e0000000-0000-4000-8000-000000000010',retryable:true})});else await route.continue();});
++  await signInWorkbench(page);await page.getByRole('button',{name:'Operations',exact:true}).click();
++  const operations=page.getByRole('region',{name:'Operations',exact:true}),lookup=page.getByRole('region',{name:'Job lookup'});
++  await lookup.getByRole('textbox',{name:'Job ID'}).fill(seeded.job_id);await lookup.getByRole('button',{name:'Load job',exact:true}).click();
++  await expect(operations.getByRole('alert')).toContainText('Service temporarily unavailable');await expect.poll(()=>calls).toBeGreaterThanOrEqual(2);
++  await expect(operations.getByRole('alert')).toHaveCount(0);await expect(lookup).toContainText('running');
++});
+diff --git a/tests/fixtures/job-clock.mjs b/tests/fixtures/job-clock.mjs
+new file mode 100644
+index 0000000..46078c3
+--- /dev/null
++++ b/tests/fixtures/job-clock.mjs
+@@ -0,0 +1,8 @@
++export const flush=async()=>{for(let i=0;i<12;i++)await Promise.resolve();};
++export function fixtureClock(){
++ let time=Date.parse('2026-10-03T00:00:00Z'),id=0;const timers=new Map();
++ const clock={now:()=>time,setTimeout:(fn,ms)=>{timers.set(++id,{at:time+ms,fn});return id;},clearTimeout:key=>timers.delete(key)};
++ async function advance(ms){const target=time+ms;await flush();for(;;){const entries=[...timers].filter(([,v])=>v.at<=target).sort((a,b)=>a[1].at-b[1].at);if(!entries.length)break;const [key,value]=entries[0];timers.delete(key);time=value.at;value.fn();await flush();}time=target;await flush();}
++ function latency(ms,value,signal){return new Promise((resolve,reject)=>{const timer=clock.setTimeout(()=>{signal?.removeEventListener('abort',abort);resolve(value);},ms);const abort=()=>{clock.clearTimeout(timer);reject(signal.reason??new DOMException('aborted','AbortError'));};if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});});}
++ return {clock,advance,latency,timers};
++}
+diff --git a/tests/job-poller-checks.mjs b/tests/job-poller-checks.mjs
+new file mode 100644
+index 0000000..aa25e10
+--- /dev/null
++++ b/tests/job-poller-checks.mjs
+@@ -0,0 +1,88 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {loadModule} from './ts-loader.mjs';
++const {startJobPoller}=await loadModule('services/live/job-poller.ts');
++const {LiveError,createLiveClient}=await loadModule('services/live/client.ts');
++const {SessionScope}=await loadModule('services/live/session.ts');
++import {fixtureClock,flush} from './fixtures/job-clock.mjs';
++const running={id:'job-a',status:'running',requested:1000,processed:1000};
++function setup(extra={}){const f=fixtureClock(),controller=new AbortController(),visibility=new EventTarget();return {...f,controller,visibility,options:{signal:controller.signal,isVisible:()=>true,visibilityTarget:visibility,clock:f.clock,...extra}};}
++
++test('B12 2.5s RTT has one in-flight and waits 2s after settlement',async()=>{
++ const f=setup(),calls=[],values=[];let inFlight=0,max=0;
++ const stop=startJobPoller({...f.options,fetchSummary:async signal=>{calls.push(f.clock.now());max=Math.max(max,++inFlight);try{return await f.latency(2500,running,signal);}finally{inFlight--;}} ,onValue:v=>values.push(v),onError:assert.fail});
++ await f.advance(2499);assert.equal(calls.length,1);assert.equal(values.length,0);await f.advance(1);assert.equal(values.length,1);
++ await f.advance(1999);assert.equal(calls.length,1);await f.advance(1);assert.equal(calls.length,2);await f.advance(20_000);
++ assert.equal(max,1);assert.ok(calls.every((v,i)=>i===0||v-calls[i-1]===4500));stop();await flush();assert.equal(inFlight,0);
++});
++
++test('B13 hidden pauses/aborts quietly; repeated visibility signals resume once',async()=>{
++ let visible=false;const f=setup({isVisible:()=>visible}),values=[],errors=[];let calls=0;
++ const stop=startJobPoller({...f.options,fetchSummary:signal=>{calls++;return f.latency(2500,running,signal);},onValue:v=>values.push(v),onError:e=>errors.push(e)});
++ await f.advance(60_000);assert.equal(calls,0);visible=true;f.visibility.dispatchEvent(new Event('visibilitychange'));f.visibility.dispatchEvent(new Event('visibilitychange'));await flush();assert.equal(calls,1);
++ visible=false;f.visibility.dispatchEvent(new Event('visibilitychange'));await f.advance(60_000);assert.equal(calls,1);assert.equal(errors.length,0);assert.equal(values.length,0);
++ visible=true;f.visibility.dispatchEvent(new Event('visibilitychange'));await f.advance(2500);assert.equal(calls,2);assert.equal(values.length,1);stop();
++});
++
++test('B13 transient failures use 2/4/8/16/30/30s and reset after success',async()=>{
++ const f=setup(),calls=[],errors=[];
++ const stop=startJobPoller({...f.options,fetchSummary:async()=>{calls.push(f.clock.now());if(calls.length<=6)throw new LiveError('outage','UNAVAILABLE',503,'fixture',true);return running;},onValue:()=>{},onError:e=>errors.push(e)});
++ await flush();for(const delay of [2000,4000,8000,16000,30000,30000])await f.advance(delay);
++ assert.equal(calls.length,7);assert.deepEqual(calls.slice(1).map((v,i)=>v-calls[i]),[2000,4000,8000,16000,30000,30000]);assert.equal(errors.length,6);
++ await f.advance(2000);assert.equal(calls.length,8);stop();
++});
++
++test('B13 429 honors Retry-After seconds and HTTP dates, invalid header uses backoff',async()=>{
++ for(const [header,delay] of [['12',12000],['Sat, 03 Oct 2026 00:00:20 GMT',20000],['invalid',2000]]){
++  const f=setup(),calls=[];const stop=startJobPoller({...f.options,fetchSummary:async()=>{calls.push(f.clock.now());if(calls.length===1)throw new LiveError('limit','RATE_LIMITED',429,'fixture',true,header);return running;},onValue:()=>{},onError:()=>{}});
++  await flush();await f.advance(delay-1);assert.equal(calls.length,1,header);await f.advance(1);assert.equal(calls.length,2,header);stop();
++ }
++});
++
++test('B13 actual live client preserves Retry-After metadata without response secrets',async()=>{
++ for(const header of ['12','Sat, 03 Oct 2026 00:00:20 GMT']){
++  const client=createLiveClient(async()=>new Response(JSON.stringify({code:'RATE_LIMITED',message:'limit',request_id:'fixture',retryable:true}),{status:429,headers:{'Retry-After':header}}));
++  await assert.rejects(client.request({path:'/jobs/a/summary',scope:'fixture'}),e=>e instanceof LiveError&&e.retryAfter===header&&e.status===429);
++ }
++});
++
++test('B12 request timeout aborts before a retry and late value is ignored',async()=>{
++ const f=setup(),errors=[];let calls=0,inFlight=0,max=0;
++ const stop=startJobPoller({...f.options,fetchSummary:async signal=>{calls++;max=Math.max(max,++inFlight);try{return await f.latency(20_000,running,signal);}finally{inFlight--;}} ,onValue:assert.fail,onError:e=>errors.push(e)});
++ await f.advance(10_000);assert.equal(errors.length,1);assert.equal(inFlight,0);await f.advance(1999);assert.equal(calls,1);await f.advance(1);assert.equal(calls,2);assert.equal(max,1);stop();await flush();assert.equal(errors.length,1);
++});
++
++test('B12 cancel/unmount suppresses late values/errors and all later requests',async()=>{
++ const f=setup(),values=[],errors=[];let calls=0;
++ startJobPoller({...f.options,fetchSummary:()=>{calls++;return f.latency(2500,running);},onValue:v=>values.push(v),onError:e=>errors.push(e)});
++ await flush();f.controller.abort();await f.advance(60_000);assert.equal(calls,1);assert.deepEqual(values,[]);assert.deepEqual(errors,[]);
++});
++
++test('B16 A-B-A lifetimes reject the obsolete result even with same scope IDs',async()=>{
++ const f=setup(),session=new SessionScope({mode:'live',actor:'actor',workspace:'A',project:'p'});session.setToken('memory');const values=[];
++ const begin=(delay,value)=>{const ctx=session.captureWriteContext();return startJobPoller({...f.options,signal:ctx.signal,fetchSummary:()=>f.latency(delay,value),onValue:v=>{if(session.isCurrent(ctx.identity))values.push(v.id);},onError:assert.fail});};
++ begin(8000,{...running,id:'old-A'});await flush();session.next({workspace:'B'});begin(5000,{...running,id:'B'});await flush();session.next({workspace:'A'});const stop=begin(100,{...running,id:'new-A',status:'completed'});
++ await f.advance(10_000);assert.deepEqual(values,['new-A']);stop();
++});
++
++test('B12 terminal summary is delivered once and stops through refresh/visibility changes',async()=>{
++ for(const status of ['completed','failed','cancelled']){
++  const f=setup(),values=[];let calls=0;const stop=startJobPoller({...f.options,fetchSummary:async()=>{calls++;return {...running,status};},onValue:v=>values.push(v),onError:assert.fail});
++  await flush();f.visibility.dispatchEvent(new Event('visibilitychange'));await f.advance(60_000);assert.equal(calls,1);assert.equal(values.length,1);stop();
++ }
++});
++
++test('B13 access denied stops rather than polling a revoked account',async()=>{
++ for(const status of [401,403,404]){
++  const f=setup();let calls=0,errors=0;const stop=startJobPoller({...f.options,fetchSummary:async()=>{calls++;throw new LiveError('access','NOT_FOUND',status,'fixture',false);},onValue:assert.fail,onError:()=>errors++});
++  await f.advance(60_000);assert.equal(calls,1);assert.equal(errors,1);stop();
++ }
++});
++
++
++test('B13 rapid hidden-visible during abort settlement resumes once immediately',async()=>{
++ let visible=true;const f=setup({isVisible:()=>visible});let calls=0;
++ const stop=startJobPoller({...f.options,fetchSummary:signal=>{calls++;return f.latency(2500,running,signal);},onValue:()=>{},onError:assert.fail});
++ await flush();assert.equal(calls,1);visible=false;f.visibility.dispatchEvent(new Event('visibilitychange'));visible=true;f.visibility.dispatchEvent(new Event('visibilitychange'));f.visibility.dispatchEvent(new Event('visibilitychange'));await flush();
++ assert.equal(calls,2);stop();await flush();
++});
+diff --git a/tests/job-poller-traffic.mjs b/tests/job-poller-traffic.mjs
+new file mode 100644
+index 0000000..5e731b3
+--- /dev/null
++++ b/tests/job-poller-traffic.mjs
+@@ -0,0 +1,45 @@
++// Q06 logical60s/10-view workload; HTTP/DB costs are measured by pytest replay.
++import assert from 'node:assert/strict';
++import {readFileSync,writeFileSync} from 'node:fs';
++import {execFileSync} from 'node:child_process';
++import {createHash} from 'node:crypto';
++import ts from 'typescript';
++import {loadModule} from './ts-loader.mjs';
++import {fixtureClock,flush} from './fixtures/job-clock.mjs';
++const {startJobPoller}=await loadModule('services/live/job-poller.ts');
++const [samplePath,outputPath]=process.argv.slice(2);assert.ok(samplePath&&outputPath);
++const samples=JSON.parse(readFileSync(samplePath,'utf8'));
++const base='b083ea43988ed73e9d8e9ab112ba3d6305f2c941';
++const original=execFileSync('git',['show',`${base}:features/live/bulk-actions.tsx`],{encoding:'utf8'});
++const a=original.indexOf('const first=await op.requestOperation',original.indexOf('export function BulkJobPanel'));
++const b=original.indexOf('        if(active)',a);assert.ok(a>0&&b>a);
++const body=original.slice(a,b);
++const js=ts.transpileModule(`async function baseline(op,ctx,scope,jobId){${body}\nreturn first;}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
++const baseline=new Function(js+'\nreturn baseline;')();
++const runs=[];
++for(const mode of ['before','after']){
++ const f=fixtureClock(),origin=f.clock.now(),requests=[];let inFlight=0,maxInFlight=0,active=true;
++ const controllers=[],intervals=[];const perView=Array.from({length:10},()=>({inFlight:0,maxInFlight:0}));
++ function request(view,kind,query,signal){
++  if(!active)return Promise.reject(new DOMException('experiment ended','AbortError'));
++  const row={view,at_ms:f.clock.now()-origin,kind,offset:query?.offset??0,limit:query?.limit??0};requests.push(row);inFlight++;maxInFlight=Math.max(maxInFlight,inFlight);perView[view].maxInFlight=Math.max(perView[view].maxInFlight,++perView[view].inFlight);
++  const value=kind==='summary'?samples.summary.data:samples.pages[String(row.offset)].data;
++  return f.latency(2500,value,signal).finally(()=>{inFlight--;perView[view].inFlight--;});
++ }
++ for(let view=0;view<10;view++){
++  if(mode==='before'){
++   const op={requestOperation:(_id,input)=>request(view,'detail',input.query)};
++   const run=()=>baseline(op,{}, {workspace:'fixture'},'fixture-job').catch(()=>{});
++   const interval=()=>{intervals[view]=f.clock.setTimeout(()=>{if(active){void run();interval();}},2000);};
++   void run().then(()=>{if(active)interval();});
++  }else{
++   const controller=new AbortController();controllers.push(controller);
++   startJobPoller({signal:controller.signal,clock:f.clock,isVisible:()=>active,fetchSummary:signal=>request(view,'summary',null,signal),onValue:()=>{},onError:assert.fail});
++  }
++ }
++ await f.advance(60_000);active=false;for(const id of intervals)f.clock.clearTimeout(id);for(const c of controllers)c.abort();await f.advance(30_000);await flush();
++ if(mode==='after'){assert.equal(maxInFlight,10);assert.ok(perView.every(v=>v.maxInFlight===1));assert.ok(requests.every(r=>r.kind==='summary'));}
++ runs.push({mode,logical_window_ms:60_000,rtt_ms:2500,views:10,results:1000,max_in_flight:maxInFlight,per_view:perView,requests});
++}
++writeFileSync(outputPath,JSON.stringify({fixture_only:true,clock:'deterministic logical time; not wall-clock/live performance',baseline_sha:base,baseline_source_sha256:createHash('sha256').update(original).digest('hex'),baseline_reader_fragment_sha256:createHash('sha256').update(body).digest('hex'),runs},null,2)+'\n');
++console.log(JSON.stringify(runs.map(r=>({mode:r.mode,requests:r.requests.length,max_in_flight:r.max_in_flight,max_per_view:Math.max(...r.per_view.map(v=>v.maxInFlight))}))));

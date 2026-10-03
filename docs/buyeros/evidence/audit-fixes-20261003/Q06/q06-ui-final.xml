@@ -1,0 +1,102 @@
+<testsuites id="" name="" tests="44" failures="0" skipped="0" errors="0" time="355.088895">
+<testsuite name="audit-auth-entry.spec.ts" timestamp="2026-10-03T10:15:59.705Z" hostname="" tests="7" failures="0" skipped="0" time="35.899" errors="0">
+<testcase name="U13 initialization has no false configuration alert before hydration" classname="audit-auth-entry.spec.ts" time="4.496">
+</testcase>
+<testcase name="U02 U03 no membership permits locale switching and read-only access retry" classname="audit-auth-entry.spec.ts" time="8.392">
+</testcase>
+<testcase name="U03 403 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="4.478">
+</testcase>
+<testcase name="U03 404 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="4.451">
+</testcase>
+<testcase name="U03 500 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="4.075">
+</testcase>
+<testcase name="U03 manual locale choice survives a delayed member preference response" classname="audit-auth-entry.spec.ts" time="5.721">
+</testcase>
+<testcase name="U03 expired access returns to sign-in with the selected locale" classname="audit-auth-entry.spec.ts" time="4.286">
+</testcase>
+</testsuite>
+<testsuite name="audit-bulk-confirmation.spec.ts" timestamp="2026-10-03T10:15:59.705Z" hostname="" tests="8" failures="0" skipped="0" time="56.875" errors="0">
+<testcase name="B02 adding a sixth buyer clears the previously confirmed five" classname="audit-bulk-confirmation.spec.ts" time="7.895">
+</testcase>
+<testcase name="B02 reason, target and exclusions clear confirmation; unchanged selection survives paging" classname="audit-bulk-confirmation.spec.ts" time="5.754">
+</testcase>
+<testcase name="B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works" classname="audit-bulk-confirmation.spec.ts" time="9.275">
+</testcase>
+<testcase name="B04 inactive owner is rejected and a stale buyer reports conflict without overwriting" classname="audit-bulk-confirmation.spec.ts" time="10.15">
+</testcase>
+<testcase name="B16 committed response loss locks changes and reconciles the same key after a route remount" classname="audit-bulk-confirmation.spec.ts" time="7.997">
+</testcase>
+<testcase name="B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link" classname="audit-bulk-confirmation.spec.ts" time="6.895">
+</testcase>
+<testcase name="B03 zh-HK mobile colleague search recovers a failed read" classname="audit-bulk-confirmation.spec.ts" time="4.643">
+</testcase>
+<testcase name="B03 viewer cannot assign through UI or direct API" classname="audit-bulk-confirmation.spec.ts" time="4.266">
+</testcase>
+</testsuite>
+<testsuite name="audit-draft-dirty.spec.ts" timestamp="2026-10-03T10:15:59.705Z" hostname="" tests="10" failures="0" skipped="0" time="64.048" errors="0">
+<testcase name="D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="5.667">
+</testcase>
+<testcase name="D02 Open draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="7.567">
+</testcase>
+<testcase name="D02 Refresh job Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="7.41">
+</testcase>
+<testcase name="D02 Save is awaited before opening another draft and persists one revision" classname="audit-draft-dirty.spec.ts" time="6.236">
+</testcase>
+<testcase name="D02 failed Save 401 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.89">
+</testcase>
+<testcase name="D02 failed Save 412 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="7.88">
+</testcase>
+<testcase name="D02 failed Save 503 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="6.33">
+</testcase>
+<testcase name="D02 Refresh does not overwrite the unsaved buffer before a decision" classname="audit-draft-dirty.spec.ts" time="4.826">
+</testcase>
+<testcase name="D02 delayed refresh cannot materialize a draft into a new project scope" classname="audit-draft-dirty.spec.ts" time="6.508">
+</testcase>
+<testcase name="D02 zh-HK mobile dialog preserves content and keeps all choices visible" classname="audit-draft-dirty.spec.ts" time="5.734">
+</testcase>
+</testsuite>
+<testsuite name="audit-memberships.spec.ts" timestamp="2026-10-03T10:15:59.705Z" hostname="" tests="7" failures="0" skipped="0" time="45.034" errors="0">
+<testcase name="U06 all 250 real members are readable in 13 pages and member 101 is searchable" classname="audit-memberships.spec.ts" time="8.211">
+</testcase>
+<testcase name="U07 duplicate names and suffixes remain distinct during a versioned role change" classname="audit-memberships.spec.ts" time="5.584">
+</testcase>
+<testcase name="U08 sole admin refusal is understandable and does not claim success" classname="audit-memberships.spec.ts" time="7.023">
+</testcase>
+<testcase name="S06 viewer cannot read the admin directory or eligible assignees" classname="audit-memberships.spec.ts" time="6.225">
+</testcase>
+<testcase name="U06 stale page response cannot restore old A-B-A directory" classname="audit-memberships.spec.ts" time="6.467">
+</testcase>
+<testcase name="U06 zh-HK mobile search and failed page read recover without synthetic rows" classname="audit-memberships.spec.ts" time="6.069">
+</testcase>
+<testcase name="U07 lost committed role response requires a read before any further role write" classname="audit-memberships.spec.ts" time="5.455">
+</testcase>
+</testsuite>
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-03T10:15:59.705Z" hostname="" tests="11" failures="0" skipped="0" time="113.871" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="5.882">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="6.811">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="6.823">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="5.817">
+</testcase>
+<testcase name="B12 unopened 1000-result job reads summary only and never walks result pages" classname="audit-operations.spec.ts" time="11.353">
+</testcase>
+<testcase name="B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once" classname="audit-operations.spec.ts" time="27.756">
+</testcase>
+<testcase name="B13 hidden summary pause and double visibility resume produce exactly one refresh" classname="audit-operations.spec.ts" time="12.689">
+</testcase>
+<testcase name="B13 actual 429 Retry-After and 503 recover without result-page traffic" classname="audit-operations.spec.ts" time="12.524">
+</testcase>
+<testcase name="B16 old summary cannot overwrite another scope after A-B-A" classname="audit-operations.spec.ts" time="10.52">
+</testcase>
+<testcase name="B13 zh-HK 390px summary/results controls remain usable without overflow" classname="audit-operations.spec.ts" time="5.674">
+</testcase>
+<testcase name="B13 Operations clears a transient summary error after a valid recovery" classname="audit-operations.spec.ts" time="8.022">
+</testcase>
+</testsuite>
+<testsuite name="audit-research-intent.spec.ts" timestamp="2026-10-03T10:15:59.705Z" hostname="" tests="1" failures="0" skipped="0" time="8.226" errors="0">
+<testcase name="B05 B06 committed lost 202 and manual Retry share one durable research intent" classname="audit-research-intent.spec.ts" time="8.226">
+</testcase>
+</testsuite>
+</testsuites>

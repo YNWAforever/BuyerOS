@@ -1,0 +1,13 @@
+{
+  "ui_marker_absent": true,
+  "db_marker_absent": true,
+  "owner": "052d6a686de9",
+  "volume": "buyeros-audit-ui-deps-052d6a686de9",
+  "owned_audit_containers_absent": true,
+  "inspected_labels": {
+    "buyeros.audit.owner": "052d6a686de9"
+  },
+  "removed": true,
+  "removed_stdout": "buyeros-audit-ui-deps-052d6a686de9",
+  "unrelated_resources": "untouched"
+}

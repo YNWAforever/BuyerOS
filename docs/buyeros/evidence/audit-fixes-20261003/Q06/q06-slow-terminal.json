@@ -1,0 +1,10 @@
+{
+  "fixture_only": true,
+  "calls": 4,
+  "max_in_flight": 1,
+  "result_requests": [
+    "?offset=0&limit=20",
+    "?offset=20&limit=20",
+    "?offset=20&limit=20"
+  ]
+}

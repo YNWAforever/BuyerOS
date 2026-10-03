@@ -6,9 +6,10 @@
     "Q04",
     "Q15",
     "Q02",
-    "Q05"
+    "Q05",
+    "Q06"
   ],
-  "next_eligible": "Q06",
+  "next_eligible": "Q07",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -128,7 +129,53 @@
     },
     {
       "id": "Q06",
-      "status": "outside-current-scope"
+      "status": "fixture-verified",
+      "base_sha": "b083ea43988ed73e9d8e9ab112ba3d6305f2c941",
+      "depends_on": [
+        "Q03"
+      ],
+      "release_status": "not-deployed",
+      "verification_status": "local-fixture-and-integration-pass",
+      "code_status": "implemented",
+      "source_sha": "b3477e341c35807bcdcbb400edfed7cceaa46de4",
+      "cases": [
+        "B12",
+        "B13",
+        "P04",
+        "B16"
+      ],
+      "commands": "docs/buyeros/evidence/audit-fixes-20261003/Q06/q06-commands.json",
+      "checks": {
+        "strict_api_db_contract": {
+          "pass": 24,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "audit_ui": {
+          "pass": 44,
+          "fail": 0,
+          "skip": 0
+        },
+        "related_unit": {
+          "pass": 29,
+          "fail": 0,
+          "skip": 0
+        },
+        "adapter_auth": {
+          "node_file_tests": 2,
+          "adapter_checks": 74,
+          "auth_checks": 8
+        },
+        "rollback_unit": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "migrations": "none; source head0036_checkpoint_schema_grants",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q06/RESULTS.md",
+      "next_eligible": "Q07"
     },
     {
       "id": "Q07",

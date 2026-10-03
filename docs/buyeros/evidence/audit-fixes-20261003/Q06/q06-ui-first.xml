@@ -1,0 +1,110 @@
+<testsuites id="" name="" tests="10" failures="2" skipped="0" errors="0" time="307.924474">
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-03T09:40:39.366Z" hostname="" tests="10" failures="2" skipped="0" time="244.05" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="27.47">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="36.573">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="26.809">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="24.843">
+</testcase>
+<testcase name="B12 unopened 1000-result job reads summary only and never walks result pages" classname="audit-operations.spec.ts" time="32.806">
+</testcase>
+<testcase name="B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once" classname="audit-operations.spec.ts" time="35.277">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-operations-B12-2-5s--fcec5-refreshes-visible-page-once\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-operations-B12-2-5s--fcec5-refreshes-visible-page-once\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toContainText(expected) failed" type="expect.toContainText">
+<![CDATA[  audit-operations.spec.ts:79:1 › B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('region', { name: 'Bulk job progress' })
+    Expected substring: "completed:"
+    Received string:    "Bulk job progressClose jobrunning: 1000 of 1000 processed; 334 updated; 0 unchanged; 333 blocked; 333 conflicts; 0 cancelled.Refresh jobCancel pending rowsExport failed IDs and reasonsRetry failed only with current versionsFailed rows: 666. Reasons are limited to buyer IDs and internal codes.e2000000-0000-4000-8000-000000000015: POLICY_BLOCKEDe2000000-0000-4000-8000-000000000017: VERSION_CONFLICTe2000000-0000-4000-8000-000000000018: POLICY_BLOCKEDe2000000-0000-4000-8000-00000000001a: VERSION_CONFLICTe2000000-0000-4000-8000-00000000001b: POLICY_BLOCKEDe2000000-0000-4000-8000-00000000001d: VERSION_CONFLICTe2000000-0000-4000-8000-00000000001e: POLICY_BLOCKEDe2000000-0000-4000-8000-000000000020: VERSION_CONFLICTe2000000-0000-4000-8000-000000000021: POLICY_BLOCKEDe2000000-0000-4000-8000-000000000023: VERSION_CONFLICTe2000000-0000-4000-8000-000000000024: POLICY_BLOCKEDe2000000-0000-4000-8000-000000000026: VERSION_CONFLICTe2000000-0000-4000-8000-000000000027: POLICY_BLOCKEDHide job resultse2000000-0000-4000-8000-000000000015: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-000000000016: updated e2000000-0000-4000-8000-000000000017: conflict VERSION_CONFLICTe2000000-0000-4000-8000-000000000018: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-000000000019: updated e2000000-0000-4000-8000-00000000001a: conflict VERSION_CONFLICTe2000000-0000-4000-8000-00000000001b: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-00000000001c: updated e2000000-0000-4000-8000-00000000001d: conflict VERSION_CONFLICTe2000000-0000-4000-8000-00000000001e: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-00000000001f: updated e2000000-0000-4000-8000-000000000020: conflict VERSION_CONFLICTe2000000-0000-4000-8000-000000000021: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-000000000022: updated e2000000-0000-4000-8000-000000000023: conflict VERSION_CONFLICTe2000000-0000-4000-8000-000000000024: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-000000000025: updated e2000000-0000-4000-8000-000000000026: conflict VERSION_CONFLICTe2000000-0000-4000-8000-000000000027: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-000000000028: updated Previous job results21–40 / 1000Next job results"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" getByRole('region', { name: 'Bulk job progress' }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Bulk job progress' })
+        14 × locator resolved to <section aria-label="Bulk job progress" class="panel bulk-action-panel">…</section>
+           - unexpected value "Bulk job progressClose jobrunning: 1000 of 1000 processed; 334 updated; 0 unchanged; 333 blocked; 333 conflicts; 0 cancelled.Refresh jobCancel pending rowsExport failed IDs and reasonsRetry failed only with current versionsFailed rows: 666. Reasons are limited to buyer IDs and internal codes.e2000000-0000-4000-8000-000000000015: POLICY_BLOCKEDe2000000-0000-4000-8000-000000000017: VERSION_CONFLICTe2000000-0000-4000-8000-000000000018: POLICY_BLOCKEDe2000000-0000-4000-8000-00000000001a: VERSION_CONFLICTe2000000-0000-4000-8000-00000000001b: POLICY_BLOCKEDe2000000-0000-4000-8000-00000000001d: VERSION_CONFLICTe2000000-0000-4000-8000-00000000001e: POLICY_BLOCKEDe2000000-0000-4000-8000-000000000020: VERSION_CONFLICTe2000000-0000-4000-8000-000000000021: POLICY_BLOCKEDe2000000-0000-4000-8000-000000000023: VERSION_CONFLICTe2000000-0000-4000-8000-000000000024: POLICY_BLOCKEDe2000000-0000-4000-8000-000000000026: VERSION_CONFLICTe2000000-0000-4000-8000-000000000027: POLICY_BLOCKEDHide job resultse2000000-0000-4000-8000-000000000015: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-000000000016: updated e2000000-0000-4000-8000-000000000017: conflict VERSION_CONFLICTe2000000-0000-4000-8000-000000000018: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-000000000019: updated e2000000-0000-4000-8000-00000000001a: conflict VERSION_CONFLICTe2000000-0000-4000-8000-00000000001b: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-00000000001c: updated e2000000-0000-4000-8000-00000000001d: conflict VERSION_CONFLICTe2000000-0000-4000-8000-00000000001e: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-00000000001f: updated e2000000-0000-4000-8000-000000000020: conflict VERSION_CONFLICTe2000000-0000-4000-8000-000000000021: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-000000000022: updated e2000000-0000-4000-8000-000000000023: conflict VERSION_CONFLICTe2000000-0000-4000-8000-000000000024: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-000000000025: updated e2000000-0000-4000-8000-000000000026: conflict VERSION_CONFLICTe2000000-0000-4000-8000-000000000027: blocked POLICY_BLOCKEDe2000000-0000-4000-8000-000000000028: updated Previous job results21–40 / 1000Next job results"
+
+
+      84 |   await panel.getByRole('button',{name:'Show job results',exact:true}).click();await expect(panel.locator('code')).toHaveCount(20);expect(results).toHaveLength(1);
+      85 |   await panel.getByRole('button',{name:'Next job results',exact:true}).click();await expect(panel.getByText('21–40 / 1000',{exact:true})).toBeVisible();expect(results).toHaveLength(2);
+    > 86 |   await statusFixture(seeded.job_id,'completed');await expect(panel).toContainText('completed:');await expect.poll(()=>results.length).toBe(3);expect(results.at(-1)).toBe('?offset=20&limit=20');
+         |                                                                      ^
+      87 |   const final=calls;await page.waitForTimeout(4500);expect(calls).toBe(final);expect(results).toHaveLength(3);expect(max).toBe(1);
+      88 |   writeFileSync('test-results/q06-slow-terminal.json',JSON.stringify({fixture_only:true,calls,max_in_flight:max,result_requests:results},null,2));await page.screenshot({path:'test-results/q06-bulk-en.png',fullPage:true});
+      89 | });
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-operations.spec.ts:86:70
+
+    Error Context: ..\..\test-results\audit-fixes\audit-operations-B12-2-5s--fcec5-refreshes-visible-page-once\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-operations-B12-2-5s--fcec5-refreshes-visible-page-once\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-operations-B12-2-5s--fcec5-refreshes-visible-page-once\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="B13 hidden summary pause and double visibility resume produce exactly one refresh" classname="audit-operations.spec.ts" time="18.403">
+</testcase>
+<testcase name="B13 actual 429 Retry-After and 503 recover without result-page traffic" classname="audit-operations.spec.ts" time="15.086">
+</testcase>
+<testcase name="B16 old summary cannot overwrite another scope after A-B-A" classname="audit-operations.spec.ts" time="16.969">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).not.toContainText(expected) failed" type="expect.not.toContainText">
+<![CDATA[  audit-operations.spec.ts:111:1 › B16 old summary cannot overwrite another scope after A-B-A ──────
+
+    Error: expect(locator).not.toContainText(expected) failed
+
+    Locator: getByRole('region', { name: 'Bulk job progress' })
+    Expected substring: not "21 of 21"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "not toContainText" getByRole('region', { name: 'Bulk job progress' }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Bulk job progress' })
+
+
+      114 |   await openBulk(page,seeded.job_id);await started;await statusFixture(seeded.job_id,'completed');
+      115 |   await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption('e0000000-0000-4000-8000-000000000101');
+    > 116 |   await expect(page.getByRole('region',{name:'Bulk job progress'})).not.toContainText('21 of 21');
+          |                                                                         ^
+      117 |   await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);release();
+      118 |   const panel=page.getByRole('region',{name:'Bulk job progress'});await expect(panel).toContainText('completed:');await page.waitForTimeout(2500);await expect(panel).not.toContainText('running:');
+      119 | });
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-operations.spec.ts:116:73
+
+    Error Context: ..\..\test-results\audit-fixes\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="B13 zh-HK 390px summary/results controls remain usable without overflow" classname="audit-operations.spec.ts" time="9.814">
+</testcase>
+</testsuite>
+</testsuites>

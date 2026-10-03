@@ -1,0 +1,11 @@
+✔ manual rollback reads once, remains idle60s, explicit refresh reads once again (2.0801ms)
+✔ manual rollback reports error once without automatic retry (0.6311ms)
+✔ manual rollback aborts obsolete response without materializing it (0.8277ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 516.8844
