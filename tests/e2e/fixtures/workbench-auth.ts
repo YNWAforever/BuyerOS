@@ -16,7 +16,7 @@ export async function resetWorkbenchFixtureRateWindows(){
   expect(JSON.parse(stdout).fixture_initial_rate_windows_reset).toBe(true);
 }
 
-export async function signInWorkbench(page:Page,waitForProject=true,actor:'reviewer'|'access'|'viewer'='reviewer',entry=`/app?workspace=${workspace}&project=${project}`){
+export async function signInWorkbench(page:Page,waitForProject=true,actor:'reviewer'|'access'|'viewer'|'admin'='reviewer',entry=`/app?workspace=${workspace}&project=${project}`){
   const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,
     publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
   const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'workbench-fixture',use:'sig'};
@@ -39,6 +39,10 @@ export async function signInWorkbench(page:Page,waitForProject=true,actor:'revie
   page.on('pageerror',error=>apiEvents.push(`pageerror ${error.name}: ${error.message}`));
   await page.goto(entry);
   await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
+  // The fake callback exchanges/verifies its token asynchronously. Negative-access
+  // cases must reach the authenticated workspace read before asserting its result.
+  await expect.poll(()=>apiEvents.some(event=>event.startsWith('request GET ')&&new URL(event.slice('request GET '.length)).pathname==='/v1/workspaces'),
+    {timeout:30_000,message:'Fake sign-in must complete and request workspace access'}).toBe(true);
   if(waitForProject){
     try{await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});}
     catch(error){throw new Error(`Project selection did not settle; API events: ${apiEvents.join(' | ')}`,{cause:error});}

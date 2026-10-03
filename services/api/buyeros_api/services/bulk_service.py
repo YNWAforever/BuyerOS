@@ -1,6 +1,7 @@
 """Durable 50-row bulk mutations, resumed through the existing transactional outbox."""
 import uuid
 
+from .membership_directory import eligible_owner_predicate
 from sqlalchemy import func, select
 
 from ..api.errors import ApiError
@@ -44,8 +45,7 @@ async def create_bulk_job(session, *, workspace_id, project_id, actor_user_id,
     if operation == "assignBuyerOwners" and command.get("owner_membership_id"):
         owner_id = uuid.UUID(command["owner_membership_id"])
         active_owner = (await session.execute(select(Membership.id).where(
-            Membership.workspace_id == workspace_id, Membership.id == owner_id,
-            Membership.active.is_(True),
+            Membership.id == owner_id, eligible_owner_predicate(workspace_id),
         ))).scalar_one_or_none()
         if active_owner is None:
             raise ApiError(422, "INVALID_REQUEST", "owner membership is not active in this workspace")
@@ -106,8 +106,7 @@ async def apply_bulk_chunk(session, job_id: uuid.UUID, limit: int = CHUNK_SIZE) 
         if permitted and job.operation == "assignBuyerOwners" and job.command.get("owner_membership_id"):
             owner_id = uuid.UUID(job.command["owner_membership_id"])
             target_active = (await session.execute(select(Membership.id).where(
-                Membership.workspace_id == job.workspace_id, Membership.id == owner_id,
-                Membership.active.is_(True),
+                Membership.id == owner_id, eligible_owner_predicate(job.workspace_id),
             ))).scalar_one_or_none() is not None
         if permitted and target_active:
             selection = {"kind": "explicit", "buyers": [

@@ -1,5 +1,9 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'The membership result is unknown. Reload members to check the current version before making another change.':'成員更新結果尚未確定。請重新載入成員並核對目前版本，再作其他更改。',
+  'Search members':'搜尋成員','Search':'搜尋','Member':'成員','Member pages':'成員分頁',
+  'Loading members…':'正在載入成員…','Previous members':'上一頁成員','Next members':'下一頁成員',
+  'Reload members':'重新載入成員','The last active administrator must remain.':'必須保留至少一位有效管理員。',
   'Retry same research':'重試同一次研究','Start new research intent':'開始全新研究意圖',
   'Check existing runs before starting new research.':'開始新研究前，請先檢查現有研究。',
   'The result is unknown. Query existing runs or retry the same research; its key is retained.':'結果尚未確定。請查詢現有研究或重試同一次研究；操作識別碼已保留。',

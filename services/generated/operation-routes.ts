@@ -6,6 +6,7 @@ export const operationRoutes = {
   "listWorkspaces": {method: "GET", path: "/v1/workspaces"},
   "getCapabilities": {method: "GET", path: "/v1/workspaces/{workspace_id}/capabilities"},
   "listMemberships": {method: "GET", path: "/v1/workspaces/{workspace_id}/memberships"},
+  "listEligibleAssignees": {method: "GET", path: "/v1/workspaces/{workspace_id}/eligible-assignees"},
   "updateMembership": {method: "PATCH", path: "/v1/workspaces/{workspace_id}/memberships/{membership_id}"},
   "getPreferences": {method: "GET", path: "/v1/workspaces/{workspace_id}/preferences"},
   "updatePreferences": {method: "PATCH", path: "/v1/workspaces/{workspace_id}/preferences"},

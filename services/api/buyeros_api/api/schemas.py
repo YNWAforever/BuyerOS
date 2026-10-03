@@ -391,6 +391,23 @@ class PreferencesUpdate(_Strict):
         return self
 
 
+class MembershipRead(_Strict):
+    id: uuid.UUID
+    workspace_id: uuid.UUID
+    user_id: uuid.UUID
+    display_name: StrictStr = Field(min_length=1, max_length=200)
+    roles: list[Literal["viewer", "operator", "reviewer", "workspace_admin"]]
+    active: StrictBool
+    version: int = Field(ge=1)
+
+
+class EligibleAssignee(_Strict):
+    membership_id: uuid.UUID
+    user_id: uuid.UUID
+    display_name: StrictStr = Field(min_length=1, max_length=200)
+    version: int = Field(ge=1)
+
+
 class MembershipUpdate(_Strict):
     roles: list[Literal["viewer", "operator", "reviewer", "workspace_admin"]] = Field(min_length=1, max_length=4)
     active: StrictBool
