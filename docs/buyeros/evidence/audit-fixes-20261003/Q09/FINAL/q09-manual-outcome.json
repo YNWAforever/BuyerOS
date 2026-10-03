@@ -1,0 +1,133 @@
+{
+  "fixture_only": true,
+  "original": {
+    "data": {
+      "id": "66237c86-4d8f-42e4-afc4-49fe3d92b6cf",
+      "workspace_id": "e0000000-0000-4000-8000-000000000001",
+      "version": 1,
+      "created_at": "2026-10-03T18:49:21.347066+00:00",
+      "updated_at": "2026-10-03T18:49:21.347066+00:00",
+      "data_mode": "live",
+      "project_id": "e1000000-0000-4000-8000-000000000001",
+      "buyer_id": "e2000000-0000-4000-8000-000000000001",
+      "stage": "reply",
+      "source": "manual",
+      "notes": "Q09 manual fixture reply",
+      "occurred_at": "2026-10-03T18:49:00+00:00",
+      "recorded_at": "2026-10-03T18:49:21.347066+00:00",
+      "actor_id": "e0000000-0000-4000-8000-000000000004",
+      "actor_display_name": null
+    },
+    "request_id": "d41fe76e-1024-4106-8bd2-b0b04647aba7",
+    "data_mode": "live"
+  },
+  "correction": {
+    "data": {
+      "id": "b929edbc-d3ce-4886-94e0-eea95d967cf6",
+      "workspace_id": "e0000000-0000-4000-8000-000000000001",
+      "version": 1,
+      "created_at": "2026-10-03T18:49:21.949301+00:00",
+      "updated_at": "2026-10-03T18:49:21.949301+00:00",
+      "data_mode": "live",
+      "project_id": "e1000000-0000-4000-8000-000000000001",
+      "buyer_id": "e2000000-0000-4000-8000-000000000001",
+      "stage": "meeting",
+      "source": "manual",
+      "notes": "Q09 corrected manual meeting",
+      "occurred_at": "2026-10-03T18:49:00+00:00",
+      "recorded_at": "2026-10-03T18:49:21.949301+00:00",
+      "actor_id": "e0000000-0000-4000-8000-000000000004",
+      "actor_display_name": null,
+      "correction_reason": "Q09 staff correction after source check",
+      "supersedes_id": "66237c86-4d8f-42e4-afc4-49fe3d92b6cf"
+    },
+    "request_id": "8f705a69-7561-4229-8a0e-ad6902b9bc04",
+    "data_mode": "live"
+  },
+  "metric": {
+    "data": {
+      "workspace_id": "e0000000-0000-4000-8000-000000000001",
+      "project_id": "e1000000-0000-4000-8000-000000000001",
+      "from": "2025-01-01T00:00:00+00:00",
+      "to": "2025-02-01T00:00:00+00:00",
+      "as_of": "2026-10-03T18:49:22.286228+00:00",
+      "categories": [
+        {
+          "category": "assessment",
+          "settled": {
+            "amount": "0.000000",
+            "currency": "USD"
+          },
+          "reserved": {
+            "amount": "0.000000",
+            "currency": "USD"
+          }
+        },
+        {
+          "category": "contact_lookup",
+          "settled": {
+            "amount": "0.000000",
+            "currency": "USD"
+          },
+          "reserved": {
+            "amount": "0.000000",
+            "currency": "USD"
+          }
+        },
+        {
+          "category": "discovery",
+          "settled": {
+            "amount": "0.000000",
+            "currency": "USD"
+          },
+          "reserved": {
+            "amount": "0.000000",
+            "currency": "USD"
+          }
+        },
+        {
+          "category": "draft_generation",
+          "settled": {
+            "amount": "0.000000",
+            "currency": "USD"
+          },
+          "reserved": {
+            "amount": "0.000000",
+            "currency": "USD"
+          }
+        },
+        {
+          "category": "extraction",
+          "settled": {
+            "amount": "0.000000",
+            "currency": "USD"
+          },
+          "reserved": {
+            "amount": "0.000000",
+            "currency": "USD"
+          }
+        }
+      ],
+      "total_settled": {
+        "amount": "0.000000",
+        "currency": "USD"
+      },
+      "total_reserved": {
+        "amount": "0.000000",
+        "currency": "USD"
+      },
+      "remaining": {
+        "amount": "0.000000",
+        "currency": "USD"
+      },
+      "accepted_company_count": 0,
+      "eligible_contactable_company_count": 0,
+      "cost_per_accepted_company": null,
+      "cost_per_contactable_accepted_company": null,
+      "denominator_definition": "Distinct project companies first accepted in the UTC half-open period and still accepted against the current ICP and fit at as_of; contactable subset has a current provider-marked-valid, research-permitted, unsuppressed business email. Numerator is all attributed metered cost events recorded in the period, including failed and partial runs and signed refunds; ratios are blended period costs, not causal acquisition costs.",
+      "includes_partial_runs": true
+    },
+    "request_id": "839331c9-8206-4f6a-8c62-6cc99ecd2203",
+    "data_mode": "live"
+  }
+}

@@ -1,0 +1,364 @@
+<testsuites id="" name="" tests="50" failures="4" skipped="0" errors="2" time="1740.9165310000003">
+<testsuite name="api-browser-zoom.spec.ts" timestamp="2026-10-03T18:08:52.631Z" hostname="" tests="2" failures="1" skipped="0" time="53.514" errors="0">
+<testcase name="T29 actual Chromium 200% zoom preserves API workbench content in en" classname="api-browser-zoom.spec.ts" time="16.505">
+</testcase>
+<testcase name="T29 actual Chromium 200% zoom preserves API workbench content in zh-HK" classname="api-browser-zoom.spec.ts" time="37.009">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\api-browser-zoom-T29-actua-c6848--workbench-content-in-zh-HK\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\api-browser-zoom-T29-actua-c6848--workbench-content-in-zh-HK\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in zh-HK 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: '買家結果' }).getByText('Buyer Fixture 01', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('region', { name: '買家結果' }).getByText('Buyer Fixture 01', { exact: true }) with timeout 5000ms
+      - waiting for getByRole('region', { name: '買家結果' }).getByText('Buyer Fixture 01', { exact: true })
+
+
+      88 |           await expect(buyers.getByText(locale === 'en' ? 'Rows 1–12 of 24' : '第 1–12 項，共 24 項', { exact: true }))
+      89 |             .toBeVisible({ timeout: 30_000 });
+    > 90 |           await expect(buyers.getByText('Buyer Fixture 01', { exact: true })).toBeVisible();
+         |                                                                               ^
+      91 |           await expect(buyers.getByText('Buyer Fixture 13', { exact: true })).toHaveCount(0);
+      92 |           await buyers.getByRole('textbox', { name: locale === 'en' ? 'Search buyers' : '搜尋買家', exact: true })
+      93 |             .fill('Buyer Fixture 24');
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\api-browser-zoom.spec.ts:90:79
+
+    Error Context: ..\..\test-results\audit-fixes\api-browser-zoom-T29-actua-c6848--workbench-content-in-zh-HK\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\api-browser-zoom-T29-actua-c6848--workbench-content-in-zh-HK\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\api-browser-zoom-T29-actua-c6848--workbench-content-in-zh-HK\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="audit-bulk-confirmation.spec.ts" timestamp="2026-10-03T18:08:52.631Z" hostname="" tests="8" failures="0" skipped="0" time="131.156" errors="0">
+<testcase name="B02 adding a sixth buyer clears the previously confirmed five" classname="audit-bulk-confirmation.spec.ts" time="14.894">
+</testcase>
+<testcase name="B02 reason, target and exclusions clear confirmation; unchanged selection survives paging" classname="audit-bulk-confirmation.spec.ts" time="11.957">
+</testcase>
+<testcase name="B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works" classname="audit-bulk-confirmation.spec.ts" time="19.028">
+</testcase>
+<testcase name="B04 inactive owner is rejected and a stale buyer reports conflict without overwriting" classname="audit-bulk-confirmation.spec.ts" time="24.969">
+</testcase>
+<testcase name="B16 committed response loss locks changes and reconciles the same key after a route remount" classname="audit-bulk-confirmation.spec.ts" time="26.732">
+</testcase>
+<testcase name="B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link" classname="audit-bulk-confirmation.spec.ts" time="17.374">
+</testcase>
+<testcase name="B03 zh-HK mobile colleague search recovers a failed read" classname="audit-bulk-confirmation.spec.ts" time="8.546">
+</testcase>
+<testcase name="B03 viewer cannot assign through UI or direct API" classname="audit-bulk-confirmation.spec.ts" time="7.656">
+</testcase>
+</testsuite>
+<testsuite name="audit-daily-journey.spec.ts" timestamp="2026-10-03T18:08:52.631Z" hostname="" tests="4" failures="2" skipped="0" time="846.663" errors="2">
+<testcase name="Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="52.67">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toContainText(expected) failed" type="expect.toContainText">
+<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('textbox', { name: 'Body' })
+    Expected substring: "Industrial sensor platform"
+    Error: strict mode violation: getByRole('textbox', { name: 'Body' }) resolved to 2 elements:
+        1) <input maxlength="1000" value="Introduce the approved offer"/> aka getByRole('textbox', { name: 'Internal work objective —' })
+        2) <textarea disabled rows="10" maxlength="20000">Hello,↵↵We offer: Industrial sensor platform [off…</textarea> aka getByRole('textbox', { name: 'Body', exact: true })
+
+    Call log:
+      - Expect "toContainText" getByRole('textbox', { name: 'Body' }) with timeout 5000ms
+      - waiting for getByRole('textbox', { name: 'Body' })
+
+
+      254 |   await expect(page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')})).toHaveCount(1);
+      255 |   await page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')}).click();
+    > 256 |   await expect(page.getByRole('textbox',{name:ui('Body')})).toContainText('Industrial sensor platform');
+          |                                                             ^
+      257 |   await expect(page.getByRole('textbox',{name:ui('Body')})).toContainText('Fictional distributor lists industrial sensors');
+      258 |   await fits(page);
+      259 |   const generatedDraft=new URL(page.url()).searchParams.get('draft')!;
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts:256:61
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="60.356">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toContainText(expected) failed" type="expect.toContainText">
+<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('textbox', { name: 'Body' })
+    Expected substring: "Industrial sensor platform"
+    Error: strict mode violation: getByRole('textbox', { name: 'Body' }) resolved to 2 elements:
+        1) <input maxlength="1000" value="Introduce the approved offer"/> aka getByRole('textbox', { name: 'Internal work objective —' })
+        2) <textarea disabled rows="10" maxlength="20000">Hello,↵↵We offer: Industrial sensor platform [off…</textarea> aka getByRole('textbox', { name: 'Body', exact: true })
+
+    Call log:
+      - Expect "toContainText" getByRole('textbox', { name: 'Body' }) with timeout 5000ms
+      - waiting for getByRole('textbox', { name: 'Body' })
+
+
+      254 |   await expect(page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')})).toHaveCount(1);
+      255 |   await page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')}).click();
+    > 256 |   await expect(page.getByRole('textbox',{name:ui('Body')})).toContainText('Industrial sensor platform');
+          |                                                             ^
+      257 |   await expect(page.getByRole('textbox',{name:ui('Body')})).toContainText('Fictional distributor lists industrial sensors');
+      258 |   await fits(page);
+      259 |   const generatedDraft=new URL(page.url()).searchParams.get('draft')!;
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts:256:61
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="360.86">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 360000ms exceeded." type="Error">
+<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+
+    Test timeout of 360000ms exceeded.
+
+    Error: locator.click: Test ended.
+    Call log:
+      - waiting for getByRole('button', { name: 'Sign in' })
+
+
+      27 |     contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[publicKey]})}));
+      28 |   await page.goto(initialPath);
+    > 29 |   await page.getByRole('button',{name:'Sign in'}).click();
+         |                                                   ^
+      30 |   await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(new URL(initialPath,'http://localhost:5173').searchParams.get('project')!,{timeout:30_000});
+      31 |   await page.locator('header select').selectOption(locale);
+      32 |   await expect(page.locator('html')).toHaveAttribute('lang',locale);
+        at signIn (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts:29:51)
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts:263:3
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="372.777">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 360000ms exceeded." type="Error">
+<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+
+    Test timeout of 360000ms exceeded.
+
+    Error: locator.click: Test ended.
+    Call log:
+      - waiting for getByRole('button', { name: 'Sign in' })
+
+
+      27 |     contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[publicKey]})}));
+      28 |   await page.goto(initialPath);
+    > 29 |   await page.getByRole('button',{name:'Sign in'}).click();
+         |                                                   ^
+      30 |   await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(new URL(initialPath,'http://localhost:5173').searchParams.get('project')!,{timeout:30_000});
+      31 |   await page.locator('header select').selectOption(locale);
+      32 |   await expect(page.locator('html')).toHaveAttribute('lang',locale);
+        at signIn (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts:29:51)
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts:263:3
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+<testsuite name="audit-daily-ux.spec.ts" timestamp="2026-10-03T18:08:52.631Z" hostname="" tests="7" failures="1" skipped="0" time="87.107" errors="0">
+<testcase name="WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history" classname="audit-daily-ux.spec.ts" time="17.986">
+</testcase>
+<testcase name="U09 no selection hides batch forms; explicit selection exposes a sticky named action summary" classname="audit-daily-ux.spec.ts" time="14.14">
+</testcase>
+<testcase name="WF01 project-only partial save preserves every input and same intent creates one project and ICP" classname="audit-daily-ux.spec.ts" time="10.262">
+</testcase>
+<testcase name="WF02 held reviewer cannot approve the previous offer revision or start research" classname="audit-daily-ux.spec.ts" time="18.754">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Profile version 1' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Profile version 1' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: 'Profile version 1' })
+
+
+      50 |  const id=new URL(page.url()).searchParams.get('project')!,ctx=await browser.newContext(),reviewer=await ctx.newPage();
+      51 |  try{
+    > 52 |   await resetWorkbenchFixtureRateWindows();await signInWorkbench(reviewer,false,'reviewer',`/app?workspace=${workspace}&project=${id}`);await expect(reviewer.getByRole('heading',{name:'Profile version 1',exact:false})).toBeVisible();await reviewer.getByRole('checkbox',{name:/Confirm approval of this exact version v1/}).check();
+         |                                                                                                                                                                                                                            ^
+      53 |   await page.getByRole('button',{name:'Edit offer',exact:true}).click();await page.getByRole('textbox',{name:'Product / service',exact:true}).fill('Revised sensor platform');await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('checkbox',{name:/I confirm these buyer requirements/}).check();await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Save profile',exact:true}).click();await expect(page.getByRole('heading',{name:'Profile version 2',exact:false})).toBeVisible();
+      54 |   const reply=reviewer.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/approve'));await reviewer.getByRole('button',{name:'Approve profile',exact:true}).click();const denied=await reply;expect(denied.status()).toBe(412);expect((await denied.json()).code).toBe('STALE_REVISION');await expect(reviewer.getByRole('alert').last()).toBeVisible();await expect(reviewer.getByRole('button',{name:'Approve profile',exact:true})).toBeDisabled();await reviewer.getByRole('button',{name:'Reload profile',exact:true}).click();await expect(reviewer.getByText('The offer changed. This profile cannot be approved.',{exact:false})).toBeVisible();
+      55 |   await page.getByRole('button',{name:'Research runs',exact:true}).click();await expect(page.getByRole('button',{name:'Start research',exact:true})).toBeDisabled();
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-daily-ux.spec.ts:52:220
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="U10 U11 en keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="11.031">
+</testcase>
+<testcase name="U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="8.11">
+</testcase>
+<testcase name="U09 manual outcome names, UTC zero denominators and append-only correction survive refresh" classname="audit-daily-ux.spec.ts" time="6.824">
+</testcase>
+</testsuite>
+<testsuite name="audit-draft-reground.spec.ts" timestamp="2026-10-03T18:08:52.631Z" hostname="" tests="4" failures="0" skipped="0" time="112.27" errors="0">
+<testcase name="D01/D03 manual Unicode draft exposes a source review and operator cannot attest" classname="audit-draft-reground.spec.ts" time="16.117">
+</testcase>
+<testcase name="D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export" classname="audit-draft-reground.spec.ts" time="48.814">
+</testcase>
+<testcase name="D03 zh-HK mobile code-point split reads every source and exports exact Unicode message" classname="audit-draft-reground.spec.ts" time="24.505">
+</testcase>
+<testcase name="U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result" classname="audit-draft-reground.spec.ts" time="22.834">
+</testcase>
+</testsuite>
+<testsuite name="audit-job-scope.spec.ts" timestamp="2026-10-03T18:08:52.631Z" hostname="" tests="6" failures="0" skipped="0" time="59.881" errors="0">
+<testcase name="U15 project A0 B5; card and failed list share scope; explicit workspace5" classname="audit-job-scope.spec.ts" time="25.289">
+</testcase>
+<testcase name="U15 workspace view remains actor-bound, other actor detail denied; admin read sees all" classname="audit-job-scope.spec.ts" time="6.232">
+</testcase>
+<testcase name="U15 actual 21 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="8.006">
+</testcase>
+<testcase name="U15 actual 101 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="6.829">
+</testcase>
+<testcase name="U15 held B list and count cannot overwrite newer A-B-A generation" classname="audit-job-scope.spec.ts" time="6.921">
+</testcase>
+<testcase name="U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery" classname="audit-job-scope.spec.ts" time="6.604">
+</testcase>
+</testsuite>
+<testsuite name="audit-memberships.spec.ts" timestamp="2026-10-03T18:08:52.631Z" hostname="" tests="8" failures="0" skipped="0" time="59.728" errors="0">
+<testcase name="U06 all 250 real members are readable in 13 pages and member 101 is searchable" classname="audit-memberships.spec.ts" time="9.073">
+</testcase>
+<testcase name="U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable" classname="audit-memberships.spec.ts" time="6.082">
+</testcase>
+<testcase name="U07 duplicate names and suffixes remain distinct during a versioned role change" classname="audit-memberships.spec.ts" time="5.731">
+</testcase>
+<testcase name="U08 sole admin refusal is understandable and does not claim success" classname="audit-memberships.spec.ts" time="8.837">
+</testcase>
+<testcase name="S06 viewer cannot read the admin directory or eligible assignees" classname="audit-memberships.spec.ts" time="4.586">
+</testcase>
+<testcase name="U06 stale page response cannot restore old A-B-A directory" classname="audit-memberships.spec.ts" time="9.527">
+</testcase>
+<testcase name="U06 zh-HK mobile search and failed page read recover without synthetic rows" classname="audit-memberships.spec.ts" time="8.218">
+</testcase>
+<testcase name="U07 lost committed role response requires a read before any further role write" classname="audit-memberships.spec.ts" time="7.674">
+</testcase>
+</testsuite>
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-03T18:08:52.631Z" hostname="" tests="11" failures="0" skipped="0" time="161.698" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="4.99">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="8.093">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="34.967">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="9.94">
+</testcase>
+<testcase name="B12 unopened 1000-result job reads summary only and never walks result pages" classname="audit-operations.spec.ts" time="17.381">
+</testcase>
+<testcase name="B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once" classname="audit-operations.spec.ts" time="30.784">
+</testcase>
+<testcase name="B13 hidden summary pause and double visibility resume produce exactly one refresh" classname="audit-operations.spec.ts" time="13.68">
+</testcase>
+<testcase name="B13 actual 429 Retry-After and 503 recover without result-page traffic" classname="audit-operations.spec.ts" time="13.218">
+</testcase>
+<testcase name="B16 old summary cannot overwrite another scope after A-B-A" classname="audit-operations.spec.ts" time="12.279">
+</testcase>
+<testcase name="B13 zh-HK 390px summary/results controls remain usable without overflow" classname="audit-operations.spec.ts" time="8.283">
+</testcase>
+<testcase name="B13 Operations clears a transient summary error after a valid recovery" classname="audit-operations.spec.ts" time="8.083">
+</testcase>
+</testsuite>
+</testsuites>

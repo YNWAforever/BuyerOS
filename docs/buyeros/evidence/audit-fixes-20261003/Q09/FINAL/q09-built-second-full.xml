@@ -1,0 +1,166 @@
+<testsuites id="" name="" tests="50" failures="0" skipped="0" errors="2" time="1318.325699">
+<testsuite name="api-browser-zoom.spec.ts" timestamp="2026-10-03T18:41:27.099Z" hostname="" tests="2" failures="0" skipped="0" time="44.925" errors="0">
+<testcase name="T29 actual Chromium 200% zoom preserves API workbench content in en" classname="api-browser-zoom.spec.ts" time="25.404">
+</testcase>
+<testcase name="T29 actual Chromium 200% zoom preserves API workbench content in zh-HK" classname="api-browser-zoom.spec.ts" time="19.521">
+</testcase>
+</testsuite>
+<testsuite name="audit-bulk-confirmation.spec.ts" timestamp="2026-10-03T18:41:27.099Z" hostname="" tests="8" failures="0" skipped="0" time="136.339" errors="0">
+<testcase name="B02 adding a sixth buyer clears the previously confirmed five" classname="audit-bulk-confirmation.spec.ts" time="9.883">
+</testcase>
+<testcase name="B02 reason, target and exclusions clear confirmation; unchanged selection survives paging" classname="audit-bulk-confirmation.spec.ts" time="9.552">
+</testcase>
+<testcase name="B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works" classname="audit-bulk-confirmation.spec.ts" time="16.027">
+</testcase>
+<testcase name="B04 inactive owner is rejected and a stale buyer reports conflict without overwriting" classname="audit-bulk-confirmation.spec.ts" time="41.597">
+</testcase>
+<testcase name="B16 committed response loss locks changes and reconciles the same key after a route remount" classname="audit-bulk-confirmation.spec.ts" time="14.456">
+</testcase>
+<testcase name="B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link" classname="audit-bulk-confirmation.spec.ts" time="13.187">
+</testcase>
+<testcase name="B03 zh-HK mobile colleague search recovers a failed read" classname="audit-bulk-confirmation.spec.ts" time="19.404">
+</testcase>
+<testcase name="B03 viewer cannot assign through UI or direct API" classname="audit-bulk-confirmation.spec.ts" time="12.233">
+</testcase>
+</testsuite>
+<testsuite name="audit-daily-journey.spec.ts" timestamp="2026-10-03T18:41:27.099Z" hostname="" tests="4" failures="0" skipped="0" time="225.874" errors="0">
+<testcase name="Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="55.678">
+</testcase>
+<testcase name="Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="50.257">
+</testcase>
+<testcase name="Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="60.487">
+</testcase>
+<testcase name="Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="59.452">
+</testcase>
+</testsuite>
+<testsuite name="audit-daily-ux.spec.ts" timestamp="2026-10-03T18:41:27.099Z" hostname="" tests="7" failures="0" skipped="0" time="66.252" errors="0">
+<testcase name="WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history" classname="audit-daily-ux.spec.ts" time="3.418">
+</testcase>
+<testcase name="U09 no selection hides batch forms; explicit selection exposes a sticky named action summary" classname="audit-daily-ux.spec.ts" time="5.366">
+</testcase>
+<testcase name="WF01 project-only partial save preserves every input and same intent creates one project and ICP" classname="audit-daily-ux.spec.ts" time="7.532">
+</testcase>
+<testcase name="WF02 held reviewer cannot approve the previous offer revision or start research" classname="audit-daily-ux.spec.ts" time="18.818">
+</testcase>
+<testcase name="U10 U11 en keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="9.431">
+</testcase>
+<testcase name="U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="9.542">
+</testcase>
+<testcase name="U09 manual outcome names, UTC zero denominators and append-only correction survive refresh" classname="audit-daily-ux.spec.ts" time="12.145">
+</testcase>
+</testsuite>
+<testsuite name="audit-draft-reground.spec.ts" timestamp="2026-10-03T18:41:27.099Z" hostname="" tests="4" failures="0" skipped="0" time="82.816" errors="0">
+<testcase name="D01/D03 manual Unicode draft exposes a source review and operator cannot attest" classname="audit-draft-reground.spec.ts" time="19.569">
+</testcase>
+<testcase name="D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export" classname="audit-draft-reground.spec.ts" time="20.463">
+</testcase>
+<testcase name="D03 zh-HK mobile code-point split reads every source and exports exact Unicode message" classname="audit-draft-reground.spec.ts" time="20.527">
+</testcase>
+<testcase name="U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result" classname="audit-draft-reground.spec.ts" time="22.257">
+</testcase>
+</testsuite>
+<testsuite name="audit-job-scope.spec.ts" timestamp="2026-10-03T18:41:27.099Z" hostname="" tests="6" failures="0" skipped="0" time="70.619" errors="0">
+<testcase name="U15 project A0 B5; card and failed list share scope; explicit workspace5" classname="audit-job-scope.spec.ts" time="18.309">
+</testcase>
+<testcase name="U15 workspace view remains actor-bound, other actor detail denied; admin read sees all" classname="audit-job-scope.spec.ts" time="7.782">
+</testcase>
+<testcase name="U15 actual 21 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="12.429">
+</testcase>
+<testcase name="U15 actual 101 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="13.296">
+</testcase>
+<testcase name="U15 held B list and count cannot overwrite newer A-B-A generation" classname="audit-job-scope.spec.ts" time="9.253">
+</testcase>
+<testcase name="U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery" classname="audit-job-scope.spec.ts" time="9.55">
+</testcase>
+</testsuite>
+<testsuite name="audit-memberships.spec.ts" timestamp="2026-10-03T18:41:27.099Z" hostname="" tests="8" failures="0" skipped="0" time="247.941" errors="2">
+<testcase name="U06 all 250 real members are readable in 13 pages and member 101 is searchable" classname="audit-memberships.spec.ts" time="28.07">
+</testcase>
+<testcase name="U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable" classname="audit-memberships.spec.ts" time="39.351">
+</testcase>
+<testcase name="U07 duplicate names and suffixes remain distinct during a versioned role change" classname="audit-memberships.spec.ts" time="45.609">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change\trace.zip]]
+]]>
+</system-out>
+<error message="Command failed: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/audit_memberships.py" type="Error">
+<![CDATA[  audit-memberships.spec.ts:43:1 › U07 duplicate names and suffixes remain distinct during a versioned role change 
+
+    Error: Command failed: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/audit_memberships.py
+
+
+    Error Context: ..\..\test-results\audit-fixes\audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="U08 sole admin refusal is understandable and does not claim success" classname="audit-memberships.spec.ts" time="41.931">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-memberships-U08-sole-6c8e7--and-does-not-claim-success\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-memberships-U08-sole-6c8e7--and-does-not-claim-success\trace.zip]]
+]]>
+</system-out>
+<error message="Command failed: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/audit_memberships.py" type="Error">
+<![CDATA[  audit-memberships.spec.ts:57:1 › U08 sole admin refusal is understandable and does not claim success 
+
+    Error: Command failed: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/audit_memberships.py
+
+
+    Error Context: ..\..\test-results\audit-fixes\audit-memberships-U08-sole-6c8e7--and-does-not-claim-success\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-memberships-U08-sole-6c8e7--and-does-not-claim-success\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-memberships-U08-sole-6c8e7--and-does-not-claim-success\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="S06 viewer cannot read the admin directory or eligible assignees" classname="audit-memberships.spec.ts" time="38.657">
+</testcase>
+<testcase name="U06 stale page response cannot restore old A-B-A directory" classname="audit-memberships.spec.ts" time="24.102">
+</testcase>
+<testcase name="U06 zh-HK mobile search and failed page read recover without synthetic rows" classname="audit-memberships.spec.ts" time="13.838">
+</testcase>
+<testcase name="U07 lost committed role response requires a read before any further role write" classname="audit-memberships.spec.ts" time="16.383">
+</testcase>
+</testsuite>
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-03T18:41:27.099Z" hostname="" tests="11" failures="0" skipped="0" time="221.886" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="40.121">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="14.476">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="14.994">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="15.601">
+</testcase>
+<testcase name="B12 unopened 1000-result job reads summary only and never walks result pages" classname="audit-operations.spec.ts" time="24.447">
+</testcase>
+<testcase name="B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once" classname="audit-operations.spec.ts" time="32.587">
+</testcase>
+<testcase name="B13 hidden summary pause and double visibility resume produce exactly one refresh" classname="audit-operations.spec.ts" time="20.183">
+</testcase>
+<testcase name="B13 actual 429 Retry-After and 503 recover without result-page traffic" classname="audit-operations.spec.ts" time="17.408">
+</testcase>
+<testcase name="B16 old summary cannot overwrite another scope after A-B-A" classname="audit-operations.spec.ts" time="16.489">
+</testcase>
+<testcase name="B13 zh-HK 390px summary/results controls remain usable without overflow" classname="audit-operations.spec.ts" time="11.902">
+</testcase>
+<testcase name="B13 Operations clears a transient summary error after a valid recovery" classname="audit-operations.spec.ts" time="13.678">
+</testcase>
+</testsuite>
+</testsuites>

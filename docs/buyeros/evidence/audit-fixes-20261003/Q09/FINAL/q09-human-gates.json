@@ -1,0 +1,20 @@
+{
+  "U11": {
+    "status": "blocked-human-screen-reader",
+    "operator": null,
+    "assistive_technology": null,
+    "automation_is_screen_reader": false
+  },
+  "U12": {
+    "status": "blocked-human-staff",
+    "participants": null,
+    "task_denominator": null,
+    "completion_rate": null,
+    "mistakes": null,
+    "duration_seconds": null,
+    "wrong_scope_writes": null,
+    "target_completion_rate": 0.9,
+    "target_wrong_scope_writes": 0
+  },
+  "fixture_automation_duration_is_UAT": false
+}

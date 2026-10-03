@@ -1,0 +1,2 @@
+All29 changed source/contract paths covered. Previously omitted inventory schema equals strict-tested API commit85686a6; no new schema edit.
+Finalization failed at line62 before task completion: task ID mistakenly Q09/FINAL instead of Q09, StopIteration. Original case fields already validated; no test reports changed. Corrected ID only; full invariants rerun next.

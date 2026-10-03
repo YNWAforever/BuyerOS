@@ -1,0 +1,116 @@
+.F.........F.........                                                    [100%]
+================================== FAILURES ===================================
+_____ test_missing_actor_name_is_null_and_other_tenant_events_not_exposed _____
+
+quote_case = (<starlette.testclient.TestClient object at 0x000001EB8CB2E5D0>, 'postgresql://buyeros:buyeros@127.0.0.1:55075/buyeros...91443-d037-483e-83ba-158c9bd5d0f0'), ('87b39dca-176d-435e-b30b-6112f20443eb', '7419b1af-bd21-471d-9abf-336690d7b0cf')])
+
+    def test_missing_actor_name_is_null_and_other_tenant_events_not_exposed(quote_case):
+        api, dsn, buyers = quote_case
+        path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/outcomes"
+        response = api.post(path, json={"buyer_id": buyers[0][0], "stage": "meeting", "source": "manual",
+            "occurred_at": "2026-09-20T11:15:00Z", "notes": "Q09 unnamed canonical actor"}, headers=_h(OPERATOR, key="q09-null-name"))
+        assert response.status_code == 201
+        actor = response.json()["data"]["actor_id"]
+        with psycopg.connect(dsn) as db:
+            db.execute("UPDATE users SET display_name=NULL WHERE id=%s", (actor,))
+        events = api.get(path, headers=_h(OPERATOR))
+        assert events.status_code == 200
+        assert events.json()["data"]["items"][0]["actor_display_name"] is None
+>       assert_contract_response("OutcomeEventPageResponse", events.json())
+
+tests\test_daily_ux_db.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...tPageResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'items': [{'actor_display_name': None, 'actor_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'buyer_id': 'cf2...}], 'limit': 20, 'offset': 0, 'total': 1}, 'data_mode': 'live', 'request_id': '52651cf5-6ebe-4f1a-b184-4b39bc9a2331'},)
+kwargs = {}, error = <ValidationError: "None is not of type 'string'">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: None is not of type 'string'
+E           
+E           Failed validating 'type' in schema['properties']['data']['properties']['items']['items']['properties']['actor_display_name']:
+E               {'type': 'string',
+E                'nullable': True,
+E                'minLength': 1,
+E                'maxLength': 200,
+E                'description': "Current display name of this event's canonical actor; "
+E                               'never identity or role authority.'}
+E           
+E           On instance['data']['items'][0]['actor_display_name']:
+E               None
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+___________ test_outcome_pagination_correction_guards_and_contract ____________
+
+quote_case = (<starlette.testclient.TestClient object at 0x000001EB8D2F3BD0>, 'postgresql://buyeros:buyeros@127.0.0.1:55075/buyeros...2aaa6-49ae-4bad-9aac-cb48fcc9b6e7'), ('cd673042-28a4-4193-a14a-59dd582f5915', '5991bc1e-8f78-4385-b8f5-b862be7c4ad8')])
+
+    def test_outcome_pagination_correction_guards_and_contract(quote_case):
+        api, dsn, buyers = quote_case
+        path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/outcomes"
+        body = {"buyer_id": buyers[0][0], "stage": "reply", "source": "manual",
+                "occurred_at": "2026-09-20T11:15:00Z", "notes": "Entered from the manual tracker"}
+        created = api.post(path, json=body, headers=_h(OPERATOR, key="t27-guard-create"))
+        assert created.status_code == 201, created.text
+>       assert_contract_response("OutcomeEventResponse", created.json())
+
+tests\test_usage_outcomes_db.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...EventResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']>)
+args = ({'data': {'actor_display_name': None, 'actor_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'buyer_id': '6d262da0-1489-... '2026-10-03T16:24:59.584398+00:00', ...}, 'data_mode': 'live', 'request_id': '739795e5-5a97-46d3-b1dc-aafe24f65882'},)
+kwargs = {}, error = <ValidationError: "None is not of type 'string'">
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+>           raise error
+E           jsonschema.exceptions.ValidationError: None is not of type 'string'
+E           
+E           Failed validating 'type' in schema['properties']['data']['properties']['actor_display_name']:
+E               {'type': 'string',
+E                'nullable': True,
+E                'minLength': 1,
+E                'maxLength': 200,
+E                'description': "Current display name of this event's canonical actor; "
+E                               'never identity or role authority.'}
+E           
+E           On instance['data']['actor_display_name']:
+E               None
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_daily_ux_db.py::test_manual_event_projects_canonical_name_and_replay_does_not_relink
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_daily_ux_db.py::test_manual_event_projects_canonical_name_and_replay_does_not_relink
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q09-api-first.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_daily_ux_db.py::test_missing_actor_name_is_null_and_other_tenant_events_not_exposed
+FAILED tests/test_usage_outcomes_db.py::test_outcome_pagination_correction_guards_and_contract
+2 failed, 19 passed, 7 warnings in 372.29s (0:06:12)

@@ -1,0 +1,23 @@
+Listing tests:
+  responsive-accessibility.spec.ts:15:3 › fictional demo routes remain usable at four widths in en
+  responsive-accessibility.spec.ts:15:3 › fictional demo routes remain usable at four widths in zh-HK
+  responsive-accessibility.spec.ts:40:1 › fictional full buyer route retains dossier and missing-buyer return
+  responsive-accessibility.spec.ts:61:1 › zh-HK full buyer dossier and return remain usable at 390px
+  responsive-accessibility.spec.ts:78:1 › fictional buyer drawer returns focus to its trigger
+  responsive-accessibility.spec.ts:92:3 › fictional demo reflows at a 200% effective viewport in en
+  responsive-accessibility.spec.ts:92:3 › fictional demo reflows at a 200% effective viewport in zh-HK
+  responsive-accessibility.spec.ts:114:1 › fictional demo interactive controls expose accessible names in both locales
+  responsive-accessibility.spec.ts:140:1 › fictional sidebar navigation keeps routes and usage action wired
+  responsive-accessibility.spec.ts:154:1 › fictional source and connection dialogs retain their context
+  responsive-accessibility.spec.ts:176:1 › fictional project strip and route heading preserve navigation
+  responsive-accessibility.spec.ts:190:1 › zh-HK Results retains manual outcomes and localizes usage labels
+  responsive-accessibility.spec.ts:215:1 › demo buyer search and filter boundaries meet measured non-text contrast
+  responsive-accessibility.spec.ts:251:1 › buyer pagination keeps page selection, bulk save and row-size changes coherent
+  responsive-accessibility.spec.ts:287:1 › 390px buyer cards support selection and bulk list action without overflow
+  responsive-accessibility.spec.ts:316:1 › demo Settings preserves local-save privacy and suppression controls
+  responsive-accessibility.spec.ts:343:1 › demo contact quote cancel releases reservation and confirm updates buyer
+  responsive-accessibility.spec.ts:369:1 › demo action dialog creates and renames a list
+  responsive-accessibility.spec.ts:393:1 › fictional Overview metric cards and project actions keep their routes
+  responsive-accessibility.spec.ts:422:1 › fictional discovery review filter and run history retain callbacks
+  responsive-accessibility.spec.ts:438:1 › fictional Outreach draft approval invalidates on edit and cannot send
+Total: 21 tests in 1 file

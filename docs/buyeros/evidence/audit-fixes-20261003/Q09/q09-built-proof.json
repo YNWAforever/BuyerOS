@@ -1,0 +1,15 @@
+{
+  "entrypoint": ".output/server/index.mjs",
+  "exists": true,
+  "sha256": "31405aba334ba79db7cf8d2160e0cd531eb2d3c3cc1f6487fc4fbe2045cb9d67",
+  "preset": "node-server",
+  "node": "v22.23.2",
+  "api_target": "http://host.docker.internal:8000",
+  "fixture_only": true,
+  "owned_container": "buyeros-audit-ui-052d6a686de9",
+  "owner_label_verified": true,
+  "runtime": "built",
+  "build_bound_seconds": 180,
+  "build_exit_inference": "&& requires exit0 and entrypoint test before server readiness; browser cases have reached compiled handler",
+  "cloud_deployed": false
+}

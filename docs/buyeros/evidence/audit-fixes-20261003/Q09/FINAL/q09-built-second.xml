@@ -1,0 +1,54 @@
+<testsuites id="" name="" tests="2" failures="1" skipped="0" errors="0" time="229.918216">
+<testsuite name="audit-bulk-confirmation.spec.ts" timestamp="2026-10-03T18:03:25.754Z" hostname="" tests="1" failures="0" skipped="0" time="38.684" errors="0">
+<testcase name="B04 inactive owner is rejected and a stale buyer reports conflict without overwriting" classname="audit-bulk-confirmation.spec.ts" time="38.684">
+</testcase>
+</testsuite>
+<testsuite name="audit-memberships.spec.ts" timestamp="2026-10-03T18:03:25.754Z" hostname="" tests="1" failures="1" skipped="0" time="17.9" errors="0">
+<testcase name="U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable" classname="audit-memberships.spec.ts" time="17.9">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-memberships-U09-memb-94506-ical-IDs-remain-inspectable\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-memberships-U09-memb-94506-ical-IDs-remain-inspectable\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveCount(expected) failed" type="expect.toHaveCount">
+<![CDATA[  audit-memberships.spec.ts:35:1 › U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('region', { name: 'Member management', exact: true }).getByRole('group', { name: 'Member Alex Chen', exact: true })
+    Expected: 2
+    Received: 0
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('region', { name: 'Member management', exact: true }).getByRole('group', { name: 'Member Alex Chen', exact: true }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Member management', exact: true }).getByRole('group', { name: 'Member Alex Chen', exact: true })
+        14 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      37 |  await region.getByRole('textbox',{name:'Search members'}).fill('Alex');await region.getByRole('button',{name:'Search',exact:true}).click();
+      38 |  await expect(region.locator('code')).toHaveText(['71000001-0000-4000-8000-000000c011de','71000002-0000-4000-8000-000000c011de']);
+    > 39 |  await expect(region.getByRole('group',{name:'Member Alex Chen',exact:true})).toHaveCount(2);
+         |                                                                               ^
+      40 |  await expect(region.getByRole('group',{name:'Roles Alex Chen',exact:true})).toHaveCount(2);
+      41 | });
+      42 |
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-memberships.spec.ts:39:79
+
+    Error Context: ..\..\test-results\audit-fixes\audit-memberships-U09-memb-94506-ical-IDs-remain-inspectable\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-memberships-U09-memb-94506-ical-IDs-remain-inspectable\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-memberships-U09-memb-94506-ical-IDs-remain-inspectable\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

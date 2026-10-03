@@ -1,0 +1,127 @@
+✔ B02 confirmation is stable for row ordering but binds every material field (21.3919ms)
+✔ B02 snapshot confirmation binds snapshot identity and normalized exclusions (0.3781ms)
+✔ B03 frozen payload preserves confirmed rows and trimmed audit reason (2.5612ms)
+✔ B16 unknown assignment survives route remount and token renewal with the same key (2.9167ms)
+✔ B16 an unresolved assignment cannot be replaced with a materially different intent (0.5252ms)
+✔ D03 Unicode code-point offsets retain emoji, CRLF, Chinese and unmodified text (1.2986ms)
+✔ D03 split code-point ranges reclassify both pieces without destroying text (1.5757ms)
+✔ D02 save has the required transition order (2.6772ms)
+✔ D02 discard has the required transition order (0.2717ms)
+✔ D02 cancel has the required transition order (0.1842ms)
+✔ D02 rejected save 412 cannot proceed (0.8628ms)
+✔ D02 rejected save 503 cannot proceed (0.2725ms)
+✔ D02 clean transition does not prompt or write (0.2893ms)
+✔ D02 asynchronous Save completes before proceeding (30.1875ms)
+✔ U15 project failed count and paged list preserve identical canonical filter (3.0175ms)
+✔ U15 explicit workspace omits project, deep link retains selected scope and status (0.5464ms)
+✔ U15 invalid URL status cannot introduce unsupported server filter; paging stays bounded (0.5036ms)
+✔ Q09 latest101 uses only head1/tail1 generated reads, never downloads all history (5.465ms)
+✔ Q09 empty and single ICP use one read; malformed/foreign pages fail closed (3.5181ms)
+✔ Q09 concurrent appended history is unavailable rather than a falsely latest profile (0.5015ms)
+✔ Q09 A-B-A rejects a late metadata response and token renewal alone keeps the context (0.7789ms)
+✔ B12 2.5s RTT has one in-flight and waits 2s after settlement (4.4067ms)
+✔ B13 hidden pauses/aborts quietly; repeated visibility signals resume once (0.9194ms)
+✔ B13 transient failures use 2/4/8/16/30/30s and reset after success (2.2863ms)
+✔ B13 429 honors Retry-After seconds and HTTP dates, invalid header uses backoff (3.7879ms)
+✔ B13 actual live client preserves Retry-After metadata without response secrets (33.8843ms)
+✔ B12 request timeout aborts before a retry and late value is ignored (0.7974ms)
+✔ B12 cancel/unmount suppresses late values/errors and all later requests (0.491ms)
+✔ B16 A-B-A lifetimes reject the obsolete result even with same scope IDs (0.9ms)
+✔ B12 terminal summary is delivered once and stops through refresh/visibility changes (4.226ms)
+✔ B13 access denied stops rather than polling a revoked account (0.5926ms)
+✔ B13 rapid hidden-visible during abort settlement resumes once immediately (0.39ms)
+PASS apiBaseUrl absent or blank resolves to demo
+PASS a configured apiBaseUrl resolves to live
+PASS demo mode makes every section available, live mode does not
+PASS live without a ready session reports not_configured, never available
+PASS unavailable and not_configured are distinct states
+PASS workspaces map to the narrow model
+PASS projects map to the narrow model
+PASS icp versions map approved_at to approvedAt and keep the hash
+PASS a missing required field raises instead of becoming an empty value
+PASS every mapper enforces its required fields
+PASS a workspace missing roles raises rather than defaulting to an empty list
+PASS a version without an approval date maps to null, not an error
+PASS an empty page is empty, not an error
+PASS a success unwraps data and sends the bearer only when a token is present
+PASS an error envelope becomes a typed LiveError keyed by code
+PASS a non-envelope body still yields a typed error, never a crash
+PASS an aborted request surfaces as LiveCancelled, not as an error toast
+PASS a network failure is a retryable error, not a cancellation
+PASS scopeKey encodes mode, actor, workspace and project
+PASS changing workspace advances the identity and aborts the previous controller
+PASS a stale identity is not current, so a late response can be discarded
+PASS returning to a previously visited workspace is a NEW scope, not the old one
+PASS the token lives in the session and survives a scope change
+PASS live failure surfaces the error with zero data and never touches the demo store
+PASS a 501 from a supported section marks it unavailable rather than failing
+PASS a section with no backing operation is unavailable without a request
+PASS a response whose scope changed underneath is discarded
+PASS no token means not_configured and no request is sent
+PASS each API failure code maps to its own state
+PASS a 401 is a sign-in requirement, never not_configured
+PASS a 404 is not_found, never denied
+PASS a cancelled request is discarded, not an error
+PASS the read attaches to the session controller signal
+PASS live mode refuses to read or write any demo storage key
+PASS demo mode still reads and writes its own keys
+PASS no token-shaped value is ever written to storage
+PASS live requests are addressed to the configured API base URL
+PASS with no base URL the path is used as-is
+PASS demo-only effects are enabled only in demo mode
+PASS the empty live store contains no companies and no demo identifiers
+PASS the banner label states the real mode and cannot be made to claim live
+PASS a write sends a JSON body and the mutation headers
+PASS If-Match is sent only when supplied
+PASS a stale write surfaces as a typed STALE_REVISION
+PASS markets resolve from names and codes, case-insensitively
+PASS an unknown market is returned, never dropped
+PASS languages resolve from names
+PASS an unresolvable value makes the mapper raise, naming it
+PASS toProjectCreate maps the contract fields without inventing values
+PASS toIcpSaveRequest maps requirements with their categories
+PASS ICP payload carries user-entered product and value facts before any write
+PASS canonical buyer types remain selected when editing and saving a profile
+PASS saveProfile creates the project then saves a version, in order
+PASS saveProfile explicitly creates a new project even if another is selected
+PASS explicit edit patches the offer under If-Match before saving a new ICP version
+PASS edit conflict stops before ICP write
+PASS approveProfile sends the version number as If-Match and the hash
+PASS buyers map to the versioned review model
+PASS a buyer without a fit or review maps those to null, not an error
+PASS a buyer page keeps the snapshot id and paging
+PASS a buyer page maps the snapshot expiry, null when absent
+PASS evidence maps provenance and does not expose a stale source link
+PASS an explicit selection carries the frozen versions
+PASS a snapshot selection excludes the removed ids
+PASS scope changed between project creation and ICP save sends no second write
+PASS generated operation route builds scoped path and bearer request
+PASS operation rejects cross-workspace path before sending
+PASS operation rejects scope change during token acquisition before request
+PASS live client rejects demo or malformed success envelopes
+PASS error keeps response header request ID when body omits it
+PASS live error guidance distinguishes reauth, stale revision and key conflict with request ID
+PASS double click shares one immutable action and one inflight promise
+PASS lost response reuses the key; changed payload uses a new key
+PASS multipart upload keeps the browser-generated boundary and bearer in memory
+74 live adapter checks passed
+✔ tests\live-adapter-checks.mjs (1160.5277ms)
+PASS scope snapshot stable until change and observer sees each generation
+PASS write context is captured and unauthenticated writes fail closed
+PASS OIDC return path rejects off-origin redirects
+PASS public auth config never accepts client secret or non-HTTPS issuer
+4 live auth checks passed
+PASS PKCE callback verifies state, nonce and signature, holds only access token in memory
+PASS callback rejects mismatched state and cannot replay transaction
+PASS callback rejects wrong nonce even with signed ID token
+PASS logout drops the token and uses an allowlisted origin return URL
+8 live auth checks passed including OIDC crypto
+✔ tests\live-auth-checks.mjs (1123.1894ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1838.2657

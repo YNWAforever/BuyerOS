@@ -1,0 +1,121 @@
+{
+  "fixture_only": true,
+  "projects": [
+    {
+      "key": "ffb711ed-8045-4ae5-85dd-dc43e76b04c1",
+      "id": "3c6d178b-1fca-4c81-becc-6fe1dc8cf3ec",
+      "body": {
+        "name": "Q09 Fictional Partial Seller",
+        "company_name": "Q09 Fictional Partial Seller",
+        "offer": "Industrial sensors\nFictional monitoring prevents unexpected downtime.",
+        "markets": [
+          "US"
+        ],
+        "language_preferences": [
+          "en"
+        ]
+      }
+    },
+    {
+      "key": "ffb711ed-8045-4ae5-85dd-dc43e76b04c1",
+      "id": "3c6d178b-1fca-4c81-becc-6fe1dc8cf3ec",
+      "body": {
+        "name": "Q09 Fictional Partial Seller",
+        "company_name": "Q09 Fictional Partial Seller",
+        "offer": "Industrial sensors\nFictional monitoring prevents unexpected downtime.",
+        "markets": [
+          "US"
+        ],
+        "language_preferences": [
+          "en"
+        ]
+      }
+    }
+  ],
+  "icps": [
+    {
+      "key": "ffb711ed-8045-4ae5-85dd-dc43e76b04c1",
+      "body": {
+        "offer_facts": [
+          {
+            "id": "d0000000-0000-4000-8000-000000000001",
+            "field": "product",
+            "value": "Industrial sensors",
+            "provenance": "user_entered",
+            "approved": false
+          },
+          {
+            "id": "d0000000-0000-4000-8000-000000000002",
+            "field": "value_proposition",
+            "value": "Fictional monitoring prevents unexpected downtime.",
+            "provenance": "user_entered",
+            "approved": false
+          }
+        ],
+        "requirements": [
+          {
+            "id": "e0000000-0000-4000-8000-100000000001",
+            "text": "Industrial sensors distributor",
+            "category": "must",
+            "hard_exclusion": false
+          }
+        ],
+        "markets": [
+          "US"
+        ],
+        "buyer_types": [
+          "distributor"
+        ],
+        "languages": [
+          "en"
+        ],
+        "desired_roles": [],
+        "offer_document_ids": [],
+        "basis_offer_revision": 1
+      },
+      "status": 500
+    },
+    {
+      "key": "ffb711ed-8045-4ae5-85dd-dc43e76b04c1",
+      "body": {
+        "offer_facts": [
+          {
+            "id": "d0000000-0000-4000-8000-000000000001",
+            "field": "product",
+            "value": "Industrial sensors",
+            "provenance": "user_entered",
+            "approved": false
+          },
+          {
+            "id": "d0000000-0000-4000-8000-000000000002",
+            "field": "value_proposition",
+            "value": "Fictional monitoring prevents unexpected downtime.",
+            "provenance": "user_entered",
+            "approved": false
+          }
+        ],
+        "requirements": [
+          {
+            "id": "e0000000-0000-4000-8000-100000000001",
+            "text": "Industrial sensors distributor",
+            "category": "must",
+            "hard_exclusion": false
+          }
+        ],
+        "markets": [
+          "US"
+        ],
+        "buyer_types": [
+          "distributor"
+        ],
+        "languages": [
+          "en"
+        ],
+        "desired_roles": [],
+        "offer_document_ids": [],
+        "basis_offer_revision": 1
+      },
+      "status": 201
+    }
+  ]
+}

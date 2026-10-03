@@ -1,0 +1,50 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="150.65216400000003">
+<testsuite name="audit-memberships.spec.ts" timestamp="2026-10-03T19:22:55.882Z" hostname="" tests="1" failures="1" skipped="0" time="22.75" errors="0">
+<testcase name="B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority" classname="audit-memberships.spec.ts" time="22.75">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-memberships-B03-U09--7d89b-anging-membership-authority\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-memberships-B03-U09--7d89b-anging-membership-authority\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveCount(expected) failed" type="expect.toHaveCount">
+<![CDATA[  audit-memberships.spec.ts:43:1 › B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('region', { name: 'Buyer results', exact: true }).getByRole('region', { name: 'Assign buyer owners', exact: true }).getByRole('combobox', { name: 'Owner', exact: true }).getByRole('option', { name: 'Alex Chen · 71000001-0000-4000-8000-000000c011de', exact: true })
+    Expected: 1
+    Received: 0
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('region', { name: 'Buyer results', exact: true }).getByRole('region', { name: 'Assign buyer owners', exact: true }).getByRole('combobox', { name: 'Owner', exact: true }).getByRole('option', { name: 'Alex Chen · 71000001-0000-4000-8000-000000c011de', exact: true }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Buyer results', exact: true }).getByRole('region', { name: 'Assign buyer owners', exact: true }).getByRole('combobox', { name: 'Owner', exact: true }).getByRole('option', { name: 'Alex Chen · 71000001-0000-4000-8000-000000c011de', exact: true })
+        14 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      48 |  const identities=['71000001-0000-4000-8000-000000c011de','71000002-0000-4000-8000-000000c011de'];
+      49 |  for(let i=0;i<identities.length;i++){
+    > 50 |   const option=picker.getByRole('option',{name:`Alex Chen · ${identities[i]}`,exact:true});await expect(option).toHaveCount(1);
+         |                                                                                                                 ^
+      51 |   await expect(option).toHaveAttribute('value',`f1000000-0000-4000-8000-${i.toString(16).padStart(12,'0')}`);
+      52 |  }
+      53 |  await picker.selectOption('f1000000-0000-4000-8000-000000000001');await expect(panel.getByText('Owner: Alex Chen',{exact:true})).toBeVisible();
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-memberships.spec.ts:50:113
+
+    Error Context: ..\..\test-results\audit-fixes\audit-memberships-B03-U09--7d89b-anging-membership-authority\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-memberships-B03-U09--7d89b-anging-membership-authority\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-memberships-B03-U09--7d89b-anging-membership-authority\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

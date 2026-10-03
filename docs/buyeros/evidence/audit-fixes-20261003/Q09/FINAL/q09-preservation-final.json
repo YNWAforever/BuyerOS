@@ -1,0 +1,16 @@
+{
+  "frozen_inputs": 31,
+  "guard_files_verified": [
+    "services/api/tests/conftest.py",
+    "services/worker/tests/conftest.py",
+    "services/api/tools/serve_e2e_fixture.py",
+    "services/worker/tests/fixtures/run_browser_research.py"
+  ],
+  "root_clean": true,
+  "root_head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+  "neon_head": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "neon_dirty_paths": 193,
+  "neon_diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0",
+  "source": "1953d615dc00e6920380dbb71be6a99b96e36488",
+  "external_actions": []
+}

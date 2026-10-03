@@ -1,0 +1,520 @@
+{
+  "retained_local_artifacts": [
+    {
+      "local_path": "test-results/q09-b04-dev-artifacts/.last-run.json",
+      "bytes": 96,
+      "sha256": "9d1811d3f7a55b01af9135e92c5d3306784a2713fb66e9bfbfb876ceb3b3134f"
+    },
+    {
+      "local_path": "test-results/q09-b04-dev-artifacts/audit-bulk-confirmation-B0-f1588-onflict-without-overwriting/error-context.md",
+      "bytes": 7758,
+      "sha256": "180c3321bb9fcb60f45fe2b5f1903ff34296256cfe24f236b04bc2e1bc530021"
+    },
+    {
+      "local_path": "test-results/q09-b04-dev-artifacts/audit-bulk-confirmation-B0-f1588-onflict-without-overwriting/trace.zip",
+      "bytes": 159268,
+      "sha256": "8a09391828424e47618ae7ad9a831f7e537a1f9861c3a18bc178c1964157b828"
+    },
+    {
+      "local_path": "test-results/q09-built-first-artifacts/.last-run.json",
+      "bytes": 145,
+      "sha256": "b2408cd24f4127fc72071826d4ada25c108c77f2a0577efa206d47f60db9d113"
+    },
+    {
+      "local_path": "test-results/q09-built-first-artifacts/audit-bulk-confirmation-B0-f1588-onflict-without-overwriting/error-context.md",
+      "bytes": 14698,
+      "sha256": "8dd57d55e0b3c1aa31219d14dbe7ec7c845d56b146afaed16ba82da76a155b91"
+    },
+    {
+      "local_path": "test-results/q09-built-first-artifacts/audit-bulk-confirmation-B0-f1588-onflict-without-overwriting/trace.zip",
+      "bytes": 629769,
+      "sha256": "1a6329ff532d852f11a2b569daf1639ea16612daec6f32a937acf7cea4383310"
+    },
+    {
+      "local_path": "test-results/q09-built-first-artifacts/audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change/error-context.md",
+      "bytes": 32597,
+      "sha256": "316253a3e234ca66c68f92bfd3375d1bfaeff30693c0518d50bdc57a20c90f70"
+    },
+    {
+      "local_path": "test-results/q09-built-first-artifacts/audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change/trace.zip",
+      "bytes": 589402,
+      "sha256": "26f3e6a11f10cd63c3c891ccea7c9ab41a4eb3b937a2a3de33f1d7cdd9a13ca5"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/.last-run.json",
+      "bytes": 341,
+      "sha256": "8838a02c81edf41a9a428aa59a2569fadc2afdd327c656219a9583481b646242"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/api-browser-zoom-T29-actua-c6848--workbench-content-in-zh-HK/error-context.md",
+      "bytes": 19003,
+      "sha256": "16274391b724c306fc489ba9c93c0aad4e05db35916cd08269e6be35a2c5d48a"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/api-browser-zoom-T29-actua-c6848--workbench-content-in-zh-HK/trace.zip",
+      "bytes": 427085,
+      "sha256": "1f7dffa8518b6c216897851cc0e3f54ad3ce5c9aa5f2671af22cf087979feaeb"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 22587,
+      "sha256": "99bb1d847eea95fdd5976fc52e59cd40c4804744725a4b89f796c41127442e92"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 4187320,
+      "sha256": "f853e4a345653d9f2790eec2c322715c006343f906212b565161e188cf75b7db"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 8696,
+      "sha256": "1b414e627bc09dcdceaabcf79209a85df14a4765775a912663158e6af5a45936"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 3888088,
+      "sha256": "a2ac2279180865523fff22d21e8573e1c205bba3d0243a079e81dd4121a9e976"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 22630,
+      "sha256": "dd23414dcd970e8e292c1c7b1bd86d6a116916c132139d967cff9896692859bf"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 4503408,
+      "sha256": "869aa717ae8e003a3171d03c54059668e1e1f503e3cd4d50fcc05ad0dd80fdc8"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 8653,
+      "sha256": "9153c1aa68a1831802aa6c53d234e2b3cbf082b97d79a187ffa3a0b7b8dea61f"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 4163971,
+      "sha256": "41e7e4624e1e4840ccf76f59e538e51f954f03ae875cc4755070f50d59ae62a0"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research/error-context.md",
+      "bytes": 22682,
+      "sha256": "e805b86e8b4b7403d64d49344ea01823a8bb4581d704f769ec3fce35fa023be6"
+    },
+    {
+      "local_path": "test-results/q09-built-first-full-artifacts/audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research/trace.zip",
+      "bytes": 1093297,
+      "sha256": "32b337e4f79279aa80a0ae9fbffa9415919ef48da1d5791f360112649ba5fa8a"
+    },
+    {
+      "local_path": "test-results/q09-built-second-artifacts/.last-run.json",
+      "bytes": 96,
+      "sha256": "bc03a458b9c435d7878f14e9f4b032baf46636bf474e76c7bc400c04e2b5a78b"
+    },
+    {
+      "local_path": "test-results/q09-built-second-artifacts/audit-memberships-U09-memb-94506-ical-IDs-remain-inspectable/error-context.md",
+      "bytes": 33582,
+      "sha256": "deb44228b62ade8bfb2f744c35fa3b874f901303ec4b69427b728f0862e043c2"
+    },
+    {
+      "local_path": "test-results/q09-built-second-artifacts/audit-memberships-U09-memb-94506-ical-IDs-remain-inspectable/trace.zip",
+      "bytes": 559967,
+      "sha256": "9869bd06e9db8f43e15b05618a5509d63de25bf44acafe35d65adc79b93bfee3"
+    },
+    {
+      "local_path": "test-results/q09-built-second-full-artifacts/.last-run.json",
+      "bytes": 145,
+      "sha256": "2dbedf05ea5912fef8d41b02e7e5ffb471d53833d89f838cfc68f388a9ae45f5"
+    },
+    {
+      "local_path": "test-results/q09-built-second-full-artifacts/audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change/error-context.md",
+      "bytes": 540,
+      "sha256": "955ef3d6c4477214a6287ceec4f0e93874fcc586202cfbe629dedbd51de0d3ab"
+    },
+    {
+      "local_path": "test-results/q09-built-second-full-artifacts/audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change/trace.zip",
+      "bytes": 9338,
+      "sha256": "e661bef8598b7278e726da33a9c645d0986b7fb4e6b88f1715bf8db67702563e"
+    },
+    {
+      "local_path": "test-results/q09-built-second-full-artifacts/audit-memberships-U08-sole-6c8e7--and-does-not-claim-success/error-context.md",
+      "bytes": 528,
+      "sha256": "32bfe91053d87a6b255d99d1a5c122d5f70f42033c6cc37d813a68449f606799"
+    },
+    {
+      "local_path": "test-results/q09-built-second-full-artifacts/audit-memberships-U08-sole-6c8e7--and-does-not-claim-success/trace.zip",
+      "bytes": 9377,
+      "sha256": "71fd3e645fc45cb44b845d565c8387550c285efdbd9ca9e6ea875f332a1a3083"
+    },
+    {
+      "local_path": "test-results/q09-first-artifacts/.last-run.json",
+      "bytes": 243,
+      "sha256": "7fa4348f52953a8e7cbfbc14a15ef831498e6ec6e240843d227ad557ff2196a3"
+    },
+    {
+      "local_path": "test-results/q09-first-artifacts/audit-daily-ux-U10-U11-en--27173-e-and-concise-announcements/error-context.md",
+      "bytes": 24383,
+      "sha256": "9f4160a70677ef1a0ead98fe76039bec947911efaaa2b6136b3bc00202bcebde"
+    },
+    {
+      "local_path": "test-results/q09-first-artifacts/audit-daily-ux-U10-U11-en--27173-e-and-concise-announcements/trace.zip",
+      "bytes": 751805,
+      "sha256": "6d3b19832c008d35316d15b270dbe9f8c7203e3335f5dbfb88c27ce20fb43522"
+    },
+    {
+      "local_path": "test-results/q09-first-artifacts/audit-daily-ux-U10-U11-zh--6e489-e-and-concise-announcements/error-context.md",
+      "bytes": 24473,
+      "sha256": "01d7b847724dada7b2bac5c7d9a7d22f4e23838237a37537631709cbc84ed05c"
+    },
+    {
+      "local_path": "test-results/q09-first-artifacts/audit-daily-ux-U10-U11-zh--6e489-e-and-concise-announcements/trace.zip",
+      "bytes": 849469,
+      "sha256": "6660f42fd4eda59b6390f88ec3779e96b74f2c9716254b8603ba5d02cf38e3ad"
+    },
+    {
+      "local_path": "test-results/q09-first-artifacts/audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history/error-context.md",
+      "bytes": 17414,
+      "sha256": "e64f981509fa27d98ed941f410750a3ecf7355cb5d5ef925de215b1524374d74"
+    },
+    {
+      "local_path": "test-results/q09-first-artifacts/audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history/trace.zip",
+      "bytes": 337057,
+      "sha256": "295253eb44a67d1ea0c7b8a70ccb95403acbf1853621bac1813899c9a91545de"
+    },
+    {
+      "local_path": "test-results/q09-first-artifacts/audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research/error-context.md",
+      "bytes": 18326,
+      "sha256": "b572efab5b533ae850b3bd9378e9098a8f605b6927b2a99f66810523da119aff"
+    },
+    {
+      "local_path": "test-results/q09-first-artifacts/audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research/trace.zip",
+      "bytes": 1628867,
+      "sha256": "31e8a2d7150f5cf7943886848d72852659fd75c86c0878b5333a03b173295833"
+    },
+    {
+      "local_path": "test-results/q09-fourth-artifacts/.last-run.json",
+      "bytes": 96,
+      "sha256": "0509b976f48b1f530647a8a80e0dcac1e84d3af5f13b351fc2c3956ae999e5c9"
+    },
+    {
+      "local_path": "test-results/q09-fourth-artifacts/audit-daily-ux-U09-manual--41667--correction-survive-refresh/error-context.md",
+      "bytes": 18961,
+      "sha256": "72b9d5589ad589bdd89c5b45a0c6c4de7d842d704040da6b3d3686ad8bac0c6c"
+    },
+    {
+      "local_path": "test-results/q09-fourth-artifacts/audit-daily-ux-U09-manual--41667--correction-survive-refresh/trace.zip",
+      "bytes": 1081054,
+      "sha256": "3db1682ee3fc34e85e1c43871b59d5718df98b24f405aa01d830895098809755"
+    },
+    {
+      "local_path": "test-results/q09-owner-final-artifacts/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "local_path": "test-results/q09-owner-red-artifacts/.last-run.json",
+      "bytes": 96,
+      "sha256": "ba8d76c705f390ad987fcb63af2adc8a2572d2c7093f2dcbb8f494df4d6b0a0a"
+    },
+    {
+      "local_path": "test-results/q09-owner-red-artifacts/audit-memberships-B03-U09--7d89b-anging-membership-authority/error-context.md",
+      "bytes": 30104,
+      "sha256": "5e15efb2f1f7c12e04e0afba84b0affac0350bf07f19bf79bd46ba9080595680"
+    },
+    {
+      "local_path": "test-results/q09-owner-red-artifacts/audit-memberships-B03-U09--7d89b-anging-membership-authority/trace.zip",
+      "bytes": 481466,
+      "sha256": "88c23c9159ff040a2d42ffb10cd0d7fa14327f099b34654d423d6ae5824eeea5"
+    },
+    {
+      "local_path": "test-results/q09-red-artifacts/.last-run.json",
+      "bytes": 145,
+      "sha256": "4fd1d54d090bc276bdf1c55e94fb85cb2073b73d79239b2b90e0c6a5d5807d73"
+    },
+    {
+      "local_path": "test-results/q09-red-artifacts/audit-daily-ux-U09-no-sele-fbac5-sticky-named-action-summary/error-context.md",
+      "bytes": 16198,
+      "sha256": "8beca873cb469299ff9082439ad96a9d5a3ba5864bb075b806e2167fb6c6e0f6"
+    },
+    {
+      "local_path": "test-results/q09-red-artifacts/audit-daily-ux-U09-no-sele-fbac5-sticky-named-action-summary/trace.zip",
+      "bytes": 434320,
+      "sha256": "01b19e46968643cf4e04fc18576fe80934d84afb72267ee52729475b1ed2d0d8"
+    },
+    {
+      "local_path": "test-results/q09-red-artifacts/audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history/error-context.md",
+      "bytes": 6785,
+      "sha256": "1af1c2f1abc1efbcc83dd12769e201702bd987263793601c2ebee831a49c7566"
+    },
+    {
+      "local_path": "test-results/q09-red-artifacts/audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history/trace.zip",
+      "bytes": 323058,
+      "sha256": "a1a164c5b3f3ded2bb705eaf3fdadbbfae6829166e6d38af5035d692dfe74056"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/.last-run.json",
+      "bytes": 439,
+      "sha256": "ccf3e907e75d94f4387b0da73224c89fbd9013575600f35bdd9ff0d6ce04a4a0"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-bulk-confirmation-B0-f1588-onflict-without-overwriting/error-context.md",
+      "bytes": 24616,
+      "sha256": "6c89b19fd46430f4db9d7ab78b1251a70ecf1b059b65fd199451df151dfe5254"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-bulk-confirmation-B0-f1588-onflict-without-overwriting/trace.zip",
+      "bytes": 1063797,
+      "sha256": "27f42e4cf839675882531da7cb846b071dc8aeb975c644804df04aae75a6e1b9"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-bulk-confirmation-B1-617f1-conciles-its-exact-job-link/error-context.md",
+      "bytes": 30002,
+      "sha256": "22638cd3f0612816c400a508dd86088e7ebd144531ed9edcab4d0552ce835e7f"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-bulk-confirmation-B1-617f1-conciles-its-exact-job-link/trace.zip",
+      "bytes": 792818,
+      "sha256": "bf3bc02a49657f85dcf430399c595193f627e021f863d6da33578d5e2b613e5c"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 20649,
+      "sha256": "98d007796ee105beee3f1bdca38f386bbe8521059dbfc9af0e9e3d1d481a0a0d"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 4457651,
+      "sha256": "7c0c8696d244a09736e1485863c2c0ccba248d31ef95d18e93a3cdd43a248af9"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 20703,
+      "sha256": "fbc68022e48dcdd5262e366984452fad79ac7a03f114f20186cc78cf324044c4"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 4091179,
+      "sha256": "e94426cdb7f1bdabd3c5c12a206cb4372b9b60a06ec5e346e5d2a8084382f67b"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 17347,
+      "sha256": "1c5629631c8421115576a991a2f3c8a1197af0e4d323b9566cb0d57d6588d3ce"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 774315,
+      "sha256": "b5014cdd0a8ba175ae8f9ce1fdebdec64d43726bdf1021af41c4aaca88f35e85"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 16518,
+      "sha256": "c88d905986168f08fc6b3c575845d7841a50d98220cfc73dd94733623579a310"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 582998,
+      "sha256": "eb0efd017b689f41a43bf458d81db310b7a765262c66f8d2af49ef502db02f58"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-job-scope-U15-actual-2ee02--resets-offset-and-old-rows/error-context.md",
+      "bytes": 5432,
+      "sha256": "34c984d217cbc87f03c7ec83d878890f783da1cf85352b48e9e6df472e44f8e2"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-job-scope-U15-actual-2ee02--resets-offset-and-old-rows/trace.zip",
+      "bytes": 125724,
+      "sha256": "6c7915d46d9b40a457352cc5f581ab94b681c74694ea1676d74239980788f2a9"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-job-scope-U15-actual-435b6--resets-offset-and-old-rows/error-context.md",
+      "bytes": 12428,
+      "sha256": "00cd7736c8ed45e774c2a408617c51e206ad6d2c896eba381aad2af5861f388f"
+    },
+    {
+      "local_path": "test-results/q09-regression-first-artifacts/audit-job-scope-U15-actual-435b6--resets-offset-and-old-rows/trace.zip",
+      "bytes": 798422,
+      "sha256": "45c445197bd952e2b30843c083723549a606d826dedceb4b6af8a63aecda5de5"
+    },
+    {
+      "local_path": "test-results/q09-responsive-first-artifacts/.last-run.json",
+      "bytes": 96,
+      "sha256": "f54ccc3a24e3de7fbe72a2a7f25eb8603e698b5b427c49707b8d39131702d2cc"
+    },
+    {
+      "local_path": "test-results/q09-responsive-first-artifacts/responsive-accessibility-f-0c04b-usable-at-four-widths-in-en/error-context.md",
+      "bytes": 10197,
+      "sha256": "2fc241de6ad677b4c5b81c87e75fe50689a1ff0b577e5629f0e50f395df22d78"
+    },
+    {
+      "local_path": "test-results/q09-responsive-first-artifacts/responsive-accessibility-f-0c04b-usable-at-four-widths-in-en/trace.zip",
+      "bytes": 134368,
+      "sha256": "0a324cd4b0b4bdd979563d4907d206de56cb66e413dee2d9295ab7c813bc7be2"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/.last-run.json",
+      "bytes": 586,
+      "sha256": "4c9f11b10bbe2f64f7e04ca3f953406f35f26e2c525dc667384c0cc4f0dfb9ff"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 18043,
+      "sha256": "286c3858c086bf174ca6cb7abbe59860c007d71275c1d335e3bb0cda19a4b8f4"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 1983277,
+      "sha256": "6daf0f4fff1b3c16335f0f984f0da1c33850266e63968e9cabd70333ad0b95ea"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 9581,
+      "sha256": "87b4f012d1e22dfbc15db995af1a980366f7253a5e345a648d888c9cf5e7f165"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 74580,
+      "sha256": "d149cdf9d33693573e06a7dece44e26ccd6762be232e33eb818b2ebfaabd183a"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 17709,
+      "sha256": "fe3eab6d32d76a8a19f7a7e32834ab1931381429657f3eaee6c2c146c260dce4"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 870766,
+      "sha256": "07d9a13f307462ff17e90568996dd2fe68f6a6be8f64ca07994e2ff93898a2bc"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset/error-context.md",
+      "bytes": 17306,
+      "sha256": "8b7fb01a8df036a8566b1dbd2c8dd4e7241078bc3f4444b922ac140959a16007"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset/trace.zip",
+      "bytes": 635936,
+      "sha256": "09250779663406d129bece8b1837909e6fff9a354119daec5ee5e01298d75e52"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-U09-manual--41667--correction-survive-refresh/error-context.md",
+      "bytes": 569,
+      "sha256": "348c6abdab31e35f917122f21666c47c9febbdafcae4626a8894c58cff1c582d"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-U09-manual--41667--correction-survive-refresh/trace.zip",
+      "bytes": 4131,
+      "sha256": "d67b850b12512a3ee02d76189b49ced29f5e2b8fdea7c4cdb6d5d03dcd46fcdc"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-U09-no-sele-fbac5-sticky-named-action-summary/error-context.md",
+      "bytes": 571,
+      "sha256": "a5f26f9f1c9506204615feb679e9e007222ef0f14f2f3df1fe2b6014f912c6e2"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-U09-no-sele-fbac5-sticky-named-action-summary/trace.zip",
+      "bytes": 4102,
+      "sha256": "ed026f019801a07320e8ad145832b37ade2a46e6f3cb8ccdb742deb7340feb71"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-U10-U11-en--27173-e-and-concise-announcements/error-context.md",
+      "bytes": 558,
+      "sha256": "fc5bde7b6cc078e4fb3ffe9c3394fffb3bc96e206503e2071259243082a98ae8"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-U10-U11-en--27173-e-and-concise-announcements/trace.zip",
+      "bytes": 4102,
+      "sha256": "3bf823263c2226ee2f5b759e61a7ba9549bec87b43131cde2fc34c5e94537909"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-U10-U11-zh--6e489-e-and-concise-announcements/error-context.md",
+      "bytes": 561,
+      "sha256": "643966e76e13b46a0ced73b645422bad2760daa7bf7a3dc46a46498b9da9c09f"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-U10-U11-zh--6e489-e-and-concise-announcements/trace.zip",
+      "bytes": 4114,
+      "sha256": "0b694ab8058af90e7574e5167a0d615b343e8d379b8db298104ca59a8368db77"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history/error-context.md",
+      "bytes": 568,
+      "sha256": "b51c122fb7556413e04c81942c48f4dd2bac73ba4d84e80f46dd3ad74cbd3433"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history/trace.zip",
+      "bytes": 4138,
+      "sha256": "1080aa8488ca461e1f47393dba574d8aa4ce0efe787211b579c6410b027f9923"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-WF01-projec-02dc9-creates-one-project-and-ICP/error-context.md",
+      "bytes": 517,
+      "sha256": "3fd8ea25455f4a96f173aec0801642784b75bfd5506ef23483850ec3ac069b6c"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-WF01-projec-02dc9-creates-one-project-and-ICP/trace.zip",
+      "bytes": 97741,
+      "sha256": "2b2d889c6df231a0233423df146d98abdfe6f70959fab5cfbbe4afc5e5ec789a"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research/error-context.md",
+      "bytes": 558,
+      "sha256": "3bb6d007a767294185d2858e768b3792d0a5f2a8f5f228c865db81e5ea1a909f"
+    },
+    {
+      "local_path": "test-results/q09-second-artifacts/audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research/trace.zip",
+      "bytes": 4091,
+      "sha256": "6fdd021e080a84988dd0ef38b8639eaa3bf0d4740da70aee7984a6addfafb9a6"
+    },
+    {
+      "local_path": "test-results/q09-third-artifacts/.last-run.json",
+      "bytes": 194,
+      "sha256": "74b9b1c02b0f5f22ffd97aa759d7dfdcb38b6a69d9d25fead5c775b724902c77"
+    },
+    {
+      "local_path": "test-results/q09-third-artifacts/audit-daily-ux-U09-manual--41667--correction-survive-refresh/error-context.md",
+      "bytes": 27741,
+      "sha256": "2119a489e9d4ce823fa468b6ad27f0f0009066e9b1cbaa675b0881679bbc0527"
+    },
+    {
+      "local_path": "test-results/q09-third-artifacts/audit-daily-ux-U09-manual--41667--correction-survive-refresh/trace.zip",
+      "bytes": 1264404,
+      "sha256": "b8ded889bd6607ebc97c7125cabe107da113171f9953ef411c4b28eee6ee5252"
+    },
+    {
+      "local_path": "test-results/q09-third-artifacts/audit-daily-ux-U10-U11-en--27173-e-and-concise-announcements/error-context.md",
+      "bytes": 19606,
+      "sha256": "c2f8a8245622f03473cb40d39bbfcfbf9be415af1e3fa42085da5666b0de1e4e"
+    },
+    {
+      "local_path": "test-results/q09-third-artifacts/audit-daily-ux-U10-U11-en--27173-e-and-concise-announcements/trace.zip",
+      "bytes": 1546850,
+      "sha256": "fec32247dee87ce3fee9361a9d29c8fd651b32ea7b1e38faca0f938a81e0e415"
+    },
+    {
+      "local_path": "test-results/q09-third-artifacts/audit-daily-ux-U10-U11-zh--6e489-e-and-concise-announcements/error-context.md",
+      "bytes": 18472,
+      "sha256": "a8df5ad32fc291a312e72e17f37aa7e60ef7f1fa88350370c3ae041d5d6a1385"
+    },
+    {
+      "local_path": "test-results/q09-third-artifacts/audit-daily-ux-U10-U11-zh--6e489-e-and-concise-announcements/trace.zip",
+      "bytes": 485322,
+      "sha256": "04f834989dcb7fa658f665ab2fe5cc0990ee01349bc88f83f717c227d615fce0"
+    },
+    {
+      "local_path": "test-results/q09-zoom-first-artifacts/.last-run.json",
+      "bytes": 96,
+      "sha256": "6c6f30aaa73dcf49366e1db2c0109bf8af1cfef25853a05f4b1b8d6a2c9723d1"
+    },
+    {
+      "local_path": "test-results/q09-zoom-first-artifacts/api-browser-zoom-T29-actua-6e6b9-API-workbench-content-in-en/error-context.md",
+      "bytes": 5359,
+      "sha256": "051ca3840765e5b7b7bc6bbb638615198cabd14074279ebe32d722bf30b4425f"
+    },
+    {
+      "local_path": "test-results/q09-zoom-first-artifacts/api-browser-zoom-T29-actua-6e6b9-API-workbench-content-in-en/trace.zip",
+      "bytes": 102843,
+      "sha256": "82bc1ab24ecae41f89a321a650bdefe1b59265899b76b1a94373a7173ed90875"
+    }
+  ],
+  "local_traces_not_uploaded": true
+}

@@ -1,0 +1,46 @@
+<testsuites id="" name="" tests="21" failures="0" skipped="0" errors="0" time="308.66396599999996">
+<testsuite name="responsive-accessibility.spec.ts" timestamp="2026-10-03T19:46:35.102Z" hostname="" tests="21" failures="0" skipped="0" time="249.581" errors="0">
+<testcase name="fictional demo routes remain usable at four widths in en" classname="responsive-accessibility.spec.ts" time="39.773">
+</testcase>
+<testcase name="fictional demo routes remain usable at four widths in zh-HK" classname="responsive-accessibility.spec.ts" time="35.782">
+</testcase>
+<testcase name="fictional full buyer route retains dossier and missing-buyer return" classname="responsive-accessibility.spec.ts" time="7.708">
+</testcase>
+<testcase name="zh-HK full buyer dossier and return remain usable at 390px" classname="responsive-accessibility.spec.ts" time="10.782">
+</testcase>
+<testcase name="fictional buyer drawer returns focus to its trigger" classname="responsive-accessibility.spec.ts" time="2.09">
+</testcase>
+<testcase name="fictional demo reflows at a 200% effective viewport in en" classname="responsive-accessibility.spec.ts" time="14.519">
+</testcase>
+<testcase name="fictional demo reflows at a 200% effective viewport in zh-HK" classname="responsive-accessibility.spec.ts" time="16.659">
+</testcase>
+<testcase name="fictional demo interactive controls expose accessible names in both locales" classname="responsive-accessibility.spec.ts" time="33.99">
+</testcase>
+<testcase name="fictional sidebar navigation keeps routes and usage action wired" classname="responsive-accessibility.spec.ts" time="3.281">
+</testcase>
+<testcase name="fictional source and connection dialogs retain their context" classname="responsive-accessibility.spec.ts" time="6.11">
+</testcase>
+<testcase name="fictional project strip and route heading preserve navigation" classname="responsive-accessibility.spec.ts" time="2.638">
+</testcase>
+<testcase name="zh-HK Results retains manual outcomes and localizes usage labels" classname="responsive-accessibility.spec.ts" time="7.09">
+</testcase>
+<testcase name="demo buyer search and filter boundaries meet measured non-text contrast" classname="responsive-accessibility.spec.ts" time="10.38">
+</testcase>
+<testcase name="buyer pagination keeps page selection, bulk save and row-size changes coherent" classname="responsive-accessibility.spec.ts" time="5.651">
+</testcase>
+<testcase name="390px buyer cards support selection and bulk list action without overflow" classname="responsive-accessibility.spec.ts" time="10.934">
+</testcase>
+<testcase name="demo Settings preserves local-save privacy and suppression controls" classname="responsive-accessibility.spec.ts" time="8.843">
+</testcase>
+<testcase name="demo contact quote cancel releases reservation and confirm updates buyer" classname="responsive-accessibility.spec.ts" time="9.215">
+</testcase>
+<testcase name="demo action dialog creates and renames a list" classname="responsive-accessibility.spec.ts" time="3.511">
+</testcase>
+<testcase name="fictional Overview metric cards and project actions keep their routes" classname="responsive-accessibility.spec.ts" time="9.475">
+</testcase>
+<testcase name="fictional discovery review filter and run history retain callbacks" classname="responsive-accessibility.spec.ts" time="3.68">
+</testcase>
+<testcase name="fictional Outreach draft approval invalidates on edit and cannot send" classname="responsive-accessibility.spec.ts" time="7.47">
+</testcase>
+</testsuite>
+</testsuites>

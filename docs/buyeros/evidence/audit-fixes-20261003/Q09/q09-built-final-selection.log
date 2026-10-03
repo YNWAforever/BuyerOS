@@ -1,0 +1,52 @@
+Listing tests:
+  api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in en
+  api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in zh-HK
+  audit-bulk-confirmation.spec.ts:22:1 › B02 adding a sixth buyer clears the previously confirmed five
+  audit-bulk-confirmation.spec.ts:34:1 › B02 reason, target and exclusions clear confirmation; unchanged selection survives paging
+  audit-bulk-confirmation.spec.ts:44:1 › B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works
+  audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting
+  audit-bulk-confirmation.spec.ts:77:1 › B16 committed response loss locks changes and reconciles the same key after a route remount
+  audit-bulk-confirmation.spec.ts:87:1 › B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link
+  audit-bulk-confirmation.spec.ts:103:1 › B03 zh-HK mobile colleague search recovers a failed read
+  audit-bulk-confirmation.spec.ts:113:1 › B03 viewer cannot assign through UI or direct API
+  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset
+  audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history
+  audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary
+  audit-daily-ux.spec.ts:32:1 › WF01 project-only partial save preserves every input and same intent creates one project and ICP
+  audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research
+  audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements
+  audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements
+  audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh
+  audit-draft-reground.spec.ts:24:1 › D01/D03 manual Unicode draft exposes a source review and operator cannot attest
+  audit-draft-reground.spec.ts:63:1 › D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export
+  audit-draft-reground.spec.ts:79:1 › D03 zh-HK mobile code-point split reads every source and exports exact Unicode message
+  audit-draft-reground.spec.ts:90:1 › U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result
+  audit-job-scope.spec.ts:15:1 › U15 project A0 B5; card and failed list share scope; explicit workspace5
+  audit-job-scope.spec.ts:26:1 › U15 workspace view remains actor-bound, other actor detail denied; admin read sees all
+  audit-job-scope.spec.ts:32:29 › U15 actual 21 job list fully pages20; scope resets offset and old rows
+  audit-job-scope.spec.ts:32:29 › U15 actual 101 job list fully pages20; scope resets offset and old rows
+  audit-job-scope.spec.ts:39:1 › U15 held B list and count cannot overwrite newer A-B-A generation
+  audit-job-scope.spec.ts:46:1 › U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery
+  audit-memberships.spec.ts:18:1 › U06 all 250 real members are readable in 13 pages and member 101 is searchable
+  audit-memberships.spec.ts:35:1 › U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable
+  audit-memberships.spec.ts:43:1 › U07 duplicate names and suffixes remain distinct during a versioned role change
+  audit-memberships.spec.ts:57:1 › U08 sole admin refusal is understandable and does not claim success
+  audit-memberships.spec.ts:66:1 › S06 viewer cannot read the admin directory or eligible assignees
+  audit-memberships.spec.ts:72:1 › U06 stale page response cannot restore old A-B-A directory
+  audit-memberships.spec.ts:83:1 › U06 zh-HK mobile search and failed page read recover without synthetic rows
+  audit-memberships.spec.ts:95:1 › U07 lost committed role response requires a read before any further role write
+  audit-operations.spec.ts:12:29 › B10 B11 all 21 real producer result IDs are readable in pages of 20
+  audit-operations.spec.ts:12:29 › B10 B11 all 101 real producer result IDs are readable in pages of 20
+  audit-operations.spec.ts:32:1 › B11 zero results and late job response cannot replace newer job
+  audit-operations.spec.ts:43:1 › B11 late result page is discarded after workspace A-B-A
+  audit-operations.spec.ts:57:1 › B12 unopened 1000-result job reads summary only and never walks result pages
+  audit-operations.spec.ts:79:1 › B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once
+  audit-operations.spec.ts:92:1 › B13 hidden summary pause and double visibility resume produce exactly one refresh
+  audit-operations.spec.ts:101:1 › B13 actual 429 Retry-After and 503 recover without result-page traffic
+  audit-operations.spec.ts:112:1 › B16 old summary cannot overwrite another scope after A-B-A
+  audit-operations.spec.ts:127:1 › B13 zh-HK 390px summary/results controls remain usable without overflow
+  audit-operations.spec.ts:136:1 › B13 Operations clears a transient summary error after a valid recovery
+Total: 50 tests in 8 files

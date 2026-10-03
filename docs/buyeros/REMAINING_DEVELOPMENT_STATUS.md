@@ -1330,3 +1330,16 @@ Broader16-case run retained14pass/2fail/0skip: initial unstructured500 at local 
 No schema revision; Alembic0036head. Pause-entry rollback patch applicability checked, runtime/production rehearsal not run; keep proof/context guards and all revisions/audit. Original31input hashes/98case original fields/other24task records/three destructive guards preserved. Labelled UI fixture/cache cleaned; unlabelled `buyeros-test-d9323d06` remains untouched without established ownership. Author review only; independent review pending.
 
 [Exact commands, reports, screenshots and rollback](evidence/audit-fixes-20261003/Q12/RESULTS.md), [local PR-15](review/2026-10-03-audit-fixes/Q12-pr.md). Code implemented, fixture verified, local integration verified; deployed SHA null. External auth/provider/worker/build/production/performance gates unverified. Next eligible local task **Q08** (Q05/Q06 complete); Q13 waits N02, Q16 root cause and Q17 remain blocked.
+
+### Q09 ongoing checkpoint (2026-10-04 HKT)
+
+Continue Q09 from base38e8873; canonical actor name projection API21pass/0fail/error/skip, relatedNode20pass. Seven direct UI cases executing; full journeys/native zoom/demo responsive/affected regressions still required. Source diff is reviewable but not marked complete. Human screen-reader/UAT blocked; no invented completion/mistake/time metrics. No schema/auth/provider/cutover/deployment. See TASKS.json and .superpowers/sdd/q09-daily-ux/progress.md.
+
+
+## Q09 / PR-19 — 2026-10-04 local candidate, human gates open
+
+Author-reviewed source 1953d615dc00e6920380dbb71be6a99b96e36488, base 38e88735b003fa8fdc0e8d034e5a883d9df5d204. Code implemented; strict API21/Node34/fresh affected UI17/demo21 pass, zero fail/error/skip; types/lint/generated84 pass. Original full50 second48pass/2setup errors preserved; whole affected-suite reruns pass, not a single all-green51 batch. Four complete en/zhdesktop/mobile actual disposable worker journeys and two native200% zoom checks pass; identities/providers fictional.
+
+U09/WF01/WF02 local evidence, U10 automated layout/partial keyboard, U11 actual screen reader and U12 human staff UAT unobserved NULL; full five-task pure keyboard rehearsal/independent review open. F04 existing-member UX only; U05 existing-page membership revocation case open.0schema migrations, head0037; reversepatch applicability only.31inputs/98originalfields/92othercases/24othertasks/81otheroperations/4guards/rootclean/unrelated193paths preserved. No push/remotePR/deploy/production/auth/provider/role/mail change; deployedSHA NULL. Auth0/delivery403 and Cloudflare separation retained.
+
+[Full reports/commands/screenshots/diff/rollback](evidence/audit-fixes-20261003/Q09/FINAL/RESULTS.md), [PR-19 description](review/2026-10-03-audit-fixes/Q09-pr.md). No further independent local task eligible in this execution scope; Q09human gates andQ16underlyingproof remainopen, Q13waitsN02, N00/Q10/Q17separatescope.

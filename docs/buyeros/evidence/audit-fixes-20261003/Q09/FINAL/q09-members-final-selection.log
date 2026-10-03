@@ -1,0 +1,10 @@
+Listing tests:
+  audit-memberships.spec.ts:18:1 › U06 all 250 real members are readable in 13 pages and member 101 is searchable
+  audit-memberships.spec.ts:35:1 › U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable
+  audit-memberships.spec.ts:43:1 › U07 duplicate names and suffixes remain distinct during a versioned role change
+  audit-memberships.spec.ts:57:1 › U08 sole admin refusal is understandable and does not claim success
+  audit-memberships.spec.ts:66:1 › S06 viewer cannot read the admin directory or eligible assignees
+  audit-memberships.spec.ts:72:1 › U06 stale page response cannot restore old A-B-A directory
+  audit-memberships.spec.ts:83:1 › U06 zh-HK mobile search and failed page read recover without synthetic rows
+  audit-memberships.spec.ts:95:1 › U07 lost committed role response requires a read before any further role write
+Total: 8 tests in 1 file

@@ -1,0 +1,54 @@
+<testsuites id="" name="" tests="7" failures="0" skipped="0" errors="1" time="320.72329699999995">
+<testsuite name="audit-daily-ux.spec.ts" timestamp="2026-10-03T17:04:15.322Z" hostname="" tests="7" failures="0" skipped="0" time="185.822" errors="1">
+<testcase name="WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history" classname="audit-daily-ux.spec.ts" time="27.437">
+</testcase>
+<testcase name="U09 no selection hides batch forms; explicit selection exposes a sticky named action summary" classname="audit-daily-ux.spec.ts" time="24.88">
+</testcase>
+<testcase name="WF01 project-only partial save preserves every input and same intent creates one project and ICP" classname="audit-daily-ux.spec.ts" time="22.015">
+</testcase>
+<testcase name="WF02 held reviewer cannot approve the previous offer revision or start research" classname="audit-daily-ux.spec.ts" time="19.847">
+</testcase>
+<testcase name="U10 U11 en keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="16.993">
+</testcase>
+<testcase name="U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="14.336">
+</testcase>
+<testcase name="U09 manual outcome names, UTC zero denominators and append-only correction survive refresh" classname="audit-daily-ux.spec.ts" time="60.314">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-ux-U09-manual--41667--correction-survive-refresh\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-ux-U09-manual--41667--correction-survive-refresh\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Sign in', exact: true })
+
+
+      79 |  const event=outcomes.locator('.activity').filter({hasText:'Q09 manual fixture reply'});await expect(event.locator('code').first()).not.toBeVisible();await expect(event).toContainText(original.data.actor_display_name||'Staff member (name unavailable)');await event.getByRole('button',{name:'Correct event',exact:true}).click();await outcomes.getByRole('combobox',{name:'Outcome stage',exact:true}).selectOption('meeting');await outcomes.getByRole('textbox',{name:'Outcome notes',exact:true}).fill('Q09 corrected manual meeting');await outcomes.getByRole('textbox',{name:'Correction reason',exact:true}).fill('Q09 staff correction after source check');const correcting=page.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/corrections'));await outcomes.getByRole('button',{name:'Append correction',exact:true}).click();const correction=await (await correcting).json();expect(correction.data.id).not.toBe(original.data.id);expect(correction.data.supersedes_id).toBe(original.data.id);await expect(outcomes).toContainText('Q09 manual fixture reply');await expect(outcomes).toContainText('Q09 corrected manual meeting');
+      80 |  const usage=page.getByRole('region',{name:'Usage',exact:true});await usage.getByLabel('From UTC',{exact:true}).fill('2025-01-01');await usage.getByLabel('To UTC',{exact:true}).fill('2025-02-01');const metrics=page.waitForResponse(r=>r.request().method()==='GET'&&new URL(r.url()).pathname.endsWith('/usage')&&new URL(r.url()).searchParams.get('from')==='2025-01-01T00:00:00.000Z');await usage.getByRole('button',{name:'Apply period',exact:true}).click();const metric=await (await metrics).json();expect(metric.data.cost_per_accepted_company).toBeNull();expect(metric.data.cost_per_contactable_accepted_company).toBeNull();await expect(usage.locator('.activity').filter({hasText:'Blended cost per accepted company'})).toContainText('—');await page.getByRole('combobox',{name:'Language',exact:true}).first().selectOption('zh-HK');await expect(page.getByRole('region',{name:'使用量',exact:true}).getByLabel('開始日期（UTC）',{exact:true})).toHaveValue('2025-01-01');
+    > 81 |  await page.reload();await page.getByRole('button',{name:'Sign in',exact:true}).click();await expect(page.getByRole('region',{name:/^(Manual outcomes|人手記錄成果)$/,exact:true})).toContainText('Q09 manual fixture reply');await expect(page.getByRole('region',{name:/^(Manual outcomes|人手記錄成果)$/,exact:true})).toContainText('Q09 corrected manual meeting');writeFileSync('test-results/q09-manual-outcome.json',JSON.stringify({fixture_only:true,original,correction,metric},null,2));
+         |                                                                                 ^
+      82 | });
+      83 |
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-daily-ux.spec.ts:81:81
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-ux-U09-manual--41667--correction-survive-refresh\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-ux-U09-manual--41667--correction-survive-refresh\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-ux-U09-manual--41667--correction-survive-refresh\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

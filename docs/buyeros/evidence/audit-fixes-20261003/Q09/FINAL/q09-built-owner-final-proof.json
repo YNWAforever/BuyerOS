@@ -1,0 +1,15 @@
+{
+  "entrypoint": ".output/server/index.mjs",
+  "exists": true,
+  "sha256": "da031053b37abfd6ba00914aa1a9fa438116ee6038faa5eddd580717b012ddc3",
+  "preset": "node-server",
+  "node": "v22.23.2",
+  "api_target": "http://host.docker.internal:8000",
+  "fixture_only": true,
+  "owned_container": "buyeros-audit-ui-052d6a686de9",
+  "owner_label_verified": true,
+  "runtime": "built",
+  "build_bound_seconds": 180,
+  "cloud_deployed": false,
+  "code_stage": "Final owner disambiguation plus bulk/members17 batch"
+}

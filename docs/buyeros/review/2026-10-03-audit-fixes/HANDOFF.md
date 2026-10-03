@@ -152,3 +152,38 @@ StrictAPI18 (3new+15related), actualUI10 (6Q14+4Q03),Node16 pass;0fail/error/ski
 0schema/API/auth/role changes; head0037 retained. Reversepatch applicability0, runtime/browser/productionrevert notrehearsed; retain allhistory. Original31inputs/98fields/97othercases/24othertasks/3guards/193unrelatedpaths preserved. Fixturesnormalteardown; labelledcache retainedforQ09. Authorreviewonly, independentpending.
 
 [Full commands/reports/screenshots/rollback](../../evidence/audit-fixes-20261003/Q14/RESULTS.md), [local PR-17](Q14-pr.md). Codeimplemented,fixtureverified,localintegrationverified; deployedSHAnull/noexternalaction. Full8module/liveauth/provider/build/continuousworker/production/performance gates remainunverified. Q16/Q17blocked, Q13waitsN02. **Next eligible local task Q09**, five staff-task UX slices; actualhumanUAT remains separate.
+
+
+## Q09 / PR-19 current checkpoint — 2026-10-04
+
+Source 1953d615dc00e6920380dbb71be6a99b96e36488;base38e88735b003fa8fdc0e8d034e5a883d9df5d204. [PR-19](Q09-pr.md), [author review](Q09-review.md), [full evidence](../../evidence/audit-fixes-20261003/Q09/FINAL/RESULTS.md).29source paths; bounded latest ICP/profile stale guard; selection-only action bar/pending+partial summaries; human identities/canonical duplicate-choice distinction; scope once/primary buyer list/concise polling.0migrations/head0037, generated84=70+14.
+
+StrictAPI21/Node34/freshaffectedUI17/demo21 pass0fail/error/skip,types/lint/contracts0. Original full50 second48pass+2setup errors retained; latest whole affected suites resolve those cases. Four full en/zhdesktop/mobile worker-shaped workflows/nativeen+zh200% pass, no single all-green51 batch or realprovider/auth/employee acceptance claimed. U11realreader/U12staff/fullfivekeyboard/independentreview open; fieldsNULL. No external action/deployedSHAnull;31inputs/98originalfields/92othercases/24tasks/81operations/4guards/rootclean/unrelated193paths preserved. Local review candidate; no further independent task eligible in scope. Q16rootcauseblocked/Q17notguessed/Q13waitsN02/N00futureauthseparate.
+
+### Current finding closure summary (historical table above retained)
+
+| Finding | Current local result / still-open boundary |
+|---|---|
+| F01 | Q01 recovery verified; actual account/workspace journey U01/U04/S01 open |
+| F02 | Q01/U03 local verified |
+| F03 | Q02/U06 directory250 real paged/search local verified |
+| F04 | Q02/Q09 role/last-admin/duplicate-name/negative-role local verified; U05 existing-page membership revocation/recheck race open |
+| F05 | Q03 21/101 generated job/result20-row pages/scope local verified |
+| F06 | Q05/Q06/Q08 confirmation/owner/unknown/recovery/manifests locally verified; B08/B09 variants/live gates separately open |
+| F07 | Q06 contact/draft durable recovery local verified; liveprovider gates open |
+| F08 | Q04 exact economic research intent1run/1outbox/1ceiling local verified; S03 broader live gate open |
+| F09 | Q07 admin-only/readiness/policy local verified; release authority not inferred |
+| F10 | Actual paid/provider allowlist/production integration unverified/blocked |
+| F11 | Q08 durable manifest/results/restart/cancel local verified; B14 original broader scenario partial |
+| F12 | Performance/goldset/production workload suites not executed; open |
+| F13 | Q11 baseline/current records prepared; production schema/role/selector/epoch readback gate open |
+| F14 | Q09/U09/U10/WF01/WF02 local UX/journeys/nativezoom verified; screen-reader/staff/fullkeyboard/WF03 live open |
+| F15 | Q01 hydration render local verified |
+| F16 | Q12 exact manual grounding review/approval/export local verified; liveprovider separate |
+| F17 | Q14 same scope/count/list/deeplink/role/paging local verified |
+| F18 | Workspace SQL query-scaling/EXPLAIN, pagination and concurrent membership/RLS cases P09/P10 not executed; open |
+| F19 | Q15 dirty editor Save/Discard/Cancel/412/error preservation local verified |
+| F20 | Neon Auth migration N00–N07 future scope; not cut over |
+| F21 | Q16 incident underlying evidence blocked; no pool/cold-start/Q17 inference |
+
+All21 F-ID rows use current tracker/source evidence; “local verified” does not mean deployed or whole98case closed. Earlier four original PR task commits/descriptions remain independent local review boundaries.

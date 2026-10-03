@@ -1,0 +1,4 @@
+Listing tests:
+  audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting
+  audit-memberships.spec.ts:35:1 › U07 duplicate names and suffixes remain distinct during a versioned role change
+Total: 2 tests in 2 files

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="21" time="372.281" timestamp="2026-10-04T00:19:11.974844+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_daily_ux_db" name="test_manual_event_projects_canonical_name_and_replay_does_not_relink" time="179.213" /><testcase classname="tests.test_daily_ux_db" name="test_missing_actor_name_is_null_and_other_tenant_events_not_exposed" time="6.130"><failure message="jsonschema.exceptions.ValidationError: None is not of type 'string'&#10;&#10;Failed validating 'type' in schema['properties']['data']['properties']['items']['items']['properties']['actor_display_name']:&#10;    {'type': 'string',&#10;     'nullable': True,&#10;     'minLength': 1,&#10;     'maxLength': 200,&#10;     'description': &quot;Current display name of this event's canonical actor; &quot;&#10;                    'never identity or role authority.'}&#10;&#10;On instance['data']['items'][0]['actor_display_name']:&#10;    None">quote_case = (&lt;starlette.testclient.TestClient object at 0x000001EB8CB2E5D0&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:55075/buyeros...91443-d037-483e-83ba-158c9bd5d0f0'), ('87b39dca-176d-435e-b30b-6112f20443eb', '7419b1af-bd21-471d-9abf-336690d7b0cf')])
+
+    def test_missing_actor_name_is_null_and_other_tenant_events_not_exposed(quote_case):
+        api, dsn, buyers = quote_case
+        path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/outcomes"
+        response = api.post(path, json={"buyer_id": buyers[0][0], "stage": "meeting", "source": "manual",
+            "occurred_at": "2026-09-20T11:15:00Z", "notes": "Q09 unnamed canonical actor"}, headers=_h(OPERATOR, key="q09-null-name"))
+        assert response.status_code == 201
+        actor = response.json()["data"]["actor_id"]
+        with psycopg.connect(dsn) as db:
+            db.execute("UPDATE users SET display_name=NULL WHERE id=%s", (actor,))
+        events = api.get(path, headers=_h(OPERATOR))
+        assert events.status_code == 200
+        assert events.json()["data"]["items"][0]["actor_display_name"] is None
+&gt;       assert_contract_response("OutcomeEventPageResponse", events.json())
+
+tests\test_daily_ux_db.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...tPageResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']&gt;)
+args = ({'data': {'items': [{'actor_display_name': None, 'actor_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'buyer_id': 'cf2...}], 'limit': 20, 'offset': 0, 'total': 1}, 'data_mode': 'live', 'request_id': '52651cf5-6ebe-4f1a-b184-4b39bc9a2331'},)
+kwargs = {}, error = &lt;ValidationError: "None is not of type 'string'"&gt;
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+&gt;           raise error
+E           jsonschema.exceptions.ValidationError: None is not of type 'string'
+E           
+E           Failed validating 'type' in schema['properties']['data']['properties']['items']['items']['properties']['actor_display_name']:
+E               {'type': 'string',
+E                'nullable': True,
+E                'minLength': 1,
+E                'maxLength': 200,
+E                'description': "Current display name of this event's canonical actor; "
+E                               'never identity or role authority.'}
+E           
+E           On instance['data']['items'][0]['actor_display_name']:
+E               None
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError</failure></testcase><testcase classname="tests.test_profile_approval_races_db" name="test_saved_v2_approval_preserves_v1_history_and_records_one_audit" time="10.520" /><testcase classname="tests.test_profile_approval_races_db" name="test_offer_change_stales_pending_basis_but_rename_does_not" time="17.965" /><testcase classname="tests.test_profile_approval_races_db" name="test_approve_archived_project_denied" time="9.108" /><testcase classname="tests.test_profile_approval_races_db" name="test_real_icp_pagination_and_bounds" time="22.836" /><testcase classname="tests.test_profile_approval_races_db" name="test_approve_update_archive_races_never_double_activate_or_deadlock" time="41.819" /><testcase classname="tests.test_profile_approval_races_db" name="test_project_list_pagination_is_sql_bounded" time="12.572" /><testcase classname="tests.test_usage_outcomes_db" name="test_usage_empty_denominators_are_null_and_viewer_can_read" time="2.639" /><testcase classname="tests.test_usage_outcomes_db" name="test_manual_outcome_is_append_only_and_viewer_cannot_write" time="4.413" /><testcase classname="tests.test_usage_outcomes_db" name="test_usage_real_ledger_holds_refunds_and_distinct_policy_contactability" time="8.743" /><testcase classname="tests.test_usage_outcomes_db" name="test_outcome_pagination_correction_guards_and_contract" time="2.164"><failure message="jsonschema.exceptions.ValidationError: None is not of type 'string'&#10;&#10;Failed validating 'type' in schema['properties']['data']['properties']['actor_display_name']:&#10;    {'type': 'string',&#10;     'nullable': True,&#10;     'minLength': 1,&#10;     'maxLength': 200,&#10;     'description': &quot;Current display name of this event's canonical actor; &quot;&#10;                    'never identity or role authority.'}&#10;&#10;On instance['data']['actor_display_name']:&#10;    None">quote_case = (&lt;starlette.testclient.TestClient object at 0x000001EB8D2F3BD0&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:55075/buyeros...2aaa6-49ae-4bad-9aac-cb48fcc9b6e7'), ('cd673042-28a4-4193-a14a-59dd582f5915', '5991bc1e-8f78-4385-b8f5-b862be7c4ad8')])
+
+    def test_outcome_pagination_correction_guards_and_contract(quote_case):
+        api, dsn, buyers = quote_case
+        path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/outcomes"
+        body = {"buyer_id": buyers[0][0], "stage": "reply", "source": "manual",
+                "occurred_at": "2026-09-20T11:15:00Z", "notes": "Entered from the manual tracker"}
+        created = api.post(path, json=body, headers=_h(OPERATOR, key="t27-guard-create"))
+        assert created.status_code == 201, created.text
+&gt;       assert_contract_response("OutcomeEventResponse", created.json())
+
+tests\test_usage_outcomes_db.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...EventResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']&gt;)
+args = ({'data': {'actor_display_name': None, 'actor_id': 'b68cdd60-092d-5e57-9212-109ecaaeebed', 'buyer_id': '6d262da0-1489-... '2026-10-03T16:24:59.584398+00:00', ...}, 'data_mode': 'live', 'request_id': '739795e5-5a97-46d3-b1dc-aafe24f65882'},)
+kwargs = {}, error = &lt;ValidationError: "None is not of type 'string'"&gt;
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+&gt;           raise error
+E           jsonschema.exceptions.ValidationError: None is not of type 'string'
+E           
+E           Failed validating 'type' in schema['properties']['data']['properties']['actor_display_name']:
+E               {'type': 'string',
+E                'nullable': True,
+E                'minLength': 1,
+E                'maxLength': 200,
+E                'description': "Current display name of this event's canonical actor; "
+E                               'never identity or role authority.'}
+E           
+E           On instance['data']['actor_display_name']:
+E               None
+
+.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError</failure></testcase><testcase classname="tests.test_usage_outcomes_db" name="test_usage_refund_is_signed_in_recorded_period_not_origin_period" time="4.762" /><testcase classname="tests.test_usage_outcomes_db" name="test_work_queue_snapshot_filters_are_server_owned" time="4.779" /><testcase classname="tests.test_api_routes_contract" name="test_unauthenticated_requests_are_rejected" time="0.097" /><testcase classname="tests.test_api_routes_contract" name="test_implemented_routes_match_openapi_operation_ids" time="2.154" /><testcase classname="tests.test_api_routes_contract" name="test_the_app_actually_exposes_every_implemented_route" time="0.154" /><testcase classname="tests.test_api_routes_contract" name="test_implemented_response_fields_are_declared_by_the_contract" time="2.677" /><testcase classname="tests.test_api_routes_contract" name="test_approve_checks_auth_before_preconditions" time="0.056" /><testcase classname="tests.test_api_routes_contract" name="test_approve_rejects_a_missing_or_malformed_if_match" time="0.122" /><testcase classname="tests.test_contract_required_fields" name="test_contract_required_fields" time="9.039" /></testsuite></testsuites>

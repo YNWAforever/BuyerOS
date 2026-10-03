@@ -1,0 +1,161 @@
+<testsuites id="" name="" tests="6" failures="4" skipped="0" errors="0" time="504.07559">
+<testsuite name="audit-daily-ux.spec.ts" timestamp="2026-10-03T16:24:44.851Z" hostname="" tests="6" failures="4" skipped="0" time="143.264" errors="0">
+<testcase name="WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history" classname="audit-daily-ux.spec.ts" time="24.252">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      12 |  page.on('request',request=>{const url=new URL(request.url());if(url.pathname.endsWith(`/projects/${project}/icp-versions`))calls.push({offset:Number(url.searchParams.get('offset')),limit:Number(url.searchParams.get('limit'))});});
+      13 |  await page.getByRole('button',{name:'Edit offer',exact:true}).click();await expect(page.getByRole('textbox',{name:'Product / service',exact:true})).not.toBeEmpty();
+    > 14 |  expect(calls.length).toBeGreaterThan(0);expect(calls.length).toBeLessThanOrEqual(2);expect(calls.every(call=>call.limit===1)).toBe(true);
+         |                                                                                                                                ^
+      15 |  writeFileSync('test-results/q09-latest-offer.json',JSON.stringify({fixture_only:true,calls},null,2));
+      16 | });
+      17 |
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-daily-ux.spec.ts:14:128
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="U09 no selection hides batch forms; explicit selection exposes a sticky named action summary" classname="audit-daily-ux.spec.ts" time="20.113">
+</testcase>
+<testcase name="WF01 project-only partial save preserves every input and same intent creates one project and ICP" classname="audit-daily-ux.spec.ts" time="23.199">
+</testcase>
+<testcase name="WF02 held reviewer cannot approve the previous offer revision or start research" classname="audit-daily-ux.spec.ts" time="40.238">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('The offer changed. This profile cannot be approved.')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('The offer changed. This profile cannot be approved.') with timeout 5000ms
+      - waiting for getByText('The offer changed. This profile cannot be approved.')
+
+
+      52 |   await resetWorkbenchFixtureRateWindows();await signInWorkbench(reviewer,false,'reviewer',`/app?workspace=${workspace}&project=${id}`);await expect(reviewer.getByRole('heading',{name:'Profile version 1',exact:false})).toBeVisible();await reviewer.getByRole('checkbox',{name:/Confirm approval of this exact version v1/}).check();
+      53 |   await page.getByRole('button',{name:'Edit offer',exact:true}).click();await page.getByRole('textbox',{name:'Product / service',exact:true}).fill('Revised sensor platform');await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('checkbox',{name:/I confirm these buyer requirements/}).check();await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Save profile',exact:true}).click();await expect(page.getByRole('heading',{name:'Profile version 2',exact:false})).toBeVisible();
+    > 54 |   const reply=reviewer.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/approve'));await reviewer.getByRole('button',{name:'Approve profile',exact:true}).click();const denied=await reply;expect(denied.status()).toBe(412);expect((await denied.json()).code).toBe('STALE_REVISION');await expect(reviewer.getByRole('alert').last()).toBeVisible();await expect(reviewer.getByRole('button',{name:'Approve profile',exact:true})).toBeDisabled();await reviewer.getByRole('button',{name:'Reload profile',exact:true}).click();await expect(reviewer.getByText('The offer changed. This profile cannot be approved.',{exact:false})).toBeVisible();
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ^
+      55 |   await page.getByRole('button',{name:'Research runs',exact:true}).click();await expect(page.getByRole('button',{name:'Start research',exact:true})).toBeDisabled();
+      56 |   const runs=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/projects/${id}/runs?offset=0&limit=1`,{headers:{Authorization:'Bearer fixture-access'}});expect(runs.status()).toBe(200);expect((await runs.json()).data.total).toBe(0);
+      57 |   writeFileSync('test-results/q09-wf02.json',JSON.stringify({fixture_only:true,project:id,approval_status:denied.status(),research_runs:0},null,2));
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-daily-ux.spec.ts:54:637
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-ux-WF02-held-r-14fa1--revision-or-start-research\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="U10 U11 en keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="18.641">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-ux-U10-U11-en--27173-e-and-concise-announcements\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-ux-U10-U11-en--27173-e-and-concise-announcements\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).not.toBe(expected) // Object.is equality" type="expect.not.toBe">
+<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+
+    Error: expect(received).not.toBe(expected) // Object.is equality
+
+    Expected: not "none"
+
+      68 |    const cdp=await page.context().newCDPSession(page);const tree=await cdp.send('Accessibility.getFullAXTree');expect(tree.nodes.filter((n:{ignored?:boolean;role?:{value?:string};name?:{value?:string}})=>!n.ignored&&['button','textbox','combobox','checkbox','link'].includes(n.role?.value??'')&&!n.name?.value)).toEqual([]);await cdp.detach();
+      69 |   }
+    > 70 |   await nav.getByRole('button').nth(2).click();const buyers=page.getByRole('region',{name:locale==='en'?'Buyer results':'買家結果',exact:true});const details=buyers.getByRole('button',{name:locale==='en'?'Details':'詳情',exact:true}).first();await details.focus();await expect(details).toBeFocused();expect(await details.evaluate(e=>getComputedStyle(e).outlineStyle)).not.toBe('none');await page.keyboard.press('Enter');await expect(page.getByRole('dialog')).toBeVisible();await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);await expect(details).toBeFocused();
+         |                                                                                                                                                                                                                                                                                                                                                                               ^
+      71 |   await nav.getByRole('button').nth(4).click();await page.locator('.run-list button').first().click();const article=page.locator('.run-detail');await expect(article).toBeVisible();await expect(article).not.toHaveAttribute('aria-live');await expect(article.getByRole('status')).toHaveCount(1);await expect(article.getByRole('status')).not.toContainText(/Event|事件|Connection|連線/);
+      72 |   await page.screenshot({path:`test-results/q09-${locale}-390.png`,fullPage:true});writeFileSync(`test-results/q09-${locale}-responsive.json`,JSON.stringify({fixture_only:true,screen_reader:false,measures},null,2));
+      73 |  });
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-daily-ux.spec.ts:70:367
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-ux-U10-U11-en--27173-e-and-concise-announcements\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-ux-U10-U11-en--27173-e-and-concise-announcements\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-ux-U10-U11-en--27173-e-and-concise-announcements\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="16.821">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-ux-U10-U11-zh--6e489-e-and-concise-announcements\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-ux-U10-U11-zh--6e489-e-and-concise-announcements\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).not.toBe(expected) // Object.is equality" type="expect.not.toBe">
+<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+
+    Error: expect(received).not.toBe(expected) // Object.is equality
+
+    Expected: not "none"
+
+      68 |    const cdp=await page.context().newCDPSession(page);const tree=await cdp.send('Accessibility.getFullAXTree');expect(tree.nodes.filter((n:{ignored?:boolean;role?:{value?:string};name?:{value?:string}})=>!n.ignored&&['button','textbox','combobox','checkbox','link'].includes(n.role?.value??'')&&!n.name?.value)).toEqual([]);await cdp.detach();
+      69 |   }
+    > 70 |   await nav.getByRole('button').nth(2).click();const buyers=page.getByRole('region',{name:locale==='en'?'Buyer results':'買家結果',exact:true});const details=buyers.getByRole('button',{name:locale==='en'?'Details':'詳情',exact:true}).first();await details.focus();await expect(details).toBeFocused();expect(await details.evaluate(e=>getComputedStyle(e).outlineStyle)).not.toBe('none');await page.keyboard.press('Enter');await expect(page.getByRole('dialog')).toBeVisible();await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);await expect(details).toBeFocused();
+         |                                                                                                                                                                                                                                                                                                                                                                               ^
+      71 |   await nav.getByRole('button').nth(4).click();await page.locator('.run-list button').first().click();const article=page.locator('.run-detail');await expect(article).toBeVisible();await expect(article).not.toHaveAttribute('aria-live');await expect(article.getByRole('status')).toHaveCount(1);await expect(article.getByRole('status')).not.toContainText(/Event|事件|Connection|連線/);
+      72 |   await page.screenshot({path:`test-results/q09-${locale}-390.png`,fullPage:true});writeFileSync(`test-results/q09-${locale}-responsive.json`,JSON.stringify({fixture_only:true,screen_reader:false,measures},null,2));
+      73 |  });
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-daily-ux.spec.ts:70:367
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-ux-U10-U11-zh--6e489-e-and-concise-announcements\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-ux-U10-U11-zh--6e489-e-and-concise-announcements\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-ux-U10-U11-zh--6e489-e-and-concise-announcements\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

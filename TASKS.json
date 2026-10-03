@@ -11,9 +11,10 @@
     "Q07",
     "Q12",
     "Q08",
-    "Q14"
+    "Q14",
+    "Q09"
   ],
-  "next_eligible": "Q09",
+  "next_eligible": null,
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -288,7 +289,90 @@
     },
     {
       "id": "Q09",
-      "status": "outside-current-scope"
+      "status": "local-candidate-human-gates-open",
+      "base_sha": "38e88735b003fa8fdc0e8d034e5a883d9df5d204",
+      "depends_on": [
+        "Q01",
+        "Q02",
+        "Q05",
+        "Q14",
+        "Q15"
+      ],
+      "cases": [
+        "U09",
+        "U10",
+        "U11",
+        "U12",
+        "WF01",
+        "WF02"
+      ],
+      "release_status": "not-deployed",
+      "checkpoint": "2026-10-04 HKT: reviewable local Q09 candidate. 4 complete fixture journeys + actual native en/zh200% zoom passed; duplicate owner choice RED/GREEN and memberships9+bulk8 fresh. Original failed batches retained. U11 real screen reader, U12 human staff and full five-task pure keyboard rehearsal unobserved; independent review pending. No external action.",
+      "tests": {
+        "api": {
+          "report": "q09-api-third.xml",
+          "executed": 21,
+          "passed": 21,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 183.647,
+          "zero_cases_is_pass": null
+        },
+        "node": {
+          "passed": 34,
+          "failed": 0,
+          "skipped": 0,
+          "evidence": "Q09/q09-node-handoff.log"
+        },
+        "ui_full_second": {
+          "report": "q09-built-second-full.xml",
+          "executed": 50,
+          "passed": 48,
+          "failures": 0,
+          "errors": 2,
+          "skipped": 0,
+          "wall_seconds": 1318.325699,
+          "zero_cases_is_pass": null
+        },
+        "ui_affected_final": {
+          "report": "q09-owner-final.xml",
+          "executed": 17,
+          "passed": 17,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 396.127954,
+          "zero_cases_is_pass": null
+        },
+        "demo_parity": {
+          "report": "q09-responsive.xml",
+          "executed": 21,
+          "passed": 21,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 308.66396599999996,
+          "zero_cases_is_pass": null
+        }
+      },
+      "migrations": [],
+      "human_gates": {
+        "screen_reader": "blocked-not-observed",
+        "staff_uat": "blocked-not-observed"
+      },
+      "module_commits": {
+        "canonical_actor_projection": "85686a6608cca04a669dbf21156fdfd2d2af33e7",
+        "offer_profile_reads": "3843623c934fba75a8a5bffe1db4175960444361",
+        "buyer_member_results": "35e859161536bc2f6726c8b713c8006ec01cc43a",
+        "scope_jobs": "6e7335b2d341167ddbc6fdfbad08d789e5c8972e",
+        "fixture_journeys": "1953d615dc00e6920380dbb71be6a99b96e36488"
+      },
+      "source_sha": "1953d615dc00e6920380dbb71be6a99b96e36488",
+      "code_status": "implemented",
+      "verification_status": "strict API21/Node34/current affected UI17/demo21 pass; full50 report48pass+2setup errors resolved by affected-suite reruns; human gates open",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/RESULTS.md",
+      "rollback": "Q09.patch reverse applicability verified; no runtime/production rollback rehearsal"
     },
     {
       "id": "Q10",
@@ -423,10 +507,11 @@
     }
   ],
   "future_eligible": [
-    "Q08",
-    "Q16 evidence collection",
-    "N00 built compatibility proof"
+    "Q09 human screen-reader/staff UAT and complete keyboard rehearsal",
+    "Independent source review",
+    "Q16 underlying evidence when available",
+    "N00 separate auth compatibility scope"
   ],
-  "reviewed_source_sha": "70d2e54ef613910ce5a684d90c4afce32f504e66",
+  "reviewed_source_sha": "1953d615dc00e6920380dbb71be6a99b96e36488",
   "deployed_sha": null
 }

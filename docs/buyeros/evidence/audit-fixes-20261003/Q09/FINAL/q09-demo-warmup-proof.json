@@ -1,0 +1,13 @@
+{
+  "fixture_only": true,
+  "owner_label_verified": true,
+  "mode": "demo",
+  "runtime": "dev",
+  "executionProfile": "portable",
+  "url": "http://localhost:5173/app/settings",
+  "hydration_ready": true,
+  "elapsed_ms": 5009,
+  "fixture_startup_bound_ms": 30000,
+  "functional_assertion_timeouts_unchanged": true,
+  "employee_or_production_latency_acceptance": false
+}

@@ -1,0 +1,11 @@
+{
+  "base": "38e88735b003fa8fdc0e8d034e5a883d9df5d204",
+  "source": "1953d615dc00e6920380dbb71be6a99b96e36488",
+  "source_paths": 29,
+  "reverse_patch_check_exit": 0,
+  "runtime_revert_performed": false,
+  "production_revert_performed": false,
+  "new_migrations": 0,
+  "heads": "0037_bulk_manifests (head)",
+  "data_history_retained": true
+}

@@ -1,0 +1,87 @@
+<testsuites id="" name="" tests="2" failures="2" skipped="0" errors="0" time="182.39627000000002">
+<testsuite name="audit-daily-ux.spec.ts" timestamp="2026-10-03T16:02:54.580Z" hostname="" tests="2" failures="2" skipped="0" time="33.673" errors="0">
+<testcase name="WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history" classname="audit-daily-ux.spec.ts" time="19.666">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      12 |  page.on('request',request=>{const url=new URL(request.url());if(url.pathname.endsWith(`/projects/${project}/icp-versions`))calls.push({offset:Number(url.searchParams.get('offset')),limit:Number(url.searchParams.get('limit'))});});
+      13 |  await page.getByRole('button',{name:'Edit offer',exact:true}).click();await expect(page.getByRole('textbox',{name:'Product / service',exact:true})).not.toBeEmpty();
+    > 14 |  expect(calls.length).toBeGreaterThan(0);expect(calls.length).toBeLessThanOrEqual(2);expect(calls.every(call=>call.limit===1)).toBe(true);
+         |                                                                                                                                ^
+      15 |  writeFileSync('test-results/q09-latest-offer.json',JSON.stringify({fixture_only:true,calls},null,2));
+      16 | });
+      17 |
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-daily-ux.spec.ts:14:128
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-ux-WF01-latest-8316b-han-downloading-ICP-history\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="U09 no selection hides batch forms; explicit selection exposes a sticky named action summary" classname="audit-daily-ux.spec.ts" time="14.007">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-daily-ux-U09-no-sele-fbac5-sticky-named-action-summary\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-daily-ux-U09-no-sele-fbac5-sticky-named-action-summary\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveCount(expected) failed" type="expect.toHaveCount">
+<![CDATA[  audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('region', { name: 'Buyer results', exact: true }).getByRole('region', { name: 'Assign buyer owners', exact: true })
+    Expected: 0
+    Received: 1
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('region', { name: 'Buyer results', exact: true }).getByRole('region', { name: 'Assign buyer owners', exact: true }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Buyer results', exact: true }).getByRole('region', { name: 'Assign buyer owners', exact: true })
+        13 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      18 | test('U09 no selection hides batch forms; explicit selection exposes a sticky named action summary',async({page})=>{
+      19 |  await open(page,'/app/discover');const buyers=page.getByRole('region',{name:'Buyer results',exact:true});await expect(buyers.getByRole('checkbox',{name:/^Select /})).toHaveCount(12);
+    > 20 |  await expect(buyers.getByRole('region',{name:'Assign buyer owners',exact:true})).toHaveCount(0);
+         |                                                                                   ^
+      21 |  await expect(buyers.getByRole('group',{name:'Selected buyer actions',exact:true})).toHaveCount(0);
+      22 |  await buyers.getByRole('checkbox',{name:/^Select /}).first().check();
+      23 |  const actions=buyers.getByRole('group',{name:'Selected buyer actions',exact:true});await expect(actions).toBeVisible();expect(await actions.evaluate(e=>getComputedStyle(e).position)).toBe('sticky');
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-daily-ux.spec.ts:20:83
+
+    Error Context: ..\..\test-results\audit-fixes\audit-daily-ux-U09-no-sele-fbac5-sticky-named-action-summary\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-daily-ux-U09-no-sele-fbac5-sticky-named-action-summary\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-daily-ux-U09-no-sele-fbac5-sticky-named-action-summary\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,0 +1,38 @@
+{
+  "fixture_only": true,
+  "operator_dom_profile_en": true,
+  "reviewer_dom_profile_zh": true,
+  "responses": [
+    {
+      "trace": "3-trace.network",
+      "status": 200,
+      "locale": "en",
+      "preferred_locale": null
+    },
+    {
+      "trace": "3-trace.network",
+      "status": 200,
+      "locale": "en",
+      "preferred_locale": null
+    },
+    {
+      "trace": "3-trace.network",
+      "status": 200,
+      "locale": "en",
+      "preferred_locale": null
+    },
+    {
+      "trace": "1-trace.network",
+      "status": 200,
+      "locale": "zh-HK",
+      "preferred_locale": null
+    },
+    {
+      "trace": "1-trace.network",
+      "status": 200,
+      "locale": "zh-HK",
+      "preferred_locale": null
+    }
+  ],
+  "interpretation": "Reviewer used actual persisted zh preference; fixed English-case setup must deliberately choose en. Business412/current role assertions unchanged."
+}

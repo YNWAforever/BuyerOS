@@ -1,0 +1,81 @@
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="2" time="425.10740100000004">
+<testsuite name="audit-bulk-confirmation.spec.ts" timestamp="2026-10-03T17:55:45.446Z" hostname="" tests="1" failures="0" skipped="0" time="69.496" errors="1">
+<testcase name="B04 inactive owner is rejected and a stale buyer reports conflict without overwriting" classname="audit-bulk-confirmation.spec.ts" time="69.496">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.check: Target page, context or browser has been closed
+
+      67 |  expect((await fixture('inspect')).buyers.slice(0,2).every((b:{owner:string|null;version:number})=>b.owner===null&&b.version===1)).toBe(true);
+      68 |  await panel.getByRole('combobox',{name:'Owner',exact:true}).selectOption(seeded.colleagues[1].membership_id);await expect(panel.getByRole('checkbox',{name:'Confirm owner assignment'})).not.toBeChecked();
+    > 69 |  await fixture('stale','e2000000-0000-4000-8000-000000000001');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
+         |                                                                                                                                    ^
+      70 |  const posted=page.waitForResponse(r=>r.url().endsWith('/buyer-owner-assignments')&&r.request().method()==='POST');await panel.getByRole('button',{name:'Assign selected buyers'}).click();const result=(await (await posted).json()).data;
+      71 |  expect([result.updated,result.conflicts,result.blocked]).toEqual([1,1,0]);const results=buyers.getByRole('region',{name:'Owner assignment results',exact:true});await expect(results).toContainText('1 updated; 0 unchanged; 0 blocked; 1 conflicts.');await expect(panel).toHaveCount(0);await expect(buyers).toContainText('0 selected explicitly');await results.getByText('Technical details',{exact:true}).click();await expect(results.locator('code')).toHaveText('e2000000-0000-4000-8000-000000000001');const state=await fixture('inspect');expect(state.buyers[0].owner).toBeNull();expect(state.buyers[0].version).toBe(2);expect(state.buyers[1].owner).toBe(seeded.colleagues[1].user_id);
+      72 |  writeFileSync('test-results/q05-owner-revalidation.json',JSON.stringify({fixture_only:true,result,state},null,2));
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-confirmation.spec.ts:69:132
+
+    Error Context: ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+<testsuite name="audit-memberships.spec.ts" timestamp="2026-10-03T17:55:45.446Z" hostname="" tests="1" failures="0" skipped="0" time="60.478" errors="1">
+<testcase name="U07 duplicate names and suffixes remain distinct during a versioned role change" classname="audit-memberships.spec.ts" time="60.478">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  audit-memberships.spec.ts:35:1 › U07 duplicate names and suffixes remain distinct during a versioned role change 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.check: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('region', { name: 'Member management', exact: true }).getByRole('group', { name: 'Member Alex', exact: true }).filter({ has: locator('code').filter({ hasText: '71000001-0000-4000-8000-000000c011de' }) }).getByRole('checkbox', { name: 'operator', exact: true })
+
+
+      38 |  await expect(region.locator('code')).toHaveText(['71000001-0000-4000-8000-000000c011de','71000002-0000-4000-8000-000000c011de']);
+      39 |  const first=region.getByRole('group',{name:'Member Alex',exact:true}).filter({has:page.locator('code').filter({hasText:'71000001-0000-4000-8000-000000c011de'})});
+    > 40 |  await first.getByRole('checkbox',{name:'operator',exact:true}).check();await region.getByRole('textbox',{name:'Change reason'}).fill('Fixture duty rotation');
+         |                                                                 ^
+      41 |  const changed=page.waitForResponse(r=>r.request().method()==='PATCH'&&r.url().includes('/memberships/'));
+      42 |  await first.getByRole('button',{name:'Save member',exact:true}).click();const response=await changed;expect(response.status()).toBe(200);
+      43 |  const payload=await response.json();expect(payload.data.user_id).toBe('71000001-0000-4000-8000-000000c011de');expect(payload.data.version).toBe(2);
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-memberships.spec.ts:40:65
+
+    Error Context: ..\..\test-results\audit-fixes\audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-memberships-U07-dupl-59fcd-ing-a-versioned-role-change\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

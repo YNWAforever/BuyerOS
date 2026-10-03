@@ -1,0 +1,151 @@
+{
+  "cwd": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS",
+  "shell": "Windows PowerShell",
+  "source": "1953d615dc00e6920380dbb71be6a99b96e36488",
+  "commands": [
+    {
+      "gate": "strict API21",
+      "command": "uv run --frozen --directory services/api pytest tests/test_daily_ux_db.py tests/test_profile_approval_races_db.py tests/test_usage_outcomes_db.py tests/test_api_routes_contract.py tests/test_contract_required_fields.py -q --junitxml=../../test-results/q09-api-third.xml",
+      "environment": {
+        "BUYEROS_STRICT_INTEGRATION": "1",
+        "BUYEROS_DATABASE_URL": "unset",
+        "DATABASE_URL": "unset",
+        "TEST_DATABASE_URL": "unset"
+      },
+      "report": "q09-api-third.xml",
+      "exit": 0
+    },
+    {
+      "gate": "Node34",
+      "command": "node --test tests/audit-profile-read.test.mjs tests/audit-job-query.test.mjs tests/audit-bulk-confirmation.test.mjs tests/audit-draft-guard.test.mjs tests/audit-draft-grounding.test.mjs tests/live-adapter-checks.mjs tests/live-auth-checks.mjs tests/job-poller-checks.mjs",
+      "report": "q09-node-handoff.log",
+      "exit": 0
+    },
+    {
+      "gate": "original full50 second",
+      "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-regression.config.ts tests/e2e/audit-daily-ux.spec.ts tests/e2e/audit-daily-journey.spec.ts tests/e2e/audit-bulk-confirmation.spec.ts tests/e2e/audit-memberships.spec.ts tests/e2e/audit-operations.spec.ts tests/e2e/audit-job-scope.spec.ts tests/e2e/audit-draft-reground.spec.ts tests/e2e/api-browser-zoom.spec.ts",
+      "environment": {
+        "BUYEROS_AUDIT_UI_RUNTIME": "built",
+        "BUYEROS_STRICT_INTEGRATION": "1",
+        "external_DSNs": "unset"
+      },
+      "report": "q09-built-second-full.xml",
+      "exit": 1
+    },
+    {
+      "gate": "membership whole8 rerun",
+      "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-regression.config.ts tests/e2e/audit-memberships.spec.ts",
+      "environment": {
+        "BUYEROS_AUDIT_UI_RUNTIME": "built",
+        "BUYEROS_STRICT_INTEGRATION": "1",
+        "external_DSNs": "unset"
+      },
+      "report": "q09-members-final.xml",
+      "exit": 0
+    },
+    {
+      "gate": "duplicate owner RED1",
+      "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-regression.config.ts tests/e2e/audit-memberships.spec.ts -g 'duplicate owner choices'",
+      "environment": {
+        "BUYEROS_AUDIT_UI_RUNTIME": "built",
+        "BUYEROS_STRICT_INTEGRATION": "1",
+        "external_DSNs": "unset"
+      },
+      "report": "q09-owner-red.xml",
+      "exit": 1
+    },
+    {
+      "gate": "final current affected17",
+      "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-regression.config.ts tests/e2e/audit-memberships.spec.ts tests/e2e/audit-bulk-confirmation.spec.ts",
+      "environment": {
+        "BUYEROS_AUDIT_UI_RUNTIME": "built",
+        "BUYEROS_STRICT_INTEGRATION": "1",
+        "external_DSNs": "unset"
+      },
+      "report": "q09-owner-final.xml",
+      "exit": 0
+    },
+    {
+      "gate": "demo21",
+      "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-responsive.config.ts",
+      "environment": {
+        "BUYEROS_AUDIT_UI_RUNTIME": "dev",
+        "BUYEROS_AUDIT_UI_MODE": "demo; set by config",
+        "profile": "portable inside owned container only",
+        "external_DSNs": "unset"
+      },
+      "report": "q09-responsive.xml",
+      "exit": 0
+    },
+    {
+      "gate": "types",
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "report": "q09-types-harness-final.log",
+      "exit": 0
+    },
+    {
+      "gate": "final edited-path lint",
+      "command": "node node_modules/eslint/bin/eslint.js features/live/bulk-actions.tsx tests/e2e/audit-memberships.spec.ts scripts/serve-audit-ui-fixture.mjs playwright.audit-responsive.config.ts --max-warnings=0",
+      "report": "q09-lint-owner-final.log",
+      "exit": 0
+    },
+    {
+      "gate": "all Q09 code-only lint",
+      "command": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "features/live/bulk-actions.tsx",
+        "features/live/buyer-results.tsx",
+        "features/live/locale.ts",
+        "features/live/member-directory.tsx",
+        "features/live/offer-wizard.tsx",
+        "features/live/operations.tsx",
+        "features/live/overview.tsx",
+        "features/live/profile.tsx",
+        "features/live/results.tsx",
+        "features/live/run-progress.tsx",
+        "features/live/workspace-picker.tsx",
+        "playwright.audit-regression.config.ts",
+        "playwright.audit-responsive.config.ts",
+        "playwright.audit-zoom.config.ts",
+        "scripts/serve-audit-ui-fixture.mjs",
+        "services/live/profile-read.ts",
+        "tests/audit-profile-read.test.mjs",
+        "tests/e2e/audit-bulk-confirmation.spec.ts",
+        "tests/e2e/audit-daily-journey.spec.ts",
+        "tests/e2e/audit-daily-ux.spec.ts",
+        "tests/e2e/audit-memberships.spec.ts",
+        "tests/e2e/fixtures/staff-journey.ts",
+        "scripts/audit-demo-warmup.mjs",
+        "--max-warnings=0"
+      ],
+      "report": "q09-lint-exact-final.log",
+      "exit": 0
+    },
+    {
+      "gate": "strict generated contract",
+      "command": "node scripts/generate-api-types.mjs --check",
+      "report": "q09-generated-handoff.log",
+      "exit": 0
+    },
+    {
+      "gate": "84 operation map",
+      "command": "uv run --frozen --directory services/api python ../../scripts/generate-operation-routes.py --check",
+      "report": "q09-routes-handoff.log",
+      "exit": 0
+    },
+    {
+      "gate": "Alembic heads read-only",
+      "command": "uv run --frozen --directory services/api alembic heads",
+      "report": "q09-alembic-heads.log",
+      "exit": 0
+    },
+    {
+      "gate": "rollback applicability only",
+      "command": "git apply --reverse --check docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch",
+      "report": "q09-rollback.json",
+      "exit": 0
+    }
+  ],
+  "selection": "--list copies retained; selected counts 50/8/17/21 nonzero; --list itself not a pass"
+}

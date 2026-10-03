@@ -1,0 +1,349 @@
+[WebServer] INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+[WebServer] INFO  [alembic.runtime.migration] Will assume transactional DDL.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade  -> 0001_initial, initial tenant boundary: workspaces, users, memberships
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0001_initial -> 0002_rls_and_roles, row-level security and least-privilege runtime roles
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0002_rls_and_roles -> 0003_p2_tables, P2 domain tables (projects, buyers, evidence, policy, budget, outbox) + RLS
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0003_p2_tables -> 0004_p4_p5_tables, P4/P5 tables (quotes, provider ops, drafts, approvals, outcomes) + RLS
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0004_p4_p5_tables -> 0005_p3_tables, P3 tables (runs, events, candidates, aliases, contacts) + RLS
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0005_p3_tables -> 0006_worker_leases, worker leases and outbox dispatch columns
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0006_worker_leases -> 0007_outbox_terminal_state, terminal outbox states, claim index and dispatcher workspace read
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0007_outbox_terminal_state -> 0008_grant_users_select, grant SELECT on users to the API role
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0008_grant_users_select -> 0009_project_profile_columns, project profile columns and ICP supersession
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0009_project_profile_columns -> 0010_widen_idempotency_key, widen idempotency_records.key to the contract's 200 chars
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0010_widen_idempotency_key -> 0011_project_buyer_version, buyer version and idempotency response storage
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0011_project_buyer_version -> 0012_offer_basis_revision, Track the offer revision used by immutable ICP versions.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0012_offer_basis_revision -> 0013_project_link_constraints, Constrain project-bound links across a shared workspace.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0013_project_link_constraints -> 0014_buyer_management, Version buyer lists and persist actor-scoped presets under tenant RLS.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0014_buyer_management -> 0015_policy_lifecycle, Give policy and suppression the full purpose/subject lifecycle contract.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0015_policy_lifecycle -> 0016_bulk_jobs, Durable actor-bound bulk jobs and per-buyer results.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0016_bulk_jobs -> 0017_settings_audit, Version existing memberships and persist actor preferences and audit request IDs.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0017_settings_audit -> 0018_budget_ledger, Versioned UTC budget scopes, one operation hold and economic-event identity.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0018_budget_ledger -> 0019_offer_documents, Private offer documents and fetched-source retention metadata.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0019_offer_documents -> 0020_research_provenance, Bind canonical candidates and evidence to one tenant/run/provider context.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0020_research_provenance -> 0021_run_bounds, Persist immutable run admission basis and cumulative execution counters.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0021_run_bounds -> 0022_research_checkpoints, Own LangGraph Postgres saver 3.1.2 schema in Alembic, never at runtime.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0022_research_checkpoints -> 0023_contact_quote_basis, Bind optional contact quotes to actor, project and immutable eligibility basis.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0023_contact_quote_basis -> 0024_contact_job_execution, Persist contact job versions and provider intent/result ownership.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0024_contact_job_execution -> 0025_provider_callback_route, Narrow, non-PII callback routing index for verified vendor references.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0025_provider_callback_route -> 0026_sender_identity_versions, Bind reviewed sender metadata to an active project-owned version.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0026_sender_identity_versions -> 0027_draft_integrity, Constrain draft buyer scope and make written revisions immutable.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0027_draft_integrity -> 0028_draft_approval_context, Bind draft approval review and recipient context without rewriting historical approvals.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0028_draft_approval_context -> 0029_export_authorization, Keep actor-bound export manifests so every content read can reauthorize live data.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0029_export_authorization -> 0030_manual_outcome_provenance, Bind manual outcomes to project and make runtime writes append-only.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0030_manual_outcome_provenance -> 0031_retention_redaction, Allow narrow, irreversible retention redaction of derived draft and approval payloads.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0031_retention_redaction -> 0032_contact_retention, Add explicit contact expiry and one-way addressed-draft redaction.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0032_contact_retention -> 0033_api_rate_windows, Durable per-actor API rate windows under tenant RLS.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0033_api_rate_windows -> 0034_worker_execution, Add disabled runtime selector, fenced step receipts and machine replay guard.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0034_worker_execution -> 0035_worker_recovery_probe, Bounded recovery cursor and minimal Queue/Workflow operational receipt.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0035_worker_recovery_probe -> 0036_checkpoint_schema_grants, Keep the pinned saver schema-version table read-only for native workers.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0036_checkpoint_schema_grants -> 0037_bulk_manifests, Actor-bound frozen maintenance manifests, preserving ordinary snapshot bounds.
+
+Running 28 tests using 1 worker
+
+(node:23648) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 tests\e2e\api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in en (32.8s)
+  ok  2 tests\e2e\audit-bulk-confirmation.spec.ts:22:1 › B02 adding a sixth buyer clears the previously confirmed five (22.6s)
+  ok  3 tests\e2e\audit-bulk-confirmation.spec.ts:34:1 › B02 reason, target and exclusions clear confirmation; unchanged selection survives paging (17.8s)
+  ok  4 tests\e2e\audit-bulk-confirmation.spec.ts:44:1 › B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works (34.7s)
+  x   5 tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting (36.9s)
+(node:54628) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  6 tests\e2e\audit-bulk-confirmation.spec.ts:75:1 › B16 committed response loss locks changes and reconciles the same key after a route remount (33.9s)
+  x   7 tests\e2e\audit-bulk-confirmation.spec.ts:85:1 › B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link (26.1s)
+(node:3652) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  8 tests\e2e\audit-bulk-confirmation.spec.ts:101:1 › B03 zh-HK mobile colleague search recovers a failed read (33.4s)
+  ok  9 tests\e2e\audit-bulk-confirmation.spec.ts:111:1 › B03 viewer cannot assign through UI or direct API (22.2s)
+  x  10 tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset (2.4m)
+(node:10952) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  11 tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset (19.1s)
+(node:50064) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  12 tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset (21.5s)
+(node:2500) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  13 tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset (2.6m)
+(node:40800) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 14 tests\e2e\audit-draft-reground.spec.ts:24:1 › D01/D03 manual Unicode draft exposes a source review and operator cannot attest (36.5s)
+  ok 15 tests\e2e\audit-draft-reground.spec.ts:63:1 › D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export (56.8s)
+  ok 16 tests\e2e\audit-draft-reground.spec.ts:79:1 › D03 zh-HK mobile code-point split reads every source and exports exact Unicode message (44.2s)
+  ok 17 tests\e2e\audit-draft-reground.spec.ts:90:1 › U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result (43.5s)
+  ok 18 tests\e2e\audit-job-scope.spec.ts:15:1 › U15 project A0 B5; card and failed list share scope; explicit workspace5 (20.0s)
+  ok 19 tests\e2e\audit-job-scope.spec.ts:26:1 › U15 workspace view remains actor-bound, other actor detail denied; admin read sees all (43.8s)
+  x  20 tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 21 job list fully pages20; scope resets offset and old rows (1.0m)
+(node:3192) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  21 tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 101 job list fully pages20; scope resets offset and old rows (1.0m)
+(node:51728) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 22 tests\e2e\audit-job-scope.spec.ts:39:1 › U15 held B list and count cannot overwrite newer A-B-A generation (36.5s)
+  ok 23 tests\e2e\audit-job-scope.spec.ts:46:1 › U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery (43.2s)
+  ok 24 tests\e2e\audit-operations.spec.ts:12:29 › B10 B11 all 21 real producer result IDs are readable in pages of 20 (40.7s)
+  ok 25 tests\e2e\audit-operations.spec.ts:12:29 › B10 B11 all 101 real producer result IDs are readable in pages of 20 (49.5s)
+  ok 26 tests\e2e\audit-operations.spec.ts:32:1 › B11 zero results and late job response cannot replace newer job (24.0s)
+  ok 27 tests\e2e\audit-operations.spec.ts:43:1 › B11 late result page is discarded after workspace A-B-A (20.9s)
+  ok 28 tests\e2e\audit-operations.spec.ts:112:1 › B16 old summary cannot overwrite another scope after A-B-A (24.6s)
+
+
+  1) tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('region', { name: 'Buyer results', exact: true }).getByRole('region', { name: 'Assign buyer owners', exact: true }).locator('code')
+    Expected: "e2000000-0000-4000-8000-000000000001"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveText" getByRole('region', { name: 'Buyer results', exact: true }).getByRole('region', { name: 'Assign buyer owners', exact: true }).locator('code') with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Buyer results', exact: true }).getByRole('region', { name: 'Assign buyer owners', exact: true }).locator('code')
+
+
+      69 |  await fixture('stale','e2000000-0000-4000-8000-000000000001');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
+      70 |  const posted=page.waitForResponse(r=>r.url().endsWith('/buyer-owner-assignments')&&r.request().method()==='POST');await panel.getByRole('button',{name:'Assign selected buyers'}).click();const result=(await (await posted).json()).data;
+    > 71 |  expect([result.updated,result.conflicts,result.blocked]).toEqual([1,1,0]);await expect(panel.locator('code')).toHaveText('e2000000-0000-4000-8000-000000000001');const state=await fixture('inspect');expect(state.buyers[0].owner).toBeNull();expect(state.buyers[0].version).toBe(2);expect(state.buyers[1].owner).toBe(seeded.colleagues[1].user_id);
+         |                                                                                                                ^
+      72 |  writeFileSync('test-results/q05-owner-revalidation.json',JSON.stringify({fixture_only:true,result,state},null,2));
+      73 | });
+      74 |
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-confirmation.spec.ts:71:112
+
+    Error Context: test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\audit-bulk-confirmation.spec.ts:85:1 › B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 202
+    Received: 503
+
+      89 |  const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});await panel.getByRole('textbox',{name:'Assignment reason'}).fill('Fixture scoped queued assignment');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
+      90 |  let release:()=>void=()=>{},received:()=>void=()=>{};const held=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);let job='';const keys:string[]=[];
+    > 91 |  await page.route(assignments,async route=>{keys.push(route.request().headers()['idempotency-key']);const response=await route.fetch();expect(response.status()).toBe(202);job=(await response.json()).data.id;if(keys.length===1){received();await held;}await route.fulfill({response}).catch(()=>{});});
+         |                                                                                                                                                                  ^
+      92 |  await panel.getByRole('button',{name:'Assign selected buyers'}).click();await started;await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);release();await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(project);
+      93 |  await expect(buyers.getByRole('checkbox',{name:'Select Buyer Fixture 01',exact:true})).toBeVisible();await expect(panel.getByRole('checkbox',{name:'Confirm owner assignment'})).toHaveCount(0);await expect(panel).toHaveCount(0);await expect(buyers).toContainText('0 selected explicitly');expect(new URL(page.url()).searchParams.get('bulk_job')).toBeNull();
+      94 |  await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(seeded.other);await expect(panel.getByRole('button',{name:'Retry same assignment'})).toBeVisible();await panel.getByRole('button',{name:'Retry same assignment'}).click();
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-confirmation.spec.ts:91:162
+
+    Error Context: test-results\audit-fixes\audit-bulk-confirmation-B1-617f1-conciles-its-exact-job-link\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\audit-fixes\audit-bulk-confirmation-B1-617f1-conciles-its-exact-job-link\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\audit-fixes\audit-bulk-confirmation-B1-617f1-conciles-its-exact-job-link\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+
+    TimeoutError: locator.selectOption: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('region', { name: 'Prepare grounded draft' }).getByRole('combobox', { name: 'Language', exact: true })
+
+
+      240 |   await expect(page.getByText(/Fictional distributor lists industrial sensors/)).toBeVisible();
+      241 |   await page.getByRole('combobox',{name:ui('Recipient (optional)')}).selectOption(existingContact.contact_id);
+    > 242 |   await page.getByRole('region',{name:ui('Prepare grounded draft')}).getByRole('combobox',{name:ui('Language'),exact:true}).selectOption(locale);
+          |                                                                                                                             ^
+      243 |   await page.getByRole('button',{name:ui('Generate addressed draft')}).click();
+      244 |   await expect.poll(()=>new URL(page.url()).searchParams.get('draft_job'),{timeout:30_000}).toMatch(/^[0-9a-f-]{36}$/);
+      245 |   const draftJobId=new URL(page.url()).searchParams.get('draft_job')!;
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts:242:125
+
+    Error Context: test-results\audit-fixes\audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\audit-fixes\audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\audit-fixes\audit-daily-journey-Q09-U0-33303--and-outcome-on-one-dataset\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Profile version 1' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Profile version 1' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: 'Profile version 1' })
+
+
+      130 |   await page.getByRole('button',{name:ui('Continue')}).click();
+      131 |   await page.getByRole('button',{name:ui('Save profile')}).click();
+    > 132 |   await expect(page.getByRole('heading',{name:ui('Profile version 1')})).toBeVisible();
+          |                                                                          ^
+      133 |   await fits(page);
+      134 |   const project=new URL(page.url()).searchParams.get('project')!;
+      135 |   expect(project).toMatch(/^[0-9a-f-]{36}$/);
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts:132:74
+
+    Error Context: test-results\audit-fixes\audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\audit-fixes\audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\audit-fixes\audit-daily-journey-Q09-U0-72dfa--and-outcome-on-one-dataset\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: '輪廓版本 1' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: '輪廓版本 1' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: '輪廓版本 1' })
+
+
+      130 |   await page.getByRole('button',{name:ui('Continue')}).click();
+      131 |   await page.getByRole('button',{name:ui('Save profile')}).click();
+    > 132 |   await expect(page.getByRole('heading',{name:ui('Profile version 1')})).toBeVisible();
+          |                                                                          ^
+      133 |   await fits(page);
+      134 |   const project=new URL(page.url()).searchParams.get('project')!;
+      135 |   expect(project).toMatch(/^[0-9a-f-]{36}$/);
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts:132:74
+
+    Error Context: test-results\audit-fixes\audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\audit-fixes\audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\audit-fixes\audit-daily-journey-Q09-U0-aeb58--and-outcome-on-one-dataset\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+
+    TimeoutError: locator.selectOption: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('region', { name: '準備有證據草稿' }).getByRole('combobox', { name: '語言', exact: true })
+
+
+      240 |   await expect(page.getByText(/Fictional distributor lists industrial sensors/)).toBeVisible();
+      241 |   await page.getByRole('combobox',{name:ui('Recipient (optional)')}).selectOption(existingContact.contact_id);
+    > 242 |   await page.getByRole('region',{name:ui('Prepare grounded draft')}).getByRole('combobox',{name:ui('Language'),exact:true}).selectOption(locale);
+          |                                                                                                                             ^
+      243 |   await page.getByRole('button',{name:ui('Generate addressed draft')}).click();
+      244 |   await expect.poll(()=>new URL(page.url()).searchParams.get('draft_job'),{timeout:30_000}).toMatch(/^[0-9a-f-]{36}$/);
+      245 |   const draftJobId=new URL(page.url()).searchParams.get('draft_job')!;
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\staff-journey.ts:242:125
+
+    Error Context: test-results\audit-fixes\audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\audit-fixes\audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\audit-fixes\audit-daily-journey-Q09-U0-450dd--and-outcome-on-one-dataset\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 21 job list fully pages20; scope resets offset and old rows 
+
+    Error: Fake sign-in must complete and request workspace access
+
+    Fake sign-in must complete and request workspace access
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Test timeout of 60000ms exceeded
+
+       at fixtures\workbench-auth.ts:45
+
+      43 |   // cases must reach the authenticated workspace read before asserting its result.
+      44 |   await expect.poll(()=>apiEvents.some(event=>event.startsWith('request GET ')&&new URL(event.slice('request GET '.length)).pathname==='/v1/workspaces'),
+    > 45 |     {timeout:30_000,message:'Fake sign-in must complete and request workspace access'}).toBe(true);
+         |                                                                                         ^
+      46 |   if(waitForProject){
+      47 |     try{await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});}
+      48 |     catch(error){throw new Error(`Project selection did not settle; API events: ${apiEvents.join(' | ')}`,{cause:error});}
+        at signInWorkbench (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\workbench-auth.ts:45:89)
+        at login (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-job-scope.spec.ts:12:47)
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-job-scope.spec.ts:33:33
+
+    Error Context: test-results\audit-fixes\audit-job-scope-U15-actual-2ee02--resets-offset-and-old-rows\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\audit-fixes\audit-job-scope-U15-actual-2ee02--resets-offset-and-old-rows\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\audit-fixes\audit-job-scope-U15-actual-2ee02--resets-offset-and-old-rows\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 101 job list fully pages20; scope resets offset and old rows 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: 'Bulk jobs' }).getByText('81–100 / 101', { exact: true })
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('region', { name: 'Bulk jobs' }).getByText('81–100 / 101', { exact: true }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Bulk jobs' }).getByText('81–100 / 101', { exact: true })
+      - Protocol error (Runtime.callFunctionOn): Internal server error, session closed.
+
+
+      33 |  const seeded=await seed(count);await login(page,`/app/operations?workspace=${workspace}&project=${project}&job_status=failed`);await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(projectB);
+      34 |  const jobs=page.getByRole('region',{name:'Bulk jobs'}),seen:string[]=[];
+    > 35 |  for(let offset=0;offset<count;offset+=20){await expect(jobs.getByText(`${offset+1}–${Math.min(offset+20,count)} / ${count}`,{exact:true})).toBeVisible();seen.push(...await jobs.getByRole('button').filter({hasText:/^[0-9a-f-]{36}$/}).allTextContents());if(offset+20<count)await jobs.getByRole('button',{name:'Next',exact:true}).click();}
+         |                                                                                                                                             ^
+      36 |  expect(new Set(seen)).toEqual(new Set(seeded.own_ids));expect(seen.length).toBe(count);
+      37 |  await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);await expect(jobs).toContainText('0 jobs in scope');await expect(jobs.getByText('0–0 / 0',{exact:true})).toBeVisible();expect(new URL(page.url()).searchParams.get('job_offset')??'0').toBe('0');
+      38 | });
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-job-scope.spec.ts:35:141
+
+    Error Context: test-results\audit-fixes\audit-job-scope-U15-actual-435b6--resets-offset-and-old-rows\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\audit-fixes\audit-job-scope-U15-actual-435b6--resets-offset-and-old-rows\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\audit-fixes\audit-job-scope-U15-actual-435b6--resets-offset-and-old-rows\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8 failed
+    tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+    tests\e2e\audit-bulk-confirmation.spec.ts:85:1 › B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link 
+    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+    tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 21 job list fully pages20; scope resets offset and old rows 
+    tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 101 job list fully pages20; scope resets offset and old rows 
+  20 passed (23.8m)

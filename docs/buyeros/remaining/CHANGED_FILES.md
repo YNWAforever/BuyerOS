@@ -653,3 +653,42 @@ services/worker/tests/fixtures/audit_job_scopes.py
 tests/audit-job-query.test.mjs
 tests/e2e/audit-job-scope.spec.ts
 ```
+
+
+## Q09 local review inventory
+
+Source 1953d615dc00e6920380dbb71be6a99b96e36488;29paths,0migration; [exactdiff](../evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch).
+
+~~~text
+app/globals.css
+features/live/bulk-actions.tsx
+features/live/buyer-results.tsx
+features/live/locale.ts
+features/live/member-directory.tsx
+features/live/offer-wizard.tsx
+features/live/operations.tsx
+features/live/overview.tsx
+features/live/profile.tsx
+features/live/results.tsx
+features/live/run-progress.tsx
+features/live/workspace-picker.tsx
+playwright.audit-regression.config.ts
+playwright.audit-responsive.config.ts
+playwright.audit-zoom.config.ts
+scripts/serve-audit-ui-fixture.mjs
+services/api/buyeros_api/api/routes/outcomes.py
+services/api/buyeros_api/services/outcome_service.py
+services/api/tests/test_daily_ux_db.py
+services/generated/buyeros-api.ts
+services/live/profile-read.ts
+tests/audit-profile-read.test.mjs
+tests/e2e/audit-bulk-confirmation.spec.ts
+tests/e2e/audit-daily-journey.spec.ts
+tests/e2e/audit-daily-ux.spec.ts
+tests/e2e/audit-memberships.spec.ts
+tests/e2e/fixtures/staff-journey.ts
+scripts/audit-demo-warmup.mjs
+docs/buyeros/contracts/openapi.proposed.yaml
+~~~
+
+Metadata artifact policy: .gitattributes adds only Q09 evidence -text to preserve captured bytes/checksums; raw log/XML/patch whitespace is retained. Source29-file rollback diff excludes this non-runtime metadata policy.

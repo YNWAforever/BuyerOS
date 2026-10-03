@@ -1,0 +1,55 @@
+.F...................                                                    [100%]
+================================== FAILURES ===================================
+_____ test_missing_actor_name_is_null_and_other_tenant_events_not_exposed _____
+
+quote_case = (<starlette.testclient.TestClient object at 0x000001F62F169090>, 'postgresql://buyeros:buyeros@127.0.0.1:58032/buyeros...fbfce-92ca-44a0-922e-8ccc6d1dcbc0'), ('4a9ed957-df99-48dd-a74c-28fe5f941e6c', '60f521dc-3258-4e22-ba30-b8cc6b37d789')])
+
+    def test_missing_actor_name_is_null_and_other_tenant_events_not_exposed(quote_case):
+        api, dsn, buyers = quote_case
+        path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/outcomes"
+        response = api.post(path, json={"buyer_id": buyers[0][0], "stage": "meeting", "source": "manual",
+            "occurred_at": "2026-09-20T11:15:00Z", "notes": "Q09 unnamed canonical actor"}, headers=_h(OPERATOR, key="q09-null-name"))
+        assert response.status_code == 201
+        actor = response.json()["data"]["actor_id"]
+        with psycopg.connect(dsn) as db:
+            db.execute("UPDATE users SET display_name=NULL WHERE id=%s", (actor,))
+        events = api.get(path, headers=_h(OPERATOR))
+        assert events.status_code == 200
+        assert events.json()["data"]["items"][0]["actor_display_name"] is None
+        assert_contract_response("OutcomeEventPageResponse", events.json())
+>       assert api.get(f"/v1/workspaces/{uuid.uuid4()}/projects/{PROJECT}/outcomes", headers=_h(OPERATOR)).status_code == 403
+E       AssertionError: assert 404 == 403
+E        +  where 404 = <Response [404 Not Found]>.status_code
+E        +    where <Response [404 Not Found]> = get('/v1/workspaces/c9666e09-a501-4713-b553-50077c9b678e/projects/a0000000-0000-4000-8000-000000000001/outcomes', headers={'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InRlc3Qta2V5LTEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2lzc3Vlc...-GNSVRGUpojmRIPmD_tDujFBCfAsvl7KHMrjaYjGT3BWKQ9hyl7SBuQ64Im9u67EuMf5K4EP9hl5kQ770x8sg', 'Idempotency-Key': 'create-01'})
+E        +      where get = <starlette.testclient.TestClient object at 0x000001F62F169090>.get
+E        +      and   {'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InRlc3Qta2V5LTEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2lzc3Vlc...-GNSVRGUpojmRIPmD_tDujFBCfAsvl7KHMrjaYjGT3BWKQ9hyl7SBuQ64Im9u67EuMf5K4EP9hl5kQ770x8sg', 'Idempotency-Key': 'create-01'} = _h('auth0|operator-a')
+
+tests\test_daily_ux_db.py:51: AssertionError
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_daily_ux_db.py::test_manual_event_projects_canonical_name_and_replay_does_not_relink
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_daily_ux_db.py::test_manual_event_projects_canonical_name_and_replay_does_not_relink
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q09-api-second.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_daily_ux_db.py::test_missing_actor_name_is_null_and_other_tenant_events_not_exposed
+1 failed, 20 passed, 7 warnings in 81.41s (0:01:21)

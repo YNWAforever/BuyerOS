@@ -1,0 +1,18 @@
+[
+  {
+    "path": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\artifacts\\t29-screenshots\\en-buyer-page-2-1280-post-extraction.png",
+    "writer": "unchanged responsive-accessibility.spec.ts screenshots at212/266",
+    "generated_sha256": "75891dd17c1593d3847f11ad9e651075e0050e59827796777b4ee1debaacd65c",
+    "baseline_restored_sha256": "0c51b0edbb6762344c6cf86db267dcdb2c56aaea49242baac631a43013b49634",
+    "generated_copy": "test-results/q09-demo-artifact-en-buyer-page-2-1280-post-extraction.png",
+    "user_changes_not_discarded": "only these two known test-generated deltas; branch artifacts initially clean"
+  },
+  {
+    "path": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\artifacts\\t29-screenshots\\zh-results-usage-390-post-extraction.png",
+    "writer": "unchanged responsive-accessibility.spec.ts screenshots at212/266",
+    "generated_sha256": "e390a0e8d68dc0b9960db9c6aae38e4fb9ac5a8aa9b3e604c369a9d057da9d9e",
+    "baseline_restored_sha256": "3171c158caf53ff2635f31bbd62a1d2fa33c5b6632ff07ecaa055f3076c7d0f5",
+    "generated_copy": "test-results/q09-demo-artifact-zh-results-usage-390-post-extraction.png",
+    "user_changes_not_discarded": "only these two known test-generated deltas; branch artifacts initially clean"
+  }
+]

@@ -1,0 +1,19 @@
+Listing tests:
+  audit-bulk-confirmation.spec.ts:22:1 › B02 adding a sixth buyer clears the previously confirmed five
+  audit-bulk-confirmation.spec.ts:34:1 › B02 reason, target and exclusions clear confirmation; unchanged selection survives paging
+  audit-bulk-confirmation.spec.ts:44:1 › B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works
+  audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting
+  audit-bulk-confirmation.spec.ts:77:1 › B16 committed response loss locks changes and reconciles the same key after a route remount
+  audit-bulk-confirmation.spec.ts:87:1 › B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link
+  audit-bulk-confirmation.spec.ts:103:1 › B03 zh-HK mobile colleague search recovers a failed read
+  audit-bulk-confirmation.spec.ts:113:1 › B03 viewer cannot assign through UI or direct API
+  audit-memberships.spec.ts:18:1 › U06 all 250 real members are readable in 13 pages and member 101 is searchable
+  audit-memberships.spec.ts:35:1 › U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable
+  audit-memberships.spec.ts:43:1 › B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority
+  audit-memberships.spec.ts:60:1 › U07 duplicate names and suffixes remain distinct during a versioned role change
+  audit-memberships.spec.ts:74:1 › U08 sole admin refusal is understandable and does not claim success
+  audit-memberships.spec.ts:83:1 › S06 viewer cannot read the admin directory or eligible assignees
+  audit-memberships.spec.ts:89:1 › U06 stale page response cannot restore old A-B-A directory
+  audit-memberships.spec.ts:100:1 › U06 zh-HK mobile search and failed page read recover without synthetic rows
+  audit-memberships.spec.ts:112:1 › U07 lost committed role response requires a read before any further role write
+Total: 17 tests in 2 files

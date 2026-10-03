@@ -1,0 +1,61 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="1" time="319.35326299999997">
+<testsuite name="audit-bulk-confirmation.spec.ts" timestamp="2026-10-03T17:47:29.906Z" hostname="" tests="1" failures="0" skipped="0" time="90.621" errors="1">
+<testcase name="B04 inactive owner is rejected and a stale buyer reports conflict without overwriting" classname="audit-bulk-confirmation.spec.ts" time="90.621">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: Command failed: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/audit_bulk.py cleanup
+
+
+    Error: Project selection did not settle; API events: request GET http://localhost:5173/v1/workspaces?offset=0&limit=100 | 200 http://localhost:5173/v1/workspaces?offset=0&limit=100 | request GET http://localhost:5173/v1/workspaces/e0000000-0000-4000-8000-000000000001/preferences | request GET http://localhost:5173/v1/workspaces?offset=0&limit=100 | request GET http://localhost:5173/v1/workspaces/e0000000-0000-4000-8000-000000000001/projects?offset=0&limit=100 | 200 http://localhost:5173/v1/workspaces?offset=0&limit=100
+
+       at fixtures\workbench-auth.ts:48
+
+      46 |   if(waitForProject){
+      47 |     try{await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});}
+    > 48 |     catch(error){throw new Error(`Project selection did not settle; API events: ${apiEvents.join(' | ')}`,{cause:error});}
+         |                        ^
+      49 |   }
+      50 | }
+      51 |
+        at signInWorkbench (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\workbench-auth.ts:48:24)
+        at open (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-confirmation.spec.ts:13:2)
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-confirmation.spec.ts:63:53
+    [cause]: Error: expect(locator).toHaveValue(expected) failed
+
+    Locator: getByRole('combobox', { name: /^(Project|專案)$/ })
+    Expected: "e1000000-0000-4000-8000-000000000001"
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveValue" getByRole('combobox', { name: /^(Project|專案)$/ }) with timeout 30000ms
+      - waiting for getByRole('combobox', { name: /^(Project|專案)$/ })
+      - Test timeout of 60000ms exceeded.
+
+        at signInWorkbench (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\workbench-auth.ts:47:74)
+        at open (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-confirmation.spec.ts:13:2)
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-confirmation.spec.ts:63:53
+
+    Error Context: ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

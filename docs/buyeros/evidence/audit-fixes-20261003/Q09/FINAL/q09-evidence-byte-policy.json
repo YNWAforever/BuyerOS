@@ -1,0 +1,16 @@
+{
+  "scope": "docs/buyeros/evidence/audit-fixes-20261003/Q09/**",
+  "git_attribute": "-text whitespace=cr-at-eol: preserves native bytes and recognizes recorded Windows CRLF; other paths retain default whitespace rules",
+  "raw_formatting_findings": 413,
+  "raw_extensions_only": [
+    ".log",
+    ".xml",
+    ".patch"
+  ],
+  "source_and_curated_document_whitespace_errors": 0,
+  "raw_files_not_stripped_or_modified": true,
+  "whitespace_check_exception": "Only these three raw producer extensions in this Q09 evidence directory; all other paths checked",
+  "artifact_hashes_verified_against_index_before_commit": true,
+  "required_test_assertions_timeouts_skips_changed": false,
+  "restaging": "git add --renormalize -- Q09 evidence only; reapplies -text to previous staged LF conversion, restores raw index bytes without editing files"
+}

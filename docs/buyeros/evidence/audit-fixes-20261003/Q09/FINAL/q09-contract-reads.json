@@ -1,0 +1,27 @@
+[
+  {
+    "path": "docs/buyeros/03_DATA_API_AND_STATE_CONTRACTS.md",
+    "sha256": "f35c26f67072802dc461677dfae4f9ec67b9108ccb3c985d2fe538a13c54d1cc",
+    "loaded_full_text_header_printed": true
+  },
+  {
+    "path": "docs/buyeros/00_README_AND_DECISIONS.md",
+    "sha256": "ab62020e634270ecece879ee4efce0ac3d6f9b2d30bb25f171d5139810a9004d",
+    "loaded_full_text_header_printed": true
+  },
+  {
+    "path": "docs/buyeros/decisions/BO-001-runtime-identity.md",
+    "sha256": "b371791019d3cebcbb5b8bba03257394394a74444591873e495f8ed34c12be46",
+    "loaded_full_text_header_printed": true
+  },
+  {
+    "path": "docs/buyeros/tasks/BO-007-persist-projects-editable-offers-and-immutable-approved-buyer-profiles.md",
+    "sha256": "0d662688d5879127276e8d7a02a13f0bc492867c448c88db20b2cd9a3d6a231b",
+    "loaded_full_text_header_printed": true
+  },
+  {
+    "path": "docs/buyeros/tasks/BO-028-prepare-a-reviewable-pilot-release-and-human-evaluation-protocol.md",
+    "sha256": "04dd4949eae8970477c3bbab4dc92c332a7b73800a56468bd111726c78b89c29",
+    "loaded_full_text_header_printed": true
+  }
+]

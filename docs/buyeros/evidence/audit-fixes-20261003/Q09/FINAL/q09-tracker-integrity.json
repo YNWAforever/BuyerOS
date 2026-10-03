@@ -1,0 +1,24 @@
+{
+  "original_cases": 98,
+  "original_fields_per_case_preserved": 15,
+  "repair_rows_updated": [
+    "U09",
+    "U10",
+    "U11",
+    "U12",
+    "WF01",
+    "WF02"
+  ],
+  "other_case_rows_unchanged": 92,
+  "other_task_records_unchanged": 24,
+  "operations": 84,
+  "original_operations": 70,
+  "extensions": 14,
+  "outcome_operations_updated": [
+    "correctOutcome",
+    "listOutcomes",
+    "recordOutcome"
+  ],
+  "other_operations_unchanged": 81,
+  "deployed_sha": null
+}

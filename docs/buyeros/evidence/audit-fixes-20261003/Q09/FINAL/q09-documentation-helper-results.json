@@ -1,0 +1,6 @@
+{
+  "first_finalizer": "Task ID replacement typo caused StopIteration before task completion; fixed and full invariants rerun pass",
+  "first_document_generator": "NameError missing shutil at final trace-copy stage; source/report/tracker/docs written, no tests altered",
+  "repair": "Added missing import; performed only remaining trace copy and checksums, did not append duplicate status/HANDOFF blocks",
+  "test_result_changes": false
+}

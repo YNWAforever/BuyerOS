@@ -1,0 +1,19 @@
+{
+  "base_sha": "38e88735b003fa8fdc0e8d034e5a883d9df5d204",
+  "branch": "codex/audit-fixes-20261003",
+  "origin": "https://github.com/YNWAforever/BuyerOS.git",
+  "frozen_inputs_verified": 31,
+  "guard_files_verified_unchanged": {
+    "services/api/tests/conftest.py": "54fd72c2553067cf36d8760dc99d0e650cb7fa3f47a9eb9be2236a96a1e1045f",
+    "services/worker/tests/conftest.py": "859b15bf36b183a651d1b1f0de48a749357829b5f7d1c3570c37294944a86946",
+    "services/api/tools/serve_e2e_fixture.py": "15b7bc7edd0a30cf41f6b401c6c7b24a8c6e28e0d88d808812eefbcb8bc7ea2b",
+    "services/worker/tests/fixtures/run_browser_research.py": "175c51f7937087d905a30fd80981d50b58915928539638ebf212b385e16a4953"
+  },
+  "root_head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+  "root_clean": true,
+  "unrelated_neon_head": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "unrelated_neon_dirty_paths": 193,
+  "unrelated_neon_raw_diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0",
+  "new_db_migrations": 0,
+  "external_actions": []
+}

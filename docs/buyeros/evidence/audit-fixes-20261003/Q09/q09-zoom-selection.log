@@ -1,0 +1,11 @@
+Listing tests:
+  api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in en
+  api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in zh-HK
+  audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history
+  audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary
+  audit-daily-ux.spec.ts:32:1 › WF01 project-only partial save preserves every input and same intent creates one project and ICP
+  audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research
+  audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements
+  audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements
+  audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh
+Total: 9 tests in 2 files

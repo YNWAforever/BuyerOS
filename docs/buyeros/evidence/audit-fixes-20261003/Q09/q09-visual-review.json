@@ -1,0 +1,15 @@
+{
+  "review_kind": "author visual inspection",
+  "observed_images": [
+    "q09-zh-HK-390.png",
+    "t29-api-actual-zoom-en-buyers.png"
+  ],
+  "observations": [
+    "zh-HK390: readable one-column scope and progress panels, wrapped navigation, technical counters collapsed; no visually cropped content in supplied screenshot.",
+    "Native en200%: enlarged human project/workspace labels, single-column scope; screenshot matches automated native zoom measurement."
+  ],
+  "limitations": [
+    "Screenshots are fictional HTTP fixtures, not production or employee acceptance.",
+    "All other routes rely on named automated layout assertions; not a claim every screen received independent visual review."
+  ]
+}

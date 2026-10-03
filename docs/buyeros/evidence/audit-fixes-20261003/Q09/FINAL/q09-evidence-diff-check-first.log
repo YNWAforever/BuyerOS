@@ -1,0 +1,823 @@
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:79: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:125: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:263: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:396: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:422: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:618: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:620: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:629: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:648: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:649: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:652: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:653: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:669: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:670: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:695: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:696: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:844: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:848: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:863: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:875: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:988: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/Q09.patch:1024: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.log:21: trailing whitespace.
++tests\test_daily_ux_db.py:50: 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.log:35: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.log:43: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.log:61: trailing whitespace.
++tests\test_usage_outcomes_db.py:151: 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.log:75: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.log:83: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.xml:17: trailing whitespace.
++tests\test_daily_ux_db.py:50: 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.xml:31: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.xml:39: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.xml:54: trailing whitespace.
++tests\test_usage_outcomes_db.py:151: 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.xml:68: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-api-first.xml:76: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-b04-dev.xml:12: trailing whitespace.
++<![CDATA[  audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-b04-green.log:48: trailing whitespace.
++  1) tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-b04-green.log:95: trailing whitespace.
++    tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:47: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:55: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:57: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:58: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:64: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:66: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:68: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:70: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:72: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:80: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:82: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:84: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:165: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:235: trailing whitespace.
++  1) tests\e2e\api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in zh-HK 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:268: trailing whitespace.
++  2) tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:302: trailing whitespace.
++  3) tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:336: trailing whitespace.
++  4) tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:365: trailing whitespace.
++  5) tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:394: trailing whitespace.
++  6) tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:428: trailing whitespace.
++    tests\e2e\api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in zh-HK 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:429: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:430: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:431: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:432: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-final.log:433: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-first-full.xml:14: trailing whitespace.
++<![CDATA[  api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in zh-HK 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-first-full.xml:78: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-first-full.xml:123: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-first-full.xml:168: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-first-full.xml:208: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-first-full.xml:256: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-first.xml:12: trailing whitespace.
++<![CDATA[  audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-first.xml:50: trailing whitespace.
++<![CDATA[  audit-memberships.spec.ts:35:1 › U07 duplicate names and suffixes remain distinct during a versioned role change 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:47: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:49: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:50: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:56: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:58: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:60: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:62: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:64: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:72: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:74: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:76: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:84: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:165: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:177: trailing whitespace.
++  1) tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:202: trailing whitespace.
++  2) tests\e2e\audit-memberships.spec.ts:35:1 › U07 duplicate names and suffixes remain distinct during a versioned role change 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:231: trailing whitespace.
++    tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-red.log:232: trailing whitespace.
++    tests\e2e\audit-memberships.spec.ts:35:1 › U07 duplicate names and suffixes remain distinct during a versioned role change 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:47: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:55: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:57: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:58: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:64: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:66: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:68: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:70: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:72: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:74: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:76: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:157: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:219: trailing whitespace.
++  1) tests\e2e\audit-memberships.spec.ts:43:1 › U07 duplicate names and suffixes remain distinct during a versioned role change 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:234: trailing whitespace.
++  2) tests\e2e\audit-memberships.spec.ts:57:1 › U08 sole admin refusal is understandable and does not claim success 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:250: trailing whitespace.
++    tests\e2e\audit-memberships.spec.ts:43:1 › U07 duplicate names and suffixes remain distinct during a versioned role change 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.log:251: trailing whitespace.
++    tests\e2e\audit-memberships.spec.ts:57:1 › U08 sole admin refusal is understandable and does not claim success 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.xml:90: trailing whitespace.
++<![CDATA[  audit-memberships.spec.ts:43:1 › U07 duplicate names and suffixes remain distinct during a versioned role change 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second-full.xml:116: trailing whitespace.
++<![CDATA[  audit-memberships.spec.ts:57:1 › U08 sole admin refusal is understandable and does not claim success 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:41: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:42: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:48: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:50: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:52: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:54: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:56: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:64: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:66: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:68: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:148: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:158: trailing whitespace.
++  1) tests\e2e\audit-memberships.spec.ts:35:1 › U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.log:194: trailing whitespace.
++    tests\e2e\audit-memberships.spec.ts:35:1 › U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-built-second.xml:16: trailing whitespace.
++<![CDATA[  audit-memberships.spec.ts:35:1 › U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-lint-handoff.log:6: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-members-final.log:41: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-members-final.log:42: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-members-final.log:48: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-members-final.log:50: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-members-final.log:52: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-members-final.log:54: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-members-final.log:56: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-members-final.log:58: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-members-final.log:60: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-members-final.log:141: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-final.log:47: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-final.log:49: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-final.log:50: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-final.log:56: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-final.log:58: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-final.log:60: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-final.log:62: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-final.log:64: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-final.log:66: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-final.log:68: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-final.log:149: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:41: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:49: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:50: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:56: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:58: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:60: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:62: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:64: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:66: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:68: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:76: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:157: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:166: trailing whitespace.
++  1) tests\e2e\audit-memberships.spec.ts:43:1 › B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.log:202: trailing whitespace.
++    tests\e2e\audit-memberships.spec.ts:43:1 › B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-owner-red.xml:12: trailing whitespace.
++<![CDATA[  audit-memberships.spec.ts:43:1 › B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:91: trailing whitespace.
++  1) tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:124: trailing whitespace.
++  2) tests\e2e\audit-bulk-confirmation.spec.ts:85:1 › B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:150: trailing whitespace.
++  3) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:176: trailing whitespace.
++  4) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:209: trailing whitespace.
++  5) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:242: trailing whitespace.
++  6) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:268: trailing whitespace.
++  7) tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 21 job list fully pages20; scope resets offset and old rows 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:305: trailing whitespace.
++  8) tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 101 job list fully pages20; scope resets offset and old rows 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:341: trailing whitespace.
++    tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:342: trailing whitespace.
++    tests\e2e\audit-bulk-confirmation.spec.ts:85:1 › B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:343: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:344: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:345: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:346: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:347: trailing whitespace.
++    tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 21 job list fully pages20; scope resets offset and old rows 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-regression.log:348: trailing whitespace.
++    tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 101 job list fully pages20; scope resets offset and old rows 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-responsive-first.log:31: trailing whitespace.
++  1) tests\e2e\responsive-accessibility.spec.ts:15:3 › fictional demo routes remain usable at four widths in en 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-responsive-first.log:65: trailing whitespace.
++    tests\e2e\responsive-accessibility.spec.ts:15:3 › fictional demo routes remain usable at four widths in en 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-responsive-startup-first.log:2: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.log:59: trailing whitespace.
++  1) tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.log:85: trailing whitespace.
++  2) tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.log:118: trailing whitespace.
++  3) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.log:143: trailing whitespace.
++  4) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.log:169: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.log:170: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.log:171: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.log:172: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.xml:12: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.xml:53: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.xml:97: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-first.xml:133: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-fourth.log:54: trailing whitespace.
++  1) tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-fourth.log:82: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-fourth.xml:24: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-red.log:51: trailing whitespace.
++  1) tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-red.log:77: trailing whitespace.
++  2) tests\e2e\audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-red.log:113: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-red.log:114: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-red.xml:12: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-red.xml:49: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:80: trailing whitespace.
++  1) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:106: trailing whitespace.
++  2) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:139: trailing whitespace.
++  3) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:172: trailing whitespace.
++  4) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:199: trailing whitespace.
++  5) tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:214: trailing whitespace.
++  6) tests\e2e\audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:229: trailing whitespace.
++  7) tests\e2e\audit-daily-ux.spec.ts:32:1 › WF01 project-only partial save preserves every input and same intent creates one project and ICP 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:243: trailing whitespace.
++  8) tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:258: trailing whitespace.
++  9) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:273: trailing whitespace.
++  10) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:288: trailing whitespace.
++  11) tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:304: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:305: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:306: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:307: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:308: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:309: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:310: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:32:1 › WF01 project-only partial save preserves every input and same intent creates one project and ICP 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:311: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:312: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:313: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.log:314: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.xml:12: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.xml:49: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.xml:93: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.xml:137: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.xml:177: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.xml:203: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.xml:229: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:32:1 › WF01 project-only partial save preserves every input and same intent creates one project and ICP 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.xml:254: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.xml:280: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.xml:306: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-second.xml:332: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-third.log:58: trailing whitespace.
++  1) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-third.log:93: trailing whitespace.
++  2) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-third.log:95: trailing whitespace.
++    Error: locator.evaluate: Target crashed 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-third.log:119: trailing whitespace.
++  3) tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-third.log:153: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-third.log:154: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-third.log:155: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-third.xml:20: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-third.xml:66: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-third.xml:68: trailing whitespace.
++    Error: locator.evaluate: Target crashed 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-third.xml:103: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-zoom.log:58: trailing whitespace.
++  1) tests\e2e\api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in en 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-ui-zoom.log:95: trailing whitespace.
++    tests\e2e\api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in en 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/q09-zoom.xml:12: trailing whitespace.
++<![CDATA[  api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in en 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.log:21: trailing whitespace.
++tests\test_daily_ux_db.py:50: 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.log:35: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.log:43: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.log:61: trailing whitespace.
++tests\test_usage_outcomes_db.py:151: 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.log:75: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.log:83: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.xml:17: trailing whitespace.
++tests\test_daily_ux_db.py:50: 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.xml:31: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.xml:39: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.xml:54: trailing whitespace.
++tests\test_usage_outcomes_db.py:151: 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.xml:68: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-api-first.xml:76: trailing whitespace.
++E           
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-b04-dev.xml:12: trailing whitespace.
++<![CDATA[  audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-b04-green.log:48: trailing whitespace.
++  1) tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-b04-green.log:95: trailing whitespace.
++    tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:47: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:55: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:57: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:58: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:64: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:66: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:68: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:70: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:72: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:80: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:82: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:84: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:165: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:235: trailing whitespace.
++  1) tests\e2e\api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in zh-HK 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:268: trailing whitespace.
++  2) tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:302: trailing whitespace.
++  3) tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:336: trailing whitespace.
++  4) tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:365: trailing whitespace.
++  5) tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:394: trailing whitespace.
++  6) tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:428: trailing whitespace.
++    tests\e2e\api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in zh-HK 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:429: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:430: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:431: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:432: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-final.log:433: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-first-full.xml:14: trailing whitespace.
++<![CDATA[  api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in zh-HK 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-first-full.xml:78: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-first-full.xml:123: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-first-full.xml:168: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-first-full.xml:208: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-first-full.xml:256: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-first.xml:12: trailing whitespace.
++<![CDATA[  audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-first.xml:50: trailing whitespace.
++<![CDATA[  audit-memberships.spec.ts:35:1 › U07 duplicate names and suffixes remain distinct during a versioned role change 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:47: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:49: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:50: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:56: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:58: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:60: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:62: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:64: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:72: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:74: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:76: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:84: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:165: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:177: trailing whitespace.
++  1) tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:202: trailing whitespace.
++  2) tests\e2e\audit-memberships.spec.ts:35:1 › U07 duplicate names and suffixes remain distinct during a versioned role change 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:231: trailing whitespace.
++    tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-red.log:232: trailing whitespace.
++    tests\e2e\audit-memberships.spec.ts:35:1 › U07 duplicate names and suffixes remain distinct during a versioned role change 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:41: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:42: trailing whitespace.
++[WebServer] [plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:48: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:50: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:52: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:54: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:56: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:64: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:66: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:68: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:148: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:158: trailing whitespace.
++  1) tests\e2e\audit-memberships.spec.ts:35:1 › U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.log:194: trailing whitespace.
++    tests\e2e\audit-memberships.spec.ts:35:1 › U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-built-second.xml:16: trailing whitespace.
++<![CDATA[  audit-memberships.spec.ts:35:1 › U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-lint-handoff.log:6: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:91: trailing whitespace.
++  1) tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:124: trailing whitespace.
++  2) tests\e2e\audit-bulk-confirmation.spec.ts:85:1 › B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:150: trailing whitespace.
++  3) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:176: trailing whitespace.
++  4) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:209: trailing whitespace.
++  5) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:242: trailing whitespace.
++  6) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:268: trailing whitespace.
++  7) tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 21 job list fully pages20; scope resets offset and old rows 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:305: trailing whitespace.
++  8) tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 101 job list fully pages20; scope resets offset and old rows 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:341: trailing whitespace.
++    tests\e2e\audit-bulk-confirmation.spec.ts:62:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:342: trailing whitespace.
++    tests\e2e\audit-bulk-confirmation.spec.ts:85:1 › B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:343: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:344: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:345: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:346: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:347: trailing whitespace.
++    tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 21 job list fully pages20; scope resets offset and old rows 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.log:348: trailing whitespace.
++    tests\e2e\audit-job-scope.spec.ts:32:29 › U15 actual 101 job list fully pages20; scope resets offset and old rows 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.xml:14: trailing whitespace.
++<![CDATA[  api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in zh-HK 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.xml:78: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.xml:123: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.xml:168: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.xml:208: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:103:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-regression.xml:256: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.log:59: trailing whitespace.
++  1) tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.log:85: trailing whitespace.
++  2) tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.log:118: trailing whitespace.
++  3) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.log:143: trailing whitespace.
++  4) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.log:169: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.log:170: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.log:171: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.log:172: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.xml:12: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.xml:53: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.xml:97: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-first.xml:133: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-fourth.log:54: trailing whitespace.
++  1) tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-fourth.log:82: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-fourth.xml:24: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-red.log:51: trailing whitespace.
++  1) tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-red.log:77: trailing whitespace.
++  2) tests\e2e\audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-red.log:113: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-red.log:114: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-red.xml:12: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-red.xml:49: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:80: trailing whitespace.
++  1) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:106: trailing whitespace.
++  2) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:139: trailing whitespace.
++  3) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:172: trailing whitespace.
++  4) tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:199: trailing whitespace.
++  5) tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:214: trailing whitespace.
++  6) tests\e2e\audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:229: trailing whitespace.
++  7) tests\e2e\audit-daily-ux.spec.ts:32:1 › WF01 project-only partial save preserves every input and same intent creates one project and ICP 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:243: trailing whitespace.
++  8) tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:258: trailing whitespace.
++  9) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:273: trailing whitespace.
++  10) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:288: trailing whitespace.
++  11) tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:304: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:305: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:306: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:307: trailing whitespace.
++    tests\e2e\fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:308: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:309: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:310: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:32:1 › WF01 project-only partial save preserves every input and same intent creates one project and ICP 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:311: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:312: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:313: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.log:314: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.xml:12: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.xml:49: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.xml:93: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.xml:137: trailing whitespace.
++<![CDATA[  fixtures\staff-journey.ts:102:1 › Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.xml:177: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:10:1 › WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.xml:203: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:18:1 › U09 no selection hides batch forms; explicit selection exposes a sticky named action summary 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.xml:229: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:32:1 › WF01 project-only partial save preserves every input and same intent creates one project and ICP 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.xml:254: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:48:1 › WF02 held reviewer cannot approve the previous offer revision or start research 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.xml:280: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.xml:306: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-second.xml:332: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-third.log:58: trailing whitespace.
++  1) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-third.log:93: trailing whitespace.
++  2) tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-third.log:95: trailing whitespace.
++    Error: locator.evaluate: Target crashed 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-third.log:119: trailing whitespace.
++  3) tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-third.log:153: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-third.log:154: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-third.log:155: trailing whitespace.
++    tests\e2e\audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-third.xml:20: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 en keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-third.xml:66: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:62:2 › U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-third.xml:68: trailing whitespace.
++    Error: locator.evaluate: Target crashed 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-third.xml:103: trailing whitespace.
++<![CDATA[  audit-daily-ux.spec.ts:76:1 › U09 manual outcome names, UTC zero denominators and append-only correction survive refresh 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-zoom.log:58: trailing whitespace.
++  1) tests\e2e\api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in en 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-ui-zoom.log:95: trailing whitespace.
++    tests\e2e\api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in en 
+docs/buyeros/evidence/audit-fixes-20261003/Q09/q09-zoom.xml:12: trailing whitespace.
++<![CDATA[  api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in en 

@@ -1,0 +1,1117 @@
+diff --git a/app/globals.css b/app/globals.css
+index a585db7..3d5ddb3 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -202,3 +202,13 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
+ .bulk-manifest-panel input:not([type="checkbox"]),
+ .bulk-manifest-panel select,
+ .bulk-manifest-panel textarea { width: 100%; min-width: 0; max-width: 100%; }
++
++/* Q09: selection summary stays reachable without keeping inactive forms onscreen. */
++.live-selection-bar {position:sticky;top:8px;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface,white);box-shadow:0 2px 8px #0001;}
++.live-selection-bar a {color:var(--foreground);text-decoration:underline;}
++.live-workspace :is(button,a,input,select,textarea,summary):focus-visible {outline:3px solid var(--primary,#3256be);outline-offset:3px;}
++.live-workspace details code {overflow-wrap:anywhere;}
++
++.live-scope-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
++.live-scope-grid > .panel {min-width:0;margin-bottom:0;}
++@media (max-width:720px) {.live-scope-grid {grid-template-columns:minmax(0,1fr);}}
+diff --git a/docs/buyeros/contracts/openapi.proposed.yaml b/docs/buyeros/contracts/openapi.proposed.yaml
+index 6f1220e..9e96642 100644
+--- a/docs/buyeros/contracts/openapi.proposed.yaml
++++ b/docs/buyeros/contracts/openapi.proposed.yaml
+@@ -7570,6 +7570,7 @@ paths:
+                       notes: Illustrative contract value
+                       project_id: 10000000-0000-4000-8000-000000000001
+                       actor_id: 10000000-0000-4000-8000-000000000001
++                      actor_display_name: null
+                       recorded_at: '2026-09-15T02:00:00Z'
+                     request_id: 10000000-0000-4000-8000-000000000001
+                     data_mode: live
+@@ -7682,6 +7683,7 @@ paths:
+                       notes: Illustrative contract value
+                       project_id: 10000000-0000-4000-8000-000000000001
+                       actor_id: 10000000-0000-4000-8000-000000000001
++                      actor_display_name: null
+                       recorded_at: '2026-09-15T02:00:00Z'
+                     request_id: 10000000-0000-4000-8000-000000000001
+                     data_mode: live
+@@ -11224,6 +11226,13 @@ components:
+         provenance_reference: *id055
+         project_id: *id001
+         actor_id: *id001
++        actor_display_name:
++          type:
++          - string
++          - 'null'
++          minLength: 1
++          maxLength: 200
++          description: Current display name of this event's canonical actor; never identity or role authority.
+         recorded_at: *id004
+         supersedes_id: *id001
+         correction_reason:
+@@ -11244,6 +11253,7 @@ components:
+       - notes
+       - project_id
+       - actor_id
++      - actor_display_name
+       - recorded_at
+     OutcomeCorrection:
+       type: object
+diff --git a/features/live/bulk-actions.tsx b/features/live/bulk-actions.tsx
+index f5c34ff..432eeff 100644
+--- a/features/live/bulk-actions.tsx
++++ b/features/live/bulk-actions.tsx
+@@ -1,5 +1,6 @@
+ 'use client';
+ import {useEffect,useMemo,useRef,useState} from 'react';
++import {liveZh} from './locale';
+ import type {components} from '@/services/generated/buyeros-api';
+ import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
+ import {assignmentRecovery,freezeBulkAssignment,type FrozenBulkAssignment} from '@/services/live/bulk-confirmation';
+@@ -31,7 +32,7 @@ const zhCopy:Record<string,string>={
+   'Retrying...':'正在重試…','Cancel pending rows':'取消未處理列','Cancelling...':'正在取消…','queued':'排隊中','running':'處理中',
+   'completed':'已完成','failed':'失敗','cancel_requested':'要求取消','cancelled':'已取消',
+ };
+-function copy(value:string,locale:Locale){return locale==='zh-HK'?(zhCopy[value]??value):value;}
++function copy(value:string,locale:Locale){return locale==='zh-HK'?(zhCopy[value]??liveZh[value]??value):value;}
+ export function isAsyncJob(value:BulkOutcome):value is AsyncJob{return 'kind' in value;}
+ 
+ export function LiveBulkActions({selection,count,canAssign,ownMembershipId,onJob,onCommitted,locale='en'}:{
+@@ -87,17 +88,24 @@ export function LiveBulkActions({selection,count,canAssign,ownMembershipId,onJob
+    if(ctx.isCurrent()&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));
+   }finally{writeBusy.current=false;if(ctx.isCurrent())setBusy(false);}
+  }
++ const resultView=(message||failures.length>0)&&<section aria-label={copy('Owner assignment results',locale)}>
++  <h3>{copy('Owner assignment results',locale)}</h3>
++  {message&&<p role="status" aria-atomic="true">{message}</p>}
++  {failures.length>0&&<details><summary>{copy('Technical details',locale)}</summary><ul>{failures.map(row=><li key={row.id}><code>{row.id}</code>: {row.reason_code??row.status}{row.version?` (${row.version})`:''}</li>)}</ul></details>}
++ </section>;
+  if(!canAssign)return null;
++ if(count===0&&!pending)return resultView?<div className="panel bulk-action-panel">{resultView}</div>:null;
+  const preview=pending??frozen,selectedOwner=pending?pending.body.owner_membership_id:owner;
+- const shownOwner=pending?pending.body.owner_membership_id===ownMembershipId?copy('Me',locale):pending.body.owner_membership_id??copy('No owner',locale):owner===ownMembershipId&&owner?copy('Me',locale):owner===null?copy('No owner',locale):ownerLabel;
++ const shownOwner=selectedOwner===null?copy('No owner',locale):selectedOwner===ownMembershipId?copy('Me',locale):
++  page?.items.find(row=>row.membership_id===selectedOwner)?.display_name??(!pending||selectedOwner===owner?ownerLabel:copy('Selected colleague (name unavailable)',locale));
+  return <section className="panel bulk-action-panel" aria-label={copy('Assign buyer owners',locale)}>
+   <h3>{copy('Assign buyer owners',locale)}</h3>
+   <p>{locale==='zh-HK'?`預覽：已選 ${preview?.count??count} 位買家；提交前會重新檢查每列的版本和負責人資格。`:`Preview: ${preview?.count??count} selected buyer${(preview?.count??count)===1?'':'s'}; each current version and owner membership is checked again before commit.`}</p>
+-  <p style={{overflowWrap:'anywhere'}}>{copy('Scope',locale)}: {scope.workspace} / {scope.project}</p>
+-  <p style={{overflowWrap:'anywhere'}}>{copy('Owner',locale)}: {shownOwner} {preview?.body.owner_membership_id??''}</p>
++  <details><summary>{copy('Technical details',locale)}</summary><p style={{overflowWrap:'anywhere'}}>{copy('Scope',locale)}: {scope.workspace} / {scope.project}</p><p>{preview?.body.owner_membership_id??''}</p></details>
++  <p style={{overflowWrap:'anywhere'}}>{copy('Owner',locale)}: {shownOwner}</p>
+   <label className="bulk-action-field">{copy('Owner',locale)} <select style={{display:'block',width:'100%',maxWidth:'100%'}} aria-label={copy('Owner',locale)} disabled={locked} value={selectedOwner??''} onChange={e=>{setOwner(e.target.value||null);setOwnerLabel(e.target.selectedOptions[0].text);}}>
+    <option value="">{copy('No owner',locale)}</option>{ownMembershipId&&<option value={ownMembershipId}>{copy('Me',locale)}</option>}
+-   {selectedOwner&&selectedOwner!==ownMembershipId&&!page?.items.some(row=>row.membership_id===selectedOwner)&&<option value={selectedOwner}>{pending?selectedOwner:ownerLabel}</option>}
++   {selectedOwner&&selectedOwner!==ownMembershipId&&!page?.items.some(row=>row.membership_id===selectedOwner)&&<option value={selectedOwner}>{shownOwner}</option>}
+    {page?.items.filter(row=>row.membership_id!==ownMembershipId).map(row=><option key={row.membership_id} value={row.membership_id}>{row.display_name} · {row.user_id}</option>)}
+   </select></label>
+   <form className="bulk-action-row" onSubmit={e=>{e.preventDefault();setQ(search.trim());setOffset(0);setRefresh(v=>v+1);}}>
+@@ -114,8 +122,7 @@ export function LiveBulkActions({selection,count,canAssign,ownMembershipId,onJob
+   {pending&&!busy?<><p role="alert">{copy('The assignment result is unknown. Retry the same frozen assignment to reconcile; changes are locked until its result is known.',locale)}</p>
+    <button onClick={()=>void assign(pending)}>{copy('Retry same assignment',locale)}</button></>
+    :<AssignmentConfirmation key={`${snapshot.identity}:${frozen?.fingerprint??''}:${message}`} preview={frozen} enabled={count>0&&reason.trim().length>=3&&!locked} busy={busy} locale={locale} onAssign={assign}/>}
+-  {failures.length>0&&<ul>{failures.map(row=><li key={row.id}><code>{row.id}</code>: {row.reason_code??row.status}{row.version?` (${row.version})`:''}</li>)}</ul>}
+-  {message&&<p role="status">{message}</p>}{error&&<p role="alert">{error}</p>}
++  {resultView}{error&&<p role="alert">{error}</p>}
+  </section>;
+ }
+ function AssignmentConfirmation({preview,enabled,busy,locale,onAssign}:{preview:FrozenBulkAssignment|null;enabled:boolean;busy:boolean;locale:Locale;onAssign:(preview:FrozenBulkAssignment)=>Promise<void>}){
+diff --git a/features/live/buyer-results.tsx b/features/live/buyer-results.tsx
+index 1025ecc..1b27595 100644
+--- a/features/live/buyer-results.tsx
++++ b/features/live/buyer-results.tsx
+@@ -18,7 +18,7 @@ import {startNewManifest} from '@/services/live/bulk-manifests';
+ 
+ const reviewStatuses=['accepted','rejected','needs_information'] as const;
+ const initial=():BuyerQuery=>readBuyerQuery(typeof window==='undefined'?'':window.location.search);
+-export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,canAssign=false,ownMembershipId=null,locale='en',onManualOutcome}:{canReview?:boolean;canEdit?:boolean;canQuote?:boolean;canAssign?:boolean;ownMembershipId?:string|null;locale?:'en'|'zh-HK';onManualOutcome?:(buyerId:string)=>void}){
++export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,canAssign=false,ownMembershipId=null,locale='en',onManualOutcome}:{canReview?:boolean;canEdit?:boolean;canQuote?:boolean;canAssign?:boolean;ownMembershipId?:string|null;locale?:'en'|'zh-HK';onManualOutcome?:(buyerId:string,buyerName:string)=>void}){
+   const {session,client}=useWorkspaceSession();
+   const t=(value:string)=>locale==='zh-HK'?(liveZh[value]||value):value;
+   const sessionSnapshot=useSessionSnapshot(),scope=sessionSnapshot.scope;
+@@ -59,7 +59,8 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
+     const url=new URL(window.location.href);url.searchParams.delete('bulk_manifest');
+     window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);
+   },[session]);
+-  const lastDetailTrigger=useRef<HTMLButtonElement|null>(null);
++  const lastDetailTrigger=useRef<HTMLButtonElement|null>(null),buyerRoot=useRef<HTMLElement|null>(null);
++  const returnDetailFocus=useRef<{id:string;snapshot:string;identity:string}|null>(null);
+   const filterQuery=useMemo<BuyerQuery>(()=>({q:query.q,fit:query.fit,review:query.review,queue:query.queue,sort:query.sort,listId:query.listId,size:12,offset:0}),[query.q,query.fit,query.review,query.queue,query.sort,query.listId]);
+   const workspace=scope.workspace,project=scope.project;
+   function changeQuery(patch:Partial<BuyerQuery>,reset=false){
+@@ -94,6 +95,15 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
+     })();
+     return()=>{active=false;};
+   },[client,session,snapshot,query,workspace,project]);
++  useEffect(()=>{
++    const pending=returnDetailFocus.current;
++    if(!pending)return;
++    if(pending.identity!==sessionSnapshot.identity){returnDetailFocus.current=null;return;}
++    if(detailId||!snapshot||!page||snapshot.id===pending.snapshot)return;
++    const trigger=buyerRoot.current?.querySelector<HTMLButtonElement>(`button[data-buyer-id="${CSS.escape(pending.id)}"]`);
++    (trigger??buyerRoot.current?.querySelector<HTMLButtonElement>('[data-refresh-buyers]'))?.focus();
++    returnDetailFocus.current=null;
++  },[page,snapshot,detailId,sessionSnapshot.identity]);
+   function selectPage(){
+     if(!page)return;
+     setAllFiltered(false);setExcluded([]);
+@@ -146,7 +156,7 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
+   if(!workspace||!project)return <section className="panel" role="status">{t('No project selected. Save a profile to create one.')}</section>;
+   const index=page?.items.findIndex(buyer=>buyer.id===detailId)??-1;
+   const current=index>=0?page?.items[index]:undefined;
+-  return <section className="panel live-buyer-results" aria-label={t('Buyer results')}>
++  return <section ref={buyerRoot} className="panel live-buyer-results" aria-label={t('Buyer results')}>
+     <div className="inline spread"><h2>{t('Buyers')}</h2><span>{snapshot?t('{count} in snapshot').replace('{count}',String(snapshot.total)):t('Loading snapshot...')}</span></div>
+     <div className="inline" role="group" aria-label={t('Buyer filters')}>
+       <label>{t('Search buyers')} <input aria-label={t('Search buyers')} value={search} onChange={event=>setSearch(event.target.value)} onKeyDown={event=>{if(event.key==='Enter')changeQuery({q:search.trim()},true);}}/></label>
+@@ -155,8 +165,13 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
+       <label>{t('Review')} <select aria-label={t('Review filter')} value={query.review} onChange={event=>changeQuery({review:event.target.value as BuyerQuery['review']},true)}><option value="">{t('Any')}</option><option value="awaiting_review">{t('Awaiting review')}</option><option value="accepted">{t('Accepted')}</option><option value="rejected">{t('Rejected')}</option><option value="needs_information">{t('Needs information')}</option></select></label>
+       <label>{t('Queue')} <select aria-label={t('Work queue filter')} value={query.queue} onChange={event=>changeQuery({queue:event.target.value as BuyerQuery['queue']},true)}><option value="">{t('All')}</option><option value="unassigned">{t('Unassigned')}</option><option value="unknown">{t('Unknown fit')}</option></select></label>
+       <label>{t('Sort')} <select aria-label={t('Buyer sort')} value={query.sort} onChange={event=>changeQuery({sort:event.target.value as BuyerQuery['sort']},true)}><option value="name_asc">{t('Name')}</option><option value="best_fit">{t('Best fit')}</option></select></label>
+-      <button type="button" onClick={()=>setReload(value=>value+1)}>{t('Refresh results')}</button>
++      <button type="button" data-refresh-buyers onClick={()=>setReload(value=>value+1)}>{t('Refresh results')}</button>
+     </div>
++    {selectedCount>0&&<div className="live-selection-bar" role="group" aria-label={t('Selected buyer actions')}>
++      <span role="status">{t('{count} selected').replace('{count}',String(selectedCount))}</span>
++      <a href="#selected-buyer-tools">{t('Selected actions')}</a>
++      <button type="button" onClick={()=>{setAllFiltered(false);setSelected({});setExcluded([]);}}>{t('Clear selection')}</button>
++    </div>}
+     {snapshot?.clipped&&<p role="status">{t('Showing the first 1000 matching buyers. Narrow filters to select all matching buyers.')}</p>}
+     {error&&<p role="alert">{t(error)}</p>}{loading&&<p role="status">{t('Loading buyers...')}</p>}
+     {page&&<>
+@@ -168,8 +183,8 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
+       {page.items.length?page.items.map(buyer=><div className="activity" key={buyer.id}>
+         <input type="checkbox" aria-label={t('Select {buyer}').replace('{buyer}',buyer.name)} checked={allFiltered?!excluded.includes(buyer.id):buyer.id in selected} onChange={()=>toggle(buyer.id,buyer.version)}/>
+         <div><b>{buyer.name}</b><p>{t(buyer.fitVerdict||'Fit not assessed')} · {t(buyer.reviewStatus||'Not reviewed')} · {buyer.note||t('No note')}</p></div>
+-        <button type="button" onClick={event=>{lastDetailTrigger.current=event.currentTarget;setDetailId(buyer.id);}}>{t('Details')}</button>
+-        {onManualOutcome&&<button type="button" onClick={()=>onManualOutcome(buyer.id)}>{t('Log outcome')}</button>}
++        <button type="button" data-buyer-id={buyer.id} onClick={event=>{lastDetailTrigger.current=event.currentTarget;setDetailId(buyer.id);}}>{t('Details')}</button>
++        {onManualOutcome&&<button type="button" onClick={()=>onManualOutcome(buyer.id,buyer.name)}>{t('Log outcome')}</button>}
+       </div>):<p>{t('No buyers in this snapshot.')}</p>}
+       <div className="inline spread"><div className="inline"><button type="button" disabled={query.offset===0||loading} onClick={()=>changeQuery({offset:Math.max(0,query.offset-query.size)})}>{t('Previous page')}</button>
+         <span>{t('Rows {from}–{to} of {total}').replace('{from}',String(page.total?query.offset+1:0)).replace('{to}',String(Math.min(query.offset+page.items.length,page.total))).replace('{total}',String(page.total))}</span>
+@@ -177,19 +192,20 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
+         <label>{t('Rows per page')} <select aria-label={t('Rows per page')} value={query.size} onChange={event=>changeQuery({size:Number(event.target.value) as BuyerQuery['size'],offset:0})}><option value={8}>8</option><option value={12}>12</option><option value={24}>24</option></select></label>
+       </div>
+     </>}
+-    {canReview&&page&&<div className="inline"><label>{t('Review status')} <select aria-label={t('Review status')} value={status} onChange={event=>setStatus(event.target.value as typeof status)}>{reviewStatuses.map(value=><option key={value} value={value}>{t(value)}</option>)}</select></label>
++    <div id="selected-buyer-tools">{canReview&&page&&selectedCount>0&&<div className="inline"><label>{t('Review status')} <select aria-label={t('Review status')} value={status} onChange={event=>setStatus(event.target.value as typeof status)}>{reviewStatuses.map(value=><option key={value} value={value}>{t(value)}</option>)}</select></label>
+       <label>{t('Review reason')} <input aria-label={t('Review reason')} value={reason} onChange={event=>setReason(event.target.value)}/></label>
+       <button type="button" disabled={busy||selectedCount<=0} onClick={()=>void submitReview()}>{t(busy?'Reviewing...':'Apply review')}</button></div>}
+     {reviewResult&&<p role="status">{t('Review: {updated} updated; {blocked} blocked; {conflicts} conflicts.').replace('{updated}',String(reviewResult.updated)).replace('{blocked}',String(reviewResult.blocked)).replace('{conflicts}',String(reviewResult.conflicts))} {reviewResult.results.filter(row=>row.status==='blocked'||row.status==='conflict').map(row=>`${row.id}: ${row.reason_code??row.status}`).join('; ')}</p>}
+-    {canEdit&&<ExportDialog key={`export:${workspace}:${project}`} locale={locale} selection={selection()} canExport={canEdit}/>}
++    {canEdit&&selectedCount>0&&<ExportDialog key={`export:${workspace}:${project}`} locale={locale} selection={selection()} canExport={canEdit}/>}
+     <LiveBulkActions key={`bulk:${sessionSnapshot.identity}`} locale={locale} selection={selection()} count={selectedCount} canAssign={canAssign} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted}/>
++    </div>
+     {(canAssign||canReview||canEdit)&&<BulkManifestMaintenance key={`manifest:${sessionSnapshot.identity}:${manifestSource?.id??''}`} locale={locale} query={filterQuery} canAssign={canAssign} canReview={canReview} canManage={canEdit} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted} sourceJob={manifestSource}/>}
+     {jobId&&<BulkJobPanel key={`job:${sessionSnapshot.identity}:${jobId}`} locale={locale} jobId={jobId} onManifestRetry={previewFailedManifest} onJob={onJob} onCommitted={onCommitted} onClose={closeJob}/>}
+     <LiveBuyerManagementControls key={`management:${workspace}:${project}`} locale={locale} onJob={onJob} query={query} onApplyQuery={patch=>{setSelected({});setAllFiltered(false);setExcluded([]);changeQuery(patch,true);setReload(value=>value+1);}} selection={selection()} canManage={canEdit}/>
+     {current&&<LiveBuyerDetail key={current.id} buyer={current} locale={locale} canEdit={canEdit} canQuote={canQuote} canReview={canReview} ownMembershipId={ownMembershipId}
+       onReviewAndNext={(nextStatus,nextReason)=>reviewOneAndNext(current.id,current.version,nextStatus,nextReason)}
+       onChanged={updated=>{setPage(previous=>previous?{...previous,items:previous.items.map(row=>row.id===updated.id?updated:row)}:previous);setSelected({});setAllFiltered(false);setExcluded([]);}}
+-      onClose={()=>{setDetailId(null);setReload(value=>value+1);lastDetailTrigger.current?.focus();}}
++      onClose={()=>{if(snapshot)returnDetailFocus.current={id:lastDetailTrigger.current?.dataset.buyerId??current.id,snapshot:snapshot.id,identity:sessionSnapshot.identity};setDetailId(null);setReload(value=>value+1);}}
+       onPrevious={index>0?()=>setDetailId(page!.items[index-1].id):undefined}
+       onNext={page&&index<page.items.length-1?()=>setDetailId(page.items[index+1].id):undefined}/>}
+   </section>;
+diff --git a/features/live/locale.ts b/features/live/locale.ts
+index 963ed46..f5408a8 100644
+--- a/features/live/locale.ts
++++ b/features/live/locale.ts
+@@ -1,5 +1,12 @@
+ /** Live-only system copy; factual source/user text is never translated automatically. */
+ export const liveZh: Record<string,string> = {
++  'Owner assignment results':'負責人分派結果','Selected colleague (name unavailable)':'已選同事（未提供姓名）',
++  'Staff-selected buyer':'職員已選買家',
++  'The offer changed. This profile cannot be approved.':'產品資料已更改，不能批准此輪廓。','Offer revision':'產品資料版本','Reload profile':'重新載入輪廓',
++  'Selected buyer actions':'已選買家操作','Selected actions':'已選操作','{count} selected':'已選 {count} 項',
++  'Profile history changed. Refresh the offer before saving.':'輪廓歷史已更新。請重新載入產品資料後再儲存。',
++  'Job details':'工作詳情','Technical details':'技術資料','Staff member (name unavailable)':'職員（未提供姓名）',
++
+   'The membership result is unknown. Reload members to check the current version before making another change.':'成員更新結果尚未確定。請重新載入成員並核對目前版本，再作其他更改。',
+   'Search members':'搜尋成員','Search':'搜尋','Member':'成員','Member pages':'成員分頁',
+   'Loading members…':'正在載入成員…','Previous members':'上一頁成員','Next members':'下一頁成員',
+diff --git a/features/live/member-directory.tsx b/features/live/member-directory.tsx
+index 60d00d6..1754889 100644
+--- a/features/live/member-directory.tsx
++++ b/features/live/member-directory.tsx
+@@ -77,9 +77,10 @@ export function MemberDirectory({workspace,t}:{workspace:string;t:(value:string)
+ }
+ function MemberRow({member,pending,onSave,t}:{member:Member;pending:boolean;onSave:(m:Member,roles:Role[],active:boolean)=>Promise<void>;t:(value:string)=>string}){
+  const [selected,setSelected]=useState<Role[]>(member.roles),[active,setActive]=useState(member.active);
+- return <div role="group" aria-label={`${t('Member')} ${member.user_id}`} style={{borderTop:'1px solid var(--border)',paddingBlock:12,minWidth:0}}>
+-  <strong>{member.display_name}</strong><br/><code style={{overflowWrap:'anywhere'}}>{member.user_id}</code>
+-  <fieldset aria-label={`${t('Roles')} ${member.user_id}`} disabled={pending} style={{minWidth:0}}><legend>{t('Roles')}</legend>
++ const name=member.display_name===member.user_id?t('Staff member (name unavailable)'):member.display_name;
++ return <div role="group" aria-label={`${t('Member')} ${name}`} style={{borderTop:'1px solid var(--border)',paddingBlock:12,minWidth:0}}>
++  <strong>{name}</strong><details><summary>{t('Technical details')}</summary><code style={{overflowWrap:'anywhere'}}>{member.user_id}</code> · {member.id}</details>
++  <fieldset aria-label={`${t('Roles')} ${name}`} disabled={pending} style={{minWidth:0}}><legend>{t('Roles')}</legend>
+    {roles.map(role=><label key={role}>{t(role)} <input type="checkbox" checked={selected.includes(role)} onChange={e=>setSelected(current=>e.target.checked?[...current,role]:current.filter(value=>value!==role))}/></label>)}
+   </fieldset>
+   <label>{t('Active')} <input type="checkbox" disabled={pending} checked={active} onChange={e=>setActive(e.target.checked)}/></label>
+diff --git a/features/live/offer-wizard.tsx b/features/live/offer-wizard.tsx
+index 83d7c19..17d103a 100644
+--- a/features/live/offer-wizard.tsx
++++ b/features/live/offer-wizard.tsx
+@@ -7,10 +7,10 @@ import {ActionIntent} from '@/services/live/action-intent';
+ import {LiveOfferDocuments} from './offer-documents';
+ import {LiveCancelled,LiveError,describeLiveError} from '@/services/live/client';
+ import {emptyLiveOffer,offerFromProject,toIcpSaveRequest,toProjectCreate,validateLiveOffer} from '@/services/live/profile';
++import {readLatestProfile} from '@/services/live/profile-read';
+ import {ProfileStepError,saveProfile} from '@/services/live/writes';
+ 
+ type Project=components['schemas']['Project'];
+-type ICP=components['schemas']['ICPVersion'];
+ type Fact=components['schemas']['OfferFact'];
+ type EditBase={id:string;version:number;offer_revision:number;latestIcpVersionId:string|null};
+ const labels=['Your offer','Target buyers','Buyer requirements','Review and save'];
+@@ -51,17 +51,8 @@ export function LiveOfferWizard({mode,projectId,onSaved,t}: {
+       try{
+         const token=session.token();
+         const project=await client.request<Project>({path,token,scope:identity,signal});
+-        const versions:ICP[]=[];
+-        for(let offset=0;;){
+-          const page=await client.request<{items:ICP[];offset:number;limit:number;total:number}>({path:`${path}/icp-versions?offset=${offset}&limit=100`,token,scope:identity,signal});
+-          if(page.offset!==offset||page.limit<1||!Array.isArray(page.items))throw new Error('Invalid profile page');
+-          versions.push(...page.items);
+-          if(versions.length>=page.total)break;
+-          if(!page.items.length)throw new Error('Incomplete profile history');
+-          offset+=page.items.length;
+-        }
++        const latest=await readLatestProfile(client,session,projectId,signal);
+         if(!active||!session.isCurrent(identity))return;
+-        const latest=versions.reduce<ICP|null>((best,row)=>!best||row.number>best.number?row:best,null);
+         setOffer(offerFromProject(project,latest));
+         setSelectedDocuments(latest?.offer_document_ids??[]);
+         setDocumentFacts(Object.fromEntries((latest?.offer_facts??[])
+diff --git a/features/live/operations.tsx b/features/live/operations.tsx
+index c352476..968b68b 100644
+--- a/features/live/operations.tsx
++++ b/features/live/operations.tsx
+@@ -1,6 +1,7 @@
+ 'use client';
+ import {useEffect,useMemo,useRef,useState} from 'react';
+ import {useSearchParams} from 'next/navigation';
++import {readLatestProfile} from '@/services/live/profile-read';
+ import {buildJobQuery,jobQueryParams,readJobStatus,type JobScope} from '@/services/live/job-query';
+ import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
+ import {LiveCancelled,describeLiveError} from '@/services/live/client';
+@@ -82,12 +83,9 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+     if(!project)return()=>own.abort();
+     void (async()=>{
+       const current=await client.request<{status:string;offer_revision:number}>({path:`/v1/workspaces/${workspace}/projects/${project}`,token,scope:identity,signal});
+-      const first=await client.request<Page<{approved_at:string|null;basis_offer_revision:number|null}>>({path:`/v1/workspaces/${workspace}/projects/${project}/icp-versions?offset=0&limit=1`,token,scope:identity,signal});
++      const latest=await readLatestProfile(client,session,project,signal);
+       if(!session.isCurrent(identity)||own.signal.aborted)return;
+-      if(first.total===0){setProfileQueue('none');return;}
+-      const latest=first.total===1?first.items[0]:(await client.request<Page<{approved_at:string|null;basis_offer_revision:number|null}>>({
+-        path:`/v1/workspaces/${workspace}/projects/${project}/icp-versions?offset=${first.total-1}&limit=1`,token,scope:identity,signal})).items[0];
+-      if(!session.isCurrent(identity)||own.signal.aborted||!latest)return;
++      if(!latest){setProfileQueue('none');return;}
+       setProfileQueue(current.status!=='active'||latest.basis_offer_revision!==current.offer_revision?'stale':latest.approved_at?'current':'pending');
+     })().catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted&&session.isCurrent(identity)){setProfileQueue('unavailable');setError(describeLiveError(e));}});
+     return()=>own.abort();
+@@ -154,7 +152,7 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+       <label>{t('Job scope')} <select aria-label={t('Job scope')} value={jobScope.kind} onChange={e=>{setJobView(e.target.value as 'project'|'workspace');changeJob('');}}>
+         <option value="project" disabled={!project}>{t('Project jobs')}</option><option value="workspace">{t('Workspace jobs')}</option>
+       </select></label>
+-      <p>{t(jobScope.kind==='project'?'Project jobs':'Workspace jobs')}: <code>{jobScope.kind==='project'?jobScope.projectId:jobScope.workspaceId}</code></p>
++      <p>{t(jobScope.kind==='project'?'Project jobs':'Workspace jobs')}</p><details><summary>{t('Technical details')}</summary><code>{jobScope.kind==='project'?jobScope.projectId:jobScope.workspaceId}</code></details>
+       {!isAdmin&&<p>{t('Only jobs created by your account are included.')}</p>}
+       <label>{t('Filter status')} <select aria-label={t('Filter status')} value={jobStatus??''} onChange={e=>{setJobStatus(readJobStatus(e.target.value));changeJob('');}}>
+         <option value="">{t('All statuses')}</option>{['queued','running','cancel_requested','cancelled','completed','failed'].map(value=><option key={value} value={value}>{t(value)}</option>)}
+@@ -172,7 +170,7 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+     </div>
+     <div role="region" aria-label={t('Job lookup')}><h3>{t('Job lookup')}</h3><label>{t('Job ID')} <input aria-label={t('Job ID')} value={jobId} onChange={e=>changeJob(e.target.value)}/></label>
+       <button onClick={()=>void loadJob()}>{t('Load job')}</button>
+-      {job&&<div role="status"><p>{job.status}: {job.processed}/{job.requested} · {job.updated} {t('updated')} · {job.blocked} {t('blocked')} · {job.conflicts} {t('conflicts')}</p>
++      {job&&<div role="region" aria-label={t('Job details')}><p role="status" aria-atomic="true">{t(job.status)}</p><p>{job.processed}/{job.requested} · {job.updated} {t('updated')} · {job.blocked} {t('blocked')} · {job.conflicts} {t('conflicts')}</p>
+         <p>{t('Retry eligibility follows each row’s persisted reason and current version.')}</p>
+         {job.result_page?.items.map(resultRow)}
+         {job.result_page&&<div className="inline" aria-busy={resultLoading}>
+diff --git a/features/live/overview.tsx b/features/live/overview.tsx
+index 4dde6c6..5e0829c 100644
+--- a/features/live/overview.tsx
++++ b/features/live/overview.tsx
+@@ -87,7 +87,7 @@ export function LiveWorkQueue({t,onNavigate}:{t:(value:string)=>string;onNavigat
+     ['Unknown provider acceptance','/app/operations',''],
+   ];
+   return <section className="panel" aria-label={t('Daily work queue')}><h2>{t('Daily work queue')}</h2>
+-    <p>{t('Project')}: <code>{scope.project}</code> · {t('As of')}: {asOf?new Date(asOf).toLocaleString(): '—'}</p>
++    <p>{t('As of')}: {asOf?new Date(asOf).toLocaleString(): '—'}</p><details><summary>{t('Technical details')}</summary><p>{t('Project')}: <code>{scope.project}</code></p></details>
+     <div className="grid two-col">{cards.map(([label,path,count])=><div className="activity" key={label}>
+       <div><b>{t(label)}</b>{count&&<p>{count}</p>}</div><button type="button" onClick={()=>onNavigate(path)}>{t('Open')}</button></div>)}</div>
+     {error&&<p role="alert">{error}</p>}
+diff --git a/features/live/profile.tsx b/features/live/profile.tsx
+index ce43981..590c7ee 100644
+--- a/features/live/profile.tsx
++++ b/features/live/profile.tsx
+@@ -54,7 +54,7 @@ export function LiveProfilePanel({canApprove=false,t=(text:string)=>text}: {canA
+         if(!active||!session.isCurrent(identity))return;
+         setState({kind:'ready',project,versions:versions.sort((a,b)=>b.number-a.number)});
+         const requested=new URLSearchParams(window.location.search).get('profile');
+-        setSelectedId(requested??versions.reduce<ICP|null>((best,row)=>!best||row.number>best.number?row:best,null)?.id??null);
++        setSelectedId(current=>requested??current??versions.reduce<ICP|null>((best,row)=>!best||row.number>best.number?row:best,null)?.id??null);
+       }catch(error){if(!active||error instanceof LiveCancelled)return;setState({kind:'error',message:message(error)});}
+     })();
+     return()=>{active=false;own.abort();};
+@@ -78,7 +78,7 @@ export function LiveProfilePanel({canApprove=false,t=(text:string)=>text}: {canA
+           icpVersion:{id:selected.id,number:selected.number,content_hash:selected.content_hash}});
+       });
+       setConfirmed(false);setRefresh(value=>value+1);
+-    }catch(error){if(!(error instanceof LiveCancelled))setActionError(message(error));}
++    }catch(error){if(!(error instanceof LiveCancelled)){setActionError(message(error));if(error instanceof LiveError&&error.status===412)setConfirmed(false);}}
+     finally{busyRef.current=false;setBusy(false);}
+   }
+   function choose(id:string){setSelectedId(id);setConfirmed(false);setActionError('');
+@@ -107,9 +107,10 @@ export function LiveProfilePanel({canApprove=false,t=(text:string)=>text}: {canA
+       <p>{t('Markets')}: {selected.markets.join(', ')} · {t('Languages')}: {selected.languages.join(', ')}</p>
+       <p>{t('Buyer type')}: {selected.buyer_types.join(', ')} · {t('Desired buyer roles (optional)')}: {selected.desired_roles?.join(', ')||'—'}</p>
+       <h4>{t('Changes from previous version')}</h4><p>{previous?(changes.length?changes.map(t).join(', '):t('No content changes')):t('No previous version')}</p>
++      {selected.basis_status==='stale'&&<p role="alert">{t('The offer changed. This profile cannot be approved.')} {t('Offer revision')}: {selected.basis_offer_revision??'—'} → {project.offer_revision}</p>}
+       {canApproveSelected&&<><label><input type="checkbox" checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>{t('Confirm approval of this exact version')} v{selected.number}</label>
+         <button type="button" disabled={!confirmed||busy} onClick={()=>void approve()}>{busy?t('Approving...'):t('Approve profile')}</button></>}
+-      {actionError&&<p role="alert">{actionError}</p>}
++      {actionError&&<><p role="alert">{t(actionError)}</p><button type="button" onClick={()=>{setConfirmed(false);setState({kind:'loading'});setRefresh(value=>value+1);setActionError('');}}>{t('Reload profile')}</button></>}
+     </article>}
+   </section>;
+ }
+diff --git a/features/live/results.tsx b/features/live/results.tsx
+index 5321a5c..921e9e2 100644
+--- a/features/live/results.tsx
++++ b/features/live/results.tsx
+@@ -33,7 +33,7 @@ export function LiveUsage({t,locale}:{t:(value:string)=>string;locale:'en'|'zh-H
+       <label>{t('To UTC')} <input type="date" aria-label={t('To UTC')} value={to} onChange={e=>setTo(e.target.value)}/></label>
+       <button type="button" onClick={apply}>{t('Apply period')}</button><button type="button" onClick={()=>{setUsage(null);setLoading(true);setError('');setRefresh(v=>v+1);}}>{t('Refresh usage')}</button></div>
+     {loading&&<p role="status">{t('Loading usage…')}</p>}{error&&<p role="alert">{error}</p>}
+-    {usage&&<><p>{t('Project')}: <code>{usage.project_id}</code> · {t('As of')}: {localeDate(usage.as_of,locale)}</p>
++    {usage&&<><p>{t('As of')}: {localeDate(usage.as_of,locale)}</p><details><summary>{t('Technical details')}</summary><p>{t('Project')}: <code>{usage.project_id}</code></p></details>
+       <div className="grid two-col"><div className="activity"><b>{t('Settled metered cost')}</b><p>{money(usage.total_settled)}</p></div>
+         <div className="activity"><b>{t('Active holds')}</b><p>{money(usage.total_reserved)}</p></div>
+         <div className="activity"><b>{t('Remaining approved budget')}</b><p>{money(usage.remaining)}</p></div>
+@@ -47,7 +47,7 @@ export function LiveUsage({t,locale}:{t:(value:string)=>string;locale:'en'|'zh-H
+   </section>;
+ }
+ 
+-export function LiveOutcomes({buyerId,canRecord,locale,t}:{buyerId:string|null;canRecord:boolean;locale:'en'|'zh-HK';t:(value:string)=>string}){
++export function LiveOutcomes({buyerId,buyerName,canRecord,locale,t}:{buyerId:string|null;buyerName?:string;canRecord:boolean;locale:'en'|'zh-HK';t:(value:string)=>string}){
+   const {client,session}=useWorkspaceSession(),scope=useSessionSnapshot().scope;
+   const [page,setPage]=useState<OutcomePage|null>(null),[offset,setOffset]=useState(0),[refresh,setRefresh]=useState(0);
+   const [error,setError]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false);
+@@ -84,7 +84,7 @@ export function LiveOutcomes({buyerId,canRecord,locale,t}:{buyerId:string|null;c
+   function startCorrection(row:Outcome){setCorrecting(row);setStage(row.stage);setOccurred(localInput(row.occurred_at));setNotes(row.notes);setReason('');}
+   return <section className="panel" aria-label={t('Manual outcomes')}><h2>{t('Manual outcomes')}</h2>
+     <p>{t('These stages are entered by staff. They do not verify mailbox activity or send a message.')}</p>
+-    {canRecord&&<div><p>{correcting?t('Correcting an earlier event'):buyerId?t('Selected buyer')+': '+buyerId:t('Select a buyer in Results to record an outcome.')}</p>
++    {canRecord&&<div><p>{correcting?t('Correcting an earlier event'):buyerId?t('Selected buyer')+': '+(buyerName||t('Staff-selected buyer')):t('Select a buyer in Results to record an outcome.')}</p>
+       <div className="inline live-outcome-fields"><label>{t('Stage')} <select aria-label={t('Outcome stage')} value={stage} onChange={e=>setStage(e.target.value as typeof stage)}>{(['reply','meeting','opportunity','disqualified'] as const).map(value=><option key={value} value={value}>{t(value)}</option>)}</select></label>
+         <label>{t('Occurred at')} <input type="datetime-local" aria-label={t('Occurred at')} value={occurred} onChange={e=>setOccurred(e.target.value)}/></label></div>
+       <label>{t('Notes')} <textarea aria-label={t('Outcome notes')} value={notes} onChange={e=>setNotes(e.target.value)} maxLength={2000}/></label>
+@@ -94,7 +94,7 @@ export function LiveOutcomes({buyerId,canRecord,locale,t}:{buyerId:string|null;c
+     {error&&<p role="alert">{error}</p>}{loading&&<p role="status">{t('Loading outcomes…')}</p>}
+     {page&&<><p>{page.total} {t('outcome events')}</p>{page.items.length?page.items.map(row=><div className="activity" key={row.id}>
+       <div><b>{t(row.stage)}</b><p>{t('Source')}: {t('manual')} · {t('Occurred at')}: {localeDate(row.occurred_at,locale)} · {t('Recorded at')}: {localeDate(row.recorded_at,locale)}</p>
+-        <p>{row.notes}{row.correction_reason&&<> · {t('Correction reason')}: {row.correction_reason}</>} · {t('Actor')}: <code>{row.actor_id}</code>{row.supersedes_id&&<> · {t('Corrects')}: <code>{row.supersedes_id}</code></>}</p></div>
++        <p>{row.notes}{row.correction_reason&&<> · {t('Correction reason')}: {row.correction_reason}</>} · {t('Actor')}: {row.actor_display_name||t('Staff member (name unavailable)')}</p><details><summary>{t('Technical details')}</summary><p>{t('Actor')}: <code>{row.actor_id}</code> · {t('Selected buyer')}: <code>{row.buyer_id}</code>{row.supersedes_id&&<> · {t('Corrects')}: <code>{row.supersedes_id}</code></>}</p></details></div>
+       {canRecord&&<button type="button" onClick={()=>startCorrection(row)}>{t('Correct event')}</button>}</div>):<p>{t('No manual outcomes recorded.')}</p>}
+       <div className="inline"><button disabled={offset===0} onClick={()=>{setPage(null);setLoading(true);setOffset(Math.max(0,offset-10));}}>{t('Previous')}</button>
+         <span>{page.total?offset+1:0}–{Math.min(offset+page.items.length,page.total)} / {page.total}</span>
+@@ -103,6 +103,6 @@ export function LiveOutcomes({buyerId,canRecord,locale,t}:{buyerId:string|null;c
+ }
+ 
+ export function LiveResults({locale,canReview,canEdit,canQuote,canAssign,ownMembershipId,t}:{locale:'en'|'zh-HK';canReview:boolean;canEdit:boolean;canQuote:boolean;canAssign:boolean;ownMembershipId:string|null;t:(value:string)=>string}){
+-  const [buyerId,setBuyerId]=useState<string|null>(null);
+-  return <><LiveUsage locale={locale} t={t}/><LiveBuyerResults locale={locale} canReview={canReview} canEdit={canEdit} canQuote={canQuote} canAssign={canAssign} ownMembershipId={ownMembershipId} onManualOutcome={setBuyerId}/><LiveOutcomes buyerId={buyerId} canRecord={canEdit||canReview} locale={locale} t={t}/></>;
++  const [buyer,setBuyer]=useState<{id:string;name:string}|null>(null);
++  return <><LiveBuyerResults locale={locale} canReview={canReview} canEdit={canEdit} canQuote={canQuote} canAssign={canAssign} ownMembershipId={ownMembershipId} onManualOutcome={(id,name)=>setBuyer({id,name})}/><LiveUsage locale={locale} t={t}/><LiveOutcomes buyerId={buyer?.id??null} buyerName={buyer?.name} canRecord={canEdit||canReview} locale={locale} t={t}/></>;
+ }
+diff --git a/features/live/run-progress.tsx b/features/live/run-progress.tsx
+index c248fd3..85ce8f4 100644
+--- a/features/live/run-progress.tsx
++++ b/features/live/run-progress.tsx
+@@ -133,15 +133,15 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
+           <button type="button" disabled={offset+list.page.items.length>=list.page.total} onClick={()=>{setList({kind:'loading'});setOffset(offset+10);}}>{t('Next')}</button></div></>}
+     </>}
+     {runId&&!run&&!detailError&&<p role="status">{t('Loading run…')}</p>}
+-    {run&&<article className="run-detail" aria-live="polite">
+-      <p><strong>{t('Status')}:</strong> {t(run.status)} · <strong>{t('Stage')}:</strong> {t(run.stage)}</p>
++    {run&&<article className="run-detail">
++      <p role="status" aria-atomic="true"><strong>{t('Status')}:</strong> {t(run.status)} · <strong>{t('Stage')}:</strong> {t(run.stage)}</p>
+       <p>{t('Actual yield')}: {run.company_count} / {run.target_companies??'—'} · {t('Raw candidates')}: {run.raw_count} · {t('Assessed')}: {run.assessed_count}</p>
+       <p>{t('Research spend')}: USD {run.spent.amount} · {t('Pending hold')}: USD {run.reserved.amount} · {t('Maximum')}: USD {run.max_cost.amount}</p>
+-      <p>{t('Attempt')}: {run.attempt} · {t('Event')}: {run.last_event_sequence} · {t('Connection')}: {transport||t('Connecting')}</p>
+-      <p role="status">{t('Next step')}: {t(nextStep(run.status))}</p>
+-      {run.status==='cancel_requested'&&<p role="status">{t('New work is stopped. A submitted operation is awaiting reconciliation; its hold remains.')}</p>}
+-      {run.status==='completed'&&run.target_companies!==undefined&&run.company_count<run.target_companies&&<p role="status">{t('Research completed with fewer companies than the requested target.')}</p>}
+-      {['partial','paused_budget','failed'].includes(run.status)&&!['fit_review_required','fit'].includes(run.stage)&&<p role="status">{t('Discovery retry waits for authoritative reconciliation; committed results remain available.')}</p>}
++      <details><summary>{t('Technical details')}</summary><p>{t('Attempt')}: {run.attempt} · {t('Event')}: {run.last_event_sequence} · {t('Connection')}: {transport||t('Connecting')}</p></details>
++      <p>{t('Next step')}: {t(nextStep(run.status))}</p>
++      {run.status==='cancel_requested'&&<p>{t('New work is stopped. A submitted operation is awaiting reconciliation; its hold remains.')}</p>}
++      {run.status==='completed'&&run.target_companies!==undefined&&run.company_count<run.target_companies&&<p>{t('Research completed with fewer companies than the requested target.')}</p>}
++      {['partial','paused_budget','failed'].includes(run.status)&&!['fit_review_required','fit'].includes(run.stage)&&<p>{t('Discovery retry waits for authoritative reconciliation; committed results remain available.')}</p>}
+       {run.failure_code&&<p role="alert">{t('Reason')}: {run.failure_code}</p>}
+       <div className="run-grid">{canStart&&['queued','running','partial','paused_budget','failed'].includes(run.status)&&<label>{t('Reason for action')} <input value={reason} onChange={event=>setReason(event.target.value)} maxLength={2000}/></label>}
+         {canStart&&['queued','running','partial','paused_budget','failed'].includes(run.status)&&<button type="button" disabled={busy||reason.trim().length<3} onClick={()=>void act('cancel')}>{t('Stop new work')}</button>}
+diff --git a/features/live/workspace-picker.tsx b/features/live/workspace-picker.tsx
+index b776596..6be3f93 100644
+--- a/features/live/workspace-picker.tsx
++++ b/features/live/workspace-picker.tsx
+@@ -12,7 +12,7 @@ import {LiveProjectManager} from './project-manager';
+ import {LivePolicySettings} from './policy-settings';
+ import {LiveSettings} from './settings';
+ import {LiveOperations} from './operations';
+-import {LiveOverview,LiveWorkQueue} from './overview';
++import {LiveWorkQueue} from './overview';
+ import {LiveResults,LiveUsage} from './results';
+ import {LiveRunProgress} from './run-progress';
+ import {LiveDraftEditor} from './drafts';
+@@ -192,24 +192,25 @@ export function LiveWorkspace() {
+   return <main className="main-shell live-workspace"><div className="content">
+     <header className="topbar live-topbar"><b>FIMMICK BuyerOS</b><span>{t('Live workspace')}</span>{languagePicker}<button onClick={() => {session.setToken(undefined); void auth.signOut();}}>{t('Sign out')}</button></header>
+     <LiveNavigation t={t} navigate={navigate} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>
+-    <section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
++    <div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
+       {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
+       {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
+       {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p><button onClick={retryAccess}>{t('Check access again')}</button></>)}
+       {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={copyDiagnostics}>{t('Copy diagnostics')}</button></>}
+       {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
+     </section>
+-    {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
+-    {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
+     {authorized && <section className="panel" aria-label={t('Project selection')}><h2>{t('Projects')}</h2>
+       {projects.kind === 'loading' && <p role="status">{t('Loading projects…')}</p>}
+       {projects.kind === 'error' && <><p role="alert">{localizeError(projects.message)}</p><button onClick={()=>{setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}>{t('Retry loading projects')}</button></>}
+       {projects.kind === 'ready' && (projects.items.length ? <label>{t('Project')} <select aria-label={t('Project')} value={project || ''} onChange={event=>chooseProject(event.target.value)}><option value="">{t('Choose project')}</option>{projects.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>{t('No projects yet.')}</p>)}
+       {(canCreate||canEdit&&projectKnown&&projectActive) && <div className="inline">{canCreate&&<button onClick={()=>navigate('/app/discover/new')}>{t('New project')}</button>}{canEdit&&projectKnown&&projectActive&&<button onClick={()=>navigate('/app/discover/edit')}>{t('Edit offer')}</button>}</div>}
+     </section>}
++    </div>
++    {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
++    {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
+     {authorized && canCreate && pathname === '/app/discover/new' && <LiveOfferWizard key={`new-${workspace}`} mode="create" onSaved={saved} t={t}/>}
+     {authorized && canEdit && projectKnown && projectActive && pathname === '/app/discover/edit' && <LiveOfferWizard key={`edit-${workspace}-${project}`} mode="edit" projectId={project!} onSaved={saved} t={t}/>}
+-    {authorized && projectKnown && pathname === '/app' && <><LiveOverview t={t}/><LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/><LiveUsage key={`usage-${workspace}-${project}`} locale={locale} t={t}/><LiveProfilePanel key={`${workspace}-${project}`} canApprove={canApprove&&projectActive} t={t}/>{canArchive&&<LiveProjectManager key={`manager-${workspace}-${project}`} projectId={project!} t={t} onArchived={()=>{session.next({project:null});updateUrl(router,{project:null,profile:null});setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}/>}</>}
++    {authorized && projectKnown && pathname === '/app' && <><LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/><LiveUsage key={`usage-${workspace}-${project}`} locale={locale} t={t}/><LiveProfilePanel key={`${workspace}-${project}`} canApprove={canApprove&&projectActive} t={t}/>{canArchive&&<LiveProjectManager key={`manager-${workspace}-${project}`} projectId={project!} t={t} onArchived={()=>{session.next({project:null});updateUrl(router,{project:null,profile:null});setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}/>}</>}
+     {authorized && projectKnown && pathname === '/app/results' && <LiveResults key={`results-${workspace}-${project}`} locale={locale} canReview={canApprove} canEdit={canEdit} canQuote={canEdit} canAssign={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId??null:null} t={t}/>}
+     {authorized && projectKnown && pathname === '/app/discover' && <LiveBuyers locale={locale} canReview={canApprove} canEdit={canBuyerEdit} canQuote={canEdit} canAssign={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId:null}/>}
+     {authorized && projectKnown && (pathname === '/app/runs' || /^\/app\/discover\/[^/]+$/.test(pathname) && !['new','edit'].includes(pathname.split('/')[3])) && <LiveRunProgress key={`runs-${workspace}-${project}-${pathname}`} runId={pathname.startsWith('/app/discover/')?pathname.split('/')[3]:undefined} canStart={canEdit&&projectActive} t={t} onOpenBuyers={()=>navigate('/app/discover')}/>}
+diff --git a/playwright.audit-regression.config.ts b/playwright.audit-regression.config.ts
+new file mode 100644
+index 0000000..8c2c3e5
+--- /dev/null
++++ b/playwright.audit-regression.config.ts
+@@ -0,0 +1,4 @@
++import {defineConfig} from '@playwright/test';
++import audit from './playwright.audit-fixes.config';
++// Exact affected audits plus the existing native Chromium zoom test; owned fixtures only.
++export default defineConfig({...audit,testMatch:['audit-*.spec.ts','api-browser-zoom.spec.ts'],reporter:[['list'],['junit',{outputFile:'test-results/q09-regression.xml'}]]});
+diff --git a/playwright.audit-responsive.config.ts b/playwright.audit-responsive.config.ts
+new file mode 100644
+index 0000000..44909a6
+--- /dev/null
++++ b/playwright.audit-responsive.config.ts
+@@ -0,0 +1,8 @@
++import {defineConfig} from '@playwright/test';
++import audit from './playwright.audit-fixes.config';
++// Separate existing demo parity from live-shaped HTTP/DB checks, retaining owned Linux UI setup.
++export default defineConfig({...audit,testMatch:'responsive-accessibility.spec.ts',globalSetup:'./scripts/audit-demo-warmup.mjs',
++ reporter:[['list'],['junit',{outputFile:'test-results/q09-responsive.xml'}]],
++ webServer:[{command:process.platform==='win32'?'node scripts/serve-audit-ui-fixture.mjs':'pnpm dev',url:'http://localhost:5173',timeout:600_000,reuseExistingServer:false,
++ env:{BUYEROS_AUDIT_UI_MODE:'demo',BUYEROS_DEPLOY_TARGET:'',BUYEROS_API_BASE_URL:'',BUYEROS_AUTH0_ISSUER:'',BUYEROS_AUTH0_CLIENT_ID:'',BUYEROS_AUTH0_AUDIENCE:''}}],
++});
+diff --git a/playwright.audit-zoom.config.ts b/playwright.audit-zoom.config.ts
+new file mode 100644
+index 0000000..8102b73
+--- /dev/null
++++ b/playwright.audit-zoom.config.ts
+@@ -0,0 +1,3 @@
++import {defineConfig} from '@playwright/test';
++import audit from './playwright.audit-fixes.config';
++export default defineConfig({...audit,testMatch:['api-browser-zoom.spec.ts','audit-daily-ux.spec.ts'],reporter:[['list'],['junit',{outputFile:'test-results/q09-zoom.xml'}]]});
+diff --git a/scripts/audit-demo-warmup.mjs b/scripts/audit-demo-warmup.mjs
+new file mode 100644
+index 0000000..e20d113
+--- /dev/null
++++ b/scripts/audit-demo-warmup.mjs
+@@ -0,0 +1,24 @@
++// Read-only dev-bundler warmup for the owned fictional demo fixture only.
++// Functional case assertions retain their original 5s bounds; this is not a latency/UAT pass.
++import {chromium} from '@playwright/test';
++import {readFileSync,writeFileSync} from 'node:fs';
++import {execFileSync} from 'node:child_process';
++import {createHash} from 'node:crypto';
++import {resolve} from 'node:path';
++export default async function warmDemo(){
++ const owner=createHash('sha256').update(resolve('.')).digest('hex').slice(0,12);
++ const meta=JSON.parse(readFileSync('test-results/audit-ui-container.json','utf8'));
++ if(meta.owner!==owner||meta.name!==`buyeros-audit-ui-${owner}`||meta.mode!=='demo'||meta.runtime!=='dev'||meta.executionProfile!=='portable')throw new Error('Demo warmup requires exact owned demo fixture');
++ const inspected=JSON.parse(execFileSync('docker',['inspect',meta.name],{encoding:'utf8',timeout:10_000}))[0];
++ if(inspected.Config.Labels?.['buyeros.audit.owner']!==owner)throw new Error('Unowned demo fixture');
++ const started=Date.now(),deadline=started+30_000;
++ const remaining=()=>{const left=deadline-Date.now();if(left<=0)throw new Error('Demo fixture hydration setup exceeded30s');return left;};
++ const browser=await chromium.launch({headless:true,timeout:remaining()});
++ try{
++  const page=await browser.newPage();
++  await page.goto('http://localhost:5173/app/settings',{waitUntil:'domcontentloaded',timeout:remaining()});
++  await page.locator('main[data-demo-ready="true"]').waitFor({state:'visible',timeout:remaining()});
++  await page.getByRole('heading',{name:'Settings',exact:true}).waitFor({state:'visible',timeout:Math.min(5_000,remaining())});
++  writeFileSync('test-results/q09-demo-warmup-proof.json',JSON.stringify({fixture_only:true,owner_label_verified:true,mode:'demo',runtime:'dev',executionProfile:'portable',url:'http://localhost:5173/app/settings',hydration_ready:true,elapsed_ms:Date.now()-started,fixture_startup_bound_ms:30_000,functional_assertion_timeouts_unchanged:true,employee_or_production_latency_acceptance:false},null,2));
++ }finally{await browser.close();}
++}
+diff --git a/scripts/serve-audit-ui-fixture.mjs b/scripts/serve-audit-ui-fixture.mjs
+index e44393a..920a578 100644
+--- a/scripts/serve-audit-ui-fixture.mjs
++++ b/scripts/serve-audit-ui-fixture.mjs
+@@ -6,6 +6,10 @@ import {resolve,join,relative,isAbsolute} from 'node:path';
+ import {createHash} from 'node:crypto';
+ const root=resolve('.'),owner=createHash('sha256').update(root).digest('hex').slice(0,12);
+ const name=`buyeros-audit-ui-${owner}`,volume=`buyeros-audit-ui-deps-${owner}`;
++const mode=process.env.BUYEROS_AUDIT_UI_MODE??'http';
++if(!['http','demo'].includes(mode))throw new Error('unrecognized audit UI mode');
++const runtime=process.env.BUYEROS_AUDIT_UI_RUNTIME??'dev';
++if(!['dev','built'].includes(runtime)||mode==='demo'&&runtime!=='dev')throw new Error('unrecognized audit UI runtime');
+ const docker=(args)=>{const r=spawnSync('docker',args,{encoding:'utf8',timeout:60_000});if(r.status!==0)throw new Error(`docker ${args[0]} failed: ${r.stderr}`);return r.stdout.trim();};
+ const exists=spawnSync('docker',['volume','inspect',volume],{encoding:'utf8'});
+ if(exists.status===0){const v=JSON.parse(exists.stdout)[0];if(v.Labels?.['buyeros.audit.owner']!==owner)throw new Error('unowned fixture cache');}
+@@ -20,16 +24,24 @@ const tar=spawnSync('tar',['-cf',join(work,'source.tar'),'-T',join(work,'files.t
+ if(tar.status!==0)throw new Error(tar.stderr);
+ docker(['run','-d','--name',name,'--label',`buyeros.audit.owner=${owner}`,'--cpus','4','--memory','6g',
+  '-p','127.0.0.1:5173:3000','--mount',`type=volume,src=${volume},dst=/src/node_modules`,
+- '-e','BUYEROS_DEPLOY_TARGET=vercel','-e','BUYEROS_INTERNAL_API_URL=http://host.docker.internal:8000',
+- '-e','BUYEROS_API_BASE_URL=/','-e','BUYEROS_AUTH0_ISSUER=https://oidc.buyeros.test/',
+- '-e','BUYEROS_AUTH0_CLIENT_ID=fixture-public-client','-e','BUYEROS_AUTH0_AUDIENCE=fixture-api',
++ '-e',`BUYEROS_DEPLOY_TARGET=${mode==='http'?'vercel':''}`,'-e','BUYEROS_INTERNAL_API_URL=http://host.docker.internal:8000',
++ '-e',`BUYEROS_API_BASE_URL=${mode==='http'?'/':''}`,'-e',`BUYEROS_AUTH0_ISSUER=${mode==='http'?'https://oidc.buyeros.test/':''}`,
++ '-e',`BUYEROS_AUTH0_CLIENT_ID=${mode==='http'?'fixture-public-client':''}`,'-e',`BUYEROS_AUTH0_AUDIENCE=${mode==='http'?'fixture-api':''}`,
++ ...(runtime==='built'?['-e','NITRO_PRESET=node-server','-e','PORT=3000','-e','HOST=0.0.0.0']:[]),
+  '-w','/src','node:22.23.2-bookworm-slim','sleep','infinity']);
+-writeFileSync('test-results/audit-ui-container.json',JSON.stringify({name,volume,owner,image:'node:22.23.2-bookworm-slim'}));
++const executionProfile=mode==='demo'?'portable':'managed-linux';
++writeFileSync('test-results/audit-ui-container.json',JSON.stringify({name,volume,owner,mode,runtime,executionProfile,image:'node:22.23.2-bookworm-slim'}));
+ try {
+  docker(['cp',join(work,'source.tar'),`${name}:/tmp/source.tar`]);
+- docker(['exec',name,'sh','-c',`tar -xf /tmp/source.tar -C /src && mkdir -p /src/.sites-runtime && printf '%s' '{"executionProfile":"managed-linux"}' > /src/.sites-runtime/execution-profile.json`]);
++ docker(['exec',name,'sh','-c',`tar -xf /tmp/source.tar -C /src && mkdir -p /src/.sites-runtime && printf '%s' '${JSON.stringify({executionProfile})}' > /src/.sites-runtime/execution-profile.json`]);
+ } finally {const inside=relative(tmpdir(),work);if(isAbsolute(inside)||!inside.startsWith('buyeros-audit-ui-'))throw new Error('unsafe temp cleanup');rmSync(work,{recursive:true,force:true});}
+-const child=spawn('docker',['exec',name,'sh','-c','corepack pnpm install --frozen-lockfile && node scripts/run-framework.mjs dev'],{stdio:'inherit'});
++// Installed Nitro supports NITRO_PRESET. Build only the owned local container,
++// bound the build, verify its actual entrypoint, then serve the compiled handler.
++const serve=runtime==='built'
++ ? 'timeout --signal=TERM --kill-after=10s 180s node node_modules/vite/bin/vite.js build && test -f .output/server/index.mjs && node .output/server/index.mjs'
++ // Demo uses the existing portable Sites mock-auth profile inside this owned fixture only.
++ : mode==='demo'?'node node_modules/vite/bin/vite.js dev --host 0.0.0.0 --port 3000':'node scripts/run-framework.mjs dev';
++const child=spawn('docker',['exec',name,'sh','-c',`corepack pnpm install --frozen-lockfile && ${serve}`],{stdio:'inherit'});
+ let stopping=false;function stop(){if(stopping)return;stopping=true;spawnSync('docker',['rm','-f',name],{stdio:'ignore',timeout:30_000});}
+ process.once('SIGTERM',()=>{stop();process.exit(0);});process.once('SIGINT',()=>{stop();process.exit(0);});
+ child.once('exit',code=>{stop();process.exit(code??1);});
+diff --git a/services/api/buyeros_api/api/routes/outcomes.py b/services/api/buyeros_api/api/routes/outcomes.py
+index 9e31821..eddb4d3 100644
+--- a/services/api/buyeros_api/api/routes/outcomes.py
++++ b/services/api/buyeros_api/api/routes/outcomes.py
+@@ -9,7 +9,7 @@ from ..errors import ApiError, envelope
+ from ..idempotency import begin_idempotency, complete_idempotency, if_match_version
+ from ..schemas import OutcomeCreateRequest, OutcomeCorrectionRequest
+ from ...services.outcome_service import (correct_outcome, list_outcomes, load_outcome,
+-                                         outcome_data, record_outcome)
++                                         project_outcome_data, record_outcome)
+ 
+ router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["outcomes"])
+ 
+@@ -51,7 +51,7 @@ async def record_manual_outcome(workspace_id: uuid.UUID, project_id: uuid.UUID,
+             event = await record_outcome(session, workspace_id=workspace_id,
+                 project_id=project_id, actor_id=member["user_id"], request=payload)
+             complete_idempotency(outcome, str(event.id))
+-        data = outcome_data(event)
++        data = await project_outcome_data(session, event)
+         response.headers["ETag"] = f'"{event.version}"'
+     return envelope(data, request.state.request_id)
+ 
+@@ -84,6 +84,6 @@ async def correct_manual_outcome(workspace_id: uuid.UUID, outcome_id: uuid.UUID,
+                 outcome_id=outcome_id, actor_id=member["user_id"], request=payload,
+                 expected_version=expected_version)
+             complete_idempotency(outcome, str(event.id))
+-        data = outcome_data(event)
++        data = await project_outcome_data(session, event)
+         response.headers["ETag"] = f'"{event.version}"'
+     return envelope(data, request.state.request_id)
+diff --git a/services/api/buyeros_api/services/outcome_service.py b/services/api/buyeros_api/services/outcome_service.py
+index 2aeef0e..8447648 100644
+--- a/services/api/buyeros_api/services/outcome_service.py
++++ b/services/api/buyeros_api/services/outcome_service.py
+@@ -8,6 +8,7 @@ from ..api.errors import ApiError
+ from ..db.buyers import ProjectBuyer
+ from ..db.icp import Project
+ from ..db.outcomes import OutcomeEvent
++from ..db.models import User
+ from .audit_service import append_audit
+ 
+ 
+@@ -18,7 +19,7 @@ def _historical_time(value: datetime) -> datetime:
+     return value
+ 
+ 
+-def outcome_data(event: OutcomeEvent) -> dict:
++def outcome_data(event: OutcomeEvent, actor_display_name: str | None = None) -> dict:
+     data = {
+         "id": str(event.id), "workspace_id": str(event.workspace_id),
+         "version": event.version, "created_at": event.created_at.isoformat(),
+@@ -28,6 +29,7 @@ def outcome_data(event: OutcomeEvent) -> dict:
+         "occurred_at": event.occurred_at.isoformat(),
+         "recorded_at": event.created_at.isoformat(),
+         "actor_id": str(event.actor_user_id),
++        "actor_display_name": actor_display_name if actor_display_name and actor_display_name.strip() else None,
+     }
+     if event.provenance_reference:
+         data["provenance_reference"] = event.provenance_reference
+@@ -38,6 +40,14 @@ def outcome_data(event: OutcomeEvent) -> dict:
+     return data
+ 
+ 
++async def project_outcome_data(session, event: OutcomeEvent) -> dict:
++    # Display metadata is projected from this event's canonical actor only.
++    # It never establishes identity, membership or permissions.
++    name = (await session.execute(select(User.display_name).where(
++        User.id == event.actor_user_id))).scalar_one_or_none()
++    return outcome_data(event, name)
++
++
+ async def _active_project(session, *, workspace_id, project_id, lock=False):
+     query = select(Project).where(Project.workspace_id == workspace_id, Project.id == project_id)
+     if lock:
+@@ -105,10 +115,11 @@ async def list_outcomes(session, *, workspace_id, project_id, offset, limit):
+     await _active_project(session, workspace_id=workspace_id, project_id=project_id)
+     scope = (OutcomeEvent.workspace_id == workspace_id, OutcomeEvent.project_id == project_id)
+     total = (await session.execute(select(func.count()).select_from(OutcomeEvent).where(*scope))).scalar_one()
+-    events = (await session.execute(select(OutcomeEvent).where(*scope)
++    events = (await session.execute(select(OutcomeEvent, User.display_name)
++        .outerjoin(User, User.id == OutcomeEvent.actor_user_id).where(*scope)
+         .order_by(OutcomeEvent.created_at.desc(), OutcomeEvent.id.desc())
+-        .offset(offset).limit(limit))).scalars().all()
+-    return {"items": [outcome_data(event) for event in events],
++        .offset(offset).limit(limit))).all()
++    return {"items": [outcome_data(event, name) for event, name in events],
+             "offset": offset, "limit": limit, "total": total}
+ 
+ 
+diff --git a/services/api/tests/test_daily_ux_db.py b/services/api/tests/test_daily_ux_db.py
+new file mode 100644
+index 0000000..261c9cf
+--- /dev/null
++++ b/services/api/tests/test_daily_ux_db.py
+@@ -0,0 +1,59 @@
++"""Q09 current canonical actor names without authority or history changes."""
++import uuid
++import psycopg
++from tests.contract_validation import assert_contract_response
++from tests.test_api_projects_db import api
++from tests.test_lookup_quotes_db import OPERATOR, WORKSPACE_A, PROJECT, _h, quote_case
++
++
++def test_manual_event_projects_canonical_name_and_replay_does_not_relink(quote_case):
++    api, dsn, buyers = quote_case
++    path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/outcomes"
++    body = {"buyer_id": buyers[0][0], "stage": "reply", "source": "manual",
++            "occurred_at": "2026-09-20T11:15:00Z", "notes": "Q09 staff-reported reply"}
++    with psycopg.connect(dsn) as db:
++        actor = uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)
++        db.execute("UPDATE users SET display_name='Q09 Fictional Operator' WHERE id=%s", (actor,))
++    response = api.post(path, json=body, headers=_h(OPERATOR, key="q09-canonical-name"))
++    assert response.status_code == 201, response.text
++    event = response.json()["data"]
++    assert event["actor_display_name"] == "Q09 Fictional Operator"
++    assert event["actor_id"] == str(actor)
++    assert_contract_response("OutcomeEventResponse", response.json())
++    with psycopg.connect(dsn) as db:
++        before = db.execute("SELECT count(*) FROM outcome_events WHERE project_id=%s", (PROJECT,)).fetchone()[0]
++        db.execute("UPDATE users SET display_name='Q09 Renamed Operator' WHERE id=%s", (actor,))
++    replay = api.post(path, json=body, headers=_h(OPERATOR, key="q09-canonical-name"))
++    assert replay.status_code == 201
++    assert replay.json()["data"]["id"] == event["id"]
++    assert replay.json()["data"]["actor_id"] == event["actor_id"]
++    assert replay.json()["data"]["actor_display_name"] == "Q09 Renamed Operator"
++    listed = api.get(path, headers=_h(OPERATOR)).json()["data"]
++    assert listed["items"][0]["actor_display_name"] == "Q09 Renamed Operator"
++    with psycopg.connect(dsn) as db:
++        assert db.execute("SELECT count(*) FROM outcome_events WHERE project_id=%s", (PROJECT,)).fetchone()[0] == before
++        assert db.execute("SELECT actor_user_id FROM outcome_events WHERE id=%s", (event["id"],)).fetchone()[0] == actor
++
++
++def test_missing_actor_name_is_null_and_other_tenant_events_not_exposed(quote_case):
++    api, dsn, buyers = quote_case
++    path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/outcomes"
++    response = api.post(path, json={"buyer_id": buyers[0][0], "stage": "meeting", "source": "manual",
++        "occurred_at": "2026-09-20T11:15:00Z", "notes": "Q09 unnamed canonical actor"}, headers=_h(OPERATOR, key="q09-null-name"))
++    assert response.status_code == 201
++    actor = response.json()["data"]["actor_id"]
++    with psycopg.connect(dsn) as db:
++        db.execute("UPDATE users SET display_name=NULL WHERE id=%s", (actor,))
++    events = api.get(path, headers=_h(OPERATOR))
++    assert events.status_code == 200
++    assert events.json()["data"]["items"][0]["actor_display_name"] is None
++    assert_contract_response("OutcomeEventPageResponse", events.json())
++    foreign_workspace = "22222222-2222-4222-8222-222222222222"
++    foreign_project = "b0000000-0000-4000-8000-000000000002"
++    with psycopg.connect(dsn) as db:
++        assert db.execute("SELECT workspace_id FROM projects WHERE id=%s", (foreign_project,)).fetchone()[0] == uuid.UUID(foreign_workspace)
++    denied = api.get(f"/v1/workspaces/{foreign_workspace}/projects/{foreign_project}/outcomes", headers=_h(OPERATOR))
++    assert denied.status_code == 404  # Existing non-enumerating membership contract.
++    assert denied.json()["code"] == "NOT_FOUND"
++    assert "data" not in denied.json()
++    assert "Q09 unnamed canonical actor" not in denied.text
+diff --git a/services/generated/buyeros-api.ts b/services/generated/buyeros-api.ts
+index 7c63f41..a609a72 100644
+--- a/services/generated/buyeros-api.ts
++++ b/services/generated/buyeros-api.ts
+@@ -2899,6 +2899,8 @@ export interface components {
+             project_id: string;
+             /** Format: uuid */
+             actor_id: string;
++            /** @description Current display name of this event's canonical actor; never identity or role authority. */
++            actor_display_name: string | null;
+             /** Format: date-time */
+             recorded_at: string;
+             /** Format: uuid */
+diff --git a/services/live/profile-read.ts b/services/live/profile-read.ts
+new file mode 100644
+index 0000000..d24f191
+--- /dev/null
++++ b/services/live/profile-read.ts
+@@ -0,0 +1,22 @@
++import type {components} from '@/services/generated/buyeros-api';
++import type {LiveClient} from './client';
++import type {SessionScope} from './session';
++import {buyerOperationContext} from './buyers';
++import {createOperationClient} from './operations';
++
++type Page=components['schemas']['ICPVersionPage'];
++/** The canonical history order is ascending. Read only a one-row head and tail. */
++export async function readLatestProfile(client:LiveClient,session:SessionScope,projectId:string,signal:AbortSignal){
++ const captured=buyerOperationContext(session),ctx={...captured,signal:AbortSignal.any([captured.signal,signal]),isCurrent:()=>captured.isCurrent()&&!signal.aborted};
++ const api=createOperationClient(client),path={workspace_id:ctx.workspace,project_id:projectId};
++ const read=async(offset:number)=>{
++  const page:Page=await api.requestOperation('listICPVersions',{path,query:{offset,limit:1}},ctx);
++  if(page.offset!==offset||page.limit!==1||!Number.isSafeInteger(page.total)||page.total<0||!Array.isArray(page.items)||page.items.length>1||page.items.some(row=>row.project_id!==projectId))throw new Error('Invalid profile metadata page');
++  return page;
++ };
++ const first=await read(0);
++ if(first.total===0){if(first.items.length)throw new Error('Invalid profile metadata page');return null;}
++ const last=first.total===1?first:await read(first.total-1);
++ if(last.total!==first.total||last.items.length!==1)throw new Error('Profile history changed. Refresh the offer before saving.');
++ return last.items[0];
++}
+diff --git a/tests/audit-profile-read.test.mjs b/tests/audit-profile-read.test.mjs
+new file mode 100644
+index 0000000..20b7c2a
+--- /dev/null
++++ b/tests/audit-profile-read.test.mjs
+@@ -0,0 +1,24 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {loadModule} from './ts-loader.mjs';
++const {readLatestProfile}=await loadModule('services/live/profile-read.ts');
++const {SessionScope}=await loadModule('services/live/session.ts');
++function session(){const value=new SessionScope({mode:'live',actor:'actor',workspace:'ws',project:'project'});value.setToken('fixture-only');return value;}
++function row(number){return {id:`icp-${number}`,project_id:'project',number};}
++function client(fn){return {request:fn};}
++
++test('Q09 latest101 uses only head1/tail1 generated reads, never downloads all history',async()=>{
++ const calls=[];const value=await readLatestProfile(client(async input=>{const q=new URL(input.path,'http://fixture.test').searchParams;const offset=Number(q.get('offset'));calls.push({offset,limit:q.get('limit'),token:input.token});return {items:[row(offset+1)],offset,limit:1,total:101};}),session(),'project',new AbortController().signal);
++ assert.equal(value.number,101);assert.deepEqual(calls,[{offset:0,limit:'1',token:'fixture-only'},{offset:100,limit:'1',token:'fixture-only'}]);
++});
++test('Q09 empty and single ICP use one read; malformed/foreign pages fail closed',async()=>{
++ for(const total of [0,1]){let calls=0;const value=await readLatestProfile(client(async()=>{calls++;return {items:total?[row(1)]:[],offset:0,limit:1,total};}),session(),'project',new AbortController().signal);assert.equal(calls,1);assert.equal(value?.number??null,total?1:null);}
++ for(const page of [{items:[{...row(1),project_id:'foreign'}],offset:0,limit:1,total:1},{items:[row(1),row(2)],offset:0,limit:1,total:2},{items:[],offset:1,limit:1,total:0}])await assert.rejects(readLatestProfile(client(async()=>page),session(),'project',new AbortController().signal),/Invalid profile metadata/);
++});
++test('Q09 concurrent appended history is unavailable rather than a falsely latest profile',async()=>{
++ let calls=0;await assert.rejects(readLatestProfile(client(async()=>++calls===1?{items:[row(1)],offset:0,limit:1,total:2}:{items:[row(2)],offset:1,limit:1,total:3}),session(),'project',new AbortController().signal),/history changed/);assert.equal(calls,2);
++});
++test('Q09 A-B-A rejects a late metadata response and token renewal alone keeps the context',async()=>{
++ const scope=session();let release;const pending=readLatestProfile(client(()=>new Promise(resolve=>{release=resolve;})),scope,'project',new AbortController().signal);while(!release)await Promise.resolve();scope.next({project:'other'});scope.next({project:'project'});release({items:[row(1)],offset:0,limit:1,total:1});await assert.rejects(pending,/scope changed/);
++ const stable=session();const value=await readLatestProfile(client(async()=>{stable.setToken('renewed');return {items:[row(1)],offset:0,limit:1,total:1};}),stable,'project',new AbortController().signal);assert.equal(value.number,1);
++});
+diff --git a/tests/e2e/audit-bulk-confirmation.spec.ts b/tests/e2e/audit-bulk-confirmation.spec.ts
+index 543a94e..bd2d513 100644
+--- a/tests/e2e/audit-bulk-confirmation.spec.ts
++++ b/tests/e2e/audit-bulk-confirmation.spec.ts
+@@ -38,7 +38,7 @@ test('B02 reason, target and exclusions clear confirmation; unchanged selection
+  await reason.fill('Different reason');await expect(confirm).not.toBeChecked();await confirm.check();await panel.getByRole('combobox',{name:'Owner',exact:true}).selectOption('');await expect(confirm).not.toBeChecked();
+  await confirm.check();await buyers.getByRole('button',{name:'Select all filtered'}).click();await expect(confirm).not.toBeChecked();await confirm.check();
+  await buyers.getByRole('checkbox',{name:'Select Buyer Fixture 13',exact:true}).uncheck();await expect(confirm).not.toBeChecked();
+- await confirm.check();await buyers.getByRole('button',{name:'Refresh results'}).click();await expect(confirm).not.toBeChecked();
++ await confirm.check();await buyers.getByRole('button',{name:'Refresh results'}).click();await expect(confirm).toHaveCount(0);await expect(panel).toHaveCount(0);await expect(buyers).toContainText('0 selected explicitly');
+ });
+ 
+ test('B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works',async({page})=>{
+@@ -60,6 +60,8 @@ test('B03 searchable colleagues assign ten buyers through a real durable API; cl
+ });
+ 
+ test('B04 inactive owner is rejected and a stale buyer reports conflict without overwriting',async({page})=>{
++ // Seven guarded Python/DB subprocesses exceeded the default whole-case budget before commit on this host. Individual UI assertions and subprocess bounds stay unchanged.
++ test.setTimeout(180_000);
+  const seeded=await fixture('targets');const buyers=await open(page);await select(buyers,2);const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});
+  await panel.getByRole('combobox',{name:'Owner',exact:true}).selectOption(seeded.colleagues[0].membership_id);await panel.getByRole('textbox',{name:'Assignment reason'}).fill('Fixture revalidation');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
+  await fixture('deactivate',seeded.colleagues[0].membership_id);
+@@ -68,7 +70,7 @@ test('B04 inactive owner is rejected and a stale buyer reports conflict without
+  await panel.getByRole('combobox',{name:'Owner',exact:true}).selectOption(seeded.colleagues[1].membership_id);await expect(panel.getByRole('checkbox',{name:'Confirm owner assignment'})).not.toBeChecked();
+  await fixture('stale','e2000000-0000-4000-8000-000000000001');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
+  const posted=page.waitForResponse(r=>r.url().endsWith('/buyer-owner-assignments')&&r.request().method()==='POST');await panel.getByRole('button',{name:'Assign selected buyers'}).click();const result=(await (await posted).json()).data;
+- expect([result.updated,result.conflicts,result.blocked]).toEqual([1,1,0]);await expect(panel.locator('code')).toHaveText('e2000000-0000-4000-8000-000000000001');const state=await fixture('inspect');expect(state.buyers[0].owner).toBeNull();expect(state.buyers[0].version).toBe(2);expect(state.buyers[1].owner).toBe(seeded.colleagues[1].user_id);
++ expect([result.updated,result.conflicts,result.blocked]).toEqual([1,1,0]);const results=buyers.getByRole('region',{name:'Owner assignment results',exact:true});await expect(results).toContainText('1 updated; 0 unchanged; 0 blocked; 1 conflicts.');await expect(panel).toHaveCount(0);await expect(buyers).toContainText('0 selected explicitly');await results.getByText('Technical details',{exact:true}).click();await expect(results.locator('code')).toHaveText('e2000000-0000-4000-8000-000000000001');const state=await fixture('inspect');expect(state.buyers[0].owner).toBeNull();expect(state.buyers[0].version).toBe(2);expect(state.buyers[1].owner).toBe(seeded.colleagues[1].user_id);
+  writeFileSync('test-results/q05-owner-revalidation.json',JSON.stringify({fixture_only:true,result,state},null,2));
+ });
+ 
+@@ -90,7 +92,7 @@ test('B16 late committed B job cannot overwrite A; returning to B reconciles its
+  let release:()=>void=()=>{},received:()=>void=()=>{};const held=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);let job='';const keys:string[]=[];
+  await page.route(assignments,async route=>{keys.push(route.request().headers()['idempotency-key']);const response=await route.fetch();expect(response.status()).toBe(202);job=(await response.json()).data.id;if(keys.length===1){received();await held;}await route.fulfill({response}).catch(()=>{});});
+  await panel.getByRole('button',{name:'Assign selected buyers'}).click();await started;await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);release();await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(project);
+- await expect(buyers.getByRole('checkbox',{name:'Select Buyer Fixture 01',exact:true})).toBeVisible();await expect(panel.getByRole('checkbox',{name:'Confirm owner assignment'})).not.toBeChecked();expect(new URL(page.url()).searchParams.get('bulk_job')).toBeNull();
++ await expect(buyers.getByRole('checkbox',{name:'Select Buyer Fixture 01',exact:true})).toBeVisible();await expect(panel.getByRole('checkbox',{name:'Confirm owner assignment'})).toHaveCount(0);await expect(panel).toHaveCount(0);await expect(buyers).toContainText('0 selected explicitly');expect(new URL(page.url()).searchParams.get('bulk_job')).toBeNull();
+  await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(seeded.other);await expect(panel.getByRole('button',{name:'Retry same assignment'})).toBeVisible();await panel.getByRole('button',{name:'Retry same assignment'}).click();
+  await expect.poll(()=>new URL(page.url()).searchParams.get('bulk_job')).toBe(job);expect(keys).toHaveLength(2);expect(keys[1]).toBe(keys[0]);
+  const read=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${seeded.other}/jobs/${job}`,{headers:{Authorization:'Bearer fixture-access'}});expect(read.status()).toBe(200);expect((await read.json()).data.requested).toBe(101);
+@@ -99,7 +101,7 @@ test('B16 late committed B job cannot overwrite A; returning to B reconciles its
+ });
+ 
+ test('B03 zh-HK mobile colleague search recovers a failed read',async({page})=>{
+- await open(page);await page.setViewportSize({width:390,height:844});await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');const panel=page.getByRole('region',{name:'批量分派買家負責人',exact:true});
++ const buyers=await open(page);await select(buyers,1);await page.setViewportSize({width:390,height:844});await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');const panel=page.getByRole('region',{name:'批量分派買家負責人',exact:true});
+  let failed=false;await page.route('**/eligible-assignees?**',async route=>{if(!failed){failed=true;await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({code:'TEMPORARILY_UNAVAILABLE',message:'Fixture outage',request_id:'fixture-q05'})});}else await route.continue();});
+  await panel.getByRole('textbox',{name:'搜尋同事'}).fill('Q05 colleague');await panel.getByRole('button',{name:'搜尋',exact:true}).click();await expect(panel.getByRole('button',{name:'重新載入同事'})).toBeVisible();await panel.getByRole('button',{name:'重新載入同事'}).click();await expect(panel.getByRole('combobox',{name:'負責人',exact:true}).locator('option')).toHaveCount(12);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:'test-results/q05-bulk-zh-mobile.png',fullPage:true});
+diff --git a/tests/e2e/audit-daily-journey.spec.ts b/tests/e2e/audit-daily-journey.spec.ts
+new file mode 100644
+index 0000000..404b052
+--- /dev/null
++++ b/tests/e2e/audit-daily-journey.spec.ts
+@@ -0,0 +1,5 @@
++// Q09 U09: same UI-created dataset through a real disposable Celery/Valkey transport.
++// OIDC/provider/contact/policy inputs remain fictional; this is not live provider verification.
++import {test} from '@playwright/test';
++import {registerStaffJourney} from './fixtures/staff-journey';
++test.describe('Q09 U09',()=>registerStaffJourney('celery'));
+diff --git a/tests/e2e/audit-daily-ux.spec.ts b/tests/e2e/audit-daily-ux.spec.ts
+new file mode 100644
+index 0000000..42a806f
+--- /dev/null
++++ b/tests/e2e/audit-daily-ux.spec.ts
+@@ -0,0 +1,82 @@
++import {expect,test,type Page} from '@playwright/test';
++import {writeFileSync} from 'node:fs';
++import {signInWorkbench,workspace,project,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
++
++async function open(page:Page,path='/app',actor:'reviewer'|'access'|'viewer'|'admin'='access'){
++ await resetWorkbenchFixtureRateWindows();await signInWorkbench(page,true,actor,`${path}?workspace=${workspace}&project=${project}`);
++ await page.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}).first().selectOption('en');
++}
++
++test('WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history',async({page})=>{
++ await open(page);await expect(page.getByRole('region',{name:'Profile details',exact:true})).toContainText('Profile version');const calls:{offset:number;limit:number}[]=[];
++ page.on('request',request=>{const url=new URL(request.url());if(url.pathname.endsWith(`/projects/${project}/icp-versions`))calls.push({offset:Number(url.searchParams.get('offset')),limit:Number(url.searchParams.get('limit'))});});
++ await page.getByRole('button',{name:'Edit offer',exact:true}).click();await expect(page.getByRole('textbox',{name:'Product / service',exact:true})).not.toBeEmpty();
++ expect(calls.length).toBeGreaterThan(0);expect(calls.length).toBeLessThanOrEqual(2);expect(calls.every(call=>call.limit===1)).toBe(true);
++ writeFileSync('test-results/q09-latest-offer.json',JSON.stringify({fixture_only:true,calls},null,2));
++});
++
++test('U09 no selection hides batch forms; explicit selection exposes a sticky named action summary',async({page})=>{
++ await open(page,'/app/discover');const buyers=page.getByRole('region',{name:'Buyer results',exact:true});await expect(buyers.getByRole('checkbox',{name:/^Select /})).toHaveCount(12);
++ await expect(buyers.getByRole('region',{name:'Assign buyer owners',exact:true})).toHaveCount(0);
++ await expect(buyers.getByRole('group',{name:'Selected buyer actions',exact:true})).toHaveCount(0);
++ await buyers.getByRole('checkbox',{name:/^Select /}).first().check();
++ const actions=buyers.getByRole('group',{name:'Selected buyer actions',exact:true});await expect(actions).toBeVisible();expect(await actions.evaluate(e=>getComputedStyle(e).position)).toBe('sticky');
++ await expect(actions).toContainText('1 selected');await actions.getByRole('link',{name:'Selected actions',exact:true}).click();await expect(page.locator('#selected-buyer-tools')).toBeVisible();await expect(page.locator('#selected-buyer-tools')).toContainText('Assign buyer owners');await actions.getByRole('button',{name:'Clear selection',exact:true}).click();await expect(actions).toHaveCount(0);
++});
++
++async function offer(page:Page,company:string){
++ await page.getByRole('textbox',{name:'Company name',exact:true}).fill(company);await page.getByRole('textbox',{name:'Product / service',exact:true}).fill('Industrial sensors');await page.getByRole('textbox',{name:'Value proposition',exact:true}).fill('Fictional monitoring prevents unexpected downtime.');
++ await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('textbox',{name:'Markets (country codes or names)',exact:true}).fill('US');await page.getByRole('textbox',{name:'Languages (codes or names)',exact:true}).fill('en');await page.getByRole('checkbox',{name:'Distributor',exact:true}).check();
++ await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('textbox',{name:'Must have',exact:true}).fill('Industrial sensors distributor');await page.getByRole('checkbox',{name:/I confirm these buyer requirements/}).check();await page.getByRole('button',{name:'Continue',exact:true}).click();
++}
++test('WF01 project-only partial save preserves every input and same intent creates one project and ICP',async({page})=>{
++ await open(page);await page.getByRole('button',{name:'New project',exact:true}).click();await offer(page,'Q09 Fictional Partial Seller');
++ const projects:{key:string;id:string;body:unknown}[]=[],icps:{key:string;body:unknown;status:number}[]=[];
++ await page.route(`**/v1/workspaces/${workspace}/projects`,async route=>{if(route.request().method()!=='POST')return route.continue();const response=await route.fetch();expect(response.status()).toBe(201);projects.push({key:route.request().headers()['idempotency-key'],id:(await response.json()).data.id,body:route.request().postDataJSON()});await route.fulfill({response});});
++ await page.route('**/v1/workspaces/*/projects/*/icp-versions',async route=>{if(route.request().method()!=='POST')return route.continue();const row={key:route.request().headers()['idempotency-key'],body:route.request().postDataJSON(),status:500};icps.push(row);if(icps.length===1)return route.fulfill({status:500,contentType:'application/json',body:JSON.stringify({code:'INTERNAL_ERROR',message:'fictional one-shot ICP outage',request_id:'e0090000-0000-4000-8000-000000000001',retryable:true})});const response=await route.fetch();row.status=response.status();await route.fulfill({response});});
++ await page.getByRole('button',{name:'Save profile',exact:true}).click();await expect(page.getByText(/Project saved; profile still needs saving/)).toBeVisible();
++ const wizard=page.getByRole('region',{name:'Create project',exact:true});await expect(wizard).toHaveAttribute('data-live-unsaved','true');await expect(wizard).toContainText('Q09 Fictional Partial Seller');await expect(wizard).toContainText('Industrial sensors distributor');
++ await page.getByRole('button',{name:'Your offer',exact:false}).click();await expect(page.getByRole('textbox',{name:'Company name',exact:true})).toHaveValue('Q09 Fictional Partial Seller');await expect(page.getByRole('textbox',{name:'Product / service',exact:true})).toHaveValue('Industrial sensors');await expect(page.getByRole('textbox',{name:'Value proposition',exact:true})).toHaveValue('Fictional monitoring prevents unexpected downtime.');
++ await page.getByRole('button',{name:'Continue',exact:true}).click();await expect(page.getByRole('textbox',{name:'Markets (country codes or names)',exact:true})).toHaveValue('US');await expect(page.getByRole('textbox',{name:'Languages (codes or names)',exact:true})).toHaveValue('en');await expect(page.getByRole('checkbox',{name:'Distributor',exact:true})).toBeChecked();await page.getByRole('button',{name:'Continue',exact:true}).click();await expect(page.getByRole('textbox',{name:'Must have',exact:true})).toHaveValue('Industrial sensors distributor');await expect(page.getByRole('checkbox',{name:/I confirm these buyer requirements/})).toBeChecked();await page.getByRole('button',{name:'Continue',exact:true}).click();
++ await page.getByRole('button',{name:'Save profile',exact:true}).click();await expect(page.getByRole('heading',{name:'Profile version 1',exact:false})).toBeVisible();
++ expect(projects).toHaveLength(2);expect(projects[1]).toEqual(projects[0]);expect(icps).toHaveLength(2);expect(icps[1].key).toBe(icps[0].key);expect(icps[1].body).toEqual(icps[0].body);expect(icps[1].status).toBe(201);
++ const stored=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/projects/${projects[0].id}/icp-versions?offset=0&limit=1`,{headers:{Authorization:'Bearer fixture-access'}});expect(stored.status()).toBe(200);expect((await stored.json()).data.total).toBe(1);
++ const list=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/projects?offset=0&limit=100`,{headers:{Authorization:'Bearer fixture-access'}});expect(list.status()).toBe(200);expect((await list.json()).data.items.filter((row:{id:string})=>row.id===projects[0].id)).toHaveLength(1);
++ writeFileSync('test-results/q09-wf01.json',JSON.stringify({fixture_only:true,projects,icps},null,2));
++});
++
++test('WF02 held reviewer cannot approve the previous offer revision or start research',async({page,browser})=>{
++ await open(page);await page.getByRole('button',{name:'New project',exact:true}).click();await offer(page,'Q09 Fictional Stale Seller');await page.getByRole('button',{name:'Save profile',exact:true}).click();await expect(page.getByRole('heading',{name:'Profile version 1',exact:false})).toBeVisible();
++ const id=new URL(page.url()).searchParams.get('project')!,ctx=await browser.newContext(),reviewer=await ctx.newPage();
++ try{
++  await resetWorkbenchFixtureRateWindows();await signInWorkbench(reviewer,false,'reviewer',`/app?workspace=${workspace}&project=${id}`);await reviewer.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}).first().selectOption('en');await expect(reviewer.getByRole('heading',{name:'Profile version 1',exact:false})).toBeVisible();await reviewer.getByRole('checkbox',{name:/Confirm approval of this exact version v1/}).check();
++  await page.getByRole('button',{name:'Edit offer',exact:true}).click();await page.getByRole('textbox',{name:'Product / service',exact:true}).fill('Revised sensor platform');await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('checkbox',{name:/I confirm these buyer requirements/}).check();await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Save profile',exact:true}).click();await expect(page.getByRole('heading',{name:'Profile version 2',exact:false})).toBeVisible();
++  const reply=reviewer.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/approve'));await reviewer.getByRole('button',{name:'Approve profile',exact:true}).click();const denied=await reply;expect(denied.status()).toBe(412);expect((await denied.json()).code).toBe('STALE_REVISION');await expect(reviewer.getByRole('alert').last()).toBeVisible();await expect(reviewer.getByRole('button',{name:'Approve profile',exact:true})).toBeDisabled();await reviewer.getByRole('button',{name:'Reload profile',exact:true}).click();await expect(reviewer.getByText('The offer changed. This profile cannot be approved.',{exact:false})).toBeVisible();
++  await page.getByRole('button',{name:'Research runs',exact:true}).click();await expect(page.getByRole('button',{name:'Start research',exact:true})).toBeDisabled();
++  const runs=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/projects/${id}/runs?offset=0&limit=1`,{headers:{Authorization:'Bearer fixture-access'}});expect(runs.status()).toBe(200);expect((await runs.json()).data.total).toBe(0);
++  writeFileSync('test-results/q09-wf02.json',JSON.stringify({fixture_only:true,project:id,approval_status:denied.status(),research_runs:0},null,2));
++ }finally{await ctx.close();}
++});
++
++for(const locale of ['en','zh-HK'] as const){
++ test(`U10 U11 ${locale} keyboard, named controls, responsive scope and concise announcements`,async({page})=>{
++  await open(page,'/app','admin');await page.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}).first().selectOption(locale);await page.emulateMedia({reducedMotion:'reduce'});
++  const nav=page.getByRole('navigation',{name:'BuyerOS sections'}),routes=[0,2,3,5,6,7];
++  const measures=[];
++  for(const index of routes){await nav.getByRole('button').nth(index).click();await expect(page.locator('main')).toBeVisible();
++   for(const width of [1280,390]){await page.setViewportSize({width,height:900});expect(await page.locator('.live-scope-grid').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length)).toBe(width===1280?2:1);await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);measures.push({url:page.url(),width,scrollWidth:await page.evaluate(()=>document.documentElement.scrollWidth)});}
++   const cdp=await page.context().newCDPSession(page);const tree=await cdp.send('Accessibility.getFullAXTree');expect(tree.nodes.filter((n:{ignored?:boolean;role?:{value?:string};name?:{value?:string}})=>!n.ignored&&['button','textbox','combobox','checkbox','link'].includes(n.role?.value??'')&&!n.name?.value)).toEqual([]);await cdp.detach();
++  }
++  await nav.getByRole('button').nth(2).click();const buyers=page.getByRole('region',{name:locale==='en'?'Buyer results':'買家結果',exact:true});const details=buyers.getByRole('button',{name:locale==='en'?'Details':'詳情',exact:true}).first();for(let tab=0;tab<80&&!await details.evaluate(e=>e===document.activeElement);tab++)await page.keyboard.press('Tab');await expect(details).toBeFocused();expect(await details.evaluate(e=>getComputedStyle(e).outlineStyle)).not.toBe('none');await page.keyboard.press('Enter');await expect(page.getByRole('dialog')).toBeVisible();await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);await expect(details).toBeFocused();
++  await page.getByRole('combobox',{name:/^(Project|專案)$/,exact:true}).selectOption('e9100000-0000-4000-8000-000000000001');await nav.getByRole('button').nth(4).click();await page.locator('.run-list button').filter({hasText:locale==='en'?'completed':'已完成'}).first().click();const article=page.locator('.run-detail');await expect(article).toBeVisible();await expect(article).not.toHaveAttribute('aria-live');await expect(article.getByRole('status')).toHaveCount(1);await expect(article.getByRole('status')).not.toContainText(/Event|事件|Connection|連線/);
++  await page.screenshot({path:`test-results/q09-${locale}-390.png`,fullPage:true});writeFileSync(`test-results/q09-${locale}-responsive.json`,JSON.stringify({fixture_only:true,screen_reader:false,measures},null,2));
++ });
++}
++
++test('U09 manual outcome names, UTC zero denominators and append-only correction survive refresh',async({page})=>{
++ await open(page,'/app/results','reviewer');const buyers=page.getByRole('region',{name:'Buyer results',exact:true});await expect(buyers.getByRole('button',{name:'Log outcome',exact:true}).first()).toBeVisible();const first=buyers.locator('.activity').first();const name=await first.locator('b').innerText();await first.getByRole('button',{name:'Log outcome',exact:true}).click();
++ const outcomes=page.getByRole('region',{name:'Manual outcomes',exact:true});await expect(outcomes).toContainText(`Selected buyer: ${name}`);await expect(outcomes).toContainText('They do not verify mailbox activity or send a message.');await outcomes.getByRole('textbox',{name:'Outcome notes',exact:true}).fill('Q09 manual fixture reply');const recorded=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith('/outcomes'));await outcomes.getByRole('button',{name:'Record manual outcome',exact:true}).click();const original=await (await recorded).json();expect(original.data.source).toBe('manual');expect(original.data.actor_id).toBe('e0000000-0000-4000-8000-000000000004');await expect(outcomes).toContainText('Q09 manual fixture reply');
++ const event=outcomes.locator('.activity').filter({hasText:'Q09 manual fixture reply'});await expect(event.locator('code').first()).not.toBeVisible();await expect(event).toContainText(original.data.actor_display_name||'Staff member (name unavailable)');await event.getByRole('button',{name:'Correct event',exact:true}).click();await outcomes.getByRole('combobox',{name:'Outcome stage',exact:true}).selectOption('meeting');await outcomes.getByRole('textbox',{name:'Outcome notes',exact:true}).fill('Q09 corrected manual meeting');await outcomes.getByRole('textbox',{name:'Correction reason',exact:true}).fill('Q09 staff correction after source check');const correcting=page.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/corrections'));await outcomes.getByRole('button',{name:'Append correction',exact:true}).click();const correction=await (await correcting).json();expect(correction.data.id).not.toBe(original.data.id);expect(correction.data.supersedes_id).toBe(original.data.id);await expect(outcomes).toContainText('Q09 manual fixture reply');await expect(outcomes).toContainText('Q09 corrected manual meeting');
++ const usage=page.getByRole('region',{name:'Usage',exact:true});await usage.getByLabel('From UTC',{exact:true}).fill('2025-01-01');await usage.getByLabel('To UTC',{exact:true}).fill('2025-02-01');const metrics=page.waitForResponse(r=>r.request().method()==='GET'&&new URL(r.url()).pathname.endsWith('/usage')&&new URL(r.url()).searchParams.get('from')==='2025-01-01T00:00:00.000Z');await usage.getByRole('button',{name:'Apply period',exact:true}).click();const metric=await (await metrics).json();expect(metric.data.cost_per_accepted_company).toBeNull();expect(metric.data.cost_per_contactable_accepted_company).toBeNull();await expect(usage.locator('.activity').filter({hasText:'Blended cost per accepted company'})).toContainText('—');await page.getByRole('combobox',{name:'Language',exact:true}).first().selectOption('zh-HK');await expect(page.getByRole('region',{name:'使用量',exact:true}).getByLabel('開始日期（UTC）',{exact:true})).toHaveValue('2025-01-01');
++ await page.reload();await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');await page.getByRole('button',{name:'登入',exact:true}).click();await expect(page.getByRole('region',{name:/^(Manual outcomes|人手記錄成果)$/,exact:true})).toContainText('Q09 manual fixture reply');await expect(page.getByRole('region',{name:/^(Manual outcomes|人手記錄成果)$/,exact:true})).toContainText('Q09 corrected manual meeting');writeFileSync('test-results/q09-manual-outcome.json',JSON.stringify({fixture_only:true,original,correction,metric},null,2));
++});
+diff --git a/tests/e2e/audit-memberships.spec.ts b/tests/e2e/audit-memberships.spec.ts
+index 097c7ab..b172e7e 100644
+--- a/tests/e2e/audit-memberships.spec.ts
++++ b/tests/e2e/audit-memberships.spec.ts
+@@ -32,11 +32,36 @@ test('U06 all 250 real members are readable in 13 pages and member 101 is search
+  await expect(region.getByText('0–0 / 0',{exact:true})).toBeVisible();await expect(region.locator('code')).toHaveCount(0);
+ });
+ 
++test('U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable',async({page})=>{
++ await fixture();const region=await open(page);
++ await region.getByRole('textbox',{name:'Search members'}).fill('Alex');await region.getByRole('button',{name:'Search',exact:true}).click();
++ await expect(region.locator('code')).toHaveText(['71000001-0000-4000-8000-000000c011de','71000002-0000-4000-8000-000000c011de']);
++ await expect(region.getByRole('group',{name:'Member Alex Chen',exact:true})).toHaveCount(2);
++ await expect(region.getByRole('group',{name:'Roles Alex Chen',exact:true})).toHaveCount(2);
++});
++
++test('B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority',async({page})=>{
++ await fixture();await open(page);await page.getByRole('button',{name:'Buyers',exact:true}).click();
++ const buyers=page.getByRole('region',{name:'Buyer results',exact:true});await buyers.getByRole('checkbox',{name:/^Select /}).first().check();
++ const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});await panel.getByRole('textbox',{name:'Search colleagues'}).fill('Alex');await panel.getByRole('button',{name:'Search',exact:true}).click();
++ const picker=panel.getByRole('combobox',{name:'Owner',exact:true});
++ const identities=['71000001-0000-4000-8000-000000c011de','71000002-0000-4000-8000-000000c011de'];
++ for(let i=0;i<identities.length;i++){
++  const option=picker.getByRole('option',{name:`Alex Chen · ${identities[i]}`,exact:true});await expect(option).toHaveCount(1);
++  await expect(option).toHaveAttribute('value',`f1000000-0000-4000-8000-${i.toString(16).padStart(12,'0')}`);
++ }
++ await picker.selectOption('f1000000-0000-4000-8000-000000000001');await expect(panel.getByText('Owner: Alex Chen',{exact:true})).toBeVisible();
++ const read=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/memberships?q=Alex`,{headers:{Authorization:'Bearer fixture-admin'}});
++ expect(read.status()).toBe(200);const members=(await read.json()).data.items;
++ expect(members.map((m:{user_id:string;version:number;roles:string[]})=>({id:m.user_id,version:m.version,roles:m.roles}))).toEqual(identities.map(id=>({id,version:1,roles:['viewer']})));
++ writeFileSync('test-results/q09-owner-disambiguation.json',JSON.stringify({fixture_only:true,identities,members,no_assignment_submitted:true},null,2));
++});
++
+ test('U07 duplicate names and suffixes remain distinct during a versioned role change',async({page})=>{
+  await fixture();const region=await open(page);
+  await region.getByRole('textbox',{name:'Search members'}).fill('Alex');await region.getByRole('button',{name:'Search',exact:true}).click();
+  await expect(region.locator('code')).toHaveText(['71000001-0000-4000-8000-000000c011de','71000002-0000-4000-8000-000000c011de']);
+- const first=region.getByRole('group',{name:'Member 71000001-0000-4000-8000-000000c011de',exact:true});
++ const first=region.getByRole('group',{name:'Member Alex Chen',exact:true}).filter({has:page.locator('code').filter({hasText:'71000001-0000-4000-8000-000000c011de'})});
+  await first.getByRole('checkbox',{name:'operator',exact:true}).check();await region.getByRole('textbox',{name:'Change reason'}).fill('Fixture duty rotation');
+  const changed=page.waitForResponse(r=>r.request().method()==='PATCH'&&r.url().includes('/memberships/'));
+  await first.getByRole('button',{name:'Save member',exact:true}).click();const response=await changed;expect(response.status()).toBe(200);
+@@ -48,7 +73,7 @@ test('U07 duplicate names and suffixes remain distinct during a versioned role c
+ 
+ test('U08 sole admin refusal is understandable and does not claim success',async({page})=>{
+  await fixture();const region=await open(page);
+- const own=region.getByRole('group',{name:'Member e0000000-0000-4000-8000-000000000008',exact:true});
++ const own=region.getByRole('group').filter({has:page.locator('code').filter({hasText:'e0000000-0000-4000-8000-000000000008'})});
+  await own.getByRole('checkbox',{name:'viewer',exact:true}).check();await own.getByRole('checkbox',{name:'workspace_admin',exact:true}).uncheck();
+  await region.getByRole('textbox',{name:'Change reason'}).fill('Fixture guard check');await own.getByRole('button',{name:'Save member'}).click();
+  await expect(page.getByRole('alert').filter({hasText:'The last active administrator must remain.'})).toBeVisible();
+@@ -87,7 +112,7 @@ test('U06 zh-HK mobile search and failed page read recover without synthetic row
+ test('U07 lost committed role response requires a read before any further role write',async({page})=>{
+  await fixture();const region=await open(page);
+  await region.getByRole('textbox',{name:'Search members'}).fill('Alex');await region.getByRole('button',{name:'Search',exact:true}).click();
+- const first=region.getByRole('group',{name:'Member 71000001-0000-4000-8000-000000c011de',exact:true});
++ const first=region.getByRole('group',{name:'Member Alex Chen',exact:true}).filter({has:page.locator('code').filter({hasText:'71000001-0000-4000-8000-000000c011de'})});
+  await first.getByRole('checkbox',{name:'operator',exact:true}).check();await region.getByRole('textbox',{name:'Change reason'}).fill('Fixture lost response');
+  const keys:string[]=[];await page.route('**/v1/workspaces/*/memberships/*',async route=>{
+   if(route.request().method()!=='PATCH'){await route.continue();return;}
+diff --git a/tests/e2e/fixtures/staff-journey.ts b/tests/e2e/fixtures/staff-journey.ts
+index 1dc42d7..af742fe 100644
+--- a/tests/e2e/fixtures/staff-journey.ts
++++ b/tests/e2e/fixtures/staff-journey.ts
+@@ -26,7 +26,7 @@ export async function signIn(page:Page,accessToken='fixture-access',initialPath=
+   await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,
+     contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[publicKey]})}));
+   await page.goto(initialPath);
+-  await page.getByRole('button',{name:'Sign in'}).click();
++  await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
+   await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(new URL(initialPath,'http://localhost:5173').searchParams.get('project')!,{timeout:30_000});
+   await page.locator('header select').selectOption(locale);
+   await expect(page.locator('html')).toHaveAttribute('lang',locale);
+@@ -62,6 +62,7 @@ const journeyZh:Record<string,string>={
+   "Individual review reason": "個別審閱原因",
+   "Languages (codes or names)": "語言（代碼或名稱）",
+   "Language": "語言",
++  "Template language": "模板語言",
+   "List name": "清單名稱",
+   "Log outcome": "記錄成果",
+   "Manual outcomes": "人手記錄成果",
+@@ -90,7 +91,7 @@ const journeyZh:Record<string,string>={
+   "Select T30 Fictional Industrial Buyer": "選取 T30 Fictional Industrial Buyer",
+   "Sender identity": "寄件人身份",
+   "Show list buyers": "顯示清單買家",
+-  "Sign in": "Sign in",
++  "Sign in": "登入",
+   "Start research": "開始研究",
+   "Target companies": "目標公司數",
+   "Value proposition": "價值主張"
+@@ -169,7 +170,7 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${locale} ${layout} UI-created of
+   await sender.getByRole('button',{name:ui('Save sender')}).click();
+   await expect(sender.getByText(locale==='en'?/Reviewed sender:/:/已審核寄件人:/)).toBeVisible();
+   await page.reload();
+-  await page.getByRole('button',{name:'Sign in'}).click();
++  await page.getByRole('button',{name:locale==='zh-HK'?'登入':'Sign in',exact:true}).click();
+   await expect(page.getByText(locale==='en'?'Current approved: v2':'目前已批准: v2')).toBeVisible();
+   await page.getByRole('button',{name:ui('Research runs')}).click();
+   await page.getByLabel(ui('Target companies')).fill('1');
+@@ -226,7 +227,7 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${locale} ${layout} UI-created of
+   await assigned.getByRole('button',{name:ui('Assign to me')}).click();
+   await expect(assigned).toContainText(`${locale==='en'?'Owner membership:':'負責人成員:'} e0000000-0000-4000-8000-000000000005`);
+   await page.reload();
+-  await page.getByRole('button',{name:'Sign in'}).click();
++  await page.getByRole('button',{name:locale==='zh-HK'?'登入':'Sign in',exact:true}).click();
+   await page.getByRole('button',{name:ui('Buyers'),exact:true}).click();
+   try{await expect(page.getByText('T30 Fictional Industrial Buyer',{exact:true})).toBeVisible();}
+   catch(cause){throw new Error(`Post-refresh buyer read failed: ${failedApi.join(' | ')}`,{cause});}
+@@ -239,7 +240,7 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${locale} ${layout} UI-created of
+   await expect(page.getByText('Industrial sensor platform',{exact:true})).toBeVisible();
+   await expect(page.getByText(/Fictional distributor lists industrial sensors/)).toBeVisible();
+   await page.getByRole('combobox',{name:ui('Recipient (optional)')}).selectOption(existingContact.contact_id);
+-  await page.getByRole('region',{name:ui('Prepare grounded draft')}).getByRole('combobox',{name:ui('Language'),exact:true}).selectOption(locale);
++  await page.getByRole('region',{name:ui('Prepare grounded draft')}).getByRole('combobox',{name:ui('Template language'),exact:true}).selectOption(locale);
+   await page.getByRole('button',{name:ui('Generate addressed draft')}).click();
+   await expect.poll(()=>new URL(page.url()).searchParams.get('draft_job'),{timeout:30_000}).toMatch(/^[0-9a-f-]{36}$/);
+   const draftJobId=new URL(page.url()).searchParams.get('draft_job')!;
+@@ -252,8 +253,8 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${locale} ${layout} UI-created of
+   await page.getByRole('button',{name:ui('Refresh job')}).click();
+   await expect(page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')})).toHaveCount(1);
+   await page.getByRole('region',{name:ui('Draft list')}).getByRole('button',{name:ui('Open draft')}).click();
+-  await expect(page.getByRole('textbox',{name:ui('Body')})).toContainText('Industrial sensor platform');
+-  await expect(page.getByRole('textbox',{name:ui('Body')})).toContainText('Fictional distributor lists industrial sensors');
++  await expect(page.getByRole('textbox',{name:ui('Body'),exact:true})).toContainText('Industrial sensor platform');
++  await expect(page.getByRole('textbox',{name:ui('Body'),exact:true})).toContainText('Fictional distributor lists industrial sensors');
+   await fits(page);
+   const generatedDraft=new URL(page.url()).searchParams.get('draft')!;
+   expect(generatedDraft).toBe(draftReport.draft_id);
+@@ -291,7 +292,7 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${locale} ${layout} UI-created of
+   await page.getByRole('button',{name:ui('Record manual outcome')}).click();
+   const outcomes=page.getByRole('region',{name:ui('Manual outcomes')});
+   await expect(outcomes).toContainText('T30 continuous fixture outcome after approved copy');
+-  await page.reload();await page.getByRole('button',{name:'Sign in'}).click();
++  await page.reload();await page.getByRole('button',{name:locale==='zh-HK'?'登入':'Sign in',exact:true}).click();
+   await expect(page.getByRole('region',{name:ui('Manual outcomes')})).toContainText('T30 continuous fixture outcome after approved copy');
+   await fits(page);
+   await page.screenshot({path:`test-results/${transport}-continuity-${locale}-${layout}-outcome-fixture.png`,fullPage:true});

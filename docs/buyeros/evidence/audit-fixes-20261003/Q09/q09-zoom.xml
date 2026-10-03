@@ -1,0 +1,69 @@
+<testsuites id="" name="" tests="9" failures="1" skipped="0" errors="0" time="317.452807">
+<testsuite name="api-browser-zoom.spec.ts" timestamp="2026-10-03T17:10:23.208Z" hostname="" tests="2" failures="1" skipped="0" time="129.667" errors="0">
+<testcase name="T29 actual Chromium 200% zoom preserves API workbench content in en" classname="api-browser-zoom.spec.ts" time="77.414">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\api-browser-zoom-T29-actua-6e6b9-API-workbench-content-in-en\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\api-browser-zoom-T29-actua-6e6b9-API-workbench-content-in-en\trace.zip]]
+]]>
+</system-out>
+<failure message="Fake sign-in must complete and request workspace access" type="expect.toBe">
+<![CDATA[  api-browser-zoom.spec.ts:25:3 › T29 actual Chromium 200% zoom preserves API workbench content in en 
+
+    Error: Fake sign-in must complete and request workspace access
+
+    Fake sign-in must complete and request workspace access
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 30000ms exceeded while waiting on the predicate
+
+       at fixtures\workbench-auth.ts:45
+
+      43 |   // cases must reach the authenticated workspace read before asserting its result.
+      44 |   await expect.poll(()=>apiEvents.some(event=>event.startsWith('request GET ')&&new URL(event.slice('request GET '.length)).pathname==='/v1/workspaces'),
+    > 45 |     {timeout:30_000,message:'Fake sign-in must complete and request workspace access'}).toBe(true);
+         |                                                                                         ^
+      46 |   if(waitForProject){
+      47 |     try{await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});}
+      48 |     catch(error){throw new Error(`Project selection did not settle; API events: ${apiEvents.join(' | ')}`,{cause:error});}
+        at signInWorkbench (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\workbench-auth.ts:45:89)
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\api-browser-zoom.spec.ts:47:7
+
+    Error Context: ..\..\test-results\audit-fixes\api-browser-zoom-T29-actua-6e6b9-API-workbench-content-in-en\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\api-browser-zoom-T29-actua-6e6b9-API-workbench-content-in-en\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\api-browser-zoom-T29-actua-6e6b9-API-workbench-content-in-en\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="T29 actual Chromium 200% zoom preserves API workbench content in zh-HK" classname="api-browser-zoom.spec.ts" time="52.253">
+</testcase>
+</testsuite>
+<testsuite name="audit-daily-ux.spec.ts" timestamp="2026-10-03T17:10:23.208Z" hostname="" tests="7" failures="0" skipped="0" time="94.974" errors="0">
+<testcase name="WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history" classname="audit-daily-ux.spec.ts" time="13.81">
+</testcase>
+<testcase name="U09 no selection hides batch forms; explicit selection exposes a sticky named action summary" classname="audit-daily-ux.spec.ts" time="11.611">
+</testcase>
+<testcase name="WF01 project-only partial save preserves every input and same intent creates one project and ICP" classname="audit-daily-ux.spec.ts" time="9.678">
+</testcase>
+<testcase name="WF02 held reviewer cannot approve the previous offer revision or start research" classname="audit-daily-ux.spec.ts" time="19.777">
+</testcase>
+<testcase name="U10 U11 en keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="10.731">
+</testcase>
+<testcase name="U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="12.533">
+</testcase>
+<testcase name="U09 manual outcome names, UTC zero denominators and append-only correction survive refresh" classname="audit-daily-ux.spec.ts" time="16.834">
+</testcase>
+</testsuite>
+</testsuites>

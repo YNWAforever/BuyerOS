@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="80.523" timestamp="2026-10-04T00:10:45.097217+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_daily_ux_db" name="test_manual_event_projects_canonical_name_and_replay_does_not_relink" time="65.779"><failure message="KeyError: 'actor_display_name'">quote_case = (&lt;starlette.testclient.TestClient object at 0x000002424171A900&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:63836/buyeros...86d64-0e37-4bf2-8445-5260986ce9c2'), ('4201f3f2-f98e-4666-9291-7c4942b19853', 'cf73b7f6-a7e6-4234-bf63-1500fd50e306')])
+
+    def test_manual_event_projects_canonical_name_and_replay_does_not_relink(quote_case):
+        api, dsn, buyers = quote_case
+        path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/outcomes"
+        body = {"buyer_id": buyers[0][0], "stage": "reply", "source": "manual",
+                "occurred_at": "2026-09-20T11:15:00Z", "notes": "Q09 staff-reported reply"}
+        with psycopg.connect(dsn) as db:
+            actor = uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)
+            db.execute("UPDATE users SET display_name='Q09 Fictional Operator' WHERE id=%s", (actor,))
+        response = api.post(path, json=body, headers=_h(OPERATOR, key="q09-canonical-name"))
+        assert response.status_code == 201, response.text
+        event = response.json()["data"]
+&gt;       assert event["actor_display_name"] == "Q09 Fictional Operator"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'actor_display_name'
+
+tests\test_daily_ux_db.py:20: KeyError</failure></testcase><testcase classname="tests.test_daily_ux_db" name="test_missing_actor_name_is_null_and_other_tenant_events_not_exposed" time="8.324"><failure message="KeyError: 'actor_display_name'">quote_case = (&lt;starlette.testclient.TestClient object at 0x000002424191BD90&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:63836/buyeros...e44df-9444-4619-ad5f-ecfb26b38f51'), ('be5fab71-d76c-4d18-8670-8e8bf809c944', 'e852d9b1-b58a-458e-bb0e-c8ccf589431b')])
+
+    def test_missing_actor_name_is_null_and_other_tenant_events_not_exposed(quote_case):
+        api, dsn, buyers = quote_case
+        path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/outcomes"
+        response = api.post(path, json={"buyer_id": buyers[0][0], "stage": "meeting", "source": "manual",
+            "occurred_at": "2026-09-20T11:15:00Z", "notes": "Q09 unnamed canonical actor"}, headers=_h(OPERATOR, key="q09-null-name"))
+        assert response.status_code == 201
+        actor = response.json()["data"]["actor_id"]
+        with psycopg.connect(dsn) as db:
+            db.execute("UPDATE users SET display_name=NULL WHERE id=%s", (actor,))
+        events = api.get(path, headers=_h(OPERATOR))
+        assert events.status_code == 200
+&gt;       assert events.json()["data"]["items"][0]["actor_display_name"] is None
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'actor_display_name'
+
+tests\test_daily_ux_db.py:49: KeyError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,315 @@
+{
+  "uniquely_named_browser_tests": 51,
+  "original_selected_browser_tests": 50,
+  "additional_duplicate_owner_regression": 1,
+  "not_a_single_all_green_batch": true,
+  "not_51_of_98_audit_case_IDs": true,
+  "latest_execution_evidence": [
+    {
+      "file": "api-browser-zoom.spec.ts",
+      "name": "T29 actual Chromium 200% zoom preserves API workbench content in en",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "api-browser-zoom.spec.ts",
+      "name": "T29 actual Chromium 200% zoom preserves API workbench content in zh-HK",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-bulk-confirmation.spec.ts",
+      "name": "B02 adding a sixth buyer clears the previously confirmed five",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-bulk-confirmation.spec.ts",
+      "name": "B02 reason, target and exclusions clear confirmation; unchanged selection survives paging",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-bulk-confirmation.spec.ts",
+      "name": "B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-bulk-confirmation.spec.ts",
+      "name": "B04 inactive owner is rejected and a stale buyer reports conflict without overwriting",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-bulk-confirmation.spec.ts",
+      "name": "B16 committed response loss locks changes and reconciles the same key after a route remount",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-bulk-confirmation.spec.ts",
+      "name": "B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-bulk-confirmation.spec.ts",
+      "name": "B03 zh-HK mobile colleague search recovers a failed read",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-bulk-confirmation.spec.ts",
+      "name": "B03 viewer cannot assign through UI or direct API",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-daily-journey.spec.ts",
+      "name": "Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-daily-journey.spec.ts",
+      "name": "Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-daily-journey.spec.ts",
+      "name": "Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-daily-journey.spec.ts",
+      "name": "Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-daily-ux.spec.ts",
+      "name": "WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-daily-ux.spec.ts",
+      "name": "U09 no selection hides batch forms; explicit selection exposes a sticky named action summary",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-daily-ux.spec.ts",
+      "name": "WF01 project-only partial save preserves every input and same intent creates one project and ICP",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-daily-ux.spec.ts",
+      "name": "WF02 held reviewer cannot approve the previous offer revision or start research",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-daily-ux.spec.ts",
+      "name": "U10 U11 en keyboard, named controls, responsive scope and concise announcements",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-daily-ux.spec.ts",
+      "name": "U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-daily-ux.spec.ts",
+      "name": "U09 manual outcome names, UTC zero denominators and append-only correction survive refresh",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-draft-reground.spec.ts",
+      "name": "D01/D03 manual Unicode draft exposes a source review and operator cannot attest",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-draft-reground.spec.ts",
+      "name": "D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-draft-reground.spec.ts",
+      "name": "D03 zh-HK mobile code-point split reads every source and exports exact Unicode message",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-draft-reground.spec.ts",
+      "name": "U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-job-scope.spec.ts",
+      "name": "U15 project A0 B5; card and failed list share scope; explicit workspace5",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-job-scope.spec.ts",
+      "name": "U15 workspace view remains actor-bound, other actor detail denied; admin read sees all",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-job-scope.spec.ts",
+      "name": "U15 actual 21 job list fully pages20; scope resets offset and old rows",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-job-scope.spec.ts",
+      "name": "U15 actual 101 job list fully pages20; scope resets offset and old rows",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-job-scope.spec.ts",
+      "name": "U15 held B list and count cannot overwrite newer A-B-A generation",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-job-scope.spec.ts",
+      "name": "U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-memberships.spec.ts",
+      "name": "U06 all 250 real members are readable in 13 pages and member 101 is searchable",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-memberships.spec.ts",
+      "name": "U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-memberships.spec.ts",
+      "name": "U07 duplicate names and suffixes remain distinct during a versioned role change",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-memberships.spec.ts",
+      "name": "U08 sole admin refusal is understandable and does not claim success",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-memberships.spec.ts",
+      "name": "S06 viewer cannot read the admin directory or eligible assignees",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-memberships.spec.ts",
+      "name": "U06 stale page response cannot restore old A-B-A directory",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-memberships.spec.ts",
+      "name": "U06 zh-HK mobile search and failed page read recover without synthetic rows",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-memberships.spec.ts",
+      "name": "U07 lost committed role response requires a read before any further role write",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-operations.spec.ts",
+      "name": "B10 B11 all 21 real producer result IDs are readable in pages of 20",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-operations.spec.ts",
+      "name": "B10 B11 all 101 real producer result IDs are readable in pages of 20",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-operations.spec.ts",
+      "name": "B11 zero results and late job response cannot replace newer job",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-operations.spec.ts",
+      "name": "B11 late result page is discarded after workspace A-B-A",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-operations.spec.ts",
+      "name": "B12 unopened 1000-result job reads summary only and never walks result pages",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-operations.spec.ts",
+      "name": "B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-operations.spec.ts",
+      "name": "B13 hidden summary pause and double visibility resume produce exactly one refresh",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-operations.spec.ts",
+      "name": "B13 actual 429 Retry-After and 503 recover without result-page traffic",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-operations.spec.ts",
+      "name": "B16 old summary cannot overwrite another scope after A-B-A",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-operations.spec.ts",
+      "name": "B13 zh-HK 390px summary/results controls remain usable without overflow",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-operations.spec.ts",
+      "name": "B13 Operations clears a transient summary error after a valid recovery",
+      "report": "q09-built-second-full.xml",
+      "status": "pass"
+    },
+    {
+      "file": "audit-memberships.spec.ts",
+      "name": "B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority",
+      "report": "q09-owner-final.xml",
+      "status": "pass"
+    }
+  ]
+}

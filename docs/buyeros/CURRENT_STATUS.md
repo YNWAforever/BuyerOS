@@ -141,3 +141,16 @@ StrictAPI18 (3new+15related), actualUI10 (6Q14+4Q03),Node16 pass;0fail/error/ski
 0schema/API/auth/role changes; head0037 retained. Reversepatch applicability0, runtime/browser/productionrevert notrehearsed; retain allhistory. Original31inputs/98fields/97othercases/24othertasks/3guards/193unrelatedpaths preserved. Fixturesnormalteardown; labelledcache retainedforQ09. Authorreviewonly, independentpending.
 
 [Full commands/reports/screenshots/rollback](evidence/audit-fixes-20261003/Q14/RESULTS.md), [local PR-17](review/2026-10-03-audit-fixes/Q14-pr.md). Codeimplemented,fixtureverified,localintegrationverified; deployedSHAnull/noexternalaction. Full8module/liveauth/provider/build/continuousworker/production/performance gates remainunverified. Q16/Q17blocked, Q13waitsN02. **Next eligible local task Q09**, five staff-task UX slices; actualhumanUAT remains separate.
+
+## Q09 in-progress checkpoint — 2026-10-04 HKT
+
+Base38e88735b003fa8fdc0e8d034e5a883d9df5d204; local diff implements bounded one-row latest ICP metadata, stale held-version reload, compact scope, selected-only sticky batch controls, concise status announcements and canonical actor display projection. Strict disposable API21/0fail/error/skip and Node20/0fail/skip; type/generated pass. Browser regressions are still being verified; previous11-case run had2 assertion failures/9 errors and is retained, not green. No task completion/source commit/deployment claimed. Native200% zoom, responsive parity and full staff journey pending; actual screen reader and3–5staff UAT remain blocked with unobserved metrics. No migration/auth/Cloudflare/provider/production action.
+
+
+## Q09 / PR-19 — 2026-10-04 local candidate, human gates open
+
+Author-reviewed source 1953d615dc00e6920380dbb71be6a99b96e36488, base 38e88735b003fa8fdc0e8d034e5a883d9df5d204. Code implemented; strict API21/Node34/fresh affected UI17/demo21 pass, zero fail/error/skip; types/lint/generated84 pass. Original full50 second48pass/2setup errors preserved; whole affected-suite reruns pass, not a single all-green51 batch. Four complete en/zhdesktop/mobile actual disposable worker journeys and two native200% zoom checks pass; identities/providers fictional.
+
+U09/WF01/WF02 local evidence, U10 automated layout/partial keyboard, U11 actual screen reader and U12 human staff UAT unobserved NULL; full five-task pure keyboard rehearsal/independent review open. F04 existing-member UX only; U05 existing-page membership revocation case open.0schema migrations, head0037; reversepatch applicability only.31inputs/98originalfields/92othercases/24othertasks/81otheroperations/4guards/rootclean/unrelated193paths preserved. No push/remotePR/deploy/production/auth/provider/role/mail change; deployedSHA NULL. Auth0/delivery403 and Cloudflare separation retained.
+
+[Full reports/commands/screenshots/diff/rollback](evidence/audit-fixes-20261003/Q09/FINAL/RESULTS.md), [PR-19 description](review/2026-10-03-audit-fixes/Q09-pr.md). No further independent local task eligible in this execution scope; Q09human gates andQ16underlyingproof remainopen, Q13waitsN02, N00/Q10/Q17separatescope.
