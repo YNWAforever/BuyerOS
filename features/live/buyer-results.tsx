@@ -19,7 +19,7 @@ const initial=():BuyerQuery=>readBuyerQuery(typeof window==='undefined'?'':windo
 export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,canAssign=false,ownMembershipId=null,locale='en',onManualOutcome}:{canReview?:boolean;canEdit?:boolean;canQuote?:boolean;canAssign?:boolean;ownMembershipId?:string|null;locale?:'en'|'zh-HK';onManualOutcome?:(buyerId:string)=>void}){
   const {session,client}=useWorkspaceSession();
   const t=(value:string)=>locale==='zh-HK'?(liveZh[value]||value):value;
-  const scope=useSessionSnapshot().scope;
+  const sessionSnapshot=useSessionSnapshot(),scope=sessionSnapshot.scope;
   const [query,setQuery]=useState<BuyerQuery>(initial);
   const [search,setSearch]=useState(query.q);
   useEffect(()=>{
@@ -173,7 +173,7 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
       <button type="button" disabled={busy||selectedCount<=0} onClick={()=>void submitReview()}>{t(busy?'Reviewing...':'Apply review')}</button></div>}
     {reviewResult&&<p role="status">{t('Review: {updated} updated; {blocked} blocked; {conflicts} conflicts.').replace('{updated}',String(reviewResult.updated)).replace('{blocked}',String(reviewResult.blocked)).replace('{conflicts}',String(reviewResult.conflicts))} {reviewResult.results.filter(row=>row.status==='blocked'||row.status==='conflict').map(row=>`${row.id}: ${row.reason_code??row.status}`).join('; ')}</p>}
     {canEdit&&<ExportDialog key={`export:${workspace}:${project}`} locale={locale} selection={selection()} canExport={canEdit}/>}
-    <LiveBulkActions key={`bulk:${workspace}:${project}`} locale={locale} selection={selection()} count={selectedCount} canAssign={canAssign} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted}/>
+    <LiveBulkActions key={`bulk:${sessionSnapshot.identity}`} locale={locale} selection={selection()} count={selectedCount} canAssign={canAssign} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted}/>
     {jobId&&<BulkJobPanel locale={locale} jobId={jobId} onJob={onJob} onCommitted={onCommitted} onClose={closeJob}/>}
     <LiveBuyerManagementControls key={`management:${workspace}:${project}`} locale={locale} onJob={onJob} query={query} onApplyQuery={patch=>{setSelected({});setAllFiltered(false);setExcluded([]);changeQuery(patch,true);setReload(value=>value+1);}} selection={selection()} canManage={canEdit}/>
     {current&&<LiveBuyerDetail key={current.id} buyer={current} locale={locale} canEdit={canEdit} canQuote={canQuote} canReview={canReview} ownMembershipId={ownMembershipId}
