@@ -1,0 +1,174 @@
+[
+  {
+    "task": "Q01",
+    "cwd": "repo",
+    "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts tests/e2e/audit-auth-entry.spec.ts",
+    "pass": 7,
+    "fail": 0,
+    "skip": 0,
+    "evidence": "Q01-green-verified.log;Q01-ui.xml"
+  },
+  {
+    "task": "Q01",
+    "cwd": "services/api",
+    "environment": {
+      "BUYEROS_STRICT_INTEGRATION": "1",
+      "external_DSN": "unset; owned Docker only"
+    },
+    "command": "uv run --frozen pytest -q tests/test_auth_routes_db.py tests/test_api_routes_contract.py",
+    "pass": 13,
+    "fail": 0,
+    "skip": 0,
+    "summary": "13 passed, 7 warnings in 16.90s",
+    "evidence": "Q01-db-contracts.log"
+  },
+  {
+    "task": "Q03",
+    "cwd": "repo",
+    "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts tests/e2e/audit-operations.spec.ts",
+    "pass": 4,
+    "fail": 0,
+    "skip": 0,
+    "evidence": "Q03-green-final.log;Q03-ui.xml"
+  },
+  {
+    "task": "Q03",
+    "cwd": "services/api",
+    "environment": {
+      "BUYEROS_STRICT_INTEGRATION": "1",
+      "external_DSN": "unset; owned Docker only"
+    },
+    "command": "uv run --frozen pytest -q tests/test_bulk_jobs_db.py",
+    "pass": 10,
+    "fail": 0,
+    "skip": 0,
+    "summary": "10 passed, 9 warnings in 36.93s",
+    "evidence": "Q03-db.log"
+  },
+  {
+    "task": "Q04",
+    "cwd": "repo",
+    "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts tests/e2e/audit-research-intent.spec.ts",
+    "pass": 1,
+    "fail": 0,
+    "skip": 0,
+    "evidence": "Q04-green-verified.log;Q04-ui.xml"
+  },
+  {
+    "task": "Q04",
+    "cwd": "services/api",
+    "environment": {
+      "BUYEROS_STRICT_INTEGRATION": "1",
+      "external_DSN": "unset; owned Docker only"
+    },
+    "command": "uv run --frozen pytest -q tests/test_run_admission_db.py tests/test_run_admission_integration_db.py",
+    "pass": 14,
+    "fail": 0,
+    "skip": 0,
+    "summary": "14 passed, 7 warnings in 23.53s",
+    "evidence": "Q04-db.log"
+  },
+  {
+    "task": "Q15",
+    "cwd": "repo",
+    "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts tests/e2e/audit-draft-dirty.spec.ts",
+    "pass": 10,
+    "fail": 0,
+    "skip": 0,
+    "evidence": "Q15-green-verified.log;Q15-ui.xml"
+  },
+  {
+    "task": "Q15",
+    "cwd": "services/api",
+    "environment": {
+      "BUYEROS_STRICT_INTEGRATION": "1",
+      "external_DSN": "unset; owned Docker only"
+    },
+    "command": "uv run --frozen pytest -q tests/test_draft_persistence_db.py tests/test_draft_approval_context_db.py",
+    "pass": 27,
+    "fail": 0,
+    "skip": 0,
+    "summary": "27 passed, 7 warnings in 124.80s (0:02:04)",
+    "evidence": "Q15-db.log"
+  },
+  {
+    "task": "Q15",
+    "cwd": "services/worker",
+    "environment": {
+      "BUYEROS_STRICT_INTEGRATION": "1",
+      "external_DSN": "unset; owned Docker only"
+    },
+    "command": "uv run --frozen pytest -q tests/test_grounded_drafts.py",
+    "pass": 11,
+    "fail": 0,
+    "skip": 0,
+    "summary": "11 passed, 4 warnings in 29.20s",
+    "evidence": "Q15-worker.log"
+  },
+  {
+    "task": "final",
+    "cwd": "repo",
+    "command": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts",
+    "pass": 22,
+    "fail": 0,
+    "skip": 0,
+    "summary": "22 passed (3.2m); JUnit tests22/failures0/errors0/skipped0/time194.822486s",
+    "evidence": "final-ui-green.log;final-ui.xml"
+  },
+  {
+    "task": "final",
+    "cwd": "repo",
+    "command": "node --test tests/audit-auth-render.test.mjs tests/audit-research-intent.test.mjs tests/audit-draft-guard.test.mjs",
+    "pass": 11,
+    "fail": 0,
+    "skip": 0,
+    "evidence": "final-unit.log"
+  },
+  {
+    "task": "final",
+    "cwd": "repo",
+    "command": "node tests/live-auth-checks.mjs",
+    "pass": 8,
+    "fail": 0,
+    "skip": 0,
+    "evidence": "final-auth.log"
+  },
+  {
+    "task": "final",
+    "cwd": "repo",
+    "command": "node tests/live-adapter-checks.mjs",
+    "pass": 74,
+    "fail": 0,
+    "skip": 0,
+    "evidence": "final-adapter.log"
+  },
+  {
+    "task": "final",
+    "cwd": "repo",
+    "command": "node scripts/generate-api-types.mjs --check",
+    "exit": 0,
+    "evidence": "final-contract-types.log"
+  },
+  {
+    "task": "final",
+    "cwd": "repo",
+    "command": "uv run --frozen --project services/api python scripts/generate-operation-routes.py --check",
+    "exit": 0,
+    "summary": "Operation route map matches OpenAPI: 78 operations",
+    "evidence": "final-contract-routes.log"
+  },
+  {
+    "task": "final",
+    "cwd": "repo",
+    "command": "node node_modules/typescript/bin/tsc --noEmit",
+    "exit": 0,
+    "evidence": "final-types-verified.log"
+  },
+  {
+    "task": "final",
+    "cwd": "repo",
+    "command": "$auditLintPaths = @(git diff --name-only a78859f -- '*.tsx' '*.ts' '*.mjs'); node node_modules/eslint/bin/eslint.js $auditLintPaths",
+    "exit": 0,
+    "evidence": "final-lint-verified.log;final-lint-paths.json"
+  }
+]

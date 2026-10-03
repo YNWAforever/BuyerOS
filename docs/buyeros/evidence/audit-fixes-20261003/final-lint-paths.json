@@ -1,0 +1,22 @@
+[
+  "app/auth/callback/page.tsx",
+  "features/live/draft-dirty-guard.tsx",
+  "features/live/drafts.tsx",
+  "features/live/locale.ts",
+  "features/live/operations.tsx",
+  "features/live/run-progress.tsx",
+  "features/live/workspace-picker.tsx",
+  "features/providers/workspace-session.tsx",
+  "playwright.audit-fixes.config.ts",
+  "scripts/serve-audit-ui-fixture.mjs",
+  "services/live/runs.ts",
+  "tests/audit-auth-render.test.mjs",
+  "tests/audit-draft-guard.test.mjs",
+  "tests/audit-research-intent.test.mjs",
+  "tests/e2e/audit-auth-entry.spec.ts",
+  "tests/e2e/audit-draft-dirty.spec.ts",
+  "tests/e2e/audit-operations.spec.ts",
+  "tests/e2e/audit-research-intent.spec.ts",
+  "tests/e2e/audit-teardown.ts",
+  "tests/e2e/fixtures/workbench-auth.ts"
+]

@@ -1,0 +1,62 @@
+{
+  "reviewed_source_sha": "3efd1f3f97036e1988751d1dfb54d37d48d0929a",
+  "tested_tree_sha": "ae62fa34c8601a826e0056c5e66de9cac2e48d57",
+  "history_only_reorganization_preserved_tested_tree": true,
+  "deployment_sha": null,
+  "UI": {
+    "id": "",
+    "name": "",
+    "tests": "22",
+    "failures": "0",
+    "skipped": "0",
+    "errors": "0",
+    "time": "194.822486"
+  },
+  "schema_source_head": "0036_checkpoint_schema_grants",
+  "new_migrations": [],
+  "production_schema_readback": "not-verified",
+  "environment": {
+    "host": "Windows PowerShell",
+    "node": "24.18.0",
+    "pnpm": "11.25.0",
+    "uv": "0.11.27",
+    "python_api": "3.14.6",
+    "python_worker": "3.14.6",
+    "docker": "29.7.2",
+    "ui_runtime": "node:22.23.2-bookworm-slim",
+    "ui_image_digest": "sha256:48e4b67d85f87bd551df43704e24d252f56cc5f8e9718841aace50f19948f0f9",
+    "ui_limits": "4 CPU / 6 GiB",
+    "browser": "Chromium / Playwright 1.63.0",
+    "database": "owned local Docker PostgreSQL 16",
+    "identities": "fictional Auth0 RSA fixture principals; not live login",
+    "provider_verification": "none"
+  },
+  "commits": {
+    "Q11": "576c3b182819b392f8b73697457769d6f16a496c",
+    "Q01": "8251027ddcf781e5cae713da4190d32a77a81dbd",
+    "Q03": "f5936cef6b363e3662c9b84c6153ea2c43f8117b",
+    "Q04": "fc8fae75dfd743feaf590e73a099443d23e34788",
+    "Q15": "3efd1f3f97036e1988751d1dfb54d37d48d0929a"
+  },
+  "cleanup": {
+    "owned_ui_container": "removed by teardown",
+    "owned_ui_volume": "buyeros-audit-ui-deps-052d6a686de9 removed after label proof",
+    "owned_api_database": "removed by teardown",
+    "existing_user_resources": "preserved",
+    "review_worktree": "retained"
+  },
+  "immutable_manifest_pass": 31,
+  "immutable_manifest_fail": 0,
+  "original_case_fields_preserved": 98,
+  "original_tasks_preserved": 25,
+  "evidence_zip_sha256": "19369591a175edad7dd2e9f3ddb5bfdebc6cdc5130a2770243b1e9de2a42d35a",
+  "case_counts": {
+    "externally-blocked": 1,
+    "fixture-pass": 3,
+    "not-tested": 88,
+    "integration-fixture-pass": 5,
+    "blocked-root-cause-evidence": 1
+  },
+  "checked_at_utc": "2026-10-03 06:15:57 UTC",
+  "review": "author diff/requirements review; independent reviewer not executed"
+}

@@ -1,0 +1,91 @@
+<testsuites id="" name="" tests="22" failures="0" skipped="0" errors="1" time="229.697136">
+<testsuite name="audit-auth-entry.spec.ts" timestamp="2026-10-03T05:48:20.222Z" hostname="" tests="7" failures="0" skipped="0" time="32.607" errors="0">
+<testcase name="U13 initialization has no false configuration alert before hydration" classname="audit-auth-entry.spec.ts" time="2.798">
+</testcase>
+<testcase name="U02 U03 no membership permits locale switching and read-only access retry" classname="audit-auth-entry.spec.ts" time="7.46">
+</testcase>
+<testcase name="U03 403 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="4.951">
+</testcase>
+<testcase name="U03 404 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="3.932">
+</testcase>
+<testcase name="U03 500 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="4.235">
+</testcase>
+<testcase name="U03 manual locale choice survives a delayed member preference response" classname="audit-auth-entry.spec.ts" time="4.874">
+</testcase>
+<testcase name="U03 expired access returns to sign-in with the selected locale" classname="audit-auth-entry.spec.ts" time="4.357">
+</testcase>
+</testsuite>
+<testsuite name="audit-draft-dirty.spec.ts" timestamp="2026-10-03T05:48:20.222Z" hostname="" tests="10" failures="0" skipped="0" time="61.42" errors="0">
+<testcase name="D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="5.668">
+</testcase>
+<testcase name="D02 Open draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="6.524">
+</testcase>
+<testcase name="D02 Refresh job Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="7.939">
+</testcase>
+<testcase name="D02 Save is awaited before opening another draft and persists one revision" classname="audit-draft-dirty.spec.ts" time="6.123">
+</testcase>
+<testcase name="D02 failed Save 401 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="6.125">
+</testcase>
+<testcase name="D02 failed Save 412 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.648">
+</testcase>
+<testcase name="D02 failed Save 503 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.95">
+</testcase>
+<testcase name="D02 Refresh does not overwrite the unsaved buffer before a decision" classname="audit-draft-dirty.spec.ts" time="5.582">
+</testcase>
+<testcase name="D02 delayed refresh cannot materialize a draft into a new project scope" classname="audit-draft-dirty.spec.ts" time="5.779">
+</testcase>
+<testcase name="D02 zh-HK mobile dialog preserves content and keeps all choices visible" classname="audit-draft-dirty.spec.ts" time="6.082">
+</testcase>
+</testsuite>
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-03T05:48:20.222Z" hostname="" tests="4" failures="0" skipped="0" time="27.544" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="6.025">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="7.424">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="8.242">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="5.853">
+</testcase>
+</testsuite>
+<testsuite name="audit-research-intent.spec.ts" timestamp="2026-10-03T05:48:20.222Z" hostname="" tests="1" failures="0" skipped="0" time="60.115" errors="1">
+<testcase name="B05 B06 committed lost 202 and manual Retry share one durable research intent" classname="audit-research-intent.spec.ts" time="60.115">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-research-intent-B05--e3f14-one-durable-research-intent\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-research-intent-B05--e3f14-one-durable-research-intent\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  audit-research-intent.spec.ts:9:1 › B05 B06 committed lost 202 and manual Retry share one durable research intent 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Target companies')
+
+
+      17 |     if(posted.length===1)return route.abort('failed');return route.fulfill({response});
+      18 |   });
+    > 19 |   await page.getByLabel('Target companies').fill('35');await page.getByLabel('Maximum research cost (USD)').fill('2.0');
+         |                                             ^
+      20 |   await page.getByRole('button',{name:'Start research',exact:true}).click();await expect(page.getByRole('alert').last()).toBeVisible();
+      21 |   const committed=await counts();expect(committed.runs).toBe(1);expect(committed.admission_outbox).toBe(1);expect(committed.economic_intents).toBe(1);
+      22 |   await page.waitForTimeout(400);expect(posted).toHaveLength(1);
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-research-intent.spec.ts:19:45
+
+    Error Context: ..\..\test-results\audit-fixes\audit-research-intent-B05--e3f14-one-durable-research-intent\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-research-intent-B05--e3f14-one-durable-research-intent\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-research-intent-B05--e3f14-one-durable-research-intent\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

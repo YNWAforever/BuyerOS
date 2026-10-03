@@ -7,7 +7,7 @@ This file is the current first-round repair record. Earlier checkpoints are hist
 - Isolated branch: `codex/audit-fixes-20261003`; original checkout and dirty Neon Auth worktree preserved.
 - Evidence ZIP SHA256: `19369591a175edad7dd2e9f3ddb5bfdebc6cdc5130a2770243b1e9de2a42d35a`; nested CRC and all 31 manifest hashes passed; outer manifest 8/8 passed.
 - Deployment: audit reports `dpl_7A95afQdDSUsaPRw2RnPFouQ1hEp`, source a78859f. No new deployment/readback in this repair round yet.
-- Schema source head: inspect before any schema edit. No migration proposed by these four UI repairs. Production schema/runtime role/jobs selector/epoch: unverified this round.
+- Schema source head verified: `0036_checkpoint_schema_grants (head)`. New migrations: 0. Production schema/runtime role/jobs selector/epoch: unverified this round.
 - Provider activation: blocked; selected live provider allowlist empty in reviewed source. Mailbox/CRM disabled; delivery remains 403.
 - Auth: Auth0 retained. Neon migration is outside this first round. No membership or identity mutation.
 - Staff journey/live verification: blocked, not inferred from fixture tests.
@@ -69,3 +69,9 @@ RED UI: same request used a different key; actual DB grew to 2 runs/outboxes/eco
 Refresh/Open/Job materialization now share an asynchronous Save/Discard/Cancel guard. Cancel and Escape keep subject/body/language, dirty state and revision/version baseline, restoring trigger focus after controls re-enable. Save awaits the actual PATCH before proceeding. 401/412/503 keep local fields and baseline; a 412 reads latest content only into a separate comparison panel with a local copy action. Inputs are locked during one transition; old scope responses cannot materialize a draft. en and zh-HK/mobile choices verified.
 
 Valid RED: 1 UI failure, persisted body overwrote Local unsaved body on Refresh. GREEN: UI 10 pass/0 fail/0 skip; actual guard unit 7 pass/0 fail/0 skip; strict draft API/persistence/approval 27 pass/0 fail/0 skip; strict grounded worker 11 pass/0 fail/0 skip. tsc/lint exit 0. Earlier locator/fixture failures are separately retained, not counted as defect RED. No schema or production changes; rollback: preserve/copy local buffers, then revert Q15 UI/test commit; keep persisted revisions and approvals. Next eligible: first-round review/handoff. Q16/Q17 remain blocked on underlying database diagnostics.
+
+## Final first-round handoff
+
+Reviewed code source `3efd1f3f97036e1988751d1dfb54d37d48d0929a`; tested tree `ae62fa34c8601a826e0056c5e66de9cac2e48d57` unchanged by organizing unpublished task commits. Final shared UI22/0/0, combined unit11/0/0, auth8/0/0, adapter74/0/0; strict backend suites75/0/0 in total; generated78 operations/type/lint exit0. No new deployed SHA.
+
+Four exact PR descriptions/diffs, every F-ID/case status, commands/environment, screenshots and rollback: [final handoff](review/2026-10-03-audit-fixes/HANDOFF.md). Original31 hashes/98-case fields/25 tasks reverified unchanged. Owned disposable fixture resources cleaned; branch/worktree retained. Independent review and external/live gates remain separate. Q16 read-only log corroborates OperationalError only; Q17 still blocked. Next within selected scope: none; next future wave requires its own scope, starting eligible Q02/N00 or Q16 diagnostic evidence.

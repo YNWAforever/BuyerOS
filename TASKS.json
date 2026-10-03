@@ -6,7 +6,7 @@
     "Q04",
     "Q15"
   ],
-  "next_eligible": "first-round-review",
+  "next_eligible": "selected-first-round-complete",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -43,7 +43,17 @@
     },
     {
       "id": "Q01",
-      "status": "fixture-verified"
+      "status": "fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "source_sha": "8251027ddcf781e5cae713da4190d32a77a81dbd",
+      "cases": [
+        "U02",
+        "U03",
+        "U13"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q01-ui.xml"
     },
     {
       "id": "Q02",
@@ -51,11 +61,29 @@
     },
     {
       "id": "Q03",
-      "status": "integration-fixture-verified"
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "source_sha": "f5936cef6b363e3662c9b84c6153ea2c43f8117b",
+      "cases": [
+        "B10",
+        "B11"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q03-ui.xml"
     },
     {
       "id": "Q04",
-      "status": "integration-fixture-verified"
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "source_sha": "fc8fae75dfd743feaf590e73a099443d23e34788",
+      "cases": [
+        "B05",
+        "B06"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q04-ui.xml"
     },
     {
       "id": "Q05",
@@ -83,7 +111,13 @@
     },
     {
       "id": "Q11",
-      "status": "baseline-recorded"
+      "status": "baseline-recorded",
+      "code_status": "baseline-recorded",
+      "verification_status": "baseline-integrity-pass; release gates open",
+      "release_status": "not-deployed",
+      "source_sha": "576c3b182819b392f8b73697457769d6f16a496c",
+      "cases": [],
+      "evidence": "docs/buyeros/CURRENT_STATUS.md"
     },
     {
       "id": "Q12",
@@ -107,15 +141,27 @@
         "D02"
       ],
       "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q15-ui.xml",
-      "migration": "none; schema source head 0036_checkpoint_schema_grants"
+      "migration": "none; schema source head 0036_checkpoint_schema_grants",
+      "source_sha": "3efd1f3f97036e1988751d1dfb54d37d48d0929a"
     },
     {
       "id": "Q16",
-      "status": "blocked-root-cause-evidence"
+      "status": "blocked-root-cause-evidence",
+      "code_status": "read-only-investigation-recorded",
+      "verification_status": "runtime-log-inspected; cause-not-confirmed",
+      "release_status": "not-deployed",
+      "evidence": "docs/buyeros/incidents/2026-10-03-workspace-500.md"
     },
     {
       "id": "Q17",
       "status": "outside-current-scope"
     }
-  ]
+  ],
+  "future_eligible": [
+    "Q02",
+    "Q16 evidence collection",
+    "N00 built compatibility proof"
+  ],
+  "reviewed_source_sha": "3efd1f3f97036e1988751d1dfb54d37d48d0929a",
+  "deployed_sha": null
 }

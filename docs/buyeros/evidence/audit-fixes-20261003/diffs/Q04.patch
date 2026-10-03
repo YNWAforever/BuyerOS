@@ -1,0 +1,1469 @@
+diff --git a/TASKS.json b/TASKS.json
+index 6bba8ae1ecedec359a75c7cd2407243cf7a15f58..422518d6f7fc76506d12bab6b9935ee73a32f87f 100644
+--- a/TASKS.json
++++ b/TASKS.json
+@@ -6,7 +6,7 @@
+     "Q04",
+     "Q15"
+   ],
+-  "next_eligible": "Q04",
++  "next_eligible": "Q15",
+   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+   "tasks": [
+     {
+@@ -55,7 +55,7 @@
+     },
+     {
+       "id": "Q04",
+-      "status": "pending"
++      "status": "integration-fixture-verified"
+     },
+     {
+       "id": "Q05",
+diff --git a/docs/buyeros/CURRENT_STATUS.md b/docs/buyeros/CURRENT_STATUS.md
+index afa118c289bba936ead248ed002d592505a6af28..1e76fec9aa737e9c2a1874516064780174bf6a18 100644
+--- a/docs/buyeros/CURRENT_STATUS.md
++++ b/docs/buyeros/CURRENT_STATUS.md
+@@ -25,7 +25,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
+ | F05 | fixed with local integration/UI evidence (Q03) | Q03 |
+ | F06 | still open (audit-source code unchanged) | outside selected first round |
+ | F07 | still open (audit-source code unchanged) | outside selected first round |
+-| F08 | still open (audit-source code unchanged) | Q04 |
++| F08 | fixed with local durability/UI evidence (Q04) | Q04 |
+ | F09 | still open (audit-source code unchanged) | outside selected first round |
+ | F10 | still open (external evidence gate) | outside selected first round |
+ | F11 | still open (audit-source code unchanged) | outside selected first round |
+@@ -57,3 +57,9 @@ RED: render 1 fail; UI 1 pass/5 fail. GREEN: render 1 pass; UI 7 pass/0 fail/0 s
+ Operations uses generated AsyncJob/BulkItemResult.id and typed getAsyncJob with offset/limit=20. Complete IDs can be copied; zero results show 0–0. Per-request sequence, cancellation and session generation reject late job/page/workspace A-B-A responses. Filter changes clear result selection.
+ 
+ RED UI: 3 failures, 0 skips. GREEN UI: 4 pass/0 fail/0 skip, actual PostgreSQL/API producer payloads for 21/101 rows fully traversed without repeats. Different actor/tenant reads return 404. Strict bulk DB suite 10 pass/0 fail/0 skip includes real producer persistence and migration downgrade/upgrade in an empty disposable database. Generated check, tsc and focused lint exit 0. No schema or server changes. Rollback: revert Q03 consumer/test commit; persisted jobs remain. Next: Q04.
++
++## Q04 repair
++
++Research starts use existing ActionIntent and the complete normalized generated RunCreate body plus actor/mode/workspace/project/ICP. Fixed-point caps use six decimals; token and UI generation are excluded from durable fingerprint. UI generation still rejects stale results. Session-owned memory keeps key/body across route remounts; unknown results permit explicit same-intent Retry, with separate explicit confirmed reset for a new intent. Hard refresh has no trustworthy handle, displays a check-existing-runs instruction and never auto POSTs.
++
++RED UI: same request used a different key; actual DB grew to 2 runs/outboxes/economic intents after committed lost 202. GREEN UI: 1 pass/0 fail/0 skip; original target 35/cap 2 restored after a settled route remount, exact same key/body/run ID on Retry, DB 1 run/1 admission outbox/1 bounded run budget account. Admission creates no provider operation/hold: 0 operations/0 reservations, not a claimed provider acceptance check. Strict admission validation+integration: 14 pass/0 fail/0 skip, including durable restart checks and new lost-response economic ceiling assertion. New unit 3/3 covers token renewal, full-body changes, double-start and A-B-A; existing adapter 74/74; tsc/lint exit 0. Backend admission/worker/hold semantics and schema unchanged. Rollback: disable new admission UI or revert consumer, preserving runs/outbox/ceilings and never replaying unknown operations. Next: Q15.
+diff --git a/docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md b/docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
+index c27a93fddebd4fd63e3208b10179ce02bb016abb..f49ba7ee80d5a1de18b5ae40e4221d189549b45a 100644
+--- a/docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
++++ b/docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
+@@ -1258,3 +1258,5 @@ proof; their automatically triggered CI status is reported separately.
+ 2026-10-03 Q01: fixture UI 7/7, strict auth/contracts 13/13, no skips. Current scope/evidence: CURRENT_STATUS.md. Next eligible: Q03.
+ 
+ 2026-10-03 Q03: UI 4/4, strict bulk DB 10/10, zero skips; generated/type/lint gates exit 0. Next eligible Q04.
++
++2026-10-03 Q04: committed lost-202 UI 1/1, strict admission 14/14, intent unit 3/3, adapter 74/74, zero skips. Next eligible Q15.
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q04-adapter.log b/docs/buyeros/evidence/audit-fixes-20261003/Q04-adapter.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..01e2d3ceee4af6f446271416fbb4ff8260fd2840
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q04-adapter.log
+@@ -0,0 +1,75 @@
++PASS apiBaseUrl absent or blank resolves to demo
++PASS a configured apiBaseUrl resolves to live
++PASS demo mode makes every section available, live mode does not
++PASS live without a ready session reports not_configured, never available
++PASS unavailable and not_configured are distinct states
++PASS workspaces map to the narrow model
++PASS projects map to the narrow model
++PASS icp versions map approved_at to approvedAt and keep the hash
++PASS a missing required field raises instead of becoming an empty value
++PASS every mapper enforces its required fields
++PASS a workspace missing roles raises rather than defaulting to an empty list
++PASS a version without an approval date maps to null, not an error
++PASS an empty page is empty, not an error
++PASS a success unwraps data and sends the bearer only when a token is present
++PASS an error envelope becomes a typed LiveError keyed by code
++PASS a non-envelope body still yields a typed error, never a crash
++PASS an aborted request surfaces as LiveCancelled, not as an error toast
++PASS a network failure is a retryable error, not a cancellation
++PASS scopeKey encodes mode, actor, workspace and project
++PASS changing workspace advances the identity and aborts the previous controller
++PASS a stale identity is not current, so a late response can be discarded
++PASS returning to a previously visited workspace is a NEW scope, not the old one
++PASS the token lives in the session and survives a scope change
++PASS live failure surfaces the error with zero data and never touches the demo store
++PASS a 501 from a supported section marks it unavailable rather than failing
++PASS a section with no backing operation is unavailable without a request
++PASS a response whose scope changed underneath is discarded
++PASS no token means not_configured and no request is sent
++PASS each API failure code maps to its own state
++PASS a 401 is a sign-in requirement, never not_configured
++PASS a 404 is not_found, never denied
++PASS a cancelled request is discarded, not an error
++PASS the read attaches to the session controller signal
++PASS live mode refuses to read or write any demo storage key
++PASS demo mode still reads and writes its own keys
++PASS no token-shaped value is ever written to storage
++PASS live requests are addressed to the configured API base URL
++PASS with no base URL the path is used as-is
++PASS demo-only effects are enabled only in demo mode
++PASS the empty live store contains no companies and no demo identifiers
++PASS the banner label states the real mode and cannot be made to claim live
++PASS a write sends a JSON body and the mutation headers
++PASS If-Match is sent only when supplied
++PASS a stale write surfaces as a typed STALE_REVISION
++PASS markets resolve from names and codes, case-insensitively
++PASS an unknown market is returned, never dropped
++PASS languages resolve from names
++PASS an unresolvable value makes the mapper raise, naming it
++PASS toProjectCreate maps the contract fields without inventing values
++PASS toIcpSaveRequest maps requirements with their categories
++PASS ICP payload carries user-entered product and value facts before any write
++PASS canonical buyer types remain selected when editing and saving a profile
++PASS saveProfile creates the project then saves a version, in order
++PASS saveProfile explicitly creates a new project even if another is selected
++PASS explicit edit patches the offer under If-Match before saving a new ICP version
++PASS edit conflict stops before ICP write
++PASS approveProfile sends the version number as If-Match and the hash
++PASS buyers map to the versioned review model
++PASS a buyer without a fit or review maps those to null, not an error
++PASS a buyer page keeps the snapshot id and paging
++PASS a buyer page maps the snapshot expiry, null when absent
++PASS evidence maps provenance and does not expose a stale source link
++PASS an explicit selection carries the frozen versions
++PASS a snapshot selection excludes the removed ids
++PASS scope changed between project creation and ICP save sends no second write
++PASS generated operation route builds scoped path and bearer request
++PASS operation rejects cross-workspace path before sending
++PASS operation rejects scope change during token acquisition before request
++PASS live client rejects demo or malformed success envelopes
++PASS error keeps response header request ID when body omits it
++PASS live error guidance distinguishes reauth, stale revision and key conflict with request ID
++PASS double click shares one immutable action and one inflight promise
++PASS lost response reuses the key; changed payload uses a new key
++PASS multipart upload keeps the browser-generated boundary and bearer in memory
++74 live adapter checks passed
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q04-db.log b/docs/buyeros/evidence/audit-fixes-20261003/Q04-db.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..56c364bc142ea28663cb50a8c0d0ecc726315af5
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q04-db.log
+@@ -0,0 +1,26 @@
++..............                                                           [100%]
++============================== warnings summary ===============================
++tests\conftest.py:24
++tests\conftest.py:24
++  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
++    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
++
++tests\conftest.py:24
++tests\conftest.py:24
++  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
++    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
++
++.venv\Lib\site-packages\starlette\testclient.py:53
++  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++tests/test_run_admission_db.py::test_run_request_rejects_each_limit_above_the_contract_ceiling[query_rounds-4]
++  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
++    return asyncio.get_event_loop_policy()
++
++tests/test_run_admission_integration_db.py::test_start_run_is_atomic_and_replays_one_outbox_intent
++  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
++    util.warn_deprecated(
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++14 passed, 7 warnings in 23.53s
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q04-durability-green.json b/docs/buyeros/evidence/audit-fixes-20261003/Q04-durability-green.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..e2956314a44d18af642bc2b34bd3b89a1a072e7a
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q04-durability-green.json
+@@ -0,0 +1,68 @@
++{
++  "posted": [
++    {
++      "key": "fcd8d418-77bb-4d33-b9ff-4a1baf779165",
++      "body": {
++        "icp_version_id": "e9200000-0000-4000-8000-000000000001",
++        "target_companies": 35,
++        "max_cost": {
++          "amount": "2.000000",
++          "currency": "USD"
++        },
++        "limits": {
++          "query_rounds": 3,
++          "max_queries_per_run": 12,
++          "max_results": 300,
++          "max_pages": 200,
++          "max_page_bytes": 2097152,
++          "max_duration_seconds": 1800,
++          "max_model_tokens": 100000,
++          "provider_concurrency": 4
++        }
++      },
++      "id": "11ccc18b-08f4-4b8e-a37b-d0495b8d0c2e"
++    },
++    {
++      "key": "fcd8d418-77bb-4d33-b9ff-4a1baf779165",
++      "body": {
++        "icp_version_id": "e9200000-0000-4000-8000-000000000001",
++        "target_companies": 35,
++        "max_cost": {
++          "amount": "2.000000",
++          "currency": "USD"
++        },
++        "limits": {
++          "query_rounds": 3,
++          "max_queries_per_run": 12,
++          "max_results": 300,
++          "max_pages": 200,
++          "max_page_bytes": 2097152,
++          "max_duration_seconds": 1800,
++          "max_model_tokens": 100000,
++          "provider_concurrency": 4
++        }
++      },
++      "id": "11ccc18b-08f4-4b8e-a37b-d0495b8d0c2e"
++    }
++  ],
++  "committed": {
++    "runs": 1,
++    "run_ids": [
++      "11ccc18b-08f4-4b8e-a37b-d0495b8d0c2e"
++    ],
++    "admission_outbox": 1,
++    "economic_intents": 1,
++    "provider_operations": 0,
++    "reservations": 0
++  },
++  "recovered": {
++    "runs": 1,
++    "run_ids": [
++      "11ccc18b-08f4-4b8e-a37b-d0495b8d0c2e"
++    ],
++    "admission_outbox": 1,
++    "economic_intents": 1,
++    "provider_operations": 0,
++    "reservations": 0
++  }
++}
+\ No newline at end of file
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q04-durability-red.json b/docs/buyeros/evidence/audit-fixes-20261003/Q04-durability-red.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..297c6511de5d91b10c308601220da02dbcc46e72
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q04-durability-red.json
+@@ -0,0 +1,69 @@
++{
++  "posted": [
++    {
++      "key": "c2a6d433-410a-4f41-9159-b88a99ee427f",
++      "body": {
++        "icp_version_id": "e9200000-0000-4000-8000-000000000001",
++        "target_companies": 24,
++        "max_cost": {
++          "amount": "2.000000",
++          "currency": "USD"
++        },
++        "limits": {
++          "query_rounds": 3,
++          "max_queries_per_run": 12,
++          "max_results": 300,
++          "max_pages": 200,
++          "max_page_bytes": 2097152,
++          "max_duration_seconds": 1800,
++          "max_model_tokens": 100000,
++          "provider_concurrency": 4
++        }
++      },
++      "id": "132f9f2f-4479-47c8-a7a6-1934ad7a695e"
++    },
++    {
++      "key": "eca07693-74c3-489e-a549-6e20bf6ada3c",
++      "body": {
++        "icp_version_id": "e9200000-0000-4000-8000-000000000001",
++        "target_companies": 24,
++        "max_cost": {
++          "amount": "2.000000",
++          "currency": "USD"
++        },
++        "limits": {
++          "query_rounds": 3,
++          "max_queries_per_run": 12,
++          "max_results": 300,
++          "max_pages": 200,
++          "max_page_bytes": 2097152,
++          "max_duration_seconds": 1800,
++          "max_model_tokens": 100000,
++          "provider_concurrency": 4
++        }
++      },
++      "id": "dab046a4-416f-4180-a67d-ed0ba899fb71"
++    }
++  ],
++  "committed": {
++    "runs": 1,
++    "run_ids": [
++      "132f9f2f-4479-47c8-a7a6-1934ad7a695e"
++    ],
++    "admission_outbox": 1,
++    "economic_intents": 1,
++    "provider_operations": 0,
++    "reservations": 0
++  },
++  "recovered": {
++    "runs": 2,
++    "run_ids": [
++      "132f9f2f-4479-47c8-a7a6-1934ad7a695e",
++      "dab046a4-416f-4180-a67d-ed0ba899fb71"
++    ],
++    "admission_outbox": 2,
++    "economic_intents": 2,
++    "provider_operations": 0,
++    "reservations": 0
++  }
++}
+\ No newline at end of file
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q04-green-verified.log b/docs/buyeros/evidence/audit-fixes-20261003/Q04-green-verified.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..f946d5272133f03f1bdc23d1233ded681152b0b0
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q04-green-verified.log
+@@ -0,0 +1,46 @@
++[WebServer] INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
++[WebServer] INFO  [alembic.runtime.migration] Will assume transactional DDL.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade  -> 0001_initial, initial tenant boundary: workspaces, users, memberships
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0001_initial -> 0002_rls_and_roles, row-level security and least-privilege runtime roles
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0002_rls_and_roles -> 0003_p2_tables, P2 domain tables (projects, buyers, evidence, policy, budget, outbox) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0003_p2_tables -> 0004_p4_p5_tables, P4/P5 tables (quotes, provider ops, drafts, approvals, outcomes) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0004_p4_p5_tables -> 0005_p3_tables, P3 tables (runs, events, candidates, aliases, contacts) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0005_p3_tables -> 0006_worker_leases, worker leases and outbox dispatch columns
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0006_worker_leases -> 0007_outbox_terminal_state, terminal outbox states, claim index and dispatcher workspace read
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0007_outbox_terminal_state -> 0008_grant_users_select, grant SELECT on users to the API role
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0008_grant_users_select -> 0009_project_profile_columns, project profile columns and ICP supersession
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0009_project_profile_columns -> 0010_widen_idempotency_key, widen idempotency_records.key to the contract's 200 chars
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0010_widen_idempotency_key -> 0011_project_buyer_version, buyer version and idempotency response storage
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0011_project_buyer_version -> 0012_offer_basis_revision, Track the offer revision used by immutable ICP versions.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0012_offer_basis_revision -> 0013_project_link_constraints, Constrain project-bound links across a shared workspace.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0013_project_link_constraints -> 0014_buyer_management, Version buyer lists and persist actor-scoped presets under tenant RLS.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0014_buyer_management -> 0015_policy_lifecycle, Give policy and suppression the full purpose/subject lifecycle contract.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0015_policy_lifecycle -> 0016_bulk_jobs, Durable actor-bound bulk jobs and per-buyer results.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0016_bulk_jobs -> 0017_settings_audit, Version existing memberships and persist actor preferences and audit request IDs.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0017_settings_audit -> 0018_budget_ledger, Versioned UTC budget scopes, one operation hold and economic-event identity.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0018_budget_ledger -> 0019_offer_documents, Private offer documents and fetched-source retention metadata.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0019_offer_documents -> 0020_research_provenance, Bind canonical candidates and evidence to one tenant/run/provider context.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0020_research_provenance -> 0021_run_bounds, Persist immutable run admission basis and cumulative execution counters.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0021_run_bounds -> 0022_research_checkpoints, Own LangGraph Postgres saver 3.1.2 schema in Alembic, never at runtime.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0022_research_checkpoints -> 0023_contact_quote_basis, Bind optional contact quotes to actor, project and immutable eligibility basis.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0023_contact_quote_basis -> 0024_contact_job_execution, Persist contact job versions and provider intent/result ownership.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0024_contact_job_execution -> 0025_provider_callback_route, Narrow, non-PII callback routing index for verified vendor references.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0025_provider_callback_route -> 0026_sender_identity_versions, Bind reviewed sender metadata to an active project-owned version.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0026_sender_identity_versions -> 0027_draft_integrity, Constrain draft buyer scope and make written revisions immutable.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0027_draft_integrity -> 0028_draft_approval_context, Bind draft approval review and recipient context without rewriting historical approvals.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0028_draft_approval_context -> 0029_export_authorization, Keep actor-bound export manifests so every content read can reauthorize live data.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0029_export_authorization -> 0030_manual_outcome_provenance, Bind manual outcomes to project and make runtime writes append-only.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0030_manual_outcome_provenance -> 0031_retention_redaction, Allow narrow, irreversible retention redaction of derived draft and approval payloads.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0031_retention_redaction -> 0032_contact_retention, Add explicit contact expiry and one-way addressed-draft redaction.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0032_contact_retention -> 0033_api_rate_windows, Durable per-actor API rate windows under tenant RLS.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0033_api_rate_windows -> 0034_worker_execution, Add disabled runtime selector, fenced step receipts and machine replay guard.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0034_worker_execution -> 0035_worker_recovery_probe, Bounded recovery cursor and minimal Queue/Workflow operational receipt.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0035_worker_recovery_probe -> 0036_checkpoint_schema_grants, Keep the pinned saver schema-version table read-only for native workers.
++
++Running 1 test using 1 worker
++
++(node:22912) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
++(Use `node --trace-warnings ...` to show where the warning was created)
++  ok 1 tests\e2e\audit-research-intent.spec.ts:9:1 › B05 B06 committed lost 202 and manual Retry share one durable research intent (29.3s)
++
++  1 passed (2.0m)
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q04-lint.log b/docs/buyeros/evidence/audit-fixes-20261003/Q04-lint.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q04-recovered.png b/docs/buyeros/evidence/audit-fixes-20261003/Q04-recovered.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..727f93df575223fcfb8a85b465570c3dcaac96bf
+GIT binary patch
+literal 38224
+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
+W<|r5Tn_LHqFnGH9xvX<aXaWGGb6Cp&
+
+literal 0
+HcmV?d00001
+
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q04-red.log b/docs/buyeros/evidence/audit-fixes-20261003/Q04-red.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..8e570da017c139418471de812a9b16fe8fd7dd82
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q04-red.log
+@@ -0,0 +1,74 @@
++[WebServer] INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
++[WebServer] INFO  [alembic.runtime.migration] Will assume transactional DDL.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade  -> 0001_initial, initial tenant boundary: workspaces, users, memberships
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0001_initial -> 0002_rls_and_roles, row-level security and least-privilege runtime roles
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0002_rls_and_roles -> 0003_p2_tables, P2 domain tables (projects, buyers, evidence, policy, budget, outbox) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0003_p2_tables -> 0004_p4_p5_tables, P4/P5 tables (quotes, provider ops, drafts, approvals, outcomes) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0004_p4_p5_tables -> 0005_p3_tables, P3 tables (runs, events, candidates, aliases, contacts) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0005_p3_tables -> 0006_worker_leases, worker leases and outbox dispatch columns
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0006_worker_leases -> 0007_outbox_terminal_state, terminal outbox states, claim index and dispatcher workspace read
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0007_outbox_terminal_state -> 0008_grant_users_select, grant SELECT on users to the API role
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0008_grant_users_select -> 0009_project_profile_columns, project profile columns and ICP supersession
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0009_project_profile_columns -> 0010_widen_idempotency_key, widen idempotency_records.key to the contract's 200 chars
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0010_widen_idempotency_key -> 0011_project_buyer_version, buyer version and idempotency response storage
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0011_project_buyer_version -> 0012_offer_basis_revision, Track the offer revision used by immutable ICP versions.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0012_offer_basis_revision -> 0013_project_link_constraints, Constrain project-bound links across a shared workspace.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0013_project_link_constraints -> 0014_buyer_management, Version buyer lists and persist actor-scoped presets under tenant RLS.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0014_buyer_management -> 0015_policy_lifecycle, Give policy and suppression the full purpose/subject lifecycle contract.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0015_policy_lifecycle -> 0016_bulk_jobs, Durable actor-bound bulk jobs and per-buyer results.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0016_bulk_jobs -> 0017_settings_audit, Version existing memberships and persist actor preferences and audit request IDs.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0017_settings_audit -> 0018_budget_ledger, Versioned UTC budget scopes, one operation hold and economic-event identity.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0018_budget_ledger -> 0019_offer_documents, Private offer documents and fetched-source retention metadata.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0019_offer_documents -> 0020_research_provenance, Bind canonical candidates and evidence to one tenant/run/provider context.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0020_research_provenance -> 0021_run_bounds, Persist immutable run admission basis and cumulative execution counters.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0021_run_bounds -> 0022_research_checkpoints, Own LangGraph Postgres saver 3.1.2 schema in Alembic, never at runtime.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0022_research_checkpoints -> 0023_contact_quote_basis, Bind optional contact quotes to actor, project and immutable eligibility basis.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0023_contact_quote_basis -> 0024_contact_job_execution, Persist contact job versions and provider intent/result ownership.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0024_contact_job_execution -> 0025_provider_callback_route, Narrow, non-PII callback routing index for verified vendor references.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0025_provider_callback_route -> 0026_sender_identity_versions, Bind reviewed sender metadata to an active project-owned version.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0026_sender_identity_versions -> 0027_draft_integrity, Constrain draft buyer scope and make written revisions immutable.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0027_draft_integrity -> 0028_draft_approval_context, Bind draft approval review and recipient context without rewriting historical approvals.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0028_draft_approval_context -> 0029_export_authorization, Keep actor-bound export manifests so every content read can reauthorize live data.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0029_export_authorization -> 0030_manual_outcome_provenance, Bind manual outcomes to project and make runtime writes append-only.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0030_manual_outcome_provenance -> 0031_retention_redaction, Allow narrow, irreversible retention redaction of derived draft and approval payloads.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0031_retention_redaction -> 0032_contact_retention, Add explicit contact expiry and one-way addressed-draft redaction.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0032_contact_retention -> 0033_api_rate_windows, Durable per-actor API rate windows under tenant RLS.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0033_api_rate_windows -> 0034_worker_execution, Add disabled runtime selector, fenced step receipts and machine replay guard.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0034_worker_execution -> 0035_worker_recovery_probe, Bounded recovery cursor and minimal Queue/Workflow operational receipt.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0035_worker_recovery_probe -> 0036_checkpoint_schema_grants, Keep the pinned saver schema-version table read-only for native workers.
++
++Running 1 test using 1 worker
++
++(node:21628) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
++(Use `node --trace-warnings ...` to show where the warning was created)
++  x  1 tests\e2e\audit-research-intent.spec.ts:9:1 › B05 B06 committed lost 202 and manual Retry share one durable research intent (13.1s)
++
++
++  1) tests\e2e\audit-research-intent.spec.ts:9:1 › B05 B06 committed lost 202 and manual Retry share one durable research intent 
++
++    Error: expect(received).toBe(expected) // Object.is equality
++
++    Expected: "c2a6d433-410a-4f41-9159-b88a99ee427f"
++    Received: "eca07693-74c3-489e-a549-6e20bf6ada3c"
++
++      22 |   await page.getByRole('button',{name:/^(Start research|Retry same research)$/}).click();await expect.poll(()=>posted.length).toBe(2);
++      23 |   const recovered=await counts();writeFileSync('test-results/audit-research-intent.json',JSON.stringify({posted,committed,recovered},null,2));
++    > 24 |   expect(posted[1].key).toBe(posted[0].key);expect(posted[1].body).toEqual(posted[0].body);expect(posted[1].id).toBe(posted[0].id);
++         |                         ^
++      25 |   expect(recovered.runs).toBe(1);expect(recovered.admission_outbox).toBe(1);expect(recovered.economic_intents).toBe(1);expect(recovered.provider_operations).toBe(0);expect(recovered.reservations).toBe(0);
++      26 |   await expect(page).toHaveURL(new RegExp(`/app/discover/${posted[0].id}`));await page.screenshot({path:'test-results/audit-research-recovered.png',fullPage:true});
++      27 |   await page.reload();await expect(page.getByRole('button',{name:'Sign in',exact:true})).toBeVisible();expect(posted).toHaveLength(2);
++        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-research-intent.spec.ts:24:25
++
++    Error Context: test-results\audit-fixes\audit-research-intent-B05--e3f14-one-durable-research-intent\error-context.md
++
++    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
++    test-results\audit-fixes\audit-research-intent-B05--e3f14-one-durable-research-intent\trace.zip
++    Usage:
++
++        npx playwright show-trace test-results\audit-fixes\audit-research-intent-B05--e3f14-one-durable-research-intent\trace.zip
++
++    ────────────────────────────────────────────────────────────────────────────────────────────────
++
++  1 failed
++    tests\e2e\audit-research-intent.spec.ts:9:1 › B05 B06 committed lost 202 and manual Retry share one durable research intent 
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q04-types-final.log b/docs/buyeros/evidence/audit-fixes-20261003/Q04-types-final.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q04-ui.xml b/docs/buyeros/evidence/audit-fixes-20261003/Q04-ui.xml
+new file mode 100644
+index 0000000000000000000000000000000000000000..ffc04aa2c5705c59f5009112e0a824177977969e
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q04-ui.xml
+@@ -0,0 +1,6 @@
++<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="117.933092">
++<testsuite name="audit-research-intent.spec.ts" timestamp="2026-10-03T05:18:39.581Z" hostname="" tests="1" failures="0" skipped="0" time="29.26" errors="0">
++<testcase name="B05 B06 committed lost 202 and manual Retry share one durable research intent" classname="audit-research-intent.spec.ts" time="29.26">
++</testcase>
++</testsuite>
++</testsuites>
+\ No newline at end of file
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q04-unit-final.log b/docs/buyeros/evidence/audit-fixes-20261003/Q04-unit-final.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..58ecd438b3c108f7187435cf8dc994a0e88b3cfb
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q04-unit-final.log
+@@ -0,0 +1,11 @@
++✔ B05 token renewal and route remount retain lost-response key; double start shares work (15.6266ms)
++✔ B06 full normalized payload and actor/scope define intent; generation and key order do not (1.0875ms)
++✔ B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent (4.1956ms)
++ℹ tests 3
++ℹ suites 0
++ℹ pass 3
++ℹ fail 0
++ℹ cancelled 0
++ℹ skipped 0
++ℹ todo 0
++ℹ duration_ms 1262.4791
+diff --git a/docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv b/docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv
+index 976b63b305a6d96c9466d644d3ec692f2342731d..d9cd5d2e5a26b63c348a9deaff89de4cd4fe08ef 100644
+--- a/docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv
++++ b/docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv
+@@ -15,8 +15,8 @@ B01,F06,P1,批量100/101邊界,100及101 buyer fixture,相同action各提交一
+ B02,F06,P1,確認後改集合,5個buyers；已勾確認,增加第6個或取消1個,confirmation清除；要求重新預覽,未於本次執行；舊狀態保留於historical_status,not-tested,code-only,E03,SOURCE_RISK,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+ B03,F06,P2,分派給同事,有資格active同事,選10位buyer；選同事並確認,10位owner正確；audit reason可追查,未於本次執行；舊狀態保留於historical_status,not-tested,code-only,E03,SOURCE_GAP,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+ B04,F06,P1,owner失效,preview後停用owner,提交batch,server拒絕／逐列blocked；沒有越權分派,未於本次執行；舊狀態保留於historical_status,not-tested,not-tested,,NOT_RUN,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+-B05,F08,P1,建立研究回應遺失,fictional provider＋owned DB,commit後丟202；使用者重試,相同key/run/outbox；不重複經濟意圖,未於本次執行；舊狀態保留於historical_status,not-tested,code-only,E03,SOURCE_RISK,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+-B06,F08,P1,研究雙擊,同body；同scope,同時按Start兩次,共用意圖；只有一工作,未於本次執行；舊狀態保留於historical_status,not-tested,not-tested,,NOT_RUN,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
++B05,F08,P1,建立研究回應遺失,fictional provider＋owned DB,commit後丟202；使用者重試,相同key/run/outbox；不重複經濟意圖,未於本次執行；舊狀態保留於historical_status,not-tested,code-only,E03,SOURCE_RISK,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,integration-fixture-pass,Q04-green-verified.log;Q04-db.log;Q04-unit-final.log;Q04-durability-green.json,a78859fe474f5722be3755b10e2586436b53bf97
++B06,F08,P1,研究雙擊,同body；同scope,同時按Start兩次,共用意圖；只有一工作,未於本次執行；舊狀態保留於historical_status,not-tested,not-tested,,NOT_RUN,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,integration-fixture-pass,Q04-green-verified.log;Q04-db.log;Q04-unit-final.log;Q04-durability-green.json,a78859fe474f5722be3755b10e2586436b53bf97
+ B07,F06,P1,混合逐列結果,成功/unchanged/conflict/blocked各25筆,提交batch,計數總和100；每列status與DB一致,未於本次執行；舊狀態保留於historical_status,not-tested,not-tested,,NOT_RUN,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+ B08,F06,P1,只重試失敗,100中20失敗；修改其中版本,failed-only retry,80成功列不重做；新版本重新判定,未於本次執行；舊狀態保留於historical_status,not-tested,not-tested,,HISTORICAL_CI_ONLY,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+ B09,F06,P1,取消及中途崩潰,101筆job正在執行,cancel；kill worker；重啟,已commit保留；未處理取消；無重複寫入,未於本次執行；舊狀態保留於historical_status,not-tested,not-tested,,HISTORICAL_CI_ONLY,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+diff --git a/features/live/locale.ts b/features/live/locale.ts
+index 3eb1f19db88ff06e2d90a16930911de54c153795..ae97134018fc01ed766b0833cf8ffe80013ebf95 100644
+--- a/features/live/locale.ts
++++ b/features/live/locale.ts
+@@ -1,5 +1,9 @@
+ /** Live-only system copy; factual source/user text is never translated automatically. */
+ export const liveZh: Record<string,string> = {
++  'Retry same research':'重試同一次研究','Start new research intent':'開始全新研究意圖',
++  'Check existing runs before starting new research.':'開始新研究前，請先檢查現有研究。',
++  'The result is unknown. Query existing runs or retry the same research; its key is retained.':'結果尚未確定。請查詢現有研究或重試同一次研究；操作識別碼已保留。',
++  'The previous research may already exist. Start a new intent?':'上一次研究可能已建立。是否開始全新意圖？',
+   'Previous results':'上一頁結果','Next results':'下一頁結果','Copy buyer ID':'複製買家編號',
+   'Request ID':'請求編號',
+   'Request failed. Try again after checking the connection.':'請求失敗。請檢查連線後重試。',
+diff --git a/features/live/run-progress.tsx b/features/live/run-progress.tsx
+index 15f95943ac49a4a5699c6b6379cb29774f51fd50..c248fd335b644dedf3aef9dd333245a9a5591070 100644
+--- a/features/live/run-progress.tsx
++++ b/features/live/run-progress.tsx
+@@ -6,7 +6,7 @@ import type {components} from '@/services/generated/buyeros-api';
+ import {useDataMode} from '@/features/providers/data-mode';
+ import {useWorkspaceSession} from '@/features/providers/workspace-session';
+ import {LiveCancelled,describeLiveError} from '@/services/live/client';
+-import {cancelRun,getRun,listRuns,retryRun,startRun,subscribeRun,type Run,type RunContext,type RunPage} from '@/services/live/runs';
++import {cancelRun,getRun,listRuns,retryRun,startResearch,hasUncertainResearch,resetResearchIntent,uncertainResearchBody,subscribeRun,type Run,type RunContext,type RunPage} from '@/services/live/runs';
+ 
+ type Project=components['schemas']['Project'];
+ type Load={kind:'loading'}|{kind:'ready';page:RunPage}|{kind:'error';message:string};
+@@ -28,11 +28,13 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
+ }) {
+   const {session,client}=useWorkspaceSession(),{apiBaseUrl}=useDataMode(),router=useRouter();
+   const scope=session.current(),workspace=scope.workspace,project=scope.project;
++  const recovery=workspace&&project?uncertainResearchBody({client,session,apiBaseUrl,workspaceId:workspace,projectId:project}):null;
+   const [list,setList]=useState<Load>({kind:'loading'}),[offset,setOffset]=useState(0);
+   const [run,setRun]=useState<Run|null>(null),[detailError,setDetailError]=useState(''),[busy,setBusy]=useState(false);
+-  const [profile,setProfile]=useState<string|null>(null),[target,setTarget]=useState('24');
+-  const [maxCost,setMaxCost]=useState('2.000000'),[reason,setReason]=useState(''),[transport,setTransport]=useState('');
++  const [profile,setProfile]=useState<string|null>(null),[target,setTarget]=useState(()=>String(recovery?.target_companies??24));
++  const [maxCost,setMaxCost]=useState(()=>recovery?.max_cost.amount??'2.000000'),[reason,setReason]=useState(''),[transport,setTransport]=useState('');
+   const busyRef=useRef(false);
++  const [uncertain,setUncertain]=useState(false);
+   const ctx=useMemo<RunContext|null>(()=>workspace&&project?
+     {client,session,apiBaseUrl,workspaceId:workspace,projectId:project}:null,
+     [client,session,apiBaseUrl,workspace,project]);
+@@ -88,13 +90,15 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
+     if(!Number.isInteger(targetCount)||targetCount<1||targetCount>100||!/^(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/.test(amount)||!/[1-9]/.test(amount)){
+       setDetailError(t('Enter a target from 1 to 100 and a positive USD cap.'));return;
+     }
++    const identity=session.identity();
++    setMaxCost(`${amount.split('.')[0]}.${(amount.split('.')[1]??'').padEnd(6,'0')}`);
+     busyRef.current=true;setBusy(true);setDetailError('');
+     try{
+-      const value=await startRun(ctx,{icp_version_id:profile,target_companies:targetCount,
+-        max_cost:{amount:`${amount.split('.')[0]}.${(amount.split('.')[1]??'').padEnd(6,'0')}`,currency:'USD'},limits:{...LIMITS}},crypto.randomUUID());
+-      if(current())router.push(`/app/discover/${encodeURIComponent(value.id)}?${new URLSearchParams({workspace:ctx.workspaceId,project:ctx.projectId})}`);
+-    }catch(error){if(current()&&!(error instanceof LiveCancelled))setDetailError(describeLiveError(error));}
+-    finally{busyRef.current=false;setBusy(false);}
++      const value=await startResearch(ctx,uncertainResearchBody(ctx)??{icp_version_id:profile,target_companies:targetCount,
++        max_cost:{amount:`${amount.split('.')[0]}.${(amount.split('.')[1]??'').padEnd(6,'0')}`,currency:'USD'},limits:{...LIMITS}});
++      if(session.isCurrent(identity))router.push(`/app/discover/${encodeURIComponent(value.id)}?${new URLSearchParams({workspace:ctx.workspaceId,project:ctx.projectId})}`);
++    }catch(error){if(session.isCurrent(identity)&&!(error instanceof LiveCancelled)){setUncertain(hasUncertainResearch(ctx));setDetailError(describeLiveError(error));}}
++    finally{busyRef.current=false;if(session.isCurrent(identity))setBusy(false);}
+   }
+   async function act(kind:'cancel'|'retry'){
+     if(!ctx||!run||busyRef.current||reason.trim().length<3)return;
+@@ -110,9 +114,12 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
+     <div className="inline spread"><h2>{t('Research runs')}</h2>{runId&&<button type="button" onClick={()=>router.push(`/app/runs?${new URLSearchParams({workspace:ctx.workspaceId,project:ctx.projectId})}`)}>{t('All runs')}</button>}</div>
+     {detailError&&<p role="alert">{t(detailError)}</p>}
+     {!runId&&<>
+-      <div className="run-grid"><label>{t('Target companies')} <input type="number" min="1" max="100" value={target} onChange={event=>setTarget(event.target.value)}/></label>
+-        <label>{t('Maximum research cost (USD)')} <input inputMode="decimal" value={maxCost} onChange={event=>setMaxCost(event.target.value)}/></label>
+-        <button type="button" disabled={!canStart||!profile||busy} onClick={()=>void start()}>{busy?t('Starting…'):t('Start research')}</button></div>
++      <p>{t('Check existing runs before starting new research.')}</p>
++      {(uncertain||hasUncertainResearch(ctx))&&<p role="status">{t('The result is unknown. Query existing runs or retry the same research; its key is retained.')}</p>}
++      {(uncertain||hasUncertainResearch(ctx))&&<button disabled={busy} onClick={()=>{if(window.confirm(t('The previous research may already exist. Start a new intent?'))){resetResearchIntent(ctx);setUncertain(false);setDetailError('');}}}>{t('Start new research intent')}</button>}
++      <div className="run-grid"><label>{t('Target companies')} <input disabled={busy||uncertain||hasUncertainResearch(ctx)} type="number" min="1" max="100" value={target} onChange={event=>setTarget(event.target.value)}/></label>
++        <label>{t('Maximum research cost (USD)')} <input disabled={busy||uncertain||hasUncertainResearch(ctx)} inputMode="decimal" value={maxCost} onChange={event=>setMaxCost(event.target.value)}/></label>
++        <button type="button" disabled={!canStart||!profile||busy} onClick={()=>void start()}>{busy?t('Starting…'):t(uncertain||hasUncertainResearch(ctx)?'Retry same research':'Start research')}</button></div>
+       {!profile&&<p role="status">{t('Approve the current buyer profile before research.')}</p>}
+       {list.kind==='loading'&&<p role="status">{t('Loading runs…')}</p>}
+       {list.kind==='error'&&<p role="alert">{list.message}<button type="button" onClick={()=>{setList({kind:'loading'});void loadPage(offset);}}>{t('Retry loading')}</button></p>}
+diff --git a/services/api/tests/test_run_admission_integration_db.py b/services/api/tests/test_run_admission_integration_db.py
+index a805c43d8f58e575d12794708741e36d1493b854..8f883d7767e363e5d742df621aaae120d6aa99b3 100644
+--- a/services/api/tests/test_run_admission_integration_db.py
++++ b/services/api/tests/test_run_admission_integration_db.py
+@@ -157,3 +157,19 @@ def test_persisted_usage_survives_worker_restart(admission_case):
+         counters, first = db.execute("SELECT usage_counters, first_dispatch_at FROM search_runs WHERE id=%s",
+                                      (str(run_id),)).fetchone()
+         assert counters["queries"] == 12 and first == start
++
++
++def test_lost_admission_response_replays_one_bounded_economic_intent(admission_case):
++    api, dsn = admission_case
++    lost = _post(api, key="audit-lost-202")
++    assert lost.status_code == 202
++    first_id = lost.json()["data"]["id"]
++    replay = _post(api, key="audit-lost-202")
++    assert replay.status_code == 202 and replay.json()["data"]["id"] == first_id
++    assert _count(dsn,"search_runs") == _count(dsn,"outbox_events") == 1
++    with psycopg.connect(dsn) as db:
++        ceiling = db.execute("SELECT count(*),min(approved_limit) FROM budget_accounts WHERE workspace_id=%s AND scope='run' AND scope_id=%s",(WORKSPACE_A,first_id)).fetchone()
++        assert ceiling[0] == 1 and str(ceiling[1]) == '2.000000'
++        # Admission records a ceiling, not a submitted provider operation or hold.
++        assert db.execute('SELECT count(*) FROM provider_operations WHERE workspace_id=%s',(WORKSPACE_A,)).fetchone()[0] == 0
++        assert db.execute('SELECT count(*) FROM budget_reservations WHERE workspace_id=%s',(WORKSPACE_A,)).fetchone()[0] == 0
+diff --git a/services/live/runs.ts b/services/live/runs.ts
+index d711cadd968f8019deb366d061a68996a6e059b4..d230dcc256f52ed1012064e2fedd30a7a3d7566b 100644
+--- a/services/live/runs.ts
++++ b/services/live/runs.ts
+@@ -1,6 +1,7 @@
+ import type {components} from '@/services/generated/buyeros-api';
+ import {createOperationClient, type WriteContext} from './operations';
+ import {LiveCancelled, LiveError, type LiveClient} from './client';
++import {ActionIntent} from './action-intent';
+ import type {SessionScope} from './session';
+ 
+ export type Run = components['schemas']['SearchRun'];
+@@ -42,6 +43,42 @@ export async function startRun(ctx:RunContext, body:components['schemas']['RunCr
+       header:{'Idempotency-Key':key},body},captured(ctx));
+ }
+ 
++type RunCreate=components['schemas']['RunCreate'];
++export function normalizeResearchBody(body:RunCreate):RunCreate {
++  const amount=body.max_cost.amount.trim();
++  if(!/^(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/.test(amount))throw new Error('Invalid fixed-point cap');
++  const [whole,fraction='']=amount.split('.');
++  return {...body,icp_version_id:body.icp_version_id.toLowerCase(),limits:{...body.limits},
++    max_cost:{...body.max_cost,amount:`${whole}.${fraction.padEnd(6,'0')}`}};
++}
++function ordered(value:unknown):unknown {
++  if(Array.isArray(value))return value.map(ordered);
++  if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,ordered(v)]));
++  return value;
++}
++function intentScope(ctx:RunContext){const scope=ctx.session.current();return JSON.stringify({mode:scope.mode,actor:scope.actor,workspace:ctx.workspaceId,project:ctx.projectId});}
++export function researchFingerprint(ctx:RunContext,body:RunCreate){return JSON.stringify(ordered({scope:intentScope(ctx),body:normalizeResearchBody(body)}));}
++type ResearchIntent={intent:ActionIntent<Run>;uncertain:boolean;pending:boolean;body:RunCreate;fingerprint:string};
++// Session-owned memory survives route remounts. No token, cookie or credential is stored.
++const researchIntents=new WeakMap<SessionScope,Map<string,ResearchIntent>>();
++function intents(ctx:RunContext){let value=researchIntents.get(ctx.session);if(!value){value=new Map();researchIntents.set(ctx.session,value);}return value;}
++export function hasUncertainResearch(ctx:RunContext){return intents(ctx).get(intentScope(ctx))?.uncertain??false;}
++export function uncertainResearchBody(ctx:RunContext):RunCreate|null{const own=intents(ctx).get(intentScope(ctx));return own?.uncertain?normalizeResearchBody(own.body):null;}
++export function resetResearchIntent(ctx:RunContext){const map=intents(ctx),scope=intentScope(ctx);if(map.get(scope)?.pending)throw new Error('Research is still pending');map.delete(scope);}
++export function startResearch(ctx:RunContext,body:RunCreate):Promise<Run>{
++  const map=intents(ctx),scope=intentScope(ctx),normalized=normalizeResearchBody(body),fingerprint=researchFingerprint(ctx,normalized);
++  let record=map.get(scope);if(!record){record={intent:new ActionIntent<Run>(),uncertain:false,pending:false,body:normalized,fingerprint};map.set(scope,record);}
++  const own=record;
++  if(own.uncertain&&own.fingerprint!==fingerprint)throw new Error('Check existing runs and explicitly start a new intent before changing this request.');
++  own.body=normalized;own.fingerprint=fingerprint;
++  return own.intent.run(fingerprint,async key=>{
++    own.pending=true;
++    try{const value=await startRun(ctx,normalized,key);if(map.get(scope)===own)map.delete(scope);return value;}
++    catch(error){own.uncertain=true;throw error;}
++    finally{own.pending=false;}
++  });
++}
++
+ export async function cancelRun(ctx:RunContext, run:Run, reason:string,key:string):Promise<Run> {
+   return createOperationClient(ctx.client).requestOperation('cancelRun',
+     {path:{workspace_id:ctx.workspaceId,run_id:run.id},
+diff --git a/services/worker/tests/fixtures/audit_intents.py b/services/worker/tests/fixtures/audit_intents.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..48fb33387316c8b0bcf27f6d2d7f4063ad523f9d
+--- /dev/null
++++ b/services/worker/tests/fixtures/audit_intents.py
+@@ -0,0 +1,14 @@
++"""Read admission durability only after existing owned-Docker fixture proof."""
++import json
++import psycopg
++from tests.fixtures.run_browser_research import owner_dsn,WORKSPACE
++ACTOR='e0000000-0000-4000-8000-000000000002'
++PROJECT='e9100000-0000-4000-8000-000000000001'
++with psycopg.connect(owner_dsn()) as db:
++    run_ids=[str(r[0]) for r in db.execute("SELECT id FROM search_runs WHERE workspace_id=%s AND project_id=%s AND execution_snapshot->>'actor_id'=%s",(WORKSPACE,PROJECT,ACTOR)).fetchall()]
++    counts={'runs':len(run_ids),'run_ids':run_ids}
++    counts['admission_outbox']=db.execute("SELECT count(*) FROM outbox_events WHERE workspace_id=%s AND event_type='run.discover' AND payload->>'run_id'=ANY(%s)",(WORKSPACE,run_ids)).fetchone()[0]
++    counts['economic_intents']=db.execute("SELECT count(*) FROM budget_accounts WHERE workspace_id=%s AND scope='run' AND scope_id::text=ANY(%s)",(WORKSPACE,run_ids)).fetchone()[0]
++    counts['provider_operations']=db.execute('SELECT count(*) FROM provider_operations WHERE workspace_id=%s',(WORKSPACE,)).fetchone()[0]
++    counts['reservations']=db.execute('SELECT count(*) FROM budget_reservations WHERE workspace_id=%s',(WORKSPACE,)).fetchone()[0]
++    print(json.dumps(counts))
+diff --git a/tests/audit-research-intent.test.mjs b/tests/audit-research-intent.test.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..9020102b4d157e058979ff30885d2d11d878d006
+--- /dev/null
++++ b/tests/audit-research-intent.test.mjs
+@@ -0,0 +1,29 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {loadModule} from './ts-loader.mjs';
++const {SessionScope}=await loadModule('services/live/session.ts');
++const {startResearch,researchFingerprint,resetResearchIntent}=await loadModule('services/live/runs.ts');
++const {LiveCancelled}=await loadModule('services/live/client.ts');
++const body={icp_version_id:'e9200000-0000-4000-8000-000000000001',target_companies:24,max_cost:{amount:'2.0',currency:'USD'},limits:{query_rounds:3,max_queries_per_run:12,max_results:300,max_pages:200,max_page_bytes:2097152,max_duration_seconds:1800,max_model_tokens:100000,provider_concurrency:4}};
++function context(request){const session=new SessionScope({mode:'live',actor:'stable-subject',workspace:'workspace-a',project:'project-a'});session.setToken('token-one');return {session,client:{request},workspaceId:'workspace-a',projectId:'project-a',apiBaseUrl:''};}
++test('B05 token renewal and route remount retain lost-response key; double start shares work',async()=>{
++  const calls=[];let fail=true;const ctx=context(async r=>{calls.push(r);if(fail)throw new Error('lost response');return {id:'committed-run'};});
++  await Promise.all([assert.rejects(startResearch(ctx,body)),assert.rejects(startResearch(ctx,body))]);assert.equal(calls.length,1);
++  ctx.session.setToken('token-two');fail=false;await startResearch({...ctx}, {...body,max_cost:{amount:'2.000000',currency:'USD'}});
++  assert.equal(calls.length,2);assert.equal(calls[0].idempotencyKey,calls[1].idempotencyKey);assert.equal(calls[1].token,'token-two');assert.deepEqual(calls[0].body,calls[1].body);
++});
++test('B06 full normalized payload and actor/scope define intent; generation and key order do not',()=>{
++  const ctx=context(async()=>({}));const fingerprint=researchFingerprint(ctx,body);
++  ctx.session.next({project:'project-b'});ctx.session.next({project:'project-a'});assert.equal(researchFingerprint(ctx,body),fingerprint);
++  assert.equal(researchFingerprint(ctx,{limits:{...body.limits},max_cost:{currency:'USD',amount:'2.000000'},target_companies:24,icp_version_id:body.icp_version_id}),fingerprint);
++  for(const changed of [{...body,target_companies:25},{...body,max_cost:{amount:'3',currency:'USD'}},{...body,icp_version_id:'other-icp'},{...body,limits:{...body.limits,max_results:301}}])assert.notEqual(researchFingerprint(ctx,changed),fingerprint);
++  for(const changed of [{workspaceId:'workspace-b'},{projectId:'project-b'}])assert.notEqual(researchFingerprint({...ctx,...changed},body),fingerprint);
++  ctx.session.next({actor:'other-subject'});assert.notEqual(researchFingerprint(ctx,body),fingerprint);
++});
++test('B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent',async()=>{
++  let release;const held=new Promise(r=>release=r),calls=[];
++  const ctx=context(async r=>{calls.push(r);if(calls.length===1)await held;else if(calls.length===2)throw new Error('still unknown');return {id:'run'};});
++  const first=startResearch(ctx,body);await new Promise(r=>setImmediate(r));ctx.session.next({project:'project-b'});ctx.session.next({project:'project-a'});release();await assert.rejects(first,LiveCancelled);
++  await assert.rejects(startResearch(ctx,body));assert.equal(calls[1].idempotencyKey,calls[0].idempotencyKey);
++  resetResearchIntent(ctx);await startResearch(ctx,body);assert.notEqual(calls[2].idempotencyKey,calls[0].idempotencyKey);
++});
+diff --git a/tests/e2e/audit-research-intent.spec.ts b/tests/e2e/audit-research-intent.spec.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..84eaa7b8484cb9c227f02f6fe5de0a1a23a0b625
+--- /dev/null
++++ b/tests/e2e/audit-research-intent.spec.ts
+@@ -0,0 +1,35 @@
++import {expect,test} from '@playwright/test';
++import {execFile} from 'node:child_process';
++import {promisify} from 'node:util';
++import {resolve} from 'node:path';
++import {writeFileSync} from 'node:fs';
++import {signInWorkbench,workspace,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
++const project='e9100000-0000-4000-8000-000000000001';
++async function counts(){const cwd=resolve('services/worker');return JSON.parse((await promisify(execFile)(resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python'),['tests/fixtures/audit_intents.py'],{cwd,timeout:30_000})).stdout);}
++test('B05 B06 committed lost 202 and manual Retry share one durable research intent',async({page})=>{
++  await resetWorkbenchFixtureRateWindows();await signInWorkbench(page,true,'access');
++  // Another isolated case may have persisted zh-HK in this owned shared fixture.
++  await page.getByRole('combobox',{name:/^(Language|語言)$/}).first().selectOption('en');
++  await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);await page.getByRole('button',{name:'Research runs',exact:true}).click();
++  const posted:{key:string|null;body:unknown;id:string}[]=[];
++  await page.route(`**/v1/workspaces/${workspace}/projects/${project}/runs`,async route=>{
++    if(route.request().method()!=='POST')return route.continue();
++    const response=await route.fetch();expect(response.status()).toBe(202);const payload=await response.json();
++    posted.push({key:route.request().headers()['idempotency-key'],body:route.request().postDataJSON(),id:payload.data.id});
++    if(posted.length===1)return route.abort('failed');return route.fulfill({response});
++  });
++  await page.getByLabel('Target companies').fill('35');await page.getByLabel('Maximum research cost (USD)').fill('2.0');
++  const start=page.getByRole('button',{name:'Start research',exact:true});await expect(start).toBeEnabled();
++  // Two synchronous UI clicks exercise the actual busy guard before React re-renders.
++  await start.evaluate(button=>{(button as HTMLButtonElement).click();(button as HTMLButtonElement).click();});await expect(page.getByRole('alert').last()).toBeVisible();
++  const committed=await counts();expect(committed.runs).toBe(1);expect(committed.admission_outbox).toBe(1);expect(committed.economic_intents).toBe(1);
++  await page.waitForTimeout(400);expect(posted).toHaveLength(1);
++  await page.getByRole('button',{name:'Operations',exact:true}).click();await expect(page).toHaveURL(/\/app\/operations\?/);await expect(page.getByRole('region',{name:'Job lookup'})).toBeVisible();await page.getByRole('button',{name:'Research runs',exact:true}).click();await expect(page).toHaveURL(/\/app\/runs\?/);
++  await expect(page.getByLabel('Target companies')).toHaveValue('35');await expect(page.getByLabel('Maximum research cost (USD)')).toHaveValue('2.000000');
++  await page.getByRole('button',{name:/^(Start research|Retry same research)$/}).click();await expect.poll(()=>posted.length).toBe(2);
++  const recovered=await counts();writeFileSync('test-results/audit-research-intent.json',JSON.stringify({posted,committed,recovered},null,2));
++  expect(posted[1].key).toBe(posted[0].key);expect(posted[1].body).toEqual(posted[0].body);expect(posted[1].id).toBe(posted[0].id);
++  expect(recovered.runs).toBe(1);expect(recovered.admission_outbox).toBe(1);expect(recovered.economic_intents).toBe(1);expect(recovered.provider_operations).toBe(0);expect(recovered.reservations).toBe(0);
++  await expect(page).toHaveURL(new RegExp(`/app/discover/${posted[0].id}`));await page.screenshot({path:'test-results/audit-research-recovered.png',fullPage:true});
++  await page.reload();await expect(page.getByRole('button',{name:'Sign in',exact:true})).toBeVisible();expect(posted).toHaveLength(2);
++});
+diff --git a/tests/e2e/fixtures/workbench-auth.ts b/tests/e2e/fixtures/workbench-auth.ts
+index d2f2cf73e78777ad9e13e0339dd8fe9e6502fb22..92842959ae1bb458984f8f6d6a98d3f5c3ef9210 100644
+--- a/tests/e2e/fixtures/workbench-auth.ts
++++ b/tests/e2e/fixtures/workbench-auth.ts
+@@ -16,7 +16,7 @@ export async function resetWorkbenchFixtureRateWindows(){
+   expect(JSON.parse(stdout).fixture_initial_rate_windows_reset).toBe(true);
+ }
+ 
+-export async function signInWorkbench(page:Page,waitForProject=true){
++export async function signInWorkbench(page:Page,waitForProject=true,actor:'reviewer'|'access'|'viewer'='reviewer',entry=`/app?workspace=${workspace}&project=${project}`){
+   const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,
+     publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
+   const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'workbench-fixture',use:'sig'};
+@@ -25,10 +25,10 @@ export async function signInWorkbench(page:Page,waitForProject=true){
+     nonce=q.get('nonce')||'';await route.fulfill({status:302,headers:{location:`http://localhost:5173/auth/callback?code=workbench-fixture&state=${q.get('state')}`},body:''});});
+   await page.route('https://oidc.buyeros.test/oauth/token',async route=>{
+     const unsigned=`${encode({alg:'RS256',kid:'workbench-fixture'})}.${encode({iss:'https://oidc.buyeros.test/',
+-      aud:'fixture-public-client',sub:'fixture-reviewer',nonce,exp:Math.floor(Date.now()/1000)+900})}`;
++      aud:'fixture-public-client',sub:`fixture-${actor}`,nonce,exp:Math.floor(Date.now()/1000)+900})}`;
+     const signature=await webcrypto.subtle.sign('RSASSA-PKCS1-v1_5',keys.privateKey,new TextEncoder().encode(unsigned));
+     await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},
+-      body:JSON.stringify({access_token:'fixture-reviewer',id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:900})});
++      body:JSON.stringify({access_token:`fixture-${actor}`,id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:900})});
+   });
+   await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,
+     contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[publicKey]})}));
+@@ -37,7 +37,7 @@ export async function signInWorkbench(page:Page,waitForProject=true){
+   page.on('requestfailed',request=>{if(new URL(request.url()).pathname.startsWith('/v1/'))apiEvents.push(`failed ${request.url()} ${request.failure()?.errorText}`);});
+   page.on('response',response=>{if(new URL(response.url()).pathname.startsWith('/v1/'))apiEvents.push(`${response.status()} ${response.url()}`);});
+   page.on('pageerror',error=>apiEvents.push(`pageerror ${error.name}: ${error.message}`));
+-  await page.goto(`/app?workspace=${workspace}&project=${project}`);
++  await page.goto(entry);
+   await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
+   if(waitForProject){
+     try{await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});}

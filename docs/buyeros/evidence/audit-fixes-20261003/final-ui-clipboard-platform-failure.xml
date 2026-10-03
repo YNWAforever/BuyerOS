@@ -1,0 +1,98 @@
+<testsuites id="" name="" tests="22" failures="1" skipped="0" errors="0" time="184.898711">
+<testsuite name="audit-auth-entry.spec.ts" timestamp="2026-10-03T05:54:06.495Z" hostname="" tests="7" failures="0" skipped="0" time="35.984" errors="0">
+<testcase name="U13 initialization has no false configuration alert before hydration" classname="audit-auth-entry.spec.ts" time="4.074">
+</testcase>
+<testcase name="U02 U03 no membership permits locale switching and read-only access retry" classname="audit-auth-entry.spec.ts" time="7.788">
+</testcase>
+<testcase name="U03 403 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="5.86">
+</testcase>
+<testcase name="U03 404 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="5.068">
+</testcase>
+<testcase name="U03 500 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="4.425">
+</testcase>
+<testcase name="U03 manual locale choice survives a delayed member preference response" classname="audit-auth-entry.spec.ts" time="4.964">
+</testcase>
+<testcase name="U03 expired access returns to sign-in with the selected locale" classname="audit-auth-entry.spec.ts" time="3.805">
+</testcase>
+</testsuite>
+<testsuite name="audit-draft-dirty.spec.ts" timestamp="2026-10-03T05:54:06.495Z" hostname="" tests="10" failures="1" skipped="0" time="66.162" errors="0">
+<testcase name="D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="5.929">
+</testcase>
+<testcase name="D02 Open draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="5.659">
+</testcase>
+<testcase name="D02 Refresh job Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="6.976">
+</testcase>
+<testcase name="D02 Save is awaited before opening another draft and persists one revision" classname="audit-draft-dirty.spec.ts" time="6.11">
+</testcase>
+<testcase name="D02 failed Save 401 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.489">
+</testcase>
+<testcase name="D02 failed Save 412 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="11.59">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-draft-dirty-D02-fail-794b4-s-buffer-and-dirty-baseline\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-draft-dirty-D02-fail-794b4-s-buffer-and-dirty-baseline\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  audit-draft-dirty.spec.ts:30:35 › D02 failed Save 412 keeps buffer and dirty baseline ────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    - Expected  - 2
+    + Received  + 2
+
+    - Local unsaved subject
+    + Local unsaved subject    
+    - Local unsaved body
+    + Local unsaved body    
+      zh-HK
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      33 |   else await page.route(`**/v1/workspaces/${workspace}/drafts/${seeded.draft}`,route=>route.request().method()==='PATCH'?route.fulfill({status,contentType:'application/json',body:JSON.stringify({code:status===401?'UNAUTHORIZED':'SERVICE_UNAVAILABLE',request_id:'11111111-1111-4111-8111-111111111111',retryable:true})}):route.continue());
+      34 |   await page.getByRole('button',{name:'Refresh draft',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Save',exact:true}).click();await expect(page.getByRole('alert').first()).toBeVisible();await kept(page);await expect(editor).toHaveAttribute('data-baseline-revision',revision!);await expect(editor).toHaveAttribute('data-baseline-version',version!);
+    > 35 |   if(status===412){await expect(page.getByRole('region',{name:'Draft conflict comparison'})).toContainText('Remote changed subject');await expect(page.getByRole('button',{name:'Copy local content'})).toBeVisible();await page.context().grantPermissions(['clipboard-read','clipboard-write']);await page.getByRole('button',{name:'Copy local content'}).click();await expect.poll(()=>page.evaluate(()=>navigator.clipboard.readText())).toBe('Local unsaved subject\nLocal unsaved body\nzh-HK');await kept(page);}
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                               ^
+      36 |   await page.screenshot({path:`test-results/audit-draft-failure-${status}.png`,fullPage:true});
+      37 | });
+      38 |
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-draft-dirty.spec.ts:35:431
+
+    Error Context: ..\..\test-results\audit-fixes\audit-draft-dirty-D02-fail-794b4-s-buffer-and-dirty-baseline\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-draft-dirty-D02-fail-794b4-s-buffer-and-dirty-baseline\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-draft-dirty-D02-fail-794b4-s-buffer-and-dirty-baseline\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="D02 failed Save 503 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="6.032">
+</testcase>
+<testcase name="D02 Refresh does not overwrite the unsaved buffer before a decision" classname="audit-draft-dirty.spec.ts" time="5.517">
+</testcase>
+<testcase name="D02 delayed refresh cannot materialize a draft into a new project scope" classname="audit-draft-dirty.spec.ts" time="5.768">
+</testcase>
+<testcase name="D02 zh-HK mobile dialog preserves content and keeps all choices visible" classname="audit-draft-dirty.spec.ts" time="7.092">
+</testcase>
+</testsuite>
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-03T05:54:06.495Z" hostname="" tests="4" failures="0" skipped="0" time="32.671" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="7.999">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="7.692">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="8.916">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="8.064">
+</testcase>
+</testsuite>
+<testsuite name="audit-research-intent.spec.ts" timestamp="2026-10-03T05:54:06.495Z" hostname="" tests="1" failures="0" skipped="0" time="10.265" errors="0">
+<testcase name="B05 B06 committed lost 202 and manual Retry share one durable research intent" classname="audit-research-intent.spec.ts" time="10.265">
+</testcase>
+</testsuite>
+</testsuites>

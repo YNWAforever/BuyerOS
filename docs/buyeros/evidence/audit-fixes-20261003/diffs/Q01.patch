@@ -1,0 +1,1508 @@
+diff --git a/TASKS.json b/TASKS.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..6b7da4c4fd9eb1a0989e3253941a52d1c2e809fa
+--- /dev/null
++++ b/TASKS.json
+@@ -0,0 +1,113 @@
++{
++  "scope": [
++    "Q11",
++    "Q01",
++    "Q03",
++    "Q04",
++    "Q15"
++  ],
++  "next_eligible": "Q03",
++  "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
++  "tasks": [
++    {
++      "id": "N00",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "N01",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "N02",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "N03",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "N04",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "N05",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "N06",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "N07",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "Q01",
++      "status": "fixture-verified"
++    },
++    {
++      "id": "Q02",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "Q03",
++      "status": "pending"
++    },
++    {
++      "id": "Q04",
++      "status": "pending"
++    },
++    {
++      "id": "Q05",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "Q06",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "Q07",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "Q08",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "Q09",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "Q10",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "Q11",
++      "status": "baseline-recorded"
++    },
++    {
++      "id": "Q12",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "Q13",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "Q14",
++      "status": "outside-current-scope"
++    },
++    {
++      "id": "Q15",
++      "status": "pending"
++    },
++    {
++      "id": "Q16",
++      "status": "blocked-root-cause-evidence"
++    },
++    {
++      "id": "Q17",
++      "status": "outside-current-scope"
++    }
++  ]
++}
+diff --git a/app/auth/callback/page.tsx b/app/auth/callback/page.tsx
+index 2dea032cf48ff41546ea8c3233d570f8c07cfcb5..4e35544052f30cf313eb9e169c7f8c9734cb46a0 100644
+--- a/app/auth/callback/page.tsx
++++ b/app/auth/callback/page.tsx
+@@ -4,7 +4,7 @@ import {useRouter} from 'next/navigation';
+ import {useWorkspaceSession} from '@/features/providers/workspace-session';
+ 
+ export default function AuthCallbackPage() {
+-  const {auth, session} = useWorkspaceSession();
++  const {auth, session, authBootstrap} = useWorkspaceSession();
+   const router = useRouter();
+   const [error, setError] = useState('');
+   const completion = useRef<Promise<void> | null>(null);
+@@ -23,6 +23,7 @@ export default function AuthCallbackPage() {
+     }).catch(() => { if (active) { session.setToken(undefined); setError('Sign-in failed. Please start again.'); } });
+     return () => { active = false; };
+   }, [auth, router, session]);
+-  const message = auth ? error || 'Completing sign-in…' : 'Live sign-in is not configured';
+-  return <main className="main-shell"><section className="panel" role={error || !auth ? 'alert' : 'status'}>{message}</section></main>;
++  const configurationError=authBootstrap.kind==='configuration_error';
++  const message = error || (configurationError ? authBootstrap.message : authBootstrap.kind==='disabled' ? 'Live sign-in is disabled' : 'Completing sign-in…');
++  return <main className="main-shell"><section className="panel" role={error || configurationError ? 'alert' : 'status'}>{message}</section></main>;
+ }
+diff --git a/docs/buyeros/CURRENT_STATUS.md b/docs/buyeros/CURRENT_STATUS.md
+index 15e707611766841b7606a3d4d3ac3bc98a493365..62855532da8314e3af694ae01d6d53037ba1dbec 100644
+--- a/docs/buyeros/CURRENT_STATUS.md
++++ b/docs/buyeros/CURRENT_STATUS.md
+@@ -19,7 +19,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
+ | Finding | Current classification | This round |
+ |---|---|---|
+ | F01 | still open (external evidence gate) | Q01 UI recovery; U01 membership gate remains blocked |
+-| F02 | still open (audit-source code unchanged) | Q01 |
++| F02 | fixed with local fixture evidence (Q01) | Q01 |
+ | F03 | still open (audit-source code unchanged) | outside selected first round |
+ | F04 | still open (audit-source code unchanged) | outside selected first round |
+ | F05 | still open (audit-source code unchanged) | Q03 |
+@@ -32,7 +32,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
+ | F12 | still open (external evidence gate) | outside selected first round |
+ | F13 | still open (audit-source code unchanged) | Q11 baseline only |
+ | F14 | still open (audit-source code unchanged) | outside selected first round |
+-| F15 | still open (audit-source code unchanged) | Q01 |
++| F15 | fixed with local render/UI evidence (Q01) | Q01 |
+ | F16 | still open (audit-source code unchanged) | outside selected first round |
+ | F17 | still open (audit-source code unchanged) | outside selected first round |
+ | F18 | still open (audit-source code unchanged) | outside selected first round |
+@@ -45,3 +45,9 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
+ Pending new regression RED/GREEN evidence. Original 98-case CSV and 25-task CSV are preserved unchanged in inputs/audit-20261003; current case results are separate in remaining/AUDIT_FIX_CASE_STATUS_20261003.csv.
+ 
+ Baseline commands: `node tests/live-auth-checks.mjs` 8 pass; `node tests/live-adapter-checks.mjs` 74 pass. Locked pnpm install exit 0 (offline attempt failed missing policy metadata; online frozen install succeeded). Initial pre-install module-not-found attempts are environment failures, not counted passes. Node 24.18.0, pnpm 11.25.0, uv 0.11.27, Docker 29.7.2, Windows PowerShell.
++
++## Q01 repair
++
++Hydration is explicitly initializing; configuration failure is distinct. Language works before membership/preferences, persists only a non-sensitive display choice and ignores late preference overwrites. Empty/error access has read-only retry and allow-listed diagnostics. No auto membership or write before authorization.
++
++RED: render 1 fail; UI 1 pass/5 fail. GREEN: render 1 pass; UI 7 pass/0 fail/0 skip; strict auth+contract DB suites 13 pass/0 fail/0 skip; auth 8, adapter 74; tsc/lint exit 0. Exact commands and full logs in evidence/audit-fixes-20261003. No schema migration; source head 0036_checkpoint_schema_grants. Rollback: revert Q01 commit, retaining baseline docs. U01 stays externally blocked; no live login/provider/production verification.
+diff --git a/docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md b/docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
+index e442c05ebdf627999952fb1dc410ad9fa0e84016..c6c4929d4e139ff92c36f82e378d9ce663f7d002 100644
+--- a/docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
++++ b/docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md
+@@ -1254,3 +1254,5 @@ ID-only Queue/Workflow/API probe, Cron off and mandatory fence; no paid-plan
+ upgrade/customer/provider/R2/delivery activation. Independent review and the five
+ open audits remain open. Following evidence-only commits keep this named source
+ proof; their automatically triggered CI status is reported separately.
++
++2026-10-03 Q01: fixture UI 7/7, strict auth/contracts 13/13, no skips. Current scope/evidence: CURRENT_STATUS.md. Next eligible: Q03.
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-adapter.log b/docs/buyeros/evidence/audit-fixes-20261003/Q01-adapter.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..01e2d3ceee4af6f446271416fbb4ff8260fd2840
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q01-adapter.log
+@@ -0,0 +1,75 @@
++PASS apiBaseUrl absent or blank resolves to demo
++PASS a configured apiBaseUrl resolves to live
++PASS demo mode makes every section available, live mode does not
++PASS live without a ready session reports not_configured, never available
++PASS unavailable and not_configured are distinct states
++PASS workspaces map to the narrow model
++PASS projects map to the narrow model
++PASS icp versions map approved_at to approvedAt and keep the hash
++PASS a missing required field raises instead of becoming an empty value
++PASS every mapper enforces its required fields
++PASS a workspace missing roles raises rather than defaulting to an empty list
++PASS a version without an approval date maps to null, not an error
++PASS an empty page is empty, not an error
++PASS a success unwraps data and sends the bearer only when a token is present
++PASS an error envelope becomes a typed LiveError keyed by code
++PASS a non-envelope body still yields a typed error, never a crash
++PASS an aborted request surfaces as LiveCancelled, not as an error toast
++PASS a network failure is a retryable error, not a cancellation
++PASS scopeKey encodes mode, actor, workspace and project
++PASS changing workspace advances the identity and aborts the previous controller
++PASS a stale identity is not current, so a late response can be discarded
++PASS returning to a previously visited workspace is a NEW scope, not the old one
++PASS the token lives in the session and survives a scope change
++PASS live failure surfaces the error with zero data and never touches the demo store
++PASS a 501 from a supported section marks it unavailable rather than failing
++PASS a section with no backing operation is unavailable without a request
++PASS a response whose scope changed underneath is discarded
++PASS no token means not_configured and no request is sent
++PASS each API failure code maps to its own state
++PASS a 401 is a sign-in requirement, never not_configured
++PASS a 404 is not_found, never denied
++PASS a cancelled request is discarded, not an error
++PASS the read attaches to the session controller signal
++PASS live mode refuses to read or write any demo storage key
++PASS demo mode still reads and writes its own keys
++PASS no token-shaped value is ever written to storage
++PASS live requests are addressed to the configured API base URL
++PASS with no base URL the path is used as-is
++PASS demo-only effects are enabled only in demo mode
++PASS the empty live store contains no companies and no demo identifiers
++PASS the banner label states the real mode and cannot be made to claim live
++PASS a write sends a JSON body and the mutation headers
++PASS If-Match is sent only when supplied
++PASS a stale write surfaces as a typed STALE_REVISION
++PASS markets resolve from names and codes, case-insensitively
++PASS an unknown market is returned, never dropped
++PASS languages resolve from names
++PASS an unresolvable value makes the mapper raise, naming it
++PASS toProjectCreate maps the contract fields without inventing values
++PASS toIcpSaveRequest maps requirements with their categories
++PASS ICP payload carries user-entered product and value facts before any write
++PASS canonical buyer types remain selected when editing and saving a profile
++PASS saveProfile creates the project then saves a version, in order
++PASS saveProfile explicitly creates a new project even if another is selected
++PASS explicit edit patches the offer under If-Match before saving a new ICP version
++PASS edit conflict stops before ICP write
++PASS approveProfile sends the version number as If-Match and the hash
++PASS buyers map to the versioned review model
++PASS a buyer without a fit or review maps those to null, not an error
++PASS a buyer page keeps the snapshot id and paging
++PASS a buyer page maps the snapshot expiry, null when absent
++PASS evidence maps provenance and does not expose a stale source link
++PASS an explicit selection carries the frozen versions
++PASS a snapshot selection excludes the removed ids
++PASS scope changed between project creation and ICP save sends no second write
++PASS generated operation route builds scoped path and bearer request
++PASS operation rejects cross-workspace path before sending
++PASS operation rejects scope change during token acquisition before request
++PASS live client rejects demo or malformed success envelopes
++PASS error keeps response header request ID when body omits it
++PASS live error guidance distinguishes reauth, stale revision and key conflict with request ID
++PASS double click shares one immutable action and one inflight promise
++PASS lost response reuses the key; changed payload uses a new key
++PASS multipart upload keeps the browser-generated boundary and bearer in memory
++74 live adapter checks passed
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-auth.log b/docs/buyeros/evidence/audit-fixes-20261003/Q01-auth.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..82fb9739ed484903c4fdc2368b48e4f74edb1390
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q01-auth.log
+@@ -0,0 +1,10 @@
++PASS scope snapshot stable until change and observer sees each generation
++PASS write context is captured and unauthenticated writes fail closed
++PASS OIDC return path rejects off-origin redirects
++PASS public auth config never accepts client secret or non-HTTPS issuer
++4 live auth checks passed
++PASS PKCE callback verifies state, nonce and signature, holds only access token in memory
++PASS callback rejects mismatched state and cannot replay transaction
++PASS callback rejects wrong nonce even with signed ID token
++PASS logout drops the token and uses an allowlisted origin return URL
++8 live auth checks passed including OIDC crypto
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-db-contracts.log b/docs/buyeros/evidence/audit-fixes-20261003/Q01-db-contracts.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..758544e60c5f9d1f22c485197ed6e92ee67af1fc
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q01-db-contracts.log
+@@ -0,0 +1,26 @@
++.............                                                            [100%]
++============================== warnings summary ===============================
++tests\conftest.py:24
++tests\conftest.py:24
++  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
++    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
++
++tests\conftest.py:24
++tests\conftest.py:24
++  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
++    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
++
++.venv\Lib\site-packages\starlette\testclient.py:53
++  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
++    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
++
++tests/test_auth_routes_db.py::test_valid_member_reaches_only_its_own_workspace
++  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
++    return asyncio.get_event_loop_policy()
++
++tests/test_auth_routes_db.py::test_valid_member_reaches_only_its_own_workspace
++  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
++    util.warn_deprecated(
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++13 passed, 7 warnings in 16.90s
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-empty-zh.png b/docs/buyeros/evidence/audit-fixes-20261003/Q01-empty-zh.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..736844996d40cf9e3b9ec339800909d5b71d2f12
+GIT binary patch
+literal 22662
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-green-verified.log b/docs/buyeros/evidence/audit-fixes-20261003/Q01-green-verified.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..63ad471c4a09d1be5f25ce7882b33cc0f3d2e48f
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q01-green-verified.log
+@@ -0,0 +1,52 @@
++[WebServer] INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
++[WebServer] INFO  [alembic.runtime.migration] Will assume transactional DDL.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade  -> 0001_initial, initial tenant boundary: workspaces, users, memberships
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0001_initial -> 0002_rls_and_roles, row-level security and least-privilege runtime roles
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0002_rls_and_roles -> 0003_p2_tables, P2 domain tables (projects, buyers, evidence, policy, budget, outbox) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0003_p2_tables -> 0004_p4_p5_tables, P4/P5 tables (quotes, provider ops, drafts, approvals, outcomes) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0004_p4_p5_tables -> 0005_p3_tables, P3 tables (runs, events, candidates, aliases, contacts) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0005_p3_tables -> 0006_worker_leases, worker leases and outbox dispatch columns
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0006_worker_leases -> 0007_outbox_terminal_state, terminal outbox states, claim index and dispatcher workspace read
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0007_outbox_terminal_state -> 0008_grant_users_select, grant SELECT on users to the API role
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0008_grant_users_select -> 0009_project_profile_columns, project profile columns and ICP supersession
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0009_project_profile_columns -> 0010_widen_idempotency_key, widen idempotency_records.key to the contract's 200 chars
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0010_widen_idempotency_key -> 0011_project_buyer_version, buyer version and idempotency response storage
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0011_project_buyer_version -> 0012_offer_basis_revision, Track the offer revision used by immutable ICP versions.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0012_offer_basis_revision -> 0013_project_link_constraints, Constrain project-bound links across a shared workspace.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0013_project_link_constraints -> 0014_buyer_management, Version buyer lists and persist actor-scoped presets under tenant RLS.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0014_buyer_management -> 0015_policy_lifecycle, Give policy and suppression the full purpose/subject lifecycle contract.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0015_policy_lifecycle -> 0016_bulk_jobs, Durable actor-bound bulk jobs and per-buyer results.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0016_bulk_jobs -> 0017_settings_audit, Version existing memberships and persist actor preferences and audit request IDs.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0017_settings_audit -> 0018_budget_ledger, Versioned UTC budget scopes, one operation hold and economic-event identity.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0018_budget_ledger -> 0019_offer_documents, Private offer documents and fetched-source retention metadata.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0019_offer_documents -> 0020_research_provenance, Bind canonical candidates and evidence to one tenant/run/provider context.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0020_research_provenance -> 0021_run_bounds, Persist immutable run admission basis and cumulative execution counters.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0021_run_bounds -> 0022_research_checkpoints, Own LangGraph Postgres saver 3.1.2 schema in Alembic, never at runtime.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0022_research_checkpoints -> 0023_contact_quote_basis, Bind optional contact quotes to actor, project and immutable eligibility basis.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0023_contact_quote_basis -> 0024_contact_job_execution, Persist contact job versions and provider intent/result ownership.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0024_contact_job_execution -> 0025_provider_callback_route, Narrow, non-PII callback routing index for verified vendor references.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0025_provider_callback_route -> 0026_sender_identity_versions, Bind reviewed sender metadata to an active project-owned version.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0026_sender_identity_versions -> 0027_draft_integrity, Constrain draft buyer scope and make written revisions immutable.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0027_draft_integrity -> 0028_draft_approval_context, Bind draft approval review and recipient context without rewriting historical approvals.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0028_draft_approval_context -> 0029_export_authorization, Keep actor-bound export manifests so every content read can reauthorize live data.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0029_export_authorization -> 0030_manual_outcome_provenance, Bind manual outcomes to project and make runtime writes append-only.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0030_manual_outcome_provenance -> 0031_retention_redaction, Allow narrow, irreversible retention redaction of derived draft and approval payloads.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0031_retention_redaction -> 0032_contact_retention, Add explicit contact expiry and one-way addressed-draft redaction.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0032_contact_retention -> 0033_api_rate_windows, Durable per-actor API rate windows under tenant RLS.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0033_api_rate_windows -> 0034_worker_execution, Add disabled runtime selector, fenced step receipts and machine replay guard.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0034_worker_execution -> 0035_worker_recovery_probe, Bounded recovery cursor and minimal Queue/Workflow operational receipt.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0035_worker_recovery_probe -> 0036_checkpoint_schema_grants, Keep the pinned saver schema-version table read-only for native workers.
++
++Running 7 tests using 1 worker
++
++(node:38544) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
++(Use `node --trace-warnings ...` to show where the warning was created)
++  ok 1 tests\e2e\audit-auth-entry.spec.ts:7:1 › U13 initialization has no false configuration alert before hydration (3.1s)
++  ok 2 tests\e2e\audit-auth-entry.spec.ts:16:1 › U02 U03 no membership permits locale switching and read-only access retry (9.0s)
++  ok 3 tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 403 access errors retain locale and retry (6.2s)
++  ok 4 tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 404 access errors retain locale and retry (5.2s)
++  ok 5 tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 500 access errors retain locale and retry (4.6s)
++  ok 6 tests\e2e\audit-auth-entry.spec.ts:50:1 › U03 manual locale choice survives a delayed member preference response (5.6s)
++  ok 7 tests\e2e\audit-auth-entry.spec.ts:62:1 › U03 expired access returns to sign-in with the selected locale (5.1s)
++
++  7 passed (1.4m)
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-lint-final.log b/docs/buyeros/evidence/audit-fixes-20261003/Q01-lint-final.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-list.log b/docs/buyeros/evidence/audit-fixes-20261003/Q01-list.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..6829e68fda443a10fb67506b1cecd6a7f4fd2e93
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q01-list.log
+@@ -0,0 +1,8 @@
++Listing tests:
++  audit-auth-entry.spec.ts:7:1 › U13 initialization has no false configuration alert before hydration
++  audit-auth-entry.spec.ts:16:1 › U02 U03 no membership permits locale switching and read-only access retry
++  audit-auth-entry.spec.ts:36:36 › U03 403 access errors retain locale and retry
++  audit-auth-entry.spec.ts:36:36 › U03 404 access errors retain locale and retry
++  audit-auth-entry.spec.ts:36:36 › U03 500 access errors retain locale and retry
++  audit-auth-entry.spec.ts:49:1 › U03 manual locale choice survives a delayed member preference response
++Total: 6 tests in 1 file
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-red-linux-port.log b/docs/buyeros/evidence/audit-fixes-20261003/Q01-red-linux-port.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..bdda692f9429def1935e1f5f9e2aa95aaa21b099
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q01-red-linux-port.log
+@@ -0,0 +1,267 @@
++[WebServer] INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
++[WebServer] INFO  [alembic.runtime.migration] Will assume transactional DDL.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade  -> 0001_initial, initial tenant boundary: workspaces, users, memberships
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0001_initial -> 0002_rls_and_roles, row-level security and least-privilege runtime roles
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0002_rls_and_roles -> 0003_p2_tables, P2 domain tables (projects, buyers, evidence, policy, budget, outbox) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0003_p2_tables -> 0004_p4_p5_tables, P4/P5 tables (quotes, provider ops, drafts, approvals, outcomes) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0004_p4_p5_tables -> 0005_p3_tables, P3 tables (runs, events, candidates, aliases, contacts) + RLS
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0005_p3_tables -> 0006_worker_leases, worker leases and outbox dispatch columns
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0006_worker_leases -> 0007_outbox_terminal_state, terminal outbox states, claim index and dispatcher workspace read
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0007_outbox_terminal_state -> 0008_grant_users_select, grant SELECT on users to the API role
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0008_grant_users_select -> 0009_project_profile_columns, project profile columns and ICP supersession
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0009_project_profile_columns -> 0010_widen_idempotency_key, widen idempotency_records.key to the contract's 200 chars
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0010_widen_idempotency_key -> 0011_project_buyer_version, buyer version and idempotency response storage
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0011_project_buyer_version -> 0012_offer_basis_revision, Track the offer revision used by immutable ICP versions.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0012_offer_basis_revision -> 0013_project_link_constraints, Constrain project-bound links across a shared workspace.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0013_project_link_constraints -> 0014_buyer_management, Version buyer lists and persist actor-scoped presets under tenant RLS.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0014_buyer_management -> 0015_policy_lifecycle, Give policy and suppression the full purpose/subject lifecycle contract.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0015_policy_lifecycle -> 0016_bulk_jobs, Durable actor-bound bulk jobs and per-buyer results.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0016_bulk_jobs -> 0017_settings_audit, Version existing memberships and persist actor preferences and audit request IDs.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0017_settings_audit -> 0018_budget_ledger, Versioned UTC budget scopes, one operation hold and economic-event identity.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0018_budget_ledger -> 0019_offer_documents, Private offer documents and fetched-source retention metadata.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0019_offer_documents -> 0020_research_provenance, Bind canonical candidates and evidence to one tenant/run/provider context.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0020_research_provenance -> 0021_run_bounds, Persist immutable run admission basis and cumulative execution counters.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0021_run_bounds -> 0022_research_checkpoints, Own LangGraph Postgres saver 3.1.2 schema in Alembic, never at runtime.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0022_research_checkpoints -> 0023_contact_quote_basis, Bind optional contact quotes to actor, project and immutable eligibility basis.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0023_contact_quote_basis -> 0024_contact_job_execution, Persist contact job versions and provider intent/result ownership.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0024_contact_job_execution -> 0025_provider_callback_route, Narrow, non-PII callback routing index for verified vendor references.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0025_provider_callback_route -> 0026_sender_identity_versions, Bind reviewed sender metadata to an active project-owned version.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0026_sender_identity_versions -> 0027_draft_integrity, Constrain draft buyer scope and make written revisions immutable.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0027_draft_integrity -> 0028_draft_approval_context, Bind draft approval review and recipient context without rewriting historical approvals.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0028_draft_approval_context -> 0029_export_authorization, Keep actor-bound export manifests so every content read can reauthorize live data.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0029_export_authorization -> 0030_manual_outcome_provenance, Bind manual outcomes to project and make runtime writes append-only.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0030_manual_outcome_provenance -> 0031_retention_redaction, Allow narrow, irreversible retention redaction of derived draft and approval payloads.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0031_retention_redaction -> 0032_contact_retention, Add explicit contact expiry and one-way addressed-draft redaction.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0032_contact_retention -> 0033_api_rate_windows, Durable per-actor API rate windows under tenant RLS.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0033_api_rate_windows -> 0034_worker_execution, Add disabled runtime selector, fenced step receipts and machine replay guard.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0034_worker_execution -> 0035_worker_recovery_probe, Bounded recovery cursor and minimal Queue/Workflow operational receipt.
++[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0035_worker_recovery_probe -> 0036_checkpoint_schema_grants, Keep the pinned saver schema-version table read-only for native workers.
++
++Running 6 tests using 1 worker
++
++(node:10412) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
++(Use `node --trace-warnings ...` to show where the warning was created)
++  ok 1 tests\e2e\audit-auth-entry.spec.ts:7:1 › U13 initialization has no false configuration alert before hydration (12.6s)
++  x  2 tests\e2e\audit-auth-entry.spec.ts:16:1 › U02 U03 no membership permits locale switching and read-only access retry (11.0s)
++(node:4884) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
++(Use `node --trace-warnings ...` to show where the warning was created)
++  x  3 tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 403 access errors retain locale and retry (1.0m)
++(node:28572) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
++(Use `node --trace-warnings ...` to show where the warning was created)
++  x  4 tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 404 access errors retain locale and retry (1.0m)
++(node:47820) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
++(Use `node --trace-warnings ...` to show where the warning was created)
++  x  5 tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 500 access errors retain locale and retry (1.0m)
++(node:18920) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
++(Use `node --trace-warnings ...` to show where the warning was created)
++  x  6 tests\e2e\audit-auth-entry.spec.ts:49:1 › U03 manual locale choice survives a delayed member preference response (1.0m)
++
++
++  1) tests\e2e\audit-auth-entry.spec.ts:16:1 › U02 U03 no membership permits locale switching and read-only access retry 
++
++    Error: expect(locator).toBeVisible() failed
++
++    Locator: getByText('No workspace membership. Ask an administrator for access.')
++    Expected: visible
++    Timeout: 5000ms
++    Error: element(s) not found
++
++    Call log:
++      - Expect "toBeVisible" getByText('No workspace membership. Ask an administrator for access.') with timeout 5000ms
++      - waiting for getByText('No workspace membership. Ask an administrator for access.')
++
++
++      20 |     body:JSON.stringify({data:{items:[],offset:0,limit:100,total:0}})});});
++      21 |   await signInWorkbench(page,false);
++    > 22 |   await expect(page.getByText('No workspace membership. Ask an administrator for access.')).toBeVisible();
++         |                                                                                             ^
++      23 |   await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
++      24 |   await expect(page.getByText('沒有工作區會員資格。請向管理員申請存取。')).toBeVisible();
++      25 |   const before=reads;await page.getByRole('button',{name:'重新檢查存取'}).click();
++        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-auth-entry.spec.ts:22:93
++
++    Error Context: test-results\audit-fixes\audit-auth-entry-U02-U03-n-81d5d--and-read-only-access-retry\error-context.md
++
++    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
++    test-results\audit-fixes\audit-auth-entry-U02-U03-n-81d5d--and-read-only-access-retry\trace.zip
++    Usage:
++
++        npx playwright show-trace test-results\audit-fixes\audit-auth-entry-U02-U03-n-81d5d--and-read-only-access-retry\trace.zip
++
++    ────────────────────────────────────────────────────────────────────────────────────────────────
++
++  2) tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 403 access errors retain locale and retry ──────
++
++    Test timeout of 60000ms exceeded.
++
++    Error: locator.selectOption: Test timeout of 60000ms exceeded.
++    Call log:
++      - waiting for getByRole('combobox', { name: 'Language', exact: true })
++        - locator resolved to <select disabled aria-label="Language">…</select>
++      - attempting select option action
++        2 × waiting for element to be visible and enabled
++          - element is not enabled
++        - retrying select option action
++        - waiting 20ms
++        2 × waiting for element to be visible and enabled
++          - element is not enabled
++        - retrying select option action
++          - waiting 100ms
++        108 × waiting for element to be visible and enabled
++            - element is not enabled
++          - retrying select option action
++            - waiting 500ms
++
++
++      40 |       request_id:'11111111-1111-4111-8111-111111111111',retryable:status===500})});});
++      41 |   await signInWorkbench(page,false);await expect(page.getByRole('alert').first()).toBeVisible();
++    > 42 |   await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
++         |                                                                 ^
++      43 |   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++      44 |   const before=reads;await page.getByRole('button',{name:'重試載入工作區'}).click();
++      45 |   await expect.poll(()=>reads).toBeGreaterThan(before);
++        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-auth-entry.spec.ts:42:65
++
++    Error Context: test-results\audit-fixes\audit-auth-entry-U03-403-a-c68d9-ors-retain-locale-and-retry\error-context.md
++
++    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
++    test-results\audit-fixes\audit-auth-entry-U03-403-a-c68d9-ors-retain-locale-and-retry\trace.zip
++    Usage:
++
++        npx playwright show-trace test-results\audit-fixes\audit-auth-entry-U03-403-a-c68d9-ors-retain-locale-and-retry\trace.zip
++
++    ────────────────────────────────────────────────────────────────────────────────────────────────
++
++  3) tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 404 access errors retain locale and retry ──────
++
++    Test timeout of 60000ms exceeded.
++
++    Error: locator.selectOption: Test timeout of 60000ms exceeded.
++    Call log:
++      - waiting for getByRole('combobox', { name: 'Language', exact: true })
++        - locator resolved to <select disabled aria-label="Language">…</select>
++      - attempting select option action
++        2 × waiting for element to be visible and enabled
++          - element is not enabled
++        - retrying select option action
++        - waiting 20ms
++        2 × waiting for element to be visible and enabled
++          - element is not enabled
++        - retrying select option action
++          - waiting 100ms
++        101 × waiting for element to be visible and enabled
++            - element is not enabled
++          - retrying select option action
++            - waiting 500ms
++
++
++      40 |       request_id:'11111111-1111-4111-8111-111111111111',retryable:status===500})});});
++      41 |   await signInWorkbench(page,false);await expect(page.getByRole('alert').first()).toBeVisible();
++    > 42 |   await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
++         |                                                                 ^
++      43 |   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++      44 |   const before=reads;await page.getByRole('button',{name:'重試載入工作區'}).click();
++      45 |   await expect.poll(()=>reads).toBeGreaterThan(before);
++        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-auth-entry.spec.ts:42:65
++
++    Error Context: test-results\audit-fixes\audit-auth-entry-U03-404-a-f25ad-ors-retain-locale-and-retry\error-context.md
++
++    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
++    test-results\audit-fixes\audit-auth-entry-U03-404-a-f25ad-ors-retain-locale-and-retry\trace.zip
++    Usage:
++
++        npx playwright show-trace test-results\audit-fixes\audit-auth-entry-U03-404-a-f25ad-ors-retain-locale-and-retry\trace.zip
++
++    ────────────────────────────────────────────────────────────────────────────────────────────────
++
++  4) tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 500 access errors retain locale and retry ──────
++
++    Test timeout of 60000ms exceeded.
++
++    Error: locator.selectOption: Test timeout of 60000ms exceeded.
++    Call log:
++      - waiting for getByRole('combobox', { name: 'Language', exact: true })
++        - locator resolved to <select disabled aria-label="Language">…</select>
++      - attempting select option action
++        2 × waiting for element to be visible and enabled
++          - element is not enabled
++        - retrying select option action
++        - waiting 20ms
++        2 × waiting for element to be visible and enabled
++          - element is not enabled
++        - retrying select option action
++          - waiting 100ms
++        107 × waiting for element to be visible and enabled
++            - element is not enabled
++          - retrying select option action
++            - waiting 500ms
++
++
++      40 |       request_id:'11111111-1111-4111-8111-111111111111',retryable:status===500})});});
++      41 |   await signInWorkbench(page,false);await expect(page.getByRole('alert').first()).toBeVisible();
++    > 42 |   await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
++         |                                                                 ^
++      43 |   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++      44 |   const before=reads;await page.getByRole('button',{name:'重試載入工作區'}).click();
++      45 |   await expect.poll(()=>reads).toBeGreaterThan(before);
++        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-auth-entry.spec.ts:42:65
++
++    Error Context: test-results\audit-fixes\audit-auth-entry-U03-500-a-65ff0-ors-retain-locale-and-retry\error-context.md
++
++    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
++    test-results\audit-fixes\audit-auth-entry-U03-500-a-65ff0-ors-retain-locale-and-retry\trace.zip
++    Usage:
++
++        npx playwright show-trace test-results\audit-fixes\audit-auth-entry-U03-500-a-65ff0-ors-retain-locale-and-retry\trace.zip
++
++    ────────────────────────────────────────────────────────────────────────────────────────────────
++
++  5) tests\e2e\audit-auth-entry.spec.ts:49:1 › U03 manual locale choice survives a delayed member preference response 
++
++    Test timeout of 60000ms exceeded.
++
++    Error: locator.selectOption: Test timeout of 60000ms exceeded.
++    Call log:
++      - waiting for getByRole('combobox', { name: 'Language', exact: true })
++        - locator resolved to <select disabled aria-label="Language">…</select>
++      - attempting select option action
++        2 × waiting for element to be visible and enabled
++          - element is not enabled
++        - retrying select option action
++        - waiting 20ms
++        2 × waiting for element to be visible and enabled
++          - element is not enabled
++        - retrying select option action
++          - waiting 100ms
++        105 × waiting for element to be visible and enabled
++            - element is not enabled
++          - retrying select option action
++            - waiting 500ms
++
++
++      53 |     await held;return route.fulfill({status:200,headers,contentType:'application/json',body:JSON.stringify({data:{locale:'en',version:1}})});
++      54 |   });
++    > 55 |   try {await signInWorkbench(page);await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');}
++         |                                                                                                  ^
++      56 |   finally {release();}
++      57 |   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++      58 |   await page.waitForTimeout(300);await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-auth-entry.spec.ts:55:98
++
++    Error Context: test-results\audit-fixes\audit-auth-entry-U03-manua-e0551--member-preference-response\error-context.md
++
++    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
++    test-results\audit-fixes\audit-auth-entry-U03-manua-e0551--member-preference-response\trace.zip
++    Usage:
++
++        npx playwright show-trace test-results\audit-fixes\audit-auth-entry-U03-manua-e0551--member-preference-response\trace.zip
++
++    ────────────────────────────────────────────────────────────────────────────────────────────────
++
++  5 failed
++    tests\e2e\audit-auth-entry.spec.ts:16:1 › U02 U03 no membership permits locale switching and read-only access retry 
++    tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 403 access errors retain locale and retry ───────
++    tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 404 access errors retain locale and retry ───────
++    tests\e2e\audit-auth-entry.spec.ts:36:36 › U03 500 access errors retain locale and retry ───────
++    tests\e2e\audit-auth-entry.spec.ts:49:1 › U03 manual locale choice survives a delayed member preference response 
++  1 passed (5.8m)
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-render-green.log b/docs/buyeros/evidence/audit-fixes-20261003/Q01-render-green.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..1c5c3da1feb4c374324d37976dffc048072ed172
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q01-render-green.log
+@@ -0,0 +1,9 @@
++✔ U13 actual callback render during initializing is status, never configuration alert (10.1821ms)
++ℹ tests 1
++ℹ suites 0
++ℹ pass 1
++ℹ fail 0
++ℹ cancelled 0
++ℹ skipped 0
++ℹ todo 0
++ℹ duration_ms 954.9604
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-render-red.log b/docs/buyeros/evidence/audit-fixes-20261003/Q01-render-red.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..472b323fc20a552b49a1962ff43ebb4139ea64b8
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q01-render-red.log
+@@ -0,0 +1,30 @@
++✖ U13 actual callback render during initializing is status, never configuration alert (12.3614ms)
++ℹ tests 1
++ℹ suites 0
++ℹ pass 0
++ℹ fail 1
++ℹ cancelled 0
++ℹ skipped 0
++ℹ todo 0
++ℹ duration_ms 2015.8459
++
++✖ failing tests:
++
++test at tests\audit-auth-render.test.mjs:17:1
++✖ U13 actual callback render during initializing is status, never configuration alert (12.3614ms)
++  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /role="status"/. Input:
++  
++  '<main class="main-shell"><section class="panel" role="alert">Live sign-in is not configured</section></main>'
++  
++      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/audit-auth-render.test.mjs:19:10)
++      at Test.runInAsyncScope (node:async_hooks:227:14)
++      at Test.run (node:internal/test_runner/test:1325:25)
++      at Test.start (node:internal/test_runner/test:1191:17)
++      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
++    generatedMessage: true,
++    code: 'ERR_ASSERTION',
++    actual: '<main class="main-shell"><section class="panel" role="alert">Live sign-in is not configured</section></main>',
++    expected: /role="status"/,
++    operator: 'match',
++    diff: 'simple'
++  }
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-types-final.log b/docs/buyeros/evidence/audit-fixes-20261003/Q01-types-final.log
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/docs/buyeros/evidence/audit-fixes-20261003/Q01-ui.xml b/docs/buyeros/evidence/audit-fixes-20261003/Q01-ui.xml
+new file mode 100644
+index 0000000000000000000000000000000000000000..fd14b0bb5c680e7f4015539d6b0e925dbc93d2c8
+--- /dev/null
++++ b/docs/buyeros/evidence/audit-fixes-20261003/Q01-ui.xml
+@@ -0,0 +1,18 @@
++<testsuites id="" name="" tests="7" failures="0" skipped="0" errors="0" time="85.477999">
++<testsuite name="audit-auth-entry.spec.ts" timestamp="2026-10-03T04:55:42.664Z" hostname="" tests="7" failures="0" skipped="0" time="38.865" errors="0">
++<testcase name="U13 initialization has no false configuration alert before hydration" classname="audit-auth-entry.spec.ts" time="3.111">
++</testcase>
++<testcase name="U02 U03 no membership permits locale switching and read-only access retry" classname="audit-auth-entry.spec.ts" time="8.989">
++</testcase>
++<testcase name="U03 403 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="6.179">
++</testcase>
++<testcase name="U03 404 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="5.236">
++</testcase>
++<testcase name="U03 500 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="4.636">
++</testcase>
++<testcase name="U03 manual locale choice survives a delayed member preference response" classname="audit-auth-entry.spec.ts" time="5.577">
++</testcase>
++<testcase name="U03 expired access returns to sign-in with the selected locale" classname="audit-auth-entry.spec.ts" time="5.137">
++</testcase>
++</testsuite>
++</testsuites>
+\ No newline at end of file
+diff --git a/docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv b/docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv
+index 561a520c2291354b4e53f3dc3fc33e3c81289fbc..87683db5ca1c73a7dc224111c87f1da7339ace84 100644
+--- a/docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv
++++ b/docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv
+@@ -1,7 +1,7 @@
+ case_id,finding_ids,priority,scenario,preconditions,steps,expected,actual,result,evidence_state,evidence_ids,historical_status,environment,cleanup,owner_role,repair_status,repair_evidence,reviewed_source_sha
+-U01,F01,P1,正式登入與工作區,指定已授權會員；正式read-only,登入並開/app,看見正確workspace和role；否則有恢復路徑,登入成功；重試後無membership、workspace404；完整業務流程未進入,blocked,verified,E01;E07,BLOCKED_NO_MEMBERSHIP,本次正式read-only,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+-U02,F01,P1,無會員恢復,0-membership fixture,登入；按重新檢查,不授權；可重新查詢；顯示聯絡方法,空狀態無重新核對membership／支援聯絡控制項,fail,verified,E01;E03,SOURCE_GAP,本次正式read-only,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+-U03,F02,P2,無會員繁中,0-membership fixture,切en/zh-HK,兩種語言均可選且空狀態已翻譯,Language選單disabled,fail,verified,E01;E03,OBSERVED_DISABLED,本次正式read-only,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
++U01,F01,P1,正式登入與工作區,指定已授權會員；正式read-only,登入並開/app,看見正確workspace和role；否則有恢復路徑,登入成功；重試後無membership、workspace404；完整業務流程未進入,blocked,verified,E01;E07,BLOCKED_NO_MEMBERSHIP,本次正式read-only,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,externally-blocked,No production membership or identity changes authorized,a78859fe474f5722be3755b10e2586436b53bf97
++U02,F01,P1,無會員恢復,0-membership fixture,登入；按重新檢查,不授權；可重新查詢；顯示聯絡方法,空狀態無重新核對membership／支援聯絡控制項,fail,verified,E01;E03,SOURCE_GAP,本次正式read-only,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,fixture-pass,Q01-green-verified.log;Q01-ui.xml;Q01-empty-zh.png,a78859fe474f5722be3755b10e2586436b53bf97
++U03,F02,P2,無會員繁中,0-membership fixture,切en/zh-HK,兩種語言均可選且空狀態已翻譯,Language選單disabled,fail,verified,E01;E03,OBSERVED_DISABLED,本次正式read-only,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,fixture-pass,Q01-green-verified.log;Q01-ui.xml;Q01-empty-zh.png,a78859fe474f5722be3755b10e2586436b53bf97
+ U04,F01,P1,不同身份提供者,同email不同issuer/subject fixture,各自登入,不自動合併或提升權限,未於本次執行；舊狀態保留於historical_status,not-tested,not-tested,,NOT_RUN,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+ U05,F04,P1,角色撤回,operator已有頁面；撤回membership,再讀寫及切scope,拒絕新操作；清理舊scope UI,未於本次執行；舊狀態保留於historical_status,not-tested,not-tested,,NOT_RUN,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+ U06,F03,P1,成員分頁,250 members及admin,第1頁至第13頁；搜尋第101位,全部可達；總數正確；無重複,未於本次執行；舊狀態保留於historical_status,not-tested,code-only,E03,SOURCE_GAP,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+@@ -55,7 +55,7 @@ R03,F10,P1,outbox恢復與lease,owned PG/controller,duplicateQueue/leaseexpired/
+ R04,F10,P1,restore及retention,隔離restore；外部journal副本,恢復舊backup再replay deletion,刪除不復活；ledger可核對；資料可用前完成,未於本次執行；舊狀態保留於historical_status,not-tested,not-tested,,NOT_RUN,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+ R05,F13,P2,單一現況文件,CURRENT_STATUS及舊handoff,比對PR狀態/時間/operation ledger,historical標清楚；部署狀態不捏造,未於本次執行；舊狀態保留於historical_status,not-tested,code-only,E03,SOURCE_GAP,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+ R06,F10,P1,告警及rollback,核准staging；注入job stalled,查alert→負責人→drain→rollback,可操作；未知holds不誤釋放；証據有時間線,未於本次執行；舊狀態保留於historical_status,not-tested,not-tested,,NOT_RUN,本地／隔離fixture；未執行者須依前置条件提供,本次未建立正式資料；未執行者於隔離fixture結束後依runbook處理,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+-U13,F15,P2,Callback初始化不誤報,有設定auth的乾淨啟動／hydration,登入並記initializing→callback→session各畫面,配置正確時不出現未設定alert,短暫顯示Live sign-in is not configured後完成登入,fail,verified,E03;E07,NEW_2026-10-03,正式read-only,不使用正式客戶資料；重現腳本無外部副作用,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
++U13,F15,P2,Callback初始化不誤報,有設定auth的乾淨啟動／hydration,登入並記initializing→callback→session各畫面,配置正確時不出現未設定alert,短暫顯示Live sign-in is not configured後完成登入,fail,verified,E03;E07,NEW_2026-10-03,正式read-only,不使用正式客戶資料；重現腳本無外部副作用,待分派,fixture-pass,Q01-green-verified.log;Q01-ui.xml;Q01-empty-zh.png,a78859fe474f5722be3755b10e2586436b53bf97
+ U14,F20,P1,Neon刷新／新分頁與deep link,隔離Neon會員及同源cookie；未實作,登入後刷新、開新分頁、短JWT過期後讀資料,正確恢復scope；限次token renewal；不把token存localStorage,Neon未實作；只見現有記憶體Auth0新頁要登入,not-tested,code-only,E03;E09,NEW_2026-10-03,隔離fixture／local,不使用正式客戶資料；重現腳本無外部副作用,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+ U15,F17,P2,專案統計與列表同範圍,A零failed；同workspace B五failed,選A看Overview Failed jobs再開列表；切B,A0、B5；或明確標全workspace，統計與列表一致,程式碼未帶project_id；尚未執行DB／UI fixture,not-tested,code-only,E03,NEW_2026-10-03,隔離fixture／local,不使用正式客戶資料；重現腳本無外部副作用,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+ U16,F21,P1,正式workspace讀取錯誤恢復,正式read-only；登入完成,首次載入；記requestID；按一次Retry,正常read或可恢復錯誤；server log可定位原因,首次500 OperationalError；Retry成功讀取空membership,fail,verified,E07,NEW_2026-10-03,正式read-only,不使用正式客戶資料；重現腳本無外部副作用,待分派,not-tested,,a78859fe474f5722be3755b10e2586436b53bf97
+diff --git a/features/live/locale.ts b/features/live/locale.ts
+index 6e18cbe9557f8ac8538c7abf1086127a094ad6bf..5c693f69531ec27b8da7f33a39a175289f6cf884 100644
+--- a/features/live/locale.ts
++++ b/features/live/locale.ts
+@@ -1,5 +1,17 @@
+ /** Live-only system copy; factual source/user text is never translated automatically. */
+ export const liveZh: Record<string,string> = {
++  'Request ID':'請求編號',
++  'Request failed. Try again after checking the connection.':'請求失敗。請檢查連線後重試。',
++  'Service temporarily unavailable. Retry after checking the status.':'服務暫時無法使用。請確認狀態後重試。',
++  'The selected item was not found in this workspace.':'在此工作區找不到所選項目。',
++  'You do not have permission for this action.':'你沒有執行此操作的權限。',
++  'No workspace membership. Ask an administrator for access.':'沒有工作區會員資格。請向管理員申請存取。',
++  'Check access again':'重新檢查存取',
++  'Contact your workspace administrator.':'請聯絡工作區管理員。',
++  'Copy diagnostics':'複製診斷資料',
++  'Initializing sign-in…':'正在初始化登入…',
++  'Sign in to access your workspaces.':'請登入以存取工作區。',
++
+   'Workspace selection':'工作區選擇','Project selection':'專案選擇',
+   'Buyer details: {buyer}':'買家詳情：{buyer}','Buyer dossier tabs':'買家詳情頁籤',
+   'Previous buyer':'上一個買家','Next buyer':'下一個買家','Close details':'關閉詳情',
+@@ -94,9 +106,9 @@ export const liveZh: Record<string,string> = {
+   'Choose at least one buyer type.':'請選擇至少一種買家類型。',
+   'Enter must-have requirements and confirm them.':'請填寫必要條件並確認。',
+   'Loading workspaces…':'載入工作區中…','Loading projects…':'載入專案中…','Retry loading workspaces':'重試載入工作區','Retry loading projects':'重試載入專案',
+-  'No workspace membership. Ask an administrator for access.':'沒有工作區權限，請向管理員申請。',
++
+   'No projects yet.':'尚未有專案。','Choose workspace':'選擇工作區','Choose project':'選擇專案',
+-  'Sign in':'登入','Sign in to access your workspaces.':'登入以存取工作區。',
++  'Sign in':'登入',
+   'Profile history':'輪廓歷史','Current approved':'目前已批准','Pending review':'待審批',
+   'Approve profile':'批准輪廓','Profile details':'輪廓詳情','Offer facts':'產品事實',
+   'Requirements':'買家條件','Markets':'市場','Languages':'語言','Sources':'來源',
+diff --git a/features/live/workspace-picker.tsx b/features/live/workspace-picker.tsx
+index 0a48e8aa097e020ca7b3707d4e4224924c816085..b776596763aad603bd0de0ebd0ef7b73a1cf10b8 100644
+--- a/features/live/workspace-picker.tsx
++++ b/features/live/workspace-picker.tsx
+@@ -1,5 +1,5 @@
+ 'use client';
+-import {useEffect, useState} from 'react';
++import {useEffect, useRef, useState} from 'react';
+ import {usePathname, useRouter} from 'next/navigation';
+ import {useWorkspaceSession, useSessionSnapshot} from '@/features/providers/workspace-session';
+ import {toWorkspaces, toProjects, toIcpVersions, type LiveWorkspace, type LiveProject} from '@/services/live/mapping';
+@@ -54,7 +54,7 @@ function updateUrl(router: ReturnType<typeof useRouter>, changes: Record<string,
+   window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+ }
+ export function LiveWorkspace() {
+-  const {session, client, auth, authError} = useWorkspaceSession();
++  const {session, client, auth, authError, authBootstrap} = useWorkspaceSession();
+   const snapshot = useSessionSnapshot();
+   const router = useRouter(), pathname = usePathname() || '/app';
+   const [workspaces, setWorkspaces] = useState<LoadState<LiveWorkspace>>({kind:'loading'});
+@@ -65,7 +65,10 @@ export function LiveWorkspace() {
+   const [locale, setLocale] = useState<'en'|'zh-HK'>('en');
+   const [prefVersion,setPrefVersion]=useState(1),[localeSaving,setLocaleSaving]=useState(false),[localeError,setLocaleError]=useState('');
+   const [localeReadyFor,setLocaleReadyFor]=useState<string|null>(null);
++  const manualLocale = useRef(false);
++  useEffect(()=>{try {const saved=localStorage.getItem('buyeros.locale');if(saved==='en'||saved==='zh-HK'){manualLocale.current=true;queueMicrotask(()=>setLocale(saved));}}catch {/* Locale storage is optional. */}},[]);
+   const t = (value:string) => locale === 'zh-HK' ? (liveZh[value] || zh[value] || value) : value;
++  const localizeError=(message:string)=>{const [guidance,id]=message.split(' Request ID: ');return t(guidance)+(id?` ${t('Request ID')}: ${id}`:'');};
+   useEffect(() => {document.documentElement.lang=locale;},[locale]);
+   const workspace = snapshot.scope.workspace, project = snapshot.scope.project;
+   const authorized = workspaces.kind === 'ready' && workspaces.items.some(item => item.id === workspace);
+@@ -83,21 +86,32 @@ export function LiveWorkspace() {
+     const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
+     void client.request<{locale:'en'|'zh-HK';version:number}>({path:`/v1/workspaces/${workspace}/preferences`,token,scope:identity,
+       signal:AbortSignal.any([own.signal,session.controller().signal])}).then(value=>{
+-      if(!own.signal.aborted&&session.isCurrent(identity)){setLocale(value.locale);setPrefVersion(value.version);setLocaleReadyFor(identity);setLocaleError('');}
++      if(!own.signal.aborted&&session.isCurrent(identity)){if(!manualLocale.current)setLocale(value.locale);setPrefVersion(value.version);setLocaleReadyFor(identity);setLocaleError('');}
+     }).catch(error=>{if(!own.signal.aborted&&session.isCurrent(identity)&&!(error instanceof LiveCancelled))setLocaleError(describeLiveError(error));});
+     return()=>own.abort();
+   },[authorized,workspace,snapshot.authenticated,snapshot.identity,client,session]);
+   async function updateLocale(value:'en'|'zh-HK'){
++    manualLocale.current=true;setLocale(value);
++    try {localStorage.setItem('buyeros.locale',value);}catch {/* Display locale works without storage. */}
+     if(!localeReady||!workspace||localeSaving)return;
+-    const previous=locale,identity=session.identity(),token=session.token();if(!token)return;
+-    setLocale(value);setLocaleSaving(true);setLocaleError('');
++    const identity=session.identity(),token=session.token();if(!token)return;
++    setLocaleSaving(true);setLocaleError('');
+     try{
+       const updated=await client.request<{locale:'en'|'zh-HK';version:number}>({path:`/v1/workspaces/${workspace}/preferences`,
+         method:'PATCH',token,scope:identity,body:{locale:value},ifMatch:`"${prefVersion}"`,idempotencyKey:crypto.randomUUID()});
+-      if(session.isCurrent(identity)){setLocale(updated.locale);setPrefVersion(updated.version);}
+-    }catch(error){if(session.isCurrent(identity)&&!(error instanceof LiveCancelled)){setLocale(previous);setLocaleError(describeLiveError(error));}}
++      if(session.isCurrent(identity))setPrefVersion(updated.version);
++    }catch(error){if(session.isCurrent(identity)&&!(error instanceof LiveCancelled))setLocaleError(describeLiveError(error));}
+     finally{setLocaleSaving(false);}
+   }
++  function retryAccess(){setSelectionError('');setWorkspaces({kind:'loading'});setWorkspaceRefresh(value=>value+1);}
++  const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
++  function copyDiagnostics(){
++    const message=workspaces.kind==='error'?workspaces.message:'';
++    const requestId=message.match(/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/i)?.[0]??null;
++    // Allow-listed support fields only: no token, OAuth code, email or user claims.
++    void navigator.clipboard?.writeText(JSON.stringify({request_id:requestId,time:new Date().toISOString(),
++      workspace_id:workspace,project_id:project,login_method:'auth0'},null,2));
++  }
+   useEffect(() => {
+     if (!snapshot.authenticated) return;
+     const own = new AbortController();
+@@ -173,22 +187,23 @@ export function LiveWorkspace() {
+     const target=new URL(path,window.location.origin);for(const [key,value] of params)target.searchParams.set(key,value);
+     router.push(target.pathname+target.search);
+   }
+-  if (!auth) return <main className="main-shell"><section className="panel" role="status"><h1>Live sign-in unavailable</h1><p>{authError || 'Configure an Auth0 public SPA client, issuer, client ID and API audience.'}</p></section></main>;
+-  if (!snapshot.authenticated) return <main className="main-shell"><section className="panel"><h1>FIMMICK BuyerOS</h1><p>Sign in to access your workspaces.</p><button onClick={() => void auth.signIn(pathname + window.location.search)}>Sign in</button></section></main>;
++  if (!auth) return <main className="main-shell">{languagePicker}<section className="panel" role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&<p>{authError}</p>}</section></main>;
++  if (!snapshot.authenticated) return <main className="main-shell">{languagePicker}<section className="panel"><h1>FIMMICK BuyerOS</h1><p>{t('Sign in to access your workspaces.')}</p><button onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></section></main>;
+   return <main className="main-shell live-workspace"><div className="content">
+-    <header className="topbar live-topbar"><b>FIMMICK BuyerOS</b><span>{t('Live workspace')}</span><label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving||!localeReady}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label><button onClick={() => {session.setToken(undefined); void auth.signOut();}}>{t('Sign out')}</button></header>
++    <header className="topbar live-topbar"><b>FIMMICK BuyerOS</b><span>{t('Live workspace')}</span>{languagePicker}<button onClick={() => {session.setToken(undefined); void auth.signOut();}}>{t('Sign out')}</button></header>
+     <LiveNavigation t={t} navigate={navigate} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>
+     <section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
+       {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
+-      {workspaces.kind === 'error' && <><p role="alert">{workspaces.message}</p><button onClick={()=>{setWorkspaces({kind:'loading'});setWorkspaceRefresh(value=>value+1);}}>{t('Retry loading workspaces')}</button></>}
+-      {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>{t('No workspace membership. Ask an administrator for access.')}</p>)}
++      {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
++      {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p><button onClick={retryAccess}>{t('Check access again')}</button></>)}
++      {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={copyDiagnostics}>{t('Copy diagnostics')}</button></>}
+       {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
+     </section>
+-    {selectionError && <section className="panel" role="alert">{selectionError}</section>}
+-    {localeError && <section className="panel" role="alert">{localeError}</section>}
++    {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
++    {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
+     {authorized && <section className="panel" aria-label={t('Project selection')}><h2>{t('Projects')}</h2>
+       {projects.kind === 'loading' && <p role="status">{t('Loading projects…')}</p>}
+-      {projects.kind === 'error' && <><p role="alert">{projects.message}</p><button onClick={()=>{setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}>{t('Retry loading projects')}</button></>}
++      {projects.kind === 'error' && <><p role="alert">{localizeError(projects.message)}</p><button onClick={()=>{setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}>{t('Retry loading projects')}</button></>}
+       {projects.kind === 'ready' && (projects.items.length ? <label>{t('Project')} <select aria-label={t('Project')} value={project || ''} onChange={event=>chooseProject(event.target.value)}><option value="">{t('Choose project')}</option>{projects.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>{t('No projects yet.')}</p>)}
+       {(canCreate||canEdit&&projectKnown&&projectActive) && <div className="inline">{canCreate&&<button onClick={()=>navigate('/app/discover/new')}>{t('New project')}</button>}{canEdit&&projectKnown&&projectActive&&<button onClick={()=>navigate('/app/discover/edit')}>{t('Edit offer')}</button>}</div>}
+     </section>}
+diff --git a/features/providers/workspace-session.tsx b/features/providers/workspace-session.tsx
+index 6da2c9feeb7e3154b6a6e3c3ecac68afbb69f15a..e13f57c773cefb7a57595efd6221c6f7c582a227 100644
+--- a/features/providers/workspace-session.tsx
++++ b/features/providers/workspace-session.tsx
+@@ -5,7 +5,8 @@ import {createLiveClient} from '@/services/live/client';
+ import {createAuthAdapter, type AuthAdapter, type AuthConfig} from '@/services/live/auth';
+ import {useDataMode} from './data-mode';
+ 
+-interface SessionValue {session: SessionScope; client: ReturnType<typeof createLiveClient>; auth: AuthAdapter | null; authError: string | null;}
++export type AuthBootstrap = {kind: 'initializing'} | {kind: 'disabled'} | {kind: 'ready'; auth: AuthAdapter} | {kind: 'configuration_error'; message: string};
++interface SessionValue {authBootstrap: AuthBootstrap; session: SessionScope; client: ReturnType<typeof createLiveClient>; auth: AuthAdapter | null; authError: string | null;}
+ const SessionContext = createContext<SessionValue | null>(null);
+ const noBrowserChange = () => () => {};
+ const inBrowser = () => true;
+@@ -17,11 +18,13 @@ export function WorkspaceSessionProvider({children, authConfig}: {children: Reac
+   // The server and hydration pass agree on a null adapter; the browser then instantiates it.
+   const browser = useSyncExternalStore(noBrowserChange, inBrowser, onServer);
+   const issuer = authConfig?.issuer, clientId = authConfig?.clientId, audience = authConfig?.audience;
+-  const authState = useMemo((): Pick<SessionValue, 'auth' | 'authError'> => {
+-    if (!browser || mode !== 'live') return {auth: null, authError: null};
+-    if (!issuer || !clientId || !audience) return {auth: null, authError: null};
+-    try {return {auth: createAuthAdapter({issuer, clientId, audience}), authError: null};}
+-    catch {return {auth: null, authError: 'Public OIDC configuration is invalid'};}
++  const authState = useMemo((): Pick<SessionValue, 'auth' | 'authError' | 'authBootstrap'> => {
++    if (mode !== 'live') return {auth: null, authError: null, authBootstrap: {kind:'disabled'}};
++    if (!browser) return {auth: null, authError: null, authBootstrap: {kind:'initializing'}};
++    const invalid = (message:string) => ({auth:null, authError:message, authBootstrap:{kind:'configuration_error' as const,message}});
++    if (!issuer || !clientId || !audience) return invalid('Configure an Auth0 public SPA client, issuer, client ID and API audience.');
++    try {const auth=createAuthAdapter({issuer, clientId, audience});return {auth, authError:null, authBootstrap:{kind:'ready',auth}};}
++    catch {return invalid('Public OIDC configuration is invalid');}
+   }, [browser, mode, issuer, clientId, audience]);
+   useEffect(() => {
+     const auth = authState.auth;
+diff --git a/playwright.audit-fixes.config.ts b/playwright.audit-fixes.config.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..e98317890403f7f66f33d2c71978f2872cc468d5
+--- /dev/null
++++ b/playwright.audit-fixes.config.ts
+@@ -0,0 +1,16 @@
++import {defineConfig} from '@playwright/test';
++// Owned loopback HTTP/Postgres fixture; never reuse a running/shared/live server.
++export default defineConfig({
++  globalTeardown:'./tests/e2e/audit-teardown.ts',
++  testDir:'./tests/e2e',testMatch:'audit-*.spec.ts',workers:1,timeout:60_000,
++  outputDir:'test-results/audit-fixes',
++  reporter:[['list'],['junit',{outputFile:'test-results/audit-fixes.xml'}]],
++  use:{baseURL:'http://localhost:5173',browserName:'chromium',viewport:{width:1120,height:800},trace:'retain-on-failure'},
++  webServer:[
++    {command:'uv run --frozen python tools/serve_e2e_fixture.py',cwd:'services/api',url:'http://127.0.0.1:8000/health/live',timeout:600_000,reuseExistingServer:false,
++      env:{BUYEROS_STRICT_INTEGRATION:'1',BUYEROS_E2E_SEED_BUYERS:'1',BUYEROS_E2E_SEED_RUNS:'1',BUYEROS_E2E_SEED_DRAFTS:'1',BUYEROS_CORS_ORIGINS:'["http://localhost:5173"]'}},
++    {command:process.platform==='win32'?'node scripts/serve-audit-ui-fixture.mjs':'pnpm dev',url:'http://localhost:5173',timeout:600_000,reuseExistingServer:false,
++      env:{BUYEROS_DEPLOY_TARGET:'vercel',BUYEROS_INTERNAL_API_URL:'http://127.0.0.1:8000',BUYEROS_API_BASE_URL:'/',BUYEROS_AUTH0_ISSUER:'https://oidc.buyeros.test/',
++        BUYEROS_AUTH0_CLIENT_ID:'fixture-public-client',BUYEROS_AUTH0_AUDIENCE:'fixture-api'}},
++  ],
++});
+diff --git a/scripts/serve-audit-ui-fixture.mjs b/scripts/serve-audit-ui-fixture.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..e44393a8e86bc3443140de9b3a07c2e50d6bc8dc
+--- /dev/null
++++ b/scripts/serve-audit-ui-fixture.mjs
+@@ -0,0 +1,35 @@
++/** Local Linux fixture for Windows Vite transport failures. No cloud deployment. */
++import {spawn,spawnSync} from 'node:child_process';
++import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';
++import {tmpdir} from 'node:os';
++import {resolve,join,relative,isAbsolute} from 'node:path';
++import {createHash} from 'node:crypto';
++const root=resolve('.'),owner=createHash('sha256').update(root).digest('hex').slice(0,12);
++const name=`buyeros-audit-ui-${owner}`,volume=`buyeros-audit-ui-deps-${owner}`;
++const docker=(args)=>{const r=spawnSync('docker',args,{encoding:'utf8',timeout:60_000});if(r.status!==0)throw new Error(`docker ${args[0]} failed: ${r.stderr}`);return r.stdout.trim();};
++const exists=spawnSync('docker',['volume','inspect',volume],{encoding:'utf8'});
++if(exists.status===0){const v=JSON.parse(exists.stdout)[0];if(v.Labels?.['buyeros.audit.owner']!==owner)throw new Error('unowned fixture cache');}
++else docker(['volume','create','--label',`buyeros.audit.owner=${owner}`,volume]);
++const work=mkdtempSync(join(tmpdir(),'buyeros-audit-ui-'));
++const source=spawnSync('git',['ls-files','--cached','--others','--exclude-standard'],{encoding:'utf8'});
++if(source.status!==0)throw new Error('source inventory failed');
++const files=source.stdout.split(/\r?\n/).filter(Boolean).filter(p=>! /^(services\/(api|worker|cloudflare-jobs)|docs|artifacts|tests)\//.test(p));
++for(const p of files){const inside=relative(root,resolve(root,p));if(isAbsolute(inside)||inside.startsWith('..')||p.startsWith('.env'))throw new Error('unsafe source file');}
++writeFileSync(join(work,'files.txt'),files.join('\n')+'\n');
++const tar=spawnSync('tar',['-cf',join(work,'source.tar'),'-T',join(work,'files.txt')],{cwd:root,encoding:'utf8',timeout:60_000});
++if(tar.status!==0)throw new Error(tar.stderr);
++docker(['run','-d','--name',name,'--label',`buyeros.audit.owner=${owner}`,'--cpus','4','--memory','6g',
++ '-p','127.0.0.1:5173:3000','--mount',`type=volume,src=${volume},dst=/src/node_modules`,
++ '-e','BUYEROS_DEPLOY_TARGET=vercel','-e','BUYEROS_INTERNAL_API_URL=http://host.docker.internal:8000',
++ '-e','BUYEROS_API_BASE_URL=/','-e','BUYEROS_AUTH0_ISSUER=https://oidc.buyeros.test/',
++ '-e','BUYEROS_AUTH0_CLIENT_ID=fixture-public-client','-e','BUYEROS_AUTH0_AUDIENCE=fixture-api',
++ '-w','/src','node:22.23.2-bookworm-slim','sleep','infinity']);
++writeFileSync('test-results/audit-ui-container.json',JSON.stringify({name,volume,owner,image:'node:22.23.2-bookworm-slim'}));
++try {
++ docker(['cp',join(work,'source.tar'),`${name}:/tmp/source.tar`]);
++ docker(['exec',name,'sh','-c',`tar -xf /tmp/source.tar -C /src && mkdir -p /src/.sites-runtime && printf '%s' '{"executionProfile":"managed-linux"}' > /src/.sites-runtime/execution-profile.json`]);
++} finally {const inside=relative(tmpdir(),work);if(isAbsolute(inside)||!inside.startsWith('buyeros-audit-ui-'))throw new Error('unsafe temp cleanup');rmSync(work,{recursive:true,force:true});}
++const child=spawn('docker',['exec',name,'sh','-c','corepack pnpm install --frozen-lockfile && node scripts/run-framework.mjs dev'],{stdio:'inherit'});
++let stopping=false;function stop(){if(stopping)return;stopping=true;spawnSync('docker',['rm','-f',name],{stdio:'ignore',timeout:30_000});}
++process.once('SIGTERM',()=>{stop();process.exit(0);});process.once('SIGINT',()=>{stop();process.exit(0);});
++child.once('exit',code=>{stop();process.exit(code??1);});
+diff --git a/tests/audit-auth-render.test.mjs b/tests/audit-auth-render.test.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..3c2f8d51d44250abc6afabece6a7c4267106def7
+--- /dev/null
++++ b/tests/audit-auth-render.test.mjs
+@@ -0,0 +1,20 @@
++import {test} from 'node:test';
++import assert from 'node:assert/strict';
++import fs from 'node:fs';
++import ts from 'typescript';
++import React from 'react';
++import {renderToString} from 'react-dom/server';
++// Render the actual callback consumer at the server/hydration boundary.
++// Router/context stand-ins avoid a browser and do not simulate successful login.
++let source=ts.transpileModule(fs.readFileSync('app/auth/callback/page.tsx','utf8'),{compilerOptions:{
++  module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
++source=source.replace(/from ["']react["']/g,`from ${JSON.stringify(import.meta.resolve('react'))}`)
++ .replace(/from ["']react\/jsx-runtime["']/g,`from ${JSON.stringify(import.meta.resolve('react/jsx-runtime'))}`)
++ .replace(/import \{ useRouter \} from ["']next\/navigation["'];/,`const useRouter=()=>({replace(){}});`)
++ .replace(/import \{ useWorkspaceSession \} from ["']@\/features\/providers\/workspace-session["'];/,
++   `const useWorkspaceSession=()=>({auth:null,authBootstrap:{kind:'initializing'},session:{}});`);
++const {default:Callback}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
++test('U13 actual callback render during initializing is status, never configuration alert',()=>{
++  const html=renderToString(React.createElement(Callback));
++  assert.match(html,/role="status"/);assert.doesNotMatch(html,/not configured|role="alert"/);
++});
+diff --git a/tests/e2e/audit-auth-entry.spec.ts b/tests/e2e/audit-auth-entry.spec.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..c86f92ec0f9a7e63f74d1bb85a75ec2faec96e5d
+--- /dev/null
++++ b/tests/e2e/audit-auth-entry.spec.ts
+@@ -0,0 +1,68 @@
++import {expect,test} from '@playwright/test';
++import {signInWorkbench,workspace,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
++const api='http://localhost:5173';
++const headers={'Access-Control-Allow-Origin':'http://localhost:5173'};
++test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
++
++test('U13 initialization has no false configuration alert before hydration',async({browser})=>{
++  const context=await browser.newContext({javaScriptEnabled:false});
++  try {
++    const page=await context.newPage();await page.goto('http://localhost:5173/auth/callback');
++    await expect(page.getByRole('alert')).toHaveCount(0);
++    await expect(page.getByRole('status')).toContainText(/sign-in/i);
++  } finally {await context.close();}
++});
++
++test('U02 U03 no membership permits locale switching and read-only access retry',async({page})=>{
++  let reads=0;const writes:string[]=[];
++  page.on('request',r=>{if(r.url().startsWith(api+'/v1/')&&r.method()!=='GET')writes.push(r.method()+' '+r.url());});
++  await page.route(api+'/v1/workspaces?**',route=>{reads++;return route.fulfill({status:200,headers,contentType:'application/json',
++    body:JSON.stringify({data_mode:'live',request_id:'11111111-1111-4111-8111-111111111111',data:{items:[],offset:0,limit:100,total:0}})});});
++  await signInWorkbench(page,false);
++  await expect(page.getByText('No workspace membership. Ask an administrator for access.')).toBeVisible();
++  await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
++  await expect(page.getByText('沒有工作區會員資格。請向管理員申請存取。')).toBeVisible();
++  const before=reads;await page.getByRole('button',{name:'重新檢查存取'}).click();
++  await expect.poll(()=>reads).toBeGreaterThan(before);
++  await expect(page.getByText('沒有工作區會員資格。請向管理員申請存取。')).toBeVisible();
++  await expect(page.getByText('請聯絡工作區管理員。')).toBeVisible();
++  await expect(page.getByRole('button',{name:'複製診斷資料'})).toBeVisible();
++  expect(writes).toEqual([]);
++  await page.screenshot({path:'test-results/audit-auth-empty-zh.png',fullPage:true});
++  await page.reload();await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
++  await expect(page.getByRole('combobox',{name:'語言',exact:true})).toHaveValue('zh-HK');
++});
++
++for(const status of [403,404,500]) test(`U03 ${status} access errors retain locale and retry`,async({page})=>{
++  let reads=0;
++  await page.route(api+'/v1/workspaces?**',route=>{reads++;return route.fulfill({status,headers,contentType:'application/json',
++    body:JSON.stringify({code:status===403?'FORBIDDEN':status===404?'NOT_FOUND':'INTERNAL_ERROR',message:'fixture access error',
++      request_id:'11111111-1111-4111-8111-111111111111',retryable:status===500})});});
++  await signInWorkbench(page,false);await expect(page.getByRole('alert').first()).toBeVisible();
++  await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
++  await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++  await expect(page.getByRole('alert').first()).toContainText(status===403?'你沒有執行此操作的權限':status===404?'找不到所選項目':'服務暫時無法使用');
++  const before=reads;await page.getByRole('button',{name:'重試載入工作區'}).click();
++  await expect.poll(()=>reads).toBeGreaterThan(before);
++  await expect(page.getByRole('alert').first()).toContainText('11111111-1111-4111-8111-111111111111');
++});
++
++test('U03 manual locale choice survives a delayed member preference response',async({page})=>{
++  let release:()=>void=()=>{};const held=new Promise<void>(resolve=>{release=resolve;});
++  await page.route(`${api}/v1/workspaces/${workspace}/preferences`,async route=>{
++    if(route.request().method()!=='GET')return route.continue();
++    await held;return route.fulfill({status:200,headers,contentType:'application/json',body:JSON.stringify({data_mode:'live',request_id:'11111111-1111-4111-8111-111111111111',data:{locale:'en',version:1}})});
++  });
++  try {await signInWorkbench(page);await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');}
++  finally {release();}
++  await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++  await page.waitForTimeout(300);await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++});
++
++test('U03 expired access returns to sign-in with the selected locale',async({page})=>{
++  await page.addInitScript(()=>localStorage.setItem('buyeros.locale','zh-HK'));
++  await page.route(api+'/v1/workspaces?**',route=>route.fulfill({status:401,contentType:'application/json',body:JSON.stringify({code:'UNAUTHENTICATED',request_id:'11111111-1111-4111-8111-111111111111'})}));
++  await signInWorkbench(page,false);
++  await expect(page.getByRole('button',{name:'登入',exact:true})).toBeVisible();
++  await expect(page.getByRole('combobox',{name:'語言',exact:true})).toHaveValue('zh-HK');
++});
+diff --git a/tests/e2e/audit-teardown.ts b/tests/e2e/audit-teardown.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..263175b257e9cca2d8bcec94ff3bb0a67f69ffd1
+--- /dev/null
++++ b/tests/e2e/audit-teardown.ts
+@@ -0,0 +1,16 @@
++import cleanupDatabase from './teardown';
++import {readFileSync,rmSync} from 'node:fs';
++import {spawnSync} from 'node:child_process';
++export default function cleanupAuditFixtures(){
++  cleanupDatabase();
++  const marker='test-results/audit-ui-container.json';
++  let proof:{name:string;owner:string};
++  try{proof=JSON.parse(readFileSync(marker,'utf8'));}catch{return;}
++  if(!/^buyeros-audit-ui-[0-9a-f]{12}$/.test(proof.name)||proof.name!==`buyeros-audit-ui-${proof.owner}`)throw new Error('unrecognized UI fixture');
++  const inspect=spawnSync('docker',['inspect',proof.name],{encoding:'utf8'});
++  if(inspect.status===0){const item=JSON.parse(inspect.stdout)[0];
++    if(item.Config.Labels?.['buyeros.audit.owner']!==proof.owner)throw new Error('unowned UI fixture');
++    const removed=spawnSync('docker',['rm','-f',proof.name],{encoding:'utf8'});if(removed.status!==0)throw new Error(removed.stderr);
++  }
++  rmSync(marker);
++}
+diff --git a/tests/e2e/fixtures/workbench-auth.ts b/tests/e2e/fixtures/workbench-auth.ts
+index eb970ec9add9d5a47b1e53a122a2ed3cd7443e03..d2f2cf73e78777ad9e13e0339dd8fe9e6502fb22 100644
+--- a/tests/e2e/fixtures/workbench-auth.ts
++++ b/tests/e2e/fixtures/workbench-auth.ts
+@@ -38,7 +38,7 @@ export async function signInWorkbench(page:Page,waitForProject=true){
+   page.on('response',response=>{if(new URL(response.url()).pathname.startsWith('/v1/'))apiEvents.push(`${response.status()} ${response.url()}`);});
+   page.on('pageerror',error=>apiEvents.push(`pageerror ${error.name}: ${error.message}`));
+   await page.goto(`/app?workspace=${workspace}&project=${project}`);
+-  await page.getByRole('button',{name:'Sign in'}).click();
++  await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
+   if(waitForProject){
+     try{await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});}
+     catch(error){throw new Error(`Project selection did not settle; API events: ${apiEvents.join(' | ')}`,{cause:error});}
