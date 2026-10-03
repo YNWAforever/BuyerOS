@@ -54,7 +54,7 @@ export function LiveProfilePanel({canApprove=false,t=(text:string)=>text}: {canA
         if(!active||!session.isCurrent(identity))return;
         setState({kind:'ready',project,versions:versions.sort((a,b)=>b.number-a.number)});
         const requested=new URLSearchParams(window.location.search).get('profile');
-        setSelectedId(requested??versions.reduce<ICP|null>((best,row)=>!best||row.number>best.number?row:best,null)?.id??null);
+        setSelectedId(current=>requested??current??versions.reduce<ICP|null>((best,row)=>!best||row.number>best.number?row:best,null)?.id??null);
       }catch(error){if(!active||error instanceof LiveCancelled)return;setState({kind:'error',message:message(error)});}
     })();
     return()=>{active=false;own.abort();};
@@ -78,7 +78,7 @@ export function LiveProfilePanel({canApprove=false,t=(text:string)=>text}: {canA
           icpVersion:{id:selected.id,number:selected.number,content_hash:selected.content_hash}});
       });
       setConfirmed(false);setRefresh(value=>value+1);
-    }catch(error){if(!(error instanceof LiveCancelled))setActionError(message(error));}
+    }catch(error){if(!(error instanceof LiveCancelled)){setActionError(message(error));if(error instanceof LiveError&&error.status===412)setConfirmed(false);}}
     finally{busyRef.current=false;setBusy(false);}
   }
   function choose(id:string){setSelectedId(id);setConfirmed(false);setActionError('');
@@ -107,9 +107,10 @@ export function LiveProfilePanel({canApprove=false,t=(text:string)=>text}: {canA
       <p>{t('Markets')}: {selected.markets.join(', ')} · {t('Languages')}: {selected.languages.join(', ')}</p>
       <p>{t('Buyer type')}: {selected.buyer_types.join(', ')} · {t('Desired buyer roles (optional)')}: {selected.desired_roles?.join(', ')||'—'}</p>
       <h4>{t('Changes from previous version')}</h4><p>{previous?(changes.length?changes.map(t).join(', '):t('No content changes')):t('No previous version')}</p>
+      {selected.basis_status==='stale'&&<p role="alert">{t('The offer changed. This profile cannot be approved.')} {t('Offer revision')}: {selected.basis_offer_revision??'—'} → {project.offer_revision}</p>}
       {canApproveSelected&&<><label><input type="checkbox" checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>{t('Confirm approval of this exact version')} v{selected.number}</label>
         <button type="button" disabled={!confirmed||busy} onClick={()=>void approve()}>{busy?t('Approving...'):t('Approve profile')}</button></>}
-      {actionError&&<p role="alert">{actionError}</p>}
+      {actionError&&<><p role="alert">{t(actionError)}</p><button type="button" onClick={()=>{setConfirmed(false);setState({kind:'loading'});setRefresh(value=>value+1);setActionError('');}}>{t('Reload profile')}</button></>}
     </article>}
   </section>;
 }
