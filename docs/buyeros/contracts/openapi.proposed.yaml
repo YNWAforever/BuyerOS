@@ -7886,6 +7886,172 @@ paths:
         references. Timestamps, IDs, money limits and actor are server controlled unless explicitly input.
       x-errors:
       - DELIVERY_DISABLED
+  /v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests:
+    post:
+      operationId: previewBulkManifest
+      summary: Freeze an actor-bound maintenance selection up to10000
+      tags:
+      - BO-010
+      parameters:
+      - &q08p002
+        name: workspace_id
+        in: path
+        required: true
+        schema: &q08p001
+          type: string
+          format: uuid
+      - &q08p003
+        name: project_id
+        in: path
+        required: true
+        schema: *q08p001
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Atomic current frozen selection or durable per-row execution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkManifestResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - workspace_admin
+      x-cost: none
+      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
+        Unknown reply is explicit same-intent Retry.
+      x-tenant-authorization: Current membership and original actor; operation-specific
+        roles and target rechecked for admission and replay.
+      x-implementation-status: LOCAL_IMPLEMENTED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkManifestCreate'
+  /v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}:
+    get:
+      operationId: getBulkManifest
+      summary: Restore an original actor manifest without executing it
+      tags:
+      - BO-010
+      parameters:
+      - *q08p002
+      - *q08p003
+      - name: manifest_id
+        in: path
+        required: true
+        schema: *q08p001
+      responses:
+        '200':
+          description: Atomic current frozen selection or durable per-row execution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkManifestResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-cost: none
+      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
+        Unknown reply is explicit same-intent Retry.
+      x-tenant-authorization: Current membership and original actor; operation-specific
+        roles and target rechecked for admission and replay.
+      x-implementation-status: LOCAL_IMPLEMENTED
+  /v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}/execute:
+    post:
+      operationId: executeBulkManifest
+      summary: Confirm the exact frozen digest and current operation authority
+      tags:
+      - BO-010
+      parameters:
+      - *q08p002
+      - *q08p003
+      - name: manifest_id
+        in: path
+        required: true
+        schema: *q08p001
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '200':
+          description: Atomic current frozen selection or durable per-row execution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResultResponse'
+        '202':
+          description: Atomic current frozen selection or durable per-row execution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncJobResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - workspace_admin
+      x-cost: none
+      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
+        Unknown reply is explicit same-intent Retry.
+      x-tenant-authorization: Current membership and original actor; operation-specific
+        roles and target rechecked for admission and replay.
+      x-implementation-status: LOCAL_IMPLEMENTED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkManifestExecute'
 components:
   securitySchemes:
     BearerAuth:
@@ -10687,6 +10853,7 @@ components:
         id: *id001
         workspace_id: *id001
         project_id: *id001
+        manifest_id: {type: string, format: uuid}
         kind:
           type: string
           enum:
@@ -10737,6 +10904,225 @@ components:
       - blocked
       - conflicts
       - cancelled
+    BulkManifestCreate:
+      oneOf:
+      - type: object
+        additionalProperties: false
+        properties:
+          filters: &q08s002
+            $ref: '#/components/schemas/BuyerFilters'
+          excluded_ids: &q08s003
+            type: array
+            items: &q08s001
+              type: string
+              format: uuid
+            maxItems: 10000
+            uniqueItems: true
+          reason: &q08s004
+            type: string
+            minLength: 3
+            maxLength: 2000
+          source_job_id: *q08s001
+          operation:
+            type: string
+            enum:
+            - assignBuyerOwners
+          target:
+            type: object
+            additionalProperties: false
+            properties:
+              owner_membership_id:
+                type:
+                - string
+                - 'null'
+                format: uuid
+            required:
+            - owner_membership_id
+        required:
+        - filters
+        - excluded_ids
+        - reason
+        - operation
+        - target
+      - type: object
+        additionalProperties: false
+        properties:
+          filters: *q08s002
+          excluded_ids: *q08s003
+          reason: *q08s004
+          source_job_id: *q08s001
+          operation:
+            type: string
+            enum:
+            - reviewBuyers
+          target:
+            type: object
+            additionalProperties: false
+            properties:
+              status:
+                type: string
+                enum:
+                - accepted
+                - rejected
+                - needs_information
+            required:
+            - status
+        required:
+        - filters
+        - excluded_ids
+        - reason
+        - operation
+        - target
+      - type: object
+        additionalProperties: false
+        properties:
+          filters: *q08s002
+          excluded_ids: *q08s003
+          reason: *q08s004
+          source_job_id: *q08s001
+          operation:
+            type: string
+            enum:
+            - changeListMemberships
+          target:
+            type: object
+            additionalProperties: false
+            properties:
+              list_id: *q08s001
+              operation:
+                type: string
+                enum:
+                - add
+                - remove
+            required:
+            - list_id
+            - operation
+        required:
+        - filters
+        - excluded_ids
+        - reason
+        - operation
+        - target
+    BulkManifestExecute:
+      type: object
+      additionalProperties: false
+      properties:
+        digest: &q08s005
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        confirmation:
+          type: boolean
+          const: true
+      required:
+      - digest
+      - confirmation
+    BulkManifest:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *q08s001
+        workspace_id: *q08s001
+        project_id: *q08s001
+        actor_user_id: *q08s001
+        operation:
+          type: string
+          enum:
+          - assignBuyerOwners
+          - reviewBuyers
+          - changeListMemberships
+        target:
+          oneOf:
+          - type: object
+            additionalProperties: false
+            properties:
+              owner_membership_id:
+                type:
+                - string
+                - 'null'
+                format: uuid
+            required:
+            - owner_membership_id
+          - type: object
+            additionalProperties: false
+            properties:
+              status:
+                type: string
+                enum:
+                - accepted
+                - rejected
+                - needs_information
+            required:
+            - status
+          - type: object
+            additionalProperties: false
+            properties:
+              list_id: *q08s001
+              operation:
+                type: string
+                enum:
+                - add
+                - remove
+            required:
+            - list_id
+            - operation
+        filters:
+          $ref: '#/components/schemas/BuyerFilters'
+        excluded_ids: *q08s003
+        reason: *q08s004
+        count:
+          type: integer
+          minimum: 1
+          maximum: 10000
+        digest: *q08s005
+        expires_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+          - ready
+          - executed
+        version:
+          type: integer
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+        job_id: *q08s001
+        source_job_id: *q08s001
+        result:
+          $ref: '#/components/schemas/BulkResult'
+      required:
+      - id
+      - workspace_id
+      - project_id
+      - actor_user_id
+      - operation
+      - target
+      - filters
+      - excluded_ids
+      - reason
+      - count
+      - digest
+      - expires_at
+      - status
+      - version
+      - created_at
+    BulkManifestResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/BulkManifest'
+        data_mode:
+          type: string
+          enum: [live]
+        request_id:
+          type: string
+      required:
+      - data
+      - request_id
+      - data_mode
     AsyncJob:
       type: object
       additionalProperties: false
@@ -10744,6 +11130,7 @@ components:
         id: *id001
         workspace_id: *id001
         project_id: *id001
+        manifest_id: {type: string, format: uuid}
         kind:
           type: string
           enum:

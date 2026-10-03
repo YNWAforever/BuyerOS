@@ -12,6 +12,7 @@ from .routes.audit import router as audit_router
 from .routes.buyers import router as buyers_router
 from .routes.budgets import router as budgets_router
 from .routes.buyer_management import router as buyer_management_router
+from .routes.bulk_manifests import router as bulk_manifests_router
 from .routes.documents import router as documents_router
 from .routes.drafts import router as drafts_router
 from .routes.exports import router as exports_router
@@ -61,6 +62,7 @@ def create_app() -> FastAPI:
     app.include_router(icp_router)
     app.include_router(buyers_router)
     app.include_router(buyer_management_router)
+    app.include_router(bulk_manifests_router)
     app.include_router(documents_router)
     app.include_router(drafts_router)
     app.include_router(exports_router)

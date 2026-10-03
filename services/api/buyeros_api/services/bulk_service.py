@@ -29,6 +29,8 @@ def job_data(job: AsyncJob, *, results: list[dict] | None = None, offset: int = 
         "cancelled": job.processed - job.updated - job.unchanged - job.blocked - job.conflicts,
         "result_page": {"items": results or [], "offset": offset, "limit": limit, "total": total or 0},
     }
+    if job.manifest_id:
+        data["manifest_id"] = str(job.manifest_id)
     if job.kind == "draft_generation" and job.status == "completed":
         draft_id = job.command.get("result_draft_id") if isinstance(job.command, dict) else None
         if draft_id:
@@ -211,6 +213,8 @@ async def retry_failed_only(session, *, workspace_id, job_id, actor_user_id, rol
         raise ApiError(404, "NOT_FOUND", "bulk job not found")
     if not permission_for_roles(roles, job.operation):
         raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+    if job.manifest_id:
+        raise ApiError(409, "MANIFEST_REVIEW_REQUIRED", "preview current failed rows and confirm a new manifest digest")
     if job.status not in {"completed", "failed"}:
         raise ApiError(409, "JOB_IN_PROGRESS", "wait until the job has finished")
     failed = (await session.execute(select(AsyncJobItem).where(

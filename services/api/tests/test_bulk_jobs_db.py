@@ -57,7 +57,7 @@ def test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback(migrated
     config = Config(str(ALEMBIC_INI))
     config.set_main_option("script_location", str(SERVICE_ROOT / "alembic"))
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
         for table in ("async_jobs", "async_job_items"):
             assert conn.execute("SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname=%s",
                                 (table,)).fetchone() == (True, True)
