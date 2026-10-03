@@ -1280,3 +1280,16 @@ Meaningful RED: UI expected20/received100; complete clean API RED 3 failed/2 pas
 Source `fb184819d038dc2ad56b7f1746362fe9b7a6089a`; base338ee8e; branchcodex/audit-fixes-20261003. Strict required gates:72pass/0fail/0skip/0error, 14warnings,275.01s (APIcwdservices/api); combinedUI29pass/0fail/0skip/0error, aggregate348.635498s; unit13pass. Full commands/artifacts and source hashes: `docs/buyeros/evidence/audit-fixes-20261003/Q02/RESULTS.md`. Generators79operations, tsc/lint exit0. No schema migration; head0036. Reversepatch20files checked; no actual revert/data undo. OriginalDBguards3files unchanged;98caseoriginalfields intact. Two specifically proven interrupted disposableDBs cleaned; inherited containers untouched. Final fixture teardown and volume ownership cleanup recorded in evidence.
 
 Implemented/fixture verified/integration verified: Q02 U06/U07/U08/S06(current RLS). Externally blocked/unverified: true live account/provider/Neon/build/cutover/production release, Q16root cause. Deployed: none in this repair session. NexteligibleQ05.
+
+
+## 2026-10-03 continuation — Q05 in progress
+
+Base `6e7a78c6994664cb47c5325d8c0eecd8cfdde573`, clean isolated `codex/audit-fixes-20261003`. Meaningful B02 UI RED: 1 failed/0 passed/0 skipped, confirmation remained checked after adding a sixth buyer. Implementing generated eligible-colleague selection, stable full-intent confirmation and immutable ActionIntent recovery. Required UI/strict DB/typed/unit gates pending; no schema or external activation changes.
+
+### Q05 final checkpoint
+
+Reviewed source `4cd0f484814be7d4333ca265c9637de940d398fa`; base `6e7a78c6994664cb47c5325d8c0eecd8cfdde573`; isolated branch `codex/audit-fixes-20261003`. Q05/F06 B02/B03/B04/B07/B16 implemented and locally fixture/integration verified: exact-context confirmation, generated colleague selector, immutable same-key unknown-result reconciliation, scope isolation and responsive en/zh-HK controls. Existing server target/version/tenant checks retained with fresh evidence.
+
+Final strict DB13, combined UI37 and related unit18 pass, all0fail/error/skip. Generated79-operation/type/lint gates pass. Completion-tool first ESLint child timeout retained; bounded rerun passes, without changing test assertions/timeouts/guards. Exact commands, failed runs, screenshots, source hashes and complete seven-file rollback patch: `evidence/audit-fixes-20261003/Q05/RESULTS.md`. No migration; head0036. Fixtures and owned dependency volume cleaned; original98case columns/31input hashes/plan bytes preserved. Git newline normalization is explicitly recorded, not claimed byte equality.
+
+Author review only; independent review pending. Memory intent recovery verified across route/scope/token renewal, not hard-browser restart. True Neon/live account/provider/built-output/production release gates unexecuted, Q16 root-cause evidence blocked, Q17 not guessed. Deployed SHA null. Next eligible local task **Q06**, bounded job summary polling (Q03 predecessor satisfied).

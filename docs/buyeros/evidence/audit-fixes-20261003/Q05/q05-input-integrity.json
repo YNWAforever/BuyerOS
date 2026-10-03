@@ -1,0 +1,10 @@
+{
+  "verified_files": 31,
+  "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "evidence_zip_sha256": "19369591a175edad7dd2e9f3ddb5bfdebc6cdc5130a2770243b1e9de2a42d35a",
+  "approved_plan_byte_equal": true,
+  "original_case_fields_preserved": 98,
+  "evidence_zip_sha256_reverified": true,
+  "outer_zip_sha256": "f11c2c079cd40692b7c1ccb059a3c83d02024fb0f19bfda99b860c388304ea3f",
+  "safe_nested_entry": "BuyerOS_Audit_2026-10-03_Evidence.zip"
+}

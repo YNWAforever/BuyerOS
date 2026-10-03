@@ -5,9 +5,10 @@
     "Q03",
     "Q04",
     "Q15",
-    "Q02"
+    "Q02",
+    "Q05"
   ],
-  "next_eligible": "Q05",
+  "next_eligible": "Q06",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -105,7 +106,25 @@
     },
     {
       "id": "Q05",
-      "status": "outside-current-scope"
+      "status": "integration-fixture-verified",
+      "base_sha": "6e7a78c6994664cb47c5325d8c0eecd8cfdde573",
+      "depends_on": [
+        "Q02"
+      ],
+      "verification_status": "13 strict DB + 37 combined UI + 18 unit pass; 0 fail/error/skip",
+      "release_status": "not-deployed",
+      "code_status": "implemented",
+      "source_sha": "4cd0f484814be7d4333ca265c9637de940d398fa",
+      "cases": [
+        "B02",
+        "B03",
+        "B04",
+        "B07",
+        "B16"
+      ],
+      "migrations": "none; source head 0036_checkpoint_schema_grants",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q05/RESULTS.md",
+      "next_eligible": "Q06"
     },
     {
       "id": "Q06",
@@ -176,10 +195,10 @@
     }
   ],
   "future_eligible": [
-    "Q05",
+    "Q06",
     "Q16 evidence collection",
     "N00 built compatibility proof"
   ],
-  "reviewed_source_sha": "fb184819d038dc2ad56b7f1746362fe9b7a6089a",
+  "reviewed_source_sha": "4cd0f484814be7d4333ca265c9637de940d398fa",
   "deployed_sha": null
 }

@@ -1,0 +1,33 @@
+test-results/q05-api-final.xml {"tests":13,"failures":0,"errors":0,"skipped":0}
+test-results/q05-ui-final.xml {"tests":37,"failures":0,"errors":0,"skipped":0}
+✔ U13 actual callback render during initializing is status, never configuration alert (9.6569ms)
+✔ B02 confirmation is stable for row ordering but binds every material field (25.1017ms)
+✔ B02 snapshot confirmation binds snapshot identity and normalized exclusions (0.3926ms)
+✔ B03 frozen payload preserves confirmed rows and trimmed audit reason (3.7442ms)
+✔ B16 unknown assignment survives route remount and token renewal with the same key (5.392ms)
+✔ B16 an unresolved assignment cannot be replaced with a materially different intent (0.356ms)
+✔ D02 save has the required transition order (3.5694ms)
+✔ D02 discard has the required transition order (0.2122ms)
+✔ D02 cancel has the required transition order (1.285ms)
+✔ D02 rejected save 412 cannot proceed (0.8973ms)
+✔ D02 rejected save 503 cannot proceed (0.7226ms)
+✔ D02 clean transition does not prompt or write (0.2487ms)
+✔ D02 asynchronous Save completes before proceeding (6.5063ms)
+✔ U06 generated member operation carries literal search and bounded page query (3.0544ms)
+✔ S06 generated eligible lookup and scope context reject foreign and A-B-A responses (2.816ms)
+✔ B05 token renewal and route remount retain lost-response key; double start shares work (19.5047ms)
+✔ B06 full normalized payload and actor/scope define intent; generation and key order do not (1.7021ms)
+✔ B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent (4.6811ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1246.6289
+PASS node --test tests/audit-bulk-confirmation.test.mjs tests/audit-member-contract.test.mjs tests/audit-research-intent.test.mjs tests/audit-draft-guard.test.mjs tests/audit-auth-render.test.mjs
+API types match the OpenAPI contract
+PASS node scripts/generate-api-types.mjs --check
+PASS node node_modules/typescript/bin/tsc --noEmit
+PASS node node_modules/eslint/bin/eslint.js features/live/bulk-actions.tsx features/live/buyer-results.tsx services/live/bulk-confirmation.ts tests/e2e/audit-bulk-confirmation.spec.ts

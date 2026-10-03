@@ -116,3 +116,7 @@ Auth0 正式路徑保留；Neon Auth、DB搬遷/Data API／framework／Cloudflar
 ## Continuation: Q02 completed locally
 
 Reviewed source `fb184819d038dc2ad56b7f1746362fe9b7a6089a`. [Q02 PR description](Q02-pr.md) and [exact results/screenshots/rollback](../../evidence/audit-fixes-20261003/Q02/RESULTS.md). Final strict API72, combinedUI29 and unit13 pass, allzero fail/skip. Contract79operations; no migration/deployment. NexteligibleQ05. Earlier four repair boundaries above remain historical, separate commits.
+
+## Continuation: Q05 completed locally
+
+Reviewed source `4cd0f484814be7d4333ca265c9637de940d398fa`; base6e7a78c. [Q05 PR-12 description](Q05-pr.md), [author review](Q05-review.md), [exact results/screenshots/rollback](../../evidence/audit-fixes-20261003/Q05/RESULTS.md). Final strict DB13, combinedUI37 and unit18 pass, zero fail/error/skip.79 operations retained, no new schema/API migration/deployment. F06 local confirmation/colleague/unknown-result/scope checks B02/B03/B04/B07/B16 now pass; hard-browser intent recovery/live gates remain unverified. The earlier F-ID table is the preserved first-round snapshot; CURRENT_STATUS and the case tracker hold current results. Original audit case columns/package remain unchanged. Next eligible local task Q06; independent review and external activation remain separate.

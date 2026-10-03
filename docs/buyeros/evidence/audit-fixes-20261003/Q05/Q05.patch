@@ -1,0 +1,535 @@
+diff --git a/features/live/bulk-actions.tsx b/features/live/bulk-actions.tsx
+index 9f9b17f..c52903f 100644
+--- a/features/live/bulk-actions.tsx
++++ b/features/live/bulk-actions.tsx
+@@ -1,11 +1,12 @@
+ 'use client';
+-import {useEffect,useRef,useState} from 'react';
++import {useEffect,useMemo,useRef,useState} from 'react';
+ import type {components} from '@/services/generated/buyeros-api';
+ import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
++import {assignmentRecovery,freezeBulkAssignment,type FrozenBulkAssignment} from '@/services/live/bulk-confirmation';
+ import {ActionIntent} from '@/services/live/action-intent';
+ import {downloadText} from '@/services/live/download-text';
+ import {readExportContent,type ExportJob} from '@/services/live/exports';
+-import {LiveCancelled,describeLiveError} from '@/services/live/client';
++import {LiveCancelled,LiveError,describeLiveError} from '@/services/live/client';
+ import {buyerOperationContext} from '@/services/live/buyers';
+ import type {ReviewSelection} from '@/services/live/buyer-selection';
+ import {createOperationClient} from '@/services/live/operations';
+@@ -18,6 +19,8 @@ type Locale='en'|'zh-HK';
+ const zhCopy:Record<string,string>={
+   'Assign buyer owners':'批量分派買家負責人','Assignment reason':'分派原因',
+   'Confirm owner assignment':'確認負責人分派','Assign selected buyers':'分派已選買家',
++  'Owner':'負責人','Me':'我','No owner':'沒有負責人','Search colleagues':'搜尋同事','Search':'搜尋','Previous colleagues':'上一頁同事','Next colleagues':'下一頁同事','Reload colleagues':'重新載入同事','Loading colleagues…':'正在載入同事…','Retry same assignment':'重試同一分派','Confirm this preview':'確認這份預覽','Scope':'工作區／專案','Reason':'原因',
++  'The assignment result is unknown. Retry the same frozen assignment to reconcile; changes are locked until its result is known.':'分派結果未明。請重試同一份已凍結分派以核對結果；確認結果前暫停更改。',
+   'Assigning...':'正在分派…','Bulk job progress':'批量工作進度','Close job':'關閉工作',
+   'Loading job...':'正在載入工作…','Refresh job':'更新工作進度',
+   'Export failed IDs and reasons':'匯出失敗買家 ID 與原因',
+@@ -32,35 +35,90 @@ export function LiveBulkActions({selection,count,canAssign,ownMembershipId,onJob
+   selection:ReviewSelection|null;count:number;canAssign:boolean;ownMembershipId:string|null;
+   onJob:(id:string)=>void;onCommitted:()=>void;locale?:Locale;
+ }){
+-  const {session,client}=useWorkspaceSession(),{scope}=useSessionSnapshot();
+-  const [reason,setReason]=useState(''),[confirm,setConfirm]=useState(false),[busy,setBusy]=useState(false);
+-  const [message,setMessage]=useState(''),[error,setError]=useState('');
+-  const intent=useRef(new ActionIntent<BulkOutcome>());
+-  if(!canAssign)return null;
+-  async function assign(){
+-    if(!selection||!scope.workspace||!scope.project||!confirm||busy||reason.trim().length<3)return;
+-    setBusy(true);setError('');setMessage('');
+-    try{
+-      const ctx=buyerOperationContext(session),body={selection,owner_membership_id:ownMembershipId,reason:reason.trim()};
+-      const result=await intent.current.run(JSON.stringify({ctx:ctx.identity,body}),key=>
+-        createOperationClient(client).requestOperation('assignBuyerOwners',{
+-          path:{workspace_id:scope.workspace!,project_id:scope.project!},header:{'Idempotency-Key':key},body,
+-        },ctx));
+-      if(isAsyncJob(result)){onJob(result.id);setMessage(locale==='zh-HK'?`已將 ${result.requested} 列加入工作，請在下方查看進度。`:`${result.requested} buyer rows queued. Open the job below for progress.`);}
+-      else{setMessage(locale==='zh-HK'?`${result.updated} 列已更新；${result.unchanged} 列不變；${result.blocked} 列受阻；${result.conflicts} 列衝突。`:`${result.updated} updated; ${result.unchanged} unchanged; ${result.blocked} blocked; ${result.conflicts} conflicts.`);
+-        if(result.updated)onCommitted();}
+-      setConfirm(false);
+-    }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
+-    finally{setBusy(false);}
+-  }
+-  return <section className="panel bulk-action-panel" aria-label={copy('Assign buyer owners',locale)}>
+-    <h3>{copy('Assign buyer owners',locale)}</h3>
+-    <p>{locale==='zh-HK'?`預覽：已選 ${count} 位買家；提交前會重新檢查每列的版本和負責人資格。`:`Preview: ${count} selected buyer${count===1?'':'s'}; each current version and owner membership is checked again before commit.`}</p>
+-    <label className="bulk-action-field">{copy('Assignment reason',locale)} <input aria-label={copy('Assignment reason',locale)} value={reason} onChange={event=>setReason(event.target.value)}/></label>
+-    <div className="bulk-action-row"><label><input type="checkbox" aria-label={copy('Confirm owner assignment',locale)} checked={confirm} onChange={event=>setConfirm(event.target.checked)}/> {locale==='zh-HK'?`確認將已選買家${ownMembershipId?'分派給我':'設為沒有負責人'}`:`Confirm assignment ${ownMembershipId?'to me':'to no owner'} for this selection`}</label>
+-      <button type="button" disabled={!selection||count===0||!confirm||reason.trim().length<3||busy} onClick={()=>void assign()}>{copy(busy?'Assigning...':'Assign selected buyers',locale)}</button></div>
+-    {message&&<p role="status">{message}</p>}{error&&<p role="alert">{error}</p>}
+-  </section>;
++ const {session,client}=useWorkspaceSession(),snapshot=useSessionSnapshot(),{scope}=snapshot;
++ const api=useMemo(()=>createOperationClient(client),[client]);
++ const record=assignmentRecovery(session);
++ const [reason,setReason]=useState(''),[owner,setOwner]=useState<string|null>(ownMembershipId);
++ const [ownerLabel,setOwnerLabel]=useState(ownMembershipId?copy('Me',locale):copy('No owner',locale));
++ const [search,setSearch]=useState(''),[q,setQ]=useState(''),[offset,setOffset]=useState(0),[refresh,setRefresh]=useState(0);
++ const [loaded,setLoaded]=useState<{key:string;page:components['schemas']['EligibleAssigneePage']}|null>(null);
++ const [lookupError,setLookupError]=useState({key:'',message:''});
++ const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState(''),[failures,setFailures]=useState<Item[]>([]);
++ const writeBusy=useRef(false),lifetime=useRef(new AbortController());
++ useEffect(()=>{const controller=new AbortController();lifetime.current=controller;return()=>controller.abort();},[]);
++ const readKey=JSON.stringify([snapshot.identity,q,offset,refresh]);
++ const page=loaded?.key===readKey?loaded.page:null;
++ const failure=lookupError.key===readKey?lookupError.message:'';
++ useEffect(()=>{
++  if(!canAssign||!scope.workspace)return;
++  const own=new AbortController(),captured=session.captureWriteContext();
++  const ctx={...captured,signal:AbortSignal.any([captured.signal,own.signal]),getToken:async()=>session.token()||'',
++   isCurrent:()=>session.isCurrent(captured.identity)&&!own.signal.aborted};
++  void api.requestOperation('listEligibleAssignees',{path:{workspace_id:captured.workspace},query:{q,offset,limit:20}},ctx)
++   .then(value=>{if(ctx.isCurrent())setLoaded({key:readKey,page:value});})
++   .catch(cause=>{if(ctx.isCurrent()&&!(cause instanceof LiveCancelled))setLookupError({key:readKey,message:describeLiveError(cause)});});
++  return()=>own.abort();
++ },[api,session,canAssign,scope.workspace,snapshot.identity,q,offset,refresh,readKey]);
++ const pending=record.pending;
++ const frozen=selection&&scope.workspace&&scope.project?freezeBulkAssignment({actor:scope.actor,workspace:scope.workspace,project:scope.project,
++  operation:'assignBuyerOwners',selection,ownerMembershipId:owner,reason},count):null;
++ const locked=busy||!!pending;
++ async function assign(preview:FrozenBulkAssignment){
++  const current=session.current();
++  if(writeBusy.current||!session.token()||preview.actor!==current.actor||preview.workspace!==current.workspace||preview.project!==current.project)return;
++  writeBusy.current=true;record.begin(preview);setBusy(true);setError('');setMessage('');setFailures([]);
++  const captured=buyerOperationContext(session);
++  const ctx={...captured,signal:AbortSignal.any([captured.signal,lifetime.current.signal]),
++   isCurrent:()=>captured.isCurrent()&&!lifetime.current.signal.aborted};
++  try{
++   const result=await record.intent.run(preview.fingerprint,key=>api.requestOperation('assignBuyerOwners',{
++    path:{workspace_id:preview.workspace,project_id:preview.project},header:{'Idempotency-Key':key},body:preview.body,
++   },ctx));
++   record.clear();
++   if(!ctx.isCurrent())return;
++   if(isAsyncJob(result)){onJob(result.id);setMessage(locale==='zh-HK'?`已將 ${result.requested} 列加入工作，請在下方查看進度。`:`${result.requested} buyer rows queued. Open the job below for progress.`);}
++   else{setFailures(result.results.filter(row=>row.status==='blocked'||row.status==='conflict'));setMessage(locale==='zh-HK'?`${result.updated} 列已更新；${result.unchanged} 列不變；${result.blocked} 列受阻；${result.conflicts} 列衝突。`:`${result.updated} updated; ${result.unchanged} unchanged; ${result.blocked} blocked; ${result.conflicts} conflicts.`);
++    if(result.updated)onCommitted();}
++  }catch(cause){
++   if(cause instanceof LiveError&&cause.status>=400&&cause.status<500)record.clear();
++   if(ctx.isCurrent()&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));
++  }finally{writeBusy.current=false;if(ctx.isCurrent())setBusy(false);}
++ }
++ if(!canAssign)return null;
++ const preview=pending??frozen,selectedOwner=pending?pending.body.owner_membership_id:owner;
++ const shownOwner=pending?pending.body.owner_membership_id===ownMembershipId?copy('Me',locale):pending.body.owner_membership_id??copy('No owner',locale):owner===ownMembershipId&&owner?copy('Me',locale):owner===null?copy('No owner',locale):ownerLabel;
++ return <section className="panel bulk-action-panel" aria-label={copy('Assign buyer owners',locale)}>
++  <h3>{copy('Assign buyer owners',locale)}</h3>
++  <p>{locale==='zh-HK'?`預覽：已選 ${preview?.count??count} 位買家；提交前會重新檢查每列的版本和負責人資格。`:`Preview: ${preview?.count??count} selected buyer${(preview?.count??count)===1?'':'s'}; each current version and owner membership is checked again before commit.`}</p>
++  <p style={{overflowWrap:'anywhere'}}>{copy('Scope',locale)}: {scope.workspace} / {scope.project}</p>
++  <p style={{overflowWrap:'anywhere'}}>{copy('Owner',locale)}: {shownOwner} {preview?.body.owner_membership_id??''}</p>
++  <label className="bulk-action-field">{copy('Owner',locale)} <select style={{display:'block',width:'100%',maxWidth:'100%'}} aria-label={copy('Owner',locale)} disabled={locked} value={selectedOwner??''} onChange={e=>{setOwner(e.target.value||null);setOwnerLabel(e.target.selectedOptions[0].text);}}>
++   <option value="">{copy('No owner',locale)}</option>{ownMembershipId&&<option value={ownMembershipId}>{copy('Me',locale)}</option>}
++   {selectedOwner&&selectedOwner!==ownMembershipId&&!page?.items.some(row=>row.membership_id===selectedOwner)&&<option value={selectedOwner}>{pending?selectedOwner:ownerLabel}</option>}
++   {page?.items.filter(row=>row.membership_id!==ownMembershipId).map(row=><option key={row.membership_id} value={row.membership_id}>{row.display_name} · {row.user_id}</option>)}
++  </select></label>
++  <form className="bulk-action-row" onSubmit={e=>{e.preventDefault();setQ(search.trim());setOffset(0);setRefresh(v=>v+1);}}>
++   <label className="bulk-action-field">{copy('Search colleagues',locale)} <input aria-label={copy('Search colleagues',locale)} maxLength={200} disabled={locked} value={search} onChange={e=>setSearch(e.target.value)}/></label>
++   <button disabled={locked}>{copy('Search',locale)}</button>
++  </form>
++  {!page&&!failure&&<p role="status">{copy('Loading colleagues…',locale)}</p>}
++  {page&&<div className="bulk-action-row"><span>{page.items.length?offset+1:0}–{offset+page.items.length} / {page.total}</span>
++   <button disabled={locked||offset===0} onClick={()=>setOffset(v=>Math.max(0,v-20))}>{copy('Previous colleagues',locale)}</button>
++   <button disabled={locked||offset+20>=page.total} onClick={()=>setOffset(v=>v+20)}>{copy('Next colleagues',locale)}</button></div>}
++  {failure&&<><p role="alert">{failure}</p><button disabled={locked} onClick={()=>setRefresh(v=>v+1)}>{copy('Reload colleagues',locale)}</button></>}
++  <label className="bulk-action-field">{copy('Assignment reason',locale)} <input aria-label={copy('Assignment reason',locale)} maxLength={2000} disabled={locked} value={pending?.body.reason??reason} onChange={e=>setReason(e.target.value)}/></label>
++  <p>{copy('Reason',locale)}: {preview?.body.reason??''}</p>
++  {pending&&!busy?<><p role="alert">{copy('The assignment result is unknown. Retry the same frozen assignment to reconcile; changes are locked until its result is known.',locale)}</p>
++   <button onClick={()=>void assign(pending)}>{copy('Retry same assignment',locale)}</button></>
++   :<AssignmentConfirmation key={`${snapshot.identity}:${frozen?.fingerprint??''}:${message}`} preview={frozen} enabled={count>0&&reason.trim().length>=3&&!locked} busy={busy} locale={locale} onAssign={assign}/>}
++  {failures.length>0&&<ul>{failures.map(row=><li key={row.id}><code>{row.id}</code>: {row.reason_code??row.status}{row.version?` (${row.version})`:''}</li>)}</ul>}
++  {message&&<p role="status">{message}</p>}{error&&<p role="alert">{error}</p>}
++ </section>;
++}
++function AssignmentConfirmation({preview,enabled,busy,locale,onAssign}:{preview:FrozenBulkAssignment|null;enabled:boolean;busy:boolean;locale:Locale;onAssign:(preview:FrozenBulkAssignment)=>Promise<void>}){
++ const [confirmed,setConfirmed]=useState(false);
++ return <div className="bulk-action-row"><label><input type="checkbox" aria-label={copy('Confirm owner assignment',locale)} disabled={!enabled} checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>{copy('Confirm this preview',locale)}</label>
++  <button type="button" disabled={!enabled||!confirmed||!preview} onClick={()=>{if(preview)void onAssign(preview);}}>{copy(busy?'Assigning...':'Assign selected buyers',locale)}</button></div>;
+ }
+ 
+ export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobId:string;onJob:(id:string)=>void;onCommitted:()=>void;onClose:()=>void;locale?:Locale}){
+diff --git a/features/live/buyer-results.tsx b/features/live/buyer-results.tsx
+index e70de49..ab272ec 100644
+--- a/features/live/buyer-results.tsx
++++ b/features/live/buyer-results.tsx
+@@ -19,7 +19,7 @@ const initial=():BuyerQuery=>readBuyerQuery(typeof window==='undefined'?'':windo
+ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,canAssign=false,ownMembershipId=null,locale='en',onManualOutcome}:{canReview?:boolean;canEdit?:boolean;canQuote?:boolean;canAssign?:boolean;ownMembershipId?:string|null;locale?:'en'|'zh-HK';onManualOutcome?:(buyerId:string)=>void}){
+   const {session,client}=useWorkspaceSession();
+   const t=(value:string)=>locale==='zh-HK'?(liveZh[value]||value):value;
+-  const scope=useSessionSnapshot().scope;
++  const sessionSnapshot=useSessionSnapshot(),scope=sessionSnapshot.scope;
+   const [query,setQuery]=useState<BuyerQuery>(initial);
+   const [search,setSearch]=useState(query.q);
+   useEffect(()=>{
+@@ -173,7 +173,7 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
+       <button type="button" disabled={busy||selectedCount<=0} onClick={()=>void submitReview()}>{t(busy?'Reviewing...':'Apply review')}</button></div>}
+     {reviewResult&&<p role="status">{t('Review: {updated} updated; {blocked} blocked; {conflicts} conflicts.').replace('{updated}',String(reviewResult.updated)).replace('{blocked}',String(reviewResult.blocked)).replace('{conflicts}',String(reviewResult.conflicts))} {reviewResult.results.filter(row=>row.status==='blocked'||row.status==='conflict').map(row=>`${row.id}: ${row.reason_code??row.status}`).join('; ')}</p>}
+     {canEdit&&<ExportDialog key={`export:${workspace}:${project}`} locale={locale} selection={selection()} canExport={canEdit}/>}
+-    <LiveBulkActions key={`bulk:${workspace}:${project}`} locale={locale} selection={selection()} count={selectedCount} canAssign={canAssign} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted}/>
++    <LiveBulkActions key={`bulk:${sessionSnapshot.identity}`} locale={locale} selection={selection()} count={selectedCount} canAssign={canAssign} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted}/>
+     {jobId&&<BulkJobPanel locale={locale} jobId={jobId} onJob={onJob} onCommitted={onCommitted} onClose={closeJob}/>}
+     <LiveBuyerManagementControls key={`management:${workspace}:${project}`} locale={locale} onJob={onJob} query={query} onApplyQuery={patch=>{setSelected({});setAllFiltered(false);setExcluded([]);changeQuery(patch,true);setReload(value=>value+1);}} selection={selection()} canManage={canEdit}/>
+     {current&&<LiveBuyerDetail key={current.id} buyer={current} locale={locale} canEdit={canEdit} canQuote={canQuote} canReview={canReview} ownMembershipId={ownMembershipId}
+diff --git a/services/api/tests/test_bulk_jobs_db.py b/services/api/tests/test_bulk_jobs_db.py
+index 78af389..eaca3fc 100644
+--- a/services/api/tests/test_bulk_jobs_db.py
++++ b/services/api/tests/test_bulk_jobs_db.py
+@@ -308,3 +308,91 @@ def test_cancel_bulk_job_preserves_committed_rows_and_stops_pending(api, seeded)
+     assert {row["status"] for row in status["result_page"]["items"]} == {"updated", "blocked", "cancelled"}
+     with psycopg.connect(seeded) as conn:
+         assert conn.execute("SELECT version FROM project_buyers WHERE id=%s", (buyer_id,)).fetchone()[0] == 2
++
++
++def test_q05_b07_mixed_100_rows_match_durable_state_and_reason_digest(api, seeded):
++    from buyeros_api.db.icp import canonical_hash
++    from tests.contract_validation import assert_contract_response
++
++    owner_id = _admin_membership(seeded)
++    owner_user = uuid.uuid5(uuid.NAMESPACE_URL, ADMIN)
++    updated = [_seed_buyer(seeded, name=f"Q05 update {i:02d}") for i in range(25)]
++    unchanged = [_seed_buyer(seeded, name=f"Q05 unchanged {i:02d}", owner_user_id=str(owner_user)) for i in range(25)]
++    stale = [_seed_buyer(seeded, name=f"Q05 stale {i:02d}") for i in range(25)]
++    missing = [str(uuid.uuid4()) for _ in range(25)]
++    body = {"selection": {"kind": "explicit", "buyers": [
++        {"id": value, "version": 99 if value in stale else 1}
++        for value in updated + unchanged + stale + missing
++    ]}, "owner_membership_id": owner_id, "reason": "Q05 exact mixed assignment reason"}
++    path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-owner-assignments"
++    response = api.post(path, json=body, headers=_h(subject=OPERATOR, key="q05-mixed-100"))
++    assert response.status_code == 200, response.text
++    assert_contract_response("BulkResultResponse", response.json())
++    data = response.json()["data"]
++    assert (data["requested"], data["updated"], data["unchanged"], data["blocked"], data["conflicts"]) == (100, 25, 25, 25, 25)
++    assert data["requested"] == sum(data[key] for key in ("updated", "unchanged", "blocked", "conflicts"))
++    results = {row["id"]: row for row in data["results"]}
++    assert len(results) == 100
++    for ids, expected in ((updated, "updated"), (unchanged, "unchanged"), (stale, "conflict"), (missing, "blocked")):
++        assert all(results[value]["status"] == expected for value in ids)
++    expected_digest = canonical_hash({"owner_membership_id": owner_id, "reason": body["reason"]})
++    with psycopg.connect(seeded) as db:
++        for value in updated + unchanged + stale:
++            state = db.execute("SELECT owner_user_id,version FROM project_buyers WHERE id=%s", (value,)).fetchone()
++            assert state == ((None, 1) if value in stale else (owner_user, 2 if value in updated else 1))
++        events = db.execute("SELECT subject_id,actor_id,detail_digest FROM audit_events WHERE workspace_id=%s AND action='buyer.owner_assigned'", (WORKSPACE_A,)).fetchall()
++        assert {str(row[0]) for row in events} == set(updated)
++        assert len(events) == 25 and all(row[1] == uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR) and row[2] == expected_digest for row in events)
++    replay = api.post(path, json=body, headers=_h(subject=OPERATOR, key="q05-mixed-100"))
++    assert replay.status_code == 200 and replay.json()["data"] == data
++    with psycopg.connect(seeded) as db:
++        assert db.execute("SELECT count(*) FROM audit_events WHERE workspace_id=%s AND action='buyer.owner_assigned'", (WORKSPACE_A,)).fetchone()[0] == 25
++
++
++def test_q05_b04_owner_deactivated_after_preview_is_rejected_without_changes(api, seeded):
++    owner_id = _admin_membership(seeded)
++    buyer_id = _seed_buyer(seeded, name="Q05 inactive owner")
++    with psycopg.connect(seeded, autocommit=True) as db:
++        db.execute("UPDATE memberships SET active=false,version=version+1 WHERE id=%s", (owner_id,))
++    path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-owner-assignments"
++    body = {"selection": {"kind": "explicit", "buyers": [{"id": buyer_id, "version": 1}]}, "owner_membership_id": owner_id, "reason": "Q05 owner revalidation"}
++    response = api.post(path, json=body, headers=_h(subject=OPERATOR, key="q05-inactive-owner"))
++    assert response.status_code == 422, response.text
++    with psycopg.connect(seeded) as db:
++        assert db.execute("SELECT owner_user_id,version FROM project_buyers WHERE id=%s", (buyer_id,)).fetchone() == (None, 1)
++        assert db.execute("SELECT count(*) FROM audit_events WHERE workspace_id=%s AND action='buyer.owner_assigned'", (WORKSPACE_A,)).fetchone()[0] == 0
++
++
++def test_q05_b04_queued_owner_deactivation_blocks_each_row_and_survives_restart(api, seeded):
++    from buyeros_api.api.deps import tenant_scoped
++    from buyeros_api.services.bulk_service import apply_bulk_chunk
++    from tests.contract_validation import assert_contract_response
++
++    owner_id = _admin_membership(seeded)
++    buyer_id = _seed_buyer(seeded, name="Q05 queued owner revalidation")
++    ids = [buyer_id] + [str(uuid.uuid4()) for _ in range(100)]
++    path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-owner-assignments"
++    body = {"selection": {"kind": "explicit", "buyers": [{"id": value, "version": 1} for value in ids]}, "owner_membership_id": owner_id, "reason": "Q05 queued owner revalidation"}
++    admitted = api.post(path, json=body, headers=_h(subject=OPERATOR, key="q05-owner-queued"))
++    assert admitted.status_code == 202, admitted.text
++    job_id = uuid.UUID(admitted.json()["data"]["id"])
++    with psycopg.connect(seeded, autocommit=True) as db:
++        db.execute("UPDATE memberships SET active=false,version=version+1 WHERE id=%s", (owner_id,))
++    async def run_chunk():
++        async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
++            await apply_bulk_chunk(session, job_id)
++    # Recreate transaction/session/event loop for every chunk, then replay the terminal chunk.
++    for _ in range(4):
++        asyncio.run(run_chunk())
++    result_path = f"/v1/workspaces/{WORKSPACE_A}/jobs/{job_id}"
++    result = api.get(result_path + "?offset=0&limit=100", headers=_h(subject=OPERATOR))
++    assert result.status_code == 200, result.text
++    assert_contract_response("AsyncJobResponse", result.json())
++    data = result.json()["data"]
++    assert (data["status"], data["requested"], data["processed"], data["updated"], data["blocked"], data["conflicts"]) == ("completed", 101, 101, 0, 101, 0)
++    rows = data["result_page"]["items"] + api.get(result_path + "?offset=100&limit=100", headers=_h(subject=OPERATOR)).json()["data"]["result_page"]["items"]
++    assert {row["id"] for row in rows} == set(ids)
++    assert all(row["status"] == "blocked" and row["reason_code"] == "owner_membership_inactive" for row in rows)
++    with psycopg.connect(seeded) as db:
++        assert db.execute("SELECT owner_user_id,version FROM project_buyers WHERE id=%s", (buyer_id,)).fetchone() == (None, 1)
++        assert db.execute("SELECT count(*) FROM async_job_items WHERE job_id=%s AND status='blocked'", (job_id,)).fetchone()[0] == 101
+diff --git a/services/live/bulk-confirmation.ts b/services/live/bulk-confirmation.ts
+new file mode 100644
+index 0000000..df854b0
+--- /dev/null
++++ b/services/live/bulk-confirmation.ts
+@@ -0,0 +1,47 @@
++import type {components} from '@/services/generated/buyeros-api';
++import type {ReviewSelection} from './buyer-selection';
++import {ActionIntent} from './action-intent';
++import {scopeKey,type SessionScope} from './session';
++
++type Outcome=components['schemas']['BulkResult']|components['schemas']['AsyncJob'];
++export interface BulkConfirmationInput {
++ actor:string;workspace:string;project:string;operation:string;
++ selection:ReviewSelection;ownerMembershipId:string|null;reason:string;
++}
++function normalized(input:BulkConfirmationInput):BulkConfirmationInput {
++ const selection:ReviewSelection=input.selection.kind==='explicit'
++  ?{kind:'explicit',buyers:input.selection.buyers.map(row=>({id:row.id,version:row.version})).sort((a,b)=>a.id.localeCompare(b.id)||a.version-b.version)}
++  :{kind:'snapshot',snapshot_id:input.selection.snapshot_id,excluded_ids:[...input.selection.excluded_ids].sort()};
++ return {actor:input.actor,workspace:input.workspace,project:input.project,operation:input.operation,
++  selection,ownerMembershipId:input.ownerMembershipId,reason:input.reason.trim()};
++}
++/** Page offsets, bearer tokens and scope generations are not business intent. */
++export function bulkConfirmationFingerprint(input:BulkConfirmationInput):string {return JSON.stringify(normalized(input));}
++export function freezeBulkAssignment(input:BulkConfirmationInput,count?:number){
++ const value=normalized(input),selection=value.selection;
++ if(selection.kind==='explicit'){selection.buyers.forEach(Object.freeze);Object.freeze(selection.buyers);}
++ else Object.freeze(selection.excluded_ids);
++ Object.freeze(selection);
++ const body:components['schemas']['OwnerAssignRequest']=Object.freeze({selection,owner_membership_id:value.ownerMembershipId,reason:value.reason});
++ return Object.freeze({count:count??(selection.kind==='explicit'?selection.buyers.length:0),actor:value.actor,workspace:value.workspace,project:value.project,fingerprint:bulkConfirmationFingerprint(value),body});
++}
++export type FrozenBulkAssignment=ReturnType<typeof freezeBulkAssignment>;
++class Recovery {
++ readonly intent=new ActionIntent<Outcome>();
++ private value:FrozenBulkAssignment|null=null;
++ get pending(){return this.value;}
++ begin(preview:FrozenBulkAssignment){
++  if(this.value&&this.value.fingerprint!==preview.fingerprint)throw new Error('Resolve the pending assignment before changing its intent');
++  this.value=preview;
++ }
++ clear(){this.value=null;}
++}
++// Memory only: a route/scope round trip cannot create a fresh key for an unknown write.
++// Never store bearer tokens, identities or buyer payloads in browser persistence.
++const recovery=new WeakMap<SessionScope,Map<string,Recovery>>();
++export function assignmentRecovery(session:SessionScope):Recovery {
++ let scopes=recovery.get(session);if(!scopes){scopes=new Map();recovery.set(session,scopes);}
++ const key=scopeKey(session.current());let item=scopes.get(key);
++ if(!item){item=new Recovery();scopes.set(key,item);}
++ return item;
++}
+diff --git a/services/worker/tests/fixtures/audit_bulk.py b/services/worker/tests/fixtures/audit_bulk.py
+new file mode 100644
+index 0000000..08768a2
+--- /dev/null
++++ b/services/worker/tests/fixtures/audit_bulk.py
+@@ -0,0 +1,49 @@
++"""Q05 fictional owned workbench only; no provider or live account verification."""
++import json
++import sys
++import psycopg
++from tests.fixtures.run_browser_research import owner_dsn, WORKSPACE
++PROJECT='e1000000-0000-4000-8000-000000000001'
++OTHER='e0000000-0000-4000-8000-000000000101'
++OTHER_PROJECT='e1050000-0000-4000-8000-000000000001'
++OPERATOR='e0000000-0000-4000-8000-000000000002'
++
++def main():
++    # Prove container ownership once per bounded helper invocation; never cache DSNs across cases.
++    with psycopg.connect(owner_dsn()) as db:
++        if db.execute('SELECT name FROM workspaces WHERE id=%s',(WORKSPACE,)).fetchone()!=('E2E fixture workspace',):
++            raise RuntimeError('unknown fictional workbench')
++        db.execute("SET LOCAL lock_timeout='5s'")
++        command=sys.argv[1] if len(sys.argv)>1 else 'seed'
++        if command=='seed':
++            rows=[]
++            for i in range(10):
++                user=f'7100000{i+1}-0000-4000-8000-000000c011de' if i<2 else f'f2000000-0000-4000-8000-{i:012x}'
++                rows.append((f'f1000000-0000-4000-8000-{i:012x}',user))
++            db.cursor().executemany("INSERT INTO users(id,issuer,subject,display_name) VALUES (%s,'urn:buyeros:e2e',%s,%s) ON CONFLICT(id) DO UPDATE SET display_name=EXCLUDED.display_name",[(user,f'directory-{i}',f'Q05 colleague {i+1:02d}') for i,(_,user) in enumerate(rows)])
++            db.cursor().executemany("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES (%s,%s,%s,'{viewer}',true) ON CONFLICT(id) DO UPDATE SET active=true,version=1",[(member,WORKSPACE,user) for member,user in rows])
++            db.execute("INSERT INTO workspaces(id,name,data_mode) VALUES (%s,'Other audit fixture','live') ON CONFLICT DO NOTHING",(OTHER,))
++            db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES ('e0000000-0000-4000-8000-000000000109',%s,'e0000000-0000-4000-8000-000000000008','{workspace_admin}',true) ON CONFLICT DO NOTHING",(OTHER,))
++            db.execute("DELETE FROM api_rate_windows WHERE workspace_id IN (%s,%s) AND actor_id IN ('e0000000-0000-4000-8000-000000000002','e0000000-0000-4000-8000-000000000004','e0000000-0000-4000-8000-000000000006')",(WORKSPACE,OTHER))
++            db.execute('UPDATE project_buyers SET owner_user_id=NULL,version=1 WHERE workspace_id=%s AND project_id=%s',(WORKSPACE,PROJECT))
++            db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES ('e0050000-0000-4000-8000-000000000002',%s,%s,'{operator}',true) ON CONFLICT DO NOTHING",(OTHER,OPERATOR))
++            db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,language_preferences,version) VALUES (%s,%s,'Q05 other project','Fictional Seller','Fixture offer','{US}','{en}',1) ON CONFLICT DO NOTHING",(OTHER_PROJECT,OTHER))
++            if db.execute('SELECT count(*) FROM project_buyers WHERE workspace_id=%s AND project_id=%s',(OTHER,OTHER_PROJECT)).fetchone()[0]==0:
++                values=[(f'e2050000-0000-4000-8000-{i:012x}',f'e3050000-0000-4000-8000-{i:012x}',f'Scope B Fixture {i:03d}') for i in range(101)]
++                db.cursor().executemany('INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES (%s,%s,%s,%s)',[(company,OTHER,name,name) for _,company,name in values])
++                db.cursor().executemany('INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES (%s,%s,%s,%s)',[(buyer,OTHER,OTHER_PROJECT,company) for buyer,company,_ in values])
++            print(json.dumps({'fixture_only':True,'colleagues':[{'membership_id':str(m),'user_id':str(u)} for m,u in rows],'other':OTHER,'other_project':OTHER_PROJECT}))
++        elif command=='targets':
++            rows=db.execute('SELECT id,user_id FROM memberships WHERE workspace_id=%s AND id::text LIKE %s ORDER BY id LIMIT 10',(WORKSPACE,'f100%')).fetchall()
++            print(json.dumps({'fixture_only':True,'colleagues':[{'membership_id':str(m),'user_id':str(u)} for m,u in rows],'other':OTHER,'other_project':OTHER_PROJECT}))
++        elif command=='cleanup':
++            db.execute('DELETE FROM memberships WHERE workspace_id=%s AND user_id=%s',(OTHER,OPERATOR));print(json.dumps({'fixture_only':True,'other_operator_removed':True}))
++        elif command=='deactivate':
++            db.execute('UPDATE memberships SET active=false,version=version+1 WHERE workspace_id=%s AND id=%s',(WORKSPACE,sys.argv[2]));print(json.dumps({'fixture_only':True,'deactivated':sys.argv[2]}))
++        elif command=='stale':
++            db.execute('UPDATE project_buyers SET version=version+1 WHERE workspace_id=%s AND project_id=%s AND id=%s',(WORKSPACE,PROJECT,sys.argv[2]));print(json.dumps({'fixture_only':True,'stale':sys.argv[2]}))
++        elif command=='inspect':
++            buyers=db.execute('SELECT id,owner_user_id,version FROM project_buyers WHERE workspace_id=%s AND project_id=%s ORDER BY id',(WORKSPACE,PROJECT)).fetchall()
++            print(json.dumps({'fixture_only':True,'buyers':[{'id':str(b),'owner':str(o) if o else None,'version':v} for b,o,v in buyers]}))
++        else:raise RuntimeError('unknown fixture command')
++if __name__=='__main__':main()
+diff --git a/tests/audit-bulk-confirmation.test.mjs b/tests/audit-bulk-confirmation.test.mjs
+new file mode 100644
+index 0000000..12b2fed
+--- /dev/null
++++ b/tests/audit-bulk-confirmation.test.mjs
+@@ -0,0 +1,35 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {loadModule} from './ts-loader.mjs';
++const {bulkConfirmationFingerprint,freezeBulkAssignment,assignmentRecovery}=await loadModule('services/live/bulk-confirmation.ts');
++const {SessionScope}=await loadModule('services/live/session.ts');
++const input={actor:'user-a',workspace:'workspace-a',project:'project-a',operation:'assignBuyerOwners',selection:{kind:'explicit',buyers:[{id:'b',version:2},{id:'a',version:1}]},ownerMembershipId:'member-a',reason:' rotation '};
++test('B02 confirmation is stable for row ordering but binds every material field',()=>{
++ const hash=bulkConfirmationFingerprint(input);
++ assert.equal(hash,bulkConfirmationFingerprint({...input,reason:'rotation',selection:{kind:'explicit',buyers:[...input.selection.buyers].reverse()}}));
++ for(const change of [{actor:'other'},{workspace:'other'},{project:'other'},{operation:'reviewBuyers'},{ownerMembershipId:null},{reason:'different'}, {selection:{kind:'explicit',buyers:[{id:'a',version:2},{id:'b',version:2}]}},{selection:{kind:'explicit',buyers:[...input.selection.buyers,{id:'c',version:1}]}}])assert.notEqual(hash,bulkConfirmationFingerprint({...input,...change}));
++});
++test('B02 snapshot confirmation binds snapshot identity and normalized exclusions',()=>{
++ const choice={...input,selection:{kind:'snapshot',snapshot_id:'snapshot-a',excluded_ids:['b','a']}};
++ assert.equal(bulkConfirmationFingerprint(choice),bulkConfirmationFingerprint({...choice,selection:{...choice.selection,excluded_ids:['a','b']}}));
++ for(const selection of [{...choice.selection,snapshot_id:'other'},{...choice.selection,excluded_ids:['a']}])assert.notEqual(bulkConfirmationFingerprint(choice),bulkConfirmationFingerprint({...choice,selection}));
++});
++test('B03 frozen payload preserves confirmed rows and trimmed audit reason',()=>{
++ const source=structuredClone(input),frozen=freezeBulkAssignment(source);source.selection.buyers[0].version=90;source.reason='new';
++ assert.deepEqual(frozen.body,{selection:{kind:'explicit',buyers:[{id:'a',version:1},{id:'b',version:2}]},owner_membership_id:'member-a',reason:'rotation'});
++ assert.throws(()=>{frozen.body.selection.buyers[0].version=99;},TypeError);
++});
++test('B16 unknown assignment survives route remount and token renewal with the same key',async()=>{
++ const session=new SessionScope({mode:'live',actor:input.actor,workspace:input.workspace,project:input.project});session.setToken('first');
++ const record=assignmentRecovery(session);record.begin(freezeBulkAssignment(input));let key;
++ await assert.rejects(record.intent.run(record.pending.fingerprint,async k=>{key=k;throw Error('lost committed response');}));
++ session.setToken('renewed');assert.equal(assignmentRecovery(session),record);
++ session.next({project:'project-b'});assert.notEqual(assignmentRecovery(session),record);session.next({project:input.project});assert.equal(assignmentRecovery(session),record);
++ await record.intent.run(record.pending.fingerprint,async k=>assert.equal(k,key));
++});
++
++test('B16 an unresolved assignment cannot be replaced with a materially different intent',()=>{
++ const session=new SessionScope({mode:'live',actor:input.actor,workspace:input.workspace,project:input.project});session.setToken('memory-only');const record=assignmentRecovery(session);
++ record.begin(freezeBulkAssignment(input));assert.throws(()=>record.begin(freezeBulkAssignment({...input,reason:'different'})),/Resolve the pending assignment/);
++ assert.equal(record.pending.body.reason,'rotation');record.clear();record.begin(freezeBulkAssignment({...input,reason:'different'}));assert.equal(record.pending.body.reason,'different');
++});
+diff --git a/tests/e2e/audit-bulk-confirmation.spec.ts b/tests/e2e/audit-bulk-confirmation.spec.ts
+new file mode 100644
+index 0000000..543a94e
+--- /dev/null
++++ b/tests/e2e/audit-bulk-confirmation.spec.ts
+@@ -0,0 +1,114 @@
++import {expect,test} from '@playwright/test';
++import {execFile} from 'node:child_process';
++import {promisify} from 'node:util';
++import {resolve} from 'node:path';
++import {writeFileSync} from 'node:fs';
++import {signInWorkbench,workspace,project} from './fixtures/workbench-auth';
++async function fixture(command='seed',id?:string){
++ const cwd=resolve('services/worker'),python=resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
++ const result=await promisify(execFile)(python,['tests/fixtures/audit_bulk.py',command,...(id?[id]:[])],{cwd,timeout:30_000});
++ return JSON.parse(result.stdout.trim().split(/\r?\n/).at(-1)!);
++}
++async function open(page:Parameters<typeof signInWorkbench>[0]){
++ await signInWorkbench(page,true,'access');await page.getByRole('combobox',{name:/^(Language|語言)$/}).selectOption('en');
++ await page.getByRole('button',{name:'Buyers',exact:true}).click();
++ const buyers=page.getByRole('region',{name:'Buyer results',exact:true});await expect(buyers.getByRole('checkbox',{name:/^Select /})).toHaveCount(12);
++ return buyers;
++}
++async function select(buyers:Awaited<ReturnType<typeof open>>,count:number){const rows=buyers.getByRole('checkbox',{name:/^Select /});for(let i=0;i<count;i++)await rows.nth(i).check();}
++const assignments='**/v1/workspaces/*/projects/*/buyer-owner-assignments';
++test.beforeEach(async()=>{await fixture();});
++test.afterEach(async()=>{await fixture('cleanup');});
++test('B02 adding a sixth buyer clears the previously confirmed five',async({page})=>{
++ await signInWorkbench(page,true,'access');await page.getByRole('combobox',{name:/^(Language|語言)$/}).selectOption('en');
++ await page.getByRole('button',{name:'Buyers',exact:true}).click();
++ const buyers=page.getByRole('region',{name:'Buyer results',exact:true});
++ const rows=buyers.getByRole('checkbox',{name:/^Select /});await expect(rows).toHaveCount(12);
++ for(let i=0;i<5;i++)await rows.nth(i).check();
++ const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});
++ await panel.getByRole('textbox',{name:'Assignment reason'}).fill('Fixture duty rotation');
++ const confirm=panel.getByRole('checkbox',{name:'Confirm owner assignment'});await confirm.check();await expect(confirm).toBeChecked();
++ await rows.nth(5).check();await expect(confirm).not.toBeChecked();await expect(panel.getByRole('button',{name:'Assign selected buyers'})).toBeDisabled();
++});
++
++test('B02 reason, target and exclusions clear confirmation; unchanged selection survives paging',async({page})=>{
++ const buyers=await open(page);await select(buyers,5);const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});
++ const confirm=panel.getByRole('checkbox',{name:'Confirm owner assignment'}),reason=panel.getByRole('textbox',{name:'Assignment reason'});
++ await reason.fill('Fixture bounded assignment');await confirm.check();await buyers.getByRole('button',{name:'Next page',exact:true}).click();await expect(confirm).toBeChecked();
++ await reason.fill('Different reason');await expect(confirm).not.toBeChecked();await confirm.check();await panel.getByRole('combobox',{name:'Owner',exact:true}).selectOption('');await expect(confirm).not.toBeChecked();
++ await confirm.check();await buyers.getByRole('button',{name:'Select all filtered'}).click();await expect(confirm).not.toBeChecked();await confirm.check();
++ await buyers.getByRole('checkbox',{name:'Select Buyer Fixture 13',exact:true}).uncheck();await expect(confirm).not.toBeChecked();
++ await confirm.check();await buyers.getByRole('button',{name:'Refresh results'}).click();await expect(confirm).not.toBeChecked();
++});
++
++test('B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works',async({page})=>{
++ const seeded=await fixture('targets');const buyers=await open(page);await select(buyers,10);const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});
++ await panel.getByRole('textbox',{name:'Search colleagues'}).fill('Q05 colleague');await panel.getByRole('button',{name:'Search',exact:true}).click();
++ const picker=panel.getByRole('combobox',{name:'Owner',exact:true});await expect(picker.locator('option')).toHaveCount(12);
++ await picker.selectOption(seeded.colleagues[9].membership_id);await panel.getByRole('textbox',{name:'Assignment reason'}).fill('  Fixture colleague rotation  ');
++ await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
++ const posted=page.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/buyer-owner-assignments'));
++ await panel.getByRole('button',{name:'Assign selected buyers'}).click();const response=await posted;expect(response.status()).toBe(200);
++ const result=await response.json();expect(result.data.updated).toBe(10);expect(response.request().postDataJSON().reason).toBe('Fixture colleague rotation');
++ const state=await fixture('inspect');expect(state.buyers.slice(0,10).every((b:{owner:string;version:number})=>b.owner===seeded.colleagues[9].user_id&&b.version===2)).toBe(true);
++ writeFileSync('test-results/q05-colleague-assignment.json',JSON.stringify({fixture_only:true,result,state},null,2));
++ await expect(buyers.getByRole('checkbox',{name:/^Select /})).toHaveCount(12);await select(buyers,10);await picker.selectOption('');
++ await panel.getByRole('textbox',{name:'Assignment reason'}).fill('Fixture clear assignment');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
++ const cleared=page.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/buyer-owner-assignments'));await panel.getByRole('button',{name:'Assign selected buyers'}).click();expect((await cleared).status()).toBe(200);
++ expect((await fixture('inspect')).buyers.slice(0,10).every((b:{owner:string|null;version:number})=>b.owner===null&&b.version===3)).toBe(true);
++ await page.screenshot({path:'test-results/q05-bulk-en.png',fullPage:true});
++});
++
++test('B04 inactive owner is rejected and a stale buyer reports conflict without overwriting',async({page})=>{
++ const seeded=await fixture('targets');const buyers=await open(page);await select(buyers,2);const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});
++ await panel.getByRole('combobox',{name:'Owner',exact:true}).selectOption(seeded.colleagues[0].membership_id);await panel.getByRole('textbox',{name:'Assignment reason'}).fill('Fixture revalidation');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
++ await fixture('deactivate',seeded.colleagues[0].membership_id);
++ const rejected=page.waitForResponse(r=>r.url().endsWith('/buyer-owner-assignments')&&r.request().method()==='POST');await panel.getByRole('button',{name:'Assign selected buyers'}).click();expect((await rejected).status()).toBe(422);
++ expect((await fixture('inspect')).buyers.slice(0,2).every((b:{owner:string|null;version:number})=>b.owner===null&&b.version===1)).toBe(true);
++ await panel.getByRole('combobox',{name:'Owner',exact:true}).selectOption(seeded.colleagues[1].membership_id);await expect(panel.getByRole('checkbox',{name:'Confirm owner assignment'})).not.toBeChecked();
++ await fixture('stale','e2000000-0000-4000-8000-000000000001');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
++ const posted=page.waitForResponse(r=>r.url().endsWith('/buyer-owner-assignments')&&r.request().method()==='POST');await panel.getByRole('button',{name:'Assign selected buyers'}).click();const result=(await (await posted).json()).data;
++ expect([result.updated,result.conflicts,result.blocked]).toEqual([1,1,0]);await expect(panel.locator('code')).toHaveText('e2000000-0000-4000-8000-000000000001');const state=await fixture('inspect');expect(state.buyers[0].owner).toBeNull();expect(state.buyers[0].version).toBe(2);expect(state.buyers[1].owner).toBe(seeded.colleagues[1].user_id);
++ writeFileSync('test-results/q05-owner-revalidation.json',JSON.stringify({fixture_only:true,result,state},null,2));
++});
++
++test('B16 committed response loss locks changes and reconciles the same key after a route remount',async({page})=>{
++ const seeded=await fixture('targets');const buyers=await open(page);await select(buyers,5);const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});await panel.getByRole('combobox',{name:'Owner',exact:true}).selectOption(seeded.colleagues[0].membership_id);await panel.getByRole('textbox',{name:'Assignment reason'}).fill('Fixture lost response');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
++ const requests:{key:string;body:unknown}[]=[];
++ await page.route(assignments,async route=>{requests.push({key:route.request().headers()['idempotency-key'],body:route.request().postDataJSON()});const response=await route.fetch();expect(response.status()).toBe(200);if(requests.length===1)await route.abort('failed');else await route.fulfill({response});});
++ await panel.getByRole('button',{name:'Assign selected buyers'}).click();await expect(panel.getByRole('button',{name:'Retry same assignment'})).toBeVisible();await expect(panel.getByRole('combobox',{name:'Owner',exact:true})).toBeDisabled();expect(requests).toHaveLength(1);
++ await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Buyers',exact:true}).click();await expect(panel.getByRole('button',{name:'Retry same assignment'})).toBeVisible();await expect(panel.getByRole('combobox',{name:'Owner',exact:true})).toHaveValue(seeded.colleagues[0].membership_id);await expect(panel.getByText(/Preview: 5 selected buyers/)).toBeVisible();
++ await panel.getByRole('button',{name:'Retry same assignment'}).click();await expect(panel.getByRole('button',{name:'Retry same assignment'})).toHaveCount(0);expect(requests).toHaveLength(2);expect(requests[1]).toEqual(requests[0]);
++ const state=await fixture('inspect');expect(state.buyers.slice(0,5).every((b:{version:number})=>b.version===2)).toBe(true);writeFileSync('test-results/q05-lost-response.json',JSON.stringify({fixture_only:true,requests,state},null,2));
++});
++
++test('B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link',async({page})=>{
++ const seeded=await fixture('targets');await open(page);await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(seeded.other);
++ await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(seeded.other_project);
++ const buyers=page.getByRole('region',{name:'Buyer results',exact:true});await expect(buyers.getByRole('checkbox',{name:/^Select /})).toHaveCount(12);await buyers.getByRole('button',{name:'Select all filtered'}).click();
++ const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});await panel.getByRole('textbox',{name:'Assignment reason'}).fill('Fixture scoped queued assignment');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
++ let release:()=>void=()=>{},received:()=>void=()=>{};const held=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);let job='';const keys:string[]=[];
++ await page.route(assignments,async route=>{keys.push(route.request().headers()['idempotency-key']);const response=await route.fetch();expect(response.status()).toBe(202);job=(await response.json()).data.id;if(keys.length===1){received();await held;}await route.fulfill({response}).catch(()=>{});});
++ await panel.getByRole('button',{name:'Assign selected buyers'}).click();await started;await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);release();await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(project);
++ await expect(buyers.getByRole('checkbox',{name:'Select Buyer Fixture 01',exact:true})).toBeVisible();await expect(panel.getByRole('checkbox',{name:'Confirm owner assignment'})).not.toBeChecked();expect(new URL(page.url()).searchParams.get('bulk_job')).toBeNull();
++ await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(seeded.other);await expect(panel.getByRole('button',{name:'Retry same assignment'})).toBeVisible();await panel.getByRole('button',{name:'Retry same assignment'}).click();
++ await expect.poll(()=>new URL(page.url()).searchParams.get('bulk_job')).toBe(job);expect(keys).toHaveLength(2);expect(keys[1]).toBe(keys[0]);
++ const read=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${seeded.other}/jobs/${job}`,{headers:{Authorization:'Bearer fixture-access'}});expect(read.status()).toBe(200);expect((await read.json()).data.requested).toBe(101);
++ const foreign=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/jobs/${job}`,{headers:{Authorization:'Bearer fixture-access'}});expect(foreign.status()).toBe(404);
++ writeFileSync('test-results/q05-scope-recovery.json',JSON.stringify({fixture_only:true,job,keys,read:await read.json()},null,2));
++});
++
++test('B03 zh-HK mobile colleague search recovers a failed read',async({page})=>{
++ await open(page);await page.setViewportSize({width:390,height:844});await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');const panel=page.getByRole('region',{name:'批量分派買家負責人',exact:true});
++ let failed=false;await page.route('**/eligible-assignees?**',async route=>{if(!failed){failed=true;await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({code:'TEMPORARILY_UNAVAILABLE',message:'Fixture outage',request_id:'fixture-q05'})});}else await route.continue();});
++ await panel.getByRole('textbox',{name:'搜尋同事'}).fill('Q05 colleague');await panel.getByRole('button',{name:'搜尋',exact:true}).click();await expect(panel.getByRole('button',{name:'重新載入同事'})).toBeVisible();await panel.getByRole('button',{name:'重新載入同事'}).click();await expect(panel.getByRole('combobox',{name:'負責人',exact:true}).locator('option')).toHaveCount(12);
++ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:'test-results/q05-bulk-zh-mobile.png',fullPage:true});
++ // This real fixture preference is shared with the following English D02 cases.
++ const restored=page.waitForResponse(r=>r.request().method()==='PATCH'&&r.url().endsWith('/preferences'));
++ await page.getByRole('combobox',{name:'語言',exact:true}).selectOption('en');expect((await restored).status()).toBe(200);
++});
++
++test('B03 viewer cannot assign through UI or direct API',async({page})=>{
++ await signInWorkbench(page,true,'viewer');await page.getByRole('combobox',{name:/^(Language|語言)$/}).selectOption('en');await page.getByRole('button',{name:'Buyers',exact:true}).click();await expect(page.getByRole('region',{name:'Assign buyer owners',exact:true})).toHaveCount(0);
++ const result=await page.request.post(`http://127.0.0.1:8000/v1/workspaces/${workspace}/projects/${project}/buyer-owner-assignments`,{headers:{Authorization:'Bearer fixture-viewer','Idempotency-Key':'q05-viewer-denied'},data:{selection:{kind:'explicit',buyers:[{id:'e2000000-0000-4000-8000-000000000001',version:1}]},owner_membership_id:null,reason:'Fixture denial'}});expect(result.status()).toBe(403);
++});

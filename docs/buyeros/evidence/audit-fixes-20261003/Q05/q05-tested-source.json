@@ -1,0 +1,47 @@
+{
+  "base_sha": "6e7a78c6994664cb47c5325d8c0eecd8cfdde573",
+  "files": [
+    {
+      "path": "features/live/bulk-actions.tsx",
+      "sha256": "3ffc1cda0c976d798b65c84c4b8f8c7b0673517648dd108b0a1d4496d87c0752",
+      "staged_blob_sha256": "9731c9a299d99c902070cccec577c05a4579c27a56c782d9dcce215b2ed543dd",
+      "staged_byte_equal": false
+    },
+    {
+      "path": "features/live/buyer-results.tsx",
+      "sha256": "d0febed67d4b63cc0016da89cdf4f88dda6ea660c9692ca6eed287274da88e75",
+      "staged_blob_sha256": "3e4055be4eda95e3da672b50dbdbf0499e4d51b0d8f464a1b8f0c3872fa6f42f",
+      "staged_byte_equal": false
+    },
+    {
+      "path": "services/live/bulk-confirmation.ts",
+      "sha256": "4fcfeea1d378041898e856f5dc9bb4a77fdc76a908391a9cc46055d07721db29",
+      "staged_blob_sha256": "cac5ff80f71fc43aeb4bcbddcafb30784099617998cfbf0fbfacf8c519e7c6dc",
+      "staged_byte_equal": false
+    },
+    {
+      "path": "services/api/tests/test_bulk_jobs_db.py",
+      "sha256": "f0dd6fb0db026761226bb64cf9fdcabc632a56218ffd9c2b9ff3b782578014c3",
+      "staged_blob_sha256": "17639d89ce621a86aaaa280221baa776d73c7ae64f1fd0a1fbbe7bc6852fea37",
+      "staged_byte_equal": false
+    },
+    {
+      "path": "services/worker/tests/fixtures/audit_bulk.py",
+      "sha256": "bb71d35c3f5713b5f6d5eeba0ccc8075aec9a0b5699a63a1705a5839f493f0b8",
+      "staged_blob_sha256": "d2499ca5713e5ba69b2d66f84b528ad977d0e78d6887807e9b5e6c498d5730d1",
+      "staged_byte_equal": false
+    },
+    {
+      "path": "tests/audit-bulk-confirmation.test.mjs",
+      "sha256": "3be0a0ebdf6c95c2d3568507d9eb030ae9fb91c61381d101c87f83a795acde26",
+      "staged_blob_sha256": "2806eea8ef2123e2223a18ab562f3824b034aa5b80209c394b52c23581b04472",
+      "staged_byte_equal": false
+    },
+    {
+      "path": "tests/e2e/audit-bulk-confirmation.spec.ts",
+      "sha256": "b0518cf28eb75257f7eea07e1047bb127a579eaa82393b79a578fc5677e55e50",
+      "staged_blob_sha256": "de3cc88a03ef185319b362e28cff5f506f52bb99632a0f9c325319305f0493bc",
+      "staged_byte_equal": false
+    }
+  ]
+}

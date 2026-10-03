@@ -1,0 +1,91 @@
+test-results/q05-api-final.xml {"tests":13,"failures":0,"errors":0,"skipped":0}
+test-results/q05-ui-final.xml {"tests":37,"failures":0,"errors":0,"skipped":0}
+✔ U13 actual callback render during initializing is status, never configuration alert (10.6299ms)
+✔ B02 confirmation is stable for row ordering but binds every material field (28.1927ms)
+✔ B02 snapshot confirmation binds snapshot identity and normalized exclusions (0.3167ms)
+✔ B03 frozen payload preserves confirmed rows and trimmed audit reason (2.0375ms)
+✔ B16 unknown assignment survives route remount and token renewal with the same key (2.459ms)
+✔ B16 an unresolved assignment cannot be replaced with a materially different intent (0.4834ms)
+✔ D02 save has the required transition order (1.9209ms)
+✔ D02 discard has the required transition order (0.2491ms)
+✔ D02 cancel has the required transition order (0.1828ms)
+✔ D02 rejected save 412 cannot proceed (0.8076ms)
+✔ D02 rejected save 503 cannot proceed (0.255ms)
+✔ D02 clean transition does not prompt or write (0.3741ms)
+✔ D02 asynchronous Save completes before proceeding (6.5421ms)
+✔ U06 generated member operation carries literal search and bounded page query (2.1127ms)
+✔ S06 generated eligible lookup and scope context reject foreign and A-B-A responses (1.0093ms)
+✔ B05 token renewal and route remount retain lost-response key; double start shares work (19.2678ms)
+✔ B06 full normalized payload and actor/scope define intent; generation and key order do not (1.1673ms)
+✔ B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent (4.9774ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1596.9033
+PASS node --test tests/audit-bulk-confirmation.test.mjs tests/audit-member-contract.test.mjs tests/audit-research-intent.test.mjs tests/audit-draft-guard.test.mjs tests/audit-auth-render.test.mjs
+API types match the OpenAPI contract
+PASS node scripts/generate-api-types.mjs --check
+PASS node node_modules/typescript/bin/tsc --noEmit
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ Error: spawnSync C:\Program Files\nodejs\node.exe ETIMEDOUT
++     at Object.spawnSync (node:internal/child_process:1143:20)
++     at spawnSync (node:child_process:911:24)
++     at file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/test-results/q05-final-gate.mjs:10:35
++     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
++     at async node:internal/modules/esm/loader:643:26
++     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
++   code: 'ETIMEDOUT',
++   errno: -4039,
++   path: 'C:\\Program Files\\nodejs\\node.exe',
++   spawnargs: [
++     'node_modules/eslint/bin/eslint.js',
++     'features/live/bulk-actions.tsx',
++     'features/live/buyer-results.tsx',
++     'services/live/bulk-confirmation.ts',
++     'tests/e2e/audit-bulk-confirmation.spec.ts'
++   ],
++   syscall: 'spawnSync C:\\Program Files\\nodejs\\node.exe'
++ }
+- undefined
+
+    at file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/test-results/q05-final-gate.mjs:10:178
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: Error: spawnSync C:\Program Files\nodejs\node.exe ETIMEDOUT
+      at Object.spawnSync (node:internal/child_process:1143:20)
+      at spawnSync (node:child_process:911:24)
+      at file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/test-results/q05-final-gate.mjs:10:35
+      at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+      at async node:internal/modules/esm/loader:643:26
+      at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+    errno: -4039,
+    code: 'ETIMEDOUT',
+    syscall: 'spawnSync C:\\Program Files\\nodejs\\node.exe',
+    path: 'C:\\Program Files\\nodejs\\node.exe',
+    spawnargs: [
+      'node_modules/eslint/bin/eslint.js',
+      'features/live/bulk-actions.tsx',
+      'features/live/buyer-results.tsx',
+      'services/live/bulk-confirmation.ts',
+      'tests/e2e/audit-bulk-confirmation.spec.ts'
+    ]
+  },
+  expected: undefined,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.18.0

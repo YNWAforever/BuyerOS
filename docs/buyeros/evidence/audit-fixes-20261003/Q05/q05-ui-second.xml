@@ -1,0 +1,171 @@
+<testsuites id="" name="" tests="8" failures="2" skipped="0" errors="3" time="402.335125">
+<testsuite name="audit-bulk-confirmation.spec.ts" timestamp="2026-10-03T07:57:00.945Z" hostname="" tests="8" failures="2" skipped="0" time="270.691" errors="3">
+<testcase name="B02 adding a sixth buyer clears the previously confirmed five" classname="audit-bulk-confirmation.spec.ts" time="18.005">
+</testcase>
+<testcase name="B02 reason, target and exclusions clear confirmation; unchanged selection survives paging" classname="audit-bulk-confirmation.spec.ts" time="27.064">
+</testcase>
+<testcase name="B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works" classname="audit-bulk-confirmation.spec.ts" time="36.853">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B0-0e661--API-clear-owner-also-works\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B0-0e661--API-clear-owner-also-works\trace.zip]]
+]]>
+</system-out>
+<error message="Command failed: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/audit_bulk.py seed" type="Error">
+<![CDATA[  audit-bulk-confirmation.spec.ts:43:1 › B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works 
+
+    Error: Command failed: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/audit_bulk.py seed
+
+
+    Error Context: ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-0e661--API-clear-owner-also-works\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-0e661--API-clear-owner-also-works\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-0e661--API-clear-owner-also-works\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B04 inactive owner is rejected and a stale buyer reports conflict without overwriting" classname="audit-bulk-confirmation.spec.ts" time="30.352">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\trace.zip]]
+]]>
+</system-out>
+<error message="Command failed: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/prepare_browser_project.py isolate-workbench" type="Error">
+<![CDATA[  audit-bulk-confirmation.spec.ts:61:1 › B04 inactive owner is rejected and a stale buyer reports conflict without overwriting 
+
+    Error: Command failed: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/prepare_browser_project.py isolate-workbench
+
+
+    Error Context: ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-f1588-onflict-without-overwriting\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B16 committed response loss locks changes and reconciles the same key after a route remount" classname="audit-bulk-confirmation.spec.ts" time="58.065">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B1-c2473-e-key-after-a-route-remount\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B1-c2473-e-key-after-a-route-remount\trace.zip]]
+]]>
+</system-out>
+<error message="Command failed: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/audit_bulk.py seed" type="Error">
+<![CDATA[  audit-bulk-confirmation.spec.ts:74:1 › B16 committed response loss locks changes and reconciles the same key after a route remount 
+
+    Error: Command failed: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/audit_bulk.py seed
+
+
+    Error Context: ..\..\test-results\audit-fixes\audit-bulk-confirmation-B1-c2473-e-key-after-a-route-remount\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-bulk-confirmation-B1-c2473-e-key-after-a-route-remount\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-bulk-confirmation-B1-c2473-e-key-after-a-route-remount\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link" classname="audit-bulk-confirmation.spec.ts" time="59.221">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B1-617f1-conciles-its-exact-job-link\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B1-617f1-conciles-its-exact-job-link\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveValue(expected) failed" type="expect.toHaveValue">
+<![CDATA[  audit-bulk-confirmation.spec.ts:84:1 › B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByRole('combobox', { name: 'Project', exact: true })
+    Expected: "e1000000-0000-4000-8000-000000000001"
+    Received: ""
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" getByRole('combobox', { name: 'Project', exact: true }) with timeout 5000ms
+      - waiting for getByRole('combobox', { name: 'Project', exact: true })
+        9 × locator resolved to <select aria-label="Project">…</select>
+          - unexpected value ""
+
+
+      89 |  const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});await panel.getByRole('textbox',{name:'Assignment reason'}).fill('Fixture scoped queued assignment');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
+      90 |  let release:()=>void=()=>{},received:()=>void=()=>{};const held=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);let job='';const keys:string[]=[];
+    > 91 |  await page.route(assignments,async route=>{keys.push(route.request().headers()['idempotency-key']);const response=await route.fetch();expect(response.status()).toBe(202);job=(await response.json()).data.id;if(keys.length===1){received();await held;}await route.fulfill({response}).catch(()=>{});});
+         |                                                                                                                                                                                                                                                              ^
+      92 |  await panel.getByRole('button',{name:'Assign selected buyers'}).click();await started;await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);release();await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(project);
+      93 |  await expect(buyers.getByRole('checkbox',{name:'Select Buyer Fixture 01',exact:true})).toBeVisible();await expect(panel.getByRole('checkbox',{name:'Confirm owner assignment'})).not.toBeChecked();expect(new URL(page.url()).searchParams.get('bulk_job')).toBeNull();
+      94 |  await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(seeded.other);await expect(panel.getByRole('button',{name:'Retry same assignment'})).toBeVisible();await panel.getByRole('button',{name:'Retry same assignment'}).click();
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-confirmation.spec.ts:91:254
+
+    Error Context: ..\..\test-results\audit-fixes\audit-bulk-confirmation-B1-617f1-conciles-its-exact-job-link\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-bulk-confirmation-B1-617f1-conciles-its-exact-job-link\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-bulk-confirmation-B1-617f1-conciles-its-exact-job-link\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="B03 zh-HK mobile colleague search recovers a failed read; viewer has no assignment entry" classname="audit-bulk-confirmation.spec.ts" time="25.273">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B0-5b2aa-wer-has-no-assignment-entry\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-bulk-confirmation-B0-5b2aa-wer-has-no-assignment-entry\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  audit-bulk-confirmation.spec.ts:100:1 › B03 zh-HK mobile colleague search recovers a failed read; viewer has no assignment entry 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      102 |  await open(page);await page.setViewportSize({width:390,height:844});await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');const panel=page.getByRole('region',{name:'批量分派買家負責人',exact:true});
+      103 |  let failed=false;await page.route('**/eligible-assignees?**',async route=>{if(!failed){failed=true;await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({code:'TEMPORARILY_UNAVAILABLE',message:'Fixture outage',request_id:'fixture-q05'})});}else await route.continue();});
+    > 104 |  await panel.getByRole('textbox',{name:'搜尋同事'}).fill('Q05 colleague');await panel.getByRole('button',{name:'搜尋',exact:true}).click();await expect(panel.getByRole('button',{name:'重新載入同事'})).toBeVisible();await panel.getByRole('button',{name:'重新載入同事'}).click();await expect(panel.getByRole('combobox',{name:'負責人',exact:true}).locator('option')).toHaveCount(12);
+          |                                                                                           ^
+      105 |  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:'test-results/q05-bulk-zh-mobile.png',fullPage:true});
+      106 | });
+      107 |
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-bulk-confirmation.spec.ts:104:91
+
+    Error Context: ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-5b2aa-wer-has-no-assignment-entry\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-5b2aa-wer-has-no-assignment-entry\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-bulk-confirmation-B0-5b2aa-wer-has-no-assignment-entry\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="B03 viewer cannot assign through UI or direct API" classname="audit-bulk-confirmation.spec.ts" time="15.858">
+</testcase>
+</testsuite>
+</testsuites>

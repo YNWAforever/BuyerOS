@@ -1,0 +1,35 @@
+{
+  "fixture_only": true,
+  "job": "7a4cfaff-73b5-4d56-91eb-32e010969a37",
+  "keys": [
+    "8867de95-100e-4240-b0e0-68ad25f9e922",
+    "8867de95-100e-4240-b0e0-68ad25f9e922"
+  ],
+  "read": {
+    "data": {
+      "id": "7a4cfaff-73b5-4d56-91eb-32e010969a37",
+      "workspace_id": "e0000000-0000-4000-8000-000000000101",
+      "project_id": "e1050000-0000-4000-8000-000000000001",
+      "kind": "bulk_mutation",
+      "status": "queued",
+      "created_at": "2026-10-03T08:25:14.864771+00:00",
+      "updated_at": "2026-10-03T08:25:14.864771+00:00",
+      "data_mode": "live",
+      "requested": 101,
+      "processed": 0,
+      "updated": 0,
+      "unchanged": 0,
+      "blocked": 0,
+      "conflicts": 0,
+      "cancelled": 0,
+      "result_page": {
+        "items": [],
+        "offset": 0,
+        "limit": 50,
+        "total": 0
+      }
+    },
+    "request_id": "1ad9fde2-b52f-4951-8309-421725cc6b06",
+    "data_mode": "live"
+  }
+}

@@ -1,0 +1,6 @@
+PASS node --test tests/audit-bulk-confirmation.test.mjs tests/audit-member-contract.test.mjs tests/audit-research-intent.test.mjs tests/audit-draft-guard.test.mjs tests/audit-auth-render.test.mjs
+API types match the OpenAPI contract
+PASS node scripts/generate-api-types.mjs --check
+PASS node node_modules/typescript/bin/tsc --noEmit
+PASS node node_modules/eslint/bin/eslint.js features/live/bulk-actions.tsx features/live/buyer-results.tsx services/live/bulk-confirmation.ts tests/e2e/audit-bulk-confirmation.spec.ts
+ledger: Task 1: complete (commits 6e7a78c..4cd0f48, tests: node test-results/q05-final-gate.mjs → PASS node node_modules/eslint/bin/eslint.js features/live/bulk-actions.tsx features/live/buyer-results.tsx services/live/bulk-confirmation.ts tests/e2e/audit-bulk-confirmation.spec.ts)

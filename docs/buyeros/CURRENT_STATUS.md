@@ -23,7 +23,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 | F03 | fixed with local fixture + DB evidence | Q02 U06: 250 member13 pages,101st search, totals, en/zh, stale scope/read recovery |
 | F04 | fixed with local fixture + DB evidence | Q02 U07/U08/S06: names/full IDs, current/RLS roles, last-admin race, post-lock revocation, legacy replay and response-loss reconciliation |
 | F05 | fixed with local integration/UI evidence (Q03) | Q03 |
-| F06 | still open (audit-source code unchanged) | outside selected first round |
+| F06 | selected Q05 cases fixed with local UI/DB evidence; other F06 cases remain unverified | Q05 B02/B03/B04/B07/B16, exact confirmation and frozen assignment reconciliation |
 | F07 | still open (audit-source code unchanged) | outside selected first round |
 | F08 | fixed with local durability/UI evidence (Q04) | Q04 |
 | F09 | still open (audit-source code unchanged) | outside selected first round |
@@ -86,3 +86,9 @@ Q02: admin-only searchable membership directory;20-row UI pages; 250 distinct re
 Final strict DB/API/contracts72pass/0fail/0skip; combined UI29pass/0fail/0skip; unit13pass/0fail/0skip; generated79operations/typecheck/lint pass. See `evidence/audit-fixes-20261003/Q02/RESULTS.md` for exact commands, original RED/fixture failures, screenshots, environment and limits. Original98casefields and input pack unchanged. Author review only; independent review pending.
 
 Next eligible local task Q05. N00 built compatibility and true Neon rehearsal remain separate; Q16 SQLSTATE/driver/pool evidence missing and Q17 blocked. Formal auth/deployment/role/provider activation remains unperformed. Release and live staff journey are not asserted.
+
+## Q05 continuation completed locally — 2026-10-03
+
+Reviewed source `4cd0f484814be7d4333ca265c9637de940d398fa`; base6e7a78c. Seven-file local product/test commit. Q05/F06 cases B02/B03/B04/B07/B16: exact normalized confirmation, generated eligible-colleague search/selection, frozen ActionIntent body/key on response loss, scope-safe replay and visible partial results. Existing domain backend checks retained; no schema or contract change.
+
+Strict DB13, combined audit UI37 and related unit18 pass; zero failures/errors/skips. Generated79-operation/type/lint gates pass. [Full evidence/commands/rollback/screenshots](evidence/audit-fixes-20261003/Q05/RESULTS.md), [local PR-12 description](review/2026-10-03-audit-fixes/Q05-pr.md). Inputs31hashes/98originalcase fields preserved; fixtures cleaned. Author review only; independent review pending. Hard-browser unknown assignment recovery, live identity/provider/Neon/production and full release gates remain unverified; no deployed SHA. Next eligible local task **Q06** (bounded summary polling), not an authorization for external activation.

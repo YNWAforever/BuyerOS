@@ -1,0 +1,106 @@
+..........F..                                                            [100%]
+================================== FAILURES ===================================
+______ test_q05_b07_mixed_100_rows_match_durable_state_and_reason_digest ______
+
+api = <starlette.testclient.TestClient object at 0x0000021501B90380>
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:63561/buyeros_test_api'
+
+    def test_q05_b07_mixed_100_rows_match_durable_state_and_reason_digest(api, seeded):
+        from buyeros_api.db.icp import canonical_hash
+        from tests.contract_validation import assert_contract_response
+    
+        owner_id = _admin_membership(seeded)
+        owner_user = uuid.uuid5(uuid.NAMESPACE_URL, ADMIN)
+        updated = [_seed_buyer(seeded, name=f"Q05 update {i:02d}") for i in range(25)]
+        unchanged = [_seed_buyer(seeded, name=f"Q05 unchanged {i:02d}", owner_user_id=str(owner_user)) for i in range(25)]
+        stale = [_seed_buyer(seeded, name=f"Q05 stale {i:02d}") for i in range(25)]
+        missing = [str(uuid.uuid4()) for _ in range(25)]
+        body = {"selection": {"kind": "explicit", "buyers": [
+            {"id": value, "version": 99 if value in stale else 1}
+            for value in updated + unchanged + stale + missing
+        ]}, "owner_membership_id": owner_id, "reason": "Q05 exact mixed assignment reason"}
+        path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-owner-assignments"
+        response = api.post(path, json=body, headers=_h(subject=OPERATOR, key="q05-mixed-100"))
+        assert response.status_code == 200, response.text
+        assert_contract_response("BulkResultResponse", response.json())
+        data = response.json()["data"]
+        assert (data["requested"], data["updated"], data["unchanged"], data["blocked"], data["conflicts"]) == (100, 25, 25, 25, 25)
+        assert data["requested"] == sum(data[key] for key in ("updated", "unchanged", "blocked", "conflicts"))
+        results = {row["id"]: row for row in data["results"]}
+        assert len(results) == 100
+        for ids, expected in ((updated, "updated"), (unchanged, "unchanged"), (stale, "conflict"), (missing, "blocked")):
+            assert all(results[value]["status"] == expected for value in ids)
+        expected_digest = canonical_hash({"owner_membership_id": owner_id, "reason": body["reason"]})
+        with psycopg.connect(seeded) as db:
+            for value in updated + unchanged + stale:
+                state = db.execute("SELECT owner_user_id,version FROM project_buyers WHERE id=%s", (value,)).fetchone()
+                assert state == ((None, 1) if value in stale else (owner_user, 2 if value in updated else 1))
+>           events = db.execute("SELECT entity_id,actor_id,detail_digest FROM audit_events WHERE workspace_id=%s AND action='buyer.owner_assigned'", (WORKSPACE_A,)).fetchall()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bulk_jobs_db.py:343: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <psycopg.Connection [BAD] at 0x21501088f50>
+query = "SELECT entity_id,actor_id,detail_digest FROM audit_events WHERE workspace_id=%s AND action='buyer.owner_assigned'"
+params = ('11111111-1111-4111-8111-111111111111',)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -> Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.UndefinedColumn: column "entity_id" does not exist
+E           LINE 1: SELECT entity_id,actor_id,detail_digest FROM audit_events WH...
+E                          ^
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UndefinedColumn
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_bulk_jobs_db.py::test_assign_owner_small_batch_is_durable_partial_and_role_scoped
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_bulk_jobs_db.py::test_assign_owner_small_batch_is_durable_partial_and_role_scoped
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q05-api-first.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_bulk_jobs_db.py::test_q05_b07_mixed_100_rows_match_durable_state_and_reason_digest
+1 failed, 12 passed, 9 warnings in 34.85s

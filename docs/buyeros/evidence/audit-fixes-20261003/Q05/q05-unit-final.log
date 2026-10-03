@@ -1,0 +1,26 @@
+✔ U13 actual callback render during initializing is status, never configuration alert (9.853ms)
+✔ B02 confirmation is stable for row ordering but binds every material field (24.6777ms)
+✔ B02 snapshot confirmation binds snapshot identity and normalized exclusions (0.3514ms)
+✔ B03 frozen payload preserves confirmed rows and trimmed audit reason (3.3795ms)
+✔ B16 unknown assignment survives route remount and token renewal with the same key (2.2195ms)
+✔ B16 an unresolved assignment cannot be replaced with a materially different intent (2.483ms)
+✔ D02 save has the required transition order (2.9286ms)
+✔ D02 discard has the required transition order (1.0567ms)
+✔ D02 cancel has the required transition order (2.5856ms)
+✔ D02 rejected save 412 cannot proceed (1.9948ms)
+✔ D02 rejected save 503 cannot proceed (0.3795ms)
+✔ D02 clean transition does not prompt or write (0.4238ms)
+✔ D02 asynchronous Save completes before proceeding (38.7938ms)
+✔ U06 generated member operation carries literal search and bounded page query (1.7434ms)
+✔ S06 generated eligible lookup and scope context reject foreign and A-B-A responses (17.7467ms)
+✔ B05 token renewal and route remount retain lost-response key; double start shares work (20.7443ms)
+✔ B06 full normalized payload and actor/scope define intent; generation and key order do not (1.0022ms)
+✔ B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent (4.4656ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2585.5236
