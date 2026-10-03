@@ -6,7 +6,7 @@
     "Q04",
     "Q15"
   ],
-  "next_eligible": "Q15",
+  "next_eligible": "first-round-review",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -99,7 +99,15 @@
     },
     {
       "id": "Q15",
-      "status": "pending"
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "cases": [
+        "D02"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q15-ui.xml",
+      "migration": "none; schema source head 0036_checkpoint_schema_grants"
     },
     {
       "id": "Q16",

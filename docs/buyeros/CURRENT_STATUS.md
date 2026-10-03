@@ -36,13 +36,13 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 | F16 | still open (audit-source code unchanged) | outside selected first round |
 | F17 | still open (audit-source code unchanged) | outside selected first round |
 | F18 | still open (audit-source code unchanged) | outside selected first round |
-| F19 | still open (audit-source code unchanged) | Q15 |
+| F19 | fixed with local dirty-buffer UI/persistence evidence (Q15) | Q15 |
 | F20 | still open (external evidence gate) | outside selected first round |
 | F21 | still open (external evidence gate) | Q16 blocked: OperationalError alone has no root cause |
 
 ## Verification
 
-Pending new regression RED/GREEN evidence. Original 98-case CSV and 25-task CSV are preserved unchanged in inputs/audit-20261003; current case results are separate in remaining/AUDIT_FIX_CASE_STATUS_20261003.csv.
+New regression RED/GREEN evidence is recorded below; it is local fixture/integration evidence only. Original 98-case CSV and 25-task CSV are preserved unchanged in inputs/audit-20261003; current case results are separate in remaining/AUDIT_FIX_CASE_STATUS_20261003.csv.
 
 Baseline commands: `node tests/live-auth-checks.mjs` 8 pass; `node tests/live-adapter-checks.mjs` 74 pass. Locked pnpm install exit 0 (offline attempt failed missing policy metadata; online frozen install succeeded). Initial pre-install module-not-found attempts are environment failures, not counted passes. Node 24.18.0, pnpm 11.25.0, uv 0.11.27, Docker 29.7.2, Windows PowerShell.
 
@@ -63,3 +63,9 @@ RED UI: 3 failures, 0 skips. GREEN UI: 4 pass/0 fail/0 skip, actual PostgreSQL/A
 Research starts use existing ActionIntent and the complete normalized generated RunCreate body plus actor/mode/workspace/project/ICP. Fixed-point caps use six decimals; token and UI generation are excluded from durable fingerprint. UI generation still rejects stale results. Session-owned memory keeps key/body across route remounts; unknown results permit explicit same-intent Retry, with separate explicit confirmed reset for a new intent. Hard refresh has no trustworthy handle, displays a check-existing-runs instruction and never auto POSTs.
 
 RED UI: same request used a different key; actual DB grew to 2 runs/outboxes/economic intents after committed lost 202. GREEN UI: 1 pass/0 fail/0 skip; original target 35/cap 2 restored after a settled route remount, exact same key/body/run ID on Retry, DB 1 run/1 admission outbox/1 bounded run budget account. Admission creates no provider operation/hold: 0 operations/0 reservations, not a claimed provider acceptance check. Strict admission validation+integration: 14 pass/0 fail/0 skip, including durable restart checks and new lost-response economic ceiling assertion. New unit 3/3 covers token renewal, full-body changes, double-start and A-B-A; existing adapter 74/74; tsc/lint exit 0. Backend admission/worker/hold semantics and schema unchanged. Rollback: disable new admission UI or revert consumer, preserving runs/outbox/ceilings and never replaying unknown operations. Next: Q15.
+
+## Q15 repair
+
+Refresh/Open/Job materialization now share an asynchronous Save/Discard/Cancel guard. Cancel and Escape keep subject/body/language, dirty state and revision/version baseline, restoring trigger focus after controls re-enable. Save awaits the actual PATCH before proceeding. 401/412/503 keep local fields and baseline; a 412 reads latest content only into a separate comparison panel with a local copy action. Inputs are locked during one transition; old scope responses cannot materialize a draft. en and zh-HK/mobile choices verified.
+
+Valid RED: 1 UI failure, persisted body overwrote Local unsaved body on Refresh. GREEN: UI 10 pass/0 fail/0 skip; actual guard unit 7 pass/0 fail/0 skip; strict draft API/persistence/approval 27 pass/0 fail/0 skip; strict grounded worker 11 pass/0 fail/0 skip. tsc/lint exit 0. Earlier locator/fixture failures are separately retained, not counted as defect RED. No schema or production changes; rollback: preserve/copy local buffers, then revert Q15 UI/test commit; keep persisted revisions and approvals. Next eligible: first-round review/handoff. Q16/Q17 remain blocked on underlying database diagnostics.

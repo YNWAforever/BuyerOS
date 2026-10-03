@@ -1260,3 +1260,5 @@ proof; their automatically triggered CI status is reported separately.
 2026-10-03 Q03: UI 4/4, strict bulk DB 10/10, zero skips; generated/type/lint gates exit 0. Next eligible Q04.
 
 2026-10-03 Q04: committed lost-202 UI 1/1, strict admission 14/14, intent unit 3/3, adapter 74/74, zero skips. Next eligible Q15.
+
+2026-10-03 Q15: UI 10/10, guard unit 7/7, strict draft API27/27 and grounded worker11/11, zero skips; type/lint exit 0. First-round code complete locally, final review/handoff next. Q16/Q17 underlying diagnostic evidence blocked; no deployment or Neon cutover.
