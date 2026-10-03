@@ -1254,3 +1254,5 @@ ID-only Queue/Workflow/API probe, Cron off and mandatory fence; no paid-plan
 upgrade/customer/provider/R2/delivery activation. Independent review and the five
 open audits remain open. Following evidence-only commits keep this named source
 proof; their automatically triggered CI status is reported separately.
+
+2026-10-03 Q01: fixture UI 7/7, strict auth/contracts 13/13, no skips. Current scope/evidence: CURRENT_STATUS.md. Next eligible: Q03.

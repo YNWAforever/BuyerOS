@@ -19,7 +19,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 | Finding | Current classification | This round |
 |---|---|---|
 | F01 | still open (external evidence gate) | Q01 UI recovery; U01 membership gate remains blocked |
-| F02 | still open (audit-source code unchanged) | Q01 |
+| F02 | fixed with local fixture evidence (Q01) | Q01 |
 | F03 | still open (audit-source code unchanged) | outside selected first round |
 | F04 | still open (audit-source code unchanged) | outside selected first round |
 | F05 | still open (audit-source code unchanged) | Q03 |
@@ -32,7 +32,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 | F12 | still open (external evidence gate) | outside selected first round |
 | F13 | still open (audit-source code unchanged) | Q11 baseline only |
 | F14 | still open (audit-source code unchanged) | outside selected first round |
-| F15 | still open (audit-source code unchanged) | Q01 |
+| F15 | fixed with local render/UI evidence (Q01) | Q01 |
 | F16 | still open (audit-source code unchanged) | outside selected first round |
 | F17 | still open (audit-source code unchanged) | outside selected first round |
 | F18 | still open (audit-source code unchanged) | outside selected first round |
@@ -45,3 +45,9 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 Pending new regression RED/GREEN evidence. Original 98-case CSV and 25-task CSV are preserved unchanged in inputs/audit-20261003; current case results are separate in remaining/AUDIT_FIX_CASE_STATUS_20261003.csv.
 
 Baseline commands: `node tests/live-auth-checks.mjs` 8 pass; `node tests/live-adapter-checks.mjs` 74 pass. Locked pnpm install exit 0 (offline attempt failed missing policy metadata; online frozen install succeeded). Initial pre-install module-not-found attempts are environment failures, not counted passes. Node 24.18.0, pnpm 11.25.0, uv 0.11.27, Docker 29.7.2, Windows PowerShell.
+
+## Q01 repair
+
+Hydration is explicitly initializing; configuration failure is distinct. Language works before membership/preferences, persists only a non-sensitive display choice and ignores late preference overwrites. Empty/error access has read-only retry and allow-listed diagnostics. No auto membership or write before authorization.
+
+RED: render 1 fail; UI 1 pass/5 fail. GREEN: render 1 pass; UI 7 pass/0 fail/0 skip; strict auth+contract DB suites 13 pass/0 fail/0 skip; auth 8, adapter 74; tsc/lint exit 0. Exact commands and full logs in evidence/audit-fixes-20261003. No schema migration; source head 0036_checkpoint_schema_grants. Rollback: revert Q01 commit, retaining baseline docs. U01 stays externally blocked; no live login/provider/production verification.

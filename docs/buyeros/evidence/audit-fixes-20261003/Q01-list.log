@@ -1,0 +1,8 @@
+Listing tests:
+  audit-auth-entry.spec.ts:7:1 › U13 initialization has no false configuration alert before hydration
+  audit-auth-entry.spec.ts:16:1 › U02 U03 no membership permits locale switching and read-only access retry
+  audit-auth-entry.spec.ts:36:36 › U03 403 access errors retain locale and retry
+  audit-auth-entry.spec.ts:36:36 › U03 404 access errors retain locale and retry
+  audit-auth-entry.spec.ts:36:36 › U03 500 access errors retain locale and retry
+  audit-auth-entry.spec.ts:49:1 › U03 manual locale choice survives a delayed member preference response
+Total: 6 tests in 1 file

@@ -1,0 +1,18 @@
+<testsuites id="" name="" tests="7" failures="0" skipped="0" errors="0" time="85.477999">
+<testsuite name="audit-auth-entry.spec.ts" timestamp="2026-10-03T04:55:42.664Z" hostname="" tests="7" failures="0" skipped="0" time="38.865" errors="0">
+<testcase name="U13 initialization has no false configuration alert before hydration" classname="audit-auth-entry.spec.ts" time="3.111">
+</testcase>
+<testcase name="U02 U03 no membership permits locale switching and read-only access retry" classname="audit-auth-entry.spec.ts" time="8.989">
+</testcase>
+<testcase name="U03 403 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="6.179">
+</testcase>
+<testcase name="U03 404 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="5.236">
+</testcase>
+<testcase name="U03 500 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="4.636">
+</testcase>
+<testcase name="U03 manual locale choice survives a delayed member preference response" classname="audit-auth-entry.spec.ts" time="5.577">
+</testcase>
+<testcase name="U03 expired access returns to sign-in with the selected locale" classname="audit-auth-entry.spec.ts" time="5.137">
+</testcase>
+</testsuite>
+</testsuites>

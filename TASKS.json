@@ -1,0 +1,113 @@
+{
+  "scope": [
+    "Q11",
+    "Q01",
+    "Q03",
+    "Q04",
+    "Q15"
+  ],
+  "next_eligible": "Q03",
+  "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "tasks": [
+    {
+      "id": "N00",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N01",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N02",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N03",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N04",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N05",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N06",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N07",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q01",
+      "status": "fixture-verified"
+    },
+    {
+      "id": "Q02",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q03",
+      "status": "pending"
+    },
+    {
+      "id": "Q04",
+      "status": "pending"
+    },
+    {
+      "id": "Q05",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q06",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q07",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q08",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q09",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q10",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q11",
+      "status": "baseline-recorded"
+    },
+    {
+      "id": "Q12",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q13",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q14",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q15",
+      "status": "pending"
+    },
+    {
+      "id": "Q16",
+      "status": "blocked-root-cause-evidence"
+    },
+    {
+      "id": "Q17",
+      "status": "outside-current-scope"
+    }
+  ]
+}

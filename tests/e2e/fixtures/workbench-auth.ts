@@ -38,7 +38,7 @@ export async function signInWorkbench(page:Page,waitForProject=true){
   page.on('response',response=>{if(new URL(response.url()).pathname.startsWith('/v1/'))apiEvents.push(`${response.status()} ${response.url()}`);});
   page.on('pageerror',error=>apiEvents.push(`pageerror ${error.name}: ${error.message}`));
   await page.goto(`/app?workspace=${workspace}&project=${project}`);
-  await page.getByRole('button',{name:'Sign in'}).click();
+  await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
   if(waitForProject){
     try{await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});}
     catch(error){throw new Error(`Project selection did not settle; API events: ${apiEvents.join(' | ')}`,{cause:error});}
