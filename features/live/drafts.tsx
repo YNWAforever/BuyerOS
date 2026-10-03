@@ -5,10 +5,33 @@ import {LiveCancelled,LiveError,describeLiveError} from '@/services/live/client'
 import {ActionIntent} from '@/services/live/action-intent';
 import {DraftDirtyDialog,guardDraftTransition,type DirtyDecision} from './draft-dirty-guard';
 import {ExportDialog} from './export-dialog';
+import {DraftGroundingReview} from './draft-grounding-review';
 import {approveExactDraft,editDraft,generateDraft,getDraft,getDraftJob,getProject,listDrafts,loadDraftContext,requestDraftReview,saveSender,
   type Draft,type DraftJob,type Evidence,type Icp,type Project,type Buyer} from '@/services/live/drafts';
 
 const words:Record<string,string>={
+  "Reload current sources":"重新載入目前來源",
+  "Manual source review":"人工來源覆核",
+  "Classify every segment, read each cited source and the whole message. This records your source review; it does not verify semantic truth.":"請分類每個段落，閱讀引用來源及整篇訊息。這會記錄你的來源覆核，不代表系統已驗證語義真確。",
+  "Save the message before preparing its source review.":"請先儲存訊息，再準備來源覆核。",
+  "A reviewer must submit this source review.":"此來源覆核須由審核員提交。",
+  "Loading current sources...":"正在載入目前來源…",
+  "Segment":"段落",
+  "Classification":"分類",
+  "Choose classification":"請選擇分類",
+  "Factual — cite a source":"事實陳述：須引用來源",
+  "Non-factual — explain why":"非事實陳述：請說明理由",
+  "Segment reason":"段落理由",
+  "Evidence":"證據",
+  "Offer fact":"產品事實",
+  "Split position (code points)":"分段位置（Unicode 字元）",
+  "Split segment":"分開段落",
+  "Overall review reason":"整體覆核理由",
+  "I read the entire exact message and every cited source, including all non-factual classifications.":"我已閱讀整篇精確訊息及所有引用來源，包括每項非事實分類。",
+  "Submit source review":"提交來源覆核",
+  "Source review recorded; request a new exact review.":"來源覆核已記錄；請重新要求精確審核。",
+  "Reviewed by":"覆核員",
+
   'Unsaved draft changes':'草稿有未儲存的更改','Save your changes, discard them, or stay with this draft.':'請儲存或捨棄更改，或繼續編輯此草稿。',
   'Save':'儲存','Discard':'捨棄','Cancel':'取消','Draft conflict comparison':'草稿衝突比對',
   'Local unsaved content':'本地未儲存內容','Latest persisted content':'最新已儲存內容','Copy local content':'複製本地內容',
@@ -297,6 +320,8 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
       </section>}
       <h4>{t('Claims and sources')}</h4>{draft.claims.map((claim,index)=><p key={index}>{claim.text} · {claim.offer_fact_ids.join(', ')} {claim.evidence_ids.join(', ')}</p>)}
       {draft.claims.length===0&&<p>{t('Human edits require a new grounding review before approval.')}</p>}
+      {draft.claims.length===0&&<DraftGroundingReview key={`grounding:${draft.id}:${draft.revision_id}`} draft={draft} canReview={canApprove} busy={busy} dirty={unsaved} t={t} onBusy={setBusy} onReviewed={(updated,identity)=>{applyDraft(updated,identity);setNotice(t('Source review recorded; request a new exact review.'));void refreshList(offset);}}/>}
+      {draft.grounding_review&&<p>{t('Reviewed by')}: {draft.grounding_review.reviewed_by} · {draft.grounding_review.reviewed_at} · {draft.grounding_review.reason}</p>}
       <section className="panel" aria-label={t('Exact revision review')}>
         <h4>{t('Exact revision review')}</h4>
         <p>{t('Revision')}: {draft.revision_number} · {draft.content_hash}</p>
