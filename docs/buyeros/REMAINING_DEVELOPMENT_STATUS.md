@@ -1264,3 +1264,19 @@ proof; their automatically triggered CI status is reported separately.
 2026-10-03 Q15: UI 10/10, guard unit 7/7, strict draft API27/27 and grounded worker11/11, zero skips; type/lint exit 0. First-round code complete locally, final review/handoff next. Q16/Q17 underlying diagnostic evidence blocked; no deployment or Neon cutover.
 
 2026-10-03 first-round final: reviewed3efd1f3; UI22/0/0, backend strict75/0/0, related node checks93/0/0; contracts78/type/lint exit0. Handoff: review/2026-10-03-audit-fixes/HANDOFF.md. Selected Q01/Q03/Q04/Q15 complete locally; no deployment, Q11 external release gates remain open, Q16/Q17 diagnostic blocker.
+
+
+## 2026-10-03 continuation — Q02 verification in progress
+
+User `continue` after the first-round handoff advances the next eligible local repair. Reused clean isolated `codex/audit-fixes-20261003`, base `338ee8e623b0f9b117c5cd6d3f84dc63a0a05b9d`. No external activation authority added; no sub-agents.
+
+Q02 implements admin search/20-row member pages/full names and IDs, restricted eligible-assignee projection, shared active-workspace target predicate, post-lock current-admin recheck, and controlled onboarding documentation. Existing `users.display_name` suffices; Alembic head remains `0036_checkpoint_schema_grants`, no migration. Settings no longer reapplies a late locale read over the user's current selection.
+
+Meaningful RED: UI expected20/received100; complete clean API RED 3 failed/2 passed/0skip; baseline admin-before-lock variant RED1 (write wrongly200 after revocation). Early fixture cleanup errors, an interrupted type-error run and port-occupied startup errors retained separately, not counted as product RED/pass. GREEN so far: strict API/admin/bulk/RLS/individual-owner/routes 71 pass/0fail/0skip; Q02 browser6 pass; unit13 pass. Combined 28-case UI regression still pending. Exact final evidence and next task follow after that gate.
+
+
+### Q02 final checkpoint
+
+Source `fb184819d038dc2ad56b7f1746362fe9b7a6089a`; base338ee8e; branchcodex/audit-fixes-20261003. Strict required gates:72pass/0fail/0skip/0error, 14warnings,275.01s (APIcwdservices/api); combinedUI29pass/0fail/0skip/0error, aggregate348.635498s; unit13pass. Full commands/artifacts and source hashes: `docs/buyeros/evidence/audit-fixes-20261003/Q02/RESULTS.md`. Generators79operations, tsc/lint exit0. No schema migration; head0036. Reversepatch20files checked; no actual revert/data undo. OriginalDBguards3files unchanged;98caseoriginalfields intact. Two specifically proven interrupted disposableDBs cleaned; inherited containers untouched. Final fixture teardown and volume ownership cleanup recorded in evidence.
+
+Implemented/fixture verified/integration verified: Q02 U06/U07/U08/S06(current RLS). Externally blocked/unverified: true live account/provider/Neon/build/cutover/production release, Q16root cause. Deployed: none in this repair session. NexteligibleQ05.

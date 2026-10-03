@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="5" time="12.270" timestamp="2026-10-03T14:39:04.062499+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_membership_directory_db" name="test_u06_all_250_members_paged_and_search_target_101" time="7.149"><failure message="assert 250 == 1">directory = (&lt;starlette.testclient.TestClient object at 0x0000028EA01BC1A0&gt;, [(UUID('10000000-0000-4000-8000-000000000000'), UUID(...61-6c229608778c')), ...], (UUID('10000000-0000-4000-8000-000000000064'), UUID('7234bd83-1a2b-4e35-8ee9-be5fadc96928')))
+
+    def test_u06_all_250_members_paged_and_search_target_101(directory):
+        client,ordered,target=directory;ids=[]
+        for offset in range(0,250,20):
+            response=client.get(f"{ROOT}/memberships?offset={offset}&amp;limit=20",headers=_h(subject=ADMIN))
+            assert response.status_code==200,response.text
+            assert_contract_response("MembershipPageResponse",response.json())
+            page=response.json()["data"];assert (page["total"],page["offset"],page["limit"])==(250,offset,20)
+            ids.extend(row["id"] for row in page["items"])
+        assert ids==[str(row[0]) for row in ordered] and len(set(ids))==250
+        for query in ("Search target 101",str(target[1]),str(target[0])):
+            response=client.get(f"{ROOT}/memberships",params={"q":query,"limit":20},headers=_h(subject=ADMIN))
+            assert response.status_code==200,response.text
+&gt;           assert response.json()["data"]["total"]==1
+E           assert 250 == 1
+
+services\api\tests\test_membership_directory_db.py:47: AssertionError</failure></testcase><testcase classname="tests.test_membership_directory_db" name="test_u07_duplicate_names_full_ids_and_no_identity_secrets" time="0.705"><failure message="AssertionError: assert (20 == 2)&#10; +  where 20 = len([{'active': True, 'id': '10000000-0000-4000-8000-000000000000', 'roles': ['viewer'], 'user_id': '70000001-0000-4000-80...000000-0000-4000-8000-000000000005', 'roles': ['viewer'], 'user_id': '606b42bc-a9b6-4397-8be5-fa433de54964', ...}, ...])">directory = (&lt;starlette.testclient.TestClient object at 0x0000028EA04E2C10&gt;, [(UUID('10000000-0000-4000-8000-000000000000'), UUID(...e5-fa433de54964')), ...], (UUID('10000000-0000-4000-8000-000000000064'), UUID('3db7725c-4048-4c2f-bc7d-5d135844e11b')))
+
+    def test_u07_duplicate_names_full_ids_and_no_identity_secrets(directory):
+        client,_,_=directory
+        response=client.get(f"{ROOT}/memberships?q=Alex",headers=_h(subject=ADMIN));assert response.status_code==200,response.text
+        rows=response.json()["data"]["items"]
+&gt;       assert len(rows)==2 and {r["display_name"] for r in rows}=={"Alex Chen"}
+E       AssertionError: assert (20 == 2)
+E        +  where 20 = len([{'active': True, 'id': '10000000-0000-4000-8000-000000000000', 'roles': ['viewer'], 'user_id': '70000001-0000-4000-80...000000-0000-4000-8000-000000000005', 'roles': ['viewer'], 'user_id': '606b42bc-a9b6-4397-8be5-fa433de54964', ...}, ...])
+
+services\api\tests\test_membership_directory_db.py:59: AssertionError</failure></testcase><testcase classname="tests.test_membership_directory_db" name="test_s06_directory_role_and_tenant_boundaries" time="1.041" /><testcase classname="tests.test_membership_directory_db" name="test_s06_eligible_projection_and_revocation" time="0.691"><failure message="AssertionError: {&quot;code&quot;:&quot;NOT_FOUND&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;5bf8e1da-ce89-4ec1-bfdf-7d3bed56c28a&quot;,&quot;retryable&quot;:false}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">directory = (&lt;starlette.testclient.TestClient object at 0x0000028EA00F88A0&gt;, [(UUID('10000000-0000-4000-8000-000000000000'), UUID(...51-cb7a3c7eba5c')), ...], (UUID('10000000-0000-4000-8000-000000000064'), UUID('f87b2bc0-14bc-4c1d-83d6-40df5ecc5c51')))
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:54293/buyeros_test_api'
+
+    def test_s06_eligible_projection_and_revocation(directory,seeded):
+        client,_,target=directory
+        for subject in (ADMIN,OPERATOR):
+            response=client.get(f"{ROOT}/eligible-assignees?q=Search target 101",headers=_h(subject=subject))
+&gt;           assert response.status_code==200,response.text
+E           AssertionError: {"code":"NOT_FOUND","message":"request failed","request_id":"5bf8e1da-ce89-4ec1-bfdf-7d3bed56c28a","retryable":false}
+E           assert 404 == 200
+E            +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+services\api\tests\test_membership_directory_db.py:78: AssertionError</failure></testcase><testcase classname="tests.test_membership_directory_db" name="test_u08_two_admins_concurrent_self_demotions_leave_one_admin" time="0.848" /></testsuite></testsuites>

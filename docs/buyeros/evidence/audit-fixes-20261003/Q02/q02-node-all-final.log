@@ -1,0 +1,21 @@
+✔ U13 actual callback render during initializing is status, never configuration alert (18.6709ms)
+✔ D02 save has the required transition order (2.0851ms)
+✔ D02 discard has the required transition order (0.6693ms)
+✔ D02 cancel has the required transition order (0.1619ms)
+✔ D02 rejected save 412 cannot proceed (0.718ms)
+✔ D02 rejected save 503 cannot proceed (0.2346ms)
+✔ D02 clean transition does not prompt or write (0.227ms)
+✔ D02 asynchronous Save completes before proceeding (13.8425ms)
+✔ U06 generated member operation carries literal search and bounded page query (1.8316ms)
+✔ S06 generated eligible lookup and scope context reject foreign and A-B-A responses (1.0358ms)
+✔ B05 token renewal and route remount retain lost-response key; double start shares work (18.3849ms)
+✔ B06 full normalized payload and actor/scope define intent; generation and key order do not (5.4098ms)
+✔ B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent (6.9263ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1264.74

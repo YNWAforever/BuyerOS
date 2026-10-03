@@ -1,0 +1,19 @@
+{
+  "docs/buyeros/contracts/openapi.proposed.yaml": "9f3229baa18fc9d1c953f531f9587a102e13072a301b73fc5d264285d1b9657e",
+  "features/live/settings.tsx": "a74f49c9fad7aa0a85aebc0d970d236514e9947e19b17534bbe3f4df46a3001e",
+  "features/live/member-directory.tsx": "129b64f3c49bfe5740b6470e9cbdfb96fc4a5225eb7f17d39e4700527c1b024c",
+  "features/live/locale.ts": "28faf7dc24b0b1d55a4f00ee5f72a1babc33aca16cdb9d9af6f88723711e0a79",
+  "services/api/buyeros_api/api/routes/memberships.py": "c107b9e7259fc1d683ee4afe2cd6dcd9dbdfd4780e1992fa95bdd8debd26ff17",
+  "services/api/buyeros_api/api/routes/buyers.py": "1e13fd6e47ef2705cd8cdb7afcf99bbefbfb41af92b272181eec377daf609a98",
+  "services/api/buyeros_api/api/schemas.py": "28d1149497a9908b81b7ff28eaf68ef38ab727cb9d3e45b089f41f9892a951e5",
+  "services/api/buyeros_api/services/membership_directory.py": "08a642311af730ac9230cc67552668c543f291c285e380eb70facb3c9b73f489",
+  "services/api/buyeros_api/services/buyer_management.py": "a5bb6a9655dfb0f8dd7869cd0722342b44d39168bfb4d36415078bcbc470fe63",
+  "services/api/buyeros_api/services/bulk_service.py": "bad0aa1402921571c9932cb940b6ac4d7582649c932c9824079935bba42d9187",
+  "services/generated/buyeros-api.ts": "7084781396126f7a0171cd27beba712034a38945010a378f5f9e4f8107da8f0d",
+  "services/generated/operation-routes.ts": "97423abbbed5f53d28862924ad783069a0e3dbf1f72db7b1f3a567dddae0208d",
+  "services/api/tests/test_membership_directory_db.py": "2a84314f2c3fd8d11d4dfea7543a8eaa5d24a819d49da76620c9cc062d2e018c",
+  "services/worker/tests/fixtures/audit_memberships.py": "eda0e523caa408b11f81fe31b3bddbf79983e38d8546e29eb3309bdff90bb71e",
+  "tests/e2e/audit-memberships.spec.ts": "e240d23f5c68c81c17587b8d14486ed7b454e714390ace970049faa1fb34b5da",
+  "tests/e2e/fixtures/workbench-auth.ts": "909e85336f9717e9955d582066701ca18c146bd3e07cfb7cf289bca9e345c017",
+  "tests/audit-member-contract.test.mjs": "d8acca7f7c733f20ab69729b11f6dac9a708a9c19e8b444830a7a4c98d13072f"
+}

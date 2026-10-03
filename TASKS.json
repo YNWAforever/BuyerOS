@@ -4,9 +4,10 @@
     "Q01",
     "Q03",
     "Q04",
-    "Q15"
+    "Q15",
+    "Q02"
   ],
-  "next_eligible": "selected-first-round-complete",
+  "next_eligible": "Q05",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -57,7 +58,24 @@
     },
     {
       "id": "Q02",
-      "status": "outside-current-scope"
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "72 API + 29 combined UI + 13 unit pass; 0 fail/skip",
+      "release_status": "not-deployed",
+      "base_sha": "338ee8e623b0f9b117c5cd6d3f84dc63a0a05b9d",
+      "cases": [
+        "U06",
+        "U07",
+        "U08",
+        "S06"
+      ],
+      "migrations": "none; source head 0036_checkpoint_schema_grants",
+      "source_sha": "fb184819d038dc2ad56b7f1746362fe9b7a6089a",
+      "depends_on": [
+        "Q01"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q02/RESULTS.md",
+      "next_eligible": "Q05"
     },
     {
       "id": "Q03",
@@ -158,10 +176,10 @@
     }
   ],
   "future_eligible": [
-    "Q02",
+    "Q05",
     "Q16 evidence collection",
     "N00 built compatibility proof"
   ],
-  "reviewed_source_sha": "3efd1f3f97036e1988751d1dfb54d37d48d0929a",
+  "reviewed_source_sha": "fb184819d038dc2ad56b7f1746362fe9b7a6089a",
   "deployed_sha": null
 }

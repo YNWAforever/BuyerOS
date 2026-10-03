@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="17.302" timestamp="2026-10-03T15:03:41.830069+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_membership_directory_db" name="test_u07_pre_q02_membership_replay_keeps_business_result_and_new_projection" time="12.650"><failure message="jsonschema.exceptions.ValidationError: 'display_name' is a required property&#10;&#10;Failed validating 'required' in schema['properties']['data']:&#10;    {'type': 'object',&#10;     'additionalProperties': False,&#10;     'properties': {'id': {'type': 'string', 'format': 'uuid'},&#10;                    'workspace_id': {'type': 'string', 'format': 'uuid'},&#10;                    'user_id': {'type': 'string', 'format': 'uuid'},&#10;                    'display_name': {'type': 'string',&#10;                                     'minLength': 1,&#10;                                     'maxLength': 200,&#10;                                     'description': 'Authorized display '&#10;                                                    'name or full '&#10;                                                    'canonical user ID '&#10;                                                    'fallback; no email or '&#10;                                                    'issuer projection.'},&#10;                    'roles': {'type': 'array',&#10;                              'minItems': 1,&#10;                              'uniqueItems': True,&#10;                              'items': {'type': 'string',&#10;                                        'enum': ['viewer',&#10;                                                 'operator',&#10;                                                 'reviewer',&#10;                                                 'workspace_admin']}},&#10;                    'active': {'type': 'boolean'},&#10;                    'version': {'type': 'integer', 'minimum': 1}},&#10;     'required': ['id',&#10;                  'workspace_id',&#10;                  'user_id',&#10;                  'display_name',&#10;                  'roles',&#10;                  'active',&#10;                  'version']}&#10;&#10;On instance['data']:&#10;    {'id': 'd5704328-7c25-4dfd-87d7-c0d5d9348ebc',&#10;     'roles': ['viewer'],&#10;     'active': True,&#10;     'user_id': 'd077e54b-385e-58a6-a246-705bacf5b781',&#10;     'version': 2,&#10;     'workspace_id': '11111111-1111-4111-8111-111111111111'}">api = &lt;starlette.testclient.TestClient object at 0x0000028313930590&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:57864/buyeros_test_api'
+
+    def test_u07_pre_q02_membership_replay_keeps_business_result_and_new_projection(api,seeded):
+        with psycopg.connect(seeded) as db:
+            target=db.execute("SELECT m.id FROM memberships m JOIN users u ON u.id=m.user_id WHERE m.workspace_id=%s AND u.subject=%s",(WORKSPACE_A,REVIEWER)).fetchone()[0]
+        path=f"{ROOT}/memberships/{target}";headers=_h(subject=ADMIN,key="q02-legacy-replay",**{"If-Match":'"1"'})
+        body={"roles":["viewer"],"active":True,"reason":"Fixture legacy response"}
+        changed=api.patch(path,json=body,headers=headers);assert changed.status_code==200,changed.text
+        original=changed.json()["data"]
+        # Model an existing pre-Q02 idempotency response; do not migrate/rewrite history in production.
+        with psycopg.connect(seeded) as db:
+            db.execute("UPDATE idempotency_records SET response=response-'display_name' WHERE workspace_id=%s AND operation_id='updateMembership' AND key='q02-legacy-replay'",(WORKSPACE_A,))
+        replay=api.patch(path,json=body,headers=headers);assert replay.status_code==200,replay.text
+&gt;       assert_contract_response('MembershipResponse',replay.json())
+
+services\api\tests\test_membership_directory_db.py:148: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+services\api\tests\contract_validation.py:22: in assert_contract_response
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Draft202012Validator(schema={'$ref': '#/components...rshipResponse', 'components': {'parameters': {'IdempotencyKey': {...mail', 'idn-email', 'idn-hostname', 'ipv4', 'ipv6', 'json-pointer', 'regex', 'relative-json-pointer', 'time', 'uuid']&gt;)
+args = ({'data': {'active': True, 'id': 'd5704328-7c25-4dfd-87d7-c0d5d9348ebc', 'roles': ['viewer'], 'user_id': 'd077e54b-385e-58a6-a246-705bacf5b781', ...}, 'data_mode': 'live', 'request_id': 'e6ca8ae4-e2ea-4627-8ff0-03b59be3e88d'},)
+kwargs = {}, error = &lt;ValidationError: "'display_name' is a required property"&gt;
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+&gt;           raise error
+E           jsonschema.exceptions.ValidationError: 'display_name' is a required property
+E           
+E           Failed validating 'required' in schema['properties']['data']:
+E               {'type': 'object',
+E                'additionalProperties': False,
+E                'properties': {'id': {'type': 'string', 'format': 'uuid'},
+E                               'workspace_id': {'type': 'string', 'format': 'uuid'},
+E                               'user_id': {'type': 'string', 'format': 'uuid'},
+E                               'display_name': {'type': 'string',
+E                                                'minLength': 1,
+E                                                'maxLength': 200,
+E                                                'description': 'Authorized display '
+E                                                               'name or full '
+E                                                               'canonical user ID '
+E                                                               'fallback; no email or '
+E                                                               'issuer projection.'},
+E                               'roles': {'type': 'array',
+E                                         'minItems': 1,
+E                                         'uniqueItems': True,
+E                                         'items': {'type': 'string',
+E                                                   'enum': ['viewer',
+E                                                            'operator',
+E                                                            'reviewer',
+E                                                            'workspace_admin']}},
+E                               'active': {'type': 'boolean'},
+E                               'version': {'type': 'integer', 'minimum': 1}},
+E                'required': ['id',
+E                             'workspace_id',
+E                             'user_id',
+E                             'display_name',
+E                             'roles',
+E                             'active',
+E                             'version']}
+E           
+E           On instance['data']:
+E               {'id': 'd5704328-7c25-4dfd-87d7-c0d5d9348ebc',
+E                'roles': ['viewer'],
+E                'active': True,
+E                'user_id': 'd077e54b-385e-58a6-a246-705bacf5b781',
+E                'version': 2,
+E                'workspace_id': '11111111-1111-4111-8111-111111111111'}
+
+services\api\.venv\Lib\site-packages\jsonschema\validators.py:450: ValidationError</failure></testcase></testsuite></testsuites>

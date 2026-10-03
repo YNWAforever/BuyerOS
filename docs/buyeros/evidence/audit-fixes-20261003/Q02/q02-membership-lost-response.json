@@ -1,0 +1,39 @@
+{
+  "fixture_only": true,
+  "patch_count": 1,
+  "idempotency_key": "cccb6039-2643-4e7d-9204-03a7be1d860d",
+  "read": {
+    "data": {
+      "items": [
+        {
+          "id": "f1000000-0000-4000-8000-000000000000",
+          "workspace_id": "e0000000-0000-4000-8000-000000000001",
+          "user_id": "71000001-0000-4000-8000-000000c011de",
+          "display_name": "Alex Chen",
+          "roles": [
+            "viewer",
+            "operator"
+          ],
+          "active": true,
+          "version": 2
+        },
+        {
+          "id": "f1000000-0000-4000-8000-000000000001",
+          "workspace_id": "e0000000-0000-4000-8000-000000000001",
+          "user_id": "71000002-0000-4000-8000-000000c011de",
+          "display_name": "Alex Chen",
+          "roles": [
+            "viewer"
+          ],
+          "active": true,
+          "version": 1
+        }
+      ],
+      "offset": 0,
+      "limit": 20,
+      "total": 2
+    },
+    "request_id": "8398f467-49b9-4ee3-b07f-e0beb03e785e",
+    "data_mode": "live"
+  }
+}

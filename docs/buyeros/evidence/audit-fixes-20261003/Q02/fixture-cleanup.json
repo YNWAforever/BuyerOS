@@ -1,0 +1,21 @@
+[
+  {
+    "name": "buyeros-test-65f37133",
+    "created": "2026-10-03T06:47:34.843214791Z",
+    "proof": "this-session interrupted E2E fixture, postgres16, loopback test DB, fictional workspace, no bind mount, not current marker",
+    "removed": true
+  },
+  {
+    "name": "buyeros-test-319f4483",
+    "created": "2026-10-03T06:49:26.402516516Z",
+    "proof": "this-session interrupted E2E fixture, postgres16, loopback test DB, fictional workspace, no bind mount, not current marker",
+    "removed": true
+  },
+  {
+    "final_fixture_markers_absent": true,
+    "owned_ui_dependency_volume": "buyeros-audit-ui-deps-052d6a686de9",
+    "owner_label_verified": "052d6a686de9",
+    "removed": true,
+    "inherited_resources_preserved": true
+  }
+]

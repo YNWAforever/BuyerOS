@@ -1,0 +1,34 @@
+........................................................................ [100%]
+============================== warnings summary ===============================
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_membership_directory_db.py::test_u06_all_250_members_paged_and_search_target_101
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/test_membership_directory_db.py::test_u06_all_250_members_paged_and_search_target_101
+tests/test_admin_operations_db.py::test_0017_preferences_rls_and_empty_rollback
+tests/test_admin_operations_db.py::test_0017_preferences_rls_and_empty_rollback
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+tests/test_bulk_jobs_db.py::test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback
+tests/test_buyer_review_db.py::test_0011_downgrade_truncates_a_long_review_reason
+tests/test_buyer_review_db.py::test_0011_downgrade_truncates_a_long_review_reason
+tests/test_buyer_review_db.py::test_0011_downgrade_truncates_a_long_review_reason
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q02-api-cwd-final.xml -
+72 passed, 14 warnings in 275.01s (0:04:35)

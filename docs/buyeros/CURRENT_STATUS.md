@@ -20,8 +20,8 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 |---|---|---|
 | F01 | still open (external evidence gate) | Q01 UI recovery; U01 membership gate remains blocked |
 | F02 | fixed with local fixture evidence (Q01) | Q01 |
-| F03 | still open (audit-source code unchanged) | outside selected first round |
-| F04 | still open (audit-source code unchanged) | outside selected first round |
+| F03 | fixed with local fixture + DB evidence | Q02 U06: 250 member13 pages,101st search, totals, en/zh, stale scope/read recovery |
+| F04 | fixed with local fixture + DB evidence | Q02 U07/U08/S06: names/full IDs, current/RLS roles, last-admin race, post-lock revocation, legacy replay and response-loss reconciliation |
 | F05 | fixed with local integration/UI evidence (Q03) | Q03 |
 | F06 | still open (audit-source code unchanged) | outside selected first round |
 | F07 | still open (audit-source code unchanged) | outside selected first round |
@@ -75,3 +75,14 @@ Valid RED: 1 UI failure, persisted body overwrote Local unsaved body on Refresh.
 Reviewed code source `3efd1f3f97036e1988751d1dfb54d37d48d0929a`; tested tree `ae62fa34c8601a826e0056c5e66de9cac2e48d57` unchanged by organizing unpublished task commits. Final shared UI22/0/0, combined unit11/0/0, auth8/0/0, adapter74/0/0; strict backend suites75/0/0 in total; generated78 operations/type/lint exit0. No new deployed SHA.
 
 Four exact PR descriptions/diffs, every F-ID/case status, commands/environment, screenshots and rollback: [final handoff](review/2026-10-03-audit-fixes/HANDOFF.md). Original31 hashes/98-case fields/25 tasks reverified unchanged. Owned disposable fixture resources cleaned; branch/worktree retained. Independent review and external/live gates remain separate. Q16 read-only log corroborates OperationalError only; Q17 still blocked. Next within selected scope: none; next future wave requires its own scope, starting eligible Q02/N00 or Q16 diagnostic evidence.
+
+
+## Q02 continuation completed locally — 2026-10-03
+
+Reviewed source `fb184819d038dc2ad56b7f1746362fe9b7a6089a`; taskbase338ee8e. 20-file product commit; local PR-11 description and complete reverse-applicable patch underreview/evidence. No deployment SHA asserted.
+
+Q02: admin-only searchable membership directory;20-row UI pages; 250 distinct records/13pages; full canonical IDs/display names; restricted operator/admin eligible projection and shared current-active-member submission rule. Preserve roles/audit/identity; no migration or invitation. Post-lock currentadmin recheck and unknown role result requires read reconciliation. Legacy replay adds only new name projection without history rewrite. Global locale owner retains manual selection against late Settings reads.
+
+Final strict DB/API/contracts72pass/0fail/0skip; combined UI29pass/0fail/0skip; unit13pass/0fail/0skip; generated79operations/typecheck/lint pass. See `evidence/audit-fixes-20261003/Q02/RESULTS.md` for exact commands, original RED/fixture failures, screenshots, environment and limits. Original98casefields and input pack unchanged. Author review only; independent review pending.
+
+Next eligible local task Q05. N00 built compatibility and true Neon rehearsal remain separate; Q16 SQLSTATE/driver/pool evidence missing and Q17 blocked. Formal auth/deployment/role/provider activation remains unperformed. Release and live staff journey are not asserted.
