@@ -6,7 +6,7 @@
     "Q04",
     "Q15"
   ],
-  "next_eligible": "Q03",
+  "next_eligible": "Q04",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -51,7 +51,7 @@
     },
     {
       "id": "Q03",
-      "status": "pending"
+      "status": "integration-fixture-verified"
     },
     {
       "id": "Q04",

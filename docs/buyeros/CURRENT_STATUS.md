@@ -22,7 +22,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 | F02 | fixed with local fixture evidence (Q01) | Q01 |
 | F03 | still open (audit-source code unchanged) | outside selected first round |
 | F04 | still open (audit-source code unchanged) | outside selected first round |
-| F05 | still open (audit-source code unchanged) | Q03 |
+| F05 | fixed with local integration/UI evidence (Q03) | Q03 |
 | F06 | still open (audit-source code unchanged) | outside selected first round |
 | F07 | still open (audit-source code unchanged) | outside selected first round |
 | F08 | still open (audit-source code unchanged) | Q04 |
@@ -51,3 +51,9 @@ Baseline commands: `node tests/live-auth-checks.mjs` 8 pass; `node tests/live-ad
 Hydration is explicitly initializing; configuration failure is distinct. Language works before membership/preferences, persists only a non-sensitive display choice and ignores late preference overwrites. Empty/error access has read-only retry and allow-listed diagnostics. No auto membership or write before authorization.
 
 RED: render 1 fail; UI 1 pass/5 fail. GREEN: render 1 pass; UI 7 pass/0 fail/0 skip; strict auth+contract DB suites 13 pass/0 fail/0 skip; auth 8, adapter 74; tsc/lint exit 0. Exact commands and full logs in evidence/audit-fixes-20261003. No schema migration; source head 0036_checkpoint_schema_grants. Rollback: revert Q01 commit, retaining baseline docs. U01 stays externally blocked; no live login/provider/production verification.
+
+## Q03 repair
+
+Operations uses generated AsyncJob/BulkItemResult.id and typed getAsyncJob with offset/limit=20. Complete IDs can be copied; zero results show 0–0. Per-request sequence, cancellation and session generation reject late job/page/workspace A-B-A responses. Filter changes clear result selection.
+
+RED UI: 3 failures, 0 skips. GREEN UI: 4 pass/0 fail/0 skip, actual PostgreSQL/API producer payloads for 21/101 rows fully traversed without repeats. Different actor/tenant reads return 404. Strict bulk DB suite 10 pass/0 fail/0 skip includes real producer persistence and migration downgrade/upgrade in an empty disposable database. Generated check, tsc and focused lint exit 0. No schema or server changes. Rollback: revert Q03 consumer/test commit; persisted jobs remain. Next: Q04.

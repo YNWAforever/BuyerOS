@@ -1,0 +1,12 @@
+<testsuites id="" name="" tests="4" failures="0" skipped="0" errors="0" time="79.72394899999999">
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-03T05:03:42.896Z" hostname="" tests="4" failures="0" skipped="0" time="37.359" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="11.609">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="7.877">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="9.111">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="8.762">
+</testcase>
+</testsuite>
+</testsuites>
