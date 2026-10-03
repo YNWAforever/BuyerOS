@@ -989,6 +989,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/jobs/{job_id}/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read actor-bound job status and counters without result rows
+         * @description Q06 read-only summary. Current membership, original actor or current workspace administrator are rechecked on every request. No result-page queries or writes.
+         */
+        get: operations["getAsyncJobSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/jobs/{job_id}": {
         parameters: {
             query?: never;
@@ -2567,6 +2587,34 @@ export interface components {
             limit: number;
             total: number;
         };
+        AsyncJobSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workspace_id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** @enum {string} */
+            kind: "offer_ingestion" | "draft_generation" | "export" | "reconciliation" | "bulk_mutation";
+            /** @enum {string} */
+            status: "queued" | "running" | "cancel_requested" | "cancelled" | "completed" | "failed" | "unknown";
+            requested: number;
+            processed: number;
+            updated: number;
+            unchanged: number;
+            blocked: number;
+            conflicts: number;
+            cancelled: number;
+            /** Format: uuid */
+            result_id?: string;
+            failure_code?: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
         AsyncJob: {
             /** Format: uuid */
             id: string;
@@ -2797,6 +2845,13 @@ export interface components {
         };
         AsyncJobPageResponse: {
             data: components["schemas"]["AsyncJobPage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        AsyncJobSummaryResponse: {
+            data: components["schemas"]["AsyncJobSummary"];
             /** Format: uuid */
             request_id: string;
             /** @enum {string} */
@@ -5724,6 +5779,33 @@ export interface operations {
                     "application/json": components["schemas"]["AsyncJobPageResponse"];
                 };
             };
+        };
+    };
+    getAsyncJobSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Durable current summary, never an inferred completion. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AsyncJobSummaryResponse"];
+                };
+            };
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            429: components["responses"]["Error"];
         };
     };
     getAsyncJob: {

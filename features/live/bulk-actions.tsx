@@ -3,6 +3,7 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import type {components} from '@/services/generated/buyeros-api';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
 import {assignmentRecovery,freezeBulkAssignment,type FrozenBulkAssignment} from '@/services/live/bulk-confirmation';
+import {startJobPoller} from '@/services/live/job-poller';
 import {ActionIntent} from '@/services/live/action-intent';
 import {downloadText} from '@/services/live/download-text';
 import {readExportContent,type ExportJob} from '@/services/live/exports';
@@ -13,8 +14,10 @@ import {createOperationClient} from '@/services/live/operations';
 
 type BulkResult=components['schemas']['BulkResult'];
 type AsyncJob=components['schemas']['AsyncJob'];
-type BulkOutcome=BulkResult|AsyncJob;
+type JobSummary=components['schemas']['AsyncJobSummary'];
+type ResultPage=components['schemas']['AsyncJobResultPage'];
 type Item=components['schemas']['BulkItemResult'];
+type BulkOutcome=BulkResult|AsyncJob;
 type Locale='en'|'zh-HK';
 const zhCopy:Record<string,string>={
   'Assign buyer owners':'批量分派買家負責人','Assignment reason':'分派原因',
@@ -22,7 +25,7 @@ const zhCopy:Record<string,string>={
   'Owner':'負責人','Me':'我','No owner':'沒有負責人','Search colleagues':'搜尋同事','Search':'搜尋','Previous colleagues':'上一頁同事','Next colleagues':'下一頁同事','Reload colleagues':'重新載入同事','Loading colleagues…':'正在載入同事…','Retry same assignment':'重試同一分派','Confirm this preview':'確認這份預覽','Scope':'工作區／專案','Reason':'原因',
   'The assignment result is unknown. Retry the same frozen assignment to reconcile; changes are locked until its result is known.':'分派結果未明。請重試同一份已凍結分派以核對結果；確認結果前暫停更改。',
   'Assigning...':'正在分派…','Bulk job progress':'批量工作進度','Close job':'關閉工作',
-  'Loading job...':'正在載入工作…','Refresh job':'更新工作進度',
+  'Loading job...':'正在載入工作…','Refresh job':'更新工作進度','Show job results':'顯示工作結果','Hide job results':'隱藏工作結果','Previous job results':'上一頁工作結果','Next job results':'下一頁工作結果',
   'Export failed IDs and reasons':'匯出失敗買家 ID 與原因',
   'Retry failed only with current versions':'只按目前版本重試失敗列',
   'Retrying...':'正在重試…','Cancel pending rows':'取消未處理列','Cancelling...':'正在取消…','queued':'排隊中','running':'處理中',
@@ -122,39 +125,46 @@ function AssignmentConfirmation({preview,enabled,busy,locale,onAssign}:{preview:
 }
 
 export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobId:string;onJob:(id:string)=>void;onCommitted:()=>void;onClose:()=>void;locale?:Locale}){
-  const {session,client}=useWorkspaceSession(),{scope}=useSessionSnapshot();
-  const [job,setJob]=useState<AsyncJob|null>(null),[items,setItems]=useState<Item[]>([]);
+  const {session,client}=useWorkspaceSession(),snapshot=useSessionSnapshot(),{scope}=snapshot;
+  const [job,setJob]=useState<JobSummary|null>(null),[resultPage,setResultPage]=useState<ResultPage|null>(null);
   const [error,setError]=useState(''),[busy,setBusy]=useState(false),[retryResult,setRetryResult]=useState<BulkResult|null>(null);
-  const [tick,setTick]=useState(0),settled=useRef('');
+  const [tick,setTick]=useState(0),[resultsOpen,setResultsOpen]=useState(false),[resultOffset,setResultOffset]=useState(0),[resultTick,setResultTick]=useState(0),[resultBusy,setResultBusy]=useState(false);
+  const settled=useRef(''),resultView=useRef({open:resultsOpen});
+  useEffect(()=>{resultView.current={open:resultsOpen};},[resultsOpen]);
   const retryIntent=useRef(new ActionIntent<BulkOutcome>());
   const cancelIntent=useRef(new ActionIntent<AsyncJob>());
   const reportIntent=useRef(new ActionIntent<ExportJob>());
   useEffect(()=>{
     if(!jobId||!scope.workspace)return;
-    let active=true;
-    void(async()=>{
-      try{
-        const ctx=buyerOperationContext(session),op=createOperationClient(client);
-        const first=await op.requestOperation('getAsyncJob',{path:{workspace_id:scope.workspace!,job_id:jobId},query:{offset:0,limit:100}},ctx);
-        const collected:Item[]=[...(first.result_page?.items??[])];
-        const total=first.result_page?.total??0;
-        for(let offset=collected.length;offset<total;){
-          const page=await op.requestOperation('getAsyncJob',{path:{workspace_id:scope.workspace!,job_id:jobId},query:{offset,limit:100}},ctx);
-          const rows=page.result_page?.items??[];
-          if(!rows.length)throw new Error('Incomplete job result page');
-          collected.push(...rows);offset+=rows.length;
+    const own=new AbortController(),basis=session.captureWriteContext(),op=createOperationClient(client);
+    const signal=AbortSignal.any([basis.signal,own.signal]);
+    return startJobPoller({signal,isVisible:()=>!document.hidden,
+      fetchSummary:requestSignal=>op.requestOperation('getAsyncJobSummary',{path:{workspace_id:scope.workspace!,job_id:jobId}},
+        {...basis,signal:AbortSignal.any([signal,requestSignal]),getToken:async()=>session.token()||'',isCurrent:()=>session.isCurrent(basis.identity)&&!own.signal.aborted}),
+      onValue:value=>{
+        if(!session.isCurrent(basis.identity)||own.signal.aborted)return;
+        setJob(value);setError('');
+        if(['completed','failed','cancelled'].includes(value.status)&&settled.current!==`${basis.identity}:${jobId}`){
+          settled.current=`${basis.identity}:${jobId}`;
+          if(resultView.current.open){setResultBusy(true);setResultTick(v=>v+1);}
+          if(value.updated)onCommitted();
         }
-        if(active){setJob(first);setItems(collected);setError('');
-          if(first.status==='completed'&&first.updated&&settled.current!==jobId){settled.current=jobId;onCommitted();}}
-      }catch(cause){if(active&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
-    })();
-    return()=>{active=false;};
-  },[client,session,scope.workspace,scope.project,jobId,tick,onCommitted]);
-  const jobStatus=job?.status;
-  useEffect(()=>{if(!jobStatus||!['queued','running','cancel_requested'].includes(jobStatus))return;
-    const timer=window.setInterval(()=>setTick(value=>value+1),2000);return()=>window.clearInterval(timer);
-  },[jobStatus]);
-  const failures=items.filter(item=>item.status==='blocked'||item.status==='conflict');
+      },onError:cause=>{if(session.isCurrent(basis.identity)&&!own.signal.aborted)setError(describeLiveError(cause));},
+    });
+  },[client,session,scope.workspace,scope.project,snapshot.identity,jobId,tick,onCommitted]);
+  useEffect(()=>{
+    if(!resultsOpen||!scope.workspace)return;
+    const own=new AbortController(),basis=session.captureWriteContext();
+    const current=()=>!own.signal.aborted&&session.isCurrent(basis.identity);
+    void createOperationClient(client).requestOperation('getAsyncJob',{path:{workspace_id:scope.workspace,job_id:jobId},query:{offset:resultOffset,limit:20}},
+      {...basis,signal:AbortSignal.any([own.signal,basis.signal]),getToken:async()=>session.token()||'',isCurrent:current})
+      .then(value=>{if(current()){setResultPage(value.result_page??null);setError('');}})
+      .catch(cause=>{if(current()&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));})
+      .finally(()=>{if(current())setResultBusy(false);});
+    return()=>own.abort();
+  },[client,session,scope.workspace,snapshot.identity,jobId,resultsOpen,resultOffset,resultTick]);
+  const failures=(resultPage?.items??[]).filter(item=>item.status==='blocked'||item.status==='conflict');
+  const failureCount=(job?.blocked??0)+(job?.conflicts??0);
   async function downloadFailures(){
     if(!scope.workspace||!scope.project||!job||busy||!['completed','failed'].includes(job.status))return;
     setBusy(true);setError('');
@@ -177,16 +187,16 @@ export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobI
     setBusy(true);setError('');
     try{
       const ctx=buyerOperationContext(session);
-      const result=await cancelIntent.current.run(JSON.stringify({ctx:ctx.identity,jobId}),key=>
+      await cancelIntent.current.run(JSON.stringify({ctx:ctx.identity,jobId}),key=>
         createOperationClient(client).requestOperation('cancelAsyncJob',{
           path:{workspace_id:scope.workspace!,job_id:jobId},header:{'Idempotency-Key':key},
         },ctx));
-      setJob(result);setTick(value=>value+1);
+      setTick(value=>value+1);
     }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
     finally{setBusy(false);}
   }
   async function retry(){
-    if(!scope.workspace||busy||!failures.length)return;
+    if(!scope.workspace||busy||!failureCount)return;
     setBusy(true);setError('');
     try{
       const ctx=buyerOperationContext(session);
@@ -204,12 +214,21 @@ export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobI
     {error&&<p role="alert">{error}</p>}
     {!job&&!error&&<p role="status">{copy('Loading job...',locale)}</p>}
     {job&&<><p role="status">{locale==='zh-HK'?`${copy(job.status,locale)}：已處理 ${job.processed??0}／${job.requested??0} 列；更新 ${job.updated??0}、不變 ${job.unchanged??0}、受阻 ${job.blocked??0}、衝突 ${job.conflicts??0}、取消 ${job.cancelled??0}。`:`${job.status}: ${job.processed??0} of ${job.requested??0} processed; ${job.updated??0} updated; ${job.unchanged??0} unchanged; ${job.blocked??0} blocked; ${job.conflicts??0} conflicts; ${job.cancelled??0} cancelled.`}</p>
-      <div className="bulk-action-row"><button type="button" onClick={()=>setTick(value=>value+1)}>{copy('Refresh job',locale)}</button>
+      <div className="bulk-action-row"><button type="button" onClick={()=>{setTick(value=>value+1);if(resultsOpen){setResultBusy(true);setResultTick(v=>v+1);}}}>{copy('Refresh job',locale)}</button>
       {['queued','running'].includes(job.status)&&<button type="button" disabled={busy} onClick={()=>void cancel()}>{copy(busy?'Cancelling...':'Cancel pending rows',locale)}</button>}
-      {failures.length>0&&<><button type="button" disabled={busy||!['completed','failed'].includes(job.status)} onClick={()=>void downloadFailures()}>{copy('Export failed IDs and reasons',locale)}</button>
+      {failureCount>0&&<><button type="button" disabled={busy||!['completed','failed'].includes(job.status)} onClick={()=>void downloadFailures()}>{copy('Export failed IDs and reasons',locale)}</button>
         <button type="button" disabled={busy||!['completed','failed'].includes(job.status)} onClick={()=>void retry()}>{copy(busy?'Retrying...':'Retry failed only with current versions',locale)}</button></>}</div>
-      {failures.length>0&&<><p>{locale==='zh-HK'?`失敗列：${failures.length}。報告只包含買家 ID 和內部原因碼。`:`Failed rows: ${failures.length}. Reasons are limited to buyer IDs and internal codes.`}</p>
-        <ul>{failures.slice(0,20).map(item=><li key={item.id}>{item.id}: {item.reason_code??item.status}</li>)}</ul></>}
+      {failureCount>0&&<><p>{locale==='zh-HK'?`失敗列：${failureCount}。報告只包含買家 ID 和內部原因碼。`:`Failed rows: ${failureCount}. Reasons are limited to buyer IDs and internal codes.`}</p>
+        <ul>{failures.map(item=><li key={item.id}>{item.id}: {item.reason_code??item.status}</li>)}</ul></>}
+      <button type="button" onClick={()=>{setResultBusy(true);setResultsOpen(v=>!v);}}>{copy(resultsOpen?'Hide job results':'Show job results',locale)}</button>
+      {resultsOpen&&<div aria-busy={resultBusy}>
+        {resultPage?.items.map(item=><p key={item.id}><code>{item.id}</code>: {copy(item.status,locale)} {item.reason_code??''}</p>)}
+        {resultPage&&<div className="bulk-action-row">
+          <button type="button" disabled={resultBusy||resultOffset===0} onClick={()=>{setResultBusy(true);setResultOffset(v=>Math.max(0,v-20));}}>{copy('Previous job results',locale)}</button>
+          <span>{resultPage.total?resultPage.offset+1:0}–{Math.min(resultPage.offset+resultPage.items.length,resultPage.total)} / {resultPage.total}</span>
+          <button type="button" disabled={resultBusy||resultOffset+20>=resultPage.total} onClick={()=>{setResultBusy(true);setResultOffset(v=>v+20);}}>{copy('Next job results',locale)}</button>
+        </div>}
+      </div>}
       {retryResult&&<p role="status">{locale==='zh-HK'?`重試：更新 ${retryResult.updated}、受阻 ${retryResult.blocked}、衝突 ${retryResult.conflicts}。`:`Retry: ${retryResult.updated} updated; ${retryResult.blocked} blocked; ${retryResult.conflicts} conflicts.`}</p>}
     </>}
   </section>;

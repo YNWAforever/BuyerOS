@@ -165,13 +165,27 @@ async def apply_bulk_chunk(session, job_id: uuid.UUID, limit: int = CHUNK_SIZE) 
             "remaining": job.requested - job.processed}
 
 
-async def read_job_page(session, *, workspace_id, job_id, actor_user_id, is_admin,
-                        offset: int, limit: int) -> dict:
+async def _read_actor_job(session, *, workspace_id, job_id, actor_user_id, is_admin):
     job = (await session.execute(select(AsyncJob).where(
         AsyncJob.workspace_id == workspace_id, AsyncJob.id == job_id
     ))).scalar_one_or_none()
     if job is None or (job.actor_user_id != actor_user_id and not is_admin):
         raise ApiError(404, "NOT_FOUND", "bulk job not found")
+    return job
+
+
+async def read_job_summary(session, *, workspace_id, job_id, actor_user_id, is_admin) -> dict:
+    job = await _read_actor_job(session, workspace_id=workspace_id, job_id=job_id,
+                                actor_user_id=actor_user_id, is_admin=is_admin)
+    data = job_data(job)
+    del data["result_page"]
+    return data
+
+
+async def read_job_page(session, *, workspace_id, job_id, actor_user_id, is_admin,
+                        offset: int, limit: int) -> dict:
+    job = await _read_actor_job(session, workspace_id=workspace_id, job_id=job_id,
+                                actor_user_id=actor_user_id, is_admin=is_admin)
     total = (await session.execute(select(func.count()).select_from(AsyncJobItem).where(
         AsyncJobItem.workspace_id == workspace_id, AsyncJobItem.job_id == job_id,
         AsyncJobItem.status != "pending"

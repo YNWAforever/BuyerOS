@@ -1,5 +1,5 @@
 export class LiveError extends Error {
-  constructor(message: string, readonly code: string, readonly status: number, readonly requestId: string, readonly retryable: boolean) {
+  constructor(message: string, readonly code: string, readonly status: number, readonly requestId: string, readonly retryable: boolean, readonly retryAfter?: string) {
     super(message);
   }
 }
@@ -101,7 +101,7 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '') 
         const message = typeof errorBody.message === 'string' ? errorBody.message : 'request failed';
         const headerId = response.headers?.get('X-Request-ID') || '';
         const requestId = typeof errorBody.request_id === 'string' ? errorBody.request_id : headerId;
-        throw new LiveError(message, code, response.status, requestId, errorBody.retryable === true);
+        throw new LiveError(message, code, response.status, requestId, errorBody.retryable === true, response.headers?.get('Retry-After') || undefined);
       }
       if (response.status === 204) return undefined as T;
       const responseBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});

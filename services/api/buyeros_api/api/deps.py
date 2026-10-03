@@ -26,6 +26,7 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
     "changeListMemberships": frozenset({"operator", "reviewer", "workspace_admin"}),
     "assignBuyerOwners": frozenset({"operator", "workspace_admin"}),
     "getAsyncJob": _VIEWERS,
+    "getAsyncJobSummary": _VIEWERS,
     "listAsyncJobs": _VIEWERS,
     "listFilterPresets": _VIEWERS,
     "saveFilterPreset": _VIEWERS,
