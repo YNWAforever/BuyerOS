@@ -1,5 +1,6 @@
 'use client';
 import {useEffect,useMemo,useRef,useState} from 'react';
+import {liveZh} from './locale';
 import type {components} from '@/services/generated/buyeros-api';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
 import {assignmentRecovery,freezeBulkAssignment,type FrozenBulkAssignment} from '@/services/live/bulk-confirmation';
@@ -31,7 +32,7 @@ const zhCopy:Record<string,string>={
   'Retrying...':'正在重試…','Cancel pending rows':'取消未處理列','Cancelling...':'正在取消…','queued':'排隊中','running':'處理中',
   'completed':'已完成','failed':'失敗','cancel_requested':'要求取消','cancelled':'已取消',
 };
-function copy(value:string,locale:Locale){return locale==='zh-HK'?(zhCopy[value]??value):value;}
+function copy(value:string,locale:Locale){return locale==='zh-HK'?(zhCopy[value]??liveZh[value]??value):value;}
 export function isAsyncJob(value:BulkOutcome):value is AsyncJob{return 'kind' in value;}
 
 export function LiveBulkActions({selection,count,canAssign,ownMembershipId,onJob,onCommitted,locale='en'}:{
@@ -87,17 +88,24 @@ export function LiveBulkActions({selection,count,canAssign,ownMembershipId,onJob
    if(ctx.isCurrent()&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));
   }finally{writeBusy.current=false;if(ctx.isCurrent())setBusy(false);}
  }
+ const resultView=(message||failures.length>0)&&<section aria-label={copy('Owner assignment results',locale)}>
+  <h3>{copy('Owner assignment results',locale)}</h3>
+  {message&&<p role="status" aria-atomic="true">{message}</p>}
+  {failures.length>0&&<details><summary>{copy('Technical details',locale)}</summary><ul>{failures.map(row=><li key={row.id}><code>{row.id}</code>: {row.reason_code??row.status}{row.version?` (${row.version})`:''}</li>)}</ul></details>}
+ </section>;
  if(!canAssign)return null;
+ if(count===0&&!pending)return resultView?<div className="panel bulk-action-panel">{resultView}</div>:null;
  const preview=pending??frozen,selectedOwner=pending?pending.body.owner_membership_id:owner;
- const shownOwner=pending?pending.body.owner_membership_id===ownMembershipId?copy('Me',locale):pending.body.owner_membership_id??copy('No owner',locale):owner===ownMembershipId&&owner?copy('Me',locale):owner===null?copy('No owner',locale):ownerLabel;
+ const shownOwner=selectedOwner===null?copy('No owner',locale):selectedOwner===ownMembershipId?copy('Me',locale):
+  page?.items.find(row=>row.membership_id===selectedOwner)?.display_name??(!pending||selectedOwner===owner?ownerLabel:copy('Selected colleague (name unavailable)',locale));
  return <section className="panel bulk-action-panel" aria-label={copy('Assign buyer owners',locale)}>
   <h3>{copy('Assign buyer owners',locale)}</h3>
   <p>{locale==='zh-HK'?`預覽：已選 ${preview?.count??count} 位買家；提交前會重新檢查每列的版本和負責人資格。`:`Preview: ${preview?.count??count} selected buyer${(preview?.count??count)===1?'':'s'}; each current version and owner membership is checked again before commit.`}</p>
-  <p style={{overflowWrap:'anywhere'}}>{copy('Scope',locale)}: {scope.workspace} / {scope.project}</p>
-  <p style={{overflowWrap:'anywhere'}}>{copy('Owner',locale)}: {shownOwner} {preview?.body.owner_membership_id??''}</p>
+  <details><summary>{copy('Technical details',locale)}</summary><p style={{overflowWrap:'anywhere'}}>{copy('Scope',locale)}: {scope.workspace} / {scope.project}</p><p>{preview?.body.owner_membership_id??''}</p></details>
+  <p style={{overflowWrap:'anywhere'}}>{copy('Owner',locale)}: {shownOwner}</p>
   <label className="bulk-action-field">{copy('Owner',locale)} <select style={{display:'block',width:'100%',maxWidth:'100%'}} aria-label={copy('Owner',locale)} disabled={locked} value={selectedOwner??''} onChange={e=>{setOwner(e.target.value||null);setOwnerLabel(e.target.selectedOptions[0].text);}}>
    <option value="">{copy('No owner',locale)}</option>{ownMembershipId&&<option value={ownMembershipId}>{copy('Me',locale)}</option>}
-   {selectedOwner&&selectedOwner!==ownMembershipId&&!page?.items.some(row=>row.membership_id===selectedOwner)&&<option value={selectedOwner}>{pending?selectedOwner:ownerLabel}</option>}
+   {selectedOwner&&selectedOwner!==ownMembershipId&&!page?.items.some(row=>row.membership_id===selectedOwner)&&<option value={selectedOwner}>{shownOwner}</option>}
    {page?.items.filter(row=>row.membership_id!==ownMembershipId).map(row=><option key={row.membership_id} value={row.membership_id}>{row.display_name} · {row.user_id}</option>)}
   </select></label>
   <form className="bulk-action-row" onSubmit={e=>{e.preventDefault();setQ(search.trim());setOffset(0);setRefresh(v=>v+1);}}>
@@ -114,8 +122,7 @@ export function LiveBulkActions({selection,count,canAssign,ownMembershipId,onJob
   {pending&&!busy?<><p role="alert">{copy('The assignment result is unknown. Retry the same frozen assignment to reconcile; changes are locked until its result is known.',locale)}</p>
    <button onClick={()=>void assign(pending)}>{copy('Retry same assignment',locale)}</button></>
    :<AssignmentConfirmation key={`${snapshot.identity}:${frozen?.fingerprint??''}:${message}`} preview={frozen} enabled={count>0&&reason.trim().length>=3&&!locked} busy={busy} locale={locale} onAssign={assign}/>}
-  {failures.length>0&&<ul>{failures.map(row=><li key={row.id}><code>{row.id}</code>: {row.reason_code??row.status}{row.version?` (${row.version})`:''}</li>)}</ul>}
-  {message&&<p role="status">{message}</p>}{error&&<p role="alert">{error}</p>}
+  {resultView}{error&&<p role="alert">{error}</p>}
  </section>;
 }
 function AssignmentConfirmation({preview,enabled,busy,locale,onAssign}:{preview:FrozenBulkAssignment|null;enabled:boolean;busy:boolean;locale:Locale;onAssign:(preview:FrozenBulkAssignment)=>Promise<void>}){

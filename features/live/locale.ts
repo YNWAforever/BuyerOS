@@ -1,5 +1,12 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'Owner assignment results':'負責人分派結果','Selected colleague (name unavailable)':'已選同事（未提供姓名）',
+  'Staff-selected buyer':'職員已選買家',
+  'The offer changed. This profile cannot be approved.':'產品資料已更改，不能批准此輪廓。','Offer revision':'產品資料版本','Reload profile':'重新載入輪廓',
+  'Selected buyer actions':'已選買家操作','Selected actions':'已選操作','{count} selected':'已選 {count} 項',
+  'Profile history changed. Refresh the offer before saving.':'輪廓歷史已更新。請重新載入產品資料後再儲存。',
+  'Job details':'工作詳情','Technical details':'技術資料','Staff member (name unavailable)':'職員（未提供姓名）',
+
   'The membership result is unknown. Reload members to check the current version before making another change.':'成員更新結果尚未確定。請重新載入成員並核對目前版本，再作其他更改。',
   'Search members':'搜尋成員','Search':'搜尋','Member':'成員','Member pages':'成員分頁',
   'Loading members…':'正在載入成員…','Previous members':'上一頁成員','Next members':'下一頁成員',

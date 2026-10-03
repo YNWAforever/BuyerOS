@@ -38,7 +38,7 @@ test('B02 reason, target and exclusions clear confirmation; unchanged selection 
  await reason.fill('Different reason');await expect(confirm).not.toBeChecked();await confirm.check();await panel.getByRole('combobox',{name:'Owner',exact:true}).selectOption('');await expect(confirm).not.toBeChecked();
  await confirm.check();await buyers.getByRole('button',{name:'Select all filtered'}).click();await expect(confirm).not.toBeChecked();await confirm.check();
  await buyers.getByRole('checkbox',{name:'Select Buyer Fixture 13',exact:true}).uncheck();await expect(confirm).not.toBeChecked();
- await confirm.check();await buyers.getByRole('button',{name:'Refresh results'}).click();await expect(confirm).not.toBeChecked();
+ await confirm.check();await buyers.getByRole('button',{name:'Refresh results'}).click();await expect(confirm).toHaveCount(0);await expect(panel).toHaveCount(0);await expect(buyers).toContainText('0 selected explicitly');
 });
 
 test('B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works',async({page})=>{
@@ -60,6 +60,8 @@ test('B03 searchable colleagues assign ten buyers through a real durable API; cl
 });
 
 test('B04 inactive owner is rejected and a stale buyer reports conflict without overwriting',async({page})=>{
+ // Seven guarded Python/DB subprocesses exceeded the default whole-case budget before commit on this host. Individual UI assertions and subprocess bounds stay unchanged.
+ test.setTimeout(180_000);
  const seeded=await fixture('targets');const buyers=await open(page);await select(buyers,2);const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});
  await panel.getByRole('combobox',{name:'Owner',exact:true}).selectOption(seeded.colleagues[0].membership_id);await panel.getByRole('textbox',{name:'Assignment reason'}).fill('Fixture revalidation');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
  await fixture('deactivate',seeded.colleagues[0].membership_id);
@@ -68,7 +70,7 @@ test('B04 inactive owner is rejected and a stale buyer reports conflict without 
  await panel.getByRole('combobox',{name:'Owner',exact:true}).selectOption(seeded.colleagues[1].membership_id);await expect(panel.getByRole('checkbox',{name:'Confirm owner assignment'})).not.toBeChecked();
  await fixture('stale','e2000000-0000-4000-8000-000000000001');await panel.getByRole('checkbox',{name:'Confirm owner assignment'}).check();
  const posted=page.waitForResponse(r=>r.url().endsWith('/buyer-owner-assignments')&&r.request().method()==='POST');await panel.getByRole('button',{name:'Assign selected buyers'}).click();const result=(await (await posted).json()).data;
- expect([result.updated,result.conflicts,result.blocked]).toEqual([1,1,0]);await expect(panel.locator('code')).toHaveText('e2000000-0000-4000-8000-000000000001');const state=await fixture('inspect');expect(state.buyers[0].owner).toBeNull();expect(state.buyers[0].version).toBe(2);expect(state.buyers[1].owner).toBe(seeded.colleagues[1].user_id);
+ expect([result.updated,result.conflicts,result.blocked]).toEqual([1,1,0]);const results=buyers.getByRole('region',{name:'Owner assignment results',exact:true});await expect(results).toContainText('1 updated; 0 unchanged; 0 blocked; 1 conflicts.');await expect(panel).toHaveCount(0);await expect(buyers).toContainText('0 selected explicitly');await results.getByText('Technical details',{exact:true}).click();await expect(results.locator('code')).toHaveText('e2000000-0000-4000-8000-000000000001');const state=await fixture('inspect');expect(state.buyers[0].owner).toBeNull();expect(state.buyers[0].version).toBe(2);expect(state.buyers[1].owner).toBe(seeded.colleagues[1].user_id);
  writeFileSync('test-results/q05-owner-revalidation.json',JSON.stringify({fixture_only:true,result,state},null,2));
 });
 
@@ -90,7 +92,7 @@ test('B16 late committed B job cannot overwrite A; returning to B reconciles its
  let release:()=>void=()=>{},received:()=>void=()=>{};const held=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);let job='';const keys:string[]=[];
  await page.route(assignments,async route=>{keys.push(route.request().headers()['idempotency-key']);const response=await route.fetch();expect(response.status()).toBe(202);job=(await response.json()).data.id;if(keys.length===1){received();await held;}await route.fulfill({response}).catch(()=>{});});
  await panel.getByRole('button',{name:'Assign selected buyers'}).click();await started;await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);release();await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(project);
- await expect(buyers.getByRole('checkbox',{name:'Select Buyer Fixture 01',exact:true})).toBeVisible();await expect(panel.getByRole('checkbox',{name:'Confirm owner assignment'})).not.toBeChecked();expect(new URL(page.url()).searchParams.get('bulk_job')).toBeNull();
+ await expect(buyers.getByRole('checkbox',{name:'Select Buyer Fixture 01',exact:true})).toBeVisible();await expect(panel.getByRole('checkbox',{name:'Confirm owner assignment'})).toHaveCount(0);await expect(panel).toHaveCount(0);await expect(buyers).toContainText('0 selected explicitly');expect(new URL(page.url()).searchParams.get('bulk_job')).toBeNull();
  await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(seeded.other);await expect(panel.getByRole('button',{name:'Retry same assignment'})).toBeVisible();await panel.getByRole('button',{name:'Retry same assignment'}).click();
  await expect.poll(()=>new URL(page.url()).searchParams.get('bulk_job')).toBe(job);expect(keys).toHaveLength(2);expect(keys[1]).toBe(keys[0]);
  const read=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${seeded.other}/jobs/${job}`,{headers:{Authorization:'Bearer fixture-access'}});expect(read.status()).toBe(200);expect((await read.json()).data.requested).toBe(101);
@@ -99,7 +101,7 @@ test('B16 late committed B job cannot overwrite A; returning to B reconciles its
 });
 
 test('B03 zh-HK mobile colleague search recovers a failed read',async({page})=>{
- await open(page);await page.setViewportSize({width:390,height:844});await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');const panel=page.getByRole('region',{name:'批量分派買家負責人',exact:true});
+ const buyers=await open(page);await select(buyers,1);await page.setViewportSize({width:390,height:844});await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');const panel=page.getByRole('region',{name:'批量分派買家負責人',exact:true});
  let failed=false;await page.route('**/eligible-assignees?**',async route=>{if(!failed){failed=true;await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({code:'TEMPORARILY_UNAVAILABLE',message:'Fixture outage',request_id:'fixture-q05'})});}else await route.continue();});
  await panel.getByRole('textbox',{name:'搜尋同事'}).fill('Q05 colleague');await panel.getByRole('button',{name:'搜尋',exact:true}).click();await expect(panel.getByRole('button',{name:'重新載入同事'})).toBeVisible();await panel.getByRole('button',{name:'重新載入同事'}).click();await expect(panel.getByRole('combobox',{name:'負責人',exact:true}).locator('option')).toHaveCount(12);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:'test-results/q05-bulk-zh-mobile.png',fullPage:true});

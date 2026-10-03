@@ -32,11 +32,36 @@ test('U06 all 250 real members are readable in 13 pages and member 101 is search
  await expect(region.getByText('0–0 / 0',{exact:true})).toBeVisible();await expect(region.locator('code')).toHaveCount(0);
 });
 
+test('U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable',async({page})=>{
+ await fixture();const region=await open(page);
+ await region.getByRole('textbox',{name:'Search members'}).fill('Alex');await region.getByRole('button',{name:'Search',exact:true}).click();
+ await expect(region.locator('code')).toHaveText(['71000001-0000-4000-8000-000000c011de','71000002-0000-4000-8000-000000c011de']);
+ await expect(region.getByRole('group',{name:'Member Alex Chen',exact:true})).toHaveCount(2);
+ await expect(region.getByRole('group',{name:'Roles Alex Chen',exact:true})).toHaveCount(2);
+});
+
+test('B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority',async({page})=>{
+ await fixture();await open(page);await page.getByRole('button',{name:'Buyers',exact:true}).click();
+ const buyers=page.getByRole('region',{name:'Buyer results',exact:true});await buyers.getByRole('checkbox',{name:/^Select /}).first().check();
+ const panel=buyers.getByRole('region',{name:'Assign buyer owners',exact:true});await panel.getByRole('textbox',{name:'Search colleagues'}).fill('Alex');await panel.getByRole('button',{name:'Search',exact:true}).click();
+ const picker=panel.getByRole('combobox',{name:'Owner',exact:true});
+ const identities=['71000001-0000-4000-8000-000000c011de','71000002-0000-4000-8000-000000c011de'];
+ for(let i=0;i<identities.length;i++){
+  const option=picker.getByRole('option',{name:`Alex Chen · ${identities[i]}`,exact:true});await expect(option).toHaveCount(1);
+  await expect(option).toHaveAttribute('value',`f1000000-0000-4000-8000-${i.toString(16).padStart(12,'0')}`);
+ }
+ await picker.selectOption('f1000000-0000-4000-8000-000000000001');await expect(panel.getByText('Owner: Alex Chen',{exact:true})).toBeVisible();
+ const read=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/memberships?q=Alex`,{headers:{Authorization:'Bearer fixture-admin'}});
+ expect(read.status()).toBe(200);const members=(await read.json()).data.items;
+ expect(members.map((m:{user_id:string;version:number;roles:string[]})=>({id:m.user_id,version:m.version,roles:m.roles}))).toEqual(identities.map(id=>({id,version:1,roles:['viewer']})));
+ writeFileSync('test-results/q09-owner-disambiguation.json',JSON.stringify({fixture_only:true,identities,members,no_assignment_submitted:true},null,2));
+});
+
 test('U07 duplicate names and suffixes remain distinct during a versioned role change',async({page})=>{
  await fixture();const region=await open(page);
  await region.getByRole('textbox',{name:'Search members'}).fill('Alex');await region.getByRole('button',{name:'Search',exact:true}).click();
  await expect(region.locator('code')).toHaveText(['71000001-0000-4000-8000-000000c011de','71000002-0000-4000-8000-000000c011de']);
- const first=region.getByRole('group',{name:'Member 71000001-0000-4000-8000-000000c011de',exact:true});
+ const first=region.getByRole('group',{name:'Member Alex Chen',exact:true}).filter({has:page.locator('code').filter({hasText:'71000001-0000-4000-8000-000000c011de'})});
  await first.getByRole('checkbox',{name:'operator',exact:true}).check();await region.getByRole('textbox',{name:'Change reason'}).fill('Fixture duty rotation');
  const changed=page.waitForResponse(r=>r.request().method()==='PATCH'&&r.url().includes('/memberships/'));
  await first.getByRole('button',{name:'Save member',exact:true}).click();const response=await changed;expect(response.status()).toBe(200);
@@ -48,7 +73,7 @@ test('U07 duplicate names and suffixes remain distinct during a versioned role c
 
 test('U08 sole admin refusal is understandable and does not claim success',async({page})=>{
  await fixture();const region=await open(page);
- const own=region.getByRole('group',{name:'Member e0000000-0000-4000-8000-000000000008',exact:true});
+ const own=region.getByRole('group').filter({has:page.locator('code').filter({hasText:'e0000000-0000-4000-8000-000000000008'})});
  await own.getByRole('checkbox',{name:'viewer',exact:true}).check();await own.getByRole('checkbox',{name:'workspace_admin',exact:true}).uncheck();
  await region.getByRole('textbox',{name:'Change reason'}).fill('Fixture guard check');await own.getByRole('button',{name:'Save member'}).click();
  await expect(page.getByRole('alert').filter({hasText:'The last active administrator must remain.'})).toBeVisible();
@@ -87,7 +112,7 @@ test('U06 zh-HK mobile search and failed page read recover without synthetic row
 test('U07 lost committed role response requires a read before any further role write',async({page})=>{
  await fixture();const region=await open(page);
  await region.getByRole('textbox',{name:'Search members'}).fill('Alex');await region.getByRole('button',{name:'Search',exact:true}).click();
- const first=region.getByRole('group',{name:'Member 71000001-0000-4000-8000-000000c011de',exact:true});
+ const first=region.getByRole('group',{name:'Member Alex Chen',exact:true}).filter({has:page.locator('code').filter({hasText:'71000001-0000-4000-8000-000000c011de'})});
  await first.getByRole('checkbox',{name:'operator',exact:true}).check();await region.getByRole('textbox',{name:'Change reason'}).fill('Fixture lost response');
  const keys:string[]=[];await page.route('**/v1/workspaces/*/memberships/*',async route=>{
   if(route.request().method()!=='PATCH'){await route.continue();return;}
