@@ -1113,6 +1113,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/drafts/{draft_id}/grounding-reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Attest every segment of an exact edited message against current sources
+         * @description Human source qualification; does not verify semantic truth. Appends an immutable successor without changing subject/body. Current recipient, profile, sender, fit, evidence and policy are rechecked in the locked transaction. No delivery.
+         */
+        post: operations["reviewDraftGrounding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals": {
         parameters: {
             query?: never;
@@ -2414,6 +2434,7 @@ export interface components {
             /** Format: uuid */
             parent_draft_id?: string;
             claims: components["schemas"]["GroundedClaim"][];
+            grounding_review?: components["schemas"]["ManualGroundingReview"];
             approval_review?: components["schemas"]["DraftApprovalReview"];
             approval_id: string | null;
             /** @constant */
@@ -2425,7 +2446,7 @@ export interface components {
             evidence_ids: string[];
             offer_fact_ids: string[];
             /** @enum {string} */
-            kind: "observation" | "offer_fact" | "labelled_inference";
+            kind: "observation" | "offer_fact" | "labelled_inference" | "non_factual";
         };
         DraftApprovalReview: {
             recipient: {
@@ -2458,6 +2479,47 @@ export interface components {
             /** Format: uuid */
             icp_version_id: string;
             context_hash: string;
+        };
+        GroundingOfferFactRef: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            icp_version_id: string;
+            icp_content_hash: string;
+        };
+        GroundingSegment: {
+            /** @enum {string} */
+            field: "subject" | "body";
+            /** @description Unicode code-point offset; not UTF-16 code units */
+            start: number;
+            /** @description Exclusive Unicode code-point offset */
+            end: number;
+            exact_text: string;
+            /** @enum {string} */
+            classification: "factual" | "non_factual";
+            evidence_refs: components["schemas"]["VersionedId"][];
+            offer_fact_refs: components["schemas"]["GroundingOfferFactRef"][];
+            reason: string;
+        };
+        DraftGroundingReviewRequest: {
+            /** Format: uuid */
+            revision_id: string;
+            content_hash: string;
+            segments: components["schemas"]["GroundingSegment"][];
+            reason: string;
+            /** @constant */
+            confirmation: true;
+        };
+        ManualGroundingReview: {
+            /** Format: uuid */
+            based_on_revision_id: string;
+            based_on_content_hash: string;
+            /** Format: uuid */
+            reviewed_by: string;
+            /** Format: date-time */
+            reviewed_at: string;
+            reason: string;
+            segments: components["schemas"]["GroundingSegment"][];
         };
         DraftReviewRequest: {
             /** Format: uuid */
@@ -6029,6 +6091,50 @@ export interface operations {
                     /** @description Server correlation ID */
                     "X-Request-ID"?: string;
                     /** @description Version ETag when response is one versioned entity */
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    reviewDraftGrounding: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Strong version ETag, e.g. "4". Compare in mutation transaction; stale is 412 STALE_REVISION, missing is 400. */
+                "If-Match": components["parameters"]["IfMatch"];
+            };
+            path: {
+                workspace_id: string;
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftGroundingReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Exact text retained in one grounded successor; replay rechecks current eligibility. */
+            200: {
+                headers: {
+                    /** @description Current draft state version */
                     ETag?: string;
                     [name: string]: unknown;
                 };

@@ -70,6 +70,7 @@ export const operationRoutes = {
   "getDraft": {method: "GET", path: "/v1/workspaces/{workspace_id}/drafts/{draft_id}"},
   "editDraft": {method: "PATCH", path: "/v1/workspaces/{workspace_id}/drafts/{draft_id}"},
   "requestDraftReview": {method: "POST", path: "/v1/workspaces/{workspace_id}/drafts/{draft_id}/review"},
+  "reviewDraftGrounding": {method: "POST", path: "/v1/workspaces/{workspace_id}/drafts/{draft_id}/grounding-reviews"},
   "approveDraft": {method: "POST", path: "/v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals"},
   "exportBulkFailures": {method: "POST", path: "/v1/workspaces/{workspace_id}/jobs/{job_id}/exports"},
   "exportBuyers": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/exports"},

@@ -118,7 +118,8 @@ def _check_preconditions(draft, revision, *, expected_version, binding):
         raise ApiError(412, "STALE_REVISION", "draft content changed")
 
 
-async def current_approval_context(session, *, workspace_id, project, draft, revision):
+async def current_approval_context(session, *, workspace_id, project, draft, revision,
+                                   pending_grounding_review=False):
     """Resolve all material inputs from current tenant data inside the locked transaction."""
     now = datetime.now(timezone.utc)
     content = revision.content
@@ -212,6 +213,14 @@ async def current_approval_context(session, *, workspace_id, project, draft, rev
         raise ApiError(412, "EVIDENCE_STALE", "unique current supporting evidence required")
     evidence_context.sort(key=lambda row: row["id"])
     claims = content.get("claims", [])
+    proof = content.get("grounding_review")
+    if proof:
+        source_binding = {"evidence": evidence_context, "icp_id": str(icp.id), "icp_hash": icp.content_hash}
+        if not pending_grounding_review and content.get("grounding_source_context") != source_binding:
+            raise ApiError(412, "EVIDENCE_STALE", "manual review source contents changed")
+        from .draft_grounding import validate_manual_segments
+        if claims != validate_manual_segments(content, proof["segments"], icp_id=icp.id, icp_hash=icp.content_hash):
+            raise ApiError(412, "STALE_REVISION", "manual source review changed")
     for claim in claims:
         if not isinstance(claim, dict) or not claim.get("text"):
             raise ApiError(412, "STALE_REVISION", "invalid grounded claim")
@@ -219,6 +228,8 @@ async def current_approval_context(session, *, workspace_id, project, draft, rev
             raise ApiError(412, "EVIDENCE_STALE", "claim cites unselected evidence")
         if not set(map(str, claim.get("offer_fact_ids", []))) <= set(selected_facts):
             raise ApiError(412, "STALE_REVISION", "claim cites unapproved offer fact")
+        if proof and claim.get("kind") == "non_factual":
+            continue
         if not claim.get("evidence_ids") and not claim.get("offer_fact_ids"):
             raise ApiError(412, "STALE_REVISION", "uncited claim")
     subject = {"workspace_id": workspace_id, "project_id": project.id,

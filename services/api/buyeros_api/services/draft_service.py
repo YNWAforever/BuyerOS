@@ -253,6 +253,8 @@ def draft_data(draft, revision, approval=None, *, include_review_context=False,
         "delivery_enabled": False,
         "value_proposition_fact_ids": content["value_proposition_fact_ids"],
     }
+    if content.get("grounding_review"):
+        data["grounding_review"] = content["grounding_review"]
     if include_review_context and context_current and draft.review_context and draft.review_revision_id == revision.id:
         context = draft.review_context
         data["approval_review"] = {
@@ -347,6 +349,8 @@ async def edit_draft(session, *, workspace_id, draft, expected_version: int, cha
     for key, value in changes.items():
         content[key] = value
     # Human edits are retained but lose machine grounding until separately reviewed.
+    content.pop("grounding_review", None)
+    content.pop("grounding_source_context", None)
     content["claims"] = []
     content["grounding_status"] = "needs_review"
     context = {key: content.get(key) for key in (
