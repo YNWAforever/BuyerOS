@@ -1,0 +1,55 @@
+{
+  "base_sha": "092e8f555d7e98f0f2603ff86a7afecf8c65492e",
+  "source_sha": "1aab3ddc0519bb6da8d1483efaf173eb5a87037e",
+  "deployed_sha": null,
+  "files": [
+    {
+      "path": "features/live/overview.tsx",
+      "sha256": "9523d25188c64731ce97fdf650f3155a68745ac2c170050550d1bb89adf4909b",
+      "normalized_sha256": "122892d04dbb5a6670f25e9e54ba84b6caca030897267a77ee1d614d9f6ade5d",
+      "committed_sha256": "122892d04dbb5a6670f25e9e54ba84b6caca030897267a77ee1d614d9f6ade5d"
+    },
+    {
+      "path": "features/live/operations.tsx",
+      "sha256": "f84d2027b72fb24cdfb688246c48e6a74eee41a0490c404028c4a888314cc8b7",
+      "normalized_sha256": "44ce0b97992faf18b1c12013be8dee2c8a9b3b95de634224f9ac4bf3f59c8cea",
+      "committed_sha256": "44ce0b97992faf18b1c12013be8dee2c8a9b3b95de634224f9ac4bf3f59c8cea"
+    },
+    {
+      "path": "features/live/locale.ts",
+      "sha256": "89cf87ec0473e1169784da0de2aa09a6688416170bb879b470b1e8f6b8377027",
+      "normalized_sha256": "60b89d8e67963acf5493ce34773ad127534979756e4a1af4a49ca7185858d894",
+      "committed_sha256": "60b89d8e67963acf5493ce34773ad127534979756e4a1af4a49ca7185858d894"
+    },
+    {
+      "path": "services/live/job-query.ts",
+      "sha256": "5b25224bc72aab270fb5f7b21b8b6e1caf7a323fc52acf099ca249cee6995f31",
+      "normalized_sha256": "2fd5ddc1273b4be07764ead8369fd43d55143835470f6d04eeb0a13cc34765ca",
+      "committed_sha256": "2fd5ddc1273b4be07764ead8369fd43d55143835470f6d04eeb0a13cc34765ca"
+    },
+    {
+      "path": "services/api/tests/test_job_scope_db.py",
+      "sha256": "932fbbb7e7255af0b2ca45e9ff40946cade8f108428cc8fd8581d4577ff7e49b",
+      "normalized_sha256": "b0a4f512898c58d10f3950a4cc3742f947e6602f95d07736f70f5b4420f95fd5",
+      "committed_sha256": "b0a4f512898c58d10f3950a4cc3742f947e6602f95d07736f70f5b4420f95fd5"
+    },
+    {
+      "path": "services/worker/tests/fixtures/audit_job_scopes.py",
+      "sha256": "cb963146b4f42e0e4039b5d023ef0cdeda23ae5a7c088c9ec9e65fc11b6d8de8",
+      "normalized_sha256": "4f5b306e56ce80749c197d3b87730082d9d2c4785e7de92eee620906c5af97f0",
+      "committed_sha256": "4f5b306e56ce80749c197d3b87730082d9d2c4785e7de92eee620906c5af97f0"
+    },
+    {
+      "path": "tests/audit-job-query.test.mjs",
+      "sha256": "5f5a827f68284e5e4684d92a875dc098c1f00a7b182f0c18fd564f6b27a230de",
+      "normalized_sha256": "c49c48d7395cd7eb90752e0f255c3eff83ab3c0d37ead2ab0e4b37b6eea5c8a4",
+      "committed_sha256": "c49c48d7395cd7eb90752e0f255c3eff83ab3c0d37ead2ab0e4b37b6eea5c8a4"
+    },
+    {
+      "path": "tests/e2e/audit-job-scope.spec.ts",
+      "sha256": "c632faf4269417bdd2aba21d17c0c41ffd355ee9378e4b8c55a23e1488cfe193",
+      "normalized_sha256": "778a9a3ff62b0568ac916d926ffbca4837f60432ef10d88e75dc187375e03272",
+      "committed_sha256": "778a9a3ff62b0568ac916d926ffbca4837f60432ef10d88e75dc187375e03272"
+    }
+  ]
+}

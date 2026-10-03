@@ -638,3 +638,18 @@ services/worker/tests/fixtures/audit_manifests.py
 tests/audit-bulk-manifests.test.mjs
 tests/e2e/audit-bulk-manifest.spec.ts
 ```
+
+## Q14 local review inventory
+
+Source`1aab3ddc0519bb6da8d1483efaf173eb5a87037e`;8files,0migration/API/authchanges; exactdiff ../evidence/audit-fixes-20261003/Q14/Q14.patch.
+
+```text
+features/live/overview.tsx
+features/live/operations.tsx
+features/live/locale.ts
+services/live/job-query.ts
+services/api/tests/test_job_scope_db.py
+services/worker/tests/fixtures/audit_job_scopes.py
+tests/audit-job-query.test.mjs
+tests/e2e/audit-job-scope.spec.ts
+```

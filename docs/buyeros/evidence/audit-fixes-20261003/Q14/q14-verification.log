@@ -1,0 +1,5 @@
+node: exit0
+generated: exit0
+type: exit0
+lint: exit0
+Q14 gate PASS:8 source hashes match; fresh Node16/generated/type/lint; actual strict API18/UI10 readback, zero fail/error/skip. Readback is not a new DB/UI run.

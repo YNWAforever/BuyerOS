@@ -1,0 +1,14 @@
+{
+  "api_cwd": "services/api",
+  "environment": "BUYEROS_STRICT_INTEGRATION=1; remove BUYEROS_TEST_DATABASE_URL/BUYEROS_DATABASE_URL/BUYEROS_DATABASE_MIGRATION_URL before owned fixture tests",
+  "api": "uv run --frozen pytest tests/test_job_scope_db.py tests/test_admin_operations_db.py tests/test_api_routes_contract.py tests/test_contract_required_fields.py -q --junitxml=../../test-results/q14-api-final.xml",
+  "UI_RED": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts tests/e2e/audit-job-scope.spec.ts --grep \"project A0 B5\"",
+  "UI_first": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts tests/e2e/audit-job-scope.spec.ts",
+  "UI_final": "node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts tests/e2e/audit-job-scope.spec.ts tests/e2e/audit-operations.spec.ts --grep \"U15|B10 B11|B11 zero|B11 late result\"",
+  "Node": "node --test tests/audit-job-query.test.mjs tests/live-adapter-checks.mjs tests/live-auth-checks.mjs tests/job-poller-checks.mjs",
+  "generated": "node scripts/generate-api-types.mjs --check",
+  "routes": "uv run --frozen python ../../scripts/generate-operation-routes.py --check (API cwd)",
+  "gate": "node test-results/q14-verification.mjs",
+  "task_done": "task-done .superpowers/sdd/q14-job-scope/q14-job-scope.md 1 092e8f555d7e98f0f2603ff86a7afecf8c65492e -- node test-results/q14-verification.mjs",
+  "rollback": "git apply --reverse --check docs/buyeros/evidence/audit-fixes-20261003/Q14/Q14.patch"
+}

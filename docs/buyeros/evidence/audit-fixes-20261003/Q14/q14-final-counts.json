@@ -1,0 +1,158 @@
+{
+  "api": {
+    "pass": 18,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "cases": [
+      {
+        "class": "tests.test_job_scope_db",
+        "name": "test_job_scope_project_zero_five_workspace_keeps_current_actor",
+        "seconds": "31.569"
+      },
+      {
+        "class": "tests.test_job_scope_db",
+        "name": "test_job_scope_all_real_schema_rows_paged_without_other_actor[21]",
+        "seconds": "15.836"
+      },
+      {
+        "class": "tests.test_job_scope_db",
+        "name": "test_job_scope_all_real_schema_rows_paged_without_other_actor[101]",
+        "seconds": "3.845"
+      },
+      {
+        "class": "tests.test_admin_operations_db",
+        "name": "test_0017_preferences_rls_and_empty_rollback",
+        "seconds": "13.356"
+      },
+      {
+        "class": "tests.test_admin_operations_db",
+        "name": "test_admin_only_memberships_and_last_admin_guard",
+        "seconds": "7.964"
+      },
+      {
+        "class": "tests.test_admin_operations_db",
+        "name": "test_versioned_role_change_revokes_existing_session_immediately",
+        "seconds": "14.947"
+      },
+      {
+        "class": "tests.test_admin_operations_db",
+        "name": "test_preferences_zh_hk_persist_and_are_actor_workspace_scoped",
+        "seconds": "6.125"
+      },
+      {
+        "class": "tests.test_admin_operations_db",
+        "name": "test_audit_archive_reason_is_redacted_and_tenant_scoped",
+        "seconds": "4.672"
+      },
+      {
+        "class": "tests.test_admin_operations_db",
+        "name": "test_capability_page_is_contract_valid_and_never_secret_bearing",
+        "seconds": "0.821"
+      },
+      {
+        "class": "tests.test_admin_operations_db",
+        "name": "test_operations_list_jobs_is_actor_scoped_and_paged",
+        "seconds": "6.231"
+      },
+      {
+        "class": "tests.test_admin_operations_db",
+        "name": "test_existing_project_write_adds_one_redacted_audit_event_on_replay",
+        "seconds": "1.239"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_unauthenticated_requests_are_rejected",
+        "seconds": "0.118"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_implemented_routes_match_openapi_operation_ids",
+        "seconds": "1.255"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_the_app_actually_exposes_every_implemented_route",
+        "seconds": "0.663"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_implemented_response_fields_are_declared_by_the_contract",
+        "seconds": "6.730"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_approve_checks_auth_before_preconditions",
+        "seconds": "0.073"
+      },
+      {
+        "class": "tests.test_api_routes_contract",
+        "name": "test_approve_rejects_a_missing_or_malformed_if_match",
+        "seconds": "0.255"
+      },
+      {
+        "class": "tests.test_contract_required_fields",
+        "name": "test_contract_required_fields",
+        "seconds": "4.117"
+      }
+    ]
+  },
+  "ui": {
+    "pass": 10,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "cases": [
+      {
+        "class": "audit-job-scope.spec.ts",
+        "name": "U15 project A0 B5; card and failed list share scope; explicit workspace5",
+        "seconds": "43.057"
+      },
+      {
+        "class": "audit-job-scope.spec.ts",
+        "name": "U15 workspace view remains actor-bound, other actor detail denied; admin read sees all",
+        "seconds": "17.588"
+      },
+      {
+        "class": "audit-job-scope.spec.ts",
+        "name": "U15 actual 21 job list fully pages20; scope resets offset and old rows",
+        "seconds": "24.367"
+      },
+      {
+        "class": "audit-job-scope.spec.ts",
+        "name": "U15 actual 101 job list fully pages20; scope resets offset and old rows",
+        "seconds": "19.99"
+      },
+      {
+        "class": "audit-job-scope.spec.ts",
+        "name": "U15 held B list and count cannot overwrite newer A-B-A generation",
+        "seconds": "14.723"
+      },
+      {
+        "class": "audit-job-scope.spec.ts",
+        "name": "U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery",
+        "seconds": "25.776"
+      },
+      {
+        "class": "audit-operations.spec.ts",
+        "name": "B10 B11 all 21 real producer result IDs are readable in pages of 20",
+        "seconds": "19.318"
+      },
+      {
+        "class": "audit-operations.spec.ts",
+        "name": "B10 B11 all 101 real producer result IDs are readable in pages of 20",
+        "seconds": "16.293"
+      },
+      {
+        "class": "audit-operations.spec.ts",
+        "name": "B11 zero results and late job response cannot replace newer job",
+        "seconds": "15.066"
+      },
+      {
+        "class": "audit-operations.spec.ts",
+        "name": "B11 late result page is discarded after workspace A-B-A",
+        "seconds": "17.512"
+      }
+    ]
+  }
+}

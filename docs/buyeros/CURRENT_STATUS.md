@@ -2,7 +2,7 @@
 
 This file is the current first-round repair record. Earlier checkpoints are historical evidence.
 
-- Scope: Q11 baseline, Q01, Q03, Q04, Q15; local continuations Q02/Q05/Q06/Q07/Q12/Q08; Q16 read-only investigation.
+- Scope: Q11 baseline, Q01, Q03, Q04, Q15; local continuations Q02/Q05/Q06/Q07/Q12/Q08/Q14; Q16 read-only investigation.
 - Audit/initial main source: `a78859fe474f5722be3755b10e2586436b53bf97`; remote main checked at the initial repair baseline. Current reviewed repair source follows each task checkpoint below.
 - Isolated branch: `codex/audit-fixes-20261003`; original checkout and dirty Neon Auth worktree preserved.
 - Evidence ZIP SHA256: `19369591a175edad7dd2e9f3ddb5bfdebc6cdc5130a2770243b1e9de2a42d35a`; nested CRC and all 31 manifest hashes passed; outer manifest 8/8 passed.
@@ -34,7 +34,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 | F14 | partial draft journey verified; whole staff journey still open | Q12 U09 slice only; full eight-module release acceptance not asserted |
 | F15 | fixed with local render/UI evidence (Q01) | Q01 |
 | F16 | fixed with local source-review/HTTP/DB/UI evidence; live rollout unverified | Q12 D01/D03; source-bound immutable proof, exact approval/export |
-| F17 | still open (audit-source code unchanged) | outside selected first round |
+| F17 | fixed with local project count/list HTTP/DB/UI evidence | Q14 U15 A0/B5/ws5, actor/20page/race/URL/zh390 |
 | F18 | still open (audit-source code unchanged) | outside selected first round |
 | F19 | fixed with local dirty-buffer UI/persistence evidence (Q15) | Q15 |
 | F20 | still open (external evidence gate) | outside selected first round |
@@ -131,3 +131,13 @@ StrictAPI90, migration39, actualUI17(9Q08+8Q05),Node22 pass;0fail/error/skip, ge
 Sole0036head inspected before allocating0037_bulk_manifests; disposableemptyupgrade/downgrade/reupgrade andpopulatedrefusal pass, productionunapplied. Pause-admissionpatch applicability only, runtime/productionrollback notrehearsed; durablehistory/results/recovery retained. Original31inputs/98fields/92othercases/24othertasks/3guards/193unrelateddirtypaths preserved. Fixturescleaned; exactownerlabelleddependencycacheretainedforQ14. Authorreviewonly; independentpending.
 
 [Full evidence/commands/screenshots/rollback](evidence/audit-fixes-20261003/Q08/RESULTS.md), [local PR-18 description](review/2026-10-03-audit-fixes/Q08-pr.md). Codeimplemented,fixtureverified,localintegrationverified; deployedSHAnull. Auth0stays,delivery403, noexternalaction. Q16underlyingcauseblocked/Q17notguessed/Q13waitsN02. **Next eligible local task Q14** (Q03complete); fullstaff/auth/provider/build/continuousworker/production gates unverified.
+
+## Q14 / PR-17 current checkpoint — 2026-10-03
+
+Reviewed source `1aab3ddc0519bb6da8d1483efaf173eb5a87037e`, base `092e8f555d7e98f0f2603ff86a7afecf8c65492e`;8file local commit. F17/U15: same generated projectfilter for Overview count, Operationscount/list and deeplink, explicit workspace label and serveractorrestriction retained. Routerqueryread/explicitURLwrites, scope/status/page generation/abort resets, read503Retry, real20rowpages en/zh390.
+
+StrictAPI18 (3new+15related), actualUI10 (6Q14+4Q03),Node16 pass;0fail/error/skip, generated84=70original+14extensions/type/lint0. Actual A0/B5/workspace5, reviewer5/operator3/admin8/viewer0, all21/101pages, heldcount+list A-B-A, URL/refresh+reauth/mobile and readfailure pass. Meaningful RED1 and first2pass/4failUI retained; fixed incomingfilter overwrite/implicitworkspace persistence, no weakened tests.
+
+0schema/API/auth/role changes; head0037 retained. Reversepatch applicability0, runtime/browser/productionrevert notrehearsed; retain allhistory. Original31inputs/98fields/97othercases/24othertasks/3guards/193unrelatedpaths preserved. Fixturesnormalteardown; labelledcache retainedforQ09. Authorreviewonly, independentpending.
+
+[Full commands/reports/screenshots/rollback](evidence/audit-fixes-20261003/Q14/RESULTS.md), [local PR-17](review/2026-10-03-audit-fixes/Q14-pr.md). Codeimplemented,fixtureverified,localintegrationverified; deployedSHAnull/noexternalaction. Full8module/liveauth/provider/build/continuousworker/production/performance gates remainunverified. Q16/Q17blocked, Q13waitsN02. **Next eligible local task Q09**, five staff-task UX slices; actualhumanUAT remains separate.

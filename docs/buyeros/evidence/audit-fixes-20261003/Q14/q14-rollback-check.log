@@ -1,0 +1,1 @@
+git apply --reverse --check Q14.patch: exit0. No schema migration or API/authorization changes. Runtime/browser/production revert not rehearsed. Revert restores previous workspace-count bug; no durable data deletion or database restore.

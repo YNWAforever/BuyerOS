@@ -1,0 +1,6 @@
+# Q14 execution ledger
+
+Clean base092e8f555d7e98f0f2603ff86a7afecf8c65492e, origin YNWAforever/BuyerOS. User authorizes local fixes/tests/commits, no agents/external actions. Global Constraints/Review Focus/E03/U15/BO-025 and current generated project filter/API actor guard read. F17 remains open: Overview/Operations jobs reads omit project_id. No schema/API authority change planned. Q03 predecessor completed. Graph discovery then current source read.
+
+RED actualA0card5:1failure0skip. StrictAPI18pass/0fail/skip (3new);Node16pass including3query+74adapter+8auth internalchecks. FirstUI2pass/4fail: incomingURLoverwritten, implicitworkspacescopepersisted andraceawaitnevermatched. Fixedrouterqueryread/explicitURLwrites/pendingprojectguard; currentfixed8sourcehashrecord. SecondUIselected10 actual6Q14+4Q03 inprogress, notpassyet. Original syntaxTS/lintfailure retained; latertype/lint0. No schema/auth/API role change; noexternalaction.
+Task 1: complete (commits 092e8f5..1aab3dd, tests: node test-results/q14-verification.mjs → Q14 gate PASS:8 source hashes match; fresh Node16/generated/type/lint; actual strict API18/UI10 readback, zero fail/error/skip. Readback is not a new DB/UI run.)

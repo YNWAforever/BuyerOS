@@ -1,0 +1,11 @@
+{
+  "original_inputs": 31,
+  "original_case_fields_unchanged": 98,
+  "unchanged_other_repair_rows": 97,
+  "unchanged_other_task_records": 24,
+  "only_API_operation_status_updated": "listAsyncJobs",
+  "generated_operations": 84,
+  "original_operations": 70,
+  "extensions": 14,
+  "deployed": false
+}

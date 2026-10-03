@@ -10,9 +10,10 @@
     "Q06",
     "Q07",
     "Q12",
-    "Q08"
+    "Q08",
+    "Q14"
   ],
-  "next_eligible": "Q14",
+  "next_eligible": "Q09",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -355,7 +356,45 @@
     },
     {
       "id": "Q14",
-      "status": "outside-current-scope"
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-HTTP-DB-UI-pass",
+      "release_status": "not-deployed",
+      "base_sha": "092e8f555d7e98f0f2603ff86a7afecf8c65492e",
+      "source_sha": "1aab3ddc0519bb6da8d1483efaf173eb5a87037e",
+      "depends_on": [
+        "Q03"
+      ],
+      "cases": [
+        "U15"
+      ],
+      "finding_ids": [
+        "F17"
+      ],
+      "checks": {
+        "api": {
+          "pass": 18,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "ui": {
+          "pass": 10,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        }
+      },
+      "node_checks": {
+        "pass": 16,
+        "fail": 0,
+        "skip": 0
+      },
+      "migrations": "none; existing source head0037 unchanged",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q14/RESULTS.md",
+      "rollback": "revert8file source commit; reverse patch applicability exit0; no DB/role/actor change; browser/production rehearsal not run",
+      "limits": "fictional OIDC/jobs; local dev only; no production/auth/provider/full UAT",
+      "next_eligible": "Q09"
     },
     {
       "id": "Q15",

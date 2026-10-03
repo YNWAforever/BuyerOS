@@ -1,0 +1,52 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="295.26142100000004">
+<testsuite name="audit-job-scope.spec.ts" timestamp="2026-10-03T15:07:36.710Z" hostname="" tests="1" failures="1" skipped="0" time="57.461" errors="0">
+<testcase name="U15 project A0 B5; card and failed list share scope; explicit workspace5" classname="audit-job-scope.spec.ts" time="57.461">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveText(expected) failed" type="expect.toHaveText">
+<![CDATA[  audit-job-scope.spec.ts:15:1 › U15 project A0 B5; card and failed list share scope; explicit workspace5 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  getByRole('region', { name: 'Daily work queue' }).locator('.activity').filter({ has: getByText('Failed jobs', { exact: true }) }).locator('p')
+    Expected: "0"
+    Received: "5"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" getByRole('region', { name: 'Daily work queue' }).locator('.activity').filter({ has: getByText('Failed jobs', { exact: true }) }).locator('p') with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Daily work queue' }).locator('.activity').filter({ has: getByText('Failed jobs', { exact: true }) }).locator('p')
+        4 × locator resolved to <p>—</p>
+          - unexpected value "—"
+        9 × locator resolved to <p>5</p>
+          - unexpected value "5"
+
+
+      14 | test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
+      15 | test('U15 project A0 B5; card and failed list share scope; explicit workspace5',async({page})=>{
+    > 16 |  const seeded=await seed();await login(page);const card=failedCard(page);await expect(card.locator('p')).toHaveText('0');
+         |                                                                                                          ^
+      17 |  await card.getByRole('button',{name:'Open',exact:true}).click();
+      18 |  const jobs=page.getByRole('region',{name:'Bulk jobs'});await expect(jobs).toContainText('0 jobs in scope');await expect(page).toHaveURL(/job_scope=project/);await expect(page).toHaveURL(/job_status=failed/);
+      19 |  await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(projectB);await expect(jobs).toContainText('5 jobs in scope');
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-job-scope.spec.ts:16:106
+
+    Error Context: ..\..\test-results\audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

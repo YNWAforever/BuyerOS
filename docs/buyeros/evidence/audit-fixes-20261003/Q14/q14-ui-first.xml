@@ -1,0 +1,173 @@
+<testsuites id="" name="" tests="6" failures="3" skipped="0" errors="1" time="532.090054">
+<testsuite name="audit-job-scope.spec.ts" timestamp="2026-10-03T15:19:37.379Z" hostname="" tests="6" failures="3" skipped="0" time="142.444" errors="1">
+<testcase name="U15 project A0 B5; card and failed list share scope; explicit workspace5" classname="audit-job-scope.spec.ts" time="18.574">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(page).toHaveURL(expected) failed" type="expect.toHaveURL">
+<![CDATA[  audit-job-scope.spec.ts:15:1 › U15 project A0 B5; card and failed list share scope; explicit workspace5 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /job_status=failed/
+    Received string:  "http://localhost:5173/app/operations?workspace=e0000000-0000-4000-8000-000000000001&job_scope=project&project=e1000000-0000-4000-8000-000000000001"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 5000ms
+        14 × locator resolved to <html lang="en">…</html>
+           - unexpected value "http://localhost:5173/app/operations?workspace=e0000000-0000-4000-8000-000000000001&job_scope=project&project=e1000000-0000-4000-8000-000000000001"
+
+
+      16 |  const seeded=await seed();await login(page);const card=failedCard(page);await expect(card.locator('p')).toHaveText('0');
+      17 |  await card.getByRole('button',{name:'Open',exact:true}).click();
+    > 18 |  const jobs=page.getByRole('region',{name:'Bulk jobs'});await expect(jobs).toContainText('0 jobs in scope');await expect(page).toHaveURL(/job_scope=project/);await expect(page).toHaveURL(/job_status=failed/);
+         |                                                                                                                                                                                  ^
+      19 |  await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(projectB);await expect(jobs).toContainText('5 jobs in scope');
+      20 |  const queue=page.getByRole('region',{name:'Work queue',exact:true});await expect(queue).toContainText('Failed jobs: 5');
+      21 |  await page.getByRole('button',{name:'Overview',exact:true}).click();await expect(failedCard(page).locator('p')).toHaveText('5');await failedCard(page).getByRole('button',{name:'Open',exact:true}).click();
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-job-scope.spec.ts:18:178
+
+    Error Context: ..\..\test-results\audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="U15 workspace view remains actor-bound, other actor detail denied; admin read sees all" classname="audit-job-scope.spec.ts" time="12.197">
+</testcase>
+<testcase name="U15 actual 21 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="18.629">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-actual-2ee02--resets-offset-and-old-rows\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-actual-2ee02--resets-offset-and-old-rows\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toContainText(expected) failed" type="expect.toContainText">
+<![CDATA[  audit-job-scope.spec.ts:32:29 › U15 actual 21 job list fully pages20; scope resets offset and old rows 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('region', { name: 'Bulk jobs' })
+    Expected substring: "0 jobs in scope"
+    Received string:    "Bulk jobsJob scope Project jobsWorkspace jobsWorkspace jobs: e0000000-0000-4000-8000-000000000001Only jobs created by your account are included.Filter status All statusesqueuedrunningcancel_requestedcancelledcompletedfailed21 jobs in scopef666e49c-9b0a-47bf-9b58-55519d6b49dffailed · 1/1ea042d0e-17a8-4f1d-a22b-0b640450cd9afailed · 1/1dc00767b-70ca-4579-8b47-297fe0baa0e9failed · 1/1bf80ee88-0d63-4e0f-9f4e-1a6c2842d63afailed · 1/1a560ff97-2aa7-4efe-82fd-32c6d706122ffailed · 1/19934dbe7-3b57-4812-ae36-f3d823a9f389failed · 1/1929fd4a2-89bd-47fd-9133-533615b1ba01failed · 1/18834f6e2-8891-4ebb-8cdd-871c2ab8c029failed · 1/1839de4d3-f6b0-4086-9847-db1fd6e6a56afailed · 1/181edcafa-a3c7-482b-8d77-8d6825458c7cfailed · 1/18155752f-43a8-4c1a-94ed-7f0dd21af22cfailed · 1/1603480b7-cfaa-4e2a-a368-e370ff1231e2failed · 1/14f768e66-11cc-466c-a146-2fb29fb07f98failed · 1/1471f8eb8-9d66-41db-9f04-e065ee73a6f9failed · 1/133251a4f-5065-4e0e-a664-6e27b462ccddfailed · 1/12fd71cf5-ae0d-4662-a15e-37b28c581dbdfailed · 1/11f1cb0fc-1d2e-4234-bc3a-1e72d20b2a60failed · 1/11899c945-464f-4d5c-a4f7-a802ed4d851cfailed · 1/113e46506-afbb-45a9-a3ed-5396103e0f59failed · 1/11260a9e7-3be3-487c-ad94-c0e7dfd9fb1afailed · 1/1Previous1–20 / 21Next"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" getByRole('region', { name: 'Bulk jobs' }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Bulk jobs' })
+        4 × locator resolved to <div role="region" aria-label="Bulk jobs">…</div>
+          - unexpected value "Bulk jobsJob scope Project jobsWorkspace jobsWorkspace jobs: e0000000-0000-4000-8000-000000000001Only jobs created by your account are included.Filter status All statusesqueuedrunningcancel_requestedcancelledcompletedfailedLoading jobs…"
+        10 × locator resolved to <div role="region" aria-label="Bulk jobs">…</div>
+           - unexpected value "Bulk jobsJob scope Project jobsWorkspace jobsWorkspace jobs: e0000000-0000-4000-8000-000000000001Only jobs created by your account are included.Filter status All statusesqueuedrunningcancel_requestedcancelledcompletedfailed21 jobs in scopef666e49c-9b0a-47bf-9b58-55519d6b49dffailed · 1/1ea042d0e-17a8-4f1d-a22b-0b640450cd9afailed · 1/1dc00767b-70ca-4579-8b47-297fe0baa0e9failed · 1/1bf80ee88-0d63-4e0f-9f4e-1a6c2842d63afailed · 1/1a560ff97-2aa7-4efe-82fd-32c6d706122ffailed · 1/19934dbe7-3b57-4812-ae36-f3d823a9f389failed · 1/1929fd4a2-89bd-47fd-9133-533615b1ba01failed · 1/18834f6e2-8891-4ebb-8cdd-871c2ab8c029failed · 1/1839de4d3-f6b0-4086-9847-db1fd6e6a56afailed · 1/181edcafa-a3c7-482b-8d77-8d6825458c7cfailed · 1/18155752f-43a8-4c1a-94ed-7f0dd21af22cfailed · 1/1603480b7-cfaa-4e2a-a368-e370ff1231e2failed · 1/14f768e66-11cc-466c-a146-2fb29fb07f98failed · 1/1471f8eb8-9d66-41db-9f04-e065ee73a6f9failed · 1/133251a4f-5065-4e0e-a664-6e27b462ccddfailed · 1/12fd71cf5-ae0d-4662-a15e-37b28c581dbdfailed · 1/11f1cb0fc-1d2e-4234-bc3a-1e72d20b2a60failed · 1/11899c945-464f-4d5c-a4f7-a802ed4d851cfailed · 1/113e46506-afbb-45a9-a3ed-5396103e0f59failed · 1/11260a9e7-3be3-487c-ad94-c0e7dfd9fb1afailed · 1/1Previous1–20 / 21Next"
+
+
+      35 |  for(let offset=0;offset<count;offset+=20){await expect(jobs.getByText(`${offset+1}–${Math.min(offset+20,count)} / ${count}`,{exact:true})).toBeVisible();seen.push(...await jobs.getByRole('button').filter({hasText:/^[0-9a-f-]{36}$/}).allTextContents());if(offset+20<count)await jobs.getByRole('button',{name:'Next',exact:true}).click();}
+      36 |  expect(new Set(seen)).toEqual(new Set(seeded.own_ids));expect(seen.length).toBe(count);
+    > 37 |  await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);await expect(jobs).toContainText('0 jobs in scope');await expect(jobs.getByText('0–0 / 0',{exact:true})).toBeVisible();expect(new URL(page.url()).searchParams.get('job_offset')??'0').toBe('0');
+         |                                                                                                        ^
+      38 | });
+      39 | test('U15 held B list and count cannot overwrite newer A-B-A generation',async({page})=>{
+      40 |  await seed();await login(page,`/app/operations?workspace=${workspace}&project=${project}&job_status=failed`);
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-job-scope.spec.ts:37:104
+
+    Error Context: ..\..\test-results\audit-fixes\audit-job-scope-U15-actual-2ee02--resets-offset-and-old-rows\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-job-scope-U15-actual-2ee02--resets-offset-and-old-rows\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-job-scope-U15-actual-2ee02--resets-offset-and-old-rows\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="U15 actual 101 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="16.837">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-actual-435b6--resets-offset-and-old-rows\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-actual-435b6--resets-offset-and-old-rows\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toContainText(expected) failed" type="expect.toContainText">
+<![CDATA[  audit-job-scope.spec.ts:32:29 › U15 actual 101 job list fully pages20; scope resets offset and old rows 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('region', { name: 'Bulk jobs' })
+    Expected substring: "0 jobs in scope"
+    Received string:    "Bulk jobsJob scope Project jobsWorkspace jobsWorkspace jobs: e0000000-0000-4000-8000-000000000001Only jobs created by your account are included.Filter status All statusesqueuedrunningcancel_requestedcancelledcompletedfailed101 jobs in scopeff27ae3a-f629-499d-bc22-bff2c758dbe4failed · 1/1fb616eea-8c1d-4174-86cf-8a172db35f3dfailed · 1/1f6e269b5-b5ca-422c-86ac-6f1df0afa879failed · 1/1e337c589-d174-4fb4-8c05-63c7e2c72935failed · 1/1df09bf42-45d2-4f8f-8d39-7dc00e91035cfailed · 1/1da178f02-f9c6-4c2f-8668-d83a464fac3dfailed · 1/1d4d111b1-c937-4180-89ea-45e9039dcba5failed · 1/1d4312a53-d964-4b69-9186-f2311429f3cdfailed · 1/1d2440d02-f253-43bb-826f-f01ffc2e586cfailed · 1/1cf808485-131d-4f6a-b9d0-6e64192e3b07failed · 1/1cf6589df-4b76-4ab8-85b5-f3ebd2c17925failed · 1/1ce60681d-e65f-4e22-8119-aa891c0011a2failed · 1/1ce0b8734-ca23-4f6d-baf1-122024dc3112failed · 1/1cd62fc74-c472-4d73-b0a5-41ddeeedc6f7failed · 1/1caab9141-5692-4814-97ba-72259db11f2dfailed · 1/1c980c2cb-6378-4b8c-9c9a-a3bdb84c7441failed · 1/1c97a1796-bca5-41b2-9c34-f93d92736d56failed · 1/1c9046823-2d08-46ab-9ddb-1b6eb62c481ffailed · 1/1c88199e0-2e55-4c59-b9f9-7a9f8abbf62bfailed · 1/1c35ce144-267d-436d-aeee-c30335a1d292failed · 1/1Previous1–20 / 101Next"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" getByRole('region', { name: 'Bulk jobs' }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Bulk jobs' })
+        3 × locator resolved to <div role="region" aria-label="Bulk jobs">…</div>
+          - unexpected value "Bulk jobsJob scope Project jobsWorkspace jobsWorkspace jobs: e0000000-0000-4000-8000-000000000001Only jobs created by your account are included.Filter status All statusesqueuedrunningcancel_requestedcancelledcompletedfailedLoading jobs…"
+        10 × locator resolved to <div role="region" aria-label="Bulk jobs">…</div>
+           - unexpected value "Bulk jobsJob scope Project jobsWorkspace jobsWorkspace jobs: e0000000-0000-4000-8000-000000000001Only jobs created by your account are included.Filter status All statusesqueuedrunningcancel_requestedcancelledcompletedfailed101 jobs in scopeff27ae3a-f629-499d-bc22-bff2c758dbe4failed · 1/1fb616eea-8c1d-4174-86cf-8a172db35f3dfailed · 1/1f6e269b5-b5ca-422c-86ac-6f1df0afa879failed · 1/1e337c589-d174-4fb4-8c05-63c7e2c72935failed · 1/1df09bf42-45d2-4f8f-8d39-7dc00e91035cfailed · 1/1da178f02-f9c6-4c2f-8668-d83a464fac3dfailed · 1/1d4d111b1-c937-4180-89ea-45e9039dcba5failed · 1/1d4312a53-d964-4b69-9186-f2311429f3cdfailed · 1/1d2440d02-f253-43bb-826f-f01ffc2e586cfailed · 1/1cf808485-131d-4f6a-b9d0-6e64192e3b07failed · 1/1cf6589df-4b76-4ab8-85b5-f3ebd2c17925failed · 1/1ce60681d-e65f-4e22-8119-aa891c0011a2failed · 1/1ce0b8734-ca23-4f6d-baf1-122024dc3112failed · 1/1cd62fc74-c472-4d73-b0a5-41ddeeedc6f7failed · 1/1caab9141-5692-4814-97ba-72259db11f2dfailed · 1/1c980c2cb-6378-4b8c-9c9a-a3bdb84c7441failed · 1/1c97a1796-bca5-41b2-9c34-f93d92736d56failed · 1/1c9046823-2d08-46ab-9ddb-1b6eb62c481ffailed · 1/1c88199e0-2e55-4c59-b9f9-7a9f8abbf62bfailed · 1/1c35ce144-267d-436d-aeee-c30335a1d292failed · 1/1Previous1–20 / 101Next"
+
+
+      35 |  for(let offset=0;offset<count;offset+=20){await expect(jobs.getByText(`${offset+1}–${Math.min(offset+20,count)} / ${count}`,{exact:true})).toBeVisible();seen.push(...await jobs.getByRole('button').filter({hasText:/^[0-9a-f-]{36}$/}).allTextContents());if(offset+20<count)await jobs.getByRole('button',{name:'Next',exact:true}).click();}
+      36 |  expect(new Set(seen)).toEqual(new Set(seeded.own_ids));expect(seen.length).toBe(count);
+    > 37 |  await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);await expect(jobs).toContainText('0 jobs in scope');await expect(jobs.getByText('0–0 / 0',{exact:true})).toBeVisible();expect(new URL(page.url()).searchParams.get('job_offset')??'0').toBe('0');
+         |                                                                                                        ^
+      38 | });
+      39 | test('U15 held B list and count cannot overwrite newer A-B-A generation',async({page})=>{
+      40 |  await seed();await login(page,`/app/operations?workspace=${workspace}&project=${project}&job_status=failed`);
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-job-scope.spec.ts:37:104
+
+    Error Context: ..\..\test-results\audit-fixes\audit-job-scope-U15-actual-435b6--resets-offset-and-old-rows\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-job-scope-U15-actual-435b6--resets-offset-and-old-rows\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-job-scope-U15-actual-435b6--resets-offset-and-old-rows\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="U15 held B list and count cannot overwrite newer A-B-A generation" classname="audit-job-scope.spec.ts" time="60.456">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-held-B-a1c60-rite-newer-A-B-A-generation\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-held-B-a1c60-rite-newer-A-B-A-generation\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  audit-job-scope.spec.ts:39:1 › U15 held B list and count cannot overwrite newer A-B-A generation ─
+
+    Test timeout of 60000ms exceeded.
+
+    Error Context: ..\..\test-results\audit-fixes\audit-job-scope-U15-held-B-a1c60-rite-newer-A-B-A-generation\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-job-scope-U15-held-B-a1c60-rite-newer-A-B-A-generation\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-job-scope-U15-held-B-a1c60-rite-newer-A-B-A-generation\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery" classname="audit-job-scope.spec.ts" time="15.751">
+</testcase>
+</testsuite>
+</testsuites>

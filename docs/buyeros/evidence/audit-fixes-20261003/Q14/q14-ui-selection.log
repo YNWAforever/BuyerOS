@@ -1,0 +1,12 @@
+Listing tests:
+  audit-job-scope.spec.ts:15:1 › U15 project A0 B5; card and failed list share scope; explicit workspace5
+  audit-job-scope.spec.ts:26:1 › U15 workspace view remains actor-bound, other actor detail denied; admin read sees all
+  audit-job-scope.spec.ts:32:29 › U15 actual 21 job list fully pages20; scope resets offset and old rows
+  audit-job-scope.spec.ts:32:29 › U15 actual 101 job list fully pages20; scope resets offset and old rows
+  audit-job-scope.spec.ts:39:1 › U15 held B list and count cannot overwrite newer A-B-A generation
+  audit-job-scope.spec.ts:46:1 › U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery
+  audit-operations.spec.ts:12:29 › B10 B11 all 21 real producer result IDs are readable in pages of 20
+  audit-operations.spec.ts:12:29 › B10 B11 all 101 real producer result IDs are readable in pages of 20
+  audit-operations.spec.ts:32:1 › B11 zero results and late job response cannot replace newer job
+  audit-operations.spec.ts:43:1 › B11 late result page is discarded after workspace A-B-A
+Total: 10 tests in 2 files

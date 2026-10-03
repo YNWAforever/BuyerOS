@@ -142,3 +142,13 @@ StrictAPI90, migration39, actualUI17(9Q08+8Q05),Node22 pass;0fail/error/skip, ge
 Sole0036head inspected before allocating0037_bulk_manifests; disposableemptyupgrade/downgrade/reupgrade andpopulatedrefusal pass, productionunapplied. Pause-admissionpatch applicability only, runtime/productionrollback notrehearsed; durablehistory/results/recovery retained. Original31inputs/98fields/92othercases/24othertasks/3guards/193unrelateddirtypaths preserved. Fixturescleaned; exactownerlabelleddependencycacheretainedforQ14. Authorreviewonly; independentpending.
 
 [Full evidence/commands/screenshots/rollback](../../evidence/audit-fixes-20261003/Q08/RESULTS.md), [local PR-18 description](Q08-pr.md). Codeimplemented,fixtureverified,localintegrationverified; deployedSHAnull. Auth0stays,delivery403, noexternalaction. Q16underlyingcauseblocked/Q17notguessed/Q13waitsN02. **Next eligible local task Q14** (Q03complete); fullstaff/auth/provider/build/continuousworker/production gates unverified.
+
+## Q14 / PR-17 current checkpoint — 2026-10-03
+
+Reviewed source `1aab3ddc0519bb6da8d1483efaf173eb5a87037e`, base `092e8f555d7e98f0f2603ff86a7afecf8c65492e`;8file local commit. F17/U15: same generated projectfilter for Overview count, Operationscount/list and deeplink, explicit workspace label and serveractorrestriction retained. Routerqueryread/explicitURLwrites, scope/status/page generation/abort resets, read503Retry, real20rowpages en/zh390.
+
+StrictAPI18 (3new+15related), actualUI10 (6Q14+4Q03),Node16 pass;0fail/error/skip, generated84=70original+14extensions/type/lint0. Actual A0/B5/workspace5, reviewer5/operator3/admin8/viewer0, all21/101pages, heldcount+list A-B-A, URL/refresh+reauth/mobile and readfailure pass. Meaningful RED1 and first2pass/4failUI retained; fixed incomingfilter overwrite/implicitworkspace persistence, no weakened tests.
+
+0schema/API/auth/role changes; head0037 retained. Reversepatch applicability0, runtime/browser/productionrevert notrehearsed; retain allhistory. Original31inputs/98fields/97othercases/24othertasks/3guards/193unrelatedpaths preserved. Fixturesnormalteardown; labelledcache retainedforQ09. Authorreviewonly, independentpending.
+
+[Full commands/reports/screenshots/rollback](../../evidence/audit-fixes-20261003/Q14/RESULTS.md), [local PR-17](Q14-pr.md). Codeimplemented,fixtureverified,localintegrationverified; deployedSHAnull/noexternalaction. Full8module/liveauth/provider/build/continuousworker/production/performance gates remainunverified. Q16/Q17blocked, Q13waitsN02. **Next eligible local task Q09**, five staff-task UX slices; actualhumanUAT remains separate.

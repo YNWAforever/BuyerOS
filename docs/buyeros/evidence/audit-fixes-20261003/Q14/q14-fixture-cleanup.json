@@ -1,0 +1,8 @@
+{
+  "normal_teardown_markers_absent": true,
+  "owned_UI_DB_fixture_teardown": "normal harness teardown",
+  "dependency_cache": "owner-labelled buyeros-audit-ui-deps-052d6a686de9 retained for Q09; owner previously positively verified",
+  "unknown_unlabelled_buyeros-test-d9323d06": "untouched",
+  "other_resources": "untouched",
+  "worktree": "retained"
+}

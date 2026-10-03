@@ -1,0 +1,26 @@
+<testsuites id="" name="" tests="10" failures="0" skipped="0" errors="0" time="314.29447100000004">
+<testsuite name="audit-job-scope.spec.ts" timestamp="2026-10-03T15:28:25.579Z" hostname="" tests="6" failures="0" skipped="0" time="145.501" errors="0">
+<testcase name="U15 project A0 B5; card and failed list share scope; explicit workspace5" classname="audit-job-scope.spec.ts" time="43.057">
+</testcase>
+<testcase name="U15 workspace view remains actor-bound, other actor detail denied; admin read sees all" classname="audit-job-scope.spec.ts" time="17.588">
+</testcase>
+<testcase name="U15 actual 21 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="24.367">
+</testcase>
+<testcase name="U15 actual 101 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="19.99">
+</testcase>
+<testcase name="U15 held B list and count cannot overwrite newer A-B-A generation" classname="audit-job-scope.spec.ts" time="14.723">
+</testcase>
+<testcase name="U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery" classname="audit-job-scope.spec.ts" time="25.776">
+</testcase>
+</testsuite>
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-03T15:28:25.579Z" hostname="" tests="4" failures="0" skipped="0" time="68.189" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="19.318">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="16.293">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="15.066">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="17.512">
+</testcase>
+</testsuite>
+</testsuites>

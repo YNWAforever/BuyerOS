@@ -1,0 +1,16 @@
+{
+  "os": "Windows PowerShell",
+  "node": "24.18.0",
+  "pnpm": "11.25.0",
+  "uv": "0.11.27",
+  "Python": "3.14.6",
+  "Docker": "29.7.2",
+  "DB": "owned loopback Docker PostgreSQL16; actual current API/runtime RLS",
+  "UI": "owned Linux Node22.23.2 Vinext/Nitro dev4CPU6GiB localhost5173/FastAPI8000; fake OIDC only",
+  "strict_integration": 1,
+  "new_migrations": 0,
+  "head": "0037_bulk_manifests",
+  "provider_calls": 0,
+  "live_auth": false,
+  "external_actions": []
+}

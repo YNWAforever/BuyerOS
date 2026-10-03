@@ -1,0 +1,2 @@
+features/live/operations.tsx(148,18): error TS2657: JSX expressions must have one parent element.
+features/live/operations.tsx(152,7): error TS1005: '}' expected.

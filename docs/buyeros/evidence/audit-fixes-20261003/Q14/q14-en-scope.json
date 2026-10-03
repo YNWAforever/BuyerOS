@@ -1,0 +1,20 @@
+{
+  "fixture_only": true,
+  "project_a": "e1000000-0000-4000-8000-000000000001",
+  "project_b": "e1140000-0000-4000-8000-000000000002",
+  "own_ids": [
+    "3529988f-6f68-4c0e-91c3-943caaeaffbb",
+    "7fd0ddc0-c078-4c78-8fe8-d010bda8cd90",
+    "84b09402-8dad-4d9a-9c08-5cd6b6345760",
+    "174437d6-ba3d-4b43-9b62-6f83d544a11d",
+    "a5378825-f5fd-48d4-9e64-c8e2ac4b31b6"
+  ],
+  "other_ids": [
+    "9637f0f5-af93-4586-aa93-88db7ca28085",
+    "0626193c-c163-4a4b-8519-fd334dc074fb",
+    "572cfedd-90f8-41dc-8e7e-3cc6d4a1a7ab"
+  ],
+  "own_failed": 5,
+  "other_failed": 3,
+  "url": "http://localhost:5173/app/operations?workspace=e0000000-0000-4000-8000-000000000001&job_scope=workspace&project=e1140000-0000-4000-8000-000000000002&job_status=failed"
+}

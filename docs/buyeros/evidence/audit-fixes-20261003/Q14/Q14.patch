@@ -1,0 +1,367 @@
+diff --git a/features/live/locale.ts b/features/live/locale.ts
+index aa7e787..963ed46 100644
+--- a/features/live/locale.ts
++++ b/features/live/locale.ts
+@@ -234,6 +234,7 @@ export const liveZh: Record<string,string> = {
+   'Enter a valid job ID.':'請輸入有效工作識別碼。','updated':'已更新','conflicts':'衝突',
+   'Retry eligibility follows each row’s persisted reason and current version.':'能否重試取決於每列已記錄的原因和目前版本。',
+   'Audit trail':'審計紀錄','Previous':'上一頁','Next':'下一頁',
++  'Job scope':'工作範圍','Project jobs':'專案工作','Workspace jobs':'工作區工作','Only jobs created by your account are included.':'只包含由你帳戶建立的工作。','Loading jobs…':'正在載入工作…','Retry loading jobs':'重新載入工作',
+   'Bulk jobs':'批量工作','Filter status':'篩選狀態','All statuses':'所有狀態','jobs in scope':'項範圍內工作','No jobs in this scope.':'此範圍沒有工作。',
+   'queued':'排隊中','running':'進行中','cancel_requested':'取消待處理','cancelled':'已取消','completed':'已完成','failed':'失敗',
+   'research':'研究','contact_enrichment':'聯絡資料增補',
+diff --git a/features/live/operations.tsx b/features/live/operations.tsx
+index f274eb0..c352476 100644
+--- a/features/live/operations.tsx
++++ b/features/live/operations.tsx
+@@ -1,5 +1,7 @@
+ 'use client';
+-import {useEffect,useRef,useState} from 'react';
++import {useEffect,useMemo,useRef,useState} from 'react';
++import {useSearchParams} from 'next/navigation';
++import {buildJobQuery,jobQueryParams,readJobStatus,type JobScope} from '@/services/live/job-query';
+ import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
+ import {LiveCancelled,describeLiveError} from '@/services/live/client';
+ import type {components} from '@/services/generated/buyeros-api';
+@@ -15,10 +17,22 @@ type Result=components['schemas']['BulkItemResult'];
+ 
+ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{workspace:string;project:string|null;isAdmin:boolean;onOpenBuyers:()=>void;t:(value:string)=>string}){
+   const {client,session}=useWorkspaceSession();
+-  const scope=useSessionSnapshot();
++  const scope=useSessionSnapshot(),searchParams=useSearchParams();
+   const [readiness,setReadiness]=useState<Readiness|null>(null),[capabilities,setCapabilities]=useState<Capability[]>([]);
+   const [jobId,setJobId]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('bulk_job')||'');
+-  const [job,setJob]=useState<Job|null>(null),[jobs,setJobs]=useState<Page<Job>|null>(null),[jobOffset,setJobOffset]=useState(0),[jobStatus,setJobStatus]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('job_status')||'');
++  const [job,setJob]=useState<Job|null>(null);
++  const [statusChoice,setStatusChoice]=useState<{value:ReturnType<typeof readJobStatus>}>();
++  const jobStatus=statusChoice?statusChoice.value:readJobStatus(searchParams.get('job_status'));
++  const [viewChoice,setViewChoice]=useState<'project'|'workspace'>();
++  const jobView=viewChoice??(searchParams.get('job_scope')==='workspace'?'workspace':'project');
++  const waitingForProject=jobView==='project'&&!project&&searchParams.has('project');
++  const jobScope=useMemo<JobScope>(()=>jobView==='project'&&project?{kind:'project',workspaceId:workspace,projectId:project}:{kind:'workspace',workspaceId:workspace},[jobView,workspace,project]);
++  const scopeKey=`${scope.identity}:${jobScope.kind}`,viewKey=`${scopeKey}:${jobStatus??''}`;
++  const [offsetState,setOffset]=useState<{key:string;offset:number}>(),[listState,setList]=useState<{key:string;page?:Page<Job>;error?:string}>();
++  const jobOffset=offsetState?.key===viewKey?offsetState.offset:0,listKey=`${viewKey}:${jobOffset}`;
++  const jobs=listState?.key===listKey?listState.page:undefined,jobError=listState?.key===listKey?listState.error:undefined;
++  const [listReload,setListReload]=useState(0);
++  const setJobOffset=(offset:number)=>setOffset({key:viewKey,offset});
+   const [audit,setAudit]=useState<Page<Audit>|null>(null),[auditOffset,setAuditOffset]=useState(0);
+   const [pollError,setPollError]=useState('');
+   const [error,setError]=useState(''),[resultLoading,setResultLoading]=useState(false);
+@@ -26,7 +40,8 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+   const pageView=useRef(job);useEffect(()=>{pageView.current=job;},[job]);
+   useEffect(()=>()=>{jobRequest.current.sequence++;jobRequest.current.controller.abort();},[scope.identity]);
+   const [profileQueue,setProfileQueue]=useState<'loading'|'none'|'pending'|'current'|'stale'|'unavailable'>(project?'loading':'none');
+-  const [failedCount,setFailedCount]=useState<number|null|'unavailable'>(null);
++  const [failedState,setFailed]=useState<{key:string;count:number|'unavailable'}>();
++  const failedCount=failedState?.key===scopeKey?failedState.count:null;
+   useEffect(()=>{
+     const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
+     const signal=AbortSignal.any([own.signal,session.controller().signal]);
+@@ -39,20 +54,31 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+     return()=>own.abort();
+   },[client,session,workspace,isAdmin,scope.identity]);
+   useEffect(()=>{
+-    const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
+-    const query=new URLSearchParams({offset:String(jobOffset),limit:'20'});if(jobStatus)query.set('status',jobStatus);
+-    void client.request<Page<Job>>({path:`/v1/workspaces/${workspace}/jobs?${query}`,token,scope:identity,
+-      signal:AbortSignal.any([own.signal,session.controller().signal])}).then(value=>{
+-      if(session.isCurrent(identity)&&!own.signal.aborted)setJobs(value);
+-    }).catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted)setError(describeLiveError(e));});
++    if(waitingForProject)return;
++    const own=new AbortController(),basis=session.captureWriteContext();
++    const ctx={...basis,signal:AbortSignal.any([own.signal,basis.signal]),getToken:async()=>session.token()||'',isCurrent:()=>session.isCurrent(basis.identity)&&!own.signal.aborted};
++    void createOperationClient(client).requestOperation('listAsyncJobs',{path:{workspace_id:workspace},query:jobQueryParams(jobScope,{offset:jobOffset,limit:20,status:jobStatus})},ctx)
++      .then(page=>{if(ctx.isCurrent())setList({key:listKey,page});})
++      .catch(cause=>{if(ctx.isCurrent()&&!(cause instanceof LiveCancelled))setList({key:listKey,error:describeLiveError(cause)});});
+     return()=>own.abort();
+-  },[client,session,workspace,jobOffset,jobStatus,scope.identity]);
++  },[client,session,workspace,jobScope,jobOffset,jobStatus,scope.identity,listKey,listReload,waitingForProject]);
++  // Router query state can settle before window.location during Vinext navigation.
++  // Persist only deliberate choices; never overwrite an incoming deep link on mount.
++  function updateJobUrl(kind:'project'|'workspace',status:ReturnType<typeof readJobStatus>){
++    const url=new URL(window.location.href);url.searchParams.set('job_scope',kind);
++    if(status)url.searchParams.set('job_status',status);else url.searchParams.delete('job_status');
++    url.searchParams.delete('job_offset');url.searchParams.delete('bulk_job');
++    window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);
++  }
++  function setJobStatus(value:ReturnType<typeof readJobStatus>){setStatusChoice({value});updateJobUrl(jobScope.kind,value);}
++  function setJobView(kind:'project'|'workspace'){setViewChoice(kind);updateJobUrl(kind,jobStatus);}
+   useEffect(()=>{
+     const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
+     const signal=AbortSignal.any([own.signal,session.controller().signal,AbortSignal.timeout(10_000)]);
+-    void client.request<Page<Job>>({path:`/v1/workspaces/${workspace}/jobs?status=failed&offset=0&limit=1`,token,scope:identity,signal}).then(value=>{
+-      if(session.isCurrent(identity)&&!own.signal.aborted)setFailedCount(value.total);
+-    }).catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted&&session.isCurrent(identity)){setFailedCount('unavailable');setError(describeLiveError(e));}});
++    if(waitingForProject)return()=>own.abort();
++    void client.request<Page<Job>>({path:`/v1/workspaces/${workspace}/jobs?${buildJobQuery(jobScope,{status:'failed',offset:0,limit:1})}`,token,scope:identity,signal}).then(value=>{
++      if(session.isCurrent(identity)&&!own.signal.aborted)setFailed({key:scopeKey,count:value.total});
++    }).catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted&&session.isCurrent(identity)){setFailed({key:scopeKey,count:'unavailable'});setError(describeLiveError(e));}});
+     if(!project)return()=>own.abort();
+     void (async()=>{
+       const current=await client.request<{status:string;offer_revision:number}>({path:`/v1/workspaces/${workspace}/projects/${project}`,token,scope:identity,signal});
+@@ -65,7 +91,7 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+       setProfileQueue(current.status!=='active'||latest.basis_offer_revision!==current.offer_revision?'stale':latest.approved_at?'current':'pending');
+     })().catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted&&session.isCurrent(identity)){setProfileQueue('unavailable');setError(describeLiveError(e));}});
+     return()=>own.abort();
+-  },[client,session,workspace,project,scope.identity]);
++  },[client,session,workspace,project,scope.identity,jobScope,scopeKey,listReload,waitingForProject]);
+   useEffect(()=>{
+     if(!isAdmin)return;
+     const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
+@@ -125,9 +151,16 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+     {isAdmin&&<div role="region" aria-label={t('Readiness')}><h3>{t('Readiness')}</h3>{readiness?<p>{t('Database')}: {readiness.database} · {t('Queue')}: {readiness.queue} · {t('Worker')}: {readiness.worker} · {readiness.ready?t('Ready'):t('Not ready')}</p>:<p role="status">{t('Loading readiness…')}</p>}</div>}
+     <div role="region" aria-label={t('Integrations')}><h3>{t('Integrations')}</h3>{capabilities.map(item=><p key={item.name}>{t(item.name)}: {t(item.status)} · {item.reason_codes.map(t).join(', ')}</p>)}</div>
+     <div role="region" aria-label={t('Bulk jobs')}><h3>{t('Bulk jobs')}</h3>
+-      <label>{t('Filter status')} <select aria-label={t('Filter status')} value={jobStatus} onChange={e=>{setJobOffset(0);setJobStatus(e.target.value);changeJob('');}}>
++      <label>{t('Job scope')} <select aria-label={t('Job scope')} value={jobScope.kind} onChange={e=>{setJobView(e.target.value as 'project'|'workspace');changeJob('');}}>
++        <option value="project" disabled={!project}>{t('Project jobs')}</option><option value="workspace">{t('Workspace jobs')}</option>
++      </select></label>
++      <p>{t(jobScope.kind==='project'?'Project jobs':'Workspace jobs')}: <code>{jobScope.kind==='project'?jobScope.projectId:jobScope.workspaceId}</code></p>
++      {!isAdmin&&<p>{t('Only jobs created by your account are included.')}</p>}
++      <label>{t('Filter status')} <select aria-label={t('Filter status')} value={jobStatus??''} onChange={e=>{setJobStatus(readJobStatus(e.target.value));changeJob('');}}>
+         <option value="">{t('All statuses')}</option>{['queued','running','cancel_requested','cancelled','completed','failed'].map(value=><option key={value} value={value}>{t(value)}</option>)}
+       </select></label>
++      {!jobs&&!jobError&&<p role="status">{t('Loading jobs…')}</p>}
++      {jobError&&<><p role="alert">{jobError}</p><button onClick={()=>setListReload(v=>v+1)}>{t('Retry loading jobs')}</button></>}
+       {jobs&&<><p>{jobs.total} {t('jobs in scope')}</p>{jobs.items.length?jobs.items.map(item=><div key={item.id} className="inline" style={{flexWrap:'wrap'}}>
+         <button onClick={()=>{changeJob(item.id);void loadJob(item.id);}}>{item.id}</button>
+         <span>{t(item.status)} · {item.processed}/{item.requested}</span>
+diff --git a/features/live/overview.tsx b/features/live/overview.tsx
+index 4238f6d..4dde6c6 100644
+--- a/features/live/overview.tsx
++++ b/features/live/overview.tsx
+@@ -1,5 +1,6 @@
+ 'use client';
+ import {useEffect,useState} from 'react';
++import {buildJobQuery,jobScopeLink,type JobScope} from '@/services/live/job-query';
+ import type {Availability} from '@/services/live/mode';
+ import {loadLive} from '@/services/live/read';
+ import {toWorkspaces,MapError,type LiveWorkspace} from '@/services/live/mapping';
+@@ -62,23 +63,26 @@ export function LiveOverview({t=(value:string)=>value}:{t?:(value:string)=>strin
+ 
+ /** Navigation cards use exactly the same server filters as Results and Operations. */
+ export function LiveWorkQueue({t,onNavigate}:{t:(value:string)=>string;onNavigate:(path:string)=>void}){
+-  const {client,session}=useWorkspaceSession(),scope=useSessionSnapshot().scope;
+-  const [failed,setFailed]=useState<number|null>(null),[error,setError]=useState('');
++  const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot(),scope=snapshot.scope;
++  const [result,setResult]=useState<{identity:string;count?:number;error?:string}>();
++  const failed=result?.identity===snapshot.identity?result.count:undefined,error=result?.identity===snapshot.identity?result.error:undefined;
+   const [asOf]=useState(()=>new Date().toISOString());
+   useEffect(()=>{
+     if(!scope.workspace||!scope.project)return;
+     const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
+-    void client.request<{total:number}>({path:`/v1/workspaces/${encodeURIComponent(scope.workspace)}/jobs?status=failed&offset=0&limit=1`,
++    const selected:JobScope={kind:'project',workspaceId:scope.workspace,projectId:scope.project};
++    const query=buildJobQuery(selected,{status:'failed',offset:0,limit:1});
++    void client.request<{total:number}>({path:`/v1/workspaces/${encodeURIComponent(scope.workspace)}/jobs?${query}`,
+       token,scope:identity,signal:AbortSignal.any([own.signal,session.controller().signal])})
+-      .then(value=>{if(!own.signal.aborted&&session.isCurrent(identity))setFailed(value.total);})
+-      .catch(cause=>{if(!own.signal.aborted&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));});
++      .then(value=>{if(!own.signal.aborted&&session.isCurrent(identity))setResult({identity,count:value.total});})
++      .catch(cause=>{if(!own.signal.aborted&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled))setResult({identity,error:describeLiveError(cause)});});
+     return()=>own.abort();
+-  },[client,session,scope.workspace,scope.project]);
++  },[client,session,scope.workspace,scope.project,snapshot.identity]);
+   const cards:[string,string,string][]=[
+     ['Awaiting review','/app/results?review=awaiting_review',''],
+     ['Pending approvals','/app/operations',''],
+     ['Unassigned buyers','/app/results?queue=unassigned',''],
+-    ['Failed jobs','/app/operations?job_status=failed',failed===null?'—':String(failed)],
++    ['Failed jobs',scope.workspace&&scope.project?jobScopeLink({kind:'project',workspaceId:scope.workspace,projectId:scope.project},'failed'):'/app/operations',failed===undefined?'—':String(failed)],
+     ['Unknown fit','/app/results?queue=unknown',''],
+     ['Unknown provider acceptance','/app/operations',''],
+   ];
+diff --git a/services/api/tests/test_job_scope_db.py b/services/api/tests/test_job_scope_db.py
+new file mode 100644
+index 0000000..d4f4662
+--- /dev/null
++++ b/services/api/tests/test_job_scope_db.py
+@@ -0,0 +1,43 @@
++"""Q14 existing project/actor job query contract on strict owned PostgreSQL."""
++import uuid
++import psycopg,pytest
++from tests.test_buyer_review_db import api as buyer_api,ADMIN,REVIEWER,VIEWER,OPERATOR,WORKSPACE_A,WORKSPACE_B,PROJECT_A,PROJECT_A2,_h
++from tests.contract_validation import assert_contract_response
++@pytest.fixture
++def api(buyer_api):
++ with buyer_api as client:yield client
++
++def seed_jobs(dsn,count):
++ own=[];other=[]
++ with psycopg.connect(dsn) as db:
++  db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,language_preferences,version) VALUES (%s,%s,'Q14 B','Fictional Seller','Fixture offer','{HK}','{en}',1) ON CONFLICT DO NOTHING",(PROJECT_A2,WORKSPACE_A))
++  for subject,n,ids in [(REVIEWER,count,own),(OPERATOR,3,other)]:
++   for _ in range(n):
++    job=str(uuid.uuid4());ids.append(job);db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,blocked) VALUES (%s,%s,%s,%s,'bulk_mutation','reviewBuyers','{}','failed',1,1,1)",(job,WORKSPACE_A,PROJECT_A2,uuid.uuid5(uuid.NAMESPACE_URL,subject)))
++ return own,other
++
++def page(api,subject,project=None,offset=0,limit=20):
++ r=api.get(f'/v1/workspaces/{WORKSPACE_A}/jobs',params={'status':'failed','offset':offset,'limit':limit,**({'project_id':project} if project else {})},headers=_h(subject=subject));assert r.status_code==200,r.text;assert_contract_response('AsyncJobPageResponse',r.json());return r.json()['data']
++
++def test_job_scope_project_zero_five_workspace_keeps_current_actor(api,seeded):
++ own,other=seed_jobs(seeded,5)
++ assert page(api,REVIEWER,PROJECT_A)['total']==0
++ assert page(api,REVIEWER,PROJECT_A2)['total']==5
++ assert page(api,REVIEWER)['total']==5
++ assert page(api,OPERATOR)['total']==3
++ assert page(api,ADMIN)['total']==8
++ assert page(api,ADMIN,PROJECT_A)['total']==0
++ assert page(api,VIEWER)['total']==0
++ assert api.get(f'/v1/workspaces/{WORKSPACE_A}/jobs/{other[0]}',headers=_h(subject=REVIEWER)).status_code==404
++ assert api.get(f'/v1/workspaces/{WORKSPACE_B}/jobs',headers=_h(subject=REVIEWER)).status_code==404
++ assert {x['id'] for x in page(api,REVIEWER)['items']}==set(own)
++ with psycopg.connect(seeded) as db:
++  assert db.execute('SELECT count(*) FROM outbox_events WHERE workspace_id=%s',(WORKSPACE_A,)).fetchone()[0]==0
++
++@pytest.mark.parametrize('count',[21,101])
++def test_job_scope_all_real_schema_rows_paged_without_other_actor(api,seeded,count):
++ own,other=seed_jobs(seeded,count);seen=[]
++ for offset in range(0,count,20):
++  p=page(api,REVIEWER,PROJECT_A2,offset);assert p['total']==count and p['offset']==offset and p['limit']==20;assert len(p['items'])==min(20,count-offset);seen.extend(x['id'] for x in p['items'])
++ assert len(seen)==len(set(seen))==count and set(seen)==set(own) and not set(seen)&set(other)
++ assert page(api,REVIEWER,PROJECT_A)['items']==[]
+diff --git a/services/live/job-query.ts b/services/live/job-query.ts
+new file mode 100644
+index 0000000..08d0ecc
+--- /dev/null
++++ b/services/live/job-query.ts
+@@ -0,0 +1,27 @@
++import type {operations} from '@/services/generated/buyeros-api';
++export type JobScope={kind:'project';workspaceId:string;projectId:string}|{kind:'workspace';workspaceId:string};
++type Query=NonNullable<operations['listAsyncJobs']['parameters']['query']>;
++export type JobStatus=NonNullable<Query['status']>;
++export type JobQueryOptions={status?:JobStatus;offset:number;limit:number};
++const statuses:JobStatus[]=['queued','running','cancel_requested','cancelled','completed','failed'];
++export function readJobStatus(value:string|null):JobStatus|undefined{return statuses.find(status=>status===value);}
++/** The same canonical filter builds count, page reads and navigation. */
++export function buildJobQuery(scope:JobScope,{status,offset,limit}:JobQueryOptions):URLSearchParams{
++ if(!scope.workspaceId||scope.kind==='project'&&!scope.projectId)throw new Error('Job scope is required');
++ if(!Number.isSafeInteger(offset)||offset<0||!Number.isSafeInteger(limit)||limit<1||limit>100)throw new Error('Invalid job page');
++ if(status&&!statuses.includes(status))throw new Error('Invalid job status');
++ const query=new URLSearchParams({offset:String(offset),limit:String(limit)});
++ if(status)query.set('status',status);
++ if(scope.kind==='project')query.set('project_id',scope.projectId);
++ return query;
++}
++export function jobQueryParams(scope:JobScope,options:JobQueryOptions):Query{
++ const q=buildJobQuery(scope,options);
++ return {offset:Number(q.get('offset')),limit:Number(q.get('limit')),...(q.has('status')?{status:readJobStatus(q.get('status'))}:{}),...(q.has('project_id')?{project_id:q.get('project_id')!}:{})};
++}
++export function jobScopeLink(scope:JobScope,status?:JobStatus):string{
++ const q=buildJobQuery(scope,{status,offset:0,limit:20}),params=new URLSearchParams({workspace:scope.workspaceId,job_scope:scope.kind});
++ if(q.has('project_id'))params.set('project',q.get('project_id')!);
++ if(q.has('status'))params.set('job_status',q.get('status')!);
++ return '/app/operations?'+params;
++}
+diff --git a/services/worker/tests/fixtures/audit_job_scopes.py b/services/worker/tests/fixtures/audit_job_scopes.py
+new file mode 100644
+index 0000000..7de6b57
+--- /dev/null
++++ b/services/worker/tests/fixtures/audit_job_scopes.py
+@@ -0,0 +1,22 @@
++"""Q14 fictional job scope fixture; guarded owned loopback Docker only."""
++import json,sys,uuid
++import psycopg
++from tests.fixtures.run_browser_research import owner_dsn,WORKSPACE
++PROJECT_A='e1000000-0000-4000-8000-000000000001'
++PROJECT_B='e1140000-0000-4000-8000-000000000002'
++REVIEWER='e0000000-0000-4000-8000-000000000004'
++OTHER='e0000000-0000-4000-8000-000000000002'
++def main():
++ count=int(sys.argv[1]);assert count in (5,21,101)
++ with psycopg.connect(owner_dsn()) as db:
++  if db.execute('SELECT name FROM workspaces WHERE id=%s',(WORKSPACE,)).fetchone()!=('E2E fixture workspace',):raise RuntimeError('unknown workbench')
++  if db.execute('SELECT company_name FROM projects WHERE workspace_id=%s AND id=%s',(WORKSPACE,PROJECT_A)).fetchone()!=('Fictional Seller',):raise RuntimeError('unknown fixture project')
++  db.execute("DELETE FROM async_job_items WHERE workspace_id=%s AND job_id IN (SELECT id FROM async_jobs WHERE workspace_id=%s AND command->>'q14_fixture'='owned')",(WORKSPACE,WORKSPACE))
++  db.execute("DELETE FROM async_jobs WHERE workspace_id=%s AND command->>'q14_fixture'='owned'",(WORKSPACE,))
++  db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,language_preferences,version) VALUES (%s,%s,'Q14 project B','Fictional Seller','Fixture offer','{HK}','{en}',1) ON CONFLICT DO NOTHING",(PROJECT_B,WORKSPACE))
++  ids=[];other=[]
++  for actor,n,target in [(REVIEWER,count,ids),(OTHER,3,other)]:
++   for _ in range(n):
++    job=uuid.uuid4();target.append(str(job));db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,blocked) VALUES (%s,%s,%s,%s,'bulk_mutation','reviewBuyers','{\"q14_fixture\":\"owned\"}','failed',1,1,1)",(job,WORKSPACE,PROJECT_B,actor))
++  print(json.dumps({'fixture_only':True,'project_a':PROJECT_A,'project_b':PROJECT_B,'own_ids':ids,'other_ids':other,'own_failed':count,'other_failed':3}))
++if __name__=='__main__':main()
+diff --git a/tests/audit-job-query.test.mjs b/tests/audit-job-query.test.mjs
+new file mode 100644
+index 0000000..84b3bf8
+--- /dev/null
++++ b/tests/audit-job-query.test.mjs
+@@ -0,0 +1,18 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {loadModule} from './ts-loader.mjs';
++const {buildJobQuery,jobScopeLink,jobQueryParams,readJobStatus}=await loadModule('services/live/job-query.ts');
++const project={kind:'project',workspaceId:'workspace-a',projectId:'project-a'},workspace={kind:'workspace',workspaceId:'workspace-a'};
++test('U15 project failed count and paged list preserve identical canonical filter',()=>{
++ const count=buildJobQuery(project,{status:'failed',offset:0,limit:1}),list=buildJobQuery(project,{status:'failed',offset:20,limit:20});
++ assert.equal(count.get('project_id'),'project-a');assert.equal(list.get('project_id'),count.get('project_id'));assert.equal(list.get('status'),count.get('status'));assert.deepEqual(jobQueryParams(project,{status:'failed',offset:20,limit:20}),{status:'failed',project_id:'project-a',offset:20,limit:20});
++});
++test('U15 explicit workspace omits project, deep link retains selected scope and status',()=>{
++ assert.equal(buildJobQuery(workspace,{status:'failed',offset:0,limit:20}).has('project_id'),false);
++ for(const scope of [project,workspace]){const link=new URL(jobScopeLink(scope,'failed'),'http://fixture.test');assert.equal(link.searchParams.get('workspace'),'workspace-a');assert.equal(link.searchParams.get('job_scope'),scope.kind);assert.equal(link.searchParams.get('job_status'),'failed');assert.equal(link.searchParams.get('project'),scope.kind==='project'?'project-a':null);}
++});
++test('U15 invalid URL status cannot introduce unsupported server filter; paging stays bounded',()=>{
++ assert.equal(readJobStatus('invented'),undefined);assert.equal(readJobStatus('failed'),'failed');
++ for(const options of [{offset:-1,limit:20},{offset:0,limit:101},{offset:0,limit:0},{offset:0.5,limit:20},{status:'invented',offset:0,limit:20}])assert.throws(()=>buildJobQuery(project,options));
++ assert.throws(()=>buildJobQuery({...project,projectId:''},{offset:0,limit:20}));
++});
+diff --git a/tests/e2e/audit-job-scope.spec.ts b/tests/e2e/audit-job-scope.spec.ts
+new file mode 100644
+index 0000000..97e972b
+--- /dev/null
++++ b/tests/e2e/audit-job-scope.spec.ts
+@@ -0,0 +1,53 @@
++import {expect,test,type Page} from '@playwright/test';
++import {execFile} from 'node:child_process';
++import {promisify} from 'node:util';
++import {resolve} from 'node:path';
++import {writeFileSync} from 'node:fs';
++import {signInWorkbench,workspace,project,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
++const projectB='e1140000-0000-4000-8000-000000000002';
++async function seed(count=5):Promise<{own_ids:string[];other_ids:string[]}>{
++ const cwd=resolve('services/worker'),python=resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
++ const result=JSON.parse((await promisify(execFile)(python,['tests/fixtures/audit_job_scopes.py',String(count)],{cwd,timeout:30_000})).stdout);expect(result.fixture_only).toBe(true);return result;
++}
++async function login(page:Page,entry?:string){await signInWorkbench(page,true,'reviewer',entry);await page.getByRole('combobox',{name:/^(Language|語言)$/}).selectOption('en');}
++function failedCard(page:Page){return page.getByRole('region',{name:'Daily work queue'}).locator('.activity').filter({has:page.getByText('Failed jobs',{exact:true})});}
++test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
++test('U15 project A0 B5; card and failed list share scope; explicit workspace5',async({page})=>{
++ const seeded=await seed();await login(page);const card=failedCard(page);await expect(card.locator('p')).toHaveText('0');
++ await card.getByRole('button',{name:'Open',exact:true}).click();
++ const jobs=page.getByRole('region',{name:'Bulk jobs'});await expect(jobs).toContainText('0 jobs in scope');await expect(page).toHaveURL(/job_scope=project/);await expect(page).toHaveURL(/job_status=failed/);
++ await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(projectB);await expect(jobs).toContainText('5 jobs in scope');
++ const queue=page.getByRole('region',{name:'Work queue',exact:true});await expect(queue).toContainText('Failed jobs: 5');
++ await page.getByRole('button',{name:'Overview',exact:true}).click();await expect(failedCard(page).locator('p')).toHaveText('5');await failedCard(page).getByRole('button',{name:'Open',exact:true}).click();
++ await page.getByRole('combobox',{name:'Job scope',exact:true}).selectOption('workspace');await expect(jobs).toContainText('Workspace jobs');await expect(jobs).toContainText('5 jobs in scope');
++ await expect(page).toHaveURL(/job_scope=workspace/);expect(new Set(await jobs.getByRole('button').filter({hasText:/^[0-9a-f-]{36}$/}).allTextContents())).toEqual(new Set(seeded.own_ids));
++ await page.screenshot({path:'test-results/q14-en-scope.png',fullPage:true});writeFileSync('test-results/q14-en-scope.json',JSON.stringify({fixture_only:true,...seeded,url:page.url()},null,2));
++});
++test('U15 workspace view remains actor-bound, other actor detail denied; admin read sees all',async({page})=>{
++ const seeded=await seed();await login(page,`/app/operations?workspace=${workspace}&project=${project}&job_scope=workspace&job_status=failed`);
++ const jobs=page.getByRole('region',{name:'Bulk jobs'});await expect(jobs).toContainText('5 jobs in scope');for(const id of seeded.other_ids)await expect(jobs.getByRole('button',{name:id,exact:true})).toHaveCount(0);
++ for(const [token,total] of [['fixture-reviewer',5],['fixture-access',3],['fixture-admin',8],['fixture-viewer',0]] as const){const r=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/jobs?status=failed&offset=0&limit=20`,{headers:{Authorization:`Bearer ${token}`}});expect(r.status()).toBe(200);expect((await r.json()).data.total).toBe(total);}
++ expect((await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/jobs/${seeded.other_ids[0]}`,{headers:{Authorization:'Bearer fixture-reviewer'}})).status()).toBe(404);
++});
++for(const count of [21,101])test(`U15 actual ${count} job list fully pages20; scope resets offset and old rows`,async({page})=>{
++ const seeded=await seed(count);await login(page,`/app/operations?workspace=${workspace}&project=${project}&job_status=failed`);await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(projectB);
++ const jobs=page.getByRole('region',{name:'Bulk jobs'}),seen:string[]=[];
++ for(let offset=0;offset<count;offset+=20){await expect(jobs.getByText(`${offset+1}–${Math.min(offset+20,count)} / ${count}`,{exact:true})).toBeVisible();seen.push(...await jobs.getByRole('button').filter({hasText:/^[0-9a-f-]{36}$/}).allTextContents());if(offset+20<count)await jobs.getByRole('button',{name:'Next',exact:true}).click();}
++ expect(new Set(seen)).toEqual(new Set(seeded.own_ids));expect(seen.length).toBe(count);
++ await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);await expect(jobs).toContainText('0 jobs in scope');await expect(jobs.getByText('0–0 / 0',{exact:true})).toBeVisible();expect(new URL(page.url()).searchParams.get('job_offset')??'0').toBe('0');
++});
++test('U15 held B list and count cannot overwrite newer A-B-A generation',async({page})=>{
++ await seed();await login(page,`/app/operations?workspace=${workspace}&project=${project}&job_status=failed`);
++ let release=()=>{},received=()=>{};const hold=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);let held=0;
++ await page.route('**/v1/workspaces/*/jobs?**',async route=>{const u=new URL(route.request().url());if(u.searchParams.get('project_id')===projectB){const response=await route.fetch();held++;received();await hold;await route.fulfill({response}).catch(()=>{});}else await route.continue();});
++ await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(projectB);await started;await expect.poll(()=>held).toBeGreaterThanOrEqual(2);
++ await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);const jobs=page.getByRole('region',{name:'Bulk jobs'});await expect(jobs).toContainText('0 jobs in scope');release();await page.waitForTimeout(300);await expect(jobs).toContainText('0 jobs in scope');await expect(page.getByRole('region',{name:'Work queue',exact:true})).toContainText('Failed jobs: 0');
++});
++test('U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery',async({page})=>{
++ await seed();await page.setViewportSize({width:390,height:844});await login(page,`/app/operations?workspace=${workspace}&project=${project}&job_scope=workspace&job_status=failed`);
++ await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');const jobs=page.getByRole('region',{name:'批量工作'});await expect(jobs).toContainText('工作區工作');await expect(jobs).toContainText('5 項範圍內工作');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
++ await page.screenshot({path:'test-results/q14-zh-mobile.png',fullPage:true});const saved=page.waitForResponse(r=>r.request().method()==='PATCH'&&r.url().endsWith('/preferences'));await page.getByRole('combobox',{name:'語言',exact:true}).selectOption('en');expect((await saved).status()).toBe(200);
++ const url=page.url();await login(page,url);await expect(page.getByRole('combobox',{name:'Job scope',exact:true})).toHaveValue('workspace');await expect(page.getByRole('combobox',{name:'Filter status',exact:true})).toHaveValue('failed');await expect(page.getByRole('region',{name:'Bulk jobs'})).toContainText('5 jobs in scope');
++ let failed=false;await page.route('**/jobs?**',async route=>{if(!failed&&new URL(route.request().url()).searchParams.get('limit')==='20'){failed=true;await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({code:'INTERNAL_ERROR',message:'Fixture read failure',request_id:'e0000000-0000-4000-8000-000000000014',retryable:true})});}else await route.continue();});
++ await page.getByRole('combobox',{name:'Filter status',exact:true}).selectOption('completed');await expect(page.getByRole('region',{name:'Bulk jobs'}).getByRole('alert')).toContainText('Service temporarily unavailable');await page.getByRole('button',{name:'Retry loading jobs',exact:true}).click();await expect(page.getByRole('region',{name:'Bulk jobs'})).toContainText('0 jobs in scope');
++});
