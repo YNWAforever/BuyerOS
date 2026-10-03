@@ -34,7 +34,12 @@ const words:Record<string,string>={
   'Display name':'顯示名稱','Role title':'職銜','Organization':'機構','Business email':'工作電郵',
   'Country':'國家','Reason for change':'更改原因','I confirm this sender identity':'我確認此寄件人身份',
   'Save sender':'儲存寄件人','Prepare grounded draft':'準備有證據草稿','Approved offer facts':'已批准的產品事實',
-  'Supporting buyer evidence':'支持買家的證據','Objective':'目的','Tone':'語氣','Language':'語言',
+  'Supporting buyer evidence':'支持買家的證據','Language':'語言',
+  'Free fixed template':'免費固定模板',
+  'Internal work objective — does not change the template body':'內部工作目的，不會改變模板正文',
+  'Template language':'模板語言',
+  'Template language changes only fixed headings, opening and closing; offer facts and source citations stay in their original language and are not automatically translated.':'模板語言只改變固定標題、開場及結尾；產品事實與來源引用保留原語言，不會自動翻譯。',
+  'Edit the draft manually after generation; changes need a new grounding review before approval.':'產生後請人手修改草稿；更改須重新審核證據才可批准。',
   'Generate unaddressed draft':'產生未指定收件人的草稿','Job status':'工作狀態',
   'Recipient (optional)':'收件人（可選）','No recipient — unaddressed draft':'不指定收件人 — 未指定收件人的草稿',
   'Generate addressed draft':'產生已指定收件人的草稿',
@@ -71,7 +76,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   const [draft,setDraft]=useState<Draft|null>(null),[drafts,setDrafts]=useState<Draft[]>([]);
   const [total,setTotal]=useState(0),[offset,setOffset]=useState(0);
   const [selectedFacts,setSelectedFacts]=useState<string[]>([]),[selectedEvidence,setSelectedEvidence]=useState<string[]>([]);
-  const [objective,setObjective]=useState('Introduce the approved offer'),[tone,setTone]=useState<'professional'|'concise'|'warm'>('professional');
+  const [objective,setObjective]=useState('Introduce the approved offer');
   const [recipient,setRecipient]=useState('');
   const [draftKind,setDraftKind]=useState<'initial'|'follow_up'>('initial'),[parentDraftId,setParentDraftId]=useState<string|null>(null);
   const [subject,setSubject]=useState(''),[body,setBody]=useState(''),[draftLanguage,setDraftLanguage]=useState<'en'|'zh-HK'>('en');
@@ -137,7 +142,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     setBusy(true);setError('');setNotice('');
     const bodyRequest={buyer_id:context.buyer.id,buyer_version:context.buyer.version,
       recipient_contact_id:recipient||undefined,
-      objective:objective.trim(),tone,language:draftLanguage,approved_offer_fact_ids:selectedFacts,
+      objective:objective.trim(),tone:'professional' as const,language:draftLanguage,approved_offer_fact_ids:selectedFacts,
       evidence_refs:context.evidence.filter(e=>selectedEvidence.includes(e.id)).map(e=>({id:e.id,version:e.version})),
       kind:draftKind,parent_draft_id:draftKind==='follow_up'?parentDraftId||undefined:undefined,
       max_cost:{amount:'0.000000',currency:'USD' as const}};
@@ -256,6 +261,9 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
       </div>}
     </section>}
     {context&&<section className="panel" aria-label={t('Prepare grounded draft')}><h3>{t('Prepare grounded draft')}</h3>
+      <p><strong>{t('Free fixed template')}</strong></p>
+      <p>{t('Template language changes only fixed headings, opening and closing; offer facts and source citations stay in their original language and are not automatically translated.')}</p>
+      <p>{t('Edit the draft manually after generation; changes need a new grounding review before approval.')}</p>
       <p>{context.buyer.name} · {context.buyer.version} · {t(context.buyer.review?.status||'review required')}</p>
       {!context.icp&&<p role="alert">{t('Current approved profile and accepted buyer are required.')}</p>}
       <fieldset><legend>{t('Approved offer facts')}</legend>{approvedFacts.map(f=><label key={f.id} className="live-draft-option"><input type="checkbox" checked={selectedFacts.includes(f.id)} onChange={e=>setSelectedFacts(v=>e.target.checked?[...v,f.id]:v.filter(id=>id!==f.id))}/>{f.value}</label>)}</fieldset>
@@ -265,9 +273,8 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
         <option value="">{t('No recipient — unaddressed draft')}</option>
         {recipients.map(contact=><option key={contact.id} value={contact.id}>{contact.value} · v{contact.version}</option>)}
       </select></label>
-      <div className="live-draft-fields"><label>{t('Objective')} <input value={objective} maxLength={1000} onChange={e=>setObjective(e.target.value)}/></label>
-        <label>{t('Tone')} <select value={tone} onChange={e=>setTone(e.target.value as typeof tone)}><option value="professional">professional</option><option value="concise">concise</option><option value="warm">warm</option></select></label>
-        <label>{t('Language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)} disabled={busy||!canGenerate}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
+      <div className="live-draft-fields"><label>{t('Internal work objective — does not change the template body')} <input value={objective} maxLength={1000} onChange={e=>setObjective(e.target.value)}/></label>
+        <label>{t('Template language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)} disabled={busy||!canGenerate}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
       <button type="button" disabled={busy||!canGenerate||!project?.sender_identity||!context.icp||(recipient!==''&&!recipients.some(contact=>contact.id===recipient))||(draftKind==='follow_up'&&!parentDraftId)||selectedFacts.length===0||selectedEvidence.length===0||objective.trim().length<3} onClick={()=>void startDraft()}>{t(recipient?'Generate addressed draft':'Generate unaddressed draft')}</button>
     </section>}
     {job&&<section className="panel" role="status"><h3>{t('Job status')}</h3><p>{job.id} · {t(job.status)}</p><button type="button" disabled={busy} onClick={()=>void refreshJob()}>{t('Refresh job')}</button></section>}
