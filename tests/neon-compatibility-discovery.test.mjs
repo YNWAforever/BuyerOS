@@ -12,3 +12,6 @@ for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regres
 test('N00 dedicated config discovers all seven built-output cases',()=>{const files=discovered('playwright.neon-auth.config.ts');assert.equal(files.length,7);assert.ok(files.every(file=>file.endsWith('audit-neon-compat.spec.ts')));});
 
 test('N00 counted config discovers the same seven cases with separate producer outputs',()=>{const files=discovered('playwright.neon-counted.config.ts');assert.equal(files.length,7);assert.ok(files.every(file=>file.endsWith('audit-neon-compat.spec.ts')));});
+
+for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regression.config.ts'])test(`all N00 output profiles stay isolated from ${config}`,()=>{const files=discovered(config);assert.ok(files.some(file=>file.endsWith('audit-auth-entry.spec.ts')));assert.equal(files.filter(file=>file.includes('audit-neon-')).length,0);});
+test('runtime flow config discovers five actual-output cases',()=>{const files=discovered('playwright.neon-runtime-flow.config.ts');assert.equal(files.length,5);assert.ok(files.every(file=>file.endsWith('audit-neon-runtime-flow.spec.ts')));});

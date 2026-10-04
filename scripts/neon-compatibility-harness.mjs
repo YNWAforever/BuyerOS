@@ -46,6 +46,8 @@ function run(cmd,args,options={}) {
 }
 export function fixtureBuildProfile(name='compatibility') {
  const profiles={
+  'runtime-flow':{area:'test-results/neon-runtime-flow',overlays:['tests/fixtures/neon-real-runtime/overlay','tests/fixtures/neon-runtime-flow/overlay','tests/fixtures/neon-runtime-flow-transport/overlay'],rscEntry:'./lib/neon-runtime-flow/rsc-service.ts'},
+  'runtime-flow-final':{area:'test-results/neon-runtime-flow-final',overlays:['tests/fixtures/neon-real-runtime/overlay','tests/fixtures/neon-runtime-flow/overlay','tests/fixtures/neon-runtime-flow-transport/overlay'],rscEntry:'./lib/neon-runtime-flow/rsc-service.ts'},
   compatibility:{area:'test-results/neon-compatibility',overlays:['tests/fixtures/neon-compatibility/overlay'],rscEntry:'./lib/neon-compatibility/rsc-service.ts'},
   'runtime-probe-dispatcher':{area:'test-results/neon-runtime-built-dispatcher',overlays:['tests/fixtures/neon-real-runtime/overlay','tests/fixtures/neon-runtime-probe/overlay'],rscEntry:'./lib/neon-runtime-probe/rsc-service.ts'},
   'runtime-probe-retry':{area:'test-results/neon-runtime-built-retry',overlays:['tests/fixtures/neon-real-runtime/overlay','tests/fixtures/neon-runtime-probe/overlay'],rscEntry:'./lib/neon-runtime-probe/rsc-service.ts'},

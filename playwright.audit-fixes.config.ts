@@ -4,7 +4,7 @@ export default defineConfig({
   globalTeardown:'./tests/e2e/audit-teardown.ts',
   testDir:'./tests/e2e',testMatch:'audit-*.spec.ts',
   // N00 runs actual built outputs with separate loopback ports and no workbench DB.
-  testIgnore:'audit-neon-compat.spec.ts',workers:1,timeout:60_000,
+  testIgnore:'audit-neon-*.spec.ts',workers:1,timeout:60_000,
   outputDir:'test-results/audit-fixes',
   reporter:[['list'],['junit',{outputFile:'test-results/audit-fixes.xml'}]],
   use:{baseURL:'http://localhost:5173',browserName:'chromium',viewport:{width:1120,height:800},trace:'retain-on-failure'},
