@@ -47,7 +47,7 @@ def pg_dsn():
 
 def test_workspace_directory_current_baseline(migrated, monkeypatch):
     samples, actors = int(os.environ["BUYEROS_DIRECTORY_SAMPLES"]), int(os.environ["BUYEROS_DIRECTORY_ACTORS"])
-    assert 30 <= samples <= 100 and actors in (1, 10, 25)
+    assert 30 <= samples <= 100 and actors == 1
     output = Path(os.environ["BUYEROS_DIRECTORY_OUTPUT"])
     subjects = [f"directory-fixture-{uuid.uuid4().hex}" for _ in range(actors+1)]
     users = [uuid.uuid4() for _ in subjects]

@@ -21,8 +21,8 @@ The opt-in case uses the existing owned PostgreSQL16 startup/guard helpers and
 current Alembic head. W1/10/100/1000 each has exactly one visible membership per
 actor. It verifies fixture RSA JWTs using the actual verifier, then serves the
 real ASGI app against the real non-owner NOBYPASSRLS database role. No live Auth0
-or Neon session is tested. `--actors 10/25` are supported, not measured in the
-first baseline. Work is bounded to30–100 batches and15minutes. On timeout the
+or Neon session is tested. Only `--actors 1` is admitted by this partial local tool;10/25 actor load
+requires a separate full-Q10 harness and evidence. Work is bounded to30–100 batches and15minutes. On timeout the
 wrapper terminates pytest and removes only the recorded matching container ID.
 The session teardown normally removes it first. The owner marker is retained
 as evidence, without a DSN/password. An ownership mismatch fails closed.
@@ -82,7 +82,7 @@ load was not rerun for this local tools slice.
 
 ## Rollback
 
-Revert only the two Q10 source commits plus their documentation metadata after
+Revert only the Q10 source commits plus their documentation metadata after
 review. No application endpoint, schema, identity, membership, approval, actor,
 hold, delivery or broker change requires runtime/data rollback. Reverse patch
 applicability is verified separately; no production rollback rehearsal occurs.

@@ -37,7 +37,7 @@ def cleanup_owned(marker: Path, nonce: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--samples", type=int, choices=range(30, 101), default=30)
-    parser.add_argument("--actors", type=int, choices=(1, 10, 25), default=1)
+    parser.add_argument("--actors", type=int, choices=(1,), default=1)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     for variable in DATABASE_VARIABLES:
