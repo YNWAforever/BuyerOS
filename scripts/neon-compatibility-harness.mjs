@@ -33,18 +33,30 @@ export function fixtureChildEnvironment(parent) {
 export function assertSeedMetadata(seed,owner,labels) {
  if(!/^[a-f0-9]{12}$/.test(owner??'')||seed!==`buyeros-audit-ui-deps-${owner}`||labels?.['buyeros.audit.owner']!==owner)throw new Error('unowned read-only dependency seed');
 }
-export function compatibilityViteConfig(input) {
+export function compatibilityViteConfig(input,profileName='compatibility') {
+ const profile=fixtureBuildProfile(profileName);
  const marker='.nitro({ vercel: ';
  if(input.split(marker).length!==2)throw new Error('N00 fixture requires the reviewed Nitro build interface');
- return input.replace(marker,'.nitro({ experimental: { vite: { services: { rsc: { entry: "./lib/neon-compatibility/rsc-service.ts" } } } }, vercel: ');
+ return input.replace(marker,`.nitro({ experimental: { vite: { services: { rsc: { entry: "${profile.rscEntry}" } } } }, vercel: `);
 }
 function run(cmd,args,options={}) {
  const result=spawnSync(cmd,args,{encoding:'utf8',timeout:60_000,maxBuffer:32*1024*1024,...options});
  if(result.status!==0)throw new Error(`${cmd} failed (${result.status}): ${result.error?.message ?? result.stderr}`);
  return result.stdout.trim();
 }
-export function buildFixture() {
- const root=resolve('.'),area=resolve('test-results/neon-compatibility');
+export function fixtureBuildProfile(name='compatibility') {
+ const profiles={
+  compatibility:{area:'test-results/neon-compatibility',overlays:['tests/fixtures/neon-compatibility/overlay'],rscEntry:'./lib/neon-compatibility/rsc-service.ts'},
+  'runtime-probe-dispatcher':{area:'test-results/neon-runtime-built-dispatcher',overlays:['tests/fixtures/neon-real-runtime/overlay','tests/fixtures/neon-runtime-probe/overlay'],rscEntry:'./lib/neon-runtime-probe/rsc-service.ts'},
+  'runtime-probe-retry':{area:'test-results/neon-runtime-built-retry',overlays:['tests/fixtures/neon-real-runtime/overlay','tests/fixtures/neon-runtime-probe/overlay'],rscEntry:'./lib/neon-runtime-probe/rsc-service.ts'},
+  'runtime-probe':{area:'test-results/neon-runtime-built',overlays:['tests/fixtures/neon-real-runtime/overlay','tests/fixtures/neon-runtime-probe/overlay'],rscEntry:'./lib/neon-runtime-probe/rsc-service.ts'}
+ };
+ if(!Object.hasOwn(profiles,name))throw new Error('N00_BUILD_PROFILE');
+ const profile=profiles[name];return Object.freeze({...profile,overlays:Object.freeze(profile.overlays)});
+}
+export function buildFixture({profile:profileName='compatibility'}={}) {
+ const profile=fixtureBuildProfile(profileName);
+ const root=resolve('.'),area=resolve(profile.area);
  if(existsSync(join(area,'build-inputs.json')))throw new Error('refuse to overwrite an existing N00 build proof');
  const seed=process.env.BUYEROS_N00_SEED_VOLUME;
  if(seed){const seedProof=JSON.parse(run('docker',['volume','inspect',seed]))[0];assertSeedMetadata(seed,process.env.BUYEROS_N00_SEED_OWNER,seedProof.Labels);}
@@ -59,15 +71,16 @@ export function buildFixture() {
   if(isAbsolute(inside)||inside.startsWith('..')||!lstatSync(absolute).isFile())throw new Error(`unsafe source file ${p}`);
   mkdirSync(dirname(join(source,destination)),{recursive:true});copyFileSync(absolute,join(source,destination));
   const output=join(source,destination);
-  if(destination==='vite.config.ts')writeFileSync(output,compatibilityViteConfig(readFileSync(absolute,'utf8')));
+  if(destination==='vite.config.ts')writeFileSync(output,compatibilityViteConfig(readFileSync(absolute,'utf8'),profileName));
   hashes.push({path:p,destination,sha256:createHash('sha256').update(readFileSync(absolute)).digest('hex'),stagedSha256:createHash('sha256').update(readFileSync(output)).digest('hex')});
  }
  for(const p of files)copy(p);
- const overlay='tests/fixtures/neon-compatibility/overlay';
+ for(const overlay of profile.overlays) {
  function walk(folder) {for(const entry of readdirSync(folder,{withFileTypes:true})){const path=join(folder,entry.name);if(entry.isDirectory())walk(path);else if(entry.isFile()){const from=relative(root,path).replaceAll('\\','/');copy(from,relative(resolve(overlay),path).replaceAll('\\','/'));}else throw new Error('overlay symlink refused');}}
  walk(overlay);
+ }
  const owner=randomBytes(12).toString('hex'),name=`buyeros-n00-${owner}`,image='node:22.23.2-bookworm-slim';
- writeFileSync(join(area,'build-inputs.json'),JSON.stringify({base:run('git',['rev-parse','HEAD']),owner,name,image,readOnlySeed:seed,files:hashes,liveVerification:false},null,2)+'\n');
+ writeFileSync(join(area,'build-inputs.json'),JSON.stringify({profile:profileName,base:run('git',['rev-parse','HEAD']),owner,name,image,readOnlySeed:seed,files:hashes,liveVerification:false},null,2)+'\n');
  const tar=process.platform==='win32'?'C:/Windows/System32/tar.exe':'tar';
  run(tar,['-cf',join(area,'source.tar'),'-C',source,'.']);
  if(realpathSync(source)!==join(realpathSync(area),'source'))throw new Error('unsafe staging cleanup path');
@@ -105,4 +118,4 @@ export function buildFixture() {
   }
  }
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)buildFixture();
+if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)buildFixture({profile:process.argv[2]??'compatibility'});
