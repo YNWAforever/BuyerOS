@@ -1,0 +1,89 @@
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-runtime-flow\overlay\app\compat\page.tsx
+  5:91   error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-runtime-flow\overlay\app\compat\page.tsx:5:91
+  3 | export const dynamic='force-dynamic';
+  4 | export default async function Page(){
+> 5 |  try{const description=describeRuntime();const result=await getAuth().getSession();return <main><h1>N00 session and token diagnostic</h1><p>Protocol experiment only. This subject is not a BuyerOS user ID or workspace role.</p><output data-testid="server-session">{result.error?'session-error':result.data?.user.id??'anonymous'}</output><output data-testid="runtime-fingerprint">{description.fingerprint}</output><Client/></main>;}
+    |                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  6 |  catch{return <main><h1>N00 configuration unavailable</h1><p>The runtime target must be explicitly configured before this experiment can run.</p></main>;}
+  7 | }
+  8 |  react-hooks/error-boundaries
+  5:97   error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-runtime-flow\overlay\app\compat\page.tsx:5:97
+  3 | export const dynamic='force-dynamic';
+  4 | export default async function Page(){
+> 5 |  try{const description=describeRuntime();const result=await getAuth().getSession();return <main><h1>N00 session and token diagnostic</h1><p>Protocol experiment only. This subject is not a BuyerOS user ID or workspace role.</p><output data-testid="server-session">{result.error?'session-error':result.data?.user.id??'anonymous'}</output><output data-testid="runtime-fingerprint">{description.fingerprint}</output><Client/></main>;}
+    |                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  6 |  catch{return <main><h1>N00 configuration unavailable</h1><p>The runtime target must be explicitly configured before this experiment can run.</p></main>;}
+  7 | }
+  8 |                                                                                                                                                                                                                                                                                                     react-hooks/error-boundaries
+  5:138  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-runtime-flow\overlay\app\compat\page.tsx:5:138
+  3 | export const dynamic='force-dynamic';
+  4 | export default async function Page(){
+> 5 |  try{const description=describeRuntime();const result=await getAuth().getSession();return <main><h1>N00 session and token diagnostic</h1><p>Protocol experiment only. This subject is not a BuyerOS user ID or workspace role.</p><output data-testid="server-session">{result.error?'session-error':result.data?.user.id??'anonymous'}</output><output data-testid="runtime-fingerprint">{description.fingerprint}</output><Client/></main>;}
+    |                                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  6 |  catch{return <main><h1>N00 configuration unavailable</h1><p>The runtime target must be explicitly configured before this experiment can run.</p></main>;}
+  7 | }
+  8 |                                                                                                                                                                                                           react-hooks/error-boundaries
+  5:227  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-runtime-flow\overlay\app\compat\page.tsx:5:227
+  3 | export const dynamic='force-dynamic';
+  4 | export default async function Page(){
+> 5 |  try{const description=describeRuntime();const result=await getAuth().getSession();return <main><h1>N00 session and token diagnostic</h1><p>Protocol experiment only. This subject is not a BuyerOS user ID or workspace role.</p><output data-testid="server-session">{result.error?'session-error':result.data?.user.id??'anonymous'}</output><output data-testid="runtime-fingerprint">{description.fingerprint}</output><Client/></main>;}
+    |                                                                                                                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  6 |  catch{return <main><h1>N00 configuration unavailable</h1><p>The runtime target must be explicitly configured before this experiment can run.</p></main>;}
+  7 | }
+  8 |                                                                                             react-hooks/error-boundaries
+  5:337  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-runtime-flow\overlay\app\compat\page.tsx:5:337
+  3 | export const dynamic='force-dynamic';
+  4 | export default async function Page(){
+> 5 |  try{const description=describeRuntime();const result=await getAuth().getSession();return <main><h1>N00 session and token diagnostic</h1><p>Protocol experiment only. This subject is not a BuyerOS user ID or workspace role.</p><output data-testid="server-session">{result.error?'session-error':result.data?.user.id??'anonymous'}</output><output data-testid="runtime-fingerprint">{description.fingerprint}</output><Client/></main>;}
+    |                                                                                                                                                                                                                                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  6 |  catch{return <main><h1>N00 configuration unavailable</h1><p>The runtime target must be explicitly configured before this experiment can run.</p></main>;}
+  7 | }
+  8 |                 react-hooks/error-boundaries
+  5:413  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-runtime-flow\overlay\app\compat\page.tsx:5:413
+  3 | export const dynamic='force-dynamic';
+  4 | export default async function Page(){
+> 5 |  try{const description=describeRuntime();const result=await getAuth().getSession();return <main><h1>N00 session and token diagnostic</h1><p>Protocol experiment only. This subject is not a BuyerOS user ID or workspace role.</p><output data-testid="server-session">{result.error?'session-error':result.data?.user.id??'anonymous'}</output><output data-testid="runtime-fingerprint">{description.fingerprint}</output><Client/></main>;}
+    |                                                                                                                                                                                                                                                                                                                                                                                                                             ^^^^^^^^^ Avoid constructing JSX within try/catch
+  6 |  catch{return <main><h1>N00 configuration unavailable</h1><p>The runtime target must be explicitly configured before this experiment can run.</p></main>;}
+  7 | }
+  8 |        react-hooks/error-boundaries
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-runtime-flow\overlay\app\page.tsx
+  1:88  error  Do not use an `<a>` element to navigate to `/compat/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-runtime-flow\overlay\server.ts
+  2:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-real-diagnostic.test.mjs
+  3:1  error  Do not assign to the variable `module`. See: https://nextjs.org/docs/messages/no-assign-module-variable  @next/next/no-assign-module-variable
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-runtime-flow.test.mjs
+  4:1  error  Do not assign to the variable `module`. See: https://nextjs.org/docs/messages/no-assign-module-variable  @next/next/no-assign-module-variable
+
+✖ 10 problems (9 errors, 1 warning)
+

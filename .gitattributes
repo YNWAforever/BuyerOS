@@ -34,3 +34,6 @@ docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_RUNTIME/** -text whitespace=
 
 # Preserve N00 built-runtime producer artifacts byte-for-byte.
 docs/buyeros/evidence/audit-fixes-20261003/N00_RUNTIME_BUILT/** -text whitespace=cr-at-eol
+
+# Preserve N00 built session/token producer bytes.
+docs/buyeros/evidence/audit-fixes-20261003/N00_RUNTIME_FLOW/** -text whitespace=cr-at-eol

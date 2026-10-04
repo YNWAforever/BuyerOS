@@ -1,0 +1,2 @@
+tests/fixtures/neon-runtime-flow/overlay/app/api/n00/verify/route.ts(1,31): error TS2307: Cannot find module '../../../../lib/neon-real-runtime/server' or its corresponding type declarations.
+tests/fixtures/neon-runtime-flow/overlay/app/compat/page.tsx(1,39): error TS2307: Cannot find module '../../lib/neon-real-runtime/server' or its corresponding type declarations.

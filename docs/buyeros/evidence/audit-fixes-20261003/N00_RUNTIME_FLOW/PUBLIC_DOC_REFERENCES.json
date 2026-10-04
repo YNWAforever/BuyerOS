@@ -1,0 +1,8 @@
+{
+  "official_main_docs_are_context_not_pinned_or_provider_verification": true,
+  "references": [
+    "https://github.com/neondatabase/neon-js/blob/main/packages/auth/NEXT-JS.md",
+    "https://github.com/neondatabase/neon-js/blob/main/CLAUDE.md"
+  ],
+  "primary_contract": "repo pinned @neondatabase/auth0.5.0-beta next client/server code and types; no SDK patch"
+}

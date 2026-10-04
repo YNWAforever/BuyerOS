@@ -1,0 +1,59 @@
+✔ N00 built fixture is isolated from playwright.audit-fixes.config.ts (3050.0804ms)
+✔ N00 built fixture is isolated from playwright.audit-regression.config.ts (2649.868ms)
+✔ N00 dedicated config discovers all seven built-output cases (1412.6275ms)
+✔ N00 counted config discovers the same seven cases with separate producer outputs (1416.7707ms)
+✖ all N00 output profiles stay isolated from playwright.audit-fixes.config.ts (1998.9727ms)
+✖ all N00 output profiles stay isolated from playwright.audit-regression.config.ts (1727.3022ms)
+✔ runtime flow config discovers five actual-output cases (1414.5066ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 5
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13926.3599
+
+✖ failing tests:
+
+test at tests\neon-compatibility-discovery.test.mjs:16:98
+✖ all N00 output profiles stay isolated from playwright.audit-fixes.config.ts (1998.9727ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  8 !== 0
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-compatibility-discovery.test.mjs:16:272)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 8,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-compatibility-discovery.test.mjs:16:98
+✖ all N00 output profiles stay isolated from playwright.audit-regression.config.ts (1727.3022ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  8 !== 0
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-compatibility-discovery.test.mjs:16:272)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 8,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

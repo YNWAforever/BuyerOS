@@ -1,0 +1,93 @@
+{
+  "cases": 10,
+  "pass": 10,
+  "fail": 0,
+  "skip": 0,
+  "global_errors": 0,
+  "results": [
+    {
+      "target": "vercel",
+      "run_nonce": "5105aabbccdd",
+      "cases": 5,
+      "pass": 5,
+      "fail": 0,
+      "skip": 0,
+      "junit_errors": 0,
+      "global_errors": 0,
+      "fixture_only": true,
+      "duration_s": 67.400413,
+      "auth_HTTP_requests": 30,
+      "forwarded": 30,
+      "accepted": 29,
+      "rejected": 1,
+      "pending": 0,
+      "unknown": 0,
+      "external_auth_requests": 0,
+      "cleanup": {
+        "fixture_only": true,
+        "private_root_removed": true,
+        "runtime_configuration_removed": true,
+        "owned_children_absent": true,
+        "owned_root_removal": {
+          "removed": true,
+          "marker_retained_until_children_removed": true,
+          "private_configuration_removed_first": true,
+          "transient_errors": []
+        },
+        "external_resources": 0,
+        "owned_journal_removed": true
+      },
+      "leak_check": {
+        "fixture_only": true,
+        "emitted_text_files": 2391,
+        "exact_runtime_value_matches": 0,
+        "cookie_secret_checked": true
+      }
+    },
+    {
+      "target": "portable",
+      "run_nonce": "6105aabbccdd",
+      "cases": 5,
+      "pass": 5,
+      "fail": 0,
+      "skip": 0,
+      "junit_errors": 0,
+      "global_errors": 0,
+      "fixture_only": true,
+      "duration_s": 26.082383999999998,
+      "auth_HTTP_requests": 30,
+      "forwarded": 30,
+      "accepted": 29,
+      "rejected": 1,
+      "pending": 0,
+      "unknown": 0,
+      "external_auth_requests": 0,
+      "cleanup": {
+        "fixture_only": true,
+        "private_root_removed": true,
+        "runtime_configuration_removed": true,
+        "owned_children_absent": true,
+        "owned_root_removal": {
+          "removed": true,
+          "marker_retained_until_children_removed": true,
+          "private_configuration_removed_first": true,
+          "transient_errors": []
+        },
+        "external_resources": 0,
+        "owned_journal_removed": true
+      },
+      "leak_check": {
+        "fixture_only": true,
+        "emitted_text_files": 91,
+        "exact_runtime_value_matches": 0,
+        "cookie_secret_checked": true
+      }
+    }
+  ],
+  "post_build_source_changes": [
+    "playwright.neon-runtime-flow.config.ts",
+    "scripts/serve-neon-runtime-flow.mjs"
+  ],
+  "changes_scope": "local launcher/Playwright startup only; no consumed app/SDK/output changes",
+  "full_N00_gate_passed": false
+}

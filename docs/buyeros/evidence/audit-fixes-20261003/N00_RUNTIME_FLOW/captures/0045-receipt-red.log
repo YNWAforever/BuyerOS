@@ -1,0 +1,40 @@
+✔ bridge forwards bearer once to exact owned diagnostic and returns subject without token (76.9585ms)
+✔ missing owner config, external endpoint and different fingerprint refuse before HTTP (4.0827ms)
+✔ foreign or missing Origin and invalid bearer refuse before HTTP (2.4535ms)
+✔ API rejection stays 401 and unknown API result is not retried or exposed (54.5034ms)
+✔ mismatched response ownership and malformed response fail closed (1.4656ms)
+✔ network failure cannot expose exception data or trigger a retry (0.888ms)
+✖ browser receipt must match the rendered target and session subject, and cannot claim live verification (2.6747ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 697.0828
+
+✖ failing tests:
+
+test at tests\neon-real-diagnostic.test.mjs:16:1
+✖ browser receipt must match the rendered target and session subject, and cannot claim live verification (2.6747ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-diagnostic.test.mjs:16:123)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

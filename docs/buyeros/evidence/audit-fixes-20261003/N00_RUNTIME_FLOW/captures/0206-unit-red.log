@@ -1,0 +1,171 @@
+✖ runtime flow builds in a fresh area with shared strict runtime and separate diagnostic/fixture overlays (1.2013ms)
+✖ allowed SDK session/token/JWKS calls preserve method/body/cookies through the counted loopback URL (1.2534ms)
+✖ fixture transport supports Request inputs without leaking a new endpoint (0.5084ms)
+✖ foreign origin, credentials, encoded path, unknown endpoint and loopback bypass never dispatch (0.3575ms)
+✖ transport cannot be installed for real targets or rebound to different fictional context (1.1971ms)
+✖ unknown upstream response is surfaced once without retry (0.3548ms)
+✖ SDK POST redirect is returned to the caller and is never automatically followed (0.3053ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 0
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 123.5532
+
+✖ failing tests:
+
+test at tests\neon-runtime-flow.test.mjs:7:1
+✖ runtime flow builds in a fresh area with shared strict runtime and separate diagnostic/fixture overlays (1.2013ms)
+  Error: N00_BUILD_PROFILE
+      at fixtureBuildProfile (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-compatibility-harness.mjs:54:41)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:7:125)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17)
+
+test at tests\neon-runtime-flow.test.mjs:8:1
+✖ allowed SDK session/token/JWKS calls preserve method/body/cookies through the counted loopback URL (1.2534ms)
+  AssertionError [ERR_ASSERTION]: fixture transport is not implemented
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at install (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:6:44)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:8:241)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-flow.test.mjs:9:1
+✖ fixture transport supports Request inputs without leaking a new endpoint (0.5084ms)
+  AssertionError [ERR_ASSERTION]: fixture transport is not implemented
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at install (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:6:44)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:9:290)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-flow.test.mjs:10:1
+✖ foreign origin, credentials, encoded path, unknown endpoint and loopback bypass never dispatch (0.3575ms)
+  AssertionError [ERR_ASSERTION]: fixture transport is not implemented
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at install (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:6:44)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:10:208)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-flow.test.mjs:11:1
+✖ transport cannot be installed for real targets or rebound to different fictional context (1.1971ms)
+  AssertionError [ERR_ASSERTION]: fixture transport is not implemented
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at install (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:6:44)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:11:149)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-flow.test.mjs:12:1
+✖ unknown upstream response is surfaced once without retry (0.3548ms)
+  AssertionError [ERR_ASSERTION]: fixture transport is not implemented
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at install (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:6:44)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:12:163)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-flow.test.mjs:13:1
+✖ SDK POST redirect is returned to the caller and is never automatically followed (0.3053ms)
+  AssertionError [ERR_ASSERTION]: fixture transport is not implemented
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at install (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:6:44)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:13:287)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

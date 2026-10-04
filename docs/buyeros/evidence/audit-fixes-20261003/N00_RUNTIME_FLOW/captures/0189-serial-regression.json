@@ -1,0 +1,17 @@
+{
+  "tests": 144,
+  "pass": 144,
+  "fail": 0,
+  "skip": 0,
+  "cancelled": 0,
+  "todo": 0,
+  "duration_ms": 66617.2528,
+  "concurrency": 1,
+  "retained_parallel_attempt": {
+    "tests": 144,
+    "pass": 143,
+    "fail": 1,
+    "skip": 0,
+    "reason": "existing40ms500-response case received503; precise host cause unproven; assertions unchanged"
+  }
+}

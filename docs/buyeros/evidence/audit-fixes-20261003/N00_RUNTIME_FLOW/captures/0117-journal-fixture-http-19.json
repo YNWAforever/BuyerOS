@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "fixture_only": true,
+  "sequence": 19,
+  "method": "GET",
+  "path": "/fixture-token",
+  "fingerprint": "7dcb45703088e9bcb6771861f9d2cf29b799eb0d8aabf6491b41104479ee0d58",
+  "status": 200,
+  "reason": "upstream-response",
+  "outcome": "accepted"
+}

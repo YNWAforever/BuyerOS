@@ -1,0 +1,38 @@
+[
+  {
+    "label": "related-node-final",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "--test",
+      "tests/neon-real-runtime.test.mjs",
+      "tests/neon-counted-proxy.test.mjs",
+      "tests/neon-real-preflight.test.mjs",
+      "tests/neon-compatibility-harness.test.mjs",
+      "tests/neon-compatibility-discovery.test.mjs",
+      "tests/neon-runtime-probe.test.mjs",
+      "tests/neon-runtime-cleanup.test.mjs",
+      "tests/neon-runtime-flow.test.mjs",
+      "tests/neon-real-diagnostic.test.mjs",
+      "tests/api-types-generation.test.mjs",
+      "tests/audit-auth-render.test.mjs",
+      "tests/vercel-services.test.mjs"
+    ],
+    "cwd": "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS",
+    "exit": 0,
+    "duration_ms": 14841
+  },
+  {
+    "label": "crypto-final",
+    "command": [
+      "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/fixtures/neon-runtime-flow/test_verify.py",
+      "--junitxml=test-results/neon-runtime-flow/crypto-final.xml"
+    ],
+    "cwd": "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS",
+    "exit": 0,
+    "duration_ms": 8511
+  }
+]

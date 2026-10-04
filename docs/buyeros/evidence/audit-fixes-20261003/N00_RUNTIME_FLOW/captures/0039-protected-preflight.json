@@ -1,0 +1,56 @@
+[
+  {
+    "file": "playwright.audit-fixes.config.ts",
+    "base_git_sha256": "c5b59d0b8c29d8d6d2ca74d79e3900e52ec53773b834cd595871ac4a1279a981",
+    "current_git_sha256": "4fcb03339aaa360d9b0dad51b82a8fc37a253ab122399fef9224b95d847eb85c",
+    "changed": true
+  },
+  {
+    "file": "scripts/neon-compatibility-harness.mjs",
+    "base_git_sha256": "e92656e552c5fc7954fe4d939aa8a6d19951e467bb4f3de9d0377c8d41d66660",
+    "current_git_sha256": "0606bb76983b508104d6fc0e6a9bda23d0c8485abba7bbdda6ca3a22ce609d71",
+    "changed": true
+  },
+  {
+    "file": "tests/neon-compatibility-discovery.test.mjs",
+    "base_git_sha256": "be6f40f6e4a66bc1d4b1e6393d869d4aa034b3d633d80e55013ee361687e1c71",
+    "current_git_sha256": "f8488bc70db1cd342ae64269e1c5112305e81e579a5bbc1b5dc17d99579fff29",
+    "changed": true
+  },
+  {
+    "file": "services/api/tests/conftest.py",
+    "base_git_sha256": "54fd72c2553067cf36d8760dc99d0e650cb7fa3f47a9eb9be2236a96a1e1045f",
+    "current_git_sha256": "54fd72c2553067cf36d8760dc99d0e650cb7fa3f47a9eb9be2236a96a1e1045f",
+    "changed": false
+  },
+  {
+    "file": "services/worker/tests/conftest.py",
+    "base_git_sha256": "859b15bf36b183a651d1b1f0de48a749357829b5f7d1c3570c37294944a86946",
+    "current_git_sha256": "859b15bf36b183a651d1b1f0de48a749357829b5f7d1c3570c37294944a86946",
+    "changed": false
+  },
+  {
+    "file": "services/api/tools/serve_e2e_fixture.py",
+    "base_git_sha256": "15b7bc7edd0a30cf41f6b401c6c7b24a8c6e28e0d88d808812eefbcb8bc7ea2b",
+    "current_git_sha256": "15b7bc7edd0a30cf41f6b401c6c7b24a8c6e28e0d88d808812eefbcb8bc7ea2b",
+    "changed": false
+  },
+  {
+    "file": "services/worker/tests/fixtures/run_browser_research.py",
+    "base_git_sha256": "175c51f7937087d905a30fd80981d50b58915928539638ebf212b385e16a4953",
+    "current_git_sha256": "175c51f7937087d905a30fd80981d50b58915928539638ebf212b385e16a4953",
+    "changed": false
+  },
+  {
+    "file": "services/generated/buyeros-api.ts",
+    "base_git_sha256": "8963a6cc6ca2f790076993c040251963bbd15a816b61233f1ab6fbb4d76ddaa1",
+    "current_git_sha256": "8963a6cc6ca2f790076993c040251963bbd15a816b61233f1ab6fbb4d76ddaa1",
+    "changed": false
+  },
+  {
+    "file": "docs/superpowers/plans/2026-10-03-buyeros-gpt61-fixes.md",
+    "base_git_sha256": "cc37ff799cb48d4b23549685e8e4696bd76d4a016333cdb6e409eb49e6b93930",
+    "current_git_sha256": "cc37ff799cb48d4b23549685e8e4696bd76d4a016333cdb6e409eb49e6b93930",
+    "changed": false
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
+  "base_sha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+  "reverse_applicability_exit": 0,
+  "applied": false,
+  "production_rehearsal": false,
+  "method": "revert source commit plus following evidence/status checkpoint; no DB or external resource undo"
+}

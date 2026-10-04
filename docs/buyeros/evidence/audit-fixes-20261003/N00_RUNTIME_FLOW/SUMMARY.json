@@ -1,0 +1,162 @@
+{
+  "task": "N00",
+  "finding": "F20",
+  "case": "NA01",
+  "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
+  "base_sha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+  "files": 27,
+  "insertions": 518,
+  "deletions": 1,
+  "node": {
+    "tests": 144,
+    "pass": 144,
+    "fail": 0,
+    "skip": 0,
+    "cancelled": 0,
+    "todo": 0,
+    "duration_ms": 66617.2528,
+    "concurrency": 1,
+    "retained_parallel_attempt": {
+      "tests": 144,
+      "pass": 143,
+      "fail": 1,
+      "skip": 0,
+      "reason": "existing40ms500-response case received503; precise host cause unproven; assertions unchanged"
+    }
+  },
+  "crypto": {
+    "cases": 8,
+    "pass": 8,
+    "fail": 0,
+    "skip": 0,
+    "warnings": 1,
+    "duration_s": 1.51
+  },
+  "built_ui": {
+    "cases": 10,
+    "pass": 10,
+    "fail": 0,
+    "skip": 0,
+    "global_errors": 0,
+    "results": [
+      {
+        "target": "vercel",
+        "run_nonce": "5105aabbccdd",
+        "cases": 5,
+        "pass": 5,
+        "fail": 0,
+        "skip": 0,
+        "junit_errors": 0,
+        "global_errors": 0,
+        "fixture_only": true,
+        "duration_s": 67.400413,
+        "auth_HTTP_requests": 30,
+        "forwarded": 30,
+        "accepted": 29,
+        "rejected": 1,
+        "pending": 0,
+        "unknown": 0,
+        "external_auth_requests": 0,
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": []
+          },
+          "external_resources": 0,
+          "owned_journal_removed": true
+        },
+        "leak_check": {
+          "fixture_only": true,
+          "emitted_text_files": 2391,
+          "exact_runtime_value_matches": 0,
+          "cookie_secret_checked": true
+        }
+      },
+      {
+        "target": "portable",
+        "run_nonce": "6105aabbccdd",
+        "cases": 5,
+        "pass": 5,
+        "fail": 0,
+        "skip": 0,
+        "junit_errors": 0,
+        "global_errors": 0,
+        "fixture_only": true,
+        "duration_s": 26.082383999999998,
+        "auth_HTTP_requests": 30,
+        "forwarded": 30,
+        "accepted": 29,
+        "rejected": 1,
+        "pending": 0,
+        "unknown": 0,
+        "external_auth_requests": 0,
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": []
+          },
+          "external_resources": 0,
+          "owned_journal_removed": true
+        },
+        "leak_check": {
+          "fixture_only": true,
+          "emitted_text_files": 91,
+          "exact_runtime_value_matches": 0,
+          "cookie_secret_checked": true
+        }
+      }
+    ],
+    "post_build_source_changes": [
+      "playwright.neon-runtime-flow.config.ts",
+      "scripts/serve-neon-runtime-flow.mjs"
+    ],
+    "changes_scope": "local launcher/Playwright startup only; no consumed app/SDK/output changes",
+    "full_N00_gate_passed": false
+  },
+  "types_exit": 0,
+  "lint_exit": 0,
+  "generated_types_exit": 0,
+  "generated_routes_exit": 0,
+  "actual_build_commands": 4,
+  "build_exits": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "schema_head": "0037_bulk_manifests",
+  "migrations": 0,
+  "DB_connections": 0,
+  "required_DB_suite_applicable": false,
+  "DB_skips": 0,
+  "external_auth_requests": 0,
+  "real_Neon_verified": false,
+  "human_Google_verified": false,
+  "full_SDK_browser_CLI_accounting_verified": false,
+  "external_cleanup_executor_verified": false,
+  "deployed_sha": null,
+  "independent_review": "pending; author review only/no agents",
+  "full_N00_gate_passed": false,
+  "original_callback": "strict302 portable500/Vercel200; historical/carried/not rerun or relaxed",
+  "retained_failures": [
+    "baselineUI1fail",
+    "initialbuiltVercel4pass1bodytimeout",
+    "finalVercelstartup0tests",
+    "finalportableAPIstartup0tests",
+    "parallelNode143pass1fail40ms500vs503",
+    "initialtypes2/lint9errors1warning"
+  ],
+  "captures": 238
+}

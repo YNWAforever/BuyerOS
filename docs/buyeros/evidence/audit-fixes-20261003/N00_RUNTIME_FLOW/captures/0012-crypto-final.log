@@ -1,0 +1,9 @@
+........                                                                 [100%]
+============================== warnings summary ===============================
+tests/fixtures/neon-runtime-flow/test_verify.py::test_exact_eddsa_trust[valid]
+  C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\test-results\neon-runtime-flow\crypto-final.xml -
+8 passed, 1 warning in 1.51s

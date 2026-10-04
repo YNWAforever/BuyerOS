@@ -1,0 +1,14 @@
+<testsuites id="" name="" tests="5" failures="0" skipped="0" errors="0" time="67.400413">
+<testsuite name="audit-neon-runtime-flow.spec.ts" timestamp="2026-10-04T17:50:01.626Z" hostname="" tests="5" failures="0" skipped="0" time="3.802" errors="0">
+<testcase name="NA01 runtime flow: real-only diagnostic UI has no build-time Auth configuration" classname="audit-neon-runtime-flow.spec.ts" time="0.482">
+</testcase>
+<testcase name="NA01 runtime flow: browser Google model, managed callback, server/client session, token/API, reload and logout" classname="audit-neon-runtime-flow.spec.ts" time="2.241">
+</testcase>
+<testcase name="NA01 runtime flow: explicit issuer differs from Auth URL; wrong trust/key/algorithm/expiry are refused by FastAPI" classname="audit-neon-runtime-flow.spec.ts" time="0.683">
+</testcase>
+<testcase name="NA01 runtime flow: foreign origin refuses before diagnostic/JWKS; each direct SDK upstream request is charged" classname="audit-neon-runtime-flow.spec.ts" time="0.078">
+</testcase>
+<testcase name="NA01 runtime flow: consumed verifier cannot create a session in a second browser" classname="audit-neon-runtime-flow.spec.ts" time="0.318">
+</testcase>
+</testsuite>
+</testsuites>

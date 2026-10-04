@@ -1,0 +1,65 @@
+[
+  {
+    "profile": "runtime-flow",
+    "base_sha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+    "source_destinations_checked": 274,
+    "source_tar_matches_inventory": true,
+    "current_source_drift": [
+      "playwright.neon-runtime-flow.config.ts",
+      "scripts/neon-real-diagnostic.d.mts",
+      "scripts/neon-real-diagnostic.mjs",
+      "scripts/neon-runtime-flow-node-bridge.mjs",
+      "scripts/serve-neon-runtime-flow.mjs",
+      "scripts/neon-compatibility-harness.mjs",
+      "tests/fixtures/neon-runtime-flow/overlay/app/compat/client.tsx",
+      "tests/fixtures/neon-runtime-flow/overlay/app/compat/page.tsx",
+      "tests/fixtures/neon-runtime-flow/overlay/app/page.tsx",
+      "tests/fixtures/neon-runtime-flow/overlay/server.ts"
+    ],
+    "targets": [
+      {
+        "target": "portable",
+        "regular_members_checked": 79,
+        "match": true,
+        "sdk_or_emitted_patch": false
+      },
+      {
+        "target": "vercel",
+        "regular_members_checked": 2204,
+        "match": true,
+        "sdk_or_emitted_patch": false
+      }
+    ],
+    "container_cleanup": {
+      "owner": "3941ceff713ef7f3fbad95ff",
+      "name": "buyeros-n00-3941ceff713ef7f3fbad95ff",
+      "removed": true
+    }
+  },
+  {
+    "profile": "runtime-flow-final",
+    "base_sha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+    "source_destinations_checked": 274,
+    "source_tar_matches_inventory": true,
+    "current_source_drift": [],
+    "targets": [
+      {
+        "target": "portable",
+        "regular_members_checked": 95,
+        "match": true,
+        "sdk_or_emitted_patch": false
+      },
+      {
+        "target": "vercel",
+        "regular_members_checked": 2220,
+        "match": true,
+        "sdk_or_emitted_patch": false
+      }
+    ],
+    "container_cleanup": {
+      "owner": "223889cebf04c46a2338a9d3",
+      "name": "buyeros-n00-223889cebf04c46a2338a9d3",
+      "removed": true
+    }
+  }
+]

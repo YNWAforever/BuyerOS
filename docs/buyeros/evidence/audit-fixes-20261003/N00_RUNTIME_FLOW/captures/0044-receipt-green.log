@@ -1,0 +1,23 @@
+✔ bridge forwards bearer once to exact owned diagnostic and returns subject without token (58.367ms)
+✔ missing owner config, external endpoint and different fingerprint refuse before HTTP (2.0576ms)
+✔ foreign or missing Origin and invalid bearer refuse before HTTP (1.1948ms)
+✔ API rejection stays 401 and unknown API result is not retried or exposed (1.7735ms)
+✔ mismatched response ownership and malformed response fail closed (1.256ms)
+✔ network failure cannot expose exception data or trigger a retry (7.831ms)
+✔ browser receipt must match the rendered target and session subject, and cannot claim live verification (0.4125ms)
+✔ runtime flow builds in a fresh area with shared strict runtime and separate diagnostic/fixture overlays (1.9099ms)
+✔ allowed SDK session/token/JWKS calls preserve method/body/cookies through the counted loopback URL (33.7802ms)
+✔ fixture transport supports Request inputs without leaking a new endpoint (10.7796ms)
+✔ foreign origin, credentials, encoded path, unknown endpoint and loopback bypass never dispatch (1.2052ms)
+✔ transport cannot be installed for real targets or rebound to different fictional context (0.3009ms)
+✔ unknown upstream response is surfaced once without retry (0.7703ms)
+✔ SDK POST redirect is returned to the caller and is never automatically followed (0.5535ms)
+✔ owned diagnostic is the only additional loopback transport and requires its exact private owner nonce (0.7332ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 299.9513

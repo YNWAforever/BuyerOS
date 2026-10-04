@@ -1,0 +1,45 @@
+[WebServer] (node:24592) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:44672) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\e2e\audit-neon-runtime-flow.spec.ts:3:1 › NA01 runtime flow: real-only diagnostic UI has no build-time Auth configuration (6.5s)
+
+
+  1) tests\e2e\audit-neon-runtime-flow.spec.ts:3:1 › NA01 runtime flow: real-only diagnostic UI has no build-time Auth configuration 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'N00 session and token diagnostic' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'N00 session and token diagnostic' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: 'N00 session and token diagnostic' })
+
+
+      3 | test('NA01 runtime flow: real-only diagnostic UI has no build-time Auth configuration',async({page})=>{
+      4 |  await page.route('**/*',route=>['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)?route.continue():route.abort());
+    > 5 |  await page.goto('/compat');await expect(page.getByRole('heading',{name:'N00 session and token diagnostic'})).toBeVisible();
+        |                                                                                                               ^
+      6 |  await expect(page.getByTestId('server-session')).toHaveText('anonymous');
+      7 |  await expect(page.getByRole('button',{name:'Continue with Google'})).toBeEnabled();
+      8 |  assertProtocolStorage(await page.evaluate(()=>Object.entries(localStorage)));
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-runtime-flow.spec.ts:5:111
+
+    Error Context: test-results\neon-runtime-flow\baseline-vercel-1105aabbccdd-ui\audit-neon-runtime-flow-NA-ab3ce-ild-time-Auth-configuration\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-runtime-flow\baseline-vercel-1105aabbccdd-ui\audit-neon-runtime-flow-NA-ab3ce-ild-time-Auth-configuration\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-runtime-flow\baseline-vercel-1105aabbccdd-ui\audit-neon-runtime-flow-NA-ab3ce-ild-time-Auth-configuration\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\audit-neon-runtime-flow.spec.ts:3:1 › NA01 runtime flow: real-only diagnostic UI has no build-time Auth configuration 

@@ -1,0 +1,67 @@
+? Verifying lockfile against supply-chain policies (1059 entries)...
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +135 -1
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+
+   ╭──────────────────────────────────────────────────────────────────────╮
+   │                                                                      │
+   │                 Update available! 11.25.0 → 12.9.1.                  │
+   │                 Changelog: https://pnpm.io/v/12.9.1                  │
+   │   To update, run: curl -fsSL https://get.pnpm.io/install.sh | sh -   │
+   │                                                                      │
+   ╰──────────────────────────────────────────────────────────────────────╯
+
+Progress: resolved 135, reused 0, downloaded 2, added 1
+Progress: resolved 135, reused 0, downloaded 19, added 4
+Progress: resolved 135, reused 0, downloaded 81, added 14
+Progress: resolved 135, reused 0, downloaded 115, added 43
+Progress: resolved 135, reused 0, downloaded 122, added 60
+Progress: resolved 135, reused 0, downloaded 129, added 94
+Progress: resolved 135, reused 0, downloaded 130, added 129
+Progress: resolved 135, reused 0, downloaded 130, added 130
+[WARN] Tarball download average speed 46 KiB/s (size 334 KiB) is below 50 KiB/s: https://registry.npmjs.org/@triplit/db/-/db-1.1.10.tgz (GET)
+Progress: resolved 135, reused 0, downloaded 131, added 130
+Progress: resolved 135, reused 0, downloaded 133, added 132
+Progress: resolved 135, reused 0, downloaded 133, added 133
+[WARN] Request took 10474ms: https://registry.npmjs.org/@instantdb%2Freact
+Progress: resolved 135, reused 0, downloaded 134, added 133
+[WARN] Request took 10906ms: https://registry.npmjs.org/@next%2Fswc-win32-x64-msvc
+Progress: resolved 135, reused 0, downloaded 134, added 134
+[WARN] Request took 11964ms: https://registry.npmjs.org/@next%2Fswc-darwin-arm64
+Progress: resolved 135, reused 0, downloaded 135, added 134
+[WARN] Request took 12450ms: https://registry.npmjs.org/@next%2Fswc-linux-arm64-musl
+[WARN] Request took 13101ms: https://registry.npmjs.org/@next%2Feslint-plugin-next
+[WARN] Request took 13455ms: https://registry.npmjs.org/@instantdb%2Fversion
+Progress: resolved 135, reused 0, downloaded 135, added 135, done
+[WARN] Request took 14472ms: https://registry.npmjs.org/@next%2Fswc-darwin-x64
+[WARN] Request took 15400ms: https://registry.npmjs.org/@next%2Fswc-linux-x64-musl
+[WARN] Request took 17089ms: https://registry.npmjs.org/@playwright%2Ftest
+[WARN] Request took 10977ms: https://registry.npmjs.org/axe-core
+[WARN] Request took 12303ms: https://registry.npmjs.org/@typescript-eslint%2Futils
+[WARN] Request took 10131ms: https://registry.npmjs.org/eslint-plugin-react-hooks
+[WARN] Request took 13239ms: https://registry.npmjs.org/@typescript-eslint%2Ftypes
+[WARN] Request took 13535ms: https://registry.npmjs.org/@typescript-eslint%2Fvisitor-keys
+[WARN] Request took 13922ms: https://registry.npmjs.org/@typescript-eslint%2Fscope-manager
+[WARN] Request took 19858ms: https://registry.npmjs.org/@typescript-eslint%2Ftype-utils
+[WARN] Request took 20510ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+[WARN] Request took 21317ms: https://registry.npmjs.org/@typescript-eslint%2Ftypescript-estree
+[WARN] Request took 22158ms: https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin
+[WARN] Request took 11012ms: https://registry.npmjs.org/react-is
+[WARN] Request took 17323ms: https://registry.npmjs.org/playwright
+[WARN] Request took 17754ms: https://registry.npmjs.org/playwright-core
+[WARN] Request took 14935ms: https://registry.npmjs.org/typescript
+[WARN] Request took 11641ms: https://registry.npmjs.org/scheduler
+[WARN] Request took 12344ms: https://registry.npmjs.org/react-server-dom-webpack
+[WARN] Request took 11784ms: https://registry.npmjs.org/react
+[WARN] Request took 17215ms: https://registry.npmjs.org/@types%2Fnode
+[WARN] Request took 12671ms: https://registry.npmjs.org/eslint-plugin-react-hooks
+[WARN] Request took 12430ms: https://registry.npmjs.org/react-dom
+[WARN] Request took 16171ms: https://registry.npmjs.org/wrangler
+[WARN] Request took 21190ms: https://registry.npmjs.org/next
+✓ Lockfile passes supply-chain policies (1059 entries in 42.9s)
+
+devDependencies:
++ @neondatabase/auth 0.5.0-beta
+
+Done in 48.4s using pnpm v11.25.0

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "proposal": "buyeros-neon-auth-n00-20261004",
+  "approvalReference": "fixture-only-no-external-authority",
+  "approvedAt": "2026-10-04T17:43:16.024Z",
+  "limit": 200,
+  "cleanupReserve": 20,
+  "buildLimit": 2,
+  "buildTimeoutMs": 1200000,
+  "target": {
+    "schemaVersion": 1,
+    "proposal": "buyeros-neon-auth-n00-20261004",
+    "sourceSha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+    "projectId": "fictional-probe-project-4105aabbccdd",
+    "branchId": "fictional-probe-branch-4105aabbccdd",
+    "authId": "fictional-probe-auth-4105aabbccdd",
+    "orgId": "org-soft-sunset-25251479",
+    "name": "buyeros-neon-auth-n00-20261004",
+    "regionId": "aws-ap-southeast-1",
+    "creationMode": "new-empty",
+    "createdAt": "2026-10-04T17:43:16.024Z",
+    "expiresAt": "2026-10-04T19:43:16.024Z",
+    "readback": {
+      "projectId": "fictional-probe-project-4105aabbccdd",
+      "branchId": "fictional-probe-branch-4105aabbccdd",
+      "authId": "fictional-probe-auth-4105aabbccdd",
+      "orgId": "org-soft-sunset-25251479",
+      "name": "buyeros-neon-auth-n00-20261004",
+      "regionId": "aws-ap-southeast-1",
+      "observedAt": "2026-10-04T17:43:16.024Z",
+      "subscription": "free_v3",
+      "emailDeliveryEnabled": false,
+      "emailPasswordEnabled": false,
+      "emailHooksEnabled": false,
+      "methods": [
+        "google"
+      ],
+      "trustedOrigins": [
+        "http://localhost:44890"
+      ]
+    },
+    "auth": {
+      "baseUrl": "https://4105aabbccdd.fixture.invalid/auth",
+      "issuer": "https://issuer-4105aabbccdd.fixture.invalid",
+      "audience": "fictional-probe-audience-4105aabbccdd",
+      "jwksUrl": "https://4105aabbccdd.fixture.invalid/auth/jwks",
+      "algorithm": "EdDSA",
+      "keyType": "OKP",
+      "curve": "Ed25519"
+    },
+    "fingerprint": "3695b913a2e1f247f2942f92a096c13968d67f62420c1f475aeb5c816d790be4"
+  },
+  "identity": null,
+  "requests": [],
+  "builds": []
+}

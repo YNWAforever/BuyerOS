@@ -1,0 +1,36 @@
+[
+  {
+    "target": "vercel",
+    "run_nonce": "5105aabbccdd",
+    "profile": "runtime-flow-final",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "node_modules/@playwright/test/cli.js",
+      "test",
+      "--config",
+      "playwright.neon-runtime-flow.config.ts"
+    ],
+    "cwd": "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS",
+    "exit": 0,
+    "error": null,
+    "duration_ms": 74605,
+    "log": "test-results/neon-runtime-flow/vercel-retry-ui.log"
+  },
+  {
+    "target": "portable",
+    "run_nonce": "6105aabbccdd",
+    "profile": "runtime-flow-final",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "node_modules/@playwright/test/cli.js",
+      "test",
+      "--config",
+      "playwright.neon-runtime-flow.config.ts"
+    ],
+    "cwd": "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS",
+    "exit": 0,
+    "error": null,
+    "duration_ms": 27145,
+    "log": "test-results/neon-runtime-flow/portable-retry-ui.log"
+  }
+]

@@ -1,0 +1,15 @@
+✔ N00 built fixture is isolated from playwright.audit-fixes.config.ts (2181.0924ms)
+✔ N00 built fixture is isolated from playwright.audit-regression.config.ts (1743.1424ms)
+✔ N00 dedicated config discovers all seven built-output cases (1199.6947ms)
+✔ N00 counted config discovers the same seven cases with separate producer outputs (1223.1112ms)
+✔ all N00 output profiles stay isolated from playwright.audit-fixes.config.ts (2766.4693ms)
+✔ all N00 output profiles stay isolated from playwright.audit-regression.config.ts (1986.1903ms)
+✔ runtime flow config discovers five actual-output cases (1061.0914ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12421.7218

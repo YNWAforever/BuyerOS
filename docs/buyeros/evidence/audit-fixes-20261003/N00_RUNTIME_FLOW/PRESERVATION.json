@@ -1,0 +1,33 @@
+{
+  "inputs": 31,
+  "frozen_N00_payloads": 1148,
+  "total_prior_payloads": 1179,
+  "unchanged": true,
+  "operation_rows": 84,
+  "generated_contract_unchanged": true,
+  "destructive_guards_unchanged": true,
+  "other_task_entries_unchanged": 24,
+  "other_cases_unchanged": 97,
+  "all98historical15fields_unchanged": true,
+  "historical_T_registry_unchanged": true,
+  "unrelated_worktrees": [
+    {
+      "worktree": "C:/Users/laich/Documents/BuyerOS",
+      "head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+      "dirty_paths": 0,
+      "binary_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "worktree": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS",
+      "head": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
+      "dirty_paths": 0,
+      "binary_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "worktree": "C:/Users/laich/.codex/worktrees/neon-auth-migration/BuyerOS",
+      "head": "a78859fe474f5722be3755b10e2586436b53bf97",
+      "dirty_paths": 193,
+      "binary_diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0"
+    }
+  ]
+}

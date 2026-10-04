@@ -22,11 +22,11 @@
     {
       "id": "N00",
       "status": "local-spike-partial",
-      "code_status": "official built runtime-only SDK configuration/constructor kernel and fixture UI; source Nitro dispatcher and owned cleanup; no auth cutover",
-      "verification_status": "fresh Node126pass0fail0skip; both actual built kernel6pass0fail0skip0globalerror; types/lint/contracts0; session/token/provider and original callback gate remain open",
+      "code_status": "guarded built session/token UI, independent owned EdDSA diagnostic and fictional counted transport; no auth cutover",
+      "verification_status": "Node144serialpass0fail0skip;crypto8pass;actual portable/Vercel each5pass0fail0skip0globalerror;types/lint/contracts0;real Neon/accounting/original callback gate open",
       "release_status": "not-deployed; Auth0 retained",
       "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
-      "source_sha": "e683a89225863387367bda204f84aa168f6abefb",
+      "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
       "finding_ids": [
         "F20"
       ],
@@ -35,16 +35,22 @@
       ],
       "checks": {
         "node": {
-          "cases": 126,
-          "pass": 126,
+          "tests": 144,
+          "pass": 144,
           "fail": 0,
           "skip": 0,
-          "duration_ms": 12046.3406,
-          "tests": 126,
-          "skipped": 0,
           "cancelled": 0,
           "todo": 0,
-          "source_sha": "e683a89225863387367bda204f84aa168f6abefb",
+          "duration_ms": 66617.2528,
+          "concurrency": 1,
+          "retained_parallel_attempt": {
+            "tests": 144,
+            "pass": 143,
+            "fail": 1,
+            "skip": 0,
+            "reason": "existing40ms500-response case received503; precise host cause unproven; assertions unchanged"
+          },
+          "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
           "executed_this_followup": true
         },
         "built_ui": {
@@ -232,8 +238,9 @@
               "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
               "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
               "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
-              "executed_this_followup": true,
-              "new_real_runtime_overlay_exercised": false
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
             },
             "vercel": {
               "target": "vercel",
@@ -250,8 +257,9 @@
               "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
               "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
               "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
-              "executed_this_followup": true,
-              "new_real_runtime_overlay_exercised": false
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
             }
           },
           "all_ui_attempts": [
@@ -270,8 +278,9 @@
               "report": "test-results\\neon-real-runtime\\portable-ui.xml",
               "log": "test-results\\neon-real-runtime\\portable-ui.log",
               "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
-              "executed_this_followup": true,
-              "new_real_runtime_overlay_exercised": false
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
             },
             {
               "target": "portable",
@@ -288,8 +297,9 @@
               "report": "test-results\\neon-real-runtime\\portable-5bdaf49c6e02-ui.xml",
               "log": "test-results\\neon-real-runtime\\portable-ui-attempt2.log",
               "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
-              "executed_this_followup": true,
-              "new_real_runtime_overlay_exercised": false
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
             },
             {
               "target": "portable",
@@ -306,8 +316,9 @@
               "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
               "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
               "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
-              "executed_this_followup": true,
-              "new_real_runtime_overlay_exercised": false
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
             },
             {
               "target": "vercel",
@@ -324,8 +335,9 @@
               "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
               "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
               "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
-              "executed_this_followup": true,
-              "new_real_runtime_overlay_exercised": false
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
             }
           ],
           "fixture_budgets": {
@@ -751,11 +763,173 @@
           "full_N00_gate_passed": false,
           "original_callback_case": "carried unchanged: portable500/vercel200 vs302; not rerun or relaxed in this follow-up",
           "rollback_reverse_check_exit": 0
+        },
+        "runtime_flow": {
+          "task": "N00",
+          "finding": "F20",
+          "case": "NA01",
+          "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
+          "base_sha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+          "files": 27,
+          "insertions": 518,
+          "deletions": 1,
+          "node": {
+            "tests": 144,
+            "pass": 144,
+            "fail": 0,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 66617.2528,
+            "concurrency": 1,
+            "retained_parallel_attempt": {
+              "tests": 144,
+              "pass": 143,
+              "fail": 1,
+              "skip": 0,
+              "reason": "existing40ms500-response case received503; precise host cause unproven; assertions unchanged"
+            }
+          },
+          "crypto": {
+            "cases": 8,
+            "pass": 8,
+            "fail": 0,
+            "skip": 0,
+            "warnings": 1,
+            "duration_s": 1.51
+          },
+          "built_ui": {
+            "cases": 10,
+            "pass": 10,
+            "fail": 0,
+            "skip": 0,
+            "global_errors": 0,
+            "results": [
+              {
+                "target": "vercel",
+                "run_nonce": "5105aabbccdd",
+                "cases": 5,
+                "pass": 5,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "global_errors": 0,
+                "fixture_only": true,
+                "duration_s": 67.400413,
+                "auth_HTTP_requests": 30,
+                "forwarded": 30,
+                "accepted": 29,
+                "rejected": 1,
+                "pending": 0,
+                "unknown": 0,
+                "external_auth_requests": 0,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0,
+                  "owned_journal_removed": true
+                },
+                "leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2391,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                }
+              },
+              {
+                "target": "portable",
+                "run_nonce": "6105aabbccdd",
+                "cases": 5,
+                "pass": 5,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "global_errors": 0,
+                "fixture_only": true,
+                "duration_s": 26.082383999999998,
+                "auth_HTTP_requests": 30,
+                "forwarded": 30,
+                "accepted": 29,
+                "rejected": 1,
+                "pending": 0,
+                "unknown": 0,
+                "external_auth_requests": 0,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0,
+                  "owned_journal_removed": true
+                },
+                "leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 91,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                }
+              }
+            ],
+            "post_build_source_changes": [
+              "playwright.neon-runtime-flow.config.ts",
+              "scripts/serve-neon-runtime-flow.mjs"
+            ],
+            "changes_scope": "local launcher/Playwright startup only; no consumed app/SDK/output changes",
+            "full_N00_gate_passed": false
+          },
+          "types_exit": 0,
+          "lint_exit": 0,
+          "generated_types_exit": 0,
+          "generated_routes_exit": 0,
+          "actual_build_commands": 4,
+          "build_exits": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "schema_head": "0037_bulk_manifests",
+          "migrations": 0,
+          "DB_connections": 0,
+          "required_DB_suite_applicable": false,
+          "DB_skips": 0,
+          "external_auth_requests": 0,
+          "real_Neon_verified": false,
+          "human_Google_verified": false,
+          "full_SDK_browser_CLI_accounting_verified": false,
+          "external_cleanup_executor_verified": false,
+          "deployed_sha": null,
+          "independent_review": "pending; author review only/no agents",
+          "full_N00_gate_passed": false,
+          "original_callback": "strict302 portable500/Vercel200; historical/carried/not rerun or relaxed",
+          "retained_failures": [
+            "baselineUI1fail",
+            "initialbuiltVercel4pass1bodytimeout",
+            "finalVercelstartup0tests",
+            "finalportableAPIstartup0tests",
+            "parallelNode143pass1fail40ms500vs503",
+            "initialtypes2/lint9errors1warning"
+          ],
+          "captures": 238
         }
       },
       "migrations": "none;0037 unchanged",
-      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_RUNTIME_BUILT/RESULTS.md",
-      "rollback": "revert e683a89225863387367bda204f84aa168f6abefb plus metadata; reverse applicability0 only; no DB/resource undo",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_RUNTIME_FLOW/RESULTS.md",
+      "rollback": "revert c756596406f41884f61a3b64c8549f569e34cfa4 plus metadata;reverse applicability0 only;no DB/resource undo",
       "limits": [
         "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
         "No Vercel ingress/protection/binding/deployment verification",
@@ -764,7 +938,7 @@
         "No live performance/SLA/UAT claim"
       ],
       "full_gate_passed": false,
-      "next_action": "Complete real-only UI/session/token/FastAPI diagnostic plus bounded SDK/browser/CLI/cleanup accounting. Fresh specific isolated Neon/human-Google authorization remains pending."
+      "next_action": "Continue N00 bounded SDK/browser/CLI and owned external cleanup preparation;fresh isolated Neon/human Google approval pending"
     },
     {
       "id": "N01",
@@ -1395,10 +1569,10 @@
     "Q09 human screen-reader/staff UAT",
     "Independent source review",
     "Q16 underlying evidence when available",
-    "N00 local real-only builds/accounting next; fresh isolated actual auth roundtrip requires specific new approval",
+    "N00 local accounting/external-cleanup next; fresh isolated actual auth roundtrip requires specific new approval",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "e683a89225863387367bda204f84aa168f6abefb",
+  "reviewed_source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
   "deployed_sha": null,
   "selected_followups": [
     "U05",

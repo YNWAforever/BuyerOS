@@ -1,0 +1,44 @@
+[WebServer] (node:46948) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 5 tests using 1 worker
+
+(node:2744) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-runtime-flow.spec.ts:3:1 › NA01 runtime flow: real-only diagnostic UI has no build-time Auth configuration (371ms)
+  x  2 tests\e2e\audit-neon-runtime-flow.spec.ts:11:1 › NA01 runtime flow: browser Google model, managed callback, server/client session, token/API, reload and logout (45.6s)
+(node:33532) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 tests\e2e\audit-neon-runtime-flow.spec.ts:33:1 › NA01 runtime flow: explicit issuer differs from Auth URL; wrong trust/key/algorithm/expiry are refused by FastAPI (756ms)
+  ok 4 tests\e2e\audit-neon-runtime-flow.spec.ts:44:1 › NA01 runtime flow: foreign origin refuses before diagnostic/JWKS; each direct SDK upstream request is charged (79ms)
+  ok 5 tests\e2e\audit-neon-runtime-flow.spec.ts:52:1 › NA01 runtime flow: consumed verifier cannot create a session in a second browser (620ms)
+
+
+  1) tests\e2e\audit-neon-runtime-flow.spec.ts:11:1 › NA01 runtime flow: browser Google model, managed callback, server/client session, token/API, reload and logout 
+
+    Test timeout of 45000ms exceeded.
+
+    Error: response.json: Test timeout of 45000ms exceeded.
+
+      23 |  const apiResponse=page.waitForResponse(r=>r.url().endsWith('/api/n00/verify'));
+      24 |  await page.getByRole('button',{name:'Verify token'}).click();const verified=await apiResponse;
+    > 25 |  expect(verified.status()).toBe(200);expect(await verified.json()).toEqual({subject:'fictional-flow-user',fingerprint:await page.getByTestId('runtime-fingerprint').textContent(),protocol_fixture_only:true,external_verified:false});
+         |                                                            ^
+      26 |  await expect(page.getByTestId('client-status')).toHaveText('api-verified');
+      27 |  assertProtocolStorage(await page.evaluate(()=>Object.entries(localStorage)));expect(await page.evaluate(()=>Object.keys(sessionStorage))).toEqual([]);
+      28 |  await page.screenshot({path:testInfo.outputPath('signed-in.png')});
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-runtime-flow.spec.ts:25:60
+
+    Error Context: test-results\neon-runtime-flow\vercel-2105aabbccdd-ui\audit-neon-runtime-flow-NA-cf88e-token-API-reload-and-logout\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-runtime-flow\vercel-2105aabbccdd-ui\audit-neon-runtime-flow-NA-cf88e-token-API-reload-and-logout\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-runtime-flow\vercel-2105aabbccdd-ui\audit-neon-runtime-flow-NA-cf88e-token-API-reload-and-logout\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\audit-neon-runtime-flow.spec.ts:11:1 › NA01 runtime flow: browser Google model, managed callback, server/client session, token/API, reload and logout 
+  4 passed (1.9m)

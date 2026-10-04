@@ -1,0 +1,19 @@
+{
+  "attempts": [
+    {
+      "phase": "tool-script parse",
+      "executed": false,
+      "error": "SyntaxError: Invalid or unexpected token",
+      "cause": "unescaped Markdown fence inside JS template",
+      "tests_affected": false,
+      "files_written": 0
+    },
+    {
+      "phase": "authored metadata whitespace check",
+      "exit": 1,
+      "error": "RESULTS.md new blank line at EOF",
+      "fix": "trim authored EOF only; all captured producer bytes preserved",
+      "tests_affected": false
+    }
+  ]
+}

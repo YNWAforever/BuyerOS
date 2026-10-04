@@ -1,0 +1,16 @@
+{
+  "fixture_only": true,
+  "manual_recovery": true,
+  "runId": "3105aabbccdd",
+  "recorded_pids": [
+    51660,
+    36032
+  ],
+  "owned_processes_absent": true,
+  "private_root_removed": true,
+  "owned_journals": [
+    "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-kE47mu"
+  ],
+  "owned_journals_removed": true,
+  "external_resources": 0
+}

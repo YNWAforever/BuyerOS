@@ -1,0 +1,48 @@
+✔ runtime flow builds in a fresh area with shared strict runtime and separate diagnostic/fixture overlays (2.5282ms)
+✔ allowed SDK session/token/JWKS calls preserve method/body/cookies through the counted loopback URL (38.8097ms)
+✔ fixture transport supports Request inputs without leaking a new endpoint (7.4656ms)
+✖ foreign origin, credentials, encoded path, unknown endpoint and loopback bypass never dispatch (2.6287ms)
+✔ transport cannot be installed for real targets or rebound to different fictional context (1.1158ms)
+✔ unknown upstream response is surfaced once without retry (0.6798ms)
+✔ SDK POST redirect is returned to the caller and is never automatically followed (0.9614ms)
+✖ owned diagnostic is the only additional loopback transport and requires its exact private owner nonce (0.6641ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 6
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 390.8303
+
+✖ failing tests:
+
+test at tests\neon-runtime-flow.test.mjs:10:1
+✖ foreign origin, credentials, encoded path, unknown endpoint and loopback bypass never dispatch (2.6287ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_FLOW_FETCH_REFUSED/. Input:
+  
+  'TypeError: Request cannot be constructed from a URL that includes credentials: https://u:p@flow.fixture.invalid/auth/token'
+  
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:10:516)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: TypeError: Request cannot be constructed from a URL that includes credentials: https://u:p@flow.fixture.invalid/auth/token
+        at new Request (node:internal/deps/undici/undici:12061:19)
+        at host.fetch (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-flow-transport.mjs:12:17)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:10:542)
+        at async Test.run (node:internal/test_runner/test:1332:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:911:7),
+    expected: /N00_FLOW_FETCH_REFUSED/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-flow.test.mjs:15:1
+✖ owned diagnostic is the only additional loopback transport and requires its exact private owner nonce (0.6641ms)
+  Error: N00_FLOW_FETCH_REFUSED
+      at host.fetch (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-flow-transport.mjs:13:178)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-flow.test.mjs:15:533)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)

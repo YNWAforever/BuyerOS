@@ -22,3 +22,10 @@ Verify: pnpm exec playwright test --config playwright.neon-auth.config.ts tests/
 
 ## Review Focus
 No secrets or env files in overlay/build; no public spike route in BuyerOS tree; old Auth0 unchanged; EdDSA diagnostic explicitly not domain trust; no fixture accepted as live; every built runtime failure retained; necessary DB tests are not skipped (no DB required by this protocol-only slice).
+
+
+## 2026-10-05 N00 built session/token checkpoint (c756596)
+
+Reviewed source c756596406f41884f61a3b64c8549f569e34cfa4;27files518insertions/1deletion. Official pinned SDK login/session/token/handler/managed callback/logout and independent owned EdDSA FastAPI execute on both actual built outputs with fictional target/transport:each5pass0fail0skip0globalerror.144serialNode/8crypto pass;types/lint/contracts0;fourcleanbuildcommands0. Receipt binds server session subject/fingerprint;bearer stays in memory. Both30fixtureAuthHTTP/0pending0unknown;owned roots/journals/children removed. Body timeout,two0-test startups,parallel40ms regression and initial type/lint failures retained;original status/body/deadline assertions unchanged. No DB/migration/external action. True Neon/Google/full SDK-browser-CLI accounting/external cleanup/independent review and original strict302 gate remain open;N00/NA01/Task2 OPEN. Evidence: docs/buyeros/evidence/audit-fixes-20261003/N00_RUNTIME_FLOW/RESULTS.md. Reverse applicability0only;revert source plus following metadata;no DB/resource undo. NexteligibleN00accounting/cleanup preparation;fresh real-target/account approval pending;Auth0 retained/deployednull.
+
+Task1 remains complete. Task2 remains open: local diagnostic component verified;original302/real provider/full accounting/review unresolved. No task-done2/branch finish.

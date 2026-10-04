@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="8" time="2.259" timestamp="2026-10-05T01:16:10.666459+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.fixtures.neon-runtime-flow.test_verify" name="test_exact_eddsa_trust[valid]" time="0.001"><failure message="AssertionError: runtime-bound verifier is not implemented&#10;assert False&#10; +  where False = exists()&#10; +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists">kind = 'valid'
+
+    @pytest.mark.parametrize("kind",["valid","wrong-issuer","wrong-audience","array-audience","expired","empty-sub","unknown-key"])
+    def test_exact_eddsa_trust(kind):
+&gt;       module=subject_module();private=Ed25519PrivateKey.generate()
+               ^^^^^^^^^^^^^^^^
+
+tests\fixtures\neon-runtime-flow\test_verify.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def subject_module():
+        path=Path(__file__).with_name("verify.py")
+&gt;       assert path.exists(), "runtime-bound verifier is not implemented"
+E       AssertionError: runtime-bound verifier is not implemented
+E       assert False
+E        +  where False = exists()
+E        +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists
+
+tests\fixtures\neon-runtime-flow\test_verify.py:11: AssertionError</failure></testcase><testcase classname="tests.fixtures.neon-runtime-flow.test_verify" name="test_exact_eddsa_trust[wrong-issuer]" time="0.004"><failure message="AssertionError: runtime-bound verifier is not implemented&#10;assert False&#10; +  where False = exists()&#10; +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists">kind = 'wrong-issuer'
+
+    @pytest.mark.parametrize("kind",["valid","wrong-issuer","wrong-audience","array-audience","expired","empty-sub","unknown-key"])
+    def test_exact_eddsa_trust(kind):
+&gt;       module=subject_module();private=Ed25519PrivateKey.generate()
+               ^^^^^^^^^^^^^^^^
+
+tests\fixtures\neon-runtime-flow\test_verify.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def subject_module():
+        path=Path(__file__).with_name("verify.py")
+&gt;       assert path.exists(), "runtime-bound verifier is not implemented"
+E       AssertionError: runtime-bound verifier is not implemented
+E       assert False
+E        +  where False = exists()
+E        +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists
+
+tests\fixtures\neon-runtime-flow\test_verify.py:11: AssertionError</failure></testcase><testcase classname="tests.fixtures.neon-runtime-flow.test_verify" name="test_exact_eddsa_trust[wrong-audience]" time="0.001"><failure message="AssertionError: runtime-bound verifier is not implemented&#10;assert False&#10; +  where False = exists()&#10; +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists">kind = 'wrong-audience'
+
+    @pytest.mark.parametrize("kind",["valid","wrong-issuer","wrong-audience","array-audience","expired","empty-sub","unknown-key"])
+    def test_exact_eddsa_trust(kind):
+&gt;       module=subject_module();private=Ed25519PrivateKey.generate()
+               ^^^^^^^^^^^^^^^^
+
+tests\fixtures\neon-runtime-flow\test_verify.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def subject_module():
+        path=Path(__file__).with_name("verify.py")
+&gt;       assert path.exists(), "runtime-bound verifier is not implemented"
+E       AssertionError: runtime-bound verifier is not implemented
+E       assert False
+E        +  where False = exists()
+E        +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists
+
+tests\fixtures\neon-runtime-flow\test_verify.py:11: AssertionError</failure></testcase><testcase classname="tests.fixtures.neon-runtime-flow.test_verify" name="test_exact_eddsa_trust[array-audience]" time="0.003"><failure message="AssertionError: runtime-bound verifier is not implemented&#10;assert False&#10; +  where False = exists()&#10; +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists">kind = 'array-audience'
+
+    @pytest.mark.parametrize("kind",["valid","wrong-issuer","wrong-audience","array-audience","expired","empty-sub","unknown-key"])
+    def test_exact_eddsa_trust(kind):
+&gt;       module=subject_module();private=Ed25519PrivateKey.generate()
+               ^^^^^^^^^^^^^^^^
+
+tests\fixtures\neon-runtime-flow\test_verify.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def subject_module():
+        path=Path(__file__).with_name("verify.py")
+&gt;       assert path.exists(), "runtime-bound verifier is not implemented"
+E       AssertionError: runtime-bound verifier is not implemented
+E       assert False
+E        +  where False = exists()
+E        +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists
+
+tests\fixtures\neon-runtime-flow\test_verify.py:11: AssertionError</failure></testcase><testcase classname="tests.fixtures.neon-runtime-flow.test_verify" name="test_exact_eddsa_trust[expired]" time="0.001"><failure message="AssertionError: runtime-bound verifier is not implemented&#10;assert False&#10; +  where False = exists()&#10; +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists">kind = 'expired'
+
+    @pytest.mark.parametrize("kind",["valid","wrong-issuer","wrong-audience","array-audience","expired","empty-sub","unknown-key"])
+    def test_exact_eddsa_trust(kind):
+&gt;       module=subject_module();private=Ed25519PrivateKey.generate()
+               ^^^^^^^^^^^^^^^^
+
+tests\fixtures\neon-runtime-flow\test_verify.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def subject_module():
+        path=Path(__file__).with_name("verify.py")
+&gt;       assert path.exists(), "runtime-bound verifier is not implemented"
+E       AssertionError: runtime-bound verifier is not implemented
+E       assert False
+E        +  where False = exists()
+E        +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists
+
+tests\fixtures\neon-runtime-flow\test_verify.py:11: AssertionError</failure></testcase><testcase classname="tests.fixtures.neon-runtime-flow.test_verify" name="test_exact_eddsa_trust[empty-sub]" time="0.001"><failure message="AssertionError: runtime-bound verifier is not implemented&#10;assert False&#10; +  where False = exists()&#10; +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists">kind = 'empty-sub'
+
+    @pytest.mark.parametrize("kind",["valid","wrong-issuer","wrong-audience","array-audience","expired","empty-sub","unknown-key"])
+    def test_exact_eddsa_trust(kind):
+&gt;       module=subject_module();private=Ed25519PrivateKey.generate()
+               ^^^^^^^^^^^^^^^^
+
+tests\fixtures\neon-runtime-flow\test_verify.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def subject_module():
+        path=Path(__file__).with_name("verify.py")
+&gt;       assert path.exists(), "runtime-bound verifier is not implemented"
+E       AssertionError: runtime-bound verifier is not implemented
+E       assert False
+E        +  where False = exists()
+E        +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists
+
+tests\fixtures\neon-runtime-flow\test_verify.py:11: AssertionError</failure></testcase><testcase classname="tests.fixtures.neon-runtime-flow.test_verify" name="test_exact_eddsa_trust[unknown-key]" time="0.002"><failure message="AssertionError: runtime-bound verifier is not implemented&#10;assert False&#10; +  where False = exists()&#10; +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists">kind = 'unknown-key'
+
+    @pytest.mark.parametrize("kind",["valid","wrong-issuer","wrong-audience","array-audience","expired","empty-sub","unknown-key"])
+    def test_exact_eddsa_trust(kind):
+&gt;       module=subject_module();private=Ed25519PrivateKey.generate()
+               ^^^^^^^^^^^^^^^^
+
+tests\fixtures\neon-runtime-flow\test_verify.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def subject_module():
+        path=Path(__file__).with_name("verify.py")
+&gt;       assert path.exists(), "runtime-bound verifier is not implemented"
+E       AssertionError: runtime-bound verifier is not implemented
+E       assert False
+E        +  where False = exists()
+E        +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists
+
+tests\fixtures\neon-runtime-flow\test_verify.py:11: AssertionError</failure></testcase><testcase classname="tests.fixtures.neon-runtime-flow.test_verify" name="test_expired_target_rejects_even_a_fresh_token" time="0.001"><failure message="AssertionError: runtime-bound verifier is not implemented&#10;assert False&#10; +  where False = exists()&#10; +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists">def test_expired_target_rejects_even_a_fresh_token():
+&gt;       module=subject_module();private=Ed25519PrivateKey.generate()
+               ^^^^^^^^^^^^^^^^
+
+tests\fixtures\neon-runtime-flow\test_verify.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def subject_module():
+        path=Path(__file__).with_name("verify.py")
+&gt;       assert path.exists(), "runtime-bound verifier is not implemented"
+E       AssertionError: runtime-bound verifier is not implemented
+E       assert False
+E        +  where False = exists()
+E        +    where exists = WindowsPath('C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-runtime-flow/verify.py').exists
+
+tests\fixtures\neon-runtime-flow\test_verify.py:11: AssertionError</failure></testcase></testsuite></testsuites>
