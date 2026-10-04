@@ -9,4 +9,4 @@ function discovered(config){
  for(const suite of JSON.parse(result.stdout).suites)visit(suite);return files;
 }
 for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regression.config.ts'])test(`N00 built fixture is isolated from ${config}`,()=>{const files=discovered(config);assert.ok(files.some(file=>file.endsWith('audit-auth-entry.spec.ts')),'existing Q01 tests stay selected');assert.equal(files.filter(file=>file.endsWith('audit-neon-compat.spec.ts')).length,0,'different runtime/upstream ports must not enter the DB workbench');});
-test('N00 dedicated config discovers all three built-output cases',()=>{const files=discovered('playwright.neon-auth.config.ts');assert.equal(files.length,3);assert.ok(files.every(file=>file.endsWith('audit-neon-compat.spec.ts')));});
+test('N00 dedicated config discovers all five built-output cases',()=>{const files=discovered('playwright.neon-auth.config.ts');assert.equal(files.length,5);assert.ok(files.every(file=>file.endsWith('audit-neon-compat.spec.ts')));});

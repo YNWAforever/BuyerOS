@@ -1,5 +1,5 @@
 import {createServer} from 'node:http';
-import {generateKeyPairSync,sign,createHmac} from 'node:crypto';
+import {generateKeyPairSync,sign,createHmac,randomBytes} from 'node:crypto';
 import {spawn,spawnSync} from 'node:child_process';
 import {existsSync,readFileSync,statSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -25,6 +25,12 @@ function issue(kind='valid') {
 }
 const cookie='__Secure-neon-auth.session_token=fictional-session; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600';
 let authenticated=false;
+// Fictional managed callback protocol only; no provider/account/network activation.
+const appOrigin='http://localhost:44890';
+const flows=new Map(),verifiers=new Map();
+const challengeName='__Secure-neon-auth.session_challenge';
+const challengeCookie=(value,maxAge=300)=>challengeName+'='+value+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age='+maxAge;
+function cookieValue(header,name){return (header??'').split(';').map(part=>part.trim()).find(part=>part.startsWith(name+'='))?.slice(name.length+1);}
 const authServer=createServer(async(req,res)=>{
  const url=new URL(req.url,upstream.origin),path=url.pathname;
  const active=authenticated&&(req.headers.cookie??'').includes('__Secure-neon-auth.session_token=fictional-session');
@@ -36,7 +42,30 @@ const authServer=createServer(async(req,res)=>{
   const credentials=JSON.parse(body);if(credentials.email!==user.email||credentials.password!=='fictional-password'){res.statusCode=401;res.end('{}');return;}
   authenticated=true;res.setHeader('Set-Cookie',cookie);res.end(JSON.stringify({redirect:false,token:session.token,user}));return;
  }
- if(path==='/fixture/auth/get-session'){if(active)res.setHeader('set-auth-jwt',issue());res.end(JSON.stringify(active?{session,user}:null));return;}
+ if(path==='/fixture/auth/sign-in/social'&&req.method==='POST'){
+  let body='';for await(const chunk of req)body+=chunk;
+  const input=JSON.parse(body);let callback;try{callback=new URL(input.callbackURL);}catch{}
+  if(input.provider!=='google'||callback?.origin!==appOrigin||callback.pathname!=='/compat/return'||req.headers.origin!==appOrigin||req.headers['x-neon-auth-middleware']!=='true'){res.statusCode=400;res.end('{"code":"INVALID_FIXTURE_FLOW"}');return;}
+  if(flows.size>=50){res.statusCode=429;res.end('{}');return;}
+  const state=randomBytes(24).toString('base64url'),challenge=randomBytes(24).toString('base64url');
+  flows.set(state,{challenge,callback:callback.href,expires:Date.now()+300_000});authenticated=false;
+  res.setHeader('Set-Cookie',challengeCookie(challenge));res.end(JSON.stringify({redirect:true,url:upstream.href+'/callback/google?state='+state}));return;
+ }
+ if(path==='/fixture/auth/callback/google'){
+  const state=url.searchParams.get('state'),flow=flows.get(state);flows.delete(state);
+  if(!flow||flow.expires<=Date.now()){res.statusCode=401;res.end('{"code":"INVALID_FIXTURE_STATE"}');return;}
+  const verifier=randomBytes(24).toString('base64url');verifiers.set(verifier,flow);
+  const callback=new URL(flow.callback);callback.searchParams.set('neon_auth_session_verifier',verifier);
+  res.statusCode=302;res.setHeader('Location',callback.href);res.end();return;
+ }
+ if(path==='/fixture/auth/get-session'){
+  if(url.searchParams.has('neon_auth_session_verifier')){
+   const value=url.searchParams.get('neon_auth_session_verifier'),flow=verifiers.get(value);
+   if(!flow||flow.expires<=Date.now()||cookieValue(req.headers.cookie,challengeName)!==flow.challenge||req.headers.origin!==appOrigin||req.headers['x-neon-auth-middleware']!=='true'){res.statusCode=401;res.end('{"code":"INVALID_FIXTURE_VERIFIER"}');return;}
+   verifiers.delete(value);authenticated=true;res.setHeader('Set-Cookie',[cookie,challengeCookie('',0)]);res.setHeader('set-auth-jwt',issue());res.end(JSON.stringify({session,user}));return;
+  }
+  if(active)res.setHeader('set-auth-jwt',issue());res.end(JSON.stringify(active?{session,user}:null));return;
+ }
  if(path==='/fixture/auth/token'){res.statusCode=active?200:401;res.end(JSON.stringify(active?{token:issue()}:{code:'UNAUTHORIZED'}));return;}
  if(path==='/fixture/auth/sign-out'&&req.method==='POST'){authenticated=false;res.setHeader('Set-Cookie',cookie.replace('fictional-session','').replace('Max-Age=3600','Max-Age=0'));res.end('{"success":true}');return;}
  if(path==='/fixture/auth/callback/fixture'&&url.searchParams.get('state')==='fictional-state'){authenticated=true;res.statusCode=302;res.setHeader('Set-Cookie',cookie);res.setHeader('Location','http://localhost:44890/compat');res.end('{}');return;}
