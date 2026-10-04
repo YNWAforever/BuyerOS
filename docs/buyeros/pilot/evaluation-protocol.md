@@ -27,3 +27,19 @@ Report active holds and unknown provider liability separately from settled spend
 Stop new admission/dispatch on tenant leakage, unauthorized contact access, unsupported material claims passing review, broken reservation limits, unexplained charges, missing authoritative provider status, accidental delivery or the approved cap/time window. Retain unknown holds and reconcile; preserve read access and audit history when safe. A failed quality threshold is a no-go with labelled examples and a proposed bounded revision, not a reason to relabel the holdout. Mailbox/CRM/sending stay disconnected and `/deliver` stays 403.
 
 No sample, reviewer assignment, provider receipt, quality score or cost figure has been collected in this session.
+
+## Q10 local tools supplement — 2026-10-04
+
+The older30–50/80% pilot proposal above is retained historical context. The
+2026-10-03 repair plan's tentative full-Q10 goal is >=200 companies, two
+independent human labels with adjudication, company-level holdout and three
+runs; proposed match precision>=95% with recall/coverage/needs_review/CI and
+zero wrong-company/cross-tenant/unsupported references. No owner approval,
+reviewer assignment, actual goldset or provider receipt is fabricated here.
+
+The new offline evaluator checks supplied label/prediction structure and
+per-run metrics; declarations remain unauthenticated, outputs always say
+live_verified=false/release_accepted=false. Its fictional8-company fixture
+validates tool arithmetic only. Contact validity/company relationship,
+factual truth and adversarial source behavior need separate actual evidence.
+[Commands and boundaries](../runbooks/q10-local-quality-tools.md).

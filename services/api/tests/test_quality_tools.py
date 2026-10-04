@@ -194,3 +194,18 @@ def test_declared_human_labels_require_real_sample_size_without_claiming_indepen
 def test_duplicate_run_ids_are_not_three_independent_repeats():
     pred=predictions();pred['runs'][1]['run_id']=pred['runs'][0]['run_id']
     with pytest.raises(ValueError,match='distinct run'):evaluator().evaluate(goldset(),pred)
+
+
+def test_p99_with_only_one_expected_tail_observation_stays_unstable():
+    rows=[dict(latency_ms=i+1,status=200,bytes=1,queries=4,sql_ms=1,invalid_context=False) for i in range(100)]
+    assert metrics().summarize_requests(rows)['latency_ms']['p99_stable'] is False
+
+
+def test_legacy_benchmark_preserves_existing_dispatcher_evidence(tmp_path):
+    env={k:v for k,v in os.environ.items() if k not in ['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL']}
+    env['PYTEST_ADDOPTS']='--collect-only'
+    output=tmp_path/'result.json';dispatcher=tmp_path/'result-dispatcher.json'
+    dispatcher.write_bytes(b'previous dispatcher evidence')
+    result=subprocess.run([sys.executable,str(ROOT/'scripts/benchmark-buyeros.py'),'--fixture-size','1000','--workspaces','100','--output',str(output)],env=env,capture_output=True,text=True,timeout=45)
+    assert result.returncode==2 and 'existing evidence' in result.stderr
+    assert dispatcher.read_bytes()==b'previous dispatcher evidence' and not output.exists()

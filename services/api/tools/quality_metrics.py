@@ -51,7 +51,8 @@ def summarize_requests(samples: list[dict]) -> dict:
     failed = sum(r["status"] is None or not 200 <= r["status"] < 300 or r["invalid_context"] for r in samples)
     return {
         "requests": n,
-        "latency_ms": {"p50": _percentile(latency, .5), "p95": _percentile(latency, .95), "p99": _percentile(latency, .99), "max": max(latency), "p99_stable": n >= 100},
+        "method": {"percentiles": "linear interpolation of all requests", "p99_sample_flag": "heuristic n>=1000 (at least10 expected tail observations); no stability guarantee"},
+        "latency_ms": {"p50": _percentile(latency, .5), "p95": _percentile(latency, .95), "p99": _percentile(latency, .99), "max": max(latency), "p99_stable": n >= 1000},
         "errors": {"denominator": n, "http_5xx": sum(r["status"] is not None and r["status"] >= 500 for r in samples), "http_non_2xx": non_2xx, "transport": sum(r["status"] is None for r in samples), "invalid_context": sum(r["invalid_context"] for r in samples), "failed_requests": failed, "rate": failed/n},
         "queries": {"total": sum(queries), "min": min(queries), "max": max(queries), "mean": sum(queries)/n},
         "bytes": {"total": sum(sizes), "min": min(sizes), "max": max(sizes)},

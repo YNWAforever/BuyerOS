@@ -28,7 +28,8 @@ def main() -> int:
     for variable in ("BUYEROS_TEST_DATABASE_URL", "BUYEROS_DATABASE_URL", "DATABASE_URL", "BUYEROS_WORKER_DATABASE_URL"):
         if os.environ.get(variable):
             parser.error(f"unset inherited database {variable}; this benchmark owns a disposable Docker database")
-    if args.output.exists():
+    dispatcher_output = args.output.resolve().with_name(args.output.stem + "-dispatcher.json")
+    if args.output.exists() or (args.workspaces == 100 and dispatcher_output.exists()):
         parser.error("output must be new; existing evidence cannot be overwritten")
     python = API / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
     if not python.is_file():
