@@ -1,0 +1,247 @@
+{
+  "schema": "buyeros.research-goldset.v1",
+  "evidence_mode": "fixture",
+  "owner": "fixture-only",
+  "rows": [
+    {
+      "company_id": "00000000-0000-4000-8000-000000000001",
+      "workspace_id": "11111111-1111-4111-8111-111111111111",
+      "market": "HK",
+      "language": "zh-HK",
+      "company_type": "fixture",
+      "split": "train",
+      "reference_verdict": "not_match",
+      "annotations": [
+        {
+          "annotator_id": "fixture-a",
+          "verdict": "not_match"
+        },
+        {
+          "annotator_id": "fixture-b",
+          "verdict": "not_match"
+        }
+      ],
+      "sources": [
+        {
+          "id": "fixture-evidence-0",
+          "company_id": "00000000-0000-4000-8000-000000000001",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "url": "https://evidence.example.test/fixture",
+          "date": "2026-10-03",
+          "current": true,
+          "is_inference": false
+        }
+      ]
+    },
+    {
+      "company_id": "00000000-0000-4000-8000-000000000002",
+      "workspace_id": "11111111-1111-4111-8111-111111111111",
+      "market": "HK",
+      "language": "zh-HK",
+      "company_type": "fixture",
+      "split": "train",
+      "reference_verdict": "not_match",
+      "annotations": [
+        {
+          "annotator_id": "fixture-a",
+          "verdict": "not_match"
+        },
+        {
+          "annotator_id": "fixture-b",
+          "verdict": "not_match"
+        }
+      ],
+      "sources": [
+        {
+          "id": "fixture-evidence-1",
+          "company_id": "00000000-0000-4000-8000-000000000002",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "url": "https://evidence.example.test/fixture",
+          "date": "2026-10-03",
+          "current": true,
+          "is_inference": false
+        }
+      ]
+    },
+    {
+      "company_id": "00000000-0000-4000-8000-000000000003",
+      "workspace_id": "11111111-1111-4111-8111-111111111111",
+      "market": "HK",
+      "language": "zh-HK",
+      "company_type": "fixture",
+      "split": "holdout",
+      "reference_verdict": "match",
+      "annotations": [
+        {
+          "annotator_id": "fixture-a",
+          "verdict": "match"
+        },
+        {
+          "annotator_id": "fixture-b",
+          "verdict": "match"
+        }
+      ],
+      "sources": [
+        {
+          "id": "fixture-evidence-2",
+          "company_id": "00000000-0000-4000-8000-000000000003",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "url": "https://evidence.example.test/fixture",
+          "date": "2026-10-03",
+          "current": true,
+          "is_inference": false
+        }
+      ]
+    },
+    {
+      "company_id": "00000000-0000-4000-8000-000000000004",
+      "workspace_id": "11111111-1111-4111-8111-111111111111",
+      "market": "HK",
+      "language": "zh-HK",
+      "company_type": "fixture",
+      "split": "holdout",
+      "reference_verdict": "match",
+      "annotations": [
+        {
+          "annotator_id": "fixture-a",
+          "verdict": "match"
+        },
+        {
+          "annotator_id": "fixture-b",
+          "verdict": "match"
+        }
+      ],
+      "sources": [
+        {
+          "id": "fixture-evidence-3",
+          "company_id": "00000000-0000-4000-8000-000000000004",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "url": "https://evidence.example.test/fixture",
+          "date": "2026-10-03",
+          "current": true,
+          "is_inference": false
+        }
+      ]
+    },
+    {
+      "company_id": "00000000-0000-4000-8000-000000000005",
+      "workspace_id": "11111111-1111-4111-8111-111111111111",
+      "market": "HK",
+      "language": "zh-HK",
+      "company_type": "fixture",
+      "split": "holdout",
+      "reference_verdict": "match",
+      "annotations": [
+        {
+          "annotator_id": "fixture-a",
+          "verdict": "match"
+        },
+        {
+          "annotator_id": "fixture-b",
+          "verdict": "match"
+        }
+      ],
+      "sources": [
+        {
+          "id": "fixture-evidence-4",
+          "company_id": "00000000-0000-4000-8000-000000000005",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "url": "https://evidence.example.test/fixture",
+          "date": "2026-10-03",
+          "current": true,
+          "is_inference": false
+        }
+      ]
+    },
+    {
+      "company_id": "00000000-0000-4000-8000-000000000006",
+      "workspace_id": "11111111-1111-4111-8111-111111111111",
+      "market": "HK",
+      "language": "zh-HK",
+      "company_type": "fixture",
+      "split": "holdout",
+      "reference_verdict": "not_match",
+      "annotations": [
+        {
+          "annotator_id": "fixture-a",
+          "verdict": "not_match"
+        },
+        {
+          "annotator_id": "fixture-b",
+          "verdict": "not_match"
+        }
+      ],
+      "sources": [
+        {
+          "id": "fixture-evidence-5",
+          "company_id": "00000000-0000-4000-8000-000000000006",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "url": "https://evidence.example.test/fixture",
+          "date": "2026-10-03",
+          "current": true,
+          "is_inference": false
+        }
+      ]
+    },
+    {
+      "company_id": "00000000-0000-4000-8000-000000000007",
+      "workspace_id": "11111111-1111-4111-8111-111111111111",
+      "market": "HK",
+      "language": "zh-HK",
+      "company_type": "fixture",
+      "split": "holdout",
+      "reference_verdict": "not_match",
+      "annotations": [
+        {
+          "annotator_id": "fixture-a",
+          "verdict": "not_match"
+        },
+        {
+          "annotator_id": "fixture-b",
+          "verdict": "not_match"
+        }
+      ],
+      "sources": [
+        {
+          "id": "fixture-evidence-6",
+          "company_id": "00000000-0000-4000-8000-000000000007",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "url": "https://evidence.example.test/fixture",
+          "date": "2026-10-03",
+          "current": true,
+          "is_inference": false
+        }
+      ]
+    },
+    {
+      "company_id": "00000000-0000-4000-8000-000000000008",
+      "workspace_id": "11111111-1111-4111-8111-111111111111",
+      "market": "HK",
+      "language": "zh-HK",
+      "company_type": "fixture",
+      "split": "holdout",
+      "reference_verdict": "not_match",
+      "annotations": [
+        {
+          "annotator_id": "fixture-a",
+          "verdict": "not_match"
+        },
+        {
+          "annotator_id": "fixture-b",
+          "verdict": "not_match"
+        }
+      ],
+      "sources": [
+        {
+          "id": "fixture-evidence-7",
+          "company_id": "00000000-0000-4000-8000-000000000008",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "url": "https://evidence.example.test/fixture",
+          "date": "2026-10-03",
+          "current": true,
+          "is_inference": false
+        }
+      ]
+    }
+  ]
+}

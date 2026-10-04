@@ -1,0 +1,170 @@
+{
+  "schema": "buyeros.research-goldset-evaluation.v1",
+  "evidence_mode": "fixture",
+  "label_verification": "supplied declarations only; independence not authenticated",
+  "owner": "fixture-only",
+  "total_companies": 8,
+  "holdout_companies": 6,
+  "runs": [
+    {
+      "run_id": "fixture-repeat-0",
+      "confusion": {
+        "tp": 2,
+        "fp": 1,
+        "tn": 1,
+        "fn": 1,
+        "needs_review": 2
+      },
+      "precision": {
+        "numerator": 2,
+        "denominator": 3,
+        "estimate": 0.6666666666666666,
+        "ci95": [
+          0.2076596008020477,
+          0.9385080552796037
+        ]
+      },
+      "recall": {
+        "numerator": 2,
+        "denominator": 3,
+        "estimate": 0.6666666666666666,
+        "ci95": [
+          0.2076596008020477,
+          0.9385080552796037
+        ]
+      },
+      "coverage": {
+        "numerator": 4,
+        "denominator": 6,
+        "estimate": 0.6666666666666666,
+        "ci95": [
+          0.299993315138392,
+          0.9032285888942195
+        ]
+      },
+      "needs_review": {
+        "numerator": 2,
+        "denominator": 6,
+        "estimate": 0.3333333333333333,
+        "ci95": [
+          0.09677141110578041,
+          0.700006684861608
+        ]
+      }
+    },
+    {
+      "run_id": "fixture-repeat-1",
+      "confusion": {
+        "tp": 2,
+        "fp": 1,
+        "tn": 1,
+        "fn": 1,
+        "needs_review": 2
+      },
+      "precision": {
+        "numerator": 2,
+        "denominator": 3,
+        "estimate": 0.6666666666666666,
+        "ci95": [
+          0.2076596008020477,
+          0.9385080552796037
+        ]
+      },
+      "recall": {
+        "numerator": 2,
+        "denominator": 3,
+        "estimate": 0.6666666666666666,
+        "ci95": [
+          0.2076596008020477,
+          0.9385080552796037
+        ]
+      },
+      "coverage": {
+        "numerator": 4,
+        "denominator": 6,
+        "estimate": 0.6666666666666666,
+        "ci95": [
+          0.299993315138392,
+          0.9032285888942195
+        ]
+      },
+      "needs_review": {
+        "numerator": 2,
+        "denominator": 6,
+        "estimate": 0.3333333333333333,
+        "ci95": [
+          0.09677141110578041,
+          0.700006684861608
+        ]
+      }
+    },
+    {
+      "run_id": "fixture-repeat-2",
+      "confusion": {
+        "tp": 2,
+        "fp": 1,
+        "tn": 1,
+        "fn": 1,
+        "needs_review": 2
+      },
+      "precision": {
+        "numerator": 2,
+        "denominator": 3,
+        "estimate": 0.6666666666666666,
+        "ci95": [
+          0.2076596008020477,
+          0.9385080552796037
+        ]
+      },
+      "recall": {
+        "numerator": 2,
+        "denominator": 3,
+        "estimate": 0.6666666666666666,
+        "ci95": [
+          0.2076596008020477,
+          0.9385080552796037
+        ]
+      },
+      "coverage": {
+        "numerator": 4,
+        "denominator": 6,
+        "estimate": 0.6666666666666666,
+        "ci95": [
+          0.299993315138392,
+          0.9032285888942195
+        ]
+      },
+      "needs_review": {
+        "numerator": 2,
+        "denominator": 6,
+        "estimate": 0.3333333333333333,
+        "ci95": [
+          0.09677141110578041,
+          0.700006684861608
+        ]
+      }
+    }
+  ],
+  "safety_violations": [],
+  "quality_thresholds_met": false,
+  "thresholds": {
+    "match_precision_estimate": 0.95,
+    "safety_violations": 0,
+    "minimum_declared_human_companies": 200
+  },
+  "repeat_policy": "separate per-run intervals; no pooled 3n sample",
+  "ci_method": "Wilson 95%, per run/company",
+  "live_verified": false,
+  "provider_calls": 0,
+  "release_accepted": false,
+  "source_sha": "7eb0ed557db61bc06cf7c0469c5fd6ea1eedebf0",
+  "source_dirty": true,
+  "tool_hashes": {
+    "services/api/tools/evaluate_research_goldset.py": "7b52a22da630b44f22bed9c937d76287671e96d993b273685d671ed1e4554304",
+    "services/api/tools/quality_metrics.py": "f189c7c241f56f5b114b8111b1bba6903808d8558d993860cb2c013ee9346de7"
+  },
+  "input_hashes": {
+    "goldset": "b301b93f8ff05422393de920fb9c608d527438cf0d17a777e06bc64dffc0c5b3",
+    "predictions": "47685a1e0f8afbdc6a4743b5c641904255eb030a68abbbafaec781f1b8863318"
+  }
+}

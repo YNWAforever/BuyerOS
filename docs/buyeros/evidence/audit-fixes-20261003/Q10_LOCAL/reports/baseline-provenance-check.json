@@ -1,0 +1,14 @@
+{
+  "source_sha": "7eb0ed557db61bc06cf7c0469c5fd6ea1eedebf0",
+  "source_dirty": true,
+  "observed_tool_hashes_match_archived_overlay": true,
+  "tool_hashes": {
+    "services/api/tests/benchmark_workspace_directory_case.py": "e5b93f4c03f0394205106c455b09949c4e923a2d320f539316158e44e3be29e9",
+    "scripts/benchmark-workspace-directory.py": "f7e971e837c94607ca1951f6e31cbe4a4f6e768cc1d7ce06fe698226718d0fc4",
+    "services/api/tools/quality_metrics.py": "f189c7c241f56f5b114b8111b1bba6903808d8558d993860cb2c013ee9346de7",
+    "services/api/buyeros_api/api/routes/workspaces.py": "7b9a61a2a246bcf9d6c395cb00ad0199e5ea931082afc7cd9833f4bd817a4834",
+    "services/api/buyeros_api/api/deps.py": "c4ad139caa306403aac08b769530529a949720d99c311fabee77f294cd4e13f8"
+  },
+  "final_reviewed_tool_source_sha": "ad4f4394819664484eb4b928bdd56c43e055fd3d",
+  "note": "Baseline predates sample-flag/actor-bound review; actual one-actor/30-sample measurements unaffected. Original report never rewritten."
+}

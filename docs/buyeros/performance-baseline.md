@@ -1,3 +1,5 @@
+> Latest Q10 independent local-tools follow-up: reviewed source `ad4f4394819664484eb4b928bdd56c43e055fd3d`;62related API/tool and69Node pass0skip; actual directory capture1pass but frozen SQL gateFAIL (4/22/202/2002 SQL forW1/10/100/1000, W1000p95=2822.957ms). F12/F18 and fullQ10 remain open; fixture goldset is not live accuracy.0runtime/schema/deployment/auth change. [Evidence](evidence/audit-fixes-20261003/Q10_LOCAL/RESULTS.md).
+
 # T29 performance baseline — local candidate
 
 Source checkout: `f43a9d88b334c2c4029fa06fa71624ed52efe4a2` plus the uncommitted BuyerOS implementation diff. This file records laboratory checks only. There is no reviewed release SHA or production p75 measurement.

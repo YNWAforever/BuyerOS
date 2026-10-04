@@ -1,0 +1,1972 @@
+{
+  "schema": "buyeros.workspace-directory-benchmark.v1",
+  "run_id": "54b29171e1e4404e963225d8c3225256",
+  "evidence_mode": "owned_disposable_fixture",
+  "live_verified": false,
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.6",
+    "database": "owned Docker PostgreSQL16",
+    "region": "local loopback; no geographic network measurement",
+    "transport": "in-process HTTPX ASGI + real loopback PostgreSQL",
+    "cold_warm": "first-after-seed is not process-cold; warm after3primers",
+    "concurrency": 1,
+    "warm_samples_per_actor": 30,
+    "duration_model": "fixed request batches; not 10-minute stairs"
+  },
+  "dataset": "fictional users/workspaces only; fixed one visible membership",
+  "role": {
+    "name": "buyeros_api",
+    "superuser": false,
+    "bypass_rls": false,
+    "membership_owner": "buyeros",
+    "membership_rls": true
+  },
+  "pool_reuse": {
+    "backend_pids": [
+      90,
+      90,
+      90
+    ],
+    "workspace_setting_after_return": [
+      "",
+      "",
+      ""
+    ],
+    "same_connection_reused": true,
+    "revocation_seen": true,
+    "probes": [
+      {
+        "latency_ms": 2709.8109999787994,
+        "status": 200,
+        "bytes": 291,
+        "queries": 2002,
+        "sql_ms": 2116.7153004789725,
+        "invalid_context": false
+      },
+      {
+        "latency_ms": 1979.0785000077449,
+        "status": 200,
+        "bytes": 124,
+        "queries": 2002,
+        "sql_ms": 1454.6595998690464,
+        "invalid_context": false
+      },
+      {
+        "latency_ms": 2403.341300028842,
+        "status": 200,
+        "bytes": 291,
+        "queries": 2002,
+        "sql_ms": 1803.5948990145698,
+        "invalid_context": false
+      },
+      {
+        "latency_ms": 2281.02300001774,
+        "status": 200,
+        "bytes": 124,
+        "queries": 2002,
+        "sql_ms": 1737.5020015169866,
+        "invalid_context": false
+      },
+      {
+        "latency_ms": 1644.0184999955818,
+        "status": 200,
+        "bytes": 291,
+        "queries": 2002,
+        "sql_ms": 1212.3193994048052,
+        "invalid_context": false
+      }
+    ]
+  },
+  "matrix": [
+    {
+      "total_workspaces": 1,
+      "unrelated_workspaces": 0,
+      "visible_memberships_per_actor": 1,
+      "actors": 1,
+      "first_after_seed": {
+        "latency_ms": 52.166500012390316,
+        "status": 200,
+        "bytes": 291,
+        "queries": 4,
+        "sql_ms": 5.758400016929954,
+        "invalid_context": false
+      },
+      "warmups": [
+        {
+          "latency_ms": 7.6428999891504645,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.115899850148708,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 8.71200003894046,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 5.029800056945533,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 9.575300035066903,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 5.511099938303232,
+          "invalid_context": false
+        }
+      ],
+      "warm": {
+        "requests": 30,
+        "latency_ms": {
+          "p50": 7.396,
+          "p95": 8.772,
+          "p99": 9.365,
+          "max": 9.549100010190159,
+          "p99_stable": false
+        },
+        "errors": {
+          "denominator": 30,
+          "http_5xx": 0,
+          "http_non_2xx": 0,
+          "transport": 0,
+          "invalid_context": 0,
+          "failed_requests": 0,
+          "rate": 0.0
+        },
+        "queries": {
+          "total": 120,
+          "min": 4,
+          "max": 4,
+          "mean": 4.0
+        },
+        "bytes": {
+          "total": 8730,
+          "min": 291,
+          "max": 291
+        },
+        "sql_ms": {
+          "total": 122.11569957435131,
+          "p95": 5.139
+        }
+      },
+      "observations": [
+        {
+          "latency_ms": 7.3998000007122755,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.864599915686995,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 7.072100008372217,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.7054000422358513,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 7.392800005618483,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.032499971799552,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 7.9465999733656645,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.433600057382137,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 6.684300024062395,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.7813999806530774,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 8.016100036911666,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.620200023055077,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 7.730600016657263,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.110800044145435,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 9.549100010190159,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 5.245000007562339,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 8.38740001199767,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.691799986176193,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 8.021700021345168,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.145400016568601,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 8.913099998608232,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 5.177699960768223,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 6.76950003253296,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.8068999419920146,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 7.404100033454597,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.161699907854199,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 7.6345999841578305,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.313199897296727,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 7.89549999171868,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.378899990115315,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 7.1493000141344965,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.942999988794327,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 6.4221000066027045,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.561499936040491,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 6.674800009932369,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.7310999468900263,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 6.600700027775019,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.684299997985363,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 7.005099963862449,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.700499946717173,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 6.021599983796477,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.276999981608242,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 6.20800000615418,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.4658999647945166,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 5.9501000214368105,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.25070001417771,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 5.953599989879876,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.2041000085882843,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 7.659400056581944,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.222900024615228,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 8.489899977575988,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.896200087387115,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 7.3441999848000705,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.04179998440668,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 8.072600001469254,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 4.306599963456392,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 8.600300003308803,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 5.092600011266768,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 6.030799995642155,
+          "status": 200,
+          "bytes": 291,
+          "queries": 4,
+          "sql_ms": 3.2683999743312597,
+          "invalid_context": false
+        }
+      ],
+      "explain_runtime_role": {
+        "candidate_query": [
+          {
+            "Plan": {
+              "Node Type": "Sort",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 1.02,
+              "Total Cost": 1.02,
+              "Plan Rows": 1,
+              "Plan Width": 36,
+              "Actual Startup Time": 0.021,
+              "Actual Total Time": 0.022,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "Sort Key": [
+                "id"
+              ],
+              "Sort Method": "quicksort",
+              "Sort Space Used": 25,
+              "Sort Space Type": "Memory",
+              "Shared Hit Blocks": 4,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "workspaces",
+                  "Alias": "workspaces",
+                  "Startup Cost": 0.0,
+                  "Total Cost": 1.01,
+                  "Plan Rows": 1,
+                  "Plan Width": 36,
+                  "Actual Startup Time": 0.006,
+                  "Actual Total Time": 0.006,
+                  "Actual Rows": 1,
+                  "Actual Loops": 1,
+                  "Shared Hit Blocks": 1,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 67,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.176,
+            "Triggers": [],
+            "Execution Time": 0.061
+          }
+        ],
+        "membership_query": [
+          {
+            "Plan": {
+              "Node Type": "Result",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 0.01,
+              "Total Cost": 1.02,
+              "Plan Rows": 1,
+              "Plan Width": 49,
+              "Actual Startup Time": 0.018,
+              "Actual Total Time": 0.019,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "One-Time Filter": "((current_setting('app.workspace_id'::text))::uuid = 'ad387ff9-a200-415e-af0b-cebff9c93e1b'::uuid)",
+              "Shared Hit Blocks": 1,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "memberships",
+                  "Alias": "memberships",
+                  "Startup Cost": 0.01,
+                  "Total Cost": 1.02,
+                  "Plan Rows": 1,
+                  "Plan Width": 49,
+                  "Actual Startup Time": 0.01,
+                  "Actual Total Time": 0.01,
+                  "Actual Rows": 1,
+                  "Actual Loops": 1,
+                  "Filter": "((active IS TRUE) AND (workspace_id = 'ad387ff9-a200-415e-af0b-cebff9c93e1b'::uuid) AND (user_id = '149d3388-3d69-4bad-8a60-303f3cb6ce49'::uuid))",
+                  "Rows Removed by Filter": 0,
+                  "Shared Hit Blocks": 1,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 86,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.282,
+            "Triggers": [],
+            "Execution Time": 0.057
+          }
+        ]
+      }
+    },
+    {
+      "total_workspaces": 10,
+      "unrelated_workspaces": 9,
+      "visible_memberships_per_actor": 1,
+      "actors": 1,
+      "first_after_seed": {
+        "latency_ms": 28.47469999687746,
+        "status": 200,
+        "bytes": 291,
+        "queries": 22,
+        "sql_ms": 19.474799861200154,
+        "invalid_context": false
+      },
+      "warmups": [
+        {
+          "latency_ms": 24.293499998748302,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 16.91400009440258,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 26.931800006423146,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 18.808999855536968,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 30.373099958524108,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 21.071699913591146,
+          "invalid_context": false
+        }
+      ],
+      "warm": {
+        "requests": 30,
+        "latency_ms": {
+          "p50": 28.643,
+          "p95": 35.749,
+          "p99": 38.307,
+          "max": 39.22439995221794,
+          "p99_stable": false
+        },
+        "errors": {
+          "denominator": 30,
+          "http_5xx": 0,
+          "http_non_2xx": 0,
+          "transport": 0,
+          "invalid_context": 0,
+          "failed_requests": 0,
+          "rate": 0.0
+        },
+        "queries": {
+          "total": 660,
+          "min": 22,
+          "max": 22,
+          "mean": 22.0
+        },
+        "bytes": {
+          "total": 8730,
+          "min": 291,
+          "max": 291
+        },
+        "sql_ms": {
+          "total": 613.3018994005397,
+          "p95": 24.936
+        }
+      },
+      "observations": [
+        {
+          "latency_ms": 28.084399993531406,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 19.702200137544423,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 26.89269999973476,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 18.361499824095517,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 28.804500005207956,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 20.196399942506105,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 29.49849999276921,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 20.281000004615635,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 31.708700000308454,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 22.853200091049075,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 26.065099984407425,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 17.99979998031631,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 33.2353999838233,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 23.531600134447217,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 28.730499965604395,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 20.267199841327965,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 29.379200015682727,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 20.225899759680033,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 32.84529998200014,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 22.643999895080924,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 33.799099968746305,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 23.588599869981408,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 39.22439995221794,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 27.797000075224787,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 27.798899973277003,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 19.09019990125671,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 34.97509995941073,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 24.357899907045066,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 36.06100002070889,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 24.944399890955538,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 35.36860004533082,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 24.92680004797876,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 35.28730000834912,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 24.53669998794794,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 32.71479997783899,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 23.03780004149303,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 30.603300023358315,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 21.403999940957874,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 25.87299997685477,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 18.202300008852035,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 24.56230000825599,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 17.083899991121143,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 25.30259999912232,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 17.517399915959686,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 28.555899974890053,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 19.78530007181689,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 28.019200020935386,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 19.47450003353879,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 25.00050002709031,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 17.206299933604896,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 23.53390003554523,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 15.940099954605103,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 25.866799987852573,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 18.134700192604214,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 21.547600044868886,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 14.36440006364137,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 27.00970001751557,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 18.53629987454042,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 25.28519998304546,
+          "status": 200,
+          "bytes": 291,
+          "queries": 22,
+          "sql_ms": 17.310500086750835,
+          "invalid_context": false
+        }
+      ],
+      "explain_runtime_role": {
+        "candidate_query": [
+          {
+            "Plan": {
+              "Node Type": "Sort",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 1.27,
+              "Total Cost": 1.29,
+              "Plan Rows": 10,
+              "Plan Width": 36,
+              "Actual Startup Time": 0.025,
+              "Actual Total Time": 0.026,
+              "Actual Rows": 10,
+              "Actual Loops": 1,
+              "Sort Key": [
+                "id"
+              ],
+              "Sort Method": "quicksort",
+              "Sort Space Used": 25,
+              "Sort Space Type": "Memory",
+              "Shared Hit Blocks": 4,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "workspaces",
+                  "Alias": "workspaces",
+                  "Startup Cost": 0.0,
+                  "Total Cost": 1.1,
+                  "Plan Rows": 10,
+                  "Plan Width": 36,
+                  "Actual Startup Time": 0.006,
+                  "Actual Total Time": 0.007,
+                  "Actual Rows": 10,
+                  "Actual Loops": 1,
+                  "Shared Hit Blocks": 1,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 67,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.181,
+            "Triggers": [],
+            "Execution Time": 0.061
+          }
+        ],
+        "membership_query": [
+          {
+            "Plan": {
+              "Node Type": "Result",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 0.01,
+              "Total Cost": 1.02,
+              "Plan Rows": 1,
+              "Plan Width": 49,
+              "Actual Startup Time": 0.007,
+              "Actual Total Time": 0.007,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "One-Time Filter": "((current_setting('app.workspace_id'::text))::uuid = 'ad387ff9-a200-415e-af0b-cebff9c93e1b'::uuid)",
+              "Shared Hit Blocks": 1,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "memberships",
+                  "Alias": "memberships",
+                  "Startup Cost": 0.01,
+                  "Total Cost": 1.02,
+                  "Plan Rows": 1,
+                  "Plan Width": 49,
+                  "Actual Startup Time": 0.003,
+                  "Actual Total Time": 0.003,
+                  "Actual Rows": 1,
+                  "Actual Loops": 1,
+                  "Filter": "((active IS TRUE) AND (workspace_id = 'ad387ff9-a200-415e-af0b-cebff9c93e1b'::uuid) AND (user_id = '149d3388-3d69-4bad-8a60-303f3cb6ce49'::uuid))",
+                  "Rows Removed by Filter": 0,
+                  "Shared Hit Blocks": 1,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 86,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.13,
+            "Triggers": [],
+            "Execution Time": 0.022
+          }
+        ]
+      }
+    },
+    {
+      "total_workspaces": 100,
+      "unrelated_workspaces": 99,
+      "visible_memberships_per_actor": 1,
+      "actors": 1,
+      "first_after_seed": {
+        "latency_ms": 168.159699998796,
+        "status": 200,
+        "bytes": 291,
+        "queries": 202,
+        "sql_ms": 123.32370056537911,
+        "invalid_context": false
+      },
+      "warmups": [
+        {
+          "latency_ms": 167.81349998200312,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 123.21809976128861,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 224.3631999590434,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 163.2306007668376,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 201.87089999672025,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 147.69680035533383,
+          "invalid_context": false
+        }
+      ],
+      "warm": {
+        "requests": 30,
+        "latency_ms": {
+          "p50": 182.175,
+          "p95": 270.364,
+          "p99": 320.903,
+          "max": 332.8064000234008,
+          "p99_stable": false
+        },
+        "errors": {
+          "denominator": 30,
+          "http_5xx": 0,
+          "http_non_2xx": 0,
+          "transport": 0,
+          "invalid_context": 0,
+          "failed_requests": 0,
+          "rate": 0.0
+        },
+        "queries": {
+          "total": 6060,
+          "min": 202,
+          "max": 202,
+          "mean": 202.0
+        },
+        "bytes": {
+          "total": 8730,
+          "min": 291,
+          "max": 291
+        },
+        "sql_ms": {
+          "total": 4291.013998503331,
+          "p95": 201.354
+        }
+      },
+      "observations": [
+        {
+          "latency_ms": 174.7243999852799,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 127.79689981834963,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 195.04399999277666,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 143.33239995175973,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 194.7167000034824,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 143.55459884973243,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 180.7682000217028,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 132.42339983116835,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 161.70219995547086,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 118.86370024876669,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 241.34820001199841,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 178.61369997262955,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 332.8064000234008,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 249.33410057565197,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 291.7604999965988,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 216.26970049692318,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 244.21360000269488,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 183.12259967206046,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 183.58210002770647,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 133.59780004248023,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 207.03980000689626,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 150.5668997997418,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 180.40239997208118,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 132.1415994898416,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 211.17690001847222,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 153.6637000972405,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 236.2610999844037,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 170.83089950028807,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 200.41550003224984,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 146.81679982459173,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 200.04909997805953,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 146.08970034169033,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 179.59179996978492,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 131.8842998589389,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 176.76569998729974,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 129.51949995476753,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 189.0638000331819,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 141.13429974531755,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 190.9828000352718,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 138.68089963216335,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 161.11029998864979,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 118.68490057531744,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 167.01509995618835,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 123.0958002852276,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 187.33980000251904,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 136.56429963884875,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 178.50420001195744,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 131.0906998696737,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 162.97369997482747,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 119.63569925865158,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 154.6033999766223,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 113.65889990702271,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 155.9072000090964,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 114.69290015520528,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 178.95159998442978,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 130.16690098447725,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 161.31769999628887,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 118.7235004035756,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 159.05159997055307,
+          "status": 200,
+          "bytes": 291,
+          "queries": 202,
+          "sql_ms": 116.46289972122759,
+          "invalid_context": false
+        }
+      ],
+      "explain_runtime_role": {
+        "candidate_query": [
+          {
+            "Plan": {
+              "Node Type": "Sort",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 6.32,
+              "Total Cost": 6.57,
+              "Plan Rows": 100,
+              "Plan Width": 36,
+              "Actual Startup Time": 0.04,
+              "Actual Total Time": 0.044,
+              "Actual Rows": 100,
+              "Actual Loops": 1,
+              "Sort Key": [
+                "id"
+              ],
+              "Sort Method": "quicksort",
+              "Sort Space Used": 31,
+              "Sort Space Type": "Memory",
+              "Shared Hit Blocks": 5,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "workspaces",
+                  "Alias": "workspaces",
+                  "Startup Cost": 0.0,
+                  "Total Cost": 3.0,
+                  "Plan Rows": 100,
+                  "Plan Width": 36,
+                  "Actual Startup Time": 0.006,
+                  "Actual Total Time": 0.012,
+                  "Actual Rows": 100,
+                  "Actual Loops": 1,
+                  "Shared Hit Blocks": 2,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 67,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.159,
+            "Triggers": [],
+            "Execution Time": 0.08
+          }
+        ],
+        "membership_query": [
+          {
+            "Plan": {
+              "Node Type": "Result",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 0.01,
+              "Total Cost": 1.02,
+              "Plan Rows": 1,
+              "Plan Width": 49,
+              "Actual Startup Time": 0.006,
+              "Actual Total Time": 0.007,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "One-Time Filter": "((current_setting('app.workspace_id'::text))::uuid = 'ad387ff9-a200-415e-af0b-cebff9c93e1b'::uuid)",
+              "Shared Hit Blocks": 1,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "memberships",
+                  "Alias": "memberships",
+                  "Startup Cost": 0.01,
+                  "Total Cost": 1.02,
+                  "Plan Rows": 1,
+                  "Plan Width": 49,
+                  "Actual Startup Time": 0.003,
+                  "Actual Total Time": 0.003,
+                  "Actual Rows": 1,
+                  "Actual Loops": 1,
+                  "Filter": "((active IS TRUE) AND (workspace_id = 'ad387ff9-a200-415e-af0b-cebff9c93e1b'::uuid) AND (user_id = '149d3388-3d69-4bad-8a60-303f3cb6ce49'::uuid))",
+                  "Rows Removed by Filter": 0,
+                  "Shared Hit Blocks": 1,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 86,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.124,
+            "Triggers": [],
+            "Execution Time": 0.021
+          }
+        ]
+      }
+    },
+    {
+      "total_workspaces": 1000,
+      "unrelated_workspaces": 999,
+      "visible_memberships_per_actor": 1,
+      "actors": 1,
+      "first_after_seed": {
+        "latency_ms": 1818.6881000292487,
+        "status": 200,
+        "bytes": 291,
+        "queries": 2002,
+        "sql_ms": 1367.8724007331766,
+        "invalid_context": false
+      },
+      "warmups": [
+        {
+          "latency_ms": 1999.4896000134759,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1488.6291991570033,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1837.3129000538029,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1353.5339012742043,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1599.6864999760874,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1179.681399546098,
+          "invalid_context": false
+        }
+      ],
+      "warm": {
+        "requests": 30,
+        "latency_ms": {
+          "p50": 1905.56,
+          "p95": 2822.957,
+          "p99": 2935.981,
+          "max": 2950.927200028673,
+          "p99_stable": false
+        },
+        "errors": {
+          "denominator": 30,
+          "http_5xx": 0,
+          "http_non_2xx": 0,
+          "transport": 0,
+          "invalid_context": 0,
+          "failed_requests": 0,
+          "rate": 0.0
+        },
+        "queries": {
+          "total": 60060,
+          "min": 2002,
+          "max": 2002,
+          "mean": 2002.0
+        },
+        "bytes": {
+          "total": 8730,
+          "min": 291,
+          "max": 291
+        },
+        "sql_ms": {
+          "total": 44789.964104711544,
+          "p95": 2154.52
+        }
+      },
+      "observations": [
+        {
+          "latency_ms": 1504.0103999781422,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1111.166700196918,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1856.355199997779,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1369.8463995824568,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1783.886999997776,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1317.9010004969314,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2196.890900027938,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1625.144598481711,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1992.4667999730445,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1465.318201633636,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1755.8983999770135,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1297.8092014673166,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1570.8828999777324,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1160.4501022375189,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1766.8805999564938,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1303.720896539744,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2244.4399000378326,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1675.4687986103818,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2729.541400040034,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 2066.6403995710425,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2065.8616999862716,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1527.832200517878,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1878.9246999658644,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1384.6448001568206,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1715.7555000158027,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1271.0853004246019,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2259.7169000073336,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1697.2854003543034,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2024.8751999461092,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1495.2605024445802,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1633.5632000118494,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1204.6005015727133,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1697.4072000011802,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1262.3964022495784,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1774.3946999544278,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1306.6732005099766,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2098.465799994301,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1554.4751984416507,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2001.7702000332065,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1470.7604004070163,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1769.0166999818757,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1305.2980995853432,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1923.8276000251062,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1420.0472002266906,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1830.761999997776,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1350.6101969978772,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2295.6418999820016,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1709.822601173073,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1804.796400014311,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1327.5658002821729,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2215.4065999784507,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1670.1596014318056,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 1887.2926000040025,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1415.3620969736949,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2008.322199981194,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 1494.9171000043862,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2899.388000019826,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 2226.4212009031326,
+          "invalid_context": false
+        },
+        {
+          "latency_ms": 2950.927200028673,
+          "status": 200,
+          "bytes": 291,
+          "queries": 2002,
+          "sql_ms": 2301.2800012365915,
+          "invalid_context": false
+        }
+      ],
+      "explain_runtime_role": {
+        "candidate_query": [
+          {
+            "Plan": {
+              "Node Type": "Sort",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 71.83,
+              "Total Cost": 74.33,
+              "Plan Rows": 1000,
+              "Plan Width": 37,
+              "Actual Startup Time": 0.294,
+              "Actual Total Time": 0.325,
+              "Actual Rows": 1000,
+              "Actual Loops": 1,
+              "Sort Key": [
+                "id"
+              ],
+              "Sort Method": "quicksort",
+              "Sort Space Used": 87,
+              "Sort Space Type": "Memory",
+              "Shared Hit Blocks": 15,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "workspaces",
+                  "Alias": "workspaces",
+                  "Startup Cost": 0.0,
+                  "Total Cost": 22.0,
+                  "Plan Rows": 1000,
+                  "Plan Width": 37,
+                  "Actual Startup Time": 0.009,
+                  "Actual Total Time": 0.092,
+                  "Actual Rows": 1000,
+                  "Actual Loops": 1,
+                  "Shared Hit Blocks": 12,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 67,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.325,
+            "Triggers": [],
+            "Execution Time": 0.406
+          }
+        ],
+        "membership_query": [
+          {
+            "Plan": {
+              "Node Type": "Result",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 0.01,
+              "Total Cost": 1.02,
+              "Plan Rows": 1,
+              "Plan Width": 49,
+              "Actual Startup Time": 0.014,
+              "Actual Total Time": 0.014,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "One-Time Filter": "((current_setting('app.workspace_id'::text))::uuid = 'ad387ff9-a200-415e-af0b-cebff9c93e1b'::uuid)",
+              "Shared Hit Blocks": 1,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "memberships",
+                  "Alias": "memberships",
+                  "Startup Cost": 0.01,
+                  "Total Cost": 1.02,
+                  "Plan Rows": 1,
+                  "Plan Width": 49,
+                  "Actual Startup Time": 0.007,
+                  "Actual Total Time": 0.007,
+                  "Actual Rows": 1,
+                  "Actual Loops": 1,
+                  "Filter": "((active IS TRUE) AND (workspace_id = 'ad387ff9-a200-415e-af0b-cebff9c93e1b'::uuid) AND (user_id = '149d3388-3d69-4bad-8a60-303f3cb6ce49'::uuid))",
+                  "Rows Removed by Filter": 0,
+                  "Shared Hit Blocks": 1,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 86,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.292,
+            "Triggers": [],
+            "Execution Time": 0.038
+          }
+        ]
+      }
+    }
+  ],
+  "directory_gate": {
+    "max_sql_per_request": 6,
+    "independent_of_unrelated_workspaces": false,
+    "within_budget": false,
+    "passed": false
+  },
+  "cost": {
+    "provider_calls": 0,
+    "paid_resources_created": false,
+    "local_infrastructure_usd": null
+  },
+  "release_accepted": false,
+  "source_sha": "7eb0ed557db61bc06cf7c0469c5fd6ea1eedebf0",
+  "source_dirty": true,
+  "tool_hashes": {
+    "services/api/tests/benchmark_workspace_directory_case.py": "e5b93f4c03f0394205106c455b09949c4e923a2d320f539316158e44e3be29e9",
+    "scripts/benchmark-workspace-directory.py": "f7e971e837c94607ca1951f6e31cbe4a4f6e768cc1d7ce06fe698226718d0fc4",
+    "services/api/tools/quality_metrics.py": "f189c7c241f56f5b114b8111b1bba6903808d8558d993860cb2c013ee9346de7",
+    "services/api/buyeros_api/api/routes/workspaces.py": "7b9a61a2a246bcf9d6c395cb00ad0199e5ea931082afc7cd9833f4bd817a4834",
+    "services/api/buyeros_api/api/deps.py": "c4ad139caa306403aac08b769530529a949720d99c311fabee77f294cd4e13f8"
+  }
+}

@@ -1,0 +1,5 @@
+warning: in the working copy of 'TASKS.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/buyeros/CURRENT_STATUS.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/buyeros/performance-baseline.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv', LF will be replaced by CRLF the next time Git touches it

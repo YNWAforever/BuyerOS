@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="30" skipped="0" tests="34" time="21.022" timestamp="2026-10-04T13:51:25.701168+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_quality_tools" name="test_latency_errors_use_all_requests_and_p99_is_not_faked" time="0.154"><failure message="AssertionError: Q10 versioned quality metrics tool missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file">def test_latency_errors_use_all_requests_and_p99_is_not_faked():
+        samples=[{'latency_ms':t,'status':s,'bytes':10,'queries':q,'sql_ms':1.0,'invalid_context':i}
+                 for t,s,q,i in [(10,200,4,False),(20,503,2,False),(30,200,4,True),(40,None,0,False)]]
+&gt;       result=metrics().summarize_requests(samples)
+               ^^^^^^^^^
+
+tests\test_quality_tools.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def metrics():
+&gt;       assert (TOOLS / 'quality_metrics.py').is_file(), 'Q10 versioned quality metrics tool missing'
+E       AssertionError: Q10 versioned quality metrics tool missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file
+
+tests\test_quality_tools.py:17: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_invalid_observations_fail_closed[change0]" time="0.003"><failure message="AssertionError: Q10 versioned quality metrics tool missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file">change = {'latency_ms': nan}
+
+    @pytest.mark.parametrize('change',[{'latency_ms':float('nan')},{'latency_ms':-1},{'status':True},{'queries':True},{'bytes':-1}])
+    def test_invalid_observations_fail_closed(change):
+        row={'latency_ms':10,'status':200,'bytes':10,'queries':4,'sql_ms':1,'invalid_context':False}
+&gt;       with pytest.raises(ValueError):metrics().summarize_requests([{**row,**change}])
+                                       ^^^^^^^^^
+
+tests\test_quality_tools.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def metrics():
+&gt;       assert (TOOLS / 'quality_metrics.py').is_file(), 'Q10 versioned quality metrics tool missing'
+E       AssertionError: Q10 versioned quality metrics tool missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file
+
+tests\test_quality_tools.py:17: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_invalid_observations_fail_closed[change1]" time="0.002"><failure message="AssertionError: Q10 versioned quality metrics tool missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file">change = {'latency_ms': -1}
+
+    @pytest.mark.parametrize('change',[{'latency_ms':float('nan')},{'latency_ms':-1},{'status':True},{'queries':True},{'bytes':-1}])
+    def test_invalid_observations_fail_closed(change):
+        row={'latency_ms':10,'status':200,'bytes':10,'queries':4,'sql_ms':1,'invalid_context':False}
+&gt;       with pytest.raises(ValueError):metrics().summarize_requests([{**row,**change}])
+                                       ^^^^^^^^^
+
+tests\test_quality_tools.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def metrics():
+&gt;       assert (TOOLS / 'quality_metrics.py').is_file(), 'Q10 versioned quality metrics tool missing'
+E       AssertionError: Q10 versioned quality metrics tool missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file
+
+tests\test_quality_tools.py:17: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_invalid_observations_fail_closed[change2]" time="0.002"><failure message="AssertionError: Q10 versioned quality metrics tool missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file">change = {'status': True}
+
+    @pytest.mark.parametrize('change',[{'latency_ms':float('nan')},{'latency_ms':-1},{'status':True},{'queries':True},{'bytes':-1}])
+    def test_invalid_observations_fail_closed(change):
+        row={'latency_ms':10,'status':200,'bytes':10,'queries':4,'sql_ms':1,'invalid_context':False}
+&gt;       with pytest.raises(ValueError):metrics().summarize_requests([{**row,**change}])
+                                       ^^^^^^^^^
+
+tests\test_quality_tools.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def metrics():
+&gt;       assert (TOOLS / 'quality_metrics.py').is_file(), 'Q10 versioned quality metrics tool missing'
+E       AssertionError: Q10 versioned quality metrics tool missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file
+
+tests\test_quality_tools.py:17: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_invalid_observations_fail_closed[change3]" time="0.005"><failure message="AssertionError: Q10 versioned quality metrics tool missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file">change = {'queries': True}
+
+    @pytest.mark.parametrize('change',[{'latency_ms':float('nan')},{'latency_ms':-1},{'status':True},{'queries':True},{'bytes':-1}])
+    def test_invalid_observations_fail_closed(change):
+        row={'latency_ms':10,'status':200,'bytes':10,'queries':4,'sql_ms':1,'invalid_context':False}
+&gt;       with pytest.raises(ValueError):metrics().summarize_requests([{**row,**change}])
+                                       ^^^^^^^^^
+
+tests\test_quality_tools.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def metrics():
+&gt;       assert (TOOLS / 'quality_metrics.py').is_file(), 'Q10 versioned quality metrics tool missing'
+E       AssertionError: Q10 versioned quality metrics tool missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file
+
+tests\test_quality_tools.py:17: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_invalid_observations_fail_closed[change4]" time="0.004"><failure message="AssertionError: Q10 versioned quality metrics tool missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file">change = {'bytes': -1}
+
+    @pytest.mark.parametrize('change',[{'latency_ms':float('nan')},{'latency_ms':-1},{'status':True},{'queries':True},{'bytes':-1}])
+    def test_invalid_observations_fail_closed(change):
+        row={'latency_ms':10,'status':200,'bytes':10,'queries':4,'sql_ms':1,'invalid_context':False}
+&gt;       with pytest.raises(ValueError):metrics().summarize_requests([{**row,**change}])
+                                       ^^^^^^^^^
+
+tests\test_quality_tools.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def metrics():
+&gt;       assert (TOOLS / 'quality_metrics.py').is_file(), 'Q10 versioned quality metrics tool missing'
+E       AssertionError: Q10 versioned quality metrics tool missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file
+
+tests\test_quality_tools.py:17: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_empty_sample_is_not_a_passing_benchmark" time="0.002"><failure message="AssertionError: Q10 versioned quality metrics tool missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file">def test_empty_sample_is_not_a_passing_benchmark():
+&gt;       with pytest.raises(ValueError):metrics().summarize_requests([])
+                                       ^^^^^^^^^
+
+tests\test_quality_tools.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def metrics():
+&gt;       assert (TOOLS / 'quality_metrics.py').is_file(), 'Q10 versioned quality metrics tool missing'
+E       AssertionError: Q10 versioned quality metrics tool missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file
+
+tests\test_quality_tools.py:17: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_zero_denominator_and_small_n_wilson_are_explicit" time="0.002"><failure message="AssertionError: Q10 versioned quality metrics tool missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file">def test_zero_denominator_and_small_n_wilson_are_explicit():
+&gt;       assert metrics().proportion(0,0)=={'numerator':0,'denominator':0,'estimate':None,'ci95':None}
+               ^^^^^^^^^
+
+tests\test_quality_tools.py:75: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def metrics():
+&gt;       assert (TOOLS / 'quality_metrics.py').is_file(), 'Q10 versioned quality metrics tool missing'
+E       AssertionError: Q10 versioned quality metrics tool missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'quality_metrics.py').is_file
+
+tests\test_quality_tools.py:17: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_legacy_benchmark_refuses_each_inherited_database_before_pytest[BUYEROS_TEST_DATABASE_URL]" time="0.992"><failure message="AssertionError: assert 'inherited database' in 'usage: benchmark-buyeros.py [-h] --fixture-size {1000,10000}\n                            --workspaces {1,10,100} [--...PUT]\nbenchmark-buyeros.py: error: unset BUYEROS_TEST_DATABASE_URL; this benchmark owns a disposable Docker database\n'&#10; +  where 'usage: benchmark-buyeros.py [-h] --fixture-size {1000,10000}\n                            --workspaces {1,10,100} [--...PUT]\nbenchmark-buyeros.py: error: unset BUYEROS_TEST_DATABASE_URL; this benchmark owns a disposable Docker database\n' = CompletedProcess(args=['C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scri...UT]\nbenchmark-buyeros.py: error: unset BUYEROS_TEST_DATABASE_URL; this benchmark owns a disposable Docker database\n').stderr">variable = 'BUYEROS_TEST_DATABASE_URL'
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-250/test_legacy_benchmark_refuses_0')
+
+    @pytest.mark.parametrize('variable',['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL'])
+    def test_legacy_benchmark_refuses_each_inherited_database_before_pytest(variable,tmp_path):
+        env={k:v for k,v in os.environ.items() if k not in ['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL']}
+        env[variable]='postgresql://not-used.example/shared'
+        # RED safety: if old wrapper ignores this DSN, collect only. No DB fixture
+        # starts, so the test proves the guard without touching any shared database.
+        env['PYTEST_ADDOPTS']='--collect-only'
+        result=subprocess.run([sys.executable,str(ROOT/'scripts/benchmark-buyeros.py'),'--fixture-size','1000',
+                               '--workspaces','1','--output',str(tmp_path/'result.json')],env=env,capture_output=True,text=True,timeout=45)
+        assert result.returncode==2, result.stdout+result.stderr
+&gt;       assert 'inherited database' in result.stderr
+E       AssertionError: assert 'inherited database' in 'usage: benchmark-buyeros.py [-h] --fixture-size {1000,10000}\n                            --workspaces {1,10,100} [--...PUT]\nbenchmark-buyeros.py: error: unset BUYEROS_TEST_DATABASE_URL; this benchmark owns a disposable Docker database\n'
+E        +  where 'usage: benchmark-buyeros.py [-h] --fixture-size {1000,10000}\n                            --workspaces {1,10,100} [--...PUT]\nbenchmark-buyeros.py: error: unset BUYEROS_TEST_DATABASE_URL; this benchmark owns a disposable Docker database\n' = CompletedProcess(args=['C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scri...UT]\nbenchmark-buyeros.py: error: unset BUYEROS_TEST_DATABASE_URL; this benchmark owns a disposable Docker database\n').stderr
+
+tests\test_quality_tools.py:92: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_legacy_benchmark_refuses_each_inherited_database_before_pytest[BUYEROS_DATABASE_URL]" time="7.983"><failure message="AssertionError: tests/benchmark_buyeros_case.py::test_representative_buyer_read_baseline&#10;  &#10;  ============================== warnings summary ===============================&#10;  tests\conftest.py:24&#10;  tests\conftest.py:24&#10;    C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16&#10;      asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())&#10;  &#10;  tests\conftest.py:24&#10;  tests\conftest.py:24&#10;    C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16&#10;      asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())&#10;  &#10;  .venv\Lib\site-packages\starlette\testclient.py:53&#10;    C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.&#10;      _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]&#10;  &#10;  -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html&#10;  1 test collected in 1.92s&#10;  &#10;assert 0 == 2&#10; +  where 0 = CompletedProcess(args=['C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scri...]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n1 test collected in 1.92s\n&quot;, stderr='').returncode">variable = 'BUYEROS_DATABASE_URL'
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-250/test_legacy_benchmark_refuses_1')
+
+    @pytest.mark.parametrize('variable',['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL'])
+    def test_legacy_benchmark_refuses_each_inherited_database_before_pytest(variable,tmp_path):
+        env={k:v for k,v in os.environ.items() if k not in ['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL']}
+        env[variable]='postgresql://not-used.example/shared'
+        # RED safety: if old wrapper ignores this DSN, collect only. No DB fixture
+        # starts, so the test proves the guard without touching any shared database.
+        env['PYTEST_ADDOPTS']='--collect-only'
+        result=subprocess.run([sys.executable,str(ROOT/'scripts/benchmark-buyeros.py'),'--fixture-size','1000',
+                               '--workspaces','1','--output',str(tmp_path/'result.json')],env=env,capture_output=True,text=True,timeout=45)
+&gt;       assert result.returncode==2, result.stdout+result.stderr
+E       AssertionError: tests/benchmark_buyeros_case.py::test_representative_buyer_read_baseline
+E         
+E         ============================== warnings summary ===============================
+E         tests\conftest.py:24
+E         tests\conftest.py:24
+E           C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+E             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+E         
+E         tests\conftest.py:24
+E         tests\conftest.py:24
+E           C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+E             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+E         
+E         .venv\Lib\site-packages\starlette\testclient.py:53
+E           C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+E             _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+E         
+E         -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+E         1 test collected in 1.92s
+E         
+E       assert 0 == 2
+E        +  where 0 = CompletedProcess(args=['C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scri...]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n1 test collected in 1.92s\n", stderr='').returncode
+
+tests\test_quality_tools.py:91: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_legacy_benchmark_refuses_each_inherited_database_before_pytest[DATABASE_URL]" time="4.409"><failure message="AssertionError: tests/benchmark_buyeros_case.py::test_representative_buyer_read_baseline&#10;  &#10;  ============================== warnings summary ===============================&#10;  tests\conftest.py:24&#10;  tests\conftest.py:24&#10;    C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16&#10;      asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())&#10;  &#10;  tests\conftest.py:24&#10;  tests\conftest.py:24&#10;    C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16&#10;      asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())&#10;  &#10;  .venv\Lib\site-packages\starlette\testclient.py:53&#10;    C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.&#10;      _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]&#10;  &#10;  -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html&#10;  1 test collected in 1.93s&#10;  &#10;assert 0 == 2&#10; +  where 0 = CompletedProcess(args=['C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scri...]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n1 test collected in 1.93s\n&quot;, stderr='').returncode">variable = 'DATABASE_URL'
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-250/test_legacy_benchmark_refuses_2')
+
+    @pytest.mark.parametrize('variable',['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL'])
+    def test_legacy_benchmark_refuses_each_inherited_database_before_pytest(variable,tmp_path):
+        env={k:v for k,v in os.environ.items() if k not in ['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL']}
+        env[variable]='postgresql://not-used.example/shared'
+        # RED safety: if old wrapper ignores this DSN, collect only. No DB fixture
+        # starts, so the test proves the guard without touching any shared database.
+        env['PYTEST_ADDOPTS']='--collect-only'
+        result=subprocess.run([sys.executable,str(ROOT/'scripts/benchmark-buyeros.py'),'--fixture-size','1000',
+                               '--workspaces','1','--output',str(tmp_path/'result.json')],env=env,capture_output=True,text=True,timeout=45)
+&gt;       assert result.returncode==2, result.stdout+result.stderr
+E       AssertionError: tests/benchmark_buyeros_case.py::test_representative_buyer_read_baseline
+E         
+E         ============================== warnings summary ===============================
+E         tests\conftest.py:24
+E         tests\conftest.py:24
+E           C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+E             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+E         
+E         tests\conftest.py:24
+E         tests\conftest.py:24
+E           C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+E             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+E         
+E         .venv\Lib\site-packages\starlette\testclient.py:53
+E           C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+E             _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+E         
+E         -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+E         1 test collected in 1.93s
+E         
+E       assert 0 == 2
+E        +  where 0 = CompletedProcess(args=['C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scri...]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n1 test collected in 1.93s\n", stderr='').returncode
+
+tests\test_quality_tools.py:91: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_legacy_benchmark_refuses_each_inherited_database_before_pytest[BUYEROS_WORKER_DATABASE_URL]" time="4.263"><failure message="AssertionError: tests/benchmark_buyeros_case.py::test_representative_buyer_read_baseline&#10;  &#10;  ============================== warnings summary ===============================&#10;  tests\conftest.py:24&#10;  tests\conftest.py:24&#10;    C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16&#10;      asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())&#10;  &#10;  tests\conftest.py:24&#10;  tests\conftest.py:24&#10;    C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16&#10;      asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())&#10;  &#10;  .venv\Lib\site-packages\starlette\testclient.py:53&#10;    C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.&#10;      _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]&#10;  &#10;  -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html&#10;  1 test collected in 1.72s&#10;  &#10;assert 0 == 2&#10; +  where 0 = CompletedProcess(args=['C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scri...]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n1 test collected in 1.72s\n&quot;, stderr='').returncode">variable = 'BUYEROS_WORKER_DATABASE_URL'
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-250/test_legacy_benchmark_refuses_3')
+
+    @pytest.mark.parametrize('variable',['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL'])
+    def test_legacy_benchmark_refuses_each_inherited_database_before_pytest(variable,tmp_path):
+        env={k:v for k,v in os.environ.items() if k not in ['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL']}
+        env[variable]='postgresql://not-used.example/shared'
+        # RED safety: if old wrapper ignores this DSN, collect only. No DB fixture
+        # starts, so the test proves the guard without touching any shared database.
+        env['PYTEST_ADDOPTS']='--collect-only'
+        result=subprocess.run([sys.executable,str(ROOT/'scripts/benchmark-buyeros.py'),'--fixture-size','1000',
+                               '--workspaces','1','--output',str(tmp_path/'result.json')],env=env,capture_output=True,text=True,timeout=45)
+&gt;       assert result.returncode==2, result.stdout+result.stderr
+E       AssertionError: tests/benchmark_buyeros_case.py::test_representative_buyer_read_baseline
+E         
+E         ============================== warnings summary ===============================
+E         tests\conftest.py:24
+E         tests\conftest.py:24
+E           C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+E             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+E         
+E         tests\conftest.py:24
+E         tests\conftest.py:24
+E           C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+E             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+E         
+E         .venv\Lib\site-packages\starlette\testclient.py:53
+E           C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+E             _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+E         
+E         -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+E         1 test collected in 1.72s
+E         
+E       assert 0 == 2
+E        +  where 0 = CompletedProcess(args=['C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scri...]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n1 test collected in 1.72s\n", stderr='').returncode
+
+tests\test_quality_tools.py:91: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_three_fixture_runs_have_hand_derived_precision_recall_and_abstention" time="0.002"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">def test_three_fixture_runs_have_hand_derived_precision_recall_and_abstention():
+&gt;       result=evaluator().evaluate(goldset(),predictions())
+               ^^^^^^^^^^^
+
+tests\test_quality_tools.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_incomplete_or_leaky_goldset_comparisons_are_rejected[company_split]" time="0.002"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'company_split'
+
+    @pytest.mark.parametrize('mutation',['company_split','same_annotator','unadjudicated','bad_reference','missing_holdout','duplicate_prediction','two_runs','train_prediction','unknown_company'])
+    def test_incomplete_or_leaky_goldset_comparisons_are_rejected(mutation):
+        data=goldset();pred=predictions()
+        if mutation=='company_split':data['rows'].append({**copy.deepcopy(data['rows'][2]),'split':'train'})
+        elif mutation=='same_annotator':data['rows'][2]['annotations'][1]['annotator_id']='fixture-a'
+        elif mutation=='unadjudicated':data['rows'][2]['annotations'][1]['verdict']='not_match'
+        elif mutation=='bad_reference':data['rows'][2]['reference_verdict']='not_match'
+        elif mutation=='missing_holdout':pred['runs'][0]['rows'].pop()
+        elif mutation=='duplicate_prediction':pred['runs'][0]['rows'].append(copy.deepcopy(pred['runs'][0]['rows'][0]))
+        elif mutation=='two_runs':pred['runs'].pop()
+        elif mutation=='train_prediction':pred['runs'][0]['rows'][0]['company_id']=data['rows'][0]['company_id']
+        elif mutation=='unknown_company':pred['runs'][0]['rows'][0]['company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+&gt;       with pytest.raises(ValueError):evaluator().evaluate(data,pred)
+                                       ^^^^^^^^^^^
+
+tests\test_quality_tools.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_incomplete_or_leaky_goldset_comparisons_are_rejected[same_annotator]" time="0.003"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'same_annotator'
+
+    @pytest.mark.parametrize('mutation',['company_split','same_annotator','unadjudicated','bad_reference','missing_holdout','duplicate_prediction','two_runs','train_prediction','unknown_company'])
+    def test_incomplete_or_leaky_goldset_comparisons_are_rejected(mutation):
+        data=goldset();pred=predictions()
+        if mutation=='company_split':data['rows'].append({**copy.deepcopy(data['rows'][2]),'split':'train'})
+        elif mutation=='same_annotator':data['rows'][2]['annotations'][1]['annotator_id']='fixture-a'
+        elif mutation=='unadjudicated':data['rows'][2]['annotations'][1]['verdict']='not_match'
+        elif mutation=='bad_reference':data['rows'][2]['reference_verdict']='not_match'
+        elif mutation=='missing_holdout':pred['runs'][0]['rows'].pop()
+        elif mutation=='duplicate_prediction':pred['runs'][0]['rows'].append(copy.deepcopy(pred['runs'][0]['rows'][0]))
+        elif mutation=='two_runs':pred['runs'].pop()
+        elif mutation=='train_prediction':pred['runs'][0]['rows'][0]['company_id']=data['rows'][0]['company_id']
+        elif mutation=='unknown_company':pred['runs'][0]['rows'][0]['company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+&gt;       with pytest.raises(ValueError):evaluator().evaluate(data,pred)
+                                       ^^^^^^^^^^^
+
+tests\test_quality_tools.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_incomplete_or_leaky_goldset_comparisons_are_rejected[unadjudicated]" time="0.002"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'unadjudicated'
+
+    @pytest.mark.parametrize('mutation',['company_split','same_annotator','unadjudicated','bad_reference','missing_holdout','duplicate_prediction','two_runs','train_prediction','unknown_company'])
+    def test_incomplete_or_leaky_goldset_comparisons_are_rejected(mutation):
+        data=goldset();pred=predictions()
+        if mutation=='company_split':data['rows'].append({**copy.deepcopy(data['rows'][2]),'split':'train'})
+        elif mutation=='same_annotator':data['rows'][2]['annotations'][1]['annotator_id']='fixture-a'
+        elif mutation=='unadjudicated':data['rows'][2]['annotations'][1]['verdict']='not_match'
+        elif mutation=='bad_reference':data['rows'][2]['reference_verdict']='not_match'
+        elif mutation=='missing_holdout':pred['runs'][0]['rows'].pop()
+        elif mutation=='duplicate_prediction':pred['runs'][0]['rows'].append(copy.deepcopy(pred['runs'][0]['rows'][0]))
+        elif mutation=='two_runs':pred['runs'].pop()
+        elif mutation=='train_prediction':pred['runs'][0]['rows'][0]['company_id']=data['rows'][0]['company_id']
+        elif mutation=='unknown_company':pred['runs'][0]['rows'][0]['company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+&gt;       with pytest.raises(ValueError):evaluator().evaluate(data,pred)
+                                       ^^^^^^^^^^^
+
+tests\test_quality_tools.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_incomplete_or_leaky_goldset_comparisons_are_rejected[bad_reference]" time="0.002"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'bad_reference'
+
+    @pytest.mark.parametrize('mutation',['company_split','same_annotator','unadjudicated','bad_reference','missing_holdout','duplicate_prediction','two_runs','train_prediction','unknown_company'])
+    def test_incomplete_or_leaky_goldset_comparisons_are_rejected(mutation):
+        data=goldset();pred=predictions()
+        if mutation=='company_split':data['rows'].append({**copy.deepcopy(data['rows'][2]),'split':'train'})
+        elif mutation=='same_annotator':data['rows'][2]['annotations'][1]['annotator_id']='fixture-a'
+        elif mutation=='unadjudicated':data['rows'][2]['annotations'][1]['verdict']='not_match'
+        elif mutation=='bad_reference':data['rows'][2]['reference_verdict']='not_match'
+        elif mutation=='missing_holdout':pred['runs'][0]['rows'].pop()
+        elif mutation=='duplicate_prediction':pred['runs'][0]['rows'].append(copy.deepcopy(pred['runs'][0]['rows'][0]))
+        elif mutation=='two_runs':pred['runs'].pop()
+        elif mutation=='train_prediction':pred['runs'][0]['rows'][0]['company_id']=data['rows'][0]['company_id']
+        elif mutation=='unknown_company':pred['runs'][0]['rows'][0]['company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+&gt;       with pytest.raises(ValueError):evaluator().evaluate(data,pred)
+                                       ^^^^^^^^^^^
+
+tests\test_quality_tools.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_incomplete_or_leaky_goldset_comparisons_are_rejected[missing_holdout]" time="0.004"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'missing_holdout'
+
+    @pytest.mark.parametrize('mutation',['company_split','same_annotator','unadjudicated','bad_reference','missing_holdout','duplicate_prediction','two_runs','train_prediction','unknown_company'])
+    def test_incomplete_or_leaky_goldset_comparisons_are_rejected(mutation):
+        data=goldset();pred=predictions()
+        if mutation=='company_split':data['rows'].append({**copy.deepcopy(data['rows'][2]),'split':'train'})
+        elif mutation=='same_annotator':data['rows'][2]['annotations'][1]['annotator_id']='fixture-a'
+        elif mutation=='unadjudicated':data['rows'][2]['annotations'][1]['verdict']='not_match'
+        elif mutation=='bad_reference':data['rows'][2]['reference_verdict']='not_match'
+        elif mutation=='missing_holdout':pred['runs'][0]['rows'].pop()
+        elif mutation=='duplicate_prediction':pred['runs'][0]['rows'].append(copy.deepcopy(pred['runs'][0]['rows'][0]))
+        elif mutation=='two_runs':pred['runs'].pop()
+        elif mutation=='train_prediction':pred['runs'][0]['rows'][0]['company_id']=data['rows'][0]['company_id']
+        elif mutation=='unknown_company':pred['runs'][0]['rows'][0]['company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+&gt;       with pytest.raises(ValueError):evaluator().evaluate(data,pred)
+                                       ^^^^^^^^^^^
+
+tests\test_quality_tools.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_incomplete_or_leaky_goldset_comparisons_are_rejected[duplicate_prediction]" time="0.003"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'duplicate_prediction'
+
+    @pytest.mark.parametrize('mutation',['company_split','same_annotator','unadjudicated','bad_reference','missing_holdout','duplicate_prediction','two_runs','train_prediction','unknown_company'])
+    def test_incomplete_or_leaky_goldset_comparisons_are_rejected(mutation):
+        data=goldset();pred=predictions()
+        if mutation=='company_split':data['rows'].append({**copy.deepcopy(data['rows'][2]),'split':'train'})
+        elif mutation=='same_annotator':data['rows'][2]['annotations'][1]['annotator_id']='fixture-a'
+        elif mutation=='unadjudicated':data['rows'][2]['annotations'][1]['verdict']='not_match'
+        elif mutation=='bad_reference':data['rows'][2]['reference_verdict']='not_match'
+        elif mutation=='missing_holdout':pred['runs'][0]['rows'].pop()
+        elif mutation=='duplicate_prediction':pred['runs'][0]['rows'].append(copy.deepcopy(pred['runs'][0]['rows'][0]))
+        elif mutation=='two_runs':pred['runs'].pop()
+        elif mutation=='train_prediction':pred['runs'][0]['rows'][0]['company_id']=data['rows'][0]['company_id']
+        elif mutation=='unknown_company':pred['runs'][0]['rows'][0]['company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+&gt;       with pytest.raises(ValueError):evaluator().evaluate(data,pred)
+                                       ^^^^^^^^^^^
+
+tests\test_quality_tools.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_incomplete_or_leaky_goldset_comparisons_are_rejected[two_runs]" time="0.005"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'two_runs'
+
+    @pytest.mark.parametrize('mutation',['company_split','same_annotator','unadjudicated','bad_reference','missing_holdout','duplicate_prediction','two_runs','train_prediction','unknown_company'])
+    def test_incomplete_or_leaky_goldset_comparisons_are_rejected(mutation):
+        data=goldset();pred=predictions()
+        if mutation=='company_split':data['rows'].append({**copy.deepcopy(data['rows'][2]),'split':'train'})
+        elif mutation=='same_annotator':data['rows'][2]['annotations'][1]['annotator_id']='fixture-a'
+        elif mutation=='unadjudicated':data['rows'][2]['annotations'][1]['verdict']='not_match'
+        elif mutation=='bad_reference':data['rows'][2]['reference_verdict']='not_match'
+        elif mutation=='missing_holdout':pred['runs'][0]['rows'].pop()
+        elif mutation=='duplicate_prediction':pred['runs'][0]['rows'].append(copy.deepcopy(pred['runs'][0]['rows'][0]))
+        elif mutation=='two_runs':pred['runs'].pop()
+        elif mutation=='train_prediction':pred['runs'][0]['rows'][0]['company_id']=data['rows'][0]['company_id']
+        elif mutation=='unknown_company':pred['runs'][0]['rows'][0]['company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+&gt;       with pytest.raises(ValueError):evaluator().evaluate(data,pred)
+                                       ^^^^^^^^^^^
+
+tests\test_quality_tools.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_incomplete_or_leaky_goldset_comparisons_are_rejected[train_prediction]" time="0.002"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'train_prediction'
+
+    @pytest.mark.parametrize('mutation',['company_split','same_annotator','unadjudicated','bad_reference','missing_holdout','duplicate_prediction','two_runs','train_prediction','unknown_company'])
+    def test_incomplete_or_leaky_goldset_comparisons_are_rejected(mutation):
+        data=goldset();pred=predictions()
+        if mutation=='company_split':data['rows'].append({**copy.deepcopy(data['rows'][2]),'split':'train'})
+        elif mutation=='same_annotator':data['rows'][2]['annotations'][1]['annotator_id']='fixture-a'
+        elif mutation=='unadjudicated':data['rows'][2]['annotations'][1]['verdict']='not_match'
+        elif mutation=='bad_reference':data['rows'][2]['reference_verdict']='not_match'
+        elif mutation=='missing_holdout':pred['runs'][0]['rows'].pop()
+        elif mutation=='duplicate_prediction':pred['runs'][0]['rows'].append(copy.deepcopy(pred['runs'][0]['rows'][0]))
+        elif mutation=='two_runs':pred['runs'].pop()
+        elif mutation=='train_prediction':pred['runs'][0]['rows'][0]['company_id']=data['rows'][0]['company_id']
+        elif mutation=='unknown_company':pred['runs'][0]['rows'][0]['company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+&gt;       with pytest.raises(ValueError):evaluator().evaluate(data,pred)
+                                       ^^^^^^^^^^^
+
+tests\test_quality_tools.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_incomplete_or_leaky_goldset_comparisons_are_rejected[unknown_company]" time="0.003"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'unknown_company'
+
+    @pytest.mark.parametrize('mutation',['company_split','same_annotator','unadjudicated','bad_reference','missing_holdout','duplicate_prediction','two_runs','train_prediction','unknown_company'])
+    def test_incomplete_or_leaky_goldset_comparisons_are_rejected(mutation):
+        data=goldset();pred=predictions()
+        if mutation=='company_split':data['rows'].append({**copy.deepcopy(data['rows'][2]),'split':'train'})
+        elif mutation=='same_annotator':data['rows'][2]['annotations'][1]['annotator_id']='fixture-a'
+        elif mutation=='unadjudicated':data['rows'][2]['annotations'][1]['verdict']='not_match'
+        elif mutation=='bad_reference':data['rows'][2]['reference_verdict']='not_match'
+        elif mutation=='missing_holdout':pred['runs'][0]['rows'].pop()
+        elif mutation=='duplicate_prediction':pred['runs'][0]['rows'].append(copy.deepcopy(pred['runs'][0]['rows'][0]))
+        elif mutation=='two_runs':pred['runs'].pop()
+        elif mutation=='train_prediction':pred['runs'][0]['rows'][0]['company_id']=data['rows'][0]['company_id']
+        elif mutation=='unknown_company':pred['runs'][0]['rows'][0]['company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+&gt;       with pytest.raises(ValueError):evaluator().evaluate(data,pred)
+                                       ^^^^^^^^^^^
+
+tests\test_quality_tools.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_disagreement_requires_separate_adjudicator_and_reason" time="0.004"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">def test_disagreement_requires_separate_adjudicator_and_reason():
+        data=goldset();data['rows'][2]['annotations'][1]['verdict']='not_match'
+        data['rows'][2]['adjudication']={'annotator_id':'fixture-c','verdict':'match','reason':'fixture-only independent adjudication'}
+&gt;       assert evaluator().evaluate(data,predictions())['holdout_companies']==6
+               ^^^^^^^^^^^
+
+tests\test_quality_tools.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_structural_source_and_scope_violations_are_not_hidden[wrong_company-wrong_company]" time="0.003"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'wrong_company', violation = 'wrong_company'
+
+    @pytest.mark.parametrize('mutation,violation',[('wrong_company','wrong_company'),('wrong_workspace','wrong_workspace'),('unsupported','unsupported_evidence'),('no_evidence','match_without_qualified_evidence'),('stale_source','unsupported_evidence'),('inference_source','unsupported_evidence')])
+    def test_structural_source_and_scope_violations_are_not_hidden(mutation,violation):
+        data=goldset();pred=predictions();row=pred['runs'][0]['rows'][0]
+        if mutation=='wrong_company':row['predicted_company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+        elif mutation=='wrong_workspace':row['workspace_id']='22222222-2222-4222-8222-222222222222'
+        elif mutation=='unsupported':row['evidence_ids']=['unqualified-id']
+        elif mutation=='no_evidence':row['evidence_ids']=[]
+        elif mutation=='stale_source':data['rows'][2]['sources'][0]['current']=False
+        elif mutation=='inference_source':data['rows'][2]['sources'][0]['is_inference']=True
+&gt;       result=evaluator().evaluate(data,pred)
+               ^^^^^^^^^^^
+
+tests\test_quality_tools.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_structural_source_and_scope_violations_are_not_hidden[wrong_workspace-wrong_workspace]" time="0.002"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'wrong_workspace', violation = 'wrong_workspace'
+
+    @pytest.mark.parametrize('mutation,violation',[('wrong_company','wrong_company'),('wrong_workspace','wrong_workspace'),('unsupported','unsupported_evidence'),('no_evidence','match_without_qualified_evidence'),('stale_source','unsupported_evidence'),('inference_source','unsupported_evidence')])
+    def test_structural_source_and_scope_violations_are_not_hidden(mutation,violation):
+        data=goldset();pred=predictions();row=pred['runs'][0]['rows'][0]
+        if mutation=='wrong_company':row['predicted_company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+        elif mutation=='wrong_workspace':row['workspace_id']='22222222-2222-4222-8222-222222222222'
+        elif mutation=='unsupported':row['evidence_ids']=['unqualified-id']
+        elif mutation=='no_evidence':row['evidence_ids']=[]
+        elif mutation=='stale_source':data['rows'][2]['sources'][0]['current']=False
+        elif mutation=='inference_source':data['rows'][2]['sources'][0]['is_inference']=True
+&gt;       result=evaluator().evaluate(data,pred)
+               ^^^^^^^^^^^
+
+tests\test_quality_tools.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_structural_source_and_scope_violations_are_not_hidden[unsupported-unsupported_evidence]" time="0.002"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'unsupported', violation = 'unsupported_evidence'
+
+    @pytest.mark.parametrize('mutation,violation',[('wrong_company','wrong_company'),('wrong_workspace','wrong_workspace'),('unsupported','unsupported_evidence'),('no_evidence','match_without_qualified_evidence'),('stale_source','unsupported_evidence'),('inference_source','unsupported_evidence')])
+    def test_structural_source_and_scope_violations_are_not_hidden(mutation,violation):
+        data=goldset();pred=predictions();row=pred['runs'][0]['rows'][0]
+        if mutation=='wrong_company':row['predicted_company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+        elif mutation=='wrong_workspace':row['workspace_id']='22222222-2222-4222-8222-222222222222'
+        elif mutation=='unsupported':row['evidence_ids']=['unqualified-id']
+        elif mutation=='no_evidence':row['evidence_ids']=[]
+        elif mutation=='stale_source':data['rows'][2]['sources'][0]['current']=False
+        elif mutation=='inference_source':data['rows'][2]['sources'][0]['is_inference']=True
+&gt;       result=evaluator().evaluate(data,pred)
+               ^^^^^^^^^^^
+
+tests\test_quality_tools.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_structural_source_and_scope_violations_are_not_hidden[no_evidence-match_without_qualified_evidence]" time="0.002"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'no_evidence', violation = 'match_without_qualified_evidence'
+
+    @pytest.mark.parametrize('mutation,violation',[('wrong_company','wrong_company'),('wrong_workspace','wrong_workspace'),('unsupported','unsupported_evidence'),('no_evidence','match_without_qualified_evidence'),('stale_source','unsupported_evidence'),('inference_source','unsupported_evidence')])
+    def test_structural_source_and_scope_violations_are_not_hidden(mutation,violation):
+        data=goldset();pred=predictions();row=pred['runs'][0]['rows'][0]
+        if mutation=='wrong_company':row['predicted_company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+        elif mutation=='wrong_workspace':row['workspace_id']='22222222-2222-4222-8222-222222222222'
+        elif mutation=='unsupported':row['evidence_ids']=['unqualified-id']
+        elif mutation=='no_evidence':row['evidence_ids']=[]
+        elif mutation=='stale_source':data['rows'][2]['sources'][0]['current']=False
+        elif mutation=='inference_source':data['rows'][2]['sources'][0]['is_inference']=True
+&gt;       result=evaluator().evaluate(data,pred)
+               ^^^^^^^^^^^
+
+tests\test_quality_tools.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_structural_source_and_scope_violations_are_not_hidden[stale_source-unsupported_evidence]" time="0.003"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'stale_source', violation = 'unsupported_evidence'
+
+    @pytest.mark.parametrize('mutation,violation',[('wrong_company','wrong_company'),('wrong_workspace','wrong_workspace'),('unsupported','unsupported_evidence'),('no_evidence','match_without_qualified_evidence'),('stale_source','unsupported_evidence'),('inference_source','unsupported_evidence')])
+    def test_structural_source_and_scope_violations_are_not_hidden(mutation,violation):
+        data=goldset();pred=predictions();row=pred['runs'][0]['rows'][0]
+        if mutation=='wrong_company':row['predicted_company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+        elif mutation=='wrong_workspace':row['workspace_id']='22222222-2222-4222-8222-222222222222'
+        elif mutation=='unsupported':row['evidence_ids']=['unqualified-id']
+        elif mutation=='no_evidence':row['evidence_ids']=[]
+        elif mutation=='stale_source':data['rows'][2]['sources'][0]['current']=False
+        elif mutation=='inference_source':data['rows'][2]['sources'][0]['is_inference']=True
+&gt;       result=evaluator().evaluate(data,pred)
+               ^^^^^^^^^^^
+
+tests\test_quality_tools.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_structural_source_and_scope_violations_are_not_hidden[inference_source-unsupported_evidence]" time="0.003"><failure message="AssertionError: Q10 offline goldset evaluator missing&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file">mutation = 'inference_source', violation = 'unsupported_evidence'
+
+    @pytest.mark.parametrize('mutation,violation',[('wrong_company','wrong_company'),('wrong_workspace','wrong_workspace'),('unsupported','unsupported_evidence'),('no_evidence','match_without_qualified_evidence'),('stale_source','unsupported_evidence'),('inference_source','unsupported_evidence')])
+    def test_structural_source_and_scope_violations_are_not_hidden(mutation,violation):
+        data=goldset();pred=predictions();row=pred['runs'][0]['rows'][0]
+        if mutation=='wrong_company':row['predicted_company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
+        elif mutation=='wrong_workspace':row['workspace_id']='22222222-2222-4222-8222-222222222222'
+        elif mutation=='unsupported':row['evidence_ids']=['unqualified-id']
+        elif mutation=='no_evidence':row['evidence_ids']=[]
+        elif mutation=='stale_source':data['rows'][2]['sources'][0]['current']=False
+        elif mutation=='inference_source':data['rows'][2]['sources'][0]['is_inference']=True
+&gt;       result=evaluator().evaluate(data,pred)
+               ^^^^^^^^^^^
+
+tests\test_quality_tools.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def evaluator():
+&gt;       assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
+E       AssertionError: Q10 offline goldset evaluator missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = (WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api/tools') / 'evaluate_research_goldset.py').is_file
+
+tests\test_quality_tools.py:49: AssertionError</failure></testcase><testcase classname="tests.test_quality_tools" name="test_evaluator_cli_writes_versioned_fixture_report_and_preserves_inputs" time="0.184"><failure message="AssertionError: C:\Users\laich\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\python.exe: can't open file 'C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\tools\\evaluate_research_goldset.py': [Errno 2] No such file or directory&#10;  &#10;assert 2 == 0&#10; +  where 2 = CompletedProcess(args=['C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scri...261003\\\\BuyerOS\\\\services\\\\api\\\\tools\\\\evaluate_research_goldset.py': [Errno 2] No such file or directory\n&quot;).returncode">tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-250/test_evaluator_cli_writes_vers0')
+
+    def test_evaluator_cli_writes_versioned_fixture_report_and_preserves_inputs(tmp_path):
+        data=tmp_path/'gold.json';pred=tmp_path/'pred.json';output=tmp_path/'report.json'
+        data.write_text(json.dumps(goldset()),encoding='utf-8');pred.write_text(json.dumps(predictions()),encoding='utf-8')
+        before=data.read_bytes(),pred.read_bytes()
+        command=[sys.executable,str(TOOLS/'evaluate_research_goldset.py'),'--goldset',str(data),'--predictions',str(pred),'--output',str(output)]
+        result=subprocess.run(command,capture_output=True,text=True,timeout=30)
+&gt;       assert result.returncode==0,result.stderr
+E       AssertionError: C:\Users\laich\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\python.exe: can't open file 'C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\tools\\evaluate_research_goldset.py': [Errno 2] No such file or directory
+E         
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scri...261003\\\\BuyerOS\\\\services\\\\api\\\\tools\\\\evaluate_research_goldset.py': [Errno 2] No such file or directory\n").returncode
+
+tests\test_quality_tools.py:156: AssertionError</failure></testcase><testcase classname="tests.test_fit_eval" name="test_research_eval_fixture_verdicts_and_citation_support" time="0.011" /><testcase classname="tests.test_settlement" name="test_success_commits_charge" time="0.002" /><testcase classname="tests.test_settlement" name="test_unknown_settles_nothing" time="0.002" /><testcase classname="tests.test_settlement" name="test_cancel_releases_only_proven_unsent" time="0.002" /></testsuite></testsuites>

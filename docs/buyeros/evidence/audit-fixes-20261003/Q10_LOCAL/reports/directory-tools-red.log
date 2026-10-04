@@ -1,0 +1,105 @@
+FFFFFF                                                                   [100%]
+================================== FAILURES ===================================
+_ test_directory_runner_refuses_inherited_dsn_without_starting_db[BUYEROS_TEST_DATABASE_URL] _
+
+variable = 'BUYEROS_TEST_DATABASE_URL'
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-254/test_directory_runner_refuses_0')
+
+    @pytest.mark.parametrize('variable',DATABASE_VARIABLES)
+    def test_directory_runner_refuses_inherited_dsn_without_starting_db(variable,tmp_path):
+>       assert RUNNER.is_file(),'Q10 owned workspace benchmark runner missing'
+E       AssertionError: Q10 owned workspace benchmark runner missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/scripts/benchmark-workspace-directory.py').is_file
+
+services\api\tests\test_workspace_benchmark_tools.py:16: AssertionError
+_ test_directory_runner_refuses_inherited_dsn_without_starting_db[BUYEROS_DATABASE_URL] _
+
+variable = 'BUYEROS_DATABASE_URL'
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-254/test_directory_runner_refuses_1')
+
+    @pytest.mark.parametrize('variable',DATABASE_VARIABLES)
+    def test_directory_runner_refuses_inherited_dsn_without_starting_db(variable,tmp_path):
+>       assert RUNNER.is_file(),'Q10 owned workspace benchmark runner missing'
+E       AssertionError: Q10 owned workspace benchmark runner missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/scripts/benchmark-workspace-directory.py').is_file
+
+services\api\tests\test_workspace_benchmark_tools.py:16: AssertionError
+_ test_directory_runner_refuses_inherited_dsn_without_starting_db[DATABASE_URL] _
+
+variable = 'DATABASE_URL'
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-254/test_directory_runner_refuses_2')
+
+    @pytest.mark.parametrize('variable',DATABASE_VARIABLES)
+    def test_directory_runner_refuses_inherited_dsn_without_starting_db(variable,tmp_path):
+>       assert RUNNER.is_file(),'Q10 owned workspace benchmark runner missing'
+E       AssertionError: Q10 owned workspace benchmark runner missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/scripts/benchmark-workspace-directory.py').is_file
+
+services\api\tests\test_workspace_benchmark_tools.py:16: AssertionError
+_ test_directory_runner_refuses_inherited_dsn_without_starting_db[BUYEROS_WORKER_DATABASE_URL] _
+
+variable = 'BUYEROS_WORKER_DATABASE_URL'
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-254/test_directory_runner_refuses_3')
+
+    @pytest.mark.parametrize('variable',DATABASE_VARIABLES)
+    def test_directory_runner_refuses_inherited_dsn_without_starting_db(variable,tmp_path):
+>       assert RUNNER.is_file(),'Q10 owned workspace benchmark runner missing'
+E       AssertionError: Q10 owned workspace benchmark runner missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/scripts/benchmark-workspace-directory.py').is_file
+
+services\api\tests\test_workspace_benchmark_tools.py:16: AssertionError
+______________ test_directory_runner_preserves_existing_evidence ______________
+
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-254/test_directory_runner_preserve0')
+
+    def test_directory_runner_preserves_existing_evidence(tmp_path):
+>       assert RUNNER.is_file(),'Q10 owned workspace benchmark runner missing'
+E       AssertionError: Q10 owned workspace benchmark runner missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/scripts/benchmark-workspace-directory.py').is_file
+
+services\api\tests\test_workspace_benchmark_tools.py:25: AssertionError
+_____________ test_directory_runner_rejects_insufficient_samples ______________
+
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-254/test_directory_runner_rejects_0')
+
+    def test_directory_runner_rejects_insufficient_samples(tmp_path):
+>       assert RUNNER.is_file(),'Q10 owned workspace benchmark runner missing'
+E       AssertionError: Q10 owned workspace benchmark runner missing
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/scripts/benchmark-workspace-directory.py').is_file
+
+services\api\tests\test_workspace_benchmark_tools.py:33: AssertionError
+============================== warnings summary ===============================
+services\api\tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+services\api\tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests/test_workspace_benchmark_tools.py::test_directory_runner_refuses_inherited_dsn_without_starting_db[BUYEROS_TEST_DATABASE_URL]
+  C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\q10-local\directory-tools-red.xml -
+=========================== short test summary info ===========================
+FAILED services\api\tests\test_workspace_benchmark_tools.py::test_directory_runner_refuses_inherited_dsn_without_starting_db[BUYEROS_TEST_DATABASE_URL]
+FAILED services\api\tests\test_workspace_benchmark_tools.py::test_directory_runner_refuses_inherited_dsn_without_starting_db[BUYEROS_DATABASE_URL]
+FAILED services\api\tests\test_workspace_benchmark_tools.py::test_directory_runner_refuses_inherited_dsn_without_starting_db[DATABASE_URL]
+FAILED services\api\tests\test_workspace_benchmark_tools.py::test_directory_runner_refuses_inherited_dsn_without_starting_db[BUYEROS_WORKER_DATABASE_URL]
+FAILED services\api\tests\test_workspace_benchmark_tools.py::test_directory_runner_preserves_existing_evidence
+FAILED services\api\tests\test_workspace_benchmark_tools.py::test_directory_runner_rejects_insufficient_samples
+6 failed, 3 warnings in 0.54s

@@ -1,0 +1,1034 @@
+# Review package: 6232e4e1f4127833b93c1343207894c79b638852..HEAD
+
+## Commits
+fd97c90 test(Q10): capture owned directory scaling and retain failing budget
+7eb0ed5 feat(Q10): add offline goldset metrics and owned benchmark guards
+
+## Files changed
+ docs/buyeros/pilot/evaluation-protocol.md          |  18 +-
+ docs/buyeros/runbooks/q10-local-quality-tools.md   |  88 +++++++++
+ .../2026-10-04-buyeros-q10-local-quality-tools.md  |  25 +++
+ scripts/benchmark-buyeros.py                       |  23 ++-
+ scripts/benchmark-workspace-directory.py           |  81 ++++++++
+ .../tests/benchmark_workspace_directory_case.py    | 166 ++++++++++++++++
+ services/api/tests/test_quality_tools.py           | 211 +++++++++++++++++++++
+ .../api/tests/test_workspace_benchmark_tools.py    |  36 ++++
+ services/api/tools/evaluate_research_goldset.py    | 181 ++++++++++++++++++
+ services/api/tools/quality_metrics.py              |  77 ++++++++
+ 10 files changed, 902 insertions(+), 4 deletions(-)
+
+## Diff
+diff --git a/docs/buyeros/pilot/evaluation-protocol.md b/docs/buyeros/pilot/evaluation-protocol.md
+index 9c4dfef..419783e 100644
+--- a/docs/buyeros/pilot/evaluation-protocol.md
++++ b/docs/buyeros/pilot/evaluation-protocol.md
+@@ -19,11 +19,27 @@ The browser's fixture Match verdict, accepted state or generated draft is never
+ | Contact yield | Accepted eligible companies with >=1 current valid eligible contact / accepted eligible companies actually researched | Measure first; no target promised |
+ | Cost per accepted company | Settled attributable USD / distinct accepted company IDs in the same scope/period | Report amount and denominator; zero denominator means unavailable |
+ | Human review time | Active minutes on completed company decisions / completed decisions | Establish baseline; proposed median <=3 minutes subject to evidence complexity |
+ 
+ Report active holds and unknown provider liability separately from settled spend. Store request IDs, provider receipts and price versions only in the restricted operational record after authorized calls. Never infer a free operation from timeout.
+ 
+ ## Stopping and disposition
+ 
+ Stop new admission/dispatch on tenant leakage, unauthorized contact access, unsupported material claims passing review, broken reservation limits, unexplained charges, missing authoritative provider status, accidental delivery or the approved cap/time window. Retain unknown holds and reconcile; preserve read access and audit history when safe. A failed quality threshold is a no-go with labelled examples and a proposed bounded revision, not a reason to relabel the holdout. Mailbox/CRM/sending stay disconnected and `/deliver` stays 403.
+ 
+-No sample, reviewer assignment, provider receipt, quality score or cost figure has been collected in this session.
+\ No newline at end of file
++No sample, reviewer assignment, provider receipt, quality score or cost figure has been collected in this session.
++
++## Q10 local tools supplement — 2026-10-04
++
++The older30–50/80% pilot proposal above is retained historical context. The
++2026-10-03 repair plan's tentative full-Q10 goal is >=200 companies, two
++independent human labels with adjudication, company-level holdout and three
++runs; proposed match precision>=95% with recall/coverage/needs_review/CI and
++zero wrong-company/cross-tenant/unsupported references. No owner approval,
++reviewer assignment, actual goldset or provider receipt is fabricated here.
++
++The new offline evaluator checks supplied label/prediction structure and
++per-run metrics; declarations remain unauthenticated, outputs always say
++live_verified=false/release_accepted=false. Its fictional8-company fixture
++validates tool arithmetic only. Contact validity/company relationship,
++factual truth and adversarial source behavior need separate actual evidence.
++[Commands and boundaries](../runbooks/q10-local-quality-tools.md).
+diff --git a/docs/buyeros/runbooks/q10-local-quality-tools.md b/docs/buyeros/runbooks/q10-local-quality-tools.md
+new file mode 100644
+index 0000000..5ce0e21
+--- /dev/null
++++ b/docs/buyeros/runbooks/q10-local-quality-tools.md
+@@ -0,0 +1,88 @@
++# Q10 local quality tools
++
++These commands create only fictional, owned local PostgreSQL fixtures or read
++supplied local label files. They do not approve providers, deployment, auth or
++Cloudflare cutover. Full Q10 remains dependent on Q13/N02 and actual external
++quality/load/UAT evidence.
++
++## Directory baseline
++
++Use the API's frozen virtual environment (`uv sync --frozen` in services/api)
++and an available Docker daemon. Unset all four inherited database variables:
++`BUYEROS_TEST_DATABASE_URL`, `BUYEROS_DATABASE_URL`, `DATABASE_URL`, and
++`BUYEROS_WORKER_DATABASE_URL`. Do not replace the shared fixture guard or supply
++production/Neon DSNs.
++
++```powershell
++services/api/.venv/Scripts/python.exe scripts/benchmark-workspace-directory.py --samples 30 --actors 1 --output test-results/q10-my-run.json
++```
++
++The opt-in case uses the existing owned PostgreSQL16 startup/guard helpers and
++current Alembic head. W1/10/100/1000 each has exactly one visible membership per
++actor. It verifies fixture RSA JWTs using the actual verifier, then serves the
++real ASGI app against the real non-owner NOBYPASSRLS database role. No live Auth0
++or Neon session is tested. `--actors 10/25` are supported, not measured in the
++first baseline. Work is bounded to30–100 batches and15minutes. On timeout the
++wrapper terminates pytest and removes only the recorded matching container ID.
++The session teardown normally removes it first. The owner marker is retained
++as evidence, without a DSN/password. An ownership mismatch fails closed.
++
++Output and sibling XML/owner marker must be new. Warm metrics include all
++requests, including errors; first-after-seed and three primers are reported
++separately and are not process-cold proof. Actual runtime-role EXPLAIN plans
++and pool member/nonmember/revocation probes are recorded. Directory query
++count must be independent of unrelated W and <=6; CLIexit1 means this frozen
++gate failed even when the capture test passed. This is in-process/local
++loopback evidence, not geographic API load,10-minute stairs, browser/RUM,
++worker throughput or product release acceptance. SQL time totals successful
++cursor completions; failed SQL execution time is not independently observed.
++
++Percentiles use linear interpolation over every request. `p99_stable` is a
++conservative sample-size flag (n>=1000), not a statistical guarantee. Raw
++samples remain available for a reviewer; the30-sample baseline flags it false.
++Provenance records HEAD, dirty state and exact tool/route bytes. The archived
++first-baseline source overlay preserves the earlier pre-review byte hashes.
++
++## Research labels
++
++```powershell
++services/api/.venv/Scripts/python.exe services/api/tools/evaluate_research_goldset.py --goldset path/to/gold.json --predictions path/to/predictions.json --output test-results/q10-quality-new.json
++```
++
++See the archived fictional inputs in `Q10_LOCAL/reports/`. Goldset schema is
++`buyeros.research-goldset.v1`; prediction schema is
++`buyeros.research-predictions.v1`. Companies are unique across train/holdout;
++all three distinct runs must cover exactly the frozen holdout. Each company
++needs two distinct declared annotators, and disagreements require a separate
++adjudicator/reason matching the reference. `declared_human_labels` requires
++at least200 unique companies; the tool does not authenticate independence,
++source truth/currentness, prompt-injection resistance or actual provider calls.
++Fixture data is never a real goldset or accuracy result.
++
++Precision=TP/(TP+FP); recall=TP/all reference positives (positive abstentions
++are FN); coverage=decided/holdout; needs_review=abstained/holdout. Wilson95%
++intervals accompany each proportion; zero denominator is null. Three runs
++reuse companies and retain separate intervals, never a pooled3n claim.
++[NIST method](https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm).
++The proposed plan threshold is precision point estimate>=95%, not a CI lower
++bound promise. Safety violations (wrong company/workspace or unsupported
++source IDs/current/inference declarations) prevent the offline gate passing.
++Contact provider-marked-valid and actual employment/company relationship are
++not measured by this research-only tool.
++
++Output cannot overwrite inputs or existing evidence. Exit2 is invalid input;
++exit1 is a safety violation or failed declared-label offline threshold; valid
++fixture tool verification exits0 even if its hypothetical quality is poor.
++Every report remains `live_verified=false`, `provider_calls=0` and
++`release_accepted=false`, including perfect fixture/declaration scores.
++
++The existing T29 wrapper retains legacy keys, adds schema/byte provenance and
++refuses inherited DSNs/existing API or dispatcher output. Its actual1k/10k
++load was not rerun for this local tools slice.
++
++## Rollback
++
++Revert only the two Q10 source commits plus their documentation metadata after
++review. No application endpoint, schema, identity, membership, approval, actor,
++hold, delivery or broker change requires runtime/data rollback. Reverse patch
++applicability is verified separately; no production rollback rehearsal occurs.
+diff --git a/docs/superpowers/plans/2026-10-04-buyeros-q10-local-quality-tools.md b/docs/superpowers/plans/2026-10-04-buyeros-q10-local-quality-tools.md
+new file mode 100644
+index 0000000..04599fc
+--- /dev/null
++++ b/docs/superpowers/plans/2026-10-04-buyeros-q10-local-quality-tools.md
+@@ -0,0 +1,25 @@
++# BuyerOS Q10 independent local quality tools
++
++Spec: 2026-10-03 implementation plan Q10/Global Constraints/Review Focus and frozen audit F12/P09/P10/A03-A08; continue after LOCAL_GATES. Base6232e4e1f4127833b93c1343207894c79b638852.
++
++## Global Constraints
++Existing isolated branch; no agents/push/remote PR/deploy/paid provider/mail/production DB or auth/Cloudflare cutover. Preserve identities, role/RLS/holds, original inputs/cases and unrelated work. Existing destructive guards remain unchanged; required DB run strictly with inherited DSNs removed and owned Docker only. Fixture labels/results cannot become real accuracy. Q13/N02 and human/provider/full-release gates remain prerequisites; no security policy optimization in this slice.
++
++## Review Focus
++Benchmark includes failed requests and query/error denominator, truthful cold/warm/in-process context, non-owner role/pool isolation and frozen <=6 directory SQL budget. Capture failing scaling baseline without claiming remediation. Goldset cannot silently omit missing/duplicate/foreign predictions; holdout segregates by company; two independent declared labels require separate adjudication for disagreement; abstention/zero denominator/uncertainty and three correlated repeats stay explicit. Wrong company/workspace/unsupported evidence fails the offline quality gate. No provider/network/identity/write activation follows from tools.
++
++## Task 1: Versioned statistics and offline goldset evaluator
++Interfaces: existing benchmark-buyeros wrapper/results; tools-only metrics/evaluator; existing fit and unknown-hold settlement. Q10's Q13/human/provider prerequisites retain their blocked state.
++
++- [ ] Write meaningful regression tests for inherited DSN refusal, full latency/error denominators, p99/small sample, Wilson/zero denominator, company isolation/labels/three runs and unsafe references. Run RED before implementation.
++  Expected: existing wrapper incorrectly accepts non-test inherited DB variables under collect-only; missing new tools/metrics fail assertions, no DB/provider called by RED.
++- [ ] Implement tools-only metrics/evaluator and strengthen wrapper guard/provenance without changing historical outputs or domain auth/roles/ledger. Run new and named fit/settlement tests.
++  Expected: fixture hand-derived metrics pass, malformed/leaky inputs fail, declared labels never imply live/provider verification; strict0skip.
++
++## Task 2: Owned workspace directory baseline and evidence
++Interfaces: current GET/v1/workspaces under actual fixture JWT/runtime NOBYPASSRLS role; existing strict migrated fixture; metrics from task1. No schema change.
++
++- [ ] Add bounded runner + opt-in persistent-loop DB benchmark for W1/10/100/1000, fixed visible memberships, actor count, actual query/bytes/latency/EXPLAIN and pool/revocation probes; run wrapper guards first and capture current baseline.
++  Expected: current O(W) route violates frozen <=6 budget for large W; keep the CLI gate nonzero and F18/P09/P10 open. Capture itself has1real DB case pass0skip if valid; no fake connection result.
++- [ ] Run regression/contract/root Node gates, inspect diff and author review, verify reverse patch and preservation; commit source then case/status/evidence locally.
++  Expected: tools locally verified; Q10 remains partial/externally or dependency blocked for Q13, full fixed-load/UI/RUM/worker/human200-company goldset/WF03. Exact task checks and failures recorded, no product-live claim.
+diff --git a/scripts/benchmark-buyeros.py b/scripts/benchmark-buyeros.py
+index 6721984..7d72ffd 100644
+--- a/scripts/benchmark-buyeros.py
++++ b/scripts/benchmark-buyeros.py
+@@ -8,42 +8,59 @@ No Celery worker or provider is called.
+ import argparse
+ import json
+ import os
+ import subprocess
+ import sys
+ from pathlib import Path
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ API = ROOT / "services" / "api"
+ CASE = API / "tests" / "benchmark_buyeros_case.py"
++sys.path.insert(0, str(API))
++from tools.quality_metrics import provenance
+ 
+ 
+ def main() -> int:
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("--fixture-size", type=int, choices=(1000, 10000), required=True)
+     parser.add_argument("--workspaces", type=int, choices=(1, 10, 100), required=True)
+     parser.add_argument("--output", type=Path, default=ROOT / "artifacts" / "t29-benchmark.json")
+     args = parser.parse_args()
+-    if os.environ.get("BUYEROS_TEST_DATABASE_URL"):
+-        parser.error("unset BUYEROS_TEST_DATABASE_URL; this benchmark owns a disposable Docker database")
++    for variable in ("BUYEROS_TEST_DATABASE_URL", "BUYEROS_DATABASE_URL", "DATABASE_URL", "BUYEROS_WORKER_DATABASE_URL"):
++        if os.environ.get(variable):
++            parser.error(f"unset inherited database {variable}; this benchmark owns a disposable Docker database")
++    dispatcher_output = args.output.resolve().with_name(args.output.stem + "-dispatcher.json")
++    if args.output.exists() or (args.workspaces == 100 and dispatcher_output.exists()):
++        parser.error("output must be new; existing evidence cannot be overwritten")
+     python = API / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+     if not python.is_file():
+         parser.error(f"API virtual environment missing: {python}; run uv sync --frozen in services/api")
+     env = dict(os.environ)
+     env["BUYEROS_STRICT_INTEGRATION"] = "1"
+     env["BUYEROS_BENCH_FIXTURE_SIZE"] = str(args.fixture_size)
+     env["BUYEROS_BENCH_WORKSPACES"] = str(args.workspaces)
+     env["BUYEROS_BENCH_OUTPUT"] = str(args.output.resolve())
+     command = [str(python), "-m", "pytest", "-q", "-s", str(CASE), "--tb=short"]
+     result = subprocess.call(command, cwd=API, env=env)
+-    if result or args.workspaces != 100:
++    if result:
+         return result
++    output = args.output.resolve()
++    if not output.is_file():
++        parser.error("benchmark produced no observations; collection is not verification")
++    observed = json.loads(output.read_text(encoding="utf-8"))
++    observed["schema"] = "buyeros.t29-benchmark.v1"
++    observed["provenance"] = provenance(ROOT, [Path(__file__).resolve(), CASE, API / "tools/quality_metrics.py"])
++    observed["evidence_mode"] = "owned_disposable_fixture"
++    observed["live_verified"] = False
++    output.write_text(json.dumps(observed, indent=2), encoding="utf-8")
++    if args.workspaces != 100:
++        return 0
+     worker = ROOT / "services" / "worker"
+     worker_python = worker / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+     if not worker_python.is_file():
+         parser.error(f"worker virtual environment missing: {worker_python}; run uv sync --frozen in services/worker")
+     dispatcher_output = args.output.resolve().with_name(args.output.stem + "-dispatcher.json")
+     env["BUYEROS_DISPATCH_BENCH_OUTPUT"] = str(dispatcher_output)
+     worker_case = worker / "tests" / "benchmark_dispatcher_case.py"
+     result = subprocess.call([str(worker_python), "-m", "pytest", "-q", "-s", str(worker_case), "--tb=short"],
+                              cwd=worker, env=env)
+     if result:
+diff --git a/scripts/benchmark-workspace-directory.py b/scripts/benchmark-workspace-directory.py
+new file mode 100644
+index 0000000..528bd92
+--- /dev/null
++++ b/scripts/benchmark-workspace-directory.py
+@@ -0,0 +1,81 @@
++"""Capture the current directory baseline on an owned PostgreSQL 16 fixture.
++
++Exit 1 means the frozen <=6 SQL budget failed; a successful capture is not a
++release gate pass. No live auth/provider/network load is verified.
++"""
++import argparse
++import json
++import os
++import subprocess
++import sys
++import uuid
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++API = ROOT / "services/api"
++sys.path.insert(0, str(API))
++from tools.quality_metrics import DATABASE_VARIABLES
++
++
++def cleanup_owned(marker: Path, nonce: str) -> None:
++    if not marker.exists():
++        return
++    owned = json.loads(marker.read_text(encoding="utf-8"))
++    if owned["nonce"] != nonce or not owned["name"].startswith("buyeros-test-"):
++        raise ValueError("refusing unrecognized directory fixture marker")
++    inspected = subprocess.run(["docker", "inspect", owned["name"]], capture_output=True, text=True, timeout=15)
++    if inspected.returncode:
++        if "no such" in inspected.stderr.lower():
++            return
++        raise RuntimeError("cannot verify owned fixture for cleanup")
++    identity = json.loads(inspected.stdout)[0]
++    if identity["Id"] != owned["container_id"]:
++        raise ValueError("refusing replacement container")
++    subprocess.run(["docker", "rm", "-f", owned["name"]], check=True, timeout=20, capture_output=True)
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--samples", type=int, choices=range(30, 101), default=30)
++    parser.add_argument("--actors", type=int, choices=(1, 10, 25), default=1)
++    parser.add_argument("--output", type=Path, required=True)
++    args = parser.parse_args()
++    for variable in DATABASE_VARIABLES:
++        if os.environ.get(variable):
++            parser.error(f"unset inherited database {variable}; owned Docker only")
++    output = args.output.resolve()
++    marker, junit = output.with_suffix(".owner.json"), output.with_suffix(".xml")
++    if any(p.exists() for p in (output, marker, junit)):
++        parser.error("output/evidence must be new")
++    python = API / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
++    if not python.is_file():
++        parser.error("API virtual environment missing; run uv sync --frozen")
++    nonce = uuid.uuid4().hex
++    env = dict(os.environ, BUYEROS_STRICT_INTEGRATION="1", BUYEROS_DIRECTORY_OUTPUT=str(output),
++               BUYEROS_DIRECTORY_OWNER=str(marker), BUYEROS_DIRECTORY_NONCE=nonce,
++               BUYEROS_DIRECTORY_SAMPLES=str(args.samples), BUYEROS_DIRECTORY_ACTORS=str(args.actors))
++    # Collection/extra-selection flags cannot turn a required DB capture into 0 tests.
++    env.pop("PYTEST_ADDOPTS", None)
++    output.parent.mkdir(parents=True, exist_ok=True)
++    command = [str(python), "-m", "pytest", "-q", "-s", "tests/benchmark_workspace_directory_case.py", "--tb=short", f"--junitxml={junit}"]
++    try:
++        result = subprocess.run(command, cwd=API, env=env, timeout=900)
++    except subprocess.TimeoutExpired:
++        print("Directory capture exceeded its 15-minute local bound", file=sys.stderr)
++        return 1
++    finally:
++        cleanup_owned(marker, nonce)
++    if result.returncode:
++        return result.returncode
++    if not output.is_file():
++        parser.error("no observed report; collection is not verification")
++    report = json.loads(output.read_text(encoding="utf-8"))
++    if report.get("run_id") != nonce or report.get("schema") != "buyeros.workspace-directory-benchmark.v1" or len(report.get("matrix", [])) != 4:
++        parser.error("invalid or stale benchmark report")
++    passed = report["directory_gate"]["passed"]
++    print(f"Capture verified; frozen directory SQL gate passed={passed}; live_verified=false")
++    return 0 if passed else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/services/api/tests/benchmark_workspace_directory_case.py b/services/api/tests/benchmark_workspace_directory_case.py
+new file mode 100644
+index 0000000..1f1354b
+--- /dev/null
++++ b/services/api/tests/benchmark_workspace_directory_case.py
+@@ -0,0 +1,166 @@
++"""Opt-in actual runtime-role directory capture; invoke the owned wrapper only."""
++import asyncio
++import contextvars
++import json
++import os
++import platform
++import time
++import uuid
++from pathlib import Path
++
++import httpx
++import psycopg
++import pytest
++from sqlalchemy import event, text
++from sqlalchemy.engine import Engine
++
++from buyeros_api.api import auth, deps
++from buyeros_api.api.app import create_app
++from buyeros_api.api.jwks import JwksKeyCache
++from buyeros_api.api.verifier import TokenVerifier
++from buyeros_api.settings import get_settings
++from tests import auth_fixtures as fx
++from tests.conftest import _docker, _require_disposable_test_dsn, _start_container, runtime_role_dsn
++from tools.quality_metrics import DATABASE_VARIABLES, provenance, summarize_requests, write_new_report
++
++ROOT = Path(__file__).resolve().parents[3]
++CURRENT = contextvars.ContextVar("directory_observation", default=None)
++
++
++@pytest.fixture(scope="session")
++def pg_dsn():
++    # Override only in this opt-in module. Keep the shared destructive guard intact.
++    for variable in DATABASE_VARIABLES:
++        assert not os.environ.get(variable), f"inherited {variable} refused"
++    nonce, marker = os.environ["BUYEROS_DIRECTORY_NONCE"], Path(os.environ["BUYEROS_DIRECTORY_OWNER"])
++    assert nonce and not marker.exists()
++    name, dsn = _start_container()
++    try:
++        _require_disposable_test_dsn(dsn)
++        identity = json.loads(_docker("inspect", name).stdout)[0]
++        write_new_report(marker, {"nonce": nonce, "name": name, "container_id": identity["Id"], "image": identity["Config"]["Image"]})
++        yield dsn
++    finally:
++        removed = _docker("rm", "-f", name)
++        assert removed.returncode == 0, "owned database cleanup failed"
++
++
++def test_workspace_directory_current_baseline(migrated, monkeypatch):
++    samples, actors = int(os.environ["BUYEROS_DIRECTORY_SAMPLES"]), int(os.environ["BUYEROS_DIRECTORY_ACTORS"])
++    assert 30 <= samples <= 100 and actors in (1, 10, 25)
++    output = Path(os.environ["BUYEROS_DIRECTORY_OUTPUT"])
++    subjects = [f"directory-fixture-{uuid.uuid4().hex}" for _ in range(actors+1)]
++    users = [uuid.uuid4() for _ in subjects]
++    workspace_ids = [uuid.uuid4() for _ in range(1000)]
++    membership_ids = [uuid.uuid4() for _ in range(actors)]
++    with psycopg.connect(migrated, autocommit=True) as owner:
++        assert owner.execute("SELECT count(*) FROM workspaces").fetchone()[0] == 0, "fixture must be freshly owned/empty"
++        owner.execute("ALTER ROLE buyeros_api LOGIN PASSWORD 'test-only'")
++        owner.execute("GRANT USAGE ON SCHEMA public TO buyeros_api")
++        for user, subject in zip(users, subjects):
++            owner.execute("INSERT INTO users(id,issuer,subject) VALUES (%s,%s,%s)", (user, fx.ISSUER, subject))
++    monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(migrated))
++    monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
++    monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
++    get_settings.cache_clear()
++    cache = JwksKeyCache(lambda: asyncio.sleep(0, result=fx.jwks_document()), cache_seconds=3600)
++    monkeypatch.setattr(auth, "_verifier_from_settings", lambda: TokenVerifier(cache, issuer=fx.ISSUER, audience=fx.AUDIENCE))
++    headers = [{"Authorization": f"Bearer {fx.make_token(sub=subject)}"} for subject in subjects]
++
++    def before(conn, cursor, statement, params, context, many):
++        observation = CURRENT.get()
++        if observation is not None:
++            observation["queries"] += 1
++            context._directory_started = time.perf_counter()
++
++    def after(conn, cursor, statement, params, context, many):
++        observation = CURRENT.get()
++        if observation is not None:
++            observation["sql_ms"] += (time.perf_counter()-context._directory_started)*1000
++
++    event.listen(Engine, "before_cursor_execute", before)
++    event.listen(Engine, "after_cursor_execute", after)
++    matrix = []
++    try:
++        async def capture():
++            app = create_app()
++            async with app.router.lifespan_context(app), httpx.AsyncClient(transport=httpx.ASGITransport(app=app, raise_app_exceptions=False), base_url="http://fixture.test") as client:
++                engine = deps.get_engine()
++                async with engine.connect() as conn:
++                    role = (await conn.execute(text("SELECT current_user, r.rolsuper, r.rolbypassrls, pg_get_userbyid(c.relowner), c.relrowsecurity FROM pg_roles r CROSS JOIN pg_class c WHERE r.rolname=current_user AND c.oid='memberships'::regclass"))).one()
++                assert role[0] == "buyeros_api" and role[1] is role[2] is False and role[3] != role[0] and role[4] is True
++                report_role = dict(name=role[0], superuser=role[1], bypass_rls=role[2], membership_owner=role[3], membership_rls=role[4])
++
++                async def request(actor=0, visible=True):
++                    observation = dict(latency_ms=0.0, status=None, bytes=0, queries=0, sql_ms=0.0, invalid_context=False)
++                    token = CURRENT.set(observation)
++                    started = time.perf_counter()
++                    try:
++                        response = await client.get("/v1/workspaces?offset=0&limit=20", headers=headers[actor])
++                        observation.update(status=response.status_code, bytes=len(response.content))
++                        data = response.json().get("data", {})
++                        expected = [{"id":str(workspace_ids[0]), "name":"Directory fixture 0", "membership_id":str(membership_ids[actor]), "roles":["viewer"], "data_mode":"live"}] if visible else []
++                        observation["invalid_context"] = data != {"items":expected, "offset":0, "limit":20, "total":int(visible)}
++                    except (httpx.HTTPError, ValueError) as exc:
++                        observation["transport_error"] = type(exc).__name__
++                    finally:
++                        observation["latency_ms"] = (time.perf_counter()-started)*1000
++                        CURRENT.reset(token)
++                    return observation
++
++                previous = 0
++                for count in (1, 10, 100, 1000):
++                    with psycopg.connect(migrated, autocommit=True) as owner:
++                        for number in range(previous, count):
++                            owner.execute("INSERT INTO workspaces(id,name,data_mode) VALUES (%s,%s,'live')", (workspace_ids[number], f"Directory fixture {number}"))
++                        if previous == 0:
++                            for user, membership in zip(users[:-1], membership_ids):
++                                owner.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES (%s,%s,%s,'{viewer}',true)", (membership, workspace_ids[0], user))
++                        owner.execute("ANALYZE workspaces"); owner.execute("ANALYZE memberships")
++                    first = await request()
++                    warmups = [await request() for _ in range(3)]
++                    observed = []
++                    for _ in range(samples):
++                        observed.extend(await asyncio.gather(*(request(i) for i in range(actors))))
++                    summary = summarize_requests(observed)
++                    with psycopg.connect(runtime_role_dsn(migrated)) as runtime:
++                        candidate_plan = runtime.execute("EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) SELECT id,name FROM workspaces ORDER BY id").fetchone()[0]
++                        runtime.execute("SELECT set_config('app.workspace_id',%s,true)", (str(workspace_ids[0]),))
++                        membership_plan = runtime.execute("EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) SELECT id,roles FROM memberships WHERE workspace_id=%s AND user_id=%s AND active IS TRUE", (workspace_ids[0], users[0])).fetchone()[0]
++                    stage = dict(total_workspaces=count, unrelated_workspaces=count-1, visible_memberships_per_actor=1, actors=actors, first_after_seed=first, warmups=warmups, warm=summary, observations=observed, explain_runtime_role=dict(candidate_query=candidate_plan, membership_query=membership_plan))
++                    matrix.append(stage)
++                    print(f"W={count}: warm requests={summary['requests']} SQL/request={summary['queries']['max']} p95={summary['latency_ms']['p95']}ms failed={summary['errors']['failed_requests']}", flush=True)
++                    previous = count
++
++                # Reuse the same real pool between a member, nonmember and revoked actor.
++                pids, settings, probes = [], [], []
++                for actor, visible in [(0,True),(actors,False),(0,True)]:
++                    probes.append(await request(actor,visible))
++                    async with engine.connect() as conn:
++                        pid, setting = (await conn.execute(text("SELECT pg_backend_pid(), current_setting('app.workspace_id',true)"))).one()
++                        pids.append(pid); settings.append(setting)
++                with psycopg.connect(migrated,autocommit=True) as owner:
++                    owner.execute("UPDATE memberships SET active=false WHERE id=%s",(membership_ids[0],))
++                probes.append(await request(0,False))
++                with psycopg.connect(migrated,autocommit=True) as owner:
++                    owner.execute("UPDATE memberships SET active=true WHERE id=%s",(membership_ids[0],))
++                probes.append(await request(0,True))
++                assert len(set(pids)) == 1 and all(s in (None,"") for s in settings)
++                assert summarize_requests(probes)["errors"]["failed_requests"] == 0
++                return report_role, dict(backend_pids=pids, workspace_setting_after_return=settings, same_connection_reused=True, revocation_seen=True, probes=probes)
++
++        role, pool = asyncio.run(capture())
++        query_maxima = [r["warm"]["queries"]["max"] for r in matrix]
++        valid = all(summarize_requests([r["first_after_seed"], *r["warmups"], *r["observations"]])["errors"]["failed_requests"] == 0 for r in matrix)
++        gate = dict(max_sql_per_request=6, independent_of_unrelated_workspaces=len(set(query_maxima)) == 1, within_budget=max(query_maxima)<=6, passed=valid and max(query_maxima)<=6 and len(set(query_maxima))==1)
++        report = dict(schema="buyeros.workspace-directory-benchmark.v1", run_id=os.environ["BUYEROS_DIRECTORY_NONCE"], evidence_mode="owned_disposable_fixture", live_verified=False,
++                      environment=dict(os=platform.platform(), python=platform.python_version(), database="owned Docker PostgreSQL16", region="local loopback; no geographic network measurement", transport="in-process HTTPX ASGI + real loopback PostgreSQL", cold_warm="first-after-seed is not process-cold; warm after3primers", concurrency=actors, warm_samples_per_actor=samples, duration_model="fixed request batches; not 10-minute stairs"),
++                      dataset="fictional users/workspaces only; fixed one visible membership", role=role, pool_reuse=pool, matrix=matrix, directory_gate=gate,
++                      cost=dict(provider_calls=0, paid_resources_created=False, local_infrastructure_usd=None), release_accepted=False)
++        report.update(provenance(ROOT,[Path(__file__).resolve(), ROOT/'scripts/benchmark-workspace-directory.py', ROOT/'services/api/tools/quality_metrics.py', ROOT/'services/api/buyeros_api/api/routes/workspaces.py', ROOT/'services/api/buyeros_api/api/deps.py']))
++        write_new_report(output, report)
++        assert valid, "captured response/scope failure; report retained"
++    finally:
++        event.remove(Engine,"before_cursor_execute",before)
++        event.remove(Engine,"after_cursor_execute",after)
++        get_settings.cache_clear()
+diff --git a/services/api/tests/test_quality_tools.py b/services/api/tests/test_quality_tools.py
+new file mode 100644
+index 0000000..63ad40f
+--- /dev/null
++++ b/services/api/tests/test_quality_tools.py
+@@ -0,0 +1,211 @@
++"""Q10 local quality-tool regressions; no live provider or human label claim."""
++import copy
++import importlib
++import json
++import os
++import subprocess
++import sys
++from pathlib import Path
++
++import pytest
++
++ROOT = Path(__file__).resolve().parents[3]
++TOOLS = ROOT / 'services/api/tools'
++
++
++def metrics():
++    assert (TOOLS / 'quality_metrics.py').is_file(), 'Q10 versioned quality metrics tool missing'
++    return importlib.import_module('tools.quality_metrics')
++
++
++def goldset():
++    rows=[]
++    for i in range(8):
++        company=f'00000000-0000-4000-8000-{i+1:012d}'
++        rows.append({'company_id':company,'workspace_id':'11111111-1111-4111-8111-111111111111',
++            'market':'HK','language':'zh-HK','company_type':'fixture','split':'train' if i<2 else 'holdout',
++            'reference_verdict':'match' if i in [2,3,4] else 'not_match',
++            'annotations':[{'annotator_id':'fixture-a','verdict':'match' if i in [2,3,4] else 'not_match'},
++                           {'annotator_id':'fixture-b','verdict':'match' if i in [2,3,4] else 'not_match'}],
++            'sources':[{'id':f'fixture-evidence-{i}','company_id':company,
++                'workspace_id':'11111111-1111-4111-8111-111111111111','url':'https://evidence.example.test/fixture',
++                'date':'2026-10-03','current':True,'is_inference':False}]})
++    return {'schema':'buyeros.research-goldset.v1','evidence_mode':'fixture','owner':'fixture-only', 'rows':rows}
++
++
++def predictions():
++    rows=goldset()['rows'][2:]
++    verdicts=['match','match','needs_review','match','not_match','needs_review']
++    runs=[]
++    for k in range(3):
++        runs.append({'run_id':f'fixture-repeat-{k}', 'rows':[
++            {'company_id':r['company_id'],'predicted_company_id':r['company_id'],'workspace_id':r['workspace_id'],
++             'verdict':verdicts[i],'evidence_ids':[r['sources'][0]['id']] if verdicts[i]=='match' else []}
++            for i,r in enumerate(rows)]})
++    return {'schema':'buyeros.research-predictions.v1','runs':runs}
++
++
++def evaluator():
++    assert (TOOLS/'evaluate_research_goldset.py').is_file(), 'Q10 offline goldset evaluator missing'
++    return importlib.import_module('tools.evaluate_research_goldset')
++
++
++def test_latency_errors_use_all_requests_and_p99_is_not_faked():
++    samples=[{'latency_ms':t,'status':s,'bytes':10,'queries':q,'sql_ms':1.0,'invalid_context':i}
++             for t,s,q,i in [(10,200,4,False),(20,503,2,False),(30,200,4,True),(40,None,0,False)]]
++    result=metrics().summarize_requests(samples)
++    assert result['requests']==4
++    assert result['latency_ms']=={'p50':25.0,'p95':38.5,'p99':39.7,'max':40.0,'p99_stable':False}
++    assert result['errors']=={'denominator':4,'http_5xx':1,'http_non_2xx':1,'transport':1,'invalid_context':1,'failed_requests':3,'rate':0.75}
++    assert result['queries']=={'total':10,'min':0,'max':4,'mean':2.5}
++    assert result['bytes']=={'total':40,'min':10,'max':10}
++
++
++@pytest.mark.parametrize('change',[{'latency_ms':float('nan')},{'latency_ms':-1},{'status':True},{'queries':True},{'bytes':-1}])
++def test_invalid_observations_fail_closed(change):
++    row={'latency_ms':10,'status':200,'bytes':10,'queries':4,'sql_ms':1,'invalid_context':False}
++    with pytest.raises(ValueError):metrics().summarize_requests([{**row,**change}])
++
++
++def test_empty_sample_is_not_a_passing_benchmark():
++    with pytest.raises(ValueError):metrics().summarize_requests([])
++
++
++def test_zero_denominator_and_small_n_wilson_are_explicit():
++    assert metrics().proportion(0,0)=={'numerator':0,'denominator':0,'estimate':None,'ci95':None}
++    result=metrics().proportion(1,1)
++    assert result['estimate']==1.0
++    assert result['ci95']==pytest.approx([0.2065493144,1.0])
++    with pytest.raises(ValueError):metrics().proportion(2,1)
++
++
++@pytest.mark.parametrize('variable',['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL'])
++def test_legacy_benchmark_refuses_each_inherited_database_before_pytest(variable,tmp_path):
++    env={k:v for k,v in os.environ.items() if k not in ['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL']}
++    env[variable]='postgresql://not-used.example/shared'
++    # RED safety: if old wrapper ignores this DSN, collect only. No DB fixture
++    # starts, so the test proves the guard without touching any shared database.
++    env['PYTEST_ADDOPTS']='--collect-only'
++    result=subprocess.run([sys.executable,str(ROOT/'scripts/benchmark-buyeros.py'),'--fixture-size','1000',
++                           '--workspaces','1','--output',str(tmp_path/'result.json')],env=env,capture_output=True,text=True,timeout=45)
++    assert result.returncode==2, result.stdout+result.stderr
++    assert variable in result.stderr
++    assert not (tmp_path/'result.json').exists()
++
++
++def test_three_fixture_runs_have_hand_derived_precision_recall_and_abstention():
++    result=evaluator().evaluate(goldset(),predictions())
++    assert result['holdout_companies']==6 and result['total_companies']==8
++    assert len(result['runs'])==3
++    first=result['runs'][0]
++    assert first['confusion']=={'tp':2,'fp':1,'tn':1,'fn':1,'needs_review':2}
++    assert first['precision']['estimate']==pytest.approx(2/3)
++    assert first['recall']['estimate']==pytest.approx(2/3)
++    assert first['coverage']['estimate']==pytest.approx(4/6)
++    assert first['needs_review']['estimate']==pytest.approx(2/6)
++    assert result['live_verified'] is False
++    assert result['provider_calls']==0
++    assert result['quality_thresholds_met'] is False
++    assert result['safety_violations']==[]
++    assert result['repeat_policy']=='separate per-run intervals; no pooled 3n sample'
++
++
++@pytest.mark.parametrize('mutation',['company_split','same_annotator','unadjudicated','bad_reference','missing_holdout','duplicate_prediction','two_runs','train_prediction','unknown_company'])
++def test_incomplete_or_leaky_goldset_comparisons_are_rejected(mutation):
++    data=goldset();pred=predictions()
++    if mutation=='company_split':data['rows'].append({**copy.deepcopy(data['rows'][2]),'split':'train'})
++    elif mutation=='same_annotator':data['rows'][2]['annotations'][1]['annotator_id']='fixture-a'
++    elif mutation=='unadjudicated':data['rows'][2]['annotations'][1]['verdict']='not_match'
++    elif mutation=='bad_reference':data['rows'][2]['reference_verdict']='not_match'
++    elif mutation=='missing_holdout':pred['runs'][0]['rows'].pop()
++    elif mutation=='duplicate_prediction':pred['runs'][0]['rows'].append(copy.deepcopy(pred['runs'][0]['rows'][0]))
++    elif mutation=='two_runs':pred['runs'].pop()
++    elif mutation=='train_prediction':pred['runs'][0]['rows'][0]['company_id']=data['rows'][0]['company_id']
++    elif mutation=='unknown_company':pred['runs'][0]['rows'][0]['company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
++    with pytest.raises(ValueError):evaluator().evaluate(data,pred)
++
++
++def test_disagreement_requires_separate_adjudicator_and_reason():
++    data=goldset();data['rows'][2]['annotations'][1]['verdict']='not_match'
++    data['rows'][2]['adjudication']={'annotator_id':'fixture-c','verdict':'match','reason':'fixture-only independent adjudication'}
++    assert evaluator().evaluate(data,predictions())['holdout_companies']==6
++    data['rows'][2]['adjudication']['annotator_id']='fixture-a'
++    with pytest.raises(ValueError):evaluator().evaluate(data,predictions())
++
++
++@pytest.mark.parametrize('mutation,violation',[('wrong_company','wrong_company'),('wrong_workspace','wrong_workspace'),('unsupported','unsupported_evidence'),('no_evidence','match_without_qualified_evidence'),('stale_source','unsupported_evidence'),('inference_source','unsupported_evidence')])
++def test_structural_source_and_scope_violations_are_not_hidden(mutation,violation):
++    data=goldset();pred=predictions();row=pred['runs'][0]['rows'][0]
++    if mutation=='wrong_company':row['predicted_company_id']='ffffffff-ffff-4fff-8fff-ffffffffffff'
++    elif mutation=='wrong_workspace':row['workspace_id']='22222222-2222-4222-8222-222222222222'
++    elif mutation=='unsupported':row['evidence_ids']=['unqualified-id']
++    elif mutation=='no_evidence':row['evidence_ids']=[]
++    elif mutation=='stale_source':data['rows'][2]['sources'][0]['current']=False
++    elif mutation=='inference_source':data['rows'][2]['sources'][0]['is_inference']=True
++    result=evaluator().evaluate(data,pred)
++    assert violation in [v['code'] for v in result['safety_violations']]
++    assert result['quality_thresholds_met'] is False and result['live_verified'] is False
++
++
++def test_evaluator_cli_writes_versioned_fixture_report_and_preserves_inputs(tmp_path):
++    data=tmp_path/'gold.json';pred=tmp_path/'pred.json';output=tmp_path/'report.json'
++    data.write_text(json.dumps(goldset()),encoding='utf-8');pred.write_text(json.dumps(predictions()),encoding='utf-8')
++    before=data.read_bytes(),pred.read_bytes()
++    command=[sys.executable,str(TOOLS/'evaluate_research_goldset.py'),'--goldset',str(data),'--predictions',str(pred),'--output',str(output)]
++    result=subprocess.run(command,capture_output=True,text=True,timeout=30)
++    assert result.returncode==0,result.stderr
++    report=json.loads(output.read_text())
++    assert report['schema']=='buyeros.research-goldset-evaluation.v1'
++    assert report['live_verified'] is False and report['evidence_mode']=='fixture'
++    assert len(report['input_hashes']['goldset'])==64
++    assert before==(data.read_bytes(),pred.read_bytes())
++    assert subprocess.run(command,capture_output=True,timeout=30).returncode==2
++    assert subprocess.run(command[:-1]+[str(data)],capture_output=True,timeout=30).returncode==2
++    assert before==(data.read_bytes(),pred.read_bytes())
++
++
++def test_no_predicted_matches_reports_unavailable_precision():
++    pred=predictions()
++    for run in pred['runs']:
++        for row in run['rows']:row['verdict']='needs_review';row['evidence_ids']=[]
++    result=evaluator().evaluate(goldset(),pred)
++    assert result['runs'][0]['precision']['estimate'] is None
++    assert result['runs'][0]['precision']['ci95'] is None
++    assert result['runs'][0]['coverage']['estimate']==0
++    assert result['quality_thresholds_met'] is False
++
++
++def test_fixture_perfect_precision_is_never_release_or_live_verification():
++    data=goldset();pred=predictions()
++    for run in pred['runs']:
++        for item,row in zip(run['rows'],data['rows'][2:]):
++            item['verdict']=row['reference_verdict']
++            item['evidence_ids']=[row['sources'][0]['id']] if item['verdict']=='match' else []
++    result=evaluator().evaluate(data,pred)
++    assert result['quality_thresholds_met'] is True
++    assert result['live_verified'] is result['release_accepted'] is False
++
++
++def test_declared_human_labels_require_real_sample_size_without_claiming_independence():
++    data=goldset();data['evidence_mode']='declared_human_labels'
++    with pytest.raises(ValueError,match='200'):evaluator().evaluate(data,predictions())
++
++
++def test_duplicate_run_ids_are_not_three_independent_repeats():
++    pred=predictions();pred['runs'][1]['run_id']=pred['runs'][0]['run_id']
++    with pytest.raises(ValueError,match='distinct run'):evaluator().evaluate(goldset(),pred)
++
++
++def test_p99_with_only_one_expected_tail_observation_stays_unstable():
++    rows=[dict(latency_ms=i+1,status=200,bytes=1,queries=4,sql_ms=1,invalid_context=False) for i in range(100)]
++    assert metrics().summarize_requests(rows)['latency_ms']['p99_stable'] is False
++
++
++def test_legacy_benchmark_preserves_existing_dispatcher_evidence(tmp_path):
++    env={k:v for k,v in os.environ.items() if k not in ['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL']}
++    env['PYTEST_ADDOPTS']='--collect-only'
++    output=tmp_path/'result.json';dispatcher=tmp_path/'result-dispatcher.json'
++    dispatcher.write_bytes(b'previous dispatcher evidence')
++    result=subprocess.run([sys.executable,str(ROOT/'scripts/benchmark-buyeros.py'),'--fixture-size','1000','--workspaces','100','--output',str(output)],env=env,capture_output=True,text=True,timeout=45)
++    assert result.returncode==2 and 'existing evidence' in result.stderr
++    assert dispatcher.read_bytes()==b'previous dispatcher evidence' and not output.exists()
+diff --git a/services/api/tests/test_workspace_benchmark_tools.py b/services/api/tests/test_workspace_benchmark_tools.py
+new file mode 100644
+index 0000000..1bdbf86
+--- /dev/null
++++ b/services/api/tests/test_workspace_benchmark_tools.py
+@@ -0,0 +1,36 @@
++"""Opt-in directory runner must refuse inherited database configuration."""
++import os
++import subprocess
++import sys
++from pathlib import Path
++
++import pytest
++
++ROOT=Path(__file__).resolve().parents[3]
++RUNNER=ROOT/'scripts/benchmark-workspace-directory.py'
++DATABASE_VARIABLES=('BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL')
++
++
++@pytest.mark.parametrize('variable',DATABASE_VARIABLES)
++def test_directory_runner_refuses_inherited_dsn_without_starting_db(variable,tmp_path):
++    assert RUNNER.is_file(),'Q10 owned workspace benchmark runner missing'
++    env={k:v for k,v in os.environ.items() if k not in DATABASE_VARIABLES}
++    env[variable]='postgresql://never-connect.example/shared'
++    result=subprocess.run([sys.executable,str(RUNNER),'--output',str(tmp_path/'new.json')],env=env,capture_output=True,text=True,timeout=30)
++    assert result.returncode==2 and variable in result.stderr
++    assert not list(tmp_path.iterdir())
++
++
++def test_directory_runner_preserves_existing_evidence(tmp_path):
++    assert RUNNER.is_file(),'Q10 owned workspace benchmark runner missing'
++    path=tmp_path/'existing.json';path.write_bytes(b'original evidence')
++    env={k:v for k,v in os.environ.items() if k not in DATABASE_VARIABLES}
++    result=subprocess.run([sys.executable,str(RUNNER),'--output',str(path)],env=env,capture_output=True,text=True,timeout=30)
++    assert result.returncode==2 and path.read_bytes()==b'original evidence'
++
++
++def test_directory_runner_rejects_insufficient_samples(tmp_path):
++    assert RUNNER.is_file(),'Q10 owned workspace benchmark runner missing'
++    env={k:v for k,v in os.environ.items() if k not in DATABASE_VARIABLES}
++    result=subprocess.run([sys.executable,str(RUNNER),'--samples','0','--output',str(tmp_path/'new.json')],env=env,capture_output=True,text=True,timeout=30)
++    assert result.returncode==2 and not list(tmp_path.iterdir())
+diff --git a/services/api/tools/evaluate_research_goldset.py b/services/api/tools/evaluate_research_goldset.py
+new file mode 100644
+index 0000000..2d5d8d2
+--- /dev/null
++++ b/services/api/tools/evaluate_research_goldset.py
+@@ -0,0 +1,181 @@
++"""Evaluate supplied research labels offline; no provider, DB or approval calls.
++
++Declared labels do not verify human independence or live provider results.
++Three repeats retain separate company-level intervals.
++"""
++import argparse
++import hashlib
++import json
++import sys
++from datetime import date
++from pathlib import Path
++from typing import Literal
++from uuid import UUID
++
++from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StrictBool
++
++if __package__ in (None, ""):
++    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++from tools.quality_metrics import proportion, provenance, write_new_report
++
++Verdict = Literal["match", "not_match"]
++
++
++class StrictModel(BaseModel):
++    model_config = ConfigDict(extra="forbid")
++
++
++class Annotation(StrictModel):
++    annotator_id: str = Field(min_length=1)
++    verdict: Verdict
++
++
++class Adjudication(Annotation):
++    reason: str = Field(min_length=1)
++
++
++class Source(StrictModel):
++    id: str = Field(min_length=1)
++    company_id: UUID
++    workspace_id: UUID
++    url: HttpUrl
++    date: date
++    current: StrictBool
++    is_inference: StrictBool
++
++
++class GoldRow(StrictModel):
++    company_id: UUID
++    workspace_id: UUID
++    market: str = Field(min_length=1)
++    language: str = Field(min_length=1)
++    company_type: str = Field(min_length=1)
++    split: Literal["train", "holdout"]
++    reference_verdict: Verdict
++    annotations: list[Annotation] = Field(min_length=2, max_length=2)
++    adjudication: Adjudication | None = None
++    sources: list[Source]
++
++
++class Goldset(StrictModel):
++    schema_version: Literal["buyeros.research-goldset.v1"] = Field(alias="schema")
++    evidence_mode: Literal["fixture", "declared_human_labels"]
++    owner: str = Field(min_length=1)
++    rows: list[GoldRow] = Field(min_length=1)
++
++
++class Prediction(StrictModel):
++    company_id: UUID
++    predicted_company_id: UUID
++    workspace_id: UUID
++    verdict: Literal["match", "not_match", "needs_review"]
++    evidence_ids: list[str]
++
++
++class Run(StrictModel):
++    run_id: str = Field(min_length=1)
++    rows: list[Prediction]
++
++
++class Predictions(StrictModel):
++    schema_version: Literal["buyeros.research-predictions.v1"] = Field(alias="schema")
++    runs: list[Run] = Field(min_length=3, max_length=3)
++
++
++def evaluate(goldset: dict, predictions: dict) -> dict:
++    gold, pred = Goldset.model_validate(goldset), Predictions.model_validate(predictions)
++    ids = [r.company_id for r in gold.rows]
++    if len(set(ids)) != len(ids):
++        raise ValueError("duplicate company across goldset/splits")
++    if gold.evidence_mode == "declared_human_labels" and len(ids) < 200:
++        raise ValueError("declared human goldset requires at least 200 companies")
++    for row in gold.rows:
++        annotators = {a.annotator_id.strip() for a in row.annotations}
++        if "" in annotators or len(annotators) != 2:
++            raise ValueError("two distinct declared annotators required")
++        verdicts = {a.verdict for a in row.annotations}
++        if row.adjudication:
++            if not row.adjudication.annotator_id.strip() or row.adjudication.annotator_id.strip() in annotators or not row.adjudication.reason.strip():
++                raise ValueError("separate adjudicator and reason required")
++            reference = row.adjudication.verdict
++        elif len(verdicts) != 1:
++            raise ValueError("disagreement requires adjudication")
++        else:
++            reference = next(iter(verdicts))
++        if row.reference_verdict != reference:
++            raise ValueError("reference disagrees with labels/adjudication")
++        if len({s.id for s in row.sources}) != len(row.sources):
++            raise ValueError("duplicate source identifier")
++    holdout = {r.company_id: r for r in gold.rows if r.split == "holdout"}
++    if not holdout:
++        raise ValueError("holdout companies required")
++    if len({r.run_id for r in pred.runs}) != 3:
++        raise ValueError("three distinct run ids required")
++    violations, reports = [], []
++    for run in pred.runs:
++        predicted_ids = [r.company_id for r in run.rows]
++        if len(set(predicted_ids)) != len(predicted_ids) or set(predicted_ids) != set(holdout):
++            raise ValueError("each run must cover exactly the fixed holdout companies")
++        counts = dict(tp=0, fp=0, tn=0, fn=0, needs_review=0)
++        for item in run.rows:
++            row = holdout[item.company_id]
++            def violation(code):
++                violations.append(dict(run_id=run.run_id, company_id=str(item.company_id), code=code))
++            if item.predicted_company_id != row.company_id:
++                violation("wrong_company")
++            if item.workspace_id != row.workspace_id:
++                violation("wrong_workspace")
++            qualified = {s.id for s in row.sources if s.company_id == row.company_id and s.workspace_id == row.workspace_id and s.current and not s.is_inference}
++            if set(item.evidence_ids) - qualified:
++                violation("unsupported_evidence")
++            if item.verdict == "match" and not (set(item.evidence_ids) & qualified):
++                violation("match_without_qualified_evidence")
++            positive = row.reference_verdict == "match"
++            if item.verdict == "match":
++                counts["tp" if positive else "fp"] += 1
++            elif positive:
++                counts["fn"] += 1  # positive abstentions reduce recall
++            elif item.verdict == "not_match":
++                counts["tn"] += 1
++            if item.verdict == "needs_review":
++                counts["needs_review"] += 1
++        n = len(holdout)
++        reports.append({"run_id": run.run_id, "confusion": counts,
++                        "precision": proportion(counts["tp"], counts["tp"] + counts["fp"]),
++                        "recall": proportion(counts["tp"], sum(r.reference_verdict == "match" for r in holdout.values())),
++                        "coverage": proportion(n-counts["needs_review"], n),
++                        "needs_review": proportion(counts["needs_review"], n)})
++    threshold_met = not violations and all(r["precision"]["estimate"] is not None and r["precision"]["estimate"] >= .95 for r in reports)
++    return {"schema": "buyeros.research-goldset-evaluation.v1", "evidence_mode": gold.evidence_mode,
++            "label_verification": "supplied declarations only; independence not authenticated",
++            "owner": gold.owner, "total_companies": len(ids), "holdout_companies": len(holdout),
++            "runs": reports, "safety_violations": violations, "quality_thresholds_met": threshold_met,
++            "thresholds": {"match_precision_estimate": .95, "safety_violations": 0, "minimum_declared_human_companies": 200},
++            "repeat_policy": "separate per-run intervals; no pooled 3n sample", "ci_method": "Wilson 95%, per run/company",
++            "live_verified": False, "provider_calls": 0, "release_accepted": False}
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--goldset", type=Path, required=True)
++    parser.add_argument("--predictions", type=Path, required=True)
++    parser.add_argument("--output", type=Path, required=True)
++    args = parser.parse_args()
++    try:
++        if args.output.resolve() in (args.goldset.resolve(), args.predictions.resolve()) or args.output.exists():
++            raise ValueError("output must be new and cannot alias inputs")
++        inputs = [p.read_bytes() for p in (args.goldset, args.predictions)]
++        report = evaluate(*(json.loads(value) for value in inputs))
++        root = Path(__file__).resolve().parents[3]
++        report.update(provenance(root, [Path(__file__).resolve(), Path(__file__).with_name("quality_metrics.py")]))
++        report["input_hashes"] = dict(zip(("goldset", "predictions"), (hashlib.sha256(value).hexdigest() for value in inputs)))
++        write_new_report(args.output, report, (args.goldset, args.predictions))
++    except (OSError, ValueError) as exc:
++        parser.error(str(exc))
++    print(f"Offline {report['evidence_mode']} report written; live_verified=false; provider_calls=0")
++    # Fixture correctness can pass without claiming actual provider accuracy.
++    return 1 if report["safety_violations"] or (report["evidence_mode"] != "fixture" and not report["quality_thresholds_met"]) else 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/services/api/tools/quality_metrics.py b/services/api/tools/quality_metrics.py
+new file mode 100644
+index 0000000..2c434a9
+--- /dev/null
++++ b/services/api/tools/quality_metrics.py
+@@ -0,0 +1,77 @@
++"""Offline measurement primitives. Failed requests stay in every denominator."""
++import hashlib
++import json
++import math
++import subprocess
++from pathlib import Path
++
++DATABASE_VARIABLES = ("BUYEROS_TEST_DATABASE_URL", "BUYEROS_DATABASE_URL", "DATABASE_URL", "BUYEROS_WORKER_DATABASE_URL")
++
++
++def proportion(numerator: int, denominator: int) -> dict:
++    """Two-sided Wilson 95% interval; zero denominator is unavailable, not zero."""
++    if type(numerator) is not int or type(denominator) is not int or not 0 <= numerator <= denominator:
++        raise ValueError("invalid proportion counts")
++    if denominator == 0:
++        return dict(numerator=0, denominator=0, estimate=None, ci95=None)
++    p, n, z = numerator / denominator, denominator, 1.959963984540054
++    divisor = 1 + z * z / n
++    centre = (p + z * z / (2 * n)) / divisor
++    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / divisor
++    return dict(numerator=numerator, denominator=n, estimate=p, ci95=[max(0.0, centre-half), min(1.0, centre+half)])
++
++
++def _percentile(values: list[float], fraction: float) -> float:
++    ordered = sorted(values)
++    index = (len(ordered) - 1) * fraction
++    low = math.floor(index)
++    return round(ordered[low] + (ordered[math.ceil(index)] - ordered[low]) * (index - low), 3)
++
++
++def summarize_requests(samples: list[dict]) -> dict:
++    if not samples:
++        raise ValueError("empty observations cannot pass a benchmark")
++    for row in samples:
++        for key in ("latency_ms", "sql_ms"):
++            value = row[key]
++            if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
++                raise ValueError(f"invalid {key}")
++        for key in ("queries", "bytes"):
++            if type(row[key]) is not int or row[key] < 0:
++                raise ValueError(f"invalid {key}")
++        status = row["status"]
++        if status is not None and (type(status) is not int or not 100 <= status <= 599):
++            raise ValueError("invalid status")
++        if type(row["invalid_context"]) is not bool:
++            raise ValueError("invalid context flag")
++    n = len(samples)
++    latency = [r["latency_ms"] for r in samples]
++    queries, sizes = [r["queries"] for r in samples], [r["bytes"] for r in samples]
++    non_2xx = sum(r["status"] is not None and not 200 <= r["status"] < 300 for r in samples)
++    failed = sum(r["status"] is None or not 200 <= r["status"] < 300 or r["invalid_context"] for r in samples)
++    return {
++        "requests": n,
++        "method": {"percentiles": "linear interpolation of all requests", "p99_sample_flag": "heuristic n>=1000 (at least10 expected tail observations); no stability guarantee"},
++        "latency_ms": {"p50": _percentile(latency, .5), "p95": _percentile(latency, .95), "p99": _percentile(latency, .99), "max": max(latency), "p99_stable": n >= 1000},
++        "errors": {"denominator": n, "http_5xx": sum(r["status"] is not None and r["status"] >= 500 for r in samples), "http_non_2xx": non_2xx, "transport": sum(r["status"] is None for r in samples), "invalid_context": sum(r["invalid_context"] for r in samples), "failed_requests": failed, "rate": failed/n},
++        "queries": {"total": sum(queries), "min": min(queries), "max": max(queries), "mean": sum(queries)/n},
++        "bytes": {"total": sum(sizes), "min": min(sizes), "max": max(sizes)},
++        "sql_ms": {"total": sum(r["sql_ms"] for r in samples), "p95": _percentile([r["sql_ms"] for r in samples], .95)},
++    }
++
++
++def provenance(root: Path, paths: list[Path]) -> dict:
++    """Dirty state and exact tool bytes accompany the repository commit."""
++    sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
++    dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=root, text=True).strip())
++    return {"source_sha": sha, "source_dirty": dirty, "tool_hashes": {str(p.relative_to(root)).replace("\\", "/"): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}}
++
++
++def write_new_report(path: Path, report: dict, protected: tuple[Path, ...] = ()) -> None:
++    path = path.resolve()
++    if path in [p.resolve() for p in protected]:
++        raise ValueError("output aliases an input")
++    payload = json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
++    path.parent.mkdir(parents=True, exist_ok=True)
++    with path.open("x", encoding="utf-8") as output:
++        output.write(payload)

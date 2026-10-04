@@ -12,7 +12,8 @@
     "Q12",
     "Q08",
     "Q14",
-    "Q09"
+    "Q09",
+    "Q10"
   ],
   "next_eligible": null,
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
@@ -425,7 +426,58 @@
     },
     {
       "id": "Q10",
-      "status": "outside-current-scope"
+      "status": "partial-local-tools-and-baseline-verified",
+      "code_status": "offline-evaluator-and-owned-directory-capture-implemented",
+      "verification_status": "62 related API/tool tests and69 Node pass; capture1pass but frozen SQL gateFAIL; actual provider/goldset/full-load/UAT not run",
+      "release_status": "not-deployed",
+      "source_sha": "ad4f4394819664484eb4b928bdd56c43e055fd3d",
+      "base_sha": "6232e4e1f4127833b93c1343207894c79b638852",
+      "cases": [
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A08",
+        "P09",
+        "P10"
+      ],
+      "finding_ids": [
+        "F12",
+        "F18"
+      ],
+      "checks": {
+        "api_and_tools": {
+          "passed": 62,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "directory_capture": {
+          "passed": 1,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "cli_exit": 1,
+          "sql_gate_passed": false
+        },
+        "node": {
+          "passed": 69,
+          "failed": 0,
+          "skipped": 0,
+          "xml_leaf_cases": 68
+        }
+      },
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/RESULTS.md",
+      "migrations": "none added; existing0037 applied only to disposable fixtures",
+      "rollback": "reviewed source reverse applicability exit0; no production rollback/migration/auth mutation",
+      "limits": [
+        "Q13/N02 directory remediation dependency unresolved; no RLS policy/identity adapter changes",
+        "real>=200-company independently labelled goldset and approved provider evidence unavailable",
+        "10/25actor stairs, full API/UI/RUM/worker load and human UAT not run",
+        "contact validity/real company relationship/adversarial source factuality not verified",
+        "independent source review pending; author only per no-agents instruction"
+      ],
+      "next_eligible": null
     },
     {
       "id": "Q11",
@@ -599,13 +651,15 @@
     "Q09 human screen-reader/staff UAT",
     "Independent source review",
     "Q16 underlying evidence when available",
-    "N00 separate auth compatibility scope"
+    "N00 separate auth compatibility scope",
+    "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "d7ab5b6323402adf139d9b94e4e499f1631006b4",
+  "reviewed_source_sha": "ad4f4394819664484eb4b928bdd56c43e055fd3d",
   "deployed_sha": null,
   "selected_followups": [
     "U05",
-    "Q11 local verification gates"
+    "Q11 local verification gates",
+    "Q10 independent local tools and current directory baseline"
   ],
   "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf"
 }

@@ -1,0 +1,6 @@
+{
+  "curated_exit": 0,
+  "raw_exit": 2,
+  "raw_producer_findings": 186,
+  "policy": "Preserve exact producer patch/log/XML bytes, do not edit captured whitespace; scoped curator check must pass"
+}

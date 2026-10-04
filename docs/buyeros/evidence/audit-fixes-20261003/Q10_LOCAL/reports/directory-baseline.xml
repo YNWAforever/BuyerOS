@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="98.603" timestamp="2026-10-04T14:02:15.510839+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.benchmark_workspace_directory_case" name="test_workspace_directory_current_baseline" time="97.087" /></testsuite></testsuites>

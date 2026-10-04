@@ -1,0 +1,164 @@
+{
+  "schema": "buyeros.research-predictions.v1",
+  "runs": [
+    {
+      "run_id": "fixture-repeat-0",
+      "rows": [
+        {
+          "company_id": "00000000-0000-4000-8000-000000000003",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000003",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "match",
+          "evidence_ids": [
+            "fixture-evidence-2"
+          ]
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000004",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000004",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "match",
+          "evidence_ids": [
+            "fixture-evidence-3"
+          ]
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000005",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000005",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "needs_review",
+          "evidence_ids": []
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000006",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000006",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "match",
+          "evidence_ids": [
+            "fixture-evidence-5"
+          ]
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000007",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000007",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "not_match",
+          "evidence_ids": []
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000008",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000008",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "needs_review",
+          "evidence_ids": []
+        }
+      ]
+    },
+    {
+      "run_id": "fixture-repeat-1",
+      "rows": [
+        {
+          "company_id": "00000000-0000-4000-8000-000000000003",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000003",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "match",
+          "evidence_ids": [
+            "fixture-evidence-2"
+          ]
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000004",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000004",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "match",
+          "evidence_ids": [
+            "fixture-evidence-3"
+          ]
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000005",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000005",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "needs_review",
+          "evidence_ids": []
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000006",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000006",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "match",
+          "evidence_ids": [
+            "fixture-evidence-5"
+          ]
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000007",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000007",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "not_match",
+          "evidence_ids": []
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000008",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000008",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "needs_review",
+          "evidence_ids": []
+        }
+      ]
+    },
+    {
+      "run_id": "fixture-repeat-2",
+      "rows": [
+        {
+          "company_id": "00000000-0000-4000-8000-000000000003",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000003",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "match",
+          "evidence_ids": [
+            "fixture-evidence-2"
+          ]
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000004",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000004",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "match",
+          "evidence_ids": [
+            "fixture-evidence-3"
+          ]
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000005",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000005",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "needs_review",
+          "evidence_ids": []
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000006",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000006",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "match",
+          "evidence_ids": [
+            "fixture-evidence-5"
+          ]
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000007",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000007",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "not_match",
+          "evidence_ids": []
+        },
+        {
+          "company_id": "00000000-0000-4000-8000-000000000008",
+          "predicted_company_id": "00000000-0000-4000-8000-000000000008",
+          "workspace_id": "11111111-1111-4111-8111-111111111111",
+          "verdict": "needs_review",
+          "evidence_ids": []
+        }
+      ]
+    }
+  ]
+}

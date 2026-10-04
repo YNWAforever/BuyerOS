@@ -1,0 +1,186 @@
+{
+  "base_sha": "6232e4e1f4127833b93c1343207894c79b638852",
+  "reviewed_source_sha": "ad4f4394819664484eb4b928bdd56c43e055fd3d",
+  "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+  "deployed_sha": null,
+  "environment": {
+    "host": "Windows PowerShell",
+    "node": "24.18.0",
+    "python": "3.14.6",
+    "uv": "0.11.27",
+    "docker_context": "desktop-linux",
+    "schema_head": "0037_bulk_manifests",
+    "inherited_database_variables_removed": [
+      "BUYEROS_TEST_DATABASE_URL",
+      "BUYEROS_DATABASE_URL",
+      "DATABASE_URL",
+      "BUYEROS_WORKER_DATABASE_URL"
+    ],
+    "strict_integration": "1",
+    "capture_cpu_memory": "Docker/default local resources; no CPU/memory caps or geographic RTT; background OS load not controlled"
+  },
+  "commands": [
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen pytest -q tests/test_fit_eval.py tests/test_settlement.py tests/test_workspace_listing_db.py tests/test_auth_tenant.py --junitxml=../../test-results/q10-local/predecessors.xml",
+      "exit": 0
+    },
+    {
+      "cwd": ".",
+      "command": "services/api/.venv/Scripts/python.exe scripts/benchmark-workspace-directory.py --samples 30 --actors 1 --output test-results/q10-local/directory-baseline.json",
+      "exit": 1,
+      "meaning": "capture1pass, frozen SQL gateFAIL"
+    },
+    {
+      "cwd": ".",
+      "command": "services/api/.venv/Scripts/python.exe -m pytest -q -c services/api/pyproject.toml services/api/tests/test_quality_tools.py services/api/tests/test_workspace_benchmark_tools.py services/api/tests/test_fit_eval.py services/api/tests/test_settlement.py services/api/tests/test_workspace_listing_db.py services/api/tests/test_auth_tenant.py --junitxml=test-results/q10-local/api-review-final.xml",
+      "exit": 0
+    },
+    {
+      "cwd": ".",
+      "command": "node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=test-results/q10-local/root-node.xml 'tests/*.test.mjs'",
+      "exit": 0
+    },
+    {
+      "cwd": ".",
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exit": 0
+    },
+    {
+      "cwd": ".",
+      "command": "node scripts/generate-api-types.mjs --check",
+      "exit": 0
+    },
+    {
+      "cwd": ".",
+      "command": "uv run --frozen --project services/api python scripts/generate-operation-routes.py --check",
+      "exit": 0
+    },
+    {
+      "cwd": "services/api",
+      "command": "uv run --frozen alembic heads",
+      "exit": 0
+    },
+    {
+      "cwd": ".",
+      "command": "git apply --reverse --check test-results/q10-local/rollback.patch",
+      "exit": 0
+    },
+    {
+      "cwd": ".",
+      "command": "services/api/.venv/Scripts/python.exe services/api/tools/evaluate_research_goldset.py --goldset test-results/q10-local/goldset-fixture.json --predictions test-results/q10-local/predictions-fixture.json --output test-results/q10-local/goldset-fixture-report.json",
+      "exit": 0,
+      "meaning": "valid fixture tool output; hypothetical precision2/3; not live verification"
+    },
+    {
+      "cwd": ".",
+      "command": "services/api/.venv/Scripts/python.exe -m py_compile services/api/tools/quality_metrics.py services/api/tools/evaluate_research_goldset.py scripts/benchmark-buyeros.py scripts/benchmark-workspace-directory.py services/api/tests/benchmark_workspace_directory_case.py",
+      "exit": 0
+    }
+  ],
+  "counts": {
+    "predecessors.xml": {
+      "testcases": 19,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "passed": 19
+    },
+    "tools-red.xml": {
+      "testcases": 30,
+      "failed": 30,
+      "error": 0,
+      "skipped": 0,
+      "passed": 0
+    },
+    "tools-edit-cwd-failure.xml": {
+      "testcases": 34,
+      "failed": 30,
+      "error": 0,
+      "skipped": 0,
+      "passed": 4
+    },
+    "tools-final.xml": {
+      "testcases": 38,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "passed": 38
+    },
+    "directory-tools-red.xml": {
+      "testcases": 6,
+      "failed": 6,
+      "error": 0,
+      "skipped": 0,
+      "passed": 0
+    },
+    "directory-tools-green.xml": {
+      "testcases": 6,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "passed": 6
+    },
+    "directory-import-error.xml": {
+      "testcases": 1,
+      "failed": 0,
+      "error": 1,
+      "skipped": 0,
+      "passed": 0
+    },
+    "directory-baseline.xml": {
+      "testcases": 1,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "passed": 1
+    },
+    "review-red.xml": {
+      "testcases": 2,
+      "failed": 2,
+      "error": 0,
+      "skipped": 0,
+      "passed": 0
+    },
+    "actor-bound-red.xml": {
+      "testcases": 1,
+      "failed": 1,
+      "error": 0,
+      "skipped": 0,
+      "passed": 0
+    },
+    "api-review-final.xml": {
+      "testcases": 62,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "passed": 62
+    },
+    "root-node.xml": {
+      "xml_leaf_cases": 68,
+      "node_reported_pass": 69,
+      "failed": 0,
+      "skipped": 0,
+      "duration_ms": 64864.1869
+    }
+  },
+  "capture_gate": {
+    "max_sql_per_request": 6,
+    "independent_of_unrelated_workspaces": false,
+    "within_budget": false,
+    "passed": false
+  },
+  "fixture_evaluation": {
+    "live_verified": false,
+    "provider_calls": 0,
+    "release_accepted": false
+  },
+  "not_run": [
+    "new UI/browser screenshots",
+    "full API load/10-25actor matrix",
+    "full worker load/RUM",
+    "real200-company goldset/contact/source accuracy",
+    "Neon Auth compatibility/cutover",
+    "deployment/production rollback"
+  ]
+}

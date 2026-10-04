@@ -1,0 +1,37 @@
+{
+  "tasks_total": 25,
+  "other_task_objects_unchanged": 24,
+  "cases_total": 98,
+  "other_case_rows_unchanged": 91,
+  "all_historical_fields_unchanged": true,
+  "changed_repair_case_ids": [
+    "A03",
+    "A04",
+    "A05",
+    "A06",
+    "A08",
+    "P09",
+    "P10"
+  ],
+  "operation_ledger_unchanged": true,
+  "operations": 84,
+  "original_inputs_verified": 31,
+  "prior_archives_verified": {
+    "U05": 91,
+    "Q09/FINAL": 161,
+    "Q09/KEYBOARD": 141,
+    "LOCAL_GATES": 59
+  },
+  "guard_hashes_verified": {
+    "services/api/tests/conftest.py": "7e12ffa4afc3b20694eac4f62d91c840a7c5e3651e4550ddc142497b88001e46",
+    "services/worker/tests/conftest.py": "493ca1b9fed272e081ae32f75cbd5faf78ae00edbb72ad674fe12be9ccb47980",
+    "services/api/tools/serve_e2e_fixture.py": "9fd9419d1ea5832e2cf64af3e4e600d48c1b80a822a101a492c06e74d78e2a6b",
+    "services/worker/tests/fixtures/run_browser_research.py": "b313473a3827155faae7b4e6b89160c0a092a8c762edeb344714cecc4dc657b4"
+  },
+  "root_head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+  "root_clean": true,
+  "unrelated_neon_dirty_paths": 193,
+  "unrelated_neon_diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0",
+  "owned_capture_container_removed": true,
+  "runtime_diff_empty": true
+}

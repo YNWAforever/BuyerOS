@@ -1,0 +1,371 @@
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/actor-bound-red.log:19: trailing whitespace.
++services\api\tests\test_workspace_benchmark_tools.py:47: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/actor-bound-red.xml:15: trailing whitespace.
++services\api\tests\test_workspace_benchmark_tools.py:47: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/metadata-diff-review.log:8: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..ad4f439.diff:30: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..ad4f439.diff:32: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..ad4f439.diff:34: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..ad4f439.diff:36: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..ad4f439.diff:192: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..ad4f439.diff:198: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..ad4f439.diff:199: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..fd97c90.diff:29: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..fd97c90.diff:31: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..fd97c90.diff:33: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..fd97c90.diff:35: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..fd97c90.diff:191: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..fd97c90.diff:197: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/review-6232e4e..fd97c90.diff:198: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/rollback.patch:6: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/rollback.patch:8: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/rollback.patch:163: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/rollback.patch:164: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/task-1-brief.md:8: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:11: trailing whitespace.
++tests\test_quality_tools.py:56: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:32: trailing whitespace.
++tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:53: trailing whitespace.
++tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:74: trailing whitespace.
++tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:95: trailing whitespace.
++tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:116: trailing whitespace.
++tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:133: trailing whitespace.
++tests\test_quality_tools.py:71: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:150: trailing whitespace.
++tests\test_quality_tools.py:75: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:197: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:203: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:208: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:212: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:215: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:236: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:242: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:247: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:251: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:254: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:275: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:281: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:286: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:290: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:293: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:304: trailing whitespace.
++tests\test_quality_tools.py:97: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:334: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:364: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:394: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:424: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:454: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:484: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:514: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:544: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:574: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:593: trailing whitespace.
++tests\test_quality_tools.py:131: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:620: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:647: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:674: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:701: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:728: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:755: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.log:778: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:7: trailing whitespace.
++tests\test_quality_tools.py:56: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:25: trailing whitespace.
++tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:43: trailing whitespace.
++tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:61: trailing whitespace.
++tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:79: trailing whitespace.
++tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:97: trailing whitespace.
++tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:111: trailing whitespace.
++tests\test_quality_tools.py:71: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:125: trailing whitespace.
++tests\test_quality_tools.py:75: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:166: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:172: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:177: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:181: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:184: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:202: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:208: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:213: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:217: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:220: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:238: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:244: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:249: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:253: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:256: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:264: trailing whitespace.
++tests\test_quality_tools.py:97: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:291: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:318: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:345: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:372: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:399: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:426: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:453: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:480: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:507: trailing whitespace.
++tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:523: trailing whitespace.
++tests\test_quality_tools.py:131: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:547: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:571: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:595: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:619: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:643: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:667: trailing whitespace.
++tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-edit-cwd-failure.xml:687: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:11: trailing whitespace.
++services\api\tests\test_quality_tools.py:56: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:32: trailing whitespace.
++services\api\tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:53: trailing whitespace.
++services\api\tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:74: trailing whitespace.
++services\api\tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:95: trailing whitespace.
++services\api\tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:116: trailing whitespace.
++services\api\tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:133: trailing whitespace.
++services\api\tests\test_quality_tools.py:71: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:150: trailing whitespace.
++services\api\tests\test_quality_tools.py:75: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:197: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:203: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:208: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:212: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:215: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:236: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:242: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:247: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:251: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:254: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:275: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:281: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:286: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:290: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:293: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:304: trailing whitespace.
++services\api\tests\test_quality_tools.py:97: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:334: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:364: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:394: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:424: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:454: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:484: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:514: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:544: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:574: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:593: trailing whitespace.
++services\api\tests\test_quality_tools.py:131: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:620: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:647: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:674: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:701: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:728: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:755: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.log:778: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:7: trailing whitespace.
++services\api\tests\test_quality_tools.py:56: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:25: trailing whitespace.
++services\api\tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:43: trailing whitespace.
++services\api\tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:61: trailing whitespace.
++services\api\tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:79: trailing whitespace.
++services\api\tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:97: trailing whitespace.
++services\api\tests\test_quality_tools.py:67: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:111: trailing whitespace.
++services\api\tests\test_quality_tools.py:71: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:125: trailing whitespace.
++services\api\tests\test_quality_tools.py:75: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:166: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:172: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:177: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:181: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:184: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:202: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:208: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:213: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:217: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:220: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:238: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:244: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:249: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:253: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:256: trailing whitespace.
++E         
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:264: trailing whitespace.
++services\api\tests\test_quality_tools.py:97: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:291: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:318: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:345: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:372: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:399: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:426: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:453: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:480: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:507: trailing whitespace.
++services\api\tests\test_quality_tools.py:125: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:523: trailing whitespace.
++services\api\tests\test_quality_tools.py:131: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:547: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:571: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:595: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:619: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:643: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:667: trailing whitespace.
++services\api\tests\test_quality_tools.py:145: 
+docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/reports/tools-red.xml:687: trailing whitespace.
++E         

@@ -1,3 +1,5 @@
+> Latest Q10 independent local-tools follow-up: reviewed source `ad4f4394819664484eb4b928bdd56c43e055fd3d`;62related API/tool and69Node pass0skip; actual directory capture1pass but frozen SQL gateFAIL (4/22/202/2002 SQL forW1/10/100/1000, W1000p95=2822.957ms). F12/F18 and fullQ10 remain open; fixture goldset is not live accuracy.0runtime/schema/deployment/auth change. [Evidence](evidence/audit-fixes-20261003/Q10_LOCAL/RESULTS.md).
+
 > Latest Q11 local verification-gates follow-up: reviewed source `d7ab5b6323402adf139d9b94e4e499f1631006b4`; root Node69pass/0fail/skip (68JUnitleaves), genuine Linux/Windows emitted SSR3 each, types/lint/generated84 pass. Resolves U05 historical two root-gate failures;0 runtime/schema/migration changes, no deployment. [Evidence](evidence/audit-fixes-20261003/LOCAL_GATES/RESULTS.md). Independent/human/live gates remain open.
 
 > Latest local U05/F04 follow-up: source `25694d3b938e704e883f9915cf0604bbdbac1daf`;36 UI/38 strict API/17 related Node pass,0fail/error/skip; whole-root Node42pass/2 inherited-environment failures open.0migration/head0037;Auth0 retained/deployedSHAnull. [Evidence](evidence/audit-fixes-20261003/U05/RESULTS.md).
@@ -33,13 +35,13 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 | F09 | fixed with local UI/output/DB evidence; production unverified | Q07 A02/A07, truthful free fixed template and original-language citations |
 | F10 | still open (external evidence gate) | outside selected first round |
 | F11 | fixed with local manifest HTTP/DB/UI evidence; live rollout unverified | Q08 B15, B14 partial; existing snapshot1000 preserved |
-| F12 | still open (external evidence gate) | outside selected first round |
+| F12 | still open (real quality/provider evidence) | Q10 offline tools fixture-verified; actual A03-A06/A08 not tested |
 | F13 | still open (audit-source code unchanged) | Q11 baseline only |
 | F14 | partial draft journey verified; whole staff journey still open | Q12 U09 slice only; full eight-module release acceptance not asserted |
 | F15 | fixed with local render/UI evidence (Q01) | Q01 |
 | F16 | fixed with local source-review/HTTP/DB/UI evidence; live rollout unverified | Q12 D01/D03; source-bound immutable proof, exact approval/export |
 | F17 | fixed with local project count/list HTTP/DB/UI evidence | Q14 U15 A0/B5/ws5, actor/20page/race/URL/zh390 |
-| F18 | still open (audit-source code unchanged) | outside selected first round |
+| F18 | still open; actual owned PG scaling gate failed | Q10 directory SQL4/22/202/2002; role/pool subchecks pass; remediation waitsQ13/N02 |
 | F19 | fixed with local dirty-buffer UI/persistence evidence (Q15) | Q15 |
 | F20 | still open (external evidence gate) | outside selected first round |
 | F21 | still open (external evidence gate) | Q16 blocked: OperationalError alone has no root cause |

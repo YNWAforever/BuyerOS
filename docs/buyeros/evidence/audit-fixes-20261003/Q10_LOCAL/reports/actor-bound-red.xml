@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.608" timestamp="2026-10-04T14:16:39.030967+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_workspace_benchmark_tools" name="test_partial_directory_runner_refuses_unverified_actor_matrix_before_dispatch" time="0.096"><failure message="AssertionError: unverified actor option reached DB dispatch">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x0000028BEC484C30&gt;
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-260/test_partial_directory_runner_0')
+
+    def test_partial_directory_runner_refuses_unverified_actor_matrix_before_dispatch(monkeypatch,tmp_path):
+        import importlib.util
+        spec=importlib.util.spec_from_file_location('directory_runner_review',RUNNER)
+        module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+        for key in DATABASE_VARIABLES:monkeypatch.delenv(key,raising=False)
+        monkeypatch.setattr(sys,'argv',[str(RUNNER),'--actors','10','--output',str(tmp_path/'new.json')])
+        def forbidden(*args,**kwargs):raise AssertionError('unverified actor option reached DB dispatch')
+        monkeypatch.setattr(module.subprocess,'run',forbidden)
+&gt;       with pytest.raises(SystemExit) as refused:module.main()
+                                                  ^^^^^^^^^^^^^
+
+services\api\tests\test_workspace_benchmark_tools.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\benchmark-workspace-directory.py:62: in main
+    result = subprocess.run(command, cwd=API, env=env, timeout=900)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+args = (['C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe', '-m', 'pytest', '-q', '-s', 'tests/benchmark_workspace_directory_case.py', ...],)
+kwargs = {'cwd': WindowsPath('C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/services/api'), 'env': {'ALLUSERSPRO...'MCowBQYDK2VwAyEAY1XWPJ0xUJ0cG93vk/eVJtnAtJfqQzuyetjgsfVJdc0=', 'BUYEROS_DIRECTORY_ACTORS': '10', ...}, 'timeout': 900}
+
+&gt;   def forbidden(*args,**kwargs):raise AssertionError('unverified actor option reached DB dispatch')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: unverified actor option reached DB dispatch
+
+services\api\tests\test_workspace_benchmark_tools.py:45: AssertionError</failure></testcase></testsuite></testsuites>
