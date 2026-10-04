@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests/e2e',testMatch:'audit-neon-execution.spec.ts',workers:1,retries:0,timeout:30000,outputDir:'test-results/neon-execution/browser',reporter:[['list'],['json',{outputFile:'test-results/neon-execution/browser.json'}],['junit',{outputFile:'test-results/neon-execution/browser.xml'}]],use:{browserName:'chromium',viewport:{width:1120,height:800},trace:'retain-on-failure',serviceWorkers:'block'}});

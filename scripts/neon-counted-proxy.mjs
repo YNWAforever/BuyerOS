@@ -92,3 +92,5 @@ export function createCountedAuthProxy({backend,journal,now=Date.now,timeoutMs=3
  proxy.fixtureReport=()=>({fixture_only:true,external_requests:0,metrics:{...metrics},journal:journal.snapshot()});
  return proxy;
 }
+
+export {address as ownedAuthServerUrl};
