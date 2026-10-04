@@ -1,0 +1,173 @@
+diff --git a/docs/buyeros/decisions/2026-10-03-neon-auth-contract.md b/docs/buyeros/decisions/2026-10-03-neon-auth-contract.md
+index 3d5b753..9d96a57 100644
+--- a/docs/buyeros/decisions/2026-10-03-neon-auth-contract.md
++++ b/docs/buyeros/decisions/2026-10-03-neon-auth-contract.md
+@@ -55,3 +55,18 @@ N00 full gate first requires a reviewed solution for the retained callback regre
+ ## Rollback
+ 
+ Revert the N00 fixture/SDK commits and its metadata, or leave the spike branch unintegrated. No DB migration/data undo/role reassignment needed. Existing Auth0 runtime remains the release path. Reverse patch applicability is recorded separately; no production rollback was performed. Independent source review is still pending (human requested no agents).
++
++
++## 2026-10-04 callback contract follow-up (fixture only)
++
++Official [OAuth setup](https://neon.com/docs/auth/guides/setup-oauth) distinguishes the provider's authorized redirect URI ({NEON_AUTH_BASE_URL}/callback/provider, on Neon) from the app callbackURL. The pinned SDK0.5.0-beta public middleware implements the app return exchange: neon_auth_session_verifier plus __Secure-neon-auth.session_challenge is sent to upstream get-session; on successful exchange it emits cookies and redirects to the same app URL with only the verifier parameter removed. Read installed public exports and next/server middleware; no SDK/internal/global-fetch patch.
++
++The previous strict /api/auth/callback/fixture 302-forwarding test remains byte-equivalent after Git newline normalization and still FAILS on both outputs (portable500/Vercel200). It characterizes arbitrary redirect forwarding through the API proxy; it is not evidence of real provider callback incompatibility, and is not relabeled pass, skipped, or converted to expected-failure. The complete five-case suite remains red and full N00/NA01 stays open.
++
++Added the official auth.middleware() in a disposable proxy.ts overlay with matcher only /compat/return and a dynamic return page. The fake upstream now models random one-use state/challenge/verifier, a fixed allowed app callback origin/path, five-minute fixture expiry, and fictional server session. It does not call Google, create a real account, prove real OAuth state/CSRF/email security, or change production trust/memberships/RLS. No domain API or migration owner added.
++
++Two added cases observed RED before the new build (missing upstream then missing middleware307vs200). After both clean actual Linux builds, each target executes5cases:4pass1fail0error0skip. Added positives include307, resolved same-origin target/query preservation, Secure/HttpOnly/Lax host cookies and signed cache, challenge clear, server session/hard reload/token/FastAPI/logout, consumed verifier rejected in a separate context, and actual browser navigation through upstream302 -> app307 -> clean return page. Negative missing/mismatched challenge is rejected without a session; rejected attempts leave the owner's fresh verifier usable. Fixtures do not prove the provider's actual wire details.
++
++Portable emits a relative Location, which resolves to the identical asserted absolute target; tests use browser URL resolution without relaxing exact status, destination, query, or cookie conditions. Replay/mismatch contexts clone actual SDK-minted cookie metadata instead of an invalid Chromium http-url Secure cookie setter. Original raw setup failures retained. Node32pass0skip, final types/lint0; both build exits0. Prior Auth0 API34pass is carried from the preceding checkpoint, not claimed as re-executed by this follow-up. No DB suite needed/skipped for this protocol-only fixture change, schema0037 unchanged.
++
++Next concrete gate is a specifically approved fresh isolated real Neon Auth target/account/method rehearsal. Auth0 remains the release path; deployed SHA is null. Do not infer real issuer/audience/JWKS from the fixture or reuse expired hosted-preview approvals. New outputs, traces and rollback evidence are captured in ../evidence/audit-fixes-20261003/N00_CALLBACK/RESULTS.md; the prior N00_LOCAL record is immutable.
+diff --git a/scripts/serve-neon-compatibility.mjs b/scripts/serve-neon-compatibility.mjs
+index 49b9e0a..052a2dc 100644
+--- a/scripts/serve-neon-compatibility.mjs
++++ b/scripts/serve-neon-compatibility.mjs
+@@ -1,5 +1,5 @@
+ import {createServer} from 'node:http';
+-import {generateKeyPairSync,sign,createHmac} from 'node:crypto';
++import {generateKeyPairSync,sign,createHmac,randomBytes} from 'node:crypto';
+ import {spawn,spawnSync} from 'node:child_process';
+ import {existsSync,readFileSync,statSync} from 'node:fs';
+ import {resolve} from 'node:path';
+@@ -25,6 +25,12 @@ function issue(kind='valid') {
+ }
+ const cookie='__Secure-neon-auth.session_token=fictional-session; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600';
+ let authenticated=false;
++// Fictional managed callback protocol only; no provider/account/network activation.
++const appOrigin='http://localhost:44890';
++const flows=new Map(),verifiers=new Map();
++const challengeName='__Secure-neon-auth.session_challenge';
++const challengeCookie=(value,maxAge=300)=>challengeName+'='+value+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age='+maxAge;
++function cookieValue(header,name){return (header??'').split(';').map(part=>part.trim()).find(part=>part.startsWith(name+'='))?.slice(name.length+1);}
+ const authServer=createServer(async(req,res)=>{
+  const url=new URL(req.url,upstream.origin),path=url.pathname;
+  const active=authenticated&&(req.headers.cookie??'').includes('__Secure-neon-auth.session_token=fictional-session');
+@@ -36,7 +42,30 @@ const authServer=createServer(async(req,res)=>{
+   const credentials=JSON.parse(body);if(credentials.email!==user.email||credentials.password!=='fictional-password'){res.statusCode=401;res.end('{}');return;}
+   authenticated=true;res.setHeader('Set-Cookie',cookie);res.end(JSON.stringify({redirect:false,token:session.token,user}));return;
+  }
+- if(path==='/fixture/auth/get-session'){if(active)res.setHeader('set-auth-jwt',issue());res.end(JSON.stringify(active?{session,user}:null));return;}
++ if(path==='/fixture/auth/sign-in/social'&&req.method==='POST'){
++  let body='';for await(const chunk of req)body+=chunk;
++  const input=JSON.parse(body);let callback;try{callback=new URL(input.callbackURL);}catch{}
++  if(input.provider!=='google'||callback?.origin!==appOrigin||callback.pathname!=='/compat/return'||req.headers.origin!==appOrigin||req.headers['x-neon-auth-middleware']!=='true'){res.statusCode=400;res.end('{"code":"INVALID_FIXTURE_FLOW"}');return;}
++  if(flows.size>=50){res.statusCode=429;res.end('{}');return;}
++  const state=randomBytes(24).toString('base64url'),challenge=randomBytes(24).toString('base64url');
++  flows.set(state,{challenge,callback:callback.href,expires:Date.now()+300_000});authenticated=false;
++  res.setHeader('Set-Cookie',challengeCookie(challenge));res.end(JSON.stringify({redirect:true,url:upstream.href+'/callback/google?state='+state}));return;
++ }
++ if(path==='/fixture/auth/callback/google'){
++  const state=url.searchParams.get('state'),flow=flows.get(state);flows.delete(state);
++  if(!flow||flow.expires<=Date.now()){res.statusCode=401;res.end('{"code":"INVALID_FIXTURE_STATE"}');return;}
++  const verifier=randomBytes(24).toString('base64url');verifiers.set(verifier,flow);
++  const callback=new URL(flow.callback);callback.searchParams.set('neon_auth_session_verifier',verifier);
++  res.statusCode=302;res.setHeader('Location',callback.href);res.end();return;
++ }
++ if(path==='/fixture/auth/get-session'){
++  if(url.searchParams.has('neon_auth_session_verifier')){
++   const value=url.searchParams.get('neon_auth_session_verifier'),flow=verifiers.get(value);
++   if(!flow||flow.expires<=Date.now()||cookieValue(req.headers.cookie,challengeName)!==flow.challenge||req.headers.origin!==appOrigin||req.headers['x-neon-auth-middleware']!=='true'){res.statusCode=401;res.end('{"code":"INVALID_FIXTURE_VERIFIER"}');return;}
++   verifiers.delete(value);authenticated=true;res.setHeader('Set-Cookie',[cookie,challengeCookie('',0)]);res.setHeader('set-auth-jwt',issue());res.end(JSON.stringify({session,user}));return;
++  }
++  if(active)res.setHeader('set-auth-jwt',issue());res.end(JSON.stringify(active?{session,user}:null));return;
++ }
+  if(path==='/fixture/auth/token'){res.statusCode=active?200:401;res.end(JSON.stringify(active?{token:issue()}:{code:'UNAUTHORIZED'}));return;}
+  if(path==='/fixture/auth/sign-out'&&req.method==='POST'){authenticated=false;res.setHeader('Set-Cookie',cookie.replace('fictional-session','').replace('Max-Age=3600','Max-Age=0'));res.end('{"success":true}');return;}
+  if(path==='/fixture/auth/callback/fixture'&&url.searchParams.get('state')==='fictional-state'){authenticated=true;res.statusCode=302;res.setHeader('Set-Cookie',cookie);res.setHeader('Location','http://localhost:44890/compat');res.end('{}');return;}
+diff --git a/tests/e2e/audit-neon-compat.spec.ts b/tests/e2e/audit-neon-compat.spec.ts
+index 3506e7b..d748f09 100644
+--- a/tests/e2e/audit-neon-compat.spec.ts
++++ b/tests/e2e/audit-neon-compat.spec.ts
+@@ -29,3 +29,60 @@ test('NA01 fixture: tokens require exact issuer/audience/algorithm, expiry and k
+   expect((await request.get('http://127.0.0.1:44892/verify',{headers:{Authorization:`Bearer ${token}`}})).status()).toBe(401);
+  }
+ });
++
++
++test('NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies',async({page,context})=>{
++ await page.route('**/*',route=>['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)?route.continue():route.abort());
++ const start=await context.request.post('/api/auth/sign-in/social',{data:{provider:'google',callbackURL:'http://localhost:44890/compat/return?keep=fixture'},headers:{Origin:'http://localhost:44890'}});
++ expect(start.status()).toBe(200);
++ const data=await start.json();expect(data.redirect).toBe(true);
++ const providerURL=new URL(data.url);expect(providerURL.origin).toBe('http://127.0.0.1:44891');expect(providerURL.pathname).toBe('/fixture/auth/callback/google');
++ const challenge=(await context.cookies()).find(c=>c.name==='__Secure-neon-auth.session_challenge');
++ expect(challenge).toBeDefined();expect(challenge?.domain).toBe('localhost');expect(challenge?.httpOnly).toBe(true);expect(challenge?.secure).toBe(true);expect(challenge?.sameSite).toBe('Lax');
++ expect((await context.cookies()).some(c=>c.name==='__Secure-neon-auth.session_token')).toBe(false);
++ const provider=await context.request.get(providerURL.href,{maxRedirects:0});expect(provider.status()).toBe(302);
++ const callbackURL=new URL(provider.headers().location);expect(callbackURL.origin).toBe('http://localhost:44890');expect(callbackURL.pathname).toBe('/compat/return');expect(callbackURL.searchParams.get('keep')).toBe('fixture');expect(callbackURL.searchParams.get('neon_auth_session_verifier')).toBeTruthy();
++ const callback=await context.request.get(callbackURL.href,{maxRedirects:0});expect(callback.status()).toBe(307);
++ expect(new URL(callback.headers().location,callbackURL.href).href).toBe('http://localhost:44890/compat/return?keep=fixture');
++ const cookies=await context.cookies();const session=cookies.find(c=>c.name==='__Secure-neon-auth.session_token');
++ expect(session?.domain).toBe('localhost');expect(session?.httpOnly).toBe(true);expect(session?.secure).toBe(true);expect(session?.sameSite).toBe('Lax');
++ expect(cookies.some(c=>c.name==='__Secure-neon-auth.local.session_data')).toBe(true);expect(cookies.some(c=>c.name==='__Secure-neon-auth.session_challenge')).toBe(false);
++ await page.goto(callback.headers().location);await expect(page.getByTestId('server-session')).toHaveText('n00-user');
++ await page.reload();await expect(page.getByTestId('server-session')).toHaveText('n00-user');
++ await page.getByRole('button',{name:'Verify token'}).click();await expect(page.getByTestId('client-status')).toHaveText('api-verified');
++ assertProtocolStorage(await page.evaluate(()=>Object.entries(localStorage)));expect(await page.evaluate(()=>Object.keys(sessionStorage))).toEqual([]);
++ // A consumed verifier must not mint a session in a different browser context.
++ const replay=await context.browser()!.newContext({baseURL:'http://localhost:44890'});
++ try{
++  await replay.addCookies([challenge!]);
++  const rejected=await replay.request.get(callbackURL.href,{maxRedirects:0});expect(rejected.status()).toBe(307);expect(new URL(rejected.headers().location,callbackURL.href).pathname).toBe('/auth/sign-in');
++  expect((await replay.cookies()).some(c=>c.name==='__Secure-neon-auth.session_token')).toBe(false);
++  expect(await(await replay.request.get('/api/auth/get-session?disableCookieCache=true')).json()).toBeNull();
++ }finally{await replay.close();}
++ await page.screenshot({path:'test-results/neon-compatibility/'+process.env.BUYEROS_N00_TARGET+'-managed-callback.png'});
++ await page.getByRole('button',{name:'Logout'}).click();await expect(page.getByTestId('client-status')).toHaveText('signed-out');
++ await page.goto('/compat');await expect(page.getByTestId('server-session')).toHaveText('anonymous');expect((await context.cookies()).filter(c=>c.name.startsWith('__Secure-neon-auth'))).toEqual([]);
++ // Also follow the managed redirect in the actual browser with the shared challenge cookie.
++ const browserStart=await context.request.post('/api/auth/sign-in/social',{data:{provider:'google',callbackURL:'http://localhost:44890/compat/return?keep=browser'},headers:{Origin:'http://localhost:44890'}});expect(browserStart.status()).toBe(200);
++ const browserProvider=new URL((await browserStart.json()).url);expect(browserProvider.origin).toBe('http://127.0.0.1:44891');
++ await page.goto(browserProvider.href);await expect(page).toHaveURL('http://localhost:44890/compat/return?keep=browser');await expect(page.getByTestId('server-session')).toHaveText('n00-user');
++ await page.getByRole('button',{name:'Logout'}).click();await expect(page.getByTestId('client-status')).toHaveText('signed-out');await page.goto('/compat');await expect(page.getByTestId('server-session')).toHaveText('anonymous');expect((await context.cookies()).filter(c=>c.name.startsWith('__Secure-neon-auth'))).toEqual([]);
++});
++
++test('NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier',async({context})=>{
++ const start=await context.request.post('/api/auth/sign-in/social',{data:{provider:'google',callbackURL:'http://localhost:44890/compat/return?keep=negative'},headers:{Origin:'http://localhost:44890'}});expect(start.status()).toBe(200);
++ const providerURL=new URL((await start.json()).url);expect(providerURL.origin).toBe('http://127.0.0.1:44891');
++ const provider=await context.request.get(providerURL.href,{maxRedirects:0});expect(provider.status()).toBe(302);const callbackURL=provider.headers().location;expect(new URL(callbackURL).origin).toBe('http://localhost:44890');
++ const minted=(await context.cookies()).find(c=>c.name==='__Secure-neon-auth.session_challenge');expect(minted).toBeDefined();
++ for(const challenge of [null,'fictional-wrong-challenge']){
++  const negative=await context.browser()!.newContext({baseURL:'http://localhost:44890'});
++  try{
++   if(challenge)await negative.addCookies([{...minted!,value:challenge}]);
++   const response=await negative.request.get(callbackURL,{maxRedirects:0});expect(response.status()).toBe(307);expect(new URL(response.headers().location,callbackURL).pathname).toBe('/auth/sign-in');
++   expect((await negative.cookies()).some(c=>c.name==='__Secure-neon-auth.session_token')).toBe(false);expect(await(await negative.request.get('/api/auth/get-session?disableCookieCache=true')).json()).toBeNull();
++  }finally{await negative.close();}
++ }
++ // Rejected attempts must not consume the owner's challenge/verifier.
++ const accepted=await context.request.get(callbackURL,{maxRedirects:0});expect(accepted.status()).toBe(307);expect(new URL(accepted.headers().location,callbackURL).href).toBe('http://localhost:44890/compat/return?keep=negative');
++ expect((await context.cookies()).some(c=>c.name==='__Secure-neon-auth.session_token')).toBe(true);
++});
+diff --git a/tests/fixtures/neon-compatibility/overlay/app/compat/return/page.tsx b/tests/fixtures/neon-compatibility/overlay/app/compat/return/page.tsx
+new file mode 100644
+index 0000000..08d9fd5
+--- /dev/null
++++ b/tests/fixtures/neon-compatibility/overlay/app/compat/return/page.tsx
+@@ -0,0 +1,3 @@
++import Page from '../page';
++export const dynamic='force-dynamic';
++export default Page;
+diff --git a/tests/fixtures/neon-compatibility/overlay/proxy.ts b/tests/fixtures/neon-compatibility/overlay/proxy.ts
+new file mode 100644
+index 0000000..4db9d92
+--- /dev/null
++++ b/tests/fixtures/neon-compatibility/overlay/proxy.ts
+@@ -0,0 +1,4 @@
++// N00 overlay only: official SDK middleware consumes the managed session verifier.
++import {auth} from './lib/neon-compatibility/server';
++export default auth.middleware({loginUrl:'/auth/sign-in'});
++export const config={matcher:['/compat/return']};
+diff --git a/tests/neon-compatibility-discovery.test.mjs b/tests/neon-compatibility-discovery.test.mjs
+index e4bfb77..f04d565 100644
+--- a/tests/neon-compatibility-discovery.test.mjs
++++ b/tests/neon-compatibility-discovery.test.mjs
+@@ -9,4 +9,4 @@ function discovered(config){
+  for(const suite of JSON.parse(result.stdout).suites)visit(suite);return files;
+ }
+ for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regression.config.ts'])test(`N00 built fixture is isolated from ${config}`,()=>{const files=discovered(config);assert.ok(files.some(file=>file.endsWith('audit-auth-entry.spec.ts')),'existing Q01 tests stay selected');assert.equal(files.filter(file=>file.endsWith('audit-neon-compat.spec.ts')).length,0,'different runtime/upstream ports must not enter the DB workbench');});
+-test('N00 dedicated config discovers all three built-output cases',()=>{const files=discovered('playwright.neon-auth.config.ts');assert.equal(files.length,3);assert.ok(files.every(file=>file.endsWith('audit-neon-compat.spec.ts')));});
++test('N00 dedicated config discovers all five built-output cases',()=>{const files=discovered('playwright.neon-auth.config.ts');assert.equal(files.length,5);assert.ok(files.every(file=>file.endsWith('audit-neon-compat.spec.ts')));});

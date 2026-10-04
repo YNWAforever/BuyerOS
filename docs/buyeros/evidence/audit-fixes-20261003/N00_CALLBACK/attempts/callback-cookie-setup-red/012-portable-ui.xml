@@ -1,0 +1,113 @@
+<testsuites id="" name="" tests="5" failures="1" skipped="0" errors="2" time="27.803634000000002">
+<testsuite name="audit-neon-compat.spec.ts" timestamp="2026-10-04T10:13:50.903Z" hostname="" tests="5" failures="1" skipped="0" time="7.277" errors="2">
+<testcase name="NA01 fixture: official handler/client, server session, bearer verification, reload and logout" classname="audit-neon-compat.spec.ts" time="2.23">
+</testcase>
+<testcase name="NA01 fixture: callback response preserves host cookies and redirect" classname="audit-neon-compat.spec.ts" time="2.328">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|portable-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\error-context.md]]
+
+[[ATTACHMENT|portable-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 302
+    Received: 500
+
+      19 | test('NA01 fixture: callback response preserves host cookies and redirect',async({page,request})=>{
+      20 |  const upstream=await request.get('http://127.0.0.1:44891/fixture/auth/callback/fixture?state=fictional-state',{maxRedirects:0});expect(upstream.status()).toBe(302);expect(upstream.headers()['set-cookie']).toContain('HttpOnly');
+    > 21 |  const callback=await request.get('/api/auth/callback/fixture?state=fictional-state',{maxRedirects:0});expect(callback.status()).toBe(302);
+         |                                                                                                                                  ^
+      22 |  await page.goto('/api/auth/callback/fixture?state=fictional-state');await expect(page).toHaveURL(/\/compat$/);
+      23 |  await expect(page.getByTestId('server-session')).toHaveText('n00-user');
+      24 | });
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:21:130
+
+    Error Context: ..\..\test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="NA01 fixture: tokens require exact issuer/audience/algorithm, expiry and known key" classname="audit-neon-compat.spec.ts" time="0.129">
+</testcase>
+<testcase name="NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies" classname="audit-neon-compat.spec.ts" time="1.499">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|portable-ui\audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies\error-context.md]]
+
+[[ATTACHMENT|portable-ui\audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies\trace.zip]]
+]]>
+</system-out>
+<error message="browserContext.addCookies: Protocol error (Storage.setCookies): Invalid cookie fields" type="Error">
+<![CDATA[  audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+
+    Error: browserContext.addCookies: Protocol error (Storage.setCookies): Invalid cookie fields
+
+      55 |  const replay=await context.browser()!.newContext({baseURL:'http://localhost:44890'});
+      56 |  try{
+    > 57 |   await replay.addCookies([{name:'__Secure-neon-auth.session_challenge',value:challenge!.value,url:'http://localhost:44890',httpOnly:true,secure:true,sameSite:'Lax'}]);
+         |                ^
+      58 |   const rejected=await replay.request.get(callbackURL.href,{maxRedirects:0});expect(rejected.status()).toBe(307);expect(new URL(rejected.headers().location,callbackURL.href).pathname).toBe('/auth/sign-in');
+      59 |   expect((await replay.cookies()).some(c=>c.name==='__Secure-neon-auth.session_token')).toBe(false);
+      60 |   expect(await(await replay.request.get('/api/auth/get-session?disableCookieCache=true')).json()).toBeNull();
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:57:16
+
+    Error Context: ..\..\test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier" classname="audit-neon-compat.spec.ts" time="1.091">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|portable-ui\audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier\error-context.md]]
+
+[[ATTACHMENT|portable-ui\audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier\trace.zip]]
+]]>
+</system-out>
+<error message="browserContext.addCookies: Protocol error (Storage.setCookies): Invalid cookie fields" type="Error">
+<![CDATA[  audit-neon-compat.spec.ts:72:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+
+    Error: browserContext.addCookies: Protocol error (Storage.setCookies): Invalid cookie fields
+
+      77 |   const negative=await context.browser()!.newContext({baseURL:'http://localhost:44890'});
+      78 |   try{
+    > 79 |    if(challenge)await negative.addCookies([{name:'__Secure-neon-auth.session_challenge',value:challenge,url:'http://localhost:44890',httpOnly:true,secure:true,sameSite:'Lax'}]);
+         |                                ^
+      80 |    const response=await negative.request.get(callbackURL,{maxRedirects:0});expect(response.status()).toBe(307);expect(new URL(response.headers().location,callbackURL).pathname).toBe('/auth/sign-in');
+      81 |    expect((await negative.cookies()).some(c=>c.name==='__Secure-neon-auth.session_token')).toBe(false);expect(await(await negative.request.get('/api/auth/get-session?disableCookieCache=true')).json()).toBeNull();
+      82 |   }finally{await negative.close();}
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:79:32
+
+    Error Context: ..\..\test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

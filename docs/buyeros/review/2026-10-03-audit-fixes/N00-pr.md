@@ -13,3 +13,8 @@ Exact SDKdev pin; official same-origin server/client fixture overlay, public Nit
 [Exact results/commands/trace/screenshots](../../evidence/audit-fixes-20261003/N00_LOCAL/RESULTS.md), [ADR](../../decisions/2026-10-03-neon-auth-contract.md). Original31inputs/98historicfields/97othercases/24tasks/84operations/4guards/otherworktrees preserved. Revert2f14645 thenb2e4d38 and checkpoint metadata; reversepatch applicability0, no DB undo/production rehearsal.
 
 Next: reconcile supported actual callback contract, then request a concrete isolated target/account rehearsal; no production provisioning/deployment/identity linking/email implied. Same-author review only; no agents spawned.
+
+
+## Callback follow-up source2fd84ef (2026-10-04)
+
+Six files/111insertions/3deletions: fictional managed protocol upstream, official proxy.ts middleware/dynamic return overlay, two added built cases, discovery5, ADR. Actual new2cases pass both outputs; whole5each4pass1fail0skip; fullN00/NA01stillopen.32Node/types/lint/builds pass; API34carried previous source, not current rerun. No original case relaxed. [Exact evidence](../../evidence/audit-fixes-20261003/N00_CALLBACK/RESULTS.md). Reviewed SHA `2fd84ef49d289ea313a5abb21ec6e30bc2659a9d`; deployed null. Revert2fd84ef and metadata for this follow-up; N00_LOCAL record untouched. Next specifically approved fresh real isolated auth/account/method; no production/cutover implied.

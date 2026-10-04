@@ -1,0 +1,72 @@
+[WebServer] (node:48864) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] INFO:     Started server process [29848]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+
+Running 2 tests using 1 worker
+
+(node:38336) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies (230ms)
+(node:2356) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 tests\e2e\audit-neon-compat.spec.ts:67:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier (180ms)
+
+
+  1) tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 307
+    Received: 200
+
+      43 |  const provider=await context.request.get(providerURL.href,{maxRedirects:0});expect(provider.status()).toBe(302);
+      44 |  const callbackURL=new URL(provider.headers().location);expect(callbackURL.origin).toBe('http://localhost:44890');expect(callbackURL.pathname).toBe('/compat/return');expect(callbackURL.searchParams.get('keep')).toBe('fixture');expect(callbackURL.searchParams.get('neon_auth_session_verifier')).toBeTruthy();
+    > 45 |  const callback=await context.request.get(callbackURL.href,{maxRedirects:0});expect(callback.status()).toBe(307);
+         |                                                                                                        ^
+      46 |  expect(callback.headers().location).toBe('http://localhost:44890/compat/return?keep=fixture');
+      47 |  const cookies=await context.cookies();const session=cookies.find(c=>c.name==='__Secure-neon-auth.session_token');
+      48 |  expect(session?.domain).toBe('localhost');expect(session?.httpOnly).toBe(true);expect(session?.secure).toBe(true);expect(session?.sameSite).toBe('Lax');
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:45:104
+
+    Error Context: test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\audit-neon-compat.spec.ts:67:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 307
+    Received: 200
+
+      72 |   try{
+      73 |    if(challenge)await negative.addCookies([{name:'__Secure-neon-auth.session_challenge',value:challenge,url:'http://localhost:44890',httpOnly:true,secure:true,sameSite:'Lax'}]);
+    > 74 |    const response=await negative.request.get(callbackURL,{maxRedirects:0});expect(response.status()).toBe(307);expect(new URL(response.headers().location).pathname).toBe('/auth/sign-in');
+         |                                                                                                      ^
+      75 |    expect((await negative.cookies()).some(c=>c.name==='__Secure-neon-auth.session_token')).toBe(false);expect(await(await negative.request.get('/api/auth/get-session?disableCookieCache=true')).json()).toBeNull();
+      76 |   }finally{await negative.close();}
+      77 |  }
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:74:102
+
+    Error Context: test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+    tests\e2e\audit-neon-compat.spec.ts:67:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 

@@ -1,0 +1,81 @@
+? Verifying lockfile against supply-chain policies (1059 entries)...
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +135 -1
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+
+   ╭──────────────────────────────────────────────────────────────────────╮
+   │                                                                      │
+   │                 Update available! 11.25.0 → 12.9.1.                  │
+   │                 Changelog: https://pnpm.io/v/12.9.1                  │
+   │   To update, run: curl -fsSL https://get.pnpm.io/install.sh | sh -   │
+   │                                                                      │
+   ╰──────────────────────────────────────────────────────────────────────╯
+
+Progress: resolved 135, reused 0, downloaded 10, added 7
+Progress: resolved 135, reused 0, downloaded 32, added 32
+Progress: resolved 135, reused 0, downloaded 63, added 50
+Progress: resolved 135, reused 0, downloaded 77, added 53
+[WARN] Tarball download average speed 25 KiB/s (size 43 KiB) is below 50 KiB/s: https://registry.npmjs.org/asn1js/-/asn1js-3.0.10.tgz (GET)
+Progress: resolved 135, reused 0, downloaded 106, added 57
+[WARN] Tarball download average speed 23 KiB/s (size 42 KiB) is below 50 KiB/s: https://registry.npmjs.org/html-to-text/-/html-to-text-9.0.5.tgz (GET)
+Progress: resolved 135, reused 0, downloaded 126, added 76
+Progress: resolved 135, reused 0, downloaded 129, added 87
+Progress: resolved 135, reused 0, downloaded 135, added 127
+Progress: resolved 135, reused 0, downloaded 135, added 131
+Progress: resolved 135, reused 0, downloaded 135, added 135, done
+[WARN] Request took 10186ms: https://registry.npmjs.org/@instantdb%2Fcore
+[WARN] Request took 11359ms: https://registry.npmjs.org/@instantdb%2Freact
+[WARN] Request took 14230ms: https://registry.npmjs.org/@playwright%2Ftest
+[WARN] Request took 10675ms: https://registry.npmjs.org/axe-core
+[WARN] Request took 12266ms: https://registry.npmjs.org/@typescript-eslint%2Ftype-utils
+[WARN] Request took 12567ms: https://registry.npmjs.org/@typescript-eslint%2Futils
+[WARN] Request took 10244ms: https://registry.npmjs.org/eslint-config-next
+[WARN] Request took 11494ms: https://registry.npmjs.org/eslint-plugin-react-hooks
+[WARN] Request took 14554ms: https://registry.npmjs.org/@typescript-eslint%2Ftypes
+[WARN] Request took 14741ms: https://registry.npmjs.org/@typescript-eslint%2Fvisitor-keys
+[WARN] Request took 11243ms: https://registry.npmjs.org/recharts
+[WARN] Request took 10986ms: https://registry.npmjs.org/unpic
+[WARN] Request took 10554ms: https://registry.npmjs.org/watchpack
+[WARN] Request took 10811ms: https://registry.npmjs.org/uuid
+[WARN] Request took 10639ms: https://registry.npmjs.org/vite-plugin-dynamic-import
+[WARN] Request took 10556ms: https://registry.npmjs.org/webpack-sources
+[WARN] Request took 11168ms: https://registry.npmjs.org/undici
+[WARN] Request took 10163ms: https://registry.npmjs.org/sorted-btree
+[WARN] Request took 11697ms: https://registry.npmjs.org/tsx
+[WARN] Request took 10608ms: https://registry.npmjs.org/web-vitals
+[WARN] Request took 24008ms: https://registry.npmjs.org/@typescript-eslint%2Fscope-manager
+[WARN] Request took 11230ms: https://registry.npmjs.org/unstorage
+[WARN] Request took 10257ms: https://registry.npmjs.org/ws
+[WARN] Request took 10291ms: https://registry.npmjs.org/yargs
+[WARN] Request took 10545ms: https://registry.npmjs.org/workerd
+[WARN] Request took 12538ms: https://registry.npmjs.org/react-resizable-panels
+[WARN] Request took 12397ms: https://registry.npmjs.org/tldts-core
+[WARN] Request took 14975ms: https://registry.npmjs.org/react-hook-form
+[WARN] Request took 11359ms: https://registry.npmjs.org/vitest
+[WARN] Request took 12585ms: https://registry.npmjs.org/tldts
+[WARN] Request took 14539ms: https://registry.npmjs.org/scheduler
+[WARN] Request took 15251ms: https://registry.npmjs.org/react-dom
+[WARN] Request took 12346ms: https://registry.npmjs.org/typescript-eslint
+[WARN] Request took 15332ms: https://registry.npmjs.org/react-is
+[WARN] Request took 11723ms: https://registry.npmjs.org/webpack
+[WARN] Request took 25190ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+[WARN] Request took 11955ms: https://registry.npmjs.org/vite
+[WARN] Request took 15492ms: https://registry.npmjs.org/react
+[WARN] Request took 12293ms: https://registry.npmjs.org/use-sync-external-store
+[WARN] Request took 15611ms: https://registry.npmjs.org/react-server-dom-webpack
+[WARN] Request took 25523ms: https://registry.npmjs.org/@typescript-eslint%2Ftypescript-estree
+[WARN] Request took 25931ms: https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin
+[WARN] Request took 14759ms: https://registry.npmjs.org/tailwindcss
+[WARN] Request took 18353ms: https://registry.npmjs.org/playwright-core
+[WARN] Request took 17241ms: https://registry.npmjs.org/@types%2Fnode
+[WARN] Request took 15366ms: https://registry.npmjs.org/typescript
+[WARN] Request took 20545ms: https://registry.npmjs.org/playwright
+[WARN] Request took 16302ms: https://registry.npmjs.org/wrangler
+[WARN] Request took 23974ms: https://registry.npmjs.org/next
+✓ Lockfile passes supply-chain policies (1059 entries in 42.2s)
+
+devDependencies:
++ @neondatabase/auth 0.5.0-beta
+
+Done in 44.5s using pnpm v11.25.0

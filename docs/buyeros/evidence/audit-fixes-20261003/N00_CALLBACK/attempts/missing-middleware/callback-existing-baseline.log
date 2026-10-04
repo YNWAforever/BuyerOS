@@ -1,0 +1,14 @@
+[WebServer] (node:47432) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] INFO:     Started server process [45456]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+
+Running 1 test using 1 worker
+
+(node:13596) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-compat.spec.ts:3:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout (1.7s)
+
+  1 passed (6.3s)

@@ -22,11 +22,11 @@
     {
       "id": "N00",
       "status": "local-spike-partial",
-      "code_status": "local-compatibility-fixture-implemented; no auth cutover",
-      "verification_status": "32 Node/34 Auth0 API pass;2 clean builds exit0; each actual UI2pass1fail0skip; synthetic callback open; real Neon not run",
+      "code_status": "local callback middleware/verifier fixture implemented; no auth cutover",
+      "verification_status": "32 Node pass0skip;2 clean build exits0;each actual UI4pass1fail0skip;new2callback cases pass;real Neon not run;prior Auth0API34 carried, not rerun",
       "release_status": "not-deployed; Auth0 retained",
       "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
-      "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6",
+      "source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
       "finding_ids": [
         "F20"
       ],
@@ -38,38 +38,53 @@
           "tests": 32,
           "pass": 32,
           "fail": 0,
-          "skipped": 0
-        },
-        "api": {
-          "cases": 34,
-          "pass": 34,
-          "fail": 0,
-          "error": 0,
           "skip": 0,
-          "junit_time": null
+          "duration_ms": 13197.2273
         },
         "built_ui": {
           "portable": {
-            "cases": 3,
-            "pass": 2,
+            "cases": 5,
+            "pass": 4,
             "fail": 1,
             "error": 0,
             "skip": 0,
-            "junit_time": "25.854788"
+            "time": "57.528115",
+            "failing": [
+              "NA01 fixture: callback response preserves host cookies and redirect"
+            ]
           },
           "vercel": {
-            "cases": 3,
-            "pass": 2,
+            "cases": 5,
+            "pass": 4,
             "fail": 1,
             "error": 0,
             "skip": 0,
-            "junit_time": "23.815467"
+            "time": "19.821048",
+            "failing": [
+              "NA01 fixture: callback response preserves host cookies and redirect"
+            ]
           }
-        }
+        },
+        "new_callback_cases": {
+          "per_target": 2,
+          "pass": 2,
+          "fail": 0,
+          "skip": 0,
+          "red_observed": true
+        },
+        "api_carried": {
+          "executed_this_followup": false,
+          "prior_pass": 34,
+          "prior_fail": 0,
+          "prior_skip": 0,
+          "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6"
+        },
+        "types_exit": 0,
+        "lint_exit": 0
       },
       "migrations": "none;0037 unchanged",
-      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/RESULTS.md",
-      "rollback": "reverse source patch check0 only; revert2f14645 thenb2e4d38 and checkpoint metadata; no DB undo",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/RESULTS.md",
+      "rollback": "reverse patch check0 only; revert2fd84ef and checkpoint metadata; no DB undo",
       "limits": [
         "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
         "No Vercel ingress/protection/binding/deployment verification",
@@ -78,7 +93,7 @@
         "No live performance/SLA/UAT claim"
       ],
       "full_gate_passed": false,
-      "next_action": "N00 reconcile callback with actual supported Neon OAuth/session-verifier contract, then specifically approved real isolated built roundtrip"
+      "next_action": "N00 specifically approved fresh isolated real Neon account/method/built roundtrip; retained synthetic302 characterization is failing"
     },
     {
       "id": "N01",
@@ -709,16 +724,17 @@
     "Q09 human screen-reader/staff UAT",
     "Independent source review",
     "Q16 underlying evidence when available",
-    "N00 callback contract and real Neon roundtrip",
+    "N00 approved isolated actual auth roundtrip; callback fixture covered, synthetic characterization red",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6",
+  "reviewed_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
   "deployed_sha": null,
   "selected_followups": [
     "U05",
     "Q11 local verification gates",
     "Q10 independent local tools and current directory baseline",
-    "N00 local built compatibility spike"
+    "N00 local built compatibility spike",
+    "N00 managed callback contract fixture follow-up"
   ],
   "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf"
 }

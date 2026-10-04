@@ -1,0 +1,9 @@
+{
+  "command": "git apply --reverse --check --binary C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\docs\\buyeros\\evidence\\audit-fixes-20261003\\N00_CALLBACK\\source.patch",
+  "exit": 0,
+  "stdout": "",
+  "stderr": "",
+  "applied": false,
+  "revert_source_commit": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+  "database_undo": "none"
+}

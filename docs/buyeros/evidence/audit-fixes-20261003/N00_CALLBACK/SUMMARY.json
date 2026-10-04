@@ -1,0 +1,86 @@
+{
+  "task": "N00",
+  "finding": "F20",
+  "case": "NA01",
+  "source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+  "base_sha": "2606ed53da983dc3b8aa9b793cb32fb882cf1829",
+  "application_source_sha_unchanged": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+  "deployed_sha": null,
+  "full_gate_passed": false,
+  "node": {
+    "tests": 32,
+    "pass": 32,
+    "fail": 0,
+    "skip": 0,
+    "duration_ms": 13197.2273
+  },
+  "built_ui": {
+    "portable": {
+      "cases": 5,
+      "pass": 4,
+      "fail": 1,
+      "error": 0,
+      "skip": 0,
+      "time": "57.528115",
+      "failing": [
+        "NA01 fixture: callback response preserves host cookies and redirect"
+      ]
+    },
+    "vercel": {
+      "cases": 5,
+      "pass": 4,
+      "fail": 1,
+      "error": 0,
+      "skip": 0,
+      "time": "19.821048",
+      "failing": [
+        "NA01 fixture: callback response preserves host cookies and redirect"
+      ]
+    }
+  },
+  "new_callback_cases": {
+    "per_target": 2,
+    "pass": 2,
+    "fail": 0,
+    "skip": 0,
+    "red_observed": true
+  },
+  "builds": {
+    "node": "v22.23.2",
+    "imageId": "sha256:48e4b67d85f87bd551df43704e24d252f56cc5f8e9718841aace50f19948f0f9",
+    "cpus": 4,
+    "memoryGiB": 6,
+    "outputs": [
+      {
+        "target": "portable",
+        "command": "corepack pnpm build",
+        "exit": 0,
+        "error": null
+      },
+      {
+        "target": "vercel",
+        "command": "node scripts/run-vercel.mjs build",
+        "exit": 0,
+        "error": null
+      }
+    ]
+  },
+  "types_exit": 0,
+  "lint_exit": 0,
+  "api": {
+    "executed_this_followup": false,
+    "prior_pass": 34,
+    "prior_fail": 0,
+    "prior_skip": 0,
+    "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6"
+  },
+  "migrations": {
+    "new": 0,
+    "head": "0037_bulk_manifests"
+  },
+  "real_neon_verified": false,
+  "actual_platform_deployment_verified": false,
+  "review": "author only; independent pending; no agents",
+  "known_failure": "original synthetic API-proxy callback expects302, portable500/vercel200; not proven real OAuth defect",
+  "next_gate": "specifically approved fresh isolated actual Neon account/method/built roundtrip"
+}

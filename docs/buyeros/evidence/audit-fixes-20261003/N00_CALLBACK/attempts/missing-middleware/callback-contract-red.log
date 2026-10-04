@@ -1,0 +1,102 @@
+[WebServer] (node:44008) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] INFO:     Started server process [34884]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+
+Running 2 tests using 1 worker
+
+(node:51196) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] TypeError: (intermediate value).default is not a function
+[WebServer]     at Object.fetch (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/vercel/.vercel/output/functions/__server.func/_ssr/ssr.mjs:93:698)
+[WebServer]     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+[WebServer]     at async Server.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/serve-neon-compatibility.mjs:69:18) {
+[WebServer]   cause: TypeError: (intermediate value).default is not a function
+[WebServer]       at Object.fetch (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/vercel/.vercel/output/functions/__server.func/_ssr/ssr.mjs:93:698)
+[WebServer]       at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+[WebServer]       at async Server.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/serve-neon-compatibility.mjs:69:18),
+[WebServer]   status: 500,
+[WebServer]   statusText: undefined,
+[WebServer]   headers: undefined,
+[WebServer]   data: undefined,
+[WebServer]   body: undefined,
+[WebServer]   unhandled: true
+[WebServer] }
+  x  1 tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies (260ms)
+(node:31468) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] TypeError: (intermediate value).default is not a function
+[WebServer]     at Object.fetch (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/vercel/.vercel/output/functions/__server.func/_ssr/ssr.mjs:93:698)
+[WebServer]     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+[WebServer]     at async Server.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/serve-neon-compatibility.mjs:69:18) {
+[WebServer]   cause: TypeError: (intermediate value).default is not a function
+[WebServer]       at Object.fetch (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/vercel/.vercel/output/functions/__server.func/_ssr/ssr.mjs:93:698)
+[WebServer]       at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+[WebServer]       at async Server.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/serve-neon-compatibility.mjs:69:18),
+[WebServer]   status: 500,
+[WebServer]   statusText: undefined,
+[WebServer]   headers: undefined,
+[WebServer]   data: undefined,
+[WebServer]   body: undefined,
+[WebServer]   unhandled: true
+[WebServer] }
+  x  2 tests\e2e\audit-neon-compat.spec.ts:67:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier (125ms)
+
+
+  1) tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      35 |  await page.route('**/*',route=>['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)?route.continue():route.abort());
+      36 |  const start=await context.request.post('/api/auth/sign-in/social',{data:{provider:'google',callbackURL:'http://localhost:44890/compat/return?keep=fixture'},headers:{Origin:'http://localhost:44890'}});
+    > 37 |  expect(start.status()).toBe(200);
+         |                         ^
+      38 |  const data=await start.json();expect(data.redirect).toBe(true);
+      39 |  const providerURL=new URL(data.url);expect(providerURL.origin).toBe('http://127.0.0.1:44891');expect(providerURL.pathname).toBe('/fixture/auth/callback/google');
+      40 |  const challenge=(await context.cookies()).find(c=>c.name==='__Secure-neon-auth.session_challenge');
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:37:25
+
+    Error Context: test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\audit-neon-compat.spec.ts:67:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      66 |
+      67 | test('NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier',async({context})=>{
+    > 68 |  const start=await context.request.post('/api/auth/sign-in/social',{data:{provider:'google',callbackURL:'http://localhost:44890/compat/return?keep=negative'},headers:{Origin:'http://localhost:44890'}});expect(start.status()).toBe(200);
+         |                                                                                                                                                                                                                                  ^
+      69 |  const provider=await context.request.get((await start.json()).url,{maxRedirects:0});expect(provider.status()).toBe(302);const callbackURL=provider.headers().location;
+      70 |  for(const challenge of [null,'fictional-wrong-challenge']){
+      71 |   const negative=await context.browser()!.newContext({baseURL:'http://localhost:44890'});
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:68:226
+
+    Error Context: test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+    tests\e2e\audit-neon-compat.spec.ts:67:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 

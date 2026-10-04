@@ -2048,9 +2048,9 @@
   "deployed_source_sha_scope": "Existing main app12327c7 freshly read-only verified2026-10-02HK; production remains0033 and unchanged. hosting_migration_proposal separately records approved isolatedpreview595865f/0035 and shutdown; noCloudflare productioncutover.",
   "latest_local_auth_checkpoint": {
     "task": "N00",
-    "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6",
-    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/RESULTS.md",
-    "state": "partial; callback fixture gate failing; real auth not tested",
+    "source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/RESULTS.md",
+    "state": "partial; managed verifier fixture green, original synthetic302 red; real auth not tested",
     "deployed_sha": null,
     "historical_T_fields_unchanged": true
   }

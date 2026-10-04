@@ -1,0 +1,326 @@
+[
+  {
+    "source": "test-results/neon-compatibility/build-inputs.json",
+    "destination": "build-inputs.json",
+    "bytes": 70912,
+    "sha256": "6245507b829d3cc287d758c8f98d1300724a66109f75dd82c0cb47913944f256"
+  },
+  {
+    "source": "test-results/neon-compatibility/build-runtime.json",
+    "destination": "build-runtime.json",
+    "bytes": 411,
+    "sha256": "87ae7325174c0f0e6ce5b8b2ec5742c878b463b83188ef18c1384affe81accb5"
+  },
+  {
+    "source": "test-results/neon-compatibility/cleanup.json",
+    "destination": "cleanup.json",
+    "bytes": 98,
+    "sha256": "477ab969be7361f69a5942dc1df5fc509697e8b00e820c8873190527a326dff7"
+  },
+  {
+    "source": "test-results/neon-compatibility/install-linux.log",
+    "destination": "install-linux.log",
+    "bytes": 5655,
+    "sha256": "7734a2ce8674fb67848f8f59a0212fb157f90816b3081b7ecc0098ad81f472fd"
+  },
+  {
+    "source": "test-results/neon-compatibility/portable-build.log",
+    "destination": "portable-build.log",
+    "bytes": 2992,
+    "sha256": "3495c9ef6d71c47f7b814f7c73aa15204f0de1b7f49ed12afde9931a6a6f3fd0"
+  },
+  {
+    "source": "test-results/neon-compatibility/vercel-build.log",
+    "destination": "vercel-build.log",
+    "bytes": 29801,
+    "sha256": "fff1ec5807d6227abc5b97f8155b73cbe58eebcd585d0653a03063df9d764a81"
+  },
+  {
+    "source": "test-results/neon-compatibility/portable.tar.gz",
+    "destination": "portable.tar.gz",
+    "bytes": 1004768,
+    "sha256": "9436fd4c7ab5c6579078355f0402b12be5511f238c655d7a273d8c798b03fb51"
+  },
+  {
+    "source": "test-results/neon-compatibility/vercel.tar.gz",
+    "destination": "vercel.tar.gz",
+    "bytes": 27534077,
+    "sha256": "f651904d205e411691ff2fc610c9fbb4a107d1aa8759ef94bc3beb31a94cb760"
+  },
+  {
+    "source": "test-results/neon-compatibility/portable-ui.xml",
+    "destination": "portable-ui.xml",
+    "bytes": 3613,
+    "sha256": "cc9057a4d89c5415360df7dbad8b92862910d24feecf277d099904c2e31ca135"
+  },
+  {
+    "source": "test-results/neon-compatibility/vercel-ui.xml",
+    "destination": "vercel-ui.xml",
+    "bytes": 3602,
+    "sha256": "9aa7ee524b84a06c81365d28211c000ddc705c21cde510b32fdeb7b7f4bceb1b"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-portable-ui.log",
+    "destination": "callback-portable-ui.log",
+    "bytes": 4193,
+    "sha256": "a277d0d14468c14d9427f139d51d95d807e92d8bc683db3a3383061b2cc82dff"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-vercel-ui.log",
+    "destination": "callback-vercel-ui.log",
+    "bytes": 3858,
+    "sha256": "14cd29fee486078457c0fb30b7e4516357a79e81bfc36f9fff9eb14904d77e55"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-node-final-verified.log",
+    "destination": "callback-node-final-verified.log",
+    "bytes": 2686,
+    "sha256": "58c8a5ada2b0d0c5457ee1b12369d06b4691efb3ab5d05dae0aa6a366c2756d6"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-types-final.log",
+    "destination": "callback-types-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-lint-final.log",
+    "destination": "callback-lint-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-verified-counts.json",
+    "destination": "callback-verified-counts.json",
+    "bytes": 469,
+    "sha256": "d02a16047239271c0f2359b0455102a0120ecffca85ad979bfe6bb10031ccc98"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-alembic-heads.log",
+    "destination": "callback-alembic-heads.log",
+    "bytes": 28,
+    "sha256": "ee4f0b43bbf4117a8b56d619979ebbef0e2bf941fd97cca8813aa20e6c29c00e"
+  },
+  {
+    "source": "test-results/neon-compatibility/portable-signed-in.png",
+    "destination": "portable-signed-in.png",
+    "bytes": 97469,
+    "sha256": "4dc606c56ed4256c28f7cf374ce5435f58e66726f6d27c5234309a50b124a88b"
+  },
+  {
+    "source": "test-results/neon-compatibility/vercel-signed-in.png",
+    "destination": "vercel-signed-in.png",
+    "bytes": 22185,
+    "sha256": "c376b43bc705af6ac050de40a66b6cc0cd23440ee02f4047e7d7fec9aca25063"
+  },
+  {
+    "source": "test-results/neon-compatibility/portable-managed-callback.png",
+    "destination": "portable-managed-callback.png",
+    "bytes": 97469,
+    "sha256": "4dc606c56ed4256c28f7cf374ce5435f58e66726f6d27c5234309a50b124a88b"
+  },
+  {
+    "source": "test-results/neon-compatibility/vercel-managed-callback.png",
+    "destination": "vercel-managed-callback.png",
+    "bytes": 22185,
+    "sha256": "c376b43bc705af6ac050de40a66b6cc0cd23440ee02f4047e7d7fec9aca25063"
+  },
+  {
+    "source": "test-results/neon-compatibility/portable-ui/.last-run.json",
+    "destination": "attempts/portable-ui/000-.last-run.json",
+    "bytes": 96,
+    "sha256": "208683994d8588028bdfd58de30ff5658fbebcdbf12fc333c5c1497abd91e0ef"
+  },
+  {
+    "source": "test-results/neon-compatibility/portable-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/error-context.md",
+    "destination": "attempts/portable-ui/002-error-context.md",
+    "bytes": 11259,
+    "sha256": "ed67b633bf49819630c21e8c3d6eec6a70fd3bf2ca4d2268aecd8069d2ffa58a"
+  },
+  {
+    "source": "test-results/neon-compatibility/portable-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/trace.zip",
+    "destination": "attempts/portable-ui/003-trace.zip",
+    "bytes": 16191,
+    "sha256": "d2386b840d543e1143a392b6ab8c92bdefec46f2f0a2a7d3c510d2adba5e5004"
+  },
+  {
+    "source": "test-results/neon-compatibility/vercel-ui/.last-run.json",
+    "destination": "attempts/vercel-ui/000-.last-run.json",
+    "bytes": 96,
+    "sha256": "208683994d8588028bdfd58de30ff5658fbebcdbf12fc333c5c1497abd91e0ef"
+  },
+  {
+    "source": "test-results/neon-compatibility/vercel-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/error-context.md",
+    "destination": "attempts/vercel-ui/002-error-context.md",
+    "bytes": 11259,
+    "sha256": "0dcb42c9a7c279995c04abbfd30e0d684d4f648214530a4912ef942212d37990"
+  },
+  {
+    "source": "test-results/neon-compatibility/vercel-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/trace.zip",
+    "destination": "attempts/vercel-ui/003-trace.zip",
+    "bytes": 15747,
+    "sha256": "d8f250150693aa590e7d36b4697f498380db64fb8a43d8e0e89ab0b5f3b7b02e"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-location-red/callback-portable-ui.log",
+    "destination": "attempts/callback-location-red/000-callback-portable-ui.log",
+    "bytes": 9190,
+    "sha256": "0492a5e313d1a42a6f2d91ec1d23f23019ad7f455c53a54876ec1352ac4f6690"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-location-red/portable-ui/.last-run.json",
+    "destination": "attempts/callback-location-red/002-.last-run.json",
+    "bytes": 194,
+    "sha256": "c16c276b960d7f7b6228cf7891987c506ed20aa14cd0a68e7fdd7cde86e9a72e"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-location-red/portable-ui/audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier/error-context.md",
+    "destination": "attempts/callback-location-red/004-error-context.md",
+    "bytes": 11165,
+    "sha256": "46140e9e61d6487720f00182c025bfe2297c8b7d95ef9667acab8ddb660d0360"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-location-red/portable-ui/audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier/trace.zip",
+    "destination": "attempts/callback-location-red/005-trace.zip",
+    "bytes": 16194,
+    "sha256": "185935c417acbdcd581169525e4e7bf2bd823eb09382e00d37b49426a6ebfecc"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-location-red/portable-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/error-context.md",
+    "destination": "attempts/callback-location-red/007-error-context.md",
+    "bytes": 11270,
+    "sha256": "ed54ca36fc73d05ae8a6392419cd0fbe9fce7cafb8791e1529a9a0a3e00ccd8f"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-location-red/portable-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/trace.zip",
+    "destination": "attempts/callback-location-red/008-trace.zip",
+    "bytes": 16145,
+    "sha256": "c75867ec0debc8dfa9e23c514df6051beaf067c2f291edf75d7a83beb463edfc"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-location-red/portable-ui/audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies/error-context.md",
+    "destination": "attempts/callback-location-red/010-error-context.md",
+    "bytes": 11276,
+    "sha256": "3026aa8550fd4764bda24a3133463690923d590be271e4d765e644c1b8da8d72"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-location-red/portable-ui/audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies/trace.zip",
+    "destination": "attempts/callback-location-red/011-trace.zip",
+    "bytes": 15866,
+    "sha256": "851062f29d21b23ba4876c2fb67d76d2d73b2454f5f51ff28127750d7a826306"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-location-red/portable-ui.xml",
+    "destination": "attempts/callback-location-red/012-portable-ui.xml",
+    "bytes": 8802,
+    "sha256": "2bc6f3937651aa069d728f1f504c8bbaa4bffed9f6a3919f9574f5731816ef40"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-cookie-setup-red/callback-portable-ui.log",
+    "destination": "attempts/callback-cookie-setup-red/000-callback-portable-ui.log",
+    "bytes": 8886,
+    "sha256": "bdfc6cd06770dbc96bcacfd418c25f2937bf8ca319584611779495d2d5121d8d"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-cookie-setup-red/portable-ui/.last-run.json",
+    "destination": "attempts/callback-cookie-setup-red/002-.last-run.json",
+    "bytes": 194,
+    "sha256": "c16c276b960d7f7b6228cf7891987c506ed20aa14cd0a68e7fdd7cde86e9a72e"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-cookie-setup-red/portable-ui/audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier/error-context.md",
+    "destination": "attempts/callback-cookie-setup-red/004-error-context.md",
+    "bytes": 11304,
+    "sha256": "d413e0ef6be7bbb935d9c69624ea1919511d9af1b11828e6545221ccbb1c8ed5"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-cookie-setup-red/portable-ui/audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier/trace.zip",
+    "destination": "attempts/callback-cookie-setup-red/005-trace.zip",
+    "bytes": 20106,
+    "sha256": "92d8087ccc6a488e1341c7a51da46ff3c277fb3f13095db91ecbd0046b3caa59"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-cookie-setup-red/portable-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/error-context.md",
+    "destination": "attempts/callback-cookie-setup-red/007-error-context.md",
+    "bytes": 11356,
+    "sha256": "99f12a427a3a289d1127afdce97ac14436241ad8f7a5d730344f81859dc2b0f2"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-cookie-setup-red/portable-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/trace.zip",
+    "destination": "attempts/callback-cookie-setup-red/008-trace.zip",
+    "bytes": 16190,
+    "sha256": "8bb4411ca7564ac18c70e0aae53b84c6f433403354c6a617df38127a61b4f719"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-cookie-setup-red/portable-ui/audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies/error-context.md",
+    "destination": "attempts/callback-cookie-setup-red/010-error-context.md",
+    "bytes": 28041,
+    "sha256": "bf0234c3cd54823bf25b6b879ed57f47161fa0b5f87aca21bc6c11313939ffde"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-cookie-setup-red/portable-ui/audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies/trace.zip",
+    "destination": "attempts/callback-cookie-setup-red/011-trace.zip",
+    "bytes": 390432,
+    "sha256": "a3e8664b7d6c7502585d6c4c089fb2c2aa270212f7918c40d01ef13c30de2846"
+  },
+  {
+    "source": "test-results/neon-compatibility/callback-cookie-setup-red/portable-ui.xml",
+    "destination": "attempts/callback-cookie-setup-red/012-portable-ui.xml",
+    "bytes": 8605,
+    "sha256": "d7323ea149e5463528716ca15e8e6485a006054ebb04d640cfffebbd0229f5f1"
+  },
+  {
+    "source": "test-results/neon-compatibility-callback-before-20261004/callback-contract-red.log",
+    "destination": "attempts/missing-middleware/callback-contract-red.log",
+    "bytes": 8532,
+    "sha256": "bdbad61532411ad967e2bd9558ac00becb22889468df1fb940363e4d6e943faa"
+  },
+  {
+    "source": "test-results/neon-compatibility-callback-before-20261004/callback-existing-baseline.log",
+    "destination": "attempts/missing-middleware/callback-existing-baseline.log",
+    "bytes": 816,
+    "sha256": "26e794fa8ed9ef17ba2721b7e3d02339a7e5fd904617ea50f9df41d17a187772"
+  },
+  {
+    "source": "test-results/neon-compatibility-callback-before-20261004/callback-middleware-red.log",
+    "destination": "attempts/missing-middleware/callback-middleware-red.log",
+    "bytes": 5931,
+    "sha256": "b9decc8b54db69637fbe7221fc7cb568eeed5cb71294e4e9a7b48fd8a8e705a3"
+  },
+  {
+    "source": "test-results/neon-compatibility-callback-before-20261004/callback-node-green.log",
+    "destination": "attempts/missing-middleware/callback-node-green.log",
+    "bytes": 2083,
+    "sha256": "6720198869812151b7b4b302928b9ee5f8c934b5fd73c0bd3cd9827e026febd4"
+  },
+  {
+    "source": "test-results/neon-compatibility-callback-before-20261004/vercel-ui/.last-run.json",
+    "destination": "attempts/missing-middleware/000-.last-run.json",
+    "bytes": 145,
+    "sha256": "d1798e4f754b4bacb5ebfcc7f314ba2141a765c399bda5925f6f835985701c73"
+  },
+  {
+    "source": "test-results/neon-compatibility-callback-before-20261004/vercel-ui/audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier/error-context.md",
+    "destination": "attempts/missing-middleware/002-error-context.md",
+    "bytes": 10050,
+    "sha256": "bafa49fdbc2b43154817a680b42ef646c74d940237006efc70a0d000f65d6c3f"
+  },
+  {
+    "source": "test-results/neon-compatibility-callback-before-20261004/vercel-ui/audit-neon-compat-NA01-fix-1b2b5-t-exchange-a-fresh-verifier/trace.zip",
+    "destination": "attempts/missing-middleware/003-trace.zip",
+    "bytes": 18909,
+    "sha256": "b585544b85ee412123b145252ff31e9909d04d0292b0f45c063dd7af4dc6fbab"
+  },
+  {
+    "source": "test-results/neon-compatibility-callback-before-20261004/vercel-ui/audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies/error-context.md",
+    "destination": "attempts/missing-middleware/005-error-context.md",
+    "bytes": 10065,
+    "sha256": "3f16a92c7a1eaee1811b4b78426ea0bf5b51705f48346138a8924adaff5b464a"
+  },
+  {
+    "source": "test-results/neon-compatibility-callback-before-20261004/vercel-ui/audit-neon-compat-NA01-fix-a2788-eware-and-keeps-app-cookies/trace.zip",
+    "destination": "attempts/missing-middleware/006-trace.zip",
+    "bytes": 17241,
+    "sha256": "a8260a1abbf7dfe4fe0b38bd4db34d1355cdf5c666981bb3507b2315e6c0c623"
+  }
+]

@@ -1,0 +1,49 @@
+[WebServer] (node:47948) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] INFO:     Started server process [48760]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+
+Running 5 tests using 1 worker
+
+(node:46960) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-compat.spec.ts:3:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout (3.6s)
+  x  2 tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect (417ms)
+(node:14220) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 tests\e2e\audit-neon-compat.spec.ts:25:1 › NA01 fixture: tokens require exact issuer/audience/algorithm, expiry and known key (254ms)
+  ok 4 tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies (2.1s)
+  ok 5 tests\e2e\audit-neon-compat.spec.ts:72:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier (452ms)
+
+
+  1) tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 302
+    Received: 200
+
+      19 | test('NA01 fixture: callback response preserves host cookies and redirect',async({page,request})=>{
+      20 |  const upstream=await request.get('http://127.0.0.1:44891/fixture/auth/callback/fixture?state=fictional-state',{maxRedirects:0});expect(upstream.status()).toBe(302);expect(upstream.headers()['set-cookie']).toContain('HttpOnly');
+    > 21 |  const callback=await request.get('/api/auth/callback/fixture?state=fictional-state',{maxRedirects:0});expect(callback.status()).toBe(302);
+         |                                                                                                                                  ^
+      22 |  await page.goto('/api/auth/callback/fixture?state=fictional-state');await expect(page).toHaveURL(/\/compat$/);
+      23 |  await expect(page.getByTestId('server-session')).toHaveText('n00-user');
+      24 | });
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:21:130
+
+    Error Context: test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+  4 passed (19.8s)

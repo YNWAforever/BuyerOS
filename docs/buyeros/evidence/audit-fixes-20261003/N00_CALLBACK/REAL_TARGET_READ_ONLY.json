@@ -1,0 +1,32 @@
+{
+  "inspection_utc": "2026-10-04T10:40:28.988960+00:00",
+  "cli_version": "4.13.0",
+  "org_id": "org-soft-sunset-25251479",
+  "subscription_type": "free_v3",
+  "projects_in_scope": [
+    {
+      "id": "rapid-night-21766635",
+      "name": "BuyerOS-CF-preview-20261001",
+      "region_id": "aws-ap-southeast-1",
+      "org_id": "org-soft-sunset-25251479"
+    },
+    {
+      "id": "nameless-bar-15324691",
+      "name": "BuyerOS",
+      "region_id": "aws-ap-southeast-1",
+      "org_id": "org-soft-sunset-25251479"
+    }
+  ],
+  "other_project_records_omitted": 22,
+  "proposed_name_absent": true,
+  "source": "read-only Neon describe_project plus explicit-org CLI projects list",
+  "mutation": false,
+  "credentials_printed": false,
+  "proposed_new_project": "buyeros-neon-auth-n00-20261004",
+  "proposed_region": "aws-ap-southeast-1",
+  "actual_new_project_id": null,
+  "actual_auth_base_url": null,
+  "actual_issuer": null,
+  "actual_audience": null,
+  "actual_jwks_url": null
+}

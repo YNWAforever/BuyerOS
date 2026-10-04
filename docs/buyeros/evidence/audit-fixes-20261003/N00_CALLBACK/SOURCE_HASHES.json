@@ -1,0 +1,22 @@
+[
+  {
+    "path": "scripts/serve-neon-compatibility.mjs",
+    "sha256": "c4f0ad4303fb62cbdc39467a11369ee929e0d0c3f2a187df6cf5448dc5772587"
+  },
+  {
+    "path": "tests/e2e/audit-neon-compat.spec.ts",
+    "sha256": "9212a133ee91c5a6f5b78d9a4c73262943c729a2454150882cfb4abfde1e8ad3"
+  },
+  {
+    "path": "tests/fixtures/neon-compatibility/overlay/proxy.ts",
+    "sha256": "9d205921871ea89bf19c7ff29f3b7e9ffa55d731042a9469df13a5584e7f5ed4"
+  },
+  {
+    "path": "tests/fixtures/neon-compatibility/overlay/app/compat/return/page.tsx",
+    "sha256": "6282f34b2d45467e59c19d87c26904ef2bc987a894f88f5115ba539940fef9cd"
+  },
+  {
+    "path": "tests/neon-compatibility-discovery.test.mjs",
+    "sha256": "0c7a425003fdcf3dffb243931b9d594363d2e8f57ee920a81fb9c951b4ac0e06"
+  }
+]

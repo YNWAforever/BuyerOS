@@ -1,0 +1,33 @@
+✔ N00 built fixture is isolated from playwright.audit-fixes.config.ts (1294.0047ms)
+✔ N00 built fixture is isolated from playwright.audit-regression.config.ts (973.7073ms)
+✔ N00 dedicated config discovers all five built-output cases (857.482ms)
+✔ N00 rejects a non-owned upstream: https://auth.neon.tech/neondb/auth (2.8435ms)
+✔ N00 rejects a non-owned upstream: http://127.0.0.1.evil.test/auth (0.2826ms)
+✔ N00 rejects a non-owned upstream: http://user:password@localhost:44891/auth (0.2464ms)
+✔ N00 rejects a non-owned upstream: http://0.0.0.0:44891/auth (0.2398ms)
+✔ N00 accepts the loopback fixture base path (0.3361ms)
+✔ N00 source inventory rejects unsafe input: ../.env (0.2846ms)
+✔ N00 source inventory rejects unsafe input: a/../../secret (0.1863ms)
+✔ N00 source inventory rejects unsafe input: /secret (0.1034ms)
+✔ N00 source inventory rejects unsafe input: C:/secret (0.1262ms)
+✔ N00 source inventory rejects unsafe input: a/.env.production (0.3194ms)
+✔ N00 source inventory rejects unsafe input: a\.env.local (0.1682ms)
+✔ N00 source inventory rejects unsafe input: node_modules/secret (0.1358ms)
+✔ N00 source inventory rejects unsafe input: test-results/secret (0.0909ms)
+✔ N00 source inventory rejects unsafe input: app/../secret (0.115ms)
+✔ N00 source inventory accepts a source file (0.2565ms)
+✔ N00 build includes BuyerOS frontend services and generated types (0.3255ms)
+✔ N00 build excludes Python/services and historical evidence (0.132ms)
+✔ N00 child env excludes inherited DB/Auth/provider variables (0.229ms)
+✔ N00 cache seed requires matching declared owner (0.3626ms)
+✔ N00 emitted static assets stay within the output static directory (0.3385ms)
+✔ N00 registers Vinext public fetch entry as the Nitro RSC service without changing production config (0.2913ms)
+✔ N00 storage permits only canonical locale prefs and refuses tokens or credential fields (0.4381ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3214.7025

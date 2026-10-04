@@ -1,0 +1,184 @@
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/000-callback-portable-ui.log:14: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/000-callback-portable-ui.log:21: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/000-callback-portable-ui.log:22: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/000-callback-portable-ui.log:33: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/000-callback-portable-ui.log:59: trailing whitespace.
++  2) tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/000-callback-portable-ui.log:82: trailing whitespace.
++  3) tests\e2e\audit-neon-compat.spec.ts:72:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/000-callback-portable-ui.log:106: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/000-callback-portable-ui.log:107: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/000-callback-portable-ui.log:108: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:72:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/004-error-context.md:52: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/004-error-context.md:53: trailing whitespace.
++  33 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/004-error-context.md:91: trailing whitespace.
++  71 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/004-error-context.md:109: trailing whitespace.
++  88 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/007-error-context.md:56: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/007-error-context.md:57: trailing whitespace.
++  33 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/007-error-context.md:95: trailing whitespace.
++  71 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/007-error-context.md:112: trailing whitespace.
++  88 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/010-error-context.md:372: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/010-error-context.md:373: trailing whitespace.
++  33 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/010-error-context.md:412: trailing whitespace.
++  71 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/010-error-context.md:429: trailing whitespace.
++  88 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/012-portable-ui.xml:14: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/012-portable-ui.xml:53: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-cookie-setup-red/012-portable-ui.xml:87: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:72:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/000-callback-portable-ui.log:14: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/000-callback-portable-ui.log:21: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/000-callback-portable-ui.log:22: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/000-callback-portable-ui.log:33: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/000-callback-portable-ui.log:59: trailing whitespace.
++  2) tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/000-callback-portable-ui.log:85: trailing whitespace.
++  3) tests\e2e\audit-neon-compat.spec.ts:72:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/000-callback-portable-ui.log:109: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/000-callback-portable-ui.log:110: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/000-callback-portable-ui.log:111: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:72:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/004-error-context.md:52: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/004-error-context.md:53: trailing whitespace.
++  33 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/004-error-context.md:91: trailing whitespace.
++  71 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/004-error-context.md:109: trailing whitespace.
++  88 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/007-error-context.md:56: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/007-error-context.md:57: trailing whitespace.
++  33 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/007-error-context.md:95: trailing whitespace.
++  71 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/007-error-context.md:112: trailing whitespace.
++  88 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/010-error-context.md:55: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/010-error-context.md:56: trailing whitespace.
++  33 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/010-error-context.md:95: trailing whitespace.
++  71 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/010-error-context.md:112: trailing whitespace.
++  88 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/012-portable-ui.xml:14: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/012-portable-ui.xml:53: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/callback-location-red/012-portable-ui.xml:90: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:72:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/002-error-context.md:55: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/002-error-context.md:56: trailing whitespace.
++  33 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/002-error-context.md:89: trailing whitespace.
++  66 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/002-error-context.md:106: trailing whitespace.
++  82 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/005-error-context.md:55: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/005-error-context.md:56: trailing whitespace.
++  33 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/005-error-context.md:90: trailing whitespace.
++  66 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/005-error-context.md:106: trailing whitespace.
++  82 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/callback-contract-red.log:48: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/callback-contract-red.log:74: trailing whitespace.
++  2) tests\e2e\audit-neon-compat.spec.ts:67:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/callback-contract-red.log:101: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/callback-contract-red.log:102: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:67:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/callback-middleware-red.log:18: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/callback-middleware-red.log:44: trailing whitespace.
++  2) tests\e2e\audit-neon-compat.spec.ts:67:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/callback-middleware-red.log:71: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/missing-middleware/callback-middleware-red.log:72: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:67:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/portable-ui/002-error-context.md:56: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/portable-ui/002-error-context.md:57: trailing whitespace.
++  33 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/portable-ui/002-error-context.md:95: trailing whitespace.
++  71 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/portable-ui/002-error-context.md:113: trailing whitespace.
++  89 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/vercel-ui/002-error-context.md:56: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/vercel-ui/002-error-context.md:57: trailing whitespace.
++  33 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/vercel-ui/002-error-context.md:95: trailing whitespace.
++  71 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/attempts/vercel-ui/002-error-context.md:113: trailing whitespace.
++  89 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/callback-portable-ui.log:14: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/callback-portable-ui.log:21: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/callback-portable-ui.log:22: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/callback-portable-ui.log:31: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/callback-portable-ui.log:58: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/callback-vercel-ui.log:21: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/callback-vercel-ui.log:48: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/portable-build.log:29: trailing whitespace.
++  ┌ ? /                  
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/portable-build.log:30: trailing whitespace.
++  ├ ƒ /:slug+            
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/portable-build.log:31: trailing whitespace.
++  ├ λ /api/auth/:path+   
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/portable-build.log:33: trailing whitespace.
++  ├ ? /auth/callback     
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/portable-build.log:34: trailing whitespace.
++  ├ ƒ /compat            
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/portable-build.log:35: trailing whitespace.
++  ├ ƒ /compat/return     
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/portable-build.log:36: trailing whitespace.
++  └ λ /v1/:path+         
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/portable-build.log:63: trailing whitespace.
++[plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/portable-build.log:83: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/portable-ui.xml:14: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/source.patch:7: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/vercel-build.log:303: trailing whitespace.
++[plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/vercel-build.log:402: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/vercel-ui.xml:14: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
