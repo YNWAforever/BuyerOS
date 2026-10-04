@@ -1,0 +1,89 @@
+<testsuites id="" name="" tests="3" failures="2" skipped="0" errors="0" time="17.989107">
+<testsuite name="audit-neon-compat.spec.ts" timestamp="2026-10-04T08:41:54.516Z" hostname="" tests="3" failures="2" skipped="0" time="8.491" errors="0">
+<testcase name="NA01 fixture: official handler/client, server session, bearer verification, reload and logout" classname="audit-neon-compat.spec.ts" time="7.453">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|vercel-ui\audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout\error-context.md]]
+
+[[ATTACHMENT|vercel-ui\audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveText(expected) failed" type="expect.toHaveText">
+<![CDATA[  audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  getByTestId('client-status')
+    Expected: "api-verified"
+    Received: "ready"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" getByTestId('client-status') with timeout 5000ms
+      - waiting for getByTestId('client-status')
+        14 × locator resolved to <output data-testid="client-status">ready</output>
+           - unexpected value "ready"
+
+
+       9 |  await page.getByRole('button',{name:'Session',exact:true}).click();await expect(page.getByTestId('client-status')).toHaveText('n00-user');
+      10 |  await page.reload();await expect(page.getByTestId('server-session')).toHaveText('n00-user');
+    > 11 |  await page.getByRole('button',{name:'Verify token'}).click();await expect(page.getByTestId('client-status')).toHaveText('api-verified');
+         |                                                                                                               ^
+      12 |  expect(await page.evaluate(()=>Object.keys(localStorage))).toEqual([]);expect(await page.evaluate(()=>Object.keys(sessionStorage))).toEqual([]);
+      13 |  await page.screenshot({path:`test-results/neon-compatibility/${process.env.BUYEROS_N00_TARGET}-signed-in.png`});
+      14 |  await page.getByRole('button',{name:'Logout'}).click();await expect(page.getByTestId('client-status')).toHaveText('signed-out');
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:11:111
+
+    Error Context: ..\..\test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ..\..\test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="NA01 fixture: callback response preserves host cookies and redirect" classname="audit-neon-compat.spec.ts" time="0.493">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|vercel-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\error-context.md]]
+
+[[ATTACHMENT|vercel-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 302
+    Received: 200
+
+      17 | });
+      18 | test('NA01 fixture: callback response preserves host cookies and redirect',async({page,request})=>{
+    > 19 |  const callback=await request.get('/api/auth/callback/fixture?state=fictional-state',{maxRedirects:0});expect(callback.status()).toBe(302);
+         |                                                                                                                                  ^
+      20 |  await page.goto('/api/auth/callback/fixture?state=fictional-state');await expect(page).toHaveURL(/\/compat$/);
+      21 |  await expect(page.getByTestId('server-session')).toHaveText('n00-user');
+      22 | });
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:19:130
+
+    Error Context: ..\..\test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ..\..\test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="NA01 fixture: tokens require exact issuer/audience/algorithm, expiry and known key" classname="audit-neon-compat.spec.ts" time="0.545">
+</testcase>
+</testsuite>
+</testsuites>

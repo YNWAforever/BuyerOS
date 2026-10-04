@@ -1,0 +1,48 @@
+? Verifying lockfile against supply-chain policies (1059 entries)...
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +135 -1
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+
+   ╭──────────────────────────────────────────────────────────────────────╮
+   │                                                                      │
+   │                 Update available! 11.25.0 → 12.9.1.                  │
+   │                 Changelog: https://pnpm.io/v/12.9.1                  │
+   │   To update, run: curl -fsSL https://get.pnpm.io/install.sh | sh -   │
+   │                                                                      │
+   ╰──────────────────────────────────────────────────────────────────────╯
+
+Progress: resolved 135, reused 0, downloaded 0, added 0
+[WARN] Tarball download average speed 27 KiB/s (size 48 KiB) is below 50 KiB/s: https://registry.npmjs.org/@better-fetch/fetch/-/fetch-1.3.1.tgz (GET)
+Progress: resolved 135, reused 0, downloaded 1, added 0
+Progress: resolved 135, reused 0, downloaded 16, added 14
+Progress: resolved 135, reused 0, downloaded 47, added 37
+Progress: resolved 135, reused 0, downloaded 79, added 53
+Progress: resolved 135, reused 0, downloaded 120, added 56
+Progress: resolved 135, reused 0, downloaded 131, added 121
+Progress: resolved 135, reused 0, downloaded 131, added 130
+Progress: resolved 135, reused 0, downloaded 132, added 132
+[WARN] Request took 10321ms: https://registry.npmjs.org/@cloudflare%2Fworkerd-windows-64
+[WARN] Request took 10333ms: https://registry.npmjs.org/@cloudflare%2Fworkerd-darwin-arm64
+[WARN] Request took 10341ms: https://registry.npmjs.org/@cloudflare%2Fworkers-types
+[WARN] Request took 10362ms: https://registry.npmjs.org/@cloudflare%2Fworkerd-darwin-64
+[WARN] Request took 10416ms: https://registry.npmjs.org/@cloudflare%2Fvite-plugin
+Progress: resolved 135, reused 0, downloaded 133, added 133
+[WARN] Request took 11231ms: https://registry.npmjs.org/@daveyplate%2Fbetter-auth-ui
+[WARN] Request took 12518ms: https://registry.npmjs.org/@date-fns%2Ftz
+[WARN] Request took 12849ms: https://registry.npmjs.org/@daveyplate%2Fbetter-auth-tanstack
+Progress: resolved 135, reused 0, downloaded 134, added 133
+Progress: resolved 135, reused 0, downloaded 135, added 134
+Progress: resolved 135, reused 0, downloaded 135, added 135, done
+[WARN] Request took 11408ms: https://registry.npmjs.org/@typescript-eslint%2Fvisitor-keys
+[WARN] Request took 11639ms: https://registry.npmjs.org/@typescript-eslint%2Fscope-manager
+[WARN] Request took 12042ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+[WARN] Request took 12168ms: https://registry.npmjs.org/@typescript-eslint%2Ftypescript-estree
+[WARN] Request took 12433ms: https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin
+[WARN] Request took 10571ms: https://registry.npmjs.org/next
+✓ Lockfile passes supply-chain policies (1059 entries in 28.7s)
+
+devDependencies:
++ @neondatabase/auth 0.5.0-beta
+
+Done in 31.2s using pnpm v11.25.0

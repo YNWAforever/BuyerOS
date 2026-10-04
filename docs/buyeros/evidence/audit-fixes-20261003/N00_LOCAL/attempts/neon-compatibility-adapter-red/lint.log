@@ -1,0 +1,24 @@
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-compatibility\overlay\app\compat\client.tsx
+  5:136  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-compatibility\overlay\app\compat\client.tsx:5:136
+  3 | import {createAuthClient} from '@neondatabase/auth/next';
+  4 | const auth=createAuthClient();
+> 5 | export default function Client(){const [status,setStatus]=useState('ready');const [hydrated,setHydrated]=useState(false);useEffect(()=>setHydrated(true),[]);
+    |                                                                                                                                        ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  6 |  async function login(){const result=await auth.signIn.email({email:'n00@fixture.invalid',password:'fictional-password'});setStatus(result.error?'login-error':'signed-in');}
+  7 |  async function session(){const result=await auth.getSession();setStatus(result.error?'session-error':result.data?.user.id??'anonymous');}
+  8 |  async function token(){const result=await auth.token();if(result.error||!result.data?.token){setStatus('token-error');return;}  react-hooks/set-state-in-effect
+
+C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\fixtures\neon-compatibility\overlay\server.ts
+  3:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+✖ 2 problems (1 error, 1 warning)
+

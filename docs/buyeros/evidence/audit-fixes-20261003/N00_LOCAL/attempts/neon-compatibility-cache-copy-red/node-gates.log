@@ -1,0 +1,36 @@
+✔ checked-in API types match the current OpenAPI contract (26557.3957ms)
+✔ U13 actual callback render during initializing is status, never configuration alert (10.1794ms)
+✔ N00 rejects a non-owned upstream: https://auth.neon.tech/neondb/auth (4.6947ms)
+✔ N00 rejects a non-owned upstream: http://127.0.0.1.evil.test/auth (0.2328ms)
+✔ N00 rejects a non-owned upstream: http://user:password@localhost:44891/auth (0.1502ms)
+✔ N00 rejects a non-owned upstream: http://0.0.0.0:44891/auth (0.1636ms)
+✔ N00 accepts the loopback fixture base path (0.2445ms)
+✔ N00 source inventory rejects unsafe input: ../.env (0.3263ms)
+✔ N00 source inventory rejects unsafe input: a/../../secret (0.2256ms)
+✔ N00 source inventory rejects unsafe input: /secret (0.1339ms)
+✔ N00 source inventory rejects unsafe input: C:/secret (0.1546ms)
+✔ N00 source inventory rejects unsafe input: a/.env.production (0.3538ms)
+✔ N00 source inventory rejects unsafe input: a\.env.local (0.1822ms)
+✔ N00 source inventory rejects unsafe input: node_modules/secret (0.115ms)
+✔ N00 source inventory rejects unsafe input: test-results/secret (0.0796ms)
+✔ N00 source inventory rejects unsafe input: app/../secret (0.1295ms)
+✔ N00 source inventory accepts a source file (0.1341ms)
+✔ N00 build includes BuyerOS frontend services and generated types (0.6594ms)
+✔ N00 build excludes Python/services and historical evidence (0.1544ms)
+✔ N00 child env excludes inherited DB/Auth/provider variables (0.2822ms)
+✔ N00 cache seed requires matching declared owner (0.3812ms)
+✔ N00 emitted static assets stay within the output static directory (0.3947ms)
+✔ N00 registers Vinext public fetch entry as the Nitro RSC service without changing production config (0.3374ms)
+✔ Vercel exposes only the app and binds its API call to the internal API service (87.8288ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (433.2764ms)
+✔ the app proxy fails closed when the binding is absent (2.0029ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (4.0296ms)
+✔ FastAPI redirects stay on the public app path (2.0614ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 27111.1001

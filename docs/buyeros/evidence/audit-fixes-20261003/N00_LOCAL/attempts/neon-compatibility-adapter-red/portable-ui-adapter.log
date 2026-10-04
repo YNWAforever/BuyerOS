@@ -1,0 +1,111 @@
+[WebServer] (node:41708) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] INFO:     Started server process [23236]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+
+Running 3 tests using 1 worker
+
+(node:42736) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout (45.5s)
+(node:43536) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ▲ [WARNING] [neon-auth] Upstream HTTP error {
+[WebServer] 
+[WebServer]     component: 'proxy',
+[WebServer]     proxyPath: 'callback/fixture',
+[WebServer]     status: 500,
+[WebServer]     statusText: 'Internal Server Error',
+[WebServer]     host: '127.0.0.1:44891'
+[WebServer]   }
+[WebServer] 
+[WebServer] 
+  x  2 tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect (2.5s)
+(node:45216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 tests\e2e\audit-neon-compat.spec.ts:23:1 › NA01 fixture: tokens require exact issuer/audience/algorithm, expiry and known key (326ms)
+
+
+  1) tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+
+    Test timeout of 45000ms exceeded.
+
+    Error: locator.click: Test timeout of 45000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Fixture login' })
+        - locator resolved to <button>Fixture login</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <div data-sidebar="footer" data-slot="sidebar-footer" class="flex flex-col gap-2 p-2">…</div> from <div data-slot="sidebar-wrapper" class="group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar">…</div> subtree intercepts pointer events
+        - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <div data-sidebar="footer" data-slot="sidebar-footer" class="flex flex-col gap-2 p-2">…</div> from <div data-slot="sidebar-wrapper" class="group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar">…</div> subtree intercepts pointer events
+        - retrying click action
+          - waiting 100ms
+        84 × waiting for element to be visible, enabled and stable
+           - element is visible, enabled and stable
+           - scrolling into view if needed
+           - done scrolling
+           - <div data-sidebar="footer" data-slot="sidebar-footer" class="flex flex-col gap-2 p-2">…</div> from <div data-slot="sidebar-wrapper" class="group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar">…</div> subtree intercepts pointer events
+         - retrying click action
+           - waiting 500ms
+
+
+      3 |  await page.route('**/*',route=>['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)?route.continue():route.abort());
+      4 |  await page.goto('/compat');await expect(page.getByTestId('server-session')).toHaveText('anonymous');
+    > 5 |  await page.getByRole('button',{name:'Fixture login'}).click();await expect(page.getByTestId('client-status')).toHaveText('signed-in');
+        |                                                        ^
+      6 |  const cookies=await context.cookies();const token=cookies.find(c=>c.name==='__Secure-neon-auth.session_token');
+      7 |  expect(token).toBeDefined();expect(token?.httpOnly).toBe(true);expect(token?.secure).toBe(true);expect(token?.sameSite).toBe('Lax');expect(token?.domain).toBe('localhost');
+      8 |  expect(cookies.some(c=>c.name==='__Secure-neon-auth.local.session_data')).toBe(true);
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:5:56
+
+    Error Context: test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 302
+    Received: 500
+
+      17 | });
+      18 | test('NA01 fixture: callback response preserves host cookies and redirect',async({page,request})=>{
+    > 19 |  const callback=await request.get('/api/auth/callback/fixture?state=fictional-state',{maxRedirects:0});expect(callback.status()).toBe(302);
+         |                                                                                                                                  ^
+      20 |  await page.goto('/api/auth/callback/fixture?state=fictional-state');await expect(page).toHaveURL(/\/compat$/);
+      21 |  await expect(page.getByTestId('server-session')).toHaveText('n00-user');
+      22 | });
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:19:130
+
+    Error Context: test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\neon-compatibility\portable-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+    tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+  1 passed (1.2m)

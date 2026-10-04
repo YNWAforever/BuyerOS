@@ -1,0 +1,3 @@
+test-results/neon-compatibility-setup-red/source/app/api/auth/[...path]/route.ts(1,20): error TS2307: Cannot find module '@/lib/neon-compatibility/server' or its corresponding type declarations.
+test-results/neon-compatibility-setup-red/source/app/api/compat/session/route.ts(1,20): error TS2307: Cannot find module '@/lib/neon-compatibility/server' or its corresponding type declarations.
+test-results/neon-compatibility-setup-red/source/app/compat/page.tsx(1,20): error TS2307: Cannot find module '@/lib/neon-compatibility/server' or its corresponding type declarations.

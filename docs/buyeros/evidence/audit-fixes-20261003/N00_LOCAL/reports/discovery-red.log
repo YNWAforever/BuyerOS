@@ -1,0 +1,47 @@
+✖ N00 built fixture is isolated from playwright.audit-fixes.config.ts (4104.4009ms)
+✖ N00 built fixture is isolated from playwright.audit-regression.config.ts (2151.5202ms)
+✔ N00 dedicated config discovers all three built-output cases (1217.1552ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 1
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7718.1394
+
+✖ failing tests:
+
+test at tests\neon-compatibility-discovery.test.mjs:11:98
+✖ N00 built fixture is isolated from playwright.audit-fixes.config.ts (4104.4009ms)
+  AssertionError [ERR_ASSERTION]: existing Q01 tests stay selected
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-compatibility-discovery.test.mjs:11:193)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at tests\neon-compatibility-discovery.test.mjs:11:98
+✖ N00 built fixture is isolated from playwright.audit-regression.config.ts (2151.5202ms)
+  AssertionError [ERR_ASSERTION]: existing Q01 tests stay selected
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-compatibility-discovery.test.mjs:11:193)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

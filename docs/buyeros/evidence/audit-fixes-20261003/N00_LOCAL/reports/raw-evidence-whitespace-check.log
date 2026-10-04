@@ -1,0 +1,564 @@
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/015-error-context.md:54: trailing whitespace.
++  30 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/017-error-context.md:67: trailing whitespace.
++  30 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/019-error-context.md:54: trailing whitespace.
++  30 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/021-error-context.md:401: trailing whitespace.
++  30 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/lint.log:24: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-build.log:29: trailing whitespace.
++  ┌ ? /                  
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-build.log:30: trailing whitespace.
++  ├ ƒ /:slug+            
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-build.log:31: trailing whitespace.
++  ├ λ /api/auth/:path+   
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-build.log:33: trailing whitespace.
++  ├ ? /auth/callback     
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-build.log:34: trailing whitespace.
++  ├ ƒ /compat            
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-build.log:35: trailing whitespace.
++  └ λ /v1/:path+         
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-build.log:46: trailing whitespace.
++[plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-ui-adapter.log:16: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-ui-adapter.log:23: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-ui-adapter.log:24: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-ui-adapter.log:31: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-ui-adapter.log:82: trailing whitespace.
++  2) tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-ui-adapter.log:109: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-ui-adapter.log:110: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-ui.xml:12: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/portable-ui.xml:74: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/vercel-build.log:303: trailing whitespace.
++[plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/vercel-build.log:410: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/vercel-ui-adapter.log:21: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/vercel-ui-adapter.log:56: trailing whitespace.
++  2) tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/vercel-ui-adapter.log:83: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/vercel-ui-adapter.log:84: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/vercel-ui.xml:12: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-adapter-red/vercel-ui.xml:58: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-cache-copy-red/build-run.log:5: trailing whitespace.
++Error: docker failed (null): 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/023-error-context.md:78: trailing whitespace.
++  29 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/025-error-context.md:66: trailing whitespace.
++  29 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/027-error-context.md:54: trailing whitespace.
++  30 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/029-error-context.md:67: trailing whitespace.
++  30 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/portable-build.log:29: trailing whitespace.
++  ┌ ? /                  
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/portable-build.log:30: trailing whitespace.
++  ├ ƒ /:slug+            
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/portable-build.log:31: trailing whitespace.
++  ├ λ /api/auth/:path+   
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/portable-build.log:33: trailing whitespace.
++  ├ ? /auth/callback     
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/portable-build.log:34: trailing whitespace.
++  ├ ƒ /compat            
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/portable-build.log:35: trailing whitespace.
++  └ λ /v1/:path+         
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/portable-build.log:46: trailing whitespace.
++[plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/portable-ui-red.log:8: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-build.log:296: trailing whitespace.
++[plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-build.log:403: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui-first-red.xml:12: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui-first-red.xml:58: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui-hosting-fixed.log:21: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui-hosting-fixed.log:56: trailing whitespace.
++  2) tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui-hosting-fixed.log:83: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui-hosting-fixed.log:84: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui-red.log:21: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui-red.log:56: trailing whitespace.
++  2) tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui-red.log:90: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui-red.log:91: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui.xml:12: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-default-red/vercel-ui.xml:58: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-install-red/build-run.log:5: trailing whitespace.
++Error: docker failed (null): 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-source-red/portable-build.log:15: trailing whitespace.
++ [38;5;240m  │[0m        ───────────┬──────────  
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/neon-compatibility-source-red/vercel-build.log:14: trailing whitespace.
++ [38;5;240m  │[0m        ───────────┬──────────  
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/portable-before-discovery/001-error-context.md:56: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/portable-ui-first-final-red/001-error-context.md:55: trailing whitespace.
++  31 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/portable-ui-first-final-red/003-error-context.md:380: trailing whitespace.
++  31 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/attempts/vercel-ui-first-final-red/001-error-context.md:55: trailing whitespace.
++  31 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/discovery-corrected-red.log:18: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/discovery-corrected-red.log:20: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/discovery-corrected-red.log:37: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/discovery-corrected-red.log:39: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-build.log:29: trailing whitespace.
++  ┌ ? /                  
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-build.log:30: trailing whitespace.
++  ├ ƒ /:slug+            
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-build.log:31: trailing whitespace.
++  ├ λ /api/auth/:path+   
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-build.log:33: trailing whitespace.
++  ├ ? /auth/callback     
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-build.log:34: trailing whitespace.
++  ├ ƒ /compat            
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-build.log:35: trailing whitespace.
++  └ λ /v1/:path+         
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-build.log:54: trailing whitespace.
++[plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-build.log:66: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final-reverified.log:14: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final-reverified.log:21: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final-reverified.log:22: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final-reverified.log:29: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final-reverified.log:56: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final.log:16: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final.log:23: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final.log:24: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final.log:31: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final.log:62: trailing whitespace.
++  2) tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final.log:89: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-final.log:90: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-first-final-red.xml:12: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-first-final-red.xml:54: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-storage-fixed.log:14: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-storage-fixed.log:21: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-storage-fixed.log:22: trailing whitespace.
++[WebServer] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-storage-fixed.log:29: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui-storage-fixed.log:56: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/portable-ui.xml:14: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/vercel-build.log:295: trailing whitespace.
++[plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/vercel-build.log:394: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/vercel-ui-final.log:19: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/vercel-ui-final.log:46: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/vercel-ui-first-final-red.xml:14: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/vercel-ui-storage-fixed.log:19: trailing whitespace.
++  1) tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/vercel-ui-storage-fixed.log:46: trailing whitespace.
++    tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/reports/vercel-ui.xml:14: trailing whitespace.
++<![CDATA[  audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:160: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:293: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:344: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:348: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:370: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:389: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:393: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:409: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:434: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:438: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:453: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:460: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:463: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:521: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:703: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:707: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:717: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:731: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:738: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:742: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:784: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:788: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:801: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:805: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:816: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:897: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:903: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:907: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:913: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:917: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:931: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:942: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:955: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:975: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:985: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:996: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1011: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1017: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1031: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1041: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1051: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1058: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1062: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1072: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1084: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1096: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1107: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1123: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1133: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1139: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1143: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1155: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1159: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1172: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1176: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1188: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1200: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1212: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1222: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1228: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1232: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1242: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1252: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1263: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1269: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1273: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1280: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1284: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1298: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1309: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1319: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1329: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1335: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1340: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1345: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1446: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1449: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1451: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1515: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1518: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1520: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1540: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1557: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1586: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1600: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1766: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1771: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1780: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1782: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1786: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1788: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1893: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:1895: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2024: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2026: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2038: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2053: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2056: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2058: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2069: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2122: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2132: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2137: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2145: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2148: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2150: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2200: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2207: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2209: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2213: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2216: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2218: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2227: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2229: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2238: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2244: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2249: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2274: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2280: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2284: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2286: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2295: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2302: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2304: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2312: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2315: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2317: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2323: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2345: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2352: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2354: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2358: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2361: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2363: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2367: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2371: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2380: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2391: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2395: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2400: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2404: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2406: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2412: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2417: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2424: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2427: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2429: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2433: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2436: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2438: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2447: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2449: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2459: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2464: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2477: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2487: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2489: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2500: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2502: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2511: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2515: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2520: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2526: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2531: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2535: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2540: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2546: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2551: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2555: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2560: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2566: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2569: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2571: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2586: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2595: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2604: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2606: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2610: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2613: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/source.patch:2615: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/traces/portable-callback-error-context.md:56: trailing whitespace.
++  32 | 
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/traces/vercel-callback-error-context.md:56: trailing whitespace.
++  32 | 

@@ -16,3 +16,6 @@ docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/** -text whitespace=cr-at
 
 # Preserve Q10 raw producer reports and measured source overlays.
 docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/** -text whitespace=cr-at-eol
+
+# Preserve N00 captured built artifacts and producer reports byte-for-byte.
+docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/** -text whitespace=cr-at-eol

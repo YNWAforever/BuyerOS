@@ -1,0 +1,74 @@
+{
+  "original_inputs_verified": 31,
+  "protected_files": [
+    {
+      "path": "services/api/tests/conftest.py",
+      "sha256": "7e12ffa4afc3b20694eac4f62d91c840a7c5e3651e4550ddc142497b88001e46",
+      "exact_bytes_unchanged": true
+    },
+    {
+      "path": "services/worker/tests/conftest.py",
+      "sha256": "493ca1b9fed272e081ae32f75cbd5faf78ae00edbb72ad674fe12be9ccb47980",
+      "exact_bytes_unchanged": true
+    },
+    {
+      "path": "services/api/tools/serve_e2e_fixture.py",
+      "sha256": "9fd9419d1ea5832e2cf64af3e4e600d48c1b80a822a101a492c06e74d78e2a6b",
+      "exact_bytes_unchanged": true
+    },
+    {
+      "path": "services/worker/tests/fixtures/run_browser_research.py",
+      "sha256": "b313473a3827155faae7b4e6b89160c0a092a8c762edeb344714cecc4dc657b4",
+      "exact_bytes_unchanged": true
+    },
+    {
+      "path": "vite.config.ts",
+      "sha256": "10eb83ae7918ee18a852ea1a1ffbadceabdb0db655972ac3b286f0f638f5d810",
+      "checkout_bytes_equal": true,
+      "git_source_unchanged": true
+    },
+    {
+      "path": "scripts/run-framework.mjs",
+      "sha256": "72075798db6191995dee4e15ba5e0a5b0c23060ff0be4acc5be085062b27fcff",
+      "checkout_bytes_equal": true,
+      "git_source_unchanged": true
+    },
+    {
+      "path": "scripts/run-vercel.mjs",
+      "sha256": "0663bc596b6f044165f298b1f4d81906e7e3bca0d4d28634a656da28821fec8f",
+      "checkout_bytes_equal": true,
+      "git_source_unchanged": true
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-03-buyeros-gpt61-fixes.md",
+      "sha256": "cc37ff799cb48d4b23549685e8e4696bd76d4a016333cdb6e409eb49e6b93930",
+      "checkout_bytes_equal": true,
+      "git_source_unchanged": true
+    },
+    {
+      "path": "docs/buyeros/remaining/API_OPERATION_STATUS.csv",
+      "sha256": "36dc39850cf99c319f87e491c9775937785428002574f2084313b6c267439f5e",
+      "checkout_bytes_equal": false,
+      "git_source_unchanged": true
+    }
+  ],
+  "compiled_overlay_files_match_final_source": 7,
+  "build_base": "b2e4d38dd4383dfacdef2f3fc398661411f6bd5b",
+  "ui_runner_sha256": "ccca57a555225aa767a2ed4fc31bbf19ec7762ad5b1f58f357ae30b396927d5a",
+  "ui_test_sha256": "5251d54495483a3489ce8b14572c84479ca346943648641ec18658e80023f1c9",
+  "root_head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+  "root_clean": true,
+  "audit_parent_head": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
+  "audit_parent_clean": true,
+  "unrelated_neon_head": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "unrelated_neon_dirty_paths": 193,
+  "unrelated_neon_diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0",
+  "line_ending_note": "Initial raw git-show comparison and audit-parent CSV comparison failed on LF/CRLF. Four guard hashes and all original frozen payloads compare exact bytes. Other text source uses normalized LF and git diff quiet; no original content rewritten.",
+  "other_audit_tasks_unchanged": 24,
+  "all_historical_case_fields_unchanged": true,
+  "other_case_rows_unchanged": 97,
+  "total_cases": 98,
+  "operations_ledger_unchanged": true,
+  "total_operations": 84,
+  "historical_T_registry_fields_unchanged": true
+}

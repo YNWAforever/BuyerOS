@@ -1,0 +1,573 @@
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/app/[...slug]/page.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/app/api/auth/[...path]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/app/api/compat/session/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/app/auth/callback/page.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/app/chatgpt-auth.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/app/compat/client.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/app/compat/page.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/app/layout.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/app/page.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/app/v1/[...path]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/build/sites-vite-plugin.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/cloudflare-env.d.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/accordion.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/alert-dialog.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/alert.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/aspect-ratio.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/attachment.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/avatar.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/badge.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/breadcrumb.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/bubble.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/button-group.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/button.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/calendar.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/card.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/carousel.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/chart.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/checkbox.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/collapsible.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/combobox.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/command.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/context-menu.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/dialog.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/direction.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/drawer.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/dropdown-menu.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/empty.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/field.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/form.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/hover-card.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/input-group.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/input-otp.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/input.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/item.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/kbd.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/label.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/marker.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/menubar.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/message-scroller.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/message.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/native-select.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/navigation-menu.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/pagination.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/popover.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/progress.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/radio-group.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/resizable.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/scroll-area.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/select.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/separator.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/sheet.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/sidebar.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/skeleton.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/slider.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/sonner.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/spinner.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/switch.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/table.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/tabs.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/textarea.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/toggle-group.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/toggle.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/components/ui/tooltip.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/data/demo/fixtures.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/db/index.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/db/schema.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/drizzle.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/examples/d1/app/api/notes/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/examples/d1/db/schema.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/buyers/detail.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/discovery/wizard.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/budgets.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/bulk-actions.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/bulk-manifest.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/buyer-detail.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/buyer-management-controls.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/buyer-results.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/buyers.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/contact-quote.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/draft-dirty-guard.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/draft-grounding-review.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/drafts.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/export-dialog.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/locale.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/member-directory.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/navigation.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/offer-documents.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/offer-wizard.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/operations.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/overview.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/policy-settings.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/profile.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/project-manager.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/results.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/run-progress.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/settings.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/unavailable.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/live/workspace-picker.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/providers/data-mode.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/providers/workspace-session.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/ui.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/workspace.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/workspace/buyer-table.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/workspace/modals.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/workspace/navigation.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/workspace/route-view.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/features/workspace/shell.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/hooks/use-mobile.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/lib/id.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/lib/neon-compatibility/rsc-service.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/lib/neon-compatibility/server.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/lib/utils.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/locales/context.tsx' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.tsx' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/locales/index.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/next.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.admin.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.approval.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.audit-fixes.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.audit-keyboard.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.audit-regression.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.audit-responsive.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.audit-zoom.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.bulk.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.buyer-management.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.buyer.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.cloudflare.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.confirm.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.contact-job.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.cors.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.draft.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.exports.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.ingestion.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.live-zoom.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.live.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.mvp-research.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.mvp.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.neon-auth.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.offer.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.policy.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.quote.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.responsive.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.run.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.workbench.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/playwright.zoom.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/server.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/contracts.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/generated/buyeros-api.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/generated/operation-routes.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/http-client.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/action-intent.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/approval-fingerprint.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/auth.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/bulk-confirmation.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/bulk-manifests.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/buyer-selection.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/buyers.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/client.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/download-text.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/draft-grounding.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/drafts.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/exports.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/job-poller.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/job-query.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/mapping.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/mode.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/operations.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/outcomes.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/profile-read.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/profile.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/quotes.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/read.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/runs.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/session.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/storage.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/usage.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/workspace-logic.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/live/writes.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/mock-client.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/services/run-engine.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'
+error TS6053: File 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-compatibility/source/vite.config.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tsconfig.json'

@@ -1,0 +1,32 @@
+✔ checked-in API types match the current OpenAPI contract (17002.9806ms)
+✔ U13 actual callback render during initializing is status, never configuration alert (16.8039ms)
+✔ N00 rejects a non-owned upstream: https://auth.neon.tech/neondb/auth (45.6542ms)
+✔ N00 rejects a non-owned upstream: http://127.0.0.1.evil.test/auth (0.3594ms)
+✔ N00 rejects a non-owned upstream: http://user:password@localhost:44891/auth (0.2045ms)
+✔ N00 rejects a non-owned upstream: http://0.0.0.0:44891/auth (0.9589ms)
+✔ N00 accepts the loopback fixture base path (1.0163ms)
+✔ N00 source inventory rejects unsafe input: ../.env (0.3368ms)
+✔ N00 source inventory rejects unsafe input: a/../../secret (0.2868ms)
+✔ N00 source inventory rejects unsafe input: /secret (0.4378ms)
+✔ N00 source inventory rejects unsafe input: C:/secret (0.1756ms)
+✔ N00 source inventory rejects unsafe input: a/.env.production (0.2872ms)
+✔ N00 source inventory rejects unsafe input: a\.env.local (3.0337ms)
+✔ N00 source inventory rejects unsafe input: node_modules/secret (1.1698ms)
+✔ N00 source inventory rejects unsafe input: test-results/secret (0.1241ms)
+✔ N00 source inventory rejects unsafe input: app/../secret (0.2121ms)
+✔ N00 source inventory accepts a source file (0.1399ms)
+✔ N00 build includes BuyerOS frontend services and generated types (0.4866ms)
+✔ N00 build excludes Python/services and historical evidence (1.6165ms)
+✔ Vercel exposes only the app and binds its API call to the internal API service (4.9174ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (233.2531ms)
+✔ the app proxy fails closed when the binding is absent (1.7301ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (4.1506ms)
+✔ FastAPI redirects stay on the public app path (8.2491ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17574.885

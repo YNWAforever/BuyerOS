@@ -13,14 +13,72 @@
     "Q08",
     "Q14",
     "Q09",
-    "Q10"
+    "Q10",
+    "N00"
   ],
-  "next_eligible": null,
+  "next_eligible": "N00",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
       "id": "N00",
-      "status": "outside-current-scope"
+      "status": "local-spike-partial",
+      "code_status": "local-compatibility-fixture-implemented; no auth cutover",
+      "verification_status": "32 Node/34 Auth0 API pass;2 clean builds exit0; each actual UI2pass1fail0skip; synthetic callback open; real Neon not run",
+      "release_status": "not-deployed; Auth0 retained",
+      "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
+      "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6",
+      "finding_ids": [
+        "F20"
+      ],
+      "cases": [
+        "NA01"
+      ],
+      "checks": {
+        "node": {
+          "tests": 32,
+          "pass": 32,
+          "fail": 0,
+          "skipped": 0
+        },
+        "api": {
+          "cases": 34,
+          "pass": 34,
+          "fail": 0,
+          "error": 0,
+          "skip": 0,
+          "junit_time": null
+        },
+        "built_ui": {
+          "portable": {
+            "cases": 3,
+            "pass": 2,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "junit_time": "25.854788"
+          },
+          "vercel": {
+            "cases": 3,
+            "pass": 2,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "junit_time": "23.815467"
+          }
+        }
+      },
+      "migrations": "none;0037 unchanged",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/RESULTS.md",
+      "rollback": "reverse source patch check0 only; revert2f14645 thenb2e4d38 and checkpoint metadata; no DB undo",
+      "limits": [
+        "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
+        "No Vercel ingress/protection/binding/deployment verification",
+        "No canonical identity/membership workspace verification by diagnostic",
+        "No production or Cloudflare cutover",
+        "No live performance/SLA/UAT claim"
+      ],
+      "full_gate_passed": false,
+      "next_action": "N00 reconcile callback with actual supported Neon OAuth/session-verifier contract, then specifically approved real isolated built roundtrip"
     },
     {
       "id": "N01",
@@ -651,15 +709,16 @@
     "Q09 human screen-reader/staff UAT",
     "Independent source review",
     "Q16 underlying evidence when available",
-    "N00 separate auth compatibility scope",
+    "N00 callback contract and real Neon roundtrip",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "ad4f4394819664484eb4b928bdd56c43e055fd3d",
+  "reviewed_source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6",
   "deployed_sha": null,
   "selected_followups": [
     "U05",
     "Q11 local verification gates",
-    "Q10 independent local tools and current directory baseline"
+    "Q10 independent local tools and current directory baseline",
+    "N00 local built compatibility spike"
   ],
   "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf"
 }

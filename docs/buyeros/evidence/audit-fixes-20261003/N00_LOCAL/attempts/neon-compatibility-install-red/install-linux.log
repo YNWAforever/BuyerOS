@@ -1,0 +1,245 @@
+? Verifying lockfile against supply-chain policies (1059 entries)...
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +869
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 869, reused 0, downloaded 3, added 0
+Progress: resolved 869, reused 0, downloaded 13, added 0
+Packages are copied from the content-addressable store to the virtual store.
+  Content-addressable store is at: /src/.sites-runtime/pnpm-store/v11
+  Virtual store is at:             node_modules/.pnpm
+Progress: resolved 869, reused 0, downloaded 21, added 7
+Progress: resolved 869, reused 0, downloaded 25, added 23
+[WARN] Tarball download average speed 7 KiB/s (size 12 KiB) is below 50 KiB/s: https://registry.npmjs.org/@vitejs/plugin-react/-/plugin-react-6.0.2.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 34, added 32
+
+   ╭──────────────────────────────────────────────────────────────────────╮
+   │                                                                      │
+   │                 Update available! 11.25.0 → 12.9.1.                  │
+   │                 Changelog: https://pnpm.io/v/12.9.1                  │
+   │   To update, run: curl -fsSL https://get.pnpm.io/install.sh | sh -   │
+   │                                                                      │
+   ╰──────────────────────────────────────────────────────────────────────╯
+
+Progress: resolved 869, reused 0, downloaded 45, added 33
+Progress: resolved 869, reused 0, downloaded 74, added 37
+Progress: resolved 869, reused 0, downloaded 89, added 44
+Progress: resolved 869, reused 0, downloaded 121, added 47
+Progress: resolved 869, reused 0, downloaded 123, added 54
+[WARN] Tarball download average speed 42 KiB/s (size 209 KiB) is below 50 KiB/s: https://registry.npmjs.org/sharp/-/sharp-0.35.4.tgz (GET)
+[WARN] Request took 11391ms: https://registry.npmjs.org/@cloudflare%2Fworkerd-windows-64
+[WARN] Tarball download average speed 16 KiB/s (size 46 KiB) is below 50 KiB/s: https://registry.npmjs.org/@vitest/runner/-/runner-4.1.0.tgz (GET)
+[WARN] Request took 11688ms: https://registry.npmjs.org/@better-auth%2Futils
+Progress: resolved 869, reused 0, downloaded 127, added 77
+[WARN] Tarball download average speed 45 KiB/s (size 51 KiB) is below 50 KiB/s: https://registry.npmjs.org/jose/-/jose-6.2.5.tgz (GET)
+[WARN] Tarball download average speed 12 KiB/s (size 48 KiB) is below 50 KiB/s: https://registry.npmjs.org/@better-fetch/fetch/-/fetch-1.3.1.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 132, added 129
+[WARN] Tarball download average speed 36 KiB/s (size 157 KiB) is below 50 KiB/s: https://registry.npmjs.org/unenv/-/unenv-2.0.0-rc.24.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 132, added 132
+Progress: resolved 869, reused 0, downloaded 136, added 135
+[WARN] Tarball download average speed 2 KiB/s (size 4 KiB) is below 50 KiB/s: https://registry.npmjs.org/@alloc/quick-lru/-/quick-lru-5.2.0.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 137, added 136
+Progress: resolved 869, reused 0, downloaded 137, added 138
+[WARN] Tarball download average speed 2 KiB/s (size 6 KiB) is below 50 KiB/s: https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.0-rc.18.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 139, added 139
+[WARN] Tarball download average speed 27 KiB/s (size 443 KiB) is below 50 KiB/s: https://registry.npmjs.org/@cloudflare/workers-types/-/workers-types-5.20260921.1.tgz (GET)
+[WARN] Tarball download average speed 23 KiB/s (size 162 KiB) is below 50 KiB/s: https://registry.npmjs.org/@neondatabase/auth-ui/-/auth-ui-0.3.0-beta.tgz (GET)
+[WARN] Tarball download average speed 7 KiB/s (size 39 KiB) is below 50 KiB/s: https://registry.npmjs.org/@tailwindcss/node/-/node-4.2.1.tgz (GET)
+[WARN] Tarball download average speed 34 KiB/s (size 271 KiB) is below 50 KiB/s: https://registry.npmjs.org/@supabase/auth-js/-/auth-js-2.79.0.tgz (GET)
+[WARN] Request took 10247ms: https://registry.npmjs.org/@next%2Fswc-linux-x64-musl
+Progress: resolved 869, reused 0, downloaded 149, added 150
+[WARN] Request took 10138ms: https://registry.npmjs.org/@nodelib%2Ffs.scandir
+[WARN] Request took 10652ms: https://registry.npmjs.org/@next%2Fswc-darwin-arm64
+Progress: resolved 869, reused 0, downloaded 162, added 156
+[WARN] Tarball download average speed 36 KiB/s (size 73 KiB) is below 50 KiB/s: https://registry.npmjs.org/@eslint/config-array/-/config-array-0.21.2.tgz (GET)
+[WARN] Request took 12426ms: https://registry.npmjs.org/@next%2Fswc-linux-arm64-musl
+Progress: resolved 869, reused 0, downloaded 175, added 173
+[WARN] Request took 13205ms: https://registry.npmjs.org/@instantdb%2Fversion
+[WARN] Request took 13476ms: https://registry.npmjs.org/@instantdb%2Fcore
+Progress: resolved 869, reused 0, downloaded 191, added 177
+[WARN] Request took 14089ms: https://registry.npmjs.org/@next%2Fswc-darwin-x64
+[WARN] Request took 14186ms: https://registry.npmjs.org/@next%2Fswc-linux-arm64-gnu
+[WARN] Request took 15126ms: https://registry.npmjs.org/@instantdb%2Freact
+Progress: resolved 869, reused 0, downloaded 219, added 181
+[WARN] Request took 14411ms: https://registry.npmjs.org/@next%2Fswc-win32-x64-msvc
+[WARN] Request took 15948ms: https://registry.npmjs.org/@next%2Feslint-plugin-next
+Progress: resolved 869, reused 0, downloaded 234, added 185
+[WARN] Request took 15814ms: https://registry.npmjs.org/@next%2Fswc-win32-arm64-msvc
+[WARN] Request took 16276ms: https://registry.npmjs.org/@next%2Fswc-linux-x64-gnu
+Progress: resolved 869, reused 0, downloaded 266, added 224
+[WARN] Request took 17289ms: https://registry.npmjs.org/@instantdb%2Freact-common
+[WARN] Request took 16782ms: https://registry.npmjs.org/@nodelib%2Ffs.stat
+Progress: resolved 869, reused 0, downloaded 290, added 250
+[WARN] Tarball download average speed 27 KiB/s (size 34 KiB) is below 50 KiB/s: https://registry.npmjs.org/@floating-ui/dom/-/dom-1.8.0.tgz (GET)
+[WARN] Request took 15241ms: https://registry.npmjs.org/@playwright%2Ftest
+Progress: resolved 869, reused 0, downloaded 314, added 281
+Progress: resolved 869, reused 0, downloaded 321, added 316
+Progress: resolved 869, reused 0, downloaded 326, added 326
+Progress: resolved 869, reused 0, downloaded 327, added 328
+[WARN] Tarball download average speed 4 KiB/s (size 14 KiB) is below 50 KiB/s: https://registry.npmjs.org/@jridgewell/remapping/-/remapping-2.3.5.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 328, added 328
+[WARN] Tarball download average speed 23 KiB/s (size 156 KiB) is below 50 KiB/s: https://registry.npmjs.org/reselect/-/reselect-5.2.0.tgz (GET)
+[WARN] Tarball download average speed 2 KiB/s (size 17 KiB) is below 50 KiB/s: https://registry.npmjs.org/d3-interpolate/-/d3-interpolate-3.0.1.tgz (GET)
+[WARN] Tarball download average speed 30 KiB/s (size 138 KiB) is below 50 KiB/s: https://registry.npmjs.org/@noble/ciphers/-/ciphers-2.4.0.tgz (GET)
+[WARN] Tarball download average speed 40 KiB/s (size 163 KiB) is below 50 KiB/s: https://registry.npmjs.org/@noble/hashes/-/hashes-2.4.0.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 332, added 333
+[WARN] Tarball download average speed 6 KiB/s (size 7 KiB) is below 50 KiB/s: https://registry.npmjs.org/@better-auth/drizzle-adapter/-/drizzle-adapter-1.6.23.tgz (GET)
+[WARN] Request took 26205ms: https://registry.npmjs.org/@next%2Fenv
+[WARN] Tarball download average speed 47 KiB/s (size 387 KiB) is below 50 KiB/s: https://registry.npmjs.org/undici/-/undici-7.29.0.tgz (GET)
+[WARN] Tarball download average speed 32 KiB/s (size 232 KiB) is below 50 KiB/s: https://registry.npmjs.org/@better-auth/core/-/core-1.6.23.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 351, added 349
+[WARN] Request took 10359ms: https://registry.npmjs.org/@supabase%2Fauth-js
+[WARN] Request took 10102ms: https://registry.npmjs.org/@tailwindcss%2Foxide-linux-arm-gnueabihf
+Progress: resolved 869, reused 0, downloaded 361, added 353
+[WARN] Request took 11010ms: https://registry.npmjs.org/@tailwindcss%2Foxide-android-arm64
+[WARN] Request took 11064ms: https://registry.npmjs.org/@tailwindcss%2Foxide-freebsd-x64
+Progress: resolved 869, reused 0, downloaded 381, added 356
+Progress: resolved 869, reused 0, downloaded 411, added 359
+Progress: resolved 869, reused 0, downloaded 424, added 418
+Progress: resolved 869, reused 0, downloaded 425, added 425
+Progress: resolved 869, reused 0, downloaded 425, added 426
+[WARN] Tarball download average speed 8 KiB/s (size 43 KiB) is below 50 KiB/s: https://registry.npmjs.org/tsconfig-paths/-/tsconfig-paths-3.15.0.tgz (GET)
+[WARN] Tarball download average speed 16 KiB/s (size 71 KiB) is below 50 KiB/s: https://registry.npmjs.org/@typescript-eslint/typescript-estree/-/typescript-estree-8.59.3.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 431, added 431
+[WARN] Tarball download average speed 9 KiB/s (size 42 KiB) is below 50 KiB/s: https://registry.npmjs.org/@typescript-eslint/utils/-/utils-8.59.3.tgz (GET)
+[WARN] Request took 13457ms: https://registry.npmjs.org/@types%2Freact
+Progress: resolved 869, reused 0, downloaded 457, added 451
+[WARN] Request took 14464ms: https://registry.npmjs.org/@types%2Fnode
+Progress: resolved 869, reused 0, downloaded 470, added 458
+[WARN] Request took 11002ms: https://registry.npmjs.org/@typescript-eslint%2Ftypes
+Progress: resolved 869, reused 0, downloaded 490, added 461
+Progress: resolved 869, reused 0, downloaded 504, added 465
+[WARN] Request took 12316ms: https://registry.npmjs.org/@typescript-eslint%2Fvisitor-keys
+[WARN] Request took 12569ms: https://registry.npmjs.org/@typescript-eslint%2Futils
+[WARN] Request took 10498ms: https://registry.npmjs.org/axe-core
+Progress: resolved 869, reused 0, downloaded 520, added 468
+Progress: resolved 869, reused 0, downloaded 544, added 489
+Progress: resolved 869, reused 0, downloaded 545, added 511
+Progress: resolved 869, reused 0, downloaded 547, added 547
+[WARN] Tarball download average speed 8 KiB/s (size 30 KiB) is below 50 KiB/s: https://registry.npmjs.org/@jridgewell/trace-mapping/-/trace-mapping-0.3.31.tgz (GET)
+[WARN] Request took 17122ms: https://registry.npmjs.org/@typescript-eslint%2Fscope-manager
+[WARN] Request took 17936ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+Progress: resolved 869, reused 0, downloaded 565, added 564
+Progress: resolved 869, reused 0, downloaded 575, added 576
+Progress: resolved 869, reused 0, downloaded 576, added 576
+[WARN] Tarball download average speed 44 KiB/s (size 499 KiB) is below 50 KiB/s: https://registry.npmjs.org/satori/-/satori-0.16.0.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 611, added 611
+[WARN] Request took 11987ms: https://registry.npmjs.org/eslint-config-next
+[WARN] Request took 12160ms: https://registry.npmjs.org/eslint-plugin-react-hooks
+[WARN] Request took 11019ms: https://registry.npmjs.org/@types%2Fnode
+Progress: resolved 869, reused 0, downloaded 645, added 646
+Progress: resolved 869, reused 0, downloaded 646, added 646
+[WARN] Tarball download average speed 32 KiB/s (size 70 KiB) is below 50 KiB/s: https://registry.npmjs.org/yoga-layout/-/yoga-layout-3.2.1.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 657, added 658
+[WARN] GET https://registry.npmjs.org/next/-/next-16.3.4.tgz error (23). Will retry in 10 seconds. 2 retries left.
+[WARN] Request took 14268ms: https://registry.npmjs.org/graphql
+Progress: resolved 869, reused 0, downloaded 658, added 658
+[WARN] Request took 10784ms: https://registry.npmjs.org/is-negative-zero
+Progress: resolved 869, reused 0, downloaded 670, added 671
+[WARN] GET https://registry.npmjs.org/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-16.3.4.tgz error (23). Will retry in 10 seconds. 2 retries left.
+Progress: resolved 869, reused 0, downloaded 674, added 675
+[WARN] Request took 13375ms: https://registry.npmjs.org/eslint
+Progress: resolved 869, reused 0, downloaded 686, added 687
+[WARN] Tarball download average speed 12 KiB/s (size 19 KiB) is below 50 KiB/s: https://registry.npmjs.org/@sindresorhus/is/-/is-7.2.0.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 699, added 698
+[WARN] Tarball download average speed 9 KiB/s (size 24 KiB) is below 50 KiB/s: https://registry.npmjs.org/@peculiar/asn1-x509/-/asn1-x509-2.9.5.tgz (GET)
+[WARN] Request took 10650ms: https://registry.npmjs.org/keyv
+[WARN] Request took 32754ms: https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin
+Progress: resolved 869, reused 0, downloaded 701, added 702
+[WARN] Request took 10159ms: https://registry.npmjs.org/marked
+[WARN] Request took 33134ms: https://registry.npmjs.org/@typescript-eslint%2Ftypescript-estree
+Progress: resolved 869, reused 0, downloaded 720, added 720
+Progress: resolved 869, reused 0, downloaded 737, added 738
+[WARN] Request took 10205ms: https://registry.npmjs.org/globals
+Progress: resolved 869, reused 0, downloaded 751, added 750
+Progress: resolved 869, reused 0, downloaded 764, added 760
+Progress: resolved 869, reused 0, downloaded 773, added 773
+Progress: resolved 869, reused 0, downloaded 781, added 782
+[WARN] Tarball download average speed 47 KiB/s (size 128 KiB) is below 50 KiB/s: https://registry.npmjs.org/fflate/-/fflate-0.7.4.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 791, added 792
+Progress: resolved 869, reused 0, downloaded 813, added 807
+[WARN] Tarball download average speed 10 KiB/s (size 19 KiB) is below 50 KiB/s: https://registry.npmjs.org/uuid/-/uuid-11.1.1.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 824, added 824
+Progress: resolved 869, reused 0, downloaded 835, added 836
+Progress: resolved 869, reused 0, downloaded 840, added 841
+[WARN] Request took 19802ms: https://registry.npmjs.org/miniflare
+Progress: resolved 869, reused 0, downloaded 842, added 843
+[WARN] Tarball download average speed 4 KiB/s (size 23 KiB) is below 50 KiB/s: https://registry.npmjs.org/domutils/-/domutils-3.2.2.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 843, added 843
+[WARN] Request took 12995ms: https://registry.npmjs.org/react-server-dom-webpack
+[WARN] Request took 13947ms: https://registry.npmjs.org/react-dom
+[WARN] Tarball download average speed 11 KiB/s (size 32 KiB) is below 50 KiB/s: https://registry.npmjs.org/d3-scale/-/d3-scale-4.0.2.tgz (GET)
+[WARN] Tarball download average speed 37 KiB/s (size 308 KiB) is below 50 KiB/s: https://registry.npmjs.org/core-js/-/core-js-3.50.0.tgz (GET)
+Progress: resolved 869, reused 0, downloaded 849, added 850
+Progress: resolved 869, reused 0, downloaded 850, added 850
+Progress: resolved 869, reused 0, downloaded 850, added 851
+[WARN] Tarball download average speed 6 KiB/s (size 37 KiB) is below 50 KiB/s: https://registry.npmjs.org/htmlparser2/-/htmlparser2-8.0.2.tgz (GET)
+[WARN] GET https://registry.npmjs.org/@img/sharp-libvips-linux-x64/-/sharp-libvips-linux-x64-1.3.3.tgz error (23). Will retry in 10 seconds. 2 retries left.
+[WARN] GET https://registry.npmjs.org/@cloudflare/workerd-linux-64/-/workerd-linux-64-1.20260921.1.tgz error (23). Will retry in 10 seconds. 2 retries left.
+Progress: resolved 869, reused 0, downloaded 851, added 852
+[WARN] Request took 10246ms: https://registry.npmjs.org/react-resizable-panels
+[WARN] Tarball download average speed 9 KiB/s (size 75 KiB) is below 50 KiB/s: https://registry.npmjs.org/entities/-/entities-4.5.0.tgz (GET)
+[WARN] Request took 10830ms: https://registry.npmjs.org/tiny-inflate
+[WARN] Tarball download average speed 39 KiB/s (size 190 KiB) is below 50 KiB/s: https://registry.npmjs.org/pako/-/pako-0.2.9.tgz (GET)
+[WARN] Request took 11133ms: https://registry.npmjs.org/tinyexec
+[WARN] Tarball download average speed 22 KiB/s (size 184 KiB) is below 50 KiB/s: https://registry.npmjs.org/@babel/helpers/-/helpers-7.29.2.tgz (GET)
+[WARN] Tarball download average speed 4 KiB/s (size 24 KiB) is below 50 KiB/s: https://registry.npmjs.org/eventsource/-/eventsource-4.1.1.tgz (GET)
+[WARN] Request took 13362ms: https://registry.npmjs.org/std-env
+[WARN] Request took 11326ms: https://registry.npmjs.org/tiny-invariant
+Progress: resolved 869, reused 0, downloaded 855, added 855
+[WARN] Tarball download average speed 36 KiB/s (size 527 KiB) is below 50 KiB/s: https://registry.npmjs.org/prismjs/-/prismjs-1.30.0.tgz (GET)
+[WARN] Request took 10392ms: https://registry.npmjs.org/type-fest
+[WARN] GET https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.25.12.tgz error (23). Will retry in 10 seconds. 2 retries left.
+[WARN] Request took 12530ms: https://registry.npmjs.org/tailwind-merge
+[WARN] Request took 11695ms: https://registry.npmjs.org/tldts
+[WARN] Request took 19397ms: https://registry.npmjs.org/react
+[WARN] Request took 10052ms: https://registry.npmjs.org/typescript-eslint
+Progress: resolved 869, reused 0, downloaded 856, added 857
+[WARN] Request took 10189ms: https://registry.npmjs.org/undici
+Progress: resolved 869, reused 0, downloaded 857, added 857
+Progress: resolved 869, reused 0, downloaded 857, added 858
+[WARN] Request took 11425ms: https://registry.npmjs.org/unicode-trie
+[WARN] Request took 16059ms: https://registry.npmjs.org/tldts-core
+[WARN] Request took 10076ms: https://registry.npmjs.org/vite
+[WARN] Request took 24788ms: https://registry.npmjs.org/react-is
+[WARN] Request took 10910ms: https://registry.npmjs.org/vitest
+[WARN] Request took 17960ms: https://registry.npmjs.org/tailwindcss
+[WARN] Request took 25490ms: https://registry.npmjs.org/react-hook-form
+[WARN] Request took 31268ms: https://registry.npmjs.org/next
+[WARN] Request took 29483ms: https://registry.npmjs.org/eslint-plugin-react-hooks
+[WARN] Request took 31454ms: https://registry.npmjs.org/playwright-core
+[WARN] Request took 10885ms: https://registry.npmjs.org/react-server-dom-webpack
+[WARN] Request took 11762ms: https://registry.npmjs.org/react-dom
+[WARN] GET https://registry.npmjs.org/@rolldown/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.2.9.tgz error (23). Will retry in 10 seconds. 2 retries left.
+[WARN] Request took 28825ms: https://registry.npmjs.org/scheduler
+[WARN] GET https://registry.npmjs.org/@rolldown/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.0.1.tgz error (23). Will retry in 10 seconds. 2 retries left.
+[WARN] Request took 22782ms: https://registry.npmjs.org/typescript
+[WARN] Request took 21192ms: https://registry.npmjs.org/use-sync-external-store
+[WARN] GET https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.31.1.tgz error (23). Will retry in 10 seconds. 2 retries left.
+[WARN] Request took 41099ms: https://registry.npmjs.org/playwright
+[WARN] Request took 22577ms: https://registry.npmjs.org/react
+[WARN] Request took 19392ms: https://registry.npmjs.org/react-is
+Progress: resolved 869, reused 0, downloaded 858, added 858
+Progress: resolved 869, reused 0, downloaded 859, added 860
+[WARN] Request took 27402ms: https://registry.npmjs.org/wrangler
+Progress: resolved 869, reused 0, downloaded 860, added 861
+[WARN] Request took 13802ms: https://registry.npmjs.org/scheduler
+[WARN] Request took 21572ms: https://registry.npmjs.org/typescript
+✓ Lockfile passes supply-chain policies (1059 entries in 2m 1.3s)
+Progress: resolved 869, reused 0, downloaded 861, added 861
+Progress: resolved 869, reused 0, downloaded 861, added 862
+Progress: resolved 869, reused 0, downloaded 863, added 864
+Progress: resolved 869, reused 0, downloaded 864, added 864
+Progress: resolved 869, reused 0, downloaded 864, added 865
+[WARN] GET https://registry.npmjs.org/next/-/next-16.3.4.tgz error (23). Will retry in 1 minute. 1 retries left.
+Progress: resolved 869, reused 0, downloaded 865, added 865
+Progress: resolved 869, reused 0, downloaded 865, added 866
+[WARN] GET https://registry.npmjs.org/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-16.3.4.tgz error (23). Will retry in 1 minute. 1 retries left.
+[WARN] GET https://registry.npmjs.org/@cloudflare/workerd-linux-64/-/workerd-linux-64-1.20260921.1.tgz error (23). Will retry in 1 minute. 1 retries left.
+[23] The operation was aborted due to timeout
+
+TimeoutError: The operation was aborted due to timeout
+    at new DOMException (node:internal/per_context/domexception:76:18)
+    at Timeout._onTimeout (node:internal/abort_controller:155:9)
+    at listOnTimeout (node:internal/timers:585:17)
+    at process.processTimers (node:internal/timers:521:7)

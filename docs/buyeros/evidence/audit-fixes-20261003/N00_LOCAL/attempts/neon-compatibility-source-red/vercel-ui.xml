@@ -1,0 +1,16 @@
+<testsuites id="" name="" tests="3" failures="0" skipped="3" errors="0" time="0.07016699999999991">
+<testsuite name="audit-neon-compat.spec.ts" timestamp="2026-10-04T07:37:08.253Z" hostname="" tests="3" failures="0" skipped="3" time="0" errors="0">
+<testcase name="NA01 fixture: official handler/client, server session, bearer verification, reload and logout" classname="audit-neon-compat.spec.ts">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="NA01 fixture: callback response preserves host cookies and redirect" classname="audit-neon-compat.spec.ts">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="NA01 fixture: tokens require exact issuer/audience/algorithm, expiry and known key" classname="audit-neon-compat.spec.ts">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+</testsuites>

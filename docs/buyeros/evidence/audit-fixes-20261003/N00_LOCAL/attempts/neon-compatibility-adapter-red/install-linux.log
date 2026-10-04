@@ -1,0 +1,50 @@
+? Verifying lockfile against supply-chain policies (1059 entries)...
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +135 -1
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+Progress: resolved 135, reused 0, downloaded 0, added 0
+Progress: resolved 135, reused 0, downloaded 25, added 8
+Progress: resolved 135, reused 0, downloaded 63, added 15
+Progress: resolved 135, reused 0, downloaded 106, added 18
+
+   ╭──────────────────────────────────────────────────────────────────────╮
+   │                                                                      │
+   │                 Update available! 11.25.0 → 12.9.1.                  │
+   │                 Changelog: https://pnpm.io/v/12.9.1                  │
+   │   To update, run: curl -fsSL https://get.pnpm.io/install.sh | sh -   │
+   │                                                                      │
+   ╰──────────────────────────────────────────────────────────────────────╯
+
+Progress: resolved 135, reused 0, downloaded 135, added 25
+Progress: resolved 135, reused 0, downloaded 135, added 94
+Progress: resolved 135, reused 0, downloaded 135, added 126
+Progress: resolved 135, reused 0, downloaded 135, added 132
+Progress: resolved 135, reused 0, downloaded 135, added 134
+Progress: resolved 135, reused 0, downloaded 135, added 135, done
+[WARN] Request took 11292ms: https://registry.npmjs.org/@instantdb%2Freact-common
+[WARN] Request took 13239ms: https://registry.npmjs.org/@next%2Feslint-plugin-next
+[WARN] Request took 13826ms: https://registry.npmjs.org/@instantdb%2Freact
+[WARN] Request took 15856ms: https://registry.npmjs.org/@instantdb%2Fcore
+[WARN] Request took 17144ms: https://registry.npmjs.org/@playwright%2Ftest
+[WARN] Request took 14304ms: https://registry.npmjs.org/@typescript-eslint%2Ftype-utils
+[WARN] Request took 11743ms: https://registry.npmjs.org/axe-core
+[WARN] Request took 16476ms: https://registry.npmjs.org/@typescript-eslint%2Futils
+[WARN] Request took 18299ms: https://registry.npmjs.org/@typescript-eslint%2Ftypes
+[WARN] Request took 14310ms: https://registry.npmjs.org/eslint-plugin-react-hooks
+[WARN] Request took 18961ms: https://registry.npmjs.org/@typescript-eslint%2Fvisitor-keys
+[WARN] Request took 19140ms: https://registry.npmjs.org/@typescript-eslint%2Fscope-manager
+[WARN] Request took 19525ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+[WARN] Request took 19707ms: https://registry.npmjs.org/@typescript-eslint%2Ftypescript-estree
+[WARN] Request took 19922ms: https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin
+[WARN] Request took 11546ms: https://registry.npmjs.org/playwright
+[WARN] Request took 11929ms: https://registry.npmjs.org/playwright-core
+[WARN] Request took 10993ms: https://registry.npmjs.org/@types%2Fnode
+[WARN] Request took 10119ms: https://registry.npmjs.org/wrangler
+[WARN] Request took 14975ms: https://registry.npmjs.org/next
+✓ Lockfile passes supply-chain policies (1059 entries in 32.4s)
+
+devDependencies:
++ @neondatabase/auth 0.5.0-beta
+
+Done in 34.4s using pnpm v11.25.0

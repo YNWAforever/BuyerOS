@@ -1,0 +1,50 @@
+
+  vinext build  (Vite 8.0.13)
+
+[1/5] analyze client references...
+[2Ktransforming...✓ 445 modules transformed.
+rendering chunks...
+✓ built in 2.32s
+[2/5] analyze server references...
+[2Ktransforming...✓ 569 modules transformed.
+rendering chunks...
+✓ built in 2.08s
+[3/5] build rsc environment...
+[2Ktransforming...✓ 442 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 1.14s
+[4/5] build client environment...
+[2Ktransforming...✓ 2347 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 3.02s
+[5/5] build ssr environment...
+[2Ktransforming...✓ 574 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 1.97s
+[0m
+  Route (app)
+  ┌ ? /                  
+  ├ ƒ /:slug+            
+  ├ λ /api/auth/:path+   
+  ├ λ /api/compat/session
+  ├ ? /auth/callback     
+  ├ ƒ /compat            
+  └ λ /v1/:path+         
+
+  λ API  ƒ Dynamic  ? Unknown
+
+  ? Some routes could not be classified. vinext currently uses static analysis
+    and cannot detect dynamic API usage (headers(), cookies(), etc.) at build time.
+    Automatic classification will be improved in a future release.
+
+  Build complete. Run `vinext start` to start the production server.
+
+$ node scripts/run-framework.mjs build
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.

@@ -1,0 +1,85 @@
+[WebServer] (node:54764) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:55312) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] INFO:     Started server process [55592]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+  x  1 tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout (6.6s)
+(node:48340) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect (1.0s)
+(node:9980) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 tests\e2e\audit-neon-compat.spec.ts:23:1 › NA01 fixture: tokens require exact issuer/audience/algorithm, expiry and known key (306ms)
+
+
+  1) tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  getByTestId('client-status')
+    Expected: "signed-in"
+    Received: "ready"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" getByTestId('client-status') with timeout 5000ms
+      - waiting for getByTestId('client-status')
+        14 × locator resolved to <output data-testid="client-status">ready</output>
+           - unexpected value "ready"
+
+
+      3 |  await page.route('**/*',route=>['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)?route.continue():route.abort());
+      4 |  await page.goto('/compat');await expect(page.getByTestId('server-session')).toHaveText('anonymous');
+    > 5 |  await page.getByRole('button',{name:'Fixture login'}).click();await expect(page.getByTestId('client-status')).toHaveText('signed-in');
+        |                                                                                                                ^
+      6 |  const cookies=await context.cookies();const token=cookies.find(c=>c.name==='__Secure-neon-auth.session_token');
+      7 |  expect(token).toBeDefined();expect(token?.httpOnly).toBe(true);expect(token?.secure).toBe(true);expect(token?.sameSite).toBe('Lax');expect(token?.domain).toBe('localhost');
+      8 |  expect(cookies.some(c=>c.name==='__Secure-neon-auth.local.session_data')).toBe(true);
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:5:112
+
+    Error Context: test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 302
+    Received: 200
+
+      17 | });
+      18 | test('NA01 fixture: callback response preserves host cookies and redirect',async({page,request})=>{
+    > 19 |  const callback=await request.get('/api/auth/callback/fixture?state=fictional-state',{maxRedirects:0});expect(callback.status()).toBe(302);
+         |                                                                                                                                  ^
+      20 |  await page.goto('/api/auth/callback/fixture?state=fictional-state');await expect(page).toHaveURL(/\/compat$/);
+      21 |  await expect(page.getByTestId('server-session')).toHaveText('n00-user');
+      22 | });
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:19:130
+
+    Error Context: test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\neon-compatibility\vercel-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    tests\e2e\audit-neon-compat.spec.ts:2:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout 
+    tests\e2e\audit-neon-compat.spec.ts:18:1 › NA01 fixture: callback response preserves host cookies and redirect 
+  1 passed (14.9s)

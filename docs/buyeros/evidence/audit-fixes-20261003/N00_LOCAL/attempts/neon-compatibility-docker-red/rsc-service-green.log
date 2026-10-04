@@ -1,0 +1,29 @@
+✔ N00 rejects a non-owned upstream: https://auth.neon.tech/neondb/auth (5.9928ms)
+✔ N00 rejects a non-owned upstream: http://127.0.0.1.evil.test/auth (0.2797ms)
+✔ N00 rejects a non-owned upstream: http://user:password@localhost:44891/auth (0.1433ms)
+✔ N00 rejects a non-owned upstream: http://0.0.0.0:44891/auth (0.2264ms)
+✔ N00 accepts the loopback fixture base path (0.2929ms)
+✔ N00 source inventory rejects unsafe input: ../.env (0.3561ms)
+✔ N00 source inventory rejects unsafe input: a/../../secret (0.2123ms)
+✔ N00 source inventory rejects unsafe input: /secret (0.1411ms)
+✔ N00 source inventory rejects unsafe input: C:/secret (0.2216ms)
+✔ N00 source inventory rejects unsafe input: a/.env.production (0.3508ms)
+✔ N00 source inventory rejects unsafe input: a\.env.local (0.2657ms)
+✔ N00 source inventory rejects unsafe input: node_modules/secret (0.1242ms)
+✔ N00 source inventory rejects unsafe input: test-results/secret (0.0937ms)
+✔ N00 source inventory rejects unsafe input: app/../secret (0.213ms)
+✔ N00 source inventory accepts a source file (0.4788ms)
+✔ N00 build includes BuyerOS frontend services and generated types (0.5936ms)
+✔ N00 build excludes Python/services and historical evidence (0.1731ms)
+✔ N00 child env excludes inherited DB/Auth/provider variables (0.6057ms)
+✔ N00 cache seed requires matching declared owner (0.5016ms)
+✔ N00 emitted static assets stay within the output static directory (0.4576ms)
+✔ N00 registers Vinext public fetch entry as the Nitro RSC service without changing production config (0.3653ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 894.9247

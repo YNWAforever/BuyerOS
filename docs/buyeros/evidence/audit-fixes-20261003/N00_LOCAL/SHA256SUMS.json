@@ -1,0 +1,752 @@
+[
+  {
+    "path": "attempts/neon-compatibility-adapter-red/013-.last-run.json",
+    "bytes": 145,
+    "sha256": "e4e683cc7ba11bf1efebc852ff92db96661c460cef87e7ceea13382e4f4e9f92"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/014-.last-run.json",
+    "bytes": 145,
+    "sha256": "e4e683cc7ba11bf1efebc852ff92db96661c460cef87e7ceea13382e4f4e9f92"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/015-error-context.md",
+    "bytes": 3751,
+    "sha256": "4ab30c735ea05c0089971bd1d58eec5c9b9cf4cae6ee01f409db83bc5413d9ea"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/016-trace.zip",
+    "bytes": 12226,
+    "sha256": "5809aef18ab26bc174be384bc297e0a2d1160552d8aa548d5b4464a7990d032f"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/017-error-context.md",
+    "bytes": 4082,
+    "sha256": "34630ff85d404fc10f9ae8bc9f48a273c1cec0c08a747e7c52523b12e0c8e6b3"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/018-trace.zip",
+    "bytes": 163954,
+    "sha256": "4b85ef06690deee8bc8aa1194dacea9a76ab12066500a79f806d2e66aca36f11"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/019-error-context.md",
+    "bytes": 3751,
+    "sha256": "83a54c200cdad2949d9244e8b3808742534f1ce4f5b2e6ec7c7302ff7ff71224"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/020-trace.zip",
+    "bytes": 12549,
+    "sha256": "bf257e5189ed726f66463f4641764e100c06218db7035c73aa5ac25733aab885"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/021-error-context.md",
+    "bytes": 21484,
+    "sha256": "700c19221e3dbe454669e0a582b4e80ca1f4d6d75fd0bb16ef4355f202276043"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/022-trace.zip",
+    "bytes": 217404,
+    "sha256": "0d2d70327b9ce9e9806ad3ddb7cc976672ae0b855b78bbb8bc45573998932f2d"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/build-inputs.json",
+    "bytes": 70302,
+    "sha256": "fd3631d3b8828d3c0b7967e1fb221616cb2d1d3d18afecbedfe37d1f54a0be39"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/build-run.log",
+    "bytes": 34,
+    "sha256": "03cd432605d4ee6b1fd6f66be0c9392b20178a6110568929885e315a3535699f"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/build-runtime.json",
+    "bytes": 411,
+    "sha256": "87ae7325174c0f0e6ce5b8b2ec5742c878b463b83188ef18c1384affe81accb5"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/cleanup.json",
+    "bytes": 98,
+    "sha256": "3910189c62b5b01909f14f74c281956aaed519fc05304674773316becec5fccd"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/install-linux.log",
+    "bytes": 3438,
+    "sha256": "e16915acb17f6bb7ab9757747dc36a2af0f0bb9749fd6797711700938992dc09"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/lint-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/lint.log",
+    "bytes": 2270,
+    "sha256": "f768d30576e308028e20afb2e9369accb22330de0a5e50330b4b47e1256f3a50"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/portable-build.log",
+    "bytes": 1662,
+    "sha256": "1027c3bb4dee139b5f64cce4b07971201fc35a723769723254ce5993ace8b3df"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/portable-ui-adapter.log",
+    "bytes": 7986,
+    "sha256": "36ab603658731c73ae74567e036d29fd66111172c759a94daa982b87b5330c6e"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/portable-ui.xml",
+    "bytes": 7339,
+    "sha256": "4de87595c7cdbdb3305b48944210168cdd708b17a60343f7cfc0fe20ee96acee"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/vercel-build.log",
+    "bytes": 29967,
+    "sha256": "2fb4aed56856aa3690293872bda4a06d427b2fb32381e8871047e00dea24365f"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/vercel-ui-adapter.log",
+    "bytes": 6291,
+    "sha256": "d0480ae5bac719c7585521c11930eeca5ee9d2294b2716db5b40955aaf1a7cf6"
+  },
+  {
+    "path": "attempts/neon-compatibility-adapter-red/vercel-ui.xml",
+    "bytes": 6007,
+    "sha256": "d40d93a8c08318947ca62371547d93c418f52945510b89ffd84f2766337df723"
+  },
+  {
+    "path": "attempts/neon-compatibility-cache-copy-red/build-inputs.json",
+    "bytes": 70302,
+    "sha256": "844472ed6533c1b450734df536e5f964ff9d9292424705536a9ec759c545f03d"
+  },
+  {
+    "path": "attempts/neon-compatibility-cache-copy-red/build-run.log",
+    "bytes": 973,
+    "sha256": "314dab5eae3be0db2633aa23430106c493c6f6708d66e2bb227ca74d9ee9fc05"
+  },
+  {
+    "path": "attempts/neon-compatibility-cache-copy-red/cleanup.json",
+    "bytes": 98,
+    "sha256": "7a82104f81ec69f88a799b39f41a6b38573cf21896a24f225f975aa6b91b0055"
+  },
+  {
+    "path": "attempts/neon-compatibility-cache-copy-red/node-gates.log",
+    "bytes": 2328,
+    "sha256": "c33eb3be87693fbf8f8f757b44463df69a1868019285d4dc7d3267b2de2df95c"
+  },
+  {
+    "path": "attempts/neon-compatibility-cache-copy-red/typecheck-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "attempts/neon-compatibility-cache-copy-red/typecheck.log",
+    "bytes": 68362,
+    "sha256": "44a33807e3b4778ee3c5f2373e2db4a04c1f7cf52a176f6981731875fc58f3f2"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/020-.last-run.json",
+    "bytes": 45,
+    "sha256": "e22df5d0991eb28c09093b1e678b3fa8cd1fab48185d38e67cf79fb6e63ad5ea"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/021-.last-run.json",
+    "bytes": 145,
+    "sha256": "e4e683cc7ba11bf1efebc852ff92db96661c460cef87e7ceea13382e4f4e9f92"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/022-.last-run.json",
+    "bytes": 145,
+    "sha256": "e4e683cc7ba11bf1efebc852ff92db96661c460cef87e7ceea13382e4f4e9f92"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/023-error-context.md",
+    "bytes": 4236,
+    "sha256": "8badcbbff151e2071147556997a670eceaf9f687c7645fce6650ec5bbe0e15dd"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/024-trace.zip",
+    "bytes": 43412,
+    "sha256": "5f0854b31d35c8bb2a14cb664bcc2d255b4c85cc71db084b1fd269a0e29bbd3d"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/025-error-context.md",
+    "bytes": 3925,
+    "sha256": "d1d2a80c2861516e677367164cdee927c2d359f036aacf29d1c6c332efa610f0"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/026-trace.zip",
+    "bytes": 58008,
+    "sha256": "76a9689e15d30fca042d6d9ca7dbffa9d0d91e4e2d5a896ed38b10a4dba49eb1"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/027-error-context.md",
+    "bytes": 3751,
+    "sha256": "4ab30c735ea05c0089971bd1d58eec5c9b9cf4cae6ee01f409db83bc5413d9ea"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/028-trace.zip",
+    "bytes": 12198,
+    "sha256": "f7fa91d534779880c2b6da387c25acad0f8864471480a6f0a73d130e4c028ea3"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/029-error-context.md",
+    "bytes": 4080,
+    "sha256": "8acaccb971572b4b66287132e57be8af6ecd524248530e4041e533d6e28308d0"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/030-trace.zip",
+    "bytes": 90187,
+    "sha256": "4ec6e6e9b0f3dec56401227f72b7a969135de325d26d171dd6789957c84c20d9"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/auth0-api.log",
+    "bytes": 1886,
+    "sha256": "c2450272f8625233c46d4fe7d2b34bac98ad529e7b0cb1a2d87eabf365ebf832"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/auth0-api.xml",
+    "bytes": 3761,
+    "sha256": "456f2eab8504bd67f227a577175b3fc95ad0f1c0ffd98cb88b36910361f972f3"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/build-inputs.json",
+    "bytes": 47618,
+    "sha256": "e21727118869b7309702aa496ac3424619e65654cc7e53e366e12f8be5140f78"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/build-run.log",
+    "bytes": 34,
+    "sha256": "03cd432605d4ee6b1fd6f66be0c9392b20178a6110568929885e315a3535699f"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/build-runtime.json",
+    "bytes": 411,
+    "sha256": "87ae7325174c0f0e6ce5b8b2ec5742c878b463b83188ef18c1384affe81accb5"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/cleanup.json",
+    "bytes": 98,
+    "sha256": "76995d0be39817f90e5ee796e538c42c8159a52531ef714f10ffad9395356014"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/env-seed-green.log",
+    "bytes": 1527,
+    "sha256": "d03f10bfaff9b31001b2a29f2100e8ee17a7a26cb9155fcb03b968bde8642e0e"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/env-seed-red.log",
+    "bytes": 1159,
+    "sha256": "b00513248a83a7146b1121bb4671678ae12cf6465a63cafb0b6ba734cc6d95dd"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/install-linux.log",
+    "bytes": 3383,
+    "sha256": "8375be22e41b1545d22c40149578fcf648ffd9c6bc9e76e96b812f389d78f91a"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/portable-build.log",
+    "bytes": 1662,
+    "sha256": "4a48c75672e5f817d7d68abe4d39ac350708d3567d043e1dcafa7d9708699162"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/portable-ui-red.log",
+    "bytes": 500,
+    "sha256": "8dabbf073a428b249518c035068aeefebce5aa4eb6f4d82187191b131380359a"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/portable-ui.xml",
+    "bytes": 111,
+    "sha256": "409b737d3ac6b1605c6817c54a0741eba7dcbe60aea2b5edad4d63c887fb2efe"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/static-green.log",
+    "bytes": 1608,
+    "sha256": "fae93f311690a495924a111d1f76186a978f6b91c152e88b44340e20bf99a377"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/static-red.log",
+    "bytes": 1188,
+    "sha256": "882366590dc8edee5da20971161432363e6c4ff20c27e9e62731df3a2890f964"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/vercel-build.log",
+    "bytes": 30010,
+    "sha256": "ff8b4f056151a87e1651957a4eb0c211c41ecba24387862b1d3cffe14bdfda4d"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/vercel-ui-first-red.xml",
+    "bytes": 6226,
+    "sha256": "44ed106073cf6bb212d9892609a93a6d5e79a6627a9bc2a258061b8ec5255dbb"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/vercel-ui-hosting-fixed.log",
+    "bytes": 6270,
+    "sha256": "7fb784719b9a2f9fa6eac01c4f0f58dfc1f70f0962319202cac9dd317cd6db3c"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/vercel-ui-red.log",
+    "bytes": 6523,
+    "sha256": "79f59ad858fb027744388bc42f0693db884e792a91bdc36cfb4d73afc6815a7f"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/vercel-ui.xml",
+    "bytes": 5987,
+    "sha256": "50d4867c84904de160eb2d253e8071020a505e31feac58efd2fa631e0f358d2e"
+  },
+  {
+    "path": "attempts/neon-compatibility-default-red/wrangler-startup-probe.log",
+    "bytes": 35935,
+    "sha256": "0ce5c3bc692acb0a492675de3391aaf3aff1b4c8fd2faa944d0311620985c1b2"
+  },
+  {
+    "path": "attempts/neon-compatibility-docker-red/build-run.log",
+    "bytes": 1194,
+    "sha256": "b5c79f45b7a0f5389777f7e4dccf3a99a119ffa7f016de2752146ad5b98c882f"
+  },
+  {
+    "path": "attempts/neon-compatibility-docker-red/harness-final.log",
+    "bytes": 1609,
+    "sha256": "bd2f08679038ec1a9227d368c992297631d960df03d830800e5aef0d16e76f9f"
+  },
+  {
+    "path": "attempts/neon-compatibility-docker-red/rsc-service-green.log",
+    "bytes": 1726,
+    "sha256": "2958377b7e652d825dcc5399ff88132fb0ff37bfc01fddb7b71d375c6d0182f8"
+  },
+  {
+    "path": "attempts/neon-compatibility-docker-red/rsc-service-red.log",
+    "bytes": 1244,
+    "sha256": "6855506bd92ba595f9d47354b76a4f77d4ee8dfba89dccabbd366d595f91d7c5"
+  },
+  {
+    "path": "attempts/neon-compatibility-install-red/build-inputs.json",
+    "bytes": 47562,
+    "sha256": "dd427f38eb413645dce7b6a7b8a8a3b6d9539b01a96a84764dac9c187371a91f"
+  },
+  {
+    "path": "attempts/neon-compatibility-install-red/build-run.log",
+    "bytes": 971,
+    "sha256": "1a55f6e30d5e18fa6f2a8d922caea0f726942a3eb716668bd95b6cc122fdebf0"
+  },
+  {
+    "path": "attempts/neon-compatibility-install-red/harness-green.log",
+    "bytes": 1389,
+    "sha256": "1f5fe3fc68a5445d0c27f0c4ea749cf41ecbbf98190d9986dc19d680f9c69773"
+  },
+  {
+    "path": "attempts/neon-compatibility-install-red/install-linux.log",
+    "bytes": 20617,
+    "sha256": "2783749a59b4f8af2a592b3d30f8ea39f0a2198ceef0fffe96e15c11f812bb3f"
+  },
+  {
+    "path": "attempts/neon-compatibility-install-red/python-setup.log",
+    "bytes": 2280,
+    "sha256": "981f1009dbab0dc471c662cfadf09307c1111b91fd89e812b8e4e37c5c7f0353"
+  },
+  {
+    "path": "attempts/neon-compatibility-install-red/task1-tests.log",
+    "bytes": 1990,
+    "sha256": "dd7919e40a4a44289a3882ec5bc4a54bf6c1f40ba7d35595094533b7b882c238"
+  },
+  {
+    "path": "attempts/neon-compatibility-install-red/typecheck-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "attempts/neon-compatibility-setup-red/build-inputs.json",
+    "bytes": 40606,
+    "sha256": "b4f888c53c8512bf1a82a6f696dab7aa624d40d53b3f7c532988496e4a9076da"
+  },
+  {
+    "path": "attempts/neon-compatibility-setup-red/build-run.log",
+    "bytes": 1020,
+    "sha256": "9c629de76ffc925c78b7210efe1a6e82dedb034907d9acdec06530c3131101a8"
+  },
+  {
+    "path": "attempts/neon-compatibility-setup-red/cleanup.json",
+    "bytes": 98,
+    "sha256": "a12c2eef6988f841bc03979a53fa831fab6474f83cad27cde133debb3ccb3190"
+  },
+  {
+    "path": "attempts/neon-compatibility-setup-red/harness-green.log",
+    "bytes": 1230,
+    "sha256": "4f1480b5097aab92097021815afec332464795a63b64e62934597c44b57ed742"
+  },
+  {
+    "path": "attempts/neon-compatibility-setup-red/harness-red.log",
+    "bytes": 1646,
+    "sha256": "21f7382e860545e016ae6129786eb3acb83cd7c42e1a33c1d267aef2f57251c1"
+  },
+  {
+    "path": "attempts/neon-compatibility-setup-red/install-host.log",
+    "bytes": 169,
+    "sha256": "7662c8beeeef1e81355eaf8fdf47915c3c3697d2802729d252cd7aea5198feb4"
+  },
+  {
+    "path": "attempts/neon-compatibility-source-red/build-inputs.json",
+    "bytes": 40606,
+    "sha256": "4b137ee3df005b8f721bbef7bb3f6d3c526811df35c5a518c45ad18979fcddde"
+  },
+  {
+    "path": "attempts/neon-compatibility-source-red/build-run.log",
+    "bytes": 910,
+    "sha256": "7f387e74b54b5b4fa9b33bb30c0aedf19c72b2683aa0b8f71903c8b4214122e6"
+  },
+  {
+    "path": "attempts/neon-compatibility-source-red/build-runtime.json",
+    "bytes": 411,
+    "sha256": "01c9ab4a4ffa7c68ed8fd677959ffa95f0ffaf6abdb06c6209c095ca61e8cc19"
+  },
+  {
+    "path": "attempts/neon-compatibility-source-red/cleanup.json",
+    "bytes": 98,
+    "sha256": "917b44d05c3f4cef04918583eea46e845a385297e212f3fa4bdd21b769eca8e4"
+  },
+  {
+    "path": "attempts/neon-compatibility-source-red/install-linux.log",
+    "bytes": 7735,
+    "sha256": "f5b8d07db9a1ff9d9ca25a36722f12ac474aa7d5b9423b2f6e93394303b9baed"
+  },
+  {
+    "path": "attempts/neon-compatibility-source-red/portable-build.log",
+    "bytes": 2810,
+    "sha256": "e4d1482080edc9fc5b959c656dbf0f0e30462b0c2342771968fe6b9777607e6c"
+  },
+  {
+    "path": "attempts/neon-compatibility-source-red/source-filter-red.log",
+    "bytes": 1065,
+    "sha256": "f67084ae6e111668604a8293130240c87081199f93613cf2f7c5f7d2e9087cf9"
+  },
+  {
+    "path": "attempts/neon-compatibility-source-red/typecheck.log",
+    "bytes": 576,
+    "sha256": "0bb70ed55cd7de86a0873db962f2714aaddac39261868c37191097df1629d231"
+  },
+  {
+    "path": "attempts/neon-compatibility-source-red/vercel-build.log",
+    "bytes": 2627,
+    "sha256": "40ae4892ab5eb95d19c7c38541f861ab920067b9f13192fa62075cbdbc3d7666"
+  },
+  {
+    "path": "attempts/neon-compatibility-source-red/vercel-ui.xml",
+    "bytes": 787,
+    "sha256": "a664b59acf655185331246e6ec87aa0a585adfed035161a6552985cb17dbb910"
+  },
+  {
+    "path": "attempts/portable-before-discovery/000-.last-run.json",
+    "bytes": 96,
+    "sha256": "208683994d8588028bdfd58de30ff5658fbebcdbf12fc333c5c1497abd91e0ef"
+  },
+  {
+    "path": "attempts/portable-before-discovery/001-error-context.md",
+    "bytes": 4116,
+    "sha256": "0951ebb35e1a267d2f3f374a04e306d95f85cf829810a1ac8c5efcaaddb424a5"
+  },
+  {
+    "path": "attempts/portable-before-discovery/002-trace.zip",
+    "bytes": 13906,
+    "sha256": "21f42df677f0bd7a36bf5ad3c592366f5f503dede810c93bbe557f88a42b0b6d"
+  },
+  {
+    "path": "attempts/portable-ui-first-final-red/.last-run.json",
+    "bytes": 145,
+    "sha256": "e4e683cc7ba11bf1efebc852ff92db96661c460cef87e7ceea13382e4f4e9f92"
+  },
+  {
+    "path": "attempts/portable-ui-first-final-red/001-error-context.md",
+    "bytes": 4017,
+    "sha256": "c5c52b2cde89242f5dde3972b9fb10b1b24300a4352ec155908850f862bbdf52"
+  },
+  {
+    "path": "attempts/portable-ui-first-final-red/002-trace.zip",
+    "bytes": 13880,
+    "sha256": "51d6c5eb1b015958f589fb87a193a93ebe27abafa42dd5496abbf7d859600d6d"
+  },
+  {
+    "path": "attempts/portable-ui-first-final-red/003-error-context.md",
+    "bytes": 20763,
+    "sha256": "cf490b9236487439326129becd4618451ced1859656d1b7ebaa2c84678980c38"
+  },
+  {
+    "path": "attempts/portable-ui-first-final-red/004-trace.zip",
+    "bytes": 574451,
+    "sha256": "19c1a23a2f3404d29951d2ffc3145922f4e6f950bee6d5d3e262256ccaefa3db"
+  },
+  {
+    "path": "attempts/vercel-ui-first-final-red/.last-run.json",
+    "bytes": 96,
+    "sha256": "208683994d8588028bdfd58de30ff5658fbebcdbf12fc333c5c1497abd91e0ef"
+  },
+  {
+    "path": "attempts/vercel-ui-first-final-red/001-error-context.md",
+    "bytes": 4017,
+    "sha256": "66752ffda9942f811ce8d5a227102e08ba0399331460cdaf488ab3e0ab8e26c3"
+  },
+  {
+    "path": "attempts/vercel-ui-first-final-red/002-trace.zip",
+    "bytes": 13389,
+    "sha256": "e56d0a91fba7e34f6406cbb4d94719bf1f228e3331584c0b48e1ae2ede27b67d"
+  },
+  {
+    "path": "attempts-index.json",
+    "bytes": 27888,
+    "sha256": "c82e8895e0fe332d8d3842e0a5ed9eda795fb1f754722ac85a2fd5183d7f0021"
+  },
+  {
+    "path": "COMMANDS.md",
+    "bytes": 3591,
+    "sha256": "20bdf7621a5ce389b581c2682513dd1872c2075ce64618b15db19fdd5148cbc4"
+  },
+  {
+    "path": "DIFF_HYGIENE.md",
+    "bytes": 527,
+    "sha256": "9592211422c5ce1afcdee2c178dd10e792efbd9cf6ee8bf07e8084b1676c489a"
+  },
+  {
+    "path": "FINDING_CASE_STATES.csv",
+    "bytes": 5691,
+    "sha256": "e45b89040b979c3c877e54aebe0f9be95a682d07d5cfd56f90ca6fc8d12aeaf9"
+  },
+  {
+    "path": "outputs/portable.tar.gz",
+    "bytes": 994297,
+    "sha256": "f7d19835ac7ec28a4c49f9aa62f0965484ef6aef44582ad379d0ad12c9fec842"
+  },
+  {
+    "path": "outputs/vercel.tar.gz",
+    "bytes": 27523210,
+    "sha256": "85f3484ad09592f1af6017555e6da3f6cbe46213caf7ab64a0cfaaec63de8294"
+  },
+  {
+    "path": "reports/alembic-heads.log",
+    "bytes": 28,
+    "sha256": "ee4f0b43bbf4117a8b56d619979ebbef0e2bf941fd97cca8813aa20e6c29c00e"
+  },
+  {
+    "path": "reports/auth0-api.log",
+    "bytes": 1885,
+    "sha256": "8e74169129d3e8e0e1f3f73d038aaf17967066e1bd51b34765515261d6291625"
+  },
+  {
+    "path": "reports/auth0-api.xml",
+    "bytes": 3760,
+    "sha256": "80f3c0a3391fb3c2d25af338f50b7609b183a5eb6efa093be3218f375da58019"
+  },
+  {
+    "path": "reports/authored-diff-check.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/build-inputs.json",
+    "bytes": 70302,
+    "sha256": "bcd6879612d34ece162334d1ace77e93f124cb5b799f0f47ad96d82b6db33c3d"
+  },
+  {
+    "path": "reports/build-run.log",
+    "bytes": 34,
+    "sha256": "03cd432605d4ee6b1fd6f66be0c9392b20178a6110568929885e315a3535699f"
+  },
+  {
+    "path": "reports/build-runtime.json",
+    "bytes": 411,
+    "sha256": "87ae7325174c0f0e6ce5b8b2ec5742c878b463b83188ef18c1384affe81accb5"
+  },
+  {
+    "path": "reports/cleanup.json",
+    "bytes": 98,
+    "sha256": "ce7e5d2ae781d24204022b3bfef3c5fe8dfe16327eb3f62019452d9a02b84808"
+  },
+  {
+    "path": "reports/discovery-corrected-red.log",
+    "bytes": 2247,
+    "sha256": "17f8ec174aa7a1a5c99613cd391f25c54b0c0f0f966e2e0966b56e2b247d13d9"
+  },
+  {
+    "path": "reports/discovery-red.log",
+    "bytes": 2144,
+    "sha256": "de6a2781d5b567a5b1c8eb96cef612bb83fa32b13b6e3260d8d6ffbe0efb71bc"
+  },
+  {
+    "path": "reports/final-cleanup.json",
+    "bytes": 157,
+    "sha256": "d7aee6a5d9509d901c01a706f82dbdb2f9f2676ddf538fe2224a409591cc0cd5"
+  },
+  {
+    "path": "reports/install-linux.log",
+    "bytes": 3566,
+    "sha256": "232d393639433be9eafb60e49c015fe7c03fdb792996002c8681d88cb8314aa2"
+  },
+  {
+    "path": "reports/lint-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/node-final.log",
+    "bytes": 2685,
+    "sha256": "0009e03efd49abf298784b8fbe40f0c4dbf87b4fb0ad344437d92a3444830722"
+  },
+  {
+    "path": "reports/portable-build.log",
+    "bytes": 2312,
+    "sha256": "28437449019754a9a61aed7917a7d67af7cf0da9ce28f82a0d637e471217f2e4"
+  },
+  {
+    "path": "reports/portable-discovery-only.xml",
+    "bytes": 787,
+    "sha256": "c30ada61828af479636692217af5f4c081a52073f6f6c93031e236bb4f991702"
+  },
+  {
+    "path": "reports/portable-ui-final-reverified.log",
+    "bytes": 3907,
+    "sha256": "58d835e7862c93ddcef41882f8ef24f290ea4e2e678181085e9562aa96c72668"
+  },
+  {
+    "path": "reports/portable-ui-final.log",
+    "bytes": 6491,
+    "sha256": "f0333c119ba04ec58bc6a49d0e4c2cb8114a4484172628404dacc4478efb9a27"
+  },
+  {
+    "path": "reports/portable-ui-first-final-red.xml",
+    "bytes": 5895,
+    "sha256": "f0cdd9ab8ca0ea75e4396921948e3a4fc2bfa5a2c9ee19e4698eedd310f74726"
+  },
+  {
+    "path": "reports/portable-ui-storage-fixed.log",
+    "bytes": 3907,
+    "sha256": "7842c1c7fc6e1cf668653949623759b1027a05f8215174a04b65e863b3be8eb2"
+  },
+  {
+    "path": "reports/portable-ui.xml",
+    "bytes": 3285,
+    "sha256": "6b7c2dd958f10439d23554ada186c0f19af2b58c72d1cc2ee5c967d4a33c26c8"
+  },
+  {
+    "path": "reports/preservation.json",
+    "bytes": 3189,
+    "sha256": "3a7c5c2e5aecd161d8c3c1bf5fcc45a0feee9d180b968c085f67e67535df67fb"
+  },
+  {
+    "path": "reports/raw-evidence-whitespace-check.log",
+    "bytes": 37179,
+    "sha256": "0279d314a9f07234224ffe3a0a168d73ead387c9f9c27505514c59cd0961f1f5"
+  },
+  {
+    "path": "reports/rollback-check.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/storage-contract-green.log",
+    "bytes": 1829,
+    "sha256": "750592eeec00ef2411b52559e25be66f66efa64c91dc68f0531ada2bf6ef4f43"
+  },
+  {
+    "path": "reports/storage-contract-red.log",
+    "bytes": 1284,
+    "sha256": "5c2510749b8ed9f3a53b5faa76a2346576d0d30e7a48931f91afcba78077f309"
+  },
+  {
+    "path": "reports/test-list.log",
+    "bytes": 400,
+    "sha256": "c820a71d1afc5b292ed9dc684ed244dce37d5c0fb05faf46ba067d9a62593411"
+  },
+  {
+    "path": "reports/typecheck-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/vercel-build.log",
+    "bytes": 29321,
+    "sha256": "97f3a5c379b5c52a196b8a10c09cad5d81eeabc385f799a6c9a69211556af8e8"
+  },
+  {
+    "path": "reports/vercel-ui-final.log",
+    "bytes": 3572,
+    "sha256": "5fe02f91cffccfb7b2910d8240f08aefa6bebae41c062b92db7584fd3b6e775f"
+  },
+  {
+    "path": "reports/vercel-ui-first-final-red.xml",
+    "bytes": 3273,
+    "sha256": "ec05ec951f6352dfc2a1bdf4e728b563a75e5c72620033b67df788fea7910f27"
+  },
+  {
+    "path": "reports/vercel-ui-storage-fixed.log",
+    "bytes": 3572,
+    "sha256": "b13a08439b29e66e654b052af98b18ba12d9f4496670bd7abaa83f891a11611c"
+  },
+  {
+    "path": "reports/vercel-ui.xml",
+    "bytes": 3274,
+    "sha256": "51c3102a457e1938c2914ab6d73b8aa7eb30224acd2bef6ec03f400b08fbd9b8"
+  },
+  {
+    "path": "RESULTS.md",
+    "bytes": 6152,
+    "sha256": "8ad07a5fc1042bc118213eb65be3ee369608b6c8eda5a993986347d105c62a7b"
+  },
+  {
+    "path": "rollback.json",
+    "bytes": 216,
+    "sha256": "2f142e0352f13d9924124a0b7998d1cf4c171120f9836a6eb2cdaaf7721b05b5"
+  },
+  {
+    "path": "RULINGS.md",
+    "bytes": 7094,
+    "sha256": "af03b5b72fecb0dab77e43be45b4f59217e6dbe5e8eba014c75f8a3d9ac5f96e"
+  },
+  {
+    "path": "screenshots/portable-signed-in.png",
+    "bytes": 97469,
+    "sha256": "4dc606c56ed4256c28f7cf374ce5435f58e66726f6d27c5234309a50b124a88b"
+  },
+  {
+    "path": "screenshots/vercel-signed-in.png",
+    "bytes": 22185,
+    "sha256": "c376b43bc705af6ac050de40a66b6cc0cd23440ee02f4047e7d7fec9aca25063"
+  },
+  {
+    "path": "source.patch",
+    "bytes": 150252,
+    "sha256": "fe6231acecf931e9a4e67b84dd1c88f0fb9939399eb5054dbaa165495dee30ea"
+  },
+  {
+    "path": "SUMMARY.json",
+    "bytes": 8421,
+    "sha256": "546d9000ad8a51eaf98e5e955517103c80a614f4b4bcd06304dc03b772bd8842"
+  },
+  {
+    "path": "traces/portable-callback-.last-run.json",
+    "bytes": 96,
+    "sha256": "208683994d8588028bdfd58de30ff5658fbebcdbf12fc333c5c1497abd91e0ef"
+  },
+  {
+    "path": "traces/portable-callback-error-context.md",
+    "bytes": 4116,
+    "sha256": "0951ebb35e1a267d2f3f374a04e306d95f85cf829810a1ac8c5efcaaddb424a5"
+  },
+  {
+    "path": "traces/portable-callback-trace.zip",
+    "bytes": 13903,
+    "sha256": "75adb4db1bf831738d9c2b8be06c589228dbc8f20f7bf688e66c58f1b48edcda"
+  },
+  {
+    "path": "traces/vercel-callback-.last-run.json",
+    "bytes": 96,
+    "sha256": "208683994d8588028bdfd58de30ff5658fbebcdbf12fc333c5c1497abd91e0ef"
+  },
+  {
+    "path": "traces/vercel-callback-error-context.md",
+    "bytes": 4116,
+    "sha256": "c4a2741a7ff502c1d9a4d9e1d207263a52a5ee6167634cdd24b334bd835c0fab"
+  },
+  {
+    "path": "traces/vercel-callback-trace.zip",
+    "bytes": 13472,
+    "sha256": "d921fa1733bc00a2ff185e7e3de9eeb6f44c75e37d335039e075b6eb59d1f8cf"
+  }
+]

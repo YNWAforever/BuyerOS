@@ -1,0 +1,302 @@
+{
+  "task": "N00",
+  "finding": "F20",
+  "case": "NA01",
+  "state": "local-spike-partial; synthetic-callback-gate-open; real-Neon-not-run",
+  "full_gate_passed": false,
+  "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
+  "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6",
+  "commits": [
+    "b2e4d38dd4383dfacdef2f3fc398661411f6bd5b",
+    "2f14645f34ba61ea032c1e826debff1c1defcec6"
+  ],
+  "author_review_only": true,
+  "independent_review": "pending",
+  "deployed_sha": null,
+  "node": {
+    "tests": 32,
+    "pass": 32,
+    "fail": 0,
+    "skipped": 0
+  },
+  "auth0_api": {
+    "cases": 34,
+    "pass": 34,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "junit_time": null,
+    "case_results": [
+      {
+        "name": "test_missing_configuration_fails_closed",
+        "time": "0.007",
+        "result": "PASS"
+      },
+      {
+        "name": "test_wrong_audience_rejected",
+        "time": "0.002",
+        "result": "PASS"
+      },
+      {
+        "name": "test_valid_claims_ok",
+        "time": "0.002",
+        "result": "PASS"
+      },
+      {
+        "name": "test_jwks_uri_derivation",
+        "time": "0.012",
+        "result": "PASS"
+      },
+      {
+        "name": "test_wrong_issuer_rejected",
+        "time": "0.004",
+        "result": "PASS"
+      },
+      {
+        "name": "test_expired_token_rejected",
+        "time": "0.002",
+        "result": "PASS"
+      },
+      {
+        "name": "test_missing_subject_rejected",
+        "time": "0.002",
+        "result": "PASS"
+      },
+      {
+        "name": "test_list_audience_accepted",
+        "time": "0.003",
+        "result": "PASS"
+      },
+      {
+        "name": "test_malformed_exp_fails_closed[not-a-number]",
+        "time": "0.003",
+        "result": "PASS"
+      },
+      {
+        "name": "test_malformed_exp_fails_closed[None]",
+        "time": "0.005",
+        "result": "PASS"
+      },
+      {
+        "name": "test_malformed_nbf_fails_closed[not-a-number]",
+        "time": "0.005",
+        "result": "PASS"
+      },
+      {
+        "name": "test_malformed_nbf_fails_closed[None]",
+        "time": "0.008",
+        "result": "PASS"
+      },
+      {
+        "name": "test_future_nbf_rejected",
+        "time": "0.003",
+        "result": "PASS"
+      },
+      {
+        "name": "test_nbf_within_clock_skew_accepted",
+        "time": "0.004",
+        "result": "PASS"
+      },
+      {
+        "name": "test_get_principal_missing_or_invalid_header_is_unauthorized[headers0]",
+        "time": "2.809",
+        "result": "PASS"
+      },
+      {
+        "name": "test_get_principal_missing_or_invalid_header_is_unauthorized[headers1]",
+        "time": "0.215",
+        "result": "PASS"
+      },
+      {
+        "name": "test_get_principal_missing_or_invalid_header_is_unauthorized[headers2]",
+        "time": "0.293",
+        "result": "PASS"
+      },
+      {
+        "name": "test_get_principal_missing_or_invalid_header_is_unauthorized[headers3]",
+        "time": "0.286",
+        "result": "PASS"
+      },
+      {
+        "name": "test_get_principal_bearer_scheme_is_case_insensitive",
+        "time": "0.241",
+        "result": "PASS"
+      },
+      {
+        "name": "test_get_principal_verifies_a_real_token",
+        "time": "0.245",
+        "result": "PASS"
+      },
+      {
+        "name": "test_verifier_is_reused_so_its_jwks_cache_survives",
+        "time": "0.004",
+        "result": "PASS"
+      },
+      {
+        "name": "test_valid_token_yields_principal",
+        "time": "0.005",
+        "result": "PASS"
+      },
+      {
+        "name": "test_wrong_issuer_rejected",
+        "time": "0.014",
+        "result": "PASS"
+      },
+      {
+        "name": "test_wrong_audience_rejected",
+        "time": "0.012",
+        "result": "PASS"
+      },
+      {
+        "name": "test_expired_token_rejected",
+        "time": "0.007",
+        "result": "PASS"
+      },
+      {
+        "name": "test_future_nbf_rejected",
+        "time": "0.005",
+        "result": "PASS"
+      },
+      {
+        "name": "test_token_within_the_nbf_skew_is_accepted",
+        "time": "0.005",
+        "result": "PASS"
+      },
+      {
+        "name": "test_nbf_beyond_the_skew_is_rejected",
+        "time": "0.019",
+        "result": "PASS"
+      },
+      {
+        "name": "test_unknown_kid_rejected",
+        "time": "0.006",
+        "result": "PASS"
+      },
+      {
+        "name": "test_missing_kid_rejected",
+        "time": "0.004",
+        "result": "PASS"
+      },
+      {
+        "name": "test_forged_signature_rejected",
+        "time": "0.132",
+        "result": "PASS"
+      },
+      {
+        "name": "test_alg_none_rejected",
+        "time": "0.006",
+        "result": "PASS"
+      },
+      {
+        "name": "test_hs256_rejected",
+        "time": "0.009",
+        "result": "PASS"
+      },
+      {
+        "name": "test_jwks_outage_with_no_cache_is_auth_error_not_a_bypass",
+        "time": "0.004",
+        "result": "PASS"
+      }
+    ]
+  },
+  "built_ui": {
+    "portable": {
+      "cases": 3,
+      "pass": 2,
+      "fail": 1,
+      "error": 0,
+      "skip": 0,
+      "junit_time": "25.854788",
+      "case_results": [
+        {
+          "name": "NA01 fixture: official handler/client, server session, bearer verification, reload and logout",
+          "time": "2.203",
+          "result": "PASS"
+        },
+        {
+          "name": "NA01 fixture: callback response preserves host cookies and redirect",
+          "time": "2.356",
+          "result": "FAIL"
+        },
+        {
+          "name": "NA01 fixture: tokens require exact issuer/audience/algorithm, expiry and known key",
+          "time": "0.276",
+          "result": "PASS"
+        }
+      ]
+    },
+    "vercel": {
+      "cases": 3,
+      "pass": 2,
+      "fail": 1,
+      "error": 0,
+      "skip": 0,
+      "junit_time": "23.815467",
+      "case_results": [
+        {
+          "name": "NA01 fixture: official handler/client, server session, bearer verification, reload and logout",
+          "time": "3.929",
+          "result": "PASS"
+        },
+        {
+          "name": "NA01 fixture: callback response preserves host cookies and redirect",
+          "time": "0.633",
+          "result": "FAIL"
+        },
+        {
+          "name": "NA01 fixture: tokens require exact issuer/audience/algorithm, expiry and known key",
+          "time": "0.22",
+          "result": "PASS"
+        }
+      ]
+    }
+  },
+  "build": {
+    "node": "v22.23.2",
+    "imageId": "sha256:48e4b67d85f87bd551df43704e24d252f56cc5f8e9718841aace50f19948f0f9",
+    "cpus": 4,
+    "memoryGiB": 6,
+    "outputs": [
+      {
+        "target": "portable",
+        "command": "corepack pnpm build",
+        "exit": 0,
+        "error": null
+      },
+      {
+        "target": "vercel",
+        "command": "node scripts/run-vercel.mjs build",
+        "exit": 0,
+        "error": null
+      }
+    ]
+  },
+  "typecheck_exit": 0,
+  "focused_lint_exit": 0,
+  "necessary_db_suites": "none for protocol-only fixture; no DB suite skipped/remote DSN used",
+  "migrations": "none; source head0037_bulk_manifests",
+  "live_provider_verification": false,
+  "fixture_identity_only": true,
+  "production_auth": "Auth0 unchanged",
+  "post_staging_non_build_dependency_changes": [
+    "scripts/serve-neon-compatibility.mjs",
+    "playwright.audit-fixes.config.ts",
+    "scripts/neon-compatibility-harness.mjs"
+  ],
+  "compiled_overlay_match": 7,
+  "callback_observed": {
+    "fixture_upstream": 302,
+    "portable_proxy": 500,
+    "vercel_proxy": 200,
+    "required_proxy": 302
+  },
+  "callback_limit": "Synthetic302 transport is not the real Neon OAuth/session-verifier protocol; not evidence of a production SDK defect",
+  "discovery_only_report": "reports/portable-discovery-only.xml records3unexecuted/skipped listed cases, excluded from executed acceptance counts",
+  "limits": [
+    "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
+    "No Vercel ingress/protection/binding/deployment verification",
+    "No canonical identity/membership workspace verification by diagnostic",
+    "No production or Cloudflare cutover",
+    "No live performance/SLA/UAT claim"
+  ]
+}

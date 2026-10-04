@@ -1,0 +1,3022 @@
+diff --git a/docs/buyeros/decisions/2026-10-03-neon-auth-contract.md b/docs/buyeros/decisions/2026-10-03-neon-auth-contract.md
+new file mode 100644
+index 0000000..3d5b753
+--- /dev/null
++++ b/docs/buyeros/decisions/2026-10-03-neon-auth-contract.md
+@@ -0,0 +1,57 @@
++# N00 Neon Auth contract — local compatibility spike
++
++Date: 2026-10-04 HKT. Audit F20 / NA01 / PR-05. Base27f1412369edb6ea8581aa15d3d2a7a0e84882d3. **No auth cutover. Real Neon compatibility remains unverified.**
++
++## Runtime and dependency contract
++
++This is Vinext/Vite with Cloudflare portable output and Nitro Vercel output, not a standard Next.js runtime. Root framework pins remain next16.3.4, vinext1.0.0-beta.5, vite8.0.13, nitro3.0.260903-beta, React19.2.6. Official `@neondatabase/auth` is pinned exactly to0.5.0-beta as a development dependency. Better Auth resolves1.6.23/jose6.2.5. Lockfile adds SDK dependencies and changes one same-version drizzle0.45.2 peer snapshot; it does not upgrade the framework. core-js lifecycle build is explicitly denied.
++
++Official sources read: [Next server](https://neon.com/docs/auth/reference/nextjs-server), [API-only integration](https://neon.com/docs/auth/reference/nextjs-api-only), [JWT plugin](https://neon.com/docs/auth/guides/plugins/jwt), and the exact installed SDK/Vinext/Nitro exports. Installed Nitro declares `experimental.vite.services` and `fetchViteEnv`; this is a version-sensitive interface.
++
++## Exact fixture contract (not a production allowlist)
++
++| Field | Local fixture value / meaning |
++|---|---|
++| Auth base URL | `http://127.0.0.1:44891/fixture/auth` (guarded loopback) |
++| Issuer and audience | Each explicitly `http://127.0.0.1:44891` |
++| JWKS | `http://127.0.0.1:44891/fixture/auth/.well-known/jwks.json` |
++| Algorithm/key | EdDSA / Ed25519 / OKP, ephemeral in-memory key |
++| Handler prefix | `/api/auth/[...path]`; GET/POST official `auth.handler()` |
++| Server session | Official `auth.getSession()` in built server page and diagnostic route |
++| Browser client | Official `createAuthClient()` from `/next`, same-origin endpoints |
++| Methods exercised | Fictional email/password, session, token, logout; redirect/cookie callback transport only |
++| Session cookie | Fictional upstream `__Secure-neon-auth.session_token`, Secure/HttpOnly/Lax/Path=/, upstream1h expiry; SDK forwarding actually checked by browser |
++| Local cache | SDK signed `__Secure-neon-auth.local.session_data`, explicit TTL300s; no claim for expiration after300s (not waited) |
++| Cookie secret | Public fictional test literal, never a real secret; fixture only |
++| Bearer | In-memory within one request, no persisted bearer/session; existing canonical locale-only prefs permitted |
++| FastAPI verification | Dedicated diagnostic, explicit issuer/audience/JWKS/EdDSA, expiry/key checks; no BuyerOS DB/membership/production verifier |
++| Configured real methods | Unknown; no real provider/account/email/auth target configured |
++| Real issuer/audience/JWKS | **NULL / not observed**, must be read back from an approved isolated target |
++
++JWT docs describe15min EdDSA tokens with Auth URL origin as issuer/audience and JWKS on full Auth base path. These are source expectations, not permission to infer production trust values. N03 must consume explicitly configured observed values and key/algorithm allowlists. The production Auth0 RSA adapter is unchanged. BuyerOS roles continue to come from current DB memberships/RLS; Neon roles and email do not link/promote identities. Canonical users.id, historical owners/approvals/audit/job actors and Cloudflare HMAC remain unchanged. Delivery remains403.
++
++## Reproduced failure and local adapter decision
++
++The unmodified official handler compiled, but the default Nitro output forwarded all requests to SSR. A real built request to `/api/auth/callback/fixture` returned200 HTML instead of302; the client did not complete login. Vercel browser runs retained2fail/1pass. An initial local platform bridge also incorrectly returned HTML for emitted JS; bridge static routing was corrected. After the public runtime adapter, login/session/token returned200 JSON, confirming dispatch reached the official SDK. The remaining callback200 HTML has a separate cause: the pinned SDK handleAuthRequest (server-b0OzGjXl.mjs1129) calls fetch without redirect:manual, following the upstream302; the fixture endpoint itself emits302. Destructured GET/POST exports were emitted correctly; changing SDK export syntax would not address this failure.
++
++Nitro expects a default object exposing `fetch`; Vinext virtual RSC default is a request function. The disposable overlay registers the public `vinext/server/app-router-entry` as Nitro's `rsc` service and dispatches API, Flight and HTML through it via `fetchViteEnv`. The harness patches exactly one reviewed Nitro configuration marker in a staged copy; original and transformed hashes are retained. Production Vite config and routes are not edited. No SDK private implementation patch and no framework replacement.
++
++| Option | Benefits | Risks / disposition |
++|---|---|---|
++| Official same-origin SDK + local public runtime adapter | Retains official handler/session/cookie implementation and one origin; limited build wiring | Tested local candidate only; pinned experimental Nitro interface; official callback regression remains open and real provider/Vercel/Safari unverified |
++| Custom Request/Response same-origin proxy/session adapter | Could bypass Next shim behavior | Must reprove cookie signing/cache, CSRF, callback/state and refresh behavior; not implemented or accepted without a new contract/tests |
++| Auth gateway on an explicitly supported runtime behind same origin | May isolate unsupported framework shims | Adds a service and operational trust boundary; requires an approved design/runtime and actual integration test; no resources created |
++
++## Acceptance and downstream gate
++
++Both clean Linux builds exit0. Final actual portable and Vercel suites each run3tests:2pass/1fail/0error/0skip. The full login→session→hard-reload→token→FastAPI→logout→reload flow and6negative-token requests pass; callback stays open (portable500, Vercel200 vs required302; direct upstream302 is asserted). Tests are not converted to expected-failure/skip. Chromium loopback accepts Secure cookies; real HTTPS/platform/Safari behavior is not thereby established. Portable also mounts the unchanged demo shell; screenshots are protocol-fixture evidence, not live BuyerOS membership/workspace verification.
++
++Production vercel.json still exposes only app catch-all and binds app→internal api using BUYEROS_INTERNAL_API_URL. No public service/binding change is made. Local Vercel bridge uses genuine Build Output API emitted function + static assets; it does not simulate Vercel ingress, protection, binding injection or deployment. All fixture process/child env is reduced to an OS/tool allowlist before loading built code.
++
++Local actual outputs and exact results are recorded in `../evidence/audit-fixes-20261003/N00_LOCAL/RESULTS.md`. No dev-server-only proof. Mock upstream and diagnostic signature verification do **not** close real NA01. Callback case exercises redirect/cookie transport and remains failing; it does not establish real OAuth/CSRF/state/email security. Cookie cache expiry, refresh/rotation, Safari/Firefox, production platform routing and signed-in workspace behavior remain external/downstream checks.
++
++N00 full gate first requires a reviewed solution for the retained callback regression (no SDK private/global-fetch patch was made), and then an approved isolated real Neon Auth target + test account/provider methods and genuine portable/Vercel built login/session/token/API/logout rehearsal. Old cleaned/expired hosted preview approvals are not reused. N01/N02/N03/N04/N05–N07 are not marked complete by this spike. Q-series independent work remains eligible according to its own prerequisites; Q16 root cause and Q17 remain blocked without underlying evidence.
++
++## Rollback
++
++Revert the N00 fixture/SDK commits and its metadata, or leave the spike branch unintegrated. No DB migration/data undo/role reassignment needed. Existing Auth0 runtime remains the release path. Reverse patch applicability is recorded separately; no production rollback was performed. Independent source review is still pending (human requested no agents).
+diff --git a/docs/superpowers/plans/2026-10-04-buyeros-n00-local-compatibility.md b/docs/superpowers/plans/2026-10-04-buyeros-n00-local-compatibility.md
+new file mode 100644
+index 0000000..66a6f56
+--- /dev/null
++++ b/docs/superpowers/plans/2026-10-04-buyeros-n00-local-compatibility.md
+@@ -0,0 +1,24 @@
++# N00 local compatibility execution
++
++Spec: docs/superpowers/plans/2026-10-03-buyeros-gpt61-fixes.md (N00 / F20 / NA01).
++Base: 27f1412369edb6ea8581aa15d3d2a7a0e84882d3.
++Global constraints: no production/auth cutover, no real accounts/email/provider, no schema/roles/DB change, no framework upgrade, no push/deploy, no agents. Source overlays only. Real Neon NA01 remains blocked.
++
++## Task 1: Guard and pin the fixture/build harness
++Interfaces: exact SDK0.5.0-beta; source inventory; loopback only; clean emitted outputs. Consumes current framework build commands. Produces reusable local-only overlay/build runner.
++1. Write Node safety regression tests, run RED.
++2. Implement source path/URL guards and isolated Docker build runner.
++3. Run Node tests GREEN and baseline contracts/types.
++Expected: tests execute, zero skips; framework pins unchanged.
++Verify: node --test tests/neon-compatibility-harness.test.mjs.
++
++## Task 2: Exercise both actual built outputs
++Interfaces: official createNeonAuth().handler()/getSession(), createAuthClient().token(); fixture upstream session/cookies/JWKS; isolated FastAPI EdDSA diagnostic (not production verifier).
++1. Write audit-neon-compat.spec.ts/config; build unpatched official SDK fixtures using pnpm build and node scripts/run-vercel.mjs build.
++2. Run actual browser flow login/session/token/FastAPI/logout plus cookie/callback/reload and negative tokens. Record actual interoperability failures; smallest adapter only if evidence requires it.
++3. Freeze SDK/runtime contract, fixture evidence, NA01 limitation, review and rollback; local commit.
++Expected: real output requests, no dev server substituted, no real Neon pass claim.
++Verify: pnpm exec playwright test --config playwright.neon-auth.config.ts tests/e2e/audit-neon-compat.spec.ts.
++
++## Review Focus
++No secrets or env files in overlay/build; no public spike route in BuyerOS tree; old Auth0 unchanged; EdDSA diagnostic explicitly not domain trust; no fixture accepted as live; every built runtime failure retained; necessary DB tests are not skipped (no DB required by this protocol-only slice).
+diff --git a/package.json b/package.json
+index 14a38d6..f03acc1 100644
+--- a/package.json
++++ b/package.json
+@@ -49,6 +49,7 @@
+     "@cloudflare/vitest-plugin": "1.2.4",
+     "@cloudflare/workers-types": "5.20260921.1",
+     "@msw/cloudflare": "0.0.1",
++    "@neondatabase/auth": "0.5.0-beta",
+     "@playwright/test": "^1.63.0",
+     "@tailwindcss/postcss": "4.2.1",
+     "@types/node": "22.19.19",
+diff --git a/playwright.audit-fixes.config.ts b/playwright.audit-fixes.config.ts
+index e983178..e9692b2 100644
+--- a/playwright.audit-fixes.config.ts
++++ b/playwright.audit-fixes.config.ts
+@@ -2,7 +2,9 @@ import {defineConfig} from '@playwright/test';
+ // Owned loopback HTTP/Postgres fixture; never reuse a running/shared/live server.
+ export default defineConfig({
+   globalTeardown:'./tests/e2e/audit-teardown.ts',
+-  testDir:'./tests/e2e',testMatch:'audit-*.spec.ts',workers:1,timeout:60_000,
++  testDir:'./tests/e2e',testMatch:'audit-*.spec.ts',
++  // N00 runs actual built outputs with separate loopback ports and no workbench DB.
++  testIgnore:'audit-neon-compat.spec.ts',workers:1,timeout:60_000,
+   outputDir:'test-results/audit-fixes',
+   reporter:[['list'],['junit',{outputFile:'test-results/audit-fixes.xml'}]],
+   use:{baseURL:'http://localhost:5173',browserName:'chromium',viewport:{width:1120,height:800},trace:'retain-on-failure'},
+diff --git a/playwright.neon-auth.config.ts b/playwright.neon-auth.config.ts
+new file mode 100644
+index 0000000..7446c31
+--- /dev/null
++++ b/playwright.neon-auth.config.ts
+@@ -0,0 +1,7 @@
++import {defineConfig} from '@playwright/test';
++const target=process.env.BUYEROS_N00_TARGET;
++if(!['portable','vercel'].includes(target??''))throw new Error('Choose an actual N00 built target: portable or vercel');
++export default defineConfig({testDir:'./tests/e2e',testMatch:'audit-neon-compat.spec.ts',workers:1,timeout:45_000,
++ outputDir:`test-results/neon-compatibility/${target}-ui`,reporter:[['list'],['junit',{outputFile:`test-results/neon-compatibility/${target}-ui.xml`}]],
++ use:{baseURL:'http://localhost:44890',browserName:'chromium',viewport:{width:1120,height:800},trace:'retain-on-failure'},
++ webServer:{command:'node scripts/serve-neon-compatibility.mjs',url:'http://localhost:44890/',timeout:90_000,reuseExistingServer:false,env:{BUYEROS_N00_TARGET:target!}}});
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index fd1522a..684f23a 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -34,7 +34,7 @@ importers:
+         version: 4.4.0
+       drizzle-orm:
+         specifier: 0.45.2
+-        version: 0.45.2(@cloudflare/workers-types@5.20260921.1)
++        version: 0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6)
+       embla-carousel-react:
+         specifier: ^8.6.0
+         version: 8.6.0(react@19.2.6)
+@@ -99,6 +99,9 @@ importers:
+       '@msw/cloudflare':
+         specifier: 0.0.1
+         version: 0.0.1(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))
++      '@neondatabase/auth':
++        specifier: 0.5.0-beta
++        version: 0.5.0-beta(ebfb641974d7a28236622b69f8304929)
+       '@playwright/test':
+         specifier: ^1.63.0
+         version: 1.63.0
+@@ -267,6 +270,132 @@ packages:
+       '@types/react':
+         optional: true
+ 
++  '@better-auth/api-key@1.7.6':
++    resolution: {integrity: sha512-BDoi3iUZpUioB3bSdzOZ7Nd9850vv5zFu0QxlZma9nwgMcNtUNsO0ky9toeDFY2h5vxNpdaIVBDRKUJ31RSCDg==}
++    peerDependencies:
++      '@better-auth/core': ^1.7.6
++      '@better-auth/utils': 0.4.2
++      better-auth: ^1.7.6
++      better-call: 1.4.0
++
++  '@better-auth/core@1.6.23':
++    resolution: {integrity: sha512-beEhOs0uVeOxYOZKUfIEBd/nQV2Bd4/6wyLxZ0OFkn6CMTK2Vi+hXuZLnyPBeB6RdHpebEoJWiHqwHxBIxgPDQ==}
++    peerDependencies:
++      '@better-auth/utils': 0.4.2
++      '@better-fetch/fetch': 1.3.1
++      '@cloudflare/workers-types': '>=4'
++      '@opentelemetry/api': ^1.9.0
++      better-call: 1.3.7
++      jose: ^6.1.0
++      kysely: ^0.28.5 || ^0.29.0
++      nanostores: ^1.0.1
++    peerDependenciesMeta:
++      '@cloudflare/workers-types':
++        optional: true
++      '@opentelemetry/api':
++        optional: true
++
++  '@better-auth/core@1.7.6':
++    resolution: {integrity: sha512-yBDDO0J4VCHT1qEZtzj6aMexX4etyLesitoxehcWHzPrzYqrFHwe/hgskye+imlGhQVOysuljMg8M8BA6GrtIg==}
++    peerDependencies:
++      '@better-auth/utils': 0.4.2
++      '@better-fetch/fetch': 1.3.2
++      '@opentelemetry/api': ^1.9.0
++      better-call: 1.4.0
++      jose: ^6.1.0
++      kysely: ^0.28.5 || ^0.29.0
++      nanostores: ^1.0.1
++    peerDependenciesMeta:
++      '@opentelemetry/api':
++        optional: true
++
++  '@better-auth/drizzle-adapter@1.6.23':
++    resolution: {integrity: sha512-2+/PTVfIP9E7iz6af8TB3lhnowHUj9ljC66kECmHaFEdUqPgzHoWux9epotKwO7XDg2ui4ttWQ8CMeNFLvQeKQ==}
++    peerDependencies:
++      '@better-auth/core': ^1.6.23
++      '@better-auth/utils': 0.4.2
++      drizzle-orm: ^0.45.2
++    peerDependenciesMeta:
++      drizzle-orm:
++        optional: true
++
++  '@better-auth/kysely-adapter@1.6.23':
++    resolution: {integrity: sha512-zbNJsMbG09exfkGyvFqBLLqWoMPAUWjxCuUnEK5AsjbYoZeIjj/QGZgdf4CapVWryKxjA9Q6Jlr6fbiPpC3VAg==}
++    peerDependencies:
++      '@better-auth/core': ^1.6.23
++      '@better-auth/utils': 0.4.2
++      kysely: ^0.28.17 || ^0.29.0
++    peerDependenciesMeta:
++      kysely:
++        optional: true
++
++  '@better-auth/memory-adapter@1.6.23':
++    resolution: {integrity: sha512-krIiR0pIVkaKlAzm690n5bcMW4NGbqeMg0HQSD9fz/KcQF/eWLqcq9gG/BhHTj2i/y96qH+W5JWPmaSOS5iTgQ==}
++    peerDependencies:
++      '@better-auth/core': ^1.6.23
++      '@better-auth/utils': 0.4.2
++
++  '@better-auth/mongo-adapter@1.6.23':
++    resolution: {integrity: sha512-7+QdevitGlKBbP6JbiSk5SBnzPsKV/mDrQBGBn8hwByQLeJwqpqbuBPw7ZI8vzUlFfAAnyFiqwP3Eb8mxnp7pA==}
++    peerDependencies:
++      '@better-auth/core': ^1.6.23
++      '@better-auth/utils': 0.4.2
++      mongodb: ^6.0.0 || ^7.0.0
++    peerDependenciesMeta:
++      mongodb:
++        optional: true
++
++  '@better-auth/passkey@1.6.23':
++    resolution: {integrity: sha512-nr5tKaNd/huUwTYX4DUm4HcXgBkixj0lXrRHdy9azY4fFjF49Tyif4sPyRMWnQJYxlRJ1HVEMJq2nGyr5CLXQg==}
++    peerDependencies:
++      '@better-auth/core': ^1.6.23
++      '@better-auth/utils': 0.4.2
++      '@better-fetch/fetch': 1.3.1
++      better-auth: ^1.6.23
++      better-call: 1.3.7
++      nanostores: ^1.0.1
++
++  '@better-auth/prisma-adapter@1.6.23':
++    resolution: {integrity: sha512-2qSdzidq4tkb1eS5TTqb4Nzg0mdZWm3Qky9SYeXeb8PpVQbC2sxqJhEM5mK7y12uU6I8hc64wO9f7AFVNL+6UQ==}
++    peerDependencies:
++      '@better-auth/core': ^1.6.23
++      '@better-auth/utils': 0.4.2
++      '@prisma/client': ^5.0.0 || ^6.0.0 || ^7.0.0
++      prisma: ^5.0.0 || ^6.0.0 || ^7.0.0
++    peerDependenciesMeta:
++      '@prisma/client':
++        optional: true
++      prisma:
++        optional: true
++
++  '@better-auth/telemetry@1.6.23':
++    resolution: {integrity: sha512-/R2Kb+z2BpDOOWwVHqOk+c0VNpuwfCv4Hp5Yr9003WIZPax/zyNraGLB9CFE8qF2gZW8Dsz419k4I8CPrGzpDA==}
++    peerDependencies:
++      '@better-auth/core': ^1.6.23
++      '@better-auth/utils': 0.4.2
++      '@better-fetch/fetch': 1.3.1
++
++  '@better-auth/utils@0.3.1':
++    resolution: {integrity: sha512-+CGp4UmZSUrHHnpHhLPYu6cV+wSUSvVbZbNykxhUDocpVNTo9uFFxw/NqJlh1iC4wQ9HKKWGCKuZ5wUgS0v6Kg==}
++
++  '@better-auth/utils@0.4.2':
++    resolution: {integrity: sha512-AUxrvu+HaaODsUyzDxFgwd/8RZ1yZaYo42LXKSrU2oGgR38pS1ij8nqQKNgtTWoYGpNevNXtCfgTy6loHveW9A==}
++
++  '@better-fetch/fetch@1.3.1':
++    resolution: {integrity: sha512-ABkD1WhyfPZprKRQI3bhATjeiFuNWC9PXhfGWqL+sg/gKrM977oFrYkdb4msM3hgUGonr7KlOsOFT5TU2rht9g==}
++
++  '@better-fetch/fetch@1.3.2':
++    resolution: {integrity: sha512-Gs7n99b5tqUC6cQAPbV0uED3IraHB6xQbHLQ/C3l7ZFafHScOx9pQ+DYmP5blbLFShVWLqxNUlI9wi4xU/X+ow==}
++
++  '@captchafox/react@1.13.0':
++    resolution: {integrity: sha512-ApU8zeUQm2tLcxR5Mm6IPwZUnaoSIy5sF0R0kUwgKHYvnxeIZ+E4uaLro/5f25JBvqM4XW1jJh03EkWjoOIhfA==}
++    peerDependencies:
++      react: '>=16.8.0'
++      react-dom: '>=16.8.0'
++
++  '@captchafox/types@1.6.0':
++    resolution: {integrity: sha512-isJBepZntzO++rE2i9rP4FGh5XPwoXXle4H2POkNR6bYwjBaWI1D7XwbW5oylLnXMMELGksNnOX0QGHYHuQ2PQ==}
++
+   '@cloudflare/kv-asset-handler@0.5.0':
+     resolution: {integrity: sha512-jxQYkj8dSIzc0cD6cMMNdOc1UVjqSqu8BZdor5s8cGjW2I8BjODt/kWPVdY+u9zj3ms75Q5qaZgnxUad83+eAg==}
+     engines: {node: '>=22.0.0'}
+@@ -334,6 +463,54 @@ packages:
+   '@date-fns/tz@1.5.0':
+     resolution: {integrity: sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg==}
+ 
++  '@daveyplate/better-auth-tanstack@1.3.6':
++    resolution: {integrity: sha512-GvIGdbjRMZCEfAffU7LeWpGpie4vSli8V9jmNFCQOziZZMEFbO4cd53HBFmAushC9oEYIyhSNZBgV2ADzW94Ww==}
++    peerDependencies:
++      '@tanstack/query-core': '>=5.65.0'
++      '@tanstack/react-query': '>=5.65.0'
++      better-auth: '>=1.2.8'
++      react: '>=18.0.0'
++      react-dom: '>=18.0.0'
++
++  '@daveyplate/better-auth-ui@3.4.0':
++    resolution: {integrity: sha512-mGA0cKsAk0AcoKkxjff2xQOviMrUDDN+9SsRusURP/kiTmoLvWAv8utaPex0GFLHKm1w3BrLBdJRg9B2LkT7Bw==}
++    peerDependencies:
++      '@better-auth/passkey': '>=1.4.6'
++      '@captchafox/react': ^1.10.0
++      '@daveyplate/better-auth-tanstack': ^1.3.6
++      '@hookform/resolvers': '>=5.2.0'
++      '@instantdb/react': '>=0.18.0'
++      '@marsidev/react-turnstile': '>=1.1.0'
++      '@radix-ui/react-avatar': '>=1.1.0'
++      '@radix-ui/react-checkbox': '>=1.1.0'
++      '@radix-ui/react-context': '>=1.1.0'
++      '@radix-ui/react-dialog': '>=1.1.0'
++      '@radix-ui/react-dropdown-menu': '>=2.1.0'
++      '@radix-ui/react-label': '>=2.1.0'
++      '@radix-ui/react-primitive': '>=2.0.0'
++      '@radix-ui/react-select': '>=2.2.0'
++      '@radix-ui/react-separator': '>=1.1.0'
++      '@radix-ui/react-slot': '>=1.1.0'
++      '@radix-ui/react-tabs': '>=1.1.0'
++      '@radix-ui/react-tooltip': '>=1.2.0'
++      '@radix-ui/react-use-callback-ref': '>=1.1.0'
++      '@radix-ui/react-use-layout-effect': '>=1.1.0'
++      '@tanstack/react-query': '>=5.66.0'
++      '@triplit/client': '>=1.0.0'
++      '@triplit/react': '>=1.0.0'
++      better-auth: ^1.4.6
++      class-variance-authority: '>=0.7.0'
++      clsx: '>=2.1.0'
++      input-otp: '>=1.4.0'
++      lucide-react: '>=0.469.0'
++      react: '>=18.0.0'
++      react-dom: '>=18.0.0'
++      react-hook-form: '>=7.55.0'
++      sonner: '>=1.7.0'
++      tailwind-merge: '>=2.6.0'
++      tailwindcss: '>=3.0.0'
++      zod: '>=3.0.0'
++
+   '@drizzle-team/brocli@0.10.2':
+     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
+ 
+@@ -854,6 +1031,21 @@ packages:
+   '@floating-ui/utils@0.2.12':
+     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+ 
++  '@hcaptcha/loader@2.4.2':
++    resolution: {integrity: sha512-+Pf0Vin6iJlJj5u/mq6XMgbJT1mi/Sg5LWHxxqO4YHt2YvdZgecp5V2sbC6vRaNPJUqQGk2HOu1K/i12mqs5vw==}
++
++  '@hcaptcha/react-hcaptcha@1.17.4':
++    resolution: {integrity: sha512-rIvgesG1N7SS9sAYYHFoWm+nXqRrxq7RcA9z2pKkDWV+S1GdfmrTNYA1aPyVWVe3eowphTCwyDJvl97Swwy0mw==}
++    peerDependencies:
++      react: '>= 16.3.0'
++      react-dom: '>= 16.3.0'
++
++  '@hcaptcha/react-hcaptcha@2.2.0':
++    resolution: {integrity: sha512-/HrPgNLRrJziLrh2s+qFRO33ubBSuHn9sdNsQcP0wQElpORxlpR6wnq3X9j/bZGd+uQtYIvPl4QSU2la+Jl9Hg==}
++
++  '@hexagon/base64@1.1.28':
++    resolution: {integrity: sha512-lhqDEAvWixy3bZ+UOYbPwUbBkwBq5C1LAJ/xPC8Oi+lL54oyakv/npbA0aU2hgCsx/1NUd4IBvV03+aUBWxerw==}
++
+   '@hookform/resolvers@5.7.1':
+     resolution: {integrity: sha512-8wS/P4UDr5sQDe4nFaV51TVyfDPrWgNIXweqG0Bs9Z5LSuzKLb+RQNPvkN2oHM5SRrJyWrVH/F+LOUcFjUyvwQ==}
+     peerDependencies:
+@@ -1149,6 +1341,22 @@ packages:
+       '@types/node':
+         optional: true
+ 
++  '@instantdb/core@1.0.67':
++    resolution: {integrity: sha512-HWB7pnZ77j6hqCCCZ+LeOBakDKl5cSsEnQieUz38PP4o1D4vMujCoNeNVuAa3nO//VLMWuIm5hCO4psEnNRsCQ==}
++
++  '@instantdb/react-common@1.0.67':
++    resolution: {integrity: sha512-hRRs5O0XSe5+rx0GYozZ4A2j/VGMx49Hr2iEQHWQWjpFVJrCvYdCEI0UDmCUnK+/G1Qtm76wddryVZwgiDzOqw==}
++    peerDependencies:
++      react: '>=16'
++
++  '@instantdb/react@1.0.67':
++    resolution: {integrity: sha512-kzZaiLZ3uAIH+0M2RpQWA0Lqr/7dnB+YQPzDp2L/iunggdcEW0eMTghDkDRLwbtQf+NNATn+UHmTRTqHQZ/fVg==}
++    peerDependencies:
++      react: '>=16'
++
++  '@instantdb/version@1.0.67':
++    resolution: {integrity: sha512-V7nCs+DcuM+rNkvSxllBUJ/XTxlas6tsmws7EpnhZrF4tEJAfSQQfQOj4LcaOfwg9ItWWOAZJCkbDJ/iZSUQhA==}
++
+   '@jridgewell/gen-mapping@0.3.13':
+     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
+ 
+@@ -1171,6 +1379,15 @@ packages:
+   '@jridgewell/trace-mapping@0.3.9':
+     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+ 
++  '@levischuck/tiny-cbor@0.2.11':
++    resolution: {integrity: sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow==}
++
++  '@marsidev/react-turnstile@1.6.1':
++    resolution: {integrity: sha512-ojI9NLYv821IRKi7KraTkxTto6KC/m58hNNyKxvYxm/cQBu5MI5eMkaiJs2JSQBFiXE3LPQI3seJVjv/2lgALA==}
++    peerDependencies:
++      react: ^17.0.2 || ^18.0.0 || ^19.0
++      react-dom: ^17.0.2 || ^18.0.0 || ^19.0
++
+   '@msw/cloudflare@0.0.1':
+     resolution: {integrity: sha512-baTWdbz1Aeiyk7/Gjw9xv6OscQuvXvVTAgvX3OYZuAbI+lI2Lys/38EFqyfmB055p1k3I+u0HdH+ZwOr4jFyZg==}
+     peerDependencies:
+@@ -1189,6 +1406,28 @@ packages:
+       '@emnapi/core': ^1.7.1
+       '@emnapi/runtime': ^1.7.1
+ 
++  '@neondatabase/auth-ui@0.3.0-beta':
++    resolution: {integrity: sha512-//7s2nOR8ej0f8soXAlHSckjkrPPPSaH86pmSeMgRq9zHLvDymKuE/jhaoRVr2tgx1/BTviS7MdYzExaABxkjA==}
++    peerDependencies:
++      '@neondatabase/auth': 0.5.0-beta
++      react: '>=18.0.0'
++      react-dom: '>=18.0.0'
++
++  '@neondatabase/auth@0.5.0-beta':
++    resolution: {integrity: sha512-s/CHBVlX7hzm1iJJpDKKDiv5zIXQqYxeGJC/3oRjs1mjY35Hzg+qM7rj/h6DVY3qrvl5jgILcrOnLtyYq/N80A==}
++    hasBin: true
++    peerDependencies:
++      next: '>=16.0.0'
++      react: '>=18.0.0'
++      react-dom: '>=18.0.0'
++    peerDependenciesMeta:
++      next:
++        optional: true
++      react:
++        optional: true
++      react-dom:
++        optional: true
++
+   '@next/env@16.3.4':
+     resolution: {integrity: sha512-cjWZnUUa6jZq2kFaNe/ZyJdZonOZ/QoN0Zka2nz/FLOrfx14pQuM9c5RaSVkWMqgdt4ksgPAMWPyHSs/CyV48Q==}
+ 
+@@ -1247,6 +1486,14 @@ packages:
+     cpu: [x64]
+     os: [win32]
+ 
++  '@noble/ciphers@2.4.0':
++    resolution: {integrity: sha512-AnjFn0Jv92laAkvMrghlFZq4qQCIN/4DxFV/eooqtC2YTjB7kBeLMS2T9KJX4Dn+ZVXLOwK0lSgqDtx9gvxtiw==}
++    engines: {node: '>= 20.19.0'}
++
++  '@noble/hashes@2.4.0':
++    resolution: {integrity: sha512-X5XaVWZIBCT7HHZGm5I7ZQXDwLG+bGXuSrMQAW+7Zvl87h1kmc1ZB1VSRJcpUfoUrGQp4Fkoxm5kZ+Ms+aW+eA==}
++    engines: {node: '>= 20.19.0'}
++
+   '@nodelib/fs.scandir@2.1.5':
+     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
+     engines: {node: '>= 8'}
+@@ -1275,12 +1522,67 @@ packages:
+   '@open-draft/until@2.1.0':
+     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
+ 
++  '@opentelemetry/semantic-conventions@1.43.0':
++    resolution: {integrity: sha512-eSYWTm620tTk45EKSedaUL8MFYI8hW164hIXsgIHyxu3VobUB3fFCu5t0hQby6OoWRPsG1KkKUG2M5UadiLiVg==}
++    engines: {node: '>=14'}
++
+   '@oxc-project/types@0.130.0':
+     resolution: {integrity: sha512-ibD2usx9JRu7f5pu2tMKMI4cpA4NgXJQoYRP4pQ7Pxmn1l6k/53qWtQWZayhYy3X4QZkt90Ot+mJEaeXouio6Q==}
+ 
+   '@oxc-project/types@0.150.0':
+     resolution: {integrity: sha512-rDS5/31E9HfPl/CIzGrn0DOlvBbXFseQ5URJ9sYMfstbKLD/c6Gm9vmRzRGDdAXyOIL4zmO37lc9RIwYqVruZw==}
+ 
++  '@peculiar/asn1-android@2.9.5':
++    resolution: {integrity: sha512-KnNE4l033gbJ3ZzfYk7fJpSZwhd5xT+dPAnrB8bcwqylHiLN2zjZ0OyFao0LDIOI/ZdXRabV0n3Ww/KvpgZq6w==}
++    engines: {node: '>=14'}
++
++  '@peculiar/asn1-cms@2.9.5':
++    resolution: {integrity: sha512-4Ivz0fsyFofe0bslNsYcGN9+iETdHX4v+BFwIPr+K/BAt61sHXECP63ff9FntU9zcfVQELJFdUG9so44OjUlBQ==}
++    engines: {node: '>=14'}
++
++  '@peculiar/asn1-csr@2.9.5':
++    resolution: {integrity: sha512-9dO6PcoJeI+1xJ4rG7eINMa6f9Ix/QdRs5UGZ0D7v/R3TzmsbVr5cqAgfYw4xgS9U54ouHYqEz0bIZBbM/UY1g==}
++    engines: {node: '>=14'}
++
++  '@peculiar/asn1-ecc@2.9.5':
++    resolution: {integrity: sha512-OD+HLlcV7wCL64w0rheX/C0J31DbJce0nf8ulv3UNftQ617JEZE3sQ4cMN6PotXWlJ1M5GQx90G3bywtdKOstw==}
++    engines: {node: '>=14'}
++
++  '@peculiar/asn1-pfx@2.9.5':
++    resolution: {integrity: sha512-btcH7lbcD4410qnjHvv7F0kEuMNKbX8CFAZSs9CDPWHKzT1byLPHYeR40AnUw9z4CzsijMY0daBFYUvVx75sdA==}
++    engines: {node: '>=14'}
++
++  '@peculiar/asn1-pkcs8@2.9.5':
++    resolution: {integrity: sha512-c7UghAGQdBfAHL9JdwcJkAc/lDJKNXfCdYXPXlf8BZdD/fVJjJnXKHxX4gyLhkFTvnGhME7caieSgc2ROtqYTQ==}
++    engines: {node: '>=14'}
++
++  '@peculiar/asn1-pkcs9@2.9.5':
++    resolution: {integrity: sha512-4R/zMgLSHbQIZRBwP1KzX6iuNHmW3xFWwu9TS9A00N60fmQqp9DkkqnQFyd0mAYMQTrQefuzQ/yP4U8sOLGUgQ==}
++    engines: {node: '>=14'}
++
++  '@peculiar/asn1-rsa@2.9.5':
++    resolution: {integrity: sha512-kHwBLVMkm9ljlM521ovS7y4z4mr8xuHTdNyyoPlDvckBwFKSgs9HqKBryLBeqHqL2YpIgl+Vspl7kzNGG2phzA==}
++    engines: {node: '>=14'}
++
++  '@peculiar/asn1-schema@2.9.5':
++    resolution: {integrity: sha512-Ez3wLKVjaxdsLcgeWN4OE31QkM7oBOgKuuBJxldRYAkfYw2C+8zJPcSd/SThnbhszsEOlAmoaS5kIIkN29fGKQ==}
++    engines: {node: '>=14'}
++
++  '@peculiar/asn1-x509-attr@2.9.5':
++    resolution: {integrity: sha512-PlbL1a74RZiry7puPCZ5hdk/puvivxYJPbjadr2i7DBjHCJFEKCfTRPKL3DILeZFtzJjn95J5EBtSc4/TB9/6Q==}
++    engines: {node: '>=14'}
++
++  '@peculiar/asn1-x509@2.9.5':
++    resolution: {integrity: sha512-NP3ecvN6zTDlwCvogIWL7MJN9AZNuskkIbnlhrlkB97Mn2EqirBUQ8GKzsOmdAL3pRvjGu1Uk/a4DNfiZrWxhw==}
++    engines: {node: '>=14'}
++
++  '@peculiar/utils@2.0.3':
++    resolution: {integrity: sha512-+oL3HPFRIZ1St2K50lWCXiioIgSoxzz7R1J3uF6neO2yl1sgmpgY6XXJH4BdpoDkMWznQTeYF6oWNDZLCdQ4eQ==}
++
++  '@peculiar/x509@1.14.3':
++    resolution: {integrity: sha512-C2Xj8FZ0uHWeCXXqX5B4/gVFQmtSkiuOolzAgutjTfseNOHT3pUjljDZsTSxXFGgio54bCzVFqmEOUrIVk8RDA==}
++    engines: {node: '>=20.0.0'}
++
+   '@playwright/test@1.63.0':
+     resolution: {integrity: sha512-oxMK4vllB9RK5NQ2l1pq1IfOf2AvnEuj/vYGDj0H2nMtmtZpKtCwt/l00GEO6xjGfpBNAvjovvYdCm50dRQkpQ==}
+     engines: {node: '>=20'}
+@@ -1985,6 +2287,185 @@ packages:
+   '@radix-ui/rect@1.1.3':
+     resolution: {integrity: sha512-JtyZR+mqgBibTo8xea3B6ZRmzZiM/YeVBtUkas6zMuXjAlfIFIW2FgqeM9eLyvEaYX66vr6DJMK+4U6LV0KhNw==}
+ 
++  '@react-email/body@0.3.0':
++    resolution: {integrity: sha512-uGo0BOOzjbMUo3lu+BIDWayvn5o6Xyfmnlla5VGf05n8gHMvO1ll7U4FtzWe3hxMLwt53pmc4iE0M+B5slG+Ug==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/button@0.2.1':
++    resolution: {integrity: sha512-qXyj7RZLE7POy9BMKSoqQ00tOXThjOZSUnI2Yu9i29IHngPlmrNayIWBoVKtElES7OWwypUcpiajwi1mUWx6/A==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/code-block@0.2.1':
++    resolution: {integrity: sha512-M3B7JpVH4ytgn83/ujRR1k1DQHvTeABiDM61OvAbjLRPhC/5KLHU5KkzIbbuGIrjWwxAbL1kSQzU8MhLEtSxyw==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/code-inline@0.0.6':
++    resolution: {integrity: sha512-jfhebvv3dVsp3OdPgKXnk8+e2pBiDVZejDOBFzBa/IblrAJ9cQDkN6rBD5IyEg8hTOxwbw3iaI/yZFmDmIguIA==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/column@0.0.14':
++    resolution: {integrity: sha512-f+W+Bk2AjNO77zynE33rHuQhyqVICx4RYtGX9NKsGUg0wWjdGP0qAuIkhx9Rnmk4/hFMo1fUrtYNqca9fwJdHg==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/components@1.0.12':
++    resolution: {integrity: sha512-tH18JhPDWgE+3jnYkzyB6ZrZdfNnEsFe4PwmuXmlOw4NGIysP8wPY5aXZg++pTG9qUabXg1nzX/FGHGkObH8xQ==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/container@0.0.16':
++    resolution: {integrity: sha512-QWBB56RkkU0AJ9h+qy33gfT5iuZknPC7Un/IjZv9B0QmMIK+WWacc0cH6y2SV5Cv/b99hU94fjEMOOO4enpkbQ==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/font@0.0.10':
++    resolution: {integrity: sha512-0urVSgCmQIfx5r7Xc586miBnQUVnGp3OTYUm8m5pwtQRdTRO5XrTtEfNJ3JhYhSOruV0nD8fd+dXtKXobum6tA==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/head@0.0.13':
++    resolution: {integrity: sha512-AJg6le/08Gz4tm+6MtKXqtNNyKHzmooOCdmtqmWxD7FxoAdU1eVcizhtQ0gcnVaY6ethEyE/hnEzQxt1zu5Kog==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/heading@0.0.16':
++    resolution: {integrity: sha512-jmsKnQm1ykpBzw4hCYHwBkt5pW2jScXffPeEH5ZRF5tZeF5b1pvlFTO9han7C0pCkZYo1kEvWiRtx69yfCIwuw==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/hr@0.0.12':
++    resolution: {integrity: sha512-TwmOmBDibavUQpXBxpmZYi2Iks/yeZOzFYh+di9EltMSnEabH8dMZXrl+pxNXzCgZ2XE8HY7VmUL65Lenfu5PA==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/html@0.0.12':
++    resolution: {integrity: sha512-KTShZesan+UsreU7PDUV90afrZwU5TLwYlALuCSU0OT+/U8lULNNbAUekg+tGwCnOfIKYtpDPKkAMRdYlqUznw==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/img@0.0.12':
++    resolution: {integrity: sha512-sRCpEARNVTf3FQhZOC+JTvu5r6ubiYWkT0ucYXg8ctkyi4G8QG+jgYPiNUqVeTLA2STOfmPM/nrk1nb84y6CPQ==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/link@0.0.13':
++    resolution: {integrity: sha512-lkWc/NjOcefRZMkQoSDDbuKBEBDES9aXnFEOuPH845wD3TxPwh+QTf0fStuzjoRLUZWpHnio4z7qGGRYusn/sw==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/markdown@0.0.18':
++    resolution: {integrity: sha512-gSuYK5fsMbGk87jDebqQ6fa2fKcWlkf2Dkva8kMONqLgGCq8/0d+ZQYMEJsdidIeBo3kmsnHZPrwdFB4HgjUXg==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/preview@0.0.14':
++    resolution: {integrity: sha512-aYK8q0IPkBXyMsbpMXgxazwHxYJxTrXrV95GFuu2HbEiIToMwSyUgb8HDFYwPqqfV03/jbwqlsXmFxsOd+VNaw==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/render@2.0.6':
++    resolution: {integrity: sha512-xOzaYkH3jLZKqN5MqrTXYnmqBYUnZSVbkxdb5PGGmDcK6sKDVMliaDiSwfXajRC9JtSHTcGc2tmGLHWuCgVpog==}
++    engines: {node: '>=20.0.0'}
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/row@0.0.13':
++    resolution: {integrity: sha512-bYnOac40vIKCId7IkwuLAAsa3fKfSfqCvv6epJKmPE0JBuu5qI4FHFCl9o9dVpIIS08s/ub+Y/txoMt0dYziGw==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/section@0.0.17':
++    resolution: {integrity: sha512-qNl65ye3W0Rd5udhdORzTV9ezjb+GFqQQSae03NDzXtmJq6sqVXNWNiVolAjvJNypim+zGXmv6J9TcV5aNtE/w==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
++  '@react-email/tailwind@2.0.7':
++    resolution: {integrity: sha512-kGw80weVFXikcnCXbigTGXGWQ0MRCSYNCudcdkWxebkWYd0FG6/NPoN3V1p/u68/4+NxZwYPVi2fhnp0x23HdA==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      '@react-email/body': '>=0'
++      '@react-email/button': '>=0'
++      '@react-email/code-block': '>=0'
++      '@react-email/code-inline': '>=0'
++      '@react-email/container': '>=0'
++      '@react-email/heading': '>=0'
++      '@react-email/hr': '>=0'
++      '@react-email/img': '>=0'
++      '@react-email/link': '>=0'
++      '@react-email/preview': '>=0'
++      '@react-email/text': '>=0'
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@react-email/body':
++        optional: true
++      '@react-email/button':
++        optional: true
++      '@react-email/code-block':
++        optional: true
++      '@react-email/code-inline':
++        optional: true
++      '@react-email/container':
++        optional: true
++      '@react-email/heading':
++        optional: true
++      '@react-email/hr':
++        optional: true
++      '@react-email/img':
++        optional: true
++      '@react-email/link':
++        optional: true
++      '@react-email/preview':
++        optional: true
++
++  '@react-email/text@0.1.6':
++    resolution: {integrity: sha512-TYqkioRS45wTR5il3dYk/SbUjjEdhSwh9BtRNB99qNH1pXAwA45H7rAuxehiu8iJQJH0IyIr+6n62gBz9ezmsw==}
++    engines: {node: '>=20.0.0'}
++    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
++    peerDependencies:
++      react: ^18.0 || ^19.0 || ^19.0.0-rc
++
+   '@redocly/ajv@8.11.2':
+     resolution: {integrity: sha512-io1JpnwtIcvojV7QKDUSIuMN/ikdOUd1ReEnUnMKGfDVridQZ31J0MmIuqwuRjWDZfmvr+Q0MqCcfHM2gTivOg==}
+ 
+@@ -2210,6 +2691,9 @@ packages:
+   '@rtsao/scc@1.1.0':
+     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
+ 
++  '@selderee/plugin-htmlparser2@0.11.0':
++    resolution: {integrity: sha512-P33hHGdldxGabLFjPPpaTxVolMrzrcegejx+0GxjrIb9Zv48D8yAIA/QTDR2dFl7Uz7urX8aX6+5bCZslr+gWQ==}
++
+   '@shadcn/react@0.3.0':
+     resolution: {integrity: sha512-iKN0NuYe850VDHlxEfvppFrpa7CMV3zArTHusXlaSmeFeQhohGbIqclv6WwPTs/44I8EkXQpcuRt6sXEVKkWqQ==}
+     peerDependencies:
+@@ -2226,6 +2710,13 @@ packages:
+     engines: {node: '>= 8.0.0'}
+     hasBin: true
+ 
++  '@simplewebauthn/browser@13.3.0':
++    resolution: {integrity: sha512-BE/UWv6FOToAdVk0EokzkqQQDOWtNydYlY6+OrmiZ5SCNmb41VehttboTetUM3T/fr6EAFYVXjz4My2wg230rQ==}
++
++  '@simplewebauthn/server@13.3.3':
++    resolution: {integrity: sha512-LelX/lcy5cjc15A86i/aNxHhB5eU7dd20QsbP0VLAf9e38+SLlsnqCCyecx3xqfGofhmX05h1J9fKRYWxw+luA==}
++    engines: {node: '>=20.0.0'}
++
+   '@sindresorhus/is@7.2.0':
+     resolution: {integrity: sha512-P1Cz1dWaFfR4IR+U13mqqiGsLFf1KbayybWwdd2vfctdV6hDpUkgCY0nKOLLTMSoRd/jJNjtbqzf13K8DCCXQw==}
+     engines: {node: '>=18'}
+@@ -2239,6 +2730,10 @@ packages:
+   '@standard-schema/utils@0.3.0':
+     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
+ 
++  '@supabase/auth-js@2.79.0':
++    resolution: {integrity: sha512-p2GKvdbF9d/6C+dtS6iNcSicPr6eUfkvovD60HWlWsD+oOjC483DzFWrzGjNpBwnswhfMRP8Qn3rYA0VWaOfjw==}
++    engines: {node: '>=20.0.0'}
++
+   '@swc/helpers@0.5.23':
+     resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
+ 
+@@ -2334,6 +2829,45 @@ packages:
+   '@tailwindcss/postcss@4.2.1':
+     resolution: {integrity: sha512-OEwGIBnXnj7zJeonOh6ZG9woofIjGrd2BORfvE5p9USYKDCZoQmfqLcfNiRWoJlRWLdNPn2IgVZuWAOM4iTYMw==}
+ 
++  '@tanstack/query-core@5.104.0':
++    resolution: {integrity: sha512-JrC2r/JQlXt7khBSdUpsgxNvybzOg+aITa+ARRMlP2AFo93Y8vIqz077rp+e61mJetSZ0T6AJbwW1JHer1vrPQ==}
++
++  '@tanstack/react-query@5.104.0':
++    resolution: {integrity: sha512-e1TZmDCQnWIfiDVryIHeA6Idj+Lfx1hORLOhXS/l5wcgvtVD4yYqbTDl378sGQKIi2cSgb0TEMC9cKK8GGoJEw==}
++    peerDependencies:
++      react: ^18 || ^19
++
++  '@triplit/client@1.0.50':
++    resolution: {integrity: sha512-3vjXTSdDQ3fzLDrewCK7elkAQc7CiDg0eZEOZInQbVMFRiakdieO5C2voSnNjSepIYHxDxFSBllgg32QsNpL9Q==}
++    engines: {node: '>=18.0.0'}
++
++  '@triplit/db@1.1.10':
++    resolution: {integrity: sha512-9BHDrlDvJOyA9Wl8AsmbUSLhilaReA8gpFoWYjS9VEcm5d6TtqKazPQrFm0/o2WNJdrs01+qR6CysAo449MAyA==}
++    peerDependencies:
++      better-sqlite3: '*'
++      expo-sqlite: '*'
++      lmdb: '*'
++      uuidv7: '*'
++    peerDependenciesMeta:
++      better-sqlite3:
++        optional: true
++      expo-sqlite:
++        optional: true
++      lmdb:
++        optional: true
++      uuidv7:
++        optional: true
++
++  '@triplit/logger@0.0.3':
++    resolution: {integrity: sha512-hHcoD6/BsNwBtXjEp8Wiy0/YA2SqIYXd1nMukEPBmFkjT7Cd30eqtsBRT0NRq2mIFX2mr5h9JaO27zDToKnwdw==}
++    peerDependencies:
++      typescript: ^5.0.0
++
++  '@triplit/react@1.0.51':
++    resolution: {integrity: sha512-yGmYWACWycrNHMEfnR1k6CQ398ESIBgFeM47fXFhrdhMJ84QgdRk6VF/C21P80D1Rk/AQePfB0TUIaY4U9BRJg==}
++    peerDependencies:
++      react: '*'
++
+   '@tybys/wasm-util@0.10.2':
+     resolution: {integrity: sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg==}
+ 
+@@ -2686,6 +3220,16 @@ packages:
+   '@webassemblyjs/wast-printer@1.14.1':
+     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
+ 
++  '@wojtekmaj/react-recaptcha-v3@0.1.4':
++    resolution: {integrity: sha512-zszMOdgI+y1Dz3496pRFr3t68n9+OmX/puLQNnOBDC7WrjM+nOKGyjIMCTe+3J14KDvzcxETeiglyDMGl0Yh/Q==}
++    peerDependencies:
++      '@types/react': ^18.0.0 || ^19.0.0
++      react: ^18.0.0 || ^19.0.0
++      react-dom: ^18.0.0 || ^19.0.0
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
+   '@xtuc/ieee754@1.2.0':
+     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
+ 
+@@ -2790,6 +3334,10 @@ packages:
+     resolution: {integrity: sha512-BNoCY6SXXPQ7gF2opIP4GBE+Xw7U+pHMYKuzjgCN3GwiaIR09UUeKfheyIry77QtrCBlC0KK0q5/TER/tYh3PQ==}
+     engines: {node: '>= 0.4'}
+ 
++  asn1js@3.0.10:
++    resolution: {integrity: sha512-S2s3aOytiKdFRdulw2qPE51MzjzVOisppcVv7jVFR+Kw0kxwvFrDcYA0h7Ndqbmj0HkMIXYWaoj7fli8kgx1eg==}
++    engines: {node: '>=12.0.0'}
++
+   assertion-error@2.0.1:
+     resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
+     engines: {node: '>=12'}
+@@ -2829,9 +3377,90 @@ packages:
+     engines: {node: '>=6.0.0'}
+     hasBin: true
+ 
++  better-auth@1.6.23:
++    resolution: {integrity: sha512-4vOaRd9UiKGKm9R+ej0jjU1es3MiJIiNc9Qq3VCnYqOZ4/nb5272QqTxWYoDxyUXl5x6A2x2we5KZKQO9teTQQ==}
++    peerDependencies:
++      '@lynx-js/react': '*'
++      '@prisma/client': ^5.0.0 || ^6.0.0 || ^7.0.0
++      '@sveltejs/kit': ^2.0.0
++      '@tanstack/react-start': ^1.0.0
++      '@tanstack/solid-start': ^1.0.0
++      better-sqlite3: ^12.0.0
++      drizzle-kit: '>=0.31.4'
++      drizzle-orm: ^0.45.2
++      mongodb: ^6.0.0 || ^7.0.0
++      mysql2: ^3.0.0
++      next: ^14.0.0 || ^15.0.0 || ^16.0.0
++      pg: ^8.0.0
++      prisma: ^5.0.0 || ^6.0.0 || ^7.0.0
++      react: ^18.0.0 || ^19.0.0
++      react-dom: ^18.0.0 || ^19.0.0
++      solid-js: ^1.0.0
++      svelte: ^4.0.0 || ^5.0.0
++      vitest: ^2.0.0 || ^3.0.0 || ^4.0.0
++      vue: ^3.0.0
++    peerDependenciesMeta:
++      '@lynx-js/react':
++        optional: true
++      '@prisma/client':
++        optional: true
++      '@sveltejs/kit':
++        optional: true
++      '@tanstack/react-start':
++        optional: true
++      '@tanstack/solid-start':
++        optional: true
++      better-sqlite3:
++        optional: true
++      drizzle-kit:
++        optional: true
++      drizzle-orm:
++        optional: true
++      mongodb:
++        optional: true
++      mysql2:
++        optional: true
++      next:
++        optional: true
++      pg:
++        optional: true
++      prisma:
++        optional: true
++      react:
++        optional: true
++      react-dom:
++        optional: true
++      solid-js:
++        optional: true
++      svelte:
++        optional: true
++      vitest:
++        optional: true
++      vue:
++        optional: true
++
++  better-call@1.3.7:
++    resolution: {integrity: sha512-Al51/hjp2SSp6CRTa3F2ptcx4yQVS1xWKoY6jcVXqNYOap6mHFP2jUBn5EwIL4iIed1/Sq4hlQ+Umm6EflZG+w==}
++    peerDependencies:
++      zod: ^4.0.0
++    peerDependenciesMeta:
++      zod:
++        optional: true
++
++  better-call@2.0.2:
++    resolution: {integrity: sha512-QqSKtfJD/ZzQdlm7BTUxT9RCA0AxcrZEMyU/yl7/uoFDoR7YCTdc555xQXjReo75M6/xkskPawPdhbn3fge4Cg==}
++    peerDependencies:
++      zod: ^4.0.0
++    peerDependenciesMeta:
++      zod:
++        optional: true
++
+   blake3-wasm@2.1.5:
+     resolution: {integrity: sha512-F1+K8EbfOZE49dtoPtmxUQrpXaBIl3ICvasLh+nJta0xkz+9kF/7uet9fLnwKqhDrmj6g+6K3Tw9yQPUg2ka5g==}
+ 
++  bowser@2.14.1:
++    resolution: {integrity: sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg==}
++
+   brace-expansion@1.1.14:
+     resolution: {integrity: sha512-MWPGfDxnyzKU7rNOW9SP/c50vi3xrmrua/+6hfPbCS2ABNWfx24vPidzvC7krjU/RTo235sV776ymlsMtGKj8g==}
+ 
+@@ -2928,6 +3557,9 @@ packages:
+   colorette@1.4.0:
+     resolution: {integrity: sha512-Y2oEozpomLn7Q3HFP7dpww7AtMJplbM9lGZP6RDfHqmbeRjiwRg4n6VM6j4KLmRke85uWEI7JqF17f3pqdRA0g==}
+ 
++  comlink@4.4.2:
++    resolution: {integrity: sha512-OxGdvBmJuNKSCMO4NTl1L47VRp6xn2wG4F/2hYzB6tiCb709otOxtEYCSvK80PtjODfXXZu8ds+Nw5kVCjqd2g==}
++
+   commander@2.20.3:
+     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
+ 
+@@ -2945,6 +3577,13 @@ packages:
+     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
+     engines: {node: '>=18'}
+ 
++  copy-anything@4.1.4:
++    resolution: {integrity: sha512-/LLeW0CtsoSybVkEpYjifB2Pis8DUSuwY7QD9FiR98fWkdbdrACw3ilckfnAHMecQ+RFEdZlRt6eCXhYHJbl/g==}
++    engines: {node: '>=18'}
++
++  core-js@3.50.0:
++    resolution: {integrity: sha512-BRWgOLKkFeCgRudR6zrs8p9XJZcE14grzKMMssoYrk6krtuEZ7MTKPIY5RzOnqsEKIR9kst7wNzphttraT+Yqw==}
++
+   cross-spawn@7.0.6:
+     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
+     engines: {node: '>= 8'}
+@@ -3065,6 +3704,10 @@ packages:
+   deep-is@0.1.4:
+     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
+ 
++  deepmerge@4.3.1:
++    resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
++    engines: {node: '>=0.10.0'}
++
+   define-data-property@1.1.4:
+     resolution: {integrity: sha512-rBMvIzlpA8v6E+SJZoo++HAYqsLrkg7MSfIinMPFhmkorw7X+dOXVJQs+QT69zGkzMyfDnIMN2Wid1+NbL3T+A==}
+     engines: {node: '>= 0.4'}
+@@ -3073,6 +3716,12 @@ packages:
+     resolution: {integrity: sha512-8QmQKqEASLd5nx0U1B1okLElbUuuttJ/AnYmRXbbbGDWh6uS208EjD4Xqq/I9wK7u0v6O08XhTWnt5XtEbR6Dg==}
+     engines: {node: '>= 0.4'}
+ 
++  defu@6.1.7:
++    resolution: {integrity: sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==}
++
++  detect-europe-js@0.1.2:
++    resolution: {integrity: sha512-lgdERlL3u0aUdHocoouzT10d9I89VVhk0qNRmll7mXdGfJT1/wqZ2ZLA4oJAjeACPY5fT1wsbq2AT+GkuInsow==}
++
+   detect-libc@2.1.2:
+     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
+     engines: {node: '>=8'}
+@@ -3084,6 +3733,19 @@ packages:
+     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
+     engines: {node: '>=0.10.0'}
+ 
++  dom-serializer@2.0.0:
++    resolution: {integrity: sha512-wIkAryiqt/nV5EQKqQpo3SToSOV9J0DnbJqwK7Wv/Trc92zIAYZ4FlMu+JPFW1DfGFt81ZTCGgDEabffXeLyJg==}
++
++  domelementtype@2.3.0:
++    resolution: {integrity: sha512-OLETBj6w0OsagBwdXnPdN0cnMfF9opN69co+7ZrbfPGrdpPVNBUj02spi6B1N7wChLQiPn4CSH/zJvXw56gmHw==}
++
++  domhandler@5.0.3:
++    resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
++    engines: {node: '>= 4'}
++
++  domutils@3.2.2:
++    resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
++
+   drizzle-kit@0.31.10:
+     resolution: {integrity: sha512-7OZcmQUrdGI+DUNNsKBn1aW8qSoKuTH7d0mYgSP8bAzdFzKoovxEFnoGQp2dVs82EOJeYycqRtciopszwUf8bw==}
+     hasBin: true
+@@ -3187,6 +3849,9 @@ packages:
+   electron-to-chromium@1.5.358:
+     resolution: {integrity: sha512-EO7tKm3QxRqTs1lSuPXzl6yRAwznehp0AH9OoMOIC+4mQzTFday8FJCO5KU6J/TFSQXEOahNq4vTKpz1jmCVOA==}
+ 
++  elen@1.0.10:
++    resolution: {integrity: sha512-ZL799/V/kzxYJ6Wlfktreq6qQWfGc3VkGUQJW5lZQ8/MhsQiKTAwERPfhEwIsV2movRGe2DfV7H2MjRw76Z7Wg==}
++
+   embla-carousel-react@8.6.0:
+     resolution: {integrity: sha512-0/PjqU7geVmo6F734pmPqpyHqiM99olvyecY7zdweCw+6tKEXnrE90pBiBbMMU8s5tICemzpQ3hi5EpxzGW+JA==}
+     peerDependencies:
+@@ -3214,6 +3879,10 @@ packages:
+     resolution: {integrity: sha512-QyL119InA+XXEkNLNTPCXPugSvOfhwv0JOlGNzvxs0hZaiHLNvXSpudUWsOlsXGWJh8G6ckCScEkVHfX3kw/2Q==}
+     engines: {node: '>=10.13.0'}
+ 
++  entities@4.5.0:
++    resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
++    engines: {node: '>=0.12'}
++
+   env-runner@0.2.3:
+     resolution: {integrity: sha512-S8EFBKyznRwPVwayK187cYjvnpgC92xy+q0BIF++V965pfjMVVRbQ/HoTYGA/1EHmZ7E68k6Heq+4WnvVhOL5w==}
+     hasBin: true
+@@ -3427,6 +4096,14 @@ packages:
+     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
+     engines: {node: '>=0.8.x'}
+ 
++  eventsource-parser@3.1.1:
++    resolution: {integrity: sha512-EKN1vKAMcZ8MlYMpaNuxN6R9yakzH6uajHcHVTqWJzvu5pWw9DyhbP35HH8MVBQ+dZjAfDxk+A8NiR9KWaXiyQ==}
++    engines: {node: '>=18.0.0'}
++
++  eventsource@4.1.1:
++    resolution: {integrity: sha512-D6bTRWh6KahHTK/m4WnjPQyEinNPf9eFLEZSEoj7d6fTibspnAVYfzHvirL7u/aoX5d9YYfIkBVAhmigUELk9w==}
++    engines: {node: '>=20.0.0'}
++
+   expect-type@1.4.0:
+     resolution: {integrity: sha512-KfYbmpRm0VbLjEvVa9yGwCi9GI34xvi7A/HXYWQO65CSD2u3MczUJSuwXKFIxlGsgBQizV9q5J9NHj4VG0n+pA==}
+     engines: {node: '>=12.0.0'}
+@@ -3634,9 +4311,19 @@ packages:
+     resolution: {integrity: sha512-Ox1pJVrDCyGHMG9CFg1tmrRUMRPRsAWYc/PinY0XzJU4K7y7vjNoLKIQ7BR5UJMCxNN8EM1MNDmHWA/B3aZUuw==}
+     engines: {node: '>=6'}
+ 
++  hoist-non-react-statics@3.3.2:
++    resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
++
+   hookable@6.1.2:
+     resolution: {integrity: sha512-+abwxtiEA52GCVIsQqut3S/uKTbUwYIp4Pe/vv+6py5XiXBCqMZHg6pA6Y5qhgLSEys0/cYuPbO0z1QFj5ZCmg==}
+ 
++  html-to-text@9.0.5:
++    resolution: {integrity: sha512-qY60FjREgVZL03vJU6IfMV4GDjGBIoOyvuFdpBDIX9yTlDw0TjxVBQp+P8NvpdIXNJvfWBTNul7fsAQJq2FNpg==}
++    engines: {node: '>=14'}
++
++  htmlparser2@8.0.2:
++    resolution: {integrity: sha512-GYdjWKDkbRLkZ5geuHs5NY1puJ+PXwP7+fHPRz06Eirsb9ugf6d8kkXav6ADhcODhFFPMIXyxkxSuMf3D6NCFA==}
++
+   https-proxy-agent@7.0.6:
+     resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
+     engines: {node: '>= 14'}
+@@ -3779,6 +4466,9 @@ packages:
+     resolution: {integrity: sha512-ISWac8drv4ZGfwKl5slpHG9OwPNty4jOWPRIhBpxOoD+hqITiwuipOQ2bNthAzwA3B4fIjO4Nln74N0S9byq8A==}
+     engines: {node: '>= 0.4'}
+ 
++  is-standalone-pwa@0.1.1:
++    resolution: {integrity: sha512-9Cbovsa52vNQCjdXOzeQq5CnCbAcRk05aU62K20WO372NrTv0NxibLFCK6lQ4/iZEFdEA3p3t2VNOn8AJ53F5g==}
++
+   is-string@1.1.1:
+     resolution: {integrity: sha512-BtEeSsoaQjlSPBemMQIrY1MY0uM6vnS1g5fmufYOtnxLGUZM2178PKbhsk7Ffv58IX+ZtcvoGwccYsh0PglkAA==}
+     engines: {node: '>= 0.4'}
+@@ -3821,6 +4511,9 @@ packages:
+     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
+     hasBin: true
+ 
++  jose@6.2.5:
++    resolution: {integrity: sha512-2E5L2yRp03FnwreJLJX8/r7mHiZICCf8kG7fAsTWkSQTDAcc46NIZoQLKy+EJ8sPoJlxyS4OQR5H70LjIZZlIQ==}
++
+   js-levenshtein@1.1.6:
+     resolution: {integrity: sha512-X2BB11YZtrRqY4EnQcLX5Rh373zbK4alC1FW7D7MBhL2gtcC17cTnr6DmfHZeS0s2rTHjUTMMHfG7gO8SSdw+g==}
+     engines: {node: '>=0.10.0'}
+@@ -3876,6 +4569,10 @@ packages:
+     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
+     engines: {node: '>=6'}
+ 
++  kysely@0.29.6:
++    resolution: {integrity: sha512-hHaB8C/rfzDDtr/t8YZwxAuPJTT0zHyaPoVzcXwDYhYNAgH/4sIfVhi/XLLIY+bL/FqaIJnjATDbi8ObSELmxg==}
++    engines: {node: '>=22.0.0'}
++
+   language-subtag-registry@0.3.23:
+     resolution: {integrity: sha512-0K65Lea881pHotoGEa5gDlMxt3pctLi2RplBb7Ezh4rRdLEOtgi7n4EwK9lamnUCkKBqaeKRVebTq6BAxSkpXQ==}
+ 
+@@ -3883,6 +4580,9 @@ packages:
+     resolution: {integrity: sha512-MbjN408fEndfiQXbFQ1vnd+1NoLDsnQW41410oQBXiyXDMYH5z505juWa4KUE1LqxRC7DgOgZDbKLxHIwm27hA==}
+     engines: {node: '>=0.10'}
+ 
++  leac@0.6.0:
++    resolution: {integrity: sha512-y+SqErxb8h7nE/fiEX07jsbuhrpO9lL8eca7/Y1nuWV2moNlXhyd59iDGcRf6moVyDMbmTNzL40SUyrFU/yDpg==}
++
+   levn@0.4.1:
+     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
+     engines: {node: '>= 0.8.0'}
+@@ -4056,6 +4756,11 @@ packages:
+   lru-cache@5.1.1:
+     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
+ 
++  lucide-react@0.555.0:
++    resolution: {integrity: sha512-D8FvHUGbxWBRQM90NZeIyhAvkFfsh3u9ekrMvJ30Z6gnpBHS6HC6ldLg7tL45hwiIz/u66eKDtdA23gwwGsAHA==}
++    peerDependencies:
++      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
++
+   lucide-react@1.31.0:
+     resolution: {integrity: sha512-G8u2eEtoHUnUa9f8lbvqDhCiORMnYLdUEo06EEG9MQvHQrInKcX3Pa2TH39MM5qyzRcWETxB0+aOwAPI1g1kEg==}
+     peerDependencies:
+@@ -4064,6 +4769,11 @@ packages:
+   magic-string@0.30.21:
+     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
+ 
++  marked@15.0.12:
++    resolution: {integrity: sha512-8dD6FusOQSrpv9Z1rdNMdlSgQOIP880DHqnohobOmYLElGEqAL/JvxvuxZO16r4HtjTlfPRDC1hbvxC9dPN2nA==}
++    engines: {node: '>= 18'}
++    hasBin: true
++
+   math-intrinsics@1.1.0:
+     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
+     engines: {node: '>= 0.4'}
+@@ -4114,6 +4824,10 @@ packages:
+       typescript:
+         optional: true
+ 
++  mutative@1.3.0:
++    resolution: {integrity: sha512-8MJj6URmOZAV70dpFe1YnSppRTKC4DsMkXQiBDFayLcDI4ljGokHxmpqaBQuDWa4iAxWaJJ1PS8vAmbntjjKmQ==}
++    engines: {node: '>=14.0'}
++
+   mute-stream@3.0.0:
+     resolution: {integrity: sha512-dkEJPVvun4FryqBmZ5KhDo0K9iDXAwn08tMLDinNdRBNPcYEDiWYysLcc6k3mjTMlbP9KyylvRpd4wFtwrT9rw==}
+     engines: {node: ^20.17.0 || >=22.9.0}
+@@ -4123,6 +4837,15 @@ packages:
+     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+     hasBin: true
+ 
++  nanoid@5.1.16:
++    resolution: {integrity: sha512-kVrnsrJqMR8+oLJnGEmSWw9BivK5mt7H3FZatVRjrc5wGqFYuBxX1yG7+A7Gi5AefkX6t/oCkizcQgpu0cY1dQ==}
++    engines: {node: ^18 || >=20}
++    hasBin: true
++
++  nanostores@1.5.4:
++    resolution: {integrity: sha512-4UXY7OAJEK0Y6V3SudBU7cXjAzTDc189R78dDOh0Xbm19gpKYto6WizSg58LJf12lTsRxKSLGyE117OiLpM4DQ==}
++    engines: {node: ^20.0.0 || >=22.0.0}
++
+   napi-postinstall@0.3.4:
+     resolution: {integrity: sha512-PHI5f1O0EP5xJ9gQmFGMS6IZcrVvTjpXjz7Na41gTE7eE2hK11lg04CECCYEEjdc17EV4DO+fkGEtt7TpTaTiQ==}
+     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
+@@ -4254,6 +4977,9 @@ packages:
+     resolution: {integrity: sha512-ybiGyvspI+fAoRQbIPRddCcSTV9/LsJbf0e/S85VLowVGzRmokfneg2kwVW/KU5rOXrPSbF1qAKPMgNTqqROQQ==}
+     engines: {node: '>=18'}
+ 
++  parseley@0.12.1:
++    resolution: {integrity: sha512-e6qHKe3a9HWr0oMRVDTRhKce+bRO8VGQR3NyVwcjwrbhMmFCX9KszEV35+rn4AdilFAq9VPxP/Fe1wC9Qjd2lw==}
++
+   path-exists@4.0.0:
+     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
+     engines: {node: '>=8'}
+@@ -4271,6 +4997,9 @@ packages:
+   pathe@2.0.3:
+     resolution: {integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==}
+ 
++  peberminta@0.9.0:
++    resolution: {integrity: sha512-XIxfHpEuSJbITd1H3EeQwpcZbTLHc+VVr8ANI9t5sit565tsI4/xK3KWTUFE2e6QiangUkh3B0jihzmGnNrRsQ==}
++
+   picocolors@1.1.1:
+     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
+ 
+@@ -4311,6 +5040,15 @@ packages:
+     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
+     engines: {node: '>= 0.8.0'}
+ 
++  prettier@3.9.9:
++    resolution: {integrity: sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg==}
++    engines: {node: '>=14'}
++    hasBin: true
++
++  prismjs@1.30.0:
++    resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
++    engines: {node: '>=6'}
++
+   prop-types@15.8.1:
+     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
+ 
+@@ -4318,6 +5056,16 @@ packages:
+     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
+     engines: {node: '>=6'}
+ 
++  pvtsutils@1.3.6:
++    resolution: {integrity: sha512-PLgQXQ6H2FWCaeRak8vvk1GW462lMxB5s3Jm673N82zI4vqtVUPuZdffdZbPDFRoU8kAhItWFtPCWiPpp4/EDg==}
++
++  pvutils@1.2.0:
++    resolution: {integrity: sha512-BbubeCEyTuQjVMakvJQ/Sxbc93F2pwmbsxONT/ZRrwU7Ua38d8unYTwXpTVLAKJ4BDuH9IGztCjQcd/N/39Dvg==}
++    engines: {node: '>=16.0.0'}
++
++  qrcode-generator@2.0.4:
++    resolution: {integrity: sha512-mZSiP6RnbHl4xL2Ap5HfkjLnmxfKcPWpWe/c+5XxCuetEenqmNFf1FH/ftXPCtFG5/TDobjsjz6sSNL0Sr8Z9g==}
++
+   queue-microtask@1.2.3:
+     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
+ 
+@@ -4334,6 +5082,11 @@ packages:
+       '@types/react-dom':
+         optional: true
+ 
++  react-async-script@1.2.0:
++    resolution: {integrity: sha512-bCpkbm9JiAuMGhkqoAiC0lLkb40DJ0HOEJIku+9JDjxX3Rcs+ztEOG13wbrOskt3n2DTrjshhaQ/iay+SnGg5Q==}
++    peerDependencies:
++      react: '>=16.4.1'
++
+   react-day-picker@10.0.1:
+     resolution: {integrity: sha512-eNh6BlwcYInWaJtRv18mXQ06Ys/H6rdTZAnTaSdOYJuTpwP1JMCHNd1FDRadA+gbeinq+psdULN5Xnowy9mV8w==}
+     engines: {node: '>=18'}
+@@ -4349,6 +5102,11 @@ packages:
+     peerDependencies:
+       react: ^19.2.6
+ 
++  react-google-recaptcha@3.1.0:
++    resolution: {integrity: sha512-cYW2/DWas8nEKZGD7SCu9BSuVz8iOcOLHChHyi7upUuVhkpkhYG/6N3KDiTQ3XAiZ2UAZkfvYKMfAHOzBOcGEg==}
++    peerDependencies:
++      react: '>=16.4.1'
++
+   react-hook-form@7.85.0:
+     resolution: {integrity: sha512-U2MTriFXnclmV4rOE20p2DcRFv5WEg3FIcBFOKcOLFHDVvGIMPvLTkTWefUsonmlaVy23khVDxDWym6uJVGOzw==}
+     engines: {node: '>=18.0.0'}
+@@ -4358,6 +5116,11 @@ packages:
+   react-is@16.13.1:
+     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
+ 
++  react-qr-code@2.2.0:
++    resolution: {integrity: sha512-e5nS0UUN22K3Nf8KBRUzemfdJ6OmnN5w+kbnj1lvJaol9RyVRFeGl05bCkxSN2ZegbLxjjYjX1+mmAoX9+fAhw==}
++    peerDependencies:
++      react: '*'
++
+   react-redux@9.3.0:
+     resolution: {integrity: sha512-KQopgqFo/p/fgmAs5qz6p5RWaNAzq40WAu7fJIXnQpYxFPbJYtsJPWvGeF2rOBaY/kEuV77AVsX8TsQzKm+A/g==}
+     peerDependencies:
+@@ -4434,6 +5197,9 @@ packages:
+   redux@5.0.1:
+     resolution: {integrity: sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w==}
+ 
++  reflect-metadata@0.2.2:
++    resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
++
+   reflect.getprototypeof@1.0.10:
+     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}
+     engines: {node: '>= 0.4'}
+@@ -4485,6 +5251,9 @@ packages:
+     engines: {node: ^20.19.0 || >=22.12.0}
+     hasBin: true
+ 
++  rou3@0.7.12:
++    resolution: {integrity: sha512-iFE4hLDuloSWcD7mjdCDhx2bKcIsYbtOTpfH5MHHLSKMOUyjqQXTeZVa289uuwEGEKFoE/BAPbhaU4B774nceg==}
++
+   rou3@0.9.2:
+     resolution: {integrity: sha512-3SOzvaAg8rkHrXtRjpCvCvbyO5to9oOO27Z/XqHEYXfMRVSw/qMIVdmaOk9W2lcRLtR6dlqTjo9hDeJk70QBYQ==}
+ 
+@@ -4514,6 +5283,9 @@ packages:
+     resolution: {integrity: sha512-eflK8wEtyOE6+hsaRVPxvUKYCpRgzLqDTb8krvAsRIwOGlHoSgYLgBXoubGgLd2fT41/OUYdb48v4k4WWHQurA==}
+     engines: {node: '>= 10.13.0'}
+ 
++  selderee@0.11.0:
++    resolution: {integrity: sha512-5TF+l7p4+OsnP8BCCvSyZiSPc4x4//p5uPwK8TCnVPJYRmU2aYKMpOXvw8zM5a5JvuuCGN1jmsMwuU2W02ukfA==}
++
+   semver@6.3.1:
+     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
+     hasBin: true
+@@ -4588,6 +5360,9 @@ packages:
+       '@types/react':
+         optional: true
+ 
++  sorted-btree@1.8.1:
++    resolution: {integrity: sha512-395+XIP+wqNn3USkFSrNz7G3Ss/MXlZEqesxvzCRFwL14h6e8LukDHdLBePn5pwbm5OQ9vGu8mDyz2lLDIqamQ==}
++
+   source-map-js@1.2.1:
+     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
+     engines: {node: '>=0.10.0'}
+@@ -4687,6 +5462,10 @@ packages:
+       babel-plugin-macros:
+         optional: true
+ 
++  superjson@2.2.6:
++    resolution: {integrity: sha512-H+ue8Zo4vJmV2nRjpx86P35lzwDT3nItnIsocgumgr0hHMQ+ZGq5vrERg9kJBo5AWGmxZDhzDo+WVIJqkB0cGA==}
++    engines: {node: '>=16'}
++
+   supports-color@10.2.2:
+     resolution: {integrity: sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==}
+     engines: {node: '>=18'}
+@@ -4810,6 +5589,9 @@ packages:
+   tsconfig-paths@3.15.0:
+     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}
+ 
++  tslib@1.14.1:
++    resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
++
+   tslib@2.8.1:
+     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+ 
+@@ -4818,6 +5600,10 @@ packages:
+     engines: {node: '>=18.0.0'}
+     hasBin: true
+ 
++  tsyringe@4.10.0:
++    resolution: {integrity: sha512-axr3IdNuVIxnaK5XGEUFTu3YmAQ6lllgrvqfEoR16g/HGnYY/6We4oWENtAnzK6/LpJ2ur9PAb80RBt7/U4ugw==}
++    engines: {node: '>= 6.0.0'}
++
+   turbo-stream@3.2.0:
+     resolution: {integrity: sha512-EK+bZ9UVrVh7JLslVFOV0GEMsociOqVOvEMTAd4ixMyffN5YNIEdLZWXUx5PJqDbTxSIBWw04HS9gCY4frYQDQ==}
+ 
+@@ -4864,6 +5650,13 @@ packages:
+     engines: {node: '>=14.17'}
+     hasBin: true
+ 
++  ua-is-frozen@0.1.2:
++    resolution: {integrity: sha512-RwKDW2p3iyWn4UbaxpP2+VxwqXh0jpvdxsYpZ5j/MLLiQOfbsV5shpgQiw93+KMYQPcteeMQ289MaAFzs3G9pw==}
++
++  ua-parser-js@2.0.10:
++    resolution: {integrity: sha512-t+3Ktbq0Ies2vaSezfOaWiolH4OigQIO1dk+1xDpOydB1COVPocVYOrEV5rqZ0kFY9XYG1v9LutCyMgYBpABcw==}
++    hasBin: true
++
+   unbox-primitive@1.1.0:
+     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
+     engines: {node: '>= 0.4'}
+@@ -4930,6 +5723,10 @@ packages:
+     peerDependencies:
+       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+ 
++  uuid@11.1.1:
++    resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
++    hasBin: true
++
+   vaul@1.1.2:
+     resolution: {integrity: sha512-ZFkClGpWyI2WUQjdLJ/BaGuV6AVQiJ3uELGk3OYtP+B6yCO7Cmn9vPFXVJkRaGkOJu3m8bQMgtyzNHixULceQA==}
+     peerDependencies:
+@@ -5051,6 +5848,9 @@ packages:
+       jsdom:
+         optional: true
+ 
++  warning@4.0.3:
++    resolution: {integrity: sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==}
++
+   watchpack@2.5.1:
+     resolution: {integrity: sha512-Zn5uXdcFNIA1+1Ei5McRd+iRzfhENPCe7LeABkJtNulSxjma+l7ltNx55BWZkRlwRnpOgHqxnjyaDgJnNXnqzg==}
+     engines: {node: '>=10.13.0'}
+@@ -5058,6 +5858,9 @@ packages:
+   web-vitals@4.2.4:
+     resolution: {integrity: sha512-r4DIlprAGwJ7YM11VZp4R884m0Vmgr6EAKe3P+kO0PPj3Unqyvv59rczf6UiGcb9Z8QxZVcqKNwv/g0WNdWwsw==}
+ 
++  web-worker@1.5.0:
++    resolution: {integrity: sha512-RiMReJrTAiA+mBjGONMnjVDP2u3p9R1vkcGz6gDIrOMT3oGuYwX2WRMYI9ipkphSuE5XKEhydbhNEJh4NY9mlw==}
++
+   webpack-sources@3.4.1:
+     resolution: {integrity: sha512-eACpxRN02yaawnt+uUNIF7Qje6A9zArxBbcAJjK1PK3S9Ycg5jIuJ8pW4q8EMnwNZCEGltcjkRx1QzOxOkKD8A==}
+     engines: {node: '>=10.13.0'}
+@@ -5173,9 +5976,15 @@ packages:
+   zod@3.25.76:
+     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+ 
++  zod@4.3.6:
++    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
++
+   zod@4.4.3:
+     resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+ 
++  zod@4.6.5:
++    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
++
+ snapshots:
+ 
+   '@alloc/quick-lru@5.2.0': {}
+@@ -5307,6 +6116,105 @@ snapshots:
+     optionalDependencies:
+       '@types/react': 19.2.14
+ 
++  '@better-auth/api-key@1.7.6(@better-auth/core@1.7.6(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(better-auth@1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1))))(better-call@2.0.2(zod@4.4.3))':
++    dependencies:
++      '@better-auth/core': 1.7.6(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4)
++      '@better-auth/utils': 0.4.2
++      better-auth: 1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1)))
++      better-call: 2.0.2(zod@4.4.3)
++      zod: 4.6.5
++
++  '@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4)':
++    dependencies:
++      '@better-auth/utils': 0.4.2
++      '@better-fetch/fetch': 1.3.1
++      '@opentelemetry/semantic-conventions': 1.43.0
++      '@standard-schema/spec': 1.1.0
++      better-call: 1.3.7(zod@4.4.3)
++      jose: 6.2.5
++      kysely: 0.29.6
++      nanostores: 1.5.4
++      zod: 4.4.3
++    optionalDependencies:
++      '@cloudflare/workers-types': 5.20260921.1
++
++  '@better-auth/core@1.7.6(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4)':
++    dependencies:
++      '@better-auth/utils': 0.4.2
++      '@better-fetch/fetch': 1.3.1
++      '@opentelemetry/semantic-conventions': 1.43.0
++      '@standard-schema/spec': 1.1.0
++      better-call: 1.3.7(zod@4.4.3)
++      jose: 6.2.5
++      kysely: 0.29.6
++      nanostores: 1.5.4
++      zod: 4.6.5
++
++  '@better-auth/drizzle-adapter@1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))':
++    dependencies:
++      '@better-auth/core': 1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4)
++      '@better-auth/utils': 0.4.2
++    optionalDependencies:
++      drizzle-orm: 0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6)
++
++  '@better-auth/kysely-adapter@1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(kysely@0.29.6)':
++    dependencies:
++      '@better-auth/core': 1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4)
++      '@better-auth/utils': 0.4.2
++    optionalDependencies:
++      kysely: 0.29.6
++
++  '@better-auth/memory-adapter@1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)':
++    dependencies:
++      '@better-auth/core': 1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4)
++      '@better-auth/utils': 0.4.2
++
++  '@better-auth/mongo-adapter@1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)':
++    dependencies:
++      '@better-auth/core': 1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4)
++      '@better-auth/utils': 0.4.2
++
++  '@better-auth/passkey@1.6.23(@better-auth/core@1.7.6(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1))))(better-call@1.3.7(zod@4.4.3))(nanostores@1.5.4)':
++    dependencies:
++      '@better-auth/core': 1.7.6(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4)
++      '@better-auth/utils': 0.4.2
++      '@better-fetch/fetch': 1.3.1
++      '@simplewebauthn/browser': 13.3.0
++      '@simplewebauthn/server': 13.3.3
++      better-auth: 1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1)))
++      better-call: 1.3.7(zod@4.4.3)
++      nanostores: 1.5.4
++      zod: 4.4.3
++
++  '@better-auth/prisma-adapter@1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)':
++    dependencies:
++      '@better-auth/core': 1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4)
++      '@better-auth/utils': 0.4.2
++
++  '@better-auth/telemetry@1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)':
++    dependencies:
++      '@better-auth/core': 1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4)
++      '@better-auth/utils': 0.4.2
++      '@better-fetch/fetch': 1.3.1
++
++  '@better-auth/utils@0.3.1': {}
++
++  '@better-auth/utils@0.4.2':
++    dependencies:
++      '@noble/hashes': 2.4.0
++
++  '@better-fetch/fetch@1.3.1': {}
++
++  '@better-fetch/fetch@1.3.2': {}
++
++  '@captchafox/react@1.13.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
++    dependencies:
++      '@captchafox/types': 1.6.0
++      react: 19.2.6
++      react-dom: 19.2.6(react@19.2.6)
++
++  '@captchafox/types@1.6.0': {}
++
+   '@cloudflare/kv-asset-handler@0.5.0': {}
+ 
+   '@cloudflare/unenv-preset@2.16.2(unenv@2.0.0-rc.24)(workerd@1.20260921.1)':
+@@ -5368,6 +6276,68 @@ snapshots:
+ 
+   '@date-fns/tz@1.5.0': {}
+ 
++  '@daveyplate/better-auth-tanstack@1.3.6(@tanstack/query-core@5.104.0)(@tanstack/react-query@5.104.0(react@19.2.6))(better-auth@1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1))))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
++    dependencies:
++      '@tanstack/query-core': 5.104.0
++      '@tanstack/react-query': 5.104.0(react@19.2.6)
++      better-auth: 1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1)))
++      react: 19.2.6
++      react-dom: 19.2.6(react@19.2.6)
++
++  '@daveyplate/better-auth-ui@3.4.0(2c456b6e375f6081c124eed0787b9a12)':
++    dependencies:
++      '@better-auth/api-key': 1.7.6(@better-auth/core@1.7.6(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(better-auth@1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1))))(better-call@2.0.2(zod@4.4.3))
++      '@better-auth/passkey': 1.6.23(@better-auth/core@1.7.6(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1))))(better-call@1.3.7(zod@4.4.3))(nanostores@1.5.4)
++      '@better-fetch/fetch': 1.3.1
++      '@captchafox/react': 1.13.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@daveyplate/better-auth-tanstack': 1.3.6(@tanstack/query-core@5.104.0)(@tanstack/react-query@5.104.0(react@19.2.6))(better-auth@1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1))))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@hcaptcha/react-hcaptcha': 2.2.0
++      '@hookform/resolvers': 5.7.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.85.0(react@19.2.6))(zod@4.4.3)
++      '@instantdb/react': 1.0.67(react@19.2.6)
++      '@marsidev/react-turnstile': 1.6.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@noble/hashes': 2.4.0
++      '@radix-ui/react-avatar': 1.2.6(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-checkbox': 1.3.11(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-context': 1.2.2(@types/react@19.2.14)(react@19.2.6)
++      '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-dropdown-menu': 2.1.24(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-label': 2.1.15(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-select': 2.3.7(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-separator': 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-slot': 1.3.3(@types/react@19.2.14)(react@19.2.6)
++      '@radix-ui/react-tabs': 1.1.21(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-tooltip': 1.2.16(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-use-callback-ref': 1.1.4(@types/react@19.2.14)(react@19.2.6)
++      '@radix-ui/react-use-layout-effect': 1.1.4(@types/react@19.2.14)(react@19.2.6)
++      '@react-email/components': 1.0.12(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@tanstack/react-query': 5.104.0(react@19.2.6)
++      '@triplit/client': 1.0.50(typescript@5.9.3)
++      '@triplit/react': 1.0.51(react@19.2.6)(typescript@5.9.3)
++      '@wojtekmaj/react-recaptcha-v3': 0.1.4(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      better-auth: 1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1)))
++      better-call: 2.0.2(zod@4.4.3)
++      bowser: 2.14.1
++      class-variance-authority: 0.7.1
++      clsx: 2.1.1
++      input-otp: 1.4.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      lucide-react: 0.555.0(react@19.2.6)
++      react: 19.2.6
++      react-dom: 19.2.6(react@19.2.6)
++      react-google-recaptcha: 3.1.0(react@19.2.6)
++      react-hook-form: 7.85.0(react@19.2.6)
++      react-qr-code: 2.2.0(react@19.2.6)
++      sonner: 2.0.8(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      tailwind-merge: 3.6.0
++      tailwindcss: 4.2.1
++      vaul: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      zod: 4.4.3
++    transitivePeerDependencies:
++      - '@better-auth/core'
++      - '@better-auth/utils'
++      - '@types/react'
++      - '@types/react-dom'
++
+   '@drizzle-team/brocli@0.10.2': {}
+ 
+   '@emnapi/core@1.10.0':
+@@ -5686,6 +6656,19 @@ snapshots:
+ 
+   '@floating-ui/utils@0.2.12': {}
+ 
++  '@hcaptcha/loader@2.4.2': {}
++
++  '@hcaptcha/react-hcaptcha@1.17.4(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
++    dependencies:
++      '@babel/runtime': 7.29.7
++      '@hcaptcha/loader': 2.4.2
++      react: 19.2.6
++      react-dom: 19.2.6(react@19.2.6)
++
++  '@hcaptcha/react-hcaptcha@2.2.0': {}
++
++  '@hexagon/base64@1.1.28': {}
++
+   '@hookform/resolvers@5.7.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.85.0(react@19.2.6))(zod@3.25.76)':
+     dependencies:
+       '@standard-schema/utils': 0.3.0
+@@ -5696,6 +6679,16 @@ snapshots:
+       ajv-formats: 2.1.1(ajv@8.20.0)
+       zod: 3.25.76
+ 
++  '@hookform/resolvers@5.7.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.85.0(react@19.2.6))(zod@4.4.3)':
++    dependencies:
++      '@standard-schema/utils': 0.3.0
++      react-hook-form: 7.85.0(react@19.2.6)
++    optionalDependencies:
++      '@standard-schema/spec': 1.1.0
++      ajv: 8.20.0
++      ajv-formats: 2.1.1(ajv@8.20.0)
++      zod: 4.4.3
++
+   '@humanfs/core@0.19.2':
+     dependencies:
+       '@humanfs/types': 0.15.0
+@@ -5845,6 +6838,28 @@ snapshots:
+     optionalDependencies:
+       '@types/node': 22.19.19
+ 
++  '@instantdb/core@1.0.67':
++    dependencies:
++      '@instantdb/version': 1.0.67
++      mutative: 1.3.0
++      uuid: 11.1.1
++
++  '@instantdb/react-common@1.0.67(react@19.2.6)':
++    dependencies:
++      '@instantdb/core': 1.0.67
++      '@instantdb/version': 1.0.67
++      react: 19.2.6
++
++  '@instantdb/react@1.0.67(react@19.2.6)':
++    dependencies:
++      '@instantdb/core': 1.0.67
++      '@instantdb/react-common': 1.0.67(react@19.2.6)
++      '@instantdb/version': 1.0.67
++      eventsource: 4.1.1
++      react: 19.2.6
++
++  '@instantdb/version@1.0.67': {}
++
+   '@jridgewell/gen-mapping@0.3.13':
+     dependencies:
+       '@jridgewell/sourcemap-codec': 1.5.5
+@@ -5874,6 +6889,13 @@ snapshots:
+       '@jridgewell/resolve-uri': 3.1.2
+       '@jridgewell/sourcemap-codec': 1.5.5
+ 
++  '@levischuck/tiny-cbor@0.2.11': {}
++
++  '@marsidev/react-turnstile@1.6.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++      react-dom: 19.2.6(react@19.2.6)
++
+   '@msw/cloudflare@0.0.1(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))':
+     dependencies:
+       '@mswjs/interceptors': 0.41.9
+@@ -5902,6 +6924,170 @@ snapshots:
+       '@tybys/wasm-util': 0.10.2
+     optional: true
+ 
++  '@neondatabase/auth-ui@0.3.0-beta(eb06d7f030a0d74d325cf4550ef52f9f)':
++    dependencies:
++      '@better-auth/passkey': 1.6.23(@better-auth/core@1.7.6(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1))))(better-call@1.3.7(zod@4.4.3))(nanostores@1.5.4)
++      '@captchafox/react': 1.13.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@daveyplate/better-auth-ui': 3.4.0(2c456b6e375f6081c124eed0787b9a12)
++      '@hcaptcha/react-hcaptcha': 1.17.4(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@hookform/resolvers': 5.7.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.85.0(react@19.2.6))(zod@4.4.3)
++      '@marsidev/react-turnstile': 1.6.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@neondatabase/auth': 0.5.0-beta(ebfb641974d7a28236622b69f8304929)
++      '@radix-ui/react-avatar': 1.2.6(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-checkbox': 1.3.11(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-context': 1.2.2(@types/react@19.2.14)(react@19.2.6)
++      '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-dropdown-menu': 2.1.24(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-label': 2.1.15(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-select': 2.3.7(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-separator': 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-slot': 1.3.3(@types/react@19.2.14)(react@19.2.6)
++      '@radix-ui/react-tabs': 1.1.21(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@radix-ui/react-use-callback-ref': 1.1.4(@types/react@19.2.14)(react@19.2.6)
++      '@radix-ui/react-use-layout-effect': 1.1.4(@types/react@19.2.14)(react@19.2.6)
++      '@wojtekmaj/react-recaptcha-v3': 0.1.4(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      better-auth: 1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1)))
++      better-call: 1.3.7(zod@4.4.3)
++      class-variance-authority: 0.7.1
++      clsx: 2.1.1
++      input-otp: 1.4.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      lucide-react: 0.555.0(react@19.2.6)
++      next-themes: 0.4.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      react: 19.2.6
++      react-dom: 19.2.6(react@19.2.6)
++      react-google-recaptcha: 3.1.0(react@19.2.6)
++      react-hook-form: 7.85.0(react@19.2.6)
++      react-qr-code: 2.2.0(react@19.2.6)
++      sonner: 2.0.8(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      tailwind-merge: 3.6.0
++      tailwindcss: 4.2.1
++      tw-animate-css: 1.4.0
++      ua-parser-js: 2.0.10
++      vaul: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      zod: 4.4.3
++    transitivePeerDependencies:
++      - '@better-auth/core'
++      - '@better-auth/utils'
++      - '@better-fetch/fetch'
++      - '@cloudflare/workers-types'
++      - '@daveyplate/better-auth-tanstack'
++      - '@instantdb/react'
++      - '@lynx-js/react'
++      - '@opentelemetry/api'
++      - '@prisma/client'
++      - '@radix-ui/react-tooltip'
++      - '@sinclair/typebox'
++      - '@standard-schema/spec'
++      - '@sveltejs/kit'
++      - '@tanstack/react-query'
++      - '@tanstack/react-start'
++      - '@tanstack/solid-start'
++      - '@triplit/client'
++      - '@triplit/react'
++      - '@types/react'
++      - '@types/react-dom'
++      - '@typeschema/main'
++      - '@vinejs/vine'
++      - ajv
++      - ajv-errors
++      - ajv-formats
++      - arktype
++      - ata-validator
++      - better-sqlite3
++      - class-transformer
++      - class-validator
++      - computed-types
++      - drizzle-kit
++      - drizzle-orm
++      - effect
++      - fluentvalidation-ts
++      - fp-ts
++      - io-ts
++      - joi
++      - mongodb
++      - mysql2
++      - nanostores
++      - next
++      - nope-validator
++      - pg
++      - prisma
++      - solid-js
++      - superstruct
++      - svelte
++      - typanion
++      - valibot
++      - vest
++      - vitest
++      - vue
++      - yup
++
++  '@neondatabase/auth@0.5.0-beta(ebfb641974d7a28236622b69f8304929)':
++    dependencies:
++      '@better-fetch/fetch': 1.3.1
++      '@neondatabase/auth-ui': 0.3.0-beta(eb06d7f030a0d74d325cf4550ef52f9f)
++      '@supabase/auth-js': 2.79.0
++      better-auth: 1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1)))
++      jose: 6.2.5
++      zod: 4.3.6
++    optionalDependencies:
++      next: 16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      react: 19.2.6
++      react-dom: 19.2.6(react@19.2.6)
++    transitivePeerDependencies:
++      - '@better-auth/core'
++      - '@better-auth/utils'
++      - '@cloudflare/workers-types'
++      - '@daveyplate/better-auth-tanstack'
++      - '@instantdb/react'
++      - '@lynx-js/react'
++      - '@opentelemetry/api'
++      - '@prisma/client'
++      - '@radix-ui/react-tooltip'
++      - '@sinclair/typebox'
++      - '@standard-schema/spec'
++      - '@sveltejs/kit'
++      - '@tanstack/react-query'
++      - '@tanstack/react-start'
++      - '@tanstack/solid-start'
++      - '@triplit/client'
++      - '@triplit/react'
++      - '@types/react'
++      - '@types/react-dom'
++      - '@typeschema/main'
++      - '@vinejs/vine'
++      - ajv
++      - ajv-errors
++      - ajv-formats
++      - arktype
++      - ata-validator
++      - better-sqlite3
++      - class-transformer
++      - class-validator
++      - computed-types
++      - drizzle-kit
++      - drizzle-orm
++      - effect
++      - fluentvalidation-ts
++      - fp-ts
++      - io-ts
++      - joi
++      - mongodb
++      - mysql2
++      - nanostores
++      - nope-validator
++      - pg
++      - prisma
++      - solid-js
++      - superstruct
++      - svelte
++      - typanion
++      - valibot
++      - vest
++      - vitest
++      - vue
++      - yup
++
+   '@next/env@16.3.4': {}
+ 
+   '@next/eslint-plugin-next@16.3.4(eslint@9.39.4(jiti@2.7.0)(supports-color@10.2.2))':
+@@ -5935,6 +7121,10 @@ snapshots:
+   '@next/swc-win32-x64-msvc@16.3.4':
+     optional: true
+ 
++  '@noble/ciphers@2.4.0': {}
++
++  '@noble/hashes@2.4.0': {}
++
+   '@nodelib/fs.scandir@2.1.5':
+     dependencies:
+       '@nodelib/fs.stat': 2.0.5
+@@ -5960,10 +7150,112 @@ snapshots:
+ 
+   '@open-draft/until@2.1.0': {}
+ 
++  '@opentelemetry/semantic-conventions@1.43.0': {}
++
+   '@oxc-project/types@0.130.0': {}
+ 
+   '@oxc-project/types@0.150.0': {}
+ 
++  '@peculiar/asn1-android@2.9.5':
++    dependencies:
++      '@peculiar/asn1-schema': 2.9.5
++      asn1js: 3.0.10
++      tslib: 2.8.1
++
++  '@peculiar/asn1-cms@2.9.5':
++    dependencies:
++      '@peculiar/asn1-schema': 2.9.5
++      '@peculiar/asn1-x509': 2.9.5
++      '@peculiar/asn1-x509-attr': 2.9.5
++      asn1js: 3.0.10
++      tslib: 2.8.1
++
++  '@peculiar/asn1-csr@2.9.5':
++    dependencies:
++      '@peculiar/asn1-schema': 2.9.5
++      '@peculiar/asn1-x509': 2.9.5
++      asn1js: 3.0.10
++      tslib: 2.8.1
++
++  '@peculiar/asn1-ecc@2.9.5':
++    dependencies:
++      '@peculiar/asn1-schema': 2.9.5
++      '@peculiar/asn1-x509': 2.9.5
++      asn1js: 3.0.10
++      tslib: 2.8.1
++
++  '@peculiar/asn1-pfx@2.9.5':
++    dependencies:
++      '@peculiar/asn1-cms': 2.9.5
++      '@peculiar/asn1-pkcs8': 2.9.5
++      '@peculiar/asn1-rsa': 2.9.5
++      '@peculiar/asn1-schema': 2.9.5
++      asn1js: 3.0.10
++      tslib: 2.8.1
++
++  '@peculiar/asn1-pkcs8@2.9.5':
++    dependencies:
++      '@peculiar/asn1-schema': 2.9.5
++      '@peculiar/asn1-x509': 2.9.5
++      asn1js: 3.0.10
++      tslib: 2.8.1
++
++  '@peculiar/asn1-pkcs9@2.9.5':
++    dependencies:
++      '@peculiar/asn1-cms': 2.9.5
++      '@peculiar/asn1-pfx': 2.9.5
++      '@peculiar/asn1-pkcs8': 2.9.5
++      '@peculiar/asn1-schema': 2.9.5
++      '@peculiar/asn1-x509': 2.9.5
++      '@peculiar/asn1-x509-attr': 2.9.5
++      asn1js: 3.0.10
++      tslib: 2.8.1
++
++  '@peculiar/asn1-rsa@2.9.5':
++    dependencies:
++      '@peculiar/asn1-schema': 2.9.5
++      '@peculiar/asn1-x509': 2.9.5
++      asn1js: 3.0.10
++      tslib: 2.8.1
++
++  '@peculiar/asn1-schema@2.9.5':
++    dependencies:
++      '@peculiar/utils': 2.0.3
++      asn1js: 3.0.10
++      tslib: 2.8.1
++
++  '@peculiar/asn1-x509-attr@2.9.5':
++    dependencies:
++      '@peculiar/asn1-schema': 2.9.5
++      '@peculiar/asn1-x509': 2.9.5
++      asn1js: 3.0.10
++      tslib: 2.8.1
++
++  '@peculiar/asn1-x509@2.9.5':
++    dependencies:
++      '@peculiar/asn1-schema': 2.9.5
++      '@peculiar/utils': 2.0.3
++      asn1js: 3.0.10
++      tslib: 2.8.1
++
++  '@peculiar/utils@2.0.3':
++    dependencies:
++      tslib: 2.8.1
++
++  '@peculiar/x509@1.14.3':
++    dependencies:
++      '@peculiar/asn1-cms': 2.9.5
++      '@peculiar/asn1-csr': 2.9.5
++      '@peculiar/asn1-ecc': 2.9.5
++      '@peculiar/asn1-pkcs9': 2.9.5
++      '@peculiar/asn1-rsa': 2.9.5
++      '@peculiar/asn1-schema': 2.9.5
++      '@peculiar/asn1-x509': 2.9.5
++      pvtsutils: 1.3.6
++      reflect-metadata: 0.2.2
++      tslib: 2.8.1
++      tsyringe: 4.10.0
++
+   '@playwright/test@1.63.0':
+     dependencies:
+       playwright: 1.63.0
+@@ -6727,6 +8019,130 @@ snapshots:
+ 
+   '@radix-ui/rect@1.1.3': {}
+ 
++  '@react-email/body@0.3.0(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/button@0.2.1(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/code-block@0.2.1(react@19.2.6)':
++    dependencies:
++      prismjs: 1.30.0
++      react: 19.2.6
++
++  '@react-email/code-inline@0.0.6(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/column@0.0.14(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/components@1.0.12(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
++    dependencies:
++      '@react-email/body': 0.3.0(react@19.2.6)
++      '@react-email/button': 0.2.1(react@19.2.6)
++      '@react-email/code-block': 0.2.1(react@19.2.6)
++      '@react-email/code-inline': 0.0.6(react@19.2.6)
++      '@react-email/column': 0.0.14(react@19.2.6)
++      '@react-email/container': 0.0.16(react@19.2.6)
++      '@react-email/font': 0.0.10(react@19.2.6)
++      '@react-email/head': 0.0.13(react@19.2.6)
++      '@react-email/heading': 0.0.16(react@19.2.6)
++      '@react-email/hr': 0.0.12(react@19.2.6)
++      '@react-email/html': 0.0.12(react@19.2.6)
++      '@react-email/img': 0.0.12(react@19.2.6)
++      '@react-email/link': 0.0.13(react@19.2.6)
++      '@react-email/markdown': 0.0.18(react@19.2.6)
++      '@react-email/preview': 0.0.14(react@19.2.6)
++      '@react-email/render': 2.0.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      '@react-email/row': 0.0.13(react@19.2.6)
++      '@react-email/section': 0.0.17(react@19.2.6)
++      '@react-email/tailwind': 2.0.7(@react-email/body@0.3.0(react@19.2.6))(@react-email/button@0.2.1(react@19.2.6))(@react-email/code-block@0.2.1(react@19.2.6))(@react-email/code-inline@0.0.6(react@19.2.6))(@react-email/container@0.0.16(react@19.2.6))(@react-email/heading@0.0.16(react@19.2.6))(@react-email/hr@0.0.12(react@19.2.6))(@react-email/img@0.0.12(react@19.2.6))(@react-email/link@0.0.13(react@19.2.6))(@react-email/preview@0.0.14(react@19.2.6))(@react-email/text@0.1.6(react@19.2.6))(react@19.2.6)
++      '@react-email/text': 0.1.6(react@19.2.6)
++      react: 19.2.6
++    transitivePeerDependencies:
++      - react-dom
++
++  '@react-email/container@0.0.16(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/font@0.0.10(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/head@0.0.13(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/heading@0.0.16(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/hr@0.0.12(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/html@0.0.12(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/img@0.0.12(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/link@0.0.13(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/markdown@0.0.18(react@19.2.6)':
++    dependencies:
++      marked: 15.0.12
++      react: 19.2.6
++
++  '@react-email/preview@0.0.14(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/render@2.0.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
++    dependencies:
++      html-to-text: 9.0.5
++      prettier: 3.9.9
++      react: 19.2.6
++      react-dom: 19.2.6(react@19.2.6)
++
++  '@react-email/row@0.0.13(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/section@0.0.17(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
++  '@react-email/tailwind@2.0.7(@react-email/body@0.3.0(react@19.2.6))(@react-email/button@0.2.1(react@19.2.6))(@react-email/code-block@0.2.1(react@19.2.6))(@react-email/code-inline@0.0.6(react@19.2.6))(@react-email/container@0.0.16(react@19.2.6))(@react-email/heading@0.0.16(react@19.2.6))(@react-email/hr@0.0.12(react@19.2.6))(@react-email/img@0.0.12(react@19.2.6))(@react-email/link@0.0.13(react@19.2.6))(@react-email/preview@0.0.14(react@19.2.6))(@react-email/text@0.1.6(react@19.2.6))(react@19.2.6)':
++    dependencies:
++      '@react-email/text': 0.1.6(react@19.2.6)
++      react: 19.2.6
++      tailwindcss: 4.2.1
++    optionalDependencies:
++      '@react-email/body': 0.3.0(react@19.2.6)
++      '@react-email/button': 0.2.1(react@19.2.6)
++      '@react-email/code-block': 0.2.1(react@19.2.6)
++      '@react-email/code-inline': 0.0.6(react@19.2.6)
++      '@react-email/container': 0.0.16(react@19.2.6)
++      '@react-email/heading': 0.0.16(react@19.2.6)
++      '@react-email/hr': 0.0.12(react@19.2.6)
++      '@react-email/img': 0.0.12(react@19.2.6)
++      '@react-email/link': 0.0.13(react@19.2.6)
++      '@react-email/preview': 0.0.14(react@19.2.6)
++
++  '@react-email/text@0.1.6(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++
+   '@redocly/ajv@8.11.2':
+     dependencies:
+       fast-deep-equal: 3.1.3
+@@ -6864,6 +8280,11 @@ snapshots:
+ 
+   '@rtsao/scc@1.1.0': {}
+ 
++  '@selderee/plugin-htmlparser2@0.11.0':
++    dependencies:
++      domhandler: 5.0.3
++      selderee: 0.11.0
++
+   '@shadcn/react@0.3.0(@types/react@19.2.14)(react@19.2.6)':
+     optionalDependencies:
+       '@types/react': 19.2.14
+@@ -6874,6 +8295,19 @@ snapshots:
+       fflate: 0.7.4
+       string.prototype.codepointat: 0.2.1
+ 
++  '@simplewebauthn/browser@13.3.0': {}
++
++  '@simplewebauthn/server@13.3.3':
++    dependencies:
++      '@hexagon/base64': 1.1.28
++      '@levischuck/tiny-cbor': 0.2.11
++      '@peculiar/asn1-android': 2.9.5
++      '@peculiar/asn1-ecc': 2.9.5
++      '@peculiar/asn1-rsa': 2.9.5
++      '@peculiar/asn1-schema': 2.9.5
++      '@peculiar/asn1-x509': 2.9.5
++      '@peculiar/x509': 1.14.3
++
+   '@sindresorhus/is@7.2.0': {}
+ 
+   '@speed-highlight/core@1.2.15': {}
+@@ -6882,6 +8316,10 @@ snapshots:
+ 
+   '@standard-schema/utils@0.3.0': {}
+ 
++  '@supabase/auth-js@2.79.0':
++    dependencies:
++      tslib: 2.8.1
++
+   '@swc/helpers@0.5.23':
+     dependencies:
+       tslib: 2.8.1
+@@ -6955,6 +8393,52 @@ snapshots:
+       postcss: 8.5.23
+       tailwindcss: 4.2.1
+ 
++  '@tanstack/query-core@5.104.0': {}
++
++  '@tanstack/react-query@5.104.0(react@19.2.6)':
++    dependencies:
++      '@tanstack/query-core': 5.104.0
++      react: 19.2.6
++
++  '@triplit/client@1.0.50(typescript@5.9.3)':
++    dependencies:
++      '@triplit/db': 1.1.10(typescript@5.9.3)
++      '@triplit/logger': 0.0.3(typescript@5.9.3)
++      comlink: 4.4.2
++      superjson: 2.2.6
++    transitivePeerDependencies:
++      - better-sqlite3
++      - expo-sqlite
++      - lmdb
++      - typescript
++      - uuidv7
++
++  '@triplit/db@1.1.10(typescript@5.9.3)':
++    dependencies:
++      '@triplit/logger': 0.0.3(typescript@5.9.3)
++      core-js: 3.50.0
++      elen: 1.0.10
++      nanoid: 5.1.16
++      sorted-btree: 1.8.1
++      web-worker: 1.5.0
++    transitivePeerDependencies:
++      - typescript
++
++  '@triplit/logger@0.0.3(typescript@5.9.3)':
++    dependencies:
++      typescript: 5.9.3
++
++  '@triplit/react@1.0.51(react@19.2.6)(typescript@5.9.3)':
++    dependencies:
++      '@triplit/client': 1.0.50(typescript@5.9.3)
++      react: 19.2.6
++    transitivePeerDependencies:
++      - better-sqlite3
++      - expo-sqlite
++      - lmdb
++      - typescript
++      - uuidv7
++
+   '@tybys/wasm-util@0.10.2':
+     dependencies:
+       tslib: 2.8.1
+@@ -7335,6 +8819,14 @@ snapshots:
+       '@webassemblyjs/ast': 1.14.1
+       '@xtuc/long': 4.2.2
+ 
++  '@wojtekmaj/react-recaptcha-v3@0.1.4(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
++    dependencies:
++      react: 19.2.6
++      react-dom: 19.2.6(react@19.2.6)
++      warning: 4.0.3
++    optionalDependencies:
++      '@types/react': 19.2.14
++
+   '@xtuc/ieee754@1.2.0': {}
+ 
+   '@xtuc/long@4.2.2': {}
+@@ -7461,6 +8953,12 @@ snapshots:
+       get-intrinsic: 1.3.0
+       is-array-buffer: 3.0.5
+ 
++  asn1js@3.0.10:
++    dependencies:
++      pvtsutils: 1.3.6
++      pvutils: 1.2.0
++      tslib: 2.8.1
++
+   assertion-error@2.0.1: {}
+ 
+   ast-types-flow@0.0.8: {}
+@@ -7483,8 +8981,58 @@ snapshots:
+ 
+   baseline-browser-mapping@2.10.30: {}
+ 
++  better-auth@1.6.23(@cloudflare/workers-types@5.20260921.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))(next@16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1))):
++    dependencies:
++      '@better-auth/core': 1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4)
++      '@better-auth/drizzle-adapter': 1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6))
++      '@better-auth/kysely-adapter': 1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(kysely@0.29.6)
++      '@better-auth/memory-adapter': 1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)
++      '@better-auth/mongo-adapter': 1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)
++      '@better-auth/prisma-adapter': 1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)
++      '@better-auth/telemetry': 1.6.23(@better-auth/core@1.6.23(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260921.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.5)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)
++      '@better-auth/utils': 0.4.2
++      '@better-fetch/fetch': 1.3.1
++      '@noble/ciphers': 2.4.0
++      '@noble/hashes': 2.4.0
++      better-call: 1.3.7(zod@4.4.3)
++      defu: 6.1.7
++      jose: 6.2.5
++      kysely: 0.29.6
++      nanostores: 1.5.4
++      zod: 4.4.3
++    optionalDependencies:
++      drizzle-kit: 0.31.10
++      drizzle-orm: 0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6)
++      next: 16.3.4(@babel/core@7.29.0(supports-color@10.2.2))(@playwright/test@1.63.0)(@types/node@22.19.19)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
++      react: 19.2.6
++      react-dom: 19.2.6(react@19.2.6)
++      vitest: 4.1.0(@types/node@22.19.19)(msw@2.14.7(@types/node@22.19.19)(typescript@5.9.3))(vite@8.0.13(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1))
++    transitivePeerDependencies:
++      - '@cloudflare/workers-types'
++      - '@opentelemetry/api'
++
++  better-call@1.3.7(zod@4.4.3):
++    dependencies:
++      '@better-auth/utils': 0.4.2
++      '@better-fetch/fetch': 1.3.2
++      rou3: 0.7.12
++      set-cookie-parser: 3.1.2
++    optionalDependencies:
++      zod: 4.4.3
++
++  better-call@2.0.2(zod@4.4.3):
++    dependencies:
++      '@better-auth/utils': 0.3.1
++      '@better-fetch/fetch': 1.3.1
++      rou3: 0.7.12
++      set-cookie-parser: 3.1.2
++    optionalDependencies:
++      zod: 4.4.3
++
+   blake3-wasm@2.1.5: {}
+ 
++  bowser@2.14.1: {}
++
+   brace-expansion@1.1.14:
+     dependencies:
+       balanced-match: 1.0.2
+@@ -7584,6 +9132,8 @@ snapshots:
+ 
+   colorette@1.4.0: {}
+ 
++  comlink@4.4.2: {}
++
+   commander@2.20.3: {}
+ 
+   concat-map@0.0.1: {}
+@@ -7594,6 +9144,10 @@ snapshots:
+ 
+   cookie@1.1.1: {}
+ 
++  copy-anything@4.1.4: {}
++
++  core-js@3.50.0: {}
++
+   cross-spawn@7.0.6:
+     dependencies:
+       path-key: 3.1.1
+@@ -7698,6 +9252,8 @@ snapshots:
+ 
+   deep-is@0.1.4: {}
+ 
++  deepmerge@4.3.1: {}
++
+   define-data-property@1.1.4:
+     dependencies:
+       es-define-property: 1.0.1
+@@ -7710,6 +9266,10 @@ snapshots:
+       has-property-descriptors: 1.0.2
+       object-keys: 1.1.1
+ 
++  defu@6.1.7: {}
++
++  detect-europe-js@0.1.2: {}
++
+   detect-libc@2.1.2: {}
+ 
+   detect-node-es@1.1.0: {}
+@@ -7718,6 +9278,24 @@ snapshots:
+     dependencies:
+       esutils: 2.0.3
+ 
++  dom-serializer@2.0.0:
++    dependencies:
++      domelementtype: 2.3.0
++      domhandler: 5.0.3
++      entities: 4.5.0
++
++  domelementtype@2.3.0: {}
++
++  domhandler@5.0.3:
++    dependencies:
++      domelementtype: 2.3.0
++
++  domutils@3.2.2:
++    dependencies:
++      dom-serializer: 2.0.0
++      domelementtype: 2.3.0
++      domhandler: 5.0.3
++
+   drizzle-kit@0.31.10:
+     dependencies:
+       '@drizzle-team/brocli': 0.10.2
+@@ -7725,9 +9303,10 @@ snapshots:
+       esbuild: 0.25.12
+       tsx: 4.22.1
+ 
+-  drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1):
++  drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260921.1)(kysely@0.29.6):
+     optionalDependencies:
+       '@cloudflare/workers-types': 5.20260921.1
++      kysely: 0.29.6
+ 
+   dunder-proto@1.0.1:
+     dependencies:
+@@ -7737,6 +9316,8 @@ snapshots:
+ 
+   electron-to-chromium@1.5.358: {}
+ 
++  elen@1.0.10: {}
++
+   embla-carousel-react@8.6.0(react@19.2.6):
+     dependencies:
+       embla-carousel: 8.6.0
+@@ -7760,6 +9341,8 @@ snapshots:
+       graceful-fs: 4.2.11
+       tapable: 2.3.3
+ 
++  entities@4.5.0: {}
++
+   env-runner@0.2.3:
+     dependencies:
+       crossws: 0.4.12(srvx@1.0.5)
+@@ -8185,6 +9768,12 @@ snapshots:
+ 
+   events@3.3.0: {}
+ 
++  eventsource-parser@3.1.1: {}
++
++  eventsource@4.1.1:
++    dependencies:
++      eventsource-parser: 3.1.1
++
+   expect-type@1.4.0: {}
+ 
+   exsolve@1.1.1: {}
+@@ -8377,8 +9966,27 @@ snapshots:
+ 
+   hex-rgb@4.3.0: {}
+ 
++  hoist-non-react-statics@3.3.2:
++    dependencies:
++      react-is: 16.13.1
++
+   hookable@6.1.2: {}
+ 
++  html-to-text@9.0.5:
++    dependencies:
++      '@selderee/plugin-htmlparser2': 0.11.0
++      deepmerge: 4.3.1
++      dom-serializer: 2.0.0
++      htmlparser2: 8.0.2
++      selderee: 0.11.0
++
++  htmlparser2@8.0.2:
++    dependencies:
++      domelementtype: 2.3.0
++      domhandler: 5.0.3
++      domutils: 3.2.2
++      entities: 4.5.0
++
+   https-proxy-agent@7.0.6(supports-color@10.2.2):
+     dependencies:
+       agent-base: 7.1.4
+@@ -8512,6 +10120,8 @@ snapshots:
+     dependencies:
+       call-bound: 1.0.4
+ 
++  is-standalone-pwa@0.1.1: {}
++
+   is-string@1.1.1:
+     dependencies:
+       call-bound: 1.0.4
+@@ -8559,6 +10169,8 @@ snapshots:
+ 
+   jiti@2.7.0: {}
+ 
++  jose@6.2.5: {}
++
+   js-levenshtein@1.1.6: {}
+ 
+   js-tokens@4.0.0: {}
+@@ -8602,12 +10214,16 @@ snapshots:
+ 
+   kleur@4.1.5: {}
+ 
++  kysely@0.29.6: {}
++
+   language-subtag-registry@0.3.23: {}
+ 
+   language-tags@1.0.9:
+     dependencies:
+       language-subtag-registry: 0.3.23
+ 
++  leac@0.6.0: {}
++
+   levn@0.4.1:
+     dependencies:
+       prelude-ls: 1.2.1
+@@ -8732,6 +10348,10 @@ snapshots:
+     dependencies:
+       yallist: 3.1.1
+ 
++  lucide-react@0.555.0(react@19.2.6):
++    dependencies:
++      react: 19.2.6
++
+   lucide-react@1.31.0(react@19.2.6):
+     dependencies:
+       react: 19.2.6
+@@ -8740,6 +10360,8 @@ snapshots:
+     dependencies:
+       '@jridgewell/sourcemap-codec': 1.5.5
+ 
++  marked@15.0.12: {}
++
+   math-intrinsics@1.1.0: {}
+ 
+   merge-stream@2.0.0: {}
+@@ -8807,10 +10429,16 @@ snapshots:
+     transitivePeerDependencies:
+       - '@types/node'
+ 
++  mutative@1.3.0: {}
++
+   mute-stream@3.0.0: {}
+ 
+   nanoid@3.3.18: {}
+ 
++  nanoid@5.1.16: {}
++
++  nanostores@1.5.4: {}
++
+   napi-postinstall@0.3.4: {}
+ 
+   natural-compare@1.4.0: {}
+@@ -8973,6 +10601,11 @@ snapshots:
+       index-to-position: 1.2.0
+       type-fest: 4.41.0
+ 
++  parseley@0.12.1:
++    dependencies:
++      leac: 0.6.0
++      peberminta: 0.9.0
++
+   path-exists@4.0.0: {}
+ 
+   path-key@3.1.1: {}
+@@ -8983,6 +10616,8 @@ snapshots:
+ 
+   pathe@2.0.3: {}
+ 
++  peberminta@0.9.0: {}
++
+   picocolors@1.1.1: {}
+ 
+   picomatch@2.3.2: {}
+@@ -9009,6 +10644,10 @@ snapshots:
+ 
+   prelude-ls@1.2.1: {}
+ 
++  prettier@3.9.9: {}
++
++  prismjs@1.30.0: {}
++
+   prop-types@15.8.1:
+     dependencies:
+       loose-envify: 1.4.0
+@@ -9017,6 +10656,14 @@ snapshots:
+ 
+   punycode@2.3.1: {}
+ 
++  pvtsutils@1.3.6:
++    dependencies:
++      tslib: 2.8.1
++
++  pvutils@1.2.0: {}
++
++  qrcode-generator@2.0.4: {}
++
+   queue-microtask@1.2.3: {}
+ 
+   radix-ui@1.6.7(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
+@@ -9082,6 +10729,12 @@ snapshots:
+       '@types/react': 19.2.14
+       '@types/react-dom': 19.2.3(@types/react@19.2.14)
+ 
++  react-async-script@1.2.0(react@19.2.6):
++    dependencies:
++      hoist-non-react-statics: 3.3.2
++      prop-types: 15.8.1
++      react: 19.2.6
++
+   react-day-picker@10.0.1(@types/react@19.2.14)(react@19.2.6):
+     dependencies:
+       '@date-fns/tz': 1.5.0
+@@ -9095,12 +10748,24 @@ snapshots:
+       react: 19.2.6
+       scheduler: 0.27.0
+ 
++  react-google-recaptcha@3.1.0(react@19.2.6):
++    dependencies:
++      prop-types: 15.8.1
++      react: 19.2.6
++      react-async-script: 1.2.0(react@19.2.6)
++
+   react-hook-form@7.85.0(react@19.2.6):
+     dependencies:
+       react: 19.2.6
+ 
+   react-is@16.13.1: {}
+ 
++  react-qr-code@2.2.0(react@19.2.6):
++    dependencies:
++      prop-types: 15.8.1
++      qrcode-generator: 2.0.4
++      react: 19.2.6
++
+   react-redux@9.3.0(@types/react@19.2.14)(react@19.2.6)(redux@5.0.1):
+     dependencies:
+       '@types/use-sync-external-store': 0.0.6
+@@ -9179,6 +10844,8 @@ snapshots:
+ 
+   redux@5.0.1: {}
+ 
++  reflect-metadata@0.2.2: {}
++
+   reflect.getprototypeof@1.0.10:
+     dependencies:
+       call-bind: 1.0.9
+@@ -9266,6 +10933,8 @@ snapshots:
+       '@rolldown/binding-win32-arm64-msvc': 1.2.9
+       '@rolldown/binding-win32-x64-msvc': 1.2.9
+ 
++  rou3@0.7.12: {}
++
+   rou3@0.9.2: {}
+ 
+   run-parallel@1.2.0:
+@@ -9314,6 +10983,10 @@ snapshots:
+       ajv-formats: 2.1.1(ajv@8.20.0)
+       ajv-keywords: 5.1.0(ajv@8.20.0)
+ 
++  selderee@0.11.0:
++    dependencies:
++      parseley: 0.12.1
++
+   semver@6.3.1: {}
+ 
+   semver@7.8.5: {}
+@@ -9420,6 +11093,8 @@ snapshots:
+     optionalDependencies:
+       '@types/react': 19.2.14
+ 
++  sorted-btree@1.8.1: {}
++
+   source-map-js@1.2.1: {}
+ 
+   source-map-support@0.5.21:
+@@ -9525,6 +11200,10 @@ snapshots:
+     optionalDependencies:
+       '@babel/core': 7.29.0(supports-color@10.2.2)
+ 
++  superjson@2.2.6:
++    dependencies:
++      copy-anything: 4.1.4
++
+   supports-color@10.2.2: {}
+ 
+   supports-color@7.2.0:
+@@ -9604,6 +11283,8 @@ snapshots:
+       minimist: 1.2.8
+       strip-bom: 3.0.0
+ 
++  tslib@1.14.1: {}
++
+   tslib@2.8.1: {}
+ 
+   tsx@4.22.1:
+@@ -9612,6 +11293,10 @@ snapshots:
+     optionalDependencies:
+       fsevents: 2.3.3
+ 
++  tsyringe@4.10.0:
++    dependencies:
++      tslib: 1.14.1
++
+   turbo-stream@3.2.0: {}
+ 
+   tw-animate-css@1.4.0: {}
+@@ -9672,6 +11357,14 @@ snapshots:
+ 
+   typescript@5.9.3: {}
+ 
++  ua-is-frozen@0.1.2: {}
++
++  ua-parser-js@2.0.10:
++    dependencies:
++      detect-europe-js: 0.1.2
++      is-standalone-pwa: 0.1.1
++      ua-is-frozen: 0.1.2
++
+   unbox-primitive@1.1.0:
+     dependencies:
+       call-bound: 1.0.4
+@@ -9753,6 +11446,8 @@ snapshots:
+     dependencies:
+       react: 19.2.6
+ 
++  uuid@11.1.1: {}
++
+   vaul@1.1.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
+     dependencies:
+       '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+@@ -9858,6 +11553,10 @@ snapshots:
+     transitivePeerDependencies:
+       - msw
+ 
++  warning@4.0.3:
++    dependencies:
++      loose-envify: 1.4.0
++
+   watchpack@2.5.1:
+     dependencies:
+       glob-to-regexp: 0.4.1
+@@ -9865,6 +11564,8 @@ snapshots:
+ 
+   web-vitals@4.2.4: {}
+ 
++  web-worker@1.5.0: {}
++
+   webpack-sources@3.4.1: {}
+ 
+   webpack@5.106.2(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23):
+@@ -10034,4 +11735,8 @@ snapshots:
+ 
+   zod@3.25.76: {}
+ 
++  zod@4.3.6: {}
++
+   zod@4.4.3: {}
++
++  zod@4.6.5: {}
+diff --git a/pnpm-workspace.yaml b/pnpm-workspace.yaml
+index e82202b..3a7043c 100644
+--- a/pnpm-workspace.yaml
++++ b/pnpm-workspace.yaml
+@@ -4,6 +4,7 @@ minimumReleaseAgeIgnoreMissingTime: false
+ trustLockfile: false
+ strictDepBuilds: true
+ allowBuilds:
++  core-js: false
+   esbuild: true
+   fsevents: true
+   # Cloudflare tests use setupNetwork; no browser service-worker asset is needed.
+diff --git a/scripts/neon-compatibility-harness.mjs b/scripts/neon-compatibility-harness.mjs
+new file mode 100644
+index 0000000..f6964a0
+--- /dev/null
++++ b/scripts/neon-compatibility-harness.mjs
+@@ -0,0 +1,108 @@
++import {spawnSync} from 'node:child_process';
++import {createHash,randomBytes} from 'node:crypto';
++import {existsSync,readFileSync,writeFileSync,mkdirSync,copyFileSync,lstatSync,readdirSync,rmSync,realpathSync} from 'node:fs';
++import {resolve,relative,isAbsolute,join,dirname} from 'node:path';
++import {pathToFileURL} from 'node:url';
++export function assertLoopbackUrl(value) {
++ const url=new URL(value);
++ if(url.protocol!=='http:'||!['127.0.0.1','localhost','[::1]'].includes(url.hostname)||url.username||url.password)throw new Error('N00 requires an owned loopback fixture URL');
++ return url;
++}
++export function assertSourcePath(value) {
++ const segments=value.split('/');
++ if(!value||isAbsolute(value)||/[\\:]/.test(value)||segments.some(s=>!s||s==='.'||s==='..'||/^\.env/i.test(s)||['.git','node_modules','test-results','.vercel'].includes(s)))throw new Error(`unsafe N00 source: ${value}`);
++ return value;
++}
++export function isBuildSource(path) {return !/^(services\/(api|worker|cloudflare-jobs)|docs|artifacts|tests|spikes|\.github)\//.test(path)&&!path.endsWith('.tmp');}
++export function staticAssetPath(root,pathname) {
++ const part=decodeURIComponent(pathname).replace(/^\//,'');assertSourcePath(part);
++ const path=resolve(root,part),inside=relative(resolve(root),path);
++ if(isAbsolute(inside)||inside.startsWith('..'))throw new Error('unsafe static asset path');return path;
++}
++export function assertProtocolStorage(entries) {
++ for(const [key,value] of entries) {
++  if(key!=='buyeros-prefs-v1')throw new Error('unexpected persisted N00 state');
++  const prefs=JSON.parse(value);
++  if(!prefs||!['en','zh-HK'].includes(prefs.locale)||value!==JSON.stringify({locale:prefs.locale}))throw new Error('only canonical locale preferences may persist');
++ }
++}
++export function fixtureChildEnvironment(parent) {
++ const env=Object.fromEntries(['PATH','Path','SystemRoot','SYSTEMROOT','TEMP','TMP','COMSPEC','PATHEXT','USERPROFILE','LOCALAPPDATA'].filter(key=>parent[key]).map(key=>[key,parent[key]]));
++ return {...env,BUYEROS_STRICT_INTEGRATION:'1',WRANGLER_SEND_METRICS:'false',WRANGLER_WRITE_LOGS:'false',CLOUDFLARE_CF_FETCH_ENABLED:'false'};
++}
++export function assertSeedMetadata(seed,owner,labels) {
++ if(!/^[a-f0-9]{12}$/.test(owner??'')||seed!==`buyeros-audit-ui-deps-${owner}`||labels?.['buyeros.audit.owner']!==owner)throw new Error('unowned read-only dependency seed');
++}
++export function compatibilityViteConfig(input) {
++ const marker='.nitro({ vercel: ';
++ if(input.split(marker).length!==2)throw new Error('N00 fixture requires the reviewed Nitro build interface');
++ return input.replace(marker,'.nitro({ experimental: { vite: { services: { rsc: { entry: "./lib/neon-compatibility/rsc-service.ts" } } } }, vercel: ');
++}
++function run(cmd,args,options={}) {
++ const result=spawnSync(cmd,args,{encoding:'utf8',timeout:60_000,maxBuffer:32*1024*1024,...options});
++ if(result.status!==0)throw new Error(`${cmd} failed (${result.status}): ${result.error?.message ?? result.stderr}`);
++ return result.stdout.trim();
++}
++export function buildFixture() {
++ const root=resolve('.'),area=resolve('test-results/neon-compatibility');
++ if(existsSync(join(area,'build-inputs.json')))throw new Error('refuse to overwrite an existing N00 build proof');
++ const seed=process.env.BUYEROS_N00_SEED_VOLUME;
++ if(seed){const seedProof=JSON.parse(run('docker',['volume','inspect',seed]))[0];assertSeedMetadata(seed,process.env.BUYEROS_N00_SEED_OWNER,seedProof.Labels);}
++ mkdirSync(area,{recursive:true});
++ const source=join(area,'source');mkdirSync(source);
++ const files=run('git',['ls-files','--cached','--others','--exclude-standard']).split(/\r?\n/).filter(Boolean)
++  .filter(isBuildSource);
++ const hashes=[];
++ function copy(p,destination=p) {
++  assertSourcePath(p);assertSourcePath(destination);
++  const absolute=resolve(root,p),inside=relative(root,absolute);
++  if(isAbsolute(inside)||inside.startsWith('..')||!lstatSync(absolute).isFile())throw new Error(`unsafe source file ${p}`);
++  mkdirSync(dirname(join(source,destination)),{recursive:true});copyFileSync(absolute,join(source,destination));
++  const output=join(source,destination);
++  if(destination==='vite.config.ts')writeFileSync(output,compatibilityViteConfig(readFileSync(absolute,'utf8')));
++  hashes.push({path:p,destination,sha256:createHash('sha256').update(readFileSync(absolute)).digest('hex'),stagedSha256:createHash('sha256').update(readFileSync(output)).digest('hex')});
++ }
++ for(const p of files)copy(p);
++ const overlay='tests/fixtures/neon-compatibility/overlay';
++ function walk(folder) {for(const entry of readdirSync(folder,{withFileTypes:true})){const path=join(folder,entry.name);if(entry.isDirectory())walk(path);else if(entry.isFile()){const from=relative(root,path).replaceAll('\\','/');copy(from,relative(resolve(overlay),path).replaceAll('\\','/'));}else throw new Error('overlay symlink refused');}}
++ walk(overlay);
++ const owner=randomBytes(12).toString('hex'),name=`buyeros-n00-${owner}`,image='node:22.23.2-bookworm-slim';
++ writeFileSync(join(area,'build-inputs.json'),JSON.stringify({base:run('git',['rev-parse','HEAD']),owner,name,image,readOnlySeed:seed,files:hashes,liveVerification:false},null,2)+'\n');
++ const tar=process.platform==='win32'?'C:/Windows/System32/tar.exe':'tar';
++ run(tar,['-cf',join(area,'source.tar'),'-C',source,'.']);
++ if(realpathSync(source)!==join(realpathSync(area),'source'))throw new Error('unsafe staging cleanup path');
++ rmSync(source,{recursive:true});
++ let started=false;
++ try {
++  run('docker',['run','-d','--name',name,'--label',`buyeros.n00.owner=${owner}`,'--cpus','4','--memory','6g',...(seed?['--mount',`type=volume,src=${seed},dst=/seed,readonly`]:[]),'-w','/src',
++   '-e','WRANGLER_SEND_METRICS=false','-e','CLOUDFLARE_CF_FETCH_ENABLED=false',image,'sleep','infinity']);started=true;
++  run('docker',['cp',join(area,'source.tar'),`${name}:/tmp/source.tar`]);
++  run('docker',['exec',name,'tar','-xf','/tmp/source.tar','-C','/src']);
++  if(seed){run('docker',['exec',name,'mkdir','-p','/src/node_modules']);run('docker',['exec',name,'sh','-c','tar -C /seed -cf - . | tar -C /src/node_modules -xf -'],{timeout:360_000});}
++  const install=spawnSync('docker',['exec',name,'sh','-c','corepack pnpm install --frozen-lockfile'],{encoding:'utf8',timeout:300_000,maxBuffer:32*1024*1024});
++  writeFileSync(join(area,'install-linux.log'),(install.stdout??'')+(install.stderr??''));
++  if(install.status!==0)throw new Error(`Linux frozen install exit${install.status}`);
++  const proof={node:run('docker',['exec',name,'node','--version']),imageId:JSON.parse(run('docker',['inspect',name]))[0].Image,cpus:4,memoryGiB:6,outputs:[]};
++  for(const [target,command,output] of [['portable','corepack pnpm build','dist'],['vercel','node scripts/run-vercel.mjs build','.vercel']]) {
++   run('docker',['exec',name,'sh','-c','test "$(pwd)" = /src && rm -rf /src/dist /src/.vercel /src/.vinext']);
++   const result=spawnSync('docker',['exec',name,'sh','-c',`timeout --signal=TERM --kill-after=10s 300s ${command}`],{encoding:'utf8',timeout:330_000,maxBuffer:32*1024*1024});
++   writeFileSync(join(area,`${target}-build.log`),(result.stdout??'')+(result.stderr??''));
++   proof.outputs.push({target,command,exit:result.status,error:result.error?.message??null});
++   writeFileSync(join(area,'build-runtime.json'),JSON.stringify(proof,null,2)+'\n');
++   console.log(`${target}: exit ${result.status}`);
++   if(result.status!==0)continue;
++   run('docker',['exec',name,'tar','-chzf',`/tmp/${target}.tar.gz`,output],{timeout:180_000});
++   run('docker',['cp',`${name}:/tmp/${target}.tar.gz`,join(area,`${target}.tar.gz`)],{timeout:180_000});
++   const destination=join(area,target);mkdirSync(destination);
++   run(tar,['-xzf',join(area,`${target}.tar.gz`),'-C',destination],{timeout:180_000});
++  }
++  if(proof.outputs.some(output=>output.exit!==0))throw new Error('N00 output build failed; retain exact logs');
++ }finally {
++  if(started) {
++   const container=JSON.parse(run('docker',['inspect',name]))[0];
++   if(container.Config.Labels?.['buyeros.n00.owner']!==owner)throw new Error('cleanup ownership mismatch');
++   run('docker',['rm','-f',name]);writeFileSync(join(area,'cleanup.json'),JSON.stringify({owner,name,removed:true})+'\n');
++  }
++ }
++}
++if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)buildFixture();
+diff --git a/scripts/serve-neon-compatibility.mjs b/scripts/serve-neon-compatibility.mjs
+new file mode 100644
+index 0000000..49b9e0a
+--- /dev/null
++++ b/scripts/serve-neon-compatibility.mjs
+@@ -0,0 +1,75 @@
++import {createServer} from 'node:http';
++import {generateKeyPairSync,sign,createHmac} from 'node:crypto';
++import {spawn,spawnSync} from 'node:child_process';
++import {existsSync,readFileSync,statSync} from 'node:fs';
++import {resolve} from 'node:path';
++import {pathToFileURL} from 'node:url';
++import {assertLoopbackUrl,fixtureChildEnvironment,staticAssetPath} from './neon-compatibility-harness.mjs';
++const target=process.env.BUYEROS_N00_TARGET;
++if(!['portable','vercel'].includes(target))throw new Error('N00 requires portable or vercel actual output');
++// The Vercel bridge runs in this process too: strip inherited application/provider env.
++const isolatedEnv=fixtureChildEnvironment(process.env);
++for(const key of Object.keys(process.env))delete process.env[key];
++Object.assign(process.env,isolatedEnv,{BUYEROS_N00_TARGET:target});
++const upstream=assertLoopbackUrl('http://127.0.0.1:44891/fixture/auth');
++const {privateKey,publicKey}=generateKeyPairSync('ed25519');
++const kid='fictional-n00-key',jwk={...publicKey.export({format:'jwk'}),kid,alg:'EdDSA',use:'sig'};
++const user={id:'n00-user',name:'Fictional N00',email:'n00@fixture.invalid',emailVerified:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
++const session={id:'n00-session',userId:user.id,token:'fictional-session',createdAt:user.createdAt,updatedAt:user.updatedAt,expiresAt:new Date(Date.now()+3_600_000).toISOString()};
++function issue(kind='valid') {
++ const now=Math.floor(Date.now()/1000),header={alg:kind==='wrong-algorithm'?'HS256':'EdDSA',kid:kind==='unknown-kid'?'fictional-unknown':kid,typ:'JWT'};
++ const claims={sub:user.id,iss:kind==='wrong-issuer'?'https://wrong.invalid':upstream.origin,aud:kind==='wrong-audience'?'wrong-audience':upstream.origin,iat:now,exp:kind==='expired'?now-120:now+900};
++ const message=[header,claims].map(v=>Buffer.from(JSON.stringify(v)).toString('base64url')).join('.');
++ const signature=kind==='wrong-algorithm'?createHmac('sha256','fictional').update(message).digest():sign(null,Buffer.from(message),privateKey);
++ return `${message}.${signature.toString('base64url')}`;
++}
++const cookie='__Secure-neon-auth.session_token=fictional-session; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600';
++let authenticated=false;
++const authServer=createServer(async(req,res)=>{
++ const url=new URL(req.url,upstream.origin),path=url.pathname;
++ const active=authenticated&&(req.headers.cookie??'').includes('__Secure-neon-auth.session_token=fictional-session');
++ res.setHeader('Content-Type','application/json');
++ if(path==='/fixture-token'){res.end(JSON.stringify({token:issue(url.searchParams.get('kind')??'valid')}));return;}
++ if(path==='/fixture/auth/.well-known/jwks.json'){res.end(JSON.stringify({keys:[jwk]}));return;}
++ if(path==='/fixture/auth/sign-in/email'&&req.method==='POST'){
++  let body='';for await(const chunk of req)body+=chunk;
++  const credentials=JSON.parse(body);if(credentials.email!==user.email||credentials.password!=='fictional-password'){res.statusCode=401;res.end('{}');return;}
++  authenticated=true;res.setHeader('Set-Cookie',cookie);res.end(JSON.stringify({redirect:false,token:session.token,user}));return;
++ }
++ if(path==='/fixture/auth/get-session'){if(active)res.setHeader('set-auth-jwt',issue());res.end(JSON.stringify(active?{session,user}:null));return;}
++ if(path==='/fixture/auth/token'){res.statusCode=active?200:401;res.end(JSON.stringify(active?{token:issue()}:{code:'UNAUTHORIZED'}));return;}
++ if(path==='/fixture/auth/sign-out'&&req.method==='POST'){authenticated=false;res.setHeader('Set-Cookie',cookie.replace('fictional-session','').replace('Max-Age=3600','Max-Age=0'));res.end('{"success":true}');return;}
++ if(path==='/fixture/auth/callback/fixture'&&url.searchParams.get('state')==='fictional-state'){authenticated=true;res.statusCode=302;res.setHeader('Set-Cookie',cookie);res.setHeader('Location','http://localhost:44890/compat');res.end('{}');return;}
++ res.statusCode=404;res.end('{"fixtureOnly":true}');
++});
++await new Promise((ok,bad)=>{authServer.once('error',bad);authServer.listen(44891,'127.0.0.1',ok);});
++const children=[];let appServer;
++// Deliberate env allowlist: no inherited Auth/DB/provider credentials reach fixture children.
++const childEnv=fixtureChildEnvironment(process.env);
++function launch(command,args){const child=spawn(command,args,{env:childEnv,stdio:'inherit',windowsHide:true});children.push(child);child.on('error',error=>{console.error(error);stop(1);});child.on('exit',code=>{if(!stopping)stop(code??1);});return child;}
++let stopping=false;
++function stop(code=0){if(stopping)return;stopping=true;for(const child of children){if(process.platform==='win32'&&child.exitCode===null&&child.pid)spawnSync('taskkill',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore',timeout:5000});else child.kill();}appServer?.close();authServer.close();setTimeout(()=>process.exit(code),500).unref();}
++process.on('SIGTERM',()=>stop());process.on('SIGINT',()=>stop());process.on('exit',()=>{for(const child of children){if(process.platform==='win32'&&child.exitCode===null&&child.pid)spawnSync('taskkill',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore',timeout:5000});else child.kill();}});
++launch('uv',['run','--frozen','--project','services/api','python',resolve('tests/fixtures/neon-compatibility/verify.py')]);
++// Wait for the actual diagnostic process, before advertising app readiness.
++const readyDeadline=Date.now()+20_000;let apiReady=false;
++while(Date.now()<readyDeadline&&!stopping){try{apiReady=(await fetch('http://127.0.0.1:44892/verify',{signal:AbortSignal.timeout(1000)})).status===401;if(apiReady)break;}catch{}await new Promise(ok=>setTimeout(ok,100));}
++if(!apiReady){stop(1);throw new Error('N00 FastAPI diagnostic did not become ready');}
++if(target==='portable'){
++ const config=resolve('test-results/neon-compatibility/portable/dist/server/wrangler.json');if(!existsSync(config))throw new Error('actual portable output missing');
++ launch(process.execPath,['node_modules/wrangler/bin/wrangler.js','dev','--local','--config',config,'--ip','127.0.0.1','--port','44890']);
++}else{
++ const entry=resolve('test-results/neon-compatibility/vercel/.vercel/output/functions/__server.func/index.mjs');if(!existsSync(entry))throw new Error('actual Vercel output missing');
++ process.env.NODE_ENV='production';const {default:handler}=await import(pathToFileURL(entry).href);
++ appServer=createServer(async(req,res)=>{try{
++  const pathname=new URL(req.url,'http://localhost:44890').pathname;
++  if(['GET','HEAD'].includes(req.method)&&pathname!=='/'){const file=staticAssetPath(resolve('test-results/neon-compatibility/vercel/.vercel/output/static'),pathname);if(existsSync(file)&&statSync(file).isFile()){res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'application/octet-stream');res.end(req.method==='HEAD'?undefined:readFileSync(file));return;}}
++  const body=[];for await(const chunk of req)body.push(chunk);
++  const request=new Request(`http://localhost:44890${req.url}`,{method:req.method,headers:req.headers,...(!['GET','HEAD'].includes(req.method)?{body:Buffer.concat(body)}:{})});
++  const response=await handler.fetch(request,{waitUntil(){}});
++  res.statusCode=response.status;for(const [key,value]of response.headers)if(key!=='set-cookie')res.setHeader(key,value);
++  const cookies=response.headers.getSetCookie();if(cookies.length)res.setHeader('Set-Cookie',cookies);
++  res.end(Buffer.from(await response.arrayBuffer()));
++ }catch(error){console.error(error);res.statusCode=500;res.end('N00 built handler failure');}});
++ await new Promise((ok,bad)=>{appServer.once('error',bad);appServer.listen(44890,'127.0.0.1',ok);});
++}
+diff --git a/tests/e2e/audit-neon-compat.spec.ts b/tests/e2e/audit-neon-compat.spec.ts
+new file mode 100644
+index 0000000..3506e7b
+--- /dev/null
++++ b/tests/e2e/audit-neon-compat.spec.ts
+@@ -0,0 +1,31 @@
++import {test,expect} from '@playwright/test';
++import {assertProtocolStorage} from '../../scripts/neon-compatibility-harness.mjs';
++test('NA01 fixture: official handler/client, server session, bearer verification, reload and logout',async({page,context})=>{
++ await page.route('**/*',route=>['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)?route.continue():route.abort());
++ await page.goto('/compat');await expect(page.getByTestId('server-session')).toHaveText('anonymous');
++ await page.getByRole('button',{name:'Fixture login'}).click();await expect(page.getByTestId('client-status')).toHaveText('signed-in');
++ const cookies=await context.cookies();const token=cookies.find(c=>c.name==='__Secure-neon-auth.session_token');
++ expect(token).toBeDefined();expect(token?.httpOnly).toBe(true);expect(token?.secure).toBe(true);expect(token?.sameSite).toBe('Lax');expect(token?.domain).toBe('localhost');
++ expect(cookies.some(c=>c.name==='__Secure-neon-auth.local.session_data')).toBe(true);
++ await page.getByRole('button',{name:'Session',exact:true}).click();await expect(page.getByTestId('client-status')).toHaveText('n00-user');
++ await page.reload();await expect(page.getByTestId('server-session')).toHaveText('n00-user');
++ await page.getByRole('button',{name:'Verify token'}).click();await expect(page.getByTestId('client-status')).toHaveText('api-verified');
++ assertProtocolStorage(await page.evaluate(()=>Object.entries(localStorage))); expect(await page.evaluate(()=>Object.keys(sessionStorage))).toEqual([]);
++ await page.screenshot({path:`test-results/neon-compatibility/${process.env.BUYEROS_N00_TARGET}-signed-in.png`});
++ await page.getByRole('button',{name:'Logout'}).click();await expect(page.getByTestId('client-status')).toHaveText('signed-out');
++ await page.reload();await expect(page.getByTestId('server-session')).toHaveText('anonymous');
++ expect((await context.cookies()).filter(c=>c.name.startsWith('__Secure-neon-auth'))).toEqual([]);
++});
++test('NA01 fixture: callback response preserves host cookies and redirect',async({page,request})=>{
++ const upstream=await request.get('http://127.0.0.1:44891/fixture/auth/callback/fixture?state=fictional-state',{maxRedirects:0});expect(upstream.status()).toBe(302);expect(upstream.headers()['set-cookie']).toContain('HttpOnly');
++ const callback=await request.get('/api/auth/callback/fixture?state=fictional-state',{maxRedirects:0});expect(callback.status()).toBe(302);
++ await page.goto('/api/auth/callback/fixture?state=fictional-state');await expect(page).toHaveURL(/\/compat$/);
++ await expect(page.getByTestId('server-session')).toHaveText('n00-user');
++});
++test('NA01 fixture: tokens require exact issuer/audience/algorithm, expiry and known key',async({request})=>{
++ expect((await request.get('http://127.0.0.1:44892/verify')).status()).toBe(401);
++ for(const kind of ['wrong-issuer','wrong-audience','expired','unknown-kid','wrong-algorithm']){
++  const result=await request.get(`http://127.0.0.1:44891/fixture-token?kind=${kind}`);const {token}=await result.json();
++  expect((await request.get('http://127.0.0.1:44892/verify',{headers:{Authorization:`Bearer ${token}`}})).status()).toBe(401);
++ }
++});
+diff --git a/tests/fixtures/neon-compatibility/overlay/app/api/auth/[...path]/route.ts b/tests/fixtures/neon-compatibility/overlay/app/api/auth/[...path]/route.ts
+new file mode 100644
+index 0000000..136d84c
+--- /dev/null
++++ b/tests/fixtures/neon-compatibility/overlay/app/api/auth/[...path]/route.ts
+@@ -0,0 +1,2 @@
++import {auth} from '../../../../lib/neon-compatibility/server';
++export const {GET,POST}=auth.handler();
+diff --git a/tests/fixtures/neon-compatibility/overlay/app/api/compat/session/route.ts b/tests/fixtures/neon-compatibility/overlay/app/api/compat/session/route.ts
+new file mode 100644
+index 0000000..a2e30d6
+--- /dev/null
++++ b/tests/fixtures/neon-compatibility/overlay/app/api/compat/session/route.ts
+@@ -0,0 +1,2 @@
++import {auth} from '../../../../lib/neon-compatibility/server';
++export async function GET(){const result=await auth.getSession();return Response.json(result);}
+diff --git a/tests/fixtures/neon-compatibility/overlay/app/compat/client.tsx b/tests/fixtures/neon-compatibility/overlay/app/compat/client.tsx
+new file mode 100644
+index 0000000..e2d510c
+--- /dev/null
++++ b/tests/fixtures/neon-compatibility/overlay/app/compat/client.tsx
+@@ -0,0 +1,13 @@
++"use client";
++import {useState,useSyncExternalStore} from 'react';
++import {createAuthClient} from '@neondatabase/auth/next';
++const auth=createAuthClient();
++const subscribe=()=>()=>{};
++export default function Client(){const [status,setStatus]=useState('ready');const hydrated=useSyncExternalStore(subscribe,()=>true,()=>false);
++ async function login(){const result=await auth.signIn.email({email:'n00@fixture.invalid',password:'fictional-password'});setStatus(result.error?'login-error':'signed-in');}
++ async function session(){const result=await auth.getSession();setStatus(result.error?'session-error':result.data?.user.id??'anonymous');}
++ async function token(){const result=await auth.token();if(result.error||!result.data?.token){setStatus('token-error');return;}
++  // Bearer remains in this call; never persist to browser storage.
++  const response=await fetch('http://127.0.0.1:44892/verify',{headers:{Authorization:`Bearer ${result.data.token}`}});setStatus(response.ok?'api-verified':'api-error');}
++ async function logout(){const result=await auth.signOut();setStatus(result.error?'logout-error':'signed-out');}
++ return <section data-hydrated={String(hydrated)}><button disabled={!hydrated} onClick={login}>Fixture login</button><button disabled={!hydrated} onClick={session}>Session</button><button disabled={!hydrated} onClick={token}>Verify token</button><button disabled={!hydrated} onClick={logout}>Logout</button><output data-testid="client-status">{status}</output></section>;}
+diff --git a/tests/fixtures/neon-compatibility/overlay/app/compat/page.tsx b/tests/fixtures/neon-compatibility/overlay/app/compat/page.tsx
+new file mode 100644
+index 0000000..fe48c63
+--- /dev/null
++++ b/tests/fixtures/neon-compatibility/overlay/app/compat/page.tsx
+@@ -0,0 +1,4 @@
++import {auth} from '../../lib/neon-compatibility/server';
++import Client from './client';
++export const dynamic='force-dynamic';
++export default async function Page(){const {data,error}=await auth.getSession();return <main style={{marginInlineStart:320,padding:24}}><h1>N00 fictional compatibility probe</h1><output data-testid="server-session">{error?'error':data?.user?.id??'anonymous'}</output><Client/></main>;}
+diff --git a/tests/fixtures/neon-compatibility/overlay/lib/neon-compatibility/rsc-service.ts b/tests/fixtures/neon-compatibility/overlay/lib/neon-compatibility/rsc-service.ts
+new file mode 100644
+index 0000000..6d6241f
+--- /dev/null
++++ b/tests/fixtures/neon-compatibility/overlay/lib/neon-compatibility/rsc-service.ts
+@@ -0,0 +1,2 @@
++// N00 overlay only: adapt the public Vinext fetch object to Nitro's service interface.
++export {default} from 'vinext/server/app-router-entry';
+diff --git a/tests/fixtures/neon-compatibility/overlay/lib/neon-compatibility/server.ts b/tests/fixtures/neon-compatibility/overlay/lib/neon-compatibility/server.ts
+new file mode 100644
+index 0000000..b0a6f43
+--- /dev/null
++++ b/tests/fixtures/neon-compatibility/overlay/lib/neon-compatibility/server.ts
+@@ -0,0 +1,5 @@
++import 'server-only';
++import {createNeonAuth} from '@neondatabase/auth/next/server';
++// N00 ONLY: this file overlays a disposable source copy. Never a real tenant.
++export const auth=createNeonAuth({baseUrl:'http://127.0.0.1:44891/fixture/auth',
++ cookies:{secret:'fictional-N00-cookie-secret-32-plus-characters',sameSite:'lax',sessionDataTtl:300}});
+diff --git a/tests/fixtures/neon-compatibility/overlay/server.ts b/tests/fixtures/neon-compatibility/overlay/server.ts
+new file mode 100644
+index 0000000..67bdc92
+--- /dev/null
++++ b/tests/fixtures/neon-compatibility/overlay/server.ts
+@@ -0,0 +1,4 @@
++import {fetchViteEnv} from 'nitro/vite/runtime';
++// N00 overlay only. Vinext's fetch entry dispatches API, Flight and HTML together.
++const dispatcher={fetch(request:Request){return fetchViteEnv('rsc',request);}};
++export default dispatcher;
+diff --git a/tests/fixtures/neon-compatibility/verify.py b/tests/fixtures/neon-compatibility/verify.py
+new file mode 100644
+index 0000000..9191513
+--- /dev/null
++++ b/tests/fixtures/neon-compatibility/verify.py
+@@ -0,0 +1,30 @@
++"""N00 loopback protocol diagnostic. No BuyerOS DB or membership access."""
++import jwt
++import httpx
++import uvicorn
++from fastapi import FastAPI, Header, HTTPException
++from fastapi.middleware.cors import CORSMiddleware
++ISSUER = "http://127.0.0.1:44891"
++AUDIENCE = "http://127.0.0.1:44891"
++JWKS_URL = "http://127.0.0.1:44891/fixture/auth/.well-known/jwks.json"
++app = FastAPI()
++app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:44890"], allow_methods=["GET"], allow_headers=["Authorization"])
++@app.get("/verify")
++async def verify(authorization: str | None = Header(default=None)):
++    if not authorization or not authorization.startswith("Bearer "):
++        raise HTTPException(401, "Bearer required")
++    token = authorization[7:]
++    try:
++        header = jwt.get_unverified_header(token)
++        if header.get("alg") != "EdDSA":
++            raise ValueError("Algorithm refused")
++        async with httpx.AsyncClient(trust_env=False) as client:
++            response = await client.get(JWKS_URL, timeout=3)
++            response.raise_for_status()
++        key = next(k for k in response.json()["keys"] if k.get("kid") == header.get("kid") and k.get("alg") == "EdDSA" and k.get("kty") == "OKP" and k.get("crv") == "Ed25519")
++        claims = jwt.decode(token, jwt.PyJWK.from_dict(key).key, algorithms=["EdDSA"], issuer=ISSUER, audience=AUDIENCE, options={"require":["sub","iss","aud","exp","iat"]})
++    except (jwt.PyJWTError, ValueError, StopIteration, httpx.HTTPError) as error:
++        raise HTTPException(401, "N00 token refused") from error
++    return {"subject":claims["sub"], "protocol_fixture_only":True}
++if __name__ == "__main__":
++    uvicorn.run(app, host="127.0.0.1", port=44892)
+diff --git a/tests/neon-compatibility-discovery.test.mjs b/tests/neon-compatibility-discovery.test.mjs
+new file mode 100644
+index 0000000..e4bfb77
+--- /dev/null
++++ b/tests/neon-compatibility-discovery.test.mjs
+@@ -0,0 +1,12 @@
++import {test} from 'node:test';
++import assert from 'node:assert/strict';
++import {spawnSync} from 'node:child_process';
++import {fixtureChildEnvironment} from '../scripts/neon-compatibility-harness.mjs';
++function discovered(config){
++ const result=spawnSync(process.execPath,['node_modules/@playwright/test/cli.js','test','--config',config,'--list','--reporter=json'],{encoding:'utf8',timeout:60_000,env:{...fixtureChildEnvironment(process.env),BUYEROS_N00_TARGET:'portable'}});
++ assert.equal(result.status,0,result.stderr||result.error?.message);
++ const files=[];function visit(suite){for(const spec of suite.specs??[])files.push(spec.file);for(const child of suite.suites??[])visit(child);}
++ for(const suite of JSON.parse(result.stdout).suites)visit(suite);return files;
++}
++for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regression.config.ts'])test(`N00 built fixture is isolated from ${config}`,()=>{const files=discovered(config);assert.ok(files.some(file=>file.endsWith('audit-auth-entry.spec.ts')),'existing Q01 tests stay selected');assert.equal(files.filter(file=>file.endsWith('audit-neon-compat.spec.ts')).length,0,'different runtime/upstream ports must not enter the DB workbench');});
++test('N00 dedicated config discovers all three built-output cases',()=>{const files=discovered('playwright.neon-auth.config.ts');assert.equal(files.length,3);assert.ok(files.every(file=>file.endsWith('audit-neon-compat.spec.ts')));});
+diff --git a/tests/neon-compatibility-harness.test.mjs b/tests/neon-compatibility-harness.test.mjs
+new file mode 100644
+index 0000000..bb79226
+--- /dev/null
++++ b/tests/neon-compatibility-harness.test.mjs
+@@ -0,0 +1,24 @@
++import assert from 'node:assert/strict';
++import {test} from 'node:test';
++import {resolve} from 'node:path';
++import {assertLoopbackUrl,assertSourcePath,isBuildSource,fixtureChildEnvironment,assertSeedMetadata,staticAssetPath,compatibilityViteConfig,assertProtocolStorage} from '../scripts/neon-compatibility-harness.mjs';
++for(const value of ['https://auth.neon.tech/neondb/auth','http://127.0.0.1.evil.test/auth','http://user:password@localhost:44891/auth','http://0.0.0.0:44891/auth']) {
++ test(`N00 rejects a non-owned upstream: ${value}`,()=>assert.throws(()=>assertLoopbackUrl(value)));
++}
++test('N00 accepts the loopback fixture base path',()=>assert.equal(assertLoopbackUrl('http://127.0.0.1:44891/fixture/auth').pathname,'/fixture/auth'));
++for(const value of ['../.env','a/../../secret','/secret','C:/secret','a/.env.production','a\\.env.local','node_modules/secret','test-results/secret','app/../secret']) {
++ test(`N00 source inventory rejects unsafe input: ${value}`,()=>assert.throws(()=>assertSourcePath(value)));
++}
++test('N00 source inventory accepts a source file',()=>assert.equal(assertSourcePath('app/page.tsx'),'app/page.tsx'));
++
++test('N00 build includes BuyerOS frontend services and generated types',()=>{for(const path of ['services/live/mode.ts','services/generated/api-types.ts'])assert.equal(isBuildSource(path),true);});
++test('N00 build excludes Python/services and historical evidence',()=>{for(const path of ['services/api/.env','services/worker/run.py','docs/private.txt','tests/fixtures/private.ts'])assert.equal(isBuildSource(path),false);});
++
++test('N00 child env excludes inherited DB/Auth/provider variables',()=>{const env=fixtureChildEnvironment({PATH:'fictional-path',DATABASE_URL:'forbidden',BUYEROS_TEST_DATABASE_URL:'forbidden',BUYEROS_AUTH0_ISSUER:'forbidden',NEON_AUTH_COOKIE_SECRET:'forbidden',OPENAI_API_KEY:'forbidden'});assert.equal(env.PATH,'fictional-path');assert.equal(env.BUYEROS_STRICT_INTEGRATION,'1');for(const key of ['DATABASE_URL','BUYEROS_TEST_DATABASE_URL','BUYEROS_AUTH0_ISSUER','NEON_AUTH_COOKIE_SECRET','OPENAI_API_KEY'])assert.equal(key in env,false);});
++test('N00 cache seed requires matching declared owner',()=>{assert.doesNotThrow(()=>assertSeedMetadata('buyeros-audit-ui-deps-052d6a686de9','052d6a686de9',{'buyeros.audit.owner':'052d6a686de9'}));assert.throws(()=>assertSeedMetadata('buyeros-audit-ui-deps-052d6a686de9','052d6a686de9',{'buyeros.audit.owner':'someone-else'}));assert.throws(()=>assertSeedMetadata('shared-production-cache','052d6a686de9',{'buyeros.audit.owner':'052d6a686de9'}));});
++
++test('N00 emitted static assets stay within the output static directory',()=>{assert.equal(staticAssetPath(resolve('fixture-static'),'/_next/static/chunks/client.js'),resolve('fixture-static/_next/static/chunks/client.js'));for(const path of ['/../private','/%2e%2e/private','/a%5cprivate','/a:private'])assert.throws(()=>staticAssetPath('/fixture-static',path));});
++
++test('N00 registers Vinext public fetch entry as the Nitro RSC service without changing production config',()=>{const input="plugins: [(await import(\"nitro/vite\")).nitro({ vercel: { functions: { maxDuration: 90 } } })]";const output=compatibilityViteConfig(input);assert.match(output,/services: \{ rsc: \{ entry: \"\.\/lib\/neon-compatibility\/rsc-service\.ts\"/);assert.match(output,/maxDuration: 90/);assert.throws(()=>compatibilityViteConfig('different build interface'));assert.throws(()=>compatibilityViteConfig(input+input));});
++
++test('N00 storage permits only canonical locale prefs and refuses tokens or credential fields',()=>{assert.doesNotThrow(()=>assertProtocolStorage([]));assert.doesNotThrow(()=>assertProtocolStorage([['buyeros-prefs-v1','{"locale":"en"}']]));assert.doesNotThrow(()=>assertProtocolStorage([['buyeros-prefs-v1','{"locale":"zh-HK"}']]));for(const entries of [[['token','fictional']], [['buyeros-prefs-v1','{"locale":"en","token":"fictional"}']], [['buyeros-prefs-v1','{"locale":"fictional-session"}']], [['buyeros-prefs-v1','{"locale":"credential","locale":"en"}']]])assert.throws(()=>assertProtocolStorage(entries));});

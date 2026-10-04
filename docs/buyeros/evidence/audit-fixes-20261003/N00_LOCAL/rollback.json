@@ -1,0 +1,7 @@
+{
+  "source_reverse_applicability_exit": 0,
+  "runtime_revert_rehearsal": false,
+  "production_rollback": false,
+  "database_undo_required": false,
+  "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6"
+}

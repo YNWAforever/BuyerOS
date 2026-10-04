@@ -1,0 +1,28 @@
+✔ N00 rejects a non-owned upstream: https://auth.neon.tech/neondb/auth (1.0187ms)
+✔ N00 rejects a non-owned upstream: http://127.0.0.1.evil.test/auth (0.9335ms)
+✔ N00 rejects a non-owned upstream: http://user:password@localhost:44891/auth (0.1309ms)
+✔ N00 rejects a non-owned upstream: http://0.0.0.0:44891/auth (0.0732ms)
+✔ N00 accepts the loopback fixture base path (0.1762ms)
+✔ N00 source inventory rejects unsafe input: ../.env (0.2839ms)
+✔ N00 source inventory rejects unsafe input: a/../../secret (0.1871ms)
+✔ N00 source inventory rejects unsafe input: /secret (0.0794ms)
+✔ N00 source inventory rejects unsafe input: C:/secret (0.1454ms)
+✔ N00 source inventory rejects unsafe input: a/.env.production (0.2336ms)
+✔ N00 source inventory rejects unsafe input: a\.env.local (0.1435ms)
+✔ N00 source inventory rejects unsafe input: node_modules/secret (0.0758ms)
+✔ N00 source inventory rejects unsafe input: test-results/secret (0.0489ms)
+✔ N00 source inventory rejects unsafe input: app/../secret (0.0414ms)
+✔ N00 source inventory accepts a source file (0.1471ms)
+✔ N00 build includes BuyerOS frontend services and generated types (0.2511ms)
+✔ N00 build excludes Python/services and historical evidence (0.1182ms)
+✔ N00 child env excludes inherited DB/Auth/provider variables (0.2471ms)
+✔ N00 cache seed requires matching declared owner (0.244ms)
+✔ N00 emitted static assets stay within the output static directory (0.2854ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 118.26

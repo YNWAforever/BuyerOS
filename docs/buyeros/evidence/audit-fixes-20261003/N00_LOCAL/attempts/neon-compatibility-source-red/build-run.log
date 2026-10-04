@@ -1,0 +1,14 @@
+portable: exit 1
+vercel: exit 1
+file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-compatibility-harness.mjs:66
+  if(proof.outputs.some(output=>output.exit!==0))throw new Error('N00 output build failed; retain exact logs');
+                                                       ^
+
+Error: N00 output build failed; retain exact logs
+    at buildFixture (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-compatibility-harness.mjs:66:56)
+    at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-compatibility-harness.mjs:75:84
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.18.0

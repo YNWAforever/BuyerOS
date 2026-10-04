@@ -1,0 +1,40 @@
+✔ checked-in API types match the current OpenAPI contract (9302.6583ms)
+✔ U13 actual callback render during initializing is status, never configuration alert (21.6379ms)
+✔ N00 built fixture is isolated from playwright.audit-fixes.config.ts (2926.3121ms)
+✔ N00 built fixture is isolated from playwright.audit-regression.config.ts (2380.5381ms)
+✔ N00 dedicated config discovers all three built-output cases (1648.6098ms)
+✔ N00 rejects a non-owned upstream: https://auth.neon.tech/neondb/auth (4.1116ms)
+✔ N00 rejects a non-owned upstream: http://127.0.0.1.evil.test/auth (0.2383ms)
+✔ N00 rejects a non-owned upstream: http://user:password@localhost:44891/auth (0.199ms)
+✔ N00 rejects a non-owned upstream: http://0.0.0.0:44891/auth (0.1497ms)
+✔ N00 accepts the loopback fixture base path (1.3009ms)
+✔ N00 source inventory rejects unsafe input: ../.env (0.5145ms)
+✔ N00 source inventory rejects unsafe input: a/../../secret (0.3047ms)
+✔ N00 source inventory rejects unsafe input: /secret (0.131ms)
+✔ N00 source inventory rejects unsafe input: C:/secret (0.2785ms)
+✔ N00 source inventory rejects unsafe input: a/.env.production (0.3089ms)
+✔ N00 source inventory rejects unsafe input: a\.env.local (0.1653ms)
+✔ N00 source inventory rejects unsafe input: node_modules/secret (0.1072ms)
+✔ N00 source inventory rejects unsafe input: test-results/secret (0.0841ms)
+✔ N00 source inventory rejects unsafe input: app/../secret (0.1101ms)
+✔ N00 source inventory accepts a source file (0.1274ms)
+✔ N00 build includes BuyerOS frontend services and generated types (0.5246ms)
+✔ N00 build excludes Python/services and historical evidence (0.5563ms)
+✔ N00 child env excludes inherited DB/Auth/provider variables (0.9238ms)
+✔ N00 cache seed requires matching declared owner (0.4369ms)
+✔ N00 emitted static assets stay within the output static directory (0.7617ms)
+✔ N00 registers Vinext public fetch entry as the Nitro RSC service without changing production config (0.5152ms)
+✔ N00 storage permits only canonical locale prefs and refuses tokens or credential fields (0.4244ms)
+✔ Vercel exposes only the app and binds its API call to the internal API service (3.6428ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (129.492ms)
+✔ the app proxy fails closed when the binding is absent (1.5241ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (1.3974ms)
+✔ FastAPI redirects stay on the public app path (2.0826ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9502.4319

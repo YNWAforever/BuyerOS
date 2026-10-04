@@ -1,0 +1,25 @@
+file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-compatibility-harness.test.mjs:3
+import {assertLoopbackUrl,assertSourcePath,isBuildSource,fixtureChildEnvironment,assertSeedMetadata,staticAssetPath} from '../scripts/neon-compatibility-harness.mjs';
+                                                                                                    ^^^^^^^^^^^^^^^
+SyntaxError: The requested module '../scripts/neon-compatibility-harness.mjs' does not provide an export named 'staticAssetPath'
+    at #asyncInstantiate (node:internal/modules/esm/module_job:327:21)
+    at async ModuleJob.run (node:internal/modules/esm/module_job:431:5)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.18.0
+✖ tests\neon-compatibility-harness.test.mjs (104.8851ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 119.3818
+
+✖ failing tests:
+
+test at tests\neon-compatibility-harness.test.mjs:1:1
+✖ tests\neon-compatibility-harness.test.mjs (104.8851ms)
+  'test failed'

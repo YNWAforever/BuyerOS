@@ -2045,5 +2045,13 @@
   },
   "deployed_source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
   "reviewed_source_sha_scope": "Historical T30 application; hosting_migration_proposal.reviewed_source_sha is current Cloudflare RC.",
-  "deployed_source_sha_scope": "Existing main app12327c7 freshly read-only verified2026-10-02HK; production remains0033 and unchanged. hosting_migration_proposal separately records approved isolatedpreview595865f/0035 and shutdown; noCloudflare productioncutover."
+  "deployed_source_sha_scope": "Existing main app12327c7 freshly read-only verified2026-10-02HK; production remains0033 and unchanged. hosting_migration_proposal separately records approved isolatedpreview595865f/0035 and shutdown; noCloudflare productioncutover.",
+  "latest_local_auth_checkpoint": {
+    "task": "N00",
+    "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/RESULTS.md",
+    "state": "partial; callback fixture gate failing; real auth not tested",
+    "deployed_sha": null,
+    "historical_T_fields_unchanged": true
+  }
 }

@@ -1,0 +1,624 @@
+[
+  {
+    "folder": "neon-compatibility-adapter-red",
+    "reports": [
+      {
+        "original": "build-inputs.json",
+        "stored": "attempts/neon-compatibility-adapter-red/build-inputs.json",
+        "sha256": "fd3631d3b8828d3c0b7967e1fb221616cb2d1d3d18afecbedfe37d1f54a0be39"
+      },
+      {
+        "original": "build-run.log",
+        "stored": "attempts/neon-compatibility-adapter-red/build-run.log",
+        "sha256": "03cd432605d4ee6b1fd6f66be0c9392b20178a6110568929885e315a3535699f"
+      },
+      {
+        "original": "build-runtime.json",
+        "stored": "attempts/neon-compatibility-adapter-red/build-runtime.json",
+        "sha256": "87ae7325174c0f0e6ce5b8b2ec5742c878b463b83188ef18c1384affe81accb5"
+      },
+      {
+        "original": "cleanup.json",
+        "stored": "attempts/neon-compatibility-adapter-red/cleanup.json",
+        "sha256": "3910189c62b5b01909f14f74c281956aaed519fc05304674773316becec5fccd"
+      },
+      {
+        "original": "install-linux.log",
+        "stored": "attempts/neon-compatibility-adapter-red/install-linux.log",
+        "sha256": "e16915acb17f6bb7ab9757747dc36a2af0f0bb9749fd6797711700938992dc09"
+      },
+      {
+        "original": "lint-final.log",
+        "stored": "attempts/neon-compatibility-adapter-red/lint-final.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "original": "lint.log",
+        "stored": "attempts/neon-compatibility-adapter-red/lint.log",
+        "sha256": "f768d30576e308028e20afb2e9369accb22330de0a5e50330b4b47e1256f3a50"
+      },
+      {
+        "original": "portable-build.log",
+        "stored": "attempts/neon-compatibility-adapter-red/portable-build.log",
+        "sha256": "1027c3bb4dee139b5f64cce4b07971201fc35a723769723254ce5993ace8b3df"
+      },
+      {
+        "original": "portable-ui-adapter.log",
+        "stored": "attempts/neon-compatibility-adapter-red/portable-ui-adapter.log",
+        "sha256": "36ab603658731c73ae74567e036d29fd66111172c759a94daa982b87b5330c6e"
+      },
+      {
+        "original": "portable-ui.xml",
+        "stored": "attempts/neon-compatibility-adapter-red/portable-ui.xml",
+        "sha256": "4de87595c7cdbdb3305b48944210168cdd708b17a60343f7cfc0fe20ee96acee"
+      },
+      {
+        "original": "vercel-build.log",
+        "stored": "attempts/neon-compatibility-adapter-red/vercel-build.log",
+        "sha256": "2fb4aed56856aa3690293872bda4a06d427b2fb32381e8871047e00dea24365f"
+      },
+      {
+        "original": "vercel-ui-adapter.log",
+        "stored": "attempts/neon-compatibility-adapter-red/vercel-ui-adapter.log",
+        "sha256": "d0480ae5bac719c7585521c11930eeca5ee9d2294b2716db5b40955aaf1a7cf6"
+      },
+      {
+        "original": "vercel-ui.xml",
+        "stored": "attempts/neon-compatibility-adapter-red/vercel-ui.xml",
+        "sha256": "d40d93a8c08318947ca62371547d93c418f52945510b89ffd84f2766337df723"
+      },
+      {
+        "original": "portable-ui/.last-run.json",
+        "stored": "attempts/neon-compatibility-adapter-red/013-.last-run.json",
+        "sha256": "e4e683cc7ba11bf1efebc852ff92db96661c460cef87e7ceea13382e4f4e9f92"
+      },
+      {
+        "original": "vercel-ui/.last-run.json",
+        "stored": "attempts/neon-compatibility-adapter-red/014-.last-run.json",
+        "sha256": "e4e683cc7ba11bf1efebc852ff92db96661c460cef87e7ceea13382e4f4e9f92"
+      },
+      {
+        "original": "vercel-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/error-context.md",
+        "stored": "attempts/neon-compatibility-adapter-red/015-error-context.md",
+        "sha256": "4ab30c735ea05c0089971bd1d58eec5c9b9cf4cae6ee01f409db83bc5413d9ea"
+      },
+      {
+        "original": "vercel-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/trace.zip",
+        "stored": "attempts/neon-compatibility-adapter-red/016-trace.zip",
+        "sha256": "5809aef18ab26bc174be384bc297e0a2d1160552d8aa548d5b4464a7990d032f"
+      },
+      {
+        "original": "vercel-ui/audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout/error-context.md",
+        "stored": "attempts/neon-compatibility-adapter-red/017-error-context.md",
+        "sha256": "34630ff85d404fc10f9ae8bc9f48a273c1cec0c08a747e7c52523b12e0c8e6b3"
+      },
+      {
+        "original": "vercel-ui/audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout/trace.zip",
+        "stored": "attempts/neon-compatibility-adapter-red/018-trace.zip",
+        "sha256": "4b85ef06690deee8bc8aa1194dacea9a76ab12066500a79f806d2e66aca36f11"
+      },
+      {
+        "original": "portable-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/error-context.md",
+        "stored": "attempts/neon-compatibility-adapter-red/019-error-context.md",
+        "sha256": "83a54c200cdad2949d9244e8b3808742534f1ce4f5b2e6ec7c7302ff7ff71224"
+      },
+      {
+        "original": "portable-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/trace.zip",
+        "stored": "attempts/neon-compatibility-adapter-red/020-trace.zip",
+        "sha256": "bf257e5189ed726f66463f4641764e100c06218db7035c73aa5ac25733aab885"
+      },
+      {
+        "original": "portable-ui/audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout/error-context.md",
+        "stored": "attempts/neon-compatibility-adapter-red/021-error-context.md",
+        "sha256": "700c19221e3dbe454669e0a582b4e80ca1f4d6d75fd0bb16ef4355f202276043"
+      },
+      {
+        "original": "portable-ui/audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout/trace.zip",
+        "stored": "attempts/neon-compatibility-adapter-red/022-trace.zip",
+        "sha256": "0d2d70327b9ce9e9806ad3ddb7cc976672ae0b855b78bbb8bc45573998932f2d"
+      }
+    ],
+    "large_prior_archives": [
+      {
+        "name": "portable.tar.gz",
+        "bytes": 992908,
+        "sha256": "ed9646b1e13d26be73f9829b476ac684eaff8364bde18717bc6069295df206f7",
+        "retained_ignored_path": "test-results/neon-compatibility-adapter-red/portable.tar.gz"
+      },
+      {
+        "name": "source.tar",
+        "bytes": 1974784,
+        "sha256": "ccac43a9e6caf3c3e4360f5f6bd6790fa2dacf1f99a25a663c15bc331a4a57c9",
+        "retained_ignored_path": "test-results/neon-compatibility-adapter-red/source.tar"
+      },
+      {
+        "name": "vercel.tar.gz",
+        "bytes": 27522914,
+        "sha256": "f3017fb1cfa9fb6c2cf9168e3ec9bfe5151826f6b28e25e6c17d38c2db2aa9f4",
+        "retained_ignored_path": "test-results/neon-compatibility-adapter-red/vercel.tar.gz"
+      }
+    ]
+  },
+  {
+    "folder": "neon-compatibility-cache-copy-red",
+    "reports": [
+      {
+        "original": "build-inputs.json",
+        "stored": "attempts/neon-compatibility-cache-copy-red/build-inputs.json",
+        "sha256": "844472ed6533c1b450734df536e5f964ff9d9292424705536a9ec759c545f03d"
+      },
+      {
+        "original": "build-run.log",
+        "stored": "attempts/neon-compatibility-cache-copy-red/build-run.log",
+        "sha256": "314dab5eae3be0db2633aa23430106c493c6f6708d66e2bb227ca74d9ee9fc05"
+      },
+      {
+        "original": "cleanup.json",
+        "stored": "attempts/neon-compatibility-cache-copy-red/cleanup.json",
+        "sha256": "7a82104f81ec69f88a799b39f41a6b38573cf21896a24f225f975aa6b91b0055"
+      },
+      {
+        "original": "node-gates.log",
+        "stored": "attempts/neon-compatibility-cache-copy-red/node-gates.log",
+        "sha256": "c33eb3be87693fbf8f8f757b44463df69a1868019285d4dc7d3267b2de2df95c"
+      },
+      {
+        "original": "typecheck-final.log",
+        "stored": "attempts/neon-compatibility-cache-copy-red/typecheck-final.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "original": "typecheck.log",
+        "stored": "attempts/neon-compatibility-cache-copy-red/typecheck.log",
+        "sha256": "44a33807e3b4778ee3c5f2373e2db4a04c1f7cf52a176f6981731875fc58f3f2"
+      }
+    ],
+    "large_prior_archives": [
+      {
+        "name": "source.tar",
+        "bytes": 1974784,
+        "sha256": "ff204fa66b9624f3e76abb231dbb875c580fe7adceb431ddcf0855f7e7d743ea",
+        "retained_ignored_path": "test-results/neon-compatibility-cache-copy-red/source.tar"
+      }
+    ]
+  },
+  {
+    "folder": "neon-compatibility-default-red",
+    "reports": [
+      {
+        "original": "auth0-api.log",
+        "stored": "attempts/neon-compatibility-default-red/auth0-api.log",
+        "sha256": "c2450272f8625233c46d4fe7d2b34bac98ad529e7b0cb1a2d87eabf365ebf832"
+      },
+      {
+        "original": "auth0-api.xml",
+        "stored": "attempts/neon-compatibility-default-red/auth0-api.xml",
+        "sha256": "456f2eab8504bd67f227a577175b3fc95ad0f1c0ffd98cb88b36910361f972f3"
+      },
+      {
+        "original": "build-inputs.json",
+        "stored": "attempts/neon-compatibility-default-red/build-inputs.json",
+        "sha256": "e21727118869b7309702aa496ac3424619e65654cc7e53e366e12f8be5140f78"
+      },
+      {
+        "original": "build-run.log",
+        "stored": "attempts/neon-compatibility-default-red/build-run.log",
+        "sha256": "03cd432605d4ee6b1fd6f66be0c9392b20178a6110568929885e315a3535699f"
+      },
+      {
+        "original": "build-runtime.json",
+        "stored": "attempts/neon-compatibility-default-red/build-runtime.json",
+        "sha256": "87ae7325174c0f0e6ce5b8b2ec5742c878b463b83188ef18c1384affe81accb5"
+      },
+      {
+        "original": "cleanup.json",
+        "stored": "attempts/neon-compatibility-default-red/cleanup.json",
+        "sha256": "76995d0be39817f90e5ee796e538c42c8159a52531ef714f10ffad9395356014"
+      },
+      {
+        "original": "env-seed-green.log",
+        "stored": "attempts/neon-compatibility-default-red/env-seed-green.log",
+        "sha256": "d03f10bfaff9b31001b2a29f2100e8ee17a7a26cb9155fcb03b968bde8642e0e"
+      },
+      {
+        "original": "env-seed-red.log",
+        "stored": "attempts/neon-compatibility-default-red/env-seed-red.log",
+        "sha256": "b00513248a83a7146b1121bb4671678ae12cf6465a63cafb0b6ba734cc6d95dd"
+      },
+      {
+        "original": "install-linux.log",
+        "stored": "attempts/neon-compatibility-default-red/install-linux.log",
+        "sha256": "8375be22e41b1545d22c40149578fcf648ffd9c6bc9e76e96b812f389d78f91a"
+      },
+      {
+        "original": "portable-build.log",
+        "stored": "attempts/neon-compatibility-default-red/portable-build.log",
+        "sha256": "4a48c75672e5f817d7d68abe4d39ac350708d3567d043e1dcafa7d9708699162"
+      },
+      {
+        "original": "portable-ui-red.log",
+        "stored": "attempts/neon-compatibility-default-red/portable-ui-red.log",
+        "sha256": "8dabbf073a428b249518c035068aeefebce5aa4eb6f4d82187191b131380359a"
+      },
+      {
+        "original": "portable-ui.xml",
+        "stored": "attempts/neon-compatibility-default-red/portable-ui.xml",
+        "sha256": "409b737d3ac6b1605c6817c54a0741eba7dcbe60aea2b5edad4d63c887fb2efe"
+      },
+      {
+        "original": "static-green.log",
+        "stored": "attempts/neon-compatibility-default-red/static-green.log",
+        "sha256": "fae93f311690a495924a111d1f76186a978f6b91c152e88b44340e20bf99a377"
+      },
+      {
+        "original": "static-red.log",
+        "stored": "attempts/neon-compatibility-default-red/static-red.log",
+        "sha256": "882366590dc8edee5da20971161432363e6c4ff20c27e9e62731df3a2890f964"
+      },
+      {
+        "original": "vercel-build.log",
+        "stored": "attempts/neon-compatibility-default-red/vercel-build.log",
+        "sha256": "ff8b4f056151a87e1651957a4eb0c211c41ecba24387862b1d3cffe14bdfda4d"
+      },
+      {
+        "original": "vercel-ui-first-red.xml",
+        "stored": "attempts/neon-compatibility-default-red/vercel-ui-first-red.xml",
+        "sha256": "44ed106073cf6bb212d9892609a93a6d5e79a6627a9bc2a258061b8ec5255dbb"
+      },
+      {
+        "original": "vercel-ui-hosting-fixed.log",
+        "stored": "attempts/neon-compatibility-default-red/vercel-ui-hosting-fixed.log",
+        "sha256": "7fb784719b9a2f9fa6eac01c4f0f58dfc1f70f0962319202cac9dd317cd6db3c"
+      },
+      {
+        "original": "vercel-ui-red.log",
+        "stored": "attempts/neon-compatibility-default-red/vercel-ui-red.log",
+        "sha256": "79f59ad858fb027744388bc42f0693db884e792a91bdc36cfb4d73afc6815a7f"
+      },
+      {
+        "original": "vercel-ui.xml",
+        "stored": "attempts/neon-compatibility-default-red/vercel-ui.xml",
+        "sha256": "50d4867c84904de160eb2d253e8071020a505e31feac58efd2fa631e0f358d2e"
+      },
+      {
+        "original": "wrangler-startup-probe.log",
+        "stored": "attempts/neon-compatibility-default-red/wrangler-startup-probe.log",
+        "sha256": "0ce5c3bc692acb0a492675de3391aaf3aff1b4c8fd2faa944d0311620985c1b2"
+      },
+      {
+        "original": "portable-ui/.last-run.json",
+        "stored": "attempts/neon-compatibility-default-red/020-.last-run.json",
+        "sha256": "e22df5d0991eb28c09093b1e678b3fa8cd1fab48185d38e67cf79fb6e63ad5ea"
+      },
+      {
+        "original": "vercel-ui/.last-run.json",
+        "stored": "attempts/neon-compatibility-default-red/021-.last-run.json",
+        "sha256": "e4e683cc7ba11bf1efebc852ff92db96661c460cef87e7ceea13382e4f4e9f92"
+      },
+      {
+        "original": "vercel-ui-first-red/.last-run.json",
+        "stored": "attempts/neon-compatibility-default-red/022-.last-run.json",
+        "sha256": "e4e683cc7ba11bf1efebc852ff92db96661c460cef87e7ceea13382e4f4e9f92"
+      },
+      {
+        "original": "vercel-ui-first-red/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/error-context.md",
+        "stored": "attempts/neon-compatibility-default-red/023-error-context.md",
+        "sha256": "8badcbbff151e2071147556997a670eceaf9f687c7645fce6650ec5bbe0e15dd"
+      },
+      {
+        "original": "vercel-ui-first-red/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/trace.zip",
+        "stored": "attempts/neon-compatibility-default-red/024-trace.zip",
+        "sha256": "5f0854b31d35c8bb2a14cb664bcc2d255b4c85cc71db084b1fd269a0e29bbd3d"
+      },
+      {
+        "original": "vercel-ui-first-red/audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout/error-context.md",
+        "stored": "attempts/neon-compatibility-default-red/025-error-context.md",
+        "sha256": "d1d2a80c2861516e677367164cdee927c2d359f036aacf29d1c6c332efa610f0"
+      },
+      {
+        "original": "vercel-ui-first-red/audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout/trace.zip",
+        "stored": "attempts/neon-compatibility-default-red/026-trace.zip",
+        "sha256": "76a9689e15d30fca042d6d9ca7dbffa9d0d91e4e2d5a896ed38b10a4dba49eb1"
+      },
+      {
+        "original": "vercel-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/error-context.md",
+        "stored": "attempts/neon-compatibility-default-red/027-error-context.md",
+        "sha256": "4ab30c735ea05c0089971bd1d58eec5c9b9cf4cae6ee01f409db83bc5413d9ea"
+      },
+      {
+        "original": "vercel-ui/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/trace.zip",
+        "stored": "attempts/neon-compatibility-default-red/028-trace.zip",
+        "sha256": "f7fa91d534779880c2b6da387c25acad0f8864471480a6f0a73d130e4c028ea3"
+      },
+      {
+        "original": "vercel-ui/audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout/error-context.md",
+        "stored": "attempts/neon-compatibility-default-red/029-error-context.md",
+        "sha256": "8acaccb971572b4b66287132e57be8af6ecd524248530e4041e533d6e28308d0"
+      },
+      {
+        "original": "vercel-ui/audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout/trace.zip",
+        "stored": "attempts/neon-compatibility-default-red/030-trace.zip",
+        "sha256": "4ec6e6e9b0f3dec56401227f72b7a969135de325d26d171dd6789957c84c20d9"
+      }
+    ],
+    "large_prior_archives": [
+      {
+        "name": "portable.tar.gz",
+        "bytes": 993660,
+        "sha256": "c54baa0abc781af18aa30bf10ef486b3b620e549c25df90d14b5a183784acb40",
+        "retained_ignored_path": "test-results/neon-compatibility-default-red/portable.tar.gz"
+      },
+      {
+        "name": "source.tar",
+        "bytes": 1970688,
+        "sha256": "7dd3146c6adf3a14c008e2f01bace359f39dd4d2dcf6a6fa9cb4d62ceb767ba6",
+        "retained_ignored_path": "test-results/neon-compatibility-default-red/source.tar"
+      },
+      {
+        "name": "vercel.tar.gz",
+        "bytes": 27522149,
+        "sha256": "1eb3f658f82c1051ad7680f652a59e9e3e8bacce10b78d9fd6b9b420a805fb75",
+        "retained_ignored_path": "test-results/neon-compatibility-default-red/vercel.tar.gz"
+      }
+    ]
+  },
+  {
+    "folder": "neon-compatibility-docker-red",
+    "reports": [
+      {
+        "original": "build-run.log",
+        "stored": "attempts/neon-compatibility-docker-red/build-run.log",
+        "sha256": "b5c79f45b7a0f5389777f7e4dccf3a99a119ffa7f016de2752146ad5b98c882f"
+      },
+      {
+        "original": "harness-final.log",
+        "stored": "attempts/neon-compatibility-docker-red/harness-final.log",
+        "sha256": "bd2f08679038ec1a9227d368c992297631d960df03d830800e5aef0d16e76f9f"
+      },
+      {
+        "original": "rsc-service-green.log",
+        "stored": "attempts/neon-compatibility-docker-red/rsc-service-green.log",
+        "sha256": "2958377b7e652d825dcc5399ff88132fb0ff37bfc01fddb7b71d375c6d0182f8"
+      },
+      {
+        "original": "rsc-service-red.log",
+        "stored": "attempts/neon-compatibility-docker-red/rsc-service-red.log",
+        "sha256": "6855506bd92ba595f9d47354b76a4f77d4ee8dfba89dccabbd366d595f91d7c5"
+      }
+    ],
+    "large_prior_archives": [
+      {
+        "name": "failed-source.tar",
+        "bytes": 1973248,
+        "sha256": "7ab140d1b253b53510c69360d363e874fb646ef561326702990349c31f70a7cb",
+        "retained_ignored_path": "test-results/neon-compatibility-docker-red/failed-source.tar"
+      }
+    ]
+  },
+  {
+    "folder": "neon-compatibility-install-red",
+    "reports": [
+      {
+        "original": "build-inputs.json",
+        "stored": "attempts/neon-compatibility-install-red/build-inputs.json",
+        "sha256": "dd427f38eb413645dce7b6a7b8a8a3b6d9539b01a96a84764dac9c187371a91f"
+      },
+      {
+        "original": "build-run.log",
+        "stored": "attempts/neon-compatibility-install-red/build-run.log",
+        "sha256": "1a55f6e30d5e18fa6f2a8d922caea0f726942a3eb716668bd95b6cc122fdebf0"
+      },
+      {
+        "original": "harness-green.log",
+        "stored": "attempts/neon-compatibility-install-red/harness-green.log",
+        "sha256": "1f5fe3fc68a5445d0c27f0c4ea749cf41ecbbf98190d9986dc19d680f9c69773"
+      },
+      {
+        "original": "install-linux.log",
+        "stored": "attempts/neon-compatibility-install-red/install-linux.log",
+        "sha256": "2783749a59b4f8af2a592b3d30f8ea39f0a2198ceef0fffe96e15c11f812bb3f"
+      },
+      {
+        "original": "python-setup.log",
+        "stored": "attempts/neon-compatibility-install-red/python-setup.log",
+        "sha256": "981f1009dbab0dc471c662cfadf09307c1111b91fd89e812b8e4e37c5c7f0353"
+      },
+      {
+        "original": "task1-tests.log",
+        "stored": "attempts/neon-compatibility-install-red/task1-tests.log",
+        "sha256": "dd7919e40a4a44289a3882ec5bc4a54bf6c1f40ba7d35595094533b7b882c238"
+      },
+      {
+        "original": "typecheck-final.log",
+        "stored": "attempts/neon-compatibility-install-red/typecheck-final.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "large_prior_archives": [
+      {
+        "name": "source.tar",
+        "bytes": 1970176,
+        "sha256": "cbba43b9a6cf78e6685eabc238a22c1c7c401e8007cf9991d4cdf23f61ddd7f5",
+        "retained_ignored_path": "test-results/neon-compatibility-install-red/source.tar"
+      }
+    ]
+  },
+  {
+    "folder": "neon-compatibility-setup-red",
+    "reports": [
+      {
+        "original": "build-inputs.json",
+        "stored": "attempts/neon-compatibility-setup-red/build-inputs.json",
+        "sha256": "b4f888c53c8512bf1a82a6f696dab7aa624d40d53b3f7c532988496e4a9076da"
+      },
+      {
+        "original": "build-run.log",
+        "stored": "attempts/neon-compatibility-setup-red/build-run.log",
+        "sha256": "9c629de76ffc925c78b7210efe1a6e82dedb034907d9acdec06530c3131101a8"
+      },
+      {
+        "original": "cleanup.json",
+        "stored": "attempts/neon-compatibility-setup-red/cleanup.json",
+        "sha256": "a12c2eef6988f841bc03979a53fa831fab6474f83cad27cde133debb3ccb3190"
+      },
+      {
+        "original": "harness-green.log",
+        "stored": "attempts/neon-compatibility-setup-red/harness-green.log",
+        "sha256": "4f1480b5097aab92097021815afec332464795a63b64e62934597c44b57ed742"
+      },
+      {
+        "original": "harness-red.log",
+        "stored": "attempts/neon-compatibility-setup-red/harness-red.log",
+        "sha256": "21f7382e860545e016ae6129786eb3acb83cd7c42e1a33c1d267aef2f57251c1"
+      },
+      {
+        "original": "install-host.log",
+        "stored": "attempts/neon-compatibility-setup-red/install-host.log",
+        "sha256": "7662c8beeeef1e81355eaf8fdf47915c3c3697d2802729d252cd7aea5198feb4"
+      }
+    ],
+    "large_prior_archives": [
+      {
+        "name": "source.tar",
+        "bytes": 1553408,
+        "sha256": "95f64b561bef3576bff865e6530db03eaed8b389709e19c386946e65f2012f29",
+        "retained_ignored_path": "test-results/neon-compatibility-setup-red/source.tar"
+      }
+    ]
+  },
+  {
+    "folder": "neon-compatibility-source-red",
+    "reports": [
+      {
+        "original": "build-inputs.json",
+        "stored": "attempts/neon-compatibility-source-red/build-inputs.json",
+        "sha256": "4b137ee3df005b8f721bbef7bb3f6d3c526811df35c5a518c45ad18979fcddde"
+      },
+      {
+        "original": "build-run.log",
+        "stored": "attempts/neon-compatibility-source-red/build-run.log",
+        "sha256": "7f387e74b54b5b4fa9b33bb30c0aedf19c72b2683aa0b8f71903c8b4214122e6"
+      },
+      {
+        "original": "build-runtime.json",
+        "stored": "attempts/neon-compatibility-source-red/build-runtime.json",
+        "sha256": "01c9ab4a4ffa7c68ed8fd677959ffa95f0ffaf6abdb06c6209c095ca61e8cc19"
+      },
+      {
+        "original": "cleanup.json",
+        "stored": "attempts/neon-compatibility-source-red/cleanup.json",
+        "sha256": "917b44d05c3f4cef04918583eea46e845a385297e212f3fa4bdd21b769eca8e4"
+      },
+      {
+        "original": "install-linux.log",
+        "stored": "attempts/neon-compatibility-source-red/install-linux.log",
+        "sha256": "f5b8d07db9a1ff9d9ca25a36722f12ac474aa7d5b9423b2f6e93394303b9baed"
+      },
+      {
+        "original": "portable-build.log",
+        "stored": "attempts/neon-compatibility-source-red/portable-build.log",
+        "sha256": "e4d1482080edc9fc5b959c656dbf0f0e30462b0c2342771968fe6b9777607e6c"
+      },
+      {
+        "original": "source-filter-red.log",
+        "stored": "attempts/neon-compatibility-source-red/source-filter-red.log",
+        "sha256": "f67084ae6e111668604a8293130240c87081199f93613cf2f7c5f7d2e9087cf9"
+      },
+      {
+        "original": "typecheck.log",
+        "stored": "attempts/neon-compatibility-source-red/typecheck.log",
+        "sha256": "0bb70ed55cd7de86a0873db962f2714aaddac39261868c37191097df1629d231"
+      },
+      {
+        "original": "vercel-build.log",
+        "stored": "attempts/neon-compatibility-source-red/vercel-build.log",
+        "sha256": "40ae4892ab5eb95d19c7c38541f861ab920067b9f13192fa62075cbdbc3d7666"
+      },
+      {
+        "original": "vercel-ui.xml",
+        "stored": "attempts/neon-compatibility-source-red/vercel-ui.xml",
+        "sha256": "a664b59acf655185331246e6ec87aa0a585adfed035161a6552985cb17dbb910"
+      }
+    ],
+    "large_prior_archives": [
+      {
+        "name": "source.tar",
+        "bytes": 1553408,
+        "sha256": "d015e81fc1df15f972b6d529712df8a5e6ccd66c550a280b92fd397e7a9b0724",
+        "retained_ignored_path": "test-results/neon-compatibility-source-red/source.tar"
+      }
+    ]
+  },
+  {
+    "folder": "portable-ui-first-final-red",
+    "reports": [
+      {
+        "original": ".last-run.json",
+        "stored": "attempts/portable-ui-first-final-red/.last-run.json",
+        "sha256": "e4e683cc7ba11bf1efebc852ff92db96661c460cef87e7ceea13382e4f4e9f92"
+      },
+      {
+        "original": "audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/error-context.md",
+        "stored": "attempts/portable-ui-first-final-red/001-error-context.md",
+        "sha256": "c5c52b2cde89242f5dde3972b9fb10b1b24300a4352ec155908850f862bbdf52"
+      },
+      {
+        "original": "audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/trace.zip",
+        "stored": "attempts/portable-ui-first-final-red/002-trace.zip",
+        "sha256": "51d6c5eb1b015958f589fb87a193a93ebe27abafa42dd5496abbf7d859600d6d"
+      },
+      {
+        "original": "audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout/error-context.md",
+        "stored": "attempts/portable-ui-first-final-red/003-error-context.md",
+        "sha256": "cf490b9236487439326129becd4618451ced1859656d1b7ebaa2c84678980c38"
+      },
+      {
+        "original": "audit-neon-compat-NA01-fix-403d4-ification-reload-and-logout/trace.zip",
+        "stored": "attempts/portable-ui-first-final-red/004-trace.zip",
+        "sha256": "19c1a23a2f3404d29951d2ffc3145922f4e6f950bee6d5d3e262256ccaefa3db"
+      }
+    ],
+    "large_prior_archives": []
+  },
+  {
+    "folder": "vercel-ui-first-final-red",
+    "reports": [
+      {
+        "original": ".last-run.json",
+        "stored": "attempts/vercel-ui-first-final-red/.last-run.json",
+        "sha256": "208683994d8588028bdfd58de30ff5658fbebcdbf12fc333c5c1497abd91e0ef"
+      },
+      {
+        "original": "audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/error-context.md",
+        "stored": "attempts/vercel-ui-first-final-red/001-error-context.md",
+        "sha256": "66752ffda9942f811ce8d5a227102e08ba0399331460cdaf488ab3e0ab8e26c3"
+      },
+      {
+        "original": "audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/trace.zip",
+        "stored": "attempts/vercel-ui-first-final-red/002-trace.zip",
+        "sha256": "e56d0a91fba7e34f6406cbb4d94719bf1f228e3331584c0b48e1ae2ede27b67d"
+      }
+    ],
+    "large_prior_archives": []
+  },
+  {
+    "folder": "portable-ui-before-discovery-red",
+    "reports": [
+      {
+        "original": "test-results/neon-compatibility/portable-ui-before-discovery-red/.last-run.json",
+        "stored": "attempts/portable-before-discovery/000-.last-run.json",
+        "sha256": "208683994d8588028bdfd58de30ff5658fbebcdbf12fc333c5c1497abd91e0ef"
+      },
+      {
+        "original": "test-results/neon-compatibility/portable-ui-before-discovery-red/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/error-context.md",
+        "stored": "attempts/portable-before-discovery/001-error-context.md",
+        "sha256": "0951ebb35e1a267d2f3f374a04e306d95f85cf829810a1ac8c5efcaaddb424a5"
+      },
+      {
+        "original": "test-results/neon-compatibility/portable-ui-before-discovery-red/audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect/trace.zip",
+        "stored": "attempts/portable-before-discovery/002-trace.zip",
+        "sha256": "21f42df677f0bd7a36bf5ad3c592366f5f503dede810c93bbe557f88a42b0b6d"
+      }
+    ]
+  }
+]
