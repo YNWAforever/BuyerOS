@@ -61,6 +61,8 @@ export function LiveWorkspace() {
   const [projects, setProjects] = useState<LoadState<LiveProject>>({kind:'loading'});
   const [selectionError, setSelectionError] = useState('');
   const [workspaceRefresh,setWorkspaceRefresh]=useState(0);
+  const [accessError,setAccessError]=useState('');
+  const checkingAccess=useRef(false),allowAutoSelection=useRef(true);
   const [projectRefresh, setProjectRefresh] = useState(0);
   const [locale, setLocale] = useState<'en'|'zh-HK'>('en');
   const [prefVersion,setPrefVersion]=useState(1),[localeSaving,setLocaleSaving]=useState(false),[localeError,setLocaleError]=useState('');
@@ -103,7 +105,17 @@ export function LiveWorkspace() {
     }catch(error){if(session.isCurrent(identity)&&!(error instanceof LiveCancelled))setLocaleError(describeLiveError(error));}
     finally{setLocaleSaving(false);}
   }
-  function retryAccess(){setSelectionError('');setWorkspaces({kind:'loading'});setWorkspaceRefresh(value=>value+1);}
+  function retryAccess(){
+    setSelectionError('');setAccessError('');
+    // Preserve a legitimate member's editor while checking; a failed read is not revocation.
+    setWorkspaces(current=>current.kind==='ready'?current:{kind:'loading'});
+    setWorkspaceRefresh(value=>value+1);
+  }
+  useEffect(()=>client.subscribeAccessDenied(event=>{
+    if(!session.isCurrent(event.scope)||event.workspace!==session.current().workspace||checkingAccess.current)return;
+    checkingAccess.current=true;
+    setWorkspaceRefresh(value=>value+1);
+  }),[client,session]);
   const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
   function copyDiagnostics(){
     const message=workspaces.kind==='error'?workspaces.message:'';
@@ -114,16 +126,29 @@ export function LiveWorkspace() {
   }
   useEffect(() => {
     if (!snapshot.authenticated) return;
-    const own = new AbortController();
+    const own = new AbortController(),identity=session.identity();
+    checkingAccess.current=true;
     const signal = AbortSignal.any([session.controller().signal, own.signal, AbortSignal.timeout(10_000)]);
     void allPages(client,session,'/v1/workspaces',toWorkspaces,signal).then(items => {
-      if (own.signal.aborted) return;
-      setWorkspaces({kind:'ready',items});
+      if (own.signal.aborted || !session.isCurrent(identity)) return;
+      setAccessError('');setWorkspaces({kind:'ready',items});
+      const current=session.current().workspace;
+      if(current&&!items.some(item=>item.id===current)){
+        allowAutoSelection.current=false;setSelectionError('Workspace not found (404)');
+        setProjects({kind:'loading'});setLocaleReadyFor(null);setLocaleError('');
+        updateUrl(router,{workspace:null,project:null,profile:null,bulk_job:null,bulk_manifest:null,draft:null,draft_job:null});
+        session.next({workspace:null,project:null});return;
+      }
       const target = requested('workspace');
-      if (target && !items.some(item => item.id === target)) {setSelectionError('Workspace not found (404)'); session.next({workspace:null,project:null}); return;}
-      if (!target && items.length === 1) {session.next({workspace:items[0].id,project:null}); updateUrl(router,{workspace:items[0].id,project:null});}
-      else if (target && session.current().workspace !== target) session.next({workspace:target,project:null});
-    }).catch(error => {if (own.signal.aborted || error instanceof LiveCancelled) return; if (error instanceof LiveError && error.status === 401) {session.setToken(undefined);return;} setWorkspaces({kind:'error',message:describeLiveError(error)});});
+      if (target && !items.some(item => item.id === target)) {setSelectionError('Workspace not found (404)'); return;}
+      if (!target && items.length === 1 && allowAutoSelection.current) {session.next({workspace:items[0].id,project:null}); updateUrl(router,{workspace:items[0].id,project:null});}
+      else if (target && current !== target) session.next({workspace:target,project:null});
+    }).catch(error => {
+      if (own.signal.aborted || !session.isCurrent(identity) || error instanceof LiveCancelled) return;
+      if (error instanceof LiveError && error.status === 401) {session.setToken(undefined);return;}
+      const message=describeLiveError(error);setAccessError(message);
+      setWorkspaces(previous=>previous.kind==='ready'?previous:{kind:'error',message});
+    }).finally(()=>{if(!own.signal.aborted&&session.isCurrent(identity))checkingAccess.current=false;});
     return () => own.abort();
   }, [client,router,session,snapshot.authenticated,snapshot.scope.actor,snapshot.identity,workspaceRefresh]);
   useEffect(()=>{
@@ -166,7 +191,7 @@ export function LiveWorkspace() {
   function chooseWorkspace(id:string) {
     if(!mayLeaveOffer())return;
     if (workspaces.kind !== 'ready' || !workspaces.items.some(item => item.id === id)) return;
-    setSelectionError(''); setProjects({kind:'loading'});
+    allowAutoSelection.current=true;setAccessError('');setSelectionError(''); setProjects({kind:'loading'});
     session.next({workspace:id,project:null}); updateUrl(router,{workspace:id,project:null,profile:null});
   }
   function chooseProject(id:string) {
@@ -195,7 +220,8 @@ export function LiveWorkspace() {
     <div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
       {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
       {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
-      {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p><button onClick={retryAccess}>{t('Check access again')}</button></>)}
+      {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p></>)}
+      {workspaces.kind==='ready'&&<><button onClick={retryAccess}>{t('Check access again')}</button>{accessError&&<p role="alert">{localizeError(accessError)}</p>}</>}
       {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={copyDiagnostics}>{t('Copy diagnostics')}</button></>}
       {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
     </section>

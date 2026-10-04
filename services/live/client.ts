@@ -20,6 +20,8 @@ export function describeLiveError(error: unknown): string {
 /** A request was aborted because the scope changed. Normal, never an error state. */
 export class LiveCancelled extends Error {}
 
+export interface AccessDenied {scope: string; workspace: string;}
+
 export interface LiveRequest {
   path: string;
   method?: string;
@@ -48,9 +50,18 @@ async function bodyOf(response: {json: () => Promise<unknown>}): Promise<Record<
  */
 export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '') {
   const root = baseUrl.replace(/\/$/, '');
+  const accessListeners = new Set<(event: AccessDenied) => void>();
+  function notifyAccessDenied(path: string, scope: string, status: number, signal?: AbortSignal) {
+    const workspace = path.match(/^\/v1\/workspaces\/([^/?]+)(?:[/?]|$)/)?.[1];
+    if (!workspace || signal?.aborted || ![403, 404].includes(status)) return;
+    for (const listener of accessListeners) listener({workspace, scope});
+  }
   return {
+    subscribeAccessDenied(listener: (event: AccessDenied) => void): () => void {
+      accessListeners.add(listener);
+      return () => {accessListeners.delete(listener);};
+    },
     async requestContent({path, token, scope, signal}: Pick<LiveRequest,'path'|'token'|'scope'|'signal'>): Promise<{text:string;contentType:string}> {
-      void scope;
       let response: Awaited<ReturnType<typeof fetch>>;
       try {
         response = await fetchImpl(`${root}${path}`, {method:'GET',
@@ -61,6 +72,7 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '') 
       }
       if (!response.ok) {
         const errorBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
+        notifyAccessDenied(path, scope, response.status, signal);
         throw new LiveError(typeof errorBody.message==='string'?errorBody.message:'request failed',
           typeof errorBody.code==='string'?errorBody.code:'UNKNOWN_ERROR', response.status,
           typeof errorBody.request_id==='string'?errorBody.request_id:response.headers.get('X-Request-ID')||'',
@@ -77,7 +89,6 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '') 
       return {text,contentType};
     },
     async request<T>({path, method = 'GET', token, scope, signal, body, formData, idempotencyKey, ifMatch}: LiveRequest): Promise<T> {
-      void scope;
       const headers: Record<string, string> = {Accept: 'application/json'};
       if (token) headers.Authorization = `Bearer ${token}`;
       if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
@@ -101,6 +112,7 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '') 
         const message = typeof errorBody.message === 'string' ? errorBody.message : 'request failed';
         const headerId = response.headers?.get('X-Request-ID') || '';
         const requestId = typeof errorBody.request_id === 'string' ? errorBody.request_id : headerId;
+        notifyAccessDenied(path, scope, response.status, signal);
         throw new LiveError(message, code, response.status, requestId, errorBody.retryable === true, response.headers?.get('Retry-After') || undefined);
       }
       if (response.status === 204) return undefined as T;
