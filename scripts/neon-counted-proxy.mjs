@@ -2,7 +2,7 @@
  * No external hostname/configuration, paid provider, or real account is accepted. */
 import {createServer} from 'node:http';
 import {createHash} from 'node:crypto';
-import {readFileSync,writeFileSync} from 'node:fs';
+import {openSync,closeSync,writeFileSync,fsyncSync} from 'node:fs';
 import {join} from 'node:path';
 import {RealRunJournal} from './neon-real-preflight.mjs';
 const owned=new WeakSet(),safeMethods=new Set(['GET','HEAD']);
@@ -12,16 +12,10 @@ function deny(code,status=503){return Object.assign(new Error(code),{status});}
 function address(server) {const value=server?.address?.();if(!owned.has(server)||!server.listening||!value||typeof value==='string'||value.address!=='127.0.0.1')throw deny('N00_FIXTURE_OWNED_BACKEND_REQUIRED');return 'http://127.0.0.1:'+value.port;}
 export function createOwnedAuthServer(handler) {const server=createServer(handler);owned.add(server);return server;}
 function unknownWrites(journal) {
- const hashes=new Set();let all=false;
- for(const record of journal.snapshot().requests.filter(v=>v.purpose==='auth'&&['pending','unknown'].includes(v.outcome))) {
-  if(record.outcome==='pending'){all=true;continue;}
-  try {
-   if(!/^fixture-http-\d+\.json$/.test(record.evidenceRef))throw deny('N00_FIXTURE_EVIDENCE_REQUIRED');
-   const evidence=JSON.parse(readFileSync(join(journal.root,record.evidenceRef),'utf8'));
-   if(!safeMethods.has(evidence.method)){if(evidence.fingerprint)hashes.add(evidence.fingerprint);else all=true;}
-  }catch {all=true;}
- }
- return {hashes,all};
+ // Old receipts do not authenticate method/intent metadata. A resumed unresolved
+ // reservation therefore holds every state-changing request until reconciliation.
+ // Reads remain available; corrupt/legacy receipt data cannot erase this hold.
+ return {hashes:new Set(),all:journal.snapshot().requests.some(record=>record.purpose==='auth'&&['pending','unknown'].includes(record.outcome))};
 }
 function respond(res,status,code) {if(!res.headersSent){res.statusCode=status;res.setHeader('Content-Type','application/json');res.setHeader('X-N00-Fixture-Only','true');}res.end(JSON.stringify({code,fixture_only:true}));}
 async function bodyBytes(req) {
@@ -45,12 +39,13 @@ export function createCountedAuthProxy({backend,journal,now=Date.now,timeoutMs=3
   if(req.method==='POST'&&req.url==='/n00-fixture-stop'&&onStop){if(req.headers['x-n00-owner']!==stopNonce){respond(res,403,'N00_FIXTURE_STOP_OWNER_REFUSED');return;}res.once('finish',onStop);respond(res,200,'N00_FIXTURE_STOPPING');return;}
   if(req.method==='GET'&&req.url==='/n00-fixture-budget'){const records=journal.snapshot().requests;res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify({fixture_only:true,external_requests:0,reserved:records.length,forwarded:metrics.forwarded,pending:records.filter(v=>v.outcome==='pending').length,rejected:records.filter(v=>v.outcome==='rejected').length,unknown:records.filter(v=>v.outcome==='unknown').length,limit:200,cleanup_reserve:20}));return;}
   metrics.received++;let reservation,fingerprint=null,path=null,upstreamStarted=false,held=false;
-  const method=req.method??'GET',write=!safeMethods.has(method);
+  const method=req.method??'GET';let write=!safeMethods.has(method);
   function settle(outcome,status,reason) {
    if(outcome==='unknown'&&write){if(fingerprint)blocked.hashes.add(fingerprint);else blocked.all=true;}
    if(outcome==='unknown')metrics.unknown++;
    const ref='fixture-http-'+reservation.sequence+'.json';
-   writeFileSync(join(journal.root,ref),JSON.stringify({schemaVersion:1,fixture_only:true,sequence:reservation.sequence,method,path,fingerprint,status,reason,outcome},null,2)+'\n',{flag:'wx',mode:0o600});
+   const fd=openSync(join(journal.root,ref),'wx',0o600);
+   try {writeFileSync(fd,JSON.stringify({schemaVersion:1,fixture_only:true,sequence:reservation.sequence,method,path,state_changing:write,fingerprint,status,reason,outcome},null,2)+'\n');fsyncSync(fd);}finally {closeSync(fd);}
    journal.settleRequest(reservation.operationId,outcome,ref);
   }
   try {
@@ -60,13 +55,22 @@ export function createCountedAuthProxy({backend,journal,now=Date.now,timeoutMs=3
    if(!req.url?.startsWith('/')||req.url.startsWith('//'))throw deny('N00_FIXTURE_PATH_REFUSED',400);
    const url=new URL(req.url,upstream);path=url.pathname;
    if(url.origin!==upstream||(!path.startsWith('/fixture/')&&path!=='/fixture-token')||/%|\\/.test(path))throw deny('N00_FIXTURE_PATH_REFUSED',400);
+   // Managed callbacks and verifier exchange consume one-use state even via GET.
+   write=write||path.startsWith('/fixture/auth/callback/')||(path==='/fixture/auth/get-session'&&url.searchParams.has('neon_auth_session_verifier'));
+   // One-use state is the intent: incidental query fields cannot turn an
+   // uncertain exchange into a new attempt. Values enter only the hash.
+   const query=path==='/fixture/auth/get-session'&&url.searchParams.has('neon_auth_session_verifier')
+    ?new URLSearchParams({neon_auth_session_verifier:url.searchParams.get('neon_auth_session_verifier')})
+    :path.startsWith('/fixture/auth/callback/')&&url.searchParams.has('state')
+     ?new URLSearchParams({state:url.searchParams.get('state')}):new URLSearchParams(url.searchParams);
+   query.sort();
    req.setTimeout(timeoutMs,()=>req.destroy());
-   const body=await bodyBytes(req);req.setTimeout(0);fingerprint=createHash('sha256').update(method+'\n'+path+'\n').update(body).digest('hex');
+   const body=await bodyBytes(req);req.setTimeout(0);fingerprint=createHash('sha256').update(method+'\n'+path+'\n'+query.toString()+'\n').update(body).digest('hex');
    if(write&&(blocked.all||blocked.hashes.has(fingerprint)))throw deny('N00_FIXTURE_UNKNOWN_AUTH_RESULT',409);
    const headers=new Headers();for(const [key,value] of Object.entries(req.headers))if(!hop.has(key)&&value!==undefined)headers.set(key,Array.isArray(value)?value.join(', '):value);
    if(write){if(inFlight.has(fingerprint))throw deny('N00_FIXTURE_AUTH_IN_FLIGHT',409);inFlight.add(fingerprint);held=true;}
    metrics.forwarded++;upstreamStarted=true;
-   const response=await fetch(url,{method,headers,...(write?{body}:{}),redirect:'manual',signal:AbortSignal.timeout(timeoutMs)});
+   const response=await fetch(url,{method,headers,...(!safeMethods.has(method)?{body}:{}),redirect:'manual',signal:AbortSignal.timeout(timeoutMs)});
    const bytes=await responseBytes(response);let location=response.headers.get('location');
    if(location) {
     const to=new URL(location,upstream),own=proxy.address(),publicOrigin='http://127.0.0.1:'+own.port;
@@ -85,7 +89,7 @@ export function createCountedAuthProxy({backend,journal,now=Date.now,timeoutMs=3
    const code=error.message?.startsWith('N00_')?error.message:'N00_FIXTURE_UPSTREAM_UNKNOWN';
    const status=code.includes('BUDGET')?429:code.includes('EXPIRED')?403:error.status??503;
    metrics.locally_rejected++;
-   if(reservation){try {settle(upstreamStarted&&code!=='N00_FIXTURE_REDIRECT_REFUSED'?'unknown':'rejected',status,code);}catch {if(write)blocked.all=true;}}
+   if(reservation){try {settle(upstreamStarted?'unknown':'rejected',status,code);}catch {if(write)blocked.all=true;}}
    respond(res,status,code);
   }finally {req.setTimeout(0);if(held)inFlight.delete(fingerprint);}
  });

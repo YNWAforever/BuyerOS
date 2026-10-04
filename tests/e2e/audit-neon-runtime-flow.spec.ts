@@ -59,3 +59,27 @@ test('NA01 runtime flow: consumed verifier cannot create a session in a second b
  try{await replay.addCookies([challenge!]);const rejected=await replay.request.get(callbackURL,{maxRedirects:0});expect(rejected.status()).toBe(307);expect(new URL(rejected.headers().location,callbackURL).pathname).toBe('/auth/sign-in');expect((await replay.cookies()).some(v=>v.name==='__Secure-neon-auth.session_token')).toBe(false);}
  finally{await replay.close();await context.request.post('/api/auth/sign-out');}
 });
+
+
+test('NA01 runtime flow: committed sign-out with refused redirect keeps unknown hold through UI retry',async({page,request},testInfo)=>{
+ await page.route('**/*',route=>['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)?route.continue():route.abort());
+ await page.goto('/compat');await page.getByRole('button',{name:'Continue with Google'}).click();
+ await expect(page).toHaveURL('http://localhost:44890/compat/return');await expect(page.getByTestId('server-session')).toHaveText('fictional-flow-user');
+ const control='http://127.0.0.1:44901/n00-flow-refuse-sign-out-redirect';
+ expect((await request.post(control,{headers:{'X-N00-Owner':'foreign'}})).status()).toBe(403);
+ const armed=await request.post(control,{headers:{'X-N00-Owner':String(testInfo.config.metadata.n00RunId)}});expect(armed.status()).toBe(200);
+ expect(await armed.json()).toEqual({fixture_only:true,external_verified:false});
+ const before=await(await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
+ const first=page.waitForResponse(r=>r.url().endsWith('/api/auth/sign-out'));
+ await page.getByRole('button',{name:'Logout'}).click();expect((await first).status()).toBe(502);await expect(page.getByTestId('client-status')).toHaveText('request-unknown');
+ const middle=await(await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
+ expect(middle.reserved).toBe(before.reserved+1);expect(middle.forwarded).toBe(before.forwarded+1);expect(middle.unknown).toBe(before.unknown+1);expect(middle.pending).toBe(0);
+ const retry=page.waitForResponse(r=>r.url().endsWith('/api/auth/sign-out'));
+ await page.getByRole('button',{name:'Logout'}).click();expect((await retry).status()).toBe(409);await expect(page.getByTestId('client-status')).toHaveText('request-unknown');
+ const after=await(await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
+ expect(after.reserved).toBe(middle.reserved+1);expect(after.forwarded).toBe(middle.forwarded);expect(after.unknown).toBe(middle.unknown);expect(after.rejected).toBe(middle.rejected+1);expect(after.external_requests).toBe(0);
+ // A read reconciles the fixture's actual committed sign-out; it never resends it.
+ expect(await(await request.get('/api/auth/get-session?disableCookieCache=true')).json()).toBeNull();
+ assertProtocolStorage(await page.evaluate(()=>Object.entries(localStorage)));expect(await page.evaluate(()=>Object.keys(sessionStorage))).toEqual([]);
+ await page.screenshot({path:testInfo.outputPath('unknown-sign-out-held.png')});
+});

@@ -7,7 +7,7 @@ export function createFlowFixture(manifest) {
  const jwk={...publicKey.export({format:'jwk'}),kid,alg:'EdDSA',use:'sig'};
  const stamp=new Date().toISOString(),user={id:'fictional-flow-user',name:'Fictional flow',email:'flow@fixture.invalid',emailVerified:false,createdAt:stamp,updatedAt:stamp};
  const session={id:'fictional-flow-session',userId:user.id,token:randomBytes(24).toString('base64url'),createdAt:stamp,updatedAt:stamp,expiresAt:new Date(Date.now()+3600000).toISOString()};
- let authenticated=false;const flows=new Map(),verifiers=new Map(),appOrigin='http://localhost:44890';
+ let authenticated=false,rejectSignOutRedirect=false;const flows=new Map(),verifiers=new Map(),appOrigin='http://localhost:44890';
  const challengeName='__Secure-neon-auth.session_challenge';
  const sessionCookie=(value,maxAge=3600)=>'__Secure-neon-auth.session_token='+value+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age='+maxAge;
  const challengeCookie=(value,maxAge=300)=>challengeName+'='+value+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age='+maxAge;
@@ -19,7 +19,7 @@ export function createFlowFixture(manifest) {
   const message=[header,claims].map(v=>Buffer.from(JSON.stringify(v)).toString('base64url')).join('.');
   return message+'.'+(kind==='wrong-algorithm'?createHmac('sha256','fictional').update(message).digest():sign(null,Buffer.from(message),privateKey)).toString('base64url');
  }
- return createOwnedAuthServer(async(req,res)=>{
+ const server=createOwnedAuthServer(async(req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1:44894'),path=url.pathname,active=authenticated&&value(req.headers.cookie,'__Secure-neon-auth.session_token')===session.token;
   res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');
   const fail=()=>{res.statusCode=401;res.end('{"code":"FICTIONAL_FLOW_REFUSED"}');};
@@ -46,7 +46,10 @@ export function createFlowFixture(manifest) {
    if(active)res.setHeader('set-auth-jwt',token());res.end(JSON.stringify(active?{session,user}:null));return;
   }
   if(path==='/fixture/auth/token'){if(!active){fail();return;}res.end(JSON.stringify({token:token()}));return;}
-  if(path==='/fixture/auth/sign-out'&&req.method==='POST'){authenticated=false;res.setHeader('Set-Cookie',sessionCookie('',0));res.end('{"success":true}');return;}
+  if(path==='/fixture/auth/sign-out'&&req.method==='POST'){authenticated=false;if(rejectSignOutRedirect){rejectSignOutRedirect=false;res.statusCode=302;res.setHeader('Location','https://unapproved.fixture.invalid/committed-sign-out');res.end();return;}res.setHeader('Set-Cookie',sessionCookie('',0));res.end('{"success":true}');return;}
   res.statusCode=404;res.end('{"fixture_only":true}');
  });
+ // This one-shot local fault never accepts an external target or creates identity.
+ server.refuseNextSignOutRedirect=()=>{rejectSignOutRedirect=true;};
+ return server;
 }

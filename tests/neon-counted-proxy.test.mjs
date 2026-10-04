@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {createServer} from 'node:http';
-import {mkdtempSync,readFileSync,readdirSync,rmSync,realpathSync} from 'node:fs';
+import {mkdtempSync,readFileSync,writeFileSync,readdirSync,rmSync,realpathSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,resolve,relative} from 'node:path';
 import {RealRunJournal} from '../scripts/neon-real-preflight.mjs';
@@ -86,4 +86,63 @@ test('fixture cleanup control requires the exact local owner nonce and never for
  let stops=0,received=0;const owner='aabbccddeeff';const f=await wire(t,(_req,res)=>{received++;res.end('{}');},{stopNonce:owner,onStop:()=>{stops++;}});
  const refused=await fetch(f.url+'/n00-fixture-stop',{method:'POST',headers:{'X-N00-Owner':'different'}});assert.equal(refused.status,403);await refused.text();assert.equal(stops,0);
  const accepted=await fetch(f.url+'/n00-fixture-stop',{method:'POST',headers:{'X-N00-Owner':owner}});assert.equal(accepted.status,200);await accepted.text();assert.equal(stops,1);assert.equal(received,0);assert.equal(f.run.snapshot().requests.length,0);
+});
+
+for(const method of ['POST','PUT','PATCH','DELETE'])test(`committed ${method} with a refused redirect stays unknown and is held after restart`,async t=>{
+ let commits=0;const f=await wire(t,async(req,res)=>{for await(const chunk of req)assert.ok(chunk.length>0);commits++;res.statusCode=302;res.setHeader('Location','https://unapproved.fixture.invalid/committed');res.end();});
+ const request={method,body:'{"intent":"redirect-committed"}',redirect:'manual'};
+ const first=await fetch(f.url+'/fixture/auth/sign-out',request);assert.equal(first.status,502);await first.text();assert.equal(commits,1);assert.equal(f.run.snapshot().requests[0].outcome,'unknown');
+ await close(f.proxy);const recovered=createCountedAuthProxy({backend:f.backend,journal:new RealRunJournal(f.root)});f.servers.push(recovered);const url=await listen(recovered);
+ const retry=await fetch(url+'/fixture/auth/sign-out',request);assert.equal(retry.status,409);await retry.text();assert.equal(commits,1);
+ const read=await fetch(url+'/fixture/auth/get-session');assert.equal(read.status,502);await read.text();assert.equal(commits,2); // A read may still reconcile; this fake handler redirects every request.
+});
+
+test('a malformed redirect after POST acceptance preserves the write hold without retry',async t=>{
+ let commits=0;const f=await wire(t,(_req,res)=>{commits++;res.statusCode=302;res.setHeader('Location','http://[');res.end();});
+ const request={method:'POST',body:'{"intent":"malformed"}',redirect:'manual'};const first=await fetch(f.url+'/fixture/auth/sign-out',request);assert.equal(first.status,503);await first.text();assert.equal(f.run.snapshot().requests[0].outcome,'unknown');
+ const retry=await fetch(f.url+'/fixture/auth/sign-out',request);assert.equal(retry.status,409);await retry.text();assert.equal(commits,1);
+});
+
+for(const path of ['/fixture/auth/callback/google?state=fictional-sensitive-state','/fixture/auth/get-session?neon_auth_session_verifier=fictional-sensitive-verifier'])test(`unknown one-use GET ${path.split('?')[0]} cannot be replayed`,async t=>{
+ let commits=0;const f=await wire(t,(req)=>{commits++;req.socket.destroy();});
+ const first=await fetch(f.url+path);assert.equal(first.status,503);await first.text();assert.equal(f.run.snapshot().requests[0].outcome,'unknown');
+ const retry=await fetch(f.url+path);assert.equal(retry.status,409);await retry.text();assert.equal(commits,1);
+ assert.doesNotMatch(readdirSync(f.root).map(p=>readFileSync(join(f.root,p),'utf8')).join(''),/fictional-sensitive|neon_auth_session_verifier/);
+});
+
+test('reordered verifier query and renewed bearer keep the same unresolved intent',async t=>{
+ let commits=0;const f=await wire(t,(req)=>{commits++;req.socket.destroy();});
+ const first=await fetch(f.url+'/fixture/auth/get-session?keep=yes&neon_auth_session_verifier=fictional-sensitive',{headers:{Authorization:'Bearer first-fictional'}});assert.equal(first.status,503);await first.text();
+ const second=await fetch(f.url+'/fixture/auth/get-session?neon_auth_session_verifier=fictional-sensitive&keep=yes',{headers:{Authorization:'Bearer renewed-fictional'}});assert.equal(second.status,409);await second.text();assert.equal(commits,1);
+});
+
+test('restart conservatively holds writes for an unresolved read without trusting receipt semantics',async t=>{
+ let received=0;const f=await wire(t,(req,res)=>{received++;if(req.method==='GET')req.socket.destroy();else res.end('{}');});
+ const read=await fetch(f.url+'/fixture/auth/get-session');assert.equal(read.status,503);await read.text();await close(f.proxy);
+ const recovered=createCountedAuthProxy({backend:f.backend,journal:new RealRunJournal(f.root)});f.servers.push(recovered);const url=await listen(recovered);
+ const write=await fetch(url+'/fixture/auth/sign-in/social',{method:'POST',body:'{}'});assert.equal(write.status,409);await write.text();assert.equal(received,1);
+});
+
+test('restart cannot erase a hold through legacy or corrupt receipt metadata',async t=>{
+ let commits=0;const f=await wire(t,(req)=>{commits++;req.socket.destroy();});
+ const post={method:'POST',body:'{"intent":"one"}'};const first=await fetch(f.url+'/fixture/auth/sign-in/social',post);assert.equal(first.status,503);await first.text();await close(f.proxy);
+ const record=f.run.snapshot().requests[0];writeFileSync(join(f.root,record.evidenceRef),JSON.stringify({method:'GET',fingerprint:'forged-read'}));
+ const recovered=createCountedAuthProxy({backend:f.backend,journal:new RealRunJournal(f.root)});f.servers.push(recovered);const url=await listen(recovered);
+ const retry=await fetch(url+'/fixture/auth/sign-in/social',post);assert.equal(retry.status,409);await retry.text();assert.equal(commits,1);
+});
+
+test('official pinned SDK social write sees unknown redirect once and retry is held',async t=>{
+ const {createAuthClient}=await import('@neondatabase/auth');let commits=0;const f=await wire(t,(_req,res)=>{commits++;res.statusCode=302;res.setHeader('Location','https://unapproved.fixture.invalid/committed');res.end();});
+ const client=createAuthClient(f.url+'/fixture/auth'),input={provider:'google',callbackURL:'http://localhost:44890/compat/return'};
+ await assert.rejects(client.signIn.social(input),{status:502});
+ await assert.rejects(client.signIn.social(input),{status:409});assert.equal(commits,1);assert.deepEqual(f.run.snapshot().requests.map(v=>v.outcome),['unknown','rejected']);
+});
+
+for(const [first,second] of [
+ ['/fixture/auth/get-session?keep=one&neon_auth_session_verifier=fictional-sensitive','/fixture/auth/get-session?keep=two&neon_auth_session_verifier=fictional-sensitive'],
+ ['/fixture/auth/callback/google?state=fictional-sensitive&code=first','/fixture/auth/callback/google?code=second&state=fictional-sensitive']
+])test(`one-use ${first.split('?')[0]} hold is bound to its verifier/state despite other query changes`,async t=>{
+ let commits=0;const f=await wire(t,(req)=>{commits++;req.socket.destroy();});
+ const response=await fetch(f.url+first);assert.equal(response.status,503);await response.text();
+ const retry=await fetch(f.url+second);assert.equal(retry.status,409);await retry.text();assert.equal(commits,1);
 });
