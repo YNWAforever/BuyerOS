@@ -1,0 +1,4 @@
+# Preserve captured N00 cleanup evidence byte-for-byte.
+* -text whitespace=cr-at-eol
+captures/** -whitespace
+source.patch -whitespace

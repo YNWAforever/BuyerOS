@@ -1,0 +1,10 @@
+{
+  "source_sha": "370a558492ef2c6617379c8923f2ce17c81da66f",
+  "base_sha": "158e05f0b31e4c59776d39c6c2926f6ab8bf3fcd",
+  "files": {
+    "scripts/neon-cleanup-contracts.d.mts": "01189247be7dc817d433ddc556fde407d9781704fd73fa6ac9554ab648490eaf",
+    "scripts/neon-cleanup-contracts.mjs": "0187193873af062535a5d620e135b9d17ddda7e427c56f1420ab7af44d8ff226",
+    "tests/neon-cleanup-contracts.test.mjs": "6b7dd7e16cbf8d4736ecdf41c72a792dbcfeaac790ae597b57787cd7cd2c1202",
+    "tests/neon-cleanup-contracts.types.ts": "614c494b2e3d6cecd8107dcd99ee5f95aedb749b183e07d482aed8ed83b9fc3a"
+  }
+}

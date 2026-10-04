@@ -1,0 +1,43 @@
+{
+  "prior_evidence_files_unchanged": 2665,
+  "original_inputs_unchanged": 35,
+  "original_case_rows": 98,
+  "historical_fields_per_case_unchanged": 15,
+  "other_case_rows_unchanged": 97,
+  "changed_repair_cases": [
+    "NA01"
+  ],
+  "other_task_objects_unchanged": 24,
+  "changed_tasks": [
+    "N00"
+  ],
+  "destructive_guards_and_existing_boundary_cleanup_unchanged": true,
+  "legacy_T_registry_unchanged": true,
+  "exact_capture_copies": 13,
+  "reverse_applicability_exit": 0,
+  "rollback_applied": false,
+  "owned_fixture_cleanup": "actual passed t.after assertions close all owned servers and remove exact owned temp journals; no provider cleanup executed",
+  "provider_account_calls": 0,
+  "deployed_sha": null,
+  "unrelated_worktrees": [
+    {
+      "path": "C:/Users/laich/Documents/BuyerOS",
+      "head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+      "status_paths": 0,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:/Users/laich/.codex/worktrees/neon-auth-migration/BuyerOS",
+      "head": "a78859fe474f5722be3755b10e2586436b53bf97",
+      "status_paths": 193,
+      "diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0"
+    },
+    {
+      "path": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS",
+      "head": "55f81338e5d12948279b6f095787aa03e6038242",
+      "status_paths": 0,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "input_count_note": "35 files include the original31 unchanged inputs plus4 prior supplemental files"
+}

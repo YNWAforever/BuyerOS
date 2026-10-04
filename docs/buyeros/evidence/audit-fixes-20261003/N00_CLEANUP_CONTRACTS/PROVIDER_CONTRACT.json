@@ -1,0 +1,22 @@
+{
+  "public_source": "https://neon.com/api_spec/release/v2.json",
+  "sha256": "54dfd27c22f64fb31f100497885cb2465a512028aa3ca5e17ac574d554fb20e5",
+  "bytes": 867639,
+  "fetched_without_credentials": true,
+  "provider_account_calls": 0,
+  "operations": {
+    "/projects/{project_id}": {
+      "get": "getProject",
+      "delete": "deleteProject"
+    },
+    "/projects/{project_id}/branches/{branch_id}/auth": {
+      "get": "getNeonAuth",
+      "delete": "disableNeonAuth"
+    },
+    "/projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}": {
+      "delete": "deleteBranchNeonAuthUser"
+    }
+  },
+  "identity_contract_limit": "users_sync description is not Managed Better Auth deletion/absence proof; no exact GET on that endpoint; no identity deletion descriptor implemented",
+  "project_cleanup_limit": "recoverable project deletion is not immediate permanent identity erasure"
+}

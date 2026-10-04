@@ -1,0 +1,30 @@
+{
+  "green-first.xml": {
+    "cases": 32,
+    "pass": 32,
+    "fail": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "reconciliation-red.xml": {
+    "cases": 36,
+    "pass": 34,
+    "fail": 2,
+    "error": 0,
+    "skip": 0
+  },
+  "red.xml": {
+    "cases": 32,
+    "pass": 0,
+    "fail": 32,
+    "error": 0,
+    "skip": 0
+  },
+  "related-final.xml": {
+    "cases": 201,
+    "pass": 201,
+    "fail": 0,
+    "error": 0,
+    "skip": 0
+  }
+}

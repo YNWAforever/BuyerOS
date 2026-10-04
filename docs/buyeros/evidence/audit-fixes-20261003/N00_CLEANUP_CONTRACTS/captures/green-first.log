@@ -1,0 +1,202 @@
+TAP version 13
+# Subtest: official project/auth requests bind exact resource, no credentials or deletion executor
+ok 1 - official project/auth requests bind exact resource, no credentials or deletion executor
+  ---
+  duration_ms: 61.9298
+  type: 'test'
+  ...
+# Subtest: mismatched projectID refuses a cleanup plan
+ok 2 - mismatched projectID refuses a cleanup plan
+  ---
+  duration_ms: 36.0415
+  type: 'test'
+  ...
+# Subtest: mismatched owner refuses a cleanup plan
+ok 3 - mismatched owner refuses a cleanup plan
+  ---
+  duration_ms: 34.3936
+  type: 'test'
+  ...
+# Subtest: mismatched conflicting-org refuses a cleanup plan
+ok 4 - mismatched conflicting-org refuses a cleanup plan
+  ---
+  duration_ms: 24.6158
+  type: 'test'
+  ...
+# Subtest: mismatched region refuses a cleanup plan
+ok 5 - mismatched region refuses a cleanup plan
+  ---
+  duration_ms: 26.4773
+  type: 'test'
+  ...
+# Subtest: mismatched name refuses a cleanup plan
+ok 6 - mismatched name refuses a cleanup plan
+  ---
+  duration_ms: 21.8483
+  type: 'test'
+  ...
+# Subtest: mismatched project-time refuses a cleanup plan
+ok 7 - mismatched project-time refuses a cleanup plan
+  ---
+  duration_ms: 32.9031
+  type: 'test'
+  ...
+# Subtest: mismatched provider refuses a cleanup plan
+ok 8 - mismatched provider refuses a cleanup plan
+  ---
+  duration_ms: 20.6814
+  type: 'test'
+  ...
+# Subtest: mismatched authID refuses a cleanup plan
+ok 9 - mismatched authID refuses a cleanup plan
+  ---
+  duration_ms: 25.7018
+  type: 'test'
+  ...
+# Subtest: mismatched branch refuses a cleanup plan
+ok 10 - mismatched branch refuses a cleanup plan
+  ---
+  duration_ms: 30.702
+  type: 'test'
+  ...
+# Subtest: mismatched ownership refuses a cleanup plan
+ok 11 - mismatched ownership refuses a cleanup plan
+  ---
+  duration_ms: 26.0381
+  type: 'test'
+  ...
+# Subtest: mismatched JWKS refuses a cleanup plan
+ok 12 - mismatched JWKS refuses a cleanup plan
+  ---
+  duration_ms: 27.6997
+  type: 'test'
+  ...
+# Subtest: mismatched baseURL refuses a cleanup plan
+ok 13 - mismatched baseURL refuses a cleanup plan
+  ---
+  duration_ms: 23.5759
+  type: 'test'
+  ...
+# Subtest: mismatched auth-time refuses a cleanup plan
+ok 14 - mismatched auth-time refuses a cleanup plan
+  ---
+  duration_ms: 24.759
+  type: 'test'
+  ...
+# Subtest: HTTP 301 is not ownership or absence proof
+ok 15 - HTTP 301 is not ownership or absence proof
+  ---
+  duration_ms: 24.5182
+  type: 'test'
+  ...
+# Subtest: HTTP 401 is not ownership or absence proof
+ok 16 - HTTP 401 is not ownership or absence proof
+  ---
+  duration_ms: 23.1624
+  type: 'test'
+  ...
+# Subtest: HTTP 403 is not ownership or absence proof
+ok 17 - HTTP 403 is not ownership or absence proof
+  ---
+  duration_ms: 20.3075
+  type: 'test'
+  ...
+# Subtest: HTTP 404 is not ownership or absence proof
+ok 18 - HTTP 404 is not ownership or absence proof
+  ---
+  duration_ms: 19.9092
+  type: 'test'
+  ...
+# Subtest: HTTP 423 is not ownership or absence proof
+ok 19 - HTTP 423 is not ownership or absence proof
+  ---
+  duration_ms: 22.5908
+  type: 'test'
+  ...
+# Subtest: HTTP 429 is not ownership or absence proof
+ok 20 - HTTP 429 is not ownership or absence proof
+  ---
+  duration_ms: 19.9934
+  type: 'test'
+  ...
+# Subtest: HTTP 500 is not ownership or absence proof
+ok 21 - HTTP 500 is not ownership or absence proof
+  ---
+  duration_ms: 24.2305
+  type: 'test'
+  ...
+# Subtest: HTTP 503 is not ownership or absence proof
+ok 22 - HTTP 503 is not ownership or absence proof
+  ---
+  duration_ms: 20.5336
+  type: 'test'
+  ...
+# Subtest: stale readback refused
+ok 23 - stale readback refused
+  ---
+  duration_ms: 22.6073
+  type: 'test'
+  ...
+# Subtest: future readback refused
+ok 24 - future readback refused
+  ---
+  duration_ms: 21.7458
+  type: 'test'
+  ...
+# Subtest: wrong-path readback refused
+ok 25 - wrong-path readback refused
+  ---
+  duration_ms: 23.4842
+  type: 'test'
+  ...
+# Subtest: foreign-origin readback refused
+ok 26 - foreign-origin readback refused
+  ---
+  duration_ms: 25.975
+  type: 'test'
+  ...
+# Subtest: query readback refused
+ok 27 - query readback refused
+  ---
+  duration_ms: 21.9599
+  type: 'test'
+  ...
+# Subtest: wrong-method readback refused
+ok 28 - wrong-method readback refused
+  ---
+  duration_ms: 21.1613
+  type: 'test'
+  ...
+# Subtest: credential-field readback refused
+ok 29 - credential-field readback refused
+  ---
+  duration_ms: 20.7281
+  type: 'test'
+  ...
+# Subtest: a bound human identity blocks auth/project deletion; users_sync is not assumed Better Auth
+ok 30 - a bound human identity blocks auth/project deletion; users_sync is not assumed Better Auth
+  ---
+  duration_ms: 38.6459
+  type: 'test'
+  ...
+# Subtest: owned counted HTTP payloads decode official field names without claiming provider verification
+ok 31 - owned counted HTTP payloads decode official field names without claiming provider verification
+  ---
+  duration_ms: 145.2929
+  type: 'test'
+  ...
+# Subtest: adapter contains no network, CLI or ambient credential execution path
+ok 32 - adapter contains no network, CLI or ambient credential execution path
+  ---
+  duration_ms: 1.2221
+  type: 'test'
+  ...
+1..32
+# tests 32
+# suites 0
+# pass 32
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1238.8187

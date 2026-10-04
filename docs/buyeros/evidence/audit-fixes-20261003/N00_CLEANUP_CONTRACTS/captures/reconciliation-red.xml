@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="official project/auth requests bind exact resource, no credentials or deletion executor" time="0.108329" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched projectID refuses a cleanup plan" time="0.117205" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched owner refuses a cleanup plan" time="0.035069" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched conflicting-org refuses a cleanup plan" time="0.027617" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched region refuses a cleanup plan" time="0.027379" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched name refuses a cleanup plan" time="0.080356" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched project-time refuses a cleanup plan" time="0.037971" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched provider refuses a cleanup plan" time="0.021993" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched authID refuses a cleanup plan" time="0.029887" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched branch refuses a cleanup plan" time="0.027445" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched ownership refuses a cleanup plan" time="0.025736" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched JWKS refuses a cleanup plan" time="0.028433" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched baseURL refuses a cleanup plan" time="0.023011" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="mismatched auth-time refuses a cleanup plan" time="0.028793" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="HTTP 301 is not ownership or absence proof" time="0.027760" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="HTTP 401 is not ownership or absence proof" time="0.033988" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="HTTP 403 is not ownership or absence proof" time="0.026772" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="HTTP 404 is not ownership or absence proof" time="0.081329" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="HTTP 423 is not ownership or absence proof" time="0.028066" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="HTTP 429 is not ownership or absence proof" time="0.023390" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="HTTP 500 is not ownership or absence proof" time="0.021535" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="HTTP 503 is not ownership or absence proof" time="0.021179" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="stale readback refused" time="0.018415" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="future readback refused" time="0.022987" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="wrong-path readback refused" time="0.024916" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="foreign-origin readback refused" time="0.018917" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="query readback refused" time="0.019550" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="wrong-method readback refused" time="0.030337" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="credential-field readback refused" time="0.023675" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="a bound human identity blocks auth/project deletion; users_sync is not assumed Better Auth" time="0.058145" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="owned counted HTTP payloads decode official field names without claiming provider verification" time="0.214794" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="adapter contains no network, CLI or ambient credential execution path" time="0.005031" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="pending request keeps deletion descriptors blocked for reconciliation" time="0.040796" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs" failure="Expected values to be strictly equal:&#10;+ actual - expected&#10;&#10;+ 'external-transport-and-authority-required'&#10;- 'unresolved-request-reconciliation-required'&#10;">
+		<failure type="testCodeFailure" message="Expected values to be strictly equal:&#10;+ actual - expected&#10;&#10;+ 'external-transport-and-authority-required'&#10;- 'unresolved-request-reconciliation-required'">
+[Error [ERR_TEST_FAILURE]: Expected values to be strictly equal:
++ actual - expected
+
++ 'external-transport-and-authority-required'
+- 'unresolved-request-reconciliation-required'
+] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'external-transport-and-authority-required'
+  - 'unresolved-request-reconciliation-required'
+  
+      at TestContext.&lt;anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-cleanup-contracts.test.mjs:18:356)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'external-transport-and-authority-required',
+    expected: 'unresolved-request-reconciliation-required',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="unknown request keeps deletion descriptors blocked for reconciliation" time="0.057690" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs" failure="Expected values to be strictly equal:&#10;+ actual - expected&#10;&#10;+ 'external-transport-and-authority-required'&#10;- 'unresolved-request-reconciliation-required'&#10;">
+		<failure type="testCodeFailure" message="Expected values to be strictly equal:&#10;+ actual - expected&#10;&#10;+ 'external-transport-and-authority-required'&#10;- 'unresolved-request-reconciliation-required'">
+[Error [ERR_TEST_FAILURE]: Expected values to be strictly equal:
++ actual - expected
+
++ 'external-transport-and-authority-required'
+- 'unresolved-request-reconciliation-required'
+] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'external-transport-and-authority-required'
+  - 'unresolved-request-reconciliation-required'
+  
+      at TestContext.&lt;anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-cleanup-contracts.test.mjs:18:356)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'external-transport-and-authority-required',
+    expected: 'unresolved-request-reconciliation-required',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="cleanup preparation after TTL requires fresh readbacks and preserves expired target" time="0.067319" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<testcase name="an unbranded journal and malformed calendar timestamp cannot create descriptors" time="0.030646" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-cleanup-contracts.test.mjs"/>
+	<!-- tests 36 -->
+	<!-- suites 0 -->
+	<!-- pass 34 -->
+	<!-- fail 2 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 2036.2317 -->
+</testsuites>

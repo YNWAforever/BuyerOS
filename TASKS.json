@@ -16,7 +16,7 @@
     "Q10",
     "N00"
   ],
-  "next_eligible": "N00",
+  "next_eligible": "N00 Managed Better Auth identity-cleanup/absence contract and actual transport preparation; original full gate open",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -1038,7 +1038,33 @@
         "No live performance/SLA/UAT claim"
       ],
       "full_gate_passed": false,
-      "next_action": "Continue N00 real transport coverage/provider cleanup adapters; original302/real provider/independent review and fresh isolated-target Google approval pending"
+      "next_action": "Continue N00 real transport coverage/provider cleanup adapters; original302/real provider/independent review and fresh isolated-target Google approval pending",
+      "cleanup_contract_followup": {
+        "source_sha": "370a558492ef2c6617379c8923f2ce17c81da66f",
+        "base_sha": "158e05f0b31e4c59776d39c6c2926f6ab8bf3fcd",
+        "status": "local-unarmed-contract-verified;N00open",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_CLEANUP_CONTRACTS/RESULTS.md",
+        "checks": {
+          "cases": 201,
+          "pass": 201,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "new_cases": 36,
+        "types_exit": 0,
+        "lint_exit": 0,
+        "contracts_exit": 0,
+        "provider_calls": 0,
+        "execution_enabled": false,
+        "identity_contract": "users_sync not assumed compatible;bound identity blocksdelete",
+        "migrations": [],
+        "limits": [
+          "ManagedBetterAuth exactidentitycleanup/absence unresolved",
+          "realtransport/original302/trueNeon/human/independentreviewopen",
+          "historicalwhole-root229pass5fail remainsRED;not rerun"
+        ]
+      }
     },
     {
       "id": "N01",
@@ -1672,7 +1698,7 @@
     "N00 full real-transport coverage/provider cleanup adapters next; fresh isolated actual auth roundtrip requires specific new approval",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
+  "reviewed_source_sha": "370a558492ef2c6617379c8923f2ce17c81da66f",
   "deployed_sha": null,
   "selected_followups": [
     "U05",
@@ -1681,5 +1707,13 @@
     "N00 local built compatibility spike",
     "N00 managed callback contract fixture follow-up"
   ],
-  "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf"
+  "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+  "peer_q13_checkpoint": {
+    "branch": "codex/q13-workspace-discovery",
+    "source_sha": "fa198ae533be3dc93eda73bc45331c2d80eb9540",
+    "evidence_commit": "55f81338e5d12948279b6f095787aa03e6038242",
+    "status": "current-auth-local-verified;N02/fullQ13open",
+    "proposed_schema_head": "0038_workspace_discovery",
+    "merged_here": false
+  }
 }

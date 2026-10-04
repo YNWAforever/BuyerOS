@@ -1,0 +1,121 @@
+diff --git a/scripts/neon-cleanup-contracts.d.mts b/scripts/neon-cleanup-contracts.d.mts
+new file mode 100644
+index 0000000..3391d21
+--- /dev/null
++++ b/scripts/neon-cleanup-contracts.d.mts
+@@ -0,0 +1,11 @@
++import type {RealRunJournal} from './neon-real-preflight.mjs';
++export interface NeonCleanupReadback {method:'GET';url:string;status:number;body:Record<string,unknown>;receivedAt:string;}
++export interface NeonCleanupDescriptor {method:'GET'|'DELETE';url:string;body?:string;}
++export interface NeonCleanupPlan {
++ schema_version:1;target_fingerprint:string;external_authorized:false;external_verified:false;execution_enabled:false;
++ blocked:'managed-identity-cleanup-contract-unverified'|'external-transport-and-authority-required'|'unresolved-request-reconciliation-required';
++ identity_erasure_verified:false;project_recovery_window_days:7;
++ resources:{kind:'auth'|'project';id:string;read:NeonCleanupDescriptor;delete:NeonCleanupDescriptor|null}[];
++ requirements:string[];
++}
++export function planNeonCleanup(options:{journal:RealRunJournal;projectRead:NeonCleanupReadback;authRead:NeonCleanupReadback;now?:number}):NeonCleanupPlan;
+diff --git a/scripts/neon-cleanup-contracts.mjs b/scripts/neon-cleanup-contracts.mjs
+new file mode 100644
+index 0000000..0c77bba
+--- /dev/null
++++ b/scripts/neon-cleanup-contracts.mjs
+@@ -0,0 +1,51 @@
++/** Unarmed Neon control-plane cleanup request/readback preparation.
++ * No network, credentials, authorization grant or deletion executor lives here.
++ * Managed Better Auth identity cleanup remains unverified; never assume the
++ * documented users_sync endpoint deletes a Managed Better Auth identity. */
++import {RealRunJournal} from './neon-real-preflight.mjs';
++const API='https://console.neon.tech/api/v2';
++const FRESH_MS=300000;
++function need(value,code){if(!value)throw new Error('N00_CLEANUP_'+code);}
++function object(value){return value!==null&&typeof value==='object'&&!Array.isArray(value);}
++function time(value){
++ need(typeof value==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,3})?Z$/.test(value),'TIME');
++ const stamp=Date.parse(value);need(Number.isFinite(stamp),'TIME');
++ // Reject rollover dates while accepting provider RFC3339 seconds or fractions.
++ need(new Date(stamp).toISOString().slice(0,19)===value.slice(0,19),'TIME');return stamp;
++}
++function read(value,url,target,now){
++ const keys=['method','url','status','body','receivedAt'];
++ need(object(value)&&Object.keys(value).length===keys.length&&keys.every(k=>Object.hasOwn(value,k)),'READBACK');
++ need(value.method==='GET'&&value.url===url&&value.status===200&&object(value.body),'READBACK');
++ const received=time(value.receivedAt);need(received>=time(target.createdAt)&&received<=now&&now-received<=FRESH_MS,'FRESH_READBACK');
++ return value.body;
++}
++export function planNeonCleanup({journal,projectRead,authRead,now=Date.now()}){
++ need(journal instanceof RealRunJournal&&Number.isFinite(now),'JOURNAL');
++ const state=journal.snapshot(),target=state.target;need(target,'BOUND_TARGET');
++ need(/^[a-z0-9-]{1,60}$/.test(target.projectId)&&/^[a-z0-9-]{1,60}$/.test(target.branchId),'RESOURCE_ID');
++ const projectUrl=API+'/projects/'+target.projectId,authUrl=projectUrl+'/branches/'+target.branchId+'/auth';
++ const project=read(projectRead,projectUrl,target,now).project;
++ need(object(project)&&project.id===target.projectId&&project.name===target.name&&project.region_id===target.regionId&&
++  project.platform_id==='aws'&&project.owner_id===target.orgId&&(!Object.hasOwn(project,'org_id')||project.org_id===target.orgId),'PROJECT_READBACK');
++ need(time(project.created_at)===time(target.createdAt),'PROJECT_READBACK');
++ const auth=read(authRead,authUrl,target,now);
++ need(auth.auth_provider==='better_auth'&&auth.auth_provider_project_id===target.authId&&auth.branch_id===target.branchId&&
++  auth.owned_by==='neon'&&auth.jwks_url===target.auth.jwksUrl&&auth.base_url===target.auth.baseUrl,'AUTH_READBACK');
++ const authCreated=time(auth.created_at);need(authCreated>=time(target.createdAt)&&authCreated<=time(authRead.receivedAt),'AUTH_READBACK');
++ const identityBlocked=state.identity!==null;
++ const unresolved=state.requests.some(request=>['pending','unknown'].includes(request.outcome));
++ const deletionBlocked=identityBlocked||unresolved;
++ return {
++  schema_version:1,target_fingerprint:target.fingerprint,
++  external_authorized:false,external_verified:false,execution_enabled:false,
++  blocked:unresolved?'unresolved-request-reconciliation-required':identityBlocked?'managed-identity-cleanup-contract-unverified':'external-transport-and-authority-required',
++  identity_erasure_verified:false,project_recovery_window_days:7,
++  resources:[
++   {kind:'auth',id:target.authId,read:{method:'GET',url:authUrl},delete:deletionBlocked?null:{method:'DELETE',url:authUrl,body:'{"delete_data":false}'}},
++   {kind:'project',id:target.projectId,read:{method:'GET',url:projectUrl},delete:deletionBlocked?null:{method:'DELETE',url:projectUrl,body:''}}
++  ],
++  requirements:['fresh-authenticated-provider-readbacks','counted-contained-provider-transport','specific-target-and-identity-authorization',
++   'managed-identity-removal-and-exact-absence-contract','unknown-write-reconciliation','fresh-post-delete-absence-readback'],
++ };
++}
+diff --git a/tests/neon-cleanup-contracts.test.mjs b/tests/neon-cleanup-contracts.test.mjs
+new file mode 100644
+index 0000000..5c35ee1
+--- /dev/null
++++ b/tests/neon-cleanup-contracts.test.mjs
+@@ -0,0 +1,20 @@
++import assert from 'node:assert/strict';
++import {test} from 'node:test';
++import {readFileSync} from 'node:fs';
++import {executionFixture} from './fixtures/neon-execution/fixture.mjs';
++import {createFixtureExecutionBoundary} from '../scripts/neon-execution-boundary.mjs';
++const adapter=await import('../scripts/neon-cleanup-contracts.mjs').catch(error=>{if(error.code!=='ERR_MODULE_NOT_FOUND')throw error;return {};});
++const stamp=()=>new Date().toISOString();
++function bodies(target){return {project:{project:{id:target.projectId,name:target.name,region_id:target.regionId,owner_id:target.orgId,platform_id:'aws',created_at:target.createdAt,owner:{email:'must-not-leak@example.invalid'}}},auth:{auth_provider:'better_auth',auth_provider_project_id:target.authId,branch_id:target.branchId,owned_by:'neon',created_at:target.createdAt,jwks_url:target.auth.jwksUrl,base_url:target.auth.baseUrl,db_name:'must-not-leak'}};}
++async function prepare(t){assert.equal(typeof adapter.planNeonCleanup,'function');const f=await executionFixture();t.after(()=>f.cleanup());const b=bodies(f.target),url='https://console.neon.tech/api/v2/projects/'+f.target.projectId;return {...f,input:{journal:f.journal,projectRead:{method:'GET',url,status:200,body:b.project,receivedAt:stamp()},authRead:{method:'GET',url:url+'/branches/'+f.target.branchId+'/auth',status:200,body:b.auth,receivedAt:stamp()}}};}
++test('official project/auth requests bind exact resource, no credentials or deletion executor',async t=>{const f=await prepare(t),r=adapter.planNeonCleanup(f.input);assert.equal(r.external_authorized,false);assert.equal(r.external_verified,false);assert.equal(r.execution_enabled,false);assert.equal(r.blocked,'external-transport-and-authority-required');assert.deepEqual(r.resources.map(v=>v.kind),['auth','project']);assert.equal(r.resources[0].delete.method,'DELETE');assert.equal(r.resources[0].delete.url,f.input.authRead.url);assert.equal(r.resources[0].delete.body,'{"delete_data":false}');assert.equal(r.resources[1].delete.url,f.input.projectRead.url);assert.equal(r.project_recovery_window_days,7);assert.equal(r.identity_erasure_verified,false);assert.doesNotMatch(JSON.stringify(r),/must-not-leak|Authorization|Bearer/);assert.equal(f.journal.snapshot().requests.length,0);});
++for(const [label,change]of [['projectID',f=>f.input.projectRead.body.project.id='nameless-bar-15324691'],['owner',f=>f.input.projectRead.body.project.owner_id='foreign-org'],['conflicting-org',f=>f.input.projectRead.body.project.org_id='foreign-org'],['region',f=>f.input.projectRead.body.project.region_id='aws-us-east-1'],['name',f=>f.input.projectRead.body.project.name='other'],['project-time',f=>f.input.projectRead.body.project.created_at=new Date(Date.parse(f.target.createdAt)-1000).toISOString()],['provider',f=>f.input.authRead.body.auth_provider='stack'],['authID',f=>f.input.authRead.body.auth_provider_project_id='other'],['branch',f=>f.input.authRead.body.branch_id='other'],['ownership',f=>f.input.authRead.body.owned_by='user'],['JWKS',f=>f.input.authRead.body.jwks_url='https://foreign.invalid/jwks'],['baseURL',f=>f.input.authRead.body.base_url='https://foreign.invalid/auth'],['auth-time',f=>f.input.authRead.body.created_at=new Date(Date.parse(f.target.createdAt)-1000).toISOString()]])test('mismatched '+label+' refuses a cleanup plan',async t=>{const f=await prepare(t);change(f);assert.throws(()=>adapter.planNeonCleanup(f.input),/N00_CLEANUP_/);assert.equal(f.journal.snapshot().requests.length,0);});
++for(const status of [301,401,403,404,423,429,500,503])test('HTTP '+status+' is not ownership or absence proof',async t=>{const f=await prepare(t);f.input.authRead.status=status;assert.throws(()=>adapter.planNeonCleanup(f.input),/READBACK/);});
++for(const [label,change]of [['stale',f=>f.input.projectRead.receivedAt=new Date(Date.now()-300001).toISOString()],['future',f=>f.input.authRead.receivedAt=new Date(Date.now()+60000).toISOString()],['wrong-path',f=>f.input.authRead.url+='/users'],['foreign-origin',f=>f.input.projectRead.url='https://foreign.invalid/api/v2/projects/'+f.target.projectId],['query',f=>f.input.projectRead.url+='?redirect=1'],['wrong-method',f=>f.input.projectRead.method='DELETE'],['credential-field',f=>f.input.authRead.headers={Authorization:'secret'}]])test(label+' readback refused',async t=>{const f=await prepare(t);change(f);assert.throws(()=>adapter.planNeonCleanup(f.input),/N00_CLEANUP_/);});
++test('a bound human identity blocks auth/project deletion; users_sync is not assumed Better Auth',async t=>{const f=await prepare(t);f.journal.bindIdentity(f.identity);const r=adapter.planNeonCleanup(f.input);assert.equal(r.blocked,'managed-identity-cleanup-contract-unverified');assert.deepEqual(r.resources.map(v=>v.kind),['auth','project']);assert.ok(r.resources.every(v=>v.delete===null));assert.equal(r.identity_erasure_verified,false);});
++test('owned counted HTTP payloads decode official field names without claiming provider verification',async t=>{assert.equal(typeof adapter.planNeonCleanup,'function');const f=await executionFixture((req,res,{target})=>{const body=bodies(target);if(req.method==='GET'&&req.url.startsWith('/fixture/control/project/')){res.end(JSON.stringify(body.project));return true;}if(req.method==='GET'&&req.url.startsWith('/fixture/control/auth/')){res.end(JSON.stringify(body.auth));return true;}});t.after(()=>f.cleanup());const execution=createFixtureExecutionBoundary({backend:f.backend,journal:f.journal});const responses=[];for(const kind of ['project','auth'])responses.push(await execution.dispatch({channel:'control',method:'GET',path:'/fixture/control/'+kind+'/'+(kind==='project'?f.target.projectId:f.target.authId)}));const url='https://console.neon.tech/api/v2/projects/'+f.target.projectId,r=adapter.planNeonCleanup({journal:f.journal,projectRead:{method:'GET',url,status:responses[0].status,body:JSON.parse(responses[0].body),receivedAt:stamp()},authRead:{method:'GET',url:url+'/branches/'+f.target.branchId+'/auth',status:responses[1].status,body:JSON.parse(responses[1].body),receivedAt:stamp()}});assert.equal(f.model.hits.length,2);assert.deepEqual(f.journal.snapshot().requests.map(v=>v.outcome),['accepted','accepted']);assert.equal(r.external_verified,false);assert.equal(r.execution_enabled,false);assert.ok(f.model.hits.every(v=>v[0]==='GET'));});
++test('adapter contains no network, CLI or ambient credential execution path',()=>{const source=readFileSync(new URL('../scripts/neon-cleanup-contracts.mjs',import.meta.url),'utf8');assert.doesNotMatch(source,/\bfetch\s*\(|process\.env|child_process|https?:.*request\s*\(/);});
++
++for(const outcome of ['pending','unknown'])test(outcome+' request keeps deletion descriptors blocked for reconciliation',async t=>{const f=await prepare(t);f.journal.reserveRequest('auth','earlier-write');if(outcome==='unknown')f.journal.settleRequest('earlier-write','unknown','fixture-only-unknown.json');const r=adapter.planNeonCleanup(f.input);assert.equal(r.blocked,'unresolved-request-reconciliation-required');assert.ok(r.resources.every(v=>v.delete===null));assert.equal(f.journal.snapshot().requests.length,1);});
++test('cleanup preparation after TTL requires fresh readbacks and preserves expired target',async t=>{const f=await prepare(t),late=Date.parse(f.target.expiresAt)+1;f.input.now=late;f.input.projectRead.receivedAt=f.input.authRead.receivedAt=new Date(late).toISOString();const r=adapter.planNeonCleanup(f.input);assert.equal(r.execution_enabled,false);assert.equal(r.blocked,'external-transport-and-authority-required');assert.equal(f.journal.snapshot().target.expiresAt,f.target.expiresAt);});
++test('an unbranded journal and malformed calendar timestamp cannot create descriptors',async t=>{const f=await prepare(t);assert.throws(()=>adapter.planNeonCleanup({...f.input,journal:{snapshot:()=>f.journal.snapshot()}}),/JOURNAL/);f.input.authRead.body.created_at='2026-02-31T00:00:00Z';assert.throws(()=>adapter.planNeonCleanup(f.input),/TIME/);});
+diff --git a/tests/neon-cleanup-contracts.types.ts b/tests/neon-cleanup-contracts.types.ts
+new file mode 100644
+index 0000000..467186d
+--- /dev/null
++++ b/tests/neon-cleanup-contracts.types.ts
+@@ -0,0 +1,15 @@
++import type {NeonCleanupPlan,NeonCleanupReadback} from '../scripts/neon-cleanup-contracts.mjs';
++function strict(plan:NeonCleanupPlan,read:NeonCleanupReadback){
++ const disabled:false=plan.execution_enabled;
++ const unverified:false=plan.external_verified;
++ const unauthorized:false=plan.external_authorized;
++ const get:'GET'=read.method;
++ // @ts-expect-error A readback cannot be a destructive request.
++ const wrongMethod:NeonCleanupReadback={...read,method:'DELETE'};
++ // @ts-expect-error A prepared cleanup contract cannot claim live verification.
++ const live:NeonCleanupPlan={...plan,external_verified:true};
++ // @ts-expect-error Local plans cannot activate execution.
++ const armed:NeonCleanupPlan={...plan,execution_enabled:true};
++ return {disabled,unverified,unauthorized,get,wrongMethod,live,armed};
++}
++void strict;
