@@ -86,3 +86,18 @@ test('NA01 fixture: missing or mismatched challenge cannot exchange a fresh veri
  const accepted=await context.request.get(callbackURL,{maxRedirects:0});expect(accepted.status()).toBe(307);expect(new URL(accepted.headers().location,callbackURL).href).toBe('http://localhost:44890/compat/return?keep=negative');
  expect((await context.cookies()).some(c=>c.name==='__Secure-neon-auth.session_token')).toBe(true);
 });
+
+
+test('NA01 counted fixture: built SDK get-session reserves one actual upstream HTTP request',async({request})=>{
+ const beforeResponse=await request.get('http://127.0.0.1:44891/n00-fixture-budget');expect(beforeResponse.status()).toBe(200);
+ const before=await beforeResponse.json();expect(before.fixture_only).toBe(true);
+ const response=await request.get('/api/auth/get-session');expect(response.status()).toBe(200);
+ const after=await (await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
+ expect(after.reserved).toBe(before.reserved+1);expect(after.forwarded).toBe(before.forwarded+1);expect(after.pending).toBe(0);expect(after.external_requests).toBe(0);
+});
+test('NA01 counted fixture: built SDK negative login is charged and returns the real fixture401',async({request})=>{
+ const beforeResponse=await request.get('http://127.0.0.1:44891/n00-fixture-budget');expect(beforeResponse.status()).toBe(200);const before=await beforeResponse.json();
+ const response=await request.post('/api/auth/sign-in/email',{data:{email:'unknown@fixture.invalid',password:'fictional-invalid-password'}});expect(response.status()).toBe(401);
+ const after=await (await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
+ expect(after.reserved).toBe(before.reserved+1);expect(after.forwarded).toBe(before.forwarded+1);expect(after.rejected).toBe(before.rejected+1);expect(after.pending).toBe(0);
+});

@@ -1,17 +1,42 @@
 import {createServer} from 'node:http';
 import {generateKeyPairSync,sign,createHmac,randomBytes} from 'node:crypto';
-import {spawn,spawnSync} from 'node:child_process';
-import {existsSync,readFileSync,statSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {spawn,spawnSync,execFile,execFileSync} from 'node:child_process';
+import {existsSync,readFileSync,statSync,mkdtempSync,writeFileSync,mkdirSync,realpathSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {resolve,join,relative} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {assertLoopbackUrl,fixtureChildEnvironment,staticAssetPath} from './neon-compatibility-harness.mjs';
-const target=process.env.BUYEROS_N00_TARGET;
+import {createOwnedAuthServer,createCountedAuthProxy} from './neon-counted-proxy.mjs';
+import {RealRunJournal} from './neon-real-preflight.mjs';
+const target=process.env.BUYEROS_N00_TARGET,requestedRunId=process.env.BUYEROS_N00_RUN_ID;
+if(requestedRunId&&!/^[a-f0-9]{12}$/.test(requestedRunId))throw new Error('N00 fixture run ID refused');
 if(!['portable','vercel'].includes(target))throw new Error('N00 requires portable or vercel actual output');
 // The Vercel bridge runs in this process too: strip inherited application/provider env.
 const isolatedEnv=fixtureChildEnvironment(process.env);
 for(const key of Object.keys(process.env))delete process.env[key];
 Object.assign(process.env,isolatedEnv,{BUYEROS_N00_TARGET:target});
 const upstream=assertLoopbackUrl('http://127.0.0.1:44891/fixture/auth');
+// Synthetic budget-record shape only: never Neon readback or owner authorization.
+const budgetRoot=mkdtempSync(join(tmpdir(),'buyeros-n00-real-')),runLabel=requestedRunId??randomBytes(6).toString('hex'),created=Date.now(),stamp=new Date(created).toISOString();
+const fixtureIds={projectId:'fictional-project-'+runLabel,branchId:'fictional-branch-'+runLabel,authId:'fictional-auth-'+runLabel};
+const fixtureScope={...fixtureIds,orgId:'org-soft-sunset-25251479',name:'buyeros-neon-auth-n00-20261004',regionId:'aws-ap-southeast-1'};
+const budget=RealRunJournal.create(budgetRoot,{approvalReference:'fixture-only-no-external-authority',approvedAt:stamp});
+budget.bindTarget({schemaVersion:1,proposal:'buyeros-neon-auth-n00-20261004',sourceSha:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),...fixtureScope,creationMode:'new-empty',createdAt:stamp,expiresAt:new Date(created+2*60*60_000).toISOString(),
+ readback:{...fixtureScope,observedAt:stamp,subscription:'free_v3',emailDeliveryEnabled:false,emailPasswordEnabled:false,emailHooksEnabled:false,methods:['google'],trustedOrigins:['http://localhost:44890']},
+ auth:{baseUrl:'https://budget-shape.fixture.invalid/auth',issuer:'https://budget-shape.fixture.invalid',audience:'fictional-budget-shape',jwksUrl:'https://budget-shape.fixture.invalid/auth/jwks',algorithm:'EdDSA',keyType:'OKP',curve:'Ed25519'}},created);
+const proofFolder=resolve('test-results/neon-counted-transport',target+'-'+runLabel);mkdirSync(proofFolder);
+const ownership={fixture_only:true,runId:runLabel,pid:process.pid,target,budget_root:budgetRoot};
+writeFileSync(join(budgetRoot,'fixture-owner.json'),JSON.stringify(ownership)+'\n',{flag:'wx'});writeFileSync(join(proofFolder,'runtime.json'),JSON.stringify(ownership)+'\n',{flag:'wx'});
+const children=[];let appServer,proxyServer,stopping=false;
+function captureBudget() {
+ const report=proxyServer?.fixtureReport(),folder=proofFolder;
+ const records=budget.snapshot().requests;
+ // Export counters/outcomes only. The synthetic validation record is not provider evidence.
+ writeFileSync(join(folder,'budget.json'),JSON.stringify({fixture_only:true,external_requests:0,runner_head_at_execution:budget.snapshot().target.sourceSha,compiled_inputs:'test-results/neon-compatibility/build-inputs.json',metrics:report?.metrics??null,requests:records,limit:200,cleanup_reserve:20,sdk_fixture_base:upstream.href,owned_backend_port:44894,real_configuration_verified:false},null,2)+'\n');
+ for(const record of records)if(record.evidenceRef){const file=join(budgetRoot,record.evidenceRef);if(existsSync(file))writeFileSync(join(folder,record.evidenceRef),readFileSync(file));}
+ if(realpathSync(budgetRoot)!==resolve(budgetRoot)||!relative(resolve(tmpdir()),budgetRoot).startsWith('buyeros-n00-real-'))throw new Error('unowned fixture journal cleanup');
+ rmSync(budgetRoot,{recursive:true});writeFileSync(join(folder,'cleanup.json'),JSON.stringify({fixture_only:true,owned_journal_removed:true,external_resources:0})+'\n');
+}
 const {privateKey,publicKey}=generateKeyPairSync('ed25519');
 const kid='fictional-n00-key',jwk={...publicKey.export({format:'jwk'}),kid,alg:'EdDSA',use:'sig'};
 const user={id:'n00-user',name:'Fictional N00',email:'n00@fixture.invalid',emailVerified:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
@@ -31,7 +56,7 @@ const flows=new Map(),verifiers=new Map();
 const challengeName='__Secure-neon-auth.session_challenge';
 const challengeCookie=(value,maxAge=300)=>challengeName+'='+value+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age='+maxAge;
 function cookieValue(header,name){return (header??'').split(';').map(part=>part.trim()).find(part=>part.startsWith(name+'='))?.slice(name.length+1);}
-const authServer=createServer(async(req,res)=>{
+const authServer=createOwnedAuthServer(async(req,res)=>{
  const url=new URL(req.url,upstream.origin),path=url.pathname;
  const active=authenticated&&(req.headers.cookie??'').includes('__Secure-neon-auth.session_token=fictional-session');
  res.setHeader('Content-Type','application/json');
@@ -71,13 +96,37 @@ const authServer=createServer(async(req,res)=>{
  if(path==='/fixture/auth/callback/fixture'&&url.searchParams.get('state')==='fictional-state'){authenticated=true;res.statusCode=302;res.setHeader('Set-Cookie',cookie);res.setHeader('Location','http://localhost:44890/compat');res.end('{}');return;}
  res.statusCode=404;res.end('{"fixtureOnly":true}');
 });
-await new Promise((ok,bad)=>{authServer.once('error',bad);authServer.listen(44891,'127.0.0.1',ok);});
-const children=[];let appServer;
+try {
+ await new Promise((ok,bad)=>{authServer.once('error',bad);authServer.listen(44894,'127.0.0.1',ok);});
+ proxyServer=createCountedAuthProxy({backend:authServer,journal:budget,stopNonce:runLabel,onStop:()=>stop()});
+ await new Promise((ok,bad)=>{proxyServer.once('error',bad);proxyServer.listen(44891,'127.0.0.1',ok);});
+}catch(error){stop(1);throw error;}
 // Deliberate env allowlist: no inherited Auth/DB/provider credentials reach fixture children.
 const childEnv=fixtureChildEnvironment(process.env);
 function launch(command,args){const child=spawn(command,args,{env:childEnv,stdio:'inherit',windowsHide:true});children.push(child);child.on('error',error=>{console.error(error);stop(1);});child.on('exit',code=>{if(!stopping)stop(code??1);});return child;}
-let stopping=false;
-function stop(code=0){if(stopping)return;stopping=true;for(const child of children){if(process.platform==='win32'&&child.exitCode===null&&child.pid)spawnSync('taskkill',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore',timeout:5000});else child.kill();}appServer?.close();authServer.close();setTimeout(()=>process.exit(code),500).unref();}
+async function stop(code=0){
+ if(stopping)return;stopping=true;
+ appServer?.close();proxyServer?.closeAllConnections();proxyServer?.close();authServer.closeAllConnections();authServer.close();
+ // Independent owned child trees must terminate concurrently: sequential Windows
+ // taskkill timeouts exceeded Playwright's cleanup deadline on portable output.
+ const childResults=await Promise.all(children.map(child=>new Promise(ok=>{
+  if(child.exitCode!==null||!child.pid){ok({pid:child.pid,already_exited:true});return;}
+  if(process.platform==='win32')execFile('taskkill',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,timeout:5000},error=>ok({pid:child.pid,terminated:child.exitCode!==null,command_exit:error?.code??0}));
+  else{child.once('exit',()=>ok({pid:child.pid,terminated:true}));child.kill();setTimeout(()=>ok({pid:child.pid,terminated:child.exitCode!==null}),5000).unref();}
+ })));
+ await new Promise(ok=>setTimeout(ok,500));
+ try{
+  for(let i=0;i<children.length;i++){
+   const child=children[i],result=childResults[i];result.event_terminated=child.exitCode!==null||child.signalCode!==null;
+   // On Windows the taskkill command can finish before ChildProcess updates its
+   // exit fields. Require OS ESRCH for this exact owned PID, not command exit0.
+   try{process.kill(child.pid,0);result.process_absent=false;}catch(error){if(error.code!=='ESRCH')throw error;result.process_absent=true;}
+  }
+  writeFileSync(join(proofFolder,'child-cleanup.json'),JSON.stringify({fixture_only:true,children:childResults})+'\n');
+  if(childResults.some(result=>!result.process_absent))throw new Error('N00_FIXTURE_CHILD_STILL_RUNNING');captureBudget();
+ }catch(error){console.error('N00 fixture evidence/cleanup failed',error.code??error.message);code=1;}
+ process.exit(code);
+}
 process.on('SIGTERM',()=>stop());process.on('SIGINT',()=>stop());process.on('exit',()=>{for(const child of children){if(process.platform==='win32'&&child.exitCode===null&&child.pid)spawnSync('taskkill',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore',timeout:5000});else child.kill();}});
 launch('uv',['run','--frozen','--project','services/api','python',resolve('tests/fixtures/neon-compatibility/verify.py')]);
 // Wait for the actual diagnostic process, before advertising app readiness.
