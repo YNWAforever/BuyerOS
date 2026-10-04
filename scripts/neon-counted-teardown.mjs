@@ -10,7 +10,7 @@ export default async function teardown(config) {
  if(owner.fixture_only!==true||owner.runId!==n00RunId||owner.target!==n00Target)throw new Error('N00 fixture cleanup ownership refused');
  const response=await fetch('http://127.0.0.1:44891/n00-fixture-stop',{method:'POST',headers:{'X-N00-Owner':n00RunId},redirect:'manual',signal:AbortSignal.timeout(1500)});
  if(response.status!==200||(await response.json()).fixture_only!==true)throw new Error('N00 fixture cleanup acknowledgement failed');
- const deadline=Date.now()+10_000;
+ const deadline=Date.now()+20_000;
  while(!existsSync(join(folder,'cleanup.json'))&&Date.now()<deadline)await new Promise(ok=>setTimeout(ok,100));
  if(!existsSync(join(folder,'cleanup.json')))throw new Error('N00 fixture cleanup evidence missing');
  const proof=JSON.parse(readFileSync(join(folder,'cleanup.json'),'utf8'));

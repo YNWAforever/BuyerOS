@@ -105,22 +105,27 @@ try {
 const childEnv=fixtureChildEnvironment(process.env);
 function launch(command,args){const child=spawn(command,args,{env:childEnv,stdio:'inherit',windowsHide:true});children.push(child);child.on('error',error=>{console.error(error);stop(1);});child.on('exit',code=>{if(!stopping)stop(code??1);});return child;}
 async function stop(code=0){
- if(stopping)return;stopping=true;
+ if(stopping)return;stopping=true;const stopDeadline=Date.now()+18000;
  appServer?.close();proxyServer?.closeAllConnections();proxyServer?.close();authServer.closeAllConnections();authServer.close();
  // Independent owned child trees must terminate concurrently: sequential Windows
  // taskkill timeouts exceeded Playwright's cleanup deadline on portable output.
+ // The sanitized-parent timing probe takes 8.5s; allow 15s per tree, 18s
+ // total, inside the global teardown's 20s bound. Command status alone is insufficient.
  const childResults=await Promise.all(children.map(child=>new Promise(ok=>{
   if(child.exitCode!==null||!child.pid){ok({pid:child.pid,already_exited:true});return;}
-  if(process.platform==='win32')execFile('taskkill',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,timeout:5000},error=>ok({pid:child.pid,terminated:child.exitCode!==null,command_exit:error?.code??0}));
+  if(process.platform==='win32')execFile('taskkill',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,timeout:15000},error=>ok({pid:child.pid,terminated:child.exitCode!==null,command_exit:error?(error.code??'TASKKILL_FAILED'):0,command_killed:error?.killed??false,command_signal:error?.signal??null}));
   else{child.once('exit',()=>ok({pid:child.pid,terminated:true}));child.kill();setTimeout(()=>ok({pid:child.pid,terminated:child.exitCode!==null}),5000).unref();}
  })));
- await new Promise(ok=>setTimeout(ok,500));
  try{
-  for(let i=0;i<children.length;i++){
-   const child=children[i],result=childResults[i];result.event_terminated=child.exitCode!==null||child.signalCode!==null;
-   // On Windows the taskkill command can finish before ChildProcess updates its
-   // exit fields. Require OS ESRCH for this exact owned PID, not command exit0.
-   try{process.kill(child.pid,0);result.process_absent=false;}catch(error){if(error.code!=='ESRCH')throw error;result.process_absent=true;}
+  // A successful command is not an OS exit acknowledgement. Poll exact owned
+  // PIDs within the teardown budget, including delayed Windows exit events.
+  while(true){
+   for(let i=0;i<children.length;i++){
+    const child=children[i],result=childResults[i];result.event_terminated=child.exitCode!==null||child.signalCode!==null;
+    try{process.kill(child.pid,0);result.process_absent=false;}catch(error){if(error.code!=='ESRCH')throw error;result.process_absent=true;}
+   }
+   if(childResults.every(result=>result.process_absent)||Date.now()>=stopDeadline)break;
+   await new Promise(ok=>setTimeout(ok,100));
   }
   writeFileSync(join(proofFolder,'child-cleanup.json'),JSON.stringify({fixture_only:true,children:childResults})+'\n');
   if(childResults.some(result=>!result.process_absent))throw new Error('N00_FIXTURE_CHILD_STILL_RUNNING');captureBudget();
