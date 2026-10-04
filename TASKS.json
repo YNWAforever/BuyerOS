@@ -435,7 +435,47 @@
       "release_status": "not-deployed",
       "source_sha": "576c3b182819b392f8b73697457769d6f16a496c",
       "cases": [],
-      "evidence": "docs/buyeros/CURRENT_STATUS.md"
+      "evidence": "docs/buyeros/CURRENT_STATUS.md",
+      "local_verification_gates_followup": {
+        "status": "local-test-gates-verified",
+        "base_sha": "cbb67ddbb907b8b989b175588ba73ed205e2c2d8",
+        "source_sha": "d7ab5b6323402adf139d9b94e4e499f1631006b4",
+        "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+        "code_changes": "one test + focused plan; application/API/schema unchanged",
+        "checks": {
+          "root_node": {
+            "pass": 69,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "junit_leaf_cases": 68,
+            "duration_ms": 96210.0865
+          },
+          "cleanup_included": {
+            "pass": 24,
+            "fail": 0,
+            "skip": 0
+          },
+          "linux_emitted_ssr": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          "windows_emitted_ssr": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "contracts": "types/lint/generated84 pass;0 new operations",
+        "migrations": [],
+        "head": "0037_bulk_manifests",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/RESULTS.md",
+        "rollback": "one-test reverse patch applicability passed; no runtime/production rehearsal",
+        "review": "author only; independent review pending",
+        "release_status": "not-deployed",
+        "limits": "Docker/image/build prerequisite; no fresh UI/DB/live/performance/human UAT; prior failures retained"
+      }
     },
     {
       "id": "Q12",
@@ -561,9 +601,11 @@
     "Q16 underlying evidence when available",
     "N00 separate auth compatibility scope"
   ],
-  "reviewed_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+  "reviewed_source_sha": "d7ab5b6323402adf139d9b94e4e499f1631006b4",
   "deployed_sha": null,
   "selected_followups": [
-    "U05"
-  ]
+    "U05",
+    "Q11 local verification gates"
+  ],
+  "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf"
 }

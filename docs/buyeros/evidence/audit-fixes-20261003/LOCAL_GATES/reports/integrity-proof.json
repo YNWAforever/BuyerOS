@@ -1,0 +1,29 @@
+{
+  "preservation": {
+    "root": {
+      "head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+      "dirty_paths": 0,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "unrelated": {
+      "head": "a78859fe474f5722be3755b10e2586436b53bf97",
+      "dirty_paths": 193,
+      "diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0"
+    }
+  },
+  "previous_archives_verified": {
+    "U05": 91,
+    "Q09/FINAL": 161,
+    "Q09/KEYBOARD": 141
+  },
+  "junit_leaf_cases": 68,
+  "root_node_counts": {
+    "pass": 69,
+    "fail": 0,
+    "skip": 0
+  },
+  "emitted_files": 2611,
+  "archive_bytes": 27344314,
+  "archive_sha256": "fb37cbacf5402efa738c65cb4f835c49360d2e266a87faff7f9d56a04a086380",
+  "docker_context": "desktop-linux"
+}

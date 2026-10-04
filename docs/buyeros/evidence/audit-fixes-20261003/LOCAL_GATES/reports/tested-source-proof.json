@@ -1,0 +1,8 @@
+{
+  "reviewed_source_sha": "d7ab5b6323402adf139d9b94e4e499f1631006b4",
+  "test_path": "tests/e2e-fixture-cleanup.test.mjs",
+  "tested_lf_sha256": "14a33da932f9c5d1c3fdc3bd1a3be128ab5c0736e38227a5143beefe57d45c3b",
+  "matches_git_blob": true,
+  "application_source_unchanged_from": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+  "deployed_sha": null
+}

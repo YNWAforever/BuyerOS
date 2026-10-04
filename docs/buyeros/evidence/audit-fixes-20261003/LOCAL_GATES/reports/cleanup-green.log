@@ -1,0 +1,432 @@
+▶ every disposable-API Playwright configuration actually removes its owned container and marker
+  ✖ playwright.admin.config.ts (6163.1777ms)
+  ✖ playwright.approval.config.ts (3278.1432ms)
+  ✖ playwright.audit-fixes.config.ts (2824.1933ms)
+  ✖ playwright.bulk.config.ts (6697.4694ms)
+  ✖ playwright.buyer-management.config.ts (17873.5657ms)
+  ✖ playwright.buyer.config.ts (4188.1582ms)
+  ✖ playwright.config.ts (3562.8817ms)
+  ✖ playwright.confirm.config.ts (4556.147ms)
+  ✖ playwright.contact-job.config.ts (2343.1461ms)
+  ✖ playwright.cors.config.ts (2351.5636ms)
+  ✖ playwright.draft.config.ts (1895.3072ms)
+  ✖ playwright.exports.config.ts (1755.5509ms)
+  ✖ playwright.ingestion.config.ts (2741.5074ms)
+  ✖ playwright.mvp-research.config.ts (2510.7595ms)
+  ✖ playwright.mvp.config.ts (3263.3711ms)
+  ✖ playwright.offer.config.ts (2502.7874ms)
+  ✖ playwright.policy.config.ts (1892.3838ms)
+  ✖ playwright.quote.config.ts (2071.9317ms)
+  ✖ playwright.run.config.ts (2445.5427ms)
+  ✖ playwright.workbench.config.ts (1891.4363ms)
+✖ every disposable-API Playwright configuration actually removes its owned container and marker (76891.3155ms)
+✖ configured audit teardown also removes its labelled UI sentinel and marker (2572.64ms)
+✔ configured audit teardown refuses a UI container whose owner label differs (2391.7018ms)
+✔ configured database teardown refuses an unrecognized marker without deleting it (120.221ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 2
+ℹ fail 22
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 82315.3047
+
+✖ failing tests:
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.admin.config.ts (6163.1777ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-eca29de5
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-eca29de5\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.approval.config.ts (3278.1432ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-37d0535d
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-37d0535d\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.audit-fixes.config.ts (2824.1933ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-476ae9f2
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-476ae9f2\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.bulk.config.ts (6697.4694ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-630645cd
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-630645cd\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.buyer-management.config.ts (17873.5657ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-1c49e6f9
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-1c49e6f9\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.buyer.config.ts (4188.1582ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-2211b1e8
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-2211b1e8\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.config.ts (3562.8817ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-7218bffa
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-7218bffa\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.confirm.config.ts (4556.147ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-9e81dd12
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-9e81dd12\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.contact-job.config.ts (2343.1461ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-14202ab3
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-14202ab3\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.cors.config.ts (2351.5636ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-f92062e7
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-f92062e7\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.draft.config.ts (1895.3072ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-f3cb4818
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-f3cb4818\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.exports.config.ts (1755.5509ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-1b30e752
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-1b30e752\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.ingestion.config.ts (2741.5074ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-961810bc
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-961810bc\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.mvp-research.config.ts (2510.7595ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-da62c0e8
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-da62c0e8\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.mvp.config.ts (3263.3711ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-49a6ab7d
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-49a6ab7d\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.offer.config.ts (2502.7874ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-391152f0
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-391152f0\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.policy.config.ts (1892.3838ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-5aea35e6
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-5aea35e6\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.quote.config.ts (2071.9317ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-b6443c84
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-b6443c84\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.run.config.ts (2445.5427ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-268a7454
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-268a7454\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.workbench.config.ts (1891.4363ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-test-636a5a37
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:91:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-test-636a5a37\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\e2e-fixture-cleanup.test.mjs:96:1
+✖ configured audit teardown also removes its labelled UI sentinel and marker (2572.64ms)
+  AssertionError [ERR_ASSERTION]: error: no such object: buyeros-audit-ui-5867f1c559b5
+  
+      at inspect (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+      at removeOwned (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:107:12)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'error: no such object: buyeros-audit-ui-5867f1c559b5\n',
+    expected: /No such (object|container)/,
+    operator: 'match',
+    diff: 'simple'
+  }

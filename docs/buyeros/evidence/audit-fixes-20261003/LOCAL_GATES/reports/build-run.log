@@ -1,0 +1,14 @@
+{"buildExit":0,"container":"buyeros-local-gates-fa2655b795dade87c2a479cf"}
+file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/test-results/local-gates/build-linux.mjs:10
+function run(command,args,options={}){const r=spawnSync(command,args,{encoding:'utf8',timeout:60_000,...options});if(r.status!==0)throw new Error(`${command} ${args[0]} exit ${r.status}: ${r.stderr}`);return r.stdout.trim();}
+                                                                                                                                        ^
+
+Error: docker cp exit 1: symlinkat ../../json-schema-traverse@0.4.1 .vercel\output\functions\__server.func\node_modules\.nf3\ajv@6.15.0\node_modules\json-schema-traverse: A required privilege is not held by the client.
+
+    at run (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/test-results/local-gates/build-linux.mjs:10:137)
+    at file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/test-results/local-gates/build-linux.mjs:44:2
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.18.0

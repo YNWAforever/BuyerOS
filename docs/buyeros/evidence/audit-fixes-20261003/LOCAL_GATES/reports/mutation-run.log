@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\test-results\local-gates\mutation-proof.py", line 17, in <module>
+    print(text[-4000:])
+    ~~~~~^^^^^^^^^^^^^^
+UnicodeEncodeError: 'cp950' codec can't encode character '\u25b6' in position 0: illegal multibyte sequence

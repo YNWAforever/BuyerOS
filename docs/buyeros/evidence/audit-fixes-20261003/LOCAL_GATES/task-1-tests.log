@@ -1,0 +1,50 @@
+✔ S06 generated eligible lookup and scope context reject foreign and A-B-A responses (11.5147ms)
+✔ Q09 latest101 uses only head1/tail1 generated reads, never downloads all history (6.862ms)
+✔ Q09 empty and single ICP use one read; malformed/foreign pages fail closed (2.3651ms)
+✔ Q09 concurrent appended history is unavailable rather than a falsely latest profile (3.8948ms)
+✔ Q09 A-B-A rejects a late metadata response and token renewal alone keeps the context (1.4543ms)
+✔ B05 token renewal and route remount retain lost-response key; double start shares work (37.0118ms)
+✔ B06 full normalized payload and actor/scope define intent; generation and key order do not (11.8006ms)
+✔ B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent (6.0196ms)
+▶ every disposable-API Playwright configuration actually removes its owned container and marker
+  ✔ playwright.admin.config.ts (10641.9524ms)
+  ✔ playwright.approval.config.ts (5190.6549ms)
+  ✔ playwright.audit-fixes.config.ts (9064.8228ms)
+  ✔ playwright.bulk.config.ts (4822.0829ms)
+  ✔ playwright.buyer-management.config.ts (4331.962ms)
+  ✔ playwright.buyer.config.ts (2991.3592ms)
+  ✔ playwright.config.ts (2171.3488ms)
+  ✔ playwright.confirm.config.ts (2108.9583ms)
+  ✔ playwright.contact-job.config.ts (1766.7094ms)
+  ✔ playwright.cors.config.ts (1946.6003ms)
+  ✔ playwright.draft.config.ts (2320.4302ms)
+  ✔ playwright.exports.config.ts (2504.6181ms)
+  ✔ playwright.ingestion.config.ts (2484.2102ms)
+  ✔ playwright.mvp-research.config.ts (2985.6761ms)
+  ✔ playwright.mvp.config.ts (2473.8362ms)
+  ✔ playwright.offer.config.ts (2573.6652ms)
+  ✔ playwright.policy.config.ts (5633.9218ms)
+  ✔ playwright.quote.config.ts (4950.0549ms)
+  ✔ playwright.run.config.ts (5753.2684ms)
+  ✔ playwright.workbench.config.ts (5306.3005ms)
+✔ every disposable-API Playwright configuration actually removes its owned container and marker (82098.2131ms)
+✔ configured audit teardown also removes its labelled UI sentinel and marker (5991.2733ms)
+✔ configured audit teardown refuses a UI container whose owner label differs (5460.5334ms)
+✔ configured database teardown refuses an unrecognized marker without deleting it (334.1943ms)
+✔ the built Vercel function renders / without a workspace import failure (510.7044ms)
+✔ the built Vercel function renders /app without a workspace import failure (25.5801ms)
+✔ the built Vercel function renders /auth/callback without a workspace import failure (19.71ms)
+✔ Vercel exposes only the app and binds its API call to the internal API service (18.6881ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (134.2651ms)
+✔ the app proxy fails closed when the binding is absent (4.1029ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (5.5979ms)
+✔ FastAPI redirects stay on the public app path (1.8846ms)
+✔ test_internal_headers_forward_only_on_allowlisted_paths (91.1523ms)
+ℹ tests 69
+ℹ suites 0
+ℹ pass 69
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 96210.0865

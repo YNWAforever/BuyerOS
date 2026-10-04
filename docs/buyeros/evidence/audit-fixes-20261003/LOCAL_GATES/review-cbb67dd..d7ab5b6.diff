@@ -1,0 +1,188 @@
+# Review package: cbb67ddbb907b8b989b175588ba73ed205e2c2d8..HEAD
+
+## Commits
+d7ab5b6 test: verify configured fixture cleanup with owned containers
+
+## Files changed
+ .../2026-10-04-buyeros-local-verification-gates.md |  20 +++
+ tests/e2e-fixture-cleanup.test.mjs                 | 137 +++++++++++++++++++--
+ 2 files changed, 150 insertions(+), 7 deletions(-)
+
+## Diff
+diff --git a/docs/superpowers/plans/2026-10-04-buyeros-local-verification-gates.md b/docs/superpowers/plans/2026-10-04-buyeros-local-verification-gates.md
+new file mode 100644
+index 0000000..f22dcc7
+--- /dev/null
++++ b/docs/superpowers/plans/2026-10-04-buyeros-local-verification-gates.md
+@@ -0,0 +1,20 @@
++# BuyerOS local verification gates follow-up
++
++Spec: 2026-10-03 repair handoff/Q11 release-evidence discipline and the 2026-10-04 continue request. The selected recommendation is the two inherited root Node failures after U05; no additional product feature or cutover is selected.
++Base: cbb67ddbb907b8b989b175588ba73ed205e2c2d8.
++
++## Global Constraints
++Use the existing isolated repair branch. No agents, remote PR, push, deploy, auth/Cloudflare cutover, production data/membership/identity mutation, mail or paid providers. Preserve frozen evidence, historical case fields and all destructive fixture guards. Only newly owned Docker sentinels/build container and ignored local output may be mutated; verify ownership before fallback cleanup. Do not skip or synthesize a built Vercel function.
++
++## Review Focus
++The teardown check must detect missing delegation through observed marker/container effects, accepting valid wrappers. Failure cleanup must only touch this run's labelled resources. Vercel verification must import the actual emitted vercel preset function; a node-server build is insufficient. Report build prerequisites, test failures and source hashes separately; no live acceptance follows.
++
++## Task 1: Close inherited local Node gates
++Interfaces: Playwright globalTeardown -> base DB cleanup / audit owned UI cleanup; run-vercel.mjs -> Nitro vercel output -> vercel-render.test.mjs. Predecessor: U05 complete. No product/API/schema interface changes.
++
++- [x] Reproduce current two failures and retain exact output; evaluate the configured teardown through real owned container/marker effects. Mutation-check removal of audit's database delegation.
++  Expected: original baseline fails two checks; behavior check detects missing cleanup, valid direct and delegated cleanup pass; no skip.
++- [x] Run a bounded local Linux build from a safe source inventory with frozen cached dependencies; import the actual emitted Vercel handler for /, /app and /auth/callback. Supply the genuine artifact to the normal whole-root Node command.
++  Expected: real vercel output, three SSR200/content assertions and whole-root Node zero failures/skips; missing build artifacts continue to fail.
++- [ ] Run types/lint/generated contract checks, inspect the diff and author review. Record exact commands, counts, artifact hashes, ownership cleanup and rollback applicability; local commit source/tests then checkpoint evidence.
++  Expected: no migration or product runtime changes, existing evidence untouched, clean reviewable commits; independent review/human UAT/live gates stay open.
+diff --git a/tests/e2e-fixture-cleanup.test.mjs b/tests/e2e-fixture-cleanup.test.mjs
+index 7f1eb72..f8ee41c 100644
+--- a/tests/e2e-fixture-cleanup.test.mjs
++++ b/tests/e2e-fixture-cleanup.test.mjs
+@@ -1,15 +1,138 @@
+ import {test} from 'node:test';
+ import assert from 'node:assert/strict';
+ import {readdir,readFile} from 'node:fs/promises';
++import {mkdtempSync,writeFileSync,mkdirSync,existsSync,rmSync} from 'node:fs';
++import {spawnSync} from 'node:child_process';
++import {randomBytes} from 'node:crypto';
++import {tmpdir} from 'node:os';
++import {join,resolve,relative,isAbsolute} from 'node:path';
++import {fileURLToPath,pathToFileURL} from 'node:url';
+ 
+-const configs=(await readdir(new URL('../',import.meta.url)))
++const root=fileURLToPath(new URL('../',import.meta.url));
++const owner=randomBytes(12).toString('hex');
++const label='buyeros.cleanup-test.owner';
++const image='node:22.23.2-bookworm-slim';
++const configs=(await readdir(root))
+   .filter(name=>/^playwright(?:\.[a-z-]+)?\.config\.ts$/.test(name));
+ 
+-test('every Playwright config that starts the disposable API fixture runs its container teardown',async()=>{
+-  const missing=[];
++function docker(args){
++  const result=spawnSync('docker',args,{encoding:'utf8',timeout:30_000});
++  assert.equal(result.status,0,`docker ${args[0]}: ${result.stderr}`);
++  return result.stdout.trim();
++}
++function inspect(name){
++  const result=spawnSync('docker',['inspect',name],{encoding:'utf8',timeout:30_000});
++  if(result.status===0)return JSON.parse(result.stdout)[0];
++  assert.match(result.stderr,/no such (object|container)/i,result.stderr);
++  return null;
++}
++function sentinel(name,extraLabels=[]){
++  docker(['run','-d','--name',name,'--label',`${label}=${owner}`, ...extraLabels,
++    '--network','none','--cpus','0.1','--memory','32m',image,'sleep','infinity']);
++  assert.equal(inspect(name).Config.Labels[label],owner);
++}
++function removeOwned(name){
++  const proof=inspect(name);
++  if(!proof)return;
++  assert.equal(proof.Config.Labels[label],owner,'refuse fallback cleanup of another run');
++  docker(['rm','-f',name]);
++}
++function temporaryDirectory(){
++  const path=mkdtempSync(join(tmpdir(),'buyeros-cleanup-gate-'));
++  mkdirSync(join(path,'test-results'));
++  return path;
++}
++function removeTemporary(path){
++  const inside=relative(tmpdir(),path);
++  assert.ok(!isAbsolute(inside)&&inside.startsWith('buyeros-cleanup-gate-')&&!inside.startsWith('..'));
++  rmSync(path,{recursive:true,force:true});
++}
++// Node's native TS loader reads the real configured teardown. The narrowly
++// scoped resolution hook supplies the extension for its existing TS import;
++// no teardown or Docker boundary is mocked.
++const invoke=`
++  import {registerHooks} from 'node:module';
++  import {pathToFileURL} from 'node:url';
++  const scope=pathToFileURL(process.argv[2]).href;
++  registerHooks({resolve(specifier,context,nextResolve){
++    try{return nextResolve(specifier,context);}catch(error){
++      if(error.code!=='ERR_MODULE_NOT_FOUND'||!specifier.startsWith('.')||!context.parentURL?.startsWith(scope))throw error;
++      return nextResolve(specifier+'.ts',context);
++    }
++  }});
++  const {default:cleanup}=await import(pathToFileURL(process.argv[1]).href);
++  await cleanup();
++`;
++function runTeardown(entry,cwd){
++  return spawnSync(process.execPath,['--input-type=module','-e',invoke,entry,join(root,'tests/e2e/')],
++    {cwd,encoding:'utf8',timeout:30_000});
++}
++async function teardownEntries(configName){
++  const {default:config}=await import(pathToFileURL(join(root,configName)).href);
++  const entries=Array.isArray(config.globalTeardown)?config.globalTeardown:[config.globalTeardown];
++  assert.ok(entries.length&&entries.every(entry=>typeof entry==='string'),'configured teardown is required');
++  return entries.map(entry=>resolve(root,entry));
++}
++
++test('every disposable-API Playwright configuration actually removes its owned container and marker',async t=>{
++  let checked=0;
+   for(const name of configs){
+-    const source=await readFile(new URL(`../${name}`,import.meta.url),'utf8');
+-    if(source.includes('serve_e2e_fixture.py')&&!/globalTeardown\s*:\s*[\'"]\.\/tests\/e2e\/teardown\.ts[\'"]/.test(source)) missing.push(name);
++    const source=await readFile(join(root,name),'utf8');
++    if(!source.includes('serve_e2e_fixture.py'))continue;
++    await t.test(name,async()=>{
++      const entries=await teardownEntries(name);
++      const cwd=temporaryDirectory(),container=`buyeros-test-${randomBytes(4).toString('hex')}`;
++      const marker=join(cwd,'test-results/e2e-db-container.txt');
++      try{
++        sentinel(container);
++        writeFileSync(marker,container+'\n');
++        for(const entry of entries){const result=runTeardown(entry,cwd);assert.equal(result.status,0,result.stderr);}
++        assert.equal(existsSync(marker),false,'database marker retained: teardown did not run');
++        assert.equal(inspect(container),null,'owned disposable container retained');
++      }finally{try{removeOwned(container);}finally{removeTemporary(cwd);}}
++    });
++    checked++;
+   }
+-  assert.deepEqual(missing,[]);
+-});
+\ No newline at end of file
++  assert.ok(checked>0,'no disposable-API configuration was verified');
++});
++
++test('configured audit teardown also removes its labelled UI sentinel and marker',async()=>{
++  const cwd=temporaryDirectory(),uiOwner=randomBytes(6).toString('hex');
++  const container=`buyeros-audit-ui-${uiOwner}`,marker=join(cwd,'test-results/audit-ui-container.json');
++  try{
++    sentinel(container,['--label',`buyeros.audit.owner=${uiOwner}`]);
++    writeFileSync(marker,JSON.stringify({name:container,owner:uiOwner}));
++    for(const entry of await teardownEntries('playwright.audit-fixes.config.ts')){
++      const result=runTeardown(entry,cwd);assert.equal(result.status,0,result.stderr);
++    }
++    assert.equal(existsSync(marker),false);
++    assert.equal(inspect(container),null);
++  }finally{try{removeOwned(container);}finally{removeTemporary(cwd);}}
++});
++
++test('configured audit teardown refuses a UI container whose owner label differs',async()=>{
++  const cwd=temporaryDirectory(),uiOwner=randomBytes(6).toString('hex');
++  const container=`buyeros-audit-ui-${uiOwner}`,marker=join(cwd,'test-results/audit-ui-container.json');
++  try{
++    sentinel(container,['--label','buyeros.audit.owner=another-owner']);
++    writeFileSync(marker,JSON.stringify({name:container,owner:uiOwner}));
++    const [entry]=await teardownEntries('playwright.audit-fixes.config.ts');
++    const result=runTeardown(entry,cwd);
++    assert.notEqual(result.status,0);
++    assert.match(result.stderr,/unowned UI fixture/);
++    assert.equal(existsSync(marker),true);
++    assert.equal(inspect(container).Config.Labels['buyeros.audit.owner'],'another-owner');
++  }finally{try{removeOwned(container);}finally{removeTemporary(cwd);}}
++});
++
++test('configured database teardown refuses an unrecognized marker without deleting it',async()=>{
++  const cwd=temporaryDirectory(),marker=join(cwd,'test-results/e2e-db-container.txt');
++  try{
++    writeFileSync(marker,'shared-production-database\n');
++    const [entry]=await teardownEntries('playwright.config.ts');
++    const result=runTeardown(entry,cwd);
++    assert.notEqual(result.status,0);
++    assert.match(result.stderr,/Refusing to clean an unrecognized E2E database container/);
++    assert.equal(existsSync(marker),true);
++  }finally{removeTemporary(cwd);}
++});

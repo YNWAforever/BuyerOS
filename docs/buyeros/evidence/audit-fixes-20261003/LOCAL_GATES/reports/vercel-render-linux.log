@@ -1,0 +1,28 @@
+TAP version 13
+# Subtest: the built Vercel function renders / without a workspace import failure
+ok 1 - the built Vercel function renders / without a workspace import failure
+  ---
+  duration_ms: 257.435441
+  type: 'test'
+  ...
+# Subtest: the built Vercel function renders /app without a workspace import failure
+ok 2 - the built Vercel function renders /app without a workspace import failure
+  ---
+  duration_ms: 22.818823
+  type: 'test'
+  ...
+# Subtest: the built Vercel function renders /auth/callback without a workspace import failure
+ok 3 - the built Vercel function renders /auth/callback without a workspace import failure
+  ---
+  duration_ms: 24.445262
+  type: 'test'
+  ...
+1..3
+# tests 3
+# suites 0
+# pass 3
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 449.838376

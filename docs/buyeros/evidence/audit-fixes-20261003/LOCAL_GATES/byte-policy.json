@@ -1,0 +1,16 @@
+{
+  "raw_whitespace_exit": 2,
+  "raw_producer_findings": 34,
+  "excluded_producer_files": [
+    "docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/first-build/vercel-build.log",
+    "docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/baseline-red.log",
+    "docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/build-run-retry.log",
+    "docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log",
+    "docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-mutation-red.log",
+    "docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/test-rollback.patch",
+    "docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/vercel-build.log",
+    "docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/review-cbb67dd..d7ab5b6.diff"
+  ],
+  "curated_whitespace_exit": 0,
+  "producer_bytes_unchanged": true
+}

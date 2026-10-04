@@ -1,0 +1,410 @@
+[
+  {
+    "name": "checked-in API types match the current OpenAPI contract",
+    "class": "test",
+    "time": "6.692047",
+    "status": "pass"
+  },
+  {
+    "name": "TypeScript approval fingerprint matches v2-exact-context-crlf",
+    "class": "test",
+    "time": "0.010398",
+    "status": "pass"
+  },
+  {
+    "name": "U05 request emits a scoped denial without changing its error or replaying",
+    "class": "test",
+    "time": "0.038908",
+    "status": "pass"
+  },
+  {
+    "name": "U05 requestContent emits a scoped denial without changing its error or replaying",
+    "class": "test",
+    "time": "0.001136",
+    "status": "pass"
+  },
+  {
+    "name": "U05 observer only requests membership checks for workspace-scoped 403/404",
+    "class": "test",
+    "time": "0.004071",
+    "status": "pass"
+  },
+  {
+    "name": "U05 an already aborted response cannot trigger a current access check",
+    "class": "test",
+    "time": "0.001587",
+    "status": "pass"
+  },
+  {
+    "name": "U13 actual callback render during initializing is status, never configuration alert",
+    "class": "test",
+    "time": "0.056456",
+    "status": "pass"
+  },
+  {
+    "name": "B02 confirmation is stable for row ordering but binds every material field",
+    "class": "test",
+    "time": "0.098502",
+    "status": "pass"
+  },
+  {
+    "name": "B02 snapshot confirmation binds snapshot identity and normalized exclusions",
+    "class": "test",
+    "time": "0.000326",
+    "status": "pass"
+  },
+  {
+    "name": "B03 frozen payload preserves confirmed rows and trimmed audit reason",
+    "class": "test",
+    "time": "0.002062",
+    "status": "pass"
+  },
+  {
+    "name": "B16 unknown assignment survives route remount and token renewal with the same key",
+    "class": "test",
+    "time": "0.001864",
+    "status": "pass"
+  },
+  {
+    "name": "B16 an unresolved assignment cannot be replaced with a materially different intent",
+    "class": "test",
+    "time": "0.000355",
+    "status": "pass"
+  },
+  {
+    "name": "B15 pending body is immutable and retry/token renewal uses same frozen body/key",
+    "class": "test",
+    "time": "0.053289",
+    "status": "pass"
+  },
+  {
+    "name": "B16 A-B-A keeps actor intent while stale response is cancelled; other actor/scope are independent",
+    "class": "test",
+    "time": "0.006292",
+    "status": "pass"
+  },
+  {
+    "name": "B15 execution binds exact manifest/version/digest and retains key on unknown acceptance",
+    "class": "test",
+    "time": "0.003353",
+    "status": "pass"
+  },
+  {
+    "name": "D03 Unicode code-point offsets retain emoji, CRLF, Chinese and unmodified text",
+    "class": "test",
+    "time": "0.001574",
+    "status": "pass"
+  },
+  {
+    "name": "D03 split code-point ranges reclassify both pieces without destroying text",
+    "class": "test",
+    "time": "0.001562",
+    "status": "pass"
+  },
+  {
+    "name": "D02 save has the required transition order",
+    "class": "test",
+    "time": "0.002087",
+    "status": "pass"
+  },
+  {
+    "name": "D02 discard has the required transition order",
+    "class": "test",
+    "time": "0.000389",
+    "status": "pass"
+  },
+  {
+    "name": "D02 cancel has the required transition order",
+    "class": "test",
+    "time": "0.000131",
+    "status": "pass"
+  },
+  {
+    "name": "D02 rejected save 412 cannot proceed",
+    "class": "test",
+    "time": "0.000885",
+    "status": "pass"
+  },
+  {
+    "name": "D02 rejected save 503 cannot proceed",
+    "class": "test",
+    "time": "0.000253",
+    "status": "pass"
+  },
+  {
+    "name": "D02 clean transition does not prompt or write",
+    "class": "test",
+    "time": "0.000246",
+    "status": "pass"
+  },
+  {
+    "name": "D02 asynchronous Save completes before proceeding",
+    "class": "test",
+    "time": "0.007022",
+    "status": "pass"
+  },
+  {
+    "name": "U15 project failed count and paged list preserve identical canonical filter",
+    "class": "test",
+    "time": "0.034332",
+    "status": "pass"
+  },
+  {
+    "name": "U15 explicit workspace omits project, deep link retains selected scope and status",
+    "class": "test",
+    "time": "0.000618",
+    "status": "pass"
+  },
+  {
+    "name": "U15 invalid URL status cannot introduce unsupported server filter; paging stays bounded",
+    "class": "test",
+    "time": "0.000448",
+    "status": "pass"
+  },
+  {
+    "name": "U06 generated member operation carries literal search and bounded page query",
+    "class": "test",
+    "time": "0.009676",
+    "status": "pass"
+  },
+  {
+    "name": "S06 generated eligible lookup and scope context reject foreign and A-B-A responses",
+    "class": "test",
+    "time": "0.011515",
+    "status": "pass"
+  },
+  {
+    "name": "Q09 latest101 uses only head1/tail1 generated reads, never downloads all history",
+    "class": "test",
+    "time": "0.006862",
+    "status": "pass"
+  },
+  {
+    "name": "Q09 empty and single ICP use one read; malformed/foreign pages fail closed",
+    "class": "test",
+    "time": "0.002365",
+    "status": "pass"
+  },
+  {
+    "name": "Q09 concurrent appended history is unavailable rather than a falsely latest profile",
+    "class": "test",
+    "time": "0.003895",
+    "status": "pass"
+  },
+  {
+    "name": "Q09 A-B-A rejects a late metadata response and token renewal alone keeps the context",
+    "class": "test",
+    "time": "0.001454",
+    "status": "pass"
+  },
+  {
+    "name": "B05 token renewal and route remount retain lost-response key; double start shares work",
+    "class": "test",
+    "time": "0.037012",
+    "status": "pass"
+  },
+  {
+    "name": "B06 full normalized payload and actor/scope define intent; generation and key order do not",
+    "class": "test",
+    "time": "0.011801",
+    "status": "pass"
+  },
+  {
+    "name": "B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent",
+    "class": "test",
+    "time": "0.006020",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.admin.config.ts",
+    "class": "test",
+    "time": "10.641952",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.approval.config.ts",
+    "class": "test",
+    "time": "5.190655",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.audit-fixes.config.ts",
+    "class": "test",
+    "time": "9.064823",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.bulk.config.ts",
+    "class": "test",
+    "time": "4.822083",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.buyer-management.config.ts",
+    "class": "test",
+    "time": "4.331962",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.buyer.config.ts",
+    "class": "test",
+    "time": "2.991359",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.config.ts",
+    "class": "test",
+    "time": "2.171349",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.confirm.config.ts",
+    "class": "test",
+    "time": "2.108958",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.contact-job.config.ts",
+    "class": "test",
+    "time": "1.766709",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.cors.config.ts",
+    "class": "test",
+    "time": "1.946600",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.draft.config.ts",
+    "class": "test",
+    "time": "2.320430",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.exports.config.ts",
+    "class": "test",
+    "time": "2.504618",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.ingestion.config.ts",
+    "class": "test",
+    "time": "2.484210",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.mvp-research.config.ts",
+    "class": "test",
+    "time": "2.985676",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.mvp.config.ts",
+    "class": "test",
+    "time": "2.473836",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.offer.config.ts",
+    "class": "test",
+    "time": "2.573665",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.policy.config.ts",
+    "class": "test",
+    "time": "5.633922",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.quote.config.ts",
+    "class": "test",
+    "time": "4.950055",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.run.config.ts",
+    "class": "test",
+    "time": "5.753268",
+    "status": "pass"
+  },
+  {
+    "name": "playwright.workbench.config.ts",
+    "class": "test",
+    "time": "5.306300",
+    "status": "pass"
+  },
+  {
+    "name": "configured audit teardown also removes its labelled UI sentinel and marker",
+    "class": "test",
+    "time": "5.991273",
+    "status": "pass"
+  },
+  {
+    "name": "configured audit teardown refuses a UI container whose owner label differs",
+    "class": "test",
+    "time": "5.460533",
+    "status": "pass"
+  },
+  {
+    "name": "configured database teardown refuses an unrecognized marker without deleting it",
+    "class": "test",
+    "time": "0.334194",
+    "status": "pass"
+  },
+  {
+    "name": "the built Vercel function renders / without a workspace import failure",
+    "class": "test",
+    "time": "0.510704",
+    "status": "pass"
+  },
+  {
+    "name": "the built Vercel function renders /app without a workspace import failure",
+    "class": "test",
+    "time": "0.025580",
+    "status": "pass"
+  },
+  {
+    "name": "the built Vercel function renders /auth/callback without a workspace import failure",
+    "class": "test",
+    "time": "0.019710",
+    "status": "pass"
+  },
+  {
+    "name": "Vercel exposes only the app and binds its API call to the internal API service",
+    "class": "test",
+    "time": "0.018688",
+    "status": "pass"
+  },
+  {
+    "name": "the app proxy forwards the bearer and original API path to the bound service",
+    "class": "test",
+    "time": "0.134265",
+    "status": "pass"
+  },
+  {
+    "name": "the app proxy fails closed when the binding is absent",
+    "class": "test",
+    "time": "0.004103",
+    "status": "pass"
+  },
+  {
+    "name": "the app proxy streams writes and preserves API conflicts without forwarding cookies",
+    "class": "test",
+    "time": "0.005598",
+    "status": "pass"
+  },
+  {
+    "name": "FastAPI redirects stay on the public app path",
+    "class": "test",
+    "time": "0.001885",
+    "status": "pass"
+  },
+  {
+    "name": "test_internal_headers_forward_only_on_allowlisted_paths",
+    "class": "test",
+    "time": "0.091152",
+    "status": "pass"
+  }
+]

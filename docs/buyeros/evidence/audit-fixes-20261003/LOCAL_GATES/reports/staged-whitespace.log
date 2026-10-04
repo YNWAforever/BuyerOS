@@ -1,0 +1,65 @@
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/first-build/vercel-build.log:292: trailing whitespace.
++[plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/first-build/vercel-build.log:399: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/baseline-red.log:38: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/baseline-red.log:43: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/build-run-retry.log:30: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:40: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:59: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:78: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:97: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:116: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:135: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:154: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:173: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:192: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:211: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:230: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:249: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:268: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:287: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:306: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:325: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:344: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:363: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:382: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:401: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-green.log:420: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-mutation-red.log:40: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/cleanup-mutation-red.log:42: trailing whitespace.
++  
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/test-rollback.patch:15: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/test-rollback.patch:23: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/vercel-build.log:292: trailing whitespace.
++[plugin builtin:vite-reporter] 
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/reports/vercel-build.log:391: new blank line at EOF.
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/review-cbb67dd..d7ab5b6.diff:52: trailing whitespace.
++ 
+docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/review-cbb67dd..d7ab5b6.diff:60: trailing whitespace.
++ 

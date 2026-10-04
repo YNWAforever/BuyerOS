@@ -1,0 +1,54 @@
+▶ every disposable-API Playwright configuration actually removes its owned container and marker
+  ✔ playwright.admin.config.ts (4666.7002ms)
+  ✔ playwright.approval.config.ts (3405.5749ms)
+  ✖ playwright.audit-fixes.config.ts (3025.1924ms)
+  ✔ playwright.bulk.config.ts (4032.4938ms)
+  ✔ playwright.buyer-management.config.ts (2164.4344ms)
+  ✔ playwright.buyer.config.ts (2095.0055ms)
+  ✔ playwright.config.ts (1818.8313ms)
+  ✔ playwright.confirm.config.ts (2723.0535ms)
+  ✔ playwright.contact-job.config.ts (1892.6012ms)
+  ✔ playwright.cors.config.ts (1646.3059ms)
+  ✔ playwright.draft.config.ts (2487.0947ms)
+  ✔ playwright.exports.config.ts (2755.2835ms)
+  ✔ playwright.ingestion.config.ts (2494.3906ms)
+  ✔ playwright.mvp-research.config.ts (2321.7436ms)
+  ✔ playwright.mvp.config.ts (3220.4034ms)
+  ✔ playwright.offer.config.ts (2903.0993ms)
+  ✔ playwright.policy.config.ts (3106.8789ms)
+  ✔ playwright.quote.config.ts (3571.3056ms)
+  ✔ playwright.run.config.ts (3130.4456ms)
+  ✔ playwright.workbench.config.ts (3096.3224ms)
+✖ every disposable-API Playwright configuration actually removes its owned container and marker (56620.046ms)
+✔ configured audit teardown also removes its labelled UI sentinel and marker (3226.682ms)
+✔ configured audit teardown refuses a UI container whose owner label differs (3039.2083ms)
+✔ configured database teardown refuses an unrecognized marker without deleting it (153.5322ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 22
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 63234.7076
+
+✖ failing tests:
+
+test at tests\e2e-fixture-cleanup.test.mjs:81:13
+✖ playwright.audit-fixes.config.ts (3025.1924ms)
+  AssertionError [ERR_ASSERTION]: database marker retained: teardown did not run
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:89:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:81:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

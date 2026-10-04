@@ -1,0 +1,16 @@
+{
+  "tasks_total": 25,
+  "other_task_objects_unchanged": 24,
+  "case_csv_unchanged": true,
+  "operation_ledger_unchanged": true,
+  "runtime_diff_empty": true,
+  "operation_ledgers": [
+    "docs/buyeros/remaining/API_OPERATION_STATUS.csv"
+  ],
+  "guard_hashes_verified": {
+    "services/api/tests/conftest.py": "7e12ffa4afc3b20694eac4f62d91c840a7c5e3651e4550ddc142497b88001e46",
+    "services/worker/tests/conftest.py": "493ca1b9fed272e081ae32f75cbd5faf78ae00edbb72ad674fe12be9ccb47980",
+    "services/api/tools/serve_e2e_fixture.py": "9fd9419d1ea5832e2cf64af3e4e600d48c1b80a822a101a492c06e74d78e2a6b",
+    "services/worker/tests/fixtures/run_browser_research.py": "b313473a3827155faae7b4e6b89160c0a092a8c762edeb344714cecc4dc657b4"
+  }
+}

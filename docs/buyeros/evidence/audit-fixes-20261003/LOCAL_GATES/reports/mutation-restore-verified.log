@@ -1,0 +1,1 @@
+{"mutation": "remove audit cleanupDatabase() invocation", "expected_failure": "database marker retained: teardown did not run", "exit": 1, "restored_sha256": "a171c47f238b08f763dca11e49711fc59b8e5cc771519921fa60029d28097d9a"}

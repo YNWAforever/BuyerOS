@@ -1,0 +1,11 @@
+✔ the built Vercel function renders / without a workspace import failure (162.6784ms)
+✔ the built Vercel function renders /app without a workspace import failure (10.7462ms)
+✔ the built Vercel function renders /auth/callback without a workspace import failure (15.7ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 658.5276
