@@ -1,0 +1,10 @@
+PASS scope snapshot stable until change and observer sees each generation
+PASS write context is captured and unauthenticated writes fail closed
+PASS OIDC return path rejects off-origin redirects
+PASS public auth config never accepts client secret or non-HTTPS issuer
+4 live auth checks passed
+PASS PKCE callback verifies state, nonce and signature, holds only access token in memory
+PASS callback rejects mismatched state and cannot replay transaction
+PASS callback rejects wrong nonce even with signed ID token
+PASS logout drops the token and uses an allowlisted origin return URL
+8 live auth checks passed including OIDC crypto

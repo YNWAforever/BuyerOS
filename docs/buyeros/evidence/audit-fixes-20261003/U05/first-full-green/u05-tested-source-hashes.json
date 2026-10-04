@@ -1,0 +1,8 @@
+{
+  "features/live/workspace-picker.tsx": "98fe8982b50c6a3d5ea90671333cd3d798e70dfecb6e73489595ed0a9d161750",
+  "services/live/client.ts": "ccc538aac928eebee6a1550b2f96fc5b8a2bf180f0fe07f14f46ce3f6c23c9f4",
+  "services/worker/tests/fixtures/audit_access_revocation.py": "f62b3200f95004e375b1dff7fd417270ed8f0acfbdf67c857850da48afca7c71",
+  "tests/e2e/audit-access-revocation.spec.ts": "a6e45999636de5dd03c5acba5f21cbd07c39f3add393c9c42f91acdc4fc89f28",
+  "tests/audit-access-denial.test.mjs": "afe793993f4a9b9a10c9313196c74be8dca8b629d722dda6eb93964abe474db4",
+  "docs/superpowers/plans/2026-10-04-buyeros-u05-revocation.md": "dc8bd36d7f4ddb974b51b050082e639e3091fe04f91ed88dc2f2d631ed93fae6"
+}

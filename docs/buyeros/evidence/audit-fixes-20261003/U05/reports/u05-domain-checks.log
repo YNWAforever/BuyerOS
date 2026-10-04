@@ -1,0 +1,12 @@
+PASS 24 distinct fictional companies, 14/6/4 fit distribution
+PASS Suppression, acceptance, suitability, policy and researched status block lookup independently
+PASS Lookup reserves budget, charges once, counts distinct companies
+PASS Expired, cancelled and newly suppressed quotes cannot charge
+PASS Budget reduction blocks outstanding quote
+PASS CSV escapes delimiters and formulas and marks demo records
+PASS Cancel retains partial results; retry finishes without duplicate events or cost
+PASS Failed stage retries deterministically with retained results
+PASS Unavailable provider returns a recoverable state and no candidates
+PASS Budget cap pauses before spend and target bounds are respected
+PASS live adapter explicitly rejects with structured error
+11 domain checks passed

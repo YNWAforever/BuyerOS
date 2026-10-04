@@ -1,0 +1,232 @@
+[
+  {
+    "source": "test-results/u05-api.log",
+    "destination": "reports/u05-api.log",
+    "sha256": "bdcaab4a7d64e36a43eb2208fa88395e424bca18fdbc49a91953e1d187da9455"
+  },
+  {
+    "source": "test-results/u05-api.xml",
+    "destination": "reports/u05-api.xml",
+    "sha256": "51d97c090e4216862ba6365860c3e5b31ecc28baf81b96f69511be2c02feae4a"
+  },
+  {
+    "source": "test-results/u05-built-runtime-proof.json",
+    "destination": "reports/u05-built-runtime-proof.json",
+    "sha256": "c4bb4817910012e9ba463b7fc938ae1a5dfa0f4313ecccc8dd8dbfa61ca72348"
+  },
+  {
+    "source": "test-results/u05-client-green.log",
+    "destination": "reports/u05-client-green.log",
+    "sha256": "60bf9ba7903dc8e9457d967fd90e4222102864331bd6518102c5266b0fa6792a"
+  },
+  {
+    "source": "test-results/u05-client-red.log",
+    "destination": "reports/u05-client-red.log",
+    "sha256": "7190e58482ced905c05535ace1338ed53232e4558a839e79389cc748b469b794"
+  },
+  {
+    "source": "test-results/u05-contract-types.log",
+    "destination": "reports/u05-contract-types.log",
+    "sha256": "4ad0a086f797ff95d7d5cf98dca236237e3c4fe1967ab5165ea7ef1ed64c18d8"
+  },
+  {
+    "source": "test-results/u05-domain-checks.log",
+    "destination": "reports/u05-domain-checks.log",
+    "sha256": "8026b7513778ef15e951ea5154455e6a2ab9cc20d4ef36539b92285cf8564252"
+  },
+  {
+    "source": "test-results/u05-final-test-list.log",
+    "destination": "reports/u05-final-test-list.log",
+    "sha256": "29cd5e181ee03e47a6f4d7bf7318febfb449a0726cc271fe5fafc927fa407860"
+  },
+  {
+    "source": "test-results/u05-heads.log",
+    "destination": "reports/u05-heads.log",
+    "sha256": "ee4f0b43bbf4117a8b56d619979ebbef0e2bf941fd97cca8813aa20e6c29c00e"
+  },
+  {
+    "source": "test-results/u05-job-poller-checks.log",
+    "destination": "reports/u05-job-poller-checks.log",
+    "sha256": "7aafd90df2d5aa9838f01a2091605c36c284f9f9351a0a1c8ded3923050e9937"
+  },
+  {
+    "source": "test-results/u05-lint-final.log",
+    "destination": "reports/u05-lint-final.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/u05-lint.log",
+    "destination": "reports/u05-lint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/u05-live-adapter-checks.log",
+    "destination": "reports/u05-live-adapter-checks.log",
+    "sha256": "4d75094611a17c8fb42948f73da0b77eb31d108c6e99b7b7eec2f997541f1bc0"
+  },
+  {
+    "source": "test-results/u05-live-auth-checks.log",
+    "destination": "reports/u05-live-auth-checks.log",
+    "sha256": "04d0e5bb240b2381a9616f0489af45b641e787bb5ca13256e2cfab2efae4cc1b"
+  },
+  {
+    "source": "test-results/u05-live-runs-checks.log",
+    "destination": "reports/u05-live-runs-checks.log",
+    "sha256": "14730cf8b3a50608d87c20fd9a3d52a6bfab8579d356e82093bcadac3107656e"
+  },
+  {
+    "source": "test-results/u05-native-gate.ps1",
+    "destination": "reports/u05-native-gate.ps1",
+    "sha256": "1f27aabc3db0a0f21df19dfe8f9f7708abc3bd789c460122fb1f9a3c3760fe1f"
+  },
+  {
+    "source": "test-results/u05-node-baseline-failures.log",
+    "destination": "reports/u05-node-baseline-failures.log",
+    "sha256": "0278b9bce7fe0ce8e5d568ff47df4a2f3cbec72dd245a40fd3c2f7f74341ce07"
+  },
+  {
+    "source": "test-results/u05-node-suite.log",
+    "destination": "reports/u05-node-suite.log",
+    "sha256": "286ff7a2edd57dc87a356ab90dbe81a3655fdf9d6eed5919c84b1495d90197ed"
+  },
+  {
+    "source": "test-results/u05-operation-routes.log",
+    "destination": "reports/u05-operation-routes.log",
+    "sha256": "563c818fa90932775948dbae3d9075f1f5559b5844278315540ad94b1c2b0251"
+  },
+  {
+    "source": "test-results/u05-preserved-archives.json",
+    "destination": "reports/u05-preserved-archives.json",
+    "sha256": "8beaec9ce8eb68b7ec0a2e3551bd86dd911c70a5597557305afe8782e8153fa1"
+  },
+  {
+    "source": "test-results/u05-related-node-final.log",
+    "destination": "reports/u05-related-node-final.log",
+    "sha256": "39951bbef4c7a362f282832211aeee32baef3544897f5a177d2b6b9ebdaec212"
+  },
+  {
+    "source": "test-results/u05-review-red.json",
+    "destination": "reports/u05-review-red.json",
+    "sha256": "e8498b0dd3f5d2bccfbdbcea4f9b7279cc3e0341209ca95e0986716b68902504"
+  },
+  {
+    "source": "test-results/u05-review-red.log",
+    "destination": "reports/u05-review-red.log",
+    "sha256": "113e91fb647b270afb0e8f5b5cdf49ab0500f534b957da4c1ca6ec9093a45170"
+  },
+  {
+    "source": "test-results/u05-review-red.xml",
+    "destination": "reports/u05-review-red.xml",
+    "sha256": "be36404daed79dadb87d2b80507fa3280483eeacdc9a09ab44e8af5cdc87f7f6"
+  },
+  {
+    "source": "test-results/u05-revoked-en.png",
+    "destination": "reports/u05-revoked-en.png",
+    "sha256": "d79ec9d7548eed2e50df210db75fa1ab81ba4d3ee0e8a7ca1831dbb73b49198e"
+  },
+  {
+    "source": "test-results/u05-revoked-zh-HK.png",
+    "destination": "reports/u05-revoked-zh-HK.png",
+    "sha256": "d45a458b85fd7ea26583862b4e7816ef7aee27dbec05f62e51b0b1cc53216fdb"
+  },
+  {
+    "source": "test-results/u05-rollback-check.log",
+    "destination": "reports/u05-rollback-check.log",
+    "sha256": "feafb7f0da7b345618b4baea8a9c55c7b95a198857ae97411f4e468a70d156f3"
+  },
+  {
+    "source": "test-results/u05-source-rollback.patch",
+    "destination": "reports/u05-source-rollback.patch",
+    "sha256": "ca76f6ab0849a36f0f98b33dee69ba0a0e4fa855d2f727127093bac787d33ef8"
+  },
+  {
+    "source": "test-results/u05-task-done-final.log",
+    "destination": "reports/u05-task-done-final.log",
+    "sha256": "57e0a71206342729a11b1f2522cad67d5f9bb10af383873e9cfca3558bdc9e41"
+  },
+  {
+    "source": "test-results/u05-task-done.log",
+    "destination": "reports/u05-task-done.log",
+    "sha256": "89b1f202ec680d415cbedc90a19b043fab55bcddc3aea0bebc2f3924cc32410b"
+  },
+  {
+    "source": "test-results/u05-tested-source-hashes.json",
+    "destination": "reports/u05-tested-source-hashes.json",
+    "sha256": "01446dc8aa204b080efcc2a3c3999d72c7d1c8de108a32c0b87e9d12113d42c2"
+  },
+  {
+    "source": "test-results/u05-types-final.log",
+    "destination": "reports/u05-types-final.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/u05-types.log",
+    "destination": "reports/u05-types.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "test-results/u05-ui-final.json",
+    "destination": "reports/u05-ui-final.json",
+    "sha256": "97115c64d7188d3168dd3ebf5f294f8a14e0576dc0bd3f661468d909d6b220c4"
+  },
+  {
+    "source": "test-results/u05-ui-final.xml",
+    "destination": "reports/u05-ui-final.xml",
+    "sha256": "2b9e696a6aaa6f8518bfc6f334176f24c7d0142be3acba5a67e346bbe1a29564"
+  },
+  {
+    "source": "test-results/u05-ui-green1.json",
+    "destination": "reports/u05-ui-green1.json",
+    "sha256": "6014a7de69c47283ff79d9b4b0362227bf57ca29950da671a7878414c4291cde"
+  },
+  {
+    "source": "test-results/u05-ui-green1.log",
+    "destination": "reports/u05-ui-green1.log",
+    "sha256": "a1c1fe928aab85d41b9f653fbba58970aa18f18f6b53d79ad0803ce85a8d75d3"
+  },
+  {
+    "source": "test-results/u05-ui-green1.xml",
+    "destination": "reports/u05-ui-green1.xml",
+    "sha256": "7d232236814b27095f442ac094225638bdc666e0fb0b211125e3f919a7d1de6a"
+  },
+  {
+    "source": "test-results/u05-ui-red-behavior.log",
+    "destination": "reports/u05-ui-red-behavior.log",
+    "sha256": "a1979635514889654f2af432ecf3204e292344e568198b8781aeb5f10951d255"
+  },
+  {
+    "source": "test-results/u05-ui-red-built.log",
+    "destination": "reports/u05-ui-red-built.log",
+    "sha256": "05e2107d4403674e6de2e3403d0f7255788e3c91a00f979aeb9f1ed129e48f2a"
+  },
+  {
+    "source": "test-results/u05-ui-red.log",
+    "destination": "reports/u05-ui-red.log",
+    "sha256": "536b8480ee62600ca7a4736c85812e813603e0e137ddc67560e324c58809ddf9"
+  },
+  {
+    "source": ".superpowers/sdd/2026-10-04-buyeros-u05-revocation/progress.md",
+    "destination": "progress.md",
+    "sha256": "68fe256260b110868d4dfc0ecaec25fcb2385aaee3e22019cbee7e04bb883236"
+  },
+  {
+    "source": ".superpowers/sdd/2026-10-04-buyeros-u05-revocation/task-1-brief.md",
+    "destination": "task-1-brief.md",
+    "sha256": "595f139e9a403cc4902ec12911d69b2bd72b0cec730b39030cb39e01583be8c1"
+  },
+  {
+    "source": ".superpowers/sdd/2026-10-04-buyeros-u05-revocation/task-1-tests.log",
+    "destination": "task-1-tests.log",
+    "sha256": "650cf65b29400d35f02c0ac76edc1ecd1a681df558794a62698637b3c9125b80"
+  },
+  {
+    "source": ".superpowers/sdd/2026-10-04-buyeros-u05-revocation/review-e8e478c..540696b.diff",
+    "destination": "review-e8e478c..540696b.diff",
+    "sha256": "da00d72174423266ab7e82d8686d6ed4dc8565d6667baed6a0827ac19243c5f1"
+  },
+  {
+    "source": ".superpowers/sdd/2026-10-04-buyeros-u05-revocation/review-e8e478c..25694d3.diff",
+    "destination": "review-e8e478c..25694d3.diff",
+    "sha256": "e6fa9650910cd7f5f3bc356ee08c794a903ff8827f7bd502d6bbcdd39ebe5ffa"
+  }
+]

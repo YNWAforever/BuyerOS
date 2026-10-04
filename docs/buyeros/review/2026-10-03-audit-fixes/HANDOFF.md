@@ -167,7 +167,7 @@ StrictAPI21/Node34/freshaffectedUI17/demo21 pass0fail/error/skip,types/lint/cont
 | F01 | Q01 recovery verified; actual account/workspace journey U01/U04/S01 open |
 | F02 | Q01/U03 local verified |
 | F03 | Q02/U06 directory250 real paged/search local verified |
-| F04 | Q02/Q09 role/last-admin/duplicate-name/negative-role local verified; U05 existing-page membership revocation/recheck race open |
+| F04 | Q02/Q09 role/last-admin/duplicate-name/negative-role and U05 existing-page withdrawal/recheck races locally verified; live/independent gates open |
 | F05 | Q03 21/101 generated job/result20-row pages/scope local verified |
 | F06 | Q05/Q06/Q08 confirmation/owner/unknown/recovery/manifests locally verified; B08/B09 variants/live gates separately open |
 | F07 | Q06 contact/draft durable recovery local verified; liveprovider gates open |
@@ -194,3 +194,7 @@ All21 F-ID rows use current tracker/source evidence; “local verified” does n
 Test/config source f70501a174c641db65d06929ebd3b7e8b52ee3bb, base 86014b03f2a7db48c90ecd1c52800b528679a220; application1953d615 unchanged. Final whole12 (8keyboard+4pointer) pass/0fail/error/skip,568.761243s;14raw JSON proofs/460visible-focus native actions/zero trusted pointer events. Actual101unique20-row result pages/exactfailed-only retry and24scoped jobs/member-version SQL verified. All5tasks en1280/zh390; tasks1/2/4 additionally en390/zh1280. Prior failures and831.079598s green12 retained. No five-task200% or human acceptance claim.
 
 U11real screen-reader/U12staff metricsNULL and independent review open; U05revocation/P09/P10SQL-RLS/Q16underlyingcause remainopen.0schema/API/auth/provider/Cloudflare/production changes; sourcehead0037/deployedNULL; test-source reverse applicability0, runtime rollback not rehearsed.31inputs/98historicalfields/94othercases/24other tasks/all84operations/4guards/rootclean/unrelated193paths preserved. [Commands/reports/screenshots/rollback](../../evidence/audit-fixes-20261003/Q09/KEYBOARD/RESULTS.md). No further independent local task eligible in current scope.
+
+## U05 / Q02 follow-up — 2026-10-04
+
+Source `25694d3b938e704e883f9915cf0604bbdbac1daf`,base`e8e478c9e5a5812d43169759d39ddea1d5529098`;10new cases+26related UI=36pass, strictAPI38/Node17 pass0fail/error/skip; prior9/35 greens and2meaningful UI REDs retained. Denial during an in-flight directory check gets one queued current-context recheck. Real404 withdrawal clears scope/URL/private UI; role403 preserves dirty Unicode draft; no writes replayed or memberships restored by app. Whole-root Node42pass/2 inherited/environment failures remain; no complete branch-green/live claim. Author review one Important fix pass; independent/human gates open.0migration/head0037,84source operations preserved,deployedNULL. [Evidence/rollback](../../evidence/audit-fixes-20261003/U05/RESULTS.md),[local PR boundary](U05-pr.md). No further selected local task eligible; Q16/N00/performance/human gates separate.

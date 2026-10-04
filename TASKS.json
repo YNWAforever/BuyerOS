@@ -82,7 +82,19 @@
         "Q01"
       ],
       "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q02/RESULTS.md",
-      "next_eligible": "Q05"
+      "next_eligible": "Q05",
+      "u05_followup": {
+        "case_id": "U05",
+        "status": "integration-fixture-verified",
+        "code_status": "implemented",
+        "verification_status": "36 UI/38 strict API/17 related Node pass; 0 fail/error/skip; whole-root Node2 inherited/environment failures remain",
+        "release_status": "not-deployed",
+        "base_sha": "e8e478c9e5a5812d43169759d39ddea1d5529098",
+        "source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/U05/RESULTS.md",
+        "migrations": "none; head0037_bulk_manifests",
+        "next_eligible": null
+      }
     },
     {
       "id": "Q03",
@@ -549,6 +561,9 @@
     "Q16 underlying evidence when available",
     "N00 separate auth compatibility scope"
   ],
-  "reviewed_source_sha": "f70501a174c641db65d06929ebd3b7e8b52ee3bb",
-  "deployed_sha": null
+  "reviewed_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+  "deployed_sha": null,
+  "selected_followups": [
+    "U05"
+  ]
 }

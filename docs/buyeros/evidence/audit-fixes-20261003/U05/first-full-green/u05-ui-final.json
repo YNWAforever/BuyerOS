@@ -1,0 +1,1335 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config",
+      "playwright.audit-fixes.config.ts",
+      "audit-access-revocation.spec.ts",
+      "audit-auth-entry.spec.ts",
+      "audit-memberships.spec.ts",
+      "audit-draft-dirty.spec.ts",
+      "--reporter=list,json,junit"
+    ],
+    "configFile": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\playwright.audit-fixes.config.ts",
+    "rootDir": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\tests\\e2e\\audit-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/test-results/audit-fixes",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "audit-*.spec.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ],
+      [
+        "junit"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "audit-access-revocation.spec.ts",
+      "file": "audit-access-revocation.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "U05 revoked open-page read clears private scope en",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 35803,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:28:13.098Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "U05 revoked read en",
+                      "contentType": "application/json",
+                      "body": "ewogICJiZWZvcmUiOiB7CiAgICAiZml4dHVyZV9vbmx5IjogdHJ1ZSwKICAgICJhY3RpdmUiOiB0cnVlLAogICAgInJvbGVzIjogWwogICAgICAib3BlcmF0b3IiCiAgICBdLAogICAgInZlcnNpb24iOiAxLAogICAgInVzZXJzIjogNCwKICAgICJtZW1iZXJzaGlwcyI6IDUsCiAgICAiYXVkaXRfcm93cyI6IDEKICB9LAogICJjaGFuZ2VkIjogewogICAgImlkIjogImUwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMyIsCiAgICAid29ya3NwYWNlX2lkIjogImUwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsCiAgICAidXNlcl9pZCI6ICJlMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLAogICAgImRpc3BsYXlfbmFtZSI6ICJlMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLAogICAgInJvbGVzIjogWwogICAgICAib3BlcmF0b3IiCiAgICBdLAogICAgImFjdGl2ZSI6IGZhbHNlLAogICAgInZlcnNpb24iOiAyCiAgfSwKICAic3RhdHVzZXMiOiB7CiAgICAicmVhZCI6IDQwNCwKICAgICJ3cml0ZSI6IDQwNAogIH0sCiAgImFmdGVyIjogewogICAgImZpeHR1cmVfb25seSI6IHRydWUsCiAgICAiYWN0aXZlIjogZmFsc2UsCiAgICAicm9sZXMiOiBbCiAgICAgICJvcGVyYXRvciIKICAgIF0sCiAgICAidmVyc2lvbiI6IDIsCiAgICAidXNlcnMiOiA0LAogICAgIm1lbWJlcnNoaXBzIjogNSwKICAgICJhdWRpdF9yb3dzIjogMgogIH0KfQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-99fda38ae9d15e8871fa",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 33,
+          "column": 45
+        },
+        {
+          "title": "U05 revoked open-page read clears private scope zh-HK",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17316,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:28:50.663Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "U05 revoked read zh-HK",
+                      "contentType": "application/json",
+                      "body": "ewogICJiZWZvcmUiOiB7CiAgICAiZml4dHVyZV9vbmx5IjogdHJ1ZSwKICAgICJhY3RpdmUiOiB0cnVlLAogICAgInJvbGVzIjogWwogICAgICAib3BlcmF0b3IiCiAgICBdLAogICAgInZlcnNpb24iOiAxLAogICAgInVzZXJzIjogNCwKICAgICJtZW1iZXJzaGlwcyI6IDUsCiAgICAiYXVkaXRfcm93cyI6IDQKICB9LAogICJjaGFuZ2VkIjogewogICAgImlkIjogImUwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMyIsCiAgICAid29ya3NwYWNlX2lkIjogImUwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsCiAgICAidXNlcl9pZCI6ICJlMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLAogICAgImRpc3BsYXlfbmFtZSI6ICJlMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLAogICAgInJvbGVzIjogWwogICAgICAib3BlcmF0b3IiCiAgICBdLAogICAgImFjdGl2ZSI6IGZhbHNlLAogICAgInZlcnNpb24iOiAyCiAgfSwKICAic3RhdHVzZXMiOiB7CiAgICAicmVhZCI6IDQwNCwKICAgICJ3cml0ZSI6IDQwNAogIH0sCiAgImFmdGVyIjogewogICAgImZpeHR1cmVfb25seSI6IHRydWUsCiAgICAiYWN0aXZlIjogZmFsc2UsCiAgICAicm9sZXMiOiBbCiAgICAgICJvcGVyYXRvciIKICAgIF0sCiAgICAidmVyc2lvbiI6IDIsCiAgICAidXNlcnMiOiA0LAogICAgIm1lbWJlcnNoaXBzIjogNSwKICAgICJhdWRpdF9yb3dzIjogNQogIH0KfQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-38f21e2da11fc510f1ff",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 33,
+          "column": 45
+        },
+        {
+          "title": "U05 explicit recheck cancels held pre-withdrawal buyer rows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10801,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:29:07.998Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "U05 held rows",
+                      "contentType": "application/json",
+                      "body": "ewogICJhY3RpdmUiOiBmYWxzZSwKICAib2xkX3Jlc3BvbnNlX3N0YXR1cyI6IDIwMCwKICAic2NvcGVfY2xlYXJlZCI6IHRydWUKfQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-e735b59522c9369b1d65",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 48,
+          "column": 1
+        },
+        {
+          "title": "U05 older access check cannot restore withdrawn A after another recheck",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8598,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:29:18.812Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-a6bc907a35f3b76998b1",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 60,
+          "column": 1
+        },
+        {
+          "title": "U05 delayed A access result cannot clear current B",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6627,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:29:27.427Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-912b3490af7e02573d3f",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 70,
+          "column": 1
+        },
+        {
+          "title": "U05 forbidden save rechecks downgraded role while retaining dirty Unicode draft",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8547,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:29:34.070Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "U05 denied write unchanged",
+                      "contentType": "application/json",
+                      "body": "ewogICJtZW1iZXJzaGlwIjogewogICAgImZpeHR1cmVfb25seSI6IHRydWUsCiAgICAiYWN0aXZlIjogdHJ1ZSwKICAgICJyb2xlcyI6IFsKICAgICAgInZpZXdlciIKICAgIF0sCiAgICAidmVyc2lvbiI6IDIsCiAgICAidXNlcnMiOiA0LAogICAgIm1lbWJlcnNoaXBzIjogNSwKICAgICJhdWRpdF9yb3dzIjogMTEKICB9LAogICJzdG9yZWQiOiB7CiAgICAiaWQiOiAiZTJkZmMzY2UtMWQ3Ni00OGUzLWIyZDctNWFhNGRiNGU3ODliIiwKICAgICJ3b3Jrc3BhY2VfaWQiOiAiZTAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwKICAgICJ2ZXJzaW9uIjogMSwKICAgICJjcmVhdGVkX2F0IjogIjIwMjYtMTAtMDRUMDI6Mjk6MzguNzYxNjY2KzAwOjAwIiwKICAgICJ1cGRhdGVkX2F0IjogIjIwMjYtMTAtMDRUMDI6Mjk6MzguNzYxNjY2KzAwOjAwIiwKICAgICJkYXRhX21vZGUiOiAibGl2ZSIsCiAgICAicHJvamVjdF9pZCI6ICJlMTAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiLAogICAgImJ1eWVyX2lkIjogImUyMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsCiAgICAic3RhdHVzIjogImRyYWZ0IiwKICAgICJyZXZpc2lvbl9pZCI6ICIwOGZmYmQ3Ny00MDgyLTQyZWItOGU2Ny1jZGQzZTEzMzMzMGYiLAogICAgInJldmlzaW9uX251bWJlciI6IDEsCiAgICAiY29udGVudF9oYXNoIjogIjkwN2VmYmVhYTlhNTlkNzJjNWMxMDczM2VmZDA2MjVmNGI0ZmVhZDg2ZmRjZTFmNzYxMTRlODAxMmI4NTEwMmYiLAogICAgImNvbnRleHRfaGFzaCI6ICJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiIiwKICAgICJpY3BfdmVyc2lvbl9pZCI6ICJlNjAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiLAogICAgImV2aWRlbmNlX3NldF9oYXNoIjogImNjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2MiLAogICAgInBvbGljeV9kZWNpc2lvbl9pZHMiOiBbCiAgICAgICJlZDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiCiAgICBdLAogICAgImtpbmQiOiAiaW5pdGlhbCIsCiAgICAic3ViamVjdCI6ICJBdWRpdCBmaXh0dXJlIDEgZTJkZmMzY2UiLAogICAgImJvZHkiOiAiRmljdGlvbmFsIGRyYWZ0IDEgY29udGVudCIsCiAgICAibGFuZ3VhZ2UiOiAiZW4iLAogICAgImV2aWRlbmNlX3JlZnMiOiBbCiAgICAgIHsKICAgICAgICAiaWQiOiAiZTUwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwKICAgICAgICAidmVyc2lvbiI6IDEKICAgICAgfQogICAgXSwKICAgICJjbGFpbXMiOiBbCiAgICAgIHsKICAgICAgICAia2luZCI6ICJvZmZlcl9mYWN0IiwKICAgICAgICAidGV4dCI6ICJGaWN0aW9uYWwgaW5kdXN0cmlhbCBzZW5zb3JzIiwKICAgICAgICAiZXZpZGVuY2VfaWRzIjogW10sCiAgICAgICAgIm9mZmVyX2ZhY3RfaWRzIjogWwogICAgICAgICAgImViMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIKICAgICAgICBdCiAgICAgIH0KICAgIF0sCiAgICAiYXBwcm92YWxfaWQiOiBudWxsLAogICAgImRlbGl2ZXJ5X2VuYWJsZWQiOiBmYWxzZSwKICAgICJ2YWx1ZV9wcm9wb3NpdGlvbl9mYWN0X2lkcyI6IFsKICAgICAgImViMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIKICAgIF0sCiAgICAib2JqZWN0aXZlIjogIkludHJvZHVjZSB0aGUgYXBwcm92ZWQgb2ZmZXIiLAogICAgInRvbmUiOiAicHJvZmVzc2lvbmFsIiwKICAgICJzZW5kZXJfaWRlbnRpdHlfdmVyc2lvbiI6ICJzZW5kZXI6ZWEwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxOjEiLAogICAgInJlY2lwaWVudF9jb250YWN0X2lkIjogbnVsbAogIH0KfQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-d273585006130d321cae",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 83,
+          "column": 1
+        },
+        {
+          "title": "U05 revoked save is denied without creating a revision or replaying",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14997,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:29:42.629Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "U05 revoked write unchanged",
+                      "contentType": "application/json",
+                      "body": "ewogICJtZW1iZXJzaGlwIjogewogICAgImZpeHR1cmVfb25seSI6IHRydWUsCiAgICAiYWN0aXZlIjogZmFsc2UsCiAgICAicm9sZXMiOiBbCiAgICAgICJvcGVyYXRvciIKICAgIF0sCiAgICAidmVyc2lvbiI6IDIsCiAgICAidXNlcnMiOiA0LAogICAgIm1lbWJlcnNoaXBzIjogNSwKICAgICJhdWRpdF9yb3dzIjogMTIKICB9LAogICJzdG9yZWQiOiB7CiAgICAiaWQiOiAiNDMwNjkzMWQtNDQyYi00MTFkLTk5YmEtYjg0ZDdmNzQ0MjlhIiwKICAgICJ3b3Jrc3BhY2VfaWQiOiAiZTAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwKICAgICJ2ZXJzaW9uIjogMSwKICAgICJjcmVhdGVkX2F0IjogIjIwMjYtMTAtMDRUMDI6Mjk6NTAuMDIxNDcyKzAwOjAwIiwKICAgICJ1cGRhdGVkX2F0IjogIjIwMjYtMTAtMDRUMDI6Mjk6NTAuMDIxNDcyKzAwOjAwIiwKICAgICJkYXRhX21vZGUiOiAibGl2ZSIsCiAgICAicHJvamVjdF9pZCI6ICJlMTAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiLAogICAgImJ1eWVyX2lkIjogImUyMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsCiAgICAic3RhdHVzIjogImRyYWZ0IiwKICAgICJyZXZpc2lvbl9pZCI6ICI5ZmY2YTIwZC1jNGY1LTQ3YzMtOTJkNy03ZDg3M2MxMDVmNjIiLAogICAgInJldmlzaW9uX251bWJlciI6IDEsCiAgICAiY29udGVudF9oYXNoIjogIjJhNzllMDExODAwNzZkYzY5NWEzMWEwMTdhOWEwOTY3MTg4NmQxYjA2ZDlkZTI2ZmNiNDVlMDk2MjNlOTRhNzciLAogICAgImNvbnRleHRfaGFzaCI6ICJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiIiwKICAgICJpY3BfdmVyc2lvbl9pZCI6ICJlNjAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiLAogICAgImV2aWRlbmNlX3NldF9oYXNoIjogImNjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2MiLAogICAgInBvbGljeV9kZWNpc2lvbl9pZHMiOiBbCiAgICAgICJlZDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiCiAgICBdLAogICAgImtpbmQiOiAiaW5pdGlhbCIsCiAgICAic3ViamVjdCI6ICJBdWRpdCBmaXh0dXJlIDEgNDMwNjkzMWQiLAogICAgImJvZHkiOiAiRmljdGlvbmFsIGRyYWZ0IDEgY29udGVudCIsCiAgICAibGFuZ3VhZ2UiOiAiZW4iLAogICAgImV2aWRlbmNlX3JlZnMiOiBbCiAgICAgIHsKICAgICAgICAiaWQiOiAiZTUwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwKICAgICAgICAidmVyc2lvbiI6IDEKICAgICAgfQogICAgXSwKICAgICJjbGFpbXMiOiBbCiAgICAgIHsKICAgICAgICAia2luZCI6ICJvZmZlcl9mYWN0IiwKICAgICAgICAidGV4dCI6ICJGaWN0aW9uYWwgaW5kdXN0cmlhbCBzZW5zb3JzIiwKICAgICAgICAiZXZpZGVuY2VfaWRzIjogW10sCiAgICAgICAgIm9mZmVyX2ZhY3RfaWRzIjogWwogICAgICAgICAgImViMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIKICAgICAgICBdCiAgICAgIH0KICAgIF0sCiAgICAiYXBwcm92YWxfaWQiOiBudWxsLAogICAgImRlbGl2ZXJ5X2VuYWJsZWQiOiBmYWxzZSwKICAgICJ2YWx1ZV9wcm9wb3NpdGlvbl9mYWN0X2lkcyI6IFsKICAgICAgImViMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIKICAgIF0sCiAgICAib2JqZWN0aXZlIjogIkludHJvZHVjZSB0aGUgYXBwcm92ZWQgb2ZmZXIiLAogICAgInRvbmUiOiAicHJvZmVzc2lvbmFsIiwKICAgICJzZW5kZXJfaWRlbnRpdHlfdmVyc2lvbiI6ICJzZW5kZXI6ZWEwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxOjEiLAogICAgInJlY2lwaWVudF9jb250YWN0X2lkIjogbnVsbAogIH0KfQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-5b019bf13081462aa2a7",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 95,
+          "column": 1
+        },
+        {
+          "title": "U05 missing job does not revoke an active membership",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10528,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:29:57.641Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-50ff131091214c4a3781",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 107,
+          "column": 1
+        },
+        {
+          "title": "U05 failed access recheck preserves scope and supports explicit recovery",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9726,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:30:08.184Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-8665f19947fa4ca45f8a",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 116,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "audit-auth-entry.spec.ts",
+      "file": "audit-auth-entry.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "U13 initialization has no false configuration alert before hydration",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3052,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:30:17.942Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ac54419841370dbf356e-f74759b3d8c2e890fc71",
+          "file": "audit-auth-entry.spec.ts",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "U02 U03 no membership permits locale switching and read-only access retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4019,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:30:21.007Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ac54419841370dbf356e-39c7062ce3e32af3ef9c",
+          "file": "audit-auth-entry.spec.ts",
+          "line": 16,
+          "column": 1
+        },
+        {
+          "title": "U03 403 access errors retain locale and retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3180,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:30:25.040Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ac54419841370dbf356e-cd6fd7e4629c82f461e2",
+          "file": "audit-auth-entry.spec.ts",
+          "line": 36,
+          "column": 36
+        },
+        {
+          "title": "U03 404 access errors retain locale and retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3720,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:30:28.232Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ac54419841370dbf356e-02b9feb2a9978b225662",
+          "file": "audit-auth-entry.spec.ts",
+          "line": 36,
+          "column": 36
+        },
+        {
+          "title": "U03 500 access errors retain locale and retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3631,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:30:31.964Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ac54419841370dbf356e-9a1c796b306fb4f0125d",
+          "file": "audit-auth-entry.spec.ts",
+          "line": 36,
+          "column": 36
+        },
+        {
+          "title": "U03 manual locale choice survives a delayed member preference response",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3950,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:30:35.607Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ac54419841370dbf356e-02e56464935d55308dd1",
+          "file": "audit-auth-entry.spec.ts",
+          "line": 50,
+          "column": 1
+        },
+        {
+          "title": "U03 expired access returns to sign-in with the selected locale",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5505,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:30:39.570Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ac54419841370dbf356e-910fc64966aa3ebb0ab4",
+          "file": "audit-auth-entry.spec.ts",
+          "line": 62,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "audit-draft-dirty.spec.ts",
+      "file": "audit-draft-dirty.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9089,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:30:45.109Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b0050061394aca46e2f-86f9324e3612f5b3c73b",
+          "file": "audit-draft-dirty.spec.ts",
+          "line": 16,
+          "column": 66
+        },
+        {
+          "title": "D02 Open draft Cancel preserves all dirty fields; Discard is explicit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11982,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:30:54.212Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b0050061394aca46e2f-88fc79ab516eb5994c89",
+          "file": "audit-draft-dirty.spec.ts",
+          "line": 16,
+          "column": 66
+        },
+        {
+          "title": "D02 Refresh job Cancel preserves all dirty fields; Discard is explicit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12286,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:31:06.207Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b0050061394aca46e2f-819f12a7ed409ce53152",
+          "file": "audit-draft-dirty.spec.ts",
+          "line": 16,
+          "column": 66
+        },
+        {
+          "title": "D02 Save is awaited before opening another draft and persists one revision",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9876,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:31:18.506Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b0050061394aca46e2f-ad1ab7f7dd6a6536c0ae",
+          "file": "audit-draft-dirty.spec.ts",
+          "line": 24,
+          "column": 1
+        },
+        {
+          "title": "D02 failed Save 401 keeps buffer and dirty baseline",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10958,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:31:28.397Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b0050061394aca46e2f-58ba20d77f427e5d9f79",
+          "file": "audit-draft-dirty.spec.ts",
+          "line": 31,
+          "column": 35
+        },
+        {
+          "title": "D02 failed Save 412 keeps buffer and dirty baseline",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10326,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:31:39.367Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b0050061394aca46e2f-322b087c8450dc145cde",
+          "file": "audit-draft-dirty.spec.ts",
+          "line": 31,
+          "column": 35
+        },
+        {
+          "title": "D02 failed Save 503 keeps buffer and dirty baseline",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8356,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:31:49.719Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b0050061394aca46e2f-9e95807f5b0617fe3fd6",
+          "file": "audit-draft-dirty.spec.ts",
+          "line": 31,
+          "column": 35
+        },
+        {
+          "title": "D02 Refresh does not overwrite the unsaved buffer before a decision",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8904,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:31:58.087Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b0050061394aca46e2f-69f87037392987ea886d",
+          "file": "audit-draft-dirty.spec.ts",
+          "line": 40,
+          "column": 1
+        },
+        {
+          "title": "D02 delayed refresh cannot materialize a draft into a new project scope",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8356,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:32:07.004Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b0050061394aca46e2f-56345dc1c60f2d916026",
+          "file": "audit-draft-dirty.spec.ts",
+          "line": 50,
+          "column": 1
+        },
+        {
+          "title": "D02 zh-HK mobile dialog preserves content and keeps all choices visible",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7760,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:32:15.373Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b0050061394aca46e2f-3dd1eefd1740f7359409",
+          "file": "audit-draft-dirty.spec.ts",
+          "line": 57,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "audit-memberships.spec.ts",
+      "file": "audit-memberships.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "U06 all 250 real members are readable in 13 pages and member 101 is searchable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11030,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:32:23.184Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "088de306d044df633e3d-81d011a58398a845424f",
+          "file": "audit-memberships.spec.ts",
+          "line": 18,
+          "column": 1
+        },
+        {
+          "title": "U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7627,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:32:34.224Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "088de306d044df633e3d-90e3e1bd9649cd8d2d21",
+          "file": "audit-memberships.spec.ts",
+          "line": 35,
+          "column": 1
+        },
+        {
+          "title": "B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6825,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:32:41.865Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "088de306d044df633e3d-ea79f2eea8707b2c9bac",
+          "file": "audit-memberships.spec.ts",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "U07 duplicate names and suffixes remain distinct during a versioned role change",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13174,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:32:48.702Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "088de306d044df633e3d-bc2b5aaaff4f20862fe2",
+          "file": "audit-memberships.spec.ts",
+          "line": 60,
+          "column": 1
+        },
+        {
+          "title": "U08 sole admin refusal is understandable and does not claim success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7873,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:33:01.894Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "088de306d044df633e3d-0f45ebab9bb580bf998a",
+          "file": "audit-memberships.spec.ts",
+          "line": 74,
+          "column": 1
+        },
+        {
+          "title": "S06 viewer cannot read the admin directory or eligible assignees",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7777,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:33:09.785Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "088de306d044df633e3d-ecfb78b66514a1584c9f",
+          "file": "audit-memberships.spec.ts",
+          "line": 83,
+          "column": 1
+        },
+        {
+          "title": "U06 stale page response cannot restore old A-B-A directory",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6868,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:33:17.573Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "088de306d044df633e3d-a5144bae5eed17708768",
+          "file": "audit-memberships.spec.ts",
+          "line": 89,
+          "column": 1
+        },
+        {
+          "title": "U06 zh-HK mobile search and failed page read recover without synthetic rows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5368,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:33:24.453Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "088de306d044df633e3d-458ac4f5fc0ec28e95a9",
+          "file": "audit-memberships.spec.ts",
+          "line": 100,
+          "column": 1
+        },
+        {
+          "title": "U07 lost committed role response requires a read before any further role write",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7014,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:33:29.833Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "088de306d044df633e3d-2d9f746d7fc44e701404",
+          "file": "audit-memberships.spec.ts",
+          "line": 112,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-04T02:26:47.776Z",
+    "duration": 412281.307,
+    "expected": 35,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

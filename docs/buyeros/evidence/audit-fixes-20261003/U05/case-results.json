@@ -1,0 +1,290 @@
+[
+  {
+    "name": "U05 revoked open-page read clears private scope en",
+    "file": "audit-access-revocation.spec.ts",
+    "line": 33,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 11581
+  },
+  {
+    "name": "U05 revoked open-page read clears private scope zh-HK",
+    "file": "audit-access-revocation.spec.ts",
+    "line": 33,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 16485
+  },
+  {
+    "name": "U05 explicit recheck cancels held pre-withdrawal buyer rows",
+    "file": "audit-access-revocation.spec.ts",
+    "line": 48,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 10688
+  },
+  {
+    "name": "U05 older access check cannot restore withdrawn A after another recheck",
+    "file": "audit-access-revocation.spec.ts",
+    "line": 60,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 8650
+  },
+  {
+    "name": "U05 delayed A access result cannot clear current B",
+    "file": "audit-access-revocation.spec.ts",
+    "line": 70,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 10635
+  },
+  {
+    "name": "U05 denial during a held access check schedules a fresh membership read",
+    "file": "audit-access-revocation.spec.ts",
+    "line": 83,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 10011
+  },
+  {
+    "name": "U05 forbidden save rechecks downgraded role while retaining dirty Unicode draft",
+    "file": "audit-access-revocation.spec.ts",
+    "line": 97,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 10645
+  },
+  {
+    "name": "U05 revoked save is denied without creating a revision or replaying",
+    "file": "audit-access-revocation.spec.ts",
+    "line": 109,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 9392
+  },
+  {
+    "name": "U05 missing job does not revoke an active membership",
+    "file": "audit-access-revocation.spec.ts",
+    "line": 121,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 8735
+  },
+  {
+    "name": "U05 failed access recheck preserves scope and supports explicit recovery",
+    "file": "audit-access-revocation.spec.ts",
+    "line": 130,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 9667
+  },
+  {
+    "name": "U13 initialization has no false configuration alert before hydration",
+    "file": "audit-auth-entry.spec.ts",
+    "line": 7,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 2500
+  },
+  {
+    "name": "U02 U03 no membership permits locale switching and read-only access retry",
+    "file": "audit-auth-entry.spec.ts",
+    "line": 16,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 5803
+  },
+  {
+    "name": "U03 403 access errors retain locale and retry",
+    "file": "audit-auth-entry.spec.ts",
+    "line": 36,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 7446
+  },
+  {
+    "name": "U03 404 access errors retain locale and retry",
+    "file": "audit-auth-entry.spec.ts",
+    "line": 36,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 10192
+  },
+  {
+    "name": "U03 500 access errors retain locale and retry",
+    "file": "audit-auth-entry.spec.ts",
+    "line": 36,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 6070
+  },
+  {
+    "name": "U03 manual locale choice survives a delayed member preference response",
+    "file": "audit-auth-entry.spec.ts",
+    "line": 50,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 6255
+  },
+  {
+    "name": "U03 expired access returns to sign-in with the selected locale",
+    "file": "audit-auth-entry.spec.ts",
+    "line": 62,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 3559
+  },
+  {
+    "name": "D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit",
+    "file": "audit-draft-dirty.spec.ts",
+    "line": 16,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 5644
+  },
+  {
+    "name": "D02 Open draft Cancel preserves all dirty fields; Discard is explicit",
+    "file": "audit-draft-dirty.spec.ts",
+    "line": 16,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 6616
+  },
+  {
+    "name": "D02 Refresh job Cancel preserves all dirty fields; Discard is explicit",
+    "file": "audit-draft-dirty.spec.ts",
+    "line": 16,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 14046
+  },
+  {
+    "name": "D02 Save is awaited before opening another draft and persists one revision",
+    "file": "audit-draft-dirty.spec.ts",
+    "line": 24,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 11352
+  },
+  {
+    "name": "D02 failed Save 401 keeps buffer and dirty baseline",
+    "file": "audit-draft-dirty.spec.ts",
+    "line": 31,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 13468
+  },
+  {
+    "name": "D02 failed Save 412 keeps buffer and dirty baseline",
+    "file": "audit-draft-dirty.spec.ts",
+    "line": 31,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 12141
+  },
+  {
+    "name": "D02 failed Save 503 keeps buffer and dirty baseline",
+    "file": "audit-draft-dirty.spec.ts",
+    "line": 31,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 11006
+  },
+  {
+    "name": "D02 Refresh does not overwrite the unsaved buffer before a decision",
+    "file": "audit-draft-dirty.spec.ts",
+    "line": 40,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 8016
+  },
+  {
+    "name": "D02 delayed refresh cannot materialize a draft into a new project scope",
+    "file": "audit-draft-dirty.spec.ts",
+    "line": 50,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 5074
+  },
+  {
+    "name": "D02 zh-HK mobile dialog preserves content and keeps all choices visible",
+    "file": "audit-draft-dirty.spec.ts",
+    "line": 57,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 6356
+  },
+  {
+    "name": "U06 all 250 real members are readable in 13 pages and member 101 is searchable",
+    "file": "audit-memberships.spec.ts",
+    "line": 18,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 10767
+  },
+  {
+    "name": "U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable",
+    "file": "audit-memberships.spec.ts",
+    "line": 35,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 6981
+  },
+  {
+    "name": "B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority",
+    "file": "audit-memberships.spec.ts",
+    "line": 43,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 7192
+  },
+  {
+    "name": "U07 duplicate names and suffixes remain distinct during a versioned role change",
+    "file": "audit-memberships.spec.ts",
+    "line": 60,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 18248
+  },
+  {
+    "name": "U08 sole admin refusal is understandable and does not claim success",
+    "file": "audit-memberships.spec.ts",
+    "line": 74,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 17020
+  },
+  {
+    "name": "S06 viewer cannot read the admin directory or eligible assignees",
+    "file": "audit-memberships.spec.ts",
+    "line": 83,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 26365
+  },
+  {
+    "name": "U06 stale page response cannot restore old A-B-A directory",
+    "file": "audit-memberships.spec.ts",
+    "line": 89,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 28536
+  },
+  {
+    "name": "U06 zh-HK mobile search and failed page read recover without synthetic rows",
+    "file": "audit-memberships.spec.ts",
+    "line": 100,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 27359
+  },
+  {
+    "name": "U07 lost committed role response requires a read before any further role write",
+    "file": "audit-memberships.spec.ts",
+    "line": 112,
+    "status": "expected",
+    "expected": "passed",
+    "duration_ms": 21830
+  }
+]

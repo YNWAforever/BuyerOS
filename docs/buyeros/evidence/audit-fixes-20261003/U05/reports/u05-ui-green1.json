@@ -1,0 +1,424 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config",
+      "playwright.audit-fixes.config.ts",
+      "audit-access-revocation.spec.ts",
+      "--reporter=list,json,junit"
+    ],
+    "configFile": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\playwright.audit-fixes.config.ts",
+    "rootDir": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\tests\\e2e\\audit-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/test-results/audit-fixes",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "audit-*.spec.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ],
+      [
+        "junit"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "audit-access-revocation.spec.ts",
+      "file": "audit-access-revocation.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "U05 revoked open-page read clears private scope en",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13445,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:20:42.093Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "U05 revoked read en",
+                      "contentType": "application/json",
+                      "body": "ewogICJiZWZvcmUiOiB7CiAgICAiZml4dHVyZV9vbmx5IjogdHJ1ZSwKICAgICJhY3RpdmUiOiB0cnVlLAogICAgInJvbGVzIjogWwogICAgICAib3BlcmF0b3IiCiAgICBdLAogICAgInZlcnNpb24iOiAxLAogICAgInVzZXJzIjogNCwKICAgICJtZW1iZXJzaGlwcyI6IDUsCiAgICAiYXVkaXRfcm93cyI6IDEKICB9LAogICJjaGFuZ2VkIjogewogICAgImlkIjogImUwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMyIsCiAgICAid29ya3NwYWNlX2lkIjogImUwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsCiAgICAidXNlcl9pZCI6ICJlMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLAogICAgImRpc3BsYXlfbmFtZSI6ICJlMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLAogICAgInJvbGVzIjogWwogICAgICAib3BlcmF0b3IiCiAgICBdLAogICAgImFjdGl2ZSI6IGZhbHNlLAogICAgInZlcnNpb24iOiAyCiAgfSwKICAic3RhdHVzZXMiOiB7CiAgICAicmVhZCI6IDQwNCwKICAgICJ3cml0ZSI6IDQwNAogIH0sCiAgImFmdGVyIjogewogICAgImZpeHR1cmVfb25seSI6IHRydWUsCiAgICAiYWN0aXZlIjogZmFsc2UsCiAgICAicm9sZXMiOiBbCiAgICAgICJvcGVyYXRvciIKICAgIF0sCiAgICAidmVyc2lvbiI6IDIsCiAgICAidXNlcnMiOiA0LAogICAgIm1lbWJlcnNoaXBzIjogNSwKICAgICJhdWRpdF9yb3dzIjogMgogIH0KfQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-99fda38ae9d15e8871fa",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 33,
+          "column": 45
+        },
+        {
+          "title": "U05 revoked open-page read clears private scope zh-HK",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 21217,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:20:56.614Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "U05 revoked read zh-HK",
+                      "contentType": "application/json",
+                      "body": "ewogICJiZWZvcmUiOiB7CiAgICAiZml4dHVyZV9vbmx5IjogdHJ1ZSwKICAgICJhY3RpdmUiOiB0cnVlLAogICAgInJvbGVzIjogWwogICAgICAib3BlcmF0b3IiCiAgICBdLAogICAgInZlcnNpb24iOiAxLAogICAgInVzZXJzIjogNCwKICAgICJtZW1iZXJzaGlwcyI6IDUsCiAgICAiYXVkaXRfcm93cyI6IDMKICB9LAogICJjaGFuZ2VkIjogewogICAgImlkIjogImUwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMyIsCiAgICAid29ya3NwYWNlX2lkIjogImUwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsCiAgICAidXNlcl9pZCI6ICJlMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLAogICAgImRpc3BsYXlfbmFtZSI6ICJlMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDIiLAogICAgInJvbGVzIjogWwogICAgICAib3BlcmF0b3IiCiAgICBdLAogICAgImFjdGl2ZSI6IGZhbHNlLAogICAgInZlcnNpb24iOiAyCiAgfSwKICAic3RhdHVzZXMiOiB7CiAgICAicmVhZCI6IDQwNCwKICAgICJ3cml0ZSI6IDQwNAogIH0sCiAgImFmdGVyIjogewogICAgImZpeHR1cmVfb25seSI6IHRydWUsCiAgICAiYWN0aXZlIjogZmFsc2UsCiAgICAicm9sZXMiOiBbCiAgICAgICJvcGVyYXRvciIKICAgIF0sCiAgICAidmVyc2lvbiI6IDIsCiAgICAidXNlcnMiOiA0LAogICAgIm1lbWJlcnNoaXBzIjogNSwKICAgICJhdWRpdF9yb3dzIjogNAogIH0KfQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-38f21e2da11fc510f1ff",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 33,
+          "column": 45
+        },
+        {
+          "title": "U05 explicit recheck cancels held pre-withdrawal buyer rows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14093,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:21:17.849Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "U05 held rows",
+                      "contentType": "application/json",
+                      "body": "ewogICJhY3RpdmUiOiBmYWxzZSwKICAib2xkX3Jlc3BvbnNlX3N0YXR1cyI6IDIwMCwKICAic2NvcGVfY2xlYXJlZCI6IHRydWUKfQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-e735b59522c9369b1d65",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 47,
+          "column": 1
+        },
+        {
+          "title": "U05 older access check cannot restore withdrawn A after another recheck",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5572,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:21:31.968Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-a6bc907a35f3b76998b1",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 59,
+          "column": 1
+        },
+        {
+          "title": "U05 delayed A access result cannot clear current B",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5212,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:21:37.553Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-912b3490af7e02573d3f",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 69,
+          "column": 1
+        },
+        {
+          "title": "U05 forbidden save rechecks downgraded role while retaining dirty Unicode draft",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8423,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:21:42.769Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "U05 denied write unchanged",
+                      "contentType": "application/json",
+                      "body": "ewogICJtZW1iZXJzaGlwIjogewogICAgImZpeHR1cmVfb25seSI6IHRydWUsCiAgICAiYWN0aXZlIjogdHJ1ZSwKICAgICJyb2xlcyI6IFsKICAgICAgInZpZXdlciIKICAgIF0sCiAgICAidmVyc2lvbiI6IDIsCiAgICAidXNlcnMiOiA0LAogICAgIm1lbWJlcnNoaXBzIjogNSwKICAgICJhdWRpdF9yb3dzIjogMTAKICB9LAogICJzdG9yZWQiOiB7CiAgICAiaWQiOiAiOGRkOWQ2YjMtY2QxMC00MmI4LWIxMjgtY2Y1MjQxZWMyODEwIiwKICAgICJ3b3Jrc3BhY2VfaWQiOiAiZTAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwKICAgICJ2ZXJzaW9uIjogMSwKICAgICJjcmVhdGVkX2F0IjogIjIwMjYtMTAtMDRUMDI6MjE6NDcuNzIyNjIzKzAwOjAwIiwKICAgICJ1cGRhdGVkX2F0IjogIjIwMjYtMTAtMDRUMDI6MjE6NDcuNzIyNjIzKzAwOjAwIiwKICAgICJkYXRhX21vZGUiOiAibGl2ZSIsCiAgICAicHJvamVjdF9pZCI6ICJlMTAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiLAogICAgImJ1eWVyX2lkIjogImUyMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsCiAgICAic3RhdHVzIjogImRyYWZ0IiwKICAgICJyZXZpc2lvbl9pZCI6ICI1MWQ5ZWY2Yy00M2M4LTQ1MWYtOTYzYS04ZDMwZDdkNzlhZTAiLAogICAgInJldmlzaW9uX251bWJlciI6IDEsCiAgICAiY29udGVudF9oYXNoIjogIjZhMDRhYjZmYmY2ZmI2NDE2ZWNjZWY4YTdkZWNlZjE0ZjcxZWM4ZjkyOTU4NDRkOWNhMzY4YzhkZGM2ZDlkMGEiLAogICAgImNvbnRleHRfaGFzaCI6ICJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiIiwKICAgICJpY3BfdmVyc2lvbl9pZCI6ICJlNjAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiLAogICAgImV2aWRlbmNlX3NldF9oYXNoIjogImNjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2MiLAogICAgInBvbGljeV9kZWNpc2lvbl9pZHMiOiBbCiAgICAgICJlZDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiCiAgICBdLAogICAgImtpbmQiOiAiaW5pdGlhbCIsCiAgICAic3ViamVjdCI6ICJBdWRpdCBmaXh0dXJlIDEgOGRkOWQ2YjMiLAogICAgImJvZHkiOiAiRmljdGlvbmFsIGRyYWZ0IDEgY29udGVudCIsCiAgICAibGFuZ3VhZ2UiOiAiZW4iLAogICAgImV2aWRlbmNlX3JlZnMiOiBbCiAgICAgIHsKICAgICAgICAiaWQiOiAiZTUwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwKICAgICAgICAidmVyc2lvbiI6IDEKICAgICAgfQogICAgXSwKICAgICJjbGFpbXMiOiBbCiAgICAgIHsKICAgICAgICAia2luZCI6ICJvZmZlcl9mYWN0IiwKICAgICAgICAidGV4dCI6ICJGaWN0aW9uYWwgaW5kdXN0cmlhbCBzZW5zb3JzIiwKICAgICAgICAiZXZpZGVuY2VfaWRzIjogW10sCiAgICAgICAgIm9mZmVyX2ZhY3RfaWRzIjogWwogICAgICAgICAgImViMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIKICAgICAgICBdCiAgICAgIH0KICAgIF0sCiAgICAiYXBwcm92YWxfaWQiOiBudWxsLAogICAgImRlbGl2ZXJ5X2VuYWJsZWQiOiBmYWxzZSwKICAgICJ2YWx1ZV9wcm9wb3NpdGlvbl9mYWN0X2lkcyI6IFsKICAgICAgImViMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIKICAgIF0sCiAgICAib2JqZWN0aXZlIjogIkludHJvZHVjZSB0aGUgYXBwcm92ZWQgb2ZmZXIiLAogICAgInRvbmUiOiAicHJvZmVzc2lvbmFsIiwKICAgICJzZW5kZXJfaWRlbnRpdHlfdmVyc2lvbiI6ICJzZW5kZXI6ZWEwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxOjEiLAogICAgInJlY2lwaWVudF9jb250YWN0X2lkIjogbnVsbAogIH0KfQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-d273585006130d321cae",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 82,
+          "column": 1
+        },
+        {
+          "title": "U05 revoked save is denied without creating a revision or replaying",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7759,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:21:51.202Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "U05 revoked write unchanged",
+                      "contentType": "application/json",
+                      "body": "ewogICJtZW1iZXJzaGlwIjogewogICAgImZpeHR1cmVfb25seSI6IHRydWUsCiAgICAiYWN0aXZlIjogZmFsc2UsCiAgICAicm9sZXMiOiBbCiAgICAgICJvcGVyYXRvciIKICAgIF0sCiAgICAidmVyc2lvbiI6IDIsCiAgICAidXNlcnMiOiA0LAogICAgIm1lbWJlcnNoaXBzIjogNSwKICAgICJhdWRpdF9yb3dzIjogMTEKICB9LAogICJzdG9yZWQiOiB7CiAgICAiaWQiOiAiOGQxM2E4MjgtZjVkNy00ZjQ3LTljNjgtMmQ1MmZlNjM5Yzc5IiwKICAgICJ3b3Jrc3BhY2VfaWQiOiAiZTAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwKICAgICJ2ZXJzaW9uIjogMSwKICAgICJjcmVhdGVkX2F0IjogIjIwMjYtMTAtMDRUMDI6MjE6NTYuMTM5NTQzKzAwOjAwIiwKICAgICJ1cGRhdGVkX2F0IjogIjIwMjYtMTAtMDRUMDI6MjE6NTYuMTM5NTQzKzAwOjAwIiwKICAgICJkYXRhX21vZGUiOiAibGl2ZSIsCiAgICAicHJvamVjdF9pZCI6ICJlMTAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiLAogICAgImJ1eWVyX2lkIjogImUyMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsCiAgICAic3RhdHVzIjogImRyYWZ0IiwKICAgICJyZXZpc2lvbl9pZCI6ICI2ODFjM2Q3Ny05NThkLTQ4NWEtYjNlYy00NTM1MWQzZGU1YjIiLAogICAgInJldmlzaW9uX251bWJlciI6IDEsCiAgICAiY29udGVudF9oYXNoIjogImIyZWRhNDBjZmMzYzZkZDI1MjU2NDAwMGUzMGEyZmQ2ZThiYWZiZGM3MDhhMmY2N2FmY2RhZmU5MGY4ODE5NmUiLAogICAgImNvbnRleHRfaGFzaCI6ICJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiIiwKICAgICJpY3BfdmVyc2lvbl9pZCI6ICJlNjAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiLAogICAgImV2aWRlbmNlX3NldF9oYXNoIjogImNjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2MiLAogICAgInBvbGljeV9kZWNpc2lvbl9pZHMiOiBbCiAgICAgICJlZDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEiCiAgICBdLAogICAgImtpbmQiOiAiaW5pdGlhbCIsCiAgICAic3ViamVjdCI6ICJBdWRpdCBmaXh0dXJlIDEgOGQxM2E4MjgiLAogICAgImJvZHkiOiAiRmljdGlvbmFsIGRyYWZ0IDEgY29udGVudCIsCiAgICAibGFuZ3VhZ2UiOiAiZW4iLAogICAgImV2aWRlbmNlX3JlZnMiOiBbCiAgICAgIHsKICAgICAgICAiaWQiOiAiZTUwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwKICAgICAgICAidmVyc2lvbiI6IDEKICAgICAgfQogICAgXSwKICAgICJjbGFpbXMiOiBbCiAgICAgIHsKICAgICAgICAia2luZCI6ICJvZmZlcl9mYWN0IiwKICAgICAgICAidGV4dCI6ICJGaWN0aW9uYWwgaW5kdXN0cmlhbCBzZW5zb3JzIiwKICAgICAgICAiZXZpZGVuY2VfaWRzIjogW10sCiAgICAgICAgIm9mZmVyX2ZhY3RfaWRzIjogWwogICAgICAgICAgImViMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIKICAgICAgICBdCiAgICAgIH0KICAgIF0sCiAgICAiYXBwcm92YWxfaWQiOiBudWxsLAogICAgImRlbGl2ZXJ5X2VuYWJsZWQiOiBmYWxzZSwKICAgICJ2YWx1ZV9wcm9wb3NpdGlvbl9mYWN0X2lkcyI6IFsKICAgICAgImViMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIKICAgIF0sCiAgICAib2JqZWN0aXZlIjogIkludHJvZHVjZSB0aGUgYXBwcm92ZWQgb2ZmZXIiLAogICAgInRvbmUiOiAicHJvZmVzc2lvbmFsIiwKICAgICJzZW5kZXJfaWRlbnRpdHlfdmVyc2lvbiI6ICJzZW5kZXI6ZWEwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxOjEiLAogICAgInJlY2lwaWVudF9jb250YWN0X2lkIjogbnVsbAogIH0KfQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-5b019bf13081462aa2a7",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 94,
+          "column": 1
+        },
+        {
+          "title": "U05 missing job does not revoke an active membership",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6792,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:21:58.973Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-50ff131091214c4a3781",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 106,
+          "column": 1
+        },
+        {
+          "title": "U05 failed access recheck preserves scope and supports explicit recovery",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6692,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:22:05.782Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-8665f19947fa4ca45f8a",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 115,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-04T02:18:58.150Z",
+    "duration": 197395.218,
+    "expected": 9,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

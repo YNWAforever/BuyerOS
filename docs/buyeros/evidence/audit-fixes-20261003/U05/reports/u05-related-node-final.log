@@ -1,0 +1,25 @@
+✔ U05 request emits a scoped denial without changing its error or replaying (41.9565ms)
+✔ U05 requestContent emits a scoped denial without changing its error or replaying (1.7395ms)
+✔ U05 observer only requests membership checks for workspace-scoped 403/404 (7.8373ms)
+✔ U05 an already aborted response cannot trigger a current access check (2.2568ms)
+✔ U13 actual callback render during initializing is status, never configuration alert (9.9858ms)
+✔ D02 save has the required transition order (5.3721ms)
+✔ D02 discard has the required transition order (0.2127ms)
+✔ D02 cancel has the required transition order (1.1686ms)
+✔ D02 rejected save 412 cannot proceed (4.0864ms)
+✔ D02 rejected save 503 cannot proceed (0.8976ms)
+✔ D02 clean transition does not prompt or write (0.2652ms)
+✔ D02 asynchronous Save completes before proceeding (5.2874ms)
+✔ U06 generated member operation carries literal search and bounded page query (1.9795ms)
+✔ S06 generated eligible lookup and scope context reject foreign and A-B-A responses (0.9813ms)
+✔ B05 token renewal and route remount retain lost-response key; double start shares work (22.2181ms)
+✔ B06 full normalized payload and actor/scope define intent; generation and key order do not (0.9725ms)
+✔ B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent (5.3877ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1906.8366

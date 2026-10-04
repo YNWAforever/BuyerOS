@@ -1,0 +1,6 @@
+  ok 33 tests\e2e\audit-memberships.spec.ts:89:1 › U06 stale page response cannot restore old A-B-A directory (6.9s)
+  ok 34 tests\e2e\audit-memberships.spec.ts:100:1 › U06 zh-HK mobile search and failed page read recover without synthetic rows (5.4s)
+  ok 35 tests\e2e\audit-memberships.spec.ts:112:1 › U07 lost committed role response requires a read before any further role write (7.0s)
+
+  35 passed (6.9m)
+ledger: Task 1: complete (commits e8e478c..e8e478c, tests: pwsh.exe -NoProfile -File test-results/u05-native-gate.ps1 →   35 passed (6.9m))

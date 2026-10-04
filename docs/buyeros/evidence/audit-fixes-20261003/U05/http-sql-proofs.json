@@ -1,0 +1,232 @@
+[
+  {
+    "name": "U05 revoked read en",
+    "value": {
+      "before": {
+        "fixture_only": true,
+        "active": true,
+        "roles": [
+          "operator"
+        ],
+        "version": 1,
+        "users": 4,
+        "memberships": 5,
+        "audit_rows": 1
+      },
+      "changed": {
+        "id": "e0000000-0000-4000-8000-000000000003",
+        "workspace_id": "e0000000-0000-4000-8000-000000000001",
+        "user_id": "e0000000-0000-4000-8000-000000000002",
+        "display_name": "e0000000-0000-4000-8000-000000000002",
+        "roles": [
+          "operator"
+        ],
+        "active": false,
+        "version": 2
+      },
+      "statuses": {
+        "read": 404,
+        "write": 404
+      },
+      "after": {
+        "fixture_only": true,
+        "active": false,
+        "roles": [
+          "operator"
+        ],
+        "version": 2,
+        "users": 4,
+        "memberships": 5,
+        "audit_rows": 2
+      }
+    }
+  },
+  {
+    "name": "U05 revoked read zh-HK",
+    "value": {
+      "before": {
+        "fixture_only": true,
+        "active": true,
+        "roles": [
+          "operator"
+        ],
+        "version": 1,
+        "users": 4,
+        "memberships": 5,
+        "audit_rows": 4
+      },
+      "changed": {
+        "id": "e0000000-0000-4000-8000-000000000003",
+        "workspace_id": "e0000000-0000-4000-8000-000000000001",
+        "user_id": "e0000000-0000-4000-8000-000000000002",
+        "display_name": "e0000000-0000-4000-8000-000000000002",
+        "roles": [
+          "operator"
+        ],
+        "active": false,
+        "version": 2
+      },
+      "statuses": {
+        "read": 404,
+        "write": 404
+      },
+      "after": {
+        "fixture_only": true,
+        "active": false,
+        "roles": [
+          "operator"
+        ],
+        "version": 2,
+        "users": 4,
+        "memberships": 5,
+        "audit_rows": 5
+      }
+    }
+  },
+  {
+    "name": "U05 held rows",
+    "value": {
+      "active": false,
+      "old_response_status": 200,
+      "scope_cleared": true
+    }
+  },
+  {
+    "name": "U05 denial while checking",
+    "value": {
+      "active": false,
+      "pre_withdrawal_directory": 200,
+      "scope_cleared": true
+    }
+  },
+  {
+    "name": "U05 denied write unchanged",
+    "value": {
+      "membership": {
+        "fixture_only": true,
+        "active": true,
+        "roles": [
+          "viewer"
+        ],
+        "version": 2,
+        "users": 4,
+        "memberships": 5,
+        "audit_rows": 13
+      },
+      "stored": {
+        "id": "b0e79d48-a595-4405-a2b6-467b20e22cb3",
+        "workspace_id": "e0000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "created_at": "2026-10-04T02:42:49.865172+00:00",
+        "updated_at": "2026-10-04T02:42:49.865172+00:00",
+        "data_mode": "live",
+        "project_id": "e1000000-0000-4000-8000-000000000001",
+        "buyer_id": "e2000000-0000-4000-8000-000000000001",
+        "status": "draft",
+        "revision_id": "7c09e707-0dca-4e51-b605-cd83221af19c",
+        "revision_number": 1,
+        "content_hash": "cd27b2cd6b25afe049462265db5283b0dfd6889cad67cf9ac9466ee98a40ff9c",
+        "context_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "icp_version_id": "e6000000-0000-4000-8000-000000000001",
+        "evidence_set_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "policy_decision_ids": [
+          "ed000000-0000-4000-8000-000000000001"
+        ],
+        "kind": "initial",
+        "subject": "Audit fixture 1 b0e79d48",
+        "body": "Fictional draft 1 content",
+        "language": "en",
+        "evidence_refs": [
+          {
+            "id": "e5000000-0000-4000-8000-000000000001",
+            "version": 1
+          }
+        ],
+        "claims": [
+          {
+            "kind": "offer_fact",
+            "text": "Fictional industrial sensors",
+            "evidence_ids": [],
+            "offer_fact_ids": [
+              "eb000000-0000-4000-8000-000000000001"
+            ]
+          }
+        ],
+        "approval_id": null,
+        "delivery_enabled": false,
+        "value_proposition_fact_ids": [
+          "eb000000-0000-4000-8000-000000000001"
+        ],
+        "objective": "Introduce the approved offer",
+        "tone": "professional",
+        "sender_identity_version": "sender:ea000000-0000-4000-8000-000000000001:1",
+        "recipient_contact_id": null
+      }
+    }
+  },
+  {
+    "name": "U05 revoked write unchanged",
+    "value": {
+      "membership": {
+        "fixture_only": true,
+        "active": false,
+        "roles": [
+          "operator"
+        ],
+        "version": 2,
+        "users": 4,
+        "memberships": 5,
+        "audit_rows": 14
+      },
+      "stored": {
+        "id": "6ed6a590-d055-4b4a-b7a6-821d3be3841f",
+        "workspace_id": "e0000000-0000-4000-8000-000000000001",
+        "version": 1,
+        "created_at": "2026-10-04T02:42:59.873949+00:00",
+        "updated_at": "2026-10-04T02:42:59.873949+00:00",
+        "data_mode": "live",
+        "project_id": "e1000000-0000-4000-8000-000000000001",
+        "buyer_id": "e2000000-0000-4000-8000-000000000001",
+        "status": "draft",
+        "revision_id": "1ec70fb0-b699-40a8-bfa9-8ab8d65b640e",
+        "revision_number": 1,
+        "content_hash": "cf1bcbae7180f8f43bfecd41370b18e32fe7ba20d56c43778fa03a287903cff6",
+        "context_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "icp_version_id": "e6000000-0000-4000-8000-000000000001",
+        "evidence_set_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "policy_decision_ids": [
+          "ed000000-0000-4000-8000-000000000001"
+        ],
+        "kind": "initial",
+        "subject": "Audit fixture 1 6ed6a590",
+        "body": "Fictional draft 1 content",
+        "language": "en",
+        "evidence_refs": [
+          {
+            "id": "e5000000-0000-4000-8000-000000000001",
+            "version": 1
+          }
+        ],
+        "claims": [
+          {
+            "kind": "offer_fact",
+            "text": "Fictional industrial sensors",
+            "evidence_ids": [],
+            "offer_fact_ids": [
+              "eb000000-0000-4000-8000-000000000001"
+            ]
+          }
+        ],
+        "approval_id": null,
+        "delivery_enabled": false,
+        "value_proposition_fact_ids": [
+          "eb000000-0000-4000-8000-000000000001"
+        ],
+        "objective": "Introduce the approved offer",
+        "tone": "professional",
+        "sender_identity_version": "sender:ea000000-0000-4000-8000-000000000001:1",
+        "recipient_contact_id": null
+      }
+    }
+  }
+]

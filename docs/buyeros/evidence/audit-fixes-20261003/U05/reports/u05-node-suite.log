@@ -1,0 +1,99 @@
+✔ checked-in API types match the current OpenAPI contract (13837.1646ms)
+✔ TypeScript approval fingerprint matches v2-exact-context-crlf (13.8766ms)
+✔ U05 request emits a scoped denial without changing its error or replaying (85.1273ms)
+✔ U05 requestContent emits a scoped denial without changing its error or replaying (1.3169ms)
+✔ U05 observer only requests membership checks for workspace-scoped 403/404 (5.191ms)
+✔ U05 an already aborted response cannot trigger a current access check (0.6598ms)
+✔ U13 actual callback render during initializing is status, never configuration alert (38.4572ms)
+✔ B02 confirmation is stable for row ordering but binds every material field (21.5005ms)
+✔ B02 snapshot confirmation binds snapshot identity and normalized exclusions (0.3281ms)
+✔ B03 frozen payload preserves confirmed rows and trimmed audit reason (1.7905ms)
+✔ B16 unknown assignment survives route remount and token renewal with the same key (2.3511ms)
+✔ B16 an unresolved assignment cannot be replaced with a materially different intent (2.2143ms)
+✔ B15 pending body is immutable and retry/token renewal uses same frozen body/key (29.3332ms)
+✔ B16 A-B-A keeps actor intent while stale response is cancelled; other actor/scope are independent (5.4049ms)
+✔ B15 execution binds exact manifest/version/digest and retains key on unknown acceptance (3.5253ms)
+✔ D03 Unicode code-point offsets retain emoji, CRLF, Chinese and unmodified text (1.0541ms)
+✔ D03 split code-point ranges reclassify both pieces without destroying text (2.0576ms)
+✔ D02 save has the required transition order (2.3404ms)
+✔ D02 discard has the required transition order (1.6776ms)
+✔ D02 cancel has the required transition order (0.1927ms)
+✔ D02 rejected save 412 cannot proceed (1.1418ms)
+✔ D02 rejected save 503 cannot proceed (0.3877ms)
+✔ D02 clean transition does not prompt or write (0.3206ms)
+✔ D02 asynchronous Save completes before proceeding (145.9415ms)
+✔ U15 project failed count and paged list preserve identical canonical filter (2.2635ms)
+✔ U15 explicit workspace omits project, deep link retains selected scope and status (0.5487ms)
+✔ U15 invalid URL status cannot introduce unsupported server filter; paging stays bounded (1.016ms)
+✔ U06 generated member operation carries literal search and bounded page query (2.5619ms)
+✔ S06 generated eligible lookup and scope context reject foreign and A-B-A responses (1.4342ms)
+✔ Q09 latest101 uses only head1/tail1 generated reads, never downloads all history (5.392ms)
+✔ Q09 empty and single ICP use one read; malformed/foreign pages fail closed (1.6755ms)
+✔ Q09 concurrent appended history is unavailable rather than a falsely latest profile (15.9503ms)
+✔ Q09 A-B-A rejects a late metadata response and token renewal alone keeps the context (1.4681ms)
+✔ B05 token renewal and route remount retain lost-response key; double start shares work (28.4108ms)
+✔ B06 full normalized payload and actor/scope define intent; generation and key order do not (2.2846ms)
+✔ B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent (8.9473ms)
+✖ every Playwright config that starts the disposable API fixture runs its container teardown (419.3619ms)
+node:internal/modules/esm/resolve:271
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\.vercel\output\functions\__server.func\index.mjs' imported from C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\vercel-render.test.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:992:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+    at #resolve (node:internal/modules/esm/loader:683:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+    at node:internal/modules/esm/loader:632:32
+    at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/.vercel/output/functions/__server.func/index.mjs'
+}
+
+Node.js v24.18.0
+✖ tests\vercel-render.test.mjs (521.6314ms)
+✔ Vercel exposes only the app and binds its API call to the internal API service (2.9605ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (101.5477ms)
+✔ the app proxy fails closed when the binding is absent (1.587ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (1.6527ms)
+✔ FastAPI redirects stay on the public app path (2.7031ms)
+✔ test_internal_headers_forward_only_on_allowlisted_paths (85.3547ms)
+ℹ tests 44
+ℹ suites 0
+ℹ pass 42
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14650.7488
+
+✖ failing tests:
+
+test at tests\e2e-fixture-cleanup.test.mjs:8:1
+✖ every Playwright config that starts the disposable API fixture runs its container teardown (419.3619ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   'playwright.audit-fixes.config.ts'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:14:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'playwright.audit-fixes.config.ts' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests\vercel-render.test.mjs:1:1
+✖ tests\vercel-render.test.mjs (521.6314ms)
+  'test failed'

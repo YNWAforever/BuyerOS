@@ -7,3 +7,6 @@
 
 # Preserve captured Q09 verification evidence byte-for-byte, including native line endings.
 docs/buyeros/evidence/audit-fixes-20261003/Q09/** -text whitespace=cr-at-eol
+
+# Preserve U05 captured verification bytes, including producer line endings.
+docs/buyeros/evidence/audit-fixes-20261003/U05/** -text whitespace=cr-at-eol

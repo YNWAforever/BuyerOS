@@ -1,0 +1,40 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="1" time="133.739941">
+<testsuite name="audit-access-revocation.spec.ts" timestamp="2026-10-04T02:10:10.138Z" hostname="" tests="1" failures="0" skipped="0" time="61.558" errors="1">
+<testcase name="U05 revoked open-page read clears private scope en" classname="audit-access-revocation.spec.ts" time="61.558">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  audit-access-revocation.spec.ts:33:45 › U05 revoked open-page read clears private scope en ───────
+
+    Test timeout of 60000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 60000ms exceeded.
+
+      37 |  const buyers=page.getByRole('region',{name:/^(Buyer results|買家結果)$/});await expect(buyers.getByRole('checkbox',{name:/^(Select |選取 )/}).first()).toBeVisible();
+      38 |  const before=await fixture();const changed=await changeAccess(page);const statuses=await denied(page);
+    > 39 |  const failed=page.waitForResponse(r=>r.request().method()==='GET'&&r.url().includes(`/workspaces/${workspace}/`)&&r.status()===404);
+         |                    ^
+      40 |  await buyers.getByRole('button',{name:/^(Refresh results|更新結果)$/}).click();await failed;await cleared(page);
+      41 |  await page.getByRole('combobox',{name:/^(Language|語言)$/}).first().selectOption(locale==='en'?'zh-HK':'en');
+      42 |  await page.getByRole('button',{name:/^(Check access again|重新檢查存取)$/}).click();await cleared(page);
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-access-revocation.spec.ts:39:20
+
+    Error Context: ..\..\test-results\audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

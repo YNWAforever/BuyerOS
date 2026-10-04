@@ -1,0 +1,23 @@
+{
+  "original_cases": 98,
+  "unchanged_historical_columns": [
+    "case_id",
+    "finding_ids",
+    "priority",
+    "scenario",
+    "preconditions",
+    "steps",
+    "expected",
+    "actual",
+    "result",
+    "evidence_state",
+    "evidence_ids",
+    "historical_status",
+    "environment",
+    "cleanup",
+    "owner_role"
+  ],
+  "other97cases_unchanged": true,
+  "other24tasks_unchanged": true,
+  "all84operation_records_unchanged": true
+}

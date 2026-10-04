@@ -1,0 +1,159 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config",
+      "playwright.audit-fixes.config.ts",
+      "audit-access-revocation.spec.ts",
+      "--grep",
+      "denial during a held access check",
+      "--reporter=list,json,junit"
+    ],
+    "configFile": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\playwright.audit-fixes.config.ts",
+    "rootDir": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\tests\\e2e\\audit-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/test-results/audit-fixes",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "audit-*.spec.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ],
+      [
+        "junit"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "audit-access-revocation.spec.ts",
+      "file": "audit-access-revocation.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "U05 denial during a held access check schedules a fresh membership read",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 13574,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('combobox', { name: /^(Project|專案)$/ })\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveCount\" getByRole('combobox', { name: /^(Project|專案)$/ }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('combobox', { name: /^(Project|專案)$/ })\u001b[22m\n\u001b[2m    14 × locator resolved to 1 element\u001b[22m\n\u001b[2m       - unexpected value \"1\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('combobox', { name: /^(Project|專案)$/ })\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveCount\" getByRole('combobox', { name: /^(Project|專案)$/ }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('combobox', { name: /^(Project|專案)$/ })\u001b[22m\n\u001b[2m    14 × locator resolved to 1 element\u001b[22m\n\u001b[2m       - unexpected value \"1\"\u001b[22m\n\n    at cleared (C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\tests\\e2e\\audit-access-revocation.spec.ts:23:67)\n    at C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\tests\\e2e\\audit-access-revocation.spec.ts:92:33",
+                    "location": {
+                      "file": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\tests\\e2e\\audit-access-revocation.spec.ts",
+                      "column": 67,
+                      "line": 23
+                    },
+                    "snippet": "  21 | }\n  22 | async function cleared(page:Page){\n> 23 |  await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveCount(0);\n     |                                                                   ^\n  24 |  await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue('');\n  25 |  await expect(page.getByRole('region',{name:/^(Buyer results|買家結果)$/})).toHaveCount(0);\n  26 |  const url=new URL(page.url());for(const key of ['workspace','project','profile','bulk_job','bulk_manifest','draft','draft_job'])expect(url.searchParams.has(key)).toBe(false);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\tests\\e2e\\audit-access-revocation.spec.ts",
+                        "column": 67,
+                        "line": 23
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveCount\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('combobox', { name: /^(Project|專案)$/ })\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveCount\" getByRole('combobox', { name: /^(Project|專案)$/ }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('combobox', { name: /^(Project|專案)$/ })\u001b[22m\n\u001b[2m    14 × locator resolved to 1 element\u001b[22m\n\u001b[2m       - unexpected value \"1\"\u001b[22m\n\n\n  21 | }\n  22 | async function cleared(page:Page){\n> 23 |  await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveCount(0);\n     |                                                                   ^\n  24 |  await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue('');\n  25 |  await expect(page.getByRole('region',{name:/^(Buyer results|買家結果)$/})).toHaveCount(0);\n  26 |  const url=new URL(page.url());for(const key of ['workspace','project','profile','bulk_job','bulk_manifest','draft','draft_job'])expect(url.searchParams.has(key)).toBe(false);\n    at cleared (C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\tests\\e2e\\audit-access-revocation.spec.ts:23:67)\n    at C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\tests\\e2e\\audit-access-revocation.spec.ts:92:33"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T02:39:18.423Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\test-results\\audit-fixes\\audit-access-revocation-U0-dd8f1-les-a-fresh-membership-read\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\test-results\\audit-fixes\\audit-access-revocation-U0-dd8f1-les-a-fresh-membership-read\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\laich\\.codex\\worktrees\\audit-fixes-20261003\\BuyerOS\\tests\\e2e\\audit-access-revocation.spec.ts",
+                    "column": 67,
+                    "line": 23
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "2c5c0aff8b3e05070894-fdaa7e68fb21f6b75858",
+          "file": "audit-access-revocation.spec.ts",
+          "line": 83,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-04T02:38:10.583Z",
+    "duration": 87979.30500000001,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

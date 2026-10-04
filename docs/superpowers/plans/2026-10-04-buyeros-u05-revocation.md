@@ -18,5 +18,5 @@ Interfaces: Q01 auth/locale recovery; Q02 current DB authority/directory; Q03 ge
   Expected: regression tests pass with unchanged current server membership authority, no synthetic API rows.
 - [x] Run UI new + auth-entry + memberships + affected dirty-draft suites, Node client/auth/scope/intent checks, strict DB auth-cache/membership/authorization suites, types/lint/generated contracts and Alembic heads.
   Expected: all named gates pass, required DB zero skips; exact counts/commands retained.
-- [ ] Inspect diff; author review and reverse-patch rollback applicability; preserve frozen inputs, guards and unrelated work. Commit source/tests then case/status/evidence metadata locally.
+- [x] Inspect diff; author review and reverse-patch rollback applicability; preserve frozen inputs, guards and unrelated work. Commit source/tests then case/status/evidence metadata locally.
   Expected: clean reviewable commits, U05 only repair fields updated, no deployed SHA and independent human/live gates remain open.

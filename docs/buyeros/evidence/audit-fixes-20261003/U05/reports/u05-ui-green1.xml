@@ -1,0 +1,22 @@
+<testsuites id="" name="" tests="9" failures="0" skipped="0" errors="0" time="197.395218">
+<testsuite name="audit-access-revocation.spec.ts" timestamp="2026-10-04T02:20:41.412Z" hostname="" tests="9" failures="0" skipped="0" time="89.205" errors="0">
+<testcase name="U05 revoked open-page read clears private scope en" classname="audit-access-revocation.spec.ts" time="13.445">
+</testcase>
+<testcase name="U05 revoked open-page read clears private scope zh-HK" classname="audit-access-revocation.spec.ts" time="21.217">
+</testcase>
+<testcase name="U05 explicit recheck cancels held pre-withdrawal buyer rows" classname="audit-access-revocation.spec.ts" time="14.093">
+</testcase>
+<testcase name="U05 older access check cannot restore withdrawn A after another recheck" classname="audit-access-revocation.spec.ts" time="5.572">
+</testcase>
+<testcase name="U05 delayed A access result cannot clear current B" classname="audit-access-revocation.spec.ts" time="5.212">
+</testcase>
+<testcase name="U05 forbidden save rechecks downgraded role while retaining dirty Unicode draft" classname="audit-access-revocation.spec.ts" time="8.423">
+</testcase>
+<testcase name="U05 revoked save is denied without creating a revision or replaying" classname="audit-access-revocation.spec.ts" time="7.759">
+</testcase>
+<testcase name="U05 missing job does not revoke an active membership" classname="audit-access-revocation.spec.ts" time="6.792">
+</testcase>
+<testcase name="U05 failed access recheck preserves scope and supports explicit recovery" classname="audit-access-revocation.spec.ts" time="6.692">
+</testcase>
+</testsuite>
+</testsuites>

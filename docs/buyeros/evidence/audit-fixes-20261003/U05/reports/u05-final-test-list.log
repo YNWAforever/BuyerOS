@@ -1,0 +1,37 @@
+Listing tests:
+  audit-access-revocation.spec.ts:33:45 › U05 revoked open-page read clears private scope en
+  audit-access-revocation.spec.ts:33:45 › U05 revoked open-page read clears private scope zh-HK
+  audit-access-revocation.spec.ts:47:1 › U05 explicit recheck cancels held pre-withdrawal buyer rows
+  audit-access-revocation.spec.ts:59:1 › U05 older access check cannot restore withdrawn A after another recheck
+  audit-access-revocation.spec.ts:69:1 › U05 delayed A access result cannot clear current B
+  audit-access-revocation.spec.ts:82:1 › U05 forbidden save rechecks downgraded role while retaining dirty Unicode draft
+  audit-access-revocation.spec.ts:94:1 › U05 revoked save is denied without creating a revision or replaying
+  audit-access-revocation.spec.ts:106:1 › U05 missing job does not revoke an active membership
+  audit-access-revocation.spec.ts:115:1 › U05 failed access recheck preserves scope and supports explicit recovery
+  audit-auth-entry.spec.ts:7:1 › U13 initialization has no false configuration alert before hydration
+  audit-auth-entry.spec.ts:16:1 › U02 U03 no membership permits locale switching and read-only access retry
+  audit-auth-entry.spec.ts:36:36 › U03 403 access errors retain locale and retry
+  audit-auth-entry.spec.ts:36:36 › U03 404 access errors retain locale and retry
+  audit-auth-entry.spec.ts:36:36 › U03 500 access errors retain locale and retry
+  audit-auth-entry.spec.ts:50:1 › U03 manual locale choice survives a delayed member preference response
+  audit-auth-entry.spec.ts:62:1 › U03 expired access returns to sign-in with the selected locale
+  audit-draft-dirty.spec.ts:16:66 › D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit
+  audit-draft-dirty.spec.ts:16:66 › D02 Open draft Cancel preserves all dirty fields; Discard is explicit
+  audit-draft-dirty.spec.ts:16:66 › D02 Refresh job Cancel preserves all dirty fields; Discard is explicit
+  audit-draft-dirty.spec.ts:24:1 › D02 Save is awaited before opening another draft and persists one revision
+  audit-draft-dirty.spec.ts:31:35 › D02 failed Save 401 keeps buffer and dirty baseline
+  audit-draft-dirty.spec.ts:31:35 › D02 failed Save 412 keeps buffer and dirty baseline
+  audit-draft-dirty.spec.ts:31:35 › D02 failed Save 503 keeps buffer and dirty baseline
+  audit-draft-dirty.spec.ts:40:1 › D02 Refresh does not overwrite the unsaved buffer before a decision
+  audit-draft-dirty.spec.ts:50:1 › D02 delayed refresh cannot materialize a draft into a new project scope
+  audit-draft-dirty.spec.ts:57:1 › D02 zh-HK mobile dialog preserves content and keeps all choices visible
+  audit-memberships.spec.ts:18:1 › U06 all 250 real members are readable in 13 pages and member 101 is searchable
+  audit-memberships.spec.ts:35:1 › U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable
+  audit-memberships.spec.ts:43:1 › B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority
+  audit-memberships.spec.ts:60:1 › U07 duplicate names and suffixes remain distinct during a versioned role change
+  audit-memberships.spec.ts:74:1 › U08 sole admin refusal is understandable and does not claim success
+  audit-memberships.spec.ts:83:1 › S06 viewer cannot read the admin directory or eligible assignees
+  audit-memberships.spec.ts:89:1 › U06 stale page response cannot restore old A-B-A directory
+  audit-memberships.spec.ts:100:1 › U06 zh-HK mobile search and failed page read recover without synthetic rows
+  audit-memberships.spec.ts:112:1 › U07 lost committed role response requires a read before any further role write
+Total: 35 tests in 4 files

@@ -1,0 +1,518 @@
+# Review package: e8e478c9e5a5812d43169759d39ddea1d5529098..25694d3b938e704e883f9915cf0604bbdbac1daf
+
+## Commits
+25694d3 fix(auth): reconcile denials during in-flight access checks
+540696b fix(auth): recheck and clear revoked workspace scope (U05)
+
+## Files changed
+ .../plans/2026-10-04-buyeros-u05-revocation.md     |  22 ++++
+ features/live/workspace-picker.tsx                 |  52 ++++++--
+ services/live/client.ts                            |  16 ++-
+ .../tests/fixtures/audit_access_revocation.py      |  32 +++++
+ tests/audit-access-denial.test.mjs                 |  23 ++++
+ tests/e2e/audit-access-revocation.spec.ts          | 137 +++++++++++++++++++++
+ 6 files changed, 270 insertions(+), 12 deletions(-)
+
+## Diff
+diff --git a/docs/superpowers/plans/2026-10-04-buyeros-u05-revocation.md b/docs/superpowers/plans/2026-10-04-buyeros-u05-revocation.md
+new file mode 100644
+index 0000000..8db4be5
+--- /dev/null
++++ b/docs/superpowers/plans/2026-10-04-buyeros-u05-revocation.md
+@@ -0,0 +1,22 @@
++# BuyerOS U05 existing-page membership withdrawal
++
++Spec: frozen audit-20261003 case U05/F04 and the human-selected U05 continuation on 2026-10-04.
++Base: e8e478c9e5a5812d43169759d39ddea1d5529098.
++
++## Global Constraints
++Retain canonical identities/current BuyerOS memberships and RLS, Auth0, in-memory bearer tokens, domain API and delivery 403. No agents, push, remote PR, deployment, production mutation, paid resources, mail or auth/Cloudflare cutover. Only the existing owned loopback/Docker fixture may mutate data. Preserve original audit inputs and unrelated work. Required DB checks use strict mode with zero skips.
++
++## Review Focus
++A scoped 403/404 is not proof of revoked membership. Recheck current membership through the existing paginated workspace API. Current-identity cancellation must defeat held requests, A-B-A races and older access checks. Failed rechecks cannot claim revocation or replay writes. A legitimate member's ordinary forbidden/missing resource must retain scope and dirty edits. Locale and explicit retry remain available without membership. Withdrawal must not create users/memberships or reactivate them. Provider fixture and live verification remain separate.
++
++## Task 1: U05 withdrawal and access recheck
++Interfaces: Q01 auth/locale recovery; Q02 current DB authority/directory; Q03 generation/abort; Q15 dirty editor. Consumers: live client, LiveWorkspace and SessionScope. Existing next-request API revocation test is unchanged.
++
++- [x] Add audit-access-revocation.spec.ts on playwright.audit-fixes.config.ts with owned HTTP/PostgreSQL: real admin withdrawal after operator opens a page, denied next read/write, automatic current-membership recheck, explicit recheck, held old rows/access results, scope races, negative legitimate 403/404 and recheck failure. Cover en and zh-HK/390px. Observe meaningful RED before product changes.
++  Expected: baseline keeps revoked cached scope or lacks current-page recheck; retained failure evidence. Setup errors are not RED.
++- [x] Implement the smallest current-identity access-denial notification and current-membership recheck; clear revoked scope/URL/private UI, abort outstanding scope requests. Never classify all 403/404 as revocation or retry writes.
++  Expected: regression tests pass with unchanged current server membership authority, no synthetic API rows.
++- [x] Run UI new + auth-entry + memberships + affected dirty-draft suites, Node client/auth/scope/intent checks, strict DB auth-cache/membership/authorization suites, types/lint/generated contracts and Alembic heads.
++  Expected: all named gates pass, required DB zero skips; exact counts/commands retained.
++- [ ] Inspect diff; author review and reverse-patch rollback applicability; preserve frozen inputs, guards and unrelated work. Commit source/tests then case/status/evidence metadata locally.
++  Expected: clean reviewable commits, U05 only repair fields updated, no deployed SHA and independent human/live gates remain open.
+diff --git a/features/live/workspace-picker.tsx b/features/live/workspace-picker.tsx
+index 6be3f93..08ee783 100644
+--- a/features/live/workspace-picker.tsx
++++ b/features/live/workspace-picker.tsx
+@@ -54,20 +54,22 @@ function updateUrl(router: ReturnType<typeof useRouter>, changes: Record<string,
+   window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+ }
+ export function LiveWorkspace() {
+   const {session, client, auth, authError, authBootstrap} = useWorkspaceSession();
+   const snapshot = useSessionSnapshot();
+   const router = useRouter(), pathname = usePathname() || '/app';
+   const [workspaces, setWorkspaces] = useState<LoadState<LiveWorkspace>>({kind:'loading'});
+   const [projects, setProjects] = useState<LoadState<LiveProject>>({kind:'loading'});
+   const [selectionError, setSelectionError] = useState('');
+   const [workspaceRefresh,setWorkspaceRefresh]=useState(0);
++  const [accessError,setAccessError]=useState('');
++  const checkingAccess=useRef(false),allowAutoSelection=useRef(true),pendingAccessCheck=useRef<string|null>(null);
+   const [projectRefresh, setProjectRefresh] = useState(0);
+   const [locale, setLocale] = useState<'en'|'zh-HK'>('en');
+   const [prefVersion,setPrefVersion]=useState(1),[localeSaving,setLocaleSaving]=useState(false),[localeError,setLocaleError]=useState('');
+   const [localeReadyFor,setLocaleReadyFor]=useState<string|null>(null);
+   const manualLocale = useRef(false);
+   useEffect(()=>{try {const saved=localStorage.getItem('buyeros.locale');if(saved==='en'||saved==='zh-HK'){manualLocale.current=true;queueMicrotask(()=>setLocale(saved));}}catch {/* Locale storage is optional. */}},[]);
+   const t = (value:string) => locale === 'zh-HK' ? (liveZh[value] || zh[value] || value) : value;
+   const localizeError=(message:string)=>{const [guidance,id]=message.split(' Request ID: ');return t(guidance)+(id?` ${t('Request ID')}: ${id}`:'');};
+   useEffect(() => {document.documentElement.lang=locale;},[locale]);
+   const workspace = snapshot.scope.workspace, project = snapshot.scope.project;
+@@ -96,41 +98,70 @@ export function LiveWorkspace() {
+     if(!localeReady||!workspace||localeSaving)return;
+     const identity=session.identity(),token=session.token();if(!token)return;
+     setLocaleSaving(true);setLocaleError('');
+     try{
+       const updated=await client.request<{locale:'en'|'zh-HK';version:number}>({path:`/v1/workspaces/${workspace}/preferences`,
+         method:'PATCH',token,scope:identity,body:{locale:value},ifMatch:`"${prefVersion}"`,idempotencyKey:crypto.randomUUID()});
+       if(session.isCurrent(identity))setPrefVersion(updated.version);
+     }catch(error){if(session.isCurrent(identity)&&!(error instanceof LiveCancelled))setLocaleError(describeLiveError(error));}
+     finally{setLocaleSaving(false);}
+   }
+-  function retryAccess(){setSelectionError('');setWorkspaces({kind:'loading'});setWorkspaceRefresh(value=>value+1);}
++  function retryAccess(){
++    setSelectionError('');setAccessError('');
++    // Preserve a legitimate member's editor while checking; a failed read is not revocation.
++    setWorkspaces(current=>current.kind==='ready'?current:{kind:'loading'});
++    setWorkspaceRefresh(value=>value+1);
++  }
++  useEffect(()=>client.subscribeAccessDenied(event=>{
++    if(!session.isCurrent(event.scope)||event.workspace!==session.current().workspace)return;
++    if(checkingAccess.current){pendingAccessCheck.current=event.scope;return;}
++    checkingAccess.current=true;
++    setWorkspaceRefresh(value=>value+1);
++  }),[client,session]);
+   const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
+   function copyDiagnostics(){
+     const message=workspaces.kind==='error'?workspaces.message:'';
+     const requestId=message.match(/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/i)?.[0]??null;
+     // Allow-listed support fields only: no token, OAuth code, email or user claims.
+     void navigator.clipboard?.writeText(JSON.stringify({request_id:requestId,time:new Date().toISOString(),
+       workspace_id:workspace,project_id:project,login_method:'auth0'},null,2));
+   }
+   useEffect(() => {
+     if (!snapshot.authenticated) return;
+-    const own = new AbortController();
++    const own = new AbortController(),identity=session.identity();
++    checkingAccess.current=true;
+     const signal = AbortSignal.any([session.controller().signal, own.signal, AbortSignal.timeout(10_000)]);
+     void allPages(client,session,'/v1/workspaces',toWorkspaces,signal).then(items => {
+-      if (own.signal.aborted) return;
+-      setWorkspaces({kind:'ready',items});
++      if (own.signal.aborted || !session.isCurrent(identity)) return;
++      setAccessError('');setWorkspaces({kind:'ready',items});
++      const current=session.current().workspace;
++      if(current&&!items.some(item=>item.id===current)){
++        allowAutoSelection.current=false;setSelectionError('Workspace not found (404)');
++        setProjects({kind:'loading'});setLocaleReadyFor(null);setLocaleError('');
++        updateUrl(router,{workspace:null,project:null,profile:null,bulk_job:null,bulk_manifest:null,draft:null,draft_job:null});
++        session.next({workspace:null,project:null});return;
++      }
+       const target = requested('workspace');
+-      if (target && !items.some(item => item.id === target)) {setSelectionError('Workspace not found (404)'); session.next({workspace:null,project:null}); return;}
+-      if (!target && items.length === 1) {session.next({workspace:items[0].id,project:null}); updateUrl(router,{workspace:items[0].id,project:null});}
+-      else if (target && session.current().workspace !== target) session.next({workspace:target,project:null});
+-    }).catch(error => {if (own.signal.aborted || error instanceof LiveCancelled) return; if (error instanceof LiveError && error.status === 401) {session.setToken(undefined);return;} setWorkspaces({kind:'error',message:describeLiveError(error)});});
++      if (target && !items.some(item => item.id === target)) {setSelectionError('Workspace not found (404)'); return;}
++      if (!target && items.length === 1 && allowAutoSelection.current) {session.next({workspace:items[0].id,project:null}); updateUrl(router,{workspace:items[0].id,project:null});}
++      else if (target && current !== target) session.next({workspace:target,project:null});
++    }).catch(error => {
++      if (own.signal.aborted || !session.isCurrent(identity) || error instanceof LiveCancelled) return;
++      if (error instanceof LiveError && error.status === 401) {session.setToken(undefined);return;}
++      const message=describeLiveError(error);setAccessError(message);
++      setWorkspaces(previous=>previous.kind==='ready'?previous:{kind:'error',message});
++    }).finally(()=>{
++      if(own.signal.aborted||!session.isCurrent(identity))return;
++      checkingAccess.current=false;
++      const followup=pendingAccessCheck.current===identity;pendingAccessCheck.current=null;
++      if(followup)setWorkspaceRefresh(value=>value+1);
++    });
+     return () => own.abort();
+   }, [client,router,session,snapshot.authenticated,snapshot.scope.actor,snapshot.identity,workspaceRefresh]);
+   useEffect(()=>{
+     if(!snapshot.authenticated||workspaces.kind!=='loading')return;
+     const timer=setTimeout(()=>setWorkspaces(current=>current.kind==='loading'
+       ?{kind:'error',message:'Request failed. Try again after checking the connection.'}:current),12_000);
+     return()=>clearTimeout(timer);
+   },[snapshot.authenticated,workspaces.kind,snapshot.identity,workspaceRefresh]);
+   useEffect(() => {
+     if (!snapshot.authenticated || !workspace || !authorized) return;
+@@ -159,21 +190,21 @@ export function LiveWorkspace() {
+     const signal = AbortSignal.any([session.controller().signal, own.signal]);
+     void allPages(client,session,`/v1/workspaces/${encodeURIComponent(workspace)}/projects/${encodeURIComponent(project)}/icp-versions`,toIcpVersions,signal)
+       .then(items => {if (!own.signal.aborted && !items.some(item=>item.id===profile)) setSelectionError('Profile not found (404)');})
+       .catch(error => {if (!own.signal.aborted && !(error instanceof LiveCancelled)) setSelectionError('Could not verify profile');});
+     return () => own.abort();
+   }, [client,session,workspace,project,projectKnown]);
+   function mayLeaveOffer(){return !document.querySelector('[data-live-unsaved="true"]') || window.confirm(t('Discard unsaved changes?'));}
+   function chooseWorkspace(id:string) {
+     if(!mayLeaveOffer())return;
+     if (workspaces.kind !== 'ready' || !workspaces.items.some(item => item.id === id)) return;
+-    setSelectionError(''); setProjects({kind:'loading'});
++    allowAutoSelection.current=true;setAccessError('');setSelectionError(''); setProjects({kind:'loading'});
+     session.next({workspace:id,project:null}); updateUrl(router,{workspace:id,project:null,profile:null});
+   }
+   function chooseProject(id:string) {
+     if(!mayLeaveOffer())return;
+     if (projects.kind !== 'ready' || !projects.items.some(item => item.id === id)) return;
+     setSelectionError(''); session.next({project:id}); updateUrl(router,{project:id,profile:null});
+   }
+   function saved(info:{projectId:string;icpVersionId:string}) {
+     updateUrl(router,{workspace,project:info.projectId,profile:info.icpVersionId});
+     session.next({project:info.projectId});
+@@ -188,21 +219,22 @@ export function LiveWorkspace() {
+     router.push(target.pathname+target.search);
+   }
+   if (!auth) return <main className="main-shell">{languagePicker}<section className="panel" role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&<p>{authError}</p>}</section></main>;
+   if (!snapshot.authenticated) return <main className="main-shell">{languagePicker}<section className="panel"><h1>FIMMICK BuyerOS</h1><p>{t('Sign in to access your workspaces.')}</p><button onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></section></main>;
+   return <main className="main-shell live-workspace"><div className="content">
+     <header className="topbar live-topbar"><b>FIMMICK BuyerOS</b><span>{t('Live workspace')}</span>{languagePicker}<button onClick={() => {session.setToken(undefined); void auth.signOut();}}>{t('Sign out')}</button></header>
+     <LiveNavigation t={t} navigate={navigate} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>
+     <div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
+       {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
+       {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
+-      {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p><button onClick={retryAccess}>{t('Check access again')}</button></>)}
++      {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p></>)}
++      {workspaces.kind==='ready'&&<><button onClick={retryAccess}>{t('Check access again')}</button>{accessError&&<p role="alert">{localizeError(accessError)}</p>}</>}
+       {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={copyDiagnostics}>{t('Copy diagnostics')}</button></>}
+       {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
+     </section>
+     {authorized && <section className="panel" aria-label={t('Project selection')}><h2>{t('Projects')}</h2>
+       {projects.kind === 'loading' && <p role="status">{t('Loading projects…')}</p>}
+       {projects.kind === 'error' && <><p role="alert">{localizeError(projects.message)}</p><button onClick={()=>{setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}>{t('Retry loading projects')}</button></>}
+       {projects.kind === 'ready' && (projects.items.length ? <label>{t('Project')} <select aria-label={t('Project')} value={project || ''} onChange={event=>chooseProject(event.target.value)}><option value="">{t('Choose project')}</option>{projects.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>{t('No projects yet.')}</p>)}
+       {(canCreate||canEdit&&projectKnown&&projectActive) && <div className="inline">{canCreate&&<button onClick={()=>navigate('/app/discover/new')}>{t('New project')}</button>}{canEdit&&projectKnown&&projectActive&&<button onClick={()=>navigate('/app/discover/edit')}>{t('Edit offer')}</button>}</div>}
+     </section>}
+     </div>
+diff --git a/services/live/client.ts b/services/live/client.ts
+index 1d4d1b2..efcddab 100644
+--- a/services/live/client.ts
++++ b/services/live/client.ts
+@@ -13,20 +13,22 @@ export function describeLiveError(error: unknown): string {
+     : error.status === 403 ? 'You do not have permission for this action.'
+     : error.status === 404 ? 'The selected item was not found in this workspace.'
+     : error.status === 429 || error.status >= 500 || error.retryable ? 'Service temporarily unavailable. Retry after checking the status.'
+     : 'Review the entered values and try again.';
+   return error.requestId ? `${guidance} Request ID: ${error.requestId}` : guidance;
+ }
+ 
+ /** A request was aborted because the scope changed. Normal, never an error state. */
+ export class LiveCancelled extends Error {}
+ 
++export interface AccessDenied {scope: string; workspace: string;}
++
+ export interface LiveRequest {
+   path: string;
+   method?: string;
+   token?: string;
+   scope: string;
+   signal?: AbortSignal;
+   body?: unknown;
+   formData?: FormData;
+   idempotencyKey?: string;
+   ifMatch?: string;
+@@ -41,50 +43,59 @@ async function bodyOf(response: {json: () => Promise<unknown>}): Promise<Record<
+   }
+ }
+ 
+ /**
+  * The API base URL is resolved server-side and threaded down through `DataModeProvider`. Without it
+  * a live read would be sent to the app's own origin (`fetch(path)`) instead of the API. The default
+  * `''` keeps the path used as-is for callers that pass no base URL.
+  */
+ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '') {
+   const root = baseUrl.replace(/\/$/, '');
++  const accessListeners = new Set<(event: AccessDenied) => void>();
++  function notifyAccessDenied(path: string, scope: string, status: number, signal?: AbortSignal) {
++    const workspace = path.match(/^\/v1\/workspaces\/([^/?]+)(?:[/?]|$)/)?.[1];
++    if (!workspace || signal?.aborted || ![403, 404].includes(status)) return;
++    for (const listener of accessListeners) listener({workspace, scope});
++  }
+   return {
++    subscribeAccessDenied(listener: (event: AccessDenied) => void): () => void {
++      accessListeners.add(listener);
++      return () => {accessListeners.delete(listener);};
++    },
+     async requestContent({path, token, scope, signal}: Pick<LiveRequest,'path'|'token'|'scope'|'signal'>): Promise<{text:string;contentType:string}> {
+-      void scope;
+       let response: Awaited<ReturnType<typeof fetch>>;
+       try {
+         response = await fetchImpl(`${root}${path}`, {method:'GET',
+           headers:{Accept:'text/csv, text/plain',...(token?{Authorization:`Bearer ${token}`}:{})}, signal});
+       } catch (err) {
+         if (err instanceof Error && err.name === 'AbortError') throw new LiveCancelled('cancelled');
+         throw new LiveError('request failed','NETWORK_ERROR',0,'',true);
+       }
+       if (!response.ok) {
+         const errorBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
++        notifyAccessDenied(path, scope, response.status, signal);
+         throw new LiveError(typeof errorBody.message==='string'?errorBody.message:'request failed',
+           typeof errorBody.code==='string'?errorBody.code:'UNKNOWN_ERROR', response.status,
+           typeof errorBody.request_id==='string'?errorBody.request_id:response.headers.get('X-Request-ID')||'',
+           errorBody.retryable===true);
+       }
+       const contentType=response.headers.get('Content-Type')||'';
+       if (!contentType.startsWith('text/csv')&&!contentType.startsWith('text/plain'))
+         throw new LiveError('Invalid export content','INVALID_CONTENT',response.status,
+           response.headers.get('X-Request-ID')||'',false);
+       const text=await response.text();
+       if (new TextEncoder().encode(text).byteLength>1_000_000)
+         throw new LiveError('Export exceeds client size limit','INVALID_CONTENT',response.status,
+           response.headers.get('X-Request-ID')||'',false);
+       return {text,contentType};
+     },
+     async request<T>({path, method = 'GET', token, scope, signal, body, formData, idempotencyKey, ifMatch}: LiveRequest): Promise<T> {
+-      void scope;
+       const headers: Record<string, string> = {Accept: 'application/json'};
+       if (token) headers.Authorization = `Bearer ${token}`;
+       if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
+       if (ifMatch) headers['If-Match'] = ifMatch;
+       if (body !== undefined && formData !== undefined) throw new LiveError('ambiguous request body', 'INVALID_REQUEST', 0, '', false);
+       let payload: string | FormData | undefined = formData;
+       if (body !== undefined) {
+         headers['Content-Type'] = 'application/json';
+         payload = JSON.stringify(body);
+       }
+@@ -94,20 +105,21 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '')
+       } catch (err) {
+         if (err instanceof Error && err.name === 'AbortError') throw new LiveCancelled('cancelled');
+         throw new LiveError('request failed', 'NETWORK_ERROR', 0, '', true);
+       }
+       if (!response.ok) {
+         const errorBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
+         const code = typeof errorBody.code === 'string' ? errorBody.code : 'UNKNOWN_ERROR';
+         const message = typeof errorBody.message === 'string' ? errorBody.message : 'request failed';
+         const headerId = response.headers?.get('X-Request-ID') || '';
+         const requestId = typeof errorBody.request_id === 'string' ? errorBody.request_id : headerId;
++        notifyAccessDenied(path, scope, response.status, signal);
+         throw new LiveError(message, code, response.status, requestId, errorBody.retryable === true, response.headers?.get('Retry-After') || undefined);
+       }
+       if (response.status === 204) return undefined as T;
+       const responseBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
+       if (responseBody.data_mode !== 'live' || typeof responseBody.request_id !== 'string' || !Object.hasOwn(responseBody, 'data')) {
+         throw new LiveError('Invalid live response', 'INVALID_ENVELOPE', response.status, response.headers?.get('X-Request-ID') || '', false);
+       }
+       return responseBody.data as T;
+     },
+   };
+diff --git a/services/worker/tests/fixtures/audit_access_revocation.py b/services/worker/tests/fixtures/audit_access_revocation.py
+new file mode 100644
+index 0000000..67eccdd
+--- /dev/null
++++ b/services/worker/tests/fixtures/audit_access_revocation.py
+@@ -0,0 +1,32 @@
++"""U05 fictional setup/readback; only existing owner_dsn owned Docker guard."""
++import json
++import sys
++import psycopg
++from tests.fixtures.run_browser_research import owner_dsn, WORKSPACE
++USER = 'e0000000-0000-4000-8000-000000000002'
++MEMBER = 'e0000000-0000-4000-8000-000000000003'
++OTHER = 'e0000000-0000-4000-8000-000000000101'
++
++def main():
++    action = sys.argv[1]
++    if action not in ('reset', 'inspect', 'cleanup'):
++        raise ValueError('unsupported fixture action')
++    with psycopg.connect(owner_dsn()) as db:
++        if db.execute('SELECT name FROM workspaces WHERE id=%s', (WORKSPACE,)).fetchone() != ('E2E fixture workspace',):
++            raise RuntimeError('unknown fictional workspace')
++        if action in ('reset', 'cleanup'):
++            db.execute("UPDATE memberships SET active=true,roles='{operator}',version=1 WHERE id=%s AND user_id=%s AND workspace_id=%s", (MEMBER, USER, WORKSPACE))
++            db.execute("UPDATE workspace_preferences SET locale='en' WHERE workspace_id=%s AND user_id=%s", (WORKSPACE, USER))
++            if action == 'reset':
++                db.execute("INSERT INTO workspaces(id,name,data_mode) VALUES (%s,'Other U05 fixture','live') ON CONFLICT DO NOTHING", (OTHER,))
++                db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES ('e0000000-0000-4000-8000-000000000119',%s,%s,'{operator}',true) ON CONFLICT(id) DO UPDATE SET active=true,roles='{operator}'", (OTHER, USER))
++        if action == 'cleanup':
++            db.execute('DELETE FROM memberships WHERE id=%s AND workspace_id=%s AND user_id=%s', ('e0000000-0000-4000-8000-000000000119', OTHER, USER))
++            db.execute("DELETE FROM workspaces WHERE id=%s AND name='Other U05 fixture' AND NOT EXISTS(SELECT 1 FROM memberships WHERE workspace_id=%s) AND NOT EXISTS(SELECT 1 FROM projects WHERE workspace_id=%s)", (OTHER, OTHER, OTHER))
++        row = db.execute('SELECT active,roles,version FROM memberships WHERE id=%s', (MEMBER,)).fetchone()
++        print(json.dumps({'fixture_only': True, 'active': row[0], 'roles': row[1], 'version': row[2],
++            'users': db.execute('SELECT count(*) FROM users').fetchone()[0],
++            'memberships': db.execute('SELECT count(*) FROM memberships').fetchone()[0],
++            'audit_rows': db.execute('SELECT count(*) FROM audit_events').fetchone()[0]}))
++if __name__ == '__main__':
++    main()
+diff --git a/tests/audit-access-denial.test.mjs b/tests/audit-access-denial.test.mjs
+new file mode 100644
+index 0000000..cf4213e
+--- /dev/null
++++ b/tests/audit-access-denial.test.mjs
+@@ -0,0 +1,23 @@
++import {test} from 'node:test';
++import assert from 'node:assert/strict';
++import {loadModule} from './ts-loader.mjs';
++const {createLiveClient,LiveError}=await loadModule('services/live/client.ts');
++const error=status=>new Response(JSON.stringify({code:status===404?'NOT_FOUND':'FORBIDDEN',message:'denied',request_id:'fixture-id',retryable:false}),{status,headers:{'Content-Type':'application/json'}});
++for(const method of ['request','requestContent'])test(`U05 ${method} emits a scoped denial without changing its error or replaying`,async()=>{
++ let calls=0;const client=createLiveClient(async()=>{calls++;return error(404);});const events=[];
++ const stop=client.subscribeAccessDenied(event=>events.push(event));
++ await assert.rejects(client[method]({path:'/v1/workspaces/A/jobs/missing',scope:'current-generation',token:'private-token'}),e=>e instanceof LiveError&&e.status===404&&e.requestId==='fixture-id');
++ assert.equal(calls,1);assert.deepEqual(events,[{workspace:'A',scope:'current-generation'}]);assert.equal(JSON.stringify(events).includes('private-token'),false);
++ stop();await assert.rejects(client[method]({path:'/v1/workspaces/A/jobs/missing',scope:'later-generation'}));assert.equal(events.length,1);
++});
++test('U05 observer only requests membership checks for workspace-scoped 403/404',async()=>{
++ let status=403;const client=createLiveClient(async()=>error(status)),events=[];client.subscribeAccessDenied(e=>events.push(e));
++ for(const path of ['/v1/workspaces','/v1/workspaces?offset=0','/v1/unknown'])await assert.rejects(client.request({path,scope:'current'}));
++ assert.deepEqual(events,[]);
++ for(status of [401,409,412,429,500])await assert.rejects(client.request({path:'/v1/workspaces/A/buyers',scope:'current'}));
++ assert.deepEqual(events,[]);status=403;await assert.rejects(client.request({path:'/v1/workspaces/A/buyers',scope:'current'}));assert.equal(events.length,1);
++});
++test('U05 an already aborted response cannot trigger a current access check',async()=>{
++ const controller=new AbortController(),client=createLiveClient(async()=>{controller.abort();return error(404);}),events=[];client.subscribeAccessDenied(e=>events.push(e));
++ await assert.rejects(client.request({path:'/v1/workspaces/A/buyers',scope:'old',signal:controller.signal}));assert.deepEqual(events,[]);
++});
+diff --git a/tests/e2e/audit-access-revocation.spec.ts b/tests/e2e/audit-access-revocation.spec.ts
+new file mode 100644
+index 0000000..7c3f285
+--- /dev/null
++++ b/tests/e2e/audit-access-revocation.spec.ts
+@@ -0,0 +1,137 @@
++import {expect,test,type Page} from '@playwright/test';
++import {execFile} from 'node:child_process';
++import {promisify} from 'node:util';
++import {resolve} from 'node:path';
++import {signInWorkbench,workspace,project,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
++const other='e0000000-0000-4000-8000-000000000101';
++const member='e0000000-0000-4000-8000-000000000003';
++async function fixture(action='inspect',script='audit_access_revocation.py'){
++ const cwd=resolve('services/worker');return JSON.parse((await promisify(execFile)(resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python'),[`tests/fixtures/${script}`,action],{cwd,timeout:30_000})).stdout);
++}
++async function changeAccess(page:Page,active=false,roles=['operator']){
++ const response=await page.request.patch(`http://127.0.0.1:8000/v1/workspaces/${workspace}/memberships/${member}`,{headers:{Authorization:'Bearer fixture-admin','If-Match':'"1"','Idempotency-Key':crypto.randomUUID()},data:{active,roles,reason:'U05 fictional access change'}});
++ expect(response.status()).toBe(200);return (await response.json()).data;
++}
++async function denied(page:Page){
++ const headers={Authorization:'Bearer fixture-access'};
++ const read=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/projects`,{headers});
++ expect(read.status()).toBe(404);expect((await read.json()).code).toBe('NOT_FOUND');
++ const write=await page.request.patch(`http://127.0.0.1:8000/v1/workspaces/${workspace}/preferences`,{headers:{...headers,'If-Match':'"1"','Idempotency-Key':crypto.randomUUID()},data:{locale:'zh-HK'}});
++ expect(write.status()).toBe(404);return {read:read.status(),write:write.status()};
++}
++async function cleared(page:Page){
++ await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveCount(0);
++ await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue('');
++ await expect(page.getByRole('region',{name:/^(Buyer results|買家結果)$/})).toHaveCount(0);
++ const url=new URL(page.url());for(const key of ['workspace','project','profile','bulk_job','bulk_manifest','draft','draft_job'])expect(url.searchParams.has(key)).toBe(false);
++ await expect(page.getByRole('button',{name:/^(Sign out|登出)$/})).toBeVisible();
++}
++async function proof(name:string,value:unknown){await test.info().attach(name,{body:JSON.stringify(value,null,2),contentType:'application/json'});}
++test.beforeEach(async({page})=>{await page.addInitScript(()=>localStorage.setItem('buyeros.locale','en'));await resetWorkbenchFixtureRateWindows();await fixture('reset');});
++test.afterEach(async()=>{await fixture('cleanup');});
++
++for(const locale of ['en','zh-HK'] as const)test(`U05 revoked open-page read clears private scope ${locale}`,async({page})=>{
++ if(locale==='zh-HK')await page.setViewportSize({width:390,height:844});
++ await signInWorkbench(page,true,'access',`/app/discover?workspace=${workspace}&project=${project}`);
++ await page.getByRole('combobox',{name:/^(Language|語言)$/}).first().selectOption(locale);
++ const buyers=page.getByRole('region',{name:/^(Buyer results|買家結果)$/});await expect(buyers.getByRole('checkbox',{name:/^(Select |選取 )/}).first()).toBeVisible();
++ const before=await fixture();const changed=await changeAccess(page);const statuses=await denied(page);
++ const failed=page.waitForResponse(r=>r.url().includes(`/workspaces/${workspace}/`)&&r.status()===404);
++ await buyers.getByRole('button',{name:/^(Refresh results|更新結果)$/}).click();await failed;await cleared(page);
++ await page.getByRole('combobox',{name:/^(Language|語言)$/}).first().selectOption(locale==='en'?'zh-HK':'en');
++ await page.getByRole('button',{name:/^(Check access again|重新檢查存取)$/}).click();await cleared(page);
++ const after=await fixture();expect(after.active).toBe(false);expect(after.version).toBe(2);expect(after.users).toBe(before.users);expect(after.memberships).toBe(before.memberships);
++ await page.getByRole('combobox',{name:/^(Language|語言)$/}).first().selectOption(locale);await expect(page.locator('html')).toHaveAttribute('lang',locale);
++ await proof(`U05 revoked read ${locale}`,{before,changed,statuses,after});await page.screenshot({path:`test-results/u05-revoked-${locale}.png`,fullPage:true});
++});
++
++test('U05 explicit recheck cancels held pre-withdrawal buyer rows',async({page})=>{
++ await signInWorkbench(page,true,'access',`/app/discover?workspace=${workspace}&project=${project}`);
++ const buyers=page.getByRole('region',{name:'Buyer results',exact:true});await expect(buyers.getByRole('checkbox',{name:/^Select /}).first()).toBeVisible();
++ let release=()=>{},started=()=>{},completed=()=>{};const finished=new Promise<void>(r=>completed=r),held=new Promise<void>(r=>release=r),received=new Promise<void>(r=>started=r);
++ await page.route(`**/v1/workspaces/${workspace}/projects/${project}/buyers?**`,async route=>{const response=await route.fetch();expect(response.status()).toBe(200);started();await held;await route.fulfill({response}).catch(()=>{});completed();});
++ try{await buyers.getByRole('button',{name:'Refresh results',exact:true}).click();await received;await changeAccess(page);
++ await page.getByRole('button',{name:'Check access again',exact:true}).click();await cleared(page);release();await finished;await cleared(page);
++ await expect(page.getByText('Fixture company',{exact:false})).toHaveCount(0);
++ await proof('U05 held rows',{active:(await fixture()).active,old_response_status:200,scope_cleared:true});
++ }finally{release();}
++});
++
++test('U05 older access check cannot restore withdrawn A after another recheck',async({page})=>{
++ await signInWorkbench(page,true,'access');let release=()=>{},started=()=>{},completed=()=>{},hold=true;
++ const finished=new Promise<void>(r=>completed=r),held=new Promise<void>(r=>release=r),received=new Promise<void>(r=>started=r);
++ await page.route('**/v1/workspaces?**',async route=>{if(!hold)return route.continue();hold=false;const response=await route.fetch();expect(response.status()).toBe(200);started();await held;await route.fulfill({response}).catch(()=>{});completed();});
++ try{await page.getByRole('button',{name:'Check access again',exact:true}).click();await received;await changeAccess(page);
++ await page.getByRole('button',{name:'Check access again',exact:true}).click();await cleared(page);release();await finished;await cleared(page);
++ await expect(page.getByRole('combobox',{name:'Workspace',exact:true}).getByRole('option',{name:'E2E fixture workspace',exact:true})).toHaveCount(0);
++ }finally{release();}
++});
++
++test('U05 delayed A access result cannot clear current B',async({page})=>{
++ await signInWorkbench(page,true,'access');let release=()=>{},started=()=>{},completed=()=>{},hold=true;
++ const finished=new Promise<void>(r=>completed=r),held=new Promise<void>(r=>release=r),received=new Promise<void>(r=>started=r);
++ await changeAccess(page);
++ await page.route('**/v1/workspaces?**',async route=>{if(!hold)return route.continue();hold=false;const response=await route.fetch();started();await held;await route.fulfill({response}).catch(()=>{});completed();});
++ try{await page.getByRole('button',{name:'Check access again',exact:true}).click();await received;
++ await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(other);
++ await expect(page.getByRole('combobox',{name:'Workspace',exact:true})).toHaveValue(other);release();await finished;
++ await expect(page.getByRole('combobox',{name:'Workspace',exact:true})).toHaveValue(other);
++ expect(new URL(page.url()).searchParams.get('workspace')).toBe(other);
++ }finally{release();}
++});
++
++test('U05 denial during a held access check schedules a fresh membership read',async({page})=>{
++ await signInWorkbench(page,true,'access',`/app/discover?workspace=${workspace}&project=${project}`);
++ const buyers=page.getByRole('region',{name:'Buyer results',exact:true});await expect(buyers.getByRole('checkbox',{name:/^Select /}).first()).toBeVisible();
++ let release=()=>{},started=()=>{},completed=()=>{},hold=true;
++ const held=new Promise<void>(r=>release=r),received=new Promise<void>(r=>started=r),finished=new Promise<void>(r=>completed=r);
++ await page.route('**/v1/workspaces?**',async route=>{if(!hold)return route.continue();hold=false;const response=await route.fetch();expect(response.status()).toBe(200);started();await held;await route.fulfill({response}).catch(()=>{});completed();});
++ try{await page.getByRole('button',{name:'Check access again',exact:true}).click();await received;await changeAccess(page);
++ const denied=page.waitForResponse(r=>r.url().includes(`/workspaces/${workspace}/`)&&r.status()===404);
++ await buyers.getByRole('button',{name:'Refresh results',exact:true}).click();await denied;
++ release();await finished;await cleared(page);
++ await proof('U05 denial while checking',{active:(await fixture()).active,pre_withdrawal_directory:200,scope_cleared:true});
++ }finally{release();}
++});
++
++test('U05 forbidden save rechecks downgraded role while retaining dirty Unicode draft',async({page})=>{
++ const seeded=await fixture('create','audit_drafts.py');await signInWorkbench(page,true,'access',`/app/outreach?workspace=${workspace}&project=${project}&draft=${seeded.draft}&draft_job=${seeded.job}`);
++ const editor=page.getByRole('region',{name:'Open draft',exact:true});await expect(editor.getByRole('textbox',{name:'Subject',exact:true})).toHaveValue(seeded.subject);
++ await editor.getByRole('textbox',{name:'Subject',exact:true}).fill('未保存主旨🙂');await editor.getByRole('textbox',{name:'Body',exact:true}).fill('保留本地內容🙂');await editor.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
++ await changeAccess(page,true,['viewer']);const fail=page.waitForResponse(r=>r.request().method()==='PATCH'&&r.url().includes('/drafts/')&&r.status()===403);
++ await editor.getByRole('button',{name:'Save revision',exact:true}).click();await fail;
++ await expect(page.getByText('Role: viewer',{exact:true})).toBeVisible();await expect(page.getByRole('combobox',{name:'Workspace',exact:true})).toHaveValue(workspace);
++ await expect(editor.getByRole('textbox',{name:'Subject',exact:true})).toHaveValue('未保存主旨🙂');await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue('保留本地內容🙂');await expect(editor.getByRole('combobox',{name:'Language',exact:true})).toHaveValue('zh-HK');await expect(editor).toHaveAttribute('data-live-unsaved','true');
++ const stored=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${seeded.draft}`,{headers:{Authorization:'Bearer fixture-admin'}});expect(stored.status()).toBe(200);expect((await stored.json()).data.subject).toBe(seeded.subject);
++ await proof('U05 denied write unchanged',{membership:await fixture(),stored:(await stored.json()).data});
++});
++
++test('U05 revoked save is denied without creating a revision or replaying',async({page})=>{
++ const seeded=await fixture('create','audit_drafts.py');await signInWorkbench(page,true,'access',`/app/outreach?workspace=${workspace}&project=${project}&draft=${seeded.draft}&draft_job=${seeded.job}`);
++ const editor=page.getByRole('region',{name:'Open draft',exact:true});await expect(editor.getByRole('textbox',{name:'Subject',exact:true})).toHaveValue(seeded.subject);
++ await editor.getByRole('textbox',{name:'Subject',exact:true}).fill('未保存主旨🙂');await editor.getByRole('textbox',{name:'Body',exact:true}).fill('保留本地內容🙂');await editor.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
++ let writes=0;page.on('request',r=>{if(r.method()==='PATCH'&&r.url().includes('/drafts/'))writes++;});
++ await changeAccess(page);const fail=page.waitForResponse(r=>r.request().method()==='PATCH'&&r.url().includes('/drafts/')&&r.status()===404);
++ await editor.getByRole('button',{name:'Save revision',exact:true}).click();await fail;
++ await cleared(page);expect(writes).toBe(1);
++ const stored=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${seeded.draft}`,{headers:{Authorization:'Bearer fixture-admin'}});expect(stored.status()).toBe(200);expect((await stored.json()).data.subject).toBe(seeded.subject);expect((await stored.json()).data.revision_number).toBe(1);
++ await proof('U05 revoked write unchanged',{membership:await fixture(),stored:(await stored.json()).data});
++});
++
++test('U05 missing job does not revoke an active membership',async({page})=>{
++ let checks=0;page.on('request',r=>{if(new URL(r.url()).pathname==='/v1/workspaces')checks++;});
++ await signInWorkbench(page,true,'access');const before=checks;
++ await page.getByRole('button',{name:'Operations',exact:true}).click();
++ const input=page.getByRole('textbox',{name:'Job ID',exact:true});await input.fill('f9999999-0000-4000-8000-000000000000');
++ await page.getByRole('button',{name:'Load job',exact:true}).click();await expect.poll(()=>checks).toBeGreaterThan(before);
++ await expect(page.getByRole('combobox',{name:'Workspace',exact:true})).toHaveValue(workspace);expect((await fixture()).active).toBe(true);
++});
++
++test('U05 failed access recheck preserves scope and supports explicit recovery',async({page})=>{
++ await signInWorkbench(page,true,'access');let fail=true;
++ await page.route('**/v1/workspaces?**',async route=>{if(!fail)return route.continue();await route.fulfill({status:500,contentType:'application/json',body:JSON.stringify({code:'INTERNAL_ERROR',message:'fixture failure',request_id:'12345678-1234-4123-8123-123456789012',retryable:true})});});
++ await page.getByRole('button',{name:'Check access again',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Service temporarily unavailable.'})).toBeVisible();
++ await expect(page.getByRole('combobox',{name:'Workspace',exact:true})).toHaveValue(workspace);fail=false;
++ await page.getByRole('button',{name:'Check access again',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Service temporarily unavailable.'})).toHaveCount(0);
++ expect((await fixture()).active).toBe(true);
++});

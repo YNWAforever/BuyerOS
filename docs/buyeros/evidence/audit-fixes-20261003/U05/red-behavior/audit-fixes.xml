@@ -1,0 +1,51 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="73.34777">
+<testsuite name="audit-access-revocation.spec.ts" timestamp="2026-10-04T02:13:10.481Z" hostname="" tests="1" failures="1" skipped="0" time="14.85" errors="0">
+<testcase name="U05 revoked open-page read clears private scope en" classname="audit-access-revocation.spec.ts" time="14.85">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveCount(expected) failed" type="expect.toHaveCount">
+<![CDATA[  audit-access-revocation.spec.ts:33:45 › U05 revoked open-page read clears private scope en ───────
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('combobox', { name: /^(Project|專案)$/ })
+    Expected: 0
+    Received: 1
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('combobox', { name: /^(Project|專案)$/ }) with timeout 5000ms
+      - waiting for getByRole('combobox', { name: /^(Project|專案)$/ })
+        14 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      21 | }
+      22 | async function cleared(page:Page){
+    > 23 |  await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveCount(0);
+         |                                                                   ^
+      24 |  await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue('');
+      25 |  await expect(page.getByRole('region',{name:/^(Buyer results|買家結果)$/})).toHaveCount(0);
+      26 |  const url=new URL(page.url());for(const key of ['workspace','project','profile'])expect(url.searchParams.has(key)).toBe(false);
+        at cleared (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-access-revocation.spec.ts:23:67)
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-access-revocation.spec.ts:40:96
+
+    Error Context: ..\..\test-results\audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

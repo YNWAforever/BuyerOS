@@ -1,0 +1,70 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="1" time="141.054811">
+<testsuite name="audit-access-revocation.spec.ts" timestamp="2026-10-04T02:07:18.988Z" hostname="" tests="1" failures="0" skipped="0" time="63.832" errors="1">
+<testcase name="U05 revoked open-page read clears private scope en" classname="audit-access-revocation.spec.ts" time="63.832">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  audit-access-revocation.spec.ts:33:45 › U05 revoked open-page read clears private scope en ───────
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: /^(Sign in|登入)$/ })
+        - locator resolved to <button>Sign in</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <div data-vinext-dev-error-overlay="" id="__vinext_dev_error_overlay_root"></div> intercepts pointer events
+        - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <div data-vinext-dev-error-overlay="" id="__vinext_dev_error_overlay_root"></div> intercepts pointer events
+        - retrying click action
+          - waiting 100ms
+        94 × waiting for element to be visible, enabled and stable
+           - element is visible, enabled and stable
+           - scrolling into view if needed
+           - done scrolling
+           - <div data-vinext-dev-error-overlay="" id="__vinext_dev_error_overlay_root"></div> intercepts pointer events
+         - retrying click action
+           - waiting 500ms
+
+
+       at fixtures\journey-input.ts:37
+
+      35 |   }
+      36 |   return {mode,install,
+    > 37 |     async activate(target:Locator){if(mode==='pointer')return target.click();await reach(target,'activate');await target.page().keyboard.press('Enter');},
+         |                                                                      ^
+      38 |     async fill(target:Locator,value:string){if(mode==='pointer')return target.fill(value);await reach(target,'type');await target.page().keyboard.press('ControlOrMeta+A');await target.page().keyboard.insertText(value);await expect(target).toHaveValue(value);},
+      39 |     async check(target:Locator,checked=true){if(mode==='pointer')return checked?target.check():target.uncheck();await reach(target,'checkbox');if(await target.isChecked()!==checked)await target.page().keyboard.press('Space');if(checked)await expect(target).toBeChecked();else await expect(target).not.toBeChecked();},
+      40 |     async choose(target:Locator,value:string){
+        at Object.activate (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\journey-input.ts:37:70)
+        at signInWorkbench (C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\fixtures\workbench-auth.ts:45:15)
+        at C:\Users\laich\.codex\worktrees\audit-fixes-20261003\BuyerOS\tests\e2e\audit-access-revocation.spec.ts:35:2
+
+    Error Context: ..\..\test-results\audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-access-revocation-U0-148a5-ead-clears-private-scope-en\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>
