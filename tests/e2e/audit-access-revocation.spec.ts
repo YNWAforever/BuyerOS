@@ -80,6 +80,20 @@ test('U05 delayed A access result cannot clear current B',async({page})=>{
  }finally{release();}
 });
 
+test('U05 denial during a held access check schedules a fresh membership read',async({page})=>{
+ await signInWorkbench(page,true,'access',`/app/discover?workspace=${workspace}&project=${project}`);
+ const buyers=page.getByRole('region',{name:'Buyer results',exact:true});await expect(buyers.getByRole('checkbox',{name:/^Select /}).first()).toBeVisible();
+ let release=()=>{},started=()=>{},completed=()=>{},hold=true;
+ const held=new Promise<void>(r=>release=r),received=new Promise<void>(r=>started=r),finished=new Promise<void>(r=>completed=r);
+ await page.route('**/v1/workspaces?**',async route=>{if(!hold)return route.continue();hold=false;const response=await route.fetch();expect(response.status()).toBe(200);started();await held;await route.fulfill({response}).catch(()=>{});completed();});
+ try{await page.getByRole('button',{name:'Check access again',exact:true}).click();await received;await changeAccess(page);
+ const denied=page.waitForResponse(r=>r.url().includes(`/workspaces/${workspace}/`)&&r.status()===404);
+ await buyers.getByRole('button',{name:'Refresh results',exact:true}).click();await denied;
+ release();await finished;await cleared(page);
+ await proof('U05 denial while checking',{active:(await fixture()).active,pre_withdrawal_directory:200,scope_cleared:true});
+ }finally{release();}
+});
+
 test('U05 forbidden save rechecks downgraded role while retaining dirty Unicode draft',async({page})=>{
  const seeded=await fixture('create','audit_drafts.py');await signInWorkbench(page,true,'access',`/app/outreach?workspace=${workspace}&project=${project}&draft=${seeded.draft}&draft_job=${seeded.job}`);
  const editor=page.getByRole('region',{name:'Open draft',exact:true});await expect(editor.getByRole('textbox',{name:'Subject',exact:true})).toHaveValue(seeded.subject);

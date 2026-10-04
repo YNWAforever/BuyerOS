@@ -62,7 +62,7 @@ export function LiveWorkspace() {
   const [selectionError, setSelectionError] = useState('');
   const [workspaceRefresh,setWorkspaceRefresh]=useState(0);
   const [accessError,setAccessError]=useState('');
-  const checkingAccess=useRef(false),allowAutoSelection=useRef(true);
+  const checkingAccess=useRef(false),allowAutoSelection=useRef(true),pendingAccessCheck=useRef<string|null>(null);
   const [projectRefresh, setProjectRefresh] = useState(0);
   const [locale, setLocale] = useState<'en'|'zh-HK'>('en');
   const [prefVersion,setPrefVersion]=useState(1),[localeSaving,setLocaleSaving]=useState(false),[localeError,setLocaleError]=useState('');
@@ -112,7 +112,8 @@ export function LiveWorkspace() {
     setWorkspaceRefresh(value=>value+1);
   }
   useEffect(()=>client.subscribeAccessDenied(event=>{
-    if(!session.isCurrent(event.scope)||event.workspace!==session.current().workspace||checkingAccess.current)return;
+    if(!session.isCurrent(event.scope)||event.workspace!==session.current().workspace)return;
+    if(checkingAccess.current){pendingAccessCheck.current=event.scope;return;}
     checkingAccess.current=true;
     setWorkspaceRefresh(value=>value+1);
   }),[client,session]);
@@ -148,7 +149,12 @@ export function LiveWorkspace() {
       if (error instanceof LiveError && error.status === 401) {session.setToken(undefined);return;}
       const message=describeLiveError(error);setAccessError(message);
       setWorkspaces(previous=>previous.kind==='ready'?previous:{kind:'error',message});
-    }).finally(()=>{if(!own.signal.aborted&&session.isCurrent(identity))checkingAccess.current=false;});
+    }).finally(()=>{
+      if(own.signal.aborted||!session.isCurrent(identity))return;
+      checkingAccess.current=false;
+      const followup=pendingAccessCheck.current===identity;pendingAccessCheck.current=null;
+      if(followup)setWorkspaceRefresh(value=>value+1);
+    });
     return () => own.abort();
   }, [client,router,session,snapshot.authenticated,snapshot.scope.actor,snapshot.identity,workspaceRefresh]);
   useEffect(()=>{
