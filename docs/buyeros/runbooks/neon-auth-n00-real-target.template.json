@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "proposal": "buyeros-neon-auth-n00-20261004",
+  "sourceSha": null,
+  "projectId": null,
+  "branchId": null,
+  "authId": null,
+  "orgId": "org-soft-sunset-25251479",
+  "name": "buyeros-neon-auth-n00-20261004",
+  "regionId": "aws-ap-southeast-1",
+  "creationMode": null,
+  "createdAt": null,
+  "expiresAt": null,
+  "readback": null,
+  "auth": {
+    "baseUrl": null,
+    "issuer": null,
+    "audience": null,
+    "jwksUrl": null,
+    "algorithm": null,
+    "keyType": null,
+    "curve": null
+  }
+}

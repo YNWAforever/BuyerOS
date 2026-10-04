@@ -41,3 +41,24 @@ Do not promise OAuth/state/CSRF/rotation/refresh/platform acceptance from the cu
 ## Approval required
 
 The latest execution request authorizes local repairs, but real external configuration/accounts require specific authorization. Earlier hosted preview resources were cleaned and their time/build limits expired. Approve this fresh empty-project/Auth setup, one human-operated Google test identity, the200-check/two-hour/US$0 limits and cleanup before any mutation. No owner approval record is prefilled or fabricated.
+
+
+## Local preflight preparation (no external execution)
+
+The separate module scripts/neon-real-preflight.mjs and tests/neon-real-preflight.test.mjs validate this proposal's exact scope. The null-valued neon-auth-n00-real-target.template.json is deliberately unusable until new resources exist and authenticated provider readbacks have been inspected. It contains no approval record, credentials or guessed issuer/audience/JWKS. The preflight does not verify the authenticity of supplied metadata; synthetic unit metadata is never provider readback evidence.
+
+Run the inert config check with:
+
+~~~text
+node scripts/neon-real-preflight.mjs check docs/buyeros/runbooks/neon-auth-n00-real-target.template.json
+~~~
+
+Expected now: exit1 / N00_REAL_TARGET_REQUIRED. A populated valid config check still reports external_authorized:false, external_started:false, built_runtime_verified:false and N00_complete:false. It performs no HTTP, resource/account creation, linking, builds or deletion.
+
+After specific human authorization, initialize one RealRunJournal in a newly owned buyeros-n00-real-* directory under the OS temporary directory or test-results/neon-real-preflight, with the actual authorization reference/time. A string in this journal is provenance, not a grant of permission. Initialize before the first counted setup/readback check. Each outgoing request needs its own reserveRequest call **before** submission; setup, negative/error responses, each redirect hop, retry and reconciliation all consume budget. The existing fictional SDK runner is unchanged and does not use this journal. The actual SDK/browser/CLI request interception and runtime wiring are still unimplemented; do not begin real execution until every traffic path is counted. The code is a prepared guard component, not an assertion that real runtime traffic is already bounded.
+
+The journal uses exclusive creation, an exclusive writer lock, fsync and atomic replacement. Never reset/recreate it to regain budget. Up to180 setup/auth checks, with20 reserved for cleanup/reconciliation, total200; pending/unknown/resolved operations retain their reservations across process restart. The same operation ID cannot be blindly resubmitted; use a separately counted readback with a new reconciliation ID. There are two build reservations, each bounded to20minutes and remaining resource TTL. A crash during a writer lock fails closed as BUSY; inspect exact process/ownership and preserve the journal before manual lock recovery. It is not a tamper-proof ledger against a malicious local administrator.
+
+Bind only the observed new-empty project/branch/auth IDs and configured auth trust to the journal. Two-hour TTL derives from its recorded resource creation time. The current plan rejects an unexpected JWKS origin: inspect and review any genuine different-origin provider contract before changing that guard. It never substitutes issuer/audience from a URL or token. Runtime environment construction takes an explicitly supplied fresh random cookie secret (use32cryptographic random bytes encoded base64url), removes inherited DB/Auth0/provider variables, and supplies only the observed auth values. Build environment construction drops all runtime auth values. **This is environment-helper verification; neither new runtime config nor secrets have been exercised on built outputs.** A later separately compiled real-only overlay/diagnostic must consume them before that gate can pass.
+
+cleanupTargets returns IDs only after fresh matching readback (at most5minutes old), includes at most one bound new-directory test identity, and stays available after TTL. It does not delete anything. The executor must confirm ownership and absent/unknown outcomes using counted provider readbacks, implement deletion in the new-target scope only, and produce cleanup evidence. No real journal/target/account/secret has been created by these local tests.
