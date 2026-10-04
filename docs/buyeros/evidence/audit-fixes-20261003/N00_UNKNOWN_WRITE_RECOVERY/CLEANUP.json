@@ -1,0 +1,102 @@
+[
+  {
+    "target": "vercel",
+    "run": "7105abbccdde",
+    "label": "RED-old-proxy",
+    "owned_private_root_absent": true,
+    "proof": {
+      "fixture_only": true,
+      "private_root_removed": true,
+      "runtime_configuration_removed": true,
+      "owned_children_absent": true,
+      "owned_root_removal": {
+        "removed": true,
+        "marker_retained_until_children_removed": true,
+        "private_configuration_removed_first": true,
+        "transient_errors": []
+      },
+      "external_resources": 0,
+      "owned_journal_removed": true
+    }
+  },
+  {
+    "target": "vercel",
+    "run": "8105abbccdde",
+    "label": "first-green",
+    "owned_private_root_absent": true,
+    "proof": {
+      "fixture_only": true,
+      "private_root_removed": true,
+      "runtime_configuration_removed": true,
+      "owned_children_absent": true,
+      "owned_root_removal": {
+        "removed": true,
+        "marker_retained_until_children_removed": true,
+        "private_configuration_removed_first": true,
+        "transient_errors": []
+      },
+      "external_resources": 0,
+      "owned_journal_removed": true
+    }
+  },
+  {
+    "target": "portable",
+    "run": "9105abbccdde",
+    "label": "startup-failure",
+    "owned_private_root_absent": true,
+    "proof": {
+      "fixture_only": true,
+      "private_root_removed": true,
+      "runtime_configuration_removed": true,
+      "owned_children_absent": true,
+      "owned_root_removal": {
+        "removed": true,
+        "marker_retained_until_children_removed": true,
+        "private_configuration_removed_first": true,
+        "transient_errors": []
+      },
+      "external_resources": 0,
+      "owned_journal_removed": true
+    }
+  },
+  {
+    "target": "portable",
+    "run": "a105abbccdde",
+    "label": "final",
+    "owned_private_root_absent": true,
+    "proof": {
+      "fixture_only": true,
+      "private_root_removed": true,
+      "runtime_configuration_removed": true,
+      "owned_children_absent": true,
+      "owned_root_removal": {
+        "removed": true,
+        "marker_retained_until_children_removed": true,
+        "private_configuration_removed_first": true,
+        "transient_errors": []
+      },
+      "external_resources": 0,
+      "owned_journal_removed": true
+    }
+  },
+  {
+    "target": "vercel",
+    "run": "b105abbccdde",
+    "label": "final",
+    "owned_private_root_absent": true,
+    "proof": {
+      "fixture_only": true,
+      "private_root_removed": true,
+      "runtime_configuration_removed": true,
+      "owned_children_absent": true,
+      "owned_root_removal": {
+        "removed": true,
+        "marker_retained_until_children_removed": true,
+        "private_configuration_removed_first": true,
+        "transient_errors": []
+      },
+      "external_resources": 0,
+      "owned_journal_removed": true
+    }
+  }
+]

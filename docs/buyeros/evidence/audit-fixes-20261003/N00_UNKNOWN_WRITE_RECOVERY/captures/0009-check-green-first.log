@@ -1,0 +1,30 @@
+✔ proxy refuses arbitrary URLs, unowned servers and unbound journals before any request (52.4424ms)
+✔ HTTP reservation is durable and pending before the owned backend receives the request (77.9788ms)
+✔ SDK origin, session/challenge cookies and JWT headers survive relay without entering evidence (62.6077ms)
+✔ approved local callback302 is preserved manually, and an external redirect is blocked (77.2117ms)
+✔ committed POST with a lost response is not replayed after proxy and journal restart (115.8373ms)
+✔ budget exhaustion refuses dispatch and keeps cleanup reserve after restart (1740.2826ms)
+✔ expired target and over-size body fail closed without dispatching upstream (55.0592ms)
+✔ POST server500 retains an unknown write and timeout is bounded without automatic retry (156.9727ms)
+✔ read-only fixture budget inspection exposes counts without auth traffic or credential data (27.1387ms)
+✔ concurrent identical fixture POSTs share the in-flight barrier before upstream acceptance is known (65.923ms)
+✔ fixture cleanup control requires the exact local owner nonce and never forwards to backend (28.2109ms)
+✔ committed POST with a refused redirect stays unknown and is held after restart (100.9723ms)
+✔ committed PUT with a refused redirect stays unknown and is held after restart (104.0582ms)
+✔ committed PATCH with a refused redirect stays unknown and is held after restart (79.519ms)
+✔ committed DELETE with a refused redirect stays unknown and is held after restart (106.023ms)
+✔ a malformed redirect after POST acceptance preserves the write hold without retry (99.3354ms)
+✔ unknown one-use GET /fixture/auth/callback/google cannot be replayed (120.6642ms)
+✔ unknown one-use GET /fixture/auth/get-session cannot be replayed (87.7378ms)
+✔ reordered verifier query and renewed bearer keep the same unresolved intent (82.5991ms)
+✔ restart conservatively holds writes for an unresolved read without trusting receipt semantics (81.1814ms)
+✔ restart cannot erase a hold through legacy or corrupt receipt metadata (98.8214ms)
+✔ official pinned SDK social write sees unknown redirect once and retry is held (624.7739ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4309.117

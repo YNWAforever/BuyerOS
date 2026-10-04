@@ -1,0 +1,249 @@
+diff --git a/scripts/neon-counted-proxy.mjs b/scripts/neon-counted-proxy.mjs
+index d732925..0e08a71 100644
+--- a/scripts/neon-counted-proxy.mjs
++++ b/scripts/neon-counted-proxy.mjs
+@@ -2,7 +2,7 @@
+  * No external hostname/configuration, paid provider, or real account is accepted. */
+ import {createServer} from 'node:http';
+ import {createHash} from 'node:crypto';
+-import {readFileSync,writeFileSync} from 'node:fs';
++import {openSync,closeSync,writeFileSync,fsyncSync} from 'node:fs';
+ import {join} from 'node:path';
+ import {RealRunJournal} from './neon-real-preflight.mjs';
+ const owned=new WeakSet(),safeMethods=new Set(['GET','HEAD']);
+@@ -12,16 +12,10 @@ function deny(code,status=503){return Object.assign(new Error(code),{status});}
+ function address(server) {const value=server?.address?.();if(!owned.has(server)||!server.listening||!value||typeof value==='string'||value.address!=='127.0.0.1')throw deny('N00_FIXTURE_OWNED_BACKEND_REQUIRED');return 'http://127.0.0.1:'+value.port;}
+ export function createOwnedAuthServer(handler) {const server=createServer(handler);owned.add(server);return server;}
+ function unknownWrites(journal) {
+- const hashes=new Set();let all=false;
+- for(const record of journal.snapshot().requests.filter(v=>v.purpose==='auth'&&['pending','unknown'].includes(v.outcome))) {
+-  if(record.outcome==='pending'){all=true;continue;}
+-  try {
+-   if(!/^fixture-http-\d+\.json$/.test(record.evidenceRef))throw deny('N00_FIXTURE_EVIDENCE_REQUIRED');
+-   const evidence=JSON.parse(readFileSync(join(journal.root,record.evidenceRef),'utf8'));
+-   if(!safeMethods.has(evidence.method)){if(evidence.fingerprint)hashes.add(evidence.fingerprint);else all=true;}
+-  }catch {all=true;}
+- }
+- return {hashes,all};
++ // Old receipts do not authenticate method/intent metadata. A resumed unresolved
++ // reservation therefore holds every state-changing request until reconciliation.
++ // Reads remain available; corrupt/legacy receipt data cannot erase this hold.
++ return {hashes:new Set(),all:journal.snapshot().requests.some(record=>record.purpose==='auth'&&['pending','unknown'].includes(record.outcome))};
+ }
+ function respond(res,status,code) {if(!res.headersSent){res.statusCode=status;res.setHeader('Content-Type','application/json');res.setHeader('X-N00-Fixture-Only','true');}res.end(JSON.stringify({code,fixture_only:true}));}
+ async function bodyBytes(req) {
+@@ -45,12 +39,13 @@ export function createCountedAuthProxy({backend,journal,now=Date.now,timeoutMs=3
+   if(req.method==='POST'&&req.url==='/n00-fixture-stop'&&onStop){if(req.headers['x-n00-owner']!==stopNonce){respond(res,403,'N00_FIXTURE_STOP_OWNER_REFUSED');return;}res.once('finish',onStop);respond(res,200,'N00_FIXTURE_STOPPING');return;}
+   if(req.method==='GET'&&req.url==='/n00-fixture-budget'){const records=journal.snapshot().requests;res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify({fixture_only:true,external_requests:0,reserved:records.length,forwarded:metrics.forwarded,pending:records.filter(v=>v.outcome==='pending').length,rejected:records.filter(v=>v.outcome==='rejected').length,unknown:records.filter(v=>v.outcome==='unknown').length,limit:200,cleanup_reserve:20}));return;}
+   metrics.received++;let reservation,fingerprint=null,path=null,upstreamStarted=false,held=false;
+-  const method=req.method??'GET',write=!safeMethods.has(method);
++  const method=req.method??'GET';let write=!safeMethods.has(method);
+   function settle(outcome,status,reason) {
+    if(outcome==='unknown'&&write){if(fingerprint)blocked.hashes.add(fingerprint);else blocked.all=true;}
+    if(outcome==='unknown')metrics.unknown++;
+    const ref='fixture-http-'+reservation.sequence+'.json';
+-   writeFileSync(join(journal.root,ref),JSON.stringify({schemaVersion:1,fixture_only:true,sequence:reservation.sequence,method,path,fingerprint,status,reason,outcome},null,2)+'\n',{flag:'wx',mode:0o600});
++   const fd=openSync(join(journal.root,ref),'wx',0o600);
++   try {writeFileSync(fd,JSON.stringify({schemaVersion:1,fixture_only:true,sequence:reservation.sequence,method,path,state_changing:write,fingerprint,status,reason,outcome},null,2)+'\n');fsyncSync(fd);}finally {closeSync(fd);}
+    journal.settleRequest(reservation.operationId,outcome,ref);
+   }
+   try {
+@@ -60,13 +55,22 @@ export function createCountedAuthProxy({backend,journal,now=Date.now,timeoutMs=3
+    if(!req.url?.startsWith('/')||req.url.startsWith('//'))throw deny('N00_FIXTURE_PATH_REFUSED',400);
+    const url=new URL(req.url,upstream);path=url.pathname;
+    if(url.origin!==upstream||(!path.startsWith('/fixture/')&&path!=='/fixture-token')||/%|\\/.test(path))throw deny('N00_FIXTURE_PATH_REFUSED',400);
++   // Managed callbacks and verifier exchange consume one-use state even via GET.
++   write=write||path.startsWith('/fixture/auth/callback/')||(path==='/fixture/auth/get-session'&&url.searchParams.has('neon_auth_session_verifier'));
++   // One-use state is the intent: incidental query fields cannot turn an
++   // uncertain exchange into a new attempt. Values enter only the hash.
++   const query=path==='/fixture/auth/get-session'&&url.searchParams.has('neon_auth_session_verifier')
++    ?new URLSearchParams({neon_auth_session_verifier:url.searchParams.get('neon_auth_session_verifier')})
++    :path.startsWith('/fixture/auth/callback/')&&url.searchParams.has('state')
++     ?new URLSearchParams({state:url.searchParams.get('state')}):new URLSearchParams(url.searchParams);
++   query.sort();
+    req.setTimeout(timeoutMs,()=>req.destroy());
+-   const body=await bodyBytes(req);req.setTimeout(0);fingerprint=createHash('sha256').update(method+'\n'+path+'\n').update(body).digest('hex');
++   const body=await bodyBytes(req);req.setTimeout(0);fingerprint=createHash('sha256').update(method+'\n'+path+'\n'+query.toString()+'\n').update(body).digest('hex');
+    if(write&&(blocked.all||blocked.hashes.has(fingerprint)))throw deny('N00_FIXTURE_UNKNOWN_AUTH_RESULT',409);
+    const headers=new Headers();for(const [key,value] of Object.entries(req.headers))if(!hop.has(key)&&value!==undefined)headers.set(key,Array.isArray(value)?value.join(', '):value);
+    if(write){if(inFlight.has(fingerprint))throw deny('N00_FIXTURE_AUTH_IN_FLIGHT',409);inFlight.add(fingerprint);held=true;}
+    metrics.forwarded++;upstreamStarted=true;
+-   const response=await fetch(url,{method,headers,...(write?{body}:{}),redirect:'manual',signal:AbortSignal.timeout(timeoutMs)});
++   const response=await fetch(url,{method,headers,...(!safeMethods.has(method)?{body}:{}),redirect:'manual',signal:AbortSignal.timeout(timeoutMs)});
+    const bytes=await responseBytes(response);let location=response.headers.get('location');
+    if(location) {
+     const to=new URL(location,upstream),own=proxy.address(),publicOrigin='http://127.0.0.1:'+own.port;
+@@ -85,7 +89,7 @@ export function createCountedAuthProxy({backend,journal,now=Date.now,timeoutMs=3
+    const code=error.message?.startsWith('N00_')?error.message:'N00_FIXTURE_UPSTREAM_UNKNOWN';
+    const status=code.includes('BUDGET')?429:code.includes('EXPIRED')?403:error.status??503;
+    metrics.locally_rejected++;
+-   if(reservation){try {settle(upstreamStarted&&code!=='N00_FIXTURE_REDIRECT_REFUSED'?'unknown':'rejected',status,code);}catch {if(write)blocked.all=true;}}
++   if(reservation){try {settle(upstreamStarted?'unknown':'rejected',status,code);}catch {if(write)blocked.all=true;}}
+    respond(res,status,code);
+   }finally {req.setTimeout(0);if(held)inFlight.delete(fingerprint);}
+  });
+diff --git a/scripts/neon-runtime-flow-fixture.mjs b/scripts/neon-runtime-flow-fixture.mjs
+index ca9a670..30fa591 100644
+--- a/scripts/neon-runtime-flow-fixture.mjs
++++ b/scripts/neon-runtime-flow-fixture.mjs
+@@ -7,7 +7,7 @@ export function createFlowFixture(manifest) {
+  const jwk={...publicKey.export({format:'jwk'}),kid,alg:'EdDSA',use:'sig'};
+  const stamp=new Date().toISOString(),user={id:'fictional-flow-user',name:'Fictional flow',email:'flow@fixture.invalid',emailVerified:false,createdAt:stamp,updatedAt:stamp};
+  const session={id:'fictional-flow-session',userId:user.id,token:randomBytes(24).toString('base64url'),createdAt:stamp,updatedAt:stamp,expiresAt:new Date(Date.now()+3600000).toISOString()};
+- let authenticated=false;const flows=new Map(),verifiers=new Map(),appOrigin='http://localhost:44890';
++ let authenticated=false,rejectSignOutRedirect=false;const flows=new Map(),verifiers=new Map(),appOrigin='http://localhost:44890';
+  const challengeName='__Secure-neon-auth.session_challenge';
+  const sessionCookie=(value,maxAge=3600)=>'__Secure-neon-auth.session_token='+value+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age='+maxAge;
+  const challengeCookie=(value,maxAge=300)=>challengeName+'='+value+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age='+maxAge;
+@@ -19,7 +19,7 @@ export function createFlowFixture(manifest) {
+   const message=[header,claims].map(v=>Buffer.from(JSON.stringify(v)).toString('base64url')).join('.');
+   return message+'.'+(kind==='wrong-algorithm'?createHmac('sha256','fictional').update(message).digest():sign(null,Buffer.from(message),privateKey)).toString('base64url');
+  }
+- return createOwnedAuthServer(async(req,res)=>{
++ const server=createOwnedAuthServer(async(req,res)=>{
+   const url=new URL(req.url,'http://127.0.0.1:44894'),path=url.pathname,active=authenticated&&value(req.headers.cookie,'__Secure-neon-auth.session_token')===session.token;
+   res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');
+   const fail=()=>{res.statusCode=401;res.end('{"code":"FICTIONAL_FLOW_REFUSED"}');};
+@@ -46,7 +46,10 @@ export function createFlowFixture(manifest) {
+    if(active)res.setHeader('set-auth-jwt',token());res.end(JSON.stringify(active?{session,user}:null));return;
+   }
+   if(path==='/fixture/auth/token'){if(!active){fail();return;}res.end(JSON.stringify({token:token()}));return;}
+-  if(path==='/fixture/auth/sign-out'&&req.method==='POST'){authenticated=false;res.setHeader('Set-Cookie',sessionCookie('',0));res.end('{"success":true}');return;}
++  if(path==='/fixture/auth/sign-out'&&req.method==='POST'){authenticated=false;if(rejectSignOutRedirect){rejectSignOutRedirect=false;res.statusCode=302;res.setHeader('Location','https://unapproved.fixture.invalid/committed-sign-out');res.end();return;}res.setHeader('Set-Cookie',sessionCookie('',0));res.end('{"success":true}');return;}
+   res.statusCode=404;res.end('{"fixture_only":true}');
+  });
++ // This one-shot local fault never accepts an external target or creates identity.
++ server.refuseNextSignOutRedirect=()=>{rejectSignOutRedirect=true;};
++ return server;
+ }
+diff --git a/scripts/serve-neon-runtime-flow.mjs b/scripts/serve-neon-runtime-flow.mjs
+index 3409940..59ae824 100644
+--- a/scripts/serve-neon-runtime-flow.mjs
++++ b/scripts/serve-neon-runtime-flow.mjs
+@@ -80,7 +80,7 @@ try{
+  await new Promise((ok,bad)=>{authServer.once('error',bad);authServer.listen(44894,'127.0.0.1',ok);});
+  proxyServer=createCountedAuthProxy({backend:authServer,journal:budget});
+  await new Promise((ok,bad)=>{proxyServer.once('error',bad);proxyServer.listen(44891,'127.0.0.1',ok);});
+- control=createServer((req,res)=>{if(req.method==='GET'&&req.url==='/n00-flow-context'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({fixture_only:true,external_verified:false,fingerprint:childEnv.N00_TARGET_FINGERPRINT,trust:manifest.auth,auth_base_url:manifest.auth.baseUrl}));return;}if(req.method!=='POST'||req.url!=='/n00-flow-stop'||req.headers['x-n00-owner']!==runId){res.statusCode=403;res.end();return;}res.setHeader('Content-Type','application/json');res.end('{"fixture_only":true}');setTimeout(()=>stop(),25);});
++ control=createServer((req,res)=>{if(req.method==='POST'&&req.url==='/n00-flow-refuse-sign-out-redirect'){if(req.headers['x-n00-owner']!==runId){res.statusCode=403;res.end();return;}authServer.refuseNextSignOutRedirect();res.setHeader('Content-Type','application/json');res.end('{"fixture_only":true,"external_verified":false}');return;}if(req.method==='GET'&&req.url==='/n00-flow-context'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({fixture_only:true,external_verified:false,fingerprint:childEnv.N00_TARGET_FINGERPRINT,trust:manifest.auth,auth_base_url:manifest.auth.baseUrl}));return;}if(req.method!=='POST'||req.url!=='/n00-flow-stop'||req.headers['x-n00-owner']!==runId){res.statusCode=403;res.end();return;}res.setHeader('Content-Type','application/json');res.end('{"fixture_only":true}');setTimeout(()=>stop(),25);});
+  await new Promise((ok,bad)=>{control.once('error',bad);control.listen(44901,'127.0.0.1',ok);});
+  launch([resolve('services/api/.venv/Scripts/python.exe'),resolve('tests/fixtures/neon-runtime-flow/verify.py')]);
+  const apiStarted=Date.now(),apiDeadline=apiStarted+60000;let apiReady=false;
+diff --git a/tests/e2e/audit-neon-runtime-flow.spec.ts b/tests/e2e/audit-neon-runtime-flow.spec.ts
+index 4050b8c..6725e36 100644
+--- a/tests/e2e/audit-neon-runtime-flow.spec.ts
++++ b/tests/e2e/audit-neon-runtime-flow.spec.ts
+@@ -59,3 +59,27 @@ test('NA01 runtime flow: consumed verifier cannot create a session in a second b
+  try{await replay.addCookies([challenge!]);const rejected=await replay.request.get(callbackURL,{maxRedirects:0});expect(rejected.status()).toBe(307);expect(new URL(rejected.headers().location,callbackURL).pathname).toBe('/auth/sign-in');expect((await replay.cookies()).some(v=>v.name==='__Secure-neon-auth.session_token')).toBe(false);}
+  finally{await replay.close();await context.request.post('/api/auth/sign-out');}
+ });
++
++
++test('NA01 runtime flow: committed sign-out with refused redirect keeps unknown hold through UI retry',async({page,request},testInfo)=>{
++ await page.route('**/*',route=>['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname)?route.continue():route.abort());
++ await page.goto('/compat');await page.getByRole('button',{name:'Continue with Google'}).click();
++ await expect(page).toHaveURL('http://localhost:44890/compat/return');await expect(page.getByTestId('server-session')).toHaveText('fictional-flow-user');
++ const control='http://127.0.0.1:44901/n00-flow-refuse-sign-out-redirect';
++ expect((await request.post(control,{headers:{'X-N00-Owner':'foreign'}})).status()).toBe(403);
++ const armed=await request.post(control,{headers:{'X-N00-Owner':String(testInfo.config.metadata.n00RunId)}});expect(armed.status()).toBe(200);
++ expect(await armed.json()).toEqual({fixture_only:true,external_verified:false});
++ const before=await(await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
++ const first=page.waitForResponse(r=>r.url().endsWith('/api/auth/sign-out'));
++ await page.getByRole('button',{name:'Logout'}).click();expect((await first).status()).toBe(502);await expect(page.getByTestId('client-status')).toHaveText('request-unknown');
++ const middle=await(await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
++ expect(middle.reserved).toBe(before.reserved+1);expect(middle.forwarded).toBe(before.forwarded+1);expect(middle.unknown).toBe(before.unknown+1);expect(middle.pending).toBe(0);
++ const retry=page.waitForResponse(r=>r.url().endsWith('/api/auth/sign-out'));
++ await page.getByRole('button',{name:'Logout'}).click();expect((await retry).status()).toBe(409);await expect(page.getByTestId('client-status')).toHaveText('request-unknown');
++ const after=await(await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
++ expect(after.reserved).toBe(middle.reserved+1);expect(after.forwarded).toBe(middle.forwarded);expect(after.unknown).toBe(middle.unknown);expect(after.rejected).toBe(middle.rejected+1);expect(after.external_requests).toBe(0);
++ // A read reconciles the fixture's actual committed sign-out; it never resends it.
++ expect(await(await request.get('/api/auth/get-session?disableCookieCache=true')).json()).toBeNull();
++ assertProtocolStorage(await page.evaluate(()=>Object.entries(localStorage)));expect(await page.evaluate(()=>Object.keys(sessionStorage))).toEqual([]);
++ await page.screenshot({path:testInfo.outputPath('unknown-sign-out-held.png')});
++});
+diff --git a/tests/neon-compatibility-discovery.test.mjs b/tests/neon-compatibility-discovery.test.mjs
+index d107b59..e8bf73b 100644
+--- a/tests/neon-compatibility-discovery.test.mjs
++++ b/tests/neon-compatibility-discovery.test.mjs
+@@ -14,4 +14,4 @@ test('N00 dedicated config discovers all seven built-output cases',()=>{const fi
+ test('N00 counted config discovers the same seven cases with separate producer outputs',()=>{const files=discovered('playwright.neon-counted.config.ts');assert.equal(files.length,7);assert.ok(files.every(file=>file.endsWith('audit-neon-compat.spec.ts')));});
+ 
+ for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regression.config.ts'])test(`all N00 output profiles stay isolated from ${config}`,()=>{const files=discovered(config);assert.ok(files.some(file=>file.endsWith('audit-auth-entry.spec.ts')));assert.equal(files.filter(file=>file.includes('audit-neon-')).length,0);});
+-test('runtime flow config discovers five actual-output cases',()=>{const files=discovered('playwright.neon-runtime-flow.config.ts');assert.equal(files.length,5);assert.ok(files.every(file=>file.endsWith('audit-neon-runtime-flow.spec.ts')));});
++test('runtime flow config discovers all six actual-output cases including unknown sign-out',()=>{const files=discovered('playwright.neon-runtime-flow.config.ts');assert.equal(files.length,6);assert.ok(files.every(file=>file.endsWith('audit-neon-runtime-flow.spec.ts')));});
+diff --git a/tests/neon-counted-proxy.test.mjs b/tests/neon-counted-proxy.test.mjs
+index e7eab0e..2431dcb 100644
+--- a/tests/neon-counted-proxy.test.mjs
++++ b/tests/neon-counted-proxy.test.mjs
+@@ -1,7 +1,7 @@
+ import assert from 'node:assert/strict';
+ import {test} from 'node:test';
+ import {createServer} from 'node:http';
+-import {mkdtempSync,readFileSync,readdirSync,rmSync,realpathSync} from 'node:fs';
++import {mkdtempSync,readFileSync,writeFileSync,readdirSync,rmSync,realpathSync} from 'node:fs';
+ import {tmpdir} from 'node:os';
+ import {join,resolve,relative} from 'node:path';
+ import {RealRunJournal} from '../scripts/neon-real-preflight.mjs';
+@@ -87,3 +87,62 @@ test('fixture cleanup control requires the exact local owner nonce and never for
+  const refused=await fetch(f.url+'/n00-fixture-stop',{method:'POST',headers:{'X-N00-Owner':'different'}});assert.equal(refused.status,403);await refused.text();assert.equal(stops,0);
+  const accepted=await fetch(f.url+'/n00-fixture-stop',{method:'POST',headers:{'X-N00-Owner':owner}});assert.equal(accepted.status,200);await accepted.text();assert.equal(stops,1);assert.equal(received,0);assert.equal(f.run.snapshot().requests.length,0);
+ });
++
++for(const method of ['POST','PUT','PATCH','DELETE'])test(`committed ${method} with a refused redirect stays unknown and is held after restart`,async t=>{
++ let commits=0;const f=await wire(t,async(req,res)=>{for await(const chunk of req)assert.ok(chunk.length>0);commits++;res.statusCode=302;res.setHeader('Location','https://unapproved.fixture.invalid/committed');res.end();});
++ const request={method,body:'{"intent":"redirect-committed"}',redirect:'manual'};
++ const first=await fetch(f.url+'/fixture/auth/sign-out',request);assert.equal(first.status,502);await first.text();assert.equal(commits,1);assert.equal(f.run.snapshot().requests[0].outcome,'unknown');
++ await close(f.proxy);const recovered=createCountedAuthProxy({backend:f.backend,journal:new RealRunJournal(f.root)});f.servers.push(recovered);const url=await listen(recovered);
++ const retry=await fetch(url+'/fixture/auth/sign-out',request);assert.equal(retry.status,409);await retry.text();assert.equal(commits,1);
++ const read=await fetch(url+'/fixture/auth/get-session');assert.equal(read.status,502);await read.text();assert.equal(commits,2); // A read may still reconcile; this fake handler redirects every request.
++});
++
++test('a malformed redirect after POST acceptance preserves the write hold without retry',async t=>{
++ let commits=0;const f=await wire(t,(_req,res)=>{commits++;res.statusCode=302;res.setHeader('Location','http://[');res.end();});
++ const request={method:'POST',body:'{"intent":"malformed"}',redirect:'manual'};const first=await fetch(f.url+'/fixture/auth/sign-out',request);assert.equal(first.status,503);await first.text();assert.equal(f.run.snapshot().requests[0].outcome,'unknown');
++ const retry=await fetch(f.url+'/fixture/auth/sign-out',request);assert.equal(retry.status,409);await retry.text();assert.equal(commits,1);
++});
++
++for(const path of ['/fixture/auth/callback/google?state=fictional-sensitive-state','/fixture/auth/get-session?neon_auth_session_verifier=fictional-sensitive-verifier'])test(`unknown one-use GET ${path.split('?')[0]} cannot be replayed`,async t=>{
++ let commits=0;const f=await wire(t,(req)=>{commits++;req.socket.destroy();});
++ const first=await fetch(f.url+path);assert.equal(first.status,503);await first.text();assert.equal(f.run.snapshot().requests[0].outcome,'unknown');
++ const retry=await fetch(f.url+path);assert.equal(retry.status,409);await retry.text();assert.equal(commits,1);
++ assert.doesNotMatch(readdirSync(f.root).map(p=>readFileSync(join(f.root,p),'utf8')).join(''),/fictional-sensitive|neon_auth_session_verifier/);
++});
++
++test('reordered verifier query and renewed bearer keep the same unresolved intent',async t=>{
++ let commits=0;const f=await wire(t,(req)=>{commits++;req.socket.destroy();});
++ const first=await fetch(f.url+'/fixture/auth/get-session?keep=yes&neon_auth_session_verifier=fictional-sensitive',{headers:{Authorization:'Bearer first-fictional'}});assert.equal(first.status,503);await first.text();
++ const second=await fetch(f.url+'/fixture/auth/get-session?neon_auth_session_verifier=fictional-sensitive&keep=yes',{headers:{Authorization:'Bearer renewed-fictional'}});assert.equal(second.status,409);await second.text();assert.equal(commits,1);
++});
++
++test('restart conservatively holds writes for an unresolved read without trusting receipt semantics',async t=>{
++ let received=0;const f=await wire(t,(req,res)=>{received++;if(req.method==='GET')req.socket.destroy();else res.end('{}');});
++ const read=await fetch(f.url+'/fixture/auth/get-session');assert.equal(read.status,503);await read.text();await close(f.proxy);
++ const recovered=createCountedAuthProxy({backend:f.backend,journal:new RealRunJournal(f.root)});f.servers.push(recovered);const url=await listen(recovered);
++ const write=await fetch(url+'/fixture/auth/sign-in/social',{method:'POST',body:'{}'});assert.equal(write.status,409);await write.text();assert.equal(received,1);
++});
++
++test('restart cannot erase a hold through legacy or corrupt receipt metadata',async t=>{
++ let commits=0;const f=await wire(t,(req)=>{commits++;req.socket.destroy();});
++ const post={method:'POST',body:'{"intent":"one"}'};const first=await fetch(f.url+'/fixture/auth/sign-in/social',post);assert.equal(first.status,503);await first.text();await close(f.proxy);
++ const record=f.run.snapshot().requests[0];writeFileSync(join(f.root,record.evidenceRef),JSON.stringify({method:'GET',fingerprint:'forged-read'}));
++ const recovered=createCountedAuthProxy({backend:f.backend,journal:new RealRunJournal(f.root)});f.servers.push(recovered);const url=await listen(recovered);
++ const retry=await fetch(url+'/fixture/auth/sign-in/social',post);assert.equal(retry.status,409);await retry.text();assert.equal(commits,1);
++});
++
++test('official pinned SDK social write sees unknown redirect once and retry is held',async t=>{
++ const {createAuthClient}=await import('@neondatabase/auth');let commits=0;const f=await wire(t,(_req,res)=>{commits++;res.statusCode=302;res.setHeader('Location','https://unapproved.fixture.invalid/committed');res.end();});
++ const client=createAuthClient(f.url+'/fixture/auth'),input={provider:'google',callbackURL:'http://localhost:44890/compat/return'};
++ await assert.rejects(client.signIn.social(input),{status:502});
++ await assert.rejects(client.signIn.social(input),{status:409});assert.equal(commits,1);assert.deepEqual(f.run.snapshot().requests.map(v=>v.outcome),['unknown','rejected']);
++});
++
++for(const [first,second] of [
++ ['/fixture/auth/get-session?keep=one&neon_auth_session_verifier=fictional-sensitive','/fixture/auth/get-session?keep=two&neon_auth_session_verifier=fictional-sensitive'],
++ ['/fixture/auth/callback/google?state=fictional-sensitive&code=first','/fixture/auth/callback/google?code=second&state=fictional-sensitive']
++])test(`one-use ${first.split('?')[0]} hold is bound to its verifier/state despite other query changes`,async t=>{
++ let commits=0;const f=await wire(t,(req)=>{commits++;req.socket.destroy();});
++ const response=await fetch(f.url+first);assert.equal(response.status,503);await response.text();
++ const retry=await fetch(f.url+second);assert.equal(retry.status,409);await retry.text();assert.equal(commits,1);
++});

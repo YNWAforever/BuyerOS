@@ -1,0 +1,11 @@
+INFO:     Started server process [36928]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+[neon-auth] Upstream HTTP error {
+  component: 'proxy',
+  proxyPath: 'sign-out',
+  status: 502,
+  statusText: 'Bad Gateway',
+  host: '8105abbccdde.fixture.invalid'
+}

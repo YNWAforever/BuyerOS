@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="proxy refuses arbitrary URLs, unowned servers and unbound journals before any request" time="0.619207" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="HTTP reservation is durable and pending before the owned backend receives the request" time="0.288786" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="SDK origin, session/challenge cookies and JWT headers survive relay without entering evidence" time="0.059924" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="approved local callback302 is preserved manually, and an external redirect is blocked" time="0.090481" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="committed POST with a lost response is not replayed after proxy and journal restart" time="0.317365" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="budget exhaustion refuses dispatch and keeps cleanup reserve after restart" time="2.211223" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="expired target and over-size body fail closed without dispatching upstream" time="0.066879" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="POST server500 retains an unknown write and timeout is bounded without automatic retry" time="0.257943" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="read-only fixture budget inspection exposes counts without auth traffic or credential data" time="0.028710" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="concurrent identical fixture POSTs share the in-flight barrier before upstream acceptance is known" time="0.244041" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="fixture cleanup control requires the exact local owner nonce and never forwards to backend" time="0.033878" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="committed POST with a refused redirect stays unknown and is held after restart" time="1.231004" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="committed PUT with a refused redirect stays unknown and is held after restart" time="0.154870" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="committed PATCH with a refused redirect stays unknown and is held after restart" time="1.137529" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="committed DELETE with a refused redirect stays unknown and is held after restart" time="0.391124" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="a malformed redirect after POST acceptance preserves the write hold without retry" time="0.341398" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="unknown one-use GET /fixture/auth/callback/google cannot be replayed" time="0.478726" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="unknown one-use GET /fixture/auth/get-session cannot be replayed" time="0.075626" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="reordered verifier query and renewed bearer keep the same unresolved intent" time="0.071396" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="restart conservatively holds writes for an unresolved read without trusting receipt semantics" time="0.336266" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="restart cannot erase a hold through legacy or corrupt receipt metadata" time="0.100322" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="official pinned SDK social write sees unknown redirect once and retry is held" time="3.104141" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="one-use /fixture/auth/get-session hold is bound to its verifier/state despite other query changes" time="0.081006" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs" failure="Expected values to be strictly equal:&#10;&#10;503 !== 409&#10;">
+		<failure type="testCodeFailure" message="Expected values to be strictly equal:&#10;&#10;503 !== 409">
+[Error [ERR_TEST_FAILURE]: Expected values to be strictly equal:
+
+503 !== 409
+] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  503 !== 409
+  
+      at TestContext.&lt;anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-counted-proxy.test.mjs:147:47)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 503,
+    expected: 409,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="one-use /fixture/auth/callback/google hold is bound to its verifier/state despite other query changes" time="0.088621" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs" failure="Expected values to be strictly equal:&#10;&#10;503 !== 409&#10;">
+		<failure type="testCodeFailure" message="Expected values to be strictly equal:&#10;&#10;503 !== 409">
+[Error [ERR_TEST_FAILURE]: Expected values to be strictly equal:
+
+503 !== 409
+] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  503 !== 409
+  
+      at TestContext.&lt;anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-counted-proxy.test.mjs:147:47)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 503,
+    expected: 409,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+}
+		</failure>
+	</testcase>
+	<!-- tests 24 -->
+	<!-- suites 0 -->
+	<!-- pass 22 -->
+	<!-- fail 2 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 13529.93 -->
+</testsuites>

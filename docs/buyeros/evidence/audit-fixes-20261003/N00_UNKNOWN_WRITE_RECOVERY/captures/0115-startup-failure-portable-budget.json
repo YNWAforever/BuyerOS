@@ -1,0 +1,66 @@
+{
+  "fixture_only": true,
+  "external_requests": 0,
+  "metrics": {
+    "received": 0,
+    "forwarded": 0,
+    "locally_rejected": 0,
+    "unknown": 0
+  },
+  "journal": {
+    "schemaVersion": 1,
+    "proposal": "buyeros-neon-auth-n00-20261004",
+    "approvalReference": "fixture-only-no-external-authority",
+    "approvedAt": "2026-10-04T21:16:58.242Z",
+    "limit": 200,
+    "cleanupReserve": 20,
+    "buildLimit": 2,
+    "buildTimeoutMs": 1200000,
+    "target": {
+      "schemaVersion": 1,
+      "proposal": "buyeros-neon-auth-n00-20261004",
+      "sourceSha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+      "projectId": "fictional-probe-project-9105abbccdde",
+      "branchId": "fictional-probe-branch-9105abbccdde",
+      "authId": "fictional-probe-auth-9105abbccdde",
+      "orgId": "org-soft-sunset-25251479",
+      "name": "buyeros-neon-auth-n00-20261004",
+      "regionId": "aws-ap-southeast-1",
+      "creationMode": "new-empty",
+      "createdAt": "2026-10-04T21:16:58.242Z",
+      "expiresAt": "2026-10-04T23:16:58.242Z",
+      "readback": {
+        "projectId": "fictional-probe-project-9105abbccdde",
+        "branchId": "fictional-probe-branch-9105abbccdde",
+        "authId": "fictional-probe-auth-9105abbccdde",
+        "orgId": "org-soft-sunset-25251479",
+        "name": "buyeros-neon-auth-n00-20261004",
+        "regionId": "aws-ap-southeast-1",
+        "observedAt": "2026-10-04T21:16:58.242Z",
+        "subscription": "free_v3",
+        "emailDeliveryEnabled": false,
+        "emailPasswordEnabled": false,
+        "emailHooksEnabled": false,
+        "methods": [
+          "google"
+        ],
+        "trustedOrigins": [
+          "http://localhost:44890"
+        ]
+      },
+      "auth": {
+        "baseUrl": "https://9105abbccdde.fixture.invalid/auth",
+        "issuer": "https://issuer-9105abbccdde.fixture.invalid",
+        "audience": "fictional-probe-audience-9105abbccdde",
+        "jwksUrl": "https://9105abbccdde.fixture.invalid/auth/jwks",
+        "algorithm": "EdDSA",
+        "keyType": "OKP",
+        "curve": "Ed25519"
+      },
+      "fingerprint": "a89f4159ef929584ed5edff4afe59dafd7157900b0f51735dfccf32ac88d27c9"
+    },
+    "identity": null,
+    "requests": [],
+    "builds": []
+  }
+}

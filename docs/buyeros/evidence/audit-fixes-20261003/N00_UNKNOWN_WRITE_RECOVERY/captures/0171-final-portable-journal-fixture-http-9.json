@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "fixture_only": true,
+  "sequence": 9,
+  "method": "POST",
+  "path": "/fixture/auth/sign-out",
+  "state_changing": true,
+  "fingerprint": "60f91e263175b1cdde16ac03f9d989ce448393991b7897dc09cca03b62b94374",
+  "status": 200,
+  "reason": "upstream-response",
+  "outcome": "accepted"
+}

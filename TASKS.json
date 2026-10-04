@@ -16,7 +16,7 @@
     "Q10",
     "N00"
   ],
-  "next_eligible": "N00 Managed Better Auth identity-cleanup/absence contract and actual transport preparation; original full gate open",
+  "next_eligible": "N00 exact Managed Better Auth identity cleanup/absence and actual native transport preparation; original full gate remains open",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -1038,7 +1038,7 @@
         "No live performance/SLA/UAT claim"
       ],
       "full_gate_passed": false,
-      "next_action": "Continue N00 real transport coverage/provider cleanup adapters; original302/real provider/independent review and fresh isolated-target Google approval pending",
+      "next_action": "N00 exact Managed Better Auth identity cleanup/absence and actual native transport preparation; original full gate remains open",
       "cleanup_contract_followup": {
         "source_sha": "370a558492ef2c6617379c8923f2ce17c81da66f",
         "base_sha": "158e05f0b31e4c59776d39c6c2926f6ab8bf3fcd",
@@ -1063,6 +1063,56 @@
           "ManagedBetterAuth exactidentitycleanup/absence unresolved",
           "realtransport/original302/trueNeon/human/independentreviewopen",
           "historicalwhole-root229pass5fail remainsRED;not rerun"
+        ]
+      },
+      "unknown_write_recovery": {
+        "source_sha": "2b69e7cf8c0b0c738bfc34b3de44b1877468a0ca",
+        "base_sha": "58b3cff65625c5abe55a0f8ab316b604989d8063",
+        "status": "local-unknown-auth-transport-recovery-verified;N00open",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_UNKNOWN_WRITE_RECOVERY/RESULTS.md",
+        "checks": {
+          "related_Node": {
+            "pass": 214,
+            "fail": 0,
+            "skip": 0
+          },
+          "crypto": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          },
+          "built_portable": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          },
+          "built_Vercel": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          },
+          "broad_root_MJS_attempt": {
+            "reported": 274,
+            "pass": 269,
+            "fail": 5,
+            "skip": 0,
+            "final_source_acceptance": false
+          }
+        },
+        "new_Node_cases": 13,
+        "new_UI_case_per_target": 1,
+        "types_exit": 0,
+        "lint_exit": 0,
+        "contracts_exit": 0,
+        "operations": 84,
+        "provider_calls": 0,
+        "migrations": [],
+        "deployed_sha": null,
+        "full_gate_passed": false,
+        "limits": [
+          "original302/trueNeon/Google/fullnativeaccounting/Managedidentitycleanup/independentreviewOPEN",
+          "broadsuiteRED;2intentfailuresnowrelatedGREEN;offerDocker30stimeout+parent+missingmainVercelentryremain",
+          "unresolvedrestartjournalsholdallstatechangespendingtrustedreconciliation"
         ]
       }
     },
@@ -1698,7 +1748,7 @@
     "N00 full real-transport coverage/provider cleanup adapters next; fresh isolated actual auth roundtrip requires specific new approval",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "370a558492ef2c6617379c8923f2ce17c81da66f",
+  "reviewed_source_sha": "2b69e7cf8c0b0c738bfc34b3de44b1877468a0ca",
   "deployed_sha": null,
   "selected_followups": [
     "U05",

@@ -1,0 +1,115 @@
+{
+  "fixture_only": true,
+  "external_requests": 0,
+  "metrics": {
+    "received": 6,
+    "forwarded": 6,
+    "locally_rejected": 1,
+    "unknown": 0
+  },
+  "journal": {
+    "schemaVersion": 1,
+    "proposal": "buyeros-neon-auth-n00-20261004",
+    "approvalReference": "fixture-only-no-external-authority",
+    "approvedAt": "2026-10-04T21:12:04.791Z",
+    "limit": 200,
+    "cleanupReserve": 20,
+    "buildLimit": 2,
+    "buildTimeoutMs": 1200000,
+    "target": {
+      "schemaVersion": 1,
+      "proposal": "buyeros-neon-auth-n00-20261004",
+      "sourceSha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+      "projectId": "fictional-probe-project-7105abbccdde",
+      "branchId": "fictional-probe-branch-7105abbccdde",
+      "authId": "fictional-probe-auth-7105abbccdde",
+      "orgId": "org-soft-sunset-25251479",
+      "name": "buyeros-neon-auth-n00-20261004",
+      "regionId": "aws-ap-southeast-1",
+      "creationMode": "new-empty",
+      "createdAt": "2026-10-04T21:12:04.791Z",
+      "expiresAt": "2026-10-04T23:12:04.791Z",
+      "readback": {
+        "projectId": "fictional-probe-project-7105abbccdde",
+        "branchId": "fictional-probe-branch-7105abbccdde",
+        "authId": "fictional-probe-auth-7105abbccdde",
+        "orgId": "org-soft-sunset-25251479",
+        "name": "buyeros-neon-auth-n00-20261004",
+        "regionId": "aws-ap-southeast-1",
+        "observedAt": "2026-10-04T21:12:04.791Z",
+        "subscription": "free_v3",
+        "emailDeliveryEnabled": false,
+        "emailPasswordEnabled": false,
+        "emailHooksEnabled": false,
+        "methods": [
+          "google"
+        ],
+        "trustedOrigins": [
+          "http://localhost:44890"
+        ]
+      },
+      "auth": {
+        "baseUrl": "https://7105abbccdde.fixture.invalid/auth",
+        "issuer": "https://issuer-7105abbccdde.fixture.invalid",
+        "audience": "fictional-probe-audience-7105abbccdde",
+        "jwksUrl": "https://7105abbccdde.fixture.invalid/auth/jwks",
+        "algorithm": "EdDSA",
+        "keyType": "OKP",
+        "curve": "Ed25519"
+      },
+      "fingerprint": "6a9c863059969a92fb42c3bd04e7a377ab02e524e1b966582b08e39ebc111cfb"
+    },
+    "identity": null,
+    "requests": [
+      {
+        "sequence": 1,
+        "purpose": "auth",
+        "operationId": "fixture-http-1",
+        "reservedAt": "2026-10-04T21:13:37.473Z",
+        "outcome": "accepted",
+        "evidenceRef": "fixture-http-1.json"
+      },
+      {
+        "sequence": 2,
+        "purpose": "auth",
+        "operationId": "fixture-http-2",
+        "reservedAt": "2026-10-04T21:13:38.025Z",
+        "outcome": "accepted",
+        "evidenceRef": "fixture-http-2.json"
+      },
+      {
+        "sequence": 3,
+        "purpose": "auth",
+        "operationId": "fixture-http-3",
+        "reservedAt": "2026-10-04T21:13:38.068Z",
+        "outcome": "accepted",
+        "evidenceRef": "fixture-http-3.json"
+      },
+      {
+        "sequence": 4,
+        "purpose": "auth",
+        "operationId": "fixture-http-4",
+        "reservedAt": "2026-10-04T21:13:38.104Z",
+        "outcome": "accepted",
+        "evidenceRef": "fixture-http-4.json"
+      },
+      {
+        "sequence": 5,
+        "purpose": "auth",
+        "operationId": "fixture-http-5",
+        "reservedAt": "2026-10-04T21:13:38.133Z",
+        "outcome": "accepted",
+        "evidenceRef": "fixture-http-5.json"
+      },
+      {
+        "sequence": 6,
+        "purpose": "auth",
+        "operationId": "fixture-http-6",
+        "reservedAt": "2026-10-04T21:13:38.444Z",
+        "outcome": "rejected",
+        "evidenceRef": "fixture-http-6.json"
+      }
+    ],
+    "builds": []
+  }
+}

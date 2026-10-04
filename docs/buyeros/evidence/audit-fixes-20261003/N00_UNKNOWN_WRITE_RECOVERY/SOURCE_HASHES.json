@@ -1,0 +1,32 @@
+{
+  "scripts/neon-counted-proxy.mjs": {
+    "tested_worktree_sha256": "36c8ed197155ff5a9283cae7067ed3a46abc50ebfee8dd6dc88f175397dd90b4",
+    "commit_blob_sha256": "36c8ed197155ff5a9283cae7067ed3a46abc50ebfee8dd6dc88f175397dd90b4",
+    "difference": "none"
+  },
+  "scripts/neon-runtime-flow-fixture.mjs": {
+    "tested_worktree_sha256": "bb77087fab09a207d66dcbc72ece0ffd5b263432faf890a08909dcdf87d0cc18",
+    "commit_blob_sha256": "bb77087fab09a207d66dcbc72ece0ffd5b263432faf890a08909dcdf87d0cc18",
+    "difference": "none"
+  },
+  "scripts/serve-neon-runtime-flow.mjs": {
+    "tested_worktree_sha256": "9d44baa9b3566f3e865b8e02a3f912e6d4ff6959a422a749b39775cd1813513a",
+    "commit_blob_sha256": "9d44baa9b3566f3e865b8e02a3f912e6d4ff6959a422a749b39775cd1813513a",
+    "difference": "none"
+  },
+  "tests/neon-counted-proxy.test.mjs": {
+    "tested_worktree_sha256": "96bfa9aa1b2d3086d85d89cbea7c03c3aefaee6dbba184074ead914cd60d4c7a",
+    "commit_blob_sha256": "12e2f274571e9cc4f88e9427cbb22ecad9bd1a292fbee6bec08e1bd6c4632777",
+    "difference": "Git text newline normalization only"
+  },
+  "tests/neon-compatibility-discovery.test.mjs": {
+    "tested_worktree_sha256": "2ba8269bcbfb21322a45f0770211d8b68bb7da087a67d1477439c91ead173db7",
+    "commit_blob_sha256": "2ba8269bcbfb21322a45f0770211d8b68bb7da087a67d1477439c91ead173db7",
+    "difference": "none"
+  },
+  "tests/e2e/audit-neon-runtime-flow.spec.ts": {
+    "tested_worktree_sha256": "70cd6a0788784544dd2f49efbb1667dd7a3b3d0eca8137f3898f59db757dc378",
+    "commit_blob_sha256": "70cd6a0788784544dd2f49efbb1667dd7a3b3d0eca8137f3898f59db757dc378",
+    "difference": "none"
+  }
+}

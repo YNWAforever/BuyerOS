@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="proxy refuses arbitrary URLs, unowned servers and unbound journals before any request" time="0.364473" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="HTTP reservation is durable and pending before the owned backend receives the request" time="0.119650" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="SDK origin, session/challenge cookies and JWT headers survive relay without entering evidence" time="0.081499" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="approved local callback302 is preserved manually, and an external redirect is blocked" time="0.316359" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="committed POST with a lost response is not replayed after proxy and journal restart" time="0.182809" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="budget exhaustion refuses dispatch and keeps cleanup reserve after restart" time="2.626843" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="expired target and over-size body fail closed without dispatching upstream" time="0.145992" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="POST server500 retains an unknown write and timeout is bounded without automatic retry" time="0.207723" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="read-only fixture budget inspection exposes counts without auth traffic or credential data" time="0.035019" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="concurrent identical fixture POSTs share the in-flight barrier before upstream acceptance is known" time="0.110141" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="fixture cleanup control requires the exact local owner nonce and never forwards to backend" time="0.047867" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="committed POST with a refused redirect stays unknown and is held after restart" time="0.133443" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="committed PUT with a refused redirect stays unknown and is held after restart" time="0.116564" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="committed PATCH with a refused redirect stays unknown and is held after restart" time="0.129948" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="committed DELETE with a refused redirect stays unknown and is held after restart" time="0.099000" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="a malformed redirect after POST acceptance preserves the write hold without retry" time="0.075888" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="unknown one-use GET /fixture/auth/callback/google cannot be replayed" time="0.081198" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="unknown one-use GET /fixture/auth/get-session cannot be replayed" time="0.079507" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="reordered verifier query and renewed bearer keep the same unresolved intent" time="0.128668" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="restart conservatively holds writes for an unresolved read without trusting receipt semantics" time="0.073049" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="restart cannot erase a hold through legacy or corrupt receipt metadata" time="0.083946" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="official pinned SDK social write sees unknown redirect once and retry is held" time="0.978388" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="one-use /fixture/auth/get-session hold is bound to its verifier/state despite other query changes" time="0.066966" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<testcase name="one-use /fixture/auth/callback/google hold is bound to its verifier/state despite other query changes" time="0.078605" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-counted-proxy.test.mjs"/>
+	<!-- tests 24 -->
+	<!-- suites 0 -->
+	<!-- pass 24 -->
+	<!-- fail 0 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 6889.8386 -->
+</testsuites>

@@ -1,0 +1,8 @@
+{
+  "source_sha": "2b69e7cf8c0b0c738bfc34b3de44b1877468a0ca",
+  "reverse_applicability_exit": 0,
+  "applied": false,
+  "production_rehearsal": false,
+  "migration_required": false,
+  "instruction": "Revert the following metadata checkpoint and source2b69e7c;Auth0 never switched. No DB/data undo."
+}

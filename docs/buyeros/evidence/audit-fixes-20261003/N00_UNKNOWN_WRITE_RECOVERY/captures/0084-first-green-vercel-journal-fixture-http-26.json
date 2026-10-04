@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "fixture_only": true,
+  "sequence": 26,
+  "method": "GET",
+  "path": "/fixture/auth/callback/google",
+  "state_changing": true,
+  "fingerprint": "39737cc6a6635196b49708aeb18a682411bd83aad8653e1e0cb894a2d6c880fb",
+  "status": 302,
+  "reason": "upstream-response",
+  "outcome": "accepted"
+}

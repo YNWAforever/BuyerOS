@@ -1,0 +1,32 @@
+✔ proxy refuses arbitrary URLs, unowned servers and unbound journals before any request (364.4725ms)
+✔ HTTP reservation is durable and pending before the owned backend receives the request (119.65ms)
+✔ SDK origin, session/challenge cookies and JWT headers survive relay without entering evidence (81.499ms)
+✔ approved local callback302 is preserved manually, and an external redirect is blocked (316.3594ms)
+✔ committed POST with a lost response is not replayed after proxy and journal restart (182.8089ms)
+✔ budget exhaustion refuses dispatch and keeps cleanup reserve after restart (2626.8432ms)
+✔ expired target and over-size body fail closed without dispatching upstream (145.9917ms)
+✔ POST server500 retains an unknown write and timeout is bounded without automatic retry (207.7231ms)
+✔ read-only fixture budget inspection exposes counts without auth traffic or credential data (35.0189ms)
+✔ concurrent identical fixture POSTs share the in-flight barrier before upstream acceptance is known (110.1406ms)
+✔ fixture cleanup control requires the exact local owner nonce and never forwards to backend (47.8671ms)
+✔ committed POST with a refused redirect stays unknown and is held after restart (133.4431ms)
+✔ committed PUT with a refused redirect stays unknown and is held after restart (116.5637ms)
+✔ committed PATCH with a refused redirect stays unknown and is held after restart (129.9477ms)
+✔ committed DELETE with a refused redirect stays unknown and is held after restart (98.9996ms)
+✔ a malformed redirect after POST acceptance preserves the write hold without retry (75.8877ms)
+✔ unknown one-use GET /fixture/auth/callback/google cannot be replayed (81.1985ms)
+✔ unknown one-use GET /fixture/auth/get-session cannot be replayed (79.5075ms)
+✔ reordered verifier query and renewed bearer keep the same unresolved intent (128.6676ms)
+✔ restart conservatively holds writes for an unresolved read without trusting receipt semantics (73.0485ms)
+✔ restart cannot erase a hold through legacy or corrupt receipt metadata (83.9459ms)
+✔ official pinned SDK social write sees unknown redirect once and retry is held (978.3879ms)
+✔ one-use /fixture/auth/get-session hold is bound to its verifier/state despite other query changes (66.9662ms)
+✔ one-use /fixture/auth/callback/google hold is bound to its verifier/state despite other query changes (78.6053ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6889.8386

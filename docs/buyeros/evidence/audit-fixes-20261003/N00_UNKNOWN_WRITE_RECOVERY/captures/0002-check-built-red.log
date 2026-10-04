@@ -1,0 +1,38 @@
+[WebServer] (node:26820) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:13824) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\e2e\audit-neon-runtime-flow.spec.ts:64:1 › NA01 runtime flow: committed sign-out with refused redirect keeps unknown hold through UI retry (4.1s)
+
+
+  1) tests\e2e\audit-neon-runtime-flow.spec.ts:64:1 › NA01 runtime flow: committed sign-out with refused redirect keeps unknown hold through UI retry 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      74 |  await page.getByRole('button',{name:'Logout'}).click();expect((await first).status()).toBe(502);await expect(page.getByTestId('client-status')).toHaveText('request-unknown');
+      75 |  const middle=await(await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
+    > 76 |  expect(middle.reserved).toBe(before.reserved+1);expect(middle.forwarded).toBe(before.forwarded+1);expect(middle.unknown).toBe(before.unknown+1);expect(middle.pending).toBe(0);
+         |                                                                                                                           ^
+      77 |  const retry=page.waitForResponse(r=>r.url().endsWith('/api/auth/sign-out'));
+      78 |  await page.getByRole('button',{name:'Logout'}).click();expect((await retry).status()).toBe(409);await expect(page.getByTestId('client-status')).toHaveText('request-unknown');
+      79 |  const after=await(await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-runtime-flow.spec.ts:76:123
+
+    Error Context: test-results\neon-runtime-flow\vercel-7105abbccdde-ui\audit-neon-runtime-flow-NA-3741b-known-hold-through-UI-retry\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-runtime-flow\vercel-7105abbccdde-ui\audit-neon-runtime-flow-NA-3741b-known-hold-through-UI-retry\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-runtime-flow\vercel-7105abbccdde-ui\audit-neon-runtime-flow-NA-3741b-known-hold-through-UI-retry\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\audit-neon-runtime-flow.spec.ts:64:1 › NA01 runtime flow: committed sign-out with refused redirect keeps unknown hold through UI retry 

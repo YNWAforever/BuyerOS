@@ -1,0 +1,240 @@
+{
+  "cwd": "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS",
+  "base_sha": "58b3cff65625c5abe55a0f8ab316b604989d8063",
+  "source_sha": "2b69e7cf8c0b0c738bfc34b3de44b1877468a0ca",
+  "environment": "Windows11/PowerShell/Node24.18.0/Python3.14.6;Chromium1120x800;owned loopback only;strict fixture children env;SDK0.5.0-beta",
+  "new_builds": 0,
+  "provider_account_calls": 0,
+  "DB_connections": 0,
+  "migrations": [],
+  "reported_broad_suite": "27rootMJS attempt, not final-source project acceptance; source evolved while slow cleanup matrix ran; every failure retained",
+  "commands": [
+    {
+      "argv": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=spec",
+        "--test-reporter-destination=test-results/neon-unknown-write-recovery/related-complete.log",
+        "--test-reporter=junit",
+        "--test-reporter-destination=test-results/neon-unknown-write-recovery/related-complete.xml",
+        "tests/neon-real-runtime.test.mjs",
+        "tests/neon-counted-proxy.test.mjs",
+        "tests/neon-real-preflight.test.mjs",
+        "tests/neon-compatibility-harness.test.mjs",
+        "tests/neon-compatibility-discovery.test.mjs",
+        "tests/neon-runtime-probe.test.mjs",
+        "tests/neon-runtime-cleanup.test.mjs",
+        "tests/neon-runtime-flow.test.mjs",
+        "tests/neon-real-diagnostic.test.mjs",
+        "tests/neon-execution-boundary.test.mjs",
+        "tests/neon-cleanup-contracts.test.mjs",
+        "tests/api-types-generation.test.mjs",
+        "tests/audit-auth-render.test.mjs",
+        "tests/vercel-services.test.mjs"
+      ],
+      "exit": 0,
+      "report": "214pass0fail/error/skip"
+    },
+    {
+      "argv": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=spec",
+        "--test-reporter-destination=test-results/neon-unknown-write-recovery/full-node.log",
+        "--test-reporter=junit",
+        "--test-reporter-destination=test-results/neon-unknown-write-recovery/full-node.xml",
+        "tests/api-types-generation.test.mjs",
+        "tests/approval-fingerprint.test.mjs",
+        "tests/audit-access-denial.test.mjs",
+        "tests/audit-auth-render.test.mjs",
+        "tests/audit-bulk-confirmation.test.mjs",
+        "tests/audit-bulk-manifests.test.mjs",
+        "tests/audit-draft-grounding.test.mjs",
+        "tests/audit-draft-guard.test.mjs",
+        "tests/audit-job-query.test.mjs",
+        "tests/audit-member-contract.test.mjs",
+        "tests/audit-profile-read.test.mjs",
+        "tests/audit-research-intent.test.mjs",
+        "tests/e2e-fixture-cleanup.test.mjs",
+        "tests/neon-cleanup-contracts.test.mjs",
+        "tests/neon-compatibility-discovery.test.mjs",
+        "tests/neon-compatibility-harness.test.mjs",
+        "tests/neon-counted-proxy.test.mjs",
+        "tests/neon-execution-boundary.test.mjs",
+        "tests/neon-real-diagnostic.test.mjs",
+        "tests/neon-real-preflight.test.mjs",
+        "tests/neon-real-runtime.test.mjs",
+        "tests/neon-runtime-cleanup.test.mjs",
+        "tests/neon-runtime-flow.test.mjs",
+        "tests/neon-runtime-probe.test.mjs",
+        "tests/vercel-render.test.mjs",
+        "tests/vercel-services.test.mjs",
+        "tests/worker-gateway.test.mjs"
+      ],
+      "exit": 1,
+      "report": "274reported269pass5fail0skip;273XMLleaves4failure_elements;oneparentfailure"
+    },
+    {
+      "argv": [
+        "services/api/.venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/fixtures/neon-runtime-flow/test_verify.py",
+        "--junitxml=test-results/neon-unknown-write-recovery/crypto.xml"
+      ],
+      "env": {
+        "BUYEROS_STRICT_INTEGRATION": "1",
+        "PYTHONUTF8": "1"
+      },
+      "exit": 0,
+      "report": "8pass0skip;oneexistingpytest_asyncio deprecation"
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit"
+      ],
+      "exit": 0,
+      "log": "types-complete.log"
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "scripts/neon-counted-proxy.mjs",
+        "scripts/neon-runtime-flow-fixture.mjs",
+        "scripts/serve-neon-runtime-flow.mjs",
+        "tests/neon-counted-proxy.test.mjs",
+        "tests/neon-compatibility-discovery.test.mjs",
+        "tests/e2e/audit-neon-runtime-flow.spec.ts",
+        "--max-warnings=0"
+      ],
+      "exit": 0,
+      "log": "lint-complete.log"
+    },
+    {
+      "argv": [
+        "node",
+        "scripts/generate-api-types.mjs",
+        "--check"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "services/api/.venv/Scripts/python.exe",
+        "scripts/generate-operation-routes.py",
+        "--check"
+      ],
+      "exit": 0,
+      "operations": 84,
+      "base_operations": 70,
+      "extensions": 14
+    },
+    {
+      "cwd": "services/api",
+      "argv": [
+        ".venv/Scripts/python.exe",
+        "-m",
+        "alembic",
+        "heads"
+      ],
+      "exit": 0,
+      "head": "0037_bulk_manifests",
+      "DB_connections": 0
+    }
+  ],
+  "UI": [
+    {
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.neon-runtime-flow.config.ts",
+        "--grep",
+        "committed sign-out"
+      ],
+      "env": {
+        "BUYEROS_N00_TARGET": "vercel",
+        "BUYEROS_N00_RUN_ID": "7105abbccdde",
+        "BUYEROS_N00_FLOW_PROFILE": "runtime-flow-final(default)"
+      },
+      "exit": 1,
+      "classification": "RED-old-proxy",
+      "cases": 1
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.neon-runtime-flow.config.ts"
+      ],
+      "env": {
+        "BUYEROS_N00_TARGET": "vercel",
+        "BUYEROS_N00_RUN_ID": "8105abbccdde",
+        "BUYEROS_N00_FLOW_PROFILE": "runtime-flow-final(default)"
+      },
+      "exit": 0,
+      "classification": "first-green",
+      "cases": 6
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.neon-runtime-flow.config.ts"
+      ],
+      "env": {
+        "BUYEROS_N00_TARGET": "portable",
+        "BUYEROS_N00_RUN_ID": "9105abbccdde",
+        "BUYEROS_N00_FLOW_PROFILE": "runtime-flow-final(default)"
+      },
+      "exit": 1,
+      "classification": "startup-failure",
+      "cases": 0
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.neon-runtime-flow.config.ts"
+      ],
+      "env": {
+        "BUYEROS_N00_TARGET": "portable",
+        "BUYEROS_N00_RUN_ID": "a105abbccdde",
+        "BUYEROS_N00_FLOW_PROFILE": "runtime-flow-final(default)"
+      },
+      "exit": 0,
+      "classification": "final",
+      "cases": 6
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.neon-runtime-flow.config.ts"
+      ],
+      "env": {
+        "BUYEROS_N00_TARGET": "vercel",
+        "BUYEROS_N00_RUN_ID": "b105abbccdde",
+        "BUYEROS_N00_FLOW_PROFILE": "runtime-flow-final(default)"
+      },
+      "exit": 0,
+      "classification": "final",
+      "cases": 6
+    }
+  ]
+}

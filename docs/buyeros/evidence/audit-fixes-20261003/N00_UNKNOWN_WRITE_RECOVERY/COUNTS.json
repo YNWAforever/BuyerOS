@@ -1,0 +1,185 @@
+{
+  "crypto": {
+    "xml_leaf_cases": 8,
+    "failure_elements": 0,
+    "error_elements": 0,
+    "skip_elements": 0,
+    "reported": {}
+  },
+  "full-node": {
+    "xml_leaf_cases": 273,
+    "failure_elements": 4,
+    "error_elements": 0,
+    "skip_elements": 0,
+    "reported": {
+      "tests": "274",
+      "pass": "269",
+      "fail": "5",
+      "cancelled": "0",
+      "skipped": "0",
+      "duration_ms": "854119.1259"
+    }
+  },
+  "green-first": {
+    "xml_leaf_cases": 22,
+    "failure_elements": 0,
+    "error_elements": 0,
+    "skip_elements": 0,
+    "reported": {
+      "tests": "22",
+      "pass": "22",
+      "fail": "0",
+      "cancelled": "0",
+      "skipped": "0",
+      "duration_ms": "4309.117"
+    }
+  },
+  "intent-green": {
+    "xml_leaf_cases": 24,
+    "failure_elements": 0,
+    "error_elements": 0,
+    "skip_elements": 0,
+    "reported": {
+      "tests": "24",
+      "pass": "24",
+      "fail": "0",
+      "cancelled": "0",
+      "skipped": "0",
+      "duration_ms": "6889.8386"
+    }
+  },
+  "intent-red": {
+    "xml_leaf_cases": 24,
+    "failure_elements": 2,
+    "error_elements": 0,
+    "skip_elements": 0,
+    "reported": {
+      "tests": "24",
+      "pass": "22",
+      "fail": "2",
+      "cancelled": "0",
+      "skipped": "0",
+      "duration_ms": "13529.93"
+    }
+  },
+  "red-valid": {
+    "xml_leaf_cases": 22,
+    "failure_elements": 10,
+    "error_elements": 0,
+    "skip_elements": 0,
+    "reported": {
+      "tests": "22",
+      "pass": "12",
+      "fail": "10",
+      "cancelled": "0",
+      "skipped": "0",
+      "duration_ms": "6109.4523"
+    }
+  },
+  "red": {
+    "xml_leaf_cases": 22,
+    "failure_elements": 10,
+    "error_elements": 0,
+    "skip_elements": 0,
+    "reported": {
+      "tests": "22",
+      "pass": "12",
+      "fail": "10",
+      "cancelled": "0",
+      "skipped": "0",
+      "duration_ms": "8908.4775"
+    }
+  },
+  "related-complete": {
+    "xml_leaf_cases": 214,
+    "failure_elements": 0,
+    "error_elements": 0,
+    "skip_elements": 0,
+    "reported": {
+      "tests": "214",
+      "pass": "214",
+      "fail": "0",
+      "cancelled": "0",
+      "skipped": "0",
+      "duration_ms": "93959.1031"
+    }
+  },
+  "related-final": {
+    "xml_leaf_cases": 212,
+    "failure_elements": 0,
+    "error_elements": 0,
+    "skip_elements": 0,
+    "reported": {
+      "tests": "212",
+      "pass": "212",
+      "fail": "0",
+      "cancelled": "0",
+      "skipped": "0",
+      "duration_ms": "81899.5296"
+    }
+  },
+  "related-first-red": {
+    "xml_leaf_cases": 212,
+    "failure_elements": 1,
+    "error_elements": 0,
+    "skip_elements": 0,
+    "reported": {
+      "tests": "212",
+      "pass": "211",
+      "fail": "1",
+      "cancelled": "0",
+      "skipped": "0",
+      "duration_ms": "99993.5922"
+    }
+  },
+  "built_final": {
+    "portable": {
+      "cases": 6,
+      "pass": 6,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "cli_exit": 0,
+      "budget_reserved": 38,
+      "forwarded": 37,
+      "outcomes": {
+        "accepted": 35,
+        "rejected": 2,
+        "unknown": 1,
+        "pending": 0
+      },
+      "external_requests": 0,
+      "leak_check": {
+        "fixture_only": true,
+        "emitted_text_files": 91,
+        "exact_runtime_value_matches": 0,
+        "cookie_secret_checked": true
+      }
+    },
+    "vercel": {
+      "cases": 6,
+      "pass": 6,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "cli_exit": 0,
+      "budget_reserved": 38,
+      "forwarded": 37,
+      "outcomes": {
+        "accepted": 35,
+        "rejected": 2,
+        "unknown": 1,
+        "pending": 0
+      },
+      "external_requests": 0,
+      "leak_check": {
+        "fixture_only": true,
+        "emitted_text_files": 2391,
+        "exact_runtime_value_matches": 0,
+        "cookie_secret_checked": true
+      }
+    }
+  },
+  "new_node_cases": 13,
+  "new_UI_cases_per_target": 1
+}

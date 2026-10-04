@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "fixture_only": true,
+  "sequence": 6,
+  "method": "POST",
+  "path": "/fixture/auth/sign-out",
+  "fingerprint": "e9362d1c4619fda02c19929e2e670a7226f671e97539fa43b55989a8f59a0fd8",
+  "status": 502,
+  "reason": "N00_FIXTURE_REDIRECT_REFUSED",
+  "outcome": "rejected"
+}

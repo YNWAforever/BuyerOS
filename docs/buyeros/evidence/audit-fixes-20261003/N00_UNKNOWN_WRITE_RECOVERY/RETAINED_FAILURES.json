@@ -1,0 +1,10 @@
+{
+  "valid_RED": "22cases12pass10fail;24cases22pass2fail;builtoldproxy1failure",
+  "initial_setup": "missingwriteFileSync and SDK throws-versus-error-result;retainedred.log;correctedRED separately",
+  "discovery": "212cases211pass1fail5vs6;exact6inventoryfixed",
+  "lint": "4unusedvariablewarnings;fixedwithoutdisabledrules",
+  "portable_startup": "0tests/CLI1;APIready/workerdnotHTTPreadywithinunchanged20s;ownercleanupverified;causeunproven",
+  "broad_root": "offer Docker run statusnull at30s +parent;2same-statequery cases sampledbeforefix nowrelatedGREEN;missingnormal.vercelentry;entireattempt remainsRED",
+  "inventory_checker": "initialWindowsunprefixedlongpathFileNotFound;extendedpath95/2220membersmatch;nooutputedited",
+  "shell_read_attempts": "wrongcleanupfilename and firstheadlogrelativepath preventedcommands;correctedheadexit0;notpassingtestevidence"
+}

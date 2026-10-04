@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "fixture_only": true,
+  "sequence": 13,
+  "method": "GET",
+  "path": "/fixture/auth/jwks",
+  "state_changing": false,
+  "fingerprint": "abb14e5af9a724daf6a6bee07d9a19c71d7778470e9c414c6140eacb5480215c",
+  "status": 200,
+  "reason": "upstream-response",
+  "outcome": "accepted"
+}

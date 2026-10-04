@@ -1,0 +1,65 @@
+{
+  "fixture_only": true,
+  "external_verified": false,
+  "compiled_source_sha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+  "runner_head": "58b3cff65625c5abe55a0f8ab316b604989d8063",
+  "scenario": "valid",
+  "manifest": {
+    "schemaVersion": 1,
+    "proposal": "buyeros-neon-auth-n00-20261004",
+    "sourceSha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+    "projectId": "fictional-probe-project-b105abbccdde",
+    "branchId": "fictional-probe-branch-b105abbccdde",
+    "authId": "fictional-probe-auth-b105abbccdde",
+    "orgId": "org-soft-sunset-25251479",
+    "name": "buyeros-neon-auth-n00-20261004",
+    "regionId": "aws-ap-southeast-1",
+    "creationMode": "new-empty",
+    "createdAt": "2026-10-04T21:36:16.512Z",
+    "expiresAt": "2026-10-04T23:36:16.512Z",
+    "readback": {
+      "projectId": "fictional-probe-project-b105abbccdde",
+      "branchId": "fictional-probe-branch-b105abbccdde",
+      "authId": "fictional-probe-auth-b105abbccdde",
+      "orgId": "org-soft-sunset-25251479",
+      "name": "buyeros-neon-auth-n00-20261004",
+      "regionId": "aws-ap-southeast-1",
+      "observedAt": "2026-10-04T21:36:16.512Z",
+      "subscription": "free_v3",
+      "emailDeliveryEnabled": false,
+      "emailPasswordEnabled": false,
+      "emailHooksEnabled": false,
+      "methods": [
+        "google"
+      ],
+      "trustedOrigins": [
+        "http://localhost:44890"
+      ]
+    },
+    "auth": {
+      "baseUrl": "https://b105abbccdde.fixture.invalid/auth",
+      "issuer": "https://issuer-b105abbccdde.fixture.invalid",
+      "audience": "fictional-probe-audience-b105abbccdde",
+      "jwksUrl": "https://b105abbccdde.fixture.invalid/auth/jwks",
+      "algorithm": "EdDSA",
+      "keyType": "OKP",
+      "curve": "Ed25519"
+    }
+  },
+  "keys": [
+    "NEON_AUTH_BASE_URL",
+    "NEON_AUTH_COOKIE_SECRET",
+    "N00_AUTH_ISSUER",
+    "N00_AUTH_AUDIENCE",
+    "N00_AUTH_JWKS_URL",
+    "N00_AUTH_ALGORITHM",
+    "N00_TARGET_FINGERPRINT",
+    "N00_REAL_TARGET_JSON",
+    "N00_FLOW_FIXTURE",
+    "N00_DIAGNOSTIC_URL",
+    "N00_DIAGNOSTIC_NONCE",
+    "N00_DIAGNOSTIC_FINGERPRINT"
+  ],
+  "cookie_secret_sha256": "3782216d39a00d6f363a508a5fa9dcae82349b2c5f9719d72a2971a8d34830f7",
+  "environment_injected_after_build": true
+}

@@ -1,0 +1,15 @@
+[WebServer] (node:49124) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:42124) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-runtime-flow.spec.ts:3:1 › NA01 runtime flow: real-only diagnostic UI has no build-time Auth configuration (668ms)
+  ok 2 tests\e2e\audit-neon-runtime-flow.spec.ts:11:1 › NA01 runtime flow: browser Google model, managed callback, server/client session, token/API, reload and logout (2.9s)
+  ok 3 tests\e2e\audit-neon-runtime-flow.spec.ts:33:1 › NA01 runtime flow: explicit issuer differs from Auth URL; wrong trust/key/algorithm/expiry are refused by FastAPI (824ms)
+  ok 4 tests\e2e\audit-neon-runtime-flow.spec.ts:44:1 › NA01 runtime flow: foreign origin refuses before diagnostic/JWKS; each direct SDK upstream request is charged (107ms)
+  ok 5 tests\e2e\audit-neon-runtime-flow.spec.ts:52:1 › NA01 runtime flow: consumed verifier cannot create a session in a second browser (598ms)
+  ok 6 tests\e2e\audit-neon-runtime-flow.spec.ts:64:1 › NA01 runtime flow: committed sign-out with refused redirect keeps unknown hold through UI retry (1.7s)
+
+  6 passed (41.2s)
