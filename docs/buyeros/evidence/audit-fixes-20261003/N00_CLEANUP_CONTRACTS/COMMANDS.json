@@ -89,8 +89,8 @@
       "argv": [
         "node",
         "node_modules/eslint/bin/eslint.js",
-        "scripts/neon-cleanup-contracts.d.mts",
         "scripts/neon-cleanup-contracts.mjs",
+        "scripts/neon-cleanup-contracts.d.mts",
         "tests/neon-cleanup-contracts.test.mjs",
         "tests/neon-cleanup-contracts.types.ts",
         "--max-warnings=0"
