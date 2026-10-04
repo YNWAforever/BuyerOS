@@ -4,6 +4,7 @@ minimumReleaseAgeIgnoreMissingTime: false
 trustLockfile: false
 strictDepBuilds: true
 allowBuilds:
+  core-js: false
   esbuild: true
   fsevents: true
   # Cloudflare tests use setupNetwork; no browser service-worker asset is needed.
