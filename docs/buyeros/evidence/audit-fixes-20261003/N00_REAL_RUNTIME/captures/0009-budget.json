@@ -1,0 +1,371 @@
+{
+  "fixture_only": true,
+  "external_requests": 0,
+  "runner_head_at_execution": "535e12bc49588eadb4e4ce0c75f748489868e084",
+  "compiled_inputs": "test-results/neon-compatibility/build-inputs.json",
+  "metrics": {
+    "received": 44,
+    "forwarded": 44,
+    "locally_rejected": 0,
+    "unknown": 0
+  },
+  "requests": [
+    {
+      "sequence": 1,
+      "purpose": "auth",
+      "operationId": "fixture-http-1",
+      "reservedAt": "2026-10-04T14:46:30.790Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-1.json"
+    },
+    {
+      "sequence": 2,
+      "purpose": "auth",
+      "operationId": "fixture-http-2",
+      "reservedAt": "2026-10-04T14:46:31.388Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-2.json"
+    },
+    {
+      "sequence": 3,
+      "purpose": "auth",
+      "operationId": "fixture-http-3",
+      "reservedAt": "2026-10-04T14:46:31.420Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-3.json"
+    },
+    {
+      "sequence": 4,
+      "purpose": "auth",
+      "operationId": "fixture-http-4",
+      "reservedAt": "2026-10-04T14:46:32.107Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-4.json"
+    },
+    {
+      "sequence": 5,
+      "purpose": "auth",
+      "operationId": "fixture-http-5",
+      "reservedAt": "2026-10-04T14:46:32.749Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-5.json"
+    },
+    {
+      "sequence": 6,
+      "purpose": "auth",
+      "operationId": "fixture-http-6",
+      "reservedAt": "2026-10-04T14:46:33.108Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-6.json"
+    },
+    {
+      "sequence": 7,
+      "purpose": "auth",
+      "operationId": "fixture-http-7",
+      "reservedAt": "2026-10-04T14:46:33.256Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-7.json"
+    },
+    {
+      "sequence": 8,
+      "purpose": "auth",
+      "operationId": "fixture-http-8",
+      "reservedAt": "2026-10-04T14:46:33.790Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-8.json"
+    },
+    {
+      "sequence": 9,
+      "purpose": "auth",
+      "operationId": "fixture-http-9",
+      "reservedAt": "2026-10-04T14:46:33.857Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-9.json"
+    },
+    {
+      "sequence": 10,
+      "purpose": "auth",
+      "operationId": "fixture-http-10",
+      "reservedAt": "2026-10-04T14:46:35.989Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-10.json"
+    },
+    {
+      "sequence": 11,
+      "purpose": "auth",
+      "operationId": "fixture-http-11",
+      "reservedAt": "2026-10-04T14:46:45.324Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-11.json"
+    },
+    {
+      "sequence": 12,
+      "purpose": "auth",
+      "operationId": "fixture-http-12",
+      "reservedAt": "2026-10-04T14:46:45.421Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-12.json"
+    },
+    {
+      "sequence": 13,
+      "purpose": "auth",
+      "operationId": "fixture-http-13",
+      "reservedAt": "2026-10-04T14:46:45.565Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-13.json"
+    },
+    {
+      "sequence": 14,
+      "purpose": "auth",
+      "operationId": "fixture-http-14",
+      "reservedAt": "2026-10-04T14:46:45.654Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-14.json"
+    },
+    {
+      "sequence": 15,
+      "purpose": "auth",
+      "operationId": "fixture-http-15",
+      "reservedAt": "2026-10-04T14:46:45.819Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-15.json"
+    },
+    {
+      "sequence": 16,
+      "purpose": "auth",
+      "operationId": "fixture-http-16",
+      "reservedAt": "2026-10-04T14:46:45.957Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-16.json"
+    },
+    {
+      "sequence": 17,
+      "purpose": "auth",
+      "operationId": "fixture-http-17",
+      "reservedAt": "2026-10-04T14:46:45.995Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-17.json"
+    },
+    {
+      "sequence": 18,
+      "purpose": "auth",
+      "operationId": "fixture-http-18",
+      "reservedAt": "2026-10-04T14:46:46.047Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-18.json"
+    },
+    {
+      "sequence": 19,
+      "purpose": "auth",
+      "operationId": "fixture-http-19",
+      "reservedAt": "2026-10-04T14:46:46.224Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-19.json"
+    },
+    {
+      "sequence": 20,
+      "purpose": "auth",
+      "operationId": "fixture-http-20",
+      "reservedAt": "2026-10-04T14:46:47.922Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-20.json"
+    },
+    {
+      "sequence": 21,
+      "purpose": "auth",
+      "operationId": "fixture-http-21",
+      "reservedAt": "2026-10-04T14:46:48.216Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-21.json"
+    },
+    {
+      "sequence": 22,
+      "purpose": "auth",
+      "operationId": "fixture-http-22",
+      "reservedAt": "2026-10-04T14:46:48.290Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-22.json"
+    },
+    {
+      "sequence": 23,
+      "purpose": "auth",
+      "operationId": "fixture-http-23",
+      "reservedAt": "2026-10-04T14:46:48.323Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-23.json"
+    },
+    {
+      "sequence": 24,
+      "purpose": "auth",
+      "operationId": "fixture-http-24",
+      "reservedAt": "2026-10-04T14:46:50.050Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-24.json"
+    },
+    {
+      "sequence": 25,
+      "purpose": "auth",
+      "operationId": "fixture-http-25",
+      "reservedAt": "2026-10-04T14:46:50.247Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-25.json"
+    },
+    {
+      "sequence": 26,
+      "purpose": "auth",
+      "operationId": "fixture-http-26",
+      "reservedAt": "2026-10-04T14:46:50.477Z",
+      "outcome": "rejected",
+      "evidenceRef": "fixture-http-26.json"
+    },
+    {
+      "sequence": 27,
+      "purpose": "auth",
+      "operationId": "fixture-http-27",
+      "reservedAt": "2026-10-04T14:46:50.601Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-27.json"
+    },
+    {
+      "sequence": 28,
+      "purpose": "auth",
+      "operationId": "fixture-http-28",
+      "reservedAt": "2026-10-04T14:46:51.843Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-28.json"
+    },
+    {
+      "sequence": 29,
+      "purpose": "auth",
+      "operationId": "fixture-http-29",
+      "reservedAt": "2026-10-04T14:46:52.018Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-29.json"
+    },
+    {
+      "sequence": 30,
+      "purpose": "auth",
+      "operationId": "fixture-http-30",
+      "reservedAt": "2026-10-04T14:46:52.588Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-30.json"
+    },
+    {
+      "sequence": 31,
+      "purpose": "auth",
+      "operationId": "fixture-http-31",
+      "reservedAt": "2026-10-04T14:46:52.639Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-31.json"
+    },
+    {
+      "sequence": 32,
+      "purpose": "auth",
+      "operationId": "fixture-http-32",
+      "reservedAt": "2026-10-04T14:46:52.746Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-32.json"
+    },
+    {
+      "sequence": 33,
+      "purpose": "auth",
+      "operationId": "fixture-http-33",
+      "reservedAt": "2026-10-04T14:46:52.790Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-33.json"
+    },
+    {
+      "sequence": 34,
+      "purpose": "auth",
+      "operationId": "fixture-http-34",
+      "reservedAt": "2026-10-04T14:46:53.411Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-34.json"
+    },
+    {
+      "sequence": 35,
+      "purpose": "auth",
+      "operationId": "fixture-http-35",
+      "reservedAt": "2026-10-04T14:46:53.665Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-35.json"
+    },
+    {
+      "sequence": 36,
+      "purpose": "auth",
+      "operationId": "fixture-http-36",
+      "reservedAt": "2026-10-04T14:46:54.458Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-36.json"
+    },
+    {
+      "sequence": 37,
+      "purpose": "auth",
+      "operationId": "fixture-http-37",
+      "reservedAt": "2026-10-04T14:46:54.549Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-37.json"
+    },
+    {
+      "sequence": 38,
+      "purpose": "auth",
+      "operationId": "fixture-http-38",
+      "reservedAt": "2026-10-04T14:46:54.763Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-38.json"
+    },
+    {
+      "sequence": 39,
+      "purpose": "auth",
+      "operationId": "fixture-http-39",
+      "reservedAt": "2026-10-04T14:46:54.977Z",
+      "outcome": "rejected",
+      "evidenceRef": "fixture-http-39.json"
+    },
+    {
+      "sequence": 40,
+      "purpose": "auth",
+      "operationId": "fixture-http-40",
+      "reservedAt": "2026-10-04T14:46:55.225Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-40.json"
+    },
+    {
+      "sequence": 41,
+      "purpose": "auth",
+      "operationId": "fixture-http-41",
+      "reservedAt": "2026-10-04T14:46:55.326Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-41.json"
+    },
+    {
+      "sequence": 42,
+      "purpose": "auth",
+      "operationId": "fixture-http-42",
+      "reservedAt": "2026-10-04T14:46:55.362Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-42.json"
+    },
+    {
+      "sequence": 43,
+      "purpose": "auth",
+      "operationId": "fixture-http-43",
+      "reservedAt": "2026-10-04T14:46:55.545Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-43.json"
+    },
+    {
+      "sequence": 44,
+      "purpose": "auth",
+      "operationId": "fixture-http-44",
+      "reservedAt": "2026-10-04T14:46:55.708Z",
+      "outcome": "rejected",
+      "evidenceRef": "fixture-http-44.json"
+    }
+  ],
+  "limit": 200,
+  "cleanup_reserve": 20,
+  "sdk_fixture_base": "http://127.0.0.1:44891/fixture/auth",
+  "owned_backend_port": 44894,
+  "real_configuration_verified": false
+}

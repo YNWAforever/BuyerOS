@@ -1,0 +1,75 @@
+[WebServer] (node:43256) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] INFO:     Started server process [41160]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+
+Running 7 tests using 1 worker
+
+(node:30440) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-compat.spec.ts:3:1 › NA01 fixture: official handler/client, server session, bearer verification, reload and logout (3.4s)
+[WebServer] ▲ [WARNING] [neon-auth] Upstream HTTP error {
+[WebServer] 
+[WebServer]     component: 'proxy',
+[WebServer]     proxyPath: 'callback/fixture',
+[WebServer]     status: 500,
+[WebServer]     statusText: 'Internal Server Error',
+[WebServer]     host: '127.0.0.1:44891'
+[WebServer]   }
+[WebServer] 
+[WebServer] 
+  x  2 tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect (2.6s)
+(node:51820) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 tests\e2e\audit-neon-compat.spec.ts:25:1 › NA01 fixture: tokens require exact issuer/audience/algorithm, expiry and known key (493ms)
+  ok 4 tests\e2e\audit-neon-compat.spec.ts:34:1 › NA01 fixture: managed callback exchanges verifier in built middleware and keeps app cookies (3.4s)
+  ok 5 tests\e2e\audit-neon-compat.spec.ts:72:1 › NA01 fixture: missing or mismatched challenge cannot exchange a fresh verifier (552ms)
+  ok 6 tests\e2e\audit-neon-compat.spec.ts:91:1 › NA01 counted fixture: built SDK get-session reserves one actual upstream HTTP request (86ms)
+  ok 7 tests\e2e\audit-neon-compat.spec.ts:98:1 › NA01 counted fixture: built SDK negative login is charged and returns the real fixture401 (82ms)
+[WebServer] N00 fixture evidence/cleanup failed N00_FIXTURE_CHILD_STILL_RUNNING
+Error: N00 fixture cleanup evidence missing
+
+   at ..\..\scripts\neon-counted-teardown.mjs:15
+
+  13 |  const deadline=Date.now()+10_000;
+  14 |  while(!existsSync(join(folder,'cleanup.json'))&&Date.now()<deadline)await new Promise(ok=>setTimeout(ok,100));
+> 15 |  if(!existsSync(join(folder,'cleanup.json')))throw new Error('N00 fixture cleanup evidence missing');
+     |                                                    ^
+  16 |  const proof=JSON.parse(readFileSync(join(folder,'cleanup.json'),'utf8'));
+  17 |  if(proof.owned_journal_removed!==true||existsSync(owner.budget_root))throw new Error('N00 fixture journal cleanup incomplete');
+  18 | }
+    at teardown (C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\scripts\neon-counted-teardown.mjs:15:52)
+
+
+  1) tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 302
+    Received: 500
+
+      19 | test('NA01 fixture: callback response preserves host cookies and redirect',async({page,request})=>{
+      20 |  const upstream=await request.get('http://127.0.0.1:44891/fixture/auth/callback/fixture?state=fictional-state',{maxRedirects:0});expect(upstream.status()).toBe(302);expect(upstream.headers()['set-cookie']).toContain('HttpOnly');
+    > 21 |  const callback=await request.get('/api/auth/callback/fixture?state=fictional-state',{maxRedirects:0});expect(callback.status()).toBe(302);
+         |                                                                                                                                  ^
+      22 |  await page.goto('/api/auth/callback/fixture?state=fictional-state');await expect(page).toHaveURL(/\/compat$/);
+      23 |  await expect(page.getByTestId('server-session')).toHaveText('n00-user');
+      24 | });
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:21:130
+
+    Error Context: test-results\neon-real-runtime\portable-5bdaf49c6e02-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-real-runtime\portable-5bdaf49c6e02-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-real-runtime\portable-5bdaf49c6e02-ui\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\audit-neon-compat.spec.ts:19:1 › NA01 fixture: callback response preserves host cookies and redirect 
+  6 passed (53.5s)
+  1 error was not a part of any test, see above for details

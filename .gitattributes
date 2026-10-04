@@ -28,3 +28,6 @@ docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_PREFLIGHT/** -text whitespac
 
 # Preserve N00 counted transport producer evidence byte-for-byte.
 docs/buyeros/evidence/audit-fixes-20261003/N00_COUNTED_TRANSPORT/** -text whitespace=cr-at-eol
+
+# Preserve N00 runtime preparation producer bytes, including native line endings.
+docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_RUNTIME/** -text whitespace=cr-at-eol

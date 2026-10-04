@@ -1,0 +1,33 @@
+{
+  "immutable_groups": [
+    {
+      "folder": "docs/buyeros/inputs/audit-20261003",
+      "unchanged_payloads": 31
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL",
+      "unchanged_payloads": 150
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK",
+      "unchanged_payloads": 66
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_PREFLIGHT",
+      "unchanged_payloads": 23
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_COUNTED_TRANSPORT",
+      "unchanged_payloads": 421
+    }
+  ],
+  "prior_payloads": 691,
+  "four_DB_guards_unchanged": true,
+  "generated_contract_unchanged": true,
+  "operation_ledger_unchanged": true,
+  "master_unchanged": true,
+  "reused_emitted_members": {
+    "portable": 89,
+    "vercel": 2214
+  }
+}

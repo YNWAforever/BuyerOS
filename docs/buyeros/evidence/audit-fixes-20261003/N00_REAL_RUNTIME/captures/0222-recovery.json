@@ -1,0 +1,26 @@
+[
+  {
+    "root": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-Pdr6ie",
+    "owned_pids_absent": true,
+    "pending": 0,
+    "runId": "7f2d941e8c63",
+    "external_resources": 0,
+    "requests": 44,
+    "fixture_only": true,
+    "unknown": 0,
+    "journal_removed": true,
+    "original_failure_retained": true
+  },
+  {
+    "root": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-zkvyzH",
+    "owned_pids_absent": true,
+    "pending": 0,
+    "runId": "5bdaf49c6e02",
+    "external_resources": 0,
+    "requests": 44,
+    "fixture_only": true,
+    "unknown": 0,
+    "journal_removed": true,
+    "original_failure_retained": true
+  }
+]

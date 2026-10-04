@@ -22,11 +22,11 @@
     {
       "id": "N00",
       "status": "local-spike-partial",
-      "code_status": "local counted SDK fixture HTTP, persistent pre-reservation/unknown barrier and guarded cleanup; no auth cutover",
-      "verification_status": "fresh Node80pass0fail0skip; each actual builtUI7cases6pass1fail0skip;new counted2pass each;types/lint/contracts0;real Neon/runtime unverified",
+      "code_status": "shared target validator; strict request-lazy runtime gate and typed server-only SDK overlay prepared; measured fixture cleanup fixed; no auth cutover",
+      "verification_status": "fresh related Node110pass0fail0skip (30newunit); types/lint/contracts0; final built fixture UI each7/6pass/1original callbackfail/0skip/0globalerror; new runtime overlay unbuilt; real Neon unverified",
       "release_status": "not-deployed; Auth0 retained",
       "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
-      "source_sha": "261a9e51d9d038c68be1d0d67002fcbe6e1eff6c",
+      "source_sha": "790a1b29b971ce6e23221ac38cd5de4a61c50144",
       "finding_ids": [
         "F20"
       ],
@@ -35,44 +35,53 @@
       ],
       "checks": {
         "node": {
-          "tests": 32,
-          "pass": 32,
+          "tests": 110,
+          "pass": 110,
           "fail": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "todo": 0,
+          "duration_ms": 13491.6775,
           "skip": 0,
-          "duration_ms": 13197.2273,
-          "executed_this_followup": false,
-          "source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d"
+          "executed_this_followup": true,
+          "source_sha": "790a1b29b971ce6e23221ac38cd5de4a61c50144"
         },
         "built_ui": {
           "portable": {
+            "target": "portable",
+            "run_nonce": "e94f786ad235",
             "cases": 7,
             "pass": 6,
             "fail": 1,
-            "error": 0,
             "skip": 0,
-            "time": "23.084738",
+            "junit_errors": 0,
+            "global_errors": 0,
+            "time": "55.428903999999996",
             "cli_exit": 1,
-            "failing": [
-              "NA01 fixture: callback response preserves host cookies and redirect"
-            ],
-            "executed_this_followup": true,
+            "fixture_only": true,
+            "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
+            "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
             "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
-            "fixture_only": true
+            "executed_this_followup": true,
+            "new_real_runtime_overlay_exercised": false
           },
           "vercel": {
+            "target": "vercel",
+            "run_nonce": "c07e49d328af",
             "cases": 7,
             "pass": 6,
             "fail": 1,
-            "error": 0,
             "skip": 0,
-            "time": "12.189678",
+            "junit_errors": 0,
+            "global_errors": 0,
+            "time": "19.568469",
             "cli_exit": 1,
-            "failing": [
-              "NA01 fixture: callback response preserves host cookies and redirect"
-            ],
-            "executed_this_followup": true,
+            "fixture_only": true,
+            "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
+            "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
             "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
-            "fixture_only": true
+            "executed_this_followup": true,
+            "new_real_runtime_overlay_exercised": false
           }
         },
         "new_callback_cases": {
@@ -106,7 +115,8 @@
           "lint_exit": 0,
           "external_requests": 0,
           "built_runtime_verified": false,
-          "no_external_executor": true
+          "no_external_executor": true,
+          "historical_checkpoint_only": true
         },
         "counted_transport": {
           "related_node": {
@@ -154,7 +164,8 @@
           "lint_exit": 0,
           "contracts_exit": 0,
           "real_runtime_verified": false,
-          "no_external_executor": true
+          "no_external_executor": true,
+          "historical_checkpoint_only": true
         },
         "new_counted_SDK_cases": {
           "per_target": 2,
@@ -162,11 +173,217 @@
           "fail": 0,
           "skip": 0,
           "red_observed": true
+        },
+        "real_runtime_preparation": {
+          "related_node": {
+            "tests": 110,
+            "pass": 110,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 13491.6775
+          },
+          "new_unit_cases": 30,
+          "new_unit_green": {
+            "tests": 30,
+            "pass": 30,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 800.5488
+          },
+          "new_unit_red": {
+            "tests": 30,
+            "pass": 0,
+            "fail": 30,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 553.1382
+          },
+          "types_red_exit": 2,
+          "types_red_error": "TS2578: unused @ts-expect-error exposed any SDK inference",
+          "types_final_exit": 0,
+          "lint_final_exit": 0,
+          "contracts_exit": 0,
+          "built_fixture_ui": {
+            "portable": {
+              "target": "portable",
+              "run_nonce": "e94f786ad235",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "55.428903999999996",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": true,
+              "new_real_runtime_overlay_exercised": false
+            },
+            "vercel": {
+              "target": "vercel",
+              "run_nonce": "c07e49d328af",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "19.568469",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
+              "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": true,
+              "new_real_runtime_overlay_exercised": false
+            }
+          },
+          "all_ui_attempts": [
+            {
+              "target": "portable",
+              "run_nonce": "7f2d941e8c63",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 1,
+              "time": "76.717208",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": true,
+              "new_real_runtime_overlay_exercised": false
+            },
+            {
+              "target": "portable",
+              "run_nonce": "5bdaf49c6e02",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 1,
+              "time": "53.492132",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-5bdaf49c6e02-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui-attempt2.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": true,
+              "new_real_runtime_overlay_exercised": false
+            },
+            {
+              "target": "portable",
+              "run_nonce": "e94f786ad235",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "55.428903999999996",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": true,
+              "new_real_runtime_overlay_exercised": false
+            },
+            {
+              "target": "vercel",
+              "run_nonce": "c07e49d328af",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "19.568469",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
+              "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": true,
+              "new_real_runtime_overlay_exercised": false
+            }
+          ],
+          "fixture_budgets": {
+            "portable": {
+              "fixture_only": true,
+              "run_nonce": "e94f786ad235",
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_auth_requests": 0
+            },
+            "vercel": {
+              "fixture_only": true,
+              "run_nonce": "c07e49d328af",
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_auth_requests": 0
+            }
+          },
+          "cleanup_error_gate": {
+            "red_attempts": 2,
+            "final_global_errors": 0,
+            "native_taskkill_timeout_ms": 15000,
+            "owned_stop_timeout_ms": 18000,
+            "global_teardown_timeout_ms": 20000,
+            "fixed_delay_replaced_with_bounded_OS_absence_poll": true
+          },
+          "null_target_exit": 1,
+          "null_target_error": "N00_REAL_TARGET_REQUIRED",
+          "alembic_heads_exit": 0,
+          "head": "0037_bulk_manifests",
+          "migrations": 0,
+          "DB_connections": 0,
+          "required_DB_suite_applicable": false,
+          "DB_skips": 0
+        },
+        "real_runtime_overlay": {
+          "SDK_version": "0.5.0-beta",
+          "strict_types_verified": true,
+          "request_lazy_constructor_boundary_unit_fixture_verified": true,
+          "constructor_in_unit_tests": "instrumented fixture; not official SDK runtime",
+          "built": false,
+          "actual_official_SDK_runtime_config_verified": false,
+          "node_crypto_in_new_workerd_bundle_verified": false,
+          "real_Neon_verified": false,
+          "human_Google_flow_verified": false,
+          "full_provider_browser_CLI_accounting_verified": false,
+          "real_HTTP_cleanup_executor_implemented": false
         }
       },
       "migrations": "none;0037 unchanged",
-      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_COUNTED_TRANSPORT/RESULTS.md",
-      "rollback": "revert 261a9e51d9d038c68be1d0d67002fcbe6e1eff6c plus metadata; reverse applicability0 only; no DB/resource undo",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_RUNTIME/RESULTS.md",
+      "rollback": "revert 790a1b29b971ce6e23221ac38cd5de4a61c50144 plus metadata; reverse applicability0 only; no DB/resource undo",
       "limits": [
         "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
         "No Vercel ingress/protection/binding/deployment verification",
@@ -175,7 +392,7 @@
         "No live performance/SLA/UAT claim"
       ],
       "full_gate_passed": false,
-      "next_action": "Real-only overlay/runtime config wiring and complete SDK/browser/CLI accounting design; no target created; exact fresh isolated target/test identity approval pending"
+      "next_action": "Compile and exercise the separate real-only runtime with fictional runtime-only configuration, add a real-harness UI/diagnostic and complete SDK/browser/CLI accounting; fresh bounded real target/test identity approval remains pending."
     },
     {
       "id": "N01",
@@ -806,10 +1023,10 @@
     "Q09 human screen-reader/staff UAT",
     "Independent source review",
     "Q16 underlying evidence when available",
-    "N00 approved isolated actual auth roundtrip; callback fixture covered, synthetic characterization red",
+    "N00 local real-only builds/accounting next; fresh isolated actual auth roundtrip requires specific new approval",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "261a9e51d9d038c68be1d0d67002fcbe6e1eff6c",
+  "reviewed_source_sha": "790a1b29b971ce6e23221ac38cd5de4a61c50144",
   "deployed_sha": null,
   "selected_followups": [
     "U05",

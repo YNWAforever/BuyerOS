@@ -1,0 +1,533 @@
+✖ runtime env carries the validated complete manifest, and build env drops it with all trust/secrets (20.062ms)
+✖ explicit issuer is kept independent from Auth base URL and actual SDK cookie options are returned (1.2159ms)
+✖ runtime missing N00_REAL_TARGET_JSON refuses SDK construction without fallback (5.5513ms)
+✖ runtime missing N00_TARGET_FINGERPRINT refuses SDK construction without fallback (0.792ms)
+✖ runtime missing NEON_AUTH_BASE_URL refuses SDK construction without fallback (4.3589ms)
+✖ runtime missing NEON_AUTH_COOKIE_SECRET refuses SDK construction without fallback (0.5765ms)
+✖ runtime missing N00_AUTH_ISSUER refuses SDK construction without fallback (0.406ms)
+✖ runtime missing N00_AUTH_AUDIENCE refuses SDK construction without fallback (0.3589ms)
+✖ runtime missing N00_AUTH_JWKS_URL refuses SDK construction without fallback (0.4164ms)
+✖ runtime missing N00_AUTH_ALGORITHM refuses SDK construction without fallback (0.7336ms)
+✖ runtime drift NEON_AUTH_BASE_URL refuses initialization (0.7682ms)
+✖ runtime drift N00_AUTH_ISSUER refuses initialization (0.5266ms)
+✖ runtime drift N00_AUTH_AUDIENCE refuses initialization (0.2868ms)
+✖ runtime drift N00_AUTH_JWKS_URL refuses initialization (0.2581ms)
+✖ runtime drift N00_AUTH_ALGORITHM refuses initialization (1.364ms)
+✖ runtime drift N00_TARGET_FINGERPRINT refuses initialization (0.4546ms)
+✖ malformed manifest error cannot echo secret or input data (2.9785ms)
+✖ oversize manifest refuses parsing rather than consuming an unbounded runtime input (1.3466ms)
+✖ runtime reuses full target validation and rejects production IDs (2.2319ms)
+✖ module/runtime creation consumes no env or SDK initialization at build time (0.3208ms)
+✖ request initialization revalidates but caches one SDK instance for exact same context (0.3252ms)
+✖ cached SDK cannot bypass the two-hour target expiry (0.8332ms)
+✖ changed target cannot reuse or silently replace an already bound SDK context (6.6768ms)
+✖ changed cookie secret requires a new owned runtime rather than silent context replacement (0.4474ms)
+✖ fresher matching readback does not change the bound target/SDK intent (0.3085ms)
+✖ SDK constructor errors are redacted and cannot disclose runtime cookie secret (1.5763ms)
+✖ runtime description contains only target/trust context and no cookie secret (0.1833ms)
+✖ returned runtime config cannot be mutated to change the validated SDK/trust tuple (0.3525ms)
+✖ separate build-environment Node process imports the runtime module without secret/init (170.517ms)
+✖ runtime consumer independently refuses an invalid cookie secret (0.583ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 0
+ℹ fail 30
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 553.1382
+
+✖ failing tests:
+
+test at tests\neon-real-runtime.test.mjs:12:1
+✖ runtime env carries the validated complete manifest, and build env drops it with all trust/secrets (20.062ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'undefined'
+  - 'string'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:13:84)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'string',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-real-runtime.test.mjs:16:1
+✖ explicit issuer is kept independent from Auth base URL and actual SDK cookie options are returned (1.2159ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at readRealRuntimeConfiguration (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:2:54)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:17:15)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+
+test at tests\neon-real-runtime.test.mjs:22:194
+✖ runtime missing N00_REAL_TARGET_JSON refuses SDK construction without fallback (5.5513ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:23:50)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:22:194
+✖ runtime missing N00_TARGET_FINGERPRINT refuses SDK construction without fallback (0.792ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:23:50)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:22:194
+✖ runtime missing NEON_AUTH_BASE_URL refuses SDK construction without fallback (4.3589ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:23:50)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:22:194
+✖ runtime missing NEON_AUTH_COOKIE_SECRET refuses SDK construction without fallback (0.5765ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:23:50)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:22:194
+✖ runtime missing N00_AUTH_ISSUER refuses SDK construction without fallback (0.406ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:23:50)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:22:194
+✖ runtime missing N00_AUTH_AUDIENCE refuses SDK construction without fallback (0.3589ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:23:50)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:22:194
+✖ runtime missing N00_AUTH_JWKS_URL refuses SDK construction without fallback (0.4164ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:23:50)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:22:194
+✖ runtime missing N00_AUTH_ALGORITHM refuses SDK construction without fallback (0.7336ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:23:50)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:25:334
+✖ runtime drift NEON_AUTH_BASE_URL refuses initialization (0.7682ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:26:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:25:334
+✖ runtime drift N00_AUTH_ISSUER refuses initialization (0.5266ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:26:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:25:334
+✖ runtime drift N00_AUTH_AUDIENCE refuses initialization (0.2868ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:26:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:25:334
+✖ runtime drift N00_AUTH_JWKS_URL refuses initialization (0.2581ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:26:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:25:334
+✖ runtime drift N00_AUTH_ALGORITHM refuses initialization (1.364ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:26:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:25:334
+✖ runtime drift N00_TARGET_FINGERPRINT refuses initialization (0.4546ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:26:49)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:28:1
+✖ malformed manifest error cannot echo secret or input data (2.9785ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    Comparison {
+  +   message: 'N00_REAL_RUNTIME_UNIMPLEMENTED'
+  -   message: 'N00_REAL_RUNTIME_MANIFEST'
+    }
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:29:69)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+        at readRealRuntimeConfiguration (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:2:54)
+        at assert.throws.message (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:29:80)
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:29:69)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12),
+    expected: { message: 'N00_REAL_RUNTIME_MANIFEST' },
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests\neon-real-runtime.test.mjs:31:1
+✖ oversize manifest refuses parsing rather than consuming an unbounded runtime input (1.3466ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_REAL_RUNTIME_MANIFEST/. Input:
+  
+  'Error: N00_REAL_RUNTIME_UNIMPLEMENTED'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:32:80)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+        at readRealRuntimeConfiguration (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:2:54)
+        at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:32:91
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:32:80)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12),
+    expected: /N00_REAL_RUNTIME_MANIFEST/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests\neon-real-runtime.test.mjs:34:1
+✖ runtime reuses full target validation and rejects production IDs (2.2319ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_REAL_NEW_EMPTY_TARGET/. Input:
+  
+  'Error: N00_REAL_RUNTIME_UNIMPLEMENTED'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:35:182)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+        at readRealRuntimeConfiguration (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:2:54)
+        at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:35:193
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:35:182)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12),
+    expected: /N00_REAL_NEW_EMPTY_TARGET/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests\neon-real-runtime.test.mjs:37:1
+✖ module/runtime creation consumes no env or SDK initialization at build time (0.3208ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:38:22)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:40:1
+✖ request initialization revalidates but caches one SDK instance for exact same context (0.3252ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:41:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:43:1
+✖ cached SDK cannot bypass the two-hour target expiry (0.8332ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:44:28)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:46:1
+✖ changed target cannot reuse or silently replace an already bound SDK context (6.6768ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:47:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:49:1
+✖ changed cookie secret requires a new owned runtime rather than silent context replacement (0.4474ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:50:34)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:52:1
+✖ fresher matching readback does not change the bound target/SDK intent (0.3085ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:53:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:55:1
+✖ SDK constructor errors are redacted and cannot disclose runtime cookie secret (1.5763ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:56:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:58:1
+✖ runtime description contains only target/trust context and no cookie secret (0.1833ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at boundary (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:10:106)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:59:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:61:1
+✖ returned runtime config cannot be mutated to change the validated SDK/trust tuple (0.3525ms)
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at readRealRuntimeConfiguration (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:2:54)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:62:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-runtime.test.mjs:64:1
+✖ separate build-environment Node process imports the runtime module without secret/init (170.517ms)
+  AssertionError [ERR_ASSERTION]: file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3
+  export function createRealAuthRuntime(){throw new Error('N00_REAL_RUNTIME_UNIMPLEMENTED');}
+                                                ^
+  
+  Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+      at createRealAuthRuntime (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:3:47)
+      at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/[eval1]:1:103
+      at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+      at async node:internal/modules/esm/loader:224:26
+      at async ModuleLoader.executeModuleJob (node:internal/modules/esm/loader:221:20)
+      at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+  
+  Node.js v24.18.0
+  
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:66:185)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-real-runtime.test.mjs:69:1
+✖ runtime consumer independently refuses an invalid cookie secret (0.583ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_REAL_COOKIE_SECRET/. Input:
+  
+  'Error: N00_REAL_RUNTIME_UNIMPLEMENTED'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:69:148)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_REAL_RUNTIME_UNIMPLEMENTED
+        at readRealRuntimeConfiguration (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-runtime.mjs:2:54)
+        at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:69:159
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-runtime.test.mjs:69:148)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12),
+    expected: /N00_REAL_COOKIE_SECRET/,
+    operator: 'throws',
+    diff: 'simple'
+  }

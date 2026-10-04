@@ -1,0 +1,52 @@
+{
+  "immutable_groups": [
+    {
+      "folder": "docs/buyeros/inputs/audit-20261003",
+      "unchanged_payloads": 31
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL",
+      "unchanged_payloads": 150
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK",
+      "unchanged_payloads": 66
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_PREFLIGHT",
+      "unchanged_payloads": 23
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_COUNTED_TRANSPORT",
+      "unchanged_payloads": 421
+    }
+  ],
+  "prior_payloads": 691,
+  "four_DB_guards_unchanged": true,
+  "generated_contract_unchanged": true,
+  "operation_ledger_unchanged": true,
+  "master_unchanged": true,
+  "reused_emitted_members": {
+    "portable": 89,
+    "vercel": 2214
+  },
+  "other_tasks_unchanged": 24,
+  "other_cases_unchanged": 97,
+  "case_rows": 98,
+  "historical_case_fields_unchanged": 15,
+  "legacy_registry_unchanged_except_additive_auth_checkpoint": true,
+  "compiled_overlay_hashes_unchanged": 9,
+  "original_strict_UI_test_file_unchanged": true,
+  "operation_rows_unchanged": 84,
+  "operation_original": 70,
+  "operation_extensions": 14,
+  "unrelated_worktrees": {
+    "root_head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+    "root_clean": true,
+    "audit_parent_head": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
+    "audit_parent_clean": true,
+    "historical_head": "a78859fe474f5722be3755b10e2586436b53bf97",
+    "historical_dirty_paths": 193,
+    "historical_binary_diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0"
+  }
+}

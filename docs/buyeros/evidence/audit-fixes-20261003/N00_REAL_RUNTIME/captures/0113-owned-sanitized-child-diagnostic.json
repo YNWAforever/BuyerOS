@@ -1,0 +1,76 @@
+{
+  "fixture_only": true,
+  "external_requests": 0,
+  "events": [
+    {
+      "ms": 2088,
+      "event": "port-ready",
+      "port": 44892,
+      "ready": true
+    },
+    {
+      "ms": 2089,
+      "event": "port-ready",
+      "port": 44890,
+      "ready": true
+    },
+    {
+      "ms": 2089,
+      "event": "kill-start",
+      "pids": [
+        20228,
+        23032
+      ]
+    },
+    {
+      "ms": 10497,
+      "event": "child-exit",
+      "label": "wrangler",
+      "pid": 23032,
+      "code": 1,
+      "signal": null
+    },
+    {
+      "ms": 10514,
+      "event": "taskkill-return",
+      "pid": 23032,
+      "error": null,
+      "stdout": "���\\: PID �� 44560 (PID �� 25996 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 47952 (PID �� 45200 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 9032 (PID �� 12540 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 25996 (PID �� 12540 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 45200 (PID �� 12540 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 21532 (PID �� 23032 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 12540 (PID �� 23032 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 23032 (PID �� 21224 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n",
+      "stderr": ""
+    },
+    {
+      "ms": 10628,
+      "event": "child-exit",
+      "label": "uv",
+      "pid": 20228,
+      "code": 1,
+      "signal": null
+    },
+    {
+      "ms": 10636,
+      "event": "taskkill-return",
+      "pid": 20228,
+      "error": null,
+      "stdout": "���\\: PID �� 6668 (PID �� 22848 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 42276 (PID �� 20228 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 22848 (PID �� 20228 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 20228 (PID �� 21224 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n",
+      "stderr": ""
+    },
+    {
+      "ms": 10636,
+      "event": "os-probe",
+      "states": [
+        {
+          "pid": 20228,
+          "absent": true,
+          "exitCode": 1,
+          "signalCode": null
+        },
+        {
+          "pid": 23032,
+          "absent": true,
+          "exitCode": 1,
+          "signalCode": null
+        }
+      ]
+    }
+  ]
+}

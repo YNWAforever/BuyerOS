@@ -1,0 +1,11 @@
+{
+  "base": "535e12bc49588eadb4e4ce0c75f748489868e084",
+  "source": "790a1b29b971ce6e23221ac38cd5de4a61c50144",
+  "reverse_check_exit": 0,
+  "applied": false,
+  "patch_sha256": "be31c3b232b66b8485e6397b96fb5d53566436e4fab3eaacd58e9504b5493fe1",
+  "command": "git apply --reverse --check --binary test-results/neon-real-runtime/rollback-source.patch",
+  "source_revert": "git revert 790a1b29b971ce6e23221ac38cd5de4a61c50144",
+  "metadata_revert": "Revert the subsequent N00_REAL_RUNTIME checkpoint first, then this source commit.",
+  "DB_or_real_resource_undo": "none required; no DB/resource mutation occurred"
+}

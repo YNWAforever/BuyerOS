@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "fixture_only": true,
+  "sequence": 44,
+  "method": "POST",
+  "path": "/fixture/auth/sign-in/email",
+  "fingerprint": "1c55d24d961243bc2bcbf56d5d234a83d8310664c6c4b96276ce93b74603eeef",
+  "status": 401,
+  "reason": "upstream-response",
+  "outcome": "rejected"
+}

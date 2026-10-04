@@ -1,0 +1,16 @@
+[
+  {
+    "url": "https://neon.com/docs/auth/quick-start/nextjs-api-only.md",
+    "observed_status": 200,
+    "local_capture_sha256": "c644002ee8817e26864c282f552d20e0972495c584088ab7fe2569c1abda0a4d",
+    "use": "Primary SDK handler/cookie configuration and OAuth callback reference; does not prove Vinext/Nitro runtime compatibility.",
+    "document_content_republished": false
+  },
+  {
+    "url": "https://neon.com/docs/auth/guides/setup-oauth.md",
+    "observed_status": 200,
+    "local_capture_sha256": "2d79af638711fd9c30a436f19062b136ec071b8ea28d0bf21534b80e8c9d83c0",
+    "use": "Primary SDK handler/cookie configuration and OAuth callback reference; does not prove Vinext/Nitro runtime compatibility.",
+    "document_content_republished": false
+  }
+]

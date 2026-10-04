@@ -1,0 +1,80 @@
+{
+  "fixture_only": true,
+  "external_requests": 0,
+  "events": [
+    {
+      "ms": 9925,
+      "event": "port-ready",
+      "port": 44892,
+      "ready": true
+    },
+    {
+      "ms": 9926,
+      "event": "port-ready",
+      "port": 44890,
+      "ready": true
+    },
+    {
+      "ms": 9926,
+      "event": "kill-start",
+      "pids": [
+        19476,
+        12016
+      ]
+    },
+    {
+      "ms": 11260,
+      "event": "child-exit",
+      "label": "wrangler",
+      "pid": 12016,
+      "code": 1,
+      "signal": null
+    },
+    {
+      "ms": 11261,
+      "event": "taskkill-return",
+      "pid": 12016,
+      "error": null,
+      "stdout": "���\\: PID �� 46812 (PID �� 41928 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 7816 (PID �� 48080 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 48324 (PID �� 45652 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 41928 (PID �� 45652 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 48080 (PID �� 45652 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 24656 (PID �� 12016 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 45652 (PID �� 12016 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 12016 (PID �� 53996 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n",
+      "stderr": ""
+    },
+    {
+      "ms": 11373,
+      "event": "child-exit",
+      "label": "uv",
+      "pid": 19476,
+      "code": 1,
+      "signal": null
+    },
+    {
+      "ms": 11389,
+      "event": "taskkill-return",
+      "pid": 19476,
+      "error": {
+        "code": 255,
+        "killed": false,
+        "signal": null
+      },
+      "stdout": "���\\: PID �� 4324 (PID �� 46092 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 53324 (PID �� 19476 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 19476 (PID �� 53996 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n",
+      "stderr": "���~: PID �� 46092 (PID �� 19476 ���l�B�z�{��) ���B�z�{�ǵL�k�פ�C\r\n��]: �S�����b���檺�u�@�Ҷ��C\r\r\n"
+    },
+    {
+      "ms": 11389,
+      "event": "os-probe",
+      "states": [
+        {
+          "pid": 19476,
+          "absent": true,
+          "exitCode": 1,
+          "signalCode": null
+        },
+        {
+          "pid": 12016,
+          "absent": true,
+          "exitCode": 1,
+          "signalCode": null
+        }
+      ]
+    }
+  ]
+}

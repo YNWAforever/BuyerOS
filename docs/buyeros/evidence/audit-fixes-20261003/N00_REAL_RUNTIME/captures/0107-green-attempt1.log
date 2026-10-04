@@ -1,0 +1,38 @@
+✔ runtime env carries the validated complete manifest, and build env drops it with all trust/secrets (5.5255ms)
+✔ explicit issuer is kept independent from Auth base URL and actual SDK cookie options are returned (1.3319ms)
+✔ runtime missing N00_REAL_TARGET_JSON refuses SDK construction without fallback (1.1144ms)
+✔ runtime missing N00_TARGET_FINGERPRINT refuses SDK construction without fallback (0.602ms)
+✔ runtime missing NEON_AUTH_BASE_URL refuses SDK construction without fallback (0.732ms)
+✔ runtime missing NEON_AUTH_COOKIE_SECRET refuses SDK construction without fallback (20.8622ms)
+✔ runtime missing N00_AUTH_ISSUER refuses SDK construction without fallback (0.6023ms)
+✔ runtime missing N00_AUTH_AUDIENCE refuses SDK construction without fallback (0.5139ms)
+✔ runtime missing N00_AUTH_JWKS_URL refuses SDK construction without fallback (0.4779ms)
+✔ runtime missing N00_AUTH_ALGORITHM refuses SDK construction without fallback (0.6413ms)
+✔ runtime drift NEON_AUTH_BASE_URL refuses initialization (1.3202ms)
+✔ runtime drift N00_AUTH_ISSUER refuses initialization (0.8808ms)
+✔ runtime drift N00_AUTH_AUDIENCE refuses initialization (0.8615ms)
+✔ runtime drift N00_AUTH_JWKS_URL refuses initialization (1.0514ms)
+✔ runtime drift N00_AUTH_ALGORITHM refuses initialization (0.7157ms)
+✔ runtime drift N00_TARGET_FINGERPRINT refuses initialization (1.1216ms)
+✔ malformed manifest error cannot echo secret or input data (0.6667ms)
+✔ oversize manifest refuses parsing rather than consuming an unbounded runtime input (0.3496ms)
+✔ runtime reuses full target validation and rejects production IDs (0.4216ms)
+✔ module/runtime creation consumes no env or SDK initialization at build time (0.1251ms)
+✔ request initialization revalidates but caches one SDK instance for exact same context (0.7787ms)
+✔ cached SDK cannot bypass the two-hour target expiry (0.7063ms)
+✔ changed target cannot reuse or silently replace an already bound SDK context (2.2683ms)
+✔ changed cookie secret requires a new owned runtime rather than silent context replacement (0.8701ms)
+✔ fresher matching readback does not change the bound target/SDK intent (0.7397ms)
+✔ SDK constructor errors are redacted and cannot disclose runtime cookie secret (1.0306ms)
+✔ runtime description contains only target/trust context and no cookie secret (0.7593ms)
+✔ returned runtime config cannot be mutated to change the validated SDK/trust tuple (0.535ms)
+✔ separate build-environment Node process imports the runtime module without secret/init (259.1888ms)
+✔ runtime consumer independently refuses an invalid cookie secret (0.6011ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 800.5488

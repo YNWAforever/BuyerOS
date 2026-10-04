@@ -1,0 +1,30 @@
+{
+  "fixture_only": true,
+  "events": [
+    {
+      "ms": 236,
+      "event": "child-ready",
+      "pid": 43640
+    },
+    {
+      "ms": 836,
+      "event": "child-exit",
+      "code": 1,
+      "signal": null
+    },
+    {
+      "ms": 837,
+      "event": "taskkill-return",
+      "error": null,
+      "stdout": "���\\: PID �� 4376 (PID �� 43640 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n���\\: PID �� 43640 (PID �� 53612 ���l�B�z�{��) ���B�z�{�Ǥw�פ�C\r\n",
+      "stderr": ""
+    },
+    {
+      "ms": 837,
+      "event": "os-probe",
+      "absent": true,
+      "exitCode": 1,
+      "signalCode": null
+    }
+  ]
+}
