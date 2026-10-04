@@ -1,0 +1,13 @@
+{
+  "fixture_only": true,
+  "external_verified": false,
+  "compiled_source_sha": "1df7b4cb1b46a25b9019adf05bd4cd46cf2a7fa3",
+  "runner_head": "1df7b4cb1b46a25b9019adf05bd4cd46cf2a7fa3",
+  "scenario": "missing",
+  "manifest": null,
+  "keys": [
+    "N00_RUNTIME_PROBE_MODE"
+  ],
+  "cookie_secret_sha256": "0c0850eea9e094baed99fb213ba01961daf26c29b043b8756daa96036cccce77",
+  "environment_injected_after_build": true
+}

@@ -1,0 +1,57 @@
+{
+  "prior_payloads": [
+    {
+      "folder": "docs/buyeros/inputs/audit-20261003",
+      "payloads": 31,
+      "matches": true
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL",
+      "payloads": 150,
+      "matches": true
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK",
+      "payloads": 66,
+      "matches": true
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_PREFLIGHT",
+      "payloads": 23,
+      "matches": true
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_COUNTED_TRANSPORT",
+      "payloads": 421,
+      "matches": true
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_RUNTIME",
+      "payloads": 252,
+      "matches": true
+    }
+  ],
+  "total_prior_payloads": 943,
+  "old_built_outputs": [
+    {
+      "target": "portable",
+      "files": 89,
+      "matches": true
+    },
+    {
+      "target": "vercel",
+      "files": 2214,
+      "matches": true
+    }
+  ],
+  "guard_contract_master_operation_paths": [
+    "services/api/tests/conftest.py",
+    "services/worker/tests/conftest.py",
+    "services/api/tools/serve_e2e_fixture.py",
+    "services/worker/tests/fixtures/run_browser_research.py",
+    "services/generated/buyeros-api.ts",
+    "docs/superpowers/plans/2026-10-03-buyeros-gpt61-fixes.md",
+    "docs/buyeros/remaining/API_OPERATION_STATUS.csv"
+  ],
+  "all_preserved": true
+}

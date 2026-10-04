@@ -1,0 +1,47 @@
+? Verifying lockfile against supply-chain policies (1059 entries)...
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +135 -1
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+
+   ╭──────────────────────────────────────────────────────────────────────╮
+   │                                                                      │
+   │                 Update available! 11.25.0 → 12.9.1.                  │
+   │                 Changelog: https://pnpm.io/v/12.9.1                  │
+   │   To update, run: curl -fsSL https://get.pnpm.io/install.sh | sh -   │
+   │                                                                      │
+   ╰──────────────────────────────────────────────────────────────────────╯
+
+Progress: resolved 135, reused 0, downloaded 14, added 6
+Progress: resolved 135, reused 0, downloaded 82, added 17
+Progress: resolved 135, reused 0, downloaded 120, added 20
+Progress: resolved 135, reused 0, downloaded 133, added 27
+Progress: resolved 135, reused 0, downloaded 135, added 90
+Progress: resolved 135, reused 0, downloaded 135, added 133
+Progress: resolved 135, reused 0, downloaded 135, added 135, done
+[WARN] Request took 10096ms: https://registry.npmjs.org/@instantdb%2Fversion
+[WARN] Request took 10772ms: https://registry.npmjs.org/@next%2Feslint-plugin-next
+[WARN] Request took 12246ms: https://registry.npmjs.org/@instantdb%2Fcore
+[WARN] Request took 12628ms: https://registry.npmjs.org/@instantdb%2Freact
+[WARN] Request took 13342ms: https://registry.npmjs.org/@playwright%2Ftest
+[WARN] Request took 10474ms: https://registry.npmjs.org/@typescript-eslint%2Ftype-utils
+[WARN] Request took 11234ms: https://registry.npmjs.org/axe-core
+[WARN] Request took 14860ms: https://registry.npmjs.org/@typescript-eslint%2Futils
+[WARN] Request took 12345ms: https://registry.npmjs.org/eslint-plugin-react-hooks
+[WARN] Request took 15471ms: https://registry.npmjs.org/@typescript-eslint%2Ftypes
+[WARN] Request took 15649ms: https://registry.npmjs.org/@typescript-eslint%2Fvisitor-keys
+[WARN] Request took 16062ms: https://registry.npmjs.org/@typescript-eslint%2Fscope-manager
+[WARN] Request took 16591ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+[WARN] Request took 16574ms: https://registry.npmjs.org/@typescript-eslint%2Ftypescript-estree
+[WARN] Request took 17199ms: https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin
+[WARN] Request took 10803ms: https://registry.npmjs.org/playwright
+[WARN] Request took 11095ms: https://registry.npmjs.org/playwright-core
+[WARN] Request took 11499ms: https://registry.npmjs.org/@types%2Fnode
+[WARN] Request took 11839ms: https://registry.npmjs.org/wrangler
+[WARN] Request took 15569ms: https://registry.npmjs.org/next
+✓ Lockfile passes supply-chain policies (1059 entries in 30.6s)
+
+devDependencies:
++ @neondatabase/auth 0.5.0-beta
+
+Done in 32.9s using pnpm v11.25.0

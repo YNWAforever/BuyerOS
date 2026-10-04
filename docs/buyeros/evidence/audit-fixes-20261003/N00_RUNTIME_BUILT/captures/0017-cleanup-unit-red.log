@@ -1,0 +1,155 @@
+✖ owned cleanup removes private configuration and keeps marker through a transient state failure (6.4199ms)
+✖ cleanup rejects a mismatched owner before deleting configuration (3.6591ms)
+✖ cleanup refuses an unreviewed entry before deleting owned configuration (3.9466ms)
+✖ cleanup deadline retains the owner while private configuration is removed (2.9221ms)
+✖ cleanup propagates non-transient IO errors without deleting ownership (4.1312ms)
+✖ cleanup rejects a root symlink and preserves its target (4.0058ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 0
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 418.3364
+
+✖ failing tests:
+
+test at tests\neon-runtime-cleanup.test.mjs:10:1
+✖ owned cleanup removes private configuration and keeps marker through a transient state failure (6.4199ms)
+  Error: N00_CLEANUP_UNIMPLEMENTED
+      at removeOwnedRuntimeRoot (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-cleanup.mjs:1:54)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-cleanup.test.mjs:10:233)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17)
+
+test at tests\neon-runtime-cleanup.test.mjs:11:1
+✖ cleanup rejects a mismatched owner before deleting configuration (3.6591ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_PROBE_OWNER/. Input:
+  
+  'Error: N00_CLEANUP_UNIMPLEMENTED'
+  
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-cleanup.test.mjs:11:116)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_CLEANUP_UNIMPLEMENTED
+        at removeOwnedRuntimeRoot (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-cleanup.mjs:1:54)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-cleanup.test.mjs:11:137)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12)
+        at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3),
+    expected: /N00_PROBE_OWNER/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-cleanup.test.mjs:12:1
+✖ cleanup refuses an unreviewed entry before deleting owned configuration (3.9466ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_PROBE_ROOT_ENTRIES/. Input:
+  
+  'Error: N00_CLEANUP_UNIMPLEMENTED'
+  
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-cleanup.test.mjs:12:176)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_CLEANUP_UNIMPLEMENTED
+        at removeOwnedRuntimeRoot (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-cleanup.mjs:1:54)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-cleanup.test.mjs:12:197)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:911:7),
+    expected: /N00_PROBE_ROOT_ENTRIES/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-cleanup.test.mjs:13:1
+✖ cleanup deadline retains the owner while private configuration is removed (2.9221ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_PROBE_ROOT_TIMEOUT/. Input:
+  
+  'Error: N00_CLEANUP_UNIMPLEMENTED'
+  
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-cleanup.test.mjs:13:188)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_CLEANUP_UNIMPLEMENTED
+        at removeOwnedRuntimeRoot (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-cleanup.mjs:1:54)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-cleanup.test.mjs:13:209)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:911:7),
+    expected: /N00_PROBE_ROOT_TIMEOUT/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-cleanup.test.mjs:14:1
+✖ cleanup propagates non-transient IO errors without deleting ownership (4.1312ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + Comparison {}
+  - Comparison {
+  -   code: 'EIO'
+  - }
+  
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-cleanup.test.mjs:14:121)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_CLEANUP_UNIMPLEMENTED
+        at removeOwnedRuntimeRoot (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-cleanup.mjs:1:54)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-cleanup.test.mjs:14:142)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:911:7),
+    expected: { code: 'EIO' },
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-cleanup.test.mjs:15:1
+✖ cleanup rejects a root symlink and preserves its target (4.0058ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_PROBE_ROOT/. Input:
+  
+  'Error: N00_CLEANUP_UNIMPLEMENTED'
+  
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-cleanup.test.mjs:15:195)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_CLEANUP_UNIMPLEMENTED
+        at removeOwnedRuntimeRoot (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-cleanup.mjs:1:54)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-cleanup.test.mjs:15:216)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:911:7),
+    expected: /N00_PROBE_ROOT/,
+    operator: 'rejects',
+    diff: 'simple'
+  }

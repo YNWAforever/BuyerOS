@@ -1,0 +1,9 @@
+{
+  "fixture_only": true,
+  "automatic_cleanup": false,
+  "manual_owned_cleanup": true,
+  "private_root_removed": true,
+  "owner_absent": true,
+  "ports_clear": true,
+  "external_resources": 0
+}

@@ -1,0 +1,20 @@
+{
+  "node": "v22.23.2",
+  "imageId": "sha256:48e4b67d85f87bd551df43704e24d252f56cc5f8e9718841aace50f19948f0f9",
+  "cpus": 4,
+  "memoryGiB": 6,
+  "outputs": [
+    {
+      "target": "portable",
+      "command": "corepack pnpm build",
+      "exit": 0,
+      "error": null
+    },
+    {
+      "target": "vercel",
+      "command": "node scripts/run-vercel.mjs build",
+      "exit": 0,
+      "error": null
+    }
+  ]
+}

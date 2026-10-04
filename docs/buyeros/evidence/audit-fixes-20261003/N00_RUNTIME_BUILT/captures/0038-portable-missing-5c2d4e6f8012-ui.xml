@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="18.126354">
+<testsuite name="audit-neon-runtime-built.spec.ts" timestamp="2026-10-04T16:07:56.740Z" hostname="" tests="1" failures="0" skipped="0" time="0.153" errors="0">
+<testcase name="NA01 runtime kernel: missing request configuration fails closed" classname="audit-neon-runtime-built.spec.ts" time="0.153">
+</testcase>
+</testsuite>
+</testsuites>

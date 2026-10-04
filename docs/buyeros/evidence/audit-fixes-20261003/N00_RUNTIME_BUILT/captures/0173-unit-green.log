@@ -1,0 +1,40 @@
+✔ N00 rejects a non-owned upstream: https://auth.neon.tech/neondb/auth (6.9414ms)
+✔ N00 rejects a non-owned upstream: http://127.0.0.1.evil.test/auth (0.2404ms)
+✔ N00 rejects a non-owned upstream: http://user:password@localhost:44891/auth (0.1613ms)
+✔ N00 rejects a non-owned upstream: http://0.0.0.0:44891/auth (0.1468ms)
+✔ N00 accepts the loopback fixture base path (0.2943ms)
+✔ N00 source inventory rejects unsafe input: ../.env (0.8336ms)
+✔ N00 source inventory rejects unsafe input: a/../../secret (0.2685ms)
+✔ N00 source inventory rejects unsafe input: /secret (0.2116ms)
+✔ N00 source inventory rejects unsafe input: C:/secret (0.1901ms)
+✔ N00 source inventory rejects unsafe input: a/.env.production (0.2994ms)
+✔ N00 source inventory rejects unsafe input: a\.env.local (0.2116ms)
+✔ N00 source inventory rejects unsafe input: node_modules/secret (0.1209ms)
+✔ N00 source inventory rejects unsafe input: test-results/secret (0.0936ms)
+✔ N00 source inventory rejects unsafe input: app/../secret (0.1602ms)
+✔ N00 source inventory accepts a source file (0.1497ms)
+✔ N00 build includes BuyerOS frontend services and generated types (0.3508ms)
+✔ N00 build excludes Python/services and historical evidence (0.1356ms)
+✔ N00 child env excludes inherited DB/Auth/provider variables (0.2239ms)
+✔ N00 cache seed requires matching declared owner (0.3966ms)
+✔ N00 emitted static assets stay within the output static directory (0.3699ms)
+✔ N00 registers Vinext public fetch entry as the Nitro RSC service without changing production config (0.394ms)
+✔ N00 storage permits only canonical locale prefs and refuses tokens or credential fields (0.3121ms)
+✔ compatibility profile retains original output and source overlay (3.6851ms)
+✔ runtime profile has distinct output and real-only plus probe scaffolding (0.2495ms)
+✔ build profile refuses custom paths and unreviewed profiles (0.5805ms)
+✔ Nitro runtime profile selects only its reviewed service entry (1.9586ms)
+✔ probe target accepts only explicit fictional IDs/hosts/audience (0.4211ms)
+✔ probe refuses a real projectId (0.1967ms)
+✔ probe refuses a real branchId (0.136ms)
+✔ probe refuses a real authId (0.1296ms)
+✔ probe refuses external trust and base hosts or non-fictional audience (0.525ms)
+✔ probe fetch guard refuses every request before original transport dispatch (16.2092ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 798.7861

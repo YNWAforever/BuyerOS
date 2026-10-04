@@ -1,0 +1,14 @@
+{
+  "first": {
+    "exit": 1,
+    "error": "FileNotFoundError",
+    "actual_file_exists_by_Node_fs": true,
+    "absolute_path_chars": 266,
+    "comparison_member": "_ssr/framework~index~layout~page~app-page-cache-render~app-page-cache~app-route-handler-dispatch-DcTwXZuK.mjs",
+    "record_kind": "derived from observed tool output; not an original redirected stderr file"
+  },
+  "second": {
+    "exit": 0,
+    "method": "Windows extended absolute path; every regular member compared byte-for-byte; no excluded missing file"
+  }
+}

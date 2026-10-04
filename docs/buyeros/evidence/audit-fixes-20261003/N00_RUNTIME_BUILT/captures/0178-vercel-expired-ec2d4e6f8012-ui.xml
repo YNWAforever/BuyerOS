@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="3.8016680000000003">
+<testsuite name="audit-neon-runtime-built.spec.ts" timestamp="2026-10-04T16:24:13.158Z" hostname="" tests="1" failures="0" skipped="0" time="0.141" errors="0">
+<testcase name="NA01 runtime kernel: expired request configuration fails closed" classname="audit-neon-runtime-built.spec.ts" time="0.141">
+</testcase>
+</testsuite>
+</testsuites>

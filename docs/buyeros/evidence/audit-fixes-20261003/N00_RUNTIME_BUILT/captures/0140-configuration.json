@@ -1,0 +1,62 @@
+{
+  "fixture_only": true,
+  "external_verified": false,
+  "compiled_source_sha": "1df7b4cb1b46a25b9019adf05bd4cd46cf2a7fa3",
+  "runner_head": "1df7b4cb1b46a25b9019adf05bd4cd46cf2a7fa3",
+  "scenario": "valid",
+  "manifest": {
+    "schemaVersion": 1,
+    "proposal": "buyeros-neon-auth-n00-20261004",
+    "sourceSha": "1df7b4cb1b46a25b9019adf05bd4cd46cf2a7fa3",
+    "projectId": "fictional-probe-project-1c2d4e6f8012",
+    "branchId": "fictional-probe-branch-1c2d4e6f8012",
+    "authId": "fictional-probe-auth-1c2d4e6f8012",
+    "orgId": "org-soft-sunset-25251479",
+    "name": "buyeros-neon-auth-n00-20261004",
+    "regionId": "aws-ap-southeast-1",
+    "creationMode": "new-empty",
+    "createdAt": "2026-10-04T15:42:12.725Z",
+    "expiresAt": "2026-10-04T17:42:12.725Z",
+    "readback": {
+      "projectId": "fictional-probe-project-1c2d4e6f8012",
+      "branchId": "fictional-probe-branch-1c2d4e6f8012",
+      "authId": "fictional-probe-auth-1c2d4e6f8012",
+      "orgId": "org-soft-sunset-25251479",
+      "name": "buyeros-neon-auth-n00-20261004",
+      "regionId": "aws-ap-southeast-1",
+      "observedAt": "2026-10-04T15:42:12.725Z",
+      "subscription": "free_v3",
+      "emailDeliveryEnabled": false,
+      "emailPasswordEnabled": false,
+      "emailHooksEnabled": false,
+      "methods": [
+        "google"
+      ],
+      "trustedOrigins": [
+        "http://localhost:44890"
+      ]
+    },
+    "auth": {
+      "baseUrl": "https://1c2d4e6f8012.fixture.invalid/auth",
+      "issuer": "https://1c2d4e6f8012.fixture.invalid",
+      "audience": "fictional-probe-audience-1c2d4e6f8012",
+      "jwksUrl": "https://1c2d4e6f8012.fixture.invalid/auth/jwks",
+      "algorithm": "EdDSA",
+      "keyType": "OKP",
+      "curve": "Ed25519"
+    }
+  },
+  "keys": [
+    "NEON_AUTH_BASE_URL",
+    "NEON_AUTH_COOKIE_SECRET",
+    "N00_AUTH_ISSUER",
+    "N00_AUTH_AUDIENCE",
+    "N00_AUTH_JWKS_URL",
+    "N00_AUTH_ALGORITHM",
+    "N00_TARGET_FINGERPRINT",
+    "N00_REAL_TARGET_JSON",
+    "N00_RUNTIME_PROBE_MODE"
+  ],
+  "cookie_secret_sha256": "8dc180258189194f1b2e3b0b99b20424b8e7d0dda4e30e416fc94b3b4117db14",
+  "environment_injected_after_build": true
+}

@@ -1,0 +1,83 @@
+? Verifying lockfile against supply-chain policies (1059 entries)...
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +135 -1
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+Progress: resolved 135, reused 0, downloaded 0, added 0
+Progress: resolved 135, reused 0, downloaded 5, added 5
+
+   ╭──────────────────────────────────────────────────────────────────────╮
+   │                                                                      │
+   │                 Update available! 11.25.0 → 12.9.1.                  │
+   │                 Changelog: https://pnpm.io/v/12.9.1                  │
+   │   To update, run: curl -fsSL https://get.pnpm.io/install.sh | sh -   │
+   │                                                                      │
+   ╰──────────────────────────────────────────────────────────────────────╯
+
+Progress: resolved 135, reused 0, downloaded 24, added 14
+Progress: resolved 135, reused 0, downloaded 32, added 16
+Progress: resolved 135, reused 0, downloaded 63, added 20
+Progress: resolved 135, reused 0, downloaded 87, added 21
+Progress: resolved 135, reused 0, downloaded 111, added 24
+Progress: resolved 135, reused 0, downloaded 132, added 25
+Progress: resolved 135, reused 0, downloaded 134, added 36
+Progress: resolved 135, reused 0, downloaded 134, added 48
+Progress: resolved 135, reused 0, downloaded 134, added 70
+[WARN] Request took 12316ms: https://registry.npmjs.org/@cloudflare%2Fvite-plugin
+Progress: resolved 135, reused 0, downloaded 135, added 104
+Progress: resolved 135, reused 0, downloaded 135, added 132
+Progress: resolved 135, reused 0, downloaded 135, added 133
+Progress: resolved 135, reused 0, downloaded 135, added 134
+Progress: resolved 135, reused 0, downloaded 135, added 135, done
+[WARN] Request took 10087ms: https://registry.npmjs.org/@instantdb%2Freact-common
+[WARN] Request took 10452ms: https://registry.npmjs.org/@next%2Fswc-darwin-arm64
+[WARN] Request took 10598ms: https://registry.npmjs.org/@next%2Fswc-linux-arm64-gnu
+[WARN] Request took 10671ms: https://registry.npmjs.org/@next%2Fswc-darwin-x64
+[WARN] Request took 11015ms: https://registry.npmjs.org/@next%2Fenv
+[WARN] Request took 12322ms: https://registry.npmjs.org/@next%2Feslint-plugin-next
+[WARN] Request took 14941ms: https://registry.npmjs.org/@instantdb%2Freact
+[WARN] Request took 15232ms: https://registry.npmjs.org/@instantdb%2Fcore
+[WARN] Request took 10693ms: https://registry.npmjs.org/@tailwindcss%2Foxide
+[WARN] Request took 20459ms: https://registry.npmjs.org/@playwright%2Ftest
+[WARN] Request took 13141ms: https://registry.npmjs.org/@types%2Fnode
+[WARN] Request took 16905ms: https://registry.npmjs.org/@typescript-eslint%2Ftype-utils
+[WARN] Request took 16331ms: https://registry.npmjs.org/@typescript-eslint%2Futils
+[WARN] Request took 12979ms: https://registry.npmjs.org/axe-core
+[WARN] Request took 14695ms: https://registry.npmjs.org/eslint-config-next
+[WARN] Request took 22683ms: https://registry.npmjs.org/@typescript-eslint%2Ftypes
+[WARN] Request took 10815ms: https://registry.npmjs.org/terser
+[WARN] Request took 19118ms: https://registry.npmjs.org/eslint-plugin-react-hooks
+[WARN] Request took 10731ms: https://registry.npmjs.org/type-fest
+[WARN] Request took 10630ms: https://registry.npmjs.org/undici
+[WARN] Request took 11153ms: https://registry.npmjs.org/react-resizable-panels
+[WARN] Request took 26596ms: https://registry.npmjs.org/@typescript-eslint%2Fvisitor-keys
+[WARN] Request took 14805ms: https://registry.npmjs.org/miniflare
+[WARN] Request took 13394ms: https://registry.npmjs.org/react-server-dom-webpack
+[WARN] Request took 11641ms: https://registry.npmjs.org/tldts-core
+[WARN] Request took 13812ms: https://registry.npmjs.org/react-hook-form
+[WARN] Request took 11400ms: https://registry.npmjs.org/typescript-eslint
+[WARN] Request took 13636ms: https://registry.npmjs.org/react
+[WARN] Request took 28308ms: https://registry.npmjs.org/@typescript-eslint%2Fscope-manager
+[WARN] Request took 14237ms: https://registry.npmjs.org/react-is
+[WARN] Request took 11080ms: https://registry.npmjs.org/recharts
+[WARN] Request took 13595ms: https://registry.npmjs.org/scheduler
+[WARN] Request took 14671ms: https://registry.npmjs.org/react-dom
+[WARN] Request took 12626ms: https://registry.npmjs.org/tldts
+[WARN] Request took 29009ms: https://registry.npmjs.org/@typescript-eslint%2Ftypescript-estree
+[WARN] Request took 29504ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+[WARN] Request took 29794ms: https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin
+[WARN] Request took 13782ms: https://registry.npmjs.org/tailwindcss
+[WARN] Request took 17527ms: https://registry.npmjs.org/@types%2Fnode
+[WARN] Request took 13823ms: https://registry.npmjs.org/use-sync-external-store
+[WARN] Request took 15141ms: https://registry.npmjs.org/typescript
+[WARN] Request took 21594ms: https://registry.npmjs.org/next
+[WARN] Request took 14461ms: https://registry.npmjs.org/wrangler
+[WARN] Request took 24574ms: https://registry.npmjs.org/playwright-core
+[WARN] Request took 24743ms: https://registry.npmjs.org/playwright
+[WARN] Request took 10573ms: https://registry.npmjs.org/react-is
+✓ Lockfile passes supply-chain policies (1059 entries in 57.4s)
+
+devDependencies:
++ @neondatabase/auth 0.5.0-beta
+
+Done in 1m 0.8s using pnpm v11.25.0

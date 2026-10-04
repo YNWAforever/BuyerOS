@@ -1,0 +1,12 @@
+[WebServer] (node:19240) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:11016) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-runtime-built.spec.ts:5:2 › NA01 runtime kernel: built page explains fixture scope (429ms)
+  ok 2 tests\e2e\audit-neon-runtime-built.spec.ts:10:2 › NA01 runtime kernel: official built SDK initializes with runtime-only trust (71ms)
+  ok 3 tests\e2e\audit-neon-runtime-built.spec.ts:21:2 › NA01 runtime kernel: built fetch guard rejects before transport dispatch (112ms)
+
+  3 passed (58.2s)

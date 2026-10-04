@@ -1,0 +1,15 @@
+✔ checked-in API types match the current OpenAPI contract (8830.4906ms)
+✔ U13 actual callback render during initializing is status, never configuration alert (10.1161ms)
+✔ Vercel exposes only the app and binds its API call to the internal API service (7.8522ms)
+✔ the app proxy forwards the bearer and original API path to the bound service (193.1658ms)
+✔ the app proxy fails closed when the binding is absent (2.3789ms)
+✔ the app proxy streams writes and preserves API conflicts without forwarding cookies (5.1608ms)
+✔ FastAPI redirects stay on the public app path (5.4205ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9162.908

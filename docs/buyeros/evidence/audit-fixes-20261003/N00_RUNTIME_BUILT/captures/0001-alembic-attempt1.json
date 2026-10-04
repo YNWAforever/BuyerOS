@@ -1,0 +1,1 @@
+{"command":"relative services/api/.venv/Scripts/python.exe with services/api cwd","status":null,"error":"ENOENT","db_connected":false}

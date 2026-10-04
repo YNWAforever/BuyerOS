@@ -1,0 +1,7 @@
+{
+  "primary_sources": [
+    "https://developers.cloudflare.com/workers/runtime-apis/nodejs/process/",
+    "https://nodejs.org/api/fs.html#fspromisesrmpath-options"
+  ],
+  "used_for": "runtime env documentation and bounded filesystem API; actual behavior verified separately; no article bodies copied"
+}

@@ -31,3 +31,6 @@ docs/buyeros/evidence/audit-fixes-20261003/N00_COUNTED_TRANSPORT/** -text whites
 
 # Preserve N00 runtime preparation producer bytes, including native line endings.
 docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_RUNTIME/** -text whitespace=cr-at-eol
+
+# Preserve N00 built-runtime producer artifacts byte-for-byte.
+docs/buyeros/evidence/audit-fixes-20261003/N00_RUNTIME_BUILT/** -text whitespace=cr-at-eol

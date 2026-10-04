@@ -1,0 +1,362 @@
+{
+  "base": "1df7b4cb1b46a25b9019adf05bd4cd46cf2a7fa3",
+  "reviewed_source_sha": "e683a89225863387367bda204f84aa168f6abefb",
+  "deployed_sha": null,
+  "date_hk": "2026-10-05",
+  "scope": "N00/F20/NA01 SDK configuration/constructor kernel on actual built output; fixture only",
+  "source_files": 16,
+  "insertions": 305,
+  "deletions": 8,
+  "node": {
+    "cases": 126,
+    "pass": 126,
+    "fail": 0,
+    "skip": 0,
+    "duration_ms": 12046.3406
+  },
+  "unit_red": {
+    "cases": 10,
+    "pass": 1,
+    "fail": 9,
+    "skip": 0
+  },
+  "cleanup_unit_red": {
+    "cases": 6,
+    "pass": 0,
+    "fail": 6,
+    "skip": 0
+  },
+  "baseline_ui_red": {
+    "cases": 3,
+    "pass": 0,
+    "fail": 3,
+    "skip": 0,
+    "startup_error": false
+  },
+  "built_kernel_acceptance": {
+    "runs": [
+      {
+        "target": "portable",
+        "scenario": "valid",
+        "run_nonce": "7c2d4e6f8012",
+        "cases": 3,
+        "fail": 0,
+        "skip": 0,
+        "junit_errors": 0,
+        "duration_s": 25.754606,
+        "report": "test-results\\neon-runtime-built\\portable-valid-7c2d4e6f8012-ui.xml",
+        "fixture_only": true,
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": [
+              {
+                "entry": "state",
+                "code": "EBUSY"
+              }
+            ]
+          },
+          "external_resources": 0
+        },
+        "runtime_value_leak_check": {
+          "fixture_only": true,
+          "emitted_text_files": 70,
+          "exact_runtime_value_matches": 0,
+          "cookie_secret_checked": true
+        },
+        "pass": 3,
+        "cli_exit": 0,
+        "global_errors": 0
+      },
+      {
+        "target": "vercel",
+        "scenario": "valid",
+        "run_nonce": "8c2d4e6f8012",
+        "cases": 3,
+        "fail": 0,
+        "skip": 0,
+        "junit_errors": 0,
+        "duration_s": 58.192747000000004,
+        "report": "test-results\\neon-runtime-built\\vercel-valid-8c2d4e6f8012-ui.xml",
+        "fixture_only": true,
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": []
+          },
+          "external_resources": 0
+        },
+        "runtime_value_leak_check": {
+          "fixture_only": true,
+          "emitted_text_files": 2368,
+          "exact_runtime_value_matches": 0,
+          "cookie_secret_checked": true
+        },
+        "pass": 3,
+        "cli_exit": 0,
+        "global_errors": 0
+      },
+      {
+        "target": "portable",
+        "scenario": "missing",
+        "run_nonce": "9c2d4e6f8012",
+        "cases": 1,
+        "fail": 0,
+        "skip": 0,
+        "junit_errors": 0,
+        "duration_s": 14.652927,
+        "report": "test-results\\neon-runtime-built\\portable-missing-9c2d4e6f8012-ui.xml",
+        "fixture_only": true,
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": [
+              {
+                "entry": "state",
+                "code": "EBUSY"
+              }
+            ]
+          },
+          "external_resources": 0
+        },
+        "runtime_value_leak_check": {
+          "fixture_only": true,
+          "emitted_text_files": 70,
+          "exact_runtime_value_matches": 0,
+          "cookie_secret_checked": true
+        },
+        "pass": 1,
+        "cli_exit": 0,
+        "global_errors": 0
+      },
+      {
+        "target": "portable",
+        "scenario": "mismatch",
+        "run_nonce": "ac2d4e6f8012",
+        "cases": 1,
+        "fail": 0,
+        "skip": 0,
+        "junit_errors": 0,
+        "duration_s": 5.165832999999999,
+        "report": "test-results\\neon-runtime-built\\portable-mismatch-ac2d4e6f8012-ui.xml",
+        "fixture_only": true,
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": [
+              {
+                "entry": "state",
+                "code": "EBUSY"
+              }
+            ]
+          },
+          "external_resources": 0
+        },
+        "runtime_value_leak_check": {
+          "fixture_only": true,
+          "emitted_text_files": 70,
+          "exact_runtime_value_matches": 0,
+          "cookie_secret_checked": true
+        },
+        "pass": 1,
+        "cli_exit": 0,
+        "global_errors": 0
+      },
+      {
+        "target": "portable",
+        "scenario": "expired",
+        "run_nonce": "bc2d4e6f8012",
+        "cases": 1,
+        "fail": 0,
+        "skip": 0,
+        "junit_errors": 0,
+        "duration_s": 5.485215,
+        "report": "test-results\\neon-runtime-built\\portable-expired-bc2d4e6f8012-ui.xml",
+        "fixture_only": true,
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": [
+              {
+                "entry": "state",
+                "code": "EBUSY"
+              }
+            ]
+          },
+          "external_resources": 0
+        },
+        "runtime_value_leak_check": {
+          "fixture_only": true,
+          "emitted_text_files": 70,
+          "exact_runtime_value_matches": 0,
+          "cookie_secret_checked": true
+        },
+        "pass": 1,
+        "cli_exit": 0,
+        "global_errors": 0
+      },
+      {
+        "target": "vercel",
+        "scenario": "missing",
+        "run_nonce": "cc2d4e6f8012",
+        "cases": 1,
+        "fail": 0,
+        "skip": 0,
+        "junit_errors": 0,
+        "duration_s": 3.4644040000000005,
+        "report": "test-results\\neon-runtime-built\\vercel-missing-cc2d4e6f8012-ui.xml",
+        "fixture_only": true,
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": []
+          },
+          "external_resources": 0
+        },
+        "runtime_value_leak_check": {
+          "fixture_only": true,
+          "emitted_text_files": 2368,
+          "exact_runtime_value_matches": 0,
+          "cookie_secret_checked": true
+        },
+        "pass": 1,
+        "cli_exit": 0,
+        "global_errors": 0
+      },
+      {
+        "target": "vercel",
+        "scenario": "mismatch",
+        "run_nonce": "dc2d4e6f8012",
+        "cases": 1,
+        "fail": 0,
+        "skip": 0,
+        "junit_errors": 0,
+        "duration_s": 2.5879090000000002,
+        "report": "test-results\\neon-runtime-built\\vercel-mismatch-dc2d4e6f8012-ui.xml",
+        "fixture_only": true,
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": []
+          },
+          "external_resources": 0
+        },
+        "runtime_value_leak_check": {
+          "fixture_only": true,
+          "emitted_text_files": 2368,
+          "exact_runtime_value_matches": 0,
+          "cookie_secret_checked": true
+        },
+        "pass": 1,
+        "cli_exit": 0,
+        "global_errors": 0
+      },
+      {
+        "target": "vercel",
+        "scenario": "expired",
+        "run_nonce": "ec2d4e6f8012",
+        "cases": 1,
+        "fail": 0,
+        "skip": 0,
+        "junit_errors": 0,
+        "duration_s": 3.8016680000000003,
+        "report": "test-results\\neon-runtime-built\\vercel-expired-ec2d4e6f8012-ui.xml",
+        "fixture_only": true,
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": []
+          },
+          "external_resources": 0
+        },
+        "runtime_value_leak_check": {
+          "fixture_only": true,
+          "emitted_text_files": 2368,
+          "exact_runtime_value_matches": 0,
+          "cookie_secret_checked": true
+        },
+        "pass": 1,
+        "cli_exit": 0,
+        "global_errors": 0
+      }
+    ],
+    "total_cases": 12,
+    "pass": 12,
+    "fail": 0,
+    "skip": 0,
+    "global_errors": 0,
+    "scope": "SDK constructor/config/kernel only; no session/token/provider verification"
+  },
+  "startup_failures_retained": 2,
+  "prior_portable_cleanup_global_failures_retained": 2,
+  "build_attempts": 3,
+  "actual_build_commands": 6,
+  "all_build_exits": 0,
+  "types_exit": 0,
+  "lint_exit": 0,
+  "contracts_exit": 0,
+  "schema_head": "0037_bulk_manifests",
+  "migrations": 0,
+  "DB_connections": 0,
+  "required_DB_suite_applicable": false,
+  "DB_skips": 0,
+  "sdk_constructor_official": true,
+  "new_runtime_node_crypto_in_workerd_verified": true,
+  "session_token_handler_or_middleware_exercised_by_kernel": false,
+  "real_Neon_verified": false,
+  "human_Google_verified": false,
+  "full_SDK_browser_CLI_provider_accounting_verified": false,
+  "external_auth_requests": 0,
+  "independent_review": "pending; author review only; no agents",
+  "full_N00_gate_passed": false,
+  "original_callback_case": "carried unchanged: portable500/vercel200 vs302; not rerun or relaxed in this follow-up",
+  "rollback_reverse_check_exit": 0
+}

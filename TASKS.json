@@ -22,11 +22,11 @@
     {
       "id": "N00",
       "status": "local-spike-partial",
-      "code_status": "shared target validator; strict request-lazy runtime gate and typed server-only SDK overlay prepared; measured fixture cleanup fixed; no auth cutover",
-      "verification_status": "fresh related Node110pass0fail0skip (30newunit); types/lint/contracts0; final built fixture UI each7/6pass/1original callbackfail/0skip/0globalerror; new runtime overlay unbuilt; real Neon unverified",
+      "code_status": "official built runtime-only SDK configuration/constructor kernel and fixture UI; source Nitro dispatcher and owned cleanup; no auth cutover",
+      "verification_status": "fresh Node126pass0fail0skip; both actual built kernel6pass0fail0skip0globalerror; types/lint/contracts0; session/token/provider and original callback gate remain open",
       "release_status": "not-deployed; Auth0 retained",
       "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
-      "source_sha": "790a1b29b971ce6e23221ac38cd5de4a61c50144",
+      "source_sha": "e683a89225863387367bda204f84aa168f6abefb",
       "finding_ids": [
         "F20"
       ],
@@ -35,16 +35,17 @@
       ],
       "checks": {
         "node": {
-          "tests": 110,
-          "pass": 110,
+          "cases": 126,
+          "pass": 126,
           "fail": 0,
+          "skip": 0,
+          "duration_ms": 12046.3406,
+          "tests": 126,
           "skipped": 0,
           "cancelled": 0,
           "todo": 0,
-          "duration_ms": 13491.6775,
-          "skip": 0,
-          "executed_this_followup": true,
-          "source_sha": "790a1b29b971ce6e23221ac38cd5de4a61c50144"
+          "source_sha": "e683a89225863387367bda204f84aa168f6abefb",
+          "executed_this_followup": true
         },
         "built_ui": {
           "portable": {
@@ -62,8 +63,9 @@
             "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
             "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
             "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
-            "executed_this_followup": true,
-            "new_real_runtime_overlay_exercised": false
+            "executed_this_followup": false,
+            "new_real_runtime_overlay_exercised": false,
+            "historical_checkpoint_only": true
           },
           "vercel": {
             "target": "vercel",
@@ -80,8 +82,9 @@
             "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
             "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
             "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
-            "executed_this_followup": true,
-            "new_real_runtime_overlay_exercised": false
+            "executed_this_followup": false,
+            "new_real_runtime_overlay_exercised": false,
+            "historical_checkpoint_only": true
           }
         },
         "new_callback_cases": {
@@ -89,14 +92,17 @@
           "pass": 2,
           "fail": 0,
           "skip": 0,
-          "red_observed": true
+          "red_observed": true,
+          "historical_checkpoint_only": true,
+          "executed_this_followup": false
         },
         "api_carried": {
           "executed_this_followup": false,
           "prior_pass": 34,
           "prior_fail": 0,
           "prior_skip": 0,
-          "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6"
+          "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6",
+          "historical_checkpoint_only": true
         },
         "types_exit": 0,
         "lint_exit": 0,
@@ -116,7 +122,8 @@
           "external_requests": 0,
           "built_runtime_verified": false,
           "no_external_executor": true,
-          "historical_checkpoint_only": true
+          "historical_checkpoint_only": true,
+          "executed_this_followup": false
         },
         "counted_transport": {
           "related_node": {
@@ -165,7 +172,8 @@
           "contracts_exit": 0,
           "real_runtime_verified": false,
           "no_external_executor": true,
-          "historical_checkpoint_only": true
+          "historical_checkpoint_only": true,
+          "executed_this_followup": false
         },
         "new_counted_SDK_cases": {
           "per_target": 2,
@@ -372,18 +380,382 @@
           "strict_types_verified": true,
           "request_lazy_constructor_boundary_unit_fixture_verified": true,
           "constructor_in_unit_tests": "instrumented fixture; not official SDK runtime",
-          "built": false,
-          "actual_official_SDK_runtime_config_verified": false,
-          "node_crypto_in_new_workerd_bundle_verified": false,
+          "built": true,
+          "actual_official_SDK_runtime_config_verified": true,
+          "node_crypto_in_new_workerd_bundle_verified": true,
           "real_Neon_verified": false,
           "human_Google_flow_verified": false,
           "full_provider_browser_CLI_accounting_verified": false,
-          "real_HTTP_cleanup_executor_implemented": false
+          "real_HTTP_cleanup_executor_implemented": false,
+          "verification_scope": "fictional exact-context constructor/config/kernel only; not live trust or session/token",
+          "kernel_pass_per_output": 6
+        },
+        "runtime_built": {
+          "base": "1df7b4cb1b46a25b9019adf05bd4cd46cf2a7fa3",
+          "reviewed_source_sha": "e683a89225863387367bda204f84aa168f6abefb",
+          "deployed_sha": null,
+          "date_hk": "2026-10-05",
+          "scope": "N00/F20/NA01 SDK configuration/constructor kernel on actual built output; fixture only",
+          "source_files": 16,
+          "insertions": 305,
+          "deletions": 8,
+          "node": {
+            "cases": 126,
+            "pass": 126,
+            "fail": 0,
+            "skip": 0,
+            "duration_ms": 12046.3406
+          },
+          "unit_red": {
+            "cases": 10,
+            "pass": 1,
+            "fail": 9,
+            "skip": 0
+          },
+          "cleanup_unit_red": {
+            "cases": 6,
+            "pass": 0,
+            "fail": 6,
+            "skip": 0
+          },
+          "baseline_ui_red": {
+            "cases": 3,
+            "pass": 0,
+            "fail": 3,
+            "skip": 0,
+            "startup_error": false
+          },
+          "built_kernel_acceptance": {
+            "runs": [
+              {
+                "target": "portable",
+                "scenario": "valid",
+                "run_nonce": "7c2d4e6f8012",
+                "cases": 3,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 25.754606,
+                "report": "test-results\\neon-runtime-built\\portable-valid-7c2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 3,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "valid",
+                "run_nonce": "8c2d4e6f8012",
+                "cases": 3,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 58.192747000000004,
+                "report": "test-results\\neon-runtime-built\\vercel-valid-8c2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 3,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "portable",
+                "scenario": "missing",
+                "run_nonce": "9c2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 14.652927,
+                "report": "test-results\\neon-runtime-built\\portable-missing-9c2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "portable",
+                "scenario": "mismatch",
+                "run_nonce": "ac2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 5.165832999999999,
+                "report": "test-results\\neon-runtime-built\\portable-mismatch-ac2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "portable",
+                "scenario": "expired",
+                "run_nonce": "bc2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 5.485215,
+                "report": "test-results\\neon-runtime-built\\portable-expired-bc2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "missing",
+                "run_nonce": "cc2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 3.4644040000000005,
+                "report": "test-results\\neon-runtime-built\\vercel-missing-cc2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "mismatch",
+                "run_nonce": "dc2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 2.5879090000000002,
+                "report": "test-results\\neon-runtime-built\\vercel-mismatch-dc2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "expired",
+                "run_nonce": "ec2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 3.8016680000000003,
+                "report": "test-results\\neon-runtime-built\\vercel-expired-ec2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              }
+            ],
+            "total_cases": 12,
+            "pass": 12,
+            "fail": 0,
+            "skip": 0,
+            "global_errors": 0,
+            "scope": "SDK constructor/config/kernel only; no session/token/provider verification"
+          },
+          "startup_failures_retained": 2,
+          "prior_portable_cleanup_global_failures_retained": 2,
+          "build_attempts": 3,
+          "actual_build_commands": 6,
+          "all_build_exits": 0,
+          "types_exit": 0,
+          "lint_exit": 0,
+          "contracts_exit": 0,
+          "schema_head": "0037_bulk_manifests",
+          "migrations": 0,
+          "DB_connections": 0,
+          "required_DB_suite_applicable": false,
+          "DB_skips": 0,
+          "sdk_constructor_official": true,
+          "new_runtime_node_crypto_in_workerd_verified": true,
+          "session_token_handler_or_middleware_exercised_by_kernel": false,
+          "real_Neon_verified": false,
+          "human_Google_verified": false,
+          "full_SDK_browser_CLI_provider_accounting_verified": false,
+          "external_auth_requests": 0,
+          "independent_review": "pending; author review only; no agents",
+          "full_N00_gate_passed": false,
+          "original_callback_case": "carried unchanged: portable500/vercel200 vs302; not rerun or relaxed in this follow-up",
+          "rollback_reverse_check_exit": 0
         }
       },
       "migrations": "none;0037 unchanged",
-      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_RUNTIME/RESULTS.md",
-      "rollback": "revert 790a1b29b971ce6e23221ac38cd5de4a61c50144 plus metadata; reverse applicability0 only; no DB/resource undo",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_RUNTIME_BUILT/RESULTS.md",
+      "rollback": "revert e683a89225863387367bda204f84aa168f6abefb plus metadata; reverse applicability0 only; no DB/resource undo",
       "limits": [
         "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
         "No Vercel ingress/protection/binding/deployment verification",
@@ -392,7 +764,7 @@
         "No live performance/SLA/UAT claim"
       ],
       "full_gate_passed": false,
-      "next_action": "Compile and exercise the separate real-only runtime with fictional runtime-only configuration, add a real-harness UI/diagnostic and complete SDK/browser/CLI accounting; fresh bounded real target/test identity approval remains pending."
+      "next_action": "Complete real-only UI/session/token/FastAPI diagnostic plus bounded SDK/browser/CLI/cleanup accounting. Fresh specific isolated Neon/human-Google authorization remains pending."
     },
     {
       "id": "N01",
@@ -1026,7 +1398,7 @@
     "N00 local real-only builds/accounting next; fresh isolated actual auth roundtrip requires specific new approval",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "790a1b29b971ce6e23221ac38cd5de4a61c50144",
+  "reviewed_source_sha": "e683a89225863387367bda204f84aa168f6abefb",
   "deployed_sha": null,
   "selected_followups": [
     "U05",

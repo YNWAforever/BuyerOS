@@ -1,0 +1,14 @@
+✔ owned cleanup removes private configuration and keeps marker through a transient state failure (169.4661ms)
+✔ cleanup rejects a mismatched owner before deleting configuration (7.6063ms)
+✔ cleanup refuses an unreviewed entry before deleting owned configuration (4.4781ms)
+✔ cleanup deadline retains the owner while private configuration is removed (14.7542ms)
+✔ cleanup propagates non-transient IO errors without deleting ownership (106.2136ms)
+✔ cleanup rejects a root symlink and preserves its target (3.766ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 902.2594

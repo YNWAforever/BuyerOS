@@ -1,0 +1,293 @@
+{
+  "runs": [
+    {
+      "runId": "bc2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 18716,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 9760,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "ac2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 9160,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 31804,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "5c2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 43404,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 11188,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "9c2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 55176,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 32692,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "4c2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 44440,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 44416,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "6c2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 26892,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 51472,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "7c2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 6456,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 47248,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "ec2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 47592,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 53496,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "dc2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 44696,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 54652,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "cc2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 3800,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 46448,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "1c2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 36688,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "2c2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 47896,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 52020,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "3c2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 22704,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 51700,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    },
+    {
+      "runId": "8c2d4e6f8012",
+      "root_removed": true,
+      "original_owned_processes_no_longer_active": true,
+      "pid_checks": [
+        {
+          "pid": 19240,
+          "kind": "parent",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        },
+        {
+          "pid": 51296,
+          "kind": "child",
+          "absent": true,
+          "reused_by_new_unowned_process": false,
+          "current": null
+        }
+      ]
+    }
+  ],
+  "all_roots_removed": true,
+  "pid_reuse_handled_without_stopping_unowned_processes": true
+}

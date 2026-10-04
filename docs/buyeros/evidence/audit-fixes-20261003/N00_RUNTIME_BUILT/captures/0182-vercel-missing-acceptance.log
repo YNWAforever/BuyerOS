@@ -1,0 +1,10 @@
+[WebServer] (node:3800) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:36868) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-runtime-built.spec.ts:28:2 › NA01 runtime kernel: missing request configuration fails closed (75ms)
+
+  1 passed (3.5s)

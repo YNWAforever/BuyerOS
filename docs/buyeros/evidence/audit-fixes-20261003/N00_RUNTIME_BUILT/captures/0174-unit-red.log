@@ -1,0 +1,228 @@
+✖ compatibility profile retains original output and source overlay (1.1735ms)
+✖ runtime profile has distinct output and real-only plus probe scaffolding (0.2654ms)
+✔ build profile refuses custom paths and unreviewed profiles (0.7359ms)
+✖ Nitro runtime profile selects only its reviewed service entry (0.9378ms)
+✖ probe target accepts only explicit fictional IDs/hosts/audience (0.4515ms)
+✖ probe refuses a real projectId (0.5173ms)
+✖ probe refuses a real branchId (0.2621ms)
+✖ probe refuses a real authId (0.2326ms)
+✖ probe refuses external trust and base hosts or non-fictional audience (0.381ms)
+✖ probe fetch guard refuses every request before original transport dispatch (0.4721ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 1
+ℹ fail 9
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 246.7115
+
+✖ failing tests:
+
+test at tests\neon-runtime-probe.test.mjs:6:1
+✖ compatibility profile retains original output and source overlay (1.1735ms)
+  Error: N00_BUILD_PROFILE_UNIMPLEMENTED
+      at fixtureBuildProfile (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-compatibility-harness.mjs:46:45)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:6:86)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17)
+
+test at tests\neon-runtime-probe.test.mjs:7:1
+✖ runtime profile has distinct output and real-only plus probe scaffolding (0.2654ms)
+  Error: N00_BUILD_PROFILE_UNIMPLEMENTED
+      at fixtureBuildProfile (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-compatibility-harness.mjs:46:45)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:7:94)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+
+test at tests\neon-runtime-probe.test.mjs:9:1
+✖ Nitro runtime profile selects only its reviewed service entry (0.9378ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /neon-runtime-probe\/rsc-service.ts/. Input:
+  
+  'plugins: [(await import("nitro/vite")).nitro({ experimental: { vite: { services: { rsc: { entry: "./lib/neon-compatibility/rsc-service.ts" } } } }, vercel: {} })]'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:9:154)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'plugins: [(await import("nitro/vite")).nitro({ experimental: { vite: { services: { rsc: { entry: "./lib/neon-compatibility/rsc-service.ts" } } } }, vercel: {} })]',
+    expected: /neon-runtime-probe\/rsc-service.ts/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-probe.test.mjs:10:1
+✖ probe target accepts only explicit fictional IDs/hosts/audience (0.4515ms)
+  AssertionError [ERR_ASSERTION]: Got unwanted exception.
+  Actual message: "N00_PROBE_UNIMPLEMENTED"
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:10:84)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_PROBE_UNIMPLEMENTED
+        at assertRuntimeProbeTarget (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-probe.mjs:1:50)
+        at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:10:101
+        at getActual (node:assert:611:5)
+        at strict.doesNotThrow (node:assert:779:32)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:10:84)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12),
+    expected: undefined,
+    operator: 'doesNotThrow',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-probe.test.mjs:11:54
+✖ probe refuses a real projectId (0.5173ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_PROBE_FICTIONAL_ONLY/. Input:
+  
+  'Error: N00_PROBE_UNIMPLEMENTED'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:11:147)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_PROBE_UNIMPLEMENTED
+        at assertRuntimeProbeTarget (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-probe.mjs:1:50)
+        at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:11:158
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:11:147)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12),
+    expected: /N00_PROBE_FICTIONAL_ONLY/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-probe.test.mjs:11:54
+✖ probe refuses a real branchId (0.2621ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_PROBE_FICTIONAL_ONLY/. Input:
+  
+  'Error: N00_PROBE_UNIMPLEMENTED'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:11:147)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_PROBE_UNIMPLEMENTED
+        at assertRuntimeProbeTarget (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-probe.mjs:1:50)
+        at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:11:158
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:11:147)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12),
+    expected: /N00_PROBE_FICTIONAL_ONLY/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-probe.test.mjs:11:54
+✖ probe refuses a real authId (0.2326ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_PROBE_FICTIONAL_ONLY/. Input:
+  
+  'Error: N00_PROBE_UNIMPLEMENTED'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:11:147)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_PROBE_UNIMPLEMENTED
+        at assertRuntimeProbeTarget (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-probe.mjs:1:50)
+        at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:11:158
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:11:147)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12),
+    expected: /N00_PROBE_FICTIONAL_ONLY/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-probe.test.mjs:12:1
+✖ probe refuses external trust and base hosts or non-fictional audience (0.381ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_PROBE_FICTIONAL_ONLY/. Input:
+  
+  'Error: N00_PROBE_UNIMPLEMENTED'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:12:322)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_PROBE_UNIMPLEMENTED
+        at assertRuntimeProbeTarget (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-probe.mjs:1:50)
+        at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:12:333
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:12:322)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12),
+    expected: /N00_PROBE_FICTIONAL_ONLY/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests\neon-runtime-probe.test.mjs:13:1
+✖ probe fetch guard refuses every request before original transport dispatch (0.4721ms)
+  Error: N00_PROBE_UNIMPLEMENTED
+      at installProbeFetchGuard (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-runtime-probe.mjs:2:48)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-runtime-probe.test.mjs:13:190)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)

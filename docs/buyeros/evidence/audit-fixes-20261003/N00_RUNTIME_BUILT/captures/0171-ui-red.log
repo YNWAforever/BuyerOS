@@ -1,0 +1,103 @@
+[WebServer] (node:41684) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] INFO:     Started server process [48112]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+
+Running 3 tests using 1 worker
+
+(node:22628) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\e2e\audit-neon-runtime-built.spec.ts:5:2 › NA01 runtime kernel: built page explains fixture scope (6.5s)
+(node:54888) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 tests\e2e\audit-neon-runtime-built.spec.ts:10:2 › NA01 runtime kernel: official built SDK initializes with runtime-only trust (287ms)
+(node:43468) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  3 tests\e2e\audit-neon-runtime-built.spec.ts:18:2 › NA01 runtime kernel: built fetch guard rejects before transport dispatch (170ms)
+
+
+  1) tests\e2e\audit-neon-runtime-built.spec.ts:5:2 › NA01 runtime kernel: built page explains fixture scope 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'N00 runtime-only SDK fixture' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'N00 runtime-only SDK fixture' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: 'N00 runtime-only SDK fixture' })
+
+
+      4 | if(scenario==='valid'){
+      5 |  test('NA01 runtime kernel: built page explains fixture scope',async({page},testInfo)=>{
+    > 6 |   await page.goto('/');await expect(page.getByRole('heading',{name:'N00 runtime-only SDK fixture'})).toBeVisible();
+        |                                                                                                      ^
+      7 |   await expect(page.getByText(/session, token and real login remain pending/i)).toBeVisible();
+      8 |   await page.screenshot({path:testInfo.outputPath('runtime-kernel.png'),fullPage:true});
+      9 |  });
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-runtime-built.spec.ts:6:102
+
+    Error Context: test-results\neon-runtime-built\baseline-vercel-valid-0c2d4e6f8012-ui\audit-neon-runtime-built-N-a47c1-page-explains-fixture-scope\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-runtime-built\baseline-vercel-valid-0c2d4e6f8012-ui\audit-neon-runtime-built-N-a47c1-page-explains-fixture-scope\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-runtime-built\baseline-vercel-valid-0c2d4e6f8012-ui\audit-neon-runtime-built-N-a47c1-page-explains-fixture-scope\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\audit-neon-runtime-built.spec.ts:10:2 › NA01 runtime kernel: official built SDK initializes with runtime-only trust 
+
+    SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+
+      10 |  test('NA01 runtime kernel: official built SDK initializes with runtime-only trust',async({request})=>{
+      11 |   const response=await request.get('/api/n00-runtime');expect(response.status()).toBe(200);
+    > 12 |   const body=await response.json();expect(body).toMatchObject({fixture_only:true,external_verified:false,sdk_initialized:true,egress_denied:false,transport:{fixture_only:true,blocked:0,forwarded:0},trust:{algorithm:'EdDSA',keyType:'OKP',curve:'Ed25519'}});
+         |              ^
+      13 |   for(const key of ['projectId','branchId','authId'])expect(body[key]).toMatch(/^fictional-probe-/);
+      14 |   expect(body.trust.issuer).toMatch(/^https:\/\/.+\.fixture\.invalid$/);expect(body.trust.jwksUrl).toMatch(/^https:\/\/.+\.fixture\.invalid\/auth\/jwks$/);
+      15 |   expect(body.trust.audience).toMatch(/^fictional-probe-/);expect(body.fingerprint).toMatch(/^[a-f0-9]{64}$/);
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-runtime-built.spec.ts:12:14
+
+    Error Context: test-results\neon-runtime-built\baseline-vercel-valid-0c2d4e6f8012-ui\audit-neon-runtime-built-N-95f21-zes-with-runtime-only-trust\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-runtime-built\baseline-vercel-valid-0c2d4e6f8012-ui\audit-neon-runtime-built-N-95f21-zes-with-runtime-only-trust\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-runtime-built\baseline-vercel-valid-0c2d4e6f8012-ui\audit-neon-runtime-built-N-95f21-zes-with-runtime-only-trust\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests\e2e\audit-neon-runtime-built.spec.ts:18:2 › NA01 runtime kernel: built fetch guard rejects before transport dispatch 
+
+    SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+
+      18 |  test('NA01 runtime kernel: built fetch guard rejects before transport dispatch',async({request})=>{
+      19 |   const response=await request.get('/api/n00-runtime?egress=test');expect(response.status()).toBe(200);
+    > 20 |   expect(await response.json()).toMatchObject({fixture_only:true,external_verified:false,sdk_initialized:true,egress_denied:true,transport:{fixture_only:true,blocked:1,forwarded:0}});
+         |          ^
+      21 |  });
+      22 | }else{
+      23 |  const code={missing:'N00_REAL_RUNTIME_REQUIRED',mismatch:'N00_REAL_RUNTIME_MISMATCH',expired:'N00_REAL_EXPIRED'}[scenario];
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-runtime-built.spec.ts:20:10
+
+    Error Context: test-results\neon-runtime-built\baseline-vercel-valid-0c2d4e6f8012-ui\audit-neon-runtime-built-N-28910-s-before-transport-dispatch\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-runtime-built\baseline-vercel-valid-0c2d4e6f8012-ui\audit-neon-runtime-built-N-28910-s-before-transport-dispatch\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-runtime-built\baseline-vercel-valid-0c2d4e6f8012-ui\audit-neon-runtime-built-N-28910-s-before-transport-dispatch\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    tests\e2e\audit-neon-runtime-built.spec.ts:5:2 › NA01 runtime kernel: built page explains fixture scope 
+    tests\e2e\audit-neon-runtime-built.spec.ts:10:2 › NA01 runtime kernel: official built SDK initializes with runtime-only trust 
+    tests\e2e\audit-neon-runtime-built.spec.ts:18:2 › NA01 runtime kernel: built fetch guard rejects before transport dispatch 

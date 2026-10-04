@@ -1,0 +1,10 @@
+<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="0" time="60.647184">
+<testsuite name="audit-neon-runtime-built.spec.ts" timestamp="2026-10-04T16:10:33.194Z" hostname="" tests="3" failures="0" skipped="0" time="1.186" errors="0">
+<testcase name="NA01 runtime kernel: built page explains fixture scope" classname="audit-neon-runtime-built.spec.ts" time="0.938">
+</testcase>
+<testcase name="NA01 runtime kernel: official built SDK initializes with runtime-only trust" classname="audit-neon-runtime-built.spec.ts" time="0.072">
+</testcase>
+<testcase name="NA01 runtime kernel: built fetch guard rejects before transport dispatch" classname="audit-neon-runtime-built.spec.ts" time="0.176">
+</testcase>
+</testsuite>
+</testsuites>

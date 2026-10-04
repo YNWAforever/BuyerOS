@@ -1,0 +1,25 @@
+[WebServer] (node:44440) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:54660) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-runtime-built.spec.ts:5:2 › NA01 runtime kernel: built page explains fixture scope (262ms)
+  ok 2 tests\e2e\audit-neon-runtime-built.spec.ts:10:2 › NA01 runtime kernel: official built SDK initializes with runtime-only trust (39ms)
+  ok 3 tests\e2e\audit-neon-runtime-built.spec.ts:18:2 › NA01 runtime kernel: built fetch guard rejects before transport dispatch (20ms)
+Error: N00_PROBE_CLEANUP_EVIDENCE
+
+   at ..\..\scripts\neon-runtime-probe-teardown.mjs:12
+
+  10 |  if(response.status!==200||(await response.json()).fixture_only!==true)throw new Error('N00_PROBE_CLEANUP_ACK');
+  11 |  const deadline=Date.now()+20000;while(!existsSync(join(folder,'cleanup.json'))&&Date.now()<deadline)await new Promise(ok=>setTimeout(ok,100));
+> 12 |  if(!existsSync(join(folder,'cleanup.json')))throw new Error('N00_PROBE_CLEANUP_EVIDENCE');
+     |                                                    ^
+  13 |  const proof=JSON.parse(readFileSync(join(folder,'cleanup.json'),'utf8'));
+  14 |  if(proof.private_root_removed!==true||proof.runtime_configuration_removed!==true||proof.owned_children_absent!==true||existsSync(owner.private_root))throw new Error('N00_PROBE_CLEANUP_INCOMPLETE');
+  15 | }
+    at teardown (C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\scripts\neon-runtime-probe-teardown.mjs:12:52)
+
+  3 passed (30.5s)
+  1 error was not a part of any test, see above for details

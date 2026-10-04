@@ -1,0 +1,361 @@
+[nitro:vercel] ℹ Using nodejs22.x runtime.
+[nitro:vercel] ℹ Using web entry format.
+[1/5] analyze client references...
+vite v8.0.13 building rsc environment for production...
+[2Ktransforming...✓ 364 modules transformed.
+rendering chunks...
+✓ built in 1.83s
+[2/5] analyze server references...
+vite v8.0.13 building ssr environment for production...
+[2Ktransforming...✓ 118 modules transformed.
+rendering chunks...
+✓ built in 648ms
+[3/5] build rsc environment...
+vite v8.0.13 building rsc environment for production...
+[2Ktransforming...✓ 361 modules transformed.
+rendering chunks...
+computing gzip size...
+node_modules/.nitro/vite/services/rsc/_next/static/page-B5XX6aMt.js                                                                                                0.04 kB │ gzip:   0.06 kB
+node_modules/.nitro/vite/services/rsc/_next/static/record-TItOXd1J.js                                                                                              0.09 kB │ gzip:   0.10 kB
+node_modules/.nitro/vite/services/rsc/_next/static/page-j_qioUrw.js                                                                                                0.20 kB │ gzip:   0.17 kB
+node_modules/.nitro/vite/services/rsc/_next/static/route-c9iBl6ly.js                                                                                               0.21 kB │ gzip:   0.17 kB
+node_modules/.nitro/vite/services/rsc/_next/static/page-CvhjhbH2.js                                                                                                0.43 kB │ gzip:   0.31 kB
+node_modules/.nitro/vite/services/rsc/_next/static/rolldown-runtime-CwMANdre.js                                                                                    0.72 kB │ gzip:   0.44 kB
+node_modules/.nitro/vite/services/rsc/_next/static/protocol-headers-2tpZEYlw.js                                                                                    0.73 kB │ gzip:   0.34 kB
+node_modules/.nitro/vite/services/rsc/_next/static/framework~index~layout~page~app-page-cache-render~app-page-cache~app-route-handler-dispatch-DcTwXZuK.js         0.89 kB │ gzip:   0.57 kB
+node_modules/.nitro/vite/services/rsc/_next/static/isr-decision-Bb-1zwT9.js                                                                                        0.89 kB │ gzip:   0.42 kB
+node_modules/.nitro/vite/services/rsc/_next/static/app-static-generation-Cz2cfjjU.js                                                                               0.91 kB │ gzip:   0.51 kB
+node_modules/.nitro/vite/services/rsc/_next/static/route-D9u5UjtS.js                                                                                               0.93 kB │ gzip:   0.57 kB
+node_modules/.nitro/vite/services/rsc/_next/static/parse-cookie-BUhMIqDN.js                                                                                        1.95 kB │ gzip:   0.92 kB
+node_modules/.nitro/vite/services/rsc/_next/static/app-prerender-endpoints-CCQ0j1mT.js                                                                             1.99 kB │ gzip:   0.85 kB
+node_modules/.nitro/vite/services/rsc/_next/static/app-page-cache-render-CSNNsNXZ.js                                                                               2.19 kB │ gzip:   0.99 kB
+node_modules/.nitro/vite/services/rsc/_next/static/route-Dr7rhgFj.js                                                                                               2.35 kB │ gzip:   1.03 kB
+node_modules/.nitro/vite/services/rsc/_next/static/app-page-cache-BuBbwDH8.js                                                                                      5.49 kB │ gzip:   1.81 kB
+node_modules/.nitro/vite/services/rsc/_next/static/framework~index~page~layout~page~app-page-cache-render~app-page-cache~app-route-handler-dispatch-ijr00U_H.js    5.53 kB │ gzip:   2.30 kB
+node_modules/.nitro/vite/services/rsc/_next/static/headers-BXKC1pvb.js                                                                                             5.97 kB │ gzip:   2.41 kB
+node_modules/.nitro/vite/services/rsc/_next/static/headers-C6qSxMkg.js                                                                                            15.97 kB │ gzip:   5.35 kB
+node_modules/.nitro/vite/services/rsc/_next/static/app-route-handler-dispatch-B5KDzLLE.js                                                                         17.99 kB │ gzip:   5.52 kB
+node_modules/.nitro/vite/services/rsc/_next/static/cache-headers-BXq5fEVd.js                                                                                      41.02 kB │ gzip:  13.22 kB
+node_modules/.nitro/vite/services/rsc/_next/static/framework~index-BP6exBHw.js                                                                                    56.74 kB │ gzip:  16.95 kB
+node_modules/.nitro/vite/services/rsc/index.js                                                                                                                   448.97 kB │ gzip: 126.77 kB
+
+✓ built in 2.83s
+[4/5] build client environment...
+vite v8.0.13 building client environment for production...
+[2Ktransforming...✓ 130 modules transformed.
+rendering chunks...
+computing gzip size...
+.vercel/output/static/vinext-client-entry-manifest.json                            0.06 kB │ gzip:  0.08 kB
+.vercel/output/static/.vite/manifest.json                                          3.91 kB │ gzip:  0.62 kB
+.vercel/output/static/_next/static/chunks/layout-segment-context-Q5rHf2yY.js       0.53 kB │ gzip:  0.36 kB
+.vercel/output/static/_next/static/chunks/rolldown-runtime-C60lm6uB.js             0.69 kB │ gzip:  0.42 kB
+.vercel/output/static/_next/static/chunks/streamed-icons-BbokXyyW.js               0.77 kB │ gzip:  0.49 kB
+.vercel/output/static/_next/static/chunks/app-route-prefetch-policy-C8Apv8sM.js    0.93 kB │ gzip:  0.48 kB
+.vercel/output/static/_next/static/chunks/page-Df7kMg49.js                         1.13 kB │ gzip:  0.68 kB
+.vercel/output/static/_next/static/chunks/navigation-errors-By4dF-Cc.js            2.08 kB │ gzip:  0.98 kB
+.vercel/output/static/_next/static/chunks/framework-D_rUT4EX.js                  190.15 kB │ gzip: 59.77 kB
+.vercel/output/static/_next/static/chunks/index-zcYgYluK.js                      192.92 kB │ gzip: 56.05 kB
+
+✓ built in 2.56s
+[5/5] build ssr environment...
+vite v8.0.13 building ssr environment for production...
+[2Ktransforming...✓ 123 modules transformed.
+rendering chunks...
+computing gzip size...
+node_modules/.nitro/vite/services/ssr/_next/static/app-nav-failure-handler-CY3hSrbp.js     0.06 kB │ gzip:  0.08 kB
+node_modules/.nitro/vite/services/ssr/_next/static/app-prefetch-fetch-queue-CNXxe-3M.js    0.10 kB │ gzip:  0.10 kB
+node_modules/.nitro/vite/services/ssr/_next/static/static.edge-D16_N_LV.js                 0.23 kB │ gzip:  0.17 kB
+node_modules/.nitro/vite/services/ssr/_next/static/layout-segment-context-Cv5t33Ef.js      0.42 kB │ gzip:  0.30 kB
+node_modules/.nitro/vite/services/ssr/_next/static/app-router-scroll-state-DRbA0FZP.js     0.63 kB │ gzip:  0.34 kB
+node_modules/.nitro/vite/services/ssr/_next/static/streamed-icons-CVHr3bJy.js              0.70 kB │ gzip:  0.45 kB
+node_modules/.nitro/vite/services/ssr/_next/static/app-router-scroll-Beicn56T.js           2.30 kB │ gzip:  1.06 kB
+node_modules/.nitro/vite/services/ssr/_next/static/page-hGiI3UTN.js                        2.43 kB │ gzip:  1.27 kB
+node_modules/.nitro/vite/services/ssr/_next/static/error-boundary-D5WpAB5O.js              5.62 kB │ gzip:  1.72 kB
+node_modules/.nitro/vite/services/ssr/index.js                                           278.73 kB │ gzip: 87.39 kB
+
+✓ built in 1.28s
+[nitro] ℹ Skipping RSC (already built)
+
+[nitro] ◐ Building [Nitro] (preset: vercel, compatibility: 2026-10-04)
+[nitro] ✔ Generated public .vercel/output/static
+vite v8.0.13 building nitro environment for production...
+[2Ktransforming...✓ 77 modules transformed.
+ℹ Tracing dependencies:
+- eslint (9.39.4)
+- playwright (1.63.0)
+- postcss (8.5.23)
+- sharp (0.35.4)
+- typescript (5.9.3)
+- webpack (5.106.2)
+- playwright-core (1.63.0)
+- nanoid (3.3.18)
+- espree (10.4.0)
+- eslint-scope (8.4.0, 5.1.1)
+- eslint-visitor-keys (4.2.1, 3.4.3)
+- @eslint/config-helpers (0.4.2)
+- @eslint/eslintrc (3.3.5)
+- acorn (8.16.0)
+- acorn-import-phases (1.0.4)
+- @img/colour (1.1.0)
+- @img/sharp-linux-x64 (0.35.4)
+- @eslint/plugin-kit (0.4.1)
+- neo-async (2.6.2)
+- cross-spawn (7.0.6)
+- source-map-js (1.2.1)
+- picocolors (1.1.1)
+- webpack-sources (3.4.1)
+- tapable (2.3.3)
+- schema-utils (4.3.3)
+- loader-runner (4.3.2)
+- debug (4.4.3)
+- is-glob (4.0.3)
+- minimatch (3.1.5)
+- glob-parent (6.0.2)
+- lodash.merge (4.6.2)
+- glob-to-regexp (0.4.1)
+- graceful-fs (4.2.11)
+- escape-string-regexp (4.0.0)
+- es-module-lexer (2.1.0)
+- enhanced-resolve (5.21.3)
+- chrome-trace-event (1.0.4)
+- semver (7.8.5)
+- @eslint/js (9.39.4)
+- detect-libc (2.1.2)
+- @humanwhocodes/retry (0.4.3)
+- @humanwhocodes/module-importer (1.0.1)
+- @humanfs/node (0.16.8)
+- jiti (2.7.0)
+- @eslint/config-array (0.21.2)
+- watchpack (2.5.1)
+- json-stable-stringify-without-jsonify (1.0.1)
+- @eslint-community/eslint-utils (4.9.1)
+- @eslint-community/regexpp (4.12.2)
+- @webassemblyjs/ast (1.14.1)
+- @webassemblyjs/wasm-parser (1.14.1)
+- ajv (6.15.0, 8.20.0)
+- fast-deep-equal (3.1.3)
+- natural-compare (1.4.0)
+- ignore (5.3.2)
+- optionator (0.9.4)
+- find-up (5.0.0)
+- esutils (2.0.3)
+- esquery (1.7.0)
+- imurmurhash (0.1.4)
+- file-entry-cache (8.0.0)
+- mime-db (1.54.0)
+- chalk (4.1.2)
+- @webassemblyjs/wasm-edit (1.14.1)
+- source-map-support (0.5.21)
+- @img/sharp-libvips-linux-x64 (1.3.3)
+- estraverse (5.3.0, 4.3.0)
+- esrecurse (4.3.0)
+- is-extglob (2.1.1)
+- brace-expansion (1.1.14)
+- import-fresh (3.3.1)
+- terser-webpack-plugin (5.6.0)
+- supports-color (10.2.2, 7.2.0, 8.1.1)
+- acorn-jsx (5.3.2)
+- @humanfs/core (0.19.2)
+- strip-json-comments (3.1.1)
+- globals (14.0.0)
+- ms (2.1.3)
+- ajv-keywords (5.1.0)
+- levn (0.4.1)
+- ajv-formats (2.1.1)
+- @eslint/object-schema (2.1.7)
+- locate-path (6.0.0)
+- path-exists (4.0.0)
+- @webassemblyjs/ieee754 (1.13.2)
+- deep-is (0.1.4)
+- @webassemblyjs/leb128 (1.13.2)
+- @webassemblyjs/utf8 (1.13.2)
+- fast-levenshtein (2.0.6)
+- fast-json-stable-stringify (2.1.0)
+- word-wrap (1.2.5)
+- @webassemblyjs/helper-wasm-bytecode (1.13.2)
+- @webassemblyjs/helper-api-error (1.13.2)
+- browserslist (4.28.2)
+- flat-cache (4.0.1)
+- json-schema-traverse (0.4.1, 1.0.0)
+- source-map (0.6.1)
+- buffer-from (1.1.2)
+- uri-js (4.4.1)
+- type-check (0.4.0)
+- prelude-ls (1.2.1)
+- @webassemblyjs/helper-numbers (1.13.2)
+- ansi-styles (4.3.0)
+- @webassemblyjs/wasm-gen (1.14.1)
+- which (2.0.2)
+- @webassemblyjs/wasm-opt (1.14.1)
+- @webassemblyjs/helper-wasm-section (1.14.1)
+- @webassemblyjs/helper-buffer (1.14.1)
+- path-key (3.1.1)
+- shebang-command (2.0.0)
+- concat-map (0.0.1)
+- balanced-match (1.0.2)
+- parent-module (1.0.1)
+- resolve-from (4.0.0)
+- esbuild (0.28.1)
+- terser (5.47.1)
+- jest-worker (27.5.1)
+- lightningcss (1.32.0)
+- @jridgewell/trace-mapping (0.3.31)
+- p-locate (5.0.0)
+- flatted (3.4.2)
+- baseline-browser-mapping (2.10.30)
+- electron-to-chromium (1.5.358)
+- color-convert (2.0.1)
+- @xtuc/ieee754 (1.2.0)
+- keyv (4.5.4)
+- has-flag (4.0.0)
+- caniuse-lite (1.0.30001793)
+- node-releases (2.0.44)
+- isexe (2.0.0)
+- shebang-regex (3.0.0)
+- @webassemblyjs/floating-point-hex-parser (1.13.2)
+- fast-uri (3.1.7)
+- @xtuc/long (4.2.2)
+- callsites (3.1.0)
+- @jridgewell/sourcemap-codec (1.5.5)
+- @jridgewell/resolve-uri (3.1.2)
+- p-limit (3.1.0)
+- @jridgewell/source-map (0.3.11)
+- json-buffer (3.0.1)
+- merge-stream (2.0.0)
+- color-name (1.1.4)
+- yocto-queue (0.1.0)
+- @jridgewell/gen-mapping (0.3.13)
+- @esbuild/linux-x64 (0.28.1)
+- lightningcss-linux-x64-gnu (1.32.0)
+✔ Traced 146 dependencies (1861 files) in 39510ms.
+ℹ Ensure your production environment matches the builder OS and architecture (linux-x64) to avoid native module issues.
+rendering chunks...
+computing gzip size...
+.vercel/output/functions/__server.func/_ssr/page-B5XX6aMt.mjs                                                                                           0.04 kB │ gzip:   0.06 kB
+.vercel/output/functions/__server.func/_ssr/app-prefetch-fetch-queue-CNXxe-3M.mjs                                                                       0.09 kB │ gzip:   0.10 kB
+.vercel/output/functions/__server.func/_ssr/page-j_qioUrw.mjs                                                                                           0.19 kB │ gzip:   0.16 kB
+.vercel/output/functions/__server.func/_ssr/route-c9iBl6ly.mjs                                                                                          0.21 kB │ gzip:   0.17 kB
+.vercel/output/functions/__server.func/_ssr/static.edge-D16_N_LV.mjs                                                                                    0.22 kB │ gzip:   0.16 kB
+.vercel/output/functions/__server.func/_ssr/page-CvhjhbH2.mjs                                                                                           0.40 kB │ gzip:   0.29 kB
+.vercel/output/functions/__server.func/_ssr/layout-segment-context-Cv5t33Ef.mjs                                                                         0.41 kB │ gzip:   0.29 kB
+.vercel/output/functions/__server.func/_chunks/ssr-renderer.mjs                                                                                         0.42 kB │ gzip:   0.28 kB
+.vercel/output/functions/__server.func/_ssr/streamed-icons-CVHr3bJy.mjs                                                                                 0.70 kB │ gzip:   0.45 kB
+.vercel/output/functions/__server.func/_ssr/isr-decision-Bb-1zwT9.mjs                                                                                   0.73 kB │ gzip:   0.35 kB
+.vercel/output/functions/__server.func/_ssr/app-static-generation-Cz2cfjjU.mjs                                                                          0.87 kB │ gzip:   0.49 kB
+.vercel/output/functions/__server.func/_ssr/route-D9u5UjtS.mjs                                                                                          0.92 kB │ gzip:   0.57 kB
+.vercel/output/functions/__server.func/_ssr/app-prerender-endpoints-CCQ0j1mT.mjs                                                                        1.98 kB │ gzip:   0.84 kB
+.vercel/output/functions/__server.func/_ssr/app-page-cache-render-CSNNsNXZ.mjs                                                                          2.02 kB │ gzip:   0.90 kB
+.vercel/output/functions/__server.func/_ssr/route-Dr7rhgFj.mjs                                                                                          2.35 kB │ gzip:   1.03 kB
+.vercel/output/functions/__server.func/_ssr/page-hGiI3UTN.mjs                                                                                           2.43 kB │ gzip:   1.27 kB
+.vercel/output/functions/__server.func/_ssr/app-router-scroll-Beicn56T.mjs                                                                              2.59 kB │ gzip:   1.17 kB
+.vercel/output/functions/__server.func/index.mjs                                                                                                        3.12 kB │ gzip:   1.57 kB
+.vercel/output/functions/__server.func/_ssr/app-page-cache-BuBbwDH8.mjs                                                                                 5.19 kB │ gzip:   1.68 kB
+.vercel/output/functions/__server.func/_ssr/error-boundary-D5WpAB5O.mjs                                                                                 5.56 kB │ gzip:   1.68 kB
+.vercel/output/functions/__server.func/_ssr/framework~index~layout~page~app-page-cache-render~app-page-cache~app-route-handler-dispatch-DcTwXZuK.mjs    6.74 kB │ gzip:   2.75 kB
+.vercel/output/functions/__server.func/_ssr/app-route-handler-dispatch-B5KDzLLE.mjs                                                                    17.27 kB │ gzip:   5.34 kB
+.vercel/output/functions/__server.func/_libs/h3+rou3+srvx.mjs                                                                                          19.78 kB │ gzip:   7.37 kB
+.vercel/output/functions/__server.func/_ssr/ssr.mjs                                                                                                   282.78 kB │ gzip:  88.04 kB
+.vercel/output/functions/__server.func/_ssr/rsc.mjs                                                                                                   559.30 kB │ gzip: 159.17 kB
+
+✓ built in 44.43s
+ℹ Generated .vercel/output/nitro.json
+
+[nitro] ✔ You can preview this build using npx vite preview
+[nitro] ✔ You can deploy this build using npx nitro deploy --prebuilt
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mapp/layout.tsx is dynamically imported by \0virtual:vinext-rsc-entry but also statically imported by \0virtual:vinext-rsc-entry, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mnode_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/shims/default-global-error.js is dynamically imported by \0virtual:vite-rsc/client-references but also statically imported by node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/server/app-browser-entry.js, node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/shims/error-boundary.js, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mnode_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/shims/error-boundary.js is dynamically imported by \0virtual:vite-rsc/client-references but also statically imported by node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/server/app-browser-entry.js, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mnode_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/shims/app-router-scroll.js is dynamically imported by \0virtual:vite-rsc/client-references but also statically imported by node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/server/app-browser-entry.js, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mnode_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/shims/slot.js is dynamically imported by \0virtual:vite-rsc/client-references but also statically imported by node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/server/app-browser-entry.js, node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/server/app-browser-visible-commit.js, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mnode_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/shims/internal/app-prefetch-fetch-queue.js is dynamically imported by \0virtual:vite-rsc/client-references but also statically imported by node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/shims/navigation.js, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mnode_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/shims/default-global-error.js is dynamically imported by \0virtual:vite-rsc/client-references but also statically imported by node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/server/app-ssr-entry.js, node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/shims/error-boundary.js, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mnode_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/shims/slot.js is dynamically imported by \0virtual:vite-rsc/client-references but also statically imported by node_modules/.pnpm/vinext@1.0.0-beta.5_@vitejs+plugin-react@6.0.2_vite@8.0.13_@types+node@22.19.19_esbuild_d5d6eb9e75c213b052ac0cc191f9f6ae/node_modules/vinext/dist/server/app-ssr-entry.js, dynamic import will not move module into another chunk.
+
+nf3: could not resolve `traceInclude` entry "@alinea/generated" from any root
+nf3: could not resolve `traceInclude` entry "@appsignal/nodejs" from any root
+nf3: could not resolve `traceInclude` entry "@aws-sdk/client-s3" from any root
+nf3: could not resolve `traceInclude` entry "@aws-sdk/s3-presigned-post" from any root
+nf3: could not resolve `traceInclude` entry "@blockfrost/blockfrost-js" from any root
+nf3: could not resolve `traceInclude` entry "@highlight-run/node" from any root
+nf3: could not resolve `traceInclude` entry "@huggingface/transformers" from any root
+nf3: could not resolve `traceInclude` entry "@jpg-store/lucid-cardano" from any root
+nf3: could not resolve `traceInclude` entry "@libsql/client" from any root
+nf3: could not resolve `traceInclude` entry "@mikro-orm/core" from any root
+nf3: could not resolve `traceInclude` entry "@mikro-orm/knex" from any root
+nf3: could not resolve `traceInclude` entry "@node-rs/argon2" from any root
+nf3: could not resolve `traceInclude` entry "@node-rs/bcrypt" from any root
+nf3: could not resolve `traceInclude` entry "@prisma/client" from any root
+nf3: could not resolve `traceInclude` entry "@react-pdf/renderer" from any root
+nf3: could not resolve `traceInclude` entry "@sentry/profiling-node" from any root
+nf3: could not resolve `traceInclude` entry "@sparticuz/chromium" from any root
+nf3: could not resolve `traceInclude` entry "@sparticuz/chromium-min" from any root
+nf3: could not resolve `traceInclude` entry "@statsig/statsig-node-core" from any root
+nf3: could not resolve `traceInclude` entry "@swc/core" from any root
+nf3: could not resolve `traceInclude` entry "@xenova/transformers" from any root
+nf3: could not resolve `traceInclude` entry "@zenstackhq/runtime" from any root
+nf3: could not resolve `traceInclude` entry "argon2" from any root
+nf3: could not resolve `traceInclude` entry "autoprefixer" from any root
+nf3: could not resolve `traceInclude` entry "aws-crt" from any root
+nf3: could not resolve `traceInclude` entry "bcrypt" from any root
+nf3: could not resolve `traceInclude` entry "better-sqlite3" from any root
+nf3: could not resolve `traceInclude` entry "canvas" from any root
+nf3: could not resolve `traceInclude` entry "chromadb-default-embed" from any root
+nf3: could not resolve `traceInclude` entry "config" from any root
+nf3: could not resolve `traceInclude` entry "cpu-features" from any root
+nf3: could not resolve `traceInclude` entry "cypress" from any root
+nf3: could not resolve `traceInclude` entry "dd-trace" from any root
+nf3: could not resolve `traceInclude` entry "express" from any root
+nf3: could not resolve `traceInclude` entry "firebase-admin" from any root
+nf3: could not resolve `traceInclude` entry "htmlrewriter" from any root
+nf3: could not resolve `traceInclude` entry "import-in-the-middle" from any root
+nf3: could not resolve `traceInclude` entry "isolated-vm" from any root
+nf3: could not resolve `traceInclude` entry "jest" from any root
+nf3: could not resolve `traceInclude` entry "jsdom" from any root
+nf3: could not resolve `traceInclude` entry "keyv" from any root
+nf3: could not resolve `traceInclude` entry "libsql" from any root
+nf3: could not resolve `traceInclude` entry "mdx-bundler" from any root
+nf3: could not resolve `traceInclude` entry "mongodb" from any root
+nf3: could not resolve `traceInclude` entry "mongoose" from any root
+nf3: could not resolve `traceInclude` entry "newrelic" from any root
+nf3: could not resolve `traceInclude` entry "next-mdx-remote" from any root
+nf3: could not resolve `traceInclude` entry "next-seo" from any root
+nf3: could not resolve `traceInclude` entry "node-cron" from any root
+nf3: could not resolve `traceInclude` entry "node-pty" from any root
+nf3: could not resolve `traceInclude` entry "node-web-audio-api" from any root
+nf3: could not resolve `traceInclude` entry "onnxruntime-node" from any root
+nf3: could not resolve `traceInclude` entry "oslo" from any root
+nf3: could not resolve `traceInclude` entry "pg" from any root
+nf3: could not resolve `traceInclude` entry "pino" from any root
+nf3: could not resolve `traceInclude` entry "pino-pretty" from any root
+nf3: could not resolve `traceInclude` entry "pino-roll" from any root
+nf3: could not resolve `traceInclude` entry "playwright-core" from any root
+nf3: could not resolve `traceInclude` entry "prettier" from any root
+nf3: could not resolve `traceInclude` entry "prisma" from any root
+nf3: could not resolve `traceInclude` entry "puppeteer" from any root
+nf3: could not resolve `traceInclude` entry "puppeteer-core" from any root
+nf3: could not resolve `traceInclude` entry "ravendb" from any root
+nf3: could not resolve `traceInclude` entry "require-in-the-middle" from any root
+nf3: could not resolve `traceInclude` entry "rimraf" from any root
+nf3: could not resolve `traceInclude` entry "shiki" from any root
+nf3: could not resolve `traceInclude` entry "sqlite3" from any root
+nf3: could not resolve `traceInclude` entry "thread-stream" from any root
+nf3: could not resolve `traceInclude` entry "ts-morph" from any root
+nf3: could not resolve `traceInclude` entry "ts-node" from any root
+nf3: could not resolve `traceInclude` entry "vscode-oniguruma" from any root
+nf3: could not resolve `traceInclude` entry "websocket" from any root
+nf3: could not resolve `traceInclude` entry "zeromq" from any root
+[33m[PLUGIN_TIMINGS] [0mYour build spent significant time in plugins. Here is a breakdown:
+  - nitro:externals (62%)
+  - vinext:jsx-in-js (8%)
+  - vinext:ignore-dynamic-requests (5%)
+  - vinext:middleware-server-only (4%)
+  - rsc:scan-strip (3%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+

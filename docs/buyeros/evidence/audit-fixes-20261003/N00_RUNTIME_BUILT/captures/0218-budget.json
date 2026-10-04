@@ -1,0 +1,18 @@
+{
+  "fixture_only": true,
+  "external_requests": 0,
+  "runner_head_at_execution": "1df7b4cb1b46a25b9019adf05bd4cd46cf2a7fa3",
+  "compiled_inputs": "test-results/neon-compatibility/build-inputs.json",
+  "metrics": {
+    "received": 0,
+    "forwarded": 0,
+    "locally_rejected": 0,
+    "unknown": 0
+  },
+  "requests": [],
+  "limit": 200,
+  "cleanup_reserve": 20,
+  "sdk_fixture_base": "http://127.0.0.1:44891/fixture/auth",
+  "owned_backend_port": 44894,
+  "real_configuration_verified": false
+}
