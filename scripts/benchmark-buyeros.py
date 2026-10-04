@@ -15,6 +15,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 API = ROOT / "services" / "api"
 CASE = API / "tests" / "benchmark_buyeros_case.py"
+sys.path.insert(0, str(API))
+from tools.quality_metrics import provenance
 
 
 def main() -> int:
@@ -23,8 +25,11 @@ def main() -> int:
     parser.add_argument("--workspaces", type=int, choices=(1, 10, 100), required=True)
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts" / "t29-benchmark.json")
     args = parser.parse_args()
-    if os.environ.get("BUYEROS_TEST_DATABASE_URL"):
-        parser.error("unset BUYEROS_TEST_DATABASE_URL; this benchmark owns a disposable Docker database")
+    for variable in ("BUYEROS_TEST_DATABASE_URL", "BUYEROS_DATABASE_URL", "DATABASE_URL", "BUYEROS_WORKER_DATABASE_URL"):
+        if os.environ.get(variable):
+            parser.error(f"unset inherited database {variable}; this benchmark owns a disposable Docker database")
+    if args.output.exists():
+        parser.error("output must be new; existing evidence cannot be overwritten")
     python = API / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
     if not python.is_file():
         parser.error(f"API virtual environment missing: {python}; run uv sync --frozen in services/api")
@@ -35,8 +40,19 @@ def main() -> int:
     env["BUYEROS_BENCH_OUTPUT"] = str(args.output.resolve())
     command = [str(python), "-m", "pytest", "-q", "-s", str(CASE), "--tb=short"]
     result = subprocess.call(command, cwd=API, env=env)
-    if result or args.workspaces != 100:
+    if result:
         return result
+    output = args.output.resolve()
+    if not output.is_file():
+        parser.error("benchmark produced no observations; collection is not verification")
+    observed = json.loads(output.read_text(encoding="utf-8"))
+    observed["schema"] = "buyeros.t29-benchmark.v1"
+    observed["provenance"] = provenance(ROOT, [Path(__file__).resolve(), CASE, API / "tools/quality_metrics.py"])
+    observed["evidence_mode"] = "owned_disposable_fixture"
+    observed["live_verified"] = False
+    output.write_text(json.dumps(observed, indent=2), encoding="utf-8")
+    if args.workspaces != 100:
+        return 0
     worker = ROOT / "services" / "worker"
     worker_python = worker / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
     if not worker_python.is_file():
