@@ -1,0 +1,33 @@
+{
+  "docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK": {
+    "payloads": 66,
+    "exact_bytes_and_sha256": true,
+    "unchanged_from_parent": true
+  },
+  "docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL": {
+    "payloads": 150,
+    "exact_bytes_and_sha256": true,
+    "unchanged_from_parent": true
+  },
+  "docs/buyeros/inputs/audit-20261003": {
+    "payloads": 31,
+    "exact_bytes_and_sha256": true,
+    "unchanged_from_parent": true
+  },
+  "services/api/tests/conftest.py": {
+    "sha256": "7e12ffa4afc3b20694eac4f62d91c840a7c5e3651e4550ddc142497b88001e46",
+    "unchanged_from_parent": true
+  },
+  "services/worker/tests/conftest.py": {
+    "sha256": "493ca1b9fed272e081ae32f75cbd5faf78ae00edbb72ad674fe12be9ccb47980",
+    "unchanged_from_parent": true
+  },
+  "services/api/tools/serve_e2e_fixture.py": {
+    "sha256": "9fd9419d1ea5832e2cf64af3e4e600d48c1b80a822a101a492c06e74d78e2a6b",
+    "unchanged_from_parent": true
+  },
+  "services/worker/tests/fixtures/run_browser_research.py": {
+    "sha256": "b313473a3827155faae7b4e6b89160c0a092a8c762edeb344714cecc4dc657b4",
+    "unchanged_from_parent": true
+  }
+}

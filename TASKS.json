@@ -22,11 +22,11 @@
     {
       "id": "N00",
       "status": "local-spike-partial",
-      "code_status": "local callback middleware/verifier fixture implemented; no auth cutover",
-      "verification_status": "32 Node pass0skip;2 clean build exits0;each actual UI4pass1fail0skip;new2callback cases pass;real Neon not run;prior Auth0API34 carried, not rerun",
+      "code_status": "local callback fixture plus separate real-target preflight/journal/env/cleanup-plan component; no auth cutover",
+      "verification_status": "fresh relatedNode68pass0fail0skip (36new);types/lint0;prior builtUIeach4pass1fail0skip carried;no actual Neon/runtime config proof",
       "release_status": "not-deployed; Auth0 retained",
       "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
-      "source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+      "source_sha": "ef0b4373fa6e4e6ca5db603d949062bec688f14b",
       "finding_ids": [
         "F20"
       ],
@@ -39,7 +39,9 @@
           "pass": 32,
           "fail": 0,
           "skip": 0,
-          "duration_ms": 13197.2273
+          "duration_ms": 13197.2273,
+          "executed_this_followup": false,
+          "source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d"
         },
         "built_ui": {
           "portable": {
@@ -51,7 +53,9 @@
             "time": "57.528115",
             "failing": [
               "NA01 fixture: callback response preserves host cookies and redirect"
-            ]
+            ],
+            "executed_this_followup": false,
+            "source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d"
           },
           "vercel": {
             "cases": 5,
@@ -62,7 +66,9 @@
             "time": "19.821048",
             "failing": [
               "NA01 fixture: callback response preserves host cookies and redirect"
-            ]
+            ],
+            "executed_this_followup": false,
+            "source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d"
           }
         },
         "new_callback_cases": {
@@ -80,11 +86,28 @@
           "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6"
         },
         "types_exit": 0,
-        "lint_exit": 0
+        "lint_exit": 0,
+        "real_preflight": {
+          "related_node": {
+            "tests": 68,
+            "pass": 68,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 10003.4381
+          },
+          "new_cases": 36,
+          "types_exit": 0,
+          "lint_exit": 0,
+          "external_requests": 0,
+          "built_runtime_verified": false,
+          "no_external_executor": true
+        }
       },
       "migrations": "none;0037 unchanged",
-      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/RESULTS.md",
-      "rollback": "reverse patch check0 only; revert2fd84ef and checkpoint metadata; no DB undo",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_PREFLIGHT/RESULTS.md",
+      "rollback": "revert ef0b437 and this metadata checkpoint; reverse check0 only; no DB/resource undo",
       "limits": [
         "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
         "No Vercel ingress/protection/binding/deployment verification",
@@ -93,7 +116,7 @@
         "No live performance/SLA/UAT claim"
       ],
       "full_gate_passed": false,
-      "next_action": "N00 specifically approved fresh isolated real Neon account/method/built roundtrip; retained synthetic302 characterization is failing"
+      "next_action": "N00 local real-runtime/accounting wiring; specifically approved fresh isolated target/test identity required for actual readbacks and auth roundtrip"
     },
     {
       "id": "N01",
@@ -727,7 +750,7 @@
     "N00 approved isolated actual auth roundtrip; callback fixture covered, synthetic characterization red",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+  "reviewed_source_sha": "ef0b4373fa6e4e6ca5db603d949062bec688f14b",
   "deployed_sha": null,
   "selected_followups": [
     "U05",

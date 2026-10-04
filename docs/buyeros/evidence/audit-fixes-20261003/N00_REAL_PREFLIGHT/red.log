@@ -1,0 +1,256 @@
+✖ real target requires observed exact identifiers and explicit Ed25519 trust (1.5827ms)
+✖ template has null target and trust values and check denies it without a network call (183.5449ms)
+✔ real preflight denies production project (0.4792ms)
+✔ real preflight denies existing Cloudflare preview (0.3415ms)
+✔ real preflight denies different owner (0.1429ms)
+✔ real preflight denies cloned data (0.1117ms)
+✔ real preflight denies unmatched branch readback (0.1271ms)
+✔ real preflight denies missing audience (1.3816ms)
+✔ real preflight denies Auth0 RSA algorithm (0.3742ms)
+✔ real preflight denies wrong key curve (0.4506ms)
+✔ real preflight denies email enabled (0.2703ms)
+✔ real preflight denies email registration (0.2664ms)
+✔ real preflight denies email hook (0.1984ms)
+✔ real preflight denies paid plan (0.1873ms)
+✔ real preflight denies wildcard trusted domain (0.1273ms)
+✔ real preflight denies unknown config or DSN (0.1228ms)
+✔ real preflight denies credential URL (0.1266ms)
+✔ real preflight denies loopback masquerading as real (0.0928ms)
+✔ real preflight denies unreviewed JWKS host (0.1045ms)
+✔ real preflight denies extended expiry (0.0811ms)
+✔ real preflight denies future creation (0.0914ms)
+✖ expiry blocks new runtime configuration while exact cleanup remains available (2.2441ms)
+✖ runtime secrets and explicit trust never enter build env or inherit DB/provider config (0.3542ms)
+✖ journal cannot be created without an explicit authorization reference or overwrite an earlier run (2.2613ms)
+✖ setup before target creation and failed requests consume the same persistent budget (1.4913ms)
+✖ lost response is reserved before execution, survives restart and cannot be blindly retried (1.5324ms)
+✖ 180 probes reserve 20 cleanup/reconcile checks and hard cap is 200 including errors (1.4532ms)
+✖ target binding is immutable across process restarts and IDs cannot be repointed (1.2762ms)
+✖ two build reservations are bounded to 20 minutes and remain consumed on restart (1.0868ms)
+✖ cleanup needs fresh matching readback and may select only one bound test identity (1.2119ms)
+✖ unknown outcomes and suspicious operation metadata do not leak bearer, query or credential data to journal (1.3231ms)
+✖ a concurrent writer or corrupt journal fails closed without resetting counters (1.3351ms)
+✖ ledger tampering with limits or target fingerprint fails before cleanup or a new reservation (1.5939ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 19
+ℹ fail 14
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 440.532
+
+✖ failing tests:
+
+test at tests\neon-real-preflight.test.mjs:23:1
+✖ real target requires observed exact identifiers and explicit Ed25519 trust (1.5827ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at validateRealTarget (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:2:45)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:24:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17)
+
+test at tests\neon-real-preflight.test.mjs:27:1
+✖ template has null target and trust values and check denies it without a network call (183.5449ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:29:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-real-preflight.test.mjs:56:1
+✖ expiry blocks new runtime configuration while exact cleanup remains available (2.2441ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at RealRunJournal.create (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:7:25)
+      at journal (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:20:76)
+      at bound (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:21:31)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:57:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-preflight.test.mjs:64:1
+✖ runtime secrets and explicit trust never enter build env or inherit DB/provider config (0.3542ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at realRuntimeEnvironment (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:3:49)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:66:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-preflight.test.mjs:72:1
+✖ journal cannot be created without an explicit authorization reference or overwrite an earlier run (2.2613ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /AUTHORIZATION/. Input:
+  
+  'Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:73:31)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+        at RealRunJournal.create (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:7:25)
+        at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:73:57
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:73:31)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12),
+    expected: /AUTHORIZATION/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests\neon-real-preflight.test.mjs:76:1
+✖ setup before target creation and failed requests consume the same persistent budget (1.4913ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at RealRunJournal.create (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:7:25)
+      at journal (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:20:76)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:77:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-preflight.test.mjs:84:1
+✖ lost response is reserved before execution, survives restart and cannot be blindly retried (1.5324ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at RealRunJournal.create (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:7:25)
+      at journal (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:20:76)
+      at bound (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:21:31)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:85:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-preflight.test.mjs:91:1
+✖ 180 probes reserve 20 cleanup/reconcile checks and hard cap is 200 including errors (1.4532ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at RealRunJournal.create (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:7:25)
+      at journal (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:20:76)
+      at bound (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:21:31)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:92:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-preflight.test.mjs:97:1
+✖ target binding is immutable across process restarts and IDs cannot be repointed (1.2762ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at RealRunJournal.create (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:7:25)
+      at journal (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:20:76)
+      at bound (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:21:31)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:98:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-preflight.test.mjs:102:1
+✖ two build reservations are bounded to 20 minutes and remain consumed on restart (1.0868ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at RealRunJournal.create (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:7:25)
+      at journal (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:20:76)
+      at bound (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:21:31)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:103:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-preflight.test.mjs:106:1
+✖ cleanup needs fresh matching readback and may select only one bound test identity (1.2119ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at RealRunJournal.create (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:7:25)
+      at journal (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:20:76)
+      at bound (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:21:31)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:107:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-preflight.test.mjs:114:1
+✖ unknown outcomes and suspicious operation metadata do not leak bearer, query or credential data to journal (1.3231ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at RealRunJournal.create (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:7:25)
+      at journal (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:20:76)
+      at bound (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:21:31)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:115:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-preflight.test.mjs:120:1
+✖ a concurrent writer or corrupt journal fails closed without resetting counters (1.3351ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at RealRunJournal.create (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:7:25)
+      at journal (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:20:76)
+      at bound (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:21:31)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:121:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at tests\neon-real-preflight.test.mjs:125:1
+✖ ledger tampering with limits or target fingerprint fails before cleanup or a new reservation (1.5939ms)
+  Error: N00_REAL_PREFLIGHT_NOT_IMPLEMENTED
+      at RealRunJournal.create (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-real-preflight.mjs:7:25)
+      at journal (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:20:76)
+      at bound (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:21:31)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:126:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)

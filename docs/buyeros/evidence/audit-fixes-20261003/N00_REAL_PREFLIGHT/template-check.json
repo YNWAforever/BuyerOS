@@ -1,0 +1,6 @@
+{
+  "exit": 1,
+  "expected_exit": 1,
+  "expected_reason": "N00_REAL_TARGET_REQUIRED",
+  "external_requests": 0
+}

@@ -1,0 +1,59 @@
+{
+  "task": "N00",
+  "finding": "F20",
+  "case": "NA01",
+  "phase": "local-real-preflight-component",
+  "base_sha": "d48cba24ce6f2afc8b792ba1f65e5b93239902cc",
+  "reviewed_source_sha": "ef0b4373fa6e4e6ca5db603d949062bec688f14b",
+  "review_type": "author-only; independent pending; no agents per user",
+  "deployed_sha": null,
+  "checks": {
+    "related_node": {
+      "tests": 68,
+      "pass": 68,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0,
+      "duration_ms": 10003.4381
+    },
+    "new_preflight_cases_in_related": 36,
+    "types_exit": 0,
+    "focused_lint_exit": 0,
+    "alembic_exit": 0,
+    "head": "0037_bulk_manifests",
+    "migrations": 0,
+    "reverse_patch_check_exit": 0,
+    "template_check_exit": 1,
+    "template_check_is_expected_denial": true,
+    "source_diff_check_exit": 0,
+    "authored_metadata_diff_check_exit": 0,
+    "full_staged_diff_check_exit": 2
+  },
+  "external_requests": 0,
+  "external_accounts_created": 0,
+  "production_changes": 0,
+  "actual_builds_this_turn": 0,
+  "ui_suites_executed_this_turn": 0,
+  "required_db_tests_for_slice": false,
+  "db_tests_skipped": 0,
+  "full_N00_gate_passed": false,
+  "carried_built_fixture": {
+    "source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+    "portable": {
+      "cases": 5,
+      "pass": 4,
+      "fail": 1,
+      "skip": 0
+    },
+    "vercel": {
+      "cases": 5,
+      "pass": 4,
+      "fail": 1,
+      "skip": 0
+    },
+    "rerun_this_turn": false
+  },
+  "next_local_work": "Wire a separate real-only overlay/diagnostic and count every SDK/browser/CLI HTTP path; actual built runtime config proof still open",
+  "external_boundary": "Fresh exact proposal approval required before new empty project/Auth/test identity; old approvals expired; no approval record generated"
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "docs/buyeros/runbooks/neon-auth-n00-real-roundtrip-20261004.md",
+    "tested_worktree_sha256": "4b91bb31ff3290f39a089d1decb3b36b6d47a5428a94795c0ccd021f3859858e",
+    "committed_blob_sha256": "4b91bb31ff3290f39a089d1decb3b36b6d47a5428a94795c0ccd021f3859858e"
+  },
+  {
+    "path": "docs/buyeros/runbooks/neon-auth-n00-real-target.template.json",
+    "tested_worktree_sha256": "f88b8b3702edea2a21b62e4ce09a5a14c39d5fd23cafa1951161ae91815733f9",
+    "committed_blob_sha256": "f88b8b3702edea2a21b62e4ce09a5a14c39d5fd23cafa1951161ae91815733f9"
+  },
+  {
+    "path": "scripts/neon-real-preflight.mjs",
+    "tested_worktree_sha256": "4b42e773196c2be33ec5ed1bc158a471f0d42cf399ead300ff776bac09f96681",
+    "committed_blob_sha256": "4b42e773196c2be33ec5ed1bc158a471f0d42cf399ead300ff776bac09f96681"
+  },
+  {
+    "path": "tests/neon-real-preflight.test.mjs",
+    "tested_worktree_sha256": "24bba21b9af545817e7b51953431f0ec82108471f39df90890a683af50fd4fd5",
+    "committed_blob_sha256": "24bba21b9af545817e7b51953431f0ec82108471f39df90890a683af50fd4fd5"
+  }
+]

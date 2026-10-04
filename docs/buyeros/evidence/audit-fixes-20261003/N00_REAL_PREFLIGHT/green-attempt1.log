@@ -1,0 +1,61 @@
+✔ real target requires observed exact identifiers and explicit Ed25519 trust (5.0245ms)
+✔ template has null target and trust values and check denies it without a network call (95.6446ms)
+✔ real preflight denies production project (0.5176ms)
+✔ real preflight denies existing Cloudflare preview (0.1907ms)
+✔ real preflight denies different owner (0.2009ms)
+✔ real preflight denies cloned data (0.1471ms)
+✔ real preflight denies unmatched branch readback (0.2837ms)
+✔ real preflight denies missing audience (0.3144ms)
+✔ real preflight denies Auth0 RSA algorithm (0.3376ms)
+✔ real preflight denies wrong key curve (0.3467ms)
+✔ real preflight denies email enabled (0.2352ms)
+✔ real preflight denies email registration (0.1535ms)
+✔ real preflight denies email hook (0.1598ms)
+✔ real preflight denies paid plan (0.1825ms)
+✔ real preflight denies wildcard trusted domain (0.1811ms)
+✔ real preflight denies unknown config or DSN (0.2351ms)
+✔ real preflight denies credential URL (0.1856ms)
+✔ real preflight denies loopback masquerading as real (0.1423ms)
+✔ real preflight denies unreviewed JWKS host (0.2042ms)
+✔ real preflight denies extended expiry (0.2135ms)
+✔ real preflight denies future creation (0.1848ms)
+✔ expiry blocks new runtime configuration while exact cleanup remains available (31.4973ms)
+✔ runtime secrets and explicit trust never enter build env or inherit DB/provider config (1.246ms)
+✔ journal cannot be created without an explicit authorization reference or overwrite an earlier run (8.2875ms)
+✔ setup before target creation and failed requests consume the same persistent budget (52.2415ms)
+✔ lost response is reserved before execution, survives restart and cannot be blindly retried (41.8934ms)
+✔ 180 probes reserve 20 cleanup/reconcile checks and hard cap is 200 including errors (1491.4627ms)
+✔ target binding is immutable across process restarts and IDs cannot be repointed (22.3817ms)
+✔ two build reservations are bounded to 20 minutes and remain consumed on restart (24.9294ms)
+✔ cleanup needs fresh matching readback and may select only one bound test identity (27.2428ms)
+✔ unknown outcomes and suspicious operation metadata do not leak bearer, query or credential data to journal (18.8623ms)
+✖ a concurrent writer or corrupt journal fails closed without resetting counters (22.1725ms)
+✔ ledger tampering with limits or target fingerprint fails before cleanup or a new reservation (19.2839ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 32
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2005.149
+
+✖ failing tests:
+
+test at tests\neon-real-preflight.test.mjs:120:1
+✖ a concurrent writer or corrupt journal fails closed without resetting counters (22.1725ms)
+  SystemError [ERR_FS_EISDIR]: Path is a directory: rm returned EISDIR (is a directory) C:\Users\laich\AppData\Local\Temp\buyeros-n00-real-a6JIEj\journal.lock
+      at rmSync (node:fs:1221:16)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:123:2)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ERR_FS_EISDIR',
+    info: { code: 'EISDIR', message: 'is a directory', path: 'C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-a6JIEj\\journal.lock', syscall: 'rm', errno: 21 },
+    errno: 21,
+    syscall: 'rm',
+    path: 'C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-a6JIEj\\journal.lock'
+  }

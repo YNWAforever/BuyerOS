@@ -1,0 +1,12 @@
+{
+  "source_sha": "ef0b4373fa6e4e6ca5db603d949062bec688f14b",
+  "source_base": "d48cba24ce6f2afc8b792ba1f65e5b93239902cc",
+  "source_files": 4,
+  "patch": "source.patch.gz",
+  "uncompressed_patch_sha256": "a6a0218a949745bbd079b169ef17976a2ca66d0f7c0aa51b92d9b838b9f1f85c",
+  "reverse_check_exit": 0,
+  "revert_command": "git revert ef0b4373fa6e4e6ca5db603d949062bec688f14b",
+  "applied": false,
+  "database_undo": "none",
+  "external_resources_created": 0
+}

@@ -1,0 +1,81 @@
+✔ real target requires observed exact identifiers and explicit Ed25519 trust (4.7161ms)
+✔ template has null target and trust values and check denies it without a network call (217.7536ms)
+✔ real preflight denies production project (0.5567ms)
+✔ real preflight denies existing Cloudflare preview (0.2329ms)
+✔ real preflight denies different owner (0.242ms)
+✔ real preflight denies cloned data (0.3014ms)
+✔ real preflight denies unmatched branch readback (0.3183ms)
+✔ real preflight denies missing audience (0.3484ms)
+✔ real preflight denies Auth0 RSA algorithm (0.2997ms)
+✔ real preflight denies wrong key curve (0.4132ms)
+✔ real preflight denies email enabled (0.1994ms)
+✔ real preflight denies email registration (0.1659ms)
+✔ real preflight denies email hook (0.1651ms)
+✔ real preflight denies paid plan (0.1182ms)
+✔ real preflight denies wildcard trusted domain (0.1914ms)
+✔ real preflight denies unknown config or DSN (0.1086ms)
+✔ real preflight denies credential URL (0.1466ms)
+✔ real preflight denies loopback masquerading as real (0.1515ms)
+✔ real preflight denies unreviewed JWKS host (0.1893ms)
+✔ real preflight denies extended expiry (0.1523ms)
+✔ real preflight denies future creation (0.1327ms)
+✔ expiry blocks new runtime configuration while exact cleanup remains available (33.6643ms)
+✔ runtime secrets and explicit trust never enter build env or inherit DB/provider config (0.9835ms)
+✔ journal cannot be created without an explicit authorization reference or overwrite an earlier run (8.4335ms)
+✔ setup before target creation and failed requests consume the same persistent budget (60.3826ms)
+✔ lost response is reserved before execution, survives restart and cannot be blindly retried (40.3794ms)
+✔ 180 probes reserve 20 cleanup/reconcile checks and hard cap is 200 including errors (3018.7937ms)
+✔ target binding is immutable across process restarts and IDs cannot be repointed (47.7402ms)
+✔ two build reservations are bounded to 20 minutes and remain consumed on restart (53.8458ms)
+✔ cleanup needs fresh matching readback and may select only one bound test identity (72.5996ms)
+✔ unknown outcomes and suspicious operation metadata do not leak bearer, query or credential data to journal (117.0232ms)
+✔ a concurrent writer or corrupt journal fails closed without resetting counters (147.3671ms)
+✔ ledger tampering with limits or target fingerprint fails before cleanup or a new reservation (111.3611ms)
+✖ persisted settled results need evidence and probe reservations cannot exceed the original expiry (80.375ms)
+✖ build deadline cannot exceed resource TTL and persisted build sequence cannot be forged (34.5689ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 33
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4399.6823
+
+✖ failing tests:
+
+test at tests\neon-real-preflight.test.mjs:132:1
+✖ persisted settled results need evidence and probe reservations cannot exceed the original expiry (80.375ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:134:127)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /JOURNAL_REQUEST/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests\neon-real-preflight.test.mjs:137:1
+✖ build deadline cannot exceed resource TTL and persisted build sequence cannot be forged (34.5689ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-real-preflight.test.mjs:140:114)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /BUILD_SCOPE/,
+    operator: 'throws',
+    diff: 'simple'
+  }

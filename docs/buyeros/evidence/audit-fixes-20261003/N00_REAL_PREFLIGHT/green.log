@@ -1,0 +1,43 @@
+✔ real target requires observed exact identifiers and explicit Ed25519 trust (9.2144ms)
+✔ template has null target and trust values and check denies it without a network call (1136.9821ms)
+✔ real preflight denies production project (0.5998ms)
+✔ real preflight denies existing Cloudflare preview (0.2118ms)
+✔ real preflight denies different owner (0.2078ms)
+✔ real preflight denies cloned data (0.1544ms)
+✔ real preflight denies unmatched branch readback (0.2649ms)
+✔ real preflight denies missing audience (0.3119ms)
+✔ real preflight denies Auth0 RSA algorithm (0.3136ms)
+✔ real preflight denies wrong key curve (0.613ms)
+✔ real preflight denies email enabled (0.5477ms)
+✔ real preflight denies email registration (0.224ms)
+✔ real preflight denies email hook (0.1654ms)
+✔ real preflight denies paid plan (0.137ms)
+✔ real preflight denies wildcard trusted domain (0.1698ms)
+✔ real preflight denies unknown config or DSN (0.2111ms)
+✔ real preflight denies credential URL (65.0635ms)
+✔ real preflight denies loopback masquerading as real (0.4576ms)
+✔ real preflight denies unreviewed JWKS host (0.2442ms)
+✔ real preflight denies extended expiry (2.0544ms)
+✔ real preflight denies future creation (27.8373ms)
+✔ expiry blocks new runtime configuration while exact cleanup remains available (184.4505ms)
+✔ runtime secrets and explicit trust never enter build env or inherit DB/provider config (2.7465ms)
+✔ journal cannot be created without an explicit authorization reference or overwrite an earlier run (23.2456ms)
+✔ setup before target creation and failed requests consume the same persistent budget (426.2402ms)
+✔ lost response is reserved before execution, survives restart and cannot be blindly retried (322.8613ms)
+✔ 180 probes reserve 20 cleanup/reconcile checks and hard cap is 200 including errors (13117.2107ms)
+✔ target binding is immutable across process restarts and IDs cannot be repointed (724.3502ms)
+✔ two build reservations are bounded to 20 minutes and remain consumed on restart (88.1345ms)
+✔ cleanup needs fresh matching readback and may select only one bound test identity (243.8823ms)
+✔ unknown outcomes and suspicious operation metadata do not leak bearer, query or credential data to journal (133.0574ms)
+✔ a concurrent writer or corrupt journal fails closed without resetting counters (167.1115ms)
+✔ ledger tampering with limits or target fingerprint fails before cleanup or a new reservation (186.8007ms)
+✔ persisted settled results need evidence and probe reservations cannot exceed the original expiry (218.4563ms)
+✔ build deadline cannot exceed resource TTL and persisted build sequence cannot be forged (246.8874ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20553.2656

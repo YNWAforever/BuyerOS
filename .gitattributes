@@ -22,3 +22,6 @@ docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL/** -text whitespace=cr-at-e
 
 # Preserve N00 callback producer evidence byte-for-byte.
 docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/** -text whitespace=cr-at-eol
+
+# Preserve N00 real-preflight producer reports byte-for-byte.
+docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_PREFLIGHT/** -text whitespace=cr-at-eol

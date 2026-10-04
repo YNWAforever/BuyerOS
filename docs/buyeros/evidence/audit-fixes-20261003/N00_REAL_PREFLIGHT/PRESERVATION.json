@@ -1,0 +1,12 @@
+{
+  "other_tasks_unchanged": 24,
+  "cases": 98,
+  "other_cases_unchanged": 97,
+  "historical_case_fields_unchanged": 15,
+  "operation_rows_unchanged": 84,
+  "prior_payloads": 247,
+  "four_DB_guards_unchanged": true,
+  "legacy_T_registry_unchanged": true,
+  "new_target_ids_null": true,
+  "real_approval_record_generated": false
+}
