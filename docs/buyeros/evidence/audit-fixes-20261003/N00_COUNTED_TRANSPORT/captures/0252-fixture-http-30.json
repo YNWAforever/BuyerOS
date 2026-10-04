@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "fixture_only": true,
+  "sequence": 30,
+  "method": "POST",
+  "path": "/fixture/auth/sign-in/social",
+  "fingerprint": "0e4856021eb08540bbb151dcdf6b8675bc117e5d9e62b02e47d12525bbf14560",
+  "status": 200,
+  "reason": "upstream-response",
+  "outcome": "accepted"
+}

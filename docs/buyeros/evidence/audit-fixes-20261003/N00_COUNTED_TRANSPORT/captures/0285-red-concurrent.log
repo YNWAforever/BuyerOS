@@ -1,0 +1,38 @@
+✔ proxy refuses arbitrary URLs, unowned servers and unbound journals before any request (386.271ms)
+✔ HTTP reservation is durable and pending before the owned backend receives the request (86.485ms)
+✔ SDK origin, session/challenge cookies and JWT headers survive relay without entering evidence (60.8739ms)
+✔ approved local callback302 is preserved manually, and an external redirect is blocked (364.6837ms)
+✔ committed POST with a lost response is not replayed after proxy and journal restart (155.8597ms)
+✔ budget exhaustion refuses dispatch and keeps cleanup reserve after restart (2530.1677ms)
+✔ expired target and over-size body fail closed without dispatching upstream (242.0235ms)
+✔ POST server500 retains an unknown write and timeout is bounded without automatic retry (293.4093ms)
+✔ read-only fixture budget inspection exposes counts without auth traffic or credential data (35.2529ms)
+✖ concurrent identical fixture POSTs share the in-flight barrier before upstream acceptance is known (170.4951ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5221.301
+
+✖ failing tests:
+
+test at tests\neon-counted-proxy.test.mjs:77:1
+✖ concurrent identical fixture POSTs share the in-flight barrier before upstream acceptance is known (170.4951ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 409
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-counted-proxy.test.mjs:81:82)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 409,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

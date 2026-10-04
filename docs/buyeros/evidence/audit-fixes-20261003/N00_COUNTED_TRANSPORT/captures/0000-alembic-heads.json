@@ -1,0 +1,1 @@
+{"command":"services/api/.venv/Scripts/python.exe -m alembic heads","cwd":"services/api","exit":0,"database_connections":0,"migrations":0,"stdout":"0037_bulk_manifests (head)"}

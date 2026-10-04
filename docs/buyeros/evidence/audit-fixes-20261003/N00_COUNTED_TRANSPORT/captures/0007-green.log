@@ -1,0 +1,16 @@
+✔ proxy refuses arbitrary URLs, unowned servers and unbound journals before any request (47.8912ms)
+✔ HTTP reservation is durable and pending before the owned backend receives the request (77.172ms)
+✔ SDK origin, session/challenge cookies and JWT headers survive relay without entering evidence (38.9085ms)
+✔ approved local callback302 is preserved manually, and an external redirect is blocked (53.1755ms)
+✔ committed POST with a lost response is not replayed after proxy and journal restart (89.5866ms)
+✔ budget exhaustion refuses dispatch and keeps cleanup reserve after restart (2037.4781ms)
+✔ expired target and over-size body fail closed without dispatching upstream (67.4868ms)
+✔ POST server500 retains an unknown write and timeout is bounded without automatic retry (131.2558ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2690.0149

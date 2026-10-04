@@ -1,0 +1,112 @@
+{
+  "task": "N00",
+  "finding": "F20",
+  "case": "NA01",
+  "phase": "local-owned-counted-SDK-transport",
+  "base_sha": "a94bdf4951a1fcf418df828fee15ac01baae9ba6",
+  "reviewed_source_sha": "261a9e51d9d038c68be1d0d67002fcbe6e1eff6c",
+  "review_type": "author-only; independent pending; no agents per user",
+  "deployed_sha": null,
+  "checks": {
+    "related_node": {
+      "tests": 80,
+      "pass": 80,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0,
+      "duration_ms": 9064.3264
+    },
+    "new_HTTP_cases": 11,
+    "new_discovery_cases": 1,
+    "new_built_cases_per_target": 2,
+    "built_ui": {
+      "portable": {
+        "cases": 7,
+        "pass": 6,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "time": "23.084738",
+        "cli_exit": 1,
+        "failing": [
+          "NA01 fixture: callback response preserves host cookies and redirect"
+        ],
+        "executed_this_followup": true,
+        "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+        "fixture_only": true
+      },
+      "vercel": {
+        "cases": 7,
+        "pass": 6,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "time": "12.189678",
+        "cli_exit": 1,
+        "failing": [
+          "NA01 fixture: callback response preserves host cookies and redirect"
+        ],
+        "executed_this_followup": true,
+        "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+        "fixture_only": true
+      }
+    },
+    "types_exit": 0,
+    "focused_lint_exit": 0,
+    "contract_generation_exit": 0,
+    "alembic_exit": 0,
+    "head": "0037_bulk_manifests",
+    "migrations": 0,
+    "reverse_patch_check_exit": 0,
+    "source_diff_check_exit": 0,
+    "authored_metadata_diff_check_exit": 0,
+    "full_staged_diff_check_exit": 2,
+    "full_staged_raw_producer_whitespace_reports": 100
+  },
+  "fixture_budgets": {
+    "portable": {
+      "fixture_only": true,
+      "reserved": 44,
+      "forwarded": 44,
+      "accepted": 41,
+      "rejected": 3,
+      "pending": 0,
+      "unknown": 0,
+      "owned_children_absent": true,
+      "owned_journal_removed": true,
+      "real_configuration_verified": false,
+      "external_requests": 0,
+      "run_nonce": "3c8f7aa30db0"
+    },
+    "vercel": {
+      "fixture_only": true,
+      "reserved": 44,
+      "forwarded": 44,
+      "accepted": 41,
+      "rejected": 3,
+      "pending": 0,
+      "unknown": 0,
+      "owned_children_absent": true,
+      "owned_journal_removed": true,
+      "real_configuration_verified": false,
+      "external_requests": 0,
+      "run_nonce": "c5245a954fcb"
+    }
+  },
+  "external_requests": 0,
+  "external_accounts_created": 0,
+  "production_changes": 0,
+  "actual_builds_this_turn": 0,
+  "reused_emitted_files_verified": {
+    "portable": 89,
+    "vercel": 2214
+  },
+  "required_db_tests_for_slice": false,
+  "db_tests_skipped": 0,
+  "full_N00_gate_passed": false,
+  "real_runtime_configuration_verified": false,
+  "fresh_external_approval": "pending; no approval record generated",
+  "next_local_work": "Real-only overlay/runtime config wiring and complete SDK/browser/CLI accounting design; no target created",
+  "external_boundary": "Exact fresh empty Neon/Auth plus one human Google test identity proposal requires specific approval; prior expired approvals not reused"
+}

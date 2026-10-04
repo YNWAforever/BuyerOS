@@ -1,0 +1,37 @@
+{
+  "immutable_groups": [
+    {
+      "folder": "docs/buyeros/inputs/audit-20261003",
+      "unchanged_payloads": 31
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_LOCAL",
+      "unchanged_payloads": 150
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK",
+      "unchanged_payloads": 66
+    },
+    {
+      "folder": "docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_PREFLIGHT",
+      "unchanged_payloads": 23
+    }
+  ],
+  "prior_payloads": 270,
+  "four_DB_guards_unchanged": true,
+  "generated_contract_unchanged": true,
+  "operation_rows_unchanged": 84,
+  "master_plan_bytes_unchanged_after_Git_newline_normalization": true,
+  "other_tasks_unchanged": 24,
+  "other_cases_unchanged": 97,
+  "cases": 98,
+  "historical_case_fields_unchanged": 15,
+  "legacy_T_registry_unchanged_except_additive_auth_checkpoint": true,
+  "real_approval_record_generated": false,
+  "new_target_ids_null": true,
+  "compiled_overlay_hashes_unchanged": 9,
+  "reused_emitted_members": {
+    "portable": 89,
+    "vercel": 2214
+  }
+}

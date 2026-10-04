@@ -1,0 +1,19 @@
+✔ proxy refuses arbitrary URLs, unowned servers and unbound journals before any request (84.1678ms)
+✔ HTTP reservation is durable and pending before the owned backend receives the request (128.6756ms)
+✔ SDK origin, session/challenge cookies and JWT headers survive relay without entering evidence (96.462ms)
+✔ approved local callback302 is preserved manually, and an external redirect is blocked (105.7323ms)
+✔ committed POST with a lost response is not replayed after proxy and journal restart (118.9231ms)
+✔ budget exhaustion refuses dispatch and keeps cleanup reserve after restart (1689.2013ms)
+✔ expired target and over-size body fail closed without dispatching upstream (44.8841ms)
+✔ POST server500 retains an unknown write and timeout is bounded without automatic retry (133.4319ms)
+✔ read-only fixture budget inspection exposes counts without auth traffic or credential data (24.4872ms)
+✔ concurrent identical fixture POSTs share the in-flight barrier before upstream acceptance is known (52.8431ms)
+✔ fixture cleanup control requires the exact local owner nonce and never forwards to backend (24.6445ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2718.8884

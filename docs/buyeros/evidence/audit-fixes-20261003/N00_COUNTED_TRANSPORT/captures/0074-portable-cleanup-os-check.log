@@ -1,0 +1,15 @@
+[WebServer] (node:28800) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] INFO:     Started server process [10244]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+
+Running 2 tests using 1 worker
+
+(node:6016) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-compat.spec.ts:91:1 › NA01 counted fixture: built SDK get-session reserves one actual upstream HTTP request (83ms)
+  ok 2 tests\e2e\audit-neon-compat.spec.ts:98:1 › NA01 counted fixture: built SDK negative login is charged and returns the real fixture401 (57ms)
+
+  2 passed (11.6s)

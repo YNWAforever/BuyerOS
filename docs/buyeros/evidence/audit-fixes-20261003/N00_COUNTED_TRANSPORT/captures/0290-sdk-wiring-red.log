@@ -1,0 +1,72 @@
+[WebServer] (node:49752) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] INFO:     Started server process [45788]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+
+Running 2 tests using 1 worker
+
+(node:38216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\e2e\audit-neon-compat.spec.ts:91:1 › NA01 counted fixture: built SDK get-session reserves one actual upstream HTTP request (578ms)
+(node:44888) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 tests\e2e\audit-neon-compat.spec.ts:98:1 › NA01 counted fixture: built SDK negative login is charged and returns the real fixture401 (390ms)
+
+
+  1) tests\e2e\audit-neon-compat.spec.ts:91:1 › NA01 counted fixture: built SDK get-session reserves one actual upstream HTTP request 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+      90 |
+      91 | test('NA01 counted fixture: built SDK get-session reserves one actual upstream HTTP request',async({request})=>{
+    > 92 |  const beforeResponse=await request.get('http://127.0.0.1:44891/n00-fixture-budget');expect(beforeResponse.status()).toBe(200);
+         |                                                                                                                      ^
+      93 |  const before=await beforeResponse.json();expect(before.fixture_only).toBe(true);
+      94 |  const response=await request.get('/api/auth/get-session');expect(response.status()).toBe(200);
+      95 |  const after=await (await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:92:118
+
+    Error Context: test-results\neon-counted-transport\vercel-ui\audit-neon-compat-NA01-cou-c6098-ctual-upstream-HTTP-request\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-counted-transport\vercel-ui\audit-neon-compat-NA01-cou-c6098-ctual-upstream-HTTP-request\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-counted-transport\vercel-ui\audit-neon-compat-NA01-cou-c6098-ctual-upstream-HTTP-request\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\e2e\audit-neon-compat.spec.ts:98:1 › NA01 counted fixture: built SDK negative login is charged and returns the real fixture401 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+       97 | });
+       98 | test('NA01 counted fixture: built SDK negative login is charged and returns the real fixture401',async({request})=>{
+    >  99 |  const beforeResponse=await request.get('http://127.0.0.1:44891/n00-fixture-budget');expect(beforeResponse.status()).toBe(200);const before=await beforeResponse.json();
+          |                                                                                                                      ^
+      100 |  const response=await request.post('/api/auth/sign-in/email',{data:{email:'unknown@fixture.invalid',password:'fictional-invalid-password'}});expect(response.status()).toBe(401);
+      101 |  const after=await (await request.get('http://127.0.0.1:44891/n00-fixture-budget')).json();
+      102 |  expect(after.reserved).toBe(before.reserved+1);expect(after.forwarded).toBe(before.forwarded+1);expect(after.rejected).toBe(before.rejected+1);expect(after.pending).toBe(0);
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-compat.spec.ts:99:118
+
+    Error Context: test-results\neon-counted-transport\vercel-ui\audit-neon-compat-NA01-cou-7e75e-returns-the-real-fixture401\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-counted-transport\vercel-ui\audit-neon-compat-NA01-cou-7e75e-returns-the-real-fixture401\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-counted-transport\vercel-ui\audit-neon-compat-NA01-cou-7e75e-returns-the-real-fixture401\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    tests\e2e\audit-neon-compat.spec.ts:91:1 › NA01 counted fixture: built SDK get-session reserves one actual upstream HTTP request 
+    tests\e2e\audit-neon-compat.spec.ts:98:1 › NA01 counted fixture: built SDK negative login is charged and returns the real fixture401 

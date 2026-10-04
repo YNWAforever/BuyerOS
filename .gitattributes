@@ -25,3 +25,6 @@ docs/buyeros/evidence/audit-fixes-20261003/N00_CALLBACK/** -text whitespace=cr-a
 
 # Preserve N00 real-preflight producer reports byte-for-byte.
 docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_PREFLIGHT/** -text whitespace=cr-at-eol
+
+# Preserve N00 counted transport producer evidence byte-for-byte.
+docs/buyeros/evidence/audit-fixes-20261003/N00_COUNTED_TRANSPORT/** -text whitespace=cr-at-eol

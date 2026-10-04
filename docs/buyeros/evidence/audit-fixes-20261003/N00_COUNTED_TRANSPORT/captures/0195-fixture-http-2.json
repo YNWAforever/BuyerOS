@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "fixture_only": true,
+  "sequence": 2,
+  "method": "POST",
+  "path": "/fixture/auth/sign-in/email",
+  "fingerprint": "b1203dccfecf953c2613c83d7fdec74f857ca6c1541e5a223273617f293ba0c2",
+  "status": 200,
+  "reason": "upstream-response",
+  "outcome": "accepted"
+}

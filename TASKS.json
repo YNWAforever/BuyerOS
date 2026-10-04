@@ -22,11 +22,11 @@
     {
       "id": "N00",
       "status": "local-spike-partial",
-      "code_status": "local callback fixture plus separate real-target preflight/journal/env/cleanup-plan component; no auth cutover",
-      "verification_status": "fresh relatedNode68pass0fail0skip (36new);types/lint0;prior builtUIeach4pass1fail0skip carried;no actual Neon/runtime config proof",
+      "code_status": "local counted SDK fixture HTTP, persistent pre-reservation/unknown barrier and guarded cleanup; no auth cutover",
+      "verification_status": "fresh Node80pass0fail0skip; each actual builtUI7cases6pass1fail0skip;new counted2pass each;types/lint/contracts0;real Neon/runtime unverified",
       "release_status": "not-deployed; Auth0 retained",
       "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
-      "source_sha": "ef0b4373fa6e4e6ca5db603d949062bec688f14b",
+      "source_sha": "261a9e51d9d038c68be1d0d67002fcbe6e1eff6c",
       "finding_ids": [
         "F20"
       ],
@@ -45,30 +45,34 @@
         },
         "built_ui": {
           "portable": {
-            "cases": 5,
-            "pass": 4,
+            "cases": 7,
+            "pass": 6,
             "fail": 1,
             "error": 0,
             "skip": 0,
-            "time": "57.528115",
+            "time": "23.084738",
+            "cli_exit": 1,
             "failing": [
               "NA01 fixture: callback response preserves host cookies and redirect"
             ],
-            "executed_this_followup": false,
-            "source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d"
+            "executed_this_followup": true,
+            "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+            "fixture_only": true
           },
           "vercel": {
-            "cases": 5,
-            "pass": 4,
+            "cases": 7,
+            "pass": 6,
             "fail": 1,
             "error": 0,
             "skip": 0,
-            "time": "19.821048",
+            "time": "12.189678",
+            "cli_exit": 1,
             "failing": [
               "NA01 fixture: callback response preserves host cookies and redirect"
             ],
-            "executed_this_followup": false,
-            "source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d"
+            "executed_this_followup": true,
+            "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+            "fixture_only": true
           }
         },
         "new_callback_cases": {
@@ -103,11 +107,66 @@
           "external_requests": 0,
           "built_runtime_verified": false,
           "no_external_executor": true
+        },
+        "counted_transport": {
+          "related_node": {
+            "tests": 80,
+            "pass": 80,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 9064.3264
+          },
+          "new_HTTP_cases": 11,
+          "new_discovery_cases": 1,
+          "fixture_budgets": {
+            "portable": {
+              "fixture_only": true,
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_requests": 0,
+              "run_nonce": "3c8f7aa30db0"
+            },
+            "vercel": {
+              "fixture_only": true,
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_requests": 0,
+              "run_nonce": "c5245a954fcb"
+            }
+          },
+          "types_exit": 0,
+          "lint_exit": 0,
+          "contracts_exit": 0,
+          "real_runtime_verified": false,
+          "no_external_executor": true
+        },
+        "new_counted_SDK_cases": {
+          "per_target": 2,
+          "pass": 2,
+          "fail": 0,
+          "skip": 0,
+          "red_observed": true
         }
       },
       "migrations": "none;0037 unchanged",
-      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_REAL_PREFLIGHT/RESULTS.md",
-      "rollback": "revert ef0b437 and this metadata checkpoint; reverse check0 only; no DB/resource undo",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_COUNTED_TRANSPORT/RESULTS.md",
+      "rollback": "revert 261a9e51d9d038c68be1d0d67002fcbe6e1eff6c plus metadata; reverse applicability0 only; no DB/resource undo",
       "limits": [
         "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
         "No Vercel ingress/protection/binding/deployment verification",
@@ -116,7 +175,7 @@
         "No live performance/SLA/UAT claim"
       ],
       "full_gate_passed": false,
-      "next_action": "N00 local real-runtime/accounting wiring; specifically approved fresh isolated target/test identity required for actual readbacks and auth roundtrip"
+      "next_action": "Real-only overlay/runtime config wiring and complete SDK/browser/CLI accounting design; no target created; exact fresh isolated target/test identity approval pending"
     },
     {
       "id": "N01",
@@ -750,7 +809,7 @@
     "N00 approved isolated actual auth roundtrip; callback fixture covered, synthetic characterization red",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "ef0b4373fa6e4e6ca5db603d949062bec688f14b",
+  "reviewed_source_sha": "261a9e51d9d038c68be1d0d67002fcbe6e1eff6c",
   "deployed_sha": null,
   "selected_followups": [
     "U05",

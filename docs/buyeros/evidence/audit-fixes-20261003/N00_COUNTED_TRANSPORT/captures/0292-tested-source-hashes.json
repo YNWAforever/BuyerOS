@@ -1,0 +1,34 @@
+[
+  {
+    "path": "playwright.neon-auth.config.ts",
+    "tested_worktree_sha256": "73f882de59caa83dd6d527dfe1719f251dcc5f49e3158cfe8fee4fb3934c8885"
+  },
+  {
+    "path": "playwright.neon-counted.config.ts",
+    "tested_worktree_sha256": "7c1390ea465ed1ab9ddfa6885cf5d82b0d69e61484b0a6aa4ac8635f8964e9b5"
+  },
+  {
+    "path": "scripts/neon-counted-proxy.mjs",
+    "tested_worktree_sha256": "cbf953094407ef86ec5872c79a79dee4576773ccfd540eeaee3d39e0f724d5c2"
+  },
+  {
+    "path": "scripts/neon-counted-teardown.mjs",
+    "tested_worktree_sha256": "b623cad88229bd4083d31d6105a1484c0b4fe8e4a7484602b1568d374af8ed28"
+  },
+  {
+    "path": "scripts/serve-neon-compatibility.mjs",
+    "tested_worktree_sha256": "6ca698c312d89a2fed73bcc4ed110564145d6befea86550eafc54868c4bc3cbf"
+  },
+  {
+    "path": "tests/neon-counted-proxy.test.mjs",
+    "tested_worktree_sha256": "424e551d471e8a5bf8dd49d3b888f0e1ed0fae73e6515578192c180cdbdf4c39"
+  },
+  {
+    "path": "tests/neon-compatibility-discovery.test.mjs",
+    "tested_worktree_sha256": "be0f505bb3b907d1ca9a223585636b872ea9e78caa2ee4824f524092a84f48e1"
+  },
+  {
+    "path": "tests/e2e/audit-neon-compat.spec.ts",
+    "tested_worktree_sha256": "9504a5b4a42089d3c915d3594cba11e7d408a63de8b1cc93d41243d8a44ceae4"
+  }
+]

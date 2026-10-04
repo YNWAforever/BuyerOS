@@ -1,0 +1,14 @@
+[
+  {
+    "target": "portable",
+    "actual_emitted_files_match_frozen_build": 89,
+    "reviewed_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+    "fresh_build_this_turn": false
+  },
+  {
+    "target": "vercel",
+    "actual_emitted_files_match_frozen_build": 2214,
+    "reviewed_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+    "fresh_build_this_turn": false
+  }
+]

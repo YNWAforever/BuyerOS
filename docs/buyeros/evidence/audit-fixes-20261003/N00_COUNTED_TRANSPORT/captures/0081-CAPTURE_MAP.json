@@ -1,0 +1,26 @@
+[
+  {
+    "source": "test-results\\neon-counted-transport\\portable-final.log",
+    "archive": "001-portable-final.log"
+  },
+  {
+    "source": "test-results\\neon-counted-transport\\portable-ui.xml",
+    "archive": "002-portable-ui.xml"
+  },
+  {
+    "source": "test-results\\neon-counted-transport\\portable-ui\\.last-run.json",
+    "archive": "003-.last-run.json"
+  },
+  {
+    "source": "test-results\\neon-counted-transport\\portable-ui\\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\\error-context.md",
+    "archive": "004-error-context.md"
+  },
+  {
+    "source": "test-results\\neon-counted-transport\\portable-ui\\audit-neon-compat-NA01-fix-36d71-s-host-cookies-and-redirect\\trace.zip",
+    "archive": "005-trace.zip"
+  },
+  {
+    "source": "test-results\\neon-counted-transport\\portable-837e0565b226\\runtime.json",
+    "archive": "006-runtime.json"
+  }
+]

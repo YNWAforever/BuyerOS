@@ -1,0 +1,19 @@
+[WebServer] file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/serve-neon-compatibility.mjs:96
+[WebServer] const children=[];let appServer;
+[WebServer]       ^
+[WebServer] 
+[WebServer] SyntaxError: Identifier 'children' has already been declared
+[WebServer]     at compileSourceTextModule (node:internal/modules/esm/utils:318:16)
+[WebServer]     at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:89:18)
+[WebServer]     at #translate (node:internal/modules/esm/loader:434:20)
+[WebServer]     at afterLoad (node:internal/modules/esm/loader:502:29)
+[WebServer]     at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:507:12)
+[WebServer]     at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:560:36)
+[WebServer]     at afterResolve (node:internal/modules/esm/loader:607:52)
+[WebServer]     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:613:12)
+[WebServer]     at node:internal/modules/esm/loader:632:32
+[WebServer]     at TracingChannel.tracePromise (node:diagnostics_channel:362:14)
+[WebServer] 
+[WebServer] Node.js v24.18.0
+Error: Process from config.webServer was not able to start. Exit code: 1
+

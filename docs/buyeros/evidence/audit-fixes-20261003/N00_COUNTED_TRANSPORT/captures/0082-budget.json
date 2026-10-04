@@ -1,0 +1,35 @@
+{
+  "fixture_only": true,
+  "external_requests": 0,
+  "runner_head_at_execution": "a94bdf4951a1fcf418df828fee15ac01baae9ba6",
+  "compiled_inputs": "test-results/neon-compatibility/build-inputs.json",
+  "metrics": {
+    "received": 2,
+    "forwarded": 2,
+    "locally_rejected": 0,
+    "unknown": 0
+  },
+  "requests": [
+    {
+      "sequence": 1,
+      "purpose": "auth",
+      "operationId": "fixture-http-1",
+      "reservedAt": "2026-10-04T13:06:31.389Z",
+      "outcome": "accepted",
+      "evidenceRef": "fixture-http-1.json"
+    },
+    {
+      "sequence": 2,
+      "purpose": "auth",
+      "operationId": "fixture-http-2",
+      "reservedAt": "2026-10-04T13:06:31.456Z",
+      "outcome": "rejected",
+      "evidenceRef": "fixture-http-2.json"
+    }
+  ],
+  "limit": 200,
+  "cleanup_reserve": 20,
+  "sdk_fixture_base": "http://127.0.0.1:44891/fixture/auth",
+  "owned_backend_port": 44894,
+  "real_configuration_verified": false
+}

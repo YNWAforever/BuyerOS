@@ -1,0 +1,37 @@
+[
+  {
+    "nonce": "2a2509f88ec0",
+    "removed": true,
+    "fixture_only": true,
+    "recovered_reservations": 44,
+    "external_resources": 0
+  },
+  {
+    "nonce": "a3b244ce78b2",
+    "removed": true,
+    "fixture_only": true,
+    "recovered_reservations": 2,
+    "external_resources": 0
+  },
+  {
+    "nonce": "837e0565b226",
+    "removed": true,
+    "fixture_only": true,
+    "recovered_reservations": 44,
+    "external_resources": 0
+  },
+  {
+    "nonce": "12d2c438f4c3",
+    "removed": true,
+    "fixture_only": true,
+    "recovered_reservations": 44,
+    "external_resources": 0
+  },
+  {
+    "nonce": "9d57ba464a61",
+    "removed": true,
+    "fixture_only": true,
+    "recovered_reservations": 44,
+    "external_resources": 0
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "fixture_only": true,
+  "sequence": 12,
+  "method": "GET",
+  "path": "/fixture/auth/.well-known/jwks.json",
+  "fingerprint": "6601498cc53e71ad82d1c2b3605517f7dbbf0b2a6fdda632dcbb5a7fec215717",
+  "status": 200,
+  "reason": "upstream-response",
+  "outcome": "accepted"
+}

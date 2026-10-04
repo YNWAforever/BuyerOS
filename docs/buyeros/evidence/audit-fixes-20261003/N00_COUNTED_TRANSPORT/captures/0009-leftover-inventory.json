@@ -1,0 +1,102 @@
+[
+  {
+    "path": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-BB8yry",
+    "nonce": "2a2509f88ec0",
+    "created": "2026-10-04T12:29:17.206Z",
+    "reservations": 44,
+    "keys": [
+      "schemaVersion",
+      "proposal",
+      "approvalReference",
+      "approvedAt",
+      "limit",
+      "cleanupReserve",
+      "buildLimit",
+      "buildTimeoutMs",
+      "target",
+      "identity",
+      "requests",
+      "builds"
+    ]
+  },
+  {
+    "path": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-cKFHYP",
+    "nonce": "a3b244ce78b2",
+    "created": "2026-10-04T13:03:48.857Z",
+    "reservations": 2,
+    "keys": [
+      "schemaVersion",
+      "proposal",
+      "approvalReference",
+      "approvedAt",
+      "limit",
+      "cleanupReserve",
+      "buildLimit",
+      "buildTimeoutMs",
+      "target",
+      "identity",
+      "requests",
+      "builds"
+    ]
+  },
+  {
+    "path": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-fEQ7gn",
+    "nonce": "837e0565b226",
+    "created": "2026-10-04T12:57:41.463Z",
+    "reservations": 44,
+    "keys": [
+      "schemaVersion",
+      "proposal",
+      "approvalReference",
+      "approvedAt",
+      "limit",
+      "cleanupReserve",
+      "buildLimit",
+      "buildTimeoutMs",
+      "target",
+      "identity",
+      "requests",
+      "builds"
+    ]
+  },
+  {
+    "path": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-s5X3Cc",
+    "nonce": "12d2c438f4c3",
+    "created": "2026-10-04T12:35:40.192Z",
+    "reservations": 44,
+    "keys": [
+      "schemaVersion",
+      "proposal",
+      "approvalReference",
+      "approvedAt",
+      "limit",
+      "cleanupReserve",
+      "buildLimit",
+      "buildTimeoutMs",
+      "target",
+      "identity",
+      "requests",
+      "builds"
+    ]
+  },
+  {
+    "path": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-vpmsi1",
+    "nonce": "9d57ba464a61",
+    "created": "2026-10-04T13:01:24.661Z",
+    "reservations": 44,
+    "keys": [
+      "schemaVersion",
+      "proposal",
+      "approvalReference",
+      "approvedAt",
+      "limit",
+      "cleanupReserve",
+      "buildLimit",
+      "buildTimeoutMs",
+      "target",
+      "identity",
+      "requests",
+      "builds"
+    ]
+  }
+]

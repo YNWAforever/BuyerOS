@@ -1,0 +1,29 @@
+[WebServer] (node:7384) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] INFO:     Started server process [37520]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:44892 (Press CTRL+C to quit)
+
+Running 2 tests using 1 worker
+
+(node:42284) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-compat.spec.ts:91:1 › NA01 counted fixture: built SDK get-session reserves one actual upstream HTTP request (97ms)
+  ok 2 tests\e2e\audit-neon-compat.spec.ts:98:1 › NA01 counted fixture: built SDK negative login is charged and returns the real fixture401 (73ms)
+[WebServer] N00 fixture evidence/cleanup failed N00_FIXTURE_CHILD_STILL_RUNNING
+Error: N00 fixture cleanup evidence missing
+
+   at ..\..\scripts\neon-counted-teardown.mjs:15
+
+  13 |  const deadline=Date.now()+10_000;
+  14 |  while(!existsSync(join(folder,'cleanup.json'))&&Date.now()<deadline)await new Promise(ok=>setTimeout(ok,100));
+> 15 |  if(!existsSync(join(folder,'cleanup.json')))throw new Error('N00 fixture cleanup evidence missing');
+     |                                                    ^
+  16 |  const proof=JSON.parse(readFileSync(join(folder,'cleanup.json'),'utf8'));
+  17 |  if(proof.owned_journal_removed!==true||existsSync(owner.budget_root))throw new Error('N00 fixture journal cleanup incomplete');
+  18 | }
+    at teardown (C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\scripts\neon-counted-teardown.mjs:15:52)
+
+  2 passed (15.8s)
+  1 error was not a part of any test, see above for details
