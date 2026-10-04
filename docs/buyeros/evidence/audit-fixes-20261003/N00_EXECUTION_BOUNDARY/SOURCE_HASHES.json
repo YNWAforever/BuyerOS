@@ -1,0 +1,82 @@
+[
+  {
+    "path": "playwright.neon-execution.config.ts",
+    "working_bytes": 485,
+    "working_sha256": "c2c52c408f6cae206037dac44a2afb48d63d8a06dde12f900ba1278cbd207f67",
+    "git_bytes": 485,
+    "git_sha256": "c2c52c408f6cae206037dac44a2afb48d63d8a06dde12f900ba1278cbd207f67",
+    "normalized_match": true
+  },
+  {
+    "path": "scripts/neon-counted-proxy.mjs",
+    "working_bytes": 7812,
+    "working_sha256": "c1422ad9b7237c584032813601db6b568988d227342bafe8be5ccd736849b4ad",
+    "git_bytes": 7811,
+    "git_sha256": "9c16358ca99d86ff9b89eeabb4ea845b883fc723915d510bec97fa11357c65c8",
+    "normalized_match": true
+  },
+  {
+    "path": "scripts/neon-execution-boundary.d.mts",
+    "working_bytes": 1346,
+    "working_sha256": "5b9d221a76a7d6708f1f099baf84abbf68c44afec83717691f2a5672c3ee7b9f",
+    "git_bytes": 1346,
+    "git_sha256": "5b9d221a76a7d6708f1f099baf84abbf68c44afec83717691f2a5672c3ee7b9f",
+    "normalized_match": true
+  },
+  {
+    "path": "scripts/neon-execution-boundary.mjs",
+    "working_bytes": 9968,
+    "working_sha256": "6b8b009df81fe824fe7593e024eb644ad1ccc2fab45cff663eafb34c19cd94af",
+    "git_bytes": 9968,
+    "git_sha256": "6b8b009df81fe824fe7593e024eb644ad1ccc2fab45cff663eafb34c19cd94af",
+    "normalized_match": true
+  },
+  {
+    "path": "scripts/neon-execution-cleanup.d.mts",
+    "working_bytes": 384,
+    "working_sha256": "1181442863925764f0681f7c037fb8e6efc532026fe69c0d419aa6ea204b92e0",
+    "git_bytes": 384,
+    "git_sha256": "1181442863925764f0681f7c037fb8e6efc532026fe69c0d419aa6ea204b92e0",
+    "normalized_match": true
+  },
+  {
+    "path": "scripts/neon-execution-cleanup.mjs",
+    "working_bytes": 2707,
+    "working_sha256": "dce77ff5ecfdd1a7e760dbc298aed8ee8cfac3e3998fad655da54e50ad3563b2",
+    "git_bytes": 2707,
+    "git_sha256": "dce77ff5ecfdd1a7e760dbc298aed8ee8cfac3e3998fad655da54e50ad3563b2",
+    "normalized_match": true
+  },
+  {
+    "path": "scripts/neon-execution-cli.mjs",
+    "working_bytes": 1493,
+    "working_sha256": "9de07233cc3a018397ae34dd2bcbda8bca0841217f38d13f3ebf48dd7b814efd",
+    "git_bytes": 1493,
+    "git_sha256": "9de07233cc3a018397ae34dd2bcbda8bca0841217f38d13f3ebf48dd7b814efd",
+    "normalized_match": true
+  },
+  {
+    "path": "tests/e2e/audit-neon-execution.spec.ts",
+    "working_bytes": 6571,
+    "working_sha256": "7af3738e31c736d1405f3037db0822568f115ee948ae18dbe5d2aea5e6cf8c75",
+    "git_bytes": 6571,
+    "git_sha256": "7af3738e31c736d1405f3037db0822568f115ee948ae18dbe5d2aea5e6cf8c75",
+    "normalized_match": true
+  },
+  {
+    "path": "tests/fixtures/neon-execution/fixture.mjs",
+    "working_bytes": 4410,
+    "working_sha256": "b57e5b492b1e249deee8f8abfe604549ac4dc9761cc453b3708bf124eeaadbba",
+    "git_bytes": 4410,
+    "git_sha256": "b57e5b492b1e249deee8f8abfe604549ac4dc9761cc453b3708bf124eeaadbba",
+    "normalized_match": true
+  },
+  {
+    "path": "tests/neon-execution-boundary.test.mjs",
+    "working_bytes": 14453,
+    "working_sha256": "f7beeb78b317f659fee98179fe21aaef07b4ca74f4aa561bbe1ec4610320d72b",
+    "git_bytes": 14453,
+    "git_sha256": "f7beeb78b317f659fee98179fe21aaef07b4ca74f4aa561bbe1ec4610320d72b",
+    "normalized_match": true
+  }
+]

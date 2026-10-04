@@ -1,0 +1,92 @@
+{
+  "base_sha": "e0256f303502d4332400a837b99903926f74c842",
+  "source_index_matches": [
+    "playwright.neon-execution.config.ts",
+    "scripts/neon-counted-proxy.mjs",
+    "scripts/neon-execution-boundary.d.mts",
+    "scripts/neon-execution-boundary.mjs",
+    "scripts/neon-execution-cleanup.d.mts",
+    "scripts/neon-execution-cleanup.mjs",
+    "scripts/neon-execution-cli.mjs",
+    "tests/e2e/audit-neon-execution.spec.ts",
+    "tests/fixtures/neon-execution/fixture.mjs",
+    "tests/neon-execution-boundary.test.mjs"
+  ],
+  "prior_N00": [
+    {
+      "group": "N00_LOCAL",
+      "payloads": 150,
+      "unchanged": true
+    },
+    {
+      "group": "N00_CALLBACK",
+      "payloads": 66,
+      "unchanged": true
+    },
+    {
+      "group": "N00_REAL_PREFLIGHT",
+      "payloads": 23,
+      "unchanged": true
+    },
+    {
+      "group": "N00_COUNTED_TRANSPORT",
+      "payloads": 421,
+      "unchanged": true
+    },
+    {
+      "group": "N00_REAL_RUNTIME",
+      "payloads": 252,
+      "unchanged": true
+    },
+    {
+      "group": "N00_RUNTIME_BUILT",
+      "payloads": 236,
+      "unchanged": true
+    },
+    {
+      "group": "N00_RUNTIME_FLOW",
+      "payloads": 253,
+      "unchanged": true
+    }
+  ],
+  "prior_N00_payloads": 1401,
+  "inputs": 31,
+  "protected_unchanged": [
+    "services/api/tests/conftest.py",
+    "services/worker/tests/conftest.py",
+    "services/api/tools/serve_e2e_fixture.py",
+    "services/worker/tests/fixtures/run_browser_research.py",
+    "services/generated/buyeros-api.ts",
+    "docs/superpowers/plans/2026-10-03-buyeros-gpt61-fixes.md",
+    "docs/buyeros/remaining/API_OPERATION_STATUS.csv",
+    "tests/e2e-fixture-cleanup.test.mjs",
+    "tests/deployment/cloudflare-release-config.test.mjs",
+    "tests/vercel-render.test.mjs"
+  ],
+  "unrelated_worktrees": [
+    {
+      "worktree": "C:/Users/laich/Documents/BuyerOS",
+      "head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+      "dirty_paths": 0,
+      "binary_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "worktree": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS",
+      "head": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
+      "dirty_paths": 0,
+      "binary_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "worktree": "C:/Users/laich/.codex/worktrees/neon-auth-migration/BuyerOS",
+      "head": "a78859fe474f5722be3755b10e2586436b53bf97",
+      "dirty_paths": 193,
+      "binary_diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0"
+    }
+  ],
+  "operation_rows": 84,
+  "all_unchanged": true,
+  "other_tasks_unchanged": 24,
+  "other_cases_unchanged": 97,
+  "all98historical15fields_unchanged": true,
+  "historical_T_registry_unchanged": true
+}

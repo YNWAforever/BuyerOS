@@ -1,0 +1,13 @@
+{
+  "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
+  "base_sha": "e0256f303502d4332400a837b99903926f74c842",
+  "reverse_applicability_exit": 0,
+  "reverse_applied": false,
+  "production_rehearsal": false,
+  "revert_order": [
+    "following local metadata commit",
+    "b8a10848b62090ff19544918961e54df3ebfa921"
+  ],
+  "DB_rollback": "none; no schema/data changes",
+  "external_resources": "none created by this slice"
+}

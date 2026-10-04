@@ -1,0 +1,27 @@
+[
+  {
+    "test": "the actual emitted Nitro gateway carries the ninety-second budget",
+    "classification": "environment missing main build artifact; test/source unchanged",
+    "detail": ".vercel/output/functions/__server.func/.vc-config.json absent"
+  },
+  {
+    "test": "playwright.admin.config.ts cleanup subtest",
+    "classification": "environment operation timeout; source unchanged",
+    "detail": "docker run status null at existing30s timeout; exact host cause unproven"
+  },
+  {
+    "test": "playwright.mvp.config.ts cleanup subtest",
+    "classification": "environment operation timeout; source unchanged",
+    "detail": "docker inspect returned null/empty stderr at existing30s timeout; exact host cause unproven"
+  },
+  {
+    "test": "every disposable-API Playwright configuration actually removes its owned container and marker",
+    "classification": "parent failure from2subtests",
+    "detail": "not a third independent Docker defect"
+  },
+  {
+    "test": "tests/vercel-render.test.mjs",
+    "classification": "environment missing main build artifact; test/source unchanged",
+    "detail": ".vercel/output/functions/__server.func/index.mjs absent; module never imported"
+  }
+]

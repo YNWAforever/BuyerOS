@@ -1,0 +1,149 @@
+{
+  "stats": {
+    "startTime": "2026-10-04T19:00:31.870Z",
+    "duration": 37886.41,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "attachments": [
+    {
+      "name": "receipt",
+      "value": {
+        "fixture_only": true,
+        "external_verified": false,
+        "http_requests": 4,
+        "channels": [
+          "browser",
+          "browser",
+          "sdk",
+          "cli"
+        ],
+        "canonical_database_connected": false
+      }
+    },
+    {
+      "name": "journal",
+      "value": {
+        "schemaVersion": 1,
+        "proposal": "buyeros-neon-auth-n00-20261004",
+        "approvalReference": "fixture-only-no-external-authority",
+        "approvedAt": "2026-10-04T19:00:55.909Z",
+        "limit": 200,
+        "cleanupReserve": 20,
+        "buildLimit": 2,
+        "buildTimeoutMs": 1200000,
+        "target": {
+          "schemaVersion": 1,
+          "proposal": "buyeros-neon-auth-n00-20261004",
+          "sourceSha": "e0256f303502d4332400a837b99903926f74c842",
+          "projectId": "fictional-execution-project",
+          "branchId": "fictional-execution-branch",
+          "authId": "fictional-execution-auth",
+          "orgId": "org-soft-sunset-25251479",
+          "name": "buyeros-neon-auth-n00-20261004",
+          "regionId": "aws-ap-southeast-1",
+          "creationMode": "new-empty",
+          "createdAt": "2026-10-04T19:00:55.909Z",
+          "expiresAt": "2026-10-04T21:00:55.909Z",
+          "readback": {
+            "projectId": "fictional-execution-project",
+            "branchId": "fictional-execution-branch",
+            "authId": "fictional-execution-auth",
+            "orgId": "org-soft-sunset-25251479",
+            "name": "buyeros-neon-auth-n00-20261004",
+            "regionId": "aws-ap-southeast-1",
+            "observedAt": "2026-10-04T19:00:55.909Z",
+            "subscription": "free_v3",
+            "emailDeliveryEnabled": false,
+            "emailPasswordEnabled": false,
+            "emailHooksEnabled": false,
+            "methods": [
+              "google"
+            ],
+            "trustedOrigins": [
+              "http://localhost:44890"
+            ]
+          },
+          "auth": {
+            "baseUrl": "https://execution.fixture.invalid/auth",
+            "issuer": "https://issuer.fixture.invalid",
+            "audience": "fictional-execution-audience",
+            "jwksUrl": "https://execution.fixture.invalid/auth/jwks",
+            "algorithm": "EdDSA",
+            "keyType": "OKP",
+            "curve": "Ed25519"
+          },
+          "fingerprint": "ae5646dfa3158a27d30c1fb80056f61ee663f77658922a34b912c3a609c7ad31"
+        },
+        "identity": null,
+        "requests": [
+          {
+            "sequence": 1,
+            "purpose": "auth",
+            "operationId": "execution-http-1",
+            "reservedAt": "2026-10-04T19:00:56.646Z",
+            "outcome": "accepted",
+            "evidenceRef": "execution-http-1.json"
+          },
+          {
+            "sequence": 2,
+            "purpose": "auth",
+            "operationId": "execution-http-2",
+            "reservedAt": "2026-10-04T19:00:56.932Z",
+            "outcome": "accepted",
+            "evidenceRef": "execution-http-2.json"
+          },
+          {
+            "sequence": 3,
+            "purpose": "auth",
+            "operationId": "execution-http-3",
+            "reservedAt": "2026-10-04T19:00:57.361Z",
+            "outcome": "accepted",
+            "evidenceRef": "execution-http-3.json"
+          },
+          {
+            "sequence": 4,
+            "purpose": "auth",
+            "operationId": "execution-http-4",
+            "reservedAt": "2026-10-04T19:00:59.020Z",
+            "outcome": "accepted",
+            "evidenceRef": "execution-http-4.json"
+          }
+        ],
+        "builds": []
+      }
+    },
+    {
+      "name": "owned-cleanup",
+      "value": {
+        "fixture_only": true,
+        "external_verified": false,
+        "owned_journal_removed": true,
+        "owned_servers_closed": true
+      }
+    },
+    {
+      "name": "owned-cleanup",
+      "value": {
+        "fixture_only": true,
+        "external_verified": false,
+        "owned_journal_removed": true,
+        "owned_servers_closed": true
+      }
+    },
+    {
+      "name": "owned-cleanup",
+      "value": {
+        "fixture_only": true,
+        "external_verified": false,
+        "owned_journal_removed": true,
+        "owned_servers_closed": true
+      }
+    }
+  ],
+  "errors": [],
+  "fixture_only": true,
+  "external_verified": false
+}

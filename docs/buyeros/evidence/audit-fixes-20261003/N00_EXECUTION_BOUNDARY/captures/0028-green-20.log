@@ -1,0 +1,130 @@
+TAP version 13
+# Subtest: all SDK/browser/CLI physical hops are durably reserved before the backend receives them
+ok 1 - all SDK/browser/CLI physical hops are durably reserved before the backend receives them
+  ---
+  duration_ms: 1046.9042
+  type: 'test'
+  ...
+# Subtest: an unowned server, real target or unknown caller/path is refused before dispatch
+ok 2 - an unowned server, real target or unknown caller/path is refused before dispatch
+  ---
+  duration_ms: 44.3673
+  type: 'test'
+  ...
+# Subtest: redirects remain manual and each explicitly followed hop consumes another reservation
+ok 3 - redirects remain manual and each explicitly followed hop consumes another reservation
+  ---
+  duration_ms: 112.1614
+  type: 'test'
+  ...
+# Subtest: a foreign redirect cannot cause an uncounted request
+ok 4 - a foreign redirect cannot cause an uncounted request
+  ---
+  duration_ms: 74.7887
+  type: 'test'
+  ...
+# Subtest: commit with lost response is held across channel changes and journal restart
+ok 5 - commit with lost response is held across channel changes and journal restart
+  ---
+  duration_ms: 106.7216
+  type: 'test'
+  ...
+# Subtest: concurrent identical writes cannot dispatch twice
+ok 6 - concurrent identical writes cannot dispatch twice
+  ---
+  duration_ms: 70.1811
+  type: 'test'
+  ...
+# Subtest: the 180-check stop retains 20 cleanup/reconciliation reservations across restart
+ok 7 - the 180-check stop retains 20 cleanup/reconciliation reservations across restart
+  ---
+  duration_ms: 14063.452
+  type: 'test'
+  ...
+# Subtest: TTL refuses new auth but allows exact cleanup readback after expiry
+ok 8 - TTL refuses new auth but allows exact cleanup readback after expiry
+  ---
+  duration_ms: 166.7874
+  type: 'test'
+  ...
+# Subtest: bodies and response bytes are bounded without returning or persisting secrets
+ok 9 - bodies and response bytes are bounded without returning or persisting secrets
+  ---
+  duration_ms: 247.016
+  type: 'test'
+  ...
+# Subtest: receipt failure preserves pending reservation and fails closed after restart
+ok 10 - receipt failure preserves pending reservation and fails closed after restart
+  ---
+  duration_ms: 158.4406
+  type: 'test'
+  ...
+# Subtest: official pinned SDK token request crosses the same durable gateway once
+ok 11 - official pinned SDK token request crosses the same durable gateway once
+  ---
+  duration_ms: 242.3418
+  type: 'test'
+  ...
+# Subtest: fixed Node CLI helper uses the owned gateway and strips inherited credentials
+ok 12 - fixed Node CLI helper uses the owned gateway and strips inherited credentials
+  ---
+  duration_ms: 544.726
+  type: 'test'
+  ...
+# Subtest: cleanup verifies exact ownership and absence after each deletion in identity/auth/project order
+ok 13 - cleanup verifies exact ownership and absence after each deletion in identity/auth/project order
+  ---
+  duration_ms: 1439.9144
+  type: 'test'
+  ...
+# Subtest: unknown deletion never blindly retries; fresh absence lets restarted cleanup continue
+ok 14 - unknown deletion never blindly retries; fresh absence lets restarted cleanup continue
+  ---
+  duration_ms: 1347.9942
+  type: 'test'
+  ...
+# Subtest: unknown deletion still present blocks every later dependent deletion and retry
+ok 15 - unknown deletion still present blocks every later dependent deletion and retry
+  ---
+  duration_ms: 552.016
+  type: 'test'
+  ...
+# Subtest: mismatched provider readback prevents every deletion
+ok 16 - mismatched provider readback prevents every deletion
+  ---
+  duration_ms: 231.2313
+  type: 'test'
+  ...
+# Subtest: cleanup after TTL still counts every readback/deletion and never touches an unbound identity
+ok 17 - cleanup after TTL still counts every readback/deletion and never touches an unbound identity
+  ---
+  duration_ms: 1386.1688
+  type: 'test'
+  ...
+# Subtest: cleanup refuses an injected transport and a different journal even with matching-looking metadata
+ok 18 - cleanup refuses an injected transport and a different journal even with matching-looking metadata
+  ---
+  duration_ms: 186.3952
+  type: 'test'
+  ...
+# Subtest: wrong gateway nonce and cross-origin writes cannot consume provider budget
+ok 19 - wrong gateway nonce and cross-origin writes cannot consume provider budget
+  ---
+  duration_ms: 108.2118
+  type: 'test'
+  ...
+# Subtest: expired or mismatched existence receipt blocks cleanup before any deletion
+ok 20 - expired or mismatched existence receipt blocks cleanup before any deletion
+  ---
+  duration_ms: 460.6316
+  type: 'test'
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 24036.8534

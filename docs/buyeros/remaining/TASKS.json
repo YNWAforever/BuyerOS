@@ -2048,9 +2048,9 @@
   "deployed_source_sha_scope": "Existing main app12327c7 freshly read-only verified2026-10-02HK; production remains0033 and unchanged. hosting_migration_proposal separately records approved isolatedpreview595865f/0035 and shutdown; noCloudflare productioncutover.",
   "latest_local_auth_checkpoint": {
     "task": "N00",
-    "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
-    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_RUNTIME_FLOW/RESULTS.md",
-    "state": "partial;144Node/8crypto pass;each actual built UI5/5pass0skip0globalerror;real Neon/full accounting still open",
+    "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_EXECUTION_BOUNDARY/RESULTS.md",
+    "state": "partial;related165pass/new21included/browser3/crypto8pass;full229pass5fail0skip;real provider/full accounting open",
     "deployed_sha": null,
     "historical_T_fields_unchanged": true
   }

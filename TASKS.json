@@ -22,11 +22,11 @@
     {
       "id": "N00",
       "status": "local-spike-partial",
-      "code_status": "guarded built session/token UI, independent owned EdDSA diagnostic and fictional counted transport; no auth cutover",
-      "verification_status": "Node144serialpass0fail0skip;crypto8pass;actual portable/Vercel each5pass0fail0skip0globalerror;types/lint/contracts0;real Neon/accounting/original callback gate open",
+      "code_status": "owned loopback execution gateway and cleanup orchestration model; built session/token prior evidence carried; no auth cutover",
+      "verification_status": "RelatedNode165pass0fail0skip;new21included;Chromium3pass0skip0globalerror;crypto8pass;types/lint/contracts0;fullNode229pass5fail0skip;real provider/full accounting gate open",
       "release_status": "not-deployed; Auth0 retained",
       "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
-      "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
+      "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
       "finding_ids": [
         "F20"
       ],
@@ -35,22 +35,14 @@
       ],
       "checks": {
         "node": {
-          "tests": 144,
-          "pass": 144,
+          "tests": 165,
+          "pass": 165,
           "fail": 0,
           "skip": 0,
           "cancelled": 0,
           "todo": 0,
-          "duration_ms": 66617.2528,
-          "concurrency": 1,
-          "retained_parallel_attempt": {
-            "tests": 144,
-            "pass": 143,
-            "fail": 1,
-            "skip": 0,
-            "reason": "existing40ms500-response case received503; precise host cause unproven; assertions unchanged"
-          },
-          "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
+          "duration_ms": 88448.9225,
+          "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
           "executed_this_followup": true
         },
         "built_ui": {
@@ -925,11 +917,119 @@
             "initialtypes2/lint9errors1warning"
           ],
           "captures": 238
+        },
+        "prior_node_checkpoint": {
+          "tests": 144,
+          "pass": 144,
+          "fail": 0,
+          "skip": 0,
+          "cancelled": 0,
+          "todo": 0,
+          "duration_ms": 66617.2528,
+          "concurrency": 1,
+          "retained_parallel_attempt": {
+            "tests": 144,
+            "pass": 143,
+            "fail": 1,
+            "skip": 0,
+            "reason": "existing40ms500-response case received503; precise host cause unproven; assertions unchanged"
+          },
+          "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
+          "executed_this_followup": false
+        },
+        "execution_boundary": {
+          "task": "N00",
+          "finding": "F20",
+          "case": "NA01",
+          "base_sha": "e0256f303502d4332400a837b99903926f74c842",
+          "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
+          "files": 10,
+          "insertions": 277,
+          "deletions": 0,
+          "related_node": {
+            "tests": 165,
+            "pass": 165,
+            "fail": 0,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 88448.9225
+          },
+          "new_boundary": {
+            "tests": 21,
+            "pass": 21,
+            "fail": 0,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 80465.3624
+          },
+          "attempted_full_node": {
+            "tests": 234,
+            "pass": 229,
+            "fail": 5,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 523519.4485
+          },
+          "full_suite_passed": false,
+          "full_suite_snapshot_note": "Full suite began before final reporter/receipt-only changes; related165 and actual Chromium3 freshly rerun after all functional boundary changes. Final reporter Chromium3 and frozen types/lint checked separately. No full green gate claimed.",
+          "crypto": {
+            "tests": 8,
+            "pass": 8,
+            "fail": 0,
+            "skip": 0,
+            "errors": 0,
+            "warnings": 1,
+            "junit_time_s": 3.068
+          },
+          "browser": {
+            "cases": 3,
+            "pass": 3,
+            "fail": 0,
+            "skip": 0,
+            "global_errors": 0,
+            "duration_ms": 37886.41,
+            "owned_cleanup_receipts": 3,
+            "first_case_HTTP": 4,
+            "fixture_only": true,
+            "external_verified": false
+          },
+          "checks": {
+            "types_exit": 0,
+            "scoped_lint_exit": 0,
+            "reporter_lint_exit": 0,
+            "generated_types_exit": 0,
+            "generated_routes_exit": 0,
+            "source_diff_check_exit": 0
+          },
+          "migrations": [],
+          "alembic_head": "0037_bulk_manifests",
+          "DB_connections": 0,
+          "DB_suites_applicable": false,
+          "DB_tests_skipped": 0,
+          "new_builds": 0,
+          "built_portable_vercel_evidence": "carried from c756596; not rerun here",
+          "external_requests": 0,
+          "deployment_sha": null,
+          "full_N00_gate_passed": false,
+          "independent_review": "pending; human no-agents instruction",
+          "next_eligible": "N00 full real-transport coverage and provider cleanup adapters; original302/real-Neon/human-Google/approval/review gates open"
+        },
+        "full_node_suite": {
+          "tests": 234,
+          "pass": 229,
+          "fail": 5,
+          "skip": 0,
+          "cancelled": 0,
+          "todo": 0,
+          "duration_ms": 523519.4485
         }
       },
       "migrations": "none;0037 unchanged",
-      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_RUNTIME_FLOW/RESULTS.md",
-      "rollback": "revert c756596406f41884f61a3b64c8549f569e34cfa4 plus metadata;reverse applicability0 only;no DB/resource undo",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_EXECUTION_BOUNDARY/RESULTS.md",
+      "rollback": "revert following metadata then b8a10848b62090ff19544918961e54df3ebfa921;reverse applicability0 only;no DB/resource undo",
       "limits": [
         "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
         "No Vercel ingress/protection/binding/deployment verification",
@@ -938,7 +1038,7 @@
         "No live performance/SLA/UAT claim"
       ],
       "full_gate_passed": false,
-      "next_action": "Continue N00 bounded SDK/browser/CLI and owned external cleanup preparation;fresh isolated Neon/human Google approval pending"
+      "next_action": "Continue N00 real transport coverage/provider cleanup adapters; original302/real provider/independent review and fresh isolated-target Google approval pending"
     },
     {
       "id": "N01",
@@ -1569,10 +1669,10 @@
     "Q09 human screen-reader/staff UAT",
     "Independent source review",
     "Q16 underlying evidence when available",
-    "N00 local accounting/external-cleanup next; fresh isolated actual auth roundtrip requires specific new approval",
+    "N00 full real-transport coverage/provider cleanup adapters next; fresh isolated actual auth roundtrip requires specific new approval",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
+  "reviewed_source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
   "deployed_sha": null,
   "selected_followups": [
     "U05",

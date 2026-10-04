@@ -1,0 +1,3 @@
+# Same-author source review
+
+Reviewed owned-server/fictional-target brand, durable pre-dispatch reservation, cross-channel write hold, restart and receipt-failure fail-closed path, budget/TTL, manual redirects and limits, exact cleanup dependencies/readback, credential-free fixed child and origin/nonce boundary. Review found missing CLI gateway brand; new failing case then fix verified. No suppression or production adapter edits. Domain/canonical identity and destructive guards unchanged. Full suite RED disclosed. Independent review pending; no agents per human instruction. This is not real-provider containment or a release approval.

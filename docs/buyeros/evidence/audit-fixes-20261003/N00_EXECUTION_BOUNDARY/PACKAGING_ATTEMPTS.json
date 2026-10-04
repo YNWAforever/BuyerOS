@@ -1,0 +1,17 @@
+[
+  {
+    "attempt": "preservation index check",
+    "result": "failed",
+    "cause": "final JSON reporter config was not yet staged; no commit made; explicit staging then byte check passed"
+  },
+  {
+    "attempt": "preservation worktree comparison",
+    "result": "failed",
+    "cause": "Windows path separator spelling differed; HEAD/dirty counts/binary diff hashes identical; canonical as_posix comparison passed"
+  },
+  {
+    "attempt": "Alembic path setup",
+    "result": "PowerShell command did not start Python",
+    "cause": "services/api prefix repeated while cwd already services/api; shell exit0 was not counted as success; corrected ./.venv command returned0037head/CLI0"
+  }
+]
