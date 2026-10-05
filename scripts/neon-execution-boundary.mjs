@@ -24,8 +24,20 @@ export function createFixtureExecutionBoundary({backend,journal,now=Date.now,tim
  need(Number.isInteger(timeoutMs)&&timeoutMs>=20&&timeoutMs<=3000,'TIMEOUT');
  function validate(input){need(input&&Object.keys(input).every(k=>['channel','path','method','body','headers'].includes(k)),'REQUEST');const {channel,path,method,body=''}=input;
   need(channels.has(channel)&&methods.has(method)&&typeof body==='string','REQUEST');need(Buffer.byteLength(body)<=BODY_LIMIT,'BODY_LIMIT');need(!safe.has(method)||body==='','REQUEST');
-  need(typeof path==='string'&&/^\/fixture\/(auth|control)\/[a-zA-Z0-9_/-]+$/.test(path)&&!path.includes('//')&&!path.includes('..'),'PATH');
-  let purpose='auth';if(path.startsWith('/fixture/control/')){purpose=method==='DELETE'?'cleanup':'reconcile';need(channel==='control'&&['GET','DELETE'].includes(method)&&body==='','CONTROL');
+  need(typeof path==='string'&&path.startsWith('/fixture/')&&!path.includes('//')&&!path.includes('..'),'PATH');
+  const url=new URL(path,origin);need(url.origin===origin&&!url.hash&&!/%|\\/.test(url.pathname)&&/^\/fixture\/(auth|control)\/[a-zA-Z0-9_/-]+$/.test(url.pathname),'PATH');
+  let purpose='auth';
+  if(url.pathname.startsWith('/fixture/auth/admin/')){
+   const identity=journal.snapshot().identity;need(identity?.id.startsWith('fictional-execution-')&&channel==='sdk','OWNED_IDENTITY');
+   if(url.pathname==='/fixture/auth/admin/list-users'){
+    const expected={filterField:'id',filterValue:identity.id,filterOperator:'eq',limit:'1',offset:'0'};
+    need(method==='GET'&&[...url.searchParams].length===5&&Object.entries(expected).every(([key,value])=>url.searchParams.get(key)===value),'IDENTITY_LOOKUP');purpose='reconcile';
+   }else if(url.pathname==='/fixture/auth/admin/remove-user'){
+    let input;try{input=JSON.parse(body);}catch{throw new Error('N00_EXECUTION_OWNED_IDENTITY');}
+    need(method==='POST'&&!url.search&&input&&Object.keys(input).length===1&&input.userId===identity.id,'OWNED_IDENTITY');purpose='cleanup';
+   }else throw new Error('N00_EXECUTION_ADMIN_REFUSED');
+  }else {need(!url.search,'PATH');}
+  if(path.startsWith('/fixture/control/')){purpose=method==='DELETE'?'cleanup':'reconcile';need(channel==='control'&&['GET','DELETE'].includes(method)&&body==='','CONTROL');
    if(path==='/fixture/control/target')need(method==='GET','CONTROL');else{const match=/^\/fixture\/control\/(identity|auth|project)\/([a-zA-Z0-9_-]+)$/.exec(path);need(match,'CONTROL');const state=journal.snapshot(),ids={identity:state.identity?.id,auth:target.authId,project:target.projectId};need(ids[match[1]]===match[2],'OWNED_RESOURCE');}
   }else need(channel!=='control','CONTROL');
   return {channel,path,method,body,purpose,headers:new Headers(input.headers),intent:hash(target.fingerprint+'\n'+method+'\n'+path+'\n'+body)};
@@ -54,10 +66,17 @@ export function createFixtureExecutionGateway({execution,nonce}){
   if(req.url?.startsWith('/sdk/auth/')){const path='/fixture/auth/'+req.url.slice('/sdk/auth/'.length);const body=(await bytes(req,BODY_LIMIT)).toString('utf8');const headers=new Headers();for(const [key,value] of Object.entries(req.headers))if(!['host','connection','content-length','x-n00-owner'].includes(key)&&value!==undefined)headers.set(key,Array.isArray(value)?value.join(', '):value);const result=await execution.dispatch({channel:'sdk',path,method:req.method,body,headers});res.statusCode=result.status;for(const [key,value] of result.headers)res.appendHeader(key,value);if(result.location)res.setHeader('Location','/sdk/auth/'+result.location.slice('/fixture/auth/'.length));res.end(result.body);return;}
   need(req.method==='POST'&&req.url==='/dispatch','GATEWAY_PATH');const input=JSON.parse((await bytes(req,BODY_LIMIT)).toString('utf8'));const result=await execution.dispatch(input);res.setHeader('Content-Type','application/json');res.end(JSON.stringify(result));
  }catch(error){res.statusCode=403;res.setHeader('Content-Type','application/json');res.end(JSON.stringify({code:error.message?.startsWith('N00_')?error.message:'N00_EXECUTION_GATEWAY_REFUSED',fixture_only:true,external_verified:false}));}});
- gateways.set(server,nonce);return server;
+ gateways.set(server,{nonce,execution});return server;
+}
+/** URL for this owned gateway only; cannot construct a provider URL. */
+export function ownedFixtureSdkUrl({gateway,execution,journal,nonce}){
+ assertFixtureExecutionBoundary(execution,journal);const owner=gateways.get(gateway);
+ need(owner&&owner.execution===execution&&owner.nonce===nonce,'GATEWAY_OWNER');
+ const address=gateway.address();need(gateway.listening&&address?.address==='127.0.0.1','GATEWAY_OWNER');
+ return 'http://127.0.0.1:'+address.port+'/sdk/auth';
 }
 export function runFixtureCli({gateway,nonce,request,parentEnvironment=process.env}){
- need(gateways.has(gateway)&&gateways.get(gateway)===nonce,'CLI_OWNER');const address=gateway.address();need(gateway.listening&&address?.address==='127.0.0.1','CLI_OWNER');need(request?.channel==='cli','CLI_CHANNEL');
+ need(gateways.has(gateway)&&gateways.get(gateway).nonce===nonce,'CLI_OWNER');const address=gateway.address();need(gateway.listening&&address?.address==='127.0.0.1','CLI_OWNER');need(request?.channel==='cli','CLI_CHANNEL');
  const environment={...fixtureChildEnvironment(parentEnvironment),N00_FIXTURE_CLI_URL:'http://127.0.0.1:'+address.port,N00_FIXTURE_CLI_NONCE:nonce};
  return new Promise((ok,bad)=>{const child=spawn(process.execPath,[resolve(dirname(fileURLToPath(import.meta.url)),'neon-execution-cli.mjs')],{env:environment,stdio:['pipe','pipe','pipe'],windowsHide:true});let output='',size=0;const timer=setTimeout(()=>child.kill(),5000);child.stdout.on('data',chunk=>{size+=chunk.length;if(size>RESPONSE_LIMIT)child.kill();else output+=chunk;});child.stderr.resume();child.on('error',()=>{clearTimeout(timer);bad(new Error('N00_EXECUTION_CLI_FAILED'));});child.on('close',code=>{clearTimeout(timer);try{need(code===0&&size<=RESPONSE_LIMIT,'CLI_FAILED');ok(JSON.parse(output));}catch{bad(new Error('N00_EXECUTION_CLI_FAILED'));}});child.stdin.end(JSON.stringify(request));});
 }

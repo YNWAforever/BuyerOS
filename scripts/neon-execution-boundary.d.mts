@@ -7,3 +7,5 @@ export function createFixtureExecutionBoundary(options:{backend:Server;journal:R
 export function assertFixtureExecutionBoundary(execution:FixtureExecutionBoundary,journal:RealRunJournal):void;
 export function createFixtureExecutionGateway(options:{execution:FixtureExecutionBoundary;nonce:string}):Server;
 export function runFixtureCli(options:{gateway:Server;nonce:string;request:ExecutionRequest;parentEnvironment?:NodeJS.ProcessEnv}):Promise<ExecutionReceipt&{environment_clean:true}>;
+
+export function ownedFixtureSdkUrl(options:{gateway:Server;execution:FixtureExecutionBoundary;journal:RealRunJournal;nonce:string}):string;
