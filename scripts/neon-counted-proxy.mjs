@@ -18,10 +18,21 @@ function unknownWrites(journal) {
  return {hashes:new Set(),all:journal.snapshot().requests.some(record=>record.purpose==='auth'&&['pending','unknown'].includes(record.outcome))};
 }
 function respond(res,status,code) {if(!res.headersSent){res.statusCode=status;res.setHeader('Content-Type','application/json');res.setHeader('X-N00-Fixture-Only','true');}res.end(JSON.stringify({code,fixture_only:true}));}
-async function bodyBytes(req) {
- const chunks=[];let size=0;
- for await(const chunk of req){size+=chunk.length;if(size<=BODY_LIMIT)chunks.push(chunk);}
- if(size>BODY_LIMIT)throw deny('N00_FIXTURE_BODY_LIMIT',413);return Buffer.concat(chunks);
+async function bodyBytes(req,timeoutMs) {
+ // A continuously active client must not extend this body's absolute deadline.
+ return new Promise((ok,bad)=>{
+  const chunks=[];let size=0,settled=false;
+  const timer=setTimeout(()=>finish(deny('N00_FIXTURE_BODY_TIMEOUT',408)),timeoutMs);
+  function finish(error){
+   if(settled)return;settled=true;clearTimeout(timer);
+   req.off('data',data);req.off('end',end);req.off('aborted',aborted);req.off('error',aborted);
+   if(error){req.pause();bad(error);}else ok(Buffer.concat(chunks));
+  }
+  function data(chunk){size+=chunk.length;if(size>BODY_LIMIT){finish(deny('N00_FIXTURE_BODY_LIMIT',413));return;}chunks.push(Buffer.from(chunk));}
+  function end(){finish();}
+  function aborted(){finish(deny('N00_FIXTURE_BODY_ABORTED',400));}
+  req.on('data',data);req.once('end',end);req.once('aborted',aborted);req.once('error',aborted);
+ });
 }
 async function responseBytes(response) {
  const chunks=[];let size=0;if(!response.body)return Buffer.alloc(0);
@@ -64,13 +75,16 @@ export function createCountedAuthProxy({backend,journal,now=Date.now,timeoutMs=3
     :path.startsWith('/fixture/auth/callback/')&&url.searchParams.has('state')
      ?new URLSearchParams({state:url.searchParams.get('state')}):new URLSearchParams(url.searchParams);
    query.sort();
-   req.setTimeout(timeoutMs,()=>req.destroy());
-   const body=await bodyBytes(req);req.setTimeout(0);fingerprint=createHash('sha256').update(method+'\n'+path+'\n'+query.toString()+'\n').update(body).digest('hex');
+   const body=await bodyBytes(req,timeoutMs);fingerprint=createHash('sha256').update(method+'\n'+path+'\n'+query.toString()+'\n').update(body).digest('hex');
    if(write&&(blocked.all||blocked.hashes.has(fingerprint)))throw deny('N00_FIXTURE_UNKNOWN_AUTH_RESULT',409);
    const headers=new Headers();for(const [key,value] of Object.entries(req.headers))if(!hop.has(key)&&value!==undefined)headers.set(key,Array.isArray(value)?value.join(', '):value);
    if(write){if(inFlight.has(fingerprint))throw deny('N00_FIXTURE_AUTH_IN_FLIGHT',409);inFlight.add(fingerprint);held=true;}
+   // Reservation preceded asynchronous body collection; recheck immediately
+   // before the physical hop and bound its lifetime by the remaining target TTL.
+   const remaining=Date.parse(journal.snapshot().target.expiresAt)-now();
+   if(!Number.isFinite(remaining)||remaining<=0)throw deny('N00_FIXTURE_EXPIRED',403);
    metrics.forwarded++;upstreamStarted=true;
-   const response=await fetch(url,{method,headers,...(!safeMethods.has(method)?{body}:{}),redirect:'manual',signal:AbortSignal.timeout(timeoutMs)});
+   const response=await fetch(url,{method,headers,...(!safeMethods.has(method)?{body}:{}),redirect:'manual',signal:AbortSignal.timeout(Math.min(timeoutMs,Math.ceil(remaining)))});
    const bytes=await responseBytes(response);let location=response.headers.get('location');
    if(location) {
     const to=new URL(location,upstream),own=proxy.address(),publicOrigin='http://127.0.0.1:'+own.port;
@@ -90,8 +104,9 @@ export function createCountedAuthProxy({backend,journal,now=Date.now,timeoutMs=3
    const status=code.includes('BUDGET')?429:code.includes('EXPIRED')?403:error.status??503;
    metrics.locally_rejected++;
    if(reservation){try {settle(upstreamStarted?'unknown':'rejected',status,code);}catch {if(write)blocked.all=true;}}
+   if(!upstreamStarted&&code.startsWith('N00_FIXTURE_BODY_')&&!res.headersSent)res.setHeader('Connection','close');
    respond(res,status,code);
-  }finally {req.setTimeout(0);if(held)inFlight.delete(fingerprint);}
+  }finally {if(held)inFlight.delete(fingerprint);}
  });
  proxy.fixtureReport=()=>({fixture_only:true,external_requests:0,metrics:{...metrics},journal:journal.snapshot()});
  return proxy;
