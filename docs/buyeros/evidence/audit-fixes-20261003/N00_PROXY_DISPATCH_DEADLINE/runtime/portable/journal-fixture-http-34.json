@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "fixture_only": true,
+  "sequence": 34,
+  "method": "GET",
+  "path": "/fixture/auth/get-session",
+  "state_changing": true,
+  "fingerprint": "a0b0d76d7b67e7ffd7db48c709eeb3c9904a69b6d8653bc523210eb5f9416ccc",
+  "status": 200,
+  "reason": "upstream-response",
+  "outcome": "accepted"
+}

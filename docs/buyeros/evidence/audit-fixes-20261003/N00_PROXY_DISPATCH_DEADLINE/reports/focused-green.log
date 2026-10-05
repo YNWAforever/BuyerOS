@@ -1,0 +1,36 @@
+✔ proxy refuses arbitrary URLs, unowned servers and unbound journals before any request (52.9514ms)
+✔ HTTP reservation is durable and pending before the owned backend receives the request (85.2215ms)
+✔ SDK origin, session/challenge cookies and JWT headers survive relay without entering evidence (53.9817ms)
+✔ approved local callback302 is preserved manually, and an external redirect is blocked (78.8836ms)
+✔ committed POST with a lost response is not replayed after proxy and journal restart (111.9945ms)
+✔ budget exhaustion refuses dispatch and keeps cleanup reserve after restart (1483.4697ms)
+✔ expired target and over-size body fail closed without dispatching upstream (66.25ms)
+✔ POST server500 retains an unknown write and timeout is bounded without automatic retry (137.2204ms)
+✔ read-only fixture budget inspection exposes counts without auth traffic or credential data (25.9107ms)
+✔ concurrent identical fixture POSTs share the in-flight barrier before upstream acceptance is known (60.1391ms)
+✔ fixture cleanup control requires the exact local owner nonce and never forwards to backend (26.9964ms)
+✔ committed POST with a refused redirect stays unknown and is held after restart (106.002ms)
+✔ committed PUT with a refused redirect stays unknown and is held after restart (129.2283ms)
+✔ committed PATCH with a refused redirect stays unknown and is held after restart (114.4978ms)
+✔ committed DELETE with a refused redirect stays unknown and is held after restart (97.5131ms)
+✔ a malformed redirect after POST acceptance preserves the write hold without retry (63.3969ms)
+✔ unknown one-use GET /fixture/auth/callback/google cannot be replayed (73.1164ms)
+✔ unknown one-use GET /fixture/auth/get-session cannot be replayed (67.4943ms)
+✔ reordered verifier query and renewed bearer keep the same unresolved intent (61.6582ms)
+✔ restart conservatively holds writes for an unresolved read without trusting receipt semantics (64.1207ms)
+✔ restart cannot erase a hold through legacy or corrupt receipt metadata (70.2028ms)
+✔ official pinned SDK social write sees unknown redirect once and retry is held (3473.9584ms)
+✔ one-use /fixture/auth/get-session hold is bound to its verifier/state despite other query changes (59.1442ms)
+✔ one-use /fixture/auth/callback/google hold is bound to its verifier/state despite other query changes (57.5795ms)
+✔ N00 streamed body crossing target TTL cannot dispatch a previously reserved auth request (95.7953ms)
+✔ N00 continuous body trickle cannot extend the ingress deadline or reach the auth backend (161.1763ms)
+✔ N00 timely streamed body retains exact bytes and one durable native HTTP hop (84.3676ms)
+✔ N00 a physical write exceeding remaining TTL stays unknown and cannot replay after restart (205.8448ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7845.584

@@ -1,0 +1,155 @@
+{
+  "checks": {
+    "red": {
+      "cases": 3,
+      "pass": 1,
+      "fail": 2,
+      "error": 0,
+      "skip": 0
+    },
+    "red-final": {
+      "cases": 4,
+      "pass": 1,
+      "fail": 3,
+      "error": 0,
+      "skip": 0
+    },
+    "focused-green": {
+      "cases": 28,
+      "pass": 28,
+      "fail": 0,
+      "error": 0,
+      "skip": 0
+    },
+    "root-green": {
+      "cases": 303,
+      "pass": 303,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "reported_pass": 304,
+      "duration_ms": 106071.156
+    },
+    "crypto": {
+      "cases": 8,
+      "pass": 8,
+      "fail": 0,
+      "error": 0,
+      "skip": 0
+    }
+  },
+  "built_reuse_ui": [
+    {
+      "target": "portable",
+      "nonce": "2314a4a2e7e8",
+      "pass": 6,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "time": "17.345563",
+      "fixture_only": true,
+      "fresh_host_proxy": true,
+      "new_build": false,
+      "metrics": {
+        "received": 38,
+        "forwarded": 37,
+        "locally_rejected": 2,
+        "unknown": 1
+      },
+      "requests": 38,
+      "outcomes": {
+        "accepted": 35,
+        "rejected": 2,
+        "unknown": 1,
+        "pending": 0
+      },
+      "cleanup": {
+        "fixture_only": true,
+        "private_root_removed": true,
+        "runtime_configuration_removed": true,
+        "owned_children_absent": true,
+        "owned_root_removal": {
+          "removed": true,
+          "marker_retained_until_children_removed": true,
+          "private_configuration_removed_first": true,
+          "transient_errors": []
+        },
+        "external_resources": 0,
+        "owned_journal_removed": true
+      }
+    },
+    {
+      "target": "vercel",
+      "nonce": "5d6402f65c01",
+      "pass": 6,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "time": "8.442167999999999",
+      "fixture_only": true,
+      "fresh_host_proxy": true,
+      "new_build": false,
+      "metrics": {
+        "received": 38,
+        "forwarded": 37,
+        "locally_rejected": 2,
+        "unknown": 1
+      },
+      "requests": 38,
+      "outcomes": {
+        "accepted": 35,
+        "rejected": 2,
+        "unknown": 1,
+        "pending": 0
+      },
+      "cleanup": {
+        "fixture_only": true,
+        "private_root_removed": true,
+        "runtime_configuration_removed": true,
+        "owned_children_absent": true,
+        "owned_root_removal": {
+          "removed": true,
+          "marker_retained_until_children_removed": true,
+          "private_configuration_removed_first": true,
+          "transient_errors": []
+        },
+        "external_resources": 0,
+        "owned_journal_removed": true
+      }
+    }
+  ],
+  "types_exit": 0,
+  "lint_exit": 0,
+  "contracts_exit": 0,
+  "routes_exit": 0,
+  "new_builds": 0,
+  "migrations": [],
+  "protocol_required_DB_suite_applicable": false,
+  "protocol_DB_connections": 0,
+  "root_suite_environment_has_separate_guarded_disposable_tests": true,
+  "external_auth_requests": 0,
+  "real_Neon_verified": false,
+  "original302_gate": "open;unchanged;not rerun this slice",
+  "independent_review": "pending;author only",
+  "full_N00_gate_passed": false,
+  "deployed_sha": null,
+  "status": "local-proxy-deadlines-verified;full-N00-open",
+  "source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+  "base_sha": "233848b263cfdefc49d6dc5f53df2d534afdba16",
+  "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+  "branch": "codex/n00-proxy-dispatch-deadline",
+  "checked_at": "2026-10-05T08:08:51.042633+00:00",
+  "owner_role": "Identity / QA",
+  "source_files": 3,
+  "insertions": 105,
+  "deletions": 8,
+  "protocol_code_changes": "absolute ingress body deadline, TTL recheck immediately before physical dispatch, remaining TTL clamps upstream timeout; unknown hold retained",
+  "new_operations": 0,
+  "operation_count": 84,
+  "original_operations": 70,
+  "extensions": 14,
+  "source_schema_head": "0037_bulk_manifests",
+  "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_PROXY_DISPATCH_DEADLINE/RESULTS.md",
+  "rollback": "Revert following metadata commit then9e1ef78 as one local harness/test unit;no DB/data undo;never erase admitted/unknown journal state.",
+  "next_eligible": "N00 local native browser/CLI containment gap audit; full real-Neon/Google/Admincleanup/original302 requires separate evidence and fresh exact authorization;N01/N02 prerequisite unchanged"
+}

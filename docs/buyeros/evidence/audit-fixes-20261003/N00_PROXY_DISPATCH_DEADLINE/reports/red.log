@@ -1,0 +1,49 @@
+✖ N00 streamed body crossing target TTL cannot dispatch a previously reserved auth request (100.6615ms)
+✖ N00 continuous body trickle cannot extend the ingress deadline or reach the auth backend (329.7684ms)
+✔ N00 timely streamed body retains exact bytes and one durable native HTTP hop (54.7808ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 1
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 659.0692
+
+✖ failing tests:
+
+test at tests\neon-proxy-deadline.test.mjs:30:1
+✖ N00 streamed body crossing target TTL cannot dispatch a previously reserved auth request (100.6615ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 403
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-proxy-deadline.test.mjs:34:38)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 403,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-proxy-deadline.test.mjs:39:1
+✖ N00 continuous body trickle cannot extend the ingress deadline or reach the auth backend (329.7684ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 408
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-proxy-deadline.test.mjs:44:59)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 408,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

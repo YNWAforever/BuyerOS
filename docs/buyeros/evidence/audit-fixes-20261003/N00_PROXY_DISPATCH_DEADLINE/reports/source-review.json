@@ -1,0 +1,15 @@
+{
+  "base_sha": "233848b263cfdefc49d6dc5f53df2d534afdba16",
+  "files": [
+    "docs/superpowers/plans/2026-10-05-n00-proxy-dispatch-deadline.md",
+    "scripts/neon-counted-proxy.mjs",
+    "tests/neon-proxy-deadline.test.mjs"
+  ],
+  "patch_sha256": "cc34364a812cc8326eb28a74c48af44c67d72b2e8829f8a05f9fef164c77d532",
+  "review": "author only;independent pending",
+  "diff_check_exit": 0,
+  "auth_business_API_UI_schema_changes": 0,
+  "original302_assertions_changed": false,
+  "original_timeout_assertions_weakened": false,
+  "claims": "local deadline repair only;fullN00open"
+}

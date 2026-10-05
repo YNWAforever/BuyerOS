@@ -1,0 +1,155 @@
+diff --git a/docs/superpowers/plans/2026-10-05-n00-proxy-dispatch-deadline.md b/docs/superpowers/plans/2026-10-05-n00-proxy-dispatch-deadline.md
+new file mode 100644
+index 0000000..1f2c09b
+--- /dev/null
++++ b/docs/superpowers/plans/2026-10-05-n00-proxy-dispatch-deadline.md
+@@ -0,0 +1,18 @@
++# N00 proxy dispatch deadline — local follow-up
++
++Spec: docs/superpowers/plans/2026-10-03-buyeros-gpt61-fixes.md (N00/F20/NA01).
++Base: 233848b263cfdefc49d6dc5f53df2d534afdba16.
++Global Constraints: existing isolated worktree; no agents/push/deploy/external calls/accounts/email/roles/schema/auth cutover. Auth0 and delivery403 retained. Original302 assertions unchanged. Owned loopback HTTP/filesystem fixtures only; no DB required by this protocol-only change.
++
++## Task 1: Bound ingress and recheck before physical dispatch
++
++Interfaces/predecessors: N00 Task1 owned backend/journal guard, RealRunJournal 200-total/20-cleanup reserve and two-hour TTL, existing counted proxy manual redirects and unknown holds. Runtime body may arrive after reservation. No new authorization inferred from a reserved request.
++
++Ruling: Fix the demonstrated local counted transport deadline independently; original302/real Neon/native all-channel containment/independent review remain open. A fixture guard cannot authorize real execution.
++
++1. Add native Node HTTP streamed-body tests: TTL crosses after durable reservation -> zero upstream hops and rejected receipt; continuous trickle exceeds body deadline -> zero upstream hops; timely body still relays original bytes/headers and records one hop; a physical write exceeding remaining TTL stays unknown and cannot replay after restart. Observe RED before implementation.
++2. Replace resettable ingress idle timeout with bounded body collection; recheck TTL immediately before physical dispatch. Preserve pre-dispatch rejected vs post-dispatch unknown and manual redirects/hold semantics. Keep body/response/budget bounds unchanged.
++3. Run new and existing related Node suites, whole root suites, types/scoped lint/generated84 contracts, strict EdDSA. Inspect source diff/rollback applicability. Reuse actual historical built runtime-flow artifacts only after verifying their hashes, label original built source separately; no current-source build claim from reuse.
++4. Local source commit and byte-exact evidence checkpoint; update only N00/NA01/current source pointers, preserve other tasks/cases/artifacts. N00 Task2 stays OPEN.
++
++Expected: meaningful nonempty RED/GREEN, zero final fail/skip for applicable suites; no external/provider/production mutation. No domain DB suite applicable; no DB skip suppressed. Rollback source plus following metadata; retain existing admitted request/unknown holds; no DB undo. Original302 and real auth gates stay OPEN.
+diff --git a/scripts/neon-counted-proxy.mjs b/scripts/neon-counted-proxy.mjs
+index 0e08a71..384f869 100644
+--- a/scripts/neon-counted-proxy.mjs
++++ b/scripts/neon-counted-proxy.mjs
+@@ -18,10 +18,21 @@ function unknownWrites(journal) {
+  return {hashes:new Set(),all:journal.snapshot().requests.some(record=>record.purpose==='auth'&&['pending','unknown'].includes(record.outcome))};
+ }
+ function respond(res,status,code) {if(!res.headersSent){res.statusCode=status;res.setHeader('Content-Type','application/json');res.setHeader('X-N00-Fixture-Only','true');}res.end(JSON.stringify({code,fixture_only:true}));}
+-async function bodyBytes(req) {
+- const chunks=[];let size=0;
+- for await(const chunk of req){size+=chunk.length;if(size<=BODY_LIMIT)chunks.push(chunk);}
+- if(size>BODY_LIMIT)throw deny('N00_FIXTURE_BODY_LIMIT',413);return Buffer.concat(chunks);
++async function bodyBytes(req,timeoutMs) {
++ // A continuously active client must not extend this body's absolute deadline.
++ return new Promise((ok,bad)=>{
++  const chunks=[];let size=0,settled=false;
++  const timer=setTimeout(()=>finish(deny('N00_FIXTURE_BODY_TIMEOUT',408)),timeoutMs);
++  function finish(error){
++   if(settled)return;settled=true;clearTimeout(timer);
++   req.off('data',data);req.off('end',end);req.off('aborted',aborted);req.off('error',aborted);
++   if(error){req.pause();bad(error);}else ok(Buffer.concat(chunks));
++  }
++  function data(chunk){size+=chunk.length;if(size>BODY_LIMIT){finish(deny('N00_FIXTURE_BODY_LIMIT',413));return;}chunks.push(Buffer.from(chunk));}
++  function end(){finish();}
++  function aborted(){finish(deny('N00_FIXTURE_BODY_ABORTED',400));}
++  req.on('data',data);req.once('end',end);req.once('aborted',aborted);req.once('error',aborted);
++ });
+ }
+ async function responseBytes(response) {
+  const chunks=[];let size=0;if(!response.body)return Buffer.alloc(0);
+@@ -64,13 +75,16 @@ export function createCountedAuthProxy({backend,journal,now=Date.now,timeoutMs=3
+     :path.startsWith('/fixture/auth/callback/')&&url.searchParams.has('state')
+      ?new URLSearchParams({state:url.searchParams.get('state')}):new URLSearchParams(url.searchParams);
+    query.sort();
+-   req.setTimeout(timeoutMs,()=>req.destroy());
+-   const body=await bodyBytes(req);req.setTimeout(0);fingerprint=createHash('sha256').update(method+'\n'+path+'\n'+query.toString()+'\n').update(body).digest('hex');
++   const body=await bodyBytes(req,timeoutMs);fingerprint=createHash('sha256').update(method+'\n'+path+'\n'+query.toString()+'\n').update(body).digest('hex');
+    if(write&&(blocked.all||blocked.hashes.has(fingerprint)))throw deny('N00_FIXTURE_UNKNOWN_AUTH_RESULT',409);
+    const headers=new Headers();for(const [key,value] of Object.entries(req.headers))if(!hop.has(key)&&value!==undefined)headers.set(key,Array.isArray(value)?value.join(', '):value);
+    if(write){if(inFlight.has(fingerprint))throw deny('N00_FIXTURE_AUTH_IN_FLIGHT',409);inFlight.add(fingerprint);held=true;}
++   // Reservation preceded asynchronous body collection; recheck immediately
++   // before the physical hop and bound its lifetime by the remaining target TTL.
++   const remaining=Date.parse(journal.snapshot().target.expiresAt)-now();
++   if(!Number.isFinite(remaining)||remaining<=0)throw deny('N00_FIXTURE_EXPIRED',403);
+    metrics.forwarded++;upstreamStarted=true;
+-   const response=await fetch(url,{method,headers,...(!safeMethods.has(method)?{body}:{}),redirect:'manual',signal:AbortSignal.timeout(timeoutMs)});
++   const response=await fetch(url,{method,headers,...(!safeMethods.has(method)?{body}:{}),redirect:'manual',signal:AbortSignal.timeout(Math.min(timeoutMs,Math.ceil(remaining)))});
+    const bytes=await responseBytes(response);let location=response.headers.get('location');
+    if(location) {
+     const to=new URL(location,upstream),own=proxy.address(),publicOrigin='http://127.0.0.1:'+own.port;
+@@ -90,8 +104,9 @@ export function createCountedAuthProxy({backend,journal,now=Date.now,timeoutMs=3
+    const status=code.includes('BUDGET')?429:code.includes('EXPIRED')?403:error.status??503;
+    metrics.locally_rejected++;
+    if(reservation){try {settle(upstreamStarted?'unknown':'rejected',status,code);}catch {if(write)blocked.all=true;}}
++   if(!upstreamStarted&&code.startsWith('N00_FIXTURE_BODY_')&&!res.headersSent)res.setHeader('Connection','close');
+    respond(res,status,code);
+-  }finally {req.setTimeout(0);if(held)inFlight.delete(fingerprint);}
++  }finally {if(held)inFlight.delete(fingerprint);}
+  });
+  proxy.fixtureReport=()=>({fixture_only:true,external_requests:0,metrics:{...metrics},journal:journal.snapshot()});
+  return proxy;
+diff --git a/tests/neon-proxy-deadline.test.mjs b/tests/neon-proxy-deadline.test.mjs
+new file mode 100644
+index 0000000..588a125
+--- /dev/null
++++ b/tests/neon-proxy-deadline.test.mjs
+@@ -0,0 +1,64 @@
++import assert from 'node:assert/strict';
++import {test} from 'node:test';
++import {request} from 'node:http';
++import {readFileSync} from 'node:fs';
++import {join} from 'node:path';
++import {executionFixture,listen} from './fixtures/neon-execution/fixture.mjs';
++import {createCountedAuthProxy} from '../scripts/neon-counted-proxy.mjs';
++import {RealRunJournal} from '../scripts/neon-real-preflight.mjs';
++
++async function wire(t,handler,options={}){
++ const f=await executionFixture(handler);t.after(()=>f.cleanup());
++ const proxy=createCountedAuthProxy({backend:f.backend,journal:f.journal,...options});f.servers.push(proxy);
++ return {...f,proxy,url:await listen(proxy)};
++}
++function streamed(t,url){
++ let req;
++ const response=new Promise((ok,bad)=>{
++  req=request(url,{method:'POST',headers:{'content-type':'application/json'}},res=>{
++   const chunks=[];res.on('data',chunk=>chunks.push(chunk));res.on('error',bad);res.on('end',()=>ok({status:res.statusCode,body:Buffer.concat(chunks).toString('utf8')}));
++  });req.on('error',bad);req.setTimeout(4000,()=>req.destroy(new Error('test request stalled')));
++ });
++ t.after(()=>req.destroy());req.flushHeaders();return {req,response};
++}
++async function admitted(f){
++ const deadline=Date.now()+2000;
++ while(f.journal.snapshot().requests.length===0&&Date.now()<deadline)await new Promise(ok=>setTimeout(ok,5));
++ assert.equal(f.journal.snapshot().requests.length,1);assert.equal(f.journal.snapshot().requests[0].outcome,'pending');
++}
++
++test('N00 streamed body crossing target TTL cannot dispatch a previously reserved auth request',async t=>{
++ let clock;const f=await wire(t,()=>false,{now:()=>clock??Date.now()});
++ const s=streamed(t,f.url+'/fixture/auth/sign-in/social');s.req.write('{"provider":');await admitted(f);
++ clock=Date.parse(f.target.expiresAt)+1;s.req.end('"google"}');
++ const reply=await s.response;assert.equal(reply.status,403);assert.match(reply.body,/EXPIRED/);assert.equal(f.model.hits.length,0);
++ const recovered=new RealRunJournal(f.root),item=recovered.snapshot().requests[0];assert.equal(item.outcome,'rejected');assert.equal(recovered.snapshot().requests.length,1);
++ const receipt=readFileSync(join(f.root,item.evidenceRef),'utf8');assert.doesNotMatch(receipt,/provider|google/);assert.match(receipt,/EXPIRED/);
++});
++
++test('N00 continuous body trickle cannot extend the ingress deadline or reach the auth backend',async t=>{
++ const f=await wire(t,()=>false,{timeoutMs:100});const s=streamed(t,f.url+'/fixture/auth/sign-in/social');
++ s.req.write('[');await admitted(f);let chunks=0;
++ const timer=setInterval(()=>{if(++chunks===8){clearInterval(timer);s.req.end('0]');}else s.req.write('0,');},25);
++ t.after(()=>clearInterval(timer));
++ const reply=await s.response;clearInterval(timer);assert.equal(reply.status,408);assert.match(reply.body,/BODY_TIMEOUT/);assert.equal(f.model.hits.length,0);
++ const item=new RealRunJournal(f.root).snapshot().requests[0];assert.equal(item.outcome,'rejected');assert.equal(f.proxy.fixtureReport().metrics.forwarded,0);
++});
++
++test('N00 timely streamed body retains exact bytes and one durable native HTTP hop',async t=>{
++ let received='';const f=await wire(t,async(req,res)=>{for await(const chunk of req)received+=chunk;assert.equal(req.headers['content-type'],'application/json');res.end('{"ok":true}');return true;});
++ const s=streamed(t,f.url+'/fixture/auth/sign-in/social');s.req.write('{"provider":');await admitted(f);s.req.end('"google"}');
++ const reply=await s.response;assert.equal(reply.status,200);assert.equal(received,'{"provider":"google"}');assert.deepEqual(JSON.parse(reply.body),{ok:true});
++ assert.equal(f.model.hits.length,1);const state=new RealRunJournal(f.root).snapshot();assert.equal(state.requests.length,1);assert.equal(state.requests[0].outcome,'accepted');
++});
++
++test('N00 a physical write exceeding remaining TTL stays unknown and cannot replay after restart',async t=>{
++ let commits=0;const f=await wire(t,async(req,res)=>{for await(const chunk of req)assert.ok(chunk.length);commits++;setTimeout(()=>res.end('{"committed":true}'),180).unref();return true;},{timeoutMs:1000,now:()=>Date.parse(fixtureExpiry)-100});
++ const fixtureExpiry=f.target.expiresAt;
++ const first=await fetch(f.url+'/fixture/auth/sign-out',{method:'POST',body:'{"same":"intent"}'});assert.equal(first.status,503);await first.text();assert.equal(commits,1);
++ assert.equal(new RealRunJournal(f.root).snapshot().requests[0].outcome,'unknown');
++ const again=await fetch(f.url+'/fixture/auth/sign-out',{method:'POST',body:'{"same":"intent"}'});assert.equal(again.status,409);await again.text();assert.equal(commits,1);
++ await new Promise(ok=>f.proxy.close(ok));
++ const recovered=createCountedAuthProxy({backend:f.backend,journal:new RealRunJournal(f.root)});f.servers.push(recovered);
++ const repeat=await fetch((await listen(recovered))+'/fixture/auth/sign-out',{method:'POST',body:'{"same":"intent"}'});assert.equal(repeat.status,409);await repeat.text();assert.equal(commits,1);
++});

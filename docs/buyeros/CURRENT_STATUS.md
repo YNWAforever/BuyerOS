@@ -1,3 +1,23 @@
+# Current N00 local proxy-deadline checkpoint — 2026-10-05
+
+Reviewed source `9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92` on codex/n00-proxy-dispatch-deadline. **Full N00/NA01/F20/Q11 remain OPEN.** [Red/green commands, actual fixture counters, screenshots and rollback](evidence/audit-fixes-20261003/N00_PROXY_DISPATCH_DEADLINE/RESULTS.md).
+
+| Current field | Evidence / disposition |
+| --- | --- |
+| Local source | `9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92`;local harness/test/plan3files105insertions/8deletions |
+| Application/API/UI source | 5aaf6492ec10078e4f1a4fa5b17efd41c5673eba unchanged in this follow-up |
+| Deployed source | Unknown / not checked;no new deployment;older deployment records historical |
+| Schema/runtime role/selector/epoch | Source0037_bulk_manifests;0migration;production unknown;peer0038unmerged |
+| Provider capabilities | Unconfigured/disabled;no real provider/price/quota/canary proof |
+| Local evidence | 28focused/304reportedroot(303leaves)/8STRICTcrypto/portable6+vercel6 UI;0fail/error/skip |
+| Build provenance | No new build;verified historical compiled base2eb4b38/c756596,14overlays/95portable+2625Vercel files;fresh current host proxy |
+| Contracts / responsibility / checked at | Generated84=70+14/types/lint exit0;Identity/QA;`2026-10-05T08:08:51.042633+00:00` |
+| Next eligible | N00 native browser/CLI containment gap audit/preparation;real auth separately gated |
+
+Local HTTP/persistence/SDK diagnostic integration verified with fictional identity. Each built-output UI fixture has38reservations/37hops/1expectedunknown/0pending/0external;owned children/root/journal removed. Original302/realNeon/Google/Admincleanup/fullnativeaccounting/independent/human gatesOPEN;N01/N02 prerequisite unchanged. Auth0/canonical users/memberships/RLS/HMAC retained;delivery403;no full staff/live/pilot acceptance. Q11 guidance child and other24 tasks/97 cases/3433 prior artifacts preserved.
+
+## Historical checkpoints below — original source/time scopes only
+
 # Current Q11 capability-guidance checkpoint — 2026-10-05
 
 Reviewed source `5aaf6492ec10078e4f1a4fa5b17efd41c5673eba` on `codex/q11-capability-guidance`. **Full Q11/F10/F13/N00 remain open.** Local responsibility/action UI and contract implemented; no deployment or migration. [Exact commands, red/green, screenshots and rollback](evidence/audit-fixes-20261003/Q11_CAPABILITY_GUIDANCE/RESULTS.md).

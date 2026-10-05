@@ -1,0 +1,5 @@
+* -text whitespace=cr-at-eol
+reports/** -text -diff
+runtime/** -text -diff
+screenshots/** -text -diff
+source.patch -text -diff -whitespace

@@ -1,0 +1,11 @@
+{
+  "protected_prior_files": 3433,
+  "other_audit_task_objects_unchanged": 24,
+  "legacy_task_objects_unchanged": 31,
+  "original_case_fields_unchanged": 98,
+  "other_cases_unchanged": 97,
+  "operations_unchanged": 84,
+  "foreign_worktrees_unchanged": 3,
+  "foreign_dirty_paths_preserved": 193,
+  "full_N00_open": true
+}
