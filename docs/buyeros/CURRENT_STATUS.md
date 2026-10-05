@@ -1,3 +1,23 @@
+# Current N00 local browser transport checkpoint — 2026-10-05
+
+Reviewed source `362b60dd42d034e229b9fa5f51a47d6ffcd4ec04` on `codex/n00-browser-websocket-refusal`. **Full N00 / NA01 remains OPEN.** [Exact evidence, native gap matrix, screenshot and rollback](evidence/audit-fixes-20261003/N00_BROWSER_NATIVE_CONTAINMENT/RESULTS.md).
+
+| Current field | Verified scope |
+| --- | --- |
+| Code | Dedicated fixture WebSockets refused; production runtime unchanged |
+| Application / proxy source | 5aaf649 /9e1ef78; no schema or role changes |
+| RED → GREEN | Chromium4pass1fail →5pass0fail/error/skip |
+| Fresh other gates | Node305 reported(304 leaves), crypto8; types/lint/contracts84 pass |
+| Open native findings | Owned probes prove Node http.get and APIRequestContext bypass; arbitrary CLI/OS egress OPEN |
+| Builds / deployment | No new build or deployment; deployed SHA unproven |
+| Schema | 0037_bulk_manifests; migrations0; peer0038 remains unmerged |
+| Review | Author self-review only; independent/human pending |
+| Next eligible | Explicit counted native transport + owned disposable egress preparation; real auth separately gated |
+
+Five owned cleanup receipts confirmed. All prior evidence, other tasks/cases and foreign worktrees preserved. Auth0/canonical users/memberships/RLS/HMAC retained; delivery403. Original302 and true Neon/Google/cleanup/full staff journey remain unverified.
+
+## Historical checkpoints below — original source and scope only
+
 # Current N00 local proxy-deadline checkpoint — 2026-10-05
 
 Reviewed source `9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92` on codex/n00-proxy-dispatch-deadline. **Full N00/NA01/F20/Q11 remain OPEN.** [Red/green commands, actual fixture counters, screenshots and rollback](evidence/audit-fixes-20261003/N00_PROXY_DISPATCH_DEADLINE/RESULTS.md).

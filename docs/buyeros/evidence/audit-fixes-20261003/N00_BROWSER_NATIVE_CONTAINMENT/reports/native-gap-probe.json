@@ -1,0 +1,17 @@
+{
+  "fixture_only": true,
+  "external_verified": false,
+  "external_http_requests": 0,
+  "auth_hops": 0,
+  "journal_reservations": 0,
+  "fetch_guard": {
+    "blocked": 1,
+    "forwarded": 0,
+    "fixture_only": true
+  },
+  "node_native_http_physical_requests": 1,
+  "browser_APIRequestContext_physical_requests": 1,
+  "context_http_route_callbacks": 0,
+  "all_native_contained": false,
+  "arbitrary_provider_cli_contained": false
+}

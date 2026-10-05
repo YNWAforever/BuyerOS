@@ -16,17 +16,17 @@
     "Q10",
     "N00"
   ],
-  "next_eligible": "N00 local native browser/CLI containment gap audit; full real-Neon/Google/Admincleanup/original302 requires separate evidence and fresh exact authorization;N01/N02 prerequisite unchanged",
+  "next_eligible": "N00 prepare explicit counted transports and disposable OS egress isolation for Node native HTTP/APIRequestContext/provider CLI; no real execution until containment, cleanup and fresh exact authorization",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
       "id": "N00",
       "status": "local-spike-partial",
-      "code_status": "local counted proxy absolute ingress and dispatch TTL repaired;Auth0 retained",
-      "verification_status": "304reportedroot(303leaves)/28focused/8crypto/6UIeach pass0fail/skip;retained compiled outputs;no new build/fullN00open",
-      "release_status": "not-deployed",
+      "code_status": "dedicated fixture Chromium WebSocket refusal; production runtime/Auth0 unchanged",
+      "verification_status": "5 actual Chromium /305 reported root(304 leaves)/8 strict crypto;0fail/error/skip;native HTTP/APIRequestContext gaps reproduced OPEN",
+      "release_status": "not-deployed; full N00 open",
       "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
-      "source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+      "source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
       "finding_ids": [
         "F20"
       ],
@@ -1321,6 +1321,73 @@
         "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_PROXY_DISPATCH_DEADLINE/RESULTS.md",
         "rollback": "Revert following metadata commit then9e1ef78 as one local harness/test unit;no DB/data undo;never erase admitted/unknown journal state.",
         "next_eligible": "N00 local native browser/CLI containment gap audit; full real-Neon/Google/Admincleanup/original302 requires separate evidence and fresh exact authorization;N01/N02 prerequisite unchanged"
+      },
+      "prior_proxy_deadline_summary_20261005": {
+        "code_status": "local counted proxy absolute ingress and dispatch TTL repaired;Auth0 retained",
+        "verification_status": "304reportedroot(303leaves)/28focused/8crypto/6UIeach pass0fail/skip;retained compiled outputs;no new build/fullN00open",
+        "release_status": "not-deployed",
+        "source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92"
+      },
+      "browser_native_containment_20261005": {
+        "checks": {
+          "red": {
+            "cases": 5,
+            "pass": 4,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "green": {
+            "cases": 5,
+            "pass": 5,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "duration_ms": 3231.391,
+            "global_errors": 0
+          },
+          "crypto": {
+            "cases": 8,
+            "pass": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "root-green": {
+            "cases": 304,
+            "pass": 304,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "reported_pass": 305,
+            "duration_ms": 125948.7707
+          }
+        },
+        "static_gates": {
+          "lint": 0,
+          "routes": 0,
+          "types": 0,
+          "contracts": 0
+        },
+        "new_build": false,
+        "external_http_requests": 0,
+        "real_Neon_verified": false,
+        "full_N00_open": true,
+        "source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+        "base_sha": "ebe830e16f15d432ad326e7f298d629c8ca59a6f",
+        "branch": "codex/n00-browser-websocket-refusal",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+        "checked_at": "2026-10-05T12:01:07.670479+00:00",
+        "status": "local-browser-WebSocket-refusal-verified; full-N00-open",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_BROWSER_NATIVE_CONTAINMENT/RESULTS.md",
+        "schema_head": "0037_bulk_manifests",
+        "migrations": 0,
+        "operation_count": 84,
+        "independent_review": "pending",
+        "deployed_sha": null,
+        "next_eligible": "N00 prepare explicit counted transports and disposable OS egress isolation for Node native HTTP/APIRequestContext/provider CLI; no real execution until containment, cleanup and fresh exact authorization",
+        "rollback": "Revert following metadata commit then source362b60d; no DB/data rollback, retain admitted/unknown journal holds."
       }
     },
     {
@@ -2114,7 +2181,7 @@
     "N00 full real-transport coverage/provider cleanup adapters next; fresh isolated actual auth roundtrip requires specific new approval",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+  "reviewed_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
   "deployed_sha": null,
   "selected_followups": [
     "U05",
@@ -2123,7 +2190,8 @@
     "N00 local built compatibility spike",
     "N00 managed callback contract fixture follow-up",
     "Q11 local capability responsibility and next action",
-    "N00 local ingress and physical dispatch deadline"
+    "N00 local ingress and physical dispatch deadline",
+    "N00 dedicated browser WebSocket refusal and native transport gap evidence (local-only)"
   ],
   "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
   "peer_q13_checkpoint": {
@@ -2134,5 +2202,5 @@
     "proposed_schema_head": "0038_workspace_discovery",
     "merged_here": false
   },
-  "latest_local_verification_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92"
+  "latest_local_verification_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04"
 }

@@ -1,3 +1,7 @@
+# Current release decision — NOT READY (2026-10-05)
+
+Source `362b60dd42d034e229b9fa5f51a47d6ffcd4ec04`: local dedicated browser WS guard verified;5Chromium/305reportedroot304leaves/8crypto, zero failures/errors/skips;types/lint/generated84 exit0. No new build or deployment; production source not asserted. FullN00/original302/realNeon/Google/Admincleanup/nativeHTTP/APIRequestContext/arbitraryCLI/OS egress/independent review remain OPEN. Auth0 retained;delivery403. [Evidence](evidence/audit-fixes-20261003/N00_BROWSER_NATIVE_CONTAINMENT/RESULTS.md). Historical release records below keep their original scope.
+
 # Current release readiness — 2026-10-05
 
 **NOT READY FOR LIVE PILOT.** [CURRENT_STATUS.md](CURRENT_STATUS.md) is the current table. Reviewed local harness source `9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92` repairs N00 deadline gaps;304reportedroot/28focused/8crypto/6UIeach pass0fail/skip. Actual retained SDK output reuse is separate from new builds (none this slice);application/API/UI source5aaf649 unchanged. FullN00/original302/realAuth/provider/recovery/staff/human/independentreview/productionreadback gatesOPEN. Auth0/delivery403 retained;no deployment or migration.

@@ -1,0 +1,23 @@
+{
+  "review_type": "author self-review",
+  "independent_review": "pending",
+  "source_base": "ebe830e16f15d432ad326e7f298d629c8ca59a6f",
+  "review_focus": {
+    "all_sockets_refused_without_server_connection": true,
+    "http_refusal_semantics_and_mutable_restart_origins_retained": true,
+    "same_origin_and_foreign_loopback_physical_observations": true,
+    "positive_control_is_owned_and_closed": true,
+    "service_worker_config_unchanged_blocked": true,
+    "original_3_browser_flows_unchanged_in_meaning": true,
+    "no_fixture_counts_presented_as_live": true,
+    "unknown_write_persistence_and_journal_budget_unchanged": true,
+    "DB_guards_auth_actor_roles_delivery_source_unchanged": true
+  },
+  "remaining_limits": [
+    "only dedicated fixture Chromium context covered",
+    "Node http and APIRequestContext bypasses demonstrated but not repaired",
+    "arbitrary provider CLI/OS/DNS/WebRTC/worker egress not contained",
+    "original302 and true Neon/Google/Admin cleanup and independent review open"
+  ],
+  "prior_protected_files_unchanged": 3563
+}

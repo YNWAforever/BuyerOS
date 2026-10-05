@@ -1,0 +1,49 @@
+<testsuites id="" name="" tests="5" failures="1" skipped="0" errors="0" time="9.613361000000001">
+<testsuite name="audit-neon-execution.spec.ts" timestamp="2026-10-05T11:48:46.631Z" hostname="" tests="5" failures="1" skipped="0" time="2.501" errors="0">
+<testcase name="NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget" classname="audit-neon-execution.spec.ts" time="0.807">
+</testcase>
+<testcase name="NA01 accounting: browser origin and direct-network refusals dispatch no provider HTTP" classname="audit-neon-execution.spec.ts" time="0.184">
+</testcase>
+<testcase name="NA01 accounting: browser refresh and a reconstructed journal cannot replay an unknown write" classname="audit-neon-execution.spec.ts" time="0.27">
+</testcase>
+<testcase name="NA01 containment: native WebSockets cannot bypass HTTP routing before or after refresh" classname="audit-neon-execution.spec.ts" time="0.414">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|browser\audit-neon-execution-NA01--a89db-ing-before-or-after-refresh\error-context.md]]
+
+[[ATTACHMENT|browser\audit-neon-execution-NA01--a89db-ing-before-or-after-refresh\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  audit-neon-execution.spec.ts:45:1 › NA01 containment: native WebSockets cannot bypass HTTP routing before or after refresh 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 3
+
+      63 |   expect(await attempt(page,targets)).toHaveLength(2);await page.reload();expect(await attempt(page,targets)).toHaveLength(2);
+      64 |   await testInfo.attach('native-socket-observations',{body:JSON.stringify({fixture_only:true,external_verified:false,positive_control_physical_upgrades:1,guarded_attempts:4,guarded_gateway_upgrades:gatewayUpgrades,guarded_foreign_sink_upgrades:sinkUpgrades-1,auth_hops:fixture.model.hits.length,reservations:fixture.journal.snapshot().requests.length}),contentType:'application/json'});
+    > 65 |   expect(sinkUpgrades).toBe(1);expect(gatewayUpgrades).toBe(0);expect(fixture.model.hits).toHaveLength(0);expect(fixture.journal.snapshot().requests).toHaveLength(0);
+         |                        ^
+      66 |  }finally{await positiveContext?.close();const proof=await fixture.cleanup();await testInfo.attach('owned-cleanup',{body:JSON.stringify(proof),contentType:'application/json'});}
+      67 | });
+      68 |
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-execution.spec.ts:65:24
+
+    Error Context: ..\..\test-results\neon-execution\browser\audit-neon-execution-NA01--a89db-ing-before-or-after-refresh\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\neon-execution\browser\audit-neon-execution-NA01--a89db-ing-before-or-after-refresh\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\neon-execution\browser\audit-neon-execution-NA01--a89db-ing-before-or-after-refresh\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="NA01 containment: blocked service workers issue no physical script request" classname="audit-neon-execution.spec.ts" time="0.826">
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,0 +1,61 @@
+{
+  "checks": {
+    "red": {
+      "cases": 5,
+      "pass": 4,
+      "fail": 1,
+      "error": 0,
+      "skip": 0
+    },
+    "green": {
+      "cases": 5,
+      "pass": 5,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "duration_ms": 3231.391,
+      "global_errors": 0
+    },
+    "crypto": {
+      "cases": 8,
+      "pass": 8,
+      "fail": 0,
+      "error": 0,
+      "skip": 0
+    },
+    "root-green": {
+      "cases": 304,
+      "pass": 304,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "reported_pass": 305,
+      "duration_ms": 125948.7707
+    }
+  },
+  "static_gates": {
+    "lint": 0,
+    "routes": 0,
+    "types": 0,
+    "contracts": 0
+  },
+  "new_build": false,
+  "external_http_requests": 0,
+  "real_Neon_verified": false,
+  "full_N00_open": true,
+  "source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+  "base_sha": "ebe830e16f15d432ad326e7f298d629c8ca59a6f",
+  "branch": "codex/n00-browser-websocket-refusal",
+  "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+  "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+  "checked_at": "2026-10-05T12:01:07.670479+00:00",
+  "status": "local-browser-WebSocket-refusal-verified; full-N00-open",
+  "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_BROWSER_NATIVE_CONTAINMENT/RESULTS.md",
+  "schema_head": "0037_bulk_manifests",
+  "migrations": 0,
+  "operation_count": 84,
+  "independent_review": "pending",
+  "deployed_sha": null,
+  "next_eligible": "N00 prepare explicit counted transports and disposable OS egress isolation for Node native HTTP/APIRequestContext/provider CLI; no real execution until containment, cleanup and fresh exact authorization",
+  "rollback": "Revert following metadata commit then source362b60d; no DB/data rollback, retain admitted/unknown journal holds."
+}

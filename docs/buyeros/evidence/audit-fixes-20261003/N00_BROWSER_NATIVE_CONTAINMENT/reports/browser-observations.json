@@ -1,0 +1,187 @@
+[
+  {
+    "case": "NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget",
+    "attachment": "receipt",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "http_requests": 4,
+      "channels": [
+        "browser",
+        "browser",
+        "sdk",
+        "cli"
+      ],
+      "canonical_database_connected": false
+    }
+  },
+  {
+    "case": "NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget",
+    "attachment": "journal",
+    "value": {
+      "schemaVersion": 1,
+      "proposal": "buyeros-neon-auth-n00-20261004",
+      "approvalReference": "fixture-only-no-external-authority",
+      "approvedAt": "2026-10-05T11:49:51.831Z",
+      "limit": 200,
+      "cleanupReserve": 20,
+      "buildLimit": 2,
+      "buildTimeoutMs": 1200000,
+      "target": {
+        "schemaVersion": 1,
+        "proposal": "buyeros-neon-auth-n00-20261004",
+        "sourceSha": "e0256f303502d4332400a837b99903926f74c842",
+        "projectId": "fictional-execution-project",
+        "branchId": "fictional-execution-branch",
+        "authId": "fictional-execution-auth",
+        "orgId": "org-soft-sunset-25251479",
+        "name": "buyeros-neon-auth-n00-20261004",
+        "regionId": "aws-ap-southeast-1",
+        "creationMode": "new-empty",
+        "createdAt": "2026-10-05T11:49:51.831Z",
+        "expiresAt": "2026-10-05T13:49:51.831Z",
+        "readback": {
+          "projectId": "fictional-execution-project",
+          "branchId": "fictional-execution-branch",
+          "authId": "fictional-execution-auth",
+          "orgId": "org-soft-sunset-25251479",
+          "name": "buyeros-neon-auth-n00-20261004",
+          "regionId": "aws-ap-southeast-1",
+          "observedAt": "2026-10-05T11:49:51.831Z",
+          "subscription": "free_v3",
+          "emailDeliveryEnabled": false,
+          "emailPasswordEnabled": false,
+          "emailHooksEnabled": false,
+          "methods": [
+            "google"
+          ],
+          "trustedOrigins": [
+            "http://localhost:44890"
+          ]
+        },
+        "auth": {
+          "baseUrl": "https://execution.fixture.invalid/auth",
+          "issuer": "https://issuer.fixture.invalid",
+          "audience": "fictional-execution-audience",
+          "jwksUrl": "https://execution.fixture.invalid/auth/jwks",
+          "algorithm": "EdDSA",
+          "keyType": "OKP",
+          "curve": "Ed25519"
+        },
+        "fingerprint": "44a20f7672c367040f39d3f59e094a65937fedab6863617bd8947629c76024c8"
+      },
+      "identity": null,
+      "requests": [
+        {
+          "sequence": 1,
+          "purpose": "auth",
+          "operationId": "execution-http-1",
+          "reservedAt": "2026-10-05T11:49:51.987Z",
+          "outcome": "accepted",
+          "evidenceRef": "execution-http-1.json"
+        },
+        {
+          "sequence": 2,
+          "purpose": "auth",
+          "operationId": "execution-http-2",
+          "reservedAt": "2026-10-05T11:49:52.028Z",
+          "outcome": "accepted",
+          "evidenceRef": "execution-http-2.json"
+        },
+        {
+          "sequence": 3,
+          "purpose": "auth",
+          "operationId": "execution-http-3",
+          "reservedAt": "2026-10-05T11:49:52.082Z",
+          "outcome": "accepted",
+          "evidenceRef": "execution-http-3.json"
+        },
+        {
+          "sequence": 4,
+          "purpose": "auth",
+          "operationId": "execution-http-4",
+          "reservedAt": "2026-10-05T11:49:52.244Z",
+          "outcome": "accepted",
+          "evidenceRef": "execution-http-4.json"
+        }
+      ],
+      "builds": []
+    }
+  },
+  {
+    "case": "NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget",
+    "attachment": "owned-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_journal_removed": true,
+      "owned_servers_closed": true
+    }
+  },
+  {
+    "case": "NA01 accounting: browser origin and direct-network refusals dispatch no provider HTTP",
+    "attachment": "owned-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_journal_removed": true,
+      "owned_servers_closed": true
+    }
+  },
+  {
+    "case": "NA01 accounting: browser refresh and a reconstructed journal cannot replay an unknown write",
+    "attachment": "owned-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_journal_removed": true,
+      "owned_servers_closed": true
+    }
+  },
+  {
+    "case": "NA01 containment: native WebSockets cannot bypass HTTP routing before or after refresh",
+    "attachment": "native-socket-observations",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "positive_control_physical_upgrades": 1,
+      "guarded_attempts": 4,
+      "guarded_gateway_upgrades": 0,
+      "guarded_foreign_sink_upgrades": 0,
+      "auth_hops": 0,
+      "reservations": 0
+    }
+  },
+  {
+    "case": "NA01 containment: native WebSockets cannot bypass HTTP routing before or after refresh",
+    "attachment": "owned-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_journal_removed": true,
+      "owned_servers_closed": true
+    }
+  },
+  {
+    "case": "NA01 containment: blocked service workers issue no physical script request",
+    "attachment": "service-worker-observations",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "registration": "blocked",
+      "physical_script_requests": 0,
+      "auth_hops": 0,
+      "reservations": 0
+    }
+  },
+  {
+    "case": "NA01 containment: blocked service workers issue no physical script request",
+    "attachment": "owned-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_journal_removed": true,
+      "owned_servers_closed": true
+    }
+  }
+]

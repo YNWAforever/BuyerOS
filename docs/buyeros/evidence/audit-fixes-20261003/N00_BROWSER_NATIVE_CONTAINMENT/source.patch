@@ -1,0 +1,123 @@
+diff --git a/docs/superpowers/plans/2026-10-05-n00-browser-websocket-refusal.md b/docs/superpowers/plans/2026-10-05-n00-browser-websocket-refusal.md
+new file mode 100644
+index 0000000..9ad03d6
+--- /dev/null
++++ b/docs/superpowers/plans/2026-10-05-n00-browser-websocket-refusal.md
+@@ -0,0 +1,19 @@
++# N00 browser WebSocket refusal and transport gap audit
++
++Spec: docs/superpowers/plans/2026-10-03-buyeros-gpt61-fixes.md N00 / F20 / NA01; BASE ebe830e16f15d432ad326e7f298d629c8ca59a6f.
++
++## Global Constraints
++Owned loopback/browser fixtures only; no external target, account, provider, email, DB/schema, roles, auth cutover, deployment, push or agents. Keep original302, unknown-write holds, budget, timeout and destructive DB guards unchanged. Source and metadata commits local only.
++
++## Task 1: Refuse browser WebSockets before physical connection
++Interfaces/predecessors: existing audit-neon-execution.spec.ts actual Chromium/pinned SDK/fixed Node CLI, owned gateway/journal and serviceWorkers:block dedicated config. HTTP routing cannot establish WebSocket containment. No port/string is authority to call a real target.
++1. Extract the existing HTTP-only route into one shared local spec helper without changing behavior. Add actual native WebSocket probes toward owned gateway and a separate owned sink; no backend upgrades permitted. A positive control in a separate unrestricted fixture context must prove the sink observes a real native upgrade. Observe meaningful RED (actual upgrades vs zero); keep original three cases unchanged in meaning.
++2. Add context-wide WebSocket refusal before any native socket is created. Verify same-origin and foreign-loopback WebSockets both blocked; normal counted browser/SDK/CLI still pass. Verify service worker registration does not make a physical script request. Include fresh-page/refresh coverage.
++3. Run dedicated browser cases and exact discovery, related/full Node, types/scoped lint/contracts84. No fresh build or full staff/Neon acceptance claim; this is a spec-side local guard, not production runtime. Review source diff, byte evidence, preservation, rollback applicability, then source and metadata commits.
++Expected: RED reflects observed owned upgrades, GREEN nonempty zero fail/error/skip, original three browser flows retained. No DB suite applicable to browser transport-only slice; no required DB skip. Unknown journals preserved.
++
++## Review Focus and limits
++Context HTTP/WS/service-worker cases cover only this dedicated fixture. Arbitrary Node HTTP/https/net/TLS/undici workers, provider CLI, browser APIRequestContext/WebRTC/DNS/background egress, true Google and actual provider cleanup remain OPEN. HTTP refusals and WS attempts are local refused transport attempts, not actual upstream auth hops; do not fabricate journal reservations for zero-hop attempts. Author review only; independent review pending. Full N00 Task2 and N01/N02 prerequisites remain open.
++
++## Rollback
++Revert following metadata and this source commit; no DB/data rollback. Retain admitted/unknown journal holds and all historical evidence. Next local eligibility: audit and prepare remaining native transports; real target/account execution separately requires fresh bounded authorization.
+diff --git a/tests/e2e/audit-neon-execution.spec.ts b/tests/e2e/audit-neon-execution.spec.ts
+index 42d1365..32d2252 100644
+--- a/tests/e2e/audit-neon-execution.spec.ts
++++ b/tests/e2e/audit-neon-execution.spec.ts
+@@ -1,14 +1,25 @@
+-import {test,expect} from '@playwright/test';
++import {test,expect,type BrowserContext} from '@playwright/test';
++import {createServer} from 'node:http';
+ import {createAuthClient} from '@neondatabase/auth';
+ import {RealRunJournal} from '../../scripts/neon-real-preflight.mjs';
+ import {createFixtureExecutionBoundary,createFixtureExecutionGateway,runFixtureCli} from '../../scripts/neon-execution-boundary.mjs';
+ import {executionFixture,listen} from '../fixtures/neon-execution/fixture.mjs';
+ const nonce='fictional-browser-owner-'.padEnd(43,'x');
++// Dedicated loopback fixture only; broader native/provider containment stays open.
++async function containBrowser(context:BrowserContext,allowed:Set<string>,onRefused=()=>{}) {
++ // No fixture flow needs WebSockets; never connect routed sockets to a server.
++ await context.routeWebSocket('**/*',socket=>socket.close({code:1008,reason:'N00 fixture WebSockets refused'}));
++ await context.route('**/*',route=>{
++  if(allowed.has(new URL(route.request().url()).origin))return route.continue();
++  onRefused();return route.abort();
++ });
++}
++
+ 
+ test('NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget',async({page},testInfo)=>{
+  const fixture=await executionFixture(undefined);
+  try{const execution=createFixtureExecutionBoundary({backend:fixture.backend,journal:fixture.journal}),gateway=createFixtureExecutionGateway({execution,nonce});fixture.servers.push(gateway);const url=await listen(gateway);
+-  await page.context().route('**/*',route=>new URL(route.request().url()).origin===url?route.continue():route.abort());await page.goto(url);await expect(page.getByRole('heading',{name:'N00 accounting fixture'})).toBeVisible();
++  await containBrowser(page.context(),new Set([url]));await page.goto(url);await expect(page.getByRole('heading',{name:'N00 accounting fixture'})).toBeVisible();
+   const results=await page.evaluate(async({nonce})=>{const call=async(path:string)=>{const response=await fetch('/dispatch',{method:'POST',headers:{'Content-Type':'application/json','x-n00-owner':nonce},body:JSON.stringify({channel:'browser',method:'GET',path,body:''})});const value:unknown=await response.json();if(!value||typeof value!=='object'||!('status' in value)||typeof value.status!=='number'||!('location' in value)||(typeof value.location!=='string'&&value.location!==null)||!('fixture_only' in value)||typeof value.fixture_only!=='boolean'||!('external_verified' in value)||typeof value.external_verified!=='boolean')throw new Error('Invalid fixture receipt');return {status:value.status,location:value.location,fixture_only:value.fixture_only,external_verified:value.external_verified};};const first=await call('/fixture/auth/redirect');if(typeof first.location!=='string')throw new Error('Missing manual redirect');const second=await call(first.location);document.body.appendChild(Object.assign(document.createElement('output'),{textContent:`Browser hops: 2; fixture only: ${second.fixture_only}`}));return [first.status,second.status,second.external_verified];},{nonce});
+   expect(results).toEqual([302,200,false]);const token=await createAuthClient(url+'/sdk/auth').token({fetchOptions:{headers:{'x-n00-owner':nonce}}});expect(token.data?.token).toBe('fictional.a.b');
+   const cli=await runFixtureCli({gateway,nonce,request:{channel:'cli',method:'GET',path:'/fixture/auth/token'},parentEnvironment:{...process.env,NEON_API_KEY:'fictional-forbidden-secret'}});expect(cli.environment_clean).toBe(true);
+@@ -19,15 +30,52 @@ test('NA01 accounting: actual browser, pinned SDK and fixed CLI share the same d
+ test('NA01 accounting: browser origin and direct-network refusals dispatch no provider HTTP',async({page},testInfo)=>{
+  const fixture=await executionFixture(undefined);
+  try{const execution=createFixtureExecutionBoundary({backend:fixture.backend,journal:fixture.journal}),gateway=createFixtureExecutionGateway({execution,nonce});fixture.servers.push(gateway);const url=await listen(gateway);let blocked=0;
+-  await page.context().route('**/*',route=>{if(new URL(route.request().url()).origin===url)return route.continue();blocked++;return route.abort();});await page.goto(url);
++  await containBrowser(page.context(),new Set([url]),()=>{blocked++;});await page.goto(url);
+   const result=await page.evaluate(async()=>{let direct=false;try{await fetch('https://execution.fixture.invalid/auth/token');}catch{direct=true;}const response=await fetch('/dispatch',{method:'POST',headers:{'x-n00-owner':'wrong'},body:JSON.stringify({channel:'browser',method:'GET',path:'/fixture/auth/token'})});return {direct,status:response.status};});expect(result).toEqual({direct:true,status:403});expect(blocked).toBe(1);expect(fixture.model.hits).toHaveLength(0);expect(fixture.journal.snapshot().requests).toHaveLength(0);
+  }finally{const proof=await fixture.cleanup();await testInfo.attach('owned-cleanup',{body:JSON.stringify(proof),contentType:'application/json'});}
+ });
+ test('NA01 accounting: browser refresh and a reconstructed journal cannot replay an unknown write',async({page},testInfo)=>{
+  const fixture=await executionFixture(undefined);
+- try{let execution=createFixtureExecutionBoundary({backend:fixture.backend,journal:fixture.journal});const first=createFixtureExecutionGateway({execution,nonce});fixture.servers.push(first);const firstUrl=await listen(first);const allowed=new Set([firstUrl]);await page.context().route('**/*',route=>allowed.has(new URL(route.request().url()).origin)?route.continue():route.abort());await page.goto(firstUrl);
++ try{let execution=createFixtureExecutionBoundary({backend:fixture.backend,journal:fixture.journal});const first=createFixtureExecutionGateway({execution,nonce});fixture.servers.push(first);const firstUrl=await listen(first);const allowed=new Set([firstUrl]);await containBrowser(page.context(),allowed);await page.goto(firstUrl);
+   const call=()=>page.evaluate(async({nonce})=>{const response=await fetch('/dispatch',{method:'POST',headers:{'x-n00-owner':nonce},body:JSON.stringify({channel:'browser',method:'POST',path:'/fixture/auth/commit',body:'{"one":"intent"}'})});const result:unknown=await response.json();if(!result||typeof result!=='object')throw new Error('Invalid fixture result');return {status:response.status,result:{outcome:'outcome' in result?result.outcome:null,code:'code' in result?result.code:null}};},{nonce});
+   expect((await call()).result.outcome).toBe('unknown');expect(fixture.model.commits).toBe(1);
+   execution=createFixtureExecutionBoundary({backend:fixture.backend,journal:new RealRunJournal(fixture.root)});const restarted=createFixtureExecutionGateway({execution,nonce});fixture.servers.push(restarted);const secondUrl=await listen(restarted);allowed.add(secondUrl);await page.goto(secondUrl);await page.reload();const retry=await call();expect(retry.status).toBe(403);expect(retry.result.code).toBe('N00_EXECUTION_HELD_INTENT');expect(fixture.model.commits).toBe(1);expect(fixture.journal.snapshot().requests).toHaveLength(1);
+  }finally{const proof=await fixture.cleanup();await testInfo.attach('owned-cleanup',{body:JSON.stringify(proof),contentType:'application/json'});}
+ });
++
++
++test('NA01 containment: native WebSockets cannot bypass HTTP routing before or after refresh',async({page,browser},testInfo)=>{
++ const fixture=await executionFixture(undefined);
++ let positiveContext:BrowserContext|undefined;
++ try {
++  const execution=createFixtureExecutionBoundary({backend:fixture.backend,journal:fixture.journal}),gateway=createFixtureExecutionGateway({execution,nonce});fixture.servers.push(gateway);const url=await listen(gateway);
++  let gatewayUpgrades=0,sinkUpgrades=0;
++  gateway.on('upgrade',(_request,socket)=>{gatewayUpgrades++;socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');});
++  const sink=createServer((_request,response)=>{response.end('<!doctype html><title>Owned socket sink</title>');});fixture.servers.push(sink);
++  sink.on('upgrade',(_request,socket)=>{sinkUpgrades++;socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');});
++  const sinkUrl=await listen(sink);
++  // Positive control: the actual Chromium socket must physically reach this sink.
++  positiveContext=await browser.newContext({serviceWorkers:'block'});const controlPage=await positiveContext.newPage();await controlPage.goto(sinkUrl);
++  const attempt=(p:typeof page,targets:string[])=>p.evaluate(async targets=>Promise.all(targets.map(target=>new Promise<string>(resolve=>{
++   const socket=new WebSocket(target);socket.onerror=()=>resolve('error');socket.onclose=()=>resolve('closed');
++  }))),targets);
++  await attempt(controlPage,[sinkUrl.replace('http:','ws:')+'/positive-control']);expect(sinkUpgrades).toBe(1);await positiveContext.close();positiveContext=undefined;
++  await containBrowser(page.context(),new Set([url]));await page.goto(url);
++  const targets=[url.replace('http:','ws:')+'/direct',sinkUrl.replace('http:','ws:')+'/direct'];
++  expect(await attempt(page,targets)).toHaveLength(2);await page.reload();expect(await attempt(page,targets)).toHaveLength(2);
++  await testInfo.attach('native-socket-observations',{body:JSON.stringify({fixture_only:true,external_verified:false,positive_control_physical_upgrades:1,guarded_attempts:4,guarded_gateway_upgrades:gatewayUpgrades,guarded_foreign_sink_upgrades:sinkUpgrades-1,auth_hops:fixture.model.hits.length,reservations:fixture.journal.snapshot().requests.length}),contentType:'application/json'});
++  expect(sinkUpgrades).toBe(1);expect(gatewayUpgrades).toBe(0);expect(fixture.model.hits).toHaveLength(0);expect(fixture.journal.snapshot().requests).toHaveLength(0);
++ }finally{await positiveContext?.close();const proof=await fixture.cleanup();await testInfo.attach('owned-cleanup',{body:JSON.stringify(proof),contentType:'application/json'});}
++});
++
++test('NA01 containment: blocked service workers issue no physical script request',async({page},testInfo)=>{
++ const fixture=await executionFixture(undefined);
++ try {
++  const execution=createFixtureExecutionBoundary({backend:fixture.backend,journal:fixture.journal}),gateway=createFixtureExecutionGateway({execution,nonce});fixture.servers.push(gateway);const url=await listen(gateway);let scriptRequests=0;
++  gateway.on('request',request=>{if(request.url==='/worker.js')scriptRequests++;});
++  await containBrowser(page.context(),new Set([url]));await page.goto(url);
++  const result=await page.evaluate(async()=>{try{return await navigator.serviceWorker.register('/worker.js')?'registered':'blocked';}catch{return 'blocked';}});
++  expect(result).toBe('blocked');expect(page.context().serviceWorkers()).toHaveLength(0);expect(scriptRequests).toBe(0);expect(fixture.model.hits).toHaveLength(0);expect(fixture.journal.snapshot().requests).toHaveLength(0);
++  await testInfo.attach('service-worker-observations',{body:JSON.stringify({fixture_only:true,external_verified:false,registration:result,physical_script_requests:scriptRequests,auth_hops:0,reservations:0}),contentType:'application/json'});
++ }finally{const proof=await fixture.cleanup();await testInfo.attach('owned-cleanup',{body:JSON.stringify(proof),contentType:'application/json'});}
++});
+diff --git a/tests/neon-compatibility-discovery.test.mjs b/tests/neon-compatibility-discovery.test.mjs
+index e8bf73b..43fb4ff 100644
+--- a/tests/neon-compatibility-discovery.test.mjs
++++ b/tests/neon-compatibility-discovery.test.mjs
+@@ -15,3 +15,6 @@ test('N00 counted config discovers the same seven cases with separate producer o
+ 
+ for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regression.config.ts'])test(`all N00 output profiles stay isolated from ${config}`,()=>{const files=discovered(config);assert.ok(files.some(file=>file.endsWith('audit-auth-entry.spec.ts')));assert.equal(files.filter(file=>file.includes('audit-neon-')).length,0);});
+ test('runtime flow config discovers all six actual-output cases including unknown sign-out',()=>{const files=discovered('playwright.neon-runtime-flow.config.ts');assert.equal(files.length,6);assert.ok(files.every(file=>file.endsWith('audit-neon-runtime-flow.spec.ts')));});
++
++
++test('execution config discovers the original three flows and both native browser guard cases',()=>{const files=discovered('playwright.neon-execution.config.ts');assert.equal(files.length,5);assert.ok(files.every(file=>file.endsWith('audit-neon-execution.spec.ts')));});

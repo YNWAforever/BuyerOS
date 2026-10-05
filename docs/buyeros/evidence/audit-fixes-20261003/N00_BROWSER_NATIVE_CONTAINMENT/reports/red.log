@@ -1,0 +1,43 @@
+
+Running 5 tests using 1 worker
+
+(node:44700) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-execution.spec.ts:17:1 › NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget (807ms)
+  ok 2 tests\e2e\audit-neon-execution.spec.ts:28:1 › NA01 accounting: browser origin and direct-network refusals dispatch no provider HTTP (184ms)
+  ok 3 tests\e2e\audit-neon-execution.spec.ts:35:1 › NA01 accounting: browser refresh and a reconstructed journal cannot replay an unknown write (270ms)
+  x  4 tests\e2e\audit-neon-execution.spec.ts:45:1 › NA01 containment: native WebSockets cannot bypass HTTP routing before or after refresh (414ms)
+(node:53164) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 5 tests\e2e\audit-neon-execution.spec.ts:69:1 › NA01 containment: blocked service workers issue no physical script request (826ms)
+
+
+  1) tests\e2e\audit-neon-execution.spec.ts:45:1 › NA01 containment: native WebSockets cannot bypass HTTP routing before or after refresh 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 3
+
+      63 |   expect(await attempt(page,targets)).toHaveLength(2);await page.reload();expect(await attempt(page,targets)).toHaveLength(2);
+      64 |   await testInfo.attach('native-socket-observations',{body:JSON.stringify({fixture_only:true,external_verified:false,positive_control_physical_upgrades:1,guarded_attempts:4,guarded_gateway_upgrades:gatewayUpgrades,guarded_foreign_sink_upgrades:sinkUpgrades-1,auth_hops:fixture.model.hits.length,reservations:fixture.journal.snapshot().requests.length}),contentType:'application/json'});
+    > 65 |   expect(sinkUpgrades).toBe(1);expect(gatewayUpgrades).toBe(0);expect(fixture.model.hits).toHaveLength(0);expect(fixture.journal.snapshot().requests).toHaveLength(0);
+         |                        ^
+      66 |  }finally{await positiveContext?.close();const proof=await fixture.cleanup();await testInfo.attach('owned-cleanup',{body:JSON.stringify(proof),contentType:'application/json'});}
+      67 | });
+      68 |
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-execution.spec.ts:65:24
+
+    Error Context: test-results\neon-execution\browser\audit-neon-execution-NA01--a89db-ing-before-or-after-refresh\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\neon-execution\browser\audit-neon-execution-NA01--a89db-ing-before-or-after-refresh\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\neon-execution\browser\audit-neon-execution-NA01--a89db-ing-before-or-after-refresh\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\audit-neon-execution.spec.ts:45:1 › NA01 containment: native WebSockets cannot bypass HTTP routing before or after refresh 
+  4 passed (9.6s)
