@@ -79,3 +79,15 @@ test('NA01 containment: blocked service workers issue no physical script request
   await testInfo.attach('service-worker-observations',{body:JSON.stringify({fixture_only:true,external_verified:false,registration:result,physical_script_requests:scriptRequests,auth_hops:0,reservations:0}),contentType:'application/json'});
  }finally{const proof=await fixture.cleanup();await testInfo.attach('owned-cleanup',{body:JSON.stringify(proof),contentType:'application/json'});}
 });
+
+
+test('NA01 counted APIRequestContext: private cookies and two manual hops through the original journal',async({page},testInfo)=>{
+ const adapter=await import('../../scripts/neon-api-request-context.mjs').catch(error=>{if(error.code!=='ERR_MODULE_NOT_FOUND')throw error;return null;});expect(typeof adapter?.createFixtureApiRequestContext).toBe('function');if(!adapter)throw new Error('Missing counted API request context');
+ const fixture=await executionFixture(undefined);let client:Awaited<ReturnType<typeof adapter.createFixtureApiRequestContext>>|undefined;
+ try {
+  const execution=createFixtureExecutionBoundary({backend:fixture.backend,journal:fixture.journal}),gateway=createFixtureExecutionGateway({execution,nonce});fixture.servers.push(gateway);const url=await listen(gateway);const cookies:(string|null)[]=[];gateway.on('request',req=>{if(req.url==='/dispatch')cookies.push(req.headers.cookie??null);});
+  await page.context().addCookies([{name:'fictional-browser-session',value:'fictional-private-browser-cookie',url}]);await containBrowser(page.context(),new Set([url]));await page.goto(url);
+  client=await adapter.createFixtureApiRequestContext({gateway,execution,journal:fixture.journal,nonce});const first=await client.dispatch({method:'GET',path:'/fixture/auth/redirect'});expect(first.status).toBe(302);expect(fixture.model.hits).toHaveLength(1);expect(first.location).toBe('/fixture/auth/token');if(!first.location)throw new Error('Missing manual hop');const second=await client.dispatch({method:'GET',path:first.location});expect(second.status).toBe(200);expect(fixture.model.hits).toHaveLength(2);expect(fixture.journal.snapshot().requests.map((v:{outcome:string})=>v.outcome)).toEqual(['accepted','accepted']);expect(cookies).toEqual([null,null]);
+  await page.evaluate(()=>document.body.appendChild(Object.assign(document.createElement('output'),{textContent:'Counted API context hops: 2; private cookie isolation: true; fixture only: true'})));await expect(page.locator('output')).toContainText('Counted API context hops: 2');await page.screenshot({path:testInfo.outputPath('api-context-fixture.png')});await testInfo.attach('api-context-receipt',{body:JSON.stringify({fixture_only:true,external_verified:false,http_requests:2,reservations:2,private_cookie_isolation:true,raw_context_os_contained:false}),contentType:'application/json'});
+ }finally {if(client)await testInfo.attach('owned-api-context-cleanup',{body:JSON.stringify(await client.dispose()),contentType:'application/json'});const proof=await fixture.cleanup();await testInfo.attach('owned-cleanup',{body:JSON.stringify(proof),contentType:'application/json'});}
+});
