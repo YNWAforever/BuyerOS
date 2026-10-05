@@ -1,3 +1,24 @@
+# Current N00 counted native IPC checkpoint — 2026-10-05
+
+Author-reviewed local source `779138aa5335eb829a97a80bbc80430a32201c1a` on `codex/n00-native-ipc-isolation`. **Full N00 / NA01 / F20 remains OPEN.** [Commands, exact raw outputs, probes, screenshot and rollback](evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md).
+
+| Current field | Verified scope |
+| --- | --- |
+| Code | Fixed fixture native worker uses private counted IPC into the existing journal owner; actual child uses network none |
+| RED → GREEN | Missing IPC: 0pass/2fail; behavioral native isolation: 2pass/1fail with 3 direct HTTP; final new3 pass, 0 direct HTTP |
+| Fresh root | 308 reported tests /307 JUnit leaf cases pass, 0fail/error/skip; 466803.7974ms |
+| Fresh other gates | Chromium5/EdDSA8 pass, zero failures/errors/skips; types/lint/generated contracts/routes84 exit0 |
+| Local integration | Owned positive control: 3 HTTP requests plus native TCP; isolated child rawHTTP/fetch/TCP/subprocess all refused, counted IPC works, unknown hold survives restart |
+| Ownership / cleanup | Exact own labels/IDs inspected before removal, absence confirmed; all this slice's owned Docker resources absent |
+| OS isolation limits | Parent/broker/browser/APIRequestContext/arbitrary provider CLI/control-plane OPEN; no real provider runtime in the fixed worker |
+| Application / schema | Application5aaf649, proxy9e1ef78, browser362b60d unchanged; head0037_bulk_manifests; migrations0; peer0038 unmerged |
+| Builds / deployment | No new build or deployment; retained app SSR output is historical source5aaf649; deployedSHA unproven |
+| Review / next | Author self-review only; independent pending. Next: counted APIRequestContext and parent/browser/control-plane isolation composition |
+
+Auth0/canonical users/memberships/roles/RLS/historical actors/Cloudflare HMAC retained; delivery403. Original302 unchanged/not rerun; true Neon/Google/managed cleanup/full staff acceptance unverified. Other tasks/cases, original evidence and foreign worktrees preserved. No accounts, email, production DB/schema, paid provider, external mutation, push or deployment.
+
+## Historical checkpoints below — original source and scope only
+
 # Current N00 local browser transport checkpoint — 2026-10-05
 
 Reviewed source `362b60dd42d034e229b9fa5f51a47d6ffcd4ec04` on `codex/n00-browser-websocket-refusal`. **Full N00 / NA01 remains OPEN.** [Exact evidence, native gap matrix, screenshot and rollback](evidence/audit-fixes-20261003/N00_BROWSER_NATIVE_CONTAINMENT/RESULTS.md).

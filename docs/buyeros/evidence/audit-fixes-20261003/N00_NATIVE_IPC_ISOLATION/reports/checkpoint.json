@@ -1,0 +1,152 @@
+{
+  "status": "local-fixed-native-worker-verified;full-N00-open",
+  "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+  "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+  "branch": "codex/n00-native-ipc-isolation",
+  "checked_at": "2026-10-05T13:43:35.000910+00:00",
+  "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+  "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+  "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+  "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+  "checks": {
+    "red-ipc": {
+      "leaf_cases": 2,
+      "pass": 0,
+      "fail": 2,
+      "error": 0,
+      "skip": 0,
+      "attributes": {}
+    },
+    "red-isolation-behavior": {
+      "leaf_cases": 3,
+      "pass": 2,
+      "fail": 1,
+      "error": 0,
+      "skip": 0,
+      "attributes": {}
+    },
+    "root-first": {
+      "leaf_cases": 307,
+      "pass": 306,
+      "fail": 1,
+      "error": 0,
+      "skip": 0,
+      "attributes": {}
+    },
+    "root-green": {
+      "leaf_cases": 307,
+      "pass": 307,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "attributes": {},
+      "reported": {
+        "tests": "308",
+        "pass": "308",
+        "fail": "0",
+        "cancelled": "0",
+        "skipped": "0",
+        "todo": "0",
+        "duration_ms": "466803.7974"
+      }
+    },
+    "browser": {
+      "leaf_cases": 5,
+      "pass": 5,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "attributes": {
+        "id": "",
+        "name": "",
+        "tests": "5",
+        "failures": "0",
+        "skipped": "0",
+        "errors": "0",
+        "time": "13.736473000000002"
+      }
+    },
+    "crypto": {
+      "leaf_cases": 8,
+      "pass": 8,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "attributes": {
+        "name": "pytest tests"
+      }
+    }
+  },
+  "static_gates": {
+    "lint": 0,
+    "types": 0,
+    "contracts": 0,
+    "routes": 0,
+    "browser": 0,
+    "crypto": 0
+  },
+  "native_observation": {
+    "fixture_only": true,
+    "positive_control": {
+      "http_requests": 3,
+      "native_tcp_connected": true
+    },
+    "direct_http_requests": 0,
+    "probes": {
+      "http_connected": false,
+      "fetch_connected": false,
+      "tcp_connected": false,
+      "subprocess_connected": false
+    },
+    "worker_policy": {
+      "network": "none",
+      "read_only": true,
+      "user": "node",
+      "cap_drop": [
+        "ALL"
+      ],
+      "pids_limit": 64,
+      "memory": 134217728,
+      "nano_cpus": 1000000000,
+      "published_ports": 0,
+      "mounts": 0,
+      "environment_names": [
+        "BUYEROS_STRICT_INTEGRATION",
+        "PATH",
+        "NODE_VERSION",
+        "YARN_VERSION"
+      ]
+    },
+    "cleanup": {
+      "complete": true,
+      "containers_absent": [
+        "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
+        "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
+        "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
+      ],
+      "network_absent": true,
+      "fixture_only": true,
+      "inspect_retries": 0
+    }
+  },
+  "new_node_cases": 3,
+  "new_build": false,
+  "fixture_only": true,
+  "canonical_db_connection": false,
+  "real_Neon_verified": false,
+  "parent_os_contained": false,
+  "browser_os_contained": false,
+  "arbitrary_provider_cli_contained": false,
+  "external_requests": 0,
+  "full_N00_open": true,
+  "original302_rerun": false,
+  "schema_head": "0037_bulk_manifests",
+  "migrations": 0,
+  "operation_count": 84,
+  "original_operations": 70,
+  "extensions": 14,
+  "independent_review": "pending",
+  "deployed_sha": null,
+  "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+  "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+}

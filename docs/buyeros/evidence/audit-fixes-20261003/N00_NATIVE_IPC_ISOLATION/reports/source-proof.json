@@ -1,0 +1,28 @@
+{
+  "files": {
+    "scripts/neon-native-ipc.mjs": "c182d89c6d010e3785975180c2616a24fa256f64c9aa7ea5f4e768db7978ce88",
+    "scripts/neon-native-ipc.d.mts": "44e6dbbaf194f92dd32e2fb671f8493754f30094443a1b23db2f7a8409aa3b90",
+    "scripts/neon-native-worker.mjs": "09fe66b2dcb95a8fcabf84d060c8bb1efb0d86781aff83754c774d82e6b6f1e3",
+    "tests/neon-native-ipc.test.mjs": "8ea730282f8f407cef8ee50cfc79bd8853cfbbe667bed18f3b84fcc48c9c4697",
+    "docs/superpowers/plans/2026-10-05-n00-native-ipc-isolation.md": "d1696f748d151aca78a5892c20bad43e0a80185138df834681187f8fbbe80b44"
+  },
+  "staged_files": [
+    "docs/superpowers/plans/2026-10-05-n00-native-ipc-isolation.md",
+    "scripts/neon-native-ipc.d.mts",
+    "scripts/neon-native-ipc.mjs",
+    "scripts/neon-native-worker.mjs",
+    "tests/neon-native-ipc.test.mjs"
+  ],
+  "reverse_apply_check_exit": 0,
+  "rollback_executed": false,
+  "independent_review": "pending",
+  "author_review": "source-reviewed, current green evidence read",
+  "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+  "commit_blob_sha256": {
+    "scripts/neon-native-ipc.mjs": "29430996cc06b4c49c03a1ca511137cae7957dcc92ba3cbf097adaf09b286c28",
+    "scripts/neon-native-ipc.d.mts": "d8695e9ca30bb3df966a8528d8a1d01c03d176c9d53617d3b062ab1814470ccb",
+    "scripts/neon-native-worker.mjs": "d836346def3564657106f4b1b2d4b71840d941291941b7d297d3c5960adb8b47",
+    "tests/neon-native-ipc.test.mjs": "79d4a01b6dacdbbbd4b2b599ac044cea488e9bbc9f555608e0c5f22a059fcd8d",
+    "docs/superpowers/plans/2026-10-05-n00-native-ipc-isolation.md": "7ccfa73ca98401e0c15797579bf7a29f5bf290da0ed1ec1bf0659091bbe2aadf"
+  }
+}

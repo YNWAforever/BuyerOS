@@ -1,0 +1,7 @@
+{
+  "fixture_only": true,
+  "verified_owner": "941a3a40cef6",
+  "container_removed": "88562a2722abfbe58b86651b4ef9fd5d92c6b6f3520f636c38dcc3669e8b8be8",
+  "network_removed": "51d5674362fe577997b932359c9bf6bf92008543c63a3cde79c560115970574d",
+  "no_shared_or_foreign_resources_touched": true
+}

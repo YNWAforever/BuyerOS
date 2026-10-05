@@ -1,0 +1,32 @@
+✔ native worker IPC reserves before physical auth and unknown intent stays held after a new container/journal (83837.9648ms)
+✔ native runner rejects injected dispatch owner and foreign journal before any Docker resources (52.3472ms)
+✖ isolated native worker cannot bypass IPC through raw HTTP, fetch, TCP or a subprocess (51266.4468ms)
+ℹ {"fixture_only":true,"positive_control":{"http_requests":3,"native_tcp_connected":true},"direct_http_requests":3,"probes":{"http_connected":true,"fetch_connected":true,"tcp_connected":true,"subprocess_connected":true},"worker_policy":{"network":"buyeros-n00-native-de3962bfc358-net","read_only":true,"user":"node","cap_drop":["ALL"],"pids_limit":64,"memory":134217728,"nano_cpus":1000000000,"published_ports":0,"mounts":0,"environment_names":["BUYEROS_STRICT_INTEGRATION","PATH","NODE_VERSION","YARN_VERSION"]},"cleanup":{"complete":true,"containers_absent":["b16cda45426bc0dca9dead21c4ef1cdc5139996505ebed19a3326877aa99325a","20cb4b8be7d765696fa9d751a8fd1f3340e38931755ddb30385e47c0652d3abd","949a96b92341647d784a8c85d78703c75cbd1ed67516e508bedae800d059fb39"],"network_absent":true,"fixture_only":true}}
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 135662.0632
+
+✖ failing tests:
+
+test at tests\neon-native-ipc.test.mjs:26:1
+✖ isolated native worker cannot bypass IPC through raw HTTP, fetch, TCP or a subprocess (51266.4468ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  3 !== 0
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-native-ipc.test.mjs:29:127)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 3,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

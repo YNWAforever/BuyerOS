@@ -1,0 +1,22 @@
+✖ native worker IPC reserves before physical auth and unknown intent stays held after a new container/journal (31085.9889ms)
+✔ native runner rejects injected dispatch owner and foreign journal before any Docker resources (40.8754ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 31870.2311
+
+✖ failing tests:
+
+test at tests\neon-native-ipc.test.mjs:12:1
+✖ native worker IPC reserves before physical auth and unknown intent stays held after a new container/journal (31085.9889ms)
+  Error: N00_NATIVE_CLEANUP_FAILED
+      at need (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-native-ipc.mjs:10:43)
+      at Module.runFixtureNativeSession (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-native-ipc.mjs:56:132)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-native-ipc.test.mjs:13:31)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)

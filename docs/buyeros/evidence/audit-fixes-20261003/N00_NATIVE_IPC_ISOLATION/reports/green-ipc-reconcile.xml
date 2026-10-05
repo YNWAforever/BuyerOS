@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="native worker IPC reserves before physical auth and unknown intent stays held after a new container/journal" time="57.983623" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-native-ipc.test.mjs" failure="N00_NATIVE_WORKER_FAILED">
+		<failure type="testCodeFailure" message="N00_NATIVE_WORKER_FAILED">
+[Error [ERR_TEST_FAILURE]: N00_NATIVE_WORKER_FAILED] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: N00_NATIVE_WORKER_FAILED
+      at ChildProcess.&lt;anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-native-ipc.mjs:28:157)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+}
+		</failure>
+	</testcase>
+	<testcase name="native runner rejects injected dispatch owner and foreign journal before any Docker resources" time="0.042509" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-native-ipc.test.mjs"/>
+	<!-- tests 2 -->
+	<!-- suites 0 -->
+	<!-- pass 1 -->
+	<!-- fail 1 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 58785.7827 -->
+</testsuites>

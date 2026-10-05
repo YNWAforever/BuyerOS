@@ -1,0 +1,98 @@
+[
+  {
+    "report": "browser.xml",
+    "leaf_cases": 5,
+    "pass": 5,
+    "fail": 0,
+    "error": 0,
+    "skip": 0
+  },
+  {
+    "report": "crypto.xml",
+    "leaf_cases": 8,
+    "pass": 8,
+    "fail": 0,
+    "error": 0,
+    "skip": 0
+  },
+  {
+    "report": "green-ipc-debug.xml",
+    "leaf_cases": 2,
+    "pass": 1,
+    "fail": 1,
+    "error": 0,
+    "skip": 0
+  },
+  {
+    "report": "green-ipc-pipe.xml",
+    "leaf_cases": 1,
+    "pass": 0,
+    "fail": 1,
+    "error": 0,
+    "skip": 0
+  },
+  {
+    "report": "green-ipc-reconcile.xml",
+    "leaf_cases": 2,
+    "pass": 1,
+    "fail": 1,
+    "error": 0,
+    "skip": 0
+  },
+  {
+    "report": "green-ipc.xml",
+    "leaf_cases": 2,
+    "pass": 1,
+    "fail": 1,
+    "error": 0,
+    "skip": 0
+  },
+  {
+    "report": "red-ipc.xml",
+    "leaf_cases": 2,
+    "pass": 0,
+    "fail": 2,
+    "error": 0,
+    "skip": 0
+  },
+  {
+    "report": "red-isolation-behavior.xml",
+    "leaf_cases": 3,
+    "pass": 2,
+    "fail": 1,
+    "error": 0,
+    "skip": 0
+  },
+  {
+    "report": "red-isolation-stage.xml",
+    "leaf_cases": 1,
+    "pass": 0,
+    "fail": 1,
+    "error": 0,
+    "skip": 0
+  },
+  {
+    "report": "red-isolation.xml",
+    "leaf_cases": 1,
+    "pass": 0,
+    "fail": 1,
+    "error": 0,
+    "skip": 0
+  },
+  {
+    "report": "root-first.xml",
+    "leaf_cases": 307,
+    "pass": 306,
+    "fail": 1,
+    "error": 0,
+    "skip": 0
+  },
+  {
+    "report": "root-green.xml",
+    "leaf_cases": 307,
+    "pass": 307,
+    "fail": 0,
+    "error": 0,
+    "skip": 0
+  }
+]

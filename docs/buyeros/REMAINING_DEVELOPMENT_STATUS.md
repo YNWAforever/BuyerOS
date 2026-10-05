@@ -1,3 +1,5 @@
+> Latest local checkpoint (2026-10-05): `779138aa5335eb829a97a80bbc80430a32201c1a`. Counted fixed-native IPC and actual network-none child verified; root308 reported/307leaves, Chromium5, crypto8 all pass0fail/error/skip. Positive control3HTTP+TCP, isolated native4probes refused/0directHTTP; unknown intent retains hold after restart. No new build/deploy/auth cutover; full N00/NA01/parent/browser/APIRequestContext/arbitraryCLI remain OPEN. [Evidence and rollback](evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md). Older notices retain their historical scope.
+
 > Latest local checkpoint (2026-10-05): `362b60dd42d034e229b9fa5f51a47d6ffcd4ec04`. Dedicated Chromium WS guard5pass; root305 reported/304leaves, crypto8; zero fail/error/skip. Native HTTP/APIRequestContext gaps reproduced and OPEN; no build/deploy/auth cutover. FullN00/NA01 still open. [Evidence and rollback](evidence/audit-fixes-20261003/N00_BROWSER_NATIVE_CONTAINMENT/RESULTS.md). Older checkpoint notices below retain historical scope.
 
 > Current N00 local deadline checkpoint: source `9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92`;absolute body wait/dispatchTTL repaired. 28focused/304reportedroot/8crypto/6UIeach pass0fail/error/skip;actual retained SDK outputs hash-verified,no newbuild/no external/authcutover/migration/deploy. FullN00/NA01/Q11 open. [Current status](CURRENT_STATUS.md); [exact evidence](evidence/audit-fixes-20261003/N00_PROXY_DISPATCH_DEADLINE/RESULTS.md). Next local native browser/CLI containment gap audit.
@@ -1425,3 +1427,25 @@ Reviewed source c756596406f41884f61a3b64c8549f569e34cfa4;27files518insertions/1d
 Reviewed source b8a10848b62090ff19544918961e54df3ebfa921;10files277insertions/0deletions. Owned loopback gateway durably counts SDK/browser/fixed Node fixture CLI/control HTTP; cross-channel write holds/manual redirects/limits/TTL; exact-resource cleanup model uses fresh matching readback and confirmed absence. Real provider/CLI/human Google containment and external cleanup API adapters remain unimplemented/unverified. Final related165pass0fail0skip(new21included),Chromium3pass0skip0globalerror/3ownedcleanup receipts,crypto8pass1existingwarning;types/lint/contracts0;0037singlehead/no migrations/DBconnections/skips. Attempted full30-fileNode234tests229pass5fail0skip: two missing mainVerceloutput gates,admin/mvp Docker30stimeouts and parent failure; unchanged tests/no weakened assertions. Full suite RED disclosed. Prior c756596 actual builtUI historicalcarried,not rerun.1401priorN00payloads+31inputs/84operations(70+14)/guards/24other tasks/97other cases/all98historicfields/legacyT registry/unrelated worktrees preserved. Reverse applicability0only;revert following metadata then source;no DB/resource undo. Evidence: docs/buyeros/evidence/audit-fixes-20261003/N00_EXECUTION_BOUNDARY/RESULTS.md. N00/NA01/Task2 OPEN;original302/realNeon/humanGoogle/fresh approval/independent review gates open. Auth0 retained/deployednull;no agents/external mutation/push/deploy. Nexteligible N00 transport coverage/provider cleanup adapters.
 
 Author review: observed23pass1fail for JSON-whitespace/header replay; canonical bound identity intent fixed; final24focused/238related0fail/skip. Initial source5ecaa23 plus correction050f0d0; no provider or schema action.
+
+
+## 2026-10-05 N00 counted native IPC and fixed-worker isolation (779138a)
+
+# Current N00 counted native IPC checkpoint — 2026-10-05
+
+Author-reviewed local source `779138aa5335eb829a97a80bbc80430a32201c1a` on `codex/n00-native-ipc-isolation`. **Full N00 / NA01 / F20 remains OPEN.** [Commands, exact raw outputs, probes, screenshot and rollback](evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md).
+
+| Current field | Verified scope |
+| --- | --- |
+| Code | Fixed fixture native worker uses private counted IPC into the existing journal owner; actual child uses network none |
+| RED → GREEN | Missing IPC: 0pass/2fail; behavioral native isolation: 2pass/1fail with 3 direct HTTP; final new3 pass, 0 direct HTTP |
+| Fresh root | 308 reported tests /307 JUnit leaf cases pass, 0fail/error/skip; 466803.7974ms |
+| Fresh other gates | Chromium5/EdDSA8 pass, zero failures/errors/skips; types/lint/generated contracts/routes84 exit0 |
+| Local integration | Owned positive control: 3 HTTP requests plus native TCP; isolated child rawHTTP/fetch/TCP/subprocess all refused, counted IPC works, unknown hold survives restart |
+| Ownership / cleanup | Exact own labels/IDs inspected before removal, absence confirmed; all this slice's owned Docker resources absent |
+| OS isolation limits | Parent/broker/browser/APIRequestContext/arbitrary provider CLI/control-plane OPEN; no real provider runtime in the fixed worker |
+| Application / schema | Application5aaf649, proxy9e1ef78, browser362b60d unchanged; head0037_bulk_manifests; migrations0; peer0038 unmerged |
+| Builds / deployment | No new build or deployment; retained app SSR output is historical source5aaf649; deployedSHA unproven |
+| Review / next | Author self-review only; independent pending. Next: counted APIRequestContext and parent/browser/control-plane isolation composition |
+
+Auth0/canonical users/memberships/roles/RLS/historical actors/Cloudflare HMAC retained; delivery403. Original302 unchanged/not rerun; true Neon/Google/managed cleanup/full staff acceptance unverified. Other tasks/cases, original evidence and foreign worktrees preserved. No accounts, email, production DB/schema, paid provider, external mutation, push or deployment.

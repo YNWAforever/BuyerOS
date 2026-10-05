@@ -1,0 +1,43 @@
+{
+  "fixture_only": true,
+  "positive_control": {
+    "http_requests": 3,
+    "native_tcp_connected": true
+  },
+  "direct_http_requests": 0,
+  "probes": {
+    "http_connected": false,
+    "fetch_connected": false,
+    "tcp_connected": false,
+    "subprocess_connected": false
+  },
+  "worker_policy": {
+    "network": "none",
+    "read_only": true,
+    "user": "node",
+    "cap_drop": [
+      "ALL"
+    ],
+    "pids_limit": 64,
+    "memory": 134217728,
+    "nano_cpus": 1000000000,
+    "published_ports": 0,
+    "mounts": 0,
+    "environment_names": [
+      "BUYEROS_STRICT_INTEGRATION",
+      "PATH",
+      "NODE_VERSION",
+      "YARN_VERSION"
+    ]
+  },
+  "cleanup": {
+    "complete": true,
+    "containers_absent": [
+      "6b2f9ffab82b41aa819b8ca51614e8b718b4096fb0838259f13e51a16e77a25c",
+      "56c0f61aa00104d3e47ae61ab5113eacb4cecd6f267b0837a16bafe34e3b5cc7",
+      "925554a302ddb56e2de061251140186a28f9b9408cb5f091f6e339a608b981e5"
+    ],
+    "network_absent": true,
+    "fixture_only": true
+  }
+}

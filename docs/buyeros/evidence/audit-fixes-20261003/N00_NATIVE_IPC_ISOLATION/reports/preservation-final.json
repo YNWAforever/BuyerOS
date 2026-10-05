@@ -1,0 +1,15 @@
+{
+  "preserved_prior_artifacts": 3599,
+  "other_audit_tasks_unchanged": 24,
+  "legacy_T_tasks_unchanged": 31,
+  "historical_case_rows_unchanged": 98,
+  "historical_columns_unchanged": 15,
+  "other_case_rows_unchanged": 97,
+  "operations_bytes_unchanged": true,
+  "operations": 84,
+  "foreign_worktrees_unchanged": 3,
+  "foreign_dirty_paths_preserved": 193,
+  "source_files_same_as_tested_working_bytes": 5,
+  "source_commit": "779138aa5335eb829a97a80bbc80430a32201c1a",
+  "full_N00_complete": false
+}

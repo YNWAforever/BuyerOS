@@ -1,0 +1,166 @@
+diff --git a/docs/superpowers/plans/2026-10-05-n00-native-ipc-isolation.md b/docs/superpowers/plans/2026-10-05-n00-native-ipc-isolation.md
+new file mode 100644
+index 0000000..dd8a8dd
+--- /dev/null
++++ b/docs/superpowers/plans/2026-10-05-n00-native-ipc-isolation.md
+@@ -0,0 +1,19 @@
++# N00 local counted IPC and isolated native worker
++
++Spec: docs/superpowers/plans/2026-10-03-buyeros-gpt61-fixes.md N00/F20/NA01. BASE a06e134d807850c6fe8f4324a877d187e1ed5387.
++
++## Global Constraints
++Existing isolated worktree/branch; no agents, external request, account, provider, email, production DB/schema/roles/auth cutover/push/deploy. Cached local image only, explicit local Docker endpoint; no pulls/builds. Owned internal network/containers, no published ports/host sockets/credential mounts. Canonical actors/RLS/HMAC and delivery403 retained. Original302 and DB guards unchanged.
++
++## Task 1: Private counted IPC into the existing journal owner
++Interfaces: existing fixture-only createFixtureExecutionBoundary.dispatch and assertFixtureExecutionBoundary; fixed cli channel; RealRunJournal canonical intent/hold/200budget/20cleanup/TTL. Single parent dispatch owner; child returns requests on stdout and receives receipts on stdin. No domain operation/migration added.
++Write nonempty failing contract tests for durable receipt, unknown/restart/channel-stable intent and invalid injected boundary; implement fixed owned Docker worker/control with bounded private pipes, read-only nonroot/cap-drop/no-new-privileges/resource limits and exact ownership/absence cleanup. Initially use only owned --internal network to exercise positive control and IPC. Assert original user/credential environment never reaches child. Observe RED before implementation and GREEN.
++
++## Task 2: Deny isolated child's direct native egress
++Add regression that raw Node HTTP/fetch/TCP/subprocess cannot reach an owned sink. Existing internal control must demonstrably reach it (three HTTP plus raw TCP), then worker must have zero direct requests. Observe behavioral RED against Task1 internal network, then select --network none for the worker; keep positive control on its own owned internal network. Inspect actual container network/user/readOnly/caps/ports/mount/env fields; validate native outcomes, IPC request persists before owned auth receives it, holds survive restart, all owned IDs absent after cleanup. No skip when Docker unavailable; fail and disclose.
++
++## Verification and review
++Meaningful RED/GREEN; full root suites, original5Chromium accounting/WS/SW, strictcrypto/types/scopedlint/contracts84 and read-only Alembic heads. No current build needed (host harness/worker only), no true Neon/provider/full staff UI claim. Parent/broker and Chromium/APIRequestContext/Google/control-plane traffic remain outside this child's OS boundary. Full N00 Task2 remains OPEN; never promote fixed worker to arbitrary provider CLI containment. Inspect payload/pipe bounds, no shell interpolation, exact label/ID cleanup on all paths, local context/image only and original evidence/worktrees preserved. Author review only, independent pending.
++
++## Rollback and next
++Revert source plus following metadata; no DB/data undo. Preserve admitted/unknown journal holds. Next local work: compose browser/parent/control-plane into an end-to-end counted isolation design, APIRequestContext explicit adapter; real scope still requires fresh target/account/cleanup authorization after harness review.
+diff --git a/scripts/neon-native-ipc.d.mts b/scripts/neon-native-ipc.d.mts
+new file mode 100644
+index 0000000..b8b2ee1
+--- /dev/null
++++ b/scripts/neon-native-ipc.d.mts
+@@ -0,0 +1,4 @@
++import type {FixtureExecutionBoundary,ExecutionRequest,ExecutionReceipt} from './neon-execution-boundary.mjs';
++import type {RealRunJournal} from './neon-real-preflight.mjs';
++export interface NativeSessionReport {fixture_only:true;external_verified:false;parent_os_contained:false;browser_os_contained:false;arbitrary_provider_cli_contained:false;environment_clean:true;runtime_environment_names:string[];receipts:(ExecutionReceipt|{error:string})[];probes:Record<string,boolean>;direct_http_requests:number;positive_control:{http_requests:number;native_tcp_connected:boolean};worker_policy:{network:string;read_only:boolean;user:string;cap_drop:string[];pids_limit:number;memory:number;nano_cpus:number;published_ports:number;mounts:number;environment_names:string[]};image_id:string;owner:string;resource_ids:{containers:string[];network:string};cleanup:{inspect_retries:number;complete:boolean;containers_absent:string[];network_absent:boolean;fixture_only:true};}
++export function runFixtureNativeSession(options:{execution:FixtureExecutionBoundary;journal:RealRunJournal;requests:ExecutionRequest[];parentEnvironment?:NodeJS.ProcessEnv}):Promise<NativeSessionReport>;
+diff --git a/scripts/neon-native-ipc.mjs b/scripts/neon-native-ipc.mjs
+new file mode 100644
+index 0000000..b1f655f
+--- /dev/null
++++ b/scripts/neon-native-ipc.mjs
+@@ -0,0 +1,61 @@
++/** Local fictional IPC worker only. Parent/broker/browser/provider egress is NOT contained. */
++import {execFile,spawn} from 'node:child_process';
++import {randomBytes} from 'node:crypto';
++import {createInterface} from 'node:readline';
++import {readFileSync,lstatSync} from 'node:fs';
++import {fileURLToPath} from 'node:url';
++import {fixtureChildEnvironment} from './neon-compatibility-harness.mjs';
++import {assertFixtureExecutionBoundary} from './neon-execution-boundary.mjs';
++const LABEL='buyeros.n00.native.owner',CONTEXT='desktop-linux',PORT=38479;
++const readbackRetries=new WeakMap();
++function need(value,code){if(!value)throw new Error('N00_NATIVE_'+code);}
++const sinkSource=`import {createServer} from 'node:http';let hits=0;createServer((req,res)=>{if(req.url.startsWith('/native/'))hits++;res.setHeader('Content-Type','application/json');res.end(JSON.stringify({hits,fixture_only:true}));}).listen(${PORT},'0.0.0.0');`;
++const metricsSource=`fetch('http://127.0.0.1:${PORT}/metrics',{signal:AbortSignal.timeout(1000)}).then(r=>r.text()).then(s=>process.stdout.write(s)).catch(()=>process.exitCode=1)`;
++const workerPath=fileURLToPath(new URL('./neon-native-worker.mjs',import.meta.url));
++function docker(args,env){return new Promise((ok,bad)=>execFile('docker',['--context',CONTEXT,...args],{env,encoding:'utf8',timeout:20000,maxBuffer:1048576,windowsHide:true},(error,stdout,stderr)=>{if(error){const failure=new Error('N00_NATIVE_DOCKER_FAILED');failure.absent=(args[0]==='inspect'||args[0]==='network'&&args[1]==='inspect')&&stderr.includes(args.at(-1))&&/No such (object|container|network)|network .* not found/i.test(stderr);failure.operation=args.slice(0,2).join(' ');failure.exit=error.code;failure.killed=error.killed;failure.detail=stderr.slice(0,512);bad(failure);}else ok(stdout.trim());}));}
++async function inspect(kind,id,env){const args=kind==='network'?['network','inspect',id]:['inspect',id];let data;try{data=await docker(args,env);}catch(e){if(!e.killed||e.detail)throw e;readbackRetries.set(env,(readbackRetries.get(env)??0)+1);data=await docker(args,env);}return JSON.parse(data)[0];}
++async function absent(kind,id,env){try{await inspect(kind,id,env);return false;}catch(e){if(e.absent)return true;throw e;}}
++function verifyContainer(value,owner){need(value.Config?.Labels?.[LABEL]===owner&&value.Id?.match(/^[a-f0-9]{64}$/),'OWNERSHIP');need(value.HostConfig.ReadonlyRootfs&&value.Config.User==='node'&&value.HostConfig.CapDrop?.includes('ALL')&&!Object.keys(value.HostConfig.PortBindings??{}).length,'CONTAINER_POLICY');}
++function pipeWorker(name,cfg,env,dispatch){return new Promise((ok,bad)=>{
++ const child=spawn('docker',['--context',CONTEXT,'start','-a','-i',name],{env,stdio:['pipe','pipe','pipe'],windowsHide:true});let size=0,complete,nextIndex=0,failed=false,failureReason=null;
++ const fail=reason=>{if(failed)return;failed=true;failureReason=reason?.message??String(reason??'worker transport');child.kill();};
++ const timer=setTimeout(()=>fail('worker deadline'),15000);child.stderr.resume();child.stdout.on('data',chunk=>{size+=chunk.length;if(size>1048576)fail();});
++ const lines=createInterface({input:child.stdout,crlfDelay:Infinity});let work=Promise.resolve();
++ lines.on('line',line=>{work=work.then(async()=>{if(failed)return;need(line.length<=65536,'PIPE_LIMIT');const item=JSON.parse(line);
++  if(item.type==='request'){need(item.index===nextIndex&&nextIndex<cfg.requests.length&&JSON.stringify(item.request)===JSON.stringify(cfg.requests[nextIndex]),'PIPE_CONTEXT');nextIndex++;let value;try{value=await dispatch(item.request);}catch(e){value={error:e.message?.startsWith('N00_')?e.message:'N00_NATIVE_DISPATCH_FAILED'};}child.stdin.write(JSON.stringify({type:'receipt',index:item.index,value})+'\n');}
++  else if(item.type==='complete'){need(!complete&&nextIndex===cfg.requests.length&&item.environment_clean===true,'PIPE_COMPLETE');complete=item;child.stdin.end();}
++  else throw new Error('N00_NATIVE_WORKER_REFUSED:'+item.stage+':'+item.error_name);
++ }).catch(fail);});
++ child.once('error',fail);child.once('close',async code=>{await work;clearTimeout(timer);lines.close();if(!failed&&code===0&&complete)ok(complete);else {const e=new Error('N00_NATIVE_WORKER_FAILED');e.reason=failureReason;e.exit=code;e.complete=!!complete;e.requests=nextIndex;bad(e);}});
++ child.stdin.on('error',e=>{if(!complete)fail(e);});child.stdin.write(JSON.stringify(cfg)+'\n');
++});}
++export async function runFixtureNativeSession({execution,journal,requests,parentEnvironment=process.env}){
++ assertFixtureExecutionBoundary(execution,journal);need(Array.isArray(requests)&&requests.length<=8,'REQUESTS');
++ need(JSON.stringify(requests).length<=32768&&requests.every(r=>r&&r.channel==='cli'&&['GET','HEAD','POST'].includes(r.method)&&typeof r.path==='string'&&r.path.startsWith('/fixture/auth/')&&!r.path.includes('admin/')),'REQUESTS');
++ need(lstatSync(workerPath).isFile()&&!lstatSync(workerPath).isSymbolicLink(),'WORKER');const source=readFileSync(workerPath,'utf8');need(source.length<32768,'WORKER');
++ const env=fixtureChildEnvironment(parentEnvironment),owner=randomBytes(6).toString('hex'),prefix='buyeros-n00-native-'+owner,networkName=prefix+'-net',containers=[],attempted=[];let networkId,result,networkAttempted=false,originalError;
++ const fingerprint=journal.snapshot().target.fingerprint;
++ const cleanup={complete:false,containers_absent:[],network_absent:false,fixture_only:true};
++ try {
++  const endpoint=JSON.parse(await docker(['context','inspect',CONTEXT],env))[0].Endpoints.docker.Host;need(/^npipe:\/.*dockerDesktopLinuxEngine$/.test(endpoint),'LOCAL_DOCKER');
++  const image=JSON.parse(await docker(['image','inspect','node:22-bookworm-slim'],env))[0];need(/^sha256:[a-f0-9]{64}$/.test(image.Id),'CACHED_IMAGE');
++  networkAttempted=true;networkId=await docker(['network','create','--internal','--label',LABEL+'='+owner,networkName],env);const network=await inspect('network',networkId,env);need(network.Internal&&network.Labels?.[LABEL]===owner&&network.Id===networkId,'NETWORK_POLICY');
++  const common=['--label',LABEL+'='+owner,'--read-only','--user','node','--cap-drop','ALL','--security-opt','no-new-privileges','--pids-limit','64','--memory','128m','--cpus','1','--env','BUYEROS_STRICT_INTEGRATION=1'];
++  const create=async(name,mode,worker)=>{attempted.push(name);const id=await docker(['create','--pull=never','--name',name,...common,'--network',mode,...(worker?['-i']:[]),image.Id,'node','--input-type=module','-e',worker?source:sinkSource],env);containers.push(id);const info=await inspect('container',id,env);verifyContainer(info,owner);return {id,info};};
++  const sink=await create(prefix+'-sink',networkName,false);await docker(['start',sink.id],env);const sinkInfo=await inspect('container',sink.id,env);const address=sinkInfo.NetworkSettings.Networks[networkName];need(address?.NetworkID===networkId&&/^\d+\.\d+\.\d+\.\d+$/.test(address.IPAddress),'OWNED_SINK');
++  let ready=false;for(let i=0;i<5;i++){try{await docker(['exec',sink.id,'node','-e',metricsSource],env);ready=true;break;}catch{await new Promise(ok=>setTimeout(ok,50));}}need(ready,'SINK_READY');
++  const cfg={probeHost:address.IPAddress,probePort:PORT,requests:[]},control=await create(prefix+'-control',networkName,true);
++  const positive=await pipeWorker(control.id,cfg,env,()=>{throw new Error('N00_NATIVE_CONTROL_RPC');});need(Object.values(positive.probes).every(Boolean),'POSITIVE_CONTROL');
++  const baseline=JSON.parse(await docker(['exec',sink.id,'node','-e',metricsSource],env));need(baseline.hits===3,'POSITIVE_CONTROL');
++  const worker=await create(prefix+'-worker','none',true);
++  const value=await pipeWorker(worker.id,{...cfg,requests},env,async request=>{assertFixtureExecutionBoundary(execution,journal);need(journal.snapshot().target.fingerprint===fingerprint,'BOUND_TARGET');return execution.dispatch(request);});
++  const metrics=JSON.parse(await docker(['exec',sink.id,'node','-e',metricsSource],env));
++  result={fixture_only:true,external_verified:false,parent_os_contained:false,browser_os_contained:false,arbitrary_provider_cli_contained:false,environment_clean:value.environment_clean,runtime_environment_names:value.environment_names,receipts:value.receipts,probes:value.probes,direct_http_requests:metrics.hits-baseline.hits,positive_control:{http_requests:baseline.hits,native_tcp_connected:positive.probes.tcp_connected},worker_policy:{network:worker.info.HostConfig.NetworkMode,read_only:worker.info.HostConfig.ReadonlyRootfs,user:worker.info.Config.User,cap_drop:worker.info.HostConfig.CapDrop,pids_limit:worker.info.HostConfig.PidsLimit,memory:worker.info.HostConfig.Memory,nano_cpus:worker.info.HostConfig.NanoCpus,published_ports:Object.keys(worker.info.HostConfig.PortBindings??{}).length,mounts:worker.info.Mounts.length,environment_names:worker.info.Config.Env.map(s=>s.split('=')[0])},image_id:image.Id,owner,resource_ids:{containers:[...containers],network:networkId},cleanup};
++ }catch(error){originalError=error;throw error;}finally {
++  const failures=[];for(const name of attempted){try{const v=await inspect('container',name,env);verifyContainer(v,owner);if(!containers.includes(v.Id))containers.push(v.Id);}catch(e){if(!e.absent)failures.push({resource:name,operation:e.operation,detail:e.detail});}}
++  if(networkAttempted&&!networkId){try{const v=await inspect('network',networkName,env);need(v.Labels?.[LABEL]===owner&&v.Internal,'OWNERSHIP');networkId=v.Id;}catch(e){if(!e.absent)failures.push({resource:networkName,operation:e.operation,detail:e.detail});}}for(const id of [...containers].reverse()){try{const value=await inspect('container',id,env);verifyContainer(value,owner);await docker(['rm','-f',id],env);need(await absent('container',id,env),'CLEANUP_ABSENCE');cleanup.containers_absent.push(id);}catch(e){failures.push({resource:id,operation:e.operation,detail:e.detail});}}
++  if(networkId){try{const value=await inspect('network',networkId,env);need(value.Labels?.[LABEL]===owner&&value.Id===networkId&&value.Internal,'OWNERSHIP');await docker(['network','rm',networkId],env);need(await absent('network',networkId,env),'CLEANUP_ABSENCE');cleanup.network_absent=true;}catch(e){failures.push({resource:networkId,operation:e.operation,detail:e.detail});}}
++  cleanup.inspect_retries=readbackRetries.get(env)??0;cleanup.complete=failures.length===0&&cleanup.containers_absent.length===containers.length&&(!networkId||cleanup.network_absent);if(!cleanup.complete){const error=new Error('N00_NATIVE_CLEANUP_FAILED');error.failures=failures;error.original=originalError?.operation;throw error;}
++ }
++ return result;
++}
+diff --git a/scripts/neon-native-worker.mjs b/scripts/neon-native-worker.mjs
+new file mode 100644
+index 0000000..be3651f
+--- /dev/null
++++ b/scripts/neon-native-worker.mjs
+@@ -0,0 +1,22 @@
++/** Fixed fixture worker. Private pipes, fictional requests, no provider/DB adapter. */
++import {createInterface} from 'node:readline';
++import {get} from 'node:http';
++import {createConnection} from 'node:net';
++import {spawnSync} from 'node:child_process';
++const input=createInterface({input:process.stdin,crlfDelay:Infinity})[Symbol.asyncIterator]();
++const send=value=>process.stdout.write(JSON.stringify(value)+'\n');
++const next=async()=>{const item=await input.next();if(item.done||item.value.length>65536)throw new Error('private input');return JSON.parse(item.value);};
++let stage='configuration';
++try {
++ const cfg=await next();if(!/^\d+\.\d+\.\d+\.\d+$/.test(cfg.probeHost)||cfg.probePort!==38479||!Array.isArray(cfg.requests)||cfg.requests.length>8)throw new Error('fixture scope');
++ stage='environment';const allowed=new Set(['PATH','HOSTNAME','NODE_VERSION','YARN_VERSION','HOME','PWD','BUYEROS_STRICT_INTEGRATION']);if(!Object.keys(process.env).every(k=>allowed.has(k)))throw new Error('inherited environment');
++ stage='native-probes';const base='http://'+cfg.probeHost+':'+cfg.probePort;
++ const http=await new Promise(resolve=>{const req=get(base+'/native/http',response=>{response.resume();response.on('end',()=>resolve(true));});req.on('error',()=>resolve(false));req.setTimeout(300,()=>req.destroy());});
++ let fetched=false;try{const res=await fetch(base+'/native/fetch',{signal:AbortSignal.timeout(300),redirect:'manual'});await res.text();fetched=res.status===200;}catch{}
++ const tcp=await new Promise(resolve=>{const socket=createConnection({host:cfg.probeHost,port:cfg.probePort});const finish=ok=>{socket.destroy();resolve(ok);};socket.on('connect',()=>finish(true));socket.on('error',()=>finish(false));socket.setTimeout(300,()=>finish(false));});
++ const source="fetch(process.argv[1],{signal:AbortSignal.timeout(300),redirect:'manual'}).then(async r=>{await r.text();process.stdout.write(String(r.status))}).catch(()=>process.exitCode=1)";
++ const cli=spawnSync(process.execPath,['-e',source,base+'/native/subprocess'],{encoding:'utf8',timeout:2000,env:process.env});
++ const probes={http_connected:http,fetch_connected:fetched,tcp_connected:tcp,subprocess_connected:cli.status===0&&cli.stdout==='200'};
++ stage='private-receipts';const receipts=[];for(let i=0;i<cfg.requests.length;i++){send({type:'request',index:i,request:cfg.requests[i]});const response=await next();if(response.type!=='receipt'||response.index!==i)throw new Error('receipt pairing');receipts.push(response.value);}
++ send({type:'complete',probes,receipts,environment_clean:true,environment_names:Object.keys(process.env).sort()});
++}catch(error){send({type:'refused',code:'N00_NATIVE_WORKER_REFUSED',stage,error_name:error.name});process.exitCode=1;}finally{process.stdin.destroy();}
+diff --git a/tests/neon-native-ipc.test.mjs b/tests/neon-native-ipc.test.mjs
+new file mode 100644
+index 0000000..8346e4a
+--- /dev/null
++++ b/tests/neon-native-ipc.test.mjs
+@@ -0,0 +1,30 @@
++import assert from 'node:assert/strict';
++import {test} from 'node:test';
++import {readFileSync} from 'node:fs';
++import {join} from 'node:path';
++import {createFixtureExecutionBoundary} from '../scripts/neon-execution-boundary.mjs';
++import {RealRunJournal} from '../scripts/neon-real-preflight.mjs';
++import {executionFixture} from './fixtures/neon-execution/fixture.mjs';
++const native=await import('../scripts/neon-native-ipc.mjs').catch(error=>{if(error.code!=='ERR_MODULE_NOT_FOUND')throw error;return {};});
++const req=(method='GET',path='/fixture/auth/token',body='',headers={})=>({channel:'cli',method,path,body,headers});
++async function setup(t){assert.equal(typeof native.runFixtureNativeSession,'function','private counted native IPC is missing');const f=await executionFixture();t.after(()=>f.cleanup());return {...f,execution:createFixtureExecutionBoundary({backend:f.backend,journal:f.journal})};}
++
++test('native worker IPC reserves before physical auth and unknown intent stays held after a new container/journal',async t=>{
++ const f=await setup(t),first=await native.runFixtureNativeSession({execution:f.execution,journal:f.journal,requests:[req(),req('POST','/fixture/auth/commit','{"one":"intent"}')],parentEnvironment:{...process.env,NEON_API_KEY:'forbidden-secret',DATABASE_URL:'forbidden-secret',HTTPS_PROXY:'https://forbidden.invalid'}});
++ assert.deepEqual(first.receipts.map(x=>[x.status,x.outcome]),[[200,'accepted'],[503,'unknown']]);assert.equal(first.environment_clean,true);assert.equal(first.positive_control.http_requests,3);assert.equal(first.positive_control.native_tcp_connected,true);assert.equal(first.cleanup.complete,true);assert.equal(first.cleanup.containers_absent.length,3);assert.equal(first.cleanup.network_absent,true);assert.equal(f.model.commits,1);assert.equal(f.model.hits.length,2);assert.equal(f.journal.snapshot().requests.length,2);
++ for(const entry of f.journal.snapshot().requests){assert.doesNotMatch(readFileSync(join(f.root,entry.evidenceRef),'utf8'),/forbidden-secret|fictional.a.b/);}
++ const restarted=new RealRunJournal(f.root),execution=createFixtureExecutionBoundary({backend:f.backend,journal:restarted}),second=await native.runFixtureNativeSession({execution,journal:restarted,requests:[req('POST','/fixture/auth/commit','{"one":"intent"}',{Authorization:'fictional-renewed-token'})]});
++ assert.equal(second.receipts[0].error,'N00_EXECUTION_HELD_INTENT');assert.equal(second.cleanup.complete,true);assert.equal(f.model.commits,1);assert.equal(restarted.snapshot().requests.length,2);assert.equal(restarted.snapshot().requests[1].outcome,'unknown');
++});
++
++test('native runner rejects injected dispatch owner and foreign journal before any Docker resources',async t=>{
++ const f=await setup(t);await assert.rejects(native.runFixtureNativeSession({execution:{dispatch:()=>{throw new Error('uncontained');}},journal:f.journal,requests:[req()]}),/CLEANUP_BOUNDARY/);
++ const other=await executionFixture();t.after(()=>other.cleanup());await assert.rejects(native.runFixtureNativeSession({execution:f.execution,journal:other.journal,requests:[req()]}),/CLEANUP_BOUNDARY/);assert.equal(f.model.hits.length,0);
++});
++
++
++test('isolated native worker cannot bypass IPC through raw HTTP, fetch, TCP or a subprocess',async t=>{
++ const f=await setup(t),report=await native.runFixtureNativeSession({execution:f.execution,journal:f.journal,requests:[req()]});
++ t.diagnostic(JSON.stringify({fixture_only:true,positive_control:report.positive_control,direct_http_requests:report.direct_http_requests,probes:report.probes,worker_policy:report.worker_policy,cleanup:report.cleanup}));
++ assert.equal(report.positive_control.http_requests,3);assert.equal(report.positive_control.native_tcp_connected,true);assert.equal(report.direct_http_requests,0);assert.deepEqual(report.probes,{http_connected:false,fetch_connected:false,tcp_connected:false,subprocess_connected:false});assert.equal(report.worker_policy.network,'none');assert.equal(report.worker_policy.read_only,true);assert.equal(report.worker_policy.user,'node');assert.deepEqual(report.worker_policy.cap_drop,['ALL']);assert.equal(report.worker_policy.published_ports,0);assert.equal(report.worker_policy.mounts,0);assert.equal(report.cleanup.complete,true);assert.equal(report.receipts[0].status,200);assert.equal(f.model.hits.length,1);assert.equal(f.journal.snapshot().requests.length,1);
++});

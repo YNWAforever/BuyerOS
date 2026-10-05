@@ -16,17 +16,17 @@
     "Q10",
     "N00"
   ],
-  "next_eligible": "N00 prepare explicit counted transports and disposable OS egress isolation for Node native HTTP/APIRequestContext/provider CLI; no real execution until containment, cleanup and fresh exact authorization",
+  "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
       "id": "N00",
       "status": "local-spike-partial",
-      "code_status": "dedicated fixture Chromium WebSocket refusal; production runtime/Auth0 unchanged",
-      "verification_status": "5 actual Chromium /305 reported root(304 leaves)/8 strict crypto;0fail/error/skip;native HTTP/APIRequestContext gaps reproduced OPEN",
+      "code_status": "fixed fictional native worker counted IPC and network-none isolation; Auth0/application unchanged",
+      "verification_status": "308 reported root/307 JUnit leaves, native3 included; Chromium5/strict crypto8;0fail-error-skip; full containment/Neon/original302 OPEN",
       "release_status": "not-deployed; full N00 open",
-      "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
-      "source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+      "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+      "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
       "finding_ids": [
         "F20"
       ],
@@ -1025,20 +1025,175 @@
           "cancelled": 0,
           "todo": 0,
           "duration_ms": 523519.4485
+        },
+        "native_ipc_isolation": {
+          "status": "local-fixed-native-worker-verified;full-N00-open",
+          "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+          "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+          "branch": "codex/n00-native-ipc-isolation",
+          "checked_at": "2026-10-05T13:43:35.000910+00:00",
+          "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+          "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+          "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+          "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+          "checks": {
+            "red-ipc": {
+              "leaf_cases": 2,
+              "pass": 0,
+              "fail": 2,
+              "error": 0,
+              "skip": 0,
+              "attributes": {}
+            },
+            "red-isolation-behavior": {
+              "leaf_cases": 3,
+              "pass": 2,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "attributes": {}
+            },
+            "root-first": {
+              "leaf_cases": 307,
+              "pass": 306,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "attributes": {}
+            },
+            "root-green": {
+              "leaf_cases": 307,
+              "pass": 307,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "attributes": {},
+              "reported": {
+                "tests": "308",
+                "pass": "308",
+                "fail": "0",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "466803.7974"
+              }
+            },
+            "browser": {
+              "leaf_cases": 5,
+              "pass": 5,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "attributes": {
+                "id": "",
+                "name": "",
+                "tests": "5",
+                "failures": "0",
+                "skipped": "0",
+                "errors": "0",
+                "time": "13.736473000000002"
+              }
+            },
+            "crypto": {
+              "leaf_cases": 8,
+              "pass": 8,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "attributes": {
+                "name": "pytest tests"
+              }
+            }
+          },
+          "static_gates": {
+            "lint": 0,
+            "types": 0,
+            "contracts": 0,
+            "routes": 0,
+            "browser": 0,
+            "crypto": 0
+          },
+          "native_observation": {
+            "fixture_only": true,
+            "positive_control": {
+              "http_requests": 3,
+              "native_tcp_connected": true
+            },
+            "direct_http_requests": 0,
+            "probes": {
+              "http_connected": false,
+              "fetch_connected": false,
+              "tcp_connected": false,
+              "subprocess_connected": false
+            },
+            "worker_policy": {
+              "network": "none",
+              "read_only": true,
+              "user": "node",
+              "cap_drop": [
+                "ALL"
+              ],
+              "pids_limit": 64,
+              "memory": 134217728,
+              "nano_cpus": 1000000000,
+              "published_ports": 0,
+              "mounts": 0,
+              "environment_names": [
+                "BUYEROS_STRICT_INTEGRATION",
+                "PATH",
+                "NODE_VERSION",
+                "YARN_VERSION"
+              ]
+            },
+            "cleanup": {
+              "complete": true,
+              "containers_absent": [
+                "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
+                "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
+                "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
+              ],
+              "network_absent": true,
+              "fixture_only": true,
+              "inspect_retries": 0
+            }
+          },
+          "new_node_cases": 3,
+          "new_build": false,
+          "fixture_only": true,
+          "canonical_db_connection": false,
+          "real_Neon_verified": false,
+          "parent_os_contained": false,
+          "browser_os_contained": false,
+          "arbitrary_provider_cli_contained": false,
+          "external_requests": 0,
+          "full_N00_open": true,
+          "original302_rerun": false,
+          "schema_head": "0037_bulk_manifests",
+          "migrations": 0,
+          "operation_count": 84,
+          "original_operations": 70,
+          "extensions": 14,
+          "independent_review": "pending",
+          "deployed_sha": null,
+          "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+          "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
         }
       },
       "migrations": "none;0037 unchanged",
-      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_EXECUTION_BOUNDARY/RESULTS.md",
-      "rollback": "revert following metadata then b8a10848b62090ff19544918961e54df3ebfa921;reverse applicability0 only;no DB/resource undo",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+      "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds.",
       "limits": [
         "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
         "No Vercel ingress/protection/binding/deployment verification",
         "No canonical identity/membership workspace verification by diagnostic",
         "No production or Cloudflare cutover",
-        "No live performance/SLA/UAT claim"
+        "No live performance/SLA/UAT claim",
+        "OS containment covers fixed Linux child only; parent/broker/browser/APIRequestContext/arbitrary provider CLI remain OPEN",
+        "Cached local image only; no real SDK/browser/provider CLI provisioned into container",
+        "Independent review and true Neon/Google/managed cleanup/original302 remain OPEN"
       ],
       "full_gate_passed": false,
-      "next_action": "N00 specifically authorized isolated real-Neon/Google roundtrip, exact admin cleanup/absence and counted native transport; full gate open",
+      "next_action": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
       "cleanup_contract_followup": {
         "source_sha": "370a558492ef2c6617379c8923f2ce17c81da66f",
         "base_sha": "158e05f0b31e4c59776d39c6c2926f6ab8bf3fcd",
@@ -1388,6 +1543,168 @@
         "deployed_sha": null,
         "next_eligible": "N00 prepare explicit counted transports and disposable OS egress isolation for Node native HTTP/APIRequestContext/provider CLI; no real execution until containment, cleanup and fresh exact authorization",
         "rollback": "Revert following metadata commit then source362b60d; no DB/data rollback, retain admitted/unknown journal holds."
+      },
+      "prior_browser_native_summary_20261005": {
+        "code_status": "dedicated fixture Chromium WebSocket refusal; production runtime/Auth0 unchanged",
+        "verification_status": "5 actual Chromium /305 reported root(304 leaves)/8 strict crypto;0fail/error/skip;native HTTP/APIRequestContext gaps reproduced OPEN",
+        "release_status": "not-deployed; full N00 open",
+        "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
+        "source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_EXECUTION_BOUNDARY/RESULTS.md",
+        "rollback": "revert following metadata then b8a10848b62090ff19544918961e54df3ebfa921;reverse applicability0 only;no DB/resource undo",
+        "next_action": "N00 specifically authorized isolated real-Neon/Google roundtrip, exact admin cleanup/absence and counted native transport; full gate open"
+      },
+      "native_ipc_isolation_20261005": {
+        "status": "local-fixed-native-worker-verified;full-N00-open",
+        "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+        "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+        "branch": "codex/n00-native-ipc-isolation",
+        "checked_at": "2026-10-05T13:43:35.000910+00:00",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+        "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+        "checks": {
+          "red-ipc": {
+            "leaf_cases": 2,
+            "pass": 0,
+            "fail": 2,
+            "error": 0,
+            "skip": 0,
+            "attributes": {}
+          },
+          "red-isolation-behavior": {
+            "leaf_cases": 3,
+            "pass": 2,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "attributes": {}
+          },
+          "root-first": {
+            "leaf_cases": 307,
+            "pass": 306,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "attributes": {}
+          },
+          "root-green": {
+            "leaf_cases": 307,
+            "pass": 307,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "attributes": {},
+            "reported": {
+              "tests": "308",
+              "pass": "308",
+              "fail": "0",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "466803.7974"
+            }
+          },
+          "browser": {
+            "leaf_cases": 5,
+            "pass": 5,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "attributes": {
+              "id": "",
+              "name": "",
+              "tests": "5",
+              "failures": "0",
+              "skipped": "0",
+              "errors": "0",
+              "time": "13.736473000000002"
+            }
+          },
+          "crypto": {
+            "leaf_cases": 8,
+            "pass": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "attributes": {
+              "name": "pytest tests"
+            }
+          }
+        },
+        "static_gates": {
+          "lint": 0,
+          "types": 0,
+          "contracts": 0,
+          "routes": 0,
+          "browser": 0,
+          "crypto": 0
+        },
+        "native_observation": {
+          "fixture_only": true,
+          "positive_control": {
+            "http_requests": 3,
+            "native_tcp_connected": true
+          },
+          "direct_http_requests": 0,
+          "probes": {
+            "http_connected": false,
+            "fetch_connected": false,
+            "tcp_connected": false,
+            "subprocess_connected": false
+          },
+          "worker_policy": {
+            "network": "none",
+            "read_only": true,
+            "user": "node",
+            "cap_drop": [
+              "ALL"
+            ],
+            "pids_limit": 64,
+            "memory": 134217728,
+            "nano_cpus": 1000000000,
+            "published_ports": 0,
+            "mounts": 0,
+            "environment_names": [
+              "BUYEROS_STRICT_INTEGRATION",
+              "PATH",
+              "NODE_VERSION",
+              "YARN_VERSION"
+            ]
+          },
+          "cleanup": {
+            "complete": true,
+            "containers_absent": [
+              "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
+              "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
+              "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
+            ],
+            "network_absent": true,
+            "fixture_only": true,
+            "inspect_retries": 0
+          }
+        },
+        "new_node_cases": 3,
+        "new_build": false,
+        "fixture_only": true,
+        "canonical_db_connection": false,
+        "real_Neon_verified": false,
+        "parent_os_contained": false,
+        "browser_os_contained": false,
+        "arbitrary_provider_cli_contained": false,
+        "external_requests": 0,
+        "full_N00_open": true,
+        "original302_rerun": false,
+        "schema_head": "0037_bulk_manifests",
+        "migrations": 0,
+        "operation_count": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "independent_review": "pending",
+        "deployed_sha": null,
+        "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+        "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
       }
     },
     {
@@ -2178,10 +2495,10 @@
     "Q09 human screen-reader/staff UAT",
     "Independent source review",
     "Q16 underlying evidence when available",
-    "N00 full real-transport coverage/provider cleanup adapters next; fresh isolated actual auth roundtrip requires specific new approval",
+    "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+  "reviewed_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
   "deployed_sha": null,
   "selected_followups": [
     "U05",
@@ -2191,7 +2508,8 @@
     "N00 managed callback contract fixture follow-up",
     "Q11 local capability responsibility and next action",
     "N00 local ingress and physical dispatch deadline",
-    "N00 dedicated browser WebSocket refusal and native transport gap evidence (local-only)"
+    "N00 dedicated browser WebSocket refusal and native transport gap evidence (local-only)",
+    "N00 counted native IPC and disposable fixed worker OS isolation (local-only)"
   ],
   "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
   "peer_q13_checkpoint": {
@@ -2202,5 +2520,5 @@
     "proposed_schema_head": "0038_workspace_discovery",
     "merged_here": false
   },
-  "latest_local_verification_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04"
+  "latest_local_verification_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a"
 }

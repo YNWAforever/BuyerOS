@@ -1,0 +1,37 @@
+{
+  "review": "author self-review",
+  "independent_review": "pending",
+  "single_existing_journal_and_dispatch_owner": true,
+  "unknown_intent_and_restart_headers_retained": true,
+  "local_docker_context_only": true,
+  "cached_image_id_readback": true,
+  "no_registry_pull_observed": true,
+  "no_credential_mounts_or_published_ports": true,
+  "exact_owner_label_id_and_absence_cleanup": true,
+  "unknown_create_outcome_reconciles_reserved_names_before_cleanup": true,
+  "pipe_input_and_output_and_deadlines_bounded": true,
+  "caller_request_tuple_pairing_and_target_fingerprint_checked": true,
+  "parent_browser_arbitrary_provider_cli_not_contained": true,
+  "real_auth_and_original302_open": true,
+  "limits": [
+    "fixed child only; parent/broker/browser/APIRequestContext/control-plane remain outside OS isolation",
+    "fixed cached image; real/browser binaries not provisioned",
+    "only fixture cli requests, no cleanup/admin/control-plane adapter",
+    "RPC response lines at most65536 JavaScript string code units, total stdout1MiB; overflow refuses",
+    "network-none child has no general SDK/browser/real Google flow",
+    "full N00/independent review remains open"
+  ],
+  "explicit_pull_never": true,
+  "read_only_inspect_retry": {
+    "max_retry_per_inspect": 1,
+    "condition": "killed 20s timeout with empty stderr only",
+    "recorded_in_report": true,
+    "write_retry": false
+  },
+  "fresh_final_root": {
+    "reported": 308,
+    "leaf": 307,
+    "fail": 0,
+    "skip": 0
+  }
+}

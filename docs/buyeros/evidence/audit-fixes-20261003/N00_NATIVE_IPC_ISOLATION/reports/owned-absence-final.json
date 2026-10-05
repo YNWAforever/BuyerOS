@@ -1,0 +1,7 @@
+{
+  "fixture_only": true,
+  "containers_remaining": 0,
+  "networks_remaining": 0,
+  "selector": "buyeros.n00.native.owner",
+  "global_prune": false
+}

@@ -1,5 +1,11 @@
 # Current release decision — NOT READY (2026-10-05)
 
+Local harness source `779138aa5335eb829a97a80bbc80430a32201c1a`: fixed-native counted IPC and network-none child verified; root308 reported/307leaves, Chromium5, crypto8 pass0fail/error/skip; types/lint/generated84 exit0. Actual own sink/control exercises native3HTTP+TCP; isolated child's4native paths refuse/0directHTTP; owned containers/networks removed with absence confirmed. Parent/broker/browser/APIRequestContext/arbitrary provider CLI/control-plane are outside this child's OS boundary and remain OPEN. Full N00/original302/realNeon/Google/Admincleanup/independent review/live staff gates OPEN. Auth0/canonical actors/RLS/HMAC/delivery403 retained. No new build, migration, push, external provider action or deployment; production source not asserted. [Evidence/rollback](evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md). Historical release records below retain their original scope.
+
+## Historical release decisions below
+
+# Current release decision — NOT READY (2026-10-05)
+
 Source `362b60dd42d034e229b9fa5f51a47d6ffcd4ec04`: local dedicated browser WS guard verified;5Chromium/305reportedroot304leaves/8crypto, zero failures/errors/skips;types/lint/generated84 exit0. No new build or deployment; production source not asserted. FullN00/original302/realNeon/Google/Admincleanup/nativeHTTP/APIRequestContext/arbitraryCLI/OS egress/independent review remain OPEN. Auth0 retained;delivery403. [Evidence](evidence/audit-fixes-20261003/N00_BROWSER_NATIVE_CONTAINMENT/RESULTS.md). Historical release records below keep their original scope.
 
 # Current release readiness — 2026-10-05

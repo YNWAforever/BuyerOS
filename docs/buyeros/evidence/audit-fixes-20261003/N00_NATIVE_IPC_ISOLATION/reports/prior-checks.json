@@ -1,0 +1,37 @@
+{
+  "red-ipc": {
+    "cases": 2,
+    "pass": 0,
+    "fail": 2,
+    "error": 0,
+    "skip": 0
+  },
+  "red-isolation-behavior": {
+    "cases": 3,
+    "pass": 2,
+    "fail": 1,
+    "error": 0,
+    "skip": 0
+  },
+  "root-first": {
+    "cases": 307,
+    "pass": 306,
+    "fail": 1,
+    "error": 0,
+    "skip": 0
+  },
+  "browser": {
+    "cases": 5,
+    "pass": 5,
+    "fail": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "crypto": {
+    "cases": 8,
+    "pass": 8,
+    "fail": 0,
+    "error": 0,
+    "skip": 0
+  }
+}
