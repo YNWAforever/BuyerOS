@@ -1,0 +1,89 @@
+<testsuites id="" name="" tests="8" failures="0" skipped="0" errors="3" time="297.457946">
+<testsuite name="daily-workbench.spec.ts" timestamp="2026-10-05T19:24:24.154Z" hostname="" tests="8" failures="0" skipped="0" time="226.135" errors="3">
+<testcase name="T27 usage, queue filters and manual outcome history survive refresh in both locales" classname="daily-workbench.spec.ts" time="32.821">
+</testcase>
+<testcase name="T29 API-backed workbench reflows across routes and widths in en" classname="daily-workbench.spec.ts" time="30.047">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\workbench\browser\daily-workbench-T29-API-ba-0430e-oss-routes-and-widths-in-en\error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded while running &quot;beforeEach&quot; hook." type="Error">
+<![CDATA[  daily-workbench.spec.ts:63:3 › T29 API-backed workbench reflows across routes and widths in en ───
+
+    Test timeout of 30000ms exceeded while running "beforeEach" hook.
+
+      3 | const browserApiOrigin=process.env.BUYEROS_E2E_FRONTEND==='vercel-built'?'http://localhost:5173':'http://127.0.0.1:8000';
+      4 |
+    > 5 | test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
+        |      ^
+      6 |
+      7 | test('T27 usage, queue filters and manual outcome history survive refresh in both locales',async({page,request})=>{
+      8 |   test.setTimeout(240_000);await signIn(page);
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\daily-workbench.spec.ts:5:6
+
+    Error: Command failed: C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe tests/fixtures/prepare_browser_project.py isolate-workbench
+
+
+    Error Context: ..\..\test-results\workbench\browser\daily-workbench-T29-API-ba-0430e-oss-routes-and-widths-in-en\error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="T29 API-backed workbench reflows across routes and widths in zh-HK" classname="daily-workbench.spec.ts" time="33.046">
+</testcase>
+<testcase name="T29 manual locale remains usable while preference loads and saves with its current version" classname="daily-workbench.spec.ts" time="30.046">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\workbench\browser\daily-workbench-T29-manual-0378c-es-with-its-current-version\error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded while running &quot;beforeEach&quot; hook." type="Error">
+<![CDATA[  daily-workbench.spec.ts:121:1 › T29 manual locale remains usable while preference loads and saves with its current version 
+
+    Test timeout of 30000ms exceeded while running "beforeEach" hook.
+
+      3 | const browserApiOrigin=process.env.BUYEROS_E2E_FRONTEND==='vercel-built'?'http://localhost:5173':'http://127.0.0.1:8000';
+      4 |
+    > 5 | test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
+        |      ^
+      6 |
+      7 | test('T27 usage, queue filters and manual outcome history survive refresh in both locales',async({page,request})=>{
+      8 |   test.setTimeout(240_000);await signIn(page);
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\daily-workbench.spec.ts:5:6
+
+    Error Context: ..\..\test-results\workbench\browser\daily-workbench-T29-manual-0378c-es-with-its-current-version\error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="T29 operations resolves a failed profile lookup without a permanent spinner" classname="daily-workbench.spec.ts" time="30.032">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\workbench\browser\daily-workbench-T29-operat-b516b-without-a-permanent-spinner\error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded while running &quot;beforeEach&quot; hook." type="Error">
+<![CDATA[  daily-workbench.spec.ts:180:1 › T29 operations resolves a failed profile lookup without a permanent spinner 
+
+    Test timeout of 30000ms exceeded while running "beforeEach" hook.
+
+      3 | const browserApiOrigin=process.env.BUYEROS_E2E_FRONTEND==='vercel-built'?'http://localhost:5173':'http://127.0.0.1:8000';
+      4 |
+    > 5 | test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
+        |      ^
+      6 |
+      7 | test('T27 usage, queue filters and manual outcome history survive refresh in both locales',async({page,request})=>{
+      8 |   test.setTimeout(240_000);await signIn(page);
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\daily-workbench.spec.ts:5:6
+
+    Error Context: ..\..\test-results\workbench\browser\daily-workbench-T29-operat-b516b-without-a-permanent-spinner\error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="T29 live operations and results text meets measured AA contrast in both locales" classname="daily-workbench.spec.ts" time="24.709">
+</testcase>
+<testcase name="T29 scope list timeout offers a bounded retry with current identity" classname="daily-workbench.spec.ts" time="31.291">
+</testcase>
+<testcase name="T29 live form controls have a visible three-to-one boundary in both locales" classname="daily-workbench.spec.ts" time="14.143">
+</testcase>
+</testsuite>
+</testsuites>

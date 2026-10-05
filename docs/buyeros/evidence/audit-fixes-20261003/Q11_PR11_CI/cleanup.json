@@ -1,0 +1,9 @@
+{
+  "api_owned_container_absent": true,
+  "q01_owned_ui_name": "buyeros-audit-ui-1810c5b8c947",
+  "q01_owned_ui_container_absent": true,
+  "e2e_db_marker_absent": true,
+  "ui_marker_absent": true,
+  "cache_volume_retained": true,
+  "cleanup_scope": "existing fixture finally/global teardown; no global process/container prune"
+}

@@ -1,0 +1,38 @@
+{
+  "fixture_only": true,
+  "baseline_source_sha": "b083ea43988ed73e9d8e9ab112ba3d6305f2c941",
+  "conditions": {
+    "logical_seconds": 60,
+    "views": 10,
+    "persisted_results": 1000,
+    "simulated_rtt_ms": 2500,
+    "wall_clock_performance": false,
+    "database": "owned disposable PostgreSQL16; real runtime-role HTTP and executes",
+    "rate_limit": "unchanged120/minute per actor; ten fictional current admins; logical experiment starts30s before minute boundary; fresh fixture windows between independent runs",
+    "identity": "fictional signed principals; no live account/provider verification"
+  },
+  "measurements": [
+    {
+      "mode": "before",
+      "requests": 1250,
+      "response_body_bytes": 9293390,
+      "db_execute_count": 10000,
+      "result_table_execute_count": 2500,
+      "http_status_counts": {
+        "200": 1250
+      },
+      "max_per_view_in_flight": 13
+    },
+    {
+      "mode": "after",
+      "requests": 140,
+      "response_body_bytes": 69440,
+      "db_execute_count": 840,
+      "result_table_execute_count": 0,
+      "http_status_counts": {
+        "200": 140
+      },
+      "max_per_view_in_flight": 1
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/attempt1-contexts/1.md:24: trailing whitespace.
++  4   | 
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/attempt1-contexts/1.md:27: trailing whitespace.
++  6   | 
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/attempt1-contexts/1.md:82: trailing whitespace.
++  61  | 
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/attempt1-contexts/2.md:24: trailing whitespace.
++  4   | 
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/attempt1-contexts/2.md:27: trailing whitespace.
++  6   | 
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/attempt1-contexts/2.md:82: trailing whitespace.
++  61  | 
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/attempt1-contexts/3.md:24: trailing whitespace.
++  4   | 
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/attempt1-contexts/3.md:27: trailing whitespace.
++  6   | 
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/attempt1-contexts/3.md:82: trailing whitespace.
++  61  | 
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/workbench-green.xml:41: trailing whitespace.
++<![CDATA[  daily-workbench.spec.ts:121:1 › T29 manual locale remains usable while preference loads and saves with its current version 
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/workbench-green.xml:65: trailing whitespace.
++<![CDATA[  daily-workbench.spec.ts:180:1 › T29 operations resolves a failed profile lookup without a permanent spinner 
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/workbench-red-scoped.xml:10: trailing whitespace.
++<![CDATA[  daily-workbench.spec.ts:121:1 › T29 locale waits for current preference version and survives a fresh sign-in 

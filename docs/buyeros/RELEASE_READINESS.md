@@ -1,3 +1,11 @@
+# Current Q11 PR11 CI checkpoint — 2026-10-06
+
+Author-reviewed test/config source `546a03770b32430f9ff90b7ac21c00fa74dd2166`. Full strict API812/workbench8/Q01built7 pass,0fail/error/skip;types/scopedlint/generated84/routes exit0. Six implemented extension IDs/current locale persistence and exact Q06 baseline-history prerequisite reconciled;scoped Playwright output protects sibling evidence. Original RED/intermediate errors preserved. [Commands,raw results,screenshots,rollback](evidence/audit-fixes-20261003/Q11_PR11_CI/RESULTS.md).
+
+**Full Q11/N00/F20/NA01/real Neon/original302/independent review/live staff remain OPEN.** Existing Draft PR11 publication/readback is pending separately. Application/Auth0/canonical actors/RLS/HMAC/delivery403 unchanged;head0037,no new schema/production/provider/manual deploy. Deployed SHA unproven for this slice. Next: N00 OS isolation composition;fresh exact authorization needed after full harness for real auth. Earlier records below retain historical scope.
+
+## Historical checkpoints below
+
 # Current release decision — NOT READY (2026-10-06)
 
 Local fixture harness source `4ba0a5d7757d5c9e4991593a13c0a2df217be511`:counted APIRequestContext/ownership lifecycle verified;root318reported/317leaves,Chromium6,crypto8 pass0fail/error/skip;types/scopedlint/generated84/routes0. Actual two-hop/private-cookie/hold/restart/body-disposal race checks pass;context/server/journal cleanup and owned Docker labels0 confirmed. Full N00/F20/NA01/original302/live Neon/Google/Admincleanup/parent-browser-control-plane/rawcontext-arbitraryCLI OS isolation/independent review/live staff OPEN. Auth0/canonical actors/RLS/HMAC/delivery403 retained. No build,migration,push,remotePR,provider/production/Cloudflare action or deploy;production source not asserted. [Evidence/rollback](evidence/audit-fixes-20261003/N00_API_REQUEST_CONTEXT/RESULTS.md). Older records retain historical scope.

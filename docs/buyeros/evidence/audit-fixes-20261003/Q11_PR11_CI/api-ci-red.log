@@ -1,0 +1,265 @@
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	﻿2026-10-05T19:00:11.0732583Z ##[group]Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0733492Z ^[[36;1muv run --frozen pytest -q --junitxml=artifacts/tests.xml^[[0m
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0816543Z shell: /usr/bin/bash -e {0}
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0816978Z env:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0817757Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0818720Z   BUYEROS_STRICT_INTEGRATION: 1
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0819277Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0819948Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0820725Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0821523Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0822270Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0822974Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0823701Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:11.0824356Z ##[endgroup]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:30.5818585Z .......................................F................................ [  8%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:00:42.5125672Z ........................................................................ [ 17%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:03:17.8460690Z ........................................................................ [ 26%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:03:48.2323450Z ........................................................................ [ 35%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:05:31.9247494Z ........................................................................ [ 44%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:05:53.6876057Z ........................................................................ [ 53%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:06:12.9886263Z ........................................................................ [ 62%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:06:49.6103808Z .......................F................................................ [ 70%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:07.7104420Z ........................................................................ [ 79%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:16.1719882Z ........................................................................ [ 88%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:30.6830532Z ........................................................................ [ 97%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7651380Z ....................                                                     [100%]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7652750Z =================================== FAILURES ===================================
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7654303Z _________ test_registry_covers_every_unimplemented_contract_operation __________
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7655134Z 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7655544Z     def test_registry_covers_every_unimplemented_contract_operation():
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7656607Z         """Regression guard: an out-of-slice operation must never silently 404."""
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7657275Z         implemented = {
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7657655Z             "getLiveness",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7658043Z             "listWorkspaces",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7658829Z             "listProjects",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7659249Z             "createProject",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7659648Z             "getProject",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7660016Z             "updateProject",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7660410Z             "archiveProject",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7660829Z             "listICPVersions",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7661218Z             "saveICPVersion",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7661659Z             "approveICPVersion",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7662059Z             "getReadiness",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7662463Z             "getCapabilities",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7662844Z             "listBuyers",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7663190Z             "getBuyer",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7663576Z             "listBuyerEvidence",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7663973Z             "getEvidence",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7664388Z             "createBuyerSnapshot",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7664803Z             "updateBuyer",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7665165Z             "reviewBuyers",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7665818Z             "listBuyerLists", "createBuyerList", "getBuyerList", "renameBuyerList",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7667021Z             "changeListMemberships", "listFilterPresets", "saveFilterPreset",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7668101Z             "assignBuyerOwners", "getAsyncJob", "listAsyncJobs", "retryFailedAsyncJob", "cancelAsyncJob",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7669584Z             "listMemberships", "updateMembership", "getPreferences", "updatePreferences", "listAuditEvents",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7670615Z             "listBudgets", "updateBudget", "startRun", "listRuns", "getRun", "cancelRun", "retryRun", "getRunEvents",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7671367Z             "quoteLookup", "getLookupQuote", "cancelLookupQuote", "confirmLookup",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7672181Z             "getEnrichmentJob", "cancelEnrichmentJob", "reconcileEnrichmentJob", "receiveProviderCallback",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7673155Z             "listPolicyDecisions", "recordPolicyDecision", "listSuppressions", "createSuppression", "removeSuppression",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7674159Z             "uploadOfferDocument", "ingestOfferUrl", "getOfferDocument", "listOfferDocuments", "deleteOfferDocument",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7675092Z             "listDrafts", "generateDraft", "getDraft", "editDraft",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7675651Z             "requestDraftReview", "approveDraft", "disabledDeliveryBoundary",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7676328Z             "exportBuyers", "exportDraft", "getExport", "downloadExport", "exportBulkFailures",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7676968Z             "getUsage", "listOutcomes", "recordOutcome", "correctOutcome",
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7677373Z         }
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7677728Z         out_of_slice = set(_contract_operations()) - implemented
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7678577Z >       assert out_of_slice == set(UNIMPLEMENTED_OPERATIONS)
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7679185Z E       AssertionError: assert {'executeBulk...aftGrounding'} == set()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7679599Z E         
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7679868Z E         Extra items in the left set:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7680203Z E         'getAsyncJobSummary'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7680516Z E         'previewBulkManifest'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7680833Z E         'reviewDraftGrounding'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7681153Z E         'listEligibleAssignees'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7681463Z E         'executeBulkManifest'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7681736Z E         'getBulkManifest'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7681975Z E         
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7682182Z E         Full diff:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7682412Z E         - set()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7682617Z E         + {
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7682884Z E         +     'executeBulkManifest',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7683232Z E         +     'getAsyncJobSummary',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7683560Z E         +     'getBulkManifest',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7683888Z E         +     'listEligibleAssignees',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7684230Z E         +     'previewBulkManifest',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7684572Z E         +     'reviewDraftGrounding',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7684842Z E         + }
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7684961Z 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7685141Z tests/test_api_buyers.py:91: AssertionError
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7685690Z ____ test_q06_60s_ten_view_traffic_replays_real_http_bytes_and_db_executes _____
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7686032Z 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7686306Z api = <starlette.testclient.TestClient object at 0x7f5b80587170>
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7687079Z seeded = '***127.0.0.1:5432/buyeros_test_api'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7687600Z monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5b79fa3620>
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7687928Z 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7688598Z     def test_q06_60s_ten_view_traffic_replays_real_http_bytes_and_db_executes(api,seeded,monkeypatch):
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7689463Z         """Fake-clock scheduling; every counted request/byte/SQL execute is replayed, not extrapolated."""
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7689988Z         import subprocess
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7690276Z         from collections import Counter
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7690639Z         from datetime import datetime, timedelta, timezone
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7690992Z         from pathlib import Path
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7691317Z         from buyeros_api.services import api_rate_limit
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7692200Z         from tests import auth_fixtures as fx
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7692722Z         root=Path(__file__).resolve().parents[3];out=root/'test-results';out.mkdir(exist_ok=True)
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7693166Z         job=seed_job(seeded)
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7693410Z         with api as client:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7693667Z             samples={'pages':{}}
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7693954Z             for offset in range(0,1000,100):
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7694529Z                 response=client.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job}?offset={offset}&limit=100",headers=_h())
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7695285Z                 assert response.status_code==200,response.text;samples['pages'][str(offset)]=response.json()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7696277Z             response=client.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job}/summary",headers=_h());assert response.status_code==200,response.text;samples['summary']=response.json()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7697271Z             sample_path=out/'q06-traffic-samples.json';sample_path.write_text(json.dumps(samples),encoding='utf-8')
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7697990Z             trace_path=out/'q06-traffic-schedule.json'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7699508Z >           scheduled=subprocess.run(['node','tests/job-poller-traffic.mjs',str(sample_path),str(trace_path)],cwd=root,capture_output=True,text=True,encoding='utf-8',check=True)
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7700476Z                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7700822Z 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7700971Z tests/test_job_summary_db.py:89: 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7701379Z _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7701626Z 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7701869Z input = None, capture_output = True, timeout = None, check = True
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7703018Z popenargs = (['node', 'tests/job-poller-traffic.mjs', '/home/runner/work/BuyerOS/BuyerOS/test-results/q06-traffic-samples.json', '/home/runner/work/BuyerOS/BuyerOS/test-results/q06-traffic-schedule.json'],)
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7704254Z kwargs = {'cwd': PosixPath('/home/runner/work/BuyerOS/BuyerOS'), 'encoding': 'utf-8', 'stderr': -1, 'stdout': -1, ...}
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7705034Z process = <Popen: returncode: 1 args: ['node', 'tests/job-poller-traffic.mjs', '/home/...>
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7705460Z stdout = ''
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7706592Z stderr = 'fatal: path \'features/live/bulk-actions.tsx\' exists on disk, but not in \'b083ea43988ed73e9d8e9ab112ba3d6305f2c941\...ulk-actions.tsx\' exists on disk, but not in \'b083ea43988ed73e9d8e9ab112ba3d6305f2c941\'\\n"\n}\n\nNode.js v24.21.0\n'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7707551Z retcode = 1
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7707665Z 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7707762Z     def run(*popenargs,
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7708293Z             input=None, capture_output=False, timeout=None, check=False, **kwargs):
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7708841Z         """Run command with arguments and return a CompletedProcess instance.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7709210Z     
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7709553Z         The returned instance will have attributes args, returncode, stdout and
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7710118Z         stderr. By default, stdout and stderr are not captured, and those attributes
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7710678Z         will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7711141Z         or pass capture_output=True to capture both.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7711421Z     
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7711709Z         If check is True and the exit code was non-zero, it raises a
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7712233Z         CalledProcessError. The CalledProcessError object will have the return code
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7712808Z         in the returncode attribute, and output & stderr attributes if those streams
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7713201Z         were captured.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7713406Z     
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7713700Z         If timeout (seconds) is given and the process takes too long,
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7714275Z          a TimeoutExpired exception will be raised.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7714565Z     
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7714837Z         There is an optional argument "input", allowing you to
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7715315Z         pass bytes or a string to the subprocess's stdin.  If you use this argument
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7715827Z         you may not also use the Popen constructor's "stdin" argument, as
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7716211Z         it will be used internally.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7716450Z     
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7716793Z         By default, all communication is in bytes, and therefore any "input" should
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7717362Z         be bytes, and the stdout and stderr will be bytes. If in text mode, any
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7717885Z         "input" should be a string, and stdout and stderr will be strings decoded
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7718762Z         according to locale encoding, or by "encoding" if set. Text mode is
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7719305Z         triggered by setting any of text, encoding, errors or universal_newlines.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7719837Z     
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7720141Z         The other arguments are the same as for the Popen constructor.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7720487Z         """
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7720687Z         if input is not None:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7720978Z             if kwargs.get('stdin') is not None:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7721411Z                 raise ValueError('stdin and input arguments may not both be used.')
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7721822Z             kwargs['stdin'] = PIPE
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7722072Z     
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7722264Z         if capture_output:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7722651Z             if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7723163Z                 raise ValueError('stdout and stderr arguments may not be used '
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7723587Z                                  'with capture_output.')
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7723909Z             kwargs['stdout'] = PIPE
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7724193Z             kwargs['stderr'] = PIPE
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7724433Z     
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7724679Z         with Popen(*popenargs, **kwargs) as process:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7724974Z             try:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7725312Z                 stdout, stderr = process.communicate(input, timeout=timeout)
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7725713Z             except TimeoutExpired as exc:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7726013Z                 process.kill()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:33.7726277Z                 if _mswindows:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0077429Z                     # Windows accumulates the output in a single blocking
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0079120Z                     # read() call run on child threads, with the timeout
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0080077Z                     # being done in a join() on those threads.  communicate()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0081023Z                     # _after_ kill() is required to collect that and add it
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0081786Z                     # to the exception.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0082625Z                     exc.stdout, exc.stderr = process.communicate()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0083169Z                 else:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0083694Z                     # POSIX _communicate already populated the output so
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0084372Z                     # far into the TimeoutExpired exception.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0084909Z                     process.wait()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0085308Z                 raise
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0085889Z             except:  # Including KeyboardInterrupt, communicate handled that.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0086532Z                 process.kill()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0087119Z                 # We don't call process.wait() as .__exit__ does that for us.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0087674Z                 raise
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0088064Z             retcode = process.poll()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0088805Z             if check and retcode:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0089447Z >               raise CalledProcessError(retcode, process.args,
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0090107Z                                          output=stdout, stderr=stderr)
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0092884Z E               subprocess.CalledProcessError: Command '['node', 'tests/job-poller-traffic.mjs', '/home/runner/work/BuyerOS/BuyerOS/test-results/q06-traffic-samples.json', '/home/runner/work/BuyerOS/BuyerOS/test-results/q06-traffic-schedule.json']' returned non-zero exit status 1.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0094212Z 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0094675Z /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/subprocess.py:571: CalledProcessError
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0095412Z =============================== warnings summary ===============================
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0096004Z .venv/lib/python3.12/site-packages/starlette/testclient.py:53
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0097440Z   /home/runner/work/BuyerOS/BuyerOS/services/api/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0099167Z     _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0099788Z 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0100007Z tests/test_admin_operations_db.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0100458Z tests/test_api_projects_db.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0100886Z tests/test_backup_restore_t28.py: 1 warning
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0101327Z tests/test_budget_atomicity_db.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0101748Z tests/test_bulk_jobs_db.py: 2 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0102152Z tests/test_bulk_manifest_db.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0102582Z tests/test_buyer_management_db.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0102978Z tests/test_buyer_review_db.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0103383Z tests/test_checkpoint_schema_privileges_db.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0103795Z tests/test_cloudflare_bridge_db.py: 1 warning
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0104179Z tests/test_cloudflare_local_steps_db.py: 1 warning
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0104577Z tests/test_cloudflare_migration_db.py: 4 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0104967Z tests/test_cloudflare_platform_db.py: 1 warning
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0105394Z tests/test_cloudflare_preview_diagnostic.py: 1 warning
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0105822Z tests/test_cloudflare_provider_steps_db.py: 1 warning
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0106267Z tests/test_cloudflare_recovery_boundaries_db.py: 6 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0106683Z tests/test_cloudflare_recovery_db.py: 1 warning
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0107085Z tests/test_cloudflare_runtime_control_db.py: 1 warning
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0107484Z tests/test_contact_job_migration.py: 5 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0107865Z tests/test_contact_quote_migration.py: 4 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0108523Z tests/test_draft_approval_migration.py: 4 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0108938Z tests/test_draft_integrity_migration.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0109316Z tests/test_export_migration.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0109683Z tests/test_icp_write_integrity_db.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0110063Z tests/test_ingestion_migration.py: 4 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0110431Z tests/test_outcome_migration.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0110796Z tests/test_policy_lifecycle_db.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0111169Z tests/test_project_constraints_db.py: 6 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0111582Z tests/test_research_checkpoint_migration.py: 4 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0111981Z tests/test_research_migration.py: 4 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0112376Z tests/test_retention_authorization_db.py: 5 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0112739Z tests/test_run_migration.py: 4 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0113072Z tests/test_runtime_readiness_db.py: 1 warning
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0113448Z tests/test_sender_identity_migration.py: 3 warnings
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0114821Z   /home/runner/work/BuyerOS/BuyerOS/services/api/.venv/lib/python3.12/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0116194Z     util.warn_deprecated(
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0116344Z 
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0116629Z -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0117294Z - generated xml file: /home/runner/work/BuyerOS/BuyerOS/services/api/artifacts/tests.xml -
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0117885Z =========================== short test summary info ============================
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0119270Z FAILED tests/test_api_buyers.py::test_registry_covers_every_unimplemented_contract_operation - AssertionError: assert {'executeBulk...aftGrounding'} == set()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0119952Z   
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0120167Z   Extra items in the left set:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0120421Z   'getAsyncJobSummary'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0120650Z   'previewBulkManifest'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0120884Z   'reviewDraftGrounding'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0121125Z   'listEligibleAssignees'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0121363Z   'executeBulkManifest'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0121586Z   'getBulkManifest'
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0121800Z   
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0121973Z   Full diff:
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0122317Z   - set()
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0122497Z   + {
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0122719Z   +     'executeBulkManifest',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0122971Z   +     'getAsyncJobSummary',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0123211Z   +     'getBulkManifest',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0123466Z   +     'listEligibleAssignees',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0123738Z   +     'previewBulkManifest',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0124002Z   +     'reviewDraftGrounding',
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0124235Z   + }
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0125967Z FAILED tests/test_job_summary_db.py::test_q06_60s_ten_view_traffic_replays_real_http_bytes_and_db_executes - subprocess.CalledProcessError: Command '['node', 'tests/job-poller-traffic.mjs', '/home/runner/work/BuyerOS/BuyerOS/test-results/q06-traffic-samples.json', '/home/runner/work/BuyerOS/BuyerOS/test-results/q06-traffic-schedule.json']' returned non-zero exit status 1.
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:36.0127519Z 2 failed, 810 passed, 101 warnings in 440.09s (0:07:20)
+api	Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml	2026-10-05T19:07:38.0543263Z ##[error]Process completed with exit code 1.

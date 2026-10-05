@@ -1,0 +1,39 @@
+{
+  "source_sha": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
+  "source_base": "38c55228489a12bfc493f27d2ed27e177117366e",
+  "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+  "paths": [
+    {
+      "path": ".github/workflows/buyeros-ci.yml",
+      "working_sha256": "2d99628c0d0b1473fcbad61663ebce9fc1a3e9ebda157ddc7748afb5eeb96845",
+      "committed_sha256": "2d99628c0d0b1473fcbad61663ebce9fc1a3e9ebda157ddc7748afb5eeb96845",
+      "logical_bytes_equal": true
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-06-q11-ci-audit-gates.md",
+      "working_sha256": "16005d9467358506b7b5368f40c806a94359b35e83a82b55cc440a2b11dd33c3",
+      "committed_sha256": "16005d9467358506b7b5368f40c806a94359b35e83a82b55cc440a2b11dd33c3",
+      "logical_bytes_equal": true
+    },
+    {
+      "path": "playwright.workbench.config.ts",
+      "working_sha256": "50a7ea80db12fe07ac86e500254b42b57eb33b25faec00f63d4de6162e58c852",
+      "committed_sha256": "50a7ea80db12fe07ac86e500254b42b57eb33b25faec00f63d4de6162e58c852",
+      "logical_bytes_equal": true
+    },
+    {
+      "path": "services/api/tests/test_api_buyers.py",
+      "working_sha256": "f7e70bfa965a700a5afb7503d02c0b5f6bf0f33aaf2d0d72115039da501f1873",
+      "committed_sha256": "f7e70bfa965a700a5afb7503d02c0b5f6bf0f33aaf2d0d72115039da501f1873",
+      "logical_bytes_equal": true
+    },
+    {
+      "path": "tests/e2e/daily-workbench.spec.ts",
+      "working_sha256": "851a1fbaa9f7ac1045341464b32d97c9ca6a5906765082fa42047d395e0abc7c",
+      "committed_sha256": "851a1fbaa9f7ac1045341464b32d97c9ca6a5906765082fa42047d395e0abc7c",
+      "logical_bytes_equal": true
+    }
+  ],
+  "normalization": "Git text attributes may normalize CRLF; tested logical source matches committed bytes after CRLF normalization",
+  "runtime_or_schema_changed": false
+}

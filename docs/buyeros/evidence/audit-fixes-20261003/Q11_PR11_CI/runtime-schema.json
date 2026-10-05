@@ -1,0 +1,14 @@
+{
+  "node": "24.18.0",
+  "python": "3.14.6",
+  "playwright": "1.63.0",
+  "docker": "29.8.1",
+  "platform": "Windows",
+  "alembic_heads": [
+    "0037_bulk_manifests"
+  ],
+  "new_migrations": [],
+  "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+  "current_patch_runtime_changes": false,
+  "build": "Workbench retained matching .vercel/output; Q01 fresh owned Linux Nitro node-server build and seven cases passed; no hosted build/deploy"
+}

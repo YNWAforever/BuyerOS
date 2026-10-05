@@ -1,3 +1,11 @@
+# Current Q11 PR11 CI checkpoint — 2026-10-06
+
+Author-reviewed test/config source `546a03770b32430f9ff90b7ac21c00fa74dd2166`. Full strict API812/workbench8/Q01built7 pass,0fail/error/skip;types/scopedlint/generated84/routes exit0. Six implemented extension IDs/current locale persistence and exact Q06 baseline-history prerequisite reconciled;scoped Playwright output protects sibling evidence. Original RED/intermediate errors preserved. [Commands,raw results,screenshots,rollback](evidence/audit-fixes-20261003/Q11_PR11_CI/RESULTS.md).
+
+**Full Q11/N00/F20/NA01/real Neon/original302/independent review/live staff remain OPEN.** Existing Draft PR11 publication/readback is pending separately. Application/Auth0/canonical actors/RLS/HMAC/delivery403 unchanged;head0037,no new schema/production/provider/manual deploy. Deployed SHA unproven for this slice. Next: N00 OS isolation composition;fresh exact authorization needed after full harness for real auth. Earlier records below retain historical scope.
+
+## Historical checkpoints below
+
 > Latest local checkpoint (2026-10-06): `4ba0a5d7757d5c9e4991593a13c0a2df217be511`. Counted fixture APIRequestContext/private cookies/ownership lifecycle verified;root318reported/317leaves,Chromium6,crypto8 pass0fail/error/skip. New10 regressions include actual body/disposal owner races,accepted/lost-response hold and two manual counted hops. No build/deploy/auth cutover/migration. Full N00/NA01/realNeon/original302/parent-browser-control-plane/rawcontext-arbitraryCLI/independent review remain OPEN. [Evidence and rollback](evidence/audit-fixes-20261003/N00_API_REQUEST_CONTEXT/RESULTS.md). Older notices retain historical scope.
 
 > Latest local checkpoint (2026-10-05): `779138aa5335eb829a97a80bbc80430a32201c1a`. Counted fixed-native IPC and actual network-none child verified; root308 reported/307leaves, Chromium5, crypto8 all pass0fail/error/skip. Positive control3HTTP+TCP, isolated native4probes refused/0directHTTP; unknown intent retains hold after restart. No new build/deploy/auth cutover; full N00/NA01/parent/browser/APIRequestContext/arbitraryCLI remain OPEN. [Evidence and rollback](evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md). Older notices retain their historical scope.

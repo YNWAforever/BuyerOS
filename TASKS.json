@@ -2889,6 +2889,118 @@
         "limits": "API/PostgreSQL/RLS and actual browser use fictional identities. Final5 new UI; intermediate15=11 Operations+4 guidance before final contradiction guard. No real auth/provider/full staff/UAT/recovery/performance/production proof. FullQ11/N00 and F10/F13 external gates OPEN.",
         "next_eligible": "N00 remaining local original-redirect/native containment/accounting gap audit; actual Neon/provider/production work still needs its own concrete evidence and authorization",
         "rollback": "Revert the following metadata commit, then source 5aaf6492ec10078e4f1a4fa5b17efd41c5673eba as one contract/API/UI/test unit. No DB/data rollback."
+      },
+      "ci_repair_20261006": {
+        "task": "Q11 PR11 CI follow-up",
+        "date_hk": "2026-10-06",
+        "base_sha": "38c55228489a12bfc493f27d2ed27e177117366e",
+        "source_sha": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "status": "local-required-gates-verified;full-Q11-and-N00-open",
+        "code_scope": "one workflow,one Playwright config,two test files,one plan;application/auth/schema unchanged",
+        "checks": {
+          "api": {
+            "cases": 812,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 812,
+            "duration_seconds": 1974.703,
+            "producer_total_seconds": 1990.119
+          },
+          "workbench": {
+            "cases": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 8,
+            "duration_seconds": 63.097,
+            "producer_total_seconds": 85.567841
+          },
+          "auth_entry": {
+            "cases": 7,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 7,
+            "duration_seconds": 35.219,
+            "producer_total_seconds": 127.74405
+          },
+          "workbench_red": {
+            "cases": 1,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "pass": 0,
+            "duration_seconds": 14.739,
+            "producer_total_seconds": 67.732543
+          },
+          "workbench_first_full": {
+            "cases": 8,
+            "fail": 0,
+            "error": 3,
+            "skip": 0,
+            "pass": 5,
+            "duration_seconds": 226.135,
+            "producer_total_seconds": 297.457946
+          },
+          "types": {
+            "exit_code": 0,
+            "report": "types.log"
+          },
+          "lint": {
+            "exit_code": 0,
+            "report": "lint.log"
+          },
+          "generated_contract": {
+            "exit_code": 0,
+            "operations": 84,
+            "report": "contracts.log"
+          },
+          "operation_routes": {
+            "exit_code": 0,
+            "operations": 84,
+            "report": "routes.log"
+          }
+        },
+        "contracts": {
+          "original": 70,
+          "extensions": 14,
+          "total": 84,
+          "changes": 0
+        },
+        "alembic_heads": [
+          "0037_bulk_manifests"
+        ],
+        "new_migrations": [],
+        "live_verification": false,
+        "deployed_sha": null,
+        "review": "author only;independent pending;no agents",
+        "remaining": [
+          "full Q11 external release comparison",
+          "full N00/F20/NA01 OS boundary",
+          "real Neon/Google/Admin cleanup",
+          "original strict302 acceptance",
+          "independent review",
+          "eight-module live staff acceptance"
+        ],
+        "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/RESULTS.md",
+        "rollback": "revert following evidence/status commit then 546a03770b32430f9ff90b7ac21c00fa74dd2166;no schema/data rollback;preserve admitted/unknown N00 holds",
+        "ci": {
+          "prior_run": 37360072047,
+          "prior_head": "38c55228489a12bfc493f27d2ed27e177117366e",
+          "prior_results": "six jobs pass;API810pass2fail0skip;continuity workbench7pass1fail0skip",
+          "updated_run": "pending push/readback;not claimed passed"
+        },
+        "failure_history": [
+          "wrong-cwd registry setup FileNotFound;correct-cwd six-extension RED",
+          "old T29 enabled-language expectation RED1fail",
+          "unscoped old Playwright output cleanup deleted ignored sibling reports/clone;interrupted startup counted no tests",
+          "first corrected full workbench5pass3beforeEach errors0skip;final serialized8pass;unchanged30s caps",
+          "CP950 console evidence read failure;corrected PYTHONUTF8;not a test failure",
+          "source-plan EOF whitespace REDexit2 then GREEN0"
+        ]
       }
     },
     {
@@ -3038,5 +3150,6 @@
     "proposed_schema_head": "0038_workspace_discovery",
     "merged_here": false
   },
-  "latest_local_verification_source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511"
+  "latest_local_verification_source_sha": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
+  "latest_local_verification_scope": "Q11 PR11 test/CI repair;N00/application checkpoint unchanged"
 }

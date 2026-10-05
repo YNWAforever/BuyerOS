@@ -1,0 +1,11 @@
+{
+  "original_evidence_files": 3741,
+  "other_root_task_objects_unchanged": 24,
+  "legacy_task_objects_unchanged": 31,
+  "case_rows": 98,
+  "other_case_rows_unchanged": 97,
+  "original_15_audit_columns_unchanged": true,
+  "legacy_auth_checkpoint_unchanged": true,
+  "legacy_deployed_source_unchanged": true,
+  "original_status_body_bytes_preserved": true
+}

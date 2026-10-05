@@ -1,0 +1,40 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="67.732543">
+<testsuite name="daily-workbench.spec.ts" timestamp="2026-10-05T19:21:41.465Z" hostname="" tests="1" failures="1" skipped="0" time="14.739" errors="0">
+<testcase name="T29 locale waits for current preference version and survives a fresh sign-in" classname="daily-workbench.spec.ts" time="14.739">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\workbench\browser\daily-workbench-T29-locale-c008a-nd-survives-a-fresh-sign-in\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeDisabled() failed" type="expect.toBeDisabled">
+<![CDATA[  daily-workbench.spec.ts:121:1 › T29 locale waits for current preference version and survives a fresh sign-in 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  locator('header select')
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" locator('header select') with timeout 5000ms
+      - waiting for locator('header select')
+        14 × locator resolved to <select aria-label="Language">…</select>
+           - unexpected value "enabled"
+
+
+      130 |     await signIn(page,false);
+      131 |     await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue(workspace,{timeout:30_000});
+    > 132 |     await expect(page.locator('header select')).toBeDisabled();
+          |                                                 ^
+      133 |   }finally{
+      134 |     releasePreference();
+      135 |   }
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\daily-workbench.spec.ts:132:49
+
+    Error Context: ..\..\test-results\workbench\browser\daily-workbench-T29-locale-c008a-nd-survives-a-fresh-sign-in\error-context.md
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>
