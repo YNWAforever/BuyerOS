@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="native pinned SDK exact-id lookup reaches owned HTTP with a durable reconciliation reservation" time="0.148367" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="native SDK removal uses the twenty-request cleanup reserve after 180 auth checks" time="4.069049" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs" failure="Expected values to be strictly equal:&#10;&#10;1 !== 181&#10;">
+		<failure type="unhandledRejection" message="Expected values to be strictly equal:&#10;&#10;1 !== 181">
+Error [ERR_TEST_FAILURE]: Expected values to be strictly equal:
+
+1 !== 181
+
+    at process.emit (node:events:509:28) {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'unhandledRejection',
+  cause: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 181
+  
+      at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:18:10
+      at Server.&lt;anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-execution/fixture.mjs:18:21)
+      at Server.emit (node:events:509:28)
+      at parserOnIncoming (node:_http_server:1268:12)
+      at HTTPParser.parserOnHeadersComplete (node:_http_common:125:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 181,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="native SDK refuses a different identity before reserving or dispatching HTTP" time="0.052019" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="fresh ownership, exact identity and native SDK absence complete only the owned identity cleanup" time="0.241387" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="read-500 read cannot authorize removal or claim absence" time="0.099964" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="generic-404 read cannot authorize removal or claim absence" time="0.095148" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="foreign-id read cannot authorize removal or claim absence" time="0.108001" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="foreign-created read cannot authorize removal or claim absence" time="0.095210" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="malformed read cannot authorize removal or claim absence" time="0.089490" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="lingering removal response cannot claim confirmed absence" time="0.219242" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="bad-success removal response cannot claim confirmed absence" time="0.234778" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="post-delete-malformed removal response cannot claim confirmed absence" time="0.222165" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="committed removal with lost response is not replayed; restart confirms exact absence through the SDK" time="0.236295" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="unknown removal still present after restart retains hold and never resends" time="0.241330" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="an expired target may consume cleanup/reconciliation reserve but cannot send new auth checks" time="0.246079" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="admin authentication failure cannot be interpreted as an empty identity set" time="0.094512" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="gateway, journal and owner must all be the same branded owned context" time="0.057806" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="changed project readback stops before native identity lookup" time="0.054218" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="no email linking, role writes, impersonation, create-user or unrestricted query enters the boundary" time="0.041212" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<testcase name="durable receipts do not persist fixture session headers or identity payloads" time="0.200514" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-managed-cleanup-sdk.test.mjs"/>
+	<!-- tests 20 -->
+	<!-- suites 0 -->
+	<!-- pass 19 -->
+	<!-- fail 1 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 7658.0334 -->
+</testsuites>

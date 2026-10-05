@@ -1,0 +1,71 @@
+{
+  "case": "foreign-created read cannot authorize removal or claim absence",
+  "fixture_only": true,
+  "external_requests": 0,
+  "records": [
+    {
+      "sequence": 1,
+      "purpose": "reconcile",
+      "operationId": "execution-http-1",
+      "reservedAt": "2026-10-05T02:04:06.095Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-1.json"
+    },
+    {
+      "sequence": 2,
+      "purpose": "reconcile",
+      "operationId": "execution-http-2",
+      "reservedAt": "2026-10-05T02:04:06.130Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-2.json"
+    }
+  ],
+  "receipts": [
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 1,
+      "channel": "control",
+      "method": "GET",
+      "path": "/fixture/control/target",
+      "intent_hash": "069792c1c56a81ea8a7ded3ce19cb4688bb5a72ae381f74774b85fb6aceb2787",
+      "target_fingerprint": "31b3b5dd085ca4eca9a641fbd17b5bc625ad73a9b254b82330995db4d58f2d67",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 2,
+      "channel": "sdk",
+      "method": "GET",
+      "path": "/fixture/auth/admin/list-users?filterField=id&filterValue=fictional-execution-identity&filterOperator=eq&limit=1&offset=0",
+      "intent_hash": "c36e9f415430e100dc0bcf7c760a536df2f02581ae5c3d4853b1d8df53148ef9",
+      "target_fingerprint": "31b3b5dd085ca4eca9a641fbd17b5bc625ad73a9b254b82330995db4d58f2d67",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    }
+  ],
+  "hits": [
+    [
+      "GET",
+      "/fixture/control/target"
+    ],
+    [
+      "GET",
+      "/fixture/auth/admin/list-users"
+    ]
+  ],
+  "removes": 0,
+  "reads": 1,
+  "cleaned": {
+    "fixture_only": true,
+    "external_verified": false,
+    "owned_journal_removed": true,
+    "owned_servers_closed": true
+  }
+}

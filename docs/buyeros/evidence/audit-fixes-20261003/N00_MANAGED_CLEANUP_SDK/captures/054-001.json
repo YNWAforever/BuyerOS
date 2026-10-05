@@ -1,0 +1,45 @@
+{
+  "case": "native pinned SDK exact-id lookup reaches owned HTTP with a durable reconciliation reservation",
+  "fixture_only": true,
+  "external_requests": 0,
+  "records": [
+    {
+      "sequence": 1,
+      "purpose": "reconcile",
+      "operationId": "execution-http-1",
+      "reservedAt": "2026-10-05T02:01:21.122Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-1.json"
+    }
+  ],
+  "receipts": [
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 1,
+      "channel": "sdk",
+      "method": "GET",
+      "path": "/fixture/auth/admin/list-users?filterField=id&filterValue=fictional-execution-identity&filterOperator=eq&limit=1&offset=0",
+      "intent_hash": "61c1f2586c2b51f6c67044334193e66bdffb8c0d5c2df82f9c5f14f2e91b2476",
+      "target_fingerprint": "74d69d5290abcf912fac2c71ad044b32eea5e1f699fff4f8d10e2bb66a46f796",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    }
+  ],
+  "hits": [
+    [
+      "GET",
+      "/fixture/auth/admin/list-users"
+    ]
+  ],
+  "removes": 0,
+  "reads": 1,
+  "cleaned": {
+    "fixture_only": true,
+    "external_verified": false,
+    "owned_journal_removed": true,
+    "owned_servers_closed": true
+  }
+}

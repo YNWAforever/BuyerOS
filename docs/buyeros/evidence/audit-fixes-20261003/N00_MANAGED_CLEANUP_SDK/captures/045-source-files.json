@@ -1,0 +1,12 @@
+[
+  "playwright.neon-execution.config.ts",
+  "scripts/neon-counted-proxy.mjs",
+  "scripts/neon-execution-boundary.d.mts",
+  "scripts/neon-execution-boundary.mjs",
+  "scripts/neon-execution-cleanup.d.mts",
+  "scripts/neon-execution-cleanup.mjs",
+  "scripts/neon-execution-cli.mjs",
+  "tests/e2e/audit-neon-execution.spec.ts",
+  "tests/fixtures/neon-execution/fixture.mjs",
+  "tests/neon-execution-boundary.test.mjs"
+]

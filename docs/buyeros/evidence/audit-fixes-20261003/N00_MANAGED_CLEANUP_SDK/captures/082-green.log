@@ -1,0 +1,31 @@
+✔ native pinned SDK exact-id lookup reaches owned HTTP with a durable reconciliation reservation (187.3303ms)
+✔ native SDK removal uses the twenty-request cleanup reserve after 180 auth checks (3519.7123ms)
+✔ native SDK refuses a different identity before reserving or dispatching HTTP (42.8434ms)
+✔ fresh ownership, exact identity and native SDK absence complete only the owned identity cleanup (197.0143ms)
+✔ read-500 read cannot authorize removal or claim absence (118.8022ms)
+✔ generic-404 read cannot authorize removal or claim absence (258.0853ms)
+✔ foreign-id read cannot authorize removal or claim absence (106.0463ms)
+✔ foreign-created read cannot authorize removal or claim absence (77.6621ms)
+✔ malformed read cannot authorize removal or claim absence (81.5091ms)
+✔ lingering removal response cannot claim confirmed absence (187.81ms)
+✔ bad-success removal response cannot claim confirmed absence (119.3166ms)
+✔ post-delete-malformed removal response cannot claim confirmed absence (215.1122ms)
+✔ committed removal with lost response is not replayed; restart confirms exact absence through the SDK (216.1229ms)
+✔ unknown removal still present after restart retains hold and never resends (253.9316ms)
+✔ an expired target may consume cleanup/reconciliation reserve but cannot send new auth checks (254.9963ms)
+✔ admin authentication failure cannot be interpreted as an empty identity set (111.4715ms)
+✔ gateway, journal and owner must all be the same branded owned context (60.2015ms)
+✔ changed project readback stops before native identity lookup (57.2364ms)
+✔ no email linking, role writes, impersonation, create-user or unrestricted query enters the boundary (33.866ms)
+✔ durable receipts do not persist fixture session headers or identity payloads (203.8063ms)
+✔ accepted remove without absence remains held on another attempt (368.4821ms)
+✔ duplicate or extended query and body fields cannot broaden exact-id cleanup (71.7729ms)
+✔ cleanup also stops at the hard total of two hundred physical requests (3544.0305ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11267.086

@@ -1,0 +1,71 @@
+{
+  "case": "malformed read cannot authorize removal or claim absence",
+  "fixture_only": true,
+  "external_requests": 0,
+  "records": [
+    {
+      "sequence": 1,
+      "purpose": "reconcile",
+      "operationId": "execution-http-1",
+      "reservedAt": "2026-10-05T02:01:25.537Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-1.json"
+    },
+    {
+      "sequence": 2,
+      "purpose": "reconcile",
+      "operationId": "execution-http-2",
+      "reservedAt": "2026-10-05T02:01:25.563Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-2.json"
+    }
+  ],
+  "receipts": [
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 1,
+      "channel": "control",
+      "method": "GET",
+      "path": "/fixture/control/target",
+      "intent_hash": "5be75656c8eda44c9f75823385db535d7de8e9da00e81c5af6129a4fea6f22ec",
+      "target_fingerprint": "a9a96258a82cff22e48ad7781de4a00a1a1d34a59c450d91183231eed742ba71",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 2,
+      "channel": "sdk",
+      "method": "GET",
+      "path": "/fixture/auth/admin/list-users?filterField=id&filterValue=fictional-execution-identity&filterOperator=eq&limit=1&offset=0",
+      "intent_hash": "5681bc675a73f8d1c628011f6e14c06e4c5bca724b6e6ebc2c0e907d84a82bc8",
+      "target_fingerprint": "a9a96258a82cff22e48ad7781de4a00a1a1d34a59c450d91183231eed742ba71",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    }
+  ],
+  "hits": [
+    [
+      "GET",
+      "/fixture/control/target"
+    ],
+    [
+      "GET",
+      "/fixture/auth/admin/list-users"
+    ]
+  ],
+  "removes": 0,
+  "reads": 1,
+  "cleaned": {
+    "fixture_only": true,
+    "external_verified": false,
+    "owned_journal_removed": true,
+    "owned_servers_closed": true
+  }
+}

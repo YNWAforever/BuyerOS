@@ -1,0 +1,97 @@
+{
+  "case": "bad-success removal response cannot claim confirmed absence",
+  "fixture_only": true,
+  "external_requests": 0,
+  "records": [
+    {
+      "sequence": 1,
+      "purpose": "reconcile",
+      "operationId": "execution-http-1",
+      "reservedAt": "2026-10-05T02:16:46.674Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-1.json"
+    },
+    {
+      "sequence": 2,
+      "purpose": "reconcile",
+      "operationId": "execution-http-2",
+      "reservedAt": "2026-10-05T02:16:46.705Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-2.json"
+    },
+    {
+      "sequence": 3,
+      "purpose": "cleanup",
+      "operationId": "execution-http-3",
+      "reservedAt": "2026-10-05T02:16:46.768Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-3.json"
+    }
+  ],
+  "receipts": [
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 1,
+      "channel": "control",
+      "method": "GET",
+      "path": "/fixture/control/target",
+      "intent_hash": "564279773b17da2d6ba6bc5855bbda3ffbc1d9703d0b594fb5a5c2f94af2641c",
+      "target_fingerprint": "38eee983610de557da7f6716dcb94a5a3354d7065555c7a34c018c24ba40e371",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 2,
+      "channel": "sdk",
+      "method": "GET",
+      "path": "/fixture/auth/admin/list-users?filterField=id&filterValue=fictional-execution-identity&filterOperator=eq&limit=1&offset=0",
+      "intent_hash": "cf8d9e71395aa6b39ab1b70f1084bb22944a79ace70019ba100e83faddf0d30d",
+      "target_fingerprint": "38eee983610de557da7f6716dcb94a5a3354d7065555c7a34c018c24ba40e371",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 3,
+      "channel": "sdk",
+      "method": "POST",
+      "path": "/fixture/auth/admin/remove-user",
+      "intent_hash": "0434a2ec88917fc08e428fb490b9a09489a9737ec172d6ea7e0fd3a189585fae",
+      "target_fingerprint": "38eee983610de557da7f6716dcb94a5a3354d7065555c7a34c018c24ba40e371",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    }
+  ],
+  "hits": [
+    [
+      "GET",
+      "/fixture/control/target"
+    ],
+    [
+      "GET",
+      "/fixture/auth/admin/list-users"
+    ],
+    [
+      "POST",
+      "/fixture/auth/admin/remove-user"
+    ]
+  ],
+  "removes": 1,
+  "reads": 1,
+  "cleaned": {
+    "fixture_only": true,
+    "external_verified": false,
+    "owned_journal_removed": true,
+    "owned_servers_closed": true
+  }
+}

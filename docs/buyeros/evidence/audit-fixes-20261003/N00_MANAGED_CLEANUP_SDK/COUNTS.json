@@ -1,0 +1,133 @@
+{
+  "red": {
+    "tests": 20,
+    "pass": 0,
+    "fail": 20,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "duration_ms": 8235.6642,
+    "xml_leaf_cases": 20,
+    "xml_failure_elements": 20,
+    "xml_skips": 0
+  },
+  "focused": {
+    "tests": 24,
+    "pass": 24,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "duration_ms": 17752.2554,
+    "xml_leaf_cases": 24,
+    "xml_failure_elements": 0,
+    "xml_skips": 0
+  },
+  "initial_green": {
+    "tests": 20,
+    "pass": 19,
+    "fail": 1,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "duration_ms": 7658.0334
+  },
+  "related": {
+    "tests": 238,
+    "pass": 238,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "duration_ms": 58663.4183,
+    "xml_leaf_cases": 238,
+    "xml_failure_elements": 0,
+    "xml_skips": 0
+  },
+  "crypto": {
+    "pass": 8,
+    "fail": 0,
+    "errors": 0,
+    "skip": 0,
+    "warnings": 1
+  },
+  "browser": {
+    "startTime": "2026-10-05T02:16:03.112Z",
+    "duration": 7595.655999999999,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "owned_native_HTTP": {
+    "captures": 25,
+    "unique_cases": 24,
+    "physical_hops": 55,
+    "SDK_or_direct_owned_removals": 11,
+    "SDK_reads": 24,
+    "unknown_receipts": 3,
+    "historic_simulated_budget_reservations": 380,
+    "external_requests": 0
+  },
+  "prior_source_counts": {
+    "focused": {
+      "tests": 23,
+      "pass": 23,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 11267.086,
+      "xml_leaf_cases": 23,
+      "xml_failure_elements": 0,
+      "xml_skips": 0
+    },
+    "related": {
+      "tests": 237,
+      "pass": 237,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 59302.9851,
+      "xml_leaf_cases": 237,
+      "xml_failure_elements": 0,
+      "xml_skips": 0
+    },
+    "crypto": {
+      "pass": 8,
+      "fail": 0,
+      "skip": 0,
+      "errors": 0,
+      "warnings": 1
+    },
+    "browser": {
+      "startTime": "2026-10-05T02:03:17.144Z",
+      "duration": 6773.906,
+      "expected": 3,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "owned_native_HTTP": {
+      "captures": 24,
+      "unique_cases": 23,
+      "physical_hops": 54,
+      "SDK_removals": 10,
+      "SDK_reads": 24,
+      "unknown_receipts": 2,
+      "historic_simulated_budget_reservations": 380,
+      "external_requests": 0
+    },
+    "source_sha": "5ecaa23abf6e3148a6964a1886b70442c3615987"
+  },
+  "author_review_red": {
+    "tests": 24,
+    "pass": 23,
+    "fail": 1,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "duration_ms": 13671.0963
+  }
+}

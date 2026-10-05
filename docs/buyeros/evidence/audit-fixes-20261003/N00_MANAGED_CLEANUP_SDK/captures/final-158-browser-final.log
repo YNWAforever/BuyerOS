@@ -1,0 +1,10 @@
+
+Running 3 tests using 1 worker
+
+(node:21556) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-execution.spec.ts:8:1 › NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget (3.0s)
+  ok 2 tests\e2e\audit-neon-execution.spec.ts:19:1 › NA01 accounting: browser origin and direct-network refusals dispatch no provider HTTP (1.3s)
+  ok 3 tests\e2e\audit-neon-execution.spec.ts:26:1 › NA01 accounting: browser refresh and a reconstructed journal cannot replay an unknown write (2.0s)
+
+  3 passed (26.8s)

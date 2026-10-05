@@ -1,0 +1,149 @@
+{
+  "case": "committed removal with lost response is not replayed; restart confirms exact absence through the SDK",
+  "fixture_only": true,
+  "external_requests": 0,
+  "records": [
+    {
+      "sequence": 1,
+      "purpose": "reconcile",
+      "operationId": "execution-http-1",
+      "reservedAt": "2026-10-05T02:16:47.058Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-1.json"
+    },
+    {
+      "sequence": 2,
+      "purpose": "reconcile",
+      "operationId": "execution-http-2",
+      "reservedAt": "2026-10-05T02:16:47.088Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-2.json"
+    },
+    {
+      "sequence": 3,
+      "purpose": "cleanup",
+      "operationId": "execution-http-3",
+      "reservedAt": "2026-10-05T02:16:47.136Z",
+      "outcome": "unknown",
+      "evidenceRef": "execution-http-3.json"
+    },
+    {
+      "sequence": 4,
+      "purpose": "reconcile",
+      "operationId": "execution-http-4",
+      "reservedAt": "2026-10-05T02:16:47.173Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-4.json"
+    },
+    {
+      "sequence": 5,
+      "purpose": "reconcile",
+      "operationId": "execution-http-5",
+      "reservedAt": "2026-10-05T02:16:47.201Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-5.json"
+    }
+  ],
+  "receipts": [
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 1,
+      "channel": "control",
+      "method": "GET",
+      "path": "/fixture/control/target",
+      "intent_hash": "7182eca3e88be277f19c0e6e3280ca7787c01fed17046e44ad0db817df886a8e",
+      "target_fingerprint": "8d914efff3f99375b6948d7ecfd1db079d653183acd4a4e6e3922399135462f5",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 2,
+      "channel": "sdk",
+      "method": "GET",
+      "path": "/fixture/auth/admin/list-users?filterField=id&filterValue=fictional-execution-identity&filterOperator=eq&limit=1&offset=0",
+      "intent_hash": "b611474dded9856127cb45b7ea731d9b050f5af19c1c62036eac6b6083e0f496",
+      "target_fingerprint": "8d914efff3f99375b6948d7ecfd1db079d653183acd4a4e6e3922399135462f5",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 3,
+      "channel": "sdk",
+      "method": "POST",
+      "path": "/fixture/auth/admin/remove-user",
+      "intent_hash": "30f89ef773eb25325cf01fbcb82530b17a7be66781b800c26d9e40a691f6e859",
+      "target_fingerprint": "8d914efff3f99375b6948d7ecfd1db079d653183acd4a4e6e3922399135462f5",
+      "status": null,
+      "outcome": "unknown",
+      "reason": "transport-unknown"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 4,
+      "channel": "control",
+      "method": "GET",
+      "path": "/fixture/control/target",
+      "intent_hash": "7182eca3e88be277f19c0e6e3280ca7787c01fed17046e44ad0db817df886a8e",
+      "target_fingerprint": "8d914efff3f99375b6948d7ecfd1db079d653183acd4a4e6e3922399135462f5",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 5,
+      "channel": "sdk",
+      "method": "GET",
+      "path": "/fixture/auth/admin/list-users?filterField=id&filterValue=fictional-execution-identity&filterOperator=eq&limit=1&offset=0",
+      "intent_hash": "b611474dded9856127cb45b7ea731d9b050f5af19c1c62036eac6b6083e0f496",
+      "target_fingerprint": "8d914efff3f99375b6948d7ecfd1db079d653183acd4a4e6e3922399135462f5",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    }
+  ],
+  "hits": [
+    [
+      "GET",
+      "/fixture/control/target"
+    ],
+    [
+      "GET",
+      "/fixture/auth/admin/list-users"
+    ],
+    [
+      "POST",
+      "/fixture/auth/admin/remove-user"
+    ],
+    [
+      "GET",
+      "/fixture/control/target"
+    ],
+    [
+      "GET",
+      "/fixture/auth/admin/list-users"
+    ]
+  ],
+  "removes": 1,
+  "reads": 2,
+  "cleaned": {
+    "fixture_only": true,
+    "external_verified": false,
+    "owned_journal_removed": true,
+    "owned_servers_closed": true
+  }
+}

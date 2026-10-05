@@ -2094,6 +2094,58 @@
       "original302/trueNeon/Google/fullnativeaccounting/Managedidentitycleanup/independentreviewOPEN",
       "broadsuiteRED;2intentfailuresnowrelatedGREEN;offerDocker30stimeout+parent+missingmainVercelentryremain",
       "unresolvedrestartjournalsholdallstatechangespendingtrustedreconciliation"
-    ]
+    ],
+    "managed_identity_sdk_cleanup": {
+      "source_sha": "050f0d03e49e867c9e5364865d3dc5f17bdc8fec",
+      "base_sha": "6c396a452fc48279ff093dc6984fdc0ad3a7e2a5",
+      "status": "local-native-SDK-managed-identity-cleanup-rehearsal-verified;N00open",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_MANAGED_CLEANUP_SDK/RESULTS.md",
+      "checks": {
+        "related_Node": {
+          "pass": 238,
+          "fail": 0,
+          "skip": 0
+        },
+        "focused_Node": {
+          "pass": 24,
+          "fail": 0,
+          "skip": 0
+        },
+        "crypto": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        },
+        "owned_browser": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "types_exit": 0,
+      "lint_exit": 0,
+      "contracts_exit": 0,
+      "operations": 84,
+      "provider_calls": 0,
+      "migrations": [],
+      "builds": 0,
+      "deployed_sha": null,
+      "full_gate_passed": false,
+      "limits": [
+        "real-Neon/Google/Admincleanup/schema/absence require fresh isolated authority",
+        "original302/fullnativecontainment/independentreview/staffUAT OPEN",
+        "priorbroadrootRED;not rerun"
+      ],
+      "source_commits": [
+        "5ecaa23abf6e3148a6964a1886b70442c3615987",
+        "050f0d03e49e867c9e5364865d3dc5f17bdc8fec"
+      ],
+      "author_review_red": {
+        "pass": 23,
+        "fail": 1,
+        "skip": 0
+      },
+      "intent": "bound identity canonical JSON;headers do not change intent"
+    }
   }
 }

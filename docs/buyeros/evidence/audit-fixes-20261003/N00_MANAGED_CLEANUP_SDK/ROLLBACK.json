@@ -1,0 +1,14 @@
+{
+  "source_sha": "050f0d03e49e867c9e5364865d3dc5f17bdc8fec",
+  "source_commits": [
+    "5ecaa23abf6e3148a6964a1886b70442c3615987",
+    "050f0d03e49e867c9e5364865d3dc5f17bdc8fec"
+  ],
+  "reverse_aggregate_patch_check_exit": 0,
+  "executed_revert": false,
+  "production_rehearsed": false,
+  "order": "revert followingmetadata, then 050f0d03e49e867c9e5364865d3dc5f17bdc8fec, then 5ecaa23abf6e3148a6964a1886b70442c3615987",
+  "DB_migrations": [],
+  "provider_resources": [],
+  "held_journals": "not automatically cleared by rollback"
+}

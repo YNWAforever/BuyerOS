@@ -1,0 +1,60 @@
+[
+  {
+    "stage": "initial red and diagnostic red",
+    "exit": 1,
+    "complete": false,
+    "counts_claimed": false,
+    "reason": "capture hook attempted nonexistent historical fixture receipt before cleanup; TCPServerWrap remained; owned worker interrupted",
+    "ownership_roots": [
+      {
+        "approval": "fixture-only-no-external-authority",
+        "root": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-e8oqQB",
+        "requests": 180,
+        "fixture_only": true,
+        "external_verified": false,
+        "createdAt": "2026-10-05T01:57:37.437Z"
+      },
+      {
+        "approval": "fixture-only-no-external-authority",
+        "root": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-L6sebk",
+        "requests": 180,
+        "fixture_only": true,
+        "external_verified": false,
+        "createdAt": "2026-10-05T01:55:12.412Z"
+      }
+    ]
+  },
+  {
+    "stage": "initial green",
+    "pass": 19,
+    "fail": 1,
+    "skip": 0,
+    "reason": "fixture asserted physical hits equal all reservations including180 historical; changed to exact execution-http reservation count; never altered production budget or assertions of before-dispatch pending"
+  },
+  {
+    "stage": "first manual cleanup guard",
+    "result": "ownership mismatch",
+    "mutation": false,
+    "reason": "PowerShell ConvertFrom-Json parsed RFC3339 into DateTime; repeated with DateKind String and exact path/createdAt/fictional ownership validation before removing only the two proved roots"
+  },
+  {
+    "stage": "previous whole-root attempt",
+    "source": "2b69e7cf8c0b0c738bfc34b3de44b1877468a0ca",
+    "pass": 269,
+    "fail": 5,
+    "skip": 0,
+    "executed_this_slice": false,
+    "final_source_acceptance": false,
+    "evidence": "../N00_UNKNOWN_WRITE_RECOVERY/RESULTS.md",
+    "remaining": "offer Docker30s+parent and absent normal mainVercelentry unresolved; no cause guessed; original302 gate unclosed"
+  },
+  {
+    "stage": "author-review RED",
+    "pass": 23,
+    "fail": 1,
+    "skip": 0,
+    "reason": "raw JSON whitespace made different intent hashes and dispatched two500 removals for one bound identity; canonicalized only validated identity removal body;final24/238GREEN",
+    "source_before": "5ecaa23abf6e3148a6964a1886b70442c3615987",
+    "source_after": "050f0d03e49e867c9e5364865d3dc5f17bdc8fec"
+  }
+]

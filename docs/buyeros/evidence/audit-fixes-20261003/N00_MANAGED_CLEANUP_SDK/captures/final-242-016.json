@@ -1,0 +1,71 @@
+{
+  "case": "admin authentication failure cannot be interpreted as an empty identity set",
+  "fixture_only": true,
+  "external_requests": 0,
+  "records": [
+    {
+      "sequence": 1,
+      "purpose": "reconcile",
+      "operationId": "execution-http-1",
+      "reservedAt": "2026-10-05T02:04:08.285Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-1.json"
+    },
+    {
+      "sequence": 2,
+      "purpose": "reconcile",
+      "operationId": "execution-http-2",
+      "reservedAt": "2026-10-05T02:04:08.329Z",
+      "outcome": "rejected",
+      "evidenceRef": "execution-http-2.json"
+    }
+  ],
+  "receipts": [
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 1,
+      "channel": "control",
+      "method": "GET",
+      "path": "/fixture/control/target",
+      "intent_hash": "288a37d3da0d29626e3646f5df3a59671d4e9b3cc2becaeb4f2f9bc42ae5d443",
+      "target_fingerprint": "5b69c4f3cffc9dc0fd960272d96c0de63d8a816bc4af0eabf97eff43b98a7b53",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 2,
+      "channel": "sdk",
+      "method": "GET",
+      "path": "/fixture/auth/admin/list-users?filterField=id&filterValue=fictional-execution-identity&filterOperator=eq&limit=1&offset=0",
+      "intent_hash": "325bc00cde001d75ef83a791c669bc2c97fe5f55bc693b05eebadad3a33697b1",
+      "target_fingerprint": "5b69c4f3cffc9dc0fd960272d96c0de63d8a816bc4af0eabf97eff43b98a7b53",
+      "status": 403,
+      "outcome": "rejected",
+      "reason": "http-response"
+    }
+  ],
+  "hits": [
+    [
+      "GET",
+      "/fixture/control/target"
+    ],
+    [
+      "GET",
+      "/fixture/auth/admin/list-users"
+    ]
+  ],
+  "removes": 0,
+  "reads": 0,
+  "cleaned": {
+    "fixture_only": true,
+    "external_verified": false,
+    "owned_journal_removed": true,
+    "owned_servers_closed": true
+  }
+}

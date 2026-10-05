@@ -1,0 +1,123 @@
+{
+  "case": "fresh ownership, exact identity and native SDK absence complete only the owned identity cleanup",
+  "fixture_only": true,
+  "external_requests": 0,
+  "records": [
+    {
+      "sequence": 1,
+      "purpose": "reconcile",
+      "operationId": "execution-http-1",
+      "reservedAt": "2026-10-05T02:04:05.287Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-1.json"
+    },
+    {
+      "sequence": 2,
+      "purpose": "reconcile",
+      "operationId": "execution-http-2",
+      "reservedAt": "2026-10-05T02:04:05.330Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-2.json"
+    },
+    {
+      "sequence": 3,
+      "purpose": "cleanup",
+      "operationId": "execution-http-3",
+      "reservedAt": "2026-10-05T02:04:05.472Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-3.json"
+    },
+    {
+      "sequence": 4,
+      "purpose": "reconcile",
+      "operationId": "execution-http-4",
+      "reservedAt": "2026-10-05T02:04:05.554Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-4.json"
+    }
+  ],
+  "receipts": [
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 1,
+      "channel": "control",
+      "method": "GET",
+      "path": "/fixture/control/target",
+      "intent_hash": "5aa2cbfe91b2b7a8ff497b6e951003795ed350fc6f6d0679e54a97ae2f74075e",
+      "target_fingerprint": "556964b72de9f611b31245cca6274af1bd67d4db2bececfbb187618665a48de0",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 2,
+      "channel": "sdk",
+      "method": "GET",
+      "path": "/fixture/auth/admin/list-users?filterField=id&filterValue=fictional-execution-identity&filterOperator=eq&limit=1&offset=0",
+      "intent_hash": "882e8f8ea5c60671bfbee5739ab7185b3fbbc2efd573a6eda548cbab4a13378e",
+      "target_fingerprint": "556964b72de9f611b31245cca6274af1bd67d4db2bececfbb187618665a48de0",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 3,
+      "channel": "sdk",
+      "method": "POST",
+      "path": "/fixture/auth/admin/remove-user",
+      "intent_hash": "e696a361e4418d636c1deeac8efea8ab56164bba2e051bcea528c33e7aae550b",
+      "target_fingerprint": "556964b72de9f611b31245cca6274af1bd67d4db2bececfbb187618665a48de0",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    },
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 4,
+      "channel": "sdk",
+      "method": "GET",
+      "path": "/fixture/auth/admin/list-users?filterField=id&filterValue=fictional-execution-identity&filterOperator=eq&limit=1&offset=0",
+      "intent_hash": "882e8f8ea5c60671bfbee5739ab7185b3fbbc2efd573a6eda548cbab4a13378e",
+      "target_fingerprint": "556964b72de9f611b31245cca6274af1bd67d4db2bececfbb187618665a48de0",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    }
+  ],
+  "hits": [
+    [
+      "GET",
+      "/fixture/control/target"
+    ],
+    [
+      "GET",
+      "/fixture/auth/admin/list-users"
+    ],
+    [
+      "POST",
+      "/fixture/auth/admin/remove-user"
+    ],
+    [
+      "GET",
+      "/fixture/auth/admin/list-users"
+    ]
+  ],
+  "removes": 1,
+  "reads": 2,
+  "cleaned": {
+    "fixture_only": true,
+    "external_verified": false,
+    "owned_journal_removed": true,
+    "owned_servers_closed": true
+  }
+}

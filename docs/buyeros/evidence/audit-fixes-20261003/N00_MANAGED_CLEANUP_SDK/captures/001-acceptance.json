@@ -1,0 +1,80 @@
+{
+  "task": "N00",
+  "finding": "F20",
+  "case": "NA01",
+  "base_sha": "e0256f303502d4332400a837b99903926f74c842",
+  "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
+  "files": 10,
+  "insertions": 277,
+  "deletions": 0,
+  "related_node": {
+    "tests": 165,
+    "pass": 165,
+    "fail": 0,
+    "skip": 0,
+    "cancelled": 0,
+    "todo": 0,
+    "duration_ms": 88448.9225
+  },
+  "new_boundary": {
+    "tests": 21,
+    "pass": 21,
+    "fail": 0,
+    "skip": 0,
+    "cancelled": 0,
+    "todo": 0,
+    "duration_ms": 80465.3624
+  },
+  "attempted_full_node": {
+    "tests": 234,
+    "pass": 229,
+    "fail": 5,
+    "skip": 0,
+    "cancelled": 0,
+    "todo": 0,
+    "duration_ms": 523519.4485
+  },
+  "full_suite_passed": false,
+  "full_suite_snapshot_note": "Full suite began before final reporter/receipt-only changes; related165 and actual Chromium3 freshly rerun after all functional boundary changes. Final reporter Chromium3 and frozen types/lint checked separately. No full green gate claimed.",
+  "crypto": {
+    "tests": 8,
+    "pass": 8,
+    "fail": 0,
+    "skip": 0,
+    "errors": 0,
+    "warnings": 1,
+    "junit_time_s": 3.068
+  },
+  "browser": {
+    "cases": 3,
+    "pass": 3,
+    "fail": 0,
+    "skip": 0,
+    "global_errors": 0,
+    "duration_ms": 37886.41,
+    "owned_cleanup_receipts": 3,
+    "first_case_HTTP": 4,
+    "fixture_only": true,
+    "external_verified": false
+  },
+  "checks": {
+    "types_exit": 0,
+    "scoped_lint_exit": 0,
+    "reporter_lint_exit": 0,
+    "generated_types_exit": 0,
+    "generated_routes_exit": 0,
+    "source_diff_check_exit": 0
+  },
+  "migrations": [],
+  "alembic_head": "0037_bulk_manifests",
+  "DB_connections": 0,
+  "DB_suites_applicable": false,
+  "DB_tests_skipped": 0,
+  "new_builds": 0,
+  "built_portable_vercel_evidence": "carried from c756596; not rerun here",
+  "external_requests": 0,
+  "deployment_sha": null,
+  "full_N00_gate_passed": false,
+  "independent_review": "pending; human no-agents instruction",
+  "next_eligible": "N00 full real-transport coverage and provider cleanup adapters; original302/real-Neon/human-Google/approval/review gates open"
+}

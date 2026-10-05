@@ -1,0 +1,45 @@
+{
+  "case": "no email linking, role writes, impersonation, create-user or unrestricted query enters the boundary",
+  "fixture_only": true,
+  "external_requests": 0,
+  "records": [
+    {
+      "sequence": 1,
+      "purpose": "auth",
+      "operationId": "execution-http-1",
+      "reservedAt": "2026-10-05T01:57:42.499Z",
+      "outcome": "rejected",
+      "evidenceRef": "execution-http-1.json"
+    }
+  ],
+  "receipts": [
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 1,
+      "channel": "sdk",
+      "method": "GET",
+      "path": "/fixture/auth/admin/create-user",
+      "intent_hash": "c0b210c794f79f57b801566809be633ef04c51b4b791a72830118399d28e60f9",
+      "target_fingerprint": "c3232412db3a2b99da84f744634598bea12fdb0781b09b97698be6beaf3caceb",
+      "status": 403,
+      "outcome": "rejected",
+      "reason": "http-response"
+    }
+  ],
+  "hits": [
+    [
+      "GET",
+      "/fixture/auth/admin/create-user"
+    ]
+  ],
+  "removes": 0,
+  "reads": 0,
+  "cleaned": {
+    "fixture_only": true,
+    "external_verified": false,
+    "owned_journal_removed": true,
+    "owned_servers_closed": true
+  }
+}

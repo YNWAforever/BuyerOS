@@ -1,0 +1,45 @@
+{
+  "case": "changed project readback stops before native identity lookup",
+  "fixture_only": true,
+  "external_requests": 0,
+  "records": [
+    {
+      "sequence": 1,
+      "purpose": "reconcile",
+      "operationId": "execution-http-1",
+      "reservedAt": "2026-10-05T02:16:47.898Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-1.json"
+    }
+  ],
+  "receipts": [
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 1,
+      "channel": "control",
+      "method": "GET",
+      "path": "/fixture/control/target",
+      "intent_hash": "c1918ecc2edd68c88e422dc28b8a9ee0f31a32d4c71cfaebb49053db462033b1",
+      "target_fingerprint": "380b2b5fef514cdcefb221c8a9122de34fc5bb1ff62b89351690aa1a1ade7271",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    }
+  ],
+  "hits": [
+    [
+      "GET",
+      "/fixture/control/target"
+    ]
+  ],
+  "removes": 0,
+  "reads": 0,
+  "cleaned": {
+    "fixture_only": true,
+    "external_verified": false,
+    "owned_journal_removed": true,
+    "owned_servers_closed": true
+  }
+}

@@ -1,0 +1,165 @@
+TAP version 13
+# Subtest: all SDK/browser/CLI physical hops are durably reserved before the backend receives them
+ok 1 - all SDK/browser/CLI physical hops are durably reserved before the backend receives them
+  ---
+  duration_ms: 567.4705
+  type: 'test'
+  ...
+# Subtest: an unowned server, real target or unknown caller/path is refused before dispatch
+ok 2 - an unowned server, real target or unknown caller/path is refused before dispatch
+  ---
+  duration_ms: 52.6582
+  type: 'test'
+  ...
+# Subtest: redirects remain manual and each explicitly followed hop consumes another reservation
+ok 3 - redirects remain manual and each explicitly followed hop consumes another reservation
+  ---
+  duration_ms: 118.5702
+  type: 'test'
+  ...
+# Subtest: a foreign redirect cannot cause an uncounted request
+ok 4 - a foreign redirect cannot cause an uncounted request
+  ---
+  duration_ms: 65.1481
+  type: 'test'
+  ...
+# Subtest: commit with lost response is held across channel changes and journal restart
+ok 5 - commit with lost response is held across channel changes and journal restart
+  ---
+  duration_ms: 109.0712
+  type: 'test'
+  ...
+# Subtest: concurrent identical writes cannot dispatch twice
+ok 6 - concurrent identical writes cannot dispatch twice
+  ---
+  duration_ms: 86.4106
+  type: 'test'
+  ...
+# Subtest: the 180-check stop retains 20 cleanup/reconciliation reservations across restart
+ok 7 - the 180-check stop retains 20 cleanup/reconciliation reservations across restart
+  ---
+  duration_ms: 25191.9367
+  type: 'test'
+  ...
+# Subtest: TTL refuses new auth but allows exact cleanup readback after expiry
+ok 8 - TTL refuses new auth but allows exact cleanup readback after expiry
+  ---
+  duration_ms: 242.314
+  type: 'test'
+  ...
+# Subtest: bodies and response bytes are bounded without returning or persisting secrets
+ok 9 - bodies and response bytes are bounded without returning or persisting secrets
+  ---
+  duration_ms: 141.9675
+  type: 'test'
+  ...
+# Subtest: receipt failure preserves pending reservation and fails closed after restart
+ok 10 - receipt failure preserves pending reservation and fails closed after restart
+  ---
+  duration_ms: 169.3079
+  type: 'test'
+  ...
+# Subtest: official pinned SDK token request crosses the same durable gateway once
+ok 11 - official pinned SDK token request crosses the same durable gateway once
+  ---
+  duration_ms: 147.0649
+  type: 'test'
+  ...
+# Subtest: fixed Node CLI helper uses the owned gateway and strips inherited credentials
+not ok 12 - fixed Node CLI helper uses the owned gateway and strips inherited credentials
+  ---
+  duration_ms: 300.2866
+  type: 'test'
+  location: 'C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\tests\\neon-execution-boundary.test.mjs:65:1'
+  failureType: 'testCodeFailure'
+  error: 'N00_EXECUTION_CLI_FAILED'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    ChildProcess.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-execution-boundary.mjs:61:625)
+    ChildProcess.emit (node:events:509:28)
+    maybeClose (node:internal/child_process:1124:16)
+    ChildProcess._handle.onexit (node:internal/child_process:306:5)
+  ...
+# Subtest: cleanup verifies exact ownership and absence after each deletion in identity/auth/project order
+ok 13 - cleanup verifies exact ownership and absence after each deletion in identity/auth/project order
+  ---
+  duration_ms: 1740.2322
+  type: 'test'
+  ...
+# Subtest: unknown deletion never blindly retries; fresh absence lets restarted cleanup continue
+ok 14 - unknown deletion never blindly retries; fresh absence lets restarted cleanup continue
+  ---
+  duration_ms: 1623.1677
+  type: 'test'
+  ...
+# Subtest: unknown deletion still present blocks every later dependent deletion and retry
+ok 15 - unknown deletion still present blocks every later dependent deletion and retry
+  ---
+  duration_ms: 808.3752
+  type: 'test'
+  ...
+# Subtest: mismatched provider readback prevents every deletion
+ok 16 - mismatched provider readback prevents every deletion
+  ---
+  duration_ms: 215.1185
+  type: 'test'
+  ...
+# Subtest: cleanup after TTL still counts every readback/deletion and never touches an unbound identity
+ok 17 - cleanup after TTL still counts every readback/deletion and never touches an unbound identity
+  ---
+  duration_ms: 925.3769
+  type: 'test'
+  ...
+# Subtest: cleanup refuses an injected transport and a different journal even with matching-looking metadata
+not ok 18 - cleanup refuses an injected transport and a different journal even with matching-looking metadata
+  ---
+  duration_ms: 41.8592
+  type: 'test'
+  location: 'C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\tests\\neon-execution-boundary.test.mjs:88:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /CLEANUP_BOUNDARY/. Input:
+    
+    'Error: uncontained-dispatch'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+  error: 'uncontained-dispatch'
+  stack: |-
+    Object.dispatch (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-execution-boundary.test.mjs:89:118)
+    read (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-execution-cleanup.mjs:7:57)
+    Module.runFixtureCleanup (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/scripts/neon-execution-cleanup.mjs:8:20)
+    TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-execution-boundary.test.mjs:89:184)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async Test.run (node:internal/test_runner/test:1332:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+  operator: 'rejects'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-execution-boundary.test.mjs:89:155)
+    async Test.run (node:internal/test_runner/test:1332:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+  ...
+# Subtest: wrong gateway nonce and cross-origin writes cannot consume provider budget
+ok 19 - wrong gateway nonce and cross-origin writes cannot consume provider budget
+  ---
+  duration_ms: 81.3299
+  type: 'test'
+  ...
+# Subtest: expired or mismatched existence receipt blocks cleanup before any deletion
+ok 20 - expired or mismatched existence receipt blocks cleanup before any deletion
+  ---
+  duration_ms: 225.1214
+  type: 'test'
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 18
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 34508.8477

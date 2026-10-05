@@ -1,0 +1,10 @@
+tests/e2e/audit-neon-execution.spec.ts(12,371): error TS18046: 'first' is of type 'unknown'.
+tests/e2e/audit-neon-execution.spec.ts(12,408): error TS2345: Argument of type 'HTMLOutputElement & { textContent: string; }' is not assignable to parameter of type 'string | ReadableStream<any> | Response'.
+  Type 'HTMLOutputElement & { textContent: string; }' is missing the following properties from type 'Response': headers, ok, redirected, status, and 13 more.
+tests/e2e/audit-neon-execution.spec.ts(12,502): error TS18046: 'second' is of type 'unknown'.
+tests/e2e/audit-neon-execution.spec.ts(12,535): error TS18046: 'first' is of type 'unknown'.
+tests/e2e/audit-neon-execution.spec.ts(12,548): error TS18046: 'second' is of type 'unknown'.
+tests/e2e/audit-neon-execution.spec.ts(12,562): error TS18046: 'second' is of type 'unknown'.
+tests/e2e/audit-neon-execution.spec.ts(15,93): error TS7006: Parameter 'value' implicitly has an 'any' type.
+tests/e2e/audit-neon-execution.spec.ts(30,10): error TS2571: Object is of type 'unknown'.
+tests/e2e/audit-neon-execution.spec.ts(31,382): error TS18046: 'retry.result' is of type 'unknown'.

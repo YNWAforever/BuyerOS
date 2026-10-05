@@ -1,0 +1,1665 @@
+{
+  "case": "native SDK removal uses the twenty-request cleanup reserve after 180 auth checks",
+  "fixture_only": true,
+  "external_requests": 0,
+  "records": [
+    {
+      "sequence": 1,
+      "purpose": "auth",
+      "operationId": "earlier-0",
+      "reservedAt": "2026-10-05T02:16:41.967Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 2,
+      "purpose": "auth",
+      "operationId": "earlier-1",
+      "reservedAt": "2026-10-05T02:16:41.981Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 3,
+      "purpose": "auth",
+      "operationId": "earlier-2",
+      "reservedAt": "2026-10-05T02:16:41.996Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 4,
+      "purpose": "auth",
+      "operationId": "earlier-3",
+      "reservedAt": "2026-10-05T02:16:42.010Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 5,
+      "purpose": "auth",
+      "operationId": "earlier-4",
+      "reservedAt": "2026-10-05T02:16:42.023Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 6,
+      "purpose": "auth",
+      "operationId": "earlier-5",
+      "reservedAt": "2026-10-05T02:16:42.039Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 7,
+      "purpose": "auth",
+      "operationId": "earlier-6",
+      "reservedAt": "2026-10-05T02:16:42.054Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 8,
+      "purpose": "auth",
+      "operationId": "earlier-7",
+      "reservedAt": "2026-10-05T02:16:42.067Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 9,
+      "purpose": "auth",
+      "operationId": "earlier-8",
+      "reservedAt": "2026-10-05T02:16:42.085Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 10,
+      "purpose": "auth",
+      "operationId": "earlier-9",
+      "reservedAt": "2026-10-05T02:16:42.105Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 11,
+      "purpose": "auth",
+      "operationId": "earlier-10",
+      "reservedAt": "2026-10-05T02:16:42.122Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 12,
+      "purpose": "auth",
+      "operationId": "earlier-11",
+      "reservedAt": "2026-10-05T02:16:42.138Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 13,
+      "purpose": "auth",
+      "operationId": "earlier-12",
+      "reservedAt": "2026-10-05T02:16:42.156Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 14,
+      "purpose": "auth",
+      "operationId": "earlier-13",
+      "reservedAt": "2026-10-05T02:16:42.177Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 15,
+      "purpose": "auth",
+      "operationId": "earlier-14",
+      "reservedAt": "2026-10-05T02:16:42.193Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 16,
+      "purpose": "auth",
+      "operationId": "earlier-15",
+      "reservedAt": "2026-10-05T02:16:42.212Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 17,
+      "purpose": "auth",
+      "operationId": "earlier-16",
+      "reservedAt": "2026-10-05T02:16:42.233Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 18,
+      "purpose": "auth",
+      "operationId": "earlier-17",
+      "reservedAt": "2026-10-05T02:16:42.251Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 19,
+      "purpose": "auth",
+      "operationId": "earlier-18",
+      "reservedAt": "2026-10-05T02:16:42.268Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 20,
+      "purpose": "auth",
+      "operationId": "earlier-19",
+      "reservedAt": "2026-10-05T02:16:42.284Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 21,
+      "purpose": "auth",
+      "operationId": "earlier-20",
+      "reservedAt": "2026-10-05T02:16:42.302Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 22,
+      "purpose": "auth",
+      "operationId": "earlier-21",
+      "reservedAt": "2026-10-05T02:16:42.318Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 23,
+      "purpose": "auth",
+      "operationId": "earlier-22",
+      "reservedAt": "2026-10-05T02:16:42.334Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 24,
+      "purpose": "auth",
+      "operationId": "earlier-23",
+      "reservedAt": "2026-10-05T02:16:42.348Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 25,
+      "purpose": "auth",
+      "operationId": "earlier-24",
+      "reservedAt": "2026-10-05T02:16:42.364Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 26,
+      "purpose": "auth",
+      "operationId": "earlier-25",
+      "reservedAt": "2026-10-05T02:16:42.379Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 27,
+      "purpose": "auth",
+      "operationId": "earlier-26",
+      "reservedAt": "2026-10-05T02:16:42.395Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 28,
+      "purpose": "auth",
+      "operationId": "earlier-27",
+      "reservedAt": "2026-10-05T02:16:42.410Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 29,
+      "purpose": "auth",
+      "operationId": "earlier-28",
+      "reservedAt": "2026-10-05T02:16:42.429Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 30,
+      "purpose": "auth",
+      "operationId": "earlier-29",
+      "reservedAt": "2026-10-05T02:16:42.444Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 31,
+      "purpose": "auth",
+      "operationId": "earlier-30",
+      "reservedAt": "2026-10-05T02:16:42.468Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 32,
+      "purpose": "auth",
+      "operationId": "earlier-31",
+      "reservedAt": "2026-10-05T02:16:42.485Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 33,
+      "purpose": "auth",
+      "operationId": "earlier-32",
+      "reservedAt": "2026-10-05T02:16:42.504Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 34,
+      "purpose": "auth",
+      "operationId": "earlier-33",
+      "reservedAt": "2026-10-05T02:16:42.518Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 35,
+      "purpose": "auth",
+      "operationId": "earlier-34",
+      "reservedAt": "2026-10-05T02:16:42.534Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 36,
+      "purpose": "auth",
+      "operationId": "earlier-35",
+      "reservedAt": "2026-10-05T02:16:42.548Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 37,
+      "purpose": "auth",
+      "operationId": "earlier-36",
+      "reservedAt": "2026-10-05T02:16:42.565Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 38,
+      "purpose": "auth",
+      "operationId": "earlier-37",
+      "reservedAt": "2026-10-05T02:16:42.581Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 39,
+      "purpose": "auth",
+      "operationId": "earlier-38",
+      "reservedAt": "2026-10-05T02:16:42.598Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 40,
+      "purpose": "auth",
+      "operationId": "earlier-39",
+      "reservedAt": "2026-10-05T02:16:42.614Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 41,
+      "purpose": "auth",
+      "operationId": "earlier-40",
+      "reservedAt": "2026-10-05T02:16:42.631Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 42,
+      "purpose": "auth",
+      "operationId": "earlier-41",
+      "reservedAt": "2026-10-05T02:16:42.648Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 43,
+      "purpose": "auth",
+      "operationId": "earlier-42",
+      "reservedAt": "2026-10-05T02:16:42.666Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 44,
+      "purpose": "auth",
+      "operationId": "earlier-43",
+      "reservedAt": "2026-10-05T02:16:42.682Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 45,
+      "purpose": "auth",
+      "operationId": "earlier-44",
+      "reservedAt": "2026-10-05T02:16:42.706Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 46,
+      "purpose": "auth",
+      "operationId": "earlier-45",
+      "reservedAt": "2026-10-05T02:16:42.722Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 47,
+      "purpose": "auth",
+      "operationId": "earlier-46",
+      "reservedAt": "2026-10-05T02:16:42.738Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 48,
+      "purpose": "auth",
+      "operationId": "earlier-47",
+      "reservedAt": "2026-10-05T02:16:42.753Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 49,
+      "purpose": "auth",
+      "operationId": "earlier-48",
+      "reservedAt": "2026-10-05T02:16:42.772Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 50,
+      "purpose": "auth",
+      "operationId": "earlier-49",
+      "reservedAt": "2026-10-05T02:16:42.789Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 51,
+      "purpose": "auth",
+      "operationId": "earlier-50",
+      "reservedAt": "2026-10-05T02:16:42.805Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 52,
+      "purpose": "auth",
+      "operationId": "earlier-51",
+      "reservedAt": "2026-10-05T02:16:42.820Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 53,
+      "purpose": "auth",
+      "operationId": "earlier-52",
+      "reservedAt": "2026-10-05T02:16:42.836Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 54,
+      "purpose": "auth",
+      "operationId": "earlier-53",
+      "reservedAt": "2026-10-05T02:16:42.851Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 55,
+      "purpose": "auth",
+      "operationId": "earlier-54",
+      "reservedAt": "2026-10-05T02:16:42.868Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 56,
+      "purpose": "auth",
+      "operationId": "earlier-55",
+      "reservedAt": "2026-10-05T02:16:42.883Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 57,
+      "purpose": "auth",
+      "operationId": "earlier-56",
+      "reservedAt": "2026-10-05T02:16:42.903Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 58,
+      "purpose": "auth",
+      "operationId": "earlier-57",
+      "reservedAt": "2026-10-05T02:16:42.929Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 59,
+      "purpose": "auth",
+      "operationId": "earlier-58",
+      "reservedAt": "2026-10-05T02:16:42.950Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 60,
+      "purpose": "auth",
+      "operationId": "earlier-59",
+      "reservedAt": "2026-10-05T02:16:42.969Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 61,
+      "purpose": "auth",
+      "operationId": "earlier-60",
+      "reservedAt": "2026-10-05T02:16:42.992Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 62,
+      "purpose": "auth",
+      "operationId": "earlier-61",
+      "reservedAt": "2026-10-05T02:16:43.014Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 63,
+      "purpose": "auth",
+      "operationId": "earlier-62",
+      "reservedAt": "2026-10-05T02:16:43.032Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 64,
+      "purpose": "auth",
+      "operationId": "earlier-63",
+      "reservedAt": "2026-10-05T02:16:43.053Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 65,
+      "purpose": "auth",
+      "operationId": "earlier-64",
+      "reservedAt": "2026-10-05T02:16:43.075Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 66,
+      "purpose": "auth",
+      "operationId": "earlier-65",
+      "reservedAt": "2026-10-05T02:16:43.093Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 67,
+      "purpose": "auth",
+      "operationId": "earlier-66",
+      "reservedAt": "2026-10-05T02:16:43.113Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 68,
+      "purpose": "auth",
+      "operationId": "earlier-67",
+      "reservedAt": "2026-10-05T02:16:43.133Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 69,
+      "purpose": "auth",
+      "operationId": "earlier-68",
+      "reservedAt": "2026-10-05T02:16:43.151Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 70,
+      "purpose": "auth",
+      "operationId": "earlier-69",
+      "reservedAt": "2026-10-05T02:16:43.168Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 71,
+      "purpose": "auth",
+      "operationId": "earlier-70",
+      "reservedAt": "2026-10-05T02:16:43.188Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 72,
+      "purpose": "auth",
+      "operationId": "earlier-71",
+      "reservedAt": "2026-10-05T02:16:43.207Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 73,
+      "purpose": "auth",
+      "operationId": "earlier-72",
+      "reservedAt": "2026-10-05T02:16:43.224Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 74,
+      "purpose": "auth",
+      "operationId": "earlier-73",
+      "reservedAt": "2026-10-05T02:16:43.243Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 75,
+      "purpose": "auth",
+      "operationId": "earlier-74",
+      "reservedAt": "2026-10-05T02:16:43.261Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 76,
+      "purpose": "auth",
+      "operationId": "earlier-75",
+      "reservedAt": "2026-10-05T02:16:43.279Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 77,
+      "purpose": "auth",
+      "operationId": "earlier-76",
+      "reservedAt": "2026-10-05T02:16:43.294Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 78,
+      "purpose": "auth",
+      "operationId": "earlier-77",
+      "reservedAt": "2026-10-05T02:16:43.312Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 79,
+      "purpose": "auth",
+      "operationId": "earlier-78",
+      "reservedAt": "2026-10-05T02:16:43.333Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 80,
+      "purpose": "auth",
+      "operationId": "earlier-79",
+      "reservedAt": "2026-10-05T02:16:43.352Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 81,
+      "purpose": "auth",
+      "operationId": "earlier-80",
+      "reservedAt": "2026-10-05T02:16:43.371Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 82,
+      "purpose": "auth",
+      "operationId": "earlier-81",
+      "reservedAt": "2026-10-05T02:16:43.393Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 83,
+      "purpose": "auth",
+      "operationId": "earlier-82",
+      "reservedAt": "2026-10-05T02:16:43.422Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 84,
+      "purpose": "auth",
+      "operationId": "earlier-83",
+      "reservedAt": "2026-10-05T02:16:43.441Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 85,
+      "purpose": "auth",
+      "operationId": "earlier-84",
+      "reservedAt": "2026-10-05T02:16:43.460Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 86,
+      "purpose": "auth",
+      "operationId": "earlier-85",
+      "reservedAt": "2026-10-05T02:16:43.480Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 87,
+      "purpose": "auth",
+      "operationId": "earlier-86",
+      "reservedAt": "2026-10-05T02:16:43.497Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 88,
+      "purpose": "auth",
+      "operationId": "earlier-87",
+      "reservedAt": "2026-10-05T02:16:43.516Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 89,
+      "purpose": "auth",
+      "operationId": "earlier-88",
+      "reservedAt": "2026-10-05T02:16:43.535Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 90,
+      "purpose": "auth",
+      "operationId": "earlier-89",
+      "reservedAt": "2026-10-05T02:16:43.553Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 91,
+      "purpose": "auth",
+      "operationId": "earlier-90",
+      "reservedAt": "2026-10-05T02:16:43.572Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 92,
+      "purpose": "auth",
+      "operationId": "earlier-91",
+      "reservedAt": "2026-10-05T02:16:43.594Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 93,
+      "purpose": "auth",
+      "operationId": "earlier-92",
+      "reservedAt": "2026-10-05T02:16:43.615Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 94,
+      "purpose": "auth",
+      "operationId": "earlier-93",
+      "reservedAt": "2026-10-05T02:16:43.637Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 95,
+      "purpose": "auth",
+      "operationId": "earlier-94",
+      "reservedAt": "2026-10-05T02:16:43.654Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 96,
+      "purpose": "auth",
+      "operationId": "earlier-95",
+      "reservedAt": "2026-10-05T02:16:43.675Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 97,
+      "purpose": "auth",
+      "operationId": "earlier-96",
+      "reservedAt": "2026-10-05T02:16:43.695Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 98,
+      "purpose": "auth",
+      "operationId": "earlier-97",
+      "reservedAt": "2026-10-05T02:16:43.715Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 99,
+      "purpose": "auth",
+      "operationId": "earlier-98",
+      "reservedAt": "2026-10-05T02:16:43.737Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 100,
+      "purpose": "auth",
+      "operationId": "earlier-99",
+      "reservedAt": "2026-10-05T02:16:43.754Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 101,
+      "purpose": "auth",
+      "operationId": "earlier-100",
+      "reservedAt": "2026-10-05T02:16:43.780Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 102,
+      "purpose": "auth",
+      "operationId": "earlier-101",
+      "reservedAt": "2026-10-05T02:16:43.800Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 103,
+      "purpose": "auth",
+      "operationId": "earlier-102",
+      "reservedAt": "2026-10-05T02:16:43.821Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 104,
+      "purpose": "auth",
+      "operationId": "earlier-103",
+      "reservedAt": "2026-10-05T02:16:43.844Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 105,
+      "purpose": "auth",
+      "operationId": "earlier-104",
+      "reservedAt": "2026-10-05T02:16:43.867Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 106,
+      "purpose": "auth",
+      "operationId": "earlier-105",
+      "reservedAt": "2026-10-05T02:16:43.887Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 107,
+      "purpose": "auth",
+      "operationId": "earlier-106",
+      "reservedAt": "2026-10-05T02:16:43.909Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 108,
+      "purpose": "auth",
+      "operationId": "earlier-107",
+      "reservedAt": "2026-10-05T02:16:43.939Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 109,
+      "purpose": "auth",
+      "operationId": "earlier-108",
+      "reservedAt": "2026-10-05T02:16:43.960Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 110,
+      "purpose": "auth",
+      "operationId": "earlier-109",
+      "reservedAt": "2026-10-05T02:16:43.980Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 111,
+      "purpose": "auth",
+      "operationId": "earlier-110",
+      "reservedAt": "2026-10-05T02:16:44.003Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 112,
+      "purpose": "auth",
+      "operationId": "earlier-111",
+      "reservedAt": "2026-10-05T02:16:44.023Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 113,
+      "purpose": "auth",
+      "operationId": "earlier-112",
+      "reservedAt": "2026-10-05T02:16:44.042Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 114,
+      "purpose": "auth",
+      "operationId": "earlier-113",
+      "reservedAt": "2026-10-05T02:16:44.063Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 115,
+      "purpose": "auth",
+      "operationId": "earlier-114",
+      "reservedAt": "2026-10-05T02:16:44.083Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 116,
+      "purpose": "auth",
+      "operationId": "earlier-115",
+      "reservedAt": "2026-10-05T02:16:44.101Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 117,
+      "purpose": "auth",
+      "operationId": "earlier-116",
+      "reservedAt": "2026-10-05T02:16:44.120Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 118,
+      "purpose": "auth",
+      "operationId": "earlier-117",
+      "reservedAt": "2026-10-05T02:16:44.138Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 119,
+      "purpose": "auth",
+      "operationId": "earlier-118",
+      "reservedAt": "2026-10-05T02:16:44.157Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 120,
+      "purpose": "auth",
+      "operationId": "earlier-119",
+      "reservedAt": "2026-10-05T02:16:44.176Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 121,
+      "purpose": "auth",
+      "operationId": "earlier-120",
+      "reservedAt": "2026-10-05T02:16:44.197Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 122,
+      "purpose": "auth",
+      "operationId": "earlier-121",
+      "reservedAt": "2026-10-05T02:16:44.216Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 123,
+      "purpose": "auth",
+      "operationId": "earlier-122",
+      "reservedAt": "2026-10-05T02:16:44.235Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 124,
+      "purpose": "auth",
+      "operationId": "earlier-123",
+      "reservedAt": "2026-10-05T02:16:44.256Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 125,
+      "purpose": "auth",
+      "operationId": "earlier-124",
+      "reservedAt": "2026-10-05T02:16:44.278Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 126,
+      "purpose": "auth",
+      "operationId": "earlier-125",
+      "reservedAt": "2026-10-05T02:16:44.301Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 127,
+      "purpose": "auth",
+      "operationId": "earlier-126",
+      "reservedAt": "2026-10-05T02:16:44.326Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 128,
+      "purpose": "auth",
+      "operationId": "earlier-127",
+      "reservedAt": "2026-10-05T02:16:44.350Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 129,
+      "purpose": "auth",
+      "operationId": "earlier-128",
+      "reservedAt": "2026-10-05T02:16:44.369Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 130,
+      "purpose": "auth",
+      "operationId": "earlier-129",
+      "reservedAt": "2026-10-05T02:16:44.387Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 131,
+      "purpose": "auth",
+      "operationId": "earlier-130",
+      "reservedAt": "2026-10-05T02:16:44.406Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 132,
+      "purpose": "auth",
+      "operationId": "earlier-131",
+      "reservedAt": "2026-10-05T02:16:44.425Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 133,
+      "purpose": "auth",
+      "operationId": "earlier-132",
+      "reservedAt": "2026-10-05T02:16:44.445Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 134,
+      "purpose": "auth",
+      "operationId": "earlier-133",
+      "reservedAt": "2026-10-05T02:16:44.463Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 135,
+      "purpose": "auth",
+      "operationId": "earlier-134",
+      "reservedAt": "2026-10-05T02:16:44.483Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 136,
+      "purpose": "auth",
+      "operationId": "earlier-135",
+      "reservedAt": "2026-10-05T02:16:44.503Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 137,
+      "purpose": "auth",
+      "operationId": "earlier-136",
+      "reservedAt": "2026-10-05T02:16:44.523Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 138,
+      "purpose": "auth",
+      "operationId": "earlier-137",
+      "reservedAt": "2026-10-05T02:16:44.546Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 139,
+      "purpose": "auth",
+      "operationId": "earlier-138",
+      "reservedAt": "2026-10-05T02:16:44.566Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 140,
+      "purpose": "auth",
+      "operationId": "earlier-139",
+      "reservedAt": "2026-10-05T02:16:44.586Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 141,
+      "purpose": "auth",
+      "operationId": "earlier-140",
+      "reservedAt": "2026-10-05T02:16:44.606Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 142,
+      "purpose": "auth",
+      "operationId": "earlier-141",
+      "reservedAt": "2026-10-05T02:16:44.639Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 143,
+      "purpose": "auth",
+      "operationId": "earlier-142",
+      "reservedAt": "2026-10-05T02:16:44.662Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 144,
+      "purpose": "auth",
+      "operationId": "earlier-143",
+      "reservedAt": "2026-10-05T02:16:44.682Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 145,
+      "purpose": "auth",
+      "operationId": "earlier-144",
+      "reservedAt": "2026-10-05T02:16:44.706Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 146,
+      "purpose": "auth",
+      "operationId": "earlier-145",
+      "reservedAt": "2026-10-05T02:16:44.726Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 147,
+      "purpose": "auth",
+      "operationId": "earlier-146",
+      "reservedAt": "2026-10-05T02:16:44.750Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 148,
+      "purpose": "auth",
+      "operationId": "earlier-147",
+      "reservedAt": "2026-10-05T02:16:44.771Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 149,
+      "purpose": "auth",
+      "operationId": "earlier-148",
+      "reservedAt": "2026-10-05T02:16:44.790Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 150,
+      "purpose": "auth",
+      "operationId": "earlier-149",
+      "reservedAt": "2026-10-05T02:16:44.810Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 151,
+      "purpose": "auth",
+      "operationId": "earlier-150",
+      "reservedAt": "2026-10-05T02:16:44.847Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 152,
+      "purpose": "auth",
+      "operationId": "earlier-151",
+      "reservedAt": "2026-10-05T02:16:44.870Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 153,
+      "purpose": "auth",
+      "operationId": "earlier-152",
+      "reservedAt": "2026-10-05T02:16:44.889Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 154,
+      "purpose": "auth",
+      "operationId": "earlier-153",
+      "reservedAt": "2026-10-05T02:16:44.909Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 155,
+      "purpose": "auth",
+      "operationId": "earlier-154",
+      "reservedAt": "2026-10-05T02:16:44.931Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 156,
+      "purpose": "auth",
+      "operationId": "earlier-155",
+      "reservedAt": "2026-10-05T02:16:44.959Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 157,
+      "purpose": "auth",
+      "operationId": "earlier-156",
+      "reservedAt": "2026-10-05T02:16:44.980Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 158,
+      "purpose": "auth",
+      "operationId": "earlier-157",
+      "reservedAt": "2026-10-05T02:16:45.000Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 159,
+      "purpose": "auth",
+      "operationId": "earlier-158",
+      "reservedAt": "2026-10-05T02:16:45.022Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 160,
+      "purpose": "auth",
+      "operationId": "earlier-159",
+      "reservedAt": "2026-10-05T02:16:45.046Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 161,
+      "purpose": "auth",
+      "operationId": "earlier-160",
+      "reservedAt": "2026-10-05T02:16:45.068Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 162,
+      "purpose": "auth",
+      "operationId": "earlier-161",
+      "reservedAt": "2026-10-05T02:16:45.090Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 163,
+      "purpose": "auth",
+      "operationId": "earlier-162",
+      "reservedAt": "2026-10-05T02:16:45.113Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 164,
+      "purpose": "auth",
+      "operationId": "earlier-163",
+      "reservedAt": "2026-10-05T02:16:45.137Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 165,
+      "purpose": "auth",
+      "operationId": "earlier-164",
+      "reservedAt": "2026-10-05T02:16:45.161Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 166,
+      "purpose": "auth",
+      "operationId": "earlier-165",
+      "reservedAt": "2026-10-05T02:16:45.198Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 167,
+      "purpose": "auth",
+      "operationId": "earlier-166",
+      "reservedAt": "2026-10-05T02:16:45.219Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 168,
+      "purpose": "auth",
+      "operationId": "earlier-167",
+      "reservedAt": "2026-10-05T02:16:45.239Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 169,
+      "purpose": "auth",
+      "operationId": "earlier-168",
+      "reservedAt": "2026-10-05T02:16:45.260Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 170,
+      "purpose": "auth",
+      "operationId": "earlier-169",
+      "reservedAt": "2026-10-05T02:16:45.281Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 171,
+      "purpose": "auth",
+      "operationId": "earlier-170",
+      "reservedAt": "2026-10-05T02:16:45.303Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 172,
+      "purpose": "auth",
+      "operationId": "earlier-171",
+      "reservedAt": "2026-10-05T02:16:45.324Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 173,
+      "purpose": "auth",
+      "operationId": "earlier-172",
+      "reservedAt": "2026-10-05T02:16:45.345Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 174,
+      "purpose": "auth",
+      "operationId": "earlier-173",
+      "reservedAt": "2026-10-05T02:16:45.367Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 175,
+      "purpose": "auth",
+      "operationId": "earlier-174",
+      "reservedAt": "2026-10-05T02:16:45.388Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 176,
+      "purpose": "auth",
+      "operationId": "earlier-175",
+      "reservedAt": "2026-10-05T02:16:45.433Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 177,
+      "purpose": "auth",
+      "operationId": "earlier-176",
+      "reservedAt": "2026-10-05T02:16:45.455Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 178,
+      "purpose": "auth",
+      "operationId": "earlier-177",
+      "reservedAt": "2026-10-05T02:16:45.478Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 179,
+      "purpose": "auth",
+      "operationId": "earlier-178",
+      "reservedAt": "2026-10-05T02:16:45.512Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 180,
+      "purpose": "auth",
+      "operationId": "earlier-179",
+      "reservedAt": "2026-10-05T02:16:45.534Z",
+      "outcome": "accepted",
+      "evidenceRef": "historical-fixture.json"
+    },
+    {
+      "sequence": 181,
+      "purpose": "cleanup",
+      "operationId": "execution-http-181",
+      "reservedAt": "2026-10-05T02:16:45.587Z",
+      "outcome": "accepted",
+      "evidenceRef": "execution-http-181.json"
+    }
+  ],
+  "receipts": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 181,
+      "channel": "sdk",
+      "method": "POST",
+      "path": "/fixture/auth/admin/remove-user",
+      "intent_hash": "d6000aef0dbcf543ca85961e57efb0c1115aad988b285fa8c440d2de8bbd10e6",
+      "target_fingerprint": "b595335df3f07707a468c1eaf5ab8efce6b43a18b063019ce3d8a26d6923f253",
+      "status": 200,
+      "outcome": "accepted",
+      "reason": "http-response"
+    }
+  ],
+  "hits": [
+    [
+      "POST",
+      "/fixture/auth/admin/remove-user"
+    ]
+  ],
+  "removes": 1,
+  "reads": 0,
+  "cleaned": {
+    "fixture_only": true,
+    "external_verified": false,
+    "owned_journal_removed": true,
+    "owned_servers_closed": true
+  }
+}

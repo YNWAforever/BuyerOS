@@ -1,0 +1,248 @@
+diff --git a/scripts/neon-execution-boundary.d.mts b/scripts/neon-execution-boundary.d.mts
+index 4f49baa..54a8346 100644
+--- a/scripts/neon-execution-boundary.d.mts
++++ b/scripts/neon-execution-boundary.d.mts
+@@ -7,3 +7,5 @@ export function createFixtureExecutionBoundary(options:{backend:Server;journal:R
+ export function assertFixtureExecutionBoundary(execution:FixtureExecutionBoundary,journal:RealRunJournal):void;
+ export function createFixtureExecutionGateway(options:{execution:FixtureExecutionBoundary;nonce:string}):Server;
+ export function runFixtureCli(options:{gateway:Server;nonce:string;request:ExecutionRequest;parentEnvironment?:NodeJS.ProcessEnv}):Promise<ExecutionReceipt&{environment_clean:true}>;
++
++export function ownedFixtureSdkUrl(options:{gateway:Server;execution:FixtureExecutionBoundary;journal:RealRunJournal;nonce:string}):string;
+diff --git a/scripts/neon-execution-boundary.mjs b/scripts/neon-execution-boundary.mjs
+index d560a87..4ca05af 100644
+--- a/scripts/neon-execution-boundary.mjs
++++ b/scripts/neon-execution-boundary.mjs
+@@ -24,8 +24,20 @@ export function createFixtureExecutionBoundary({backend,journal,now=Date.now,tim
+  need(Number.isInteger(timeoutMs)&&timeoutMs>=20&&timeoutMs<=3000,'TIMEOUT');
+  function validate(input){need(input&&Object.keys(input).every(k=>['channel','path','method','body','headers'].includes(k)),'REQUEST');const {channel,path,method,body=''}=input;
+   need(channels.has(channel)&&methods.has(method)&&typeof body==='string','REQUEST');need(Buffer.byteLength(body)<=BODY_LIMIT,'BODY_LIMIT');need(!safe.has(method)||body==='','REQUEST');
+-  need(typeof path==='string'&&/^\/fixture\/(auth|control)\/[a-zA-Z0-9_/-]+$/.test(path)&&!path.includes('//')&&!path.includes('..'),'PATH');
+-  let purpose='auth';if(path.startsWith('/fixture/control/')){purpose=method==='DELETE'?'cleanup':'reconcile';need(channel==='control'&&['GET','DELETE'].includes(method)&&body==='','CONTROL');
++  need(typeof path==='string'&&path.startsWith('/fixture/')&&!path.includes('//')&&!path.includes('..'),'PATH');
++  const url=new URL(path,origin);need(url.origin===origin&&!url.hash&&!/%|\\/.test(url.pathname)&&/^\/fixture\/(auth|control)\/[a-zA-Z0-9_/-]+$/.test(url.pathname),'PATH');
++  let purpose='auth';
++  if(url.pathname.startsWith('/fixture/auth/admin/')){
++   const identity=journal.snapshot().identity;need(identity?.id.startsWith('fictional-execution-')&&channel==='sdk','OWNED_IDENTITY');
++   if(url.pathname==='/fixture/auth/admin/list-users'){
++    const expected={filterField:'id',filterValue:identity.id,filterOperator:'eq',limit:'1',offset:'0'};
++    need(method==='GET'&&[...url.searchParams].length===5&&Object.entries(expected).every(([key,value])=>url.searchParams.get(key)===value),'IDENTITY_LOOKUP');purpose='reconcile';
++   }else if(url.pathname==='/fixture/auth/admin/remove-user'){
++    let input;try{input=JSON.parse(body);}catch{throw new Error('N00_EXECUTION_OWNED_IDENTITY');}
++    need(method==='POST'&&!url.search&&input&&Object.keys(input).length===1&&input.userId===identity.id,'OWNED_IDENTITY');purpose='cleanup';
++   }else throw new Error('N00_EXECUTION_ADMIN_REFUSED');
++  }else {need(!url.search,'PATH');}
++  if(path.startsWith('/fixture/control/')){purpose=method==='DELETE'?'cleanup':'reconcile';need(channel==='control'&&['GET','DELETE'].includes(method)&&body==='','CONTROL');
+    if(path==='/fixture/control/target')need(method==='GET','CONTROL');else{const match=/^\/fixture\/control\/(identity|auth|project)\/([a-zA-Z0-9_-]+)$/.exec(path);need(match,'CONTROL');const state=journal.snapshot(),ids={identity:state.identity?.id,auth:target.authId,project:target.projectId};need(ids[match[1]]===match[2],'OWNED_RESOURCE');}
+   }else need(channel!=='control','CONTROL');
+   return {channel,path,method,body,purpose,headers:new Headers(input.headers),intent:hash(target.fingerprint+'\n'+method+'\n'+path+'\n'+body)};
+@@ -54,10 +66,17 @@ export function createFixtureExecutionGateway({execution,nonce}){
+   if(req.url?.startsWith('/sdk/auth/')){const path='/fixture/auth/'+req.url.slice('/sdk/auth/'.length);const body=(await bytes(req,BODY_LIMIT)).toString('utf8');const headers=new Headers();for(const [key,value] of Object.entries(req.headers))if(!['host','connection','content-length','x-n00-owner'].includes(key)&&value!==undefined)headers.set(key,Array.isArray(value)?value.join(', '):value);const result=await execution.dispatch({channel:'sdk',path,method:req.method,body,headers});res.statusCode=result.status;for(const [key,value] of result.headers)res.appendHeader(key,value);if(result.location)res.setHeader('Location','/sdk/auth/'+result.location.slice('/fixture/auth/'.length));res.end(result.body);return;}
+   need(req.method==='POST'&&req.url==='/dispatch','GATEWAY_PATH');const input=JSON.parse((await bytes(req,BODY_LIMIT)).toString('utf8'));const result=await execution.dispatch(input);res.setHeader('Content-Type','application/json');res.end(JSON.stringify(result));
+  }catch(error){res.statusCode=403;res.setHeader('Content-Type','application/json');res.end(JSON.stringify({code:error.message?.startsWith('N00_')?error.message:'N00_EXECUTION_GATEWAY_REFUSED',fixture_only:true,external_verified:false}));}});
+- gateways.set(server,nonce);return server;
++ gateways.set(server,{nonce,execution});return server;
++}
++/** URL for this owned gateway only; cannot construct a provider URL. */
++export function ownedFixtureSdkUrl({gateway,execution,journal,nonce}){
++ assertFixtureExecutionBoundary(execution,journal);const owner=gateways.get(gateway);
++ need(owner&&owner.execution===execution&&owner.nonce===nonce,'GATEWAY_OWNER');
++ const address=gateway.address();need(gateway.listening&&address?.address==='127.0.0.1','GATEWAY_OWNER');
++ return 'http://127.0.0.1:'+address.port+'/sdk/auth';
+ }
+ export function runFixtureCli({gateway,nonce,request,parentEnvironment=process.env}){
+- need(gateways.has(gateway)&&gateways.get(gateway)===nonce,'CLI_OWNER');const address=gateway.address();need(gateway.listening&&address?.address==='127.0.0.1','CLI_OWNER');need(request?.channel==='cli','CLI_CHANNEL');
++ need(gateways.has(gateway)&&gateways.get(gateway).nonce===nonce,'CLI_OWNER');const address=gateway.address();need(gateway.listening&&address?.address==='127.0.0.1','CLI_OWNER');need(request?.channel==='cli','CLI_CHANNEL');
+  const environment={...fixtureChildEnvironment(parentEnvironment),N00_FIXTURE_CLI_URL:'http://127.0.0.1:'+address.port,N00_FIXTURE_CLI_NONCE:nonce};
+  return new Promise((ok,bad)=>{const child=spawn(process.execPath,[resolve(dirname(fileURLToPath(import.meta.url)),'neon-execution-cli.mjs')],{env:environment,stdio:['pipe','pipe','pipe'],windowsHide:true});let output='',size=0;const timer=setTimeout(()=>child.kill(),5000);child.stdout.on('data',chunk=>{size+=chunk.length;if(size>RESPONSE_LIMIT)child.kill();else output+=chunk;});child.stderr.resume();child.on('error',()=>{clearTimeout(timer);bad(new Error('N00_EXECUTION_CLI_FAILED'));});child.on('close',code=>{clearTimeout(timer);try{need(code===0&&size<=RESPONSE_LIMIT,'CLI_FAILED');ok(JSON.parse(output));}catch{bad(new Error('N00_EXECUTION_CLI_FAILED'));}});child.stdin.end(JSON.stringify(request));});
+ }
+diff --git a/scripts/neon-managed-cleanup-sdk.d.mts b/scripts/neon-managed-cleanup-sdk.d.mts
+new file mode 100644
+index 0000000..d32633c
+--- /dev/null
++++ b/scripts/neon-managed-cleanup-sdk.d.mts
+@@ -0,0 +1,5 @@
++import type {Server} from 'node:http';
++import type {RealRunJournal} from './neon-real-preflight.mjs';
++import type {FixtureExecutionBoundary} from './neon-execution-boundary.mjs';
++export interface ManagedFixtureCleanupResult {complete:boolean;blocked:string|null;absent_identity:boolean;receipts:string[];fixture_only:true;external_verified:false;}
++export function runFixtureManagedIdentityCleanup(options:{execution:FixtureExecutionBoundary;journal:RealRunJournal;gateway:Server;nonce:string;sessionCookie:string;now?:()=>number}):Promise<ManagedFixtureCleanupResult>;
+diff --git a/scripts/neon-managed-cleanup-sdk.mjs b/scripts/neon-managed-cleanup-sdk.mjs
+new file mode 100644
+index 0000000..fc9e2c0
+--- /dev/null
++++ b/scripts/neon-managed-cleanup-sdk.mjs
+@@ -0,0 +1,33 @@
++/** Native pinned SDK cleanup rehearsal against a branded owned loopback only.
++ * No real provider URL, automatic admin grant or BuyerOS identity/role mutation. */
++import {createAuthClient} from '@neondatabase/auth';
++import {cleanupTargets} from './neon-real-preflight.mjs';
++import {ownedFixtureSdkUrl} from './neon-execution-boundary.mjs';
++function need(value,code){if(!value)throw new Error('N00_MANAGED_CLEANUP_'+code);}
++export async function runFixtureManagedIdentityCleanup({execution,journal,gateway,nonce,sessionCookie,now=Date.now}){
++ const url=ownedFixtureSdkUrl({gateway,execution,journal,nonce});
++ need(typeof sessionCookie==='string'&&/^fictional-cleanup-admin=[a-z-]+$/.test(sessionCookie),'FIXTURE_SESSION');
++ const state=journal.snapshot(),identity=state.identity;need(identity?.id.startsWith('fictional-execution-'),'BOUND_IDENTITY');
++ const receipts=[];
++ const result=(complete,blocked=null)=>({complete,blocked,absent_identity:complete,receipts,fixture_only:true,external_verified:false});
++ const fresh=await execution.dispatch({channel:'control',method:'GET',path:'/fixture/control/target',body:''});receipts.push(fresh.evidenceRef);
++ need(fresh.outcome==='accepted'&&fresh.status===200,'OWNERSHIP_READBACK');
++ let target;try{target=JSON.parse(fresh.body);}catch{throw new Error('N00_MANAGED_CLEANUP_OWNERSHIP_READBACK');}
++ need(cleanupTargets(state,target,now()).some(v=>v.kind==='identity'&&v.id===identity.id),'BOUND_IDENTITY');
++ const client=createAuthClient(url),fetchOptions={headers:{'x-n00-owner':nonce,cookie:sessionCookie},retry:0,redirect:'manual'};
++ async function call(method,input){const before=journal.snapshot().requests.length;try{return await method(input);}catch{return null;}finally{receipts.push(...journal.snapshot().requests.slice(before).map(v=>v.evidenceRef).filter(Boolean));}}
++ async function exists(){
++  const response=await call(input=>client.admin.listUsers(input),{query:{filterField:'id',filterValue:identity.id,filterOperator:'eq',limit:1,offset:0},fetchOptions});
++  const data=response?.data;
++  if(response?.error||!data||!Array.isArray(data.users)||![0,1].includes(data.total)||data.users.length!==data.total||data.limit!==1||data.offset!==0)return null;
++  if(data.total===0)return false;
++  const user=data.users[0],created=user?.createdAt instanceof Date?user.createdAt.toISOString():user?.createdAt;
++  return user?.id===identity.id&&created===identity.createdAt?true:null;
++ }
++ const before=await exists();if(before===null)return result(false,'identity-readback-unconfirmed');if(before===false)return result(true);
++ const request={channel:'sdk',method:'POST',path:'/fixture/auth/admin/remove-user',body:JSON.stringify({userId:identity.id})};
++ if(execution.holds(request))return result(false,'held-remove');
++ const removed=await call(input=>client.admin.removeUser(input),{userId:identity.id,fetchOptions});
++ if(removed?.error||removed?.data?.success!==true)return result(false,'remove-result-unconfirmed');
++ if(await exists()!==false)return result(false,'absence-unconfirmed');return result(true);
++}
+diff --git a/tests/neon-managed-cleanup-sdk.test.mjs b/tests/neon-managed-cleanup-sdk.test.mjs
+new file mode 100644
+index 0000000..25f9e7b
+--- /dev/null
++++ b/tests/neon-managed-cleanup-sdk.test.mjs
+@@ -0,0 +1,121 @@
++import assert from 'node:assert/strict';
++import {test} from 'node:test';
++import {readFileSync,readdirSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
++import {join} from 'node:path';
++import {createAuthClient} from '@neondatabase/auth';
++import {executionFixture,listen} from './fixtures/neon-execution/fixture.mjs';
++import {RealRunJournal} from '../scripts/neon-real-preflight.mjs';
++import {createFixtureExecutionBoundary,createFixtureExecutionGateway} from '../scripts/neon-execution-boundary.mjs';
++const cleanup=await import('../scripts/neon-managed-cleanup-sdk.mjs').catch(e=>{if(e.code!=='ERR_MODULE_NOT_FOUND')throw e;return {};});
++const nonce='n'.repeat(43),cookie='fictional-cleanup-admin=owned';
++const options={headers:{'x-n00-owner':nonce,cookie},retry:0,redirect:'manual'};
++const query=id=>({filterField:'id',filterValue:id,filterOperator:'eq',limit:1,offset:0});
++let capture=0;
++async function wire(t,mode='normal'){
++ const f=await executionFixture(async(req,res,{identity,model})=>{
++  const url=new URL(req.url,'http://127.0.0.1');
++  if(!url.pathname.startsWith('/fixture/auth/admin/'))return;
++  assert.equal(model.hits.length,model.journal.snapshot().requests.filter(r=>r.operationId.startsWith('execution-http-')).length);
++  assert.equal(model.journal.snapshot().requests.at(-1).outcome,'pending');
++  res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');
++  if(req.headers.cookie!==cookie){res.statusCode=403;res.end('{"code":"FORBIDDEN"}');return true;}
++  const resource=model.resources.get('identity');
++  if(url.pathname==='/fixture/auth/admin/list-users'){
++   assert.equal(req.method,'GET');assert.deepEqual(Object.fromEntries(url.searchParams),Object.fromEntries(Object.entries(query(identity.id)).map(([k,v])=>[k,String(v)])));
++   model.reads++;
++   if(mode==='read-500'){res.statusCode=500;res.end('{"code":"INTERNAL_SERVER_ERROR"}');return true;}
++   if(mode==='generic-404'){res.statusCode=404;res.end('{"code":"NOT_FOUND"}');return true;}
++   const user={id:identity.id,name:'Fictional cleanup',email:'cleanup@fixture.invalid',emailVerified:false,role:'user',createdAt:identity.createdAt,updatedAt:identity.createdAt};
++   if(mode==='foreign-id')user.id='other-user';
++   if(mode==='foreign-created')user.createdAt=new Date(Date.parse(identity.createdAt)-1000).toISOString();
++   const users=resource.exists?[user]:[],total=users.length;
++   res.end(JSON.stringify(mode==='malformed'?{users:[],total:1,limit:1,offset:0}:mode==='post-delete-malformed'&&!resource.exists?{users:[],total:0}:{users,total,limit:1,offset:0}));return true;
++  }
++  if(url.pathname==='/fixture/auth/admin/remove-user'){
++   assert.equal(req.method,'POST');let body='';for await(const c of req)body+=c;
++   assert.deepEqual(JSON.parse(body),{userId:identity.id});model.removes++;
++   if(mode==='reject-500'){res.statusCode=500;res.end('{"code":"INTERNAL_SERVER_ERROR"}');return true;}
++   if(mode!=='lingering')resource.exists=false;
++   if(mode==='commit-lost'){req.socket.destroy();return true;}
++   res.end(JSON.stringify({success:mode!=='bad-success'}));return true;
++  }
++ });
++ f.model.journal=f.journal;f.model.reads=0;f.model.removes=0;
++ f.journal.bindIdentity(f.identity);
++ f.execution=createFixtureExecutionBoundary({backend:f.backend,journal:f.journal});
++ f.gateway=createFixtureExecutionGateway({execution:f.execution,nonce});f.servers.push(f.gateway);
++ f.sdk=createAuthClient(await listen(f.gateway)+'/sdk/auth');
++ t.after(async()=>{const records=f.journal.snapshot().requests;const receipts=records.map(r=>r.evidenceRef&&existsSync(join(f.root,r.evidenceRef))?JSON.parse(readFileSync(join(f.root,r.evidenceRef),'utf8')):null);const cleaned=await f.cleanup();const dir='test-results/neon-managed-cleanup-sdk/http-captures';mkdirSync(dir,{recursive:true});writeFileSync(join(dir,String(++capture).padStart(3,'0')+'.json'),JSON.stringify({case:t.name,fixture_only:true,external_requests:0,records,receipts,hits:f.model.hits,removes:f.model.removes,reads:f.model.reads,cleaned},null,2)+'\n');});
++ return f;
++}
++async function run(f,extra={}){assert.equal(typeof cleanup.runFixtureManagedIdentityCleanup,'function','native SDK cleanup not wired');return cleanup.runFixtureManagedIdentityCleanup({execution:f.execution,journal:f.journal,gateway:f.gateway,nonce,sessionCookie:cookie,...extra});}
++
++test('native pinned SDK exact-id lookup reaches owned HTTP with a durable reconciliation reservation',async t=>{
++ const f=await wire(t);const response=await f.sdk.admin.listUsers({query:query(f.identity.id),fetchOptions:options});
++ assert.equal(response.error,null);assert.equal(response.data.users[0].id,f.identity.id);assert.equal(f.model.reads,1);assert.equal(f.journal.snapshot().requests[0].purpose,'reconcile');
++});
++test('native SDK removal uses the twenty-request cleanup reserve after 180 auth checks',async t=>{
++ const f=await wire(t);for(let i=0;i<180;i++){f.journal.reserveRequest('auth','earlier-'+i);f.journal.settleRequest('earlier-'+i,'accepted','historical-fixture.json');}
++ const response=await f.sdk.admin.removeUser({userId:f.identity.id,fetchOptions:options});assert.equal(response.error,null);assert.equal(response.data.success,true);assert.equal(f.model.removes,1);assert.equal(f.journal.snapshot().requests.at(-1).purpose,'cleanup');
++});
++test('native SDK refuses a different identity before reserving or dispatching HTTP',async t=>{
++ const f=await wire(t);for(const call of [()=>f.sdk.admin.listUsers({query:query('foreign-user'),fetchOptions:options}),()=>f.sdk.admin.removeUser({userId:'foreign-user',fetchOptions:options})]){await assert.rejects(call(),e=>e.status===403);}
++ assert.equal(f.model.hits.length,0);assert.equal(f.journal.snapshot().requests.length,0);
++});
++test('fresh ownership, exact identity and native SDK absence complete only the owned identity cleanup',async t=>{
++ const f=await wire(t),r=await run(f);assert.equal(r.complete,true);assert.equal(r.absent_identity,true);assert.equal(r.fixture_only,true);assert.equal(r.external_verified,false);assert.equal(f.model.removes,1);assert.equal(f.model.reads,2);assert.deepEqual(f.journal.snapshot().requests.map(v=>v.purpose),['reconcile','reconcile','cleanup','reconcile']);assert.ok(f.model.resources.get('auth').exists&&f.model.resources.get('project').exists);assert.equal(f.journal.snapshot().identity.id,f.identity.id);
++});
++for(const mode of ['read-500','generic-404','foreign-id','foreign-created','malformed'])test(mode+' read cannot authorize removal or claim absence',async t=>{
++ const f=await wire(t,mode),r=await run(f);assert.equal(r.complete,false);assert.equal(r.absent_identity,false);assert.equal(f.model.removes,0);
++});
++for(const mode of ['lingering','bad-success','post-delete-malformed'])test(mode+' removal response cannot claim confirmed absence',async t=>{
++ const f=await wire(t,mode),r=await run(f);assert.equal(r.complete,false);assert.equal(r.absent_identity,false);assert.equal(f.model.removes,1);
++});
++test('committed removal with lost response is not replayed; restart confirms exact absence through the SDK',async t=>{
++ const f=await wire(t,'commit-lost'),first=await run(f);assert.equal(first.complete,false);assert.equal(f.model.removes,1);assert.equal(f.journal.snapshot().requests.at(-1).outcome,'unknown');
++ const resumed=new RealRunJournal(f.root),execution=createFixtureExecutionBoundary({backend:f.backend,journal:resumed}),gateway=createFixtureExecutionGateway({execution,nonce});f.servers.push(gateway);await listen(gateway);
++ const second=await run(f,{journal:resumed,execution,gateway});assert.equal(second.complete,true);assert.equal(second.absent_identity,true);assert.equal(f.model.removes,1);assert.equal(resumed.snapshot().requests.filter(r=>r.outcome==='unknown').length,1);
++});
++test('unknown removal still present after restart retains hold and never resends',async t=>{
++ const f=await wire(t,'reject-500');assert.equal((await run(f)).complete,false);assert.equal(f.model.removes,1);
++ const r=await run(f);assert.equal(r.complete,false);assert.equal(r.blocked,'held-remove');assert.equal(f.model.removes,1);
++});
++test('an expired target may consume cleanup/reconciliation reserve but cannot send new auth checks',async t=>{
++ const f=await wire(t),late=Date.parse(f.target.expiresAt)+1;f.execution=createFixtureExecutionBoundary({backend:f.backend,journal:f.journal,now:()=>late});f.gateway=createFixtureExecutionGateway({execution:f.execution,nonce});f.servers.push(f.gateway);await listen(f.gateway);
++ // Fresh readbacks are evaluated at real wall time; accounting alone uses the expired clock.
++ assert.equal((await run(f)).complete,true);await assert.rejects(f.execution.dispatch({channel:'sdk',path:'/fixture/auth/token',method:'GET'}),/EXPIRED/);
++});
++test('admin authentication failure cannot be interpreted as an empty identity set',async t=>{
++ const f=await wire(t),r=await run(f,{sessionCookie:'fictional-cleanup-admin=unprivileged'});assert.equal(r.complete,false);assert.equal(f.model.removes,0);
++});
++test('gateway, journal and owner must all be the same branded owned context',async t=>{
++ const f=await wire(t),other=await wire(t);
++ for(const extra of [{nonce:'w'.repeat(43)},{gateway:other.gateway},{journal:other.journal},{execution:{}},{sessionCookie:'real-session=not-allowed'}])await assert.rejects(run(f,extra),/N00_/);
++ assert.equal(f.model.hits.length,0);assert.equal(other.model.hits.length,0);
++});
++test('changed project readback stops before native identity lookup',async t=>{
++ const f=await wire(t);f.model.readbackPatch={projectId:'foreign-project'};await assert.rejects(run(f),/N00_/);assert.equal(f.model.reads,0);assert.equal(f.model.removes,0);
++});
++test('no email linking, role writes, impersonation, create-user or unrestricted query enters the boundary',async t=>{
++ const f=await wire(t);
++ for(const path of ['/fixture/auth/admin/create-user','/fixture/auth/admin/set-role','/fixture/auth/admin/list-users?searchValue=cleanup@fixture.invalid','/fixture/auth/admin/list-users?'+new URLSearchParams({...query(f.identity.id),offset:1}),'https://auth.neon.tech/auth/admin/list-users'])await assert.rejects(f.execution.dispatch({channel:'sdk',method:'GET',path}));
++ assert.equal(f.model.hits.length,0);
++});
++test('durable receipts do not persist fixture session headers or identity payloads',async t=>{
++ const f=await wire(t);assert.equal((await run(f)).complete,true);const receipts=readdirSync(f.root).filter(n=>n.startsWith('execution-http')).map(n=>readFileSync(join(f.root,n),'utf8')).join('\n');assert.doesNotMatch(receipts,/fictional-cleanup-admin|cleanup@fixture.invalid|"users"|"role"/);
++});
++
++
++test('accepted remove without absence remains held on another attempt',async t=>{
++ const f=await wire(t,'lingering');assert.equal((await run(f)).blocked,'absence-unconfirmed');assert.equal((await run(f)).blocked,'held-remove');assert.equal(f.model.removes,1);
++});
++test('duplicate or extended query and body fields cannot broaden exact-id cleanup',async t=>{
++ const f=await wire(t),base='/fixture/auth/admin/list-users?'+new URLSearchParams(query(f.identity.id));
++ for(const path of [base+'&filterValue=other',base+'&searchValue=cleanup@fixture.invalid',base.replace('offset=0','offset=1')])await assert.rejects(f.execution.dispatch({channel:'sdk',method:'GET',path}),/IDENTITY_LOOKUP/);
++ for(const body of ['{"userId":"fictional-execution-identity","role":"admin"}','{"userId":123}','not-json'])await assert.rejects(f.execution.dispatch({channel:'sdk',method:'POST',path:'/fixture/auth/admin/remove-user',body}),/OWNED_IDENTITY/);
++ assert.equal(f.model.hits.length,0);assert.equal(f.journal.snapshot().requests.length,0);
++});
++test('cleanup also stops at the hard total of two hundred physical requests',async t=>{
++ const f=await wire(t);for(let i=0;i<200;i++){const purpose=i<180?'auth':'reconcile';f.journal.reserveRequest(purpose,'earlier-'+i);f.journal.settleRequest('earlier-'+i,'accepted','historical-fixture.json');}
++ await assert.rejects(run(f),/BUDGET/);assert.equal(f.model.hits.length,0);assert.equal(f.journal.snapshot().requests.length,200);
++});
+diff --git a/tests/neon-managed-cleanup-sdk.types.ts b/tests/neon-managed-cleanup-sdk.types.ts
+new file mode 100644
+index 0000000..92fbc29
+--- /dev/null
++++ b/tests/neon-managed-cleanup-sdk.types.ts
+@@ -0,0 +1,8 @@
++import type {ManagedFixtureCleanupResult} from '../scripts/neon-managed-cleanup-sdk.mjs';
++import {runFixtureManagedIdentityCleanup} from '../scripts/neon-managed-cleanup-sdk.mjs';
++// @ts-expect-error cleanup requires a branded runtime boundary, owned gateway and journal
++void runFixtureManagedIdentityCleanup({sessionCookie:'fictional-cleanup-admin=owned'});
++declare const result:ManagedFixtureCleanupResult;
++// @ts-expect-error a local fixture cannot claim external verification
++const external:true=result.external_verified;
++void external;

@@ -1,0 +1,49 @@
+✔ native pinned SDK exact-id lookup reaches owned HTTP with a durable reconciliation reservation (148.3665ms)
+✖ native SDK removal uses the twenty-request cleanup reserve after 180 auth checks (4069.049ms)
+✔ native SDK refuses a different identity before reserving or dispatching HTTP (52.019ms)
+✔ fresh ownership, exact identity and native SDK absence complete only the owned identity cleanup (241.3865ms)
+✔ read-500 read cannot authorize removal or claim absence (99.9637ms)
+✔ generic-404 read cannot authorize removal or claim absence (95.1481ms)
+✔ foreign-id read cannot authorize removal or claim absence (108.0008ms)
+✔ foreign-created read cannot authorize removal or claim absence (95.2097ms)
+✔ malformed read cannot authorize removal or claim absence (89.4896ms)
+✔ lingering removal response cannot claim confirmed absence (219.2424ms)
+✔ bad-success removal response cannot claim confirmed absence (234.7775ms)
+✔ post-delete-malformed removal response cannot claim confirmed absence (222.165ms)
+✔ committed removal with lost response is not replayed; restart confirms exact absence through the SDK (236.2946ms)
+✔ unknown removal still present after restart retains hold and never resends (241.3302ms)
+✔ an expired target may consume cleanup/reconciliation reserve but cannot send new auth checks (246.079ms)
+✔ admin authentication failure cannot be interpreted as an empty identity set (94.5119ms)
+✔ gateway, journal and owner must all be the same branded owned context (57.8059ms)
+✔ changed project readback stops before native identity lookup (54.218ms)
+✔ no email linking, role writes, impersonation, create-user or unrestricted query enters the boundary (41.2119ms)
+✔ durable receipts do not persist fixture session headers or identity payloads (200.5141ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 19
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7658.0334
+
+✖ failing tests:
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:57:1
+✖ native SDK removal uses the twenty-request cleanup reserve after 180 auth checks (4069.049ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 181
+  
+      at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:18:10
+      at Server.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-execution/fixture.mjs:18:21)
+      at Server.emit (node:events:509:28)
+      at parserOnIncoming (node:_http_server:1268:12)
+      at HTTPParser.parserOnHeadersComplete (node:_http_common:125:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 181,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

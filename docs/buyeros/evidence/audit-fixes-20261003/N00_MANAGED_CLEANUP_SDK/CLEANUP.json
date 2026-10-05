@@ -1,0 +1,25 @@
+{
+  "native_capture_count": 25,
+  "native_unique_cases": 24,
+  "all_completed_owned_servers_closed_and_journals_removed": true,
+  "interrupted_roots": [
+    {
+      "approval": "fixture-only-no-external-authority",
+      "root": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-e8oqQB",
+      "requests": 180,
+      "fixture_only": true,
+      "external_verified": false,
+      "createdAt": "2026-10-05T01:57:37.437Z"
+    },
+    {
+      "approval": "fixture-only-no-external-authority",
+      "root": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-L6sebk",
+      "requests": 180,
+      "fixture_only": true,
+      "external_verified": false,
+      "createdAt": "2026-10-05T01:55:12.412Z"
+    }
+  ],
+  "browser_owned_cleanup_attachments": 3,
+  "real_provider_resource_cleanup": false
+}

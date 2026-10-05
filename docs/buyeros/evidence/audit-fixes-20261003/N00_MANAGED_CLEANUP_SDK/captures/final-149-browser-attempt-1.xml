@@ -1,0 +1,10 @@
+<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="0" time="11.798314">
+<testsuite name="audit-neon-execution.spec.ts" timestamp="2026-10-04T18:47:07.572Z" hostname="" tests="3" failures="0" skipped="0" time="3.721" errors="0">
+<testcase name="NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget" classname="audit-neon-execution.spec.ts" time="2.092">
+</testcase>
+<testcase name="NA01 accounting: browser origin and direct-network refusals dispatch no provider HTTP" classname="audit-neon-execution.spec.ts" time="0.578">
+</testcase>
+<testcase name="NA01 accounting: browser refresh and a reconstructed journal cannot replay an unknown write" classname="audit-neon-execution.spec.ts" time="1.051">
+</testcase>
+</testsuite>
+</testsuites>

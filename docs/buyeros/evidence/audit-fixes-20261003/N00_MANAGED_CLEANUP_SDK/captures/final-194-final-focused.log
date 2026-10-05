@@ -1,0 +1,32 @@
+✔ native pinned SDK exact-id lookup reaches owned HTTP with a durable reconciliation reservation (280.3725ms)
+✔ native SDK removal uses the twenty-request cleanup reserve after 180 auth checks (4790.4564ms)
+✔ native SDK refuses a different identity before reserving or dispatching HTTP (45.7891ms)
+✔ fresh ownership, exact identity and native SDK absence complete only the owned identity cleanup (255.1937ms)
+✔ read-500 read cannot authorize removal or claim absence (104.6592ms)
+✔ generic-404 read cannot authorize removal or claim absence (153.7156ms)
+✔ foreign-id read cannot authorize removal or claim absence (181.178ms)
+✔ foreign-created read cannot authorize removal or claim absence (282.9532ms)
+✔ malformed read cannot authorize removal or claim absence (122.4543ms)
+✔ lingering removal response cannot claim confirmed absence (462.0988ms)
+✔ bad-success removal response cannot claim confirmed absence (344.2047ms)
+✔ post-delete-malformed removal response cannot claim confirmed absence (369.7125ms)
+✔ committed removal with lost response is not replayed; restart confirms exact absence through the SDK (309.9984ms)
+✔ unknown removal still present after restart retains hold and never resends (296.356ms)
+✔ an expired target may consume cleanup/reconciliation reserve but cannot send new auth checks (378.2602ms)
+✔ admin authentication failure cannot be interpreted as an empty identity set (365.8774ms)
+✔ gateway, journal and owner must all be the same branded owned context (203.4559ms)
+✔ changed project readback stops before native identity lookup (62.2318ms)
+✔ no email linking, role writes, impersonation, create-user or unrestricted query enters the boundary (43.6254ms)
+✔ durable receipts do not persist fixture session headers or identity payloads (497.0816ms)
+✔ accepted remove without absence remains held on another attempt (375.2024ms)
+✔ duplicate or extended query and body fields cannot broaden exact-id cleanup (54.3378ms)
+✔ cleanup also stops at the hard total of two hundred physical requests (4738.2582ms)
+✔ unknown identity removal stays held when only JSON whitespace or session headers change (97.1429ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17752.2554

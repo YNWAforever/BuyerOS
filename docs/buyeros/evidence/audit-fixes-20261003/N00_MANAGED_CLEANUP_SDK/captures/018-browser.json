@@ -1,0 +1,224 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config",
+      "playwright.neon-execution.config.ts",
+      "tests/e2e/audit-neon-execution.spec.ts"
+    ],
+    "configFile": "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\playwright.neon-execution.config.ts",
+    "rootDir": "C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/neon-execution/browser",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "audit-neon-execution.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/neon-execution/browser.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "test-results/neon-execution/browser.xml"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "audit-neon-execution.spec.ts",
+      "file": "audit-neon-execution.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1479,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T02:03:20.755Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "receipt",
+                      "contentType": "application/json",
+                      "body": "eyJmaXh0dXJlX29ubHkiOnRydWUsImV4dGVybmFsX3ZlcmlmaWVkIjpmYWxzZSwiaHR0cF9yZXF1ZXN0cyI6NCwiY2hhbm5lbHMiOlsiYnJvd3NlciIsImJyb3dzZXIiLCJzZGsiLCJjbGkiXSwiY2Fub25pY2FsX2RhdGFiYXNlX2Nvbm5lY3RlZCI6ZmFsc2V9"
+                    },
+                    {
+                      "name": "journal",
+                      "contentType": "application/json",
+                      "body": "eyJzY2hlbWFWZXJzaW9uIjoxLCJwcm9wb3NhbCI6ImJ1eWVyb3MtbmVvbi1hdXRoLW4wMC0yMDI2MTAwNCIsImFwcHJvdmFsUmVmZXJlbmNlIjoiZml4dHVyZS1vbmx5LW5vLWV4dGVybmFsLWF1dGhvcml0eSIsImFwcHJvdmVkQXQiOiIyMDI2LTEwLTA1VDAyOjAzOjIxLjQzMVoiLCJsaW1pdCI6MjAwLCJjbGVhbnVwUmVzZXJ2ZSI6MjAsImJ1aWxkTGltaXQiOjIsImJ1aWxkVGltZW91dE1zIjoxMjAwMDAwLCJ0YXJnZXQiOnsic2NoZW1hVmVyc2lvbiI6MSwicHJvcG9zYWwiOiJidXllcm9zLW5lb24tYXV0aC1uMDAtMjAyNjEwMDQiLCJzb3VyY2VTaGEiOiJlMDI1NmYzMDM1MDJkNDMzMjQwMGE4MzdiOTk5MDM5MjZmNzRjODQyIiwicHJvamVjdElkIjoiZmljdGlvbmFsLWV4ZWN1dGlvbi1wcm9qZWN0IiwiYnJhbmNoSWQiOiJmaWN0aW9uYWwtZXhlY3V0aW9uLWJyYW5jaCIsImF1dGhJZCI6ImZpY3Rpb25hbC1leGVjdXRpb24tYXV0aCIsIm9yZ0lkIjoib3JnLXNvZnQtc3Vuc2V0LTI1MjUxNDc5IiwibmFtZSI6ImJ1eWVyb3MtbmVvbi1hdXRoLW4wMC0yMDI2MTAwNCIsInJlZ2lvbklkIjoiYXdzLWFwLXNvdXRoZWFzdC0xIiwiY3JlYXRpb25Nb2RlIjoibmV3LWVtcHR5IiwiY3JlYXRlZEF0IjoiMjAyNi0xMC0wNVQwMjowMzoyMS40MzFaIiwiZXhwaXJlc0F0IjoiMjAyNi0xMC0wNVQwNDowMzoyMS40MzFaIiwicmVhZGJhY2siOnsicHJvamVjdElkIjoiZmljdGlvbmFsLWV4ZWN1dGlvbi1wcm9qZWN0IiwiYnJhbmNoSWQiOiJmaWN0aW9uYWwtZXhlY3V0aW9uLWJyYW5jaCIsImF1dGhJZCI6ImZpY3Rpb25hbC1leGVjdXRpb24tYXV0aCIsIm9yZ0lkIjoib3JnLXNvZnQtc3Vuc2V0LTI1MjUxNDc5IiwibmFtZSI6ImJ1eWVyb3MtbmVvbi1hdXRoLW4wMC0yMDI2MTAwNCIsInJlZ2lvbklkIjoiYXdzLWFwLXNvdXRoZWFzdC0xIiwib2JzZXJ2ZWRBdCI6IjIwMjYtMTAtMDVUMDI6MDM6MjEuNDMxWiIsInN1YnNjcmlwdGlvbiI6ImZyZWVfdjMiLCJlbWFpbERlbGl2ZXJ5RW5hYmxlZCI6ZmFsc2UsImVtYWlsUGFzc3dvcmRFbmFibGVkIjpmYWxzZSwiZW1haWxIb29rc0VuYWJsZWQiOmZhbHNlLCJtZXRob2RzIjpbImdvb2dsZSJdLCJ0cnVzdGVkT3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjQ0ODkwIl19LCJhdXRoIjp7ImJhc2VVcmwiOiJodHRwczovL2V4ZWN1dGlvbi5maXh0dXJlLmludmFsaWQvYXV0aCIsImlzc3VlciI6Imh0dHBzOi8vaXNzdWVyLmZpeHR1cmUuaW52YWxpZCIsImF1ZGllbmNlIjoiZmljdGlvbmFsLWV4ZWN1dGlvbi1hdWRpZW5jZSIsImp3a3NVcmwiOiJodHRwczovL2V4ZWN1dGlvbi5maXh0dXJlLmludmFsaWQvYXV0aC9qd2tzIiwiYWxnb3JpdGhtIjoiRWREU0EiLCJrZXlUeXBlIjoiT0tQIiwiY3VydmUiOiJFZDI1NTE5In0sImZpbmdlcnByaW50IjoiNTIzYmY4OGU5NjljNzA2YTQzMjFiMTFhMmMxMTY1MTk0Y2I0ZTg2MTAyOTFiNzljNDY4MjY5ODM1NzJiYzBkZiJ9LCJpZGVudGl0eSI6bnVsbCwicmVxdWVzdHMiOlt7InNlcXVlbmNlIjoxLCJwdXJwb3NlIjoiYXV0aCIsIm9wZXJhdGlvbklkIjoiZXhlY3V0aW9uLWh0dHAtMSIsInJlc2VydmVkQXQiOiIyMDI2LTEwLTA1VDAyOjAzOjIxLjczMFoiLCJvdXRjb21lIjoiYWNjZXB0ZWQiLCJldmlkZW5jZVJlZiI6ImV4ZWN1dGlvbi1odHRwLTEuanNvbiJ9LHsic2VxdWVuY2UiOjIsInB1cnBvc2UiOiJhdXRoIiwib3BlcmF0aW9uSWQiOiJleGVjdXRpb24taHR0cC0yIiwicmVzZXJ2ZWRBdCI6IjIwMjYtMTAtMDVUMDI6MDM6MjEuODA0WiIsIm91dGNvbWUiOiJhY2NlcHRlZCIsImV2aWRlbmNlUmVmIjoiZXhlY3V0aW9uLWh0dHAtMi5qc29uIn0seyJzZXF1ZW5jZSI6MywicHVycG9zZSI6ImF1dGgiLCJvcGVyYXRpb25JZCI6ImV4ZWN1dGlvbi1odHRwLTMiLCJyZXNlcnZlZEF0IjoiMjAyNi0xMC0wNVQwMjowMzoyMS44ODVaIiwib3V0Y29tZSI6ImFjY2VwdGVkIiwiZXZpZGVuY2VSZWYiOiJleGVjdXRpb24taHR0cC0zLmpzb24ifSx7InNlcXVlbmNlIjo0LCJwdXJwb3NlIjoiYXV0aCIsIm9wZXJhdGlvbklkIjoiZXhlY3V0aW9uLWh0dHAtNCIsInJlc2VydmVkQXQiOiIyMDI2LTEwLTA1VDAyOjAzOjIyLjIyMFoiLCJvdXRjb21lIjoiYWNjZXB0ZWQiLCJldmlkZW5jZVJlZiI6ImV4ZWN1dGlvbi1odHRwLTQuanNvbiJ9XSwiYnVpbGRzIjpbXX0="
+                    },
+                    {
+                      "name": "owned-cleanup",
+                      "contentType": "application/json",
+                      "body": "eyJmaXh0dXJlX29ubHkiOnRydWUsImV4dGVybmFsX3ZlcmlmaWVkIjpmYWxzZSwib3duZWRfam91cm5hbF9yZW1vdmVkIjp0cnVlLCJvd25lZF9zZXJ2ZXJzX2Nsb3NlZCI6dHJ1ZX0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3ddc2841c20600a8659b-89d6f4ff603c7335f967",
+          "file": "audit-neon-execution.spec.ts",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "NA01 accounting: browser origin and direct-network refusals dispatch no provider HTTP",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 409,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T02:03:22.449Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "owned-cleanup",
+                      "contentType": "application/json",
+                      "body": "eyJmaXh0dXJlX29ubHkiOnRydWUsImV4dGVybmFsX3ZlcmlmaWVkIjpmYWxzZSwib3duZWRfam91cm5hbF9yZW1vdmVkIjp0cnVlLCJvd25lZF9zZXJ2ZXJzX2Nsb3NlZCI6dHJ1ZX0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3ddc2841c20600a8659b-655253467ccecd752bb9",
+          "file": "audit-neon-execution.spec.ts",
+          "line": 19,
+          "column": 1
+        },
+        {
+          "title": "NA01 accounting: browser refresh and a reconstructed journal cannot replay an unknown write",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 668,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-05T02:03:22.876Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "owned-cleanup",
+                      "contentType": "application/json",
+                      "body": "eyJmaXh0dXJlX29ubHkiOnRydWUsImV4dGVybmFsX3ZlcmlmaWVkIjpmYWxzZSwib3duZWRfam91cm5hbF9yZW1vdmVkIjp0cnVlLCJvd25lZF9zZXJ2ZXJzX2Nsb3NlZCI6dHJ1ZX0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3ddc2841c20600a8659b-81feab00b6b9ec7ca917",
+          "file": "audit-neon-execution.spec.ts",
+          "line": 26,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-05T02:03:17.144Z",
+    "duration": 6773.906,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

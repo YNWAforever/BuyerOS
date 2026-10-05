@@ -1,0 +1,18 @@
+[
+  {
+    "approval": "fixture-only-no-external-authority",
+    "root": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-e8oqQB",
+    "requests": 180,
+    "fixture_only": true,
+    "external_verified": false,
+    "createdAt": "2026-10-05T01:57:37.437Z"
+  },
+  {
+    "approval": "fixture-only-no-external-authority",
+    "root": "C:\\Users\\laich\\AppData\\Local\\Temp\\buyeros-n00-real-L6sebk",
+    "requests": 180,
+    "fixture_only": true,
+    "external_verified": false,
+    "createdAt": "2026-10-05T01:55:12.412Z"
+  }
+]

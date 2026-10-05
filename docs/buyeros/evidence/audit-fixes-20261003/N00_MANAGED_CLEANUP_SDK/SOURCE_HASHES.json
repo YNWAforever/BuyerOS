@@ -1,0 +1,32 @@
+[
+  {
+    "file": "scripts/neon-execution-boundary.d.mts",
+    "worktree_sha256": "56d80953ef81dff5ae70ce204605218bb2e31994ef135b348301f16996ebec7d",
+    "commit_blob_sha256": "671405075fbfa5013689fbde7b03aeeec0e95eb82b7fcf6faac77afc601a8afa"
+  },
+  {
+    "file": "scripts/neon-execution-boundary.mjs",
+    "worktree_sha256": "fe599c1a26d04a6f045769cb05e56be9011c8f7c7519e1e63019de287dafe7b8",
+    "commit_blob_sha256": "ed173b180d753d068add64d8206e438b4677174d3ff02768cc9606305bbf300a"
+  },
+  {
+    "file": "scripts/neon-managed-cleanup-sdk.d.mts",
+    "worktree_sha256": "1454c896d6b7ec455572dec865b17aad7dd15d0ae6c526de15b227734dcc5e8d",
+    "commit_blob_sha256": "dd9dcb7fdefff84df54e0fd42314fe732cbf4d06cd6caa6228117e4f6414b339"
+  },
+  {
+    "file": "scripts/neon-managed-cleanup-sdk.mjs",
+    "worktree_sha256": "b0b7eccb0541d4d8c63a1acf177b05e4ca1c4693f751d786b3f5ef5262b5da23",
+    "commit_blob_sha256": "05717cd70806c03e68ed924847dfb187d50c9641e655ce92aff77421a8386a6c"
+  },
+  {
+    "file": "tests/neon-managed-cleanup-sdk.test.mjs",
+    "worktree_sha256": "47a6e0b54813b2d449398c9da6a5cab54559522fdd52af961453cb321f0b0cd6",
+    "commit_blob_sha256": "dbbde838998b54bb7805d93ee5a9cfd7e0395f82ee12b3e791b2bf82066e5e97"
+  },
+  {
+    "file": "tests/neon-managed-cleanup-sdk.types.ts",
+    "worktree_sha256": "47f82bfc76cea0b9e272bc00f50789ac3004e72301ef631dd3c2f2f231cae682",
+    "commit_blob_sha256": "8e63decbc1671ad4fb45aadcf8b7676b210f496f25126bae1f0e1fd1635c8b4c"
+  }
+]

@@ -98,3 +98,12 @@ Reviewed source b8a10848b62090ff19544918961e54df3ebfa921;10files277insertions/0d
 2026-10-05 N00 transport recovery source `2b69e7cf8c0b0c738bfc34b3de44b1877468a0ca`: post-dispatch redirect refusal stays unknown; one-use verifier/state intent survives query/token changes; fsynced receipts and conservative restart hold. Fresh214Node/8crypto/6UIeachactualoutput pass0fail/skip,types/lint/generated84(70+14)exit0. Broader27rootMJS attempt269pass5fail0skip retained;not final-source project acceptance. Original302/trueNeon/Google/nativeaccounting/Managedidentitycleanup/independentreviewOPEN;Auth0retained/deployednull/noDBmigrations. [Evidence](../evidence/audit-fixes-20261003/N00_UNKNOWN_WRITE_RECOVERY/RESULTS.md). Rollback followingmetadata then source2b69e7c;noDBundo.
 
 Fixture and integration verified separately from true provider verification. No N01/N02/Auth0 cutover/migration-owner change; peerQ13 current-auth-only checkpoint remains separate. Broader offer Docker run timeout and absent normal main Vercel output are unresolved; no cause guessed. Original callback302 test/assertions not edited or reclassified pass; installed SDK fetch follows redirects and response header allowlist omits Location. New controlled response fault checks502 unknown ->409 held in the actual built UI. Historical source/evidence remains immutable; no old external approval reused.
+
+
+## 2026-10-05 N00 native SDK identity-cleanup rehearsal
+
+2026-10-05 N00 native SDK cleanup rehearsal source `050f0d03e49e867c9e5364865d3dc5f17bdc8fec`: exact bound identity listUsers/removal/absence through the pinned SDK and branded owned gateway; cleanup/reconciliation reserve and held unknown removal survive restart. Fresh238relatedNode/24focused/8EdDSA/3browser pass0fail/skip; types/lint/generated84(70+14)exit0. No business/schema/build/deployment change; full N00/NA01 OPEN. Real Neon/Google/Admin cleanup, original302, full native containment and independent review remain unverified. [Evidence](../evidence/audit-fixes-20261003/N00_MANAGED_CLEANUP_SDK/RESULTS.md). Rollback followingmetadata then source050f0d0 then5ecaa23;noDBundo.
+
+Real Managed Admin session/cleanup authority and provider exact-filter/schema/absence are unverified. Fixture roles never grant BuyerOS permissions. No fallback users_sync deletion or framework/auth switch.
+
+Author review: observed23pass1fail for JSON-whitespace/header replay; canonical bound identity intent fixed; final24focused/238related0fail/skip. Initial source5ecaa23 plus correction050f0d0; no provider or schema action.

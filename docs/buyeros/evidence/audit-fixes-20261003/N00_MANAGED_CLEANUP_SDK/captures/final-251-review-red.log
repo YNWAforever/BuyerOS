@@ -1,0 +1,49 @@
+✔ native pinned SDK exact-id lookup reaches owned HTTP with a durable reconciliation reservation (164.3715ms)
+✔ native SDK removal uses the twenty-request cleanup reserve after 180 auth checks (3298.502ms)
+✔ native SDK refuses a different identity before reserving or dispatching HTTP (49.5405ms)
+✔ fresh ownership, exact identity and native SDK absence complete only the owned identity cleanup (227.2799ms)
+✔ read-500 read cannot authorize removal or claim absence (105.6835ms)
+✔ generic-404 read cannot authorize removal or claim absence (107.4594ms)
+✔ foreign-id read cannot authorize removal or claim absence (95.1319ms)
+✔ foreign-created read cannot authorize removal or claim absence (116.2592ms)
+✔ malformed read cannot authorize removal or claim absence (95.6123ms)
+✔ lingering removal response cannot claim confirmed absence (200.9851ms)
+✔ bad-success removal response cannot claim confirmed absence (159.7471ms)
+✔ post-delete-malformed removal response cannot claim confirmed absence (220.8191ms)
+✔ committed removal with lost response is not replayed; restart confirms exact absence through the SDK (225.3206ms)
+✔ unknown removal still present after restart retains hold and never resends (203.098ms)
+✔ an expired target may consume cleanup/reconciliation reserve but cannot send new auth checks (199.9297ms)
+✔ admin authentication failure cannot be interpreted as an empty identity set (99.1685ms)
+✔ gateway, journal and owner must all be the same branded owned context (55.8677ms)
+✔ changed project readback stops before native identity lookup (54.6744ms)
+✔ no email linking, role writes, impersonation, create-user or unrestricted query enters the boundary (35.0246ms)
+✔ durable receipts do not persist fixture session headers or identity payloads (227.2995ms)
+✔ accepted remove without absence remains held on another attempt (296.5036ms)
+✔ duplicate or extended query and body fields cannot broaden exact-id cleanup (42.2011ms)
+✔ cleanup also stops at the hard total of two hundred physical requests (3737.7958ms)
+✖ unknown identity removal stays held when only JSON whitespace or session headers change (98.0478ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 23
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13671.0963
+
+✖ failing tests:
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:124:1
+✖ unknown identity removal stays held when only JSON whitespace or session headers change (98.0478ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:127:2)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /HELD_INTENT/,
+    operator: 'rejects',
+    diff: 'simple'
+  }

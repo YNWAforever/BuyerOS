@@ -45,3 +45,8 @@ docs/buyeros/evidence/audit-fixes-20261003/N00_EXECUTION_BOUNDARY/** -text white
 docs/buyeros/evidence/audit-fixes-20261003/N00_UNKNOWN_WRITE_RECOVERY/** -text whitespace=cr-at-eol
 docs/buyeros/evidence/audit-fixes-20261003/N00_UNKNOWN_WRITE_RECOVERY/captures/** -whitespace
 docs/buyeros/evidence/audit-fixes-20261003/N00_UNKNOWN_WRITE_RECOVERY/source.patch -whitespace
+
+# Preserve native SDK cleanup rehearsal producer bytes.
+docs/buyeros/evidence/audit-fixes-20261003/N00_MANAGED_CLEANUP_SDK/** -text whitespace=cr-at-eol
+docs/buyeros/evidence/audit-fixes-20261003/N00_MANAGED_CLEANUP_SDK/captures/** -whitespace
+docs/buyeros/evidence/audit-fixes-20261003/N00_MANAGED_CLEANUP_SDK/source.patch -whitespace

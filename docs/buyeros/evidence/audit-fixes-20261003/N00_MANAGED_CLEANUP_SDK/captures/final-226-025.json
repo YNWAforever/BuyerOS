@@ -1,0 +1,45 @@
+{
+  "case": "unknown identity removal stays held when only JSON whitespace or session headers change",
+  "fixture_only": true,
+  "external_requests": 0,
+  "records": [
+    {
+      "sequence": 1,
+      "purpose": "cleanup",
+      "operationId": "execution-http-1",
+      "reservedAt": "2026-10-05T02:16:52.577Z",
+      "outcome": "unknown",
+      "evidenceRef": "execution-http-1.json"
+    }
+  ],
+  "receipts": [
+    {
+      "schemaVersion": 1,
+      "fixture_only": true,
+      "external_verified": false,
+      "sequence": 1,
+      "channel": "sdk",
+      "method": "POST",
+      "path": "/fixture/auth/admin/remove-user",
+      "intent_hash": "c363fca751ef574843e6a8521c929ded733e8f90d7f42f5ef0eca94345adb835",
+      "target_fingerprint": "25972298531b7bdf8f0d1cb50826048f3ee688e50ee3c2fa529bbb8ab003cf8a",
+      "status": 500,
+      "outcome": "unknown",
+      "reason": "http-response"
+    }
+  ],
+  "hits": [
+    [
+      "POST",
+      "/fixture/auth/admin/remove-user"
+    ]
+  ],
+  "removes": 1,
+  "reads": 0,
+  "cleaned": {
+    "fixture_only": true,
+    "external_verified": false,
+    "owned_journal_removed": true,
+    "owned_servers_closed": true
+  }
+}

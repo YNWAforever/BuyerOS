@@ -1,0 +1,460 @@
+✖ native pinned SDK exact-id lookup reaches owned HTTP with a durable reconciliation reservation (112.9367ms)
+✖ native SDK removal uses the twenty-request cleanup reserve after 180 auth checks (5083.5914ms)
+✖ native SDK refuses a different identity before reserving or dispatching HTTP (98.1756ms)
+✖ fresh ownership, exact identity and native SDK absence complete only the owned identity cleanup (36.3071ms)
+✖ read-500 read cannot authorize removal or claim absence (33.5373ms)
+✖ generic-404 read cannot authorize removal or claim absence (36.1993ms)
+✖ foreign-id read cannot authorize removal or claim absence (35.2331ms)
+✖ foreign-created read cannot authorize removal or claim absence (32.1564ms)
+✖ malformed read cannot authorize removal or claim absence (33.0741ms)
+✖ lingering removal response cannot claim confirmed absence (39.1861ms)
+✖ bad-success removal response cannot claim confirmed absence (39.8306ms)
+✖ post-delete-malformed removal response cannot claim confirmed absence (37.2976ms)
+✖ committed removal with lost response is not replayed; restart confirms exact absence through the SDK (44.4672ms)
+✖ unknown removal still present after restart retains hold and never resends (34.4665ms)
+✖ an expired target may consume cleanup/reconciliation reserve but cannot send new auth checks (54.5969ms)
+✖ admin authentication failure cannot be interpreted as an empty identity set (46.1752ms)
+✖ gateway, journal and owner must all be the same branded owned context (64.7ms)
+✖ changed project readback stops before native identity lookup (36.7444ms)
+✖ no email linking, role writes, impersonation, create-user or unrestricted query enters the boundary (76.9284ms)
+✖ durable receipts do not persist fixture session headers or identity payloads (40.7983ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 0
+ℹ fail 20
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8235.6642
+
+✖ failing tests:
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:53:1
+✖ native pinned SDK exact-id lookup reaches owned HTTP with a durable reconciliation reservation (112.9367ms)
+  Error [AuthApiError]: HTTP 403 Forbidden
+      at createNormalizedError (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/@neondatabase+auth@0.5.0-be_a7cddb613c9eb2b7939241dafdbbb723/node_modules/@neondatabase/auth/dist/better-auth-helpers-DlzEQzcv.mjs:456:65)
+      at normalizeBetterAuthError (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/@neondatabase+auth@0.5.0-be_a7cddb613c9eb2b7939241dafdbbb723/node_modules/@neondatabase/auth/dist/better-auth-helpers-DlzEQzcv.mjs:372:10)
+      at customFetchImpl (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/@neondatabase+auth@0.5.0-be_a7cddb613c9eb2b7939241dafdbbb723/node_modules/@neondatabase/auth/dist/adapter-core-CZ8saNEY.mjs:787:13)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async betterFetch (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/@better-fetch+fetch@1.3.1/node_modules/@better-fetch/fetch/dist/index.js:628:18)
+      at async $fetch (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/@better-fetch+fetch@1.3.1/node_modules/@better-fetch/fetch/dist/index.js:519:12)
+      at async Object.apply (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/better-auth@1.6.23_@cloudfl_01ef7a4f9325274bee4716523a643a77/node_modules/better-auth/dist/client/proxy.mjs:39:12)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:54:39)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    __isAuthError: true,
+    status: 403,
+    code: 'feature_not_supported'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:57:1
+✖ native SDK removal uses the twenty-request cleanup reserve after 180 auth checks (5083.5914ms)
+  Error [AuthApiError]: HTTP 403 Forbidden
+      at createNormalizedError (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/@neondatabase+auth@0.5.0-be_a7cddb613c9eb2b7939241dafdbbb723/node_modules/@neondatabase/auth/dist/better-auth-helpers-DlzEQzcv.mjs:456:65)
+      at normalizeBetterAuthError (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/@neondatabase+auth@0.5.0-be_a7cddb613c9eb2b7939241dafdbbb723/node_modules/@neondatabase/auth/dist/better-auth-helpers-DlzEQzcv.mjs:372:10)
+      at customFetchImpl (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/@neondatabase+auth@0.5.0-be_a7cddb613c9eb2b7939241dafdbbb723/node_modules/@neondatabase/auth/dist/adapter-core-CZ8saNEY.mjs:787:13)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async betterFetch (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/@better-fetch+fetch@1.3.1/node_modules/@better-fetch/fetch/dist/index.js:628:18)
+      at async $fetch (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/@better-fetch+fetch@1.3.1/node_modules/@better-fetch/fetch/dist/index.js:519:12)
+      at async Object.apply (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/node_modules/.pnpm/better-auth@1.6.23_@cloudfl_01ef7a4f9325274bee4716523a643a77/node_modules/better-auth/dist/client/proxy.mjs:39:12)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:59:17)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    __isAuthError: true,
+    status: 403,
+    code: 'feature_not_supported'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:61:1
+✖ native SDK refuses a different identity before reserving or dispatching HTTP (98.1756ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   userId: 'foreign-user'
+  -   userId: 'fictional-execution-identity'
+    }
+  
+      at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:36:11
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Server.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/fixtures/neon-execution/fixture.mjs:18:15) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { userId: 'foreign-user' },
+    expected: { userId: 'fictional-execution-identity' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:65:1
+✖ fresh ownership, exact identity and native SDK absence complete only the owned identity cleanup (36.3071ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:66:32)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:68:89
+✖ read-500 read cannot authorize removal or claim absence (33.5373ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:69:37)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:68:89
+✖ generic-404 read cannot authorize removal or claim absence (36.1993ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:69:37)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:68:89
+✖ foreign-id read cannot authorize removal or claim absence (35.2331ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:69:37)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:68:89
+✖ foreign-created read cannot authorize removal or claim absence (32.1564ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:69:37)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:68:89
+✖ malformed read cannot authorize removal or claim absence (33.0741ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:69:37)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:71:71
+✖ lingering removal response cannot claim confirmed absence (39.1861ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:72:37)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:71:71
+✖ bad-success removal response cannot claim confirmed absence (39.8306ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:72:37)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:71:71
+✖ post-delete-malformed removal response cannot claim confirmed absence (37.2976ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:72:37)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:74:1
+✖ committed removal with lost response is not replayed; restart confirms exact absence through the SDK (44.4672ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:75:50)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:79:1
+✖ unknown removal still present after restart retains hold and never resends (34.4665ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:80:57)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:83:1
+✖ an expired target may consume cleanup/reconciliation reserve but cannot send new auth checks (54.5969ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:86:22)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:88:1
+✖ admin authentication failure cannot be interpreted as an empty identity set (46.1752ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:89:32)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:91:1
+✖ gateway, journal and owner must all be the same branded owned context (64.7ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: native SDK cleanup not wired\n' +
+    '+ actual - expected\n' +
+    '\n' +
+    "+ 'undefined'\n" +
+    "- 'function'\n"
+  
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:93:152)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+    + actual - expected
+    
+    + 'undefined'
+    - 'function'
+    
+        at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:93:173)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async Test.run (node:internal/test_runner/test:1332:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:911:7),
+    expected: /N00_/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:96:1
+✖ changed project readback stops before native identity lookup (36.7444ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /N00_/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: native SDK cleanup not wired\n' +
+    '+ actual - expected\n' +
+    '\n' +
+    "+ 'undefined'\n" +
+    "- 'function'\n"
+  
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:97:76)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+    + actual - expected
+    
+    + 'undefined'
+    - 'function'
+    
+        at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+        at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:97:97)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async Test.run (node:internal/test_runner/test:1332:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:911:7),
+    expected: /N00_/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:99:1
+✖ no email linking, role writes, impersonation, create-user or unrestricted query enters the boundary (76.9284ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:101:293)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests\neon-managed-cleanup-sdk.test.mjs:104:1
+✖ durable receipts do not persist fixture session headers or identity payloads (40.7983ms)
+  AssertionError [ERR_ASSERTION]: native SDK cleanup not wired
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at run (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:51:39)
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-managed-cleanup-sdk.test.mjs:105:44)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,1496 @@
+TAP version 13
+# Subtest: checked-in API types match the current OpenAPI contract
+ok 1 - checked-in API types match the current OpenAPI contract
+  ---
+  duration_ms: 11158.0299
+  type: 'test'
+  ...
+# Subtest: TypeScript approval fingerprint matches v2-exact-context-crlf
+ok 2 - TypeScript approval fingerprint matches v2-exact-context-crlf
+  ---
+  duration_ms: 9.1784
+  type: 'test'
+  ...
+# Subtest: U05 request emits a scoped denial without changing its error or replaying
+ok 3 - U05 request emits a scoped denial without changing its error or replaying
+  ---
+  duration_ms: 62.2131
+  type: 'test'
+  ...
+# Subtest: U05 requestContent emits a scoped denial without changing its error or replaying
+ok 4 - U05 requestContent emits a scoped denial without changing its error or replaying
+  ---
+  duration_ms: 1.2496
+  type: 'test'
+  ...
+# Subtest: U05 observer only requests membership checks for workspace-scoped 403/404
+ok 5 - U05 observer only requests membership checks for workspace-scoped 403/404
+  ---
+  duration_ms: 34.0834
+  type: 'test'
+  ...
+# Subtest: U05 an already aborted response cannot trigger a current access check
+ok 6 - U05 an already aborted response cannot trigger a current access check
+  ---
+  duration_ms: 0.7287
+  type: 'test'
+  ...
+# Subtest: U13 actual callback render during initializing is status, never configuration alert
+ok 7 - U13 actual callback render during initializing is status, never configuration alert
+  ---
+  duration_ms: 16.1509
+  type: 'test'
+  ...
+# Subtest: B02 confirmation is stable for row ordering but binds every material field
+ok 8 - B02 confirmation is stable for row ordering but binds every material field
+  ---
+  duration_ms: 16.2818
+  type: 'test'
+  ...
+# Subtest: B02 snapshot confirmation binds snapshot identity and normalized exclusions
+ok 9 - B02 snapshot confirmation binds snapshot identity and normalized exclusions
+  ---
+  duration_ms: 0.6568
+  type: 'test'
+  ...
+# Subtest: B03 frozen payload preserves confirmed rows and trimmed audit reason
+ok 10 - B03 frozen payload preserves confirmed rows and trimmed audit reason
+  ---
+  duration_ms: 40.622
+  type: 'test'
+  ...
+# Subtest: B16 unknown assignment survives route remount and token renewal with the same key
+ok 11 - B16 unknown assignment survives route remount and token renewal with the same key
+  ---
+  duration_ms: 2.5333
+  type: 'test'
+  ...
+# Subtest: B16 an unresolved assignment cannot be replaced with a materially different intent
+ok 12 - B16 an unresolved assignment cannot be replaced with a materially different intent
+  ---
+  duration_ms: 0.6266
+  type: 'test'
+  ...
+# Subtest: B15 pending body is immutable and retry/token renewal uses same frozen body/key
+ok 13 - B15 pending body is immutable and retry/token renewal uses same frozen body/key
+  ---
+  duration_ms: 33.3204
+  type: 'test'
+  ...
+# Subtest: B16 A-B-A keeps actor intent while stale response is cancelled; other actor/scope are independent
+ok 14 - B16 A-B-A keeps actor intent while stale response is cancelled; other actor/scope are independent
+  ---
+  duration_ms: 16.7005
+  type: 'test'
+  ...
+# Subtest: B15 execution binds exact manifest/version/digest and retains key on unknown acceptance
+ok 15 - B15 execution binds exact manifest/version/digest and retains key on unknown acceptance
+  ---
+  duration_ms: 21.2013
+  type: 'test'
+  ...
+# Subtest: D03 Unicode code-point offsets retain emoji, CRLF, Chinese and unmodified text
+ok 16 - D03 Unicode code-point offsets retain emoji, CRLF, Chinese and unmodified text
+  ---
+  duration_ms: 1.2948
+  type: 'test'
+  ...
+# Subtest: D03 split code-point ranges reclassify both pieces without destroying text
+ok 17 - D03 split code-point ranges reclassify both pieces without destroying text
+  ---
+  duration_ms: 2.4195
+  type: 'test'
+  ...
+# Subtest: D02 save has the required transition order
+ok 18 - D02 save has the required transition order
+  ---
+  duration_ms: 2.9222
+  type: 'test'
+  ...
+# Subtest: D02 discard has the required transition order
+ok 19 - D02 discard has the required transition order
+  ---
+  duration_ms: 0.2501
+  type: 'test'
+  ...
+# Subtest: D02 cancel has the required transition order
+ok 20 - D02 cancel has the required transition order
+  ---
+  duration_ms: 0.2757
+  type: 'test'
+  ...
+# Subtest: D02 rejected save 412 cannot proceed
+ok 21 - D02 rejected save 412 cannot proceed
+  ---
+  duration_ms: 1.2514
+  type: 'test'
+  ...
+# Subtest: D02 rejected save 503 cannot proceed
+ok 22 - D02 rejected save 503 cannot proceed
+  ---
+  duration_ms: 0.322
+  type: 'test'
+  ...
+# Subtest: D02 clean transition does not prompt or write
+ok 23 - D02 clean transition does not prompt or write
+  ---
+  duration_ms: 0.2974
+  type: 'test'
+  ...
+# Subtest: D02 asynchronous Save completes before proceeding
+ok 24 - D02 asynchronous Save completes before proceeding
+  ---
+  duration_ms: 5.808
+  type: 'test'
+  ...
+# Subtest: U15 project failed count and paged list preserve identical canonical filter
+ok 25 - U15 project failed count and paged list preserve identical canonical filter
+  ---
+  duration_ms: 5.2119
+  type: 'test'
+  ...
+# Subtest: U15 explicit workspace omits project, deep link retains selected scope and status
+ok 26 - U15 explicit workspace omits project, deep link retains selected scope and status
+  ---
+  duration_ms: 0.8042
+  type: 'test'
+  ...
+# Subtest: U15 invalid URL status cannot introduce unsupported server filter; paging stays bounded
+ok 27 - U15 invalid URL status cannot introduce unsupported server filter; paging stays bounded
+  ---
+  duration_ms: 0.547
+  type: 'test'
+  ...
+# Subtest: U06 generated member operation carries literal search and bounded page query
+ok 28 - U06 generated member operation carries literal search and bounded page query
+  ---
+  duration_ms: 1.9241
+  type: 'test'
+  ...
+# Subtest: S06 generated eligible lookup and scope context reject foreign and A-B-A responses
+ok 29 - S06 generated eligible lookup and scope context reject foreign and A-B-A responses
+  ---
+  duration_ms: 1.1392
+  type: 'test'
+  ...
+# Subtest: Q09 latest101 uses only head1/tail1 generated reads, never downloads all history
+ok 30 - Q09 latest101 uses only head1/tail1 generated reads, never downloads all history
+  ---
+  duration_ms: 2.964
+  type: 'test'
+  ...
+# Subtest: Q09 empty and single ICP use one read; malformed/foreign pages fail closed
+ok 31 - Q09 empty and single ICP use one read; malformed/foreign pages fail closed
+  ---
+  duration_ms: 1.422
+  type: 'test'
+  ...
+# Subtest: Q09 concurrent appended history is unavailable rather than a falsely latest profile
+ok 32 - Q09 concurrent appended history is unavailable rather than a falsely latest profile
+  ---
+  duration_ms: 0.3922
+  type: 'test'
+  ...
+# Subtest: Q09 A-B-A rejects a late metadata response and token renewal alone keeps the context
+ok 33 - Q09 A-B-A rejects a late metadata response and token renewal alone keeps the context
+  ---
+  duration_ms: 0.9352
+  type: 'test'
+  ...
+# Subtest: B05 token renewal and route remount retain lost-response key; double start shares work
+ok 34 - B05 token renewal and route remount retain lost-response key; double start shares work
+  ---
+  duration_ms: 30.1383
+  type: 'test'
+  ...
+# Subtest: B06 full normalized payload and actor/scope define intent; generation and key order do not
+ok 35 - B06 full normalized payload and actor/scope define intent; generation and key order do not
+  ---
+  duration_ms: 1.7689
+  type: 'test'
+  ...
+# Subtest: B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent
+ok 36 - B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent
+  ---
+  duration_ms: 6.6006
+  type: 'test'
+  ...
+# Subtest: built UI fixture refuses inherited databases, credentials and nonfixture API targets
+ok 37 - built UI fixture refuses inherited databases, credentials and nonfixture API targets
+  ---
+  duration_ms: 1.4162
+  type: 'test'
+  ...
+# Subtest: built UI static assets cannot escape their emitted public directory
+ok 38 - built UI static assets cannot escape their emitted public directory
+  ---
+  duration_ms: 0.5609
+  type: 'test'
+  ...
+# Subtest: local acceptance rejects shared targets, preview activation and inherited credentials
+ok 39 - local acceptance rejects shared targets, preview activation and inherited credentials
+  ---
+  duration_ms: 1.5695
+  type: 'test'
+  ...
+# Subtest: acceptance counts actual executed cases and fails closed on empty, skipped or failed reports
+ok 40 - acceptance counts actual executed cases and fails closed on empty, skipped or failed reports
+  ---
+  duration_ms: 1.6481
+  type: 'test'
+  ...
+# Subtest: a new acceptance attempt invalidates old success and old JUnit before any command
+ok 41 - a new acceptance attempt invalidates old success and old JUnit before any command
+  ---
+  duration_ms: 64.5068
+  type: 'test'
+  ...
+# Subtest: CF00 reports measured local feasibility separately from hosted Vercel evidence
+ok 42 - CF00 reports measured local feasibility separately from hosted Vercel evidence
+  ---
+  duration_ms: 4.208
+  type: 'test'
+  ...
+# Subtest: native API budget applies to the resolved Python entrypoint inside its service
+ok 43 - native API budget applies to the resolved Python entrypoint inside its service
+  ---
+  duration_ms: 2.1504
+  type: 'test'
+  ...
+# Subtest: the actual emitted Nitro gateway carries the ninety-second budget
+not ok 44 - the actual emitted Nitro gateway carries the ninety-second budget
+  ---
+  duration_ms: 0.4207
+  type: 'test'
+  location: 'C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\tests\\deployment\\cloudflare-release-config.test.mjs:10:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, open 'C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\.vercel\\output\\functions\\__server.func\\.vc-config.json'"
+  code: 'ENOENT'
+  stack: |-
+    readFileSync (node:fs:441:20)
+    TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/deployment/cloudflare-release-config.test.mjs:11:27)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1325:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+    Test.postRun (node:internal/test_runner/test:1465:19)
+    Test.run (node:internal/test_runner/test:1390:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+  ...
+# Subtest: the isolated preview controller has distinct private resources and execution off
+ok 45 - the isolated preview controller has distinct private resources and execution off
+  ---
+  duration_ms: 1.5378
+  type: 'test'
+  ...
+# Subtest: every disposable-API Playwright configuration actually removes its owned container and marker
+    # Subtest: playwright.admin.config.ts
+    not ok 1 - playwright.admin.config.ts
+      ---
+      duration_ms: 45114.4507
+      type: 'test'
+      location: 'C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\tests\\e2e-fixture-cleanup.test.mjs:82:13'
+      failureType: 'testCodeFailure'
+      error: |-
+        docker run: 
+        
+        null !== 0
+        
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected: 0
+      actual: ~
+      operator: 'strictEqual'
+      stack: |-
+        docker (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:20:10)
+        sentinel (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:30:3)
+        TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:87:9)
+        async Test.run (node:internal/test_runner/test:1332:7)
+        async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:82:5)
+        async Test.run (node:internal/test_runner/test:1332:7)
+        async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+      ...
+    # Subtest: playwright.approval.config.ts
+    ok 2 - playwright.approval.config.ts
+      ---
+      duration_ms: 50965.3121
+      type: 'test'
+      ...
+    # Subtest: playwright.audit-fixes.config.ts
+    ok 3 - playwright.audit-fixes.config.ts
+      ---
+      duration_ms: 7504.4507
+      type: 'test'
+      ...
+    # Subtest: playwright.bulk.config.ts
+    ok 4 - playwright.bulk.config.ts
+      ---
+      duration_ms: 12161.3914
+      type: 'test'
+      ...
+    # Subtest: playwright.buyer-management.config.ts
+    ok 5 - playwright.buyer-management.config.ts
+      ---
+      duration_ms: 4837.6925
+      type: 'test'
+      ...
+    # Subtest: playwright.buyer.config.ts
+    ok 6 - playwright.buyer.config.ts
+      ---
+      duration_ms: 5102.9446
+      type: 'test'
+      ...
+    # Subtest: playwright.config.ts
+    ok 7 - playwright.config.ts
+      ---
+      duration_ms: 7240.9295
+      type: 'test'
+      ...
+    # Subtest: playwright.confirm.config.ts
+    ok 8 - playwright.confirm.config.ts
+      ---
+      duration_ms: 5928.776
+      type: 'test'
+      ...
+    # Subtest: playwright.contact-job.config.ts
+    ok 9 - playwright.contact-job.config.ts
+      ---
+      duration_ms: 18366.5909
+      type: 'test'
+      ...
+    # Subtest: playwright.cors.config.ts
+    ok 10 - playwright.cors.config.ts
+      ---
+      duration_ms: 12890.6027
+      type: 'test'
+      ...
+    # Subtest: playwright.draft.config.ts
+    ok 11 - playwright.draft.config.ts
+      ---
+      duration_ms: 7946.2159
+      type: 'test'
+      ...
+    # Subtest: playwright.exports.config.ts
+    ok 12 - playwright.exports.config.ts
+      ---
+      duration_ms: 29171.6801
+      type: 'test'
+      ...
+    # Subtest: playwright.ingestion.config.ts
+    ok 13 - playwright.ingestion.config.ts
+      ---
+      duration_ms: 14891.4226
+      type: 'test'
+      ...
+    # Subtest: playwright.mvp-research.config.ts
+    ok 14 - playwright.mvp-research.config.ts
+      ---
+      duration_ms: 9095.4612
+      type: 'test'
+      ...
+    # Subtest: playwright.mvp.config.ts
+    not ok 15 - playwright.mvp.config.ts
+      ---
+      duration_ms: 46747.7606
+      type: 'test'
+      location: 'C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\tests\\e2e-fixture-cleanup.test.mjs:82:13'
+      failureType: 'testCodeFailure'
+      error: |-
+        The input did not match the regular expression /no such (object|container)/i. Input:
+        
+        ''
+        
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+      actual: ''
+      operator: 'match'
+      stack: |-
+        inspect (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:26:10)
+        removeOwned (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:35:15)
+        TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:92:20)
+        async Test.run (node:internal/test_runner/test:1332:7)
+        async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/e2e-fixture-cleanup.test.mjs:82:5)
+        async Test.run (node:internal/test_runner/test:1332:7)
+        async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+      ...
+    # Subtest: playwright.offer.config.ts
+    ok 16 - playwright.offer.config.ts
+      ---
+      duration_ms: 60008.3219
+      type: 'test'
+      ...
+    # Subtest: playwright.policy.config.ts
+    ok 17 - playwright.policy.config.ts
+      ---
+      duration_ms: 19368.1729
+      type: 'test'
+      ...
+    # Subtest: playwright.quote.config.ts
+    ok 18 - playwright.quote.config.ts
+      ---
+      duration_ms: 10886.0428
+      type: 'test'
+      ...
+    # Subtest: playwright.run.config.ts
+    ok 19 - playwright.run.config.ts
+      ---
+      duration_ms: 14865.3574
+      type: 'test'
+      ...
+    # Subtest: playwright.workbench.config.ts
+    ok 20 - playwright.workbench.config.ts
+      ---
+      duration_ms: 17811.1268
+      type: 'test'
+      ...
+    1..20
+not ok 46 - every disposable-API Playwright configuration actually removes its owned container and marker
+  ---
+  duration_ms: 401371.6713
+  type: 'test'
+  location: 'C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\tests\\e2e-fixture-cleanup.test.mjs:77:1'
+  failureType: 'subtestsFailed'
+  error: '2 subtests failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: configured audit teardown also removes its labelled UI sentinel and marker
+ok 47 - configured audit teardown also removes its labelled UI sentinel and marker
+  ---
+  duration_ms: 34728.8435
+  type: 'test'
+  ...
+# Subtest: configured audit teardown refuses a UI container whose owner label differs
+ok 48 - configured audit teardown refuses a UI container whose owner label differs
+  ---
+  duration_ms: 11195.6676
+  type: 'test'
+  ...
+# Subtest: configured database teardown refuses an unrecognized marker without deleting it
+ok 49 - configured database teardown refuses an unrecognized marker without deleting it
+  ---
+  duration_ms: 359.6513
+  type: 'test'
+  ...
+# Subtest: N00 built fixture is isolated from playwright.audit-fixes.config.ts
+ok 50 - N00 built fixture is isolated from playwright.audit-fixes.config.ts
+  ---
+  duration_ms: 3911.9796
+  type: 'test'
+  ...
+# Subtest: N00 built fixture is isolated from playwright.audit-regression.config.ts
+ok 51 - N00 built fixture is isolated from playwright.audit-regression.config.ts
+  ---
+  duration_ms: 2000.9529
+  type: 'test'
+  ...
+# Subtest: N00 dedicated config discovers all seven built-output cases
+ok 52 - N00 dedicated config discovers all seven built-output cases
+  ---
+  duration_ms: 1397.4076
+  type: 'test'
+  ...
+# Subtest: N00 counted config discovers the same seven cases with separate producer outputs
+ok 53 - N00 counted config discovers the same seven cases with separate producer outputs
+  ---
+  duration_ms: 1442.6573
+  type: 'test'
+  ...
+# Subtest: all N00 output profiles stay isolated from playwright.audit-fixes.config.ts
+ok 54 - all N00 output profiles stay isolated from playwright.audit-fixes.config.ts
+  ---
+  duration_ms: 1797.1685
+  type: 'test'
+  ...
+# Subtest: all N00 output profiles stay isolated from playwright.audit-regression.config.ts
+ok 55 - all N00 output profiles stay isolated from playwright.audit-regression.config.ts
+  ---
+  duration_ms: 2268.2404
+  type: 'test'
+  ...
+# Subtest: runtime flow config discovers five actual-output cases
+ok 56 - runtime flow config discovers five actual-output cases
+  ---
+  duration_ms: 1521.7938
+  type: 'test'
+  ...
+# Subtest: N00 rejects a non-owned upstream: https://auth.neon.tech/neondb/auth
+ok 57 - N00 rejects a non-owned upstream: https://auth.neon.tech/neondb/auth
+  ---
+  duration_ms: 5.1822
+  type: 'test'
+  ...
+# Subtest: N00 rejects a non-owned upstream: http://127.0.0.1.evil.test/auth
+ok 58 - N00 rejects a non-owned upstream: http://127.0.0.1.evil.test/auth
+  ---
+  duration_ms: 0.2396
+  type: 'test'
+  ...
+# Subtest: N00 rejects a non-owned upstream: http://user:password@localhost:44891/auth
+ok 59 - N00 rejects a non-owned upstream: http://user:password@localhost:44891/auth
+  ---
+  duration_ms: 0.2446
+  type: 'test'
+  ...
+# Subtest: N00 rejects a non-owned upstream: http://0.0.0.0:44891/auth
+ok 60 - N00 rejects a non-owned upstream: http://0.0.0.0:44891/auth
+  ---
+  duration_ms: 0.1253
+  type: 'test'
+  ...
+# Subtest: N00 accepts the loopback fixture base path
+ok 61 - N00 accepts the loopback fixture base path
+  ---
+  duration_ms: 0.267
+  type: 'test'
+  ...
+# Subtest: N00 source inventory rejects unsafe input: ../.env
+ok 62 - N00 source inventory rejects unsafe input: ../.env
+  ---
+  duration_ms: 0.3515
+  type: 'test'
+  ...
+# Subtest: N00 source inventory rejects unsafe input: a/../../secret
+ok 63 - N00 source inventory rejects unsafe input: a/../../secret
+  ---
+  duration_ms: 0.2057
+  type: 'test'
+  ...
+# Subtest: N00 source inventory rejects unsafe input: /secret
+ok 64 - N00 source inventory rejects unsafe input: /secret
+  ---
+  duration_ms: 0.1145
+  type: 'test'
+  ...
+# Subtest: N00 source inventory rejects unsafe input: C:/secret
+ok 65 - N00 source inventory rejects unsafe input: C:/secret
+  ---
+  duration_ms: 0.1565
+  type: 'test'
+  ...
+# Subtest: N00 source inventory rejects unsafe input: a/.env.production
+ok 66 - N00 source inventory rejects unsafe input: a/.env.production
+  ---
+  duration_ms: 0.2499
+  type: 'test'
+  ...
+# Subtest: N00 source inventory rejects unsafe input: a\\.env.local
+ok 67 - N00 source inventory rejects unsafe input: a\\.env.local
+  ---
+  duration_ms: 0.1748
+  type: 'test'
+  ...
+# Subtest: N00 source inventory rejects unsafe input: node_modules/secret
+ok 68 - N00 source inventory rejects unsafe input: node_modules/secret
+  ---
+  duration_ms: 0.1255
+  type: 'test'
+  ...
+# Subtest: N00 source inventory rejects unsafe input: test-results/secret
+ok 69 - N00 source inventory rejects unsafe input: test-results/secret
+  ---
+  duration_ms: 0.084
+  type: 'test'
+  ...
+# Subtest: N00 source inventory rejects unsafe input: app/../secret
+ok 70 - N00 source inventory rejects unsafe input: app/../secret
+  ---
+  duration_ms: 0.1298
+  type: 'test'
+  ...
+# Subtest: N00 source inventory accepts a source file
+ok 71 - N00 source inventory accepts a source file
+  ---
+  duration_ms: 0.1596
+  type: 'test'
+  ...
+# Subtest: N00 build includes BuyerOS frontend services and generated types
+ok 72 - N00 build includes BuyerOS frontend services and generated types
+  ---
+  duration_ms: 0.6356
+  type: 'test'
+  ...
+# Subtest: N00 build excludes Python/services and historical evidence
+ok 73 - N00 build excludes Python/services and historical evidence
+  ---
+  duration_ms: 0.1278
+  type: 'test'
+  ...
+# Subtest: N00 child env excludes inherited DB/Auth/provider variables
+ok 74 - N00 child env excludes inherited DB/Auth/provider variables
+  ---
+  duration_ms: 0.2126
+  type: 'test'
+  ...
+# Subtest: N00 cache seed requires matching declared owner
+ok 75 - N00 cache seed requires matching declared owner
+  ---
+  duration_ms: 0.3821
+  type: 'test'
+  ...
+# Subtest: N00 emitted static assets stay within the output static directory
+ok 76 - N00 emitted static assets stay within the output static directory
+  ---
+  duration_ms: 0.3791
+  type: 'test'
+  ...
+# Subtest: N00 registers Vinext public fetch entry as the Nitro RSC service without changing production config
+ok 77 - N00 registers Vinext public fetch entry as the Nitro RSC service without changing production config
+  ---
+  duration_ms: 0.4873
+  type: 'test'
+  ...
+# Subtest: N00 storage permits only canonical locale prefs and refuses tokens or credential fields
+ok 78 - N00 storage permits only canonical locale prefs and refuses tokens or credential fields
+  ---
+  duration_ms: 0.3441
+  type: 'test'
+  ...
+# Subtest: proxy refuses arbitrary URLs, unowned servers and unbound journals before any request
+ok 79 - proxy refuses arbitrary URLs, unowned servers and unbound journals before any request
+  ---
+  duration_ms: 92.0891
+  type: 'test'
+  ...
+# Subtest: HTTP reservation is durable and pending before the owned backend receives the request
+ok 80 - HTTP reservation is durable and pending before the owned backend receives the request
+  ---
+  duration_ms: 105.5002
+  type: 'test'
+  ...
+# Subtest: SDK origin, session/challenge cookies and JWT headers survive relay without entering evidence
+ok 81 - SDK origin, session/challenge cookies and JWT headers survive relay without entering evidence
+  ---
+  duration_ms: 66.3362
+  type: 'test'
+  ...
+# Subtest: approved local callback302 is preserved manually, and an external redirect is blocked
+ok 82 - approved local callback302 is preserved manually, and an external redirect is blocked
+  ---
+  duration_ms: 97.2487
+  type: 'test'
+  ...
+# Subtest: committed POST with a lost response is not replayed after proxy and journal restart
+ok 83 - committed POST with a lost response is not replayed after proxy and journal restart
+  ---
+  duration_ms: 136.4938
+  type: 'test'
+  ...
+# Subtest: budget exhaustion refuses dispatch and keeps cleanup reserve after restart
+ok 84 - budget exhaustion refuses dispatch and keeps cleanup reserve after restart
+  ---
+  duration_ms: 2162.177
+  type: 'test'
+  ...
+# Subtest: expired target and over-size body fail closed without dispatching upstream
+ok 85 - expired target and over-size body fail closed without dispatching upstream
+  ---
+  duration_ms: 125.1644
+  type: 'test'
+  ...
+# Subtest: POST server500 retains an unknown write and timeout is bounded without automatic retry
+ok 86 - POST server500 retains an unknown write and timeout is bounded without automatic retry
+  ---
+  duration_ms: 638.9226
+  type: 'test'
+  ...
+# Subtest: read-only fixture budget inspection exposes counts without auth traffic or credential data
+ok 87 - read-only fixture budget inspection exposes counts without auth traffic or credential data
+  ---
+  duration_ms: 279.0977
+  type: 'test'
+  ...
+# Subtest: concurrent identical fixture POSTs share the in-flight barrier before upstream acceptance is known
+ok 88 - concurrent identical fixture POSTs share the in-flight barrier before upstream acceptance is known
+  ---
+  duration_ms: 319.3863
+  type: 'test'
+  ...
+# Subtest: fixture cleanup control requires the exact local owner nonce and never forwards to backend
+ok 89 - fixture cleanup control requires the exact local owner nonce and never forwards to backend
+  ---
+  duration_ms: 94.2193
+  type: 'test'
+  ...
+# Subtest: all SDK/browser/CLI physical hops are durably reserved before the backend receives them
+ok 90 - all SDK/browser/CLI physical hops are durably reserved before the backend receives them
+  ---
+  duration_ms: 319.0225
+  type: 'test'
+  ...
+# Subtest: an unowned server, real target or unknown caller/path is refused before dispatch
+ok 91 - an unowned server, real target or unknown caller/path is refused before dispatch
+  ---
+  duration_ms: 54.2741
+  type: 'test'
+  ...
+# Subtest: redirects remain manual and each explicitly followed hop consumes another reservation
+ok 92 - redirects remain manual and each explicitly followed hop consumes another reservation
+  ---
+  duration_ms: 77.1767
+  type: 'test'
+  ...
+# Subtest: a foreign redirect cannot cause an uncounted request
+ok 93 - a foreign redirect cannot cause an uncounted request
+  ---
+  duration_ms: 68.5364
+  type: 'test'
+  ...
+# Subtest: commit with lost response is held across channel changes and journal restart
+ok 94 - commit with lost response is held across channel changes and journal restart
+  ---
+  duration_ms: 79.4961
+  type: 'test'
+  ...
+# Subtest: concurrent identical writes cannot dispatch twice
+ok 95 - concurrent identical writes cannot dispatch twice
+  ---
+  duration_ms: 138.5345
+  type: 'test'
+  ...
+# Subtest: the 180-check stop retains 20 cleanup/reconciliation reservations across restart
+ok 96 - the 180-check stop retains 20 cleanup/reconciliation reservations across restart
+  ---
+  duration_ms: 9756.4564
+  type: 'test'
+  ...
+# Subtest: TTL refuses new auth but allows exact cleanup readback after expiry
+ok 97 - TTL refuses new auth but allows exact cleanup readback after expiry
+  ---
+  duration_ms: 106.3209
+  type: 'test'
+  ...
+# Subtest: bodies and response bytes are bounded without returning or persisting secrets
+ok 98 - bodies and response bytes are bounded without returning or persisting secrets
+  ---
+  duration_ms: 129.5984
+  type: 'test'
+  ...
+# Subtest: receipt failure preserves pending reservation and fails closed after restart
+ok 99 - receipt failure preserves pending reservation and fails closed after restart
+  ---
+  duration_ms: 111.0392
+  type: 'test'
+  ...
+# Subtest: official pinned SDK token request crosses the same durable gateway once
+ok 100 - official pinned SDK token request crosses the same durable gateway once
+  ---
+  duration_ms: 167.69
+  type: 'test'
+  ...
+# Subtest: fixed Node CLI helper uses the owned gateway and strips inherited credentials
+ok 101 - fixed Node CLI helper uses the owned gateway and strips inherited credentials
+  ---
+  duration_ms: 418.8711
+  type: 'test'
+  ...
+# Subtest: cleanup verifies exact ownership and absence after each deletion in identity/auth/project order
+ok 102 - cleanup verifies exact ownership and absence after each deletion in identity/auth/project order
+  ---
+  duration_ms: 1487.3828
+  type: 'test'
+  ...
+# Subtest: unknown deletion never blindly retries; fresh absence lets restarted cleanup continue
+ok 103 - unknown deletion never blindly retries; fresh absence lets restarted cleanup continue
+  ---
+  duration_ms: 3175.2876
+  type: 'test'
+  ...
+# Subtest: unknown deletion still present blocks every later dependent deletion and retry
+ok 104 - unknown deletion still present blocks every later dependent deletion and retry
+  ---
+  duration_ms: 1092.4294
+  type: 'test'
+  ...
+# Subtest: mismatched provider readback prevents every deletion
+ok 105 - mismatched provider readback prevents every deletion
+  ---
+  duration_ms: 236.6365
+  type: 'test'
+  ...
+# Subtest: cleanup after TTL still counts every readback/deletion and never touches an unbound identity
+ok 106 - cleanup after TTL still counts every readback/deletion and never touches an unbound identity
+  ---
+  duration_ms: 1109.4155
+  type: 'test'
+  ...
+# Subtest: cleanup refuses an injected transport and a different journal even with matching-looking metadata
+ok 107 - cleanup refuses an injected transport and a different journal even with matching-looking metadata
+  ---
+  duration_ms: 65.2205
+  type: 'test'
+  ...
+# Subtest: wrong gateway nonce and cross-origin writes cannot consume provider budget
+ok 108 - wrong gateway nonce and cross-origin writes cannot consume provider budget
+  ---
+  duration_ms: 79.1525
+  type: 'test'
+  ...
+# Subtest: expired or mismatched existence receipt blocks cleanup before any deletion
+ok 109 - expired or mismatched existence receipt blocks cleanup before any deletion
+  ---
+  duration_ms: 144.9443
+  type: 'test'
+  ...
+# Subtest: CLI refuses an absent or unowned gateway before spawning a subprocess
+ok 110 - CLI refuses an absent or unowned gateway before spawning a subprocess
+  ---
+  duration_ms: 0.4517
+  type: 'test'
+  ...
+# Subtest: bridge forwards bearer once to exact owned diagnostic and returns subject without token
+ok 111 - bridge forwards bearer once to exact owned diagnostic and returns subject without token
+  ---
+  duration_ms: 48.6719
+  type: 'test'
+  ...
+# Subtest: missing owner config, external endpoint and different fingerprint refuse before HTTP
+ok 112 - missing owner config, external endpoint and different fingerprint refuse before HTTP
+  ---
+  duration_ms: 1.8458
+  type: 'test'
+  ...
+# Subtest: foreign or missing Origin and invalid bearer refuse before HTTP
+ok 113 - foreign or missing Origin and invalid bearer refuse before HTTP
+  ---
+  duration_ms: 1.4171
+  type: 'test'
+  ...
+# Subtest: API rejection stays 401 and unknown API result is not retried or exposed
+ok 114 - API rejection stays 401 and unknown API result is not retried or exposed
+  ---
+  duration_ms: 2.1143
+  type: 'test'
+  ...
+# Subtest: mismatched response ownership and malformed response fail closed
+ok 115 - mismatched response ownership and malformed response fail closed
+  ---
+  duration_ms: 1.2909
+  type: 'test'
+  ...
+# Subtest: network failure cannot expose exception data or trigger a retry
+ok 116 - network failure cannot expose exception data or trigger a retry
+  ---
+  duration_ms: 0.7454
+  type: 'test'
+  ...
+# Subtest: browser receipt must match the rendered target and session subject, and cannot claim live verification
+ok 117 - browser receipt must match the rendered target and session subject, and cannot claim live verification
+  ---
+  duration_ms: 0.2952
+  type: 'test'
+  ...
+# Subtest: real target requires observed exact identifiers and explicit Ed25519 trust
+ok 118 - real target requires observed exact identifiers and explicit Ed25519 trust
+  ---
+  duration_ms: 4.2839
+  type: 'test'
+  ...
+# Subtest: template has null target and trust values and check denies it without a network call
+ok 119 - template has null target and trust values and check denies it without a network call
+  ---
+  duration_ms: 141.6094
+  type: 'test'
+  ...
+# Subtest: real preflight denies production project
+ok 120 - real preflight denies production project
+  ---
+  duration_ms: 0.5285
+  type: 'test'
+  ...
+# Subtest: real preflight denies existing Cloudflare preview
+ok 121 - real preflight denies existing Cloudflare preview
+  ---
+  duration_ms: 0.1873
+  type: 'test'
+  ...
+# Subtest: real preflight denies different owner
+ok 122 - real preflight denies different owner
+  ---
+  duration_ms: 0.1957
+  type: 'test'
+  ...
+# Subtest: real preflight denies cloned data
+ok 123 - real preflight denies cloned data
+  ---
+  duration_ms: 0.1868
+  type: 'test'
+  ...
+# Subtest: real preflight denies unmatched branch readback
+ok 124 - real preflight denies unmatched branch readback
+  ---
+  duration_ms: 0.3032
+  type: 'test'
+  ...
+# Subtest: real preflight denies missing audience
+ok 125 - real preflight denies missing audience
+  ---
+  duration_ms: 0.2831
+  type: 'test'
+  ...
+# Subtest: real preflight denies Auth0 RSA algorithm
+ok 126 - real preflight denies Auth0 RSA algorithm
+  ---
+  duration_ms: 0.3394
+  type: 'test'
+  ...
+# Subtest: real preflight denies wrong key curve
+ok 127 - real preflight denies wrong key curve
+  ---
+  duration_ms: 0.5072
+  type: 'test'
+  ...
+# Subtest: real preflight denies email enabled
+ok 128 - real preflight denies email enabled
+  ---
+  duration_ms: 0.2135
+  type: 'test'
+  ...
+# Subtest: real preflight denies email registration
+ok 129 - real preflight denies email registration
+  ---
+  duration_ms: 0.2019
+  type: 'test'
+  ...
+# Subtest: real preflight denies email hook
+ok 130 - real preflight denies email hook
+  ---
+  duration_ms: 0.1395
+  type: 'test'
+  ...
+# Subtest: real preflight denies paid plan
+ok 131 - real preflight denies paid plan
+  ---
+  duration_ms: 0.1224
+  type: 'test'
+  ...
+# Subtest: real preflight denies wildcard trusted domain
+ok 132 - real preflight denies wildcard trusted domain
+  ---
+  duration_ms: 0.1741
+  type: 'test'
+  ...
+# Subtest: real preflight denies unknown config or DSN
+ok 133 - real preflight denies unknown config or DSN
+  ---
+  duration_ms: 0.1159
+  type: 'test'
+  ...
+# Subtest: real preflight denies credential URL
+ok 134 - real preflight denies credential URL
+  ---
+  duration_ms: 0.159
+  type: 'test'
+  ...
+# Subtest: real preflight denies loopback masquerading as real
+ok 135 - real preflight denies loopback masquerading as real
+  ---
+  duration_ms: 0.1373
+  type: 'test'
+  ...
+# Subtest: real preflight denies unreviewed JWKS host
+ok 136 - real preflight denies unreviewed JWKS host
+  ---
+  duration_ms: 0.1817
+  type: 'test'
+  ...
+# Subtest: real preflight denies extended expiry
+ok 137 - real preflight denies extended expiry
+  ---
+  duration_ms: 0.1446
+  type: 'test'
+  ...
+# Subtest: real preflight denies future creation
+ok 138 - real preflight denies future creation
+  ---
+  duration_ms: 0.1388
+  type: 'test'
+  ...
+# Subtest: expiry blocks new runtime configuration while exact cleanup remains available
+ok 139 - expiry blocks new runtime configuration while exact cleanup remains available
+  ---
+  duration_ms: 32.5823
+  type: 'test'
+  ...
+# Subtest: runtime secrets and explicit trust never enter build env or inherit DB/provider config
+ok 140 - runtime secrets and explicit trust never enter build env or inherit DB/provider config
+  ---
+  duration_ms: 1.0337
+  type: 'test'
+  ...
+# Subtest: journal cannot be created without an explicit authorization reference or overwrite an earlier run
+ok 141 - journal cannot be created without an explicit authorization reference or overwrite an earlier run
+  ---
+  duration_ms: 9.3001
+  type: 'test'
+  ...
+# Subtest: setup before target creation and failed requests consume the same persistent budget
+ok 142 - setup before target creation and failed requests consume the same persistent budget
+  ---
+  duration_ms: 59.4572
+  type: 'test'
+  ...
+# Subtest: lost response is reserved before execution, survives restart and cannot be blindly retried
+ok 143 - lost response is reserved before execution, survives restart and cannot be blindly retried
+  ---
+  duration_ms: 42.6677
+  type: 'test'
+  ...
+# Subtest: 180 probes reserve 20 cleanup/reconcile checks and hard cap is 200 including errors
+ok 144 - 180 probes reserve 20 cleanup/reconcile checks and hard cap is 200 including errors
+  ---
+  duration_ms: 2078.4212
+  type: 'test'
+  ...
+# Subtest: target binding is immutable across process restarts and IDs cannot be repointed
+ok 145 - target binding is immutable across process restarts and IDs cannot be repointed
+  ---
+  duration_ms: 53.3616
+  type: 'test'
+  ...
+# Subtest: two build reservations are bounded to 20 minutes and remain consumed on restart
+ok 146 - two build reservations are bounded to 20 minutes and remain consumed on restart
+  ---
+  duration_ms: 30.2667
+  type: 'test'
+  ...
+# Subtest: cleanup needs fresh matching readback and may select only one bound test identity
+ok 147 - cleanup needs fresh matching readback and may select only one bound test identity
+  ---
+  duration_ms: 30.3469
+  type: 'test'
+  ...
+# Subtest: unknown outcomes and suspicious operation metadata do not leak bearer, query or credential data to journal
+ok 148 - unknown outcomes and suspicious operation metadata do not leak bearer, query or credential data to journal
+  ---
+  duration_ms: 21.5049
+  type: 'test'
+  ...
+# Subtest: a concurrent writer or corrupt journal fails closed without resetting counters
+ok 149 - a concurrent writer or corrupt journal fails closed without resetting counters
+  ---
+  duration_ms: 29.1461
+  type: 'test'
+  ...
+# Subtest: ledger tampering with limits or target fingerprint fails before cleanup or a new reservation
+ok 150 - ledger tampering with limits or target fingerprint fails before cleanup or a new reservation
+  ---
+  duration_ms: 19.1618
+  type: 'test'
+  ...
+# Subtest: persisted settled results need evidence and probe reservations cannot exceed the original expiry
+ok 151 - persisted settled results need evidence and probe reservations cannot exceed the original expiry
+  ---
+  duration_ms: 24.9214
+  type: 'test'
+  ...
+# Subtest: build deadline cannot exceed resource TTL and persisted build sequence cannot be forged
+ok 152 - build deadline cannot exceed resource TTL and persisted build sequence cannot be forged
+  ---
+  duration_ms: 24.0077
+  type: 'test'
+  ...
+# Subtest: an actual terminated Node process leaves its reservation consumed and the next process sees it
+ok 153 - an actual terminated Node process leaves its reservation consumed and the next process sees it
+  ---
+  duration_ms: 440.817
+  type: 'test'
+  ...
+# Subtest: runtime env carries the validated complete manifest, and build env drops it with all trust/secrets
+ok 154 - runtime env carries the validated complete manifest, and build env drops it with all trust/secrets
+  ---
+  duration_ms: 5.5983
+  type: 'test'
+  ...
+# Subtest: explicit issuer is kept independent from Auth base URL and actual SDK cookie options are returned
+ok 155 - explicit issuer is kept independent from Auth base URL and actual SDK cookie options are returned
+  ---
+  duration_ms: 1.5548
+  type: 'test'
+  ...
+# Subtest: runtime missing N00_REAL_TARGET_JSON refuses SDK construction without fallback
+ok 156 - runtime missing N00_REAL_TARGET_JSON refuses SDK construction without fallback
+  ---
+  duration_ms: 1.0234
+  type: 'test'
+  ...
+# Subtest: runtime missing N00_TARGET_FINGERPRINT refuses SDK construction without fallback
+ok 157 - runtime missing N00_TARGET_FINGERPRINT refuses SDK construction without fallback
+  ---
+  duration_ms: 0.4334
+  type: 'test'
+  ...
+# Subtest: runtime missing NEON_AUTH_BASE_URL refuses SDK construction without fallback
+ok 158 - runtime missing NEON_AUTH_BASE_URL refuses SDK construction without fallback
+  ---
+  duration_ms: 0.365
+  type: 'test'
+  ...
+# Subtest: runtime missing NEON_AUTH_COOKIE_SECRET refuses SDK construction without fallback
+ok 159 - runtime missing NEON_AUTH_COOKIE_SECRET refuses SDK construction without fallback
+  ---
+  duration_ms: 0.3721
+  type: 'test'
+  ...
+# Subtest: runtime missing N00_AUTH_ISSUER refuses SDK construction without fallback
+ok 160 - runtime missing N00_AUTH_ISSUER refuses SDK construction without fallback
+  ---
+  duration_ms: 0.3265
+  type: 'test'
+  ...
+# Subtest: runtime missing N00_AUTH_AUDIENCE refuses SDK construction without fallback
+ok 161 - runtime missing N00_AUTH_AUDIENCE refuses SDK construction without fallback
+  ---
+  duration_ms: 0.3693
+  type: 'test'
+  ...
+# Subtest: runtime missing N00_AUTH_JWKS_URL refuses SDK construction without fallback
+ok 162 - runtime missing N00_AUTH_JWKS_URL refuses SDK construction without fallback
+  ---
+  duration_ms: 0.4171
+  type: 'test'
+  ...
+# Subtest: runtime missing N00_AUTH_ALGORITHM refuses SDK construction without fallback
+ok 163 - runtime missing N00_AUTH_ALGORITHM refuses SDK construction without fallback
+  ---
+  duration_ms: 0.6136
+  type: 'test'
+  ...
+# Subtest: runtime drift NEON_AUTH_BASE_URL refuses initialization
+ok 164 - runtime drift NEON_AUTH_BASE_URL refuses initialization
+  ---
+  duration_ms: 0.7045
+  type: 'test'
+  ...
+# Subtest: runtime drift N00_AUTH_ISSUER refuses initialization
+ok 165 - runtime drift N00_AUTH_ISSUER refuses initialization
+  ---
+  duration_ms: 0.4514
+  type: 'test'
+  ...
+# Subtest: runtime drift N00_AUTH_AUDIENCE refuses initialization
+ok 166 - runtime drift N00_AUTH_AUDIENCE refuses initialization
+  ---
+  duration_ms: 9.4593
+  type: 'test'
+  ...
+# Subtest: runtime drift N00_AUTH_JWKS_URL refuses initialization
+ok 167 - runtime drift N00_AUTH_JWKS_URL refuses initialization
+  ---
+  duration_ms: 1.0424
+  type: 'test'
+  ...
+# Subtest: runtime drift N00_AUTH_ALGORITHM refuses initialization
+ok 168 - runtime drift N00_AUTH_ALGORITHM refuses initialization
+  ---
+  duration_ms: 0.3793
+  type: 'test'
+  ...
+# Subtest: runtime drift N00_TARGET_FINGERPRINT refuses initialization
+ok 169 - runtime drift N00_TARGET_FINGERPRINT refuses initialization
+  ---
+  duration_ms: 0.3937
+  type: 'test'
+  ...
+# Subtest: malformed manifest error cannot echo secret or input data
+ok 170 - malformed manifest error cannot echo secret or input data
+  ---
+  duration_ms: 0.4416
+  type: 'test'
+  ...
+# Subtest: oversize manifest refuses parsing rather than consuming an unbounded runtime input
+ok 171 - oversize manifest refuses parsing rather than consuming an unbounded runtime input
+  ---
+  duration_ms: 0.2929
+  type: 'test'
+  ...
+# Subtest: runtime reuses full target validation and rejects production IDs
+ok 172 - runtime reuses full target validation and rejects production IDs
+  ---
+  duration_ms: 0.3634
+  type: 'test'
+  ...
+# Subtest: module/runtime creation consumes no env or SDK initialization at build time
+ok 173 - module/runtime creation consumes no env or SDK initialization at build time
+  ---
+  duration_ms: 0.0946
+  type: 'test'
+  ...
+# Subtest: request initialization revalidates but caches one SDK instance for exact same context
+ok 174 - request initialization revalidates but caches one SDK instance for exact same context
+  ---
+  duration_ms: 0.6428
+  type: 'test'
+  ...
+# Subtest: cached SDK cannot bypass the two-hour target expiry
+ok 175 - cached SDK cannot bypass the two-hour target expiry
+  ---
+  duration_ms: 0.5641
+  type: 'test'
+  ...
+# Subtest: changed target cannot reuse or silently replace an already bound SDK context
+ok 176 - changed target cannot reuse or silently replace an already bound SDK context
+  ---
+  duration_ms: 1.3688
+  type: 'test'
+  ...
+# Subtest: changed cookie secret requires a new owned runtime rather than silent context replacement
+ok 177 - changed cookie secret requires a new owned runtime rather than silent context replacement
+  ---
+  duration_ms: 0.852
+  type: 'test'
+  ...
+# Subtest: fresher matching readback does not change the bound target/SDK intent
+ok 178 - fresher matching readback does not change the bound target/SDK intent
+  ---
+  duration_ms: 0.8072
+  type: 'test'
+  ...
+# Subtest: SDK constructor errors are redacted and cannot disclose runtime cookie secret
+ok 179 - SDK constructor errors are redacted and cannot disclose runtime cookie secret
+  ---
+  duration_ms: 0.5076
+  type: 'test'
+  ...
+# Subtest: runtime description contains only target/trust context and no cookie secret
+ok 180 - runtime description contains only target/trust context and no cookie secret
+  ---
+  duration_ms: 0.6893
+  type: 'test'
+  ...
+# Subtest: returned runtime config cannot be mutated to change the validated SDK/trust tuple
+ok 181 - returned runtime config cannot be mutated to change the validated SDK/trust tuple
+  ---
+  duration_ms: 0.5798
+  type: 'test'
+  ...
+# Subtest: separate build-environment Node process imports the runtime module without secret/init
+ok 182 - separate build-environment Node process imports the runtime module without secret/init
+  ---
+  duration_ms: 252.2014
+  type: 'test'
+  ...
+# Subtest: runtime consumer independently refuses an invalid cookie secret
+ok 183 - runtime consumer independently refuses an invalid cookie secret
+  ---
+  duration_ms: 1.33
+  type: 'test'
+  ...
+# Subtest: owned cleanup removes private configuration and keeps marker through a transient state failure
+ok 184 - owned cleanup removes private configuration and keeps marker through a transient state failure
+  ---
+  duration_ms: 47.3555
+  type: 'test'
+  ...
+# Subtest: cleanup rejects a mismatched owner before deleting configuration
+ok 185 - cleanup rejects a mismatched owner before deleting configuration
+  ---
+  duration_ms: 4.5399
+  type: 'test'
+  ...
+# Subtest: cleanup refuses an unreviewed entry before deleting owned configuration
+ok 186 - cleanup refuses an unreviewed entry before deleting owned configuration
+  ---
+  duration_ms: 6.0148
+  type: 'test'
+  ...
+# Subtest: cleanup deadline retains the owner while private configuration is removed
+ok 187 - cleanup deadline retains the owner while private configuration is removed
+  ---
+  duration_ms: 64.9145
+  type: 'test'
+  ...
+# Subtest: cleanup propagates non-transient IO errors without deleting ownership
+ok 188 - cleanup propagates non-transient IO errors without deleting ownership
+  ---
+  duration_ms: 9.4183
+  type: 'test'
+  ...
+# Subtest: cleanup rejects a root symlink and preserves its target
+ok 189 - cleanup rejects a root symlink and preserves its target
+  ---
+  duration_ms: 4.48
+  type: 'test'
+  ...
+# Subtest: runtime flow builds in a fresh area with shared strict runtime and separate diagnostic/fixture overlays
+ok 190 - runtime flow builds in a fresh area with shared strict runtime and separate diagnostic/fixture overlays
+  ---
+  duration_ms: 2.3239
+  type: 'test'
+  ...
+# Subtest: allowed SDK session/token/JWKS calls preserve method/body/cookies through the counted loopback URL
+ok 191 - allowed SDK session/token/JWKS calls preserve method/body/cookies through the counted loopback URL
+  ---
+  duration_ms: 37.8626
+  type: 'test'
+  ...
+# Subtest: fixture transport supports Request inputs without leaking a new endpoint
+ok 192 - fixture transport supports Request inputs without leaking a new endpoint
+  ---
+  duration_ms: 24.7977
+  type: 'test'
+  ...
+# Subtest: foreign origin, credentials, encoded path, unknown endpoint and loopback bypass never dispatch
+ok 193 - foreign origin, credentials, encoded path, unknown endpoint and loopback bypass never dispatch
+  ---
+  duration_ms: 2.4904
+  type: 'test'
+  ...
+# Subtest: transport cannot be installed for real targets or rebound to different fictional context
+ok 194 - transport cannot be installed for real targets or rebound to different fictional context
+  ---
+  duration_ms: 0.6842
+  type: 'test'
+  ...
+# Subtest: unknown upstream response is surfaced once without retry
+ok 195 - unknown upstream response is surfaced once without retry
+  ---
+  duration_ms: 1.131
+  type: 'test'
+  ...
+# Subtest: SDK POST redirect is returned to the caller and is never automatically followed
+ok 196 - SDK POST redirect is returned to the caller and is never automatically followed
+  ---
+  duration_ms: 0.7639
+  type: 'test'
+  ...
+# Subtest: owned diagnostic is the only additional loopback transport and requires its exact private owner nonce
+ok 197 - owned diagnostic is the only additional loopback transport and requires its exact private owner nonce
+  ---
+  duration_ms: 2.2958
+  type: 'test'
+  ...
+# Subtest: compatibility profile retains original output and source overlay
+ok 198 - compatibility profile retains original output and source overlay
+  ---
+  duration_ms: 1.9344
+  type: 'test'
+  ...
+# Subtest: runtime profile has distinct output and real-only plus probe scaffolding
+ok 199 - runtime profile has distinct output and real-only plus probe scaffolding
+  ---
+  duration_ms: 0.2542
+  type: 'test'
+  ...
+# Subtest: build profile refuses custom paths and unreviewed profiles
+ok 200 - build profile refuses custom paths and unreviewed profiles
+  ---
+  duration_ms: 0.5432
+  type: 'test'
+  ...
+# Subtest: Nitro runtime profile selects only its reviewed service entry
+ok 201 - Nitro runtime profile selects only its reviewed service entry
+  ---
+  duration_ms: 0.4238
+  type: 'test'
+  ...
+# Subtest: probe target accepts only explicit fictional IDs/hosts/audience
+ok 202 - probe target accepts only explicit fictional IDs/hosts/audience
+  ---
+  duration_ms: 0.5574
+  type: 'test'
+  ...
+# Subtest: probe refuses a real projectId
+ok 203 - probe refuses a real projectId
+  ---
+  duration_ms: 0.1972
+  type: 'test'
+  ...
+# Subtest: probe refuses a real branchId
+ok 204 - probe refuses a real branchId
+  ---
+  duration_ms: 0.1292
+  type: 'test'
+  ...
+# Subtest: probe refuses a real authId
+ok 205 - probe refuses a real authId
+  ---
+  duration_ms: 0.1167
+  type: 'test'
+  ...
+# Subtest: probe refuses external trust and base hosts or non-fictional audience
+ok 206 - probe refuses external trust and base hosts or non-fictional audience
+  ---
+  duration_ms: 0.4487
+  type: 'test'
+  ...
+# Subtest: probe fetch guard refuses every request before original transport dispatch
+ok 207 - probe fetch guard refuses every request before original transport dispatch
+  ---
+  duration_ms: 0.6755
+  type: 'test'
+  ...
+# node:internal/modules/esm/resolve:271
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\.vercel\\output\\functions\\__server.func\\index.mjs' imported from C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\tests\\vercel-render.test.mjs
+#     at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:865:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:992:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+#     at \#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+#     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+#     at \#resolve (node:internal/modules/esm/loader:683:17)
+#     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+#     at node:internal/modules/esm/loader:632:32
+#     at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/.vercel/output/functions/__server.func/index.mjs'
+# }
+# Node.js v24.18.0
+# Subtest: tests\\vercel-render.test.mjs
+not ok 28 - tests\\vercel-render.test.mjs
+  ---
+  duration_ms: 195.7978
+  type: 'test'
+  location: 'C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\tests\\vercel-render.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: Vercel exposes only the app and binds its API call to the internal API service
+ok 209 - Vercel exposes only the app and binds its API call to the internal API service
+  ---
+  duration_ms: 24.0363
+  type: 'test'
+  ...
+# Subtest: the app proxy forwards the bearer and original API path to the bound service
+ok 210 - the app proxy forwards the bearer and original API path to the bound service
+  ---
+  duration_ms: 96.5992
+  type: 'test'
+  ...
+# Subtest: the app proxy fails closed when the binding is absent
+ok 211 - the app proxy fails closed when the binding is absent
+  ---
+  duration_ms: 2.1912
+  type: 'test'
+  ...
+# Subtest: the app proxy streams writes and preserves API conflicts without forwarding cookies
+ok 212 - the app proxy streams writes and preserves API conflicts without forwarding cookies
+  ---
+  duration_ms: 5.5769
+  type: 'test'
+  ...
+# Subtest: FastAPI redirects stay on the public app path
+ok 213 - FastAPI redirects stay on the public app path
+  ---
+  duration_ms: 2.0454
+  type: 'test'
+  ...
+# Subtest: test_internal_headers_forward_only_on_allowlisted_paths
+ok 214 - test_internal_headers_forward_only_on_allowlisted_paths
+  ---
+  duration_ms: 63.6388
+  type: 'test'
+  ...
+1..214
+# tests 234
+# suites 0
+# pass 229
+# fail 5
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 523519.4485
