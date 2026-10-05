@@ -119,3 +119,11 @@ test('cleanup also stops at the hard total of two hundred physical requests',asy
  const f=await wire(t);for(let i=0;i<200;i++){const purpose=i<180?'auth':'reconcile';f.journal.reserveRequest(purpose,'earlier-'+i);f.journal.settleRequest('earlier-'+i,'accepted','historical-fixture.json');}
  await assert.rejects(run(f),/BUDGET/);assert.equal(f.model.hits.length,0);assert.equal(f.journal.snapshot().requests.length,200);
 });
+
+
+test('unknown identity removal stays held when only JSON whitespace or session headers change',async t=>{
+ const f=await wire(t,'reject-500'),request={channel:'sdk',method:'POST',path:'/fixture/auth/admin/remove-user',body:JSON.stringify({userId:f.identity.id}),headers:{cookie}};
+ assert.equal((await f.execution.dispatch(request)).outcome,'unknown');assert.equal(f.model.removes,1);
+ await assert.rejects(f.execution.dispatch({...request,body:JSON.stringify({userId:f.identity.id},null,2),headers:{cookie,'x-fixture-renewed-token':'fictional'}}),/HELD_INTENT/);
+ assert.equal(f.model.removes,1);assert.equal(f.journal.snapshot().requests.length,1);
+});

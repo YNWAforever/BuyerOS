@@ -26,7 +26,7 @@ export function createFixtureExecutionBoundary({backend,journal,now=Date.now,tim
   need(channels.has(channel)&&methods.has(method)&&typeof body==='string','REQUEST');need(Buffer.byteLength(body)<=BODY_LIMIT,'BODY_LIMIT');need(!safe.has(method)||body==='','REQUEST');
   need(typeof path==='string'&&path.startsWith('/fixture/')&&!path.includes('//')&&!path.includes('..'),'PATH');
   const url=new URL(path,origin);need(url.origin===origin&&!url.hash&&!/%|\\/.test(url.pathname)&&/^\/fixture\/(auth|control)\/[a-zA-Z0-9_/-]+$/.test(url.pathname),'PATH');
-  let purpose='auth';
+  let purpose='auth',intentBody=body;
   if(url.pathname.startsWith('/fixture/auth/admin/')){
    const identity=journal.snapshot().identity;need(identity?.id.startsWith('fictional-execution-')&&channel==='sdk','OWNED_IDENTITY');
    if(url.pathname==='/fixture/auth/admin/list-users'){
@@ -34,13 +34,13 @@ export function createFixtureExecutionBoundary({backend,journal,now=Date.now,tim
     need(method==='GET'&&[...url.searchParams].length===5&&Object.entries(expected).every(([key,value])=>url.searchParams.get(key)===value),'IDENTITY_LOOKUP');purpose='reconcile';
    }else if(url.pathname==='/fixture/auth/admin/remove-user'){
     let input;try{input=JSON.parse(body);}catch{throw new Error('N00_EXECUTION_OWNED_IDENTITY');}
-    need(method==='POST'&&!url.search&&input&&Object.keys(input).length===1&&input.userId===identity.id,'OWNED_IDENTITY');purpose='cleanup';
+    need(method==='POST'&&!url.search&&input&&Object.keys(input).length===1&&input.userId===identity.id,'OWNED_IDENTITY');purpose='cleanup';intentBody=JSON.stringify({userId:identity.id});
    }else throw new Error('N00_EXECUTION_ADMIN_REFUSED');
   }else {need(!url.search,'PATH');}
   if(path.startsWith('/fixture/control/')){purpose=method==='DELETE'?'cleanup':'reconcile';need(channel==='control'&&['GET','DELETE'].includes(method)&&body==='','CONTROL');
    if(path==='/fixture/control/target')need(method==='GET','CONTROL');else{const match=/^\/fixture\/control\/(identity|auth|project)\/([a-zA-Z0-9_-]+)$/.exec(path);need(match,'CONTROL');const state=journal.snapshot(),ids={identity:state.identity?.id,auth:target.authId,project:target.projectId};need(ids[match[1]]===match[2],'OWNED_RESOURCE');}
   }else need(channel!=='control','CONTROL');
-  return {channel,path,method,body,purpose,headers:new Headers(input.headers),intent:hash(target.fingerprint+'\n'+method+'\n'+path+'\n'+body)};
+  return {channel,path,method,body,purpose,headers:new Headers(input.headers),intent:hash(target.fingerprint+'\n'+method+'\n'+path+'\n'+intentBody)};
  }
  function held(intent){for(const item of journal.snapshot().requests){if(!item.operationId.startsWith('execution-http-')){if(['pending','unknown'].includes(item.outcome))return true;continue;}if(item.outcome==='pending')return true;try{const receipt=readReceipt(journal,item);if(!safe.has(receipt.method)&&receipt.intent_hash===intent)return true;}catch{return true;}}return false;}
  const execution={async dispatch(input){const value=validate(input);need(ownedAuthServerUrl(backend)===origin,'OWNED_BACKEND');need(journal.snapshot().target.fingerprint===target.fingerprint,'BOUND_TARGET');if(!safe.has(value.method))need(!held(value.intent),'HELD_INTENT');
