@@ -15,3 +15,6 @@ test('N00 counted config discovers the same seven cases with separate producer o
 
 for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regression.config.ts'])test(`all N00 output profiles stay isolated from ${config}`,()=>{const files=discovered(config);assert.ok(files.some(file=>file.endsWith('audit-auth-entry.spec.ts')));assert.equal(files.filter(file=>file.includes('audit-neon-')).length,0);});
 test('runtime flow config discovers all six actual-output cases including unknown sign-out',()=>{const files=discovered('playwright.neon-runtime-flow.config.ts');assert.equal(files.length,6);assert.ok(files.every(file=>file.endsWith('audit-neon-runtime-flow.spec.ts')));});
+
+
+test('execution config discovers the original three flows and both native browser guard cases',()=>{const files=discovered('playwright.neon-execution.config.ts');assert.equal(files.length,5);assert.ok(files.every(file=>file.endsWith('audit-neon-execution.spec.ts')));});
