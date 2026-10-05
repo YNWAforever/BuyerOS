@@ -65,3 +65,22 @@ def test_capabilities_never_become_ready_from_an_unverified_env_value(monkeypatc
     monkeypatch.setenv("BUYEROS_RESEARCH_PROVIDER_KEY", "fixture-only")
     page = capabilities_payload()
     assert next(x for x in page["items"] if x["name"] == "research")["status"] == "unconfigured"
+
+
+def test_capabilities_include_bounded_responsibility_and_next_action():
+    """Staff can identify the activation owner/action without exposing credentials or granting access."""
+    from datetime import datetime
+
+    page = capabilities_payload()
+    for item in page["items"]:
+        assert item["owner_role"] == "Release owner"
+        assert 1 <= len(item["owner_role"]) <= 80
+        assert 1 <= len(item["next_action"]) <= 512
+        assert datetime.fromisoformat(item["checked_at"]).tzinfo is not None
+        if item["name"] in {"mailbox", "crm"}:
+            assert item["status"] == "disabled"
+            assert item["next_action"] == "Keep delivery disabled. Use authorized exports and manual outcomes."
+        else:
+            assert item["status"] == "unconfigured"
+            assert item["next_action"] == "Select a provider and complete bounded verification before activation."
+    assert_contract_response("CapabilityPage", page)

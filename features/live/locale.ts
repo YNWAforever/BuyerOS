@@ -1,5 +1,16 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'Responsible role: {role}':'責任角色：{role}','Release owner':'發佈負責人',
+  'Review the current capability state before use.':'使用前請核對目前的能力狀態。',
+  'Next action':'下一步','Checked at':'檢查時間','Capability':'能力','Capability: {name}':'能力：{name}',
+  'Not configured':'尚未配置','Needs attention':'需要跟進','Disabled':'已停用','Unknown capability':'未確認能力',
+  'Live provider capabilities have not been verified.':'實際供應商能力尚未完成驗證。',
+  'Select a provider and complete bounded verification before activation.':'選定供應商並完成有界驗證後，才可批准啟用。',
+  'Keep delivery disabled. Use authorized exports and manual outcomes.':'保持外展發送停用。請使用已授權匯出及手動成果記錄。',
+  'Capability verification is unavailable. Keep this capability disabled and contact the release owner.':'能力驗證資料無法確認。請保持停用並聯絡發佈負責人。',
+  'Check worker and queue status, then refresh.':'檢查工作程序與佇列狀態，再重新整理。',
+  'Check the database connection and current workspace access, then refresh.':'檢查資料庫連線及目前工作區存取，再重新整理。',
+  'Loading capabilities…':'正在載入能力狀態…','Refresh service status':'重新整理服務狀態',
   'Owner assignment results':'負責人分派結果','Selected colleague (name unavailable)':'已選同事（未提供姓名）',
   'Staff-selected buyer':'職員已選買家',
   'The offer changed. This profile cannot be approved.':'產品資料已更改，不能批准此輪廓。','Offer revision':'產品資料版本','Reload profile':'重新載入輪廓',

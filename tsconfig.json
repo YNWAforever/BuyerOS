@@ -44,6 +44,8 @@
     "node_modules",
     "examples",
     "services/cloudflare-jobs",
-    "tests/integration/cloudflare-recovery.test.ts"
+    "tests/integration/cloudflare-recovery.test.ts",
+    "docs/buyeros/evidence",
+    "test-results"
   ]
 }

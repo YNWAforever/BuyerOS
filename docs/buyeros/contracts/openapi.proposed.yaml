@@ -11306,12 +11306,24 @@ components:
             type: string
         checked_at: *id004
         billable: *id016
+        owner_role:
+          type: string
+          minLength: 1
+          maxLength: 80
+          description: Operational responsibility, not a membership role or access grant. No named owner is inferred.
+        next_action:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Read-only guidance; it does not authorize provider activation or delivery.
       required:
       - name
       - status
       - reason_codes
       - checked_at
       - billable
+      - owner_role
+      - next_action
     Health:
       type: object
       additionalProperties: false

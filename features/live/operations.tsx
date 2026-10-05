@@ -9,17 +9,41 @@ import type {components} from '@/services/generated/buyeros-api';
 import {startJobPoller} from '@/services/live/job-poller';
 import {createOperationClient} from '@/services/live/operations';
 
-type Capability={name:string;status:string;reason_codes:string[];checked_at:string;billable:boolean};
-type Readiness={ready:boolean;database:string;queue:string;worker:string;checked_at:string};
+type Capability=components['schemas']['Capability'];
+type Readiness=components['schemas']['Readiness'];
 type Audit={id:string;action:string;entity_type:string;entity_id?:string;occurred_at:string;reason_code?:string;request_id?:string};
 type Page<T>={items:T[];offset:number;limit:number;total:number};
 type Job=components['schemas']['AsyncJob'];
 type Result=components['schemas']['BulkItemResult'];
 
+const capabilityNames=['research','contact_enrichment','draft_generation','mailbox','crm'];
+const capabilityStatuses:Record<Capability['status'],string>={unconfigured:'Not configured',blocked:'Blocked',ready:'Ready',degraded:'Needs attention',disabled:'Disabled'};
+const unknownAdvice='Capability verification is unavailable. Keep this capability disabled and contact the release owner.';
+function capabilityView(item:Capability){
+  const value=item&&typeof item==='object'?item:null;
+  const name=value&&capabilityNames.includes(value.name)?value.name:'Unknown capability';
+  const bounded=(text:unknown,max:number):text is string=>typeof text==='string'&&text.trim().length>0&&text.length<=max;
+  const valid=value&&name!=='Unknown capability'&&typeof value.status==='string'&&Object.hasOwn(capabilityStatuses,value.status)
+    &&bounded(value.owner_role,80)&&bounded(value.next_action,512)&&typeof value.billable==='boolean'
+    &&bounded(value.checked_at,80)&&Number.isFinite(Date.parse(value.checked_at))
+    &&Array.isArray(value.reason_codes)&&value.reason_codes.length<=20&&value.reason_codes.every(code=>bounded(code,120))
+    &&(value.status!=='ready'||value.reason_codes.length===0);
+  return {name,status:valid?capabilityStatuses[value.status]:'Unknown',owner:valid?value.owner_role:'Release owner',
+    nextAction:valid?value.next_action:unknownAdvice,checkedAt:valid?value.checked_at:null,
+    reason:valid?(value.reason_codes.includes('live_providers_not_activated')?'Live provider capabilities have not been verified.':'Review the current capability state before use.'):unknownAdvice,
+    codes:valid?value.reason_codes:[]};
+}
+
 export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{workspace:string;project:string|null;isAdmin:boolean;onOpenBuyers:()=>void;t:(value:string)=>string}){
   const {client,session}=useWorkspaceSession();
   const scope=useSessionSnapshot(),searchParams=useSearchParams();
-  const [readiness,setReadiness]=useState<Readiness|null>(null),[capabilities,setCapabilities]=useState<Capability[]>([]);
+  const [readinessState,setReadiness]=useState<{key:string;value?:Readiness;error?:string}>();
+  const [capabilityState,setCapabilities]=useState<{key:string;items?:Capability[];error?:string}>();
+  const [statusReload,setStatusReload]=useState(0);
+  const readiness=readinessState?.key===scope.identity?readinessState.value:undefined;
+  const readinessError=readinessState?.key===scope.identity?readinessState.error:undefined;
+  const capabilities=capabilityState?.key===scope.identity?capabilityState.items:undefined;
+  const capabilityError=capabilityState?.key===scope.identity?capabilityState.error:undefined;
   const [jobId,setJobId]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('bulk_job')||'');
   const [job,setJob]=useState<Job|null>(null);
   const [statusChoice,setStatusChoice]=useState<{value:ReturnType<typeof readJobStatus>}>();
@@ -44,16 +68,18 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
   const [failedState,setFailed]=useState<{key:string;count:number|'unavailable'}>();
   const failedCount=failedState?.key===scopeKey?failedState.count:null;
   useEffect(()=>{
-    const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
-    const signal=AbortSignal.any([own.signal,session.controller().signal]);
-    void client.request<Page<Capability>>({path:`/v1/workspaces/${workspace}/capabilities`,token,scope:identity,signal}).then(value=>{
-      if(session.isCurrent(identity)&&!own.signal.aborted)setCapabilities(value.items);
-    }).catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted)setError(describeLiveError(e));});
-    if(isAdmin)void client.request<Readiness>({path:`/v1/workspaces/${workspace}/readiness`,token,scope:identity,signal}).then(value=>{
-      if(session.isCurrent(identity)&&!own.signal.aborted)setReadiness(value);
-    }).catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted)setError(describeLiveError(e));});
+    if(!session.token()||session.current().workspace!==workspace)return;
+    const own=new AbortController(),basis=session.captureWriteContext();
+    const ctx={...basis,signal:AbortSignal.any([own.signal,basis.signal]),getToken:async()=>session.token()||'',isCurrent:()=>session.isCurrent(basis.identity)&&!own.signal.aborted};
+    void createOperationClient(client).requestOperation('getCapabilities',{path:{workspace_id:workspace}},ctx).then(value=>{
+      if(!Array.isArray(value.items))throw new Error('Invalid capability page');
+      if(ctx.isCurrent())setCapabilities({key:basis.identity,items:value.items});
+    }).catch(e=>{if(ctx.isCurrent()&&!(e instanceof LiveCancelled))setCapabilities({key:basis.identity,error:describeLiveError(e)});});
+    if(isAdmin)void createOperationClient(client).requestOperation('getReadiness',{path:{workspace_id:workspace}},ctx).then(value=>{
+      if(ctx.isCurrent())setReadiness({key:basis.identity,value});
+    }).catch(e=>{if(ctx.isCurrent()&&!(e instanceof LiveCancelled))setReadiness({key:basis.identity,error:describeLiveError(e)});});
     return()=>own.abort();
-  },[client,session,workspace,isAdmin,scope.identity]);
+  },[client,session,workspace,isAdmin,scope.identity,statusReload]);
   useEffect(()=>{
     if(waitingForProject)return;
     const own=new AbortController(),basis=session.captureWriteContext();
@@ -146,8 +172,21 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
       <p>{t('Buyer review')}: {t('Open the live buyer list for current review status.')}</p>
       <button disabled={!project} onClick={onOpenBuyers}>{t('Open buyer list')}</button>
     </div>
-    {isAdmin&&<div role="region" aria-label={t('Readiness')}><h3>{t('Readiness')}</h3>{readiness?<p>{t('Database')}: {readiness.database} · {t('Queue')}: {readiness.queue} · {t('Worker')}: {readiness.worker} · {readiness.ready?t('Ready'):t('Not ready')}</p>:<p role="status">{t('Loading readiness…')}</p>}</div>}
-    <div role="region" aria-label={t('Integrations')}><h3>{t('Integrations')}</h3>{capabilities.map(item=><p key={item.name}>{t(item.name)}: {t(item.status)} · {item.reason_codes.map(t).join(', ')}</p>)}</div>
+    {isAdmin&&<div role="region" aria-label={t('Readiness')}><h3>{t('Readiness')}</h3>
+      {readiness?<><p>{t('Database')}: {t(readiness.database)} · {t('Queue')}: {t(readiness.queue)} · {t('Worker')}: {t(readiness.worker)} · {readiness.ready===true&&readiness.database==='ready'&&readiness.queue==='ready'&&readiness.worker==='ready'&&Number.isFinite(Date.parse(readiness.checked_at))?t('Ready'):t('Not ready')}</p>
+        <p>{t('Checked at')}: <time dateTime={readiness.checked_at}>{readiness.checked_at}</time></p></>:readinessError?<p role="alert">{t(readinessError)}</p>:<p role="status">{t('Loading readiness…')}</p>}
+      <p>{t('Responsible role: {role}').replace('{role}','SRE')}</p><p>{t('Next action')}: {t(readiness?.database==='unavailable'?'Check the database connection and current workspace access, then refresh.':'Check worker and queue status, then refresh.')}</p>
+    </div>}
+    <div role="region" aria-label={t('Integrations')}><h3>{t('Integrations')}</h3>
+      {capabilities?capabilities.length?capabilities.map((item,index)=>{const view=capabilityView(item);return <div role="region" aria-label={t('Capability: {name}').replace('{name}',t(view.name))} key={`${view.name}:${index}`}>
+        <h4>{t(view.name)}: {t(view.status)}</h4><p>{t(view.reason)}</p>
+        <p>{t('Responsible role: {role}').replace('{role}',t(view.owner))}</p>
+        <p>{t('Next action')}: {t(view.nextAction)}</p>
+        <p>{t('Checked at')}: {view.checkedAt?<time dateTime={view.checkedAt}>{view.checkedAt}</time>:t('Unknown')}</p>
+        {view.codes.length>0&&<details><summary>{t('Technical details')}</summary><p>{view.codes.join(', ')}</p></details>}
+      </div>;}):<p>{t(unknownAdvice)}</p>:capabilityError?<><p role="alert">{t(capabilityError)}</p><p>{t(unknownAdvice)}</p></>:<p role="status">{t('Loading capabilities…')}</p>}
+      <button onClick={()=>{setCapabilities(undefined);setReadiness(undefined);setStatusReload(value=>value+1);}}>{t('Refresh service status')}</button>
+    </div>
     <div role="region" aria-label={t('Bulk jobs')}><h3>{t('Bulk jobs')}</h3>
       <label>{t('Job scope')} <select aria-label={t('Job scope')} value={jobScope.kind} onChange={e=>{setJobView(e.target.value as 'project'|'workspace');changeJob('');}}>
         <option value="project" disabled={!project}>{t('Project jobs')}</option><option value="workspace">{t('Workspace jobs')}</option>

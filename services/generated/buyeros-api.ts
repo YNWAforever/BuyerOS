@@ -2924,6 +2924,10 @@ export interface components {
             /** Format: date-time */
             checked_at: string;
             billable: boolean;
+            /** @description Operational responsibility, not a membership role or access grant. No named owner is inferred. */
+            owner_role: string;
+            /** @description Read-only guidance; it does not authorize provider activation or delivery. */
+            next_action: string;
         };
         Health: {
             /** @enum {string} */

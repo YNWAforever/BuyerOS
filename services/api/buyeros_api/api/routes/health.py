@@ -40,6 +40,12 @@ def capabilities_payload() -> dict:
             "reason_codes": ["live_providers_not_activated"],
             "checked_at": now,
             "billable": False,
+            "owner_role": "Release owner",
+            "next_action": (
+                "Keep delivery disabled. Use authorized exports and manual outcomes."
+                if name in {"mailbox", "crm"}
+                else "Select a provider and complete bounded verification before activation."
+            ),
         }
         for name in CAPABILITY_NAMES
     ]
