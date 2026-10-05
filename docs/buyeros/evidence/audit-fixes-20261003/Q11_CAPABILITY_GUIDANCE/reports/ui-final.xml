@@ -1,0 +1,14 @@
+<testsuites id="" name="" tests="5" failures="0" skipped="0" errors="0" time="55.179936000000005">
+<testsuite name="audit-readiness-guidance.spec.ts" timestamp="2026-10-05T06:29:27.217Z" hostname="" tests="5" failures="0" skipped="0" time="25.306" errors="0">
+<testcase name="R05 provider responsibility and actionable status are available to a reviewer without admin reads" classname="audit-readiness-guidance.spec.ts" time="6.202">
+</testcase>
+<testcase name="R05 admin readiness guidance and malformed capability fail closed in zh-HK mobile" classname="audit-readiness-guidance.spec.ts" time="4.48">
+</testcase>
+<testcase name="R05 new workspace hides old capability state while its read is pending and rejects A-B-A late advice" classname="audit-readiness-guidance.spec.ts" time="6.414">
+</testcase>
+<testcase name="R05 failed capability read remains unavailable and manual refresh recovers with reads only" classname="audit-readiness-guidance.spec.ts" time="4.193">
+</testcase>
+<testcase name="R05 a ready label contradicting provider blockers remains unavailable" classname="audit-readiness-guidance.spec.ts" time="4.017">
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,0 +1,50 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="43.388306">
+<testsuite name="audit-readiness-guidance.spec.ts" timestamp="2026-10-05T06:06:41.344Z" hostname="" tests="1" failures="1" skipped="0" time="10.679" errors="0">
+<testcase name="R05 provider responsibility and actionable status are available to a reviewer without admin reads" classname="audit-readiness-guidance.spec.ts" time="10.679">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-readiness-guidance-R-435ad-eviewer-without-admin-reads\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-readiness-guidance-R-435ad-eviewer-without-admin-reads\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveCount(expected) failed" type="expect.toHaveCount">
+<![CDATA[  audit-readiness-guidance.spec.ts:10:1 › R05 provider responsibility and actionable status are available to a reviewer without admin reads 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('region', { name: 'Integrations', exact: true }).getByText('Responsible role: Release owner', { exact: true })
+    Expected: 5
+    Received: 0
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('region', { name: 'Integrations', exact: true }).getByText('Responsible role: Release owner', { exact: true }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Integrations', exact: true }).getByText('Responsible role: Release owner', { exact: true })
+        14 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      12 |  await signInWorkbench(page);await page.getByRole('button',{name:'Operations',exact:true}).click();
+      13 |  const integrations=page.getByRole('region',{name:'Integrations',exact:true});
+    > 14 |  await expect(integrations.getByText('Responsible role: Release owner',{exact:true})).toHaveCount(5);
+         |                                                                                       ^
+      15 |  for(const name of ['research','contact_enrichment','draft_generation'])await expect(integrations.getByRole('region',{name:`Capability: ${name}`,exact:true})).toContainText(action);
+      16 |  for(const name of ['mailbox','crm'])await expect(integrations.getByRole('region',{name:`Capability: ${name}`,exact:true})).toContainText(disabled);
+      17 |  await expect(integrations.locator('time')).toHaveCount(5);expect(readiness).toHaveLength(0);
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-readiness-guidance.spec.ts:14:87
+
+    Error Context: ..\..\test-results\q11-capability-guidance\ui-artifacts\audit-readiness-guidance-R-435ad-eviewer-without-admin-reads\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-capability-guidance\ui-artifacts\audit-readiness-guidance-R-435ad-eviewer-without-admin-reads\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-capability-guidance\ui-artifacts\audit-readiness-guidance-R-435ad-eviewer-without-admin-reads\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

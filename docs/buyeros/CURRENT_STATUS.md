@@ -1,3 +1,23 @@
+# Current Q11 capability-guidance checkpoint — 2026-10-05
+
+Reviewed source `5aaf6492ec10078e4f1a4fa5b17efd41c5673eba` on `codex/q11-capability-guidance`. **Full Q11/F10/F13/N00 remain open.** Local responsibility/action UI and contract implemented; no deployment or migration. [Exact commands, red/green, screenshots and rollback](evidence/audit-fixes-20261003/Q11_CAPABILITY_GUIDANCE/RESULTS.md).
+
+| Current field | Evidence / disposition |
+| --- | --- |
+| Local source | `5aaf6492ec10078e4f1a4fa5b17efd41c5673eba`; source commit8files,168insertions/15deletions; preceding metadataf53ebec retained |
+| Deployed source | Unknown / not checked this round; no new deployment; earlier records historical |
+| Schema | Source0037_bulk_manifests;0new migrations; guarded disposable DB integration only; production unknown |
+| Runtime role / worker selector / epoch | Production unknown; no mutation/readback |
+| Provider capabilities | Unconfigured/disabled; bounded responsibility/next action displayed; no live price/quota/canary/provider verification |
+| Local case evidence | FinalAPI19/newUI5/root300reported(299leaves)/LinuxSSR3/WindowsSSR3;0fail/error/skip; intermediate15Operations+guidance separately |
+| Build / contracts | Genuine Vercel build0;types/lint/generated84=70+14routes exit0;0new operations |
+| Responsible role / checked at | Release owner / SRE; `2026-10-05T06:46:36.763406+00:00`; no named owner or access grant inferred |
+| Next eligible local work | N00 remaining original-redirect/native containment/accounting gap audit; real isolated auth separately gated |
+
+Code implemented, browser fixtures verified, actual local SQL/RLS/HTTP/build/SSR verified. Real Auth/provider/recovery/full staff/UAT/production gates remain open; Auth0 retained and delivery403. R05 only partial local subset; other97 tracker rows and24 audit task objects unchanged. Three foreign worktrees and3370 prior artifacts preserved. Author review completed; independent review pending.
+
+## Historical checkpoints below — their original source/time scopes only
+
 # Current Q11 local release-gate checkpoint — 2026-10-05
 
 Reviewed/tested source `bb7a1ede078085dede0433cafd47078ea63a4e11` on `codex/q11-current-source-gates`. **Full Q11, F13 and N00 remain open.** This checkpoint changes status/evidence only; no runtime code, tests or migration changed. [Exact commands, failures and artifacts](evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/RESULTS.md).
@@ -64,7 +84,7 @@ Main is exactly the audit source; no committed source drift for F01–F21. Uncom
 | F10 | still open (external evidence gate) | outside selected first round |
 | F11 | fixed with local manifest HTTP/DB/UI evidence; live rollout unverified | Q08 B15, B14 partial; existing snapshot1000 preserved |
 | F12 | still open (real quality/provider evidence) | Q10 offline tools fixture-verified; actual A03-A06/A08 not tested |
-| F13 | still open (audit-source code unchanged) | Q11 baseline only |
+| F13 | partial local status and capability guidance verified; deployed comparison open | Q11 R05 supplementary cases; exact current checkpoint above |
 | F14 | partial draft journey verified; whole staff journey still open | Q12 U09 slice only; full eight-module release acceptance not asserted |
 | F15 | fixed with local render/UI evidence (Q01) | Q01 |
 | F16 | fixed with local source-review/HTTP/DB/UI evidence; live rollout unverified | Q12 D01/D03; source-bound immutable proof, exact approval/export |

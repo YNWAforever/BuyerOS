@@ -2149,6 +2149,103 @@
     }
   },
   "latest_local_verification_checkpoint": {
+    "checked_at": "2026-10-05T06:46:36.763406+00:00",
+    "checks": {
+      "api-red": {
+        "cases": 1,
+        "pass": 0,
+        "fail": 1,
+        "error": 0,
+        "skip": 0
+      },
+      "ui-red": {
+        "cases": 1,
+        "pass": 0,
+        "fail": 1,
+        "error": 0,
+        "skip": 0
+      },
+      "review-red": {
+        "cases": 1,
+        "pass": 0,
+        "fail": 1,
+        "error": 0,
+        "skip": 0
+      },
+      "api-green": {
+        "cases": 19,
+        "pass": 19,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "ui-green-first": {
+        "cases": 15,
+        "pass": 15,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "ui-final": {
+        "cases": 5,
+        "pass": 5,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "root-node": {
+        "cases": 299,
+        "pass": 299,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "reported_pass": 300,
+        "duration_ms": 67414.0489
+      },
+      "vercel-render-linux": {
+        "cases": 3,
+        "pass": 3,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "vercel-render-windows": {
+        "cases": 3,
+        "pass": 3,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      }
+    },
+    "typescript_exit": 0,
+    "source_lint_exit": 0,
+    "generated_contracts_exit": 0,
+    "operation_routes_exit": 0,
+    "build_exit": 0,
+    "original_artifacts_unchanged": 3200,
+    "all_prior_artifacts_unchanged": 3370,
+    "foreign_worktrees_unchanged": 3,
+    "review": "author only; independent review pending",
+    "live_verification": false,
+    "status": "local-guidance-and-regression-verified;full-Q11-open",
+    "source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "base_sha": "f53ebec2a02a354edf6a8a858c4ca2e10f7f5fca",
+    "branch": "codex/q11-capability-guidance",
+    "owner_role": "Release owner / SRE",
+    "code_changes": "bounded capability responsibility/action contract and API; generated typed, scope-current en/zh-HK UI; archive-only compiler exclusions",
+    "contract_operations": 84,
+    "original_operations": 70,
+    "extensions": 14,
+    "new_operations": 0,
+    "migrations": [],
+    "source_schema_head": "0037_bulk_manifests",
+    "deployed_sha": null,
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_CAPABILITY_GUIDANCE/RESULTS.md",
+    "limits": "API/PostgreSQL/RLS and actual browser use fictional identities. Final5 new UI; intermediate15=11 Operations+4 guidance before final contradiction guard. No real auth/provider/full staff/UAT/recovery/performance/production proof. FullQ11/N00 and F10/F13 external gates OPEN.",
+    "next_eligible": "N00 remaining local original-redirect/native containment/accounting gap audit; actual Neon/provider/production work still needs its own concrete evidence and authorization",
+    "rollback": "Revert the following metadata commit, then source 5aaf6492ec10078e4f1a4fa5b17efd41c5673eba as one contract/API/UI/test unit. No DB/data rollback."
+  },
+  "prior_q11_current_source_verification_20261005": {
     "status": "current-source-local-gates-verified;full-Q11-open",
     "source_sha": "bb7a1ede078085dede0433cafd47078ea63a4e11",
     "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",

@@ -1,0 +1,37 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+______ test_capabilities_include_bounded_responsibility_and_next_action _______
+
+    def test_capabilities_include_bounded_responsibility_and_next_action():
+        """Staff can identify the activation owner/action without exposing credentials or granting access."""
+        from datetime import datetime
+    
+        page = capabilities_payload()
+        for item in page["items"]:
+>           assert item["owner_role"] == "Release owner"
+                   ^^^^^^^^^^^^^^^^^^
+E           KeyError: 'owner_role'
+
+tests\test_api_health.py:76: KeyError
+============================== warnings summary ===============================
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+tests\conftest.py:24
+  C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\api\tests\conftest.py:24: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_api_health.py::test_capabilities_include_bounded_responsibility_and_next_action
+  C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\api\.venv\Lib\site-packages\pytest_asyncio\plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\test-results\q11-capability-guidance\api-red.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_api_health.py::test_capabilities_include_bounded_responsibility_and_next_action
+1 failed, 4 warnings in 2.14s

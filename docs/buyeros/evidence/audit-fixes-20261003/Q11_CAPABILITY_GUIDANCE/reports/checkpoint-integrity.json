@@ -1,0 +1,17 @@
+{
+  "all_prior_artifacts_unchanged": 3370,
+  "other_audit_tasks_unchanged": 24,
+  "legacy_task_objects_unchanged": 31,
+  "other_case_rows_unchanged": 97,
+  "case_count": 98,
+  "operation_ledger_count": 84,
+  "operation_ledger_changed": true,
+  "migrations": [],
+  "deployed_sha": null,
+  "operation_rows_with_additional_evidence": [
+    "getCapabilities",
+    "getReadiness"
+  ],
+  "other_operation_rows_unchanged": 82,
+  "operation_definitions_and_deployed_states_unchanged": true
+}

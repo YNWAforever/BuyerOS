@@ -1,0 +1,12 @@
+{
+  "compiled_source_files": 277,
+  "required_real_tests_and_source": [
+    "./tests/e2e/audit-readiness-guidance.spec.ts",
+    "./tests/neon-managed-cleanup-sdk.types.ts",
+    "./features/live/operations.tsx",
+    "./services/generated/buyeros-api.ts"
+  ],
+  "all_required_included": true,
+  "archives_not_compiled": true,
+  "real_test_exclusions_added": false
+}

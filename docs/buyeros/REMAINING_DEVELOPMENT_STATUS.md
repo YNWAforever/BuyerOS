@@ -1,4 +1,6 @@
-> Current Q11 local checkpoint: source `bb7a1ede078085dede0433cafd47078ea63a4e11`; root300/strictAPI18/OperationsUI11/LinuxSSR3/WindowsSSR3 final pass0fail/error/skip. No runtime/schema/deployment change. [Single current status](CURRENT_STATUS.md); [evidence](evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/RESULTS.md). Full Q11/N00 and external release gates stay open. Next local: Q11 capability responsibility/next-action presentation.
+> Current Q11 guidance checkpoint: source `5aaf6492ec10078e4f1a4fa5b17efd41c5673eba`; final19API/5newUI/300reportedroot/LinuxSSR3/WindowsSSR3 pass0fail/error/skip, genuine build/types/lint/generated84 exit0. Bounded role/action API and en/zh UI implemented; no grant/provider/migration/deploy. FullQ11/N00 and external gates open. [Single current status](CURRENT_STATUS.md); [evidence](evidence/audit-fixes-20261003/Q11_CAPABILITY_GUIDANCE/RESULTS.md). Next local: N00 remaining redirect/native-accounting gap audit.
+
+> Historical Q11 local checkpoint: source `bb7a1ede078085dede0433cafd47078ea63a4e11`; root300/strictAPI18/OperationsUI11/LinuxSSR3/WindowsSSR3 final pass0fail/error/skip. No runtime/schema/deployment change. [Single current status](CURRENT_STATUS.md); [evidence](evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/RESULTS.md). Full Q11/N00 and external release gates stay open. Next local: Q11 capability responsibility/next-action presentation.
 
 > Earlier checkpoint notices below are historical.
 

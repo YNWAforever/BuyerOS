@@ -1,3 +1,9 @@
+# Current capability presentation — Q11, 2026-10-05
+
+Reviewed source `5aaf6492ec10078e4f1a4fa5b17efd41c5673eba` adds bounded operational `owner_role` and read-only `next_action` to generated Capability. Release owner is a responsibility label, not a membership role, access grant or invented contact. UI displays en/zh-HK status/reason/check time/role/action; missing or contradictory ready metadata stays unknown. Refresh performs reads only. No named live provider selected, no pricing/canary/provider calls; research/contact/model stay unconfigured and mailbox/CRM disabled. Delivery403. [Local proof and rollback](evidence/audit-fixes-20261003/Q11_CAPABILITY_GUIDANCE/RESULTS.md).
+
+## Historical T14 interface and evidence scope
+
 # Provider capabilities (T14, fixture implementation)
 
 Reviewed against BuyerOS source at `f43a9d88b334c2c4029fa06fa71624ed52efe4a2` and the pinned upstream inventory in `research/UPSTREAM_AUDIT.md`. This file records the local interface and evidence gap; it is not a vendor approval record.

@@ -1,0 +1,6 @@
+? Verifying lockfile against supply-chain policies (1059 entries)...
+Lockfile is up to date, resolution step is skipped
+Already up to date
+✓ Lockfile passes supply-chain policies (1059 entries in 10s)
+
+Done in 11.1s using pnpm v11.25.0

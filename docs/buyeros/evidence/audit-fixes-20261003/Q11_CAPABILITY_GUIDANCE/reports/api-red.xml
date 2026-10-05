@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.141" timestamp="2026-10-05T14:05:46.899938+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_api_health" name="test_capabilities_include_bounded_responsibility_and_next_action" time="0.003"><failure message="KeyError: 'owner_role'">def test_capabilities_include_bounded_responsibility_and_next_action():
+        """Staff can identify the activation owner/action without exposing credentials or granting access."""
+        from datetime import datetime
+    
+        page = capabilities_payload()
+        for item in page["items"]:
+&gt;           assert item["owner_role"] == "Release owner"
+                   ^^^^^^^^^^^^^^^^^^
+E           KeyError: 'owner_role'
+
+tests\test_api_health.py:76: KeyError</failure></testcase></testsuite></testsuites>

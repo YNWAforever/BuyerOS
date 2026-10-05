@@ -1,0 +1,290 @@
+diff --git a/docs/buyeros/contracts/openapi.proposed.yaml b/docs/buyeros/contracts/openapi.proposed.yaml
+index 9e96642..55dab45 100644
+--- a/docs/buyeros/contracts/openapi.proposed.yaml
++++ b/docs/buyeros/contracts/openapi.proposed.yaml
+@@ -11306,12 +11306,24 @@ components:
+             type: string
+         checked_at: *id004
+         billable: *id016
++        owner_role:
++          type: string
++          minLength: 1
++          maxLength: 80
++          description: Operational responsibility, not a membership role or access grant. No named owner is inferred.
++        next_action:
++          type: string
++          minLength: 1
++          maxLength: 512
++          description: Read-only guidance; it does not authorize provider activation or delivery.
+       required:
+       - name
+       - status
+       - reason_codes
+       - checked_at
+       - billable
++      - owner_role
++      - next_action
+     Health:
+       type: object
+       additionalProperties: false
+diff --git a/features/live/locale.ts b/features/live/locale.ts
+index f5408a8..6f540db 100644
+--- a/features/live/locale.ts
++++ b/features/live/locale.ts
+@@ -1,5 +1,16 @@
+ /** Live-only system copy; factual source/user text is never translated automatically. */
+ export const liveZh: Record<string,string> = {
++  'Responsible role: {role}':'責任角色：{role}','Release owner':'發佈負責人',
++  'Review the current capability state before use.':'使用前請核對目前的能力狀態。',
++  'Next action':'下一步','Checked at':'檢查時間','Capability':'能力','Capability: {name}':'能力：{name}',
++  'Not configured':'尚未配置','Needs attention':'需要跟進','Disabled':'已停用','Unknown capability':'未確認能力',
++  'Live provider capabilities have not been verified.':'實際供應商能力尚未完成驗證。',
++  'Select a provider and complete bounded verification before activation.':'選定供應商並完成有界驗證後，才可批准啟用。',
++  'Keep delivery disabled. Use authorized exports and manual outcomes.':'保持外展發送停用。請使用已授權匯出及手動成果記錄。',
++  'Capability verification is unavailable. Keep this capability disabled and contact the release owner.':'能力驗證資料無法確認。請保持停用並聯絡發佈負責人。',
++  'Check worker and queue status, then refresh.':'檢查工作程序與佇列狀態，再重新整理。',
++  'Check the database connection and current workspace access, then refresh.':'檢查資料庫連線及目前工作區存取，再重新整理。',
++  'Loading capabilities…':'正在載入能力狀態…','Refresh service status':'重新整理服務狀態',
+   'Owner assignment results':'負責人分派結果','Selected colleague (name unavailable)':'已選同事（未提供姓名）',
+   'Staff-selected buyer':'職員已選買家',
+   'The offer changed. This profile cannot be approved.':'產品資料已更改，不能批准此輪廓。','Offer revision':'產品資料版本','Reload profile':'重新載入輪廓',
+diff --git a/features/live/operations.tsx b/features/live/operations.tsx
+index 968b68b..7eb45dc 100644
+--- a/features/live/operations.tsx
++++ b/features/live/operations.tsx
+@@ -9,17 +9,41 @@ import type {components} from '@/services/generated/buyeros-api';
+ import {startJobPoller} from '@/services/live/job-poller';
+ import {createOperationClient} from '@/services/live/operations';
+ 
+-type Capability={name:string;status:string;reason_codes:string[];checked_at:string;billable:boolean};
+-type Readiness={ready:boolean;database:string;queue:string;worker:string;checked_at:string};
++type Capability=components['schemas']['Capability'];
++type Readiness=components['schemas']['Readiness'];
+ type Audit={id:string;action:string;entity_type:string;entity_id?:string;occurred_at:string;reason_code?:string;request_id?:string};
+ type Page<T>={items:T[];offset:number;limit:number;total:number};
+ type Job=components['schemas']['AsyncJob'];
+ type Result=components['schemas']['BulkItemResult'];
+ 
++const capabilityNames=['research','contact_enrichment','draft_generation','mailbox','crm'];
++const capabilityStatuses:Record<Capability['status'],string>={unconfigured:'Not configured',blocked:'Blocked',ready:'Ready',degraded:'Needs attention',disabled:'Disabled'};
++const unknownAdvice='Capability verification is unavailable. Keep this capability disabled and contact the release owner.';
++function capabilityView(item:Capability){
++  const value=item&&typeof item==='object'?item:null;
++  const name=value&&capabilityNames.includes(value.name)?value.name:'Unknown capability';
++  const bounded=(text:unknown,max:number):text is string=>typeof text==='string'&&text.trim().length>0&&text.length<=max;
++  const valid=value&&name!=='Unknown capability'&&typeof value.status==='string'&&Object.hasOwn(capabilityStatuses,value.status)
++    &&bounded(value.owner_role,80)&&bounded(value.next_action,512)&&typeof value.billable==='boolean'
++    &&bounded(value.checked_at,80)&&Number.isFinite(Date.parse(value.checked_at))
++    &&Array.isArray(value.reason_codes)&&value.reason_codes.length<=20&&value.reason_codes.every(code=>bounded(code,120))
++    &&(value.status!=='ready'||value.reason_codes.length===0);
++  return {name,status:valid?capabilityStatuses[value.status]:'Unknown',owner:valid?value.owner_role:'Release owner',
++    nextAction:valid?value.next_action:unknownAdvice,checkedAt:valid?value.checked_at:null,
++    reason:valid?(value.reason_codes.includes('live_providers_not_activated')?'Live provider capabilities have not been verified.':'Review the current capability state before use.'):unknownAdvice,
++    codes:valid?value.reason_codes:[]};
++}
++
+ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{workspace:string;project:string|null;isAdmin:boolean;onOpenBuyers:()=>void;t:(value:string)=>string}){
+   const {client,session}=useWorkspaceSession();
+   const scope=useSessionSnapshot(),searchParams=useSearchParams();
+-  const [readiness,setReadiness]=useState<Readiness|null>(null),[capabilities,setCapabilities]=useState<Capability[]>([]);
++  const [readinessState,setReadiness]=useState<{key:string;value?:Readiness;error?:string}>();
++  const [capabilityState,setCapabilities]=useState<{key:string;items?:Capability[];error?:string}>();
++  const [statusReload,setStatusReload]=useState(0);
++  const readiness=readinessState?.key===scope.identity?readinessState.value:undefined;
++  const readinessError=readinessState?.key===scope.identity?readinessState.error:undefined;
++  const capabilities=capabilityState?.key===scope.identity?capabilityState.items:undefined;
++  const capabilityError=capabilityState?.key===scope.identity?capabilityState.error:undefined;
+   const [jobId,setJobId]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('bulk_job')||'');
+   const [job,setJob]=useState<Job|null>(null);
+   const [statusChoice,setStatusChoice]=useState<{value:ReturnType<typeof readJobStatus>}>();
+@@ -44,16 +68,18 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+   const [failedState,setFailed]=useState<{key:string;count:number|'unavailable'}>();
+   const failedCount=failedState?.key===scopeKey?failedState.count:null;
+   useEffect(()=>{
+-    const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
+-    const signal=AbortSignal.any([own.signal,session.controller().signal]);
+-    void client.request<Page<Capability>>({path:`/v1/workspaces/${workspace}/capabilities`,token,scope:identity,signal}).then(value=>{
+-      if(session.isCurrent(identity)&&!own.signal.aborted)setCapabilities(value.items);
+-    }).catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted)setError(describeLiveError(e));});
+-    if(isAdmin)void client.request<Readiness>({path:`/v1/workspaces/${workspace}/readiness`,token,scope:identity,signal}).then(value=>{
+-      if(session.isCurrent(identity)&&!own.signal.aborted)setReadiness(value);
+-    }).catch(e=>{if(!(e instanceof LiveCancelled)&&!own.signal.aborted)setError(describeLiveError(e));});
++    if(!session.token()||session.current().workspace!==workspace)return;
++    const own=new AbortController(),basis=session.captureWriteContext();
++    const ctx={...basis,signal:AbortSignal.any([own.signal,basis.signal]),getToken:async()=>session.token()||'',isCurrent:()=>session.isCurrent(basis.identity)&&!own.signal.aborted};
++    void createOperationClient(client).requestOperation('getCapabilities',{path:{workspace_id:workspace}},ctx).then(value=>{
++      if(!Array.isArray(value.items))throw new Error('Invalid capability page');
++      if(ctx.isCurrent())setCapabilities({key:basis.identity,items:value.items});
++    }).catch(e=>{if(ctx.isCurrent()&&!(e instanceof LiveCancelled))setCapabilities({key:basis.identity,error:describeLiveError(e)});});
++    if(isAdmin)void createOperationClient(client).requestOperation('getReadiness',{path:{workspace_id:workspace}},ctx).then(value=>{
++      if(ctx.isCurrent())setReadiness({key:basis.identity,value});
++    }).catch(e=>{if(ctx.isCurrent()&&!(e instanceof LiveCancelled))setReadiness({key:basis.identity,error:describeLiveError(e)});});
+     return()=>own.abort();
+-  },[client,session,workspace,isAdmin,scope.identity]);
++  },[client,session,workspace,isAdmin,scope.identity,statusReload]);
+   useEffect(()=>{
+     if(waitingForProject)return;
+     const own=new AbortController(),basis=session.captureWriteContext();
+@@ -146,8 +172,21 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
+       <p>{t('Buyer review')}: {t('Open the live buyer list for current review status.')}</p>
+       <button disabled={!project} onClick={onOpenBuyers}>{t('Open buyer list')}</button>
+     </div>
+-    {isAdmin&&<div role="region" aria-label={t('Readiness')}><h3>{t('Readiness')}</h3>{readiness?<p>{t('Database')}: {readiness.database} · {t('Queue')}: {readiness.queue} · {t('Worker')}: {readiness.worker} · {readiness.ready?t('Ready'):t('Not ready')}</p>:<p role="status">{t('Loading readiness…')}</p>}</div>}
+-    <div role="region" aria-label={t('Integrations')}><h3>{t('Integrations')}</h3>{capabilities.map(item=><p key={item.name}>{t(item.name)}: {t(item.status)} · {item.reason_codes.map(t).join(', ')}</p>)}</div>
++    {isAdmin&&<div role="region" aria-label={t('Readiness')}><h3>{t('Readiness')}</h3>
++      {readiness?<><p>{t('Database')}: {t(readiness.database)} · {t('Queue')}: {t(readiness.queue)} · {t('Worker')}: {t(readiness.worker)} · {readiness.ready===true&&readiness.database==='ready'&&readiness.queue==='ready'&&readiness.worker==='ready'&&Number.isFinite(Date.parse(readiness.checked_at))?t('Ready'):t('Not ready')}</p>
++        <p>{t('Checked at')}: <time dateTime={readiness.checked_at}>{readiness.checked_at}</time></p></>:readinessError?<p role="alert">{t(readinessError)}</p>:<p role="status">{t('Loading readiness…')}</p>}
++      <p>{t('Responsible role: {role}').replace('{role}','SRE')}</p><p>{t('Next action')}: {t(readiness?.database==='unavailable'?'Check the database connection and current workspace access, then refresh.':'Check worker and queue status, then refresh.')}</p>
++    </div>}
++    <div role="region" aria-label={t('Integrations')}><h3>{t('Integrations')}</h3>
++      {capabilities?capabilities.length?capabilities.map((item,index)=>{const view=capabilityView(item);return <div role="region" aria-label={t('Capability: {name}').replace('{name}',t(view.name))} key={`${view.name}:${index}`}>
++        <h4>{t(view.name)}: {t(view.status)}</h4><p>{t(view.reason)}</p>
++        <p>{t('Responsible role: {role}').replace('{role}',t(view.owner))}</p>
++        <p>{t('Next action')}: {t(view.nextAction)}</p>
++        <p>{t('Checked at')}: {view.checkedAt?<time dateTime={view.checkedAt}>{view.checkedAt}</time>:t('Unknown')}</p>
++        {view.codes.length>0&&<details><summary>{t('Technical details')}</summary><p>{view.codes.join(', ')}</p></details>}
++      </div>;}):<p>{t(unknownAdvice)}</p>:capabilityError?<><p role="alert">{t(capabilityError)}</p><p>{t(unknownAdvice)}</p></>:<p role="status">{t('Loading capabilities…')}</p>}
++      <button onClick={()=>{setCapabilities(undefined);setReadiness(undefined);setStatusReload(value=>value+1);}}>{t('Refresh service status')}</button>
++    </div>
+     <div role="region" aria-label={t('Bulk jobs')}><h3>{t('Bulk jobs')}</h3>
+       <label>{t('Job scope')} <select aria-label={t('Job scope')} value={jobScope.kind} onChange={e=>{setJobView(e.target.value as 'project'|'workspace');changeJob('');}}>
+         <option value="project" disabled={!project}>{t('Project jobs')}</option><option value="workspace">{t('Workspace jobs')}</option>
+diff --git a/services/api/buyeros_api/api/routes/health.py b/services/api/buyeros_api/api/routes/health.py
+index 48591fa..c57baa6 100644
+--- a/services/api/buyeros_api/api/routes/health.py
++++ b/services/api/buyeros_api/api/routes/health.py
+@@ -40,6 +40,12 @@ def capabilities_payload() -> dict:
+             "reason_codes": ["live_providers_not_activated"],
+             "checked_at": now,
+             "billable": False,
++            "owner_role": "Release owner",
++            "next_action": (
++                "Keep delivery disabled. Use authorized exports and manual outcomes."
++                if name in {"mailbox", "crm"}
++                else "Select a provider and complete bounded verification before activation."
++            ),
+         }
+         for name in CAPABILITY_NAMES
+     ]
+diff --git a/services/api/tests/test_api_health.py b/services/api/tests/test_api_health.py
+index 927ce68..79e3c43 100644
+--- a/services/api/tests/test_api_health.py
++++ b/services/api/tests/test_api_health.py
+@@ -65,3 +65,22 @@ def test_capabilities_never_become_ready_from_an_unverified_env_value(monkeypatc
+     monkeypatch.setenv("BUYEROS_RESEARCH_PROVIDER_KEY", "fixture-only")
+     page = capabilities_payload()
+     assert next(x for x in page["items"] if x["name"] == "research")["status"] == "unconfigured"
++
++
++def test_capabilities_include_bounded_responsibility_and_next_action():
++    """Staff can identify the activation owner/action without exposing credentials or granting access."""
++    from datetime import datetime
++
++    page = capabilities_payload()
++    for item in page["items"]:
++        assert item["owner_role"] == "Release owner"
++        assert 1 <= len(item["owner_role"]) <= 80
++        assert 1 <= len(item["next_action"]) <= 512
++        assert datetime.fromisoformat(item["checked_at"]).tzinfo is not None
++        if item["name"] in {"mailbox", "crm"}:
++            assert item["status"] == "disabled"
++            assert item["next_action"] == "Keep delivery disabled. Use authorized exports and manual outcomes."
++        else:
++            assert item["status"] == "unconfigured"
++            assert item["next_action"] == "Select a provider and complete bounded verification before activation."
++    assert_contract_response("CapabilityPage", page)
+diff --git a/services/generated/buyeros-api.ts b/services/generated/buyeros-api.ts
+index a609a72..f648270 100644
+--- a/services/generated/buyeros-api.ts
++++ b/services/generated/buyeros-api.ts
+@@ -2924,6 +2924,10 @@ export interface components {
+             /** Format: date-time */
+             checked_at: string;
+             billable: boolean;
++            /** @description Operational responsibility, not a membership role or access grant. No named owner is inferred. */
++            owner_role: string;
++            /** @description Read-only guidance; it does not authorize provider activation or delivery. */
++            next_action: string;
+         };
+         Health: {
+             /** @enum {string} */
+diff --git a/tests/e2e/audit-readiness-guidance.spec.ts b/tests/e2e/audit-readiness-guidance.spec.ts
+new file mode 100644
+index 0000000..88fe0f4
+--- /dev/null
++++ b/tests/e2e/audit-readiness-guidance.spec.ts
+@@ -0,0 +1,60 @@
++import {expect,test} from '@playwright/test';
++import {execFile} from 'node:child_process';
++import {promisify} from 'node:util';
++import {resolve} from 'node:path';
++import {signInWorkbench,workspace,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
++const action='Select a provider and complete bounded verification before activation.';
++const disabled='Keep delivery disabled. Use authorized exports and manual outcomes.';
++test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
++
++test('R05 provider responsibility and actionable status are available to a reviewer without admin reads',async({page})=>{
++ const readiness:string[]=[];page.on('request',r=>{if(new URL(r.url()).pathname.endsWith('/readiness'))readiness.push(r.url());});
++ await signInWorkbench(page);await page.getByRole('button',{name:'Operations',exact:true}).click();
++ const integrations=page.getByRole('region',{name:'Integrations',exact:true});
++ await expect(integrations.getByText('Responsible role: Release owner',{exact:true})).toHaveCount(5);
++ for(const name of ['research','contact_enrichment','draft_generation'])await expect(integrations.getByRole('region',{name:`Capability: ${name}`,exact:true})).toContainText(action);
++ for(const name of ['mailbox','crm'])await expect(integrations.getByRole('region',{name:`Capability: ${name}`,exact:true})).toContainText(disabled);
++ await expect(integrations.locator('time')).toHaveCount(5);expect(readiness).toHaveLength(0);
++ await expect(page.getByRole('region',{name:'Readiness',exact:true})).toHaveCount(0);
++ await page.screenshot({path:'test-results/q11-capability-guidance/reviewer-en.png',fullPage:true});
++});
++
++test('R05 admin readiness guidance and malformed capability fail closed in zh-HK mobile',async({page})=>{
++ await page.route('**/v1/workspaces/*/capabilities',async route=>{const response=await route.fetch();const body=await response.json();body.data.items[0]={...body.data.items[0],status:'ready',owner_role:null,next_action:null,checked_at:'invalid'};await route.fulfill({response,json:body});});
++ await signInWorkbench(page,true,'admin');await page.getByRole('button',{name:'Operations',exact:true}).click();
++ await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');await page.setViewportSize({width:390,height:844});
++ const integrations=page.getByRole('region',{name:'整合服務',exact:true});
++ await expect(integrations).toContainText('能力驗證資料無法確認。請保持停用並聯絡發佈負責人。');
++ await expect(integrations.getByRole('region',{name:'能力：研究',exact:true})).not.toContainText('就緒');
++ const readiness=page.getByRole('region',{name:'就緒狀態',exact:true});await expect(readiness).toContainText('責任角色：SRE');await expect(readiness).toContainText('檢查工作程序與佇列狀態，再重新整理。');
++ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
++ await page.screenshot({path:'test-results/q11-capability-guidance/admin-zh-mobile.png',fullPage:true});
++ const saved=page.waitForResponse(r=>r.request().method()==='PATCH'&&new URL(r.url()).pathname.endsWith('/preferences'));await page.getByRole('combobox',{name:'語言',exact:true}).selectOption('en');expect((await saved).status()).toBe(200);
++});
++
++test('R05 new workspace hides old capability state while its read is pending and rejects A-B-A late advice',async({page})=>{
++ const cwd=resolve('services/worker'),python=resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');await promisify(execFile)(python,['tests/fixtures/audit_jobs.py','0'],{cwd,timeout:30000});
++ let release:()=>void=()=>{},received:()=>void=()=>{};const held=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);
++ const other='e0000000-0000-4000-8000-000000000101';
++ await page.route(`**/v1/workspaces/${other}/capabilities`,async route=>{const response=await route.fetch();const body=await response.json();body.data.items.forEach((item:{next_action:string})=>item.next_action='OLD WORKSPACE ADVICE');received();await held;await route.fulfill({response,json:body}).catch(()=>{});});
++ await signInWorkbench(page);await page.getByRole('button',{name:'Operations',exact:true}).click();const integrations=page.getByRole('region',{name:'Integrations',exact:true});await expect(integrations).toContainText(action);
++ await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(other);await started;
++ await expect(integrations).not.toContainText(action);await expect(integrations).toContainText('Loading capabilities…');
++ await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);await expect(integrations).toContainText(action);release();await page.waitForTimeout(300);await expect(integrations).not.toContainText('OLD WORKSPACE ADVICE');
++});
++
++
++test('R05 failed capability read remains unavailable and manual refresh recovers with reads only',async({page})=>{
++ let reads=0;const writes:string[]=[];page.on('request',r=>{if(new URL(r.url()).pathname.endsWith('/capabilities')&&r.method()!=='GET')writes.push(r.method());});
++ await page.route('**/v1/workspaces/*/capabilities',async route=>{reads++;if(reads===1)await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({code:'INTERNAL_ERROR',message:'fixture unavailable',request_id:'e0000000-0000-4000-8000-000000000011',retryable:true})});else await route.continue();});
++ await signInWorkbench(page);await page.getByRole('button',{name:'Operations',exact:true}).click();const integrations=page.getByRole('region',{name:'Integrations',exact:true});
++ await expect(integrations.getByRole('alert')).toContainText('Service temporarily unavailable');await expect(integrations).toContainText('Capability verification is unavailable.');
++ await integrations.getByRole('button',{name:'Refresh service status',exact:true}).click();await expect(integrations.getByText('Responsible role: Release owner',{exact:true})).toHaveCount(5);await expect(integrations.getByRole('alert')).toHaveCount(0);expect(reads).toBe(2);expect(writes).toHaveLength(0);
++});
++
++
++test('R05 a ready label contradicting provider blockers remains unavailable',async({page})=>{
++ await page.route('**/v1/workspaces/*/capabilities',async route=>{const response=await route.fetch();const body=await response.json();body.data.items[0].status='ready';await route.fulfill({response,json:body});});
++ await signInWorkbench(page);await page.getByRole('button',{name:'Operations',exact:true}).click();const capability=page.getByRole('region',{name:'Capability: research',exact:true});
++ await expect(capability).toContainText('Capability verification is unavailable.');await expect(capability.getByText('research: Ready',{exact:true})).toHaveCount(0);
++});
+diff --git a/tsconfig.json b/tsconfig.json
+index 03950df..4297593 100644
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -44,6 +44,8 @@
+     "node_modules",
+     "examples",
+     "services/cloudflare-jobs",
+-    "tests/integration/cloudflare-recovery.test.ts"
++    "tests/integration/cloudflare-recovery.test.ts",
++    "docs/buyeros/evidence",
++    "test-results"
+   ]
+ }

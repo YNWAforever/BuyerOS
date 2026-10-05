@@ -1,0 +1,6 @@
+{"phase":"setup","code":0,"signal":null,"timedOut":false}
+{"phase":"install","code":0,"signal":null,"timedOut":false}
+{"phase":"build","code":0,"signal":null,"timedOut":false}
+{"phase":"linuxSSR","code":0,"signal":null,"timedOut":false}
+{"phase":"export","files":2611,"archiveBytes":27690146}
+{"phase":"cleanup","removed":true}

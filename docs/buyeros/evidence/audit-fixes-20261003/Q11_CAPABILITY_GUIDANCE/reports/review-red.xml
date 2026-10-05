@@ -1,0 +1,49 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="41.208205">
+<testsuite name="audit-readiness-guidance.spec.ts" timestamp="2026-10-05T06:26:21.746Z" hostname="" tests="1" failures="1" skipped="0" time="10.371" errors="0">
+<testcase name="R05 a ready label contradicting provider blockers remains unavailable" classname="audit-readiness-guidance.spec.ts" time="10.371">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-readiness-guidance-R-12950-lockers-remains-unavailable\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-readiness-guidance-R-12950-lockers-remains-unavailable\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toContainText(expected) failed" type="expect.toContainText">
+<![CDATA[  audit-readiness-guidance.spec.ts:56:1 › R05 a ready label contradicting provider blockers remains unavailable 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('region', { name: 'Capability: research', exact: true })
+    Expected substring: "Capability verification is unavailable."
+    Received string:    "research: ReadyLive provider capabilities have not been verified.Responsible role: Release ownerNext action: Select a provider and complete bounded verification before activation.Checked at: 2026-10-05T06:26:27.859745ZTechnical detailslive_providers_not_activated"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" getByRole('region', { name: 'Capability: research', exact: true }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Capability: research', exact: true })
+        10 × locator resolved to <div role="region" aria-label="Capability: research">…</div>
+           - unexpected value "research: ReadyLive provider capabilities have not been verified.Responsible role: Release ownerNext action: Select a provider and complete bounded verification before activation.Checked at: 2026-10-05T06:26:27.859745ZTechnical detailslive_providers_not_activated"
+
+
+      57 |  await page.route('**/v1/workspaces/*/capabilities',async route=>{const response=await route.fetch();const body=await response.json();body.data.items[0].status='ready';await route.fulfill({response,json:body});});
+      58 |  await signInWorkbench(page);await page.getByRole('button',{name:'Operations',exact:true}).click();const capability=page.getByRole('region',{name:'Capability: research',exact:true});
+    > 59 |  await expect(capability).toContainText('Capability verification is unavailable.');await expect(capability.getByText('research: Ready',{exact:true})).toHaveCount(0);
+         |                           ^
+      60 | });
+      61 |
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-readiness-guidance.spec.ts:59:27
+
+    Error Context: ..\..\test-results\q11-capability-guidance\ui-artifacts\audit-readiness-guidance-R-12950-lockers-remains-unavailable\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-capability-guidance\ui-artifacts\audit-readiness-guidance-R-12950-lockers-remains-unavailable\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-capability-guidance\ui-artifacts\audit-readiness-guidance-R-12950-lockers-remains-unavailable\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,0 +1,14 @@
+docs/buyeros/evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/reports/ui-attempt-1/ui.config.ts(2,18): error TS2307: Cannot find module '../../playwright.audit-fixes.config' or its corresponding type declarations.
+docs/buyeros/evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/reports/ui-teardown.ts(1,21): error TS2307: Cannot find module '../../tests/e2e/audit-teardown' or its corresponding type declarations.
+docs/buyeros/evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/reports/ui.config.ts(2,18): error TS2307: Cannot find module '../../playwright.audit-fixes.config' or its corresponding type declarations.
+test-results/q11-capability-guidance/ui.config.ts(4,290): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Type '{ cwd: string; }[]' is not assignable to type 'TestConfigWebServer | TestConfigWebServer[] | undefined'.
+      Type '{ cwd: string; }[]' is not assignable to type 'TestConfigWebServer[]'.
+        Property 'command' is missing in type '{ cwd: string; }' but required in type 'TestConfigWebServer'.
+test-results/q11-current-source-gates/ui-attempt-1/ui.config.ts(2,18): error TS2307: Cannot find module '../../playwright.audit-fixes.config' or its corresponding type declarations.
+test-results/q11-current-source-gates/ui.config.ts(8,2): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Type '{ cwd: string; }[]' is not assignable to type 'TestConfigWebServer | TestConfigWebServer[] | undefined'.
+      Type '{ cwd: string; }[]' is not assignable to type 'TestConfigWebServer[]'.
+        Property 'command' is missing in type '{ cwd: string; }' but required in type 'TestConfigWebServer'.

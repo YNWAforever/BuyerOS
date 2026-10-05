@@ -1,0 +1,7 @@
+{
+  "source": "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\.vercel\\output",
+  "destination": "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS\\test-results\\q11-capability-guidance\\prior-main-output",
+  "verifiedFiles": 2611,
+  "unchanged": true,
+  "rollback": "Rename destination back to source when the new owned output has been moved aside."
+}

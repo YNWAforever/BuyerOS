@@ -1,0 +1,36 @@
+<testsuites id="" name="" tests="15" failures="0" skipped="0" errors="0" time="166.482758">
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-05T06:18:48.083Z" hostname="" tests="11" failures="0" skipped="0" time="115.859" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="8.01">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="6.483">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="6.754">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="5.433">
+</testcase>
+<testcase name="B12 unopened 1000-result job reads summary only and never walks result pages" classname="audit-operations.spec.ts" time="11.938">
+</testcase>
+<testcase name="B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once" classname="audit-operations.spec.ts" time="28.103">
+</testcase>
+<testcase name="B13 hidden summary pause and double visibility resume produce exactly one refresh" classname="audit-operations.spec.ts" time="12.685">
+</testcase>
+<testcase name="B13 actual 429 Retry-After and 503 recover without result-page traffic" classname="audit-operations.spec.ts" time="12.635">
+</testcase>
+<testcase name="B16 old summary cannot overwrite another scope after A-B-A" classname="audit-operations.spec.ts" time="9.119">
+</testcase>
+<testcase name="B13 zh-HK 390px summary/results controls remain usable without overflow" classname="audit-operations.spec.ts" time="5.619">
+</testcase>
+<testcase name="B13 Operations clears a transient summary error after a valid recovery" classname="audit-operations.spec.ts" time="9.08">
+</testcase>
+</testsuite>
+<testsuite name="audit-readiness-guidance.spec.ts" timestamp="2026-10-05T06:18:48.083Z" hostname="" tests="4" failures="0" skipped="0" time="19.012" errors="0">
+<testcase name="R05 provider responsibility and actionable status are available to a reviewer without admin reads" classname="audit-readiness-guidance.spec.ts" time="4.421">
+</testcase>
+<testcase name="R05 admin readiness guidance and malformed capability fail closed in zh-HK mobile" classname="audit-readiness-guidance.spec.ts" time="4.492">
+</testcase>
+<testcase name="R05 new workspace hides old capability state while its read is pending and rejects A-B-A late advice" classname="audit-readiness-guidance.spec.ts" time="5.937">
+</testcase>
+<testcase name="R05 failed capability read remains unavailable and manual refresh recovers with reads only" classname="audit-readiness-guidance.spec.ts" time="4.162">
+</testcase>
+</testsuite>
+</testsuites>

@@ -16,7 +16,7 @@
     "Q10",
     "N00"
   ],
-  "next_eligible": "Q11 local capability/readiness responsible role and concrete next action; N00 real compatibility separately blocked",
+  "next_eligible": "N00 remaining local original-redirect/native containment/accounting gap audit; actual Neon/provider/production work still needs its own concrete evidence and authorization",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -1627,12 +1627,14 @@
     },
     {
       "id": "Q11",
-      "status": "partial-local-verification;release-gates-open",
-      "code_status": "current-status-docs-updated;runtime-unchanged",
-      "verification_status": "300root/18strictAPI/11UI/3LinuxSSR/3WindowsSSR pass;zero fail/skip;full release unverified",
+      "status": "partial-local-guidance;release-gates-open",
+      "code_status": "bounded capability responsibility/action contract and API; generated typed, scope-current en/zh-HK UI; archive-only compiler exclusions",
+      "verification_status": "19strictAPI/5finalguidanceUI/300reportedroot/3LinuxSSR/3WindowsSSR pass0fail/skip;intermediate15UIseparate",
       "release_status": "not-deployed",
-      "source_sha": "576c3b182819b392f8b73697457769d6f16a496c",
-      "cases": [],
+      "source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+      "cases": [
+        "R05"
+      ],
       "evidence": "docs/buyeros/CURRENT_STATUS.md",
       "local_verification_gates_followup": {
         "status": "local-test-gates-verified",
@@ -1733,6 +1735,103 @@
         "limits": "Fixture identities/SQL rows; API/DB and 11 actual Operations browser cases. No real auth/provider/full staff/recovery/performance/production evidence. Original302 and fullN00 open. No deployment.",
         "next_eligible": "Q11 local capability/readiness responsible role and concrete next action; N00 real compatibility separately blocked",
         "rollback": "Revert this metadata/evidence commit only; no runtime/data/DB rollback."
+      },
+      "capability_guidance_20261005": {
+        "checked_at": "2026-10-05T06:46:36.763406+00:00",
+        "checks": {
+          "api-red": {
+            "cases": 1,
+            "pass": 0,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "ui-red": {
+            "cases": 1,
+            "pass": 0,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "review-red": {
+            "cases": 1,
+            "pass": 0,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "api-green": {
+            "cases": 19,
+            "pass": 19,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "ui-green-first": {
+            "cases": 15,
+            "pass": 15,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "ui-final": {
+            "cases": 5,
+            "pass": 5,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "root-node": {
+            "cases": 299,
+            "pass": 299,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "reported_pass": 300,
+            "duration_ms": 67414.0489
+          },
+          "vercel-render-linux": {
+            "cases": 3,
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "vercel-render-windows": {
+            "cases": 3,
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          }
+        },
+        "typescript_exit": 0,
+        "source_lint_exit": 0,
+        "generated_contracts_exit": 0,
+        "operation_routes_exit": 0,
+        "build_exit": 0,
+        "original_artifacts_unchanged": 3200,
+        "all_prior_artifacts_unchanged": 3370,
+        "foreign_worktrees_unchanged": 3,
+        "review": "author only; independent review pending",
+        "live_verification": false,
+        "status": "local-guidance-and-regression-verified;full-Q11-open",
+        "source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "base_sha": "f53ebec2a02a354edf6a8a858c4ca2e10f7f5fca",
+        "branch": "codex/q11-capability-guidance",
+        "owner_role": "Release owner / SRE",
+        "code_changes": "bounded capability responsibility/action contract and API; generated typed, scope-current en/zh-HK UI; archive-only compiler exclusions",
+        "contract_operations": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "new_operations": 0,
+        "migrations": [],
+        "source_schema_head": "0037_bulk_manifests",
+        "deployed_sha": null,
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_CAPABILITY_GUIDANCE/RESULTS.md",
+        "limits": "API/PostgreSQL/RLS and actual browser use fictional identities. Final5 new UI; intermediate15=11 Operations+4 guidance before final contradiction guard. No real auth/provider/full staff/UAT/recovery/performance/production proof. FullQ11/N00 and F10/F13 external gates OPEN.",
+        "next_eligible": "N00 remaining local original-redirect/native containment/accounting gap audit; actual Neon/provider/production work still needs its own concrete evidence and authorization",
+        "rollback": "Revert the following metadata commit, then source 5aaf6492ec10078e4f1a4fa5b17efd41c5673eba as one contract/API/UI/test unit. No DB/data rollback."
       }
     },
     {
@@ -1860,16 +1959,17 @@
     "N00 full real-transport coverage/provider cleanup adapters next; fresh isolated actual auth roundtrip requires specific new approval",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "050f0d03e49e867c9e5364865d3dc5f17bdc8fec",
+  "reviewed_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
   "deployed_sha": null,
   "selected_followups": [
     "U05",
     "Q11 local verification gates",
     "Q10 independent local tools and current directory baseline",
     "N00 local built compatibility spike",
-    "N00 managed callback contract fixture follow-up"
+    "N00 managed callback contract fixture follow-up",
+    "Q11 local capability responsibility and next action"
   ],
-  "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+  "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
   "peer_q13_checkpoint": {
     "branch": "codex/q13-workspace-discovery",
     "source_sha": "fa198ae533be3dc93eda73bc45331c2d80eb9540",
@@ -1878,5 +1978,5 @@
     "proposed_schema_head": "0038_workspace_discovery",
     "merged_here": false
   },
-  "latest_local_verification_source_sha": "bb7a1ede078085dede0433cafd47078ea63a4e11"
+  "latest_local_verification_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba"
 }
