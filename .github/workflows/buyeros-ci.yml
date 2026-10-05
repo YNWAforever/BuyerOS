@@ -74,6 +74,9 @@ jobs:
       BUYEROS_STRICT_INTEGRATION: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Q06 replays exact historical polling source, not a synthetic baseline.
+          fetch-depth: 0
       # The mandatory owned-PG test drives the actual local Queue/Workflow runtime.
       - uses: pnpm/action-setup@v4
         with:
