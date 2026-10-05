@@ -16,17 +16,17 @@
     "Q10",
     "N00"
   ],
-  "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+  "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
       "id": "N00",
       "status": "local-spike-partial",
-      "code_status": "fixed fictional native worker counted IPC and network-none isolation; Auth0/application unchanged",
-      "verification_status": "308 reported root/307 JUnit leaves, native3 included; Chromium5/strict crypto8;0fail-error-skip; full containment/Neon/original302 OPEN",
-      "release_status": "not-deployed; full N00 open",
-      "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
-      "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+      "code_status": "counted fixture APIRequestContext/private cookies and ownership lifecycle;Auth0/application unchanged",
+      "verification_status": "318reported root/317JUnit leaves,newAPIcontext10;Chromium6/strictcrypto8;0fail-error-skip;fullN00/realNeon/original302 OPEN",
+      "release_status": "not-deployed;full N00 open",
+      "base_sha": "ad1a54510f6a0fb2485392c878e7e867e9def6be",
+      "source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
       "finding_ids": [
         "F20"
       ],
@@ -35,14 +35,22 @@
       ],
       "checks": {
         "node": {
-          "tests": 165,
-          "pass": 165,
+          "leaf_cases": 317,
           "fail": 0,
+          "error": 0,
           "skip": 0,
-          "cancelled": 0,
-          "todo": 0,
-          "duration_ms": 88448.9225,
-          "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
+          "pass": 317,
+          "attributes": {},
+          "reported": {
+            "tests": "318",
+            "pass": "318",
+            "fail": "0",
+            "cancelled": "0",
+            "skipped": "0",
+            "todo": "0",
+            "duration_ms": "519306.7825"
+          },
+          "source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
           "executed_this_followup": true
         },
         "built_ui": {
@@ -1177,11 +1185,255 @@
           "deployed_sha": null,
           "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
           "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+        },
+        "api_request_context": {
+          "status": "local-counted-APIRequestContext-verified;full-N00-open",
+          "source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
+          "base_sha": "ad1a54510f6a0fb2485392c878e7e867e9def6be",
+          "branch": "codex/n00-api-request-context",
+          "checked_at": "2026-10-05T17:21:02.560778+00:00",
+          "date_hk": "2026-10-06",
+          "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_API_REQUEST_CONTEXT/RESULTS.md",
+          "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+          "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+          "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+          "native_worker_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+          "checks": {
+            "red-node": {
+              "leaf_cases": 8,
+              "fail": 8,
+              "error": 0,
+              "skip": 0,
+              "pass": 0,
+              "attributes": {},
+              "reported": {
+                "tests": "8",
+                "pass": "0",
+                "fail": "8",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "1007.4626"
+              }
+            },
+            "red-browser": {
+              "leaf_cases": 6,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "pass": 5,
+              "attributes": {
+                "id": "",
+                "name": "",
+                "tests": "6",
+                "failures": "1",
+                "skipped": "0",
+                "errors": "0",
+                "time": "13.954609"
+              },
+              "reported": {}
+            },
+            "envelope-red": {
+              "leaf_cases": 8,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "pass": 7,
+              "attributes": {},
+              "reported": {
+                "tests": "8",
+                "pass": "7",
+                "fail": "1",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "6375.6904"
+              }
+            },
+            "root-first": {
+              "leaf_cases": 315,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "pass": 314,
+              "attributes": {},
+              "reported": {
+                "tests": "316",
+                "pass": "315",
+                "fail": "1",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "212366.4882"
+              }
+            },
+            "race-red": {
+              "leaf_cases": 9,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "pass": 8,
+              "attributes": {},
+              "reported": {
+                "tests": "9",
+                "pass": "8",
+                "fail": "1",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "5499.6881"
+              }
+            },
+            "race-red-both": {
+              "leaf_cases": 10,
+              "fail": 2,
+              "error": 0,
+              "skip": 0,
+              "pass": 8,
+              "attributes": {},
+              "reported": {
+                "tests": "10",
+                "pass": "8",
+                "fail": "2",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "5400.9806"
+              }
+            },
+            "green-final": {
+              "leaf_cases": 18,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "pass": 18,
+              "attributes": {},
+              "reported": {
+                "tests": "18",
+                "pass": "18",
+                "fail": "0",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "17454.2441"
+              }
+            },
+            "root-final": {
+              "leaf_cases": 317,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "pass": 317,
+              "attributes": {},
+              "reported": {
+                "tests": "318",
+                "pass": "318",
+                "fail": "0",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "519306.7825"
+              }
+            },
+            "browser-final": {
+              "leaf_cases": 6,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "pass": 6,
+              "attributes": {
+                "id": "",
+                "name": "",
+                "tests": "6",
+                "failures": "0",
+                "skipped": "0",
+                "errors": "0",
+                "time": "47.728449"
+              },
+              "reported": {}
+            },
+            "crypto": {
+              "leaf_cases": 8,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "pass": 8,
+              "attributes": {
+                "name": "pytest tests"
+              },
+              "reported": {}
+            }
+          },
+          "static_gates": {
+            "lint": 0,
+            "types": 0,
+            "routes": 0,
+            "contracts": 0,
+            "crypto": 0,
+            "browser": 0
+          },
+          "actual_context_observation": [
+            {
+              "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+              "name": "api-context-receipt",
+              "observation": {
+                "fixture_only": true,
+                "external_verified": false,
+                "http_requests": 2,
+                "reservations": 2,
+                "private_cookie_isolation": true,
+                "raw_context_os_contained": false
+              }
+            },
+            {
+              "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+              "name": "owned-api-context-cleanup",
+              "observation": {
+                "fixture_only": true,
+                "external_verified": false,
+                "owned_context_disposed": true
+              }
+            },
+            {
+              "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+              "name": "owned-cleanup",
+              "observation": {
+                "fixture_only": true,
+                "external_verified": false,
+                "owned_journal_removed": true,
+                "owned_servers_closed": true
+              }
+            }
+          ],
+          "new_node_cases": 10,
+          "new_browser_cases": 1,
+          "new_build": false,
+          "fixture_only": true,
+          "canonical_db_connection": false,
+          "required_DB_suite_for_new_protocol_cases": false,
+          "DB_skips": 0,
+          "real_Neon_verified": false,
+          "parent_os_contained": false,
+          "browser_os_contained": false,
+          "raw_APIRequestContext_os_contained": false,
+          "arbitrary_provider_cli_contained": false,
+          "external_auth_requests": 0,
+          "full_N00_open": true,
+          "original302_rerun": false,
+          "schema_head": "0037_bulk_manifests",
+          "migrations": 0,
+          "operation_count": 84,
+          "original_operations": 70,
+          "extensions": 14,
+          "independent_review": "pending",
+          "deployed_sha": null,
+          "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+          "rollback": "Revert following metadata commit then source4ba0a5d7757d5c9e4991593a13c0a2df217be511;reverse patch check0 only;retain admitted/unknown journal holds;no DB/data rollback."
         }
       },
       "migrations": "none;0037 unchanged",
       "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
-      "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds.",
+      "rollback": "Revert following metadata commit then source4ba0a5d7757d5c9e4991593a13c0a2df217be511;reverse patch check0 only;retain admitted/unknown journal holds;no DB/data rollback.",
       "limits": [
         "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
         "No Vercel ingress/protection/binding/deployment verification",
@@ -1193,7 +1445,7 @@
         "Independent review and true Neon/Google/managed cleanup/original302 remain OPEN"
       ],
       "full_gate_passed": false,
-      "next_action": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+      "next_action": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
       "cleanup_contract_followup": {
         "source_sha": "370a558492ef2c6617379c8923f2ce17c81da66f",
         "base_sha": "158e05f0b31e4c59776d39c6c2926f6ab8bf3fcd",
@@ -1705,6 +1957,272 @@
         "deployed_sha": null,
         "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
         "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+      },
+      "prior_native_ipc_summary_20261006": {
+        "code_status": "fixed fictional native worker counted IPC and network-none isolation; Auth0/application unchanged",
+        "verification_status": "308 reported root/307 JUnit leaves, native3 included; Chromium5/strict crypto8;0fail-error-skip; full containment/Neon/original302 OPEN",
+        "release_status": "not-deployed; full N00 open",
+        "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+        "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a"
+      },
+      "prior_latest_checks_fields_20261006": {
+        "node": {
+          "tests": 165,
+          "pass": 165,
+          "fail": 0,
+          "skip": 0,
+          "cancelled": 0,
+          "todo": 0,
+          "duration_ms": 88448.9225,
+          "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
+          "executed_this_followup": true
+        },
+        "types_exit": 0,
+        "lint_exit": 0
+      },
+      "api_request_context_20261006": {
+        "status": "local-counted-APIRequestContext-verified;full-N00-open",
+        "source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
+        "base_sha": "ad1a54510f6a0fb2485392c878e7e867e9def6be",
+        "branch": "codex/n00-api-request-context",
+        "checked_at": "2026-10-05T17:21:02.560778+00:00",
+        "date_hk": "2026-10-06",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_API_REQUEST_CONTEXT/RESULTS.md",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+        "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+        "native_worker_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+        "checks": {
+          "red-node": {
+            "leaf_cases": 8,
+            "fail": 8,
+            "error": 0,
+            "skip": 0,
+            "pass": 0,
+            "attributes": {},
+            "reported": {
+              "tests": "8",
+              "pass": "0",
+              "fail": "8",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "1007.4626"
+            }
+          },
+          "red-browser": {
+            "leaf_cases": 6,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "pass": 5,
+            "attributes": {
+              "id": "",
+              "name": "",
+              "tests": "6",
+              "failures": "1",
+              "skipped": "0",
+              "errors": "0",
+              "time": "13.954609"
+            },
+            "reported": {}
+          },
+          "envelope-red": {
+            "leaf_cases": 8,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "pass": 7,
+            "attributes": {},
+            "reported": {
+              "tests": "8",
+              "pass": "7",
+              "fail": "1",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "6375.6904"
+            }
+          },
+          "root-first": {
+            "leaf_cases": 315,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "pass": 314,
+            "attributes": {},
+            "reported": {
+              "tests": "316",
+              "pass": "315",
+              "fail": "1",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "212366.4882"
+            }
+          },
+          "race-red": {
+            "leaf_cases": 9,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "pass": 8,
+            "attributes": {},
+            "reported": {
+              "tests": "9",
+              "pass": "8",
+              "fail": "1",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "5499.6881"
+            }
+          },
+          "race-red-both": {
+            "leaf_cases": 10,
+            "fail": 2,
+            "error": 0,
+            "skip": 0,
+            "pass": 8,
+            "attributes": {},
+            "reported": {
+              "tests": "10",
+              "pass": "8",
+              "fail": "2",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "5400.9806"
+            }
+          },
+          "green-final": {
+            "leaf_cases": 18,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 18,
+            "attributes": {},
+            "reported": {
+              "tests": "18",
+              "pass": "18",
+              "fail": "0",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "17454.2441"
+            }
+          },
+          "root-final": {
+            "leaf_cases": 317,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 317,
+            "attributes": {},
+            "reported": {
+              "tests": "318",
+              "pass": "318",
+              "fail": "0",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "519306.7825"
+            }
+          },
+          "browser-final": {
+            "leaf_cases": 6,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 6,
+            "attributes": {
+              "id": "",
+              "name": "",
+              "tests": "6",
+              "failures": "0",
+              "skipped": "0",
+              "errors": "0",
+              "time": "47.728449"
+            },
+            "reported": {}
+          },
+          "crypto": {
+            "leaf_cases": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 8,
+            "attributes": {
+              "name": "pytest tests"
+            },
+            "reported": {}
+          }
+        },
+        "static_gates": {
+          "lint": 0,
+          "types": 0,
+          "routes": 0,
+          "contracts": 0,
+          "crypto": 0,
+          "browser": 0
+        },
+        "actual_context_observation": [
+          {
+            "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+            "name": "api-context-receipt",
+            "observation": {
+              "fixture_only": true,
+              "external_verified": false,
+              "http_requests": 2,
+              "reservations": 2,
+              "private_cookie_isolation": true,
+              "raw_context_os_contained": false
+            }
+          },
+          {
+            "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+            "name": "owned-api-context-cleanup",
+            "observation": {
+              "fixture_only": true,
+              "external_verified": false,
+              "owned_context_disposed": true
+            }
+          },
+          {
+            "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+            "name": "owned-cleanup",
+            "observation": {
+              "fixture_only": true,
+              "external_verified": false,
+              "owned_journal_removed": true,
+              "owned_servers_closed": true
+            }
+          }
+        ],
+        "new_node_cases": 10,
+        "new_browser_cases": 1,
+        "new_build": false,
+        "fixture_only": true,
+        "canonical_db_connection": false,
+        "required_DB_suite_for_new_protocol_cases": false,
+        "DB_skips": 0,
+        "real_Neon_verified": false,
+        "parent_os_contained": false,
+        "browser_os_contained": false,
+        "raw_APIRequestContext_os_contained": false,
+        "arbitrary_provider_cli_contained": false,
+        "external_auth_requests": 0,
+        "full_N00_open": true,
+        "original302_rerun": false,
+        "schema_head": "0037_bulk_manifests",
+        "migrations": 0,
+        "operation_count": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "independent_review": "pending",
+        "deployed_sha": null,
+        "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+        "rollback": "Revert following metadata commit then source4ba0a5d7757d5c9e4991593a13c0a2df217be511;reverse patch check0 only;retain admitted/unknown journal holds;no DB/data rollback."
       }
     },
     {
@@ -2498,7 +3016,7 @@
     "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
     "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
   ],
-  "reviewed_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+  "reviewed_source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
   "deployed_sha": null,
   "selected_followups": [
     "U05",
@@ -2520,5 +3038,5 @@
     "proposed_schema_head": "0038_workspace_discovery",
     "merged_here": false
   },
-  "latest_local_verification_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a"
+  "latest_local_verification_source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511"
 }

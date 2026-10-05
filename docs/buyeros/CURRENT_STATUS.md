@@ -1,3 +1,22 @@
+# Current N00 counted APIRequestContext checkpoint — 2026-10-06
+
+Author-reviewed source `4ba0a5d7757d5c9e4991593a13c0a2df217be511` on `codex/n00-api-request-context`. **Full N00 / NA01 / F20 OPEN.** [Exact commands,raw attempts,screenshot and rollback](evidence/audit-fixes-20261003/N00_API_REQUEST_CONTEXT/RESULTS.md).
+
+| Current field | Verified scope |
+| --- | --- |
+| Code |Standalone fixed fixture APIRequestContext through original journal;private cookies;zero wire redirects/retries;owner/target checks across body/dispose |
+| RED → GREEN |Missing adapter8fail;Chromium5pass1fail;body/disposal races8pass2fail;final new10 pass |
+| Fresh root |318reported/317leaves pass;0fail/error/skip;519306.7825ms |
+| Fresh other gates |Chromium6/strictcrypto8 pass;0fail/error/skip/globalerror;types/scopedlint/generated84/routes0 |
+| Integration |Actual loopback HTTP;two reserved manual hops;unknown/accepted holds after context/journal restart;cookie isolation;foreign redirect sink0 |
+| Preservation |3659 prior artifacts/threeforeign trees/193dirty paths unchanged;actual context/server/journal cleanup;owned Docker labels0 |
+| Limits |Full parent/broker/browser/control-plane/rawcontext/arbitraryCLI OS isolation,live Neon/Google/Admincleanup/original302/independent review OPEN |
+| Contracts/schema |70original+14extensions unchanged;0037 head;0migrations/build/deploy |
+| Application |5aaf649 unchanged;Auth0/canonical actors/RLS/HMAC/delivery403 retained;deployedSHA unproven/null for this slice |
+| Next |Local OS feasibility/composition;fresh exact real authorization after full harness review |
+
+## Historical checkpoints below
+
 # Current N00 counted native IPC checkpoint — 2026-10-05
 
 Author-reviewed local source `779138aa5335eb829a97a80bbc80430a32201c1a` on `codex/n00-native-ipc-isolation`. **Full N00 / NA01 / F20 remains OPEN.** [Commands, exact raw outputs, probes, screenshot and rollback](evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md).

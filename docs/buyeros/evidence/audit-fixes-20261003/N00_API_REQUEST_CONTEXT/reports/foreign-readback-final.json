@@ -1,0 +1,29 @@
+{
+  "checked_at": "2026-10-05T17:30:09.304682+00:00",
+  "worktrees": [
+    {
+      "path": "C:/Users/laich/Documents/BuyerOS",
+      "head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+      "branch": "codex/fix-vercel-tslib-ssr",
+      "dirty_paths": 0,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    },
+    {
+      "path": "C:/Users/laich/.codex/worktrees/audit-fixes-20261003/BuyerOS",
+      "head": "55f81338e5d12948279b6f095787aa03e6038242",
+      "branch": "codex/q13-workspace-discovery",
+      "dirty_paths": 0,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    },
+    {
+      "path": "C:/Users/laich/.codex/worktrees/neon-auth-migration/BuyerOS",
+      "head": "a78859fe474f5722be3755b10e2586436b53bf97",
+      "branch": "codex/neon-auth-migration",
+      "dirty_paths": 193,
+      "diff_sha256": "32ad7260ed5da5c8f2b20dd2ff1a8b526548daf35e8e71efc4bd90c70863b2b0",
+      "unchanged": true
+    }
+  ]
+}

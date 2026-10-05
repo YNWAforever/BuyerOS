@@ -1,0 +1,75 @@
+[
+  {
+    "name": "owned-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_journal_removed": true,
+      "owned_servers_closed": true
+    }
+  },
+  {
+    "name": "owned-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_journal_removed": true,
+      "owned_servers_closed": true
+    }
+  },
+  {
+    "name": "owned-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_journal_removed": true,
+      "owned_servers_closed": true
+    }
+  },
+  {
+    "name": "owned-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_journal_removed": true,
+      "owned_servers_closed": true
+    }
+  },
+  {
+    "name": "owned-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_journal_removed": true,
+      "owned_servers_closed": true
+    }
+  },
+  {
+    "name": "api-context-receipt",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "http_requests": 2,
+      "reservations": 2,
+      "private_cookie_isolation": true,
+      "raw_context_os_contained": false
+    }
+  },
+  {
+    "name": "owned-api-context-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_context_disposed": true
+    }
+  },
+  {
+    "name": "owned-cleanup",
+    "value": {
+      "fixture_only": true,
+      "external_verified": false,
+      "owned_journal_removed": true,
+      "owned_servers_closed": true
+    }
+  }
+]

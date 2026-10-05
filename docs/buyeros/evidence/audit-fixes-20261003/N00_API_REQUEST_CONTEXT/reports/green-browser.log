@@ -1,0 +1,13 @@
+
+Running 6 tests using 1 worker
+
+(node:61596) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\e2e\audit-neon-execution.spec.ts:19:1 › NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget (1.9s)
+  ok 2 tests\e2e\audit-neon-execution.spec.ts:30:1 › NA01 accounting: browser origin and direct-network refusals dispatch no provider HTTP (407ms)
+  ok 3 tests\e2e\audit-neon-execution.spec.ts:37:1 › NA01 accounting: browser refresh and a reconstructed journal cannot replay an unknown write (384ms)
+  ok 4 tests\e2e\audit-neon-execution.spec.ts:47:1 › NA01 containment: native WebSockets cannot bypass HTTP routing before or after refresh (570ms)
+  ok 5 tests\e2e\audit-neon-execution.spec.ts:71:1 › NA01 containment: blocked service workers issue no physical script request (250ms)
+  ok 6 tests\e2e\audit-neon-execution.spec.ts:84:1 › NA01 counted APIRequestContext: private cookies and two manual hops through the original journal (1.1s)
+
+  6 passed (8.3s)

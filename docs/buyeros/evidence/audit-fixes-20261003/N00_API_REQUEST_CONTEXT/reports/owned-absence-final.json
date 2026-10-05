@@ -1,0 +1,30 @@
+{
+  "containers": {
+    "ids": [],
+    "exit": 0,
+    "command": [
+      "docker",
+      "ps",
+      "-a",
+      "--filter",
+      "label=buyeros.n00.native.owner",
+      "--format",
+      "{{.ID}}"
+    ]
+  },
+  "networks": {
+    "ids": [],
+    "exit": 0,
+    "command": [
+      "docker",
+      "network",
+      "ls",
+      "--filter",
+      "label=buyeros.n00.native.owner",
+      "--format",
+      "{{.ID}}"
+    ]
+  },
+  "checked_at": "2026-10-05T17:10:14.849340+00:00",
+  "scope": "only buyeros.n00.native.owner labelled resources"
+}

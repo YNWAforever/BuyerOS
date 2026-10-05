@@ -1,0 +1,234 @@
+{
+  "browser-final": {
+    "leaf_cases": 6,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "pass": 6,
+    "attributes": {
+      "id": "",
+      "name": "",
+      "tests": "6",
+      "failures": "0",
+      "skipped": "0",
+      "errors": "0",
+      "time": "47.728449"
+    },
+    "reported": {}
+  },
+  "crypto": {
+    "leaf_cases": 8,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "pass": 8,
+    "attributes": {
+      "name": "pytest tests"
+    },
+    "reported": {}
+  },
+  "envelope-red": {
+    "leaf_cases": 8,
+    "fail": 1,
+    "error": 0,
+    "skip": 0,
+    "pass": 7,
+    "attributes": {},
+    "reported": {
+      "tests": "8",
+      "pass": "7",
+      "fail": "1",
+      "cancelled": "0",
+      "skipped": "0",
+      "todo": "0",
+      "duration_ms": "6375.6904"
+    }
+  },
+  "green-browser": {
+    "leaf_cases": 6,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "pass": 6,
+    "attributes": {
+      "id": "",
+      "name": "",
+      "tests": "6",
+      "failures": "0",
+      "skipped": "0",
+      "errors": "0",
+      "time": "8.325036"
+    },
+    "reported": {}
+  },
+  "green-final": {
+    "leaf_cases": 18,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "pass": 18,
+    "attributes": {},
+    "reported": {
+      "tests": "18",
+      "pass": "18",
+      "fail": "0",
+      "cancelled": "0",
+      "skipped": "0",
+      "todo": "0",
+      "duration_ms": "17454.2441"
+    }
+  },
+  "green-node-final": {
+    "leaf_cases": 8,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "pass": 8,
+    "attributes": {},
+    "reported": {
+      "tests": "8",
+      "pass": "8",
+      "fail": "0",
+      "cancelled": "0",
+      "skipped": "0",
+      "todo": "0",
+      "duration_ms": "7211.4687"
+    }
+  },
+  "green-node": {
+    "leaf_cases": 8,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "pass": 8,
+    "attributes": {},
+    "reported": {
+      "tests": "8",
+      "pass": "8",
+      "fail": "0",
+      "cancelled": "0",
+      "skipped": "0",
+      "todo": "0",
+      "duration_ms": "7031.4948"
+    }
+  },
+  "race-red-both": {
+    "leaf_cases": 10,
+    "fail": 2,
+    "error": 0,
+    "skip": 0,
+    "pass": 8,
+    "attributes": {},
+    "reported": {
+      "tests": "10",
+      "pass": "8",
+      "fail": "2",
+      "cancelled": "0",
+      "skipped": "0",
+      "todo": "0",
+      "duration_ms": "5400.9806"
+    }
+  },
+  "race-red": {
+    "leaf_cases": 9,
+    "fail": 1,
+    "error": 0,
+    "skip": 0,
+    "pass": 8,
+    "attributes": {},
+    "reported": {
+      "tests": "9",
+      "pass": "8",
+      "fail": "1",
+      "cancelled": "0",
+      "skipped": "0",
+      "todo": "0",
+      "duration_ms": "5499.6881"
+    }
+  },
+  "red-browser": {
+    "leaf_cases": 6,
+    "fail": 1,
+    "error": 0,
+    "skip": 0,
+    "pass": 5,
+    "attributes": {
+      "id": "",
+      "name": "",
+      "tests": "6",
+      "failures": "1",
+      "skipped": "0",
+      "errors": "0",
+      "time": "13.954609"
+    },
+    "reported": {}
+  },
+  "red-node": {
+    "leaf_cases": 8,
+    "fail": 8,
+    "error": 0,
+    "skip": 0,
+    "pass": 0,
+    "attributes": {},
+    "reported": {
+      "tests": "8",
+      "pass": "0",
+      "fail": "8",
+      "cancelled": "0",
+      "skipped": "0",
+      "todo": "0",
+      "duration_ms": "1007.4626"
+    }
+  },
+  "root-final": {
+    "leaf_cases": 317,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "pass": 317,
+    "attributes": {},
+    "reported": {
+      "tests": "318",
+      "pass": "318",
+      "fail": "0",
+      "cancelled": "0",
+      "skipped": "0",
+      "todo": "0",
+      "duration_ms": "519306.7825"
+    }
+  },
+  "root-first": {
+    "leaf_cases": 315,
+    "fail": 1,
+    "error": 0,
+    "skip": 0,
+    "pass": 314,
+    "attributes": {},
+    "reported": {
+      "tests": "316",
+      "pass": "315",
+      "fail": "1",
+      "cancelled": "0",
+      "skipped": "0",
+      "todo": "0",
+      "duration_ms": "212366.4882"
+    }
+  },
+  "root-green": {
+    "leaf_cases": 315,
+    "fail": 1,
+    "error": 0,
+    "skip": 0,
+    "pass": 314,
+    "attributes": {},
+    "reported": {
+      "tests": "316",
+      "pass": "315",
+      "fail": "1",
+      "cancelled": "0",
+      "skipped": "0",
+      "todo": "0",
+      "duration_ms": "212366.4882"
+    }
+  }
+}

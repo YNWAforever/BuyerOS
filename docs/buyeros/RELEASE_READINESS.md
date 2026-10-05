@@ -1,3 +1,9 @@
+# Current release decision — NOT READY (2026-10-06)
+
+Local fixture harness source `4ba0a5d7757d5c9e4991593a13c0a2df217be511`:counted APIRequestContext/ownership lifecycle verified;root318reported/317leaves,Chromium6,crypto8 pass0fail/error/skip;types/scopedlint/generated84/routes0. Actual two-hop/private-cookie/hold/restart/body-disposal race checks pass;context/server/journal cleanup and owned Docker labels0 confirmed. Full N00/F20/NA01/original302/live Neon/Google/Admincleanup/parent-browser-control-plane/rawcontext-arbitraryCLI OS isolation/independent review/live staff OPEN. Auth0/canonical actors/RLS/HMAC/delivery403 retained. No build,migration,push,remotePR,provider/production/Cloudflare action or deploy;production source not asserted. [Evidence/rollback](evidence/audit-fixes-20261003/N00_API_REQUEST_CONTEXT/RESULTS.md). Older records retain historical scope.
+
+## Historical release decisions below
+
 # Current release decision — NOT READY (2026-10-05)
 
 Local harness source `779138aa5335eb829a97a80bbc80430a32201c1a`: fixed-native counted IPC and network-none child verified; root308 reported/307leaves, Chromium5, crypto8 pass0fail/error/skip; types/lint/generated84 exit0. Actual own sink/control exercises native3HTTP+TCP; isolated child's4native paths refuse/0directHTTP; owned containers/networks removed with absence confirmed. Parent/broker/browser/APIRequestContext/arbitrary provider CLI/control-plane are outside this child's OS boundary and remain OPEN. Full N00/original302/realNeon/Google/Admincleanup/independent review/live staff gates OPEN. Auth0/canonical actors/RLS/HMAC/delivery403 retained. No new build, migration, push, external provider action or deployment; production source not asserted. [Evidence/rollback](evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md). Historical release records below retain their original scope.

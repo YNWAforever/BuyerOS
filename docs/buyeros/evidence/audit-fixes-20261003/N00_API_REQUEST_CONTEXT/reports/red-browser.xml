@@ -1,0 +1,51 @@
+<testsuites id="" name="" tests="6" failures="1" skipped="0" errors="0" time="13.954609">
+<testsuite name="audit-neon-execution.spec.ts" timestamp="2026-10-05T16:34:13.168Z" hostname="" tests="6" failures="1" skipped="0" time="4.836" errors="0">
+<testcase name="NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget" classname="audit-neon-execution.spec.ts" time="1.942">
+</testcase>
+<testcase name="NA01 accounting: browser origin and direct-network refusals dispatch no provider HTTP" classname="audit-neon-execution.spec.ts" time="0.532">
+</testcase>
+<testcase name="NA01 accounting: browser refresh and a reconstructed journal cannot replay an unknown write" classname="audit-neon-execution.spec.ts" time="1.005">
+</testcase>
+<testcase name="NA01 containment: native WebSockets cannot bypass HTTP routing before or after refresh" classname="audit-neon-execution.spec.ts" time="0.774">
+</testcase>
+<testcase name="NA01 containment: blocked service workers issue no physical script request" classname="audit-neon-execution.spec.ts" time="0.294">
+</testcase>
+<testcase name="NA01 counted APIRequestContext: private cookies and two manual hops through the original journal" classname="audit-neon-execution.spec.ts" time="0.289">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|browser\audit-neon-execution-NA01--e9c48-hrough-the-original-journal\error-context.md]]
+
+[[ATTACHMENT|browser\audit-neon-execution-NA01--e9c48-hrough-the-original-journal\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">
+<![CDATA[  audit-neon-execution.spec.ts:84:1 › NA01 counted APIRequestContext: private cookies and two manual hops through the original journal 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "function"
+    Received: "undefined"
+
+      83 |
+      84 | test('NA01 counted APIRequestContext: private cookies and two manual hops through the original journal',async({page},testInfo)=>{
+    > 85 |  const adapter=await import('../../scripts/neon-api-request-context.mjs').catch(error=>{if(error.code!=='ERR_MODULE_NOT_FOUND')throw error;return null;});expect(typeof adapter?.createFixtureApiRequestContext).toBe('function');if(!adapter)throw new Error('Missing counted API request context');
+         |                                                                                                                                                                                                                  ^
+      86 |  const fixture=await executionFixture(undefined);let client:Awaited<ReturnType<typeof adapter.createFixtureApiRequestContext>>|undefined;
+      87 |  try {
+      88 |   const execution=createFixtureExecutionBoundary({backend:fixture.backend,journal:fixture.journal}),gateway=createFixtureExecutionGateway({execution,nonce});fixture.servers.push(gateway);const url=await listen(gateway);const cookies:(string|null)[]=[];gateway.on('request',req=>{if(req.url==='/dispatch')cookies.push(req.headers.cookie??null);});
+        at C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e\audit-neon-execution.spec.ts:85:210
+
+    Error Context: ..\..\test-results\neon-execution\browser\audit-neon-execution-NA01--e9c48-hrough-the-original-journal\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\neon-execution\browser\audit-neon-execution-NA01--e9c48-hrough-the-original-journal\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\neon-execution\browser\audit-neon-execution-NA01--e9c48-hrough-the-original-journal\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

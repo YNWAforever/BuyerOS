@@ -1,0 +1,2524 @@
+{
+  "scope": [
+    "Q11",
+    "Q01",
+    "Q03",
+    "Q04",
+    "Q15",
+    "Q02",
+    "Q05",
+    "Q06",
+    "Q07",
+    "Q12",
+    "Q08",
+    "Q14",
+    "Q09",
+    "Q10",
+    "N00"
+  ],
+  "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+  "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "tasks": [
+    {
+      "id": "N00",
+      "status": "local-spike-partial",
+      "code_status": "fixed fictional native worker counted IPC and network-none isolation; Auth0/application unchanged",
+      "verification_status": "308 reported root/307 JUnit leaves, native3 included; Chromium5/strict crypto8;0fail-error-skip; full containment/Neon/original302 OPEN",
+      "release_status": "not-deployed; full N00 open",
+      "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+      "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+      "finding_ids": [
+        "F20"
+      ],
+      "cases": [
+        "NA01"
+      ],
+      "checks": {
+        "node": {
+          "tests": 165,
+          "pass": 165,
+          "fail": 0,
+          "skip": 0,
+          "cancelled": 0,
+          "todo": 0,
+          "duration_ms": 88448.9225,
+          "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
+          "executed_this_followup": true
+        },
+        "built_ui": {
+          "portable": {
+            "target": "portable",
+            "run_nonce": "e94f786ad235",
+            "cases": 7,
+            "pass": 6,
+            "fail": 1,
+            "skip": 0,
+            "junit_errors": 0,
+            "global_errors": 0,
+            "time": "55.428903999999996",
+            "cli_exit": 1,
+            "fixture_only": true,
+            "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
+            "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
+            "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+            "executed_this_followup": false,
+            "new_real_runtime_overlay_exercised": false,
+            "historical_checkpoint_only": true
+          },
+          "vercel": {
+            "target": "vercel",
+            "run_nonce": "c07e49d328af",
+            "cases": 7,
+            "pass": 6,
+            "fail": 1,
+            "skip": 0,
+            "junit_errors": 0,
+            "global_errors": 0,
+            "time": "19.568469",
+            "cli_exit": 1,
+            "fixture_only": true,
+            "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
+            "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
+            "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+            "executed_this_followup": false,
+            "new_real_runtime_overlay_exercised": false,
+            "historical_checkpoint_only": true
+          }
+        },
+        "new_callback_cases": {
+          "per_target": 2,
+          "pass": 2,
+          "fail": 0,
+          "skip": 0,
+          "red_observed": true,
+          "historical_checkpoint_only": true,
+          "executed_this_followup": false
+        },
+        "api_carried": {
+          "executed_this_followup": false,
+          "prior_pass": 34,
+          "prior_fail": 0,
+          "prior_skip": 0,
+          "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6",
+          "historical_checkpoint_only": true
+        },
+        "types_exit": 0,
+        "lint_exit": 0,
+        "real_preflight": {
+          "related_node": {
+            "tests": 68,
+            "pass": 68,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 10003.4381
+          },
+          "new_cases": 36,
+          "types_exit": 0,
+          "lint_exit": 0,
+          "external_requests": 0,
+          "built_runtime_verified": false,
+          "no_external_executor": true,
+          "historical_checkpoint_only": true,
+          "executed_this_followup": false
+        },
+        "counted_transport": {
+          "related_node": {
+            "tests": 80,
+            "pass": 80,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 9064.3264
+          },
+          "new_HTTP_cases": 11,
+          "new_discovery_cases": 1,
+          "fixture_budgets": {
+            "portable": {
+              "fixture_only": true,
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_requests": 0,
+              "run_nonce": "3c8f7aa30db0"
+            },
+            "vercel": {
+              "fixture_only": true,
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_requests": 0,
+              "run_nonce": "c5245a954fcb"
+            }
+          },
+          "types_exit": 0,
+          "lint_exit": 0,
+          "contracts_exit": 0,
+          "real_runtime_verified": false,
+          "no_external_executor": true,
+          "historical_checkpoint_only": true,
+          "executed_this_followup": false
+        },
+        "new_counted_SDK_cases": {
+          "per_target": 2,
+          "pass": 2,
+          "fail": 0,
+          "skip": 0,
+          "red_observed": true
+        },
+        "real_runtime_preparation": {
+          "related_node": {
+            "tests": 110,
+            "pass": 110,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 13491.6775
+          },
+          "new_unit_cases": 30,
+          "new_unit_green": {
+            "tests": 30,
+            "pass": 30,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 800.5488
+          },
+          "new_unit_red": {
+            "tests": 30,
+            "pass": 0,
+            "fail": 30,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 553.1382
+          },
+          "types_red_exit": 2,
+          "types_red_error": "TS2578: unused @ts-expect-error exposed any SDK inference",
+          "types_final_exit": 0,
+          "lint_final_exit": 0,
+          "contracts_exit": 0,
+          "built_fixture_ui": {
+            "portable": {
+              "target": "portable",
+              "run_nonce": "e94f786ad235",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "55.428903999999996",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            },
+            "vercel": {
+              "target": "vercel",
+              "run_nonce": "c07e49d328af",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "19.568469",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
+              "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            }
+          },
+          "all_ui_attempts": [
+            {
+              "target": "portable",
+              "run_nonce": "7f2d941e8c63",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 1,
+              "time": "76.717208",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            },
+            {
+              "target": "portable",
+              "run_nonce": "5bdaf49c6e02",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 1,
+              "time": "53.492132",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-5bdaf49c6e02-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui-attempt2.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            },
+            {
+              "target": "portable",
+              "run_nonce": "e94f786ad235",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "55.428903999999996",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            },
+            {
+              "target": "vercel",
+              "run_nonce": "c07e49d328af",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "19.568469",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
+              "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            }
+          ],
+          "fixture_budgets": {
+            "portable": {
+              "fixture_only": true,
+              "run_nonce": "e94f786ad235",
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_auth_requests": 0
+            },
+            "vercel": {
+              "fixture_only": true,
+              "run_nonce": "c07e49d328af",
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_auth_requests": 0
+            }
+          },
+          "cleanup_error_gate": {
+            "red_attempts": 2,
+            "final_global_errors": 0,
+            "native_taskkill_timeout_ms": 15000,
+            "owned_stop_timeout_ms": 18000,
+            "global_teardown_timeout_ms": 20000,
+            "fixed_delay_replaced_with_bounded_OS_absence_poll": true
+          },
+          "null_target_exit": 1,
+          "null_target_error": "N00_REAL_TARGET_REQUIRED",
+          "alembic_heads_exit": 0,
+          "head": "0037_bulk_manifests",
+          "migrations": 0,
+          "DB_connections": 0,
+          "required_DB_suite_applicable": false,
+          "DB_skips": 0
+        },
+        "real_runtime_overlay": {
+          "SDK_version": "0.5.0-beta",
+          "strict_types_verified": true,
+          "request_lazy_constructor_boundary_unit_fixture_verified": true,
+          "constructor_in_unit_tests": "instrumented fixture; not official SDK runtime",
+          "built": true,
+          "actual_official_SDK_runtime_config_verified": true,
+          "node_crypto_in_new_workerd_bundle_verified": true,
+          "real_Neon_verified": false,
+          "human_Google_flow_verified": false,
+          "full_provider_browser_CLI_accounting_verified": false,
+          "real_HTTP_cleanup_executor_implemented": false,
+          "verification_scope": "fictional exact-context constructor/config/kernel only; not live trust or session/token",
+          "kernel_pass_per_output": 6
+        },
+        "runtime_built": {
+          "base": "1df7b4cb1b46a25b9019adf05bd4cd46cf2a7fa3",
+          "reviewed_source_sha": "e683a89225863387367bda204f84aa168f6abefb",
+          "deployed_sha": null,
+          "date_hk": "2026-10-05",
+          "scope": "N00/F20/NA01 SDK configuration/constructor kernel on actual built output; fixture only",
+          "source_files": 16,
+          "insertions": 305,
+          "deletions": 8,
+          "node": {
+            "cases": 126,
+            "pass": 126,
+            "fail": 0,
+            "skip": 0,
+            "duration_ms": 12046.3406
+          },
+          "unit_red": {
+            "cases": 10,
+            "pass": 1,
+            "fail": 9,
+            "skip": 0
+          },
+          "cleanup_unit_red": {
+            "cases": 6,
+            "pass": 0,
+            "fail": 6,
+            "skip": 0
+          },
+          "baseline_ui_red": {
+            "cases": 3,
+            "pass": 0,
+            "fail": 3,
+            "skip": 0,
+            "startup_error": false
+          },
+          "built_kernel_acceptance": {
+            "runs": [
+              {
+                "target": "portable",
+                "scenario": "valid",
+                "run_nonce": "7c2d4e6f8012",
+                "cases": 3,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 25.754606,
+                "report": "test-results\\neon-runtime-built\\portable-valid-7c2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 3,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "valid",
+                "run_nonce": "8c2d4e6f8012",
+                "cases": 3,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 58.192747000000004,
+                "report": "test-results\\neon-runtime-built\\vercel-valid-8c2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 3,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "portable",
+                "scenario": "missing",
+                "run_nonce": "9c2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 14.652927,
+                "report": "test-results\\neon-runtime-built\\portable-missing-9c2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "portable",
+                "scenario": "mismatch",
+                "run_nonce": "ac2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 5.165832999999999,
+                "report": "test-results\\neon-runtime-built\\portable-mismatch-ac2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "portable",
+                "scenario": "expired",
+                "run_nonce": "bc2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 5.485215,
+                "report": "test-results\\neon-runtime-built\\portable-expired-bc2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "missing",
+                "run_nonce": "cc2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 3.4644040000000005,
+                "report": "test-results\\neon-runtime-built\\vercel-missing-cc2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "mismatch",
+                "run_nonce": "dc2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 2.5879090000000002,
+                "report": "test-results\\neon-runtime-built\\vercel-mismatch-dc2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "expired",
+                "run_nonce": "ec2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 3.8016680000000003,
+                "report": "test-results\\neon-runtime-built\\vercel-expired-ec2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              }
+            ],
+            "total_cases": 12,
+            "pass": 12,
+            "fail": 0,
+            "skip": 0,
+            "global_errors": 0,
+            "scope": "SDK constructor/config/kernel only; no session/token/provider verification"
+          },
+          "startup_failures_retained": 2,
+          "prior_portable_cleanup_global_failures_retained": 2,
+          "build_attempts": 3,
+          "actual_build_commands": 6,
+          "all_build_exits": 0,
+          "types_exit": 0,
+          "lint_exit": 0,
+          "contracts_exit": 0,
+          "schema_head": "0037_bulk_manifests",
+          "migrations": 0,
+          "DB_connections": 0,
+          "required_DB_suite_applicable": false,
+          "DB_skips": 0,
+          "sdk_constructor_official": true,
+          "new_runtime_node_crypto_in_workerd_verified": true,
+          "session_token_handler_or_middleware_exercised_by_kernel": false,
+          "real_Neon_verified": false,
+          "human_Google_verified": false,
+          "full_SDK_browser_CLI_provider_accounting_verified": false,
+          "external_auth_requests": 0,
+          "independent_review": "pending; author review only; no agents",
+          "full_N00_gate_passed": false,
+          "original_callback_case": "carried unchanged: portable500/vercel200 vs302; not rerun or relaxed in this follow-up",
+          "rollback_reverse_check_exit": 0
+        },
+        "runtime_flow": {
+          "task": "N00",
+          "finding": "F20",
+          "case": "NA01",
+          "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
+          "base_sha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+          "files": 27,
+          "insertions": 518,
+          "deletions": 1,
+          "node": {
+            "tests": 144,
+            "pass": 144,
+            "fail": 0,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 66617.2528,
+            "concurrency": 1,
+            "retained_parallel_attempt": {
+              "tests": 144,
+              "pass": 143,
+              "fail": 1,
+              "skip": 0,
+              "reason": "existing40ms500-response case received503; precise host cause unproven; assertions unchanged"
+            }
+          },
+          "crypto": {
+            "cases": 8,
+            "pass": 8,
+            "fail": 0,
+            "skip": 0,
+            "warnings": 1,
+            "duration_s": 1.51
+          },
+          "built_ui": {
+            "cases": 10,
+            "pass": 10,
+            "fail": 0,
+            "skip": 0,
+            "global_errors": 0,
+            "results": [
+              {
+                "target": "vercel",
+                "run_nonce": "5105aabbccdd",
+                "cases": 5,
+                "pass": 5,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "global_errors": 0,
+                "fixture_only": true,
+                "duration_s": 67.400413,
+                "auth_HTTP_requests": 30,
+                "forwarded": 30,
+                "accepted": 29,
+                "rejected": 1,
+                "pending": 0,
+                "unknown": 0,
+                "external_auth_requests": 0,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0,
+                  "owned_journal_removed": true
+                },
+                "leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2391,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                }
+              },
+              {
+                "target": "portable",
+                "run_nonce": "6105aabbccdd",
+                "cases": 5,
+                "pass": 5,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "global_errors": 0,
+                "fixture_only": true,
+                "duration_s": 26.082383999999998,
+                "auth_HTTP_requests": 30,
+                "forwarded": 30,
+                "accepted": 29,
+                "rejected": 1,
+                "pending": 0,
+                "unknown": 0,
+                "external_auth_requests": 0,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0,
+                  "owned_journal_removed": true
+                },
+                "leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 91,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                }
+              }
+            ],
+            "post_build_source_changes": [
+              "playwright.neon-runtime-flow.config.ts",
+              "scripts/serve-neon-runtime-flow.mjs"
+            ],
+            "changes_scope": "local launcher/Playwright startup only; no consumed app/SDK/output changes",
+            "full_N00_gate_passed": false
+          },
+          "types_exit": 0,
+          "lint_exit": 0,
+          "generated_types_exit": 0,
+          "generated_routes_exit": 0,
+          "actual_build_commands": 4,
+          "build_exits": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "schema_head": "0037_bulk_manifests",
+          "migrations": 0,
+          "DB_connections": 0,
+          "required_DB_suite_applicable": false,
+          "DB_skips": 0,
+          "external_auth_requests": 0,
+          "real_Neon_verified": false,
+          "human_Google_verified": false,
+          "full_SDK_browser_CLI_accounting_verified": false,
+          "external_cleanup_executor_verified": false,
+          "deployed_sha": null,
+          "independent_review": "pending; author review only/no agents",
+          "full_N00_gate_passed": false,
+          "original_callback": "strict302 portable500/Vercel200; historical/carried/not rerun or relaxed",
+          "retained_failures": [
+            "baselineUI1fail",
+            "initialbuiltVercel4pass1bodytimeout",
+            "finalVercelstartup0tests",
+            "finalportableAPIstartup0tests",
+            "parallelNode143pass1fail40ms500vs503",
+            "initialtypes2/lint9errors1warning"
+          ],
+          "captures": 238
+        },
+        "prior_node_checkpoint": {
+          "tests": 144,
+          "pass": 144,
+          "fail": 0,
+          "skip": 0,
+          "cancelled": 0,
+          "todo": 0,
+          "duration_ms": 66617.2528,
+          "concurrency": 1,
+          "retained_parallel_attempt": {
+            "tests": 144,
+            "pass": 143,
+            "fail": 1,
+            "skip": 0,
+            "reason": "existing40ms500-response case received503; precise host cause unproven; assertions unchanged"
+          },
+          "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
+          "executed_this_followup": false
+        },
+        "execution_boundary": {
+          "task": "N00",
+          "finding": "F20",
+          "case": "NA01",
+          "base_sha": "e0256f303502d4332400a837b99903926f74c842",
+          "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
+          "files": 10,
+          "insertions": 277,
+          "deletions": 0,
+          "related_node": {
+            "tests": 165,
+            "pass": 165,
+            "fail": 0,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 88448.9225
+          },
+          "new_boundary": {
+            "tests": 21,
+            "pass": 21,
+            "fail": 0,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 80465.3624
+          },
+          "attempted_full_node": {
+            "tests": 234,
+            "pass": 229,
+            "fail": 5,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 523519.4485
+          },
+          "full_suite_passed": false,
+          "full_suite_snapshot_note": "Full suite began before final reporter/receipt-only changes; related165 and actual Chromium3 freshly rerun after all functional boundary changes. Final reporter Chromium3 and frozen types/lint checked separately. No full green gate claimed.",
+          "crypto": {
+            "tests": 8,
+            "pass": 8,
+            "fail": 0,
+            "skip": 0,
+            "errors": 0,
+            "warnings": 1,
+            "junit_time_s": 3.068
+          },
+          "browser": {
+            "cases": 3,
+            "pass": 3,
+            "fail": 0,
+            "skip": 0,
+            "global_errors": 0,
+            "duration_ms": 37886.41,
+            "owned_cleanup_receipts": 3,
+            "first_case_HTTP": 4,
+            "fixture_only": true,
+            "external_verified": false
+          },
+          "checks": {
+            "types_exit": 0,
+            "scoped_lint_exit": 0,
+            "reporter_lint_exit": 0,
+            "generated_types_exit": 0,
+            "generated_routes_exit": 0,
+            "source_diff_check_exit": 0
+          },
+          "migrations": [],
+          "alembic_head": "0037_bulk_manifests",
+          "DB_connections": 0,
+          "DB_suites_applicable": false,
+          "DB_tests_skipped": 0,
+          "new_builds": 0,
+          "built_portable_vercel_evidence": "carried from c756596; not rerun here",
+          "external_requests": 0,
+          "deployment_sha": null,
+          "full_N00_gate_passed": false,
+          "independent_review": "pending; human no-agents instruction",
+          "next_eligible": "N00 full real-transport coverage and provider cleanup adapters; original302/real-Neon/human-Google/approval/review gates open"
+        },
+        "full_node_suite": {
+          "tests": 234,
+          "pass": 229,
+          "fail": 5,
+          "skip": 0,
+          "cancelled": 0,
+          "todo": 0,
+          "duration_ms": 523519.4485
+        },
+        "native_ipc_isolation": {
+          "status": "local-fixed-native-worker-verified;full-N00-open",
+          "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+          "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+          "branch": "codex/n00-native-ipc-isolation",
+          "checked_at": "2026-10-05T13:43:35.000910+00:00",
+          "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+          "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+          "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+          "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+          "checks": {
+            "red-ipc": {
+              "leaf_cases": 2,
+              "pass": 0,
+              "fail": 2,
+              "error": 0,
+              "skip": 0,
+              "attributes": {}
+            },
+            "red-isolation-behavior": {
+              "leaf_cases": 3,
+              "pass": 2,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "attributes": {}
+            },
+            "root-first": {
+              "leaf_cases": 307,
+              "pass": 306,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "attributes": {}
+            },
+            "root-green": {
+              "leaf_cases": 307,
+              "pass": 307,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "attributes": {},
+              "reported": {
+                "tests": "308",
+                "pass": "308",
+                "fail": "0",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "466803.7974"
+              }
+            },
+            "browser": {
+              "leaf_cases": 5,
+              "pass": 5,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "attributes": {
+                "id": "",
+                "name": "",
+                "tests": "5",
+                "failures": "0",
+                "skipped": "0",
+                "errors": "0",
+                "time": "13.736473000000002"
+              }
+            },
+            "crypto": {
+              "leaf_cases": 8,
+              "pass": 8,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "attributes": {
+                "name": "pytest tests"
+              }
+            }
+          },
+          "static_gates": {
+            "lint": 0,
+            "types": 0,
+            "contracts": 0,
+            "routes": 0,
+            "browser": 0,
+            "crypto": 0
+          },
+          "native_observation": {
+            "fixture_only": true,
+            "positive_control": {
+              "http_requests": 3,
+              "native_tcp_connected": true
+            },
+            "direct_http_requests": 0,
+            "probes": {
+              "http_connected": false,
+              "fetch_connected": false,
+              "tcp_connected": false,
+              "subprocess_connected": false
+            },
+            "worker_policy": {
+              "network": "none",
+              "read_only": true,
+              "user": "node",
+              "cap_drop": [
+                "ALL"
+              ],
+              "pids_limit": 64,
+              "memory": 134217728,
+              "nano_cpus": 1000000000,
+              "published_ports": 0,
+              "mounts": 0,
+              "environment_names": [
+                "BUYEROS_STRICT_INTEGRATION",
+                "PATH",
+                "NODE_VERSION",
+                "YARN_VERSION"
+              ]
+            },
+            "cleanup": {
+              "complete": true,
+              "containers_absent": [
+                "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
+                "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
+                "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
+              ],
+              "network_absent": true,
+              "fixture_only": true,
+              "inspect_retries": 0
+            }
+          },
+          "new_node_cases": 3,
+          "new_build": false,
+          "fixture_only": true,
+          "canonical_db_connection": false,
+          "real_Neon_verified": false,
+          "parent_os_contained": false,
+          "browser_os_contained": false,
+          "arbitrary_provider_cli_contained": false,
+          "external_requests": 0,
+          "full_N00_open": true,
+          "original302_rerun": false,
+          "schema_head": "0037_bulk_manifests",
+          "migrations": 0,
+          "operation_count": 84,
+          "original_operations": 70,
+          "extensions": 14,
+          "independent_review": "pending",
+          "deployed_sha": null,
+          "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+          "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+        }
+      },
+      "migrations": "none;0037 unchanged",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+      "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds.",
+      "limits": [
+        "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
+        "No Vercel ingress/protection/binding/deployment verification",
+        "No canonical identity/membership workspace verification by diagnostic",
+        "No production or Cloudflare cutover",
+        "No live performance/SLA/UAT claim",
+        "OS containment covers fixed Linux child only; parent/broker/browser/APIRequestContext/arbitrary provider CLI remain OPEN",
+        "Cached local image only; no real SDK/browser/provider CLI provisioned into container",
+        "Independent review and true Neon/Google/managed cleanup/original302 remain OPEN"
+      ],
+      "full_gate_passed": false,
+      "next_action": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+      "cleanup_contract_followup": {
+        "source_sha": "370a558492ef2c6617379c8923f2ce17c81da66f",
+        "base_sha": "158e05f0b31e4c59776d39c6c2926f6ab8bf3fcd",
+        "status": "local-unarmed-contract-verified;N00open",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_CLEANUP_CONTRACTS/RESULTS.md",
+        "checks": {
+          "cases": 201,
+          "pass": 201,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "new_cases": 36,
+        "types_exit": 0,
+        "lint_exit": 0,
+        "contracts_exit": 0,
+        "provider_calls": 0,
+        "execution_enabled": false,
+        "identity_contract": "users_sync not assumed compatible;bound identity blocksdelete",
+        "migrations": [],
+        "limits": [
+          "ManagedBetterAuth exactidentitycleanup/absence unresolved",
+          "realtransport/original302/trueNeon/human/independentreviewopen",
+          "historicalwhole-root229pass5fail remainsRED;not rerun"
+        ]
+      },
+      "unknown_write_recovery": {
+        "source_sha": "2b69e7cf8c0b0c738bfc34b3de44b1877468a0ca",
+        "base_sha": "58b3cff65625c5abe55a0f8ab316b604989d8063",
+        "status": "local-unknown-auth-transport-recovery-verified;N00open",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_UNKNOWN_WRITE_RECOVERY/RESULTS.md",
+        "checks": {
+          "related_Node": {
+            "pass": 214,
+            "fail": 0,
+            "skip": 0
+          },
+          "crypto": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          },
+          "built_portable": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          },
+          "built_Vercel": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          },
+          "broad_root_MJS_attempt": {
+            "reported": 274,
+            "pass": 269,
+            "fail": 5,
+            "skip": 0,
+            "final_source_acceptance": false
+          }
+        },
+        "new_Node_cases": 13,
+        "new_UI_case_per_target": 1,
+        "types_exit": 0,
+        "lint_exit": 0,
+        "contracts_exit": 0,
+        "operations": 84,
+        "provider_calls": 0,
+        "migrations": [],
+        "deployed_sha": null,
+        "full_gate_passed": false,
+        "limits": [
+          "original302/trueNeon/Google/fullnativeaccounting/Managedidentitycleanup/independentreviewOPEN",
+          "broadsuiteRED;2intentfailuresnowrelatedGREEN;offerDocker30stimeout+parent+missingmainVercelentryremain",
+          "unresolvedrestartjournalsholdallstatechangespendingtrustedreconciliation"
+        ]
+      },
+      "managed_identity_sdk_cleanup": {
+        "source_sha": "050f0d03e49e867c9e5364865d3dc5f17bdc8fec",
+        "base_sha": "6c396a452fc48279ff093dc6984fdc0ad3a7e2a5",
+        "status": "local-native-SDK-managed-identity-cleanup-rehearsal-verified;N00open",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_MANAGED_CLEANUP_SDK/RESULTS.md",
+        "checks": {
+          "related_Node": {
+            "pass": 238,
+            "fail": 0,
+            "skip": 0
+          },
+          "focused_Node": {
+            "pass": 24,
+            "fail": 0,
+            "skip": 0
+          },
+          "crypto": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          },
+          "owned_browser": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "types_exit": 0,
+        "lint_exit": 0,
+        "contracts_exit": 0,
+        "operations": 84,
+        "provider_calls": 0,
+        "migrations": [],
+        "builds": 0,
+        "deployed_sha": null,
+        "full_gate_passed": false,
+        "limits": [
+          "real-Neon/Google/Admincleanup/schema/absence require fresh isolated authority",
+          "original302/fullnativecontainment/independentreview/staffUAT OPEN",
+          "priorbroadrootRED;not rerun"
+        ],
+        "source_commits": [
+          "5ecaa23abf6e3148a6964a1886b70442c3615987",
+          "050f0d03e49e867c9e5364865d3dc5f17bdc8fec"
+        ],
+        "author_review_red": {
+          "pass": 23,
+          "fail": 1,
+          "skip": 0
+        },
+        "intent": "bound identity canonical JSON;headers do not change intent"
+      },
+      "proxy_dispatch_deadline_20261005": {
+        "checks": {
+          "red": {
+            "cases": 3,
+            "pass": 1,
+            "fail": 2,
+            "error": 0,
+            "skip": 0
+          },
+          "red-final": {
+            "cases": 4,
+            "pass": 1,
+            "fail": 3,
+            "error": 0,
+            "skip": 0
+          },
+          "focused-green": {
+            "cases": 28,
+            "pass": 28,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "root-green": {
+            "cases": 303,
+            "pass": 303,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "reported_pass": 304,
+            "duration_ms": 106071.156
+          },
+          "crypto": {
+            "cases": 8,
+            "pass": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          }
+        },
+        "built_reuse_ui": [
+          {
+            "target": "portable",
+            "nonce": "2314a4a2e7e8",
+            "pass": 6,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "time": "17.345563",
+            "fixture_only": true,
+            "fresh_host_proxy": true,
+            "new_build": false,
+            "metrics": {
+              "received": 38,
+              "forwarded": 37,
+              "locally_rejected": 2,
+              "unknown": 1
+            },
+            "requests": 38,
+            "outcomes": {
+              "accepted": 35,
+              "rejected": 2,
+              "unknown": 1,
+              "pending": 0
+            },
+            "cleanup": {
+              "fixture_only": true,
+              "private_root_removed": true,
+              "runtime_configuration_removed": true,
+              "owned_children_absent": true,
+              "owned_root_removal": {
+                "removed": true,
+                "marker_retained_until_children_removed": true,
+                "private_configuration_removed_first": true,
+                "transient_errors": []
+              },
+              "external_resources": 0,
+              "owned_journal_removed": true
+            }
+          },
+          {
+            "target": "vercel",
+            "nonce": "5d6402f65c01",
+            "pass": 6,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "time": "8.442167999999999",
+            "fixture_only": true,
+            "fresh_host_proxy": true,
+            "new_build": false,
+            "metrics": {
+              "received": 38,
+              "forwarded": 37,
+              "locally_rejected": 2,
+              "unknown": 1
+            },
+            "requests": 38,
+            "outcomes": {
+              "accepted": 35,
+              "rejected": 2,
+              "unknown": 1,
+              "pending": 0
+            },
+            "cleanup": {
+              "fixture_only": true,
+              "private_root_removed": true,
+              "runtime_configuration_removed": true,
+              "owned_children_absent": true,
+              "owned_root_removal": {
+                "removed": true,
+                "marker_retained_until_children_removed": true,
+                "private_configuration_removed_first": true,
+                "transient_errors": []
+              },
+              "external_resources": 0,
+              "owned_journal_removed": true
+            }
+          }
+        ],
+        "types_exit": 0,
+        "lint_exit": 0,
+        "contracts_exit": 0,
+        "routes_exit": 0,
+        "new_builds": 0,
+        "migrations": [],
+        "protocol_required_DB_suite_applicable": false,
+        "protocol_DB_connections": 0,
+        "root_suite_environment_has_separate_guarded_disposable_tests": true,
+        "external_auth_requests": 0,
+        "real_Neon_verified": false,
+        "original302_gate": "open;unchanged;not rerun this slice",
+        "independent_review": "pending;author only",
+        "full_N00_gate_passed": false,
+        "deployed_sha": null,
+        "status": "local-proxy-deadlines-verified;full-N00-open",
+        "source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+        "base_sha": "233848b263cfdefc49d6dc5f53df2d534afdba16",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "branch": "codex/n00-proxy-dispatch-deadline",
+        "checked_at": "2026-10-05T08:08:51.042633+00:00",
+        "owner_role": "Identity / QA",
+        "source_files": 3,
+        "insertions": 105,
+        "deletions": 8,
+        "protocol_code_changes": "absolute ingress body deadline, TTL recheck immediately before physical dispatch, remaining TTL clamps upstream timeout; unknown hold retained",
+        "new_operations": 0,
+        "operation_count": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "source_schema_head": "0037_bulk_manifests",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_PROXY_DISPATCH_DEADLINE/RESULTS.md",
+        "rollback": "Revert following metadata commit then9e1ef78 as one local harness/test unit;no DB/data undo;never erase admitted/unknown journal state.",
+        "next_eligible": "N00 local native browser/CLI containment gap audit; full real-Neon/Google/Admincleanup/original302 requires separate evidence and fresh exact authorization;N01/N02 prerequisite unchanged"
+      },
+      "prior_proxy_deadline_summary_20261005": {
+        "code_status": "local counted proxy absolute ingress and dispatch TTL repaired;Auth0 retained",
+        "verification_status": "304reportedroot(303leaves)/28focused/8crypto/6UIeach pass0fail/skip;retained compiled outputs;no new build/fullN00open",
+        "release_status": "not-deployed",
+        "source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92"
+      },
+      "browser_native_containment_20261005": {
+        "checks": {
+          "red": {
+            "cases": 5,
+            "pass": 4,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "green": {
+            "cases": 5,
+            "pass": 5,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "duration_ms": 3231.391,
+            "global_errors": 0
+          },
+          "crypto": {
+            "cases": 8,
+            "pass": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "root-green": {
+            "cases": 304,
+            "pass": 304,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "reported_pass": 305,
+            "duration_ms": 125948.7707
+          }
+        },
+        "static_gates": {
+          "lint": 0,
+          "routes": 0,
+          "types": 0,
+          "contracts": 0
+        },
+        "new_build": false,
+        "external_http_requests": 0,
+        "real_Neon_verified": false,
+        "full_N00_open": true,
+        "source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+        "base_sha": "ebe830e16f15d432ad326e7f298d629c8ca59a6f",
+        "branch": "codex/n00-browser-websocket-refusal",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+        "checked_at": "2026-10-05T12:01:07.670479+00:00",
+        "status": "local-browser-WebSocket-refusal-verified; full-N00-open",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_BROWSER_NATIVE_CONTAINMENT/RESULTS.md",
+        "schema_head": "0037_bulk_manifests",
+        "migrations": 0,
+        "operation_count": 84,
+        "independent_review": "pending",
+        "deployed_sha": null,
+        "next_eligible": "N00 prepare explicit counted transports and disposable OS egress isolation for Node native HTTP/APIRequestContext/provider CLI; no real execution until containment, cleanup and fresh exact authorization",
+        "rollback": "Revert following metadata commit then source362b60d; no DB/data rollback, retain admitted/unknown journal holds."
+      },
+      "prior_browser_native_summary_20261005": {
+        "code_status": "dedicated fixture Chromium WebSocket refusal; production runtime/Auth0 unchanged",
+        "verification_status": "5 actual Chromium /305 reported root(304 leaves)/8 strict crypto;0fail/error/skip;native HTTP/APIRequestContext gaps reproduced OPEN",
+        "release_status": "not-deployed; full N00 open",
+        "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
+        "source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_EXECUTION_BOUNDARY/RESULTS.md",
+        "rollback": "revert following metadata then b8a10848b62090ff19544918961e54df3ebfa921;reverse applicability0 only;no DB/resource undo",
+        "next_action": "N00 specifically authorized isolated real-Neon/Google roundtrip, exact admin cleanup/absence and counted native transport; full gate open"
+      },
+      "native_ipc_isolation_20261005": {
+        "status": "local-fixed-native-worker-verified;full-N00-open",
+        "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+        "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+        "branch": "codex/n00-native-ipc-isolation",
+        "checked_at": "2026-10-05T13:43:35.000910+00:00",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+        "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+        "checks": {
+          "red-ipc": {
+            "leaf_cases": 2,
+            "pass": 0,
+            "fail": 2,
+            "error": 0,
+            "skip": 0,
+            "attributes": {}
+          },
+          "red-isolation-behavior": {
+            "leaf_cases": 3,
+            "pass": 2,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "attributes": {}
+          },
+          "root-first": {
+            "leaf_cases": 307,
+            "pass": 306,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "attributes": {}
+          },
+          "root-green": {
+            "leaf_cases": 307,
+            "pass": 307,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "attributes": {},
+            "reported": {
+              "tests": "308",
+              "pass": "308",
+              "fail": "0",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "466803.7974"
+            }
+          },
+          "browser": {
+            "leaf_cases": 5,
+            "pass": 5,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "attributes": {
+              "id": "",
+              "name": "",
+              "tests": "5",
+              "failures": "0",
+              "skipped": "0",
+              "errors": "0",
+              "time": "13.736473000000002"
+            }
+          },
+          "crypto": {
+            "leaf_cases": 8,
+            "pass": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "attributes": {
+              "name": "pytest tests"
+            }
+          }
+        },
+        "static_gates": {
+          "lint": 0,
+          "types": 0,
+          "contracts": 0,
+          "routes": 0,
+          "browser": 0,
+          "crypto": 0
+        },
+        "native_observation": {
+          "fixture_only": true,
+          "positive_control": {
+            "http_requests": 3,
+            "native_tcp_connected": true
+          },
+          "direct_http_requests": 0,
+          "probes": {
+            "http_connected": false,
+            "fetch_connected": false,
+            "tcp_connected": false,
+            "subprocess_connected": false
+          },
+          "worker_policy": {
+            "network": "none",
+            "read_only": true,
+            "user": "node",
+            "cap_drop": [
+              "ALL"
+            ],
+            "pids_limit": 64,
+            "memory": 134217728,
+            "nano_cpus": 1000000000,
+            "published_ports": 0,
+            "mounts": 0,
+            "environment_names": [
+              "BUYEROS_STRICT_INTEGRATION",
+              "PATH",
+              "NODE_VERSION",
+              "YARN_VERSION"
+            ]
+          },
+          "cleanup": {
+            "complete": true,
+            "containers_absent": [
+              "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
+              "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
+              "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
+            ],
+            "network_absent": true,
+            "fixture_only": true,
+            "inspect_retries": 0
+          }
+        },
+        "new_node_cases": 3,
+        "new_build": false,
+        "fixture_only": true,
+        "canonical_db_connection": false,
+        "real_Neon_verified": false,
+        "parent_os_contained": false,
+        "browser_os_contained": false,
+        "arbitrary_provider_cli_contained": false,
+        "external_requests": 0,
+        "full_N00_open": true,
+        "original302_rerun": false,
+        "schema_head": "0037_bulk_manifests",
+        "migrations": 0,
+        "operation_count": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "independent_review": "pending",
+        "deployed_sha": null,
+        "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+        "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+      }
+    },
+    {
+      "id": "N01",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N02",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N03",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N04",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N05",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N06",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N07",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q01",
+      "status": "fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "source_sha": "8251027ddcf781e5cae713da4190d32a77a81dbd",
+      "cases": [
+        "U02",
+        "U03",
+        "U13"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q01-ui.xml"
+    },
+    {
+      "id": "Q02",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "72 API + 29 combined UI + 13 unit pass; 0 fail/skip",
+      "release_status": "not-deployed",
+      "base_sha": "338ee8e623b0f9b117c5cd6d3f84dc63a0a05b9d",
+      "cases": [
+        "U06",
+        "U07",
+        "U08",
+        "S06"
+      ],
+      "migrations": "none; source head 0036_checkpoint_schema_grants",
+      "source_sha": "fb184819d038dc2ad56b7f1746362fe9b7a6089a",
+      "depends_on": [
+        "Q01"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q02/RESULTS.md",
+      "next_eligible": "Q05",
+      "u05_followup": {
+        "case_id": "U05",
+        "status": "integration-fixture-verified",
+        "code_status": "implemented",
+        "verification_status": "36 UI/38 strict API/17 related Node pass; 0 fail/error/skip; whole-root Node2 inherited/environment failures remain",
+        "release_status": "not-deployed",
+        "base_sha": "e8e478c9e5a5812d43169759d39ddea1d5529098",
+        "source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/U05/RESULTS.md",
+        "migrations": "none; head0037_bulk_manifests",
+        "next_eligible": null
+      }
+    },
+    {
+      "id": "Q03",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "source_sha": "f5936cef6b363e3662c9b84c6153ea2c43f8117b",
+      "cases": [
+        "B10",
+        "B11"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q03-ui.xml"
+    },
+    {
+      "id": "Q04",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "source_sha": "fc8fae75dfd743feaf590e73a099443d23e34788",
+      "cases": [
+        "B05",
+        "B06"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q04-ui.xml"
+    },
+    {
+      "id": "Q05",
+      "status": "integration-fixture-verified",
+      "base_sha": "6e7a78c6994664cb47c5325d8c0eecd8cfdde573",
+      "depends_on": [
+        "Q02"
+      ],
+      "verification_status": "13 strict DB + 37 combined UI + 18 unit pass; 0 fail/error/skip",
+      "release_status": "not-deployed",
+      "code_status": "implemented",
+      "source_sha": "4cd0f484814be7d4333ca265c9637de940d398fa",
+      "cases": [
+        "B02",
+        "B03",
+        "B04",
+        "B07",
+        "B16"
+      ],
+      "migrations": "none; source head 0036_checkpoint_schema_grants",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q05/RESULTS.md",
+      "next_eligible": "Q06"
+    },
+    {
+      "id": "Q06",
+      "status": "fixture-verified",
+      "base_sha": "b083ea43988ed73e9d8e9ab112ba3d6305f2c941",
+      "depends_on": [
+        "Q03"
+      ],
+      "release_status": "not-deployed",
+      "verification_status": "local-fixture-and-integration-pass",
+      "code_status": "implemented",
+      "source_sha": "b3477e341c35807bcdcbb400edfed7cceaa46de4",
+      "cases": [
+        "B12",
+        "B13",
+        "P04",
+        "B16"
+      ],
+      "commands": "docs/buyeros/evidence/audit-fixes-20261003/Q06/q06-commands.json",
+      "checks": {
+        "strict_api_db_contract": {
+          "pass": 24,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "audit_ui": {
+          "pass": 44,
+          "fail": 0,
+          "skip": 0
+        },
+        "related_unit": {
+          "pass": 29,
+          "fail": 0,
+          "skip": 0
+        },
+        "adapter_auth": {
+          "node_file_tests": 2,
+          "adapter_checks": 74,
+          "auth_checks": 8
+        },
+        "rollback_unit": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "migrations": "none; source head0036_checkpoint_schema_grants",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q06/RESULTS.md",
+      "next_eligible": "Q07"
+    },
+    {
+      "id": "Q07",
+      "status": "fixture-verified",
+      "base_sha": "c09eec2872b1fa73719c0894c14d01c23a13bbdc",
+      "depends_on": [
+        "Q15"
+      ],
+      "release_status": "not-deployed",
+      "verification_status": "local-fixture-and-integration-pass",
+      "code_status": "implemented",
+      "source_sha": "a2696e1a317342a64c9b9b29b0585ae8ddff54bf",
+      "cases": [
+        "A02",
+        "A07"
+      ],
+      "finding_ids": [
+        "F09"
+      ],
+      "commands": "docs/buyeros/evidence/audit-fixes-20261003/Q07/q07-commands.json",
+      "checks": {
+        "strict_api_db_contract": {
+          "pass": 47,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "strict_worker_db": {
+          "pass": 11,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "q07_q15_ui": {
+          "pass": 12,
+          "fail": 0,
+          "skip": 0
+        },
+        "related_node": {
+          "pass": 12,
+          "fail": 0,
+          "skip": 0,
+          "adapter_checks": 74,
+          "auth_checks": 8
+        }
+      },
+      "migrations": "none; source head0036_checkpoint_schema_grants",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q07/RESULTS.md",
+      "rollback": "generation-pause-rollback.patch; retains truthful fixed-template copy, existing drafts/edits and API guards; applicability checked, browser/deployment rehearsal not run",
+      "limits": "fictional identity/contact/purposes and fixture-staged dispatch; no live provider/auth/worker/production validation; Q12 manual grounding still pending",
+      "next_eligible": "Q12"
+    },
+    {
+      "id": "Q08",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "required-local-HTTP-DB-UI-pass; original-case-variant/live limitations recorded",
+      "release_status": "not-deployed",
+      "base_sha": "80ecfc762a6b1aeb5ce6c205d0a641539aff54c1",
+      "source_sha": "c98fb6860ce2d4f9ba1797abe919454edcb13204",
+      "depends_on": [
+        "Q05",
+        "Q06"
+      ],
+      "cases": [
+        "B01",
+        "B08",
+        "B09",
+        "B14",
+        "B15",
+        "B16"
+      ],
+      "finding_ids": [
+        "F11"
+      ],
+      "checks": {
+        "api": {
+          "pass": 90,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "ui": {
+          "pass": 17,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "migrations": {
+          "pass": 39,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        }
+      },
+      "node_checks": {
+        "pass": 22,
+        "fail": 0,
+        "skip": 0
+      },
+      "migrations": "0037_bulk_manifests allocated after sole0036head; disposable upgrade/empty roundtrip/populated refusal; production unapplied",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q08/RESULTS.md",
+      "rollback": "pause new admissions; preserve durable manifests/jobs/results; populated downgrade refused; patch applicability only",
+      "limits": "fake OIDC/fit; manual shared worker chunks; no live provider/continuous worker/production/whole staff journey",
+      "next_eligible": "Q14"
+    },
+    {
+      "id": "Q09",
+      "status": "local-candidate-human-gates-open",
+      "base_sha": "38e88735b003fa8fdc0e8d034e5a883d9df5d204",
+      "depends_on": [
+        "Q01",
+        "Q02",
+        "Q05",
+        "Q14",
+        "Q15"
+      ],
+      "cases": [
+        "U09",
+        "U10",
+        "U11",
+        "U12",
+        "WF01",
+        "WF02"
+      ],
+      "release_status": "not-deployed",
+      "checkpoint": "2026-10-04 HKT: five-task selected keyboard fixture matrix verified; final12pass/0fail/error/skip+14rawproofs. Application unchanged; human screen-reader/staff/independent review open; earlier failures retained; no external action.",
+      "tests": {
+        "api": {
+          "report": "q09-api-third.xml",
+          "executed": 21,
+          "passed": 21,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 183.647,
+          "zero_cases_is_pass": null
+        },
+        "node": {
+          "passed": 34,
+          "failed": 0,
+          "skipped": 0,
+          "evidence": "Q09/q09-node-handoff.log"
+        },
+        "ui_full_second": {
+          "report": "q09-built-second-full.xml",
+          "executed": 50,
+          "passed": 48,
+          "failures": 0,
+          "errors": 2,
+          "skipped": 0,
+          "wall_seconds": 1318.325699,
+          "zero_cases_is_pass": null
+        },
+        "ui_affected_final": {
+          "report": "q09-owner-final.xml",
+          "executed": 17,
+          "passed": 17,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 396.127954,
+          "zero_cases_is_pass": null
+        },
+        "demo_parity": {
+          "report": "q09-responsive.xml",
+          "executed": 21,
+          "passed": 21,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 308.66396599999996,
+          "zero_cases_is_pass": null
+        },
+        "keyboard_final": {
+          "report": "q09-keyboard-proof-full.xml",
+          "executed": 12,
+          "passed": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 568.761243,
+          "zero_case_is_pass": null
+        }
+      },
+      "migrations": [],
+      "human_gates": {
+        "screen_reader": "blocked-not-observed",
+        "staff_uat": "blocked-not-observed"
+      },
+      "module_commits": {
+        "canonical_actor_projection": "85686a6608cca04a669dbf21156fdfd2d2af33e7",
+        "offer_profile_reads": "3843623c934fba75a8a5bffe1db4175960444361",
+        "buyer_member_results": "35e859161536bc2f6726c8b713c8006ec01cc43a",
+        "scope_jobs": "6e7335b2d341167ddbc6fdfbad08d789e5c8972e",
+        "fixture_journeys": "1953d615dc00e6920380dbb71be6a99b96e36488",
+        "keyboard_fixtures": "f70501a174c641db65d06929ebd3b7e8b52ee3bb"
+      },
+      "source_sha": "1953d615dc00e6920380dbb71be6a99b96e36488",
+      "code_status": "implemented",
+      "verification_status": "strict API21/Node34/current affected UI17/demo21 pass; full50 report48pass+2setup errors resolved by affected-suite reruns; human gates open; keyboard final12 with14rawproofs pass0fail/error/skip; human gates open",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/RESULTS.md",
+      "rollback": "Q09.patch reverse applicability verified; no runtime/production rollback rehearsal",
+      "keyboard_followup": {
+        "status": "local-fixture-integration-verified",
+        "base_sha": "86014b03f2a7db48c90ecd1c52800b528679a220",
+        "source_sha": "f70501a174c641db65d06929ebd3b7e8b52ee3bb",
+        "application_source_sha": "1953d615dc00e6920380dbb71be6a99b96e36488",
+        "tests": {
+          "report": "q09-keyboard-proof-full.xml",
+          "executed": 12,
+          "passed": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 568.761243,
+          "zero_case_is_pass": null
+        },
+        "keyboard_cases": 8,
+        "pointer_continuity_cases": 4,
+        "proof_bodies": 14,
+        "native_actions": 460,
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/RESULTS.md",
+        "human_uat": "unobserved",
+        "screen_reader": "unobserved",
+        "release_status": "not-deployed",
+        "migrations": [],
+        "rollback": "six-file test-source revert; reverse applicability0; no production rehearsal"
+      }
+    },
+    {
+      "id": "Q10",
+      "status": "partial-local-tools-and-baseline-verified",
+      "code_status": "offline-evaluator-and-owned-directory-capture-implemented",
+      "verification_status": "62 related API/tool tests and69 Node pass; capture1pass but frozen SQL gateFAIL; actual provider/goldset/full-load/UAT not run",
+      "release_status": "not-deployed",
+      "source_sha": "ad4f4394819664484eb4b928bdd56c43e055fd3d",
+      "base_sha": "6232e4e1f4127833b93c1343207894c79b638852",
+      "cases": [
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A08",
+        "P09",
+        "P10"
+      ],
+      "finding_ids": [
+        "F12",
+        "F18"
+      ],
+      "checks": {
+        "api_and_tools": {
+          "passed": 62,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "directory_capture": {
+          "passed": 1,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "cli_exit": 1,
+          "sql_gate_passed": false
+        },
+        "node": {
+          "passed": 69,
+          "failed": 0,
+          "skipped": 0,
+          "xml_leaf_cases": 68
+        }
+      },
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/RESULTS.md",
+      "migrations": "none added; existing0037 applied only to disposable fixtures",
+      "rollback": "reviewed source reverse applicability exit0; no production rollback/migration/auth mutation",
+      "limits": [
+        "Q13/N02 directory remediation dependency unresolved; no RLS policy/identity adapter changes",
+        "real>=200-company independently labelled goldset and approved provider evidence unavailable",
+        "10/25actor stairs, full API/UI/RUM/worker load and human UAT not run",
+        "contact validity/real company relationship/adversarial source factuality not verified",
+        "independent source review pending; author only per no-agents instruction"
+      ],
+      "next_eligible": null
+    },
+    {
+      "id": "Q11",
+      "status": "partial-local-guidance;release-gates-open",
+      "code_status": "bounded capability responsibility/action contract and API; generated typed, scope-current en/zh-HK UI; archive-only compiler exclusions",
+      "verification_status": "19strictAPI/5finalguidanceUI/300reportedroot/3LinuxSSR/3WindowsSSR pass0fail/skip;intermediate15UIseparate",
+      "release_status": "not-deployed",
+      "source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+      "cases": [
+        "R05"
+      ],
+      "evidence": "docs/buyeros/CURRENT_STATUS.md",
+      "local_verification_gates_followup": {
+        "status": "local-test-gates-verified",
+        "base_sha": "cbb67ddbb907b8b989b175588ba73ed205e2c2d8",
+        "source_sha": "d7ab5b6323402adf139d9b94e4e499f1631006b4",
+        "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+        "code_changes": "one test + focused plan; application/API/schema unchanged",
+        "checks": {
+          "root_node": {
+            "pass": 69,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "junit_leaf_cases": 68,
+            "duration_ms": 96210.0865
+          },
+          "cleanup_included": {
+            "pass": 24,
+            "fail": 0,
+            "skip": 0
+          },
+          "linux_emitted_ssr": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          "windows_emitted_ssr": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "contracts": "types/lint/generated84 pass;0 new operations",
+        "migrations": [],
+        "head": "0037_bulk_manifests",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/RESULTS.md",
+        "rollback": "one-test reverse patch applicability passed; no runtime/production rehearsal",
+        "review": "author only; independent review pending",
+        "release_status": "not-deployed",
+        "limits": "Docker/image/build prerequisite; no fresh UI/DB/live/performance/human UAT; prior failures retained"
+      },
+      "current_source_verification_20261005": {
+        "status": "current-source-local-gates-verified;full-Q11-open",
+        "source_sha": "bb7a1ede078085dede0433cafd47078ea63a4e11",
+        "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+        "branch": "codex/q11-current-source-gates",
+        "checked_at": "2026-10-05T05:50:55.784291+00:00",
+        "owner_role": "Release owner / QA",
+        "runtime_code_changes": 0,
+        "tests_changed": 0,
+        "checks": {
+          "root-node": {
+            "pass": 299,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "reported_pass": 300,
+            "junit_leaf_cases": 299,
+            "duration_ms": 100374.5609
+          },
+          "api": {
+            "pass": 18,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "vercel-render-linux": {
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "vercel-render-windows": {
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "ui": {
+            "pass": 11,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          }
+        },
+        "contract_operations": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "generated_types_exit": 0,
+        "routes_exit": 0,
+        "typescript_exit": 0,
+        "source_lint_exit": 0,
+        "build_exit": 0,
+        "migrations": [],
+        "source_schema_head": "0037_bulk_manifests",
+        "deployed_sha": null,
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/RESULTS.md",
+        "limits": "Fixture identities/SQL rows; API/DB and 11 actual Operations browser cases. No real auth/provider/full staff/recovery/performance/production evidence. Original302 and fullN00 open. No deployment.",
+        "next_eligible": "Q11 local capability/readiness responsible role and concrete next action; N00 real compatibility separately blocked",
+        "rollback": "Revert this metadata/evidence commit only; no runtime/data/DB rollback."
+      },
+      "capability_guidance_20261005": {
+        "checked_at": "2026-10-05T06:46:36.763406+00:00",
+        "checks": {
+          "api-red": {
+            "cases": 1,
+            "pass": 0,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "ui-red": {
+            "cases": 1,
+            "pass": 0,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "review-red": {
+            "cases": 1,
+            "pass": 0,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "api-green": {
+            "cases": 19,
+            "pass": 19,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "ui-green-first": {
+            "cases": 15,
+            "pass": 15,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "ui-final": {
+            "cases": 5,
+            "pass": 5,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "root-node": {
+            "cases": 299,
+            "pass": 299,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "reported_pass": 300,
+            "duration_ms": 67414.0489
+          },
+          "vercel-render-linux": {
+            "cases": 3,
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "vercel-render-windows": {
+            "cases": 3,
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          }
+        },
+        "typescript_exit": 0,
+        "source_lint_exit": 0,
+        "generated_contracts_exit": 0,
+        "operation_routes_exit": 0,
+        "build_exit": 0,
+        "original_artifacts_unchanged": 3200,
+        "all_prior_artifacts_unchanged": 3370,
+        "foreign_worktrees_unchanged": 3,
+        "review": "author only; independent review pending",
+        "live_verification": false,
+        "status": "local-guidance-and-regression-verified;full-Q11-open",
+        "source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "base_sha": "f53ebec2a02a354edf6a8a858c4ca2e10f7f5fca",
+        "branch": "codex/q11-capability-guidance",
+        "owner_role": "Release owner / SRE",
+        "code_changes": "bounded capability responsibility/action contract and API; generated typed, scope-current en/zh-HK UI; archive-only compiler exclusions",
+        "contract_operations": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "new_operations": 0,
+        "migrations": [],
+        "source_schema_head": "0037_bulk_manifests",
+        "deployed_sha": null,
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_CAPABILITY_GUIDANCE/RESULTS.md",
+        "limits": "API/PostgreSQL/RLS and actual browser use fictional identities. Final5 new UI; intermediate15=11 Operations+4 guidance before final contradiction guard. No real auth/provider/full staff/UAT/recovery/performance/production proof. FullQ11/N00 and F10/F13 external gates OPEN.",
+        "next_eligible": "N00 remaining local original-redirect/native containment/accounting gap audit; actual Neon/provider/production work still needs its own concrete evidence and authorization",
+        "rollback": "Revert the following metadata commit, then source 5aaf6492ec10078e4f1a4fa5b17efd41c5673eba as one contract/API/UI/test unit. No DB/data rollback."
+      }
+    },
+    {
+      "id": "Q12",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "required-task-local-fixture-and-integration-pass; broader-dev-transport-flakiness-open",
+      "release_status": "not-deployed",
+      "base_sha": "c7136fbceb1567bca87215b57d142e8137b8968d",
+      "source_sha": "70d2e54ef613910ce5a684d90c4afce32f504e66",
+      "domain_commit": "63d140b4b5d4636b1fe9125ec3885d1e69bbecb4",
+      "ui_commit": "70d2e54ef613910ce5a684d90c4afce32f504e66",
+      "cases": [
+        "D01",
+        "D03",
+        "U09 (draft slice only; whole journey partial)"
+      ],
+      "test_counts": {
+        "strict_api_db": {
+          "pass": 85,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "named_q12_ui": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        },
+        "related_node": {
+          "pass": 14,
+          "fail": 0,
+          "skip": 0,
+          "adapter_checks": 74,
+          "auth_checks": 8
+        },
+        "broader_ui_transport_preserved": {
+          "pass": 14,
+          "fail": 2,
+          "skip": 0
+        }
+      },
+      "migrations": "none; source head0036_checkpoint_schema_grants",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q12/RESULTS.md",
+      "rollback": "q12-grounding-pause-rollback.patch; keep shared proof/context guards and all immutable history; applicability checked only",
+      "limits": "fake OIDC/contact/source/purpose; fixture-staged zero-cost handler; no live auth/provider/continuous transport/build/production proof; U09 full staff journey partial; broader UI dev transport failure unresolved; independent review pending",
+      "next_eligible": "Q08"
+    },
+    {
+      "id": "Q13",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q14",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-HTTP-DB-UI-pass",
+      "release_status": "not-deployed",
+      "base_sha": "092e8f555d7e98f0f2603ff86a7afecf8c65492e",
+      "source_sha": "1aab3ddc0519bb6da8d1483efaf173eb5a87037e",
+      "depends_on": [
+        "Q03"
+      ],
+      "cases": [
+        "U15"
+      ],
+      "finding_ids": [
+        "F17"
+      ],
+      "checks": {
+        "api": {
+          "pass": 18,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "ui": {
+          "pass": 10,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        }
+      },
+      "node_checks": {
+        "pass": 16,
+        "fail": 0,
+        "skip": 0
+      },
+      "migrations": "none; existing source head0037 unchanged",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q14/RESULTS.md",
+      "rollback": "revert8file source commit; reverse patch applicability exit0; no DB/role/actor change; browser/production rehearsal not run",
+      "limits": "fictional OIDC/jobs; local dev only; no production/auth/provider/full UAT",
+      "next_eligible": "Q09"
+    },
+    {
+      "id": "Q15",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "cases": [
+        "D02"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q15-ui.xml",
+      "migration": "none; schema source head 0036_checkpoint_schema_grants",
+      "source_sha": "3efd1f3f97036e1988751d1dfb54d37d48d0929a"
+    },
+    {
+      "id": "Q16",
+      "status": "blocked-root-cause-evidence",
+      "code_status": "read-only-investigation-recorded",
+      "verification_status": "runtime-log-inspected; cause-not-confirmed",
+      "release_status": "not-deployed",
+      "evidence": "docs/buyeros/incidents/2026-10-03-workspace-500.md"
+    },
+    {
+      "id": "Q17",
+      "status": "outside-current-scope"
+    }
+  ],
+  "future_eligible": [
+    "Q09 human screen-reader/staff UAT",
+    "Independent source review",
+    "Q16 underlying evidence when available",
+    "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+    "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
+  ],
+  "reviewed_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+  "deployed_sha": null,
+  "selected_followups": [
+    "U05",
+    "Q11 local verification gates",
+    "Q10 independent local tools and current directory baseline",
+    "N00 local built compatibility spike",
+    "N00 managed callback contract fixture follow-up",
+    "Q11 local capability responsibility and next action",
+    "N00 local ingress and physical dispatch deadline",
+    "N00 dedicated browser WebSocket refusal and native transport gap evidence (local-only)",
+    "N00 counted native IPC and disposable fixed worker OS isolation (local-only)"
+  ],
+  "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+  "peer_q13_checkpoint": {
+    "branch": "codex/q13-workspace-discovery",
+    "source_sha": "fa198ae533be3dc93eda73bc45331c2d80eb9540",
+    "evidence_commit": "55f81338e5d12948279b6f095787aa03e6038242",
+    "status": "current-auth-local-verified;N02/fullQ13open",
+    "proposed_schema_head": "0038_workspace_discovery",
+    "merged_here": false
+  },
+  "latest_local_verification_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a"
+}

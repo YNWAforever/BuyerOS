@@ -1,0 +1,35 @@
+✔ API request context persists each manual auth hop before HTTP and forwards only explicit in-memory headers (240.7331ms)
+✔ API context backend unknown intent stays held across fresh context and journal with renewed bearer (113.4206ms)
+✔ lost gateway response never autoretries an accepted write and restart retains the hold (112.0437ms)
+✔ unexpected gateway wire redirect cannot leak owner nonce to a foreign owned sink (84.1104ms)
+✔ unowned gateway, foreign journal, bad nonce and injected raw context are refused before HTTP (54.5214ms)
+✖ invalid, administrative and oversized requests are refused before even the gateway wire (107.361ms)
+✔ API context keeps the original auth budget and cleanup reserve intact (4542.7835ms)
+✔ disposed or rebound owned gateway cannot be silently adopted by an old API context (35.7659ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6375.6904
+
+✖ failing tests:
+
+test at tests\neon-api-request-context.test.mjs:45:1
+✖ invalid, administrative and oversized requests are refused before even the gateway wire (107.361ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-api-request-context.test.mjs:47:502)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

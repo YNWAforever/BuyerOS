@@ -1,0 +1,16 @@
+<testsuites id="" name="" tests="6" failures="0" skipped="0" errors="0" time="47.728449">
+<testsuite name="audit-neon-execution.spec.ts" timestamp="2026-10-05T17:00:39.645Z" hostname="" tests="6" failures="0" skipped="0" time="24.097" errors="0">
+<testcase name="NA01 accounting: actual browser, pinned SDK and fixed CLI share the same durable HTTP budget" classname="audit-neon-execution.spec.ts" time="3.185">
+</testcase>
+<testcase name="NA01 accounting: browser origin and direct-network refusals dispatch no provider HTTP" classname="audit-neon-execution.spec.ts" time="0.756">
+</testcase>
+<testcase name="NA01 accounting: browser refresh and a reconstructed journal cannot replay an unknown write" classname="audit-neon-execution.spec.ts" time="13.181">
+</testcase>
+<testcase name="NA01 containment: native WebSockets cannot bypass HTTP routing before or after refresh" classname="audit-neon-execution.spec.ts" time="3.366">
+</testcase>
+<testcase name="NA01 containment: blocked service workers issue no physical script request" classname="audit-neon-execution.spec.ts" time="1.161">
+</testcase>
+<testcase name="NA01 counted APIRequestContext: private cookies and two manual hops through the original journal" classname="audit-neon-execution.spec.ts" time="2.448">
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="API request context persists each manual auth hop before HTTP and forwards only explicit in-memory headers" time="0.264128" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-api-request-context.test.mjs"/>
+	<testcase name="API context backend unknown intent stays held across fresh context and journal with renewed bearer" time="0.104860" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-api-request-context.test.mjs"/>
+	<testcase name="lost gateway response never autoretries an accepted write and restart retains the hold" time="0.094679" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-api-request-context.test.mjs"/>
+	<testcase name="unexpected gateway wire redirect cannot leak owner nonce to a foreign owned sink" time="0.072310" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-api-request-context.test.mjs"/>
+	<testcase name="unowned gateway, foreign journal, bad nonce and injected raw context are refused before HTTP" time="0.042402" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-api-request-context.test.mjs"/>
+	<testcase name="invalid, administrative and oversized requests are refused before even the gateway wire" time="0.052076" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-api-request-context.test.mjs"/>
+	<testcase name="API context keeps the original auth budget and cleanup reserve intact" time="4.898834" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-api-request-context.test.mjs"/>
+	<testcase name="disposed or rebound owned gateway cannot be silently adopted by an old API context" time="0.035910" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\neon-api-request-context.test.mjs"/>
+	<!-- tests 8 -->
+	<!-- suites 0 -->
+	<!-- pass 8 -->
+	<!-- fail 0 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 7031.4948 -->
+</testsuites>

@@ -1,0 +1,167 @@
+{
+  "environment": {
+    "BUYEROS_STRICT_INTEGRATION": "1",
+    "PYTHONUTF8": "1",
+    "DATABASE_URL": "unset",
+    "BUYEROS_TEST_DATABASE_URL": "unset"
+  },
+  "root_final": {
+    "cwd": "C:\\Users\\laich\\.codex\\worktrees\\neon-auth-compatibility-local-20261004\\BuyerOS",
+    "argv": [
+      "node",
+      "--test",
+      "--test-concurrency=1",
+      "--test-reporter=spec",
+      "--test-reporter-destination=test-results/n00-api-request-context/root-final.log",
+      "--test-reporter=junit",
+      "--test-reporter-destination=test-results/n00-api-request-context/root-final.xml",
+      "tests/api-types-generation.test.mjs",
+      "tests/approval-fingerprint.test.mjs",
+      "tests/audit-access-denial.test.mjs",
+      "tests/audit-auth-render.test.mjs",
+      "tests/audit-bulk-confirmation.test.mjs",
+      "tests/audit-bulk-manifests.test.mjs",
+      "tests/audit-draft-grounding.test.mjs",
+      "tests/audit-draft-guard.test.mjs",
+      "tests/audit-job-query.test.mjs",
+      "tests/audit-member-contract.test.mjs",
+      "tests/audit-profile-read.test.mjs",
+      "tests/audit-research-intent.test.mjs",
+      "tests/e2e-fixture-cleanup.test.mjs",
+      "tests/neon-api-request-context.test.mjs",
+      "tests/neon-cleanup-contracts.test.mjs",
+      "tests/neon-compatibility-discovery.test.mjs",
+      "tests/neon-compatibility-harness.test.mjs",
+      "tests/neon-counted-proxy.test.mjs",
+      "tests/neon-execution-boundary.test.mjs",
+      "tests/neon-managed-cleanup-sdk.test.mjs",
+      "tests/neon-native-ipc.test.mjs",
+      "tests/neon-proxy-deadline.test.mjs",
+      "tests/neon-real-diagnostic.test.mjs",
+      "tests/neon-real-preflight.test.mjs",
+      "tests/neon-real-runtime.test.mjs",
+      "tests/neon-runtime-cleanup.test.mjs",
+      "tests/neon-runtime-flow.test.mjs",
+      "tests/neon-runtime-probe.test.mjs",
+      "tests/vercel-render.test.mjs",
+      "tests/vercel-services.test.mjs",
+      "tests/worker-gateway.test.mjs"
+    ],
+    "exit": 0
+  },
+  "focused_final": {
+    "argv": [
+      "node",
+      "--test",
+      "--test-concurrency=1",
+      "--test-reporter=spec",
+      "--test-reporter-destination=test-results/n00-api-request-context/green-final.log",
+      "--test-reporter=junit",
+      "--test-reporter-destination=test-results/n00-api-request-context/green-final.xml",
+      "tests/neon-api-request-context.test.mjs",
+      "tests/neon-compatibility-discovery.test.mjs"
+    ],
+    "exit": 0
+  },
+  "browser_final": {
+    "argv": [
+      "node",
+      "node_modules/@playwright/test/cli.js",
+      "test",
+      "--config",
+      "playwright.neon-execution.config.ts"
+    ],
+    "exit": 0
+  },
+  "types_final": {
+    "argv": [
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "--noEmit"
+    ],
+    "exit": 0
+  },
+  "lint_final": {
+    "argv": [
+      "node",
+      "node_modules/eslint/bin/eslint.js",
+      "scripts/neon-api-request-context.mjs",
+      "tests/neon-api-request-context.test.mjs",
+      "tests/neon-compatibility-discovery.test.mjs",
+      "tests/e2e/audit-neon-execution.spec.ts",
+      "--max-warnings=0"
+    ],
+    "exit": 0
+  },
+  "crypto": {
+    "argv": [
+      "services/api/.venv/Scripts/python.exe",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/fixtures/neon-runtime-flow/test_verify.py",
+      "--junitxml=test-results/n00-api-request-context/crypto.xml"
+    ],
+    "exit": 0
+  },
+  "contracts": {
+    "argv": [
+      "node",
+      "scripts/generate-api-types.mjs",
+      "--check"
+    ],
+    "exit": 0
+  },
+  "routes": {
+    "argv": [
+      "uv",
+      "run",
+      "--frozen",
+      "--project",
+      "services/api",
+      "python",
+      "scripts/generate-operation-routes.py",
+      "--check"
+    ],
+    "exit": 0
+  },
+  "alembic_heads": {
+    "cwd": "services/api",
+    "argv": [
+      "uv",
+      "run",
+      "--frozen",
+      "--project",
+      ".",
+      "alembic",
+      "heads"
+    ],
+    "exit": 0,
+    "read_only": true
+  },
+  "rollback_check": {
+    "argv": [
+      "git",
+      "apply",
+      "--reverse",
+      "--check",
+      "test-results/n00-api-request-context/source.patch"
+    ],
+    "exit": 0,
+    "executed_rollback": false
+  },
+  "failed_attempts": {
+    "red-node": 1,
+    "red-browser": 1,
+    "envelope-red": 1,
+    "root-first": 1,
+    "race-red": 1,
+    "race-red-both": 1
+  },
+  "previous_green_attempts": {
+    "green-node": 0,
+    "green-node-final": 0,
+    "green-browser": 0
+  },
+  "note": "Actual completed commands/exit results; overlapping root/focused cases must not be summed."
+}
