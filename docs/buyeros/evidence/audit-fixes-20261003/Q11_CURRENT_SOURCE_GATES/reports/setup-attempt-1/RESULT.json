@@ -1,0 +1,17 @@
+{
+  "phase": "seed-copy",
+  "command": [
+    "docker",
+    "exec",
+    "owned-container",
+    "sh",
+    "-c",
+    "tar -xf /tmp/source.tar -C /src && mkdir -p /src/node_modules && cp -a /seed/. /src/node_modules/"
+  ],
+  "outer_timeout_ms": 60000,
+  "exit": null,
+  "failed": true,
+  "actual_build_started": false,
+  "tests_started": false,
+  "removed_label_checked": true
+}

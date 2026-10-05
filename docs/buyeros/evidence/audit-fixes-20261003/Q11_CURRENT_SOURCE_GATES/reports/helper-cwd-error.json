@@ -1,0 +1,7 @@
+{
+  "command": "source bundle amendment wrapper",
+  "exit": 1,
+  "cause": "PowerShell workdir incorrectly services/api for root-relative helper paths",
+  "files_mutated": false,
+  "pytest_started": false
+}

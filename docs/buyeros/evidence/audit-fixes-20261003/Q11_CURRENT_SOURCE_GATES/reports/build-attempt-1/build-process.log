@@ -1,0 +1,13 @@
+{"phase":"setup","code":0,"signal":null,"timedOut":false}
+{"phase":"install","code":0,"signal":null,"timedOut":false}
+{"phase":"build","code":1,"signal":null,"timedOut":false}
+{"phase":"cleanup","removed":true}
+file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/q11-current-source-gates/build-linux.mjs:36
+ console.log(JSON.stringify({phase:'build',...build}));if(build.code!==0)throw new Error('genuine main Vercel build failed');
+                                                                               ^
+
+Error: genuine main Vercel build failed
+    at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/q11-current-source-gates/build-linux.mjs:36:80
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+
+Node.js v24.18.0

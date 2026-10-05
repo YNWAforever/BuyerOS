@@ -1,0 +1,14 @@
+Recreating /src/node_modules
+? Verifying lockfile against supply-chain policies (1059 entries)...
+[WARN] Request took 10510ms: https://registry.npmjs.org/@playwright%2Ftest
+[WARN] Request took 10177ms: https://registry.npmjs.org/@typescript-eslint%2Ftypes
+[WARN] Request took 10412ms: https://registry.npmjs.org/@typescript-eslint%2Fvisitor-keys
+[WARN] Request took 10709ms: https://registry.npmjs.org/@typescript-eslint%2Fscope-manager
+[WARN] Request took 11506ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+[WARN] Request took 12144ms: https://registry.npmjs.org/@typescript-eslint%2Ftypescript-estree
+[WARN] Request took 12909ms: https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin
+[WARN] Request took 11234ms: https://registry.npmjs.org/next
+✓ Lockfile passes supply-chain policies (1059 entries in 22.3s)
+[ERR_PNPM_LOCKFILE_CONFIG_MISMATCH] Cannot proceed with the frozen installation. The current "overrides" configuration doesn't match the value found in the lockfile
+
+Update your lockfile using "pnpm install --no-frozen-lockfile"

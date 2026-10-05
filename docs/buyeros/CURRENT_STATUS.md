@@ -1,3 +1,25 @@
+# Current Q11 local release-gate checkpoint — 2026-10-05
+
+Reviewed/tested source `bb7a1ede078085dede0433cafd47078ea63a4e11` on `codex/q11-current-source-gates`. **Full Q11, F13 and N00 remain open.** This checkpoint changes status/evidence only; no runtime code, tests or migration changed. [Exact commands, failures and artifacts](evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/RESULTS.md).
+
+| Current field | Evidence / disposition |
+| --- | --- |
+| Local source | `bb7a1ede078085dede0433cafd47078ea63a4e11`; application source `25694d3b938e704e883f9915cf0604bbdbac1daf` unchanged |
+| Deployed source | **Unknown / not checked this round**; no new deployment; previous deployment records below are historical |
+| Schema | Source head `0037_bulk_manifests`; only guarded disposable DB upgrades this round; production unknown |
+| Runtime role / worker selector / epoch | Production unknown; no production mutation or readback |
+| Provider capabilities | Source remains unconfigured/disabled; no selected provider, credential/canary/paid verification |
+| Local case evidence | Root300 (299JUnit leaves), strict API18, Operations UI11, genuine LinuxSSR3 and WindowsSSR3; zero failures/errors/skips in final reports |
+| Responsible role | Release owner / QA for checkpoint; external SRE/provider/identity gates require their own evidence |
+| Checked at | `2026-10-05T05:50:55.784291+00:00` |
+| Next eligible local task | Q11 capability/readiness responsible role and concrete next action; N00 real compatibility remains separately blocked |
+
+Auth gate: Auth0 retained; real Neon/Google/Admin cleanup/original302/full native containment/independent review remain open. Daily-work gate: Operations SQL-schema/API/actual browser subset verified, whole staff journey and human UAT remain open. Provider and production recovery gates: unverified/blocked. F10/F18/F20/F21 are not closed by these checks. Delivery stays403.
+
+The first root baseline was24 pass/1 missing-build failure (SSR had0 executed cases). Fresh complete source build/export fixes the environment prerequisite; no test assertions or timeout guards were weakened. Prior Docker30s offer timeout was not reproduced in two current serial lifecycle runs; its historical failure remains.
+
+## Earlier checkpoints (historical; keep their original source scope)
+
 > Latest local checkpoint: 2026-10-05 N00 native SDK cleanup rehearsal source `050f0d03e49e867c9e5364865d3dc5f17bdc8fec`: exact bound identity listUsers/removal/absence through the pinned SDK and branded owned gateway; cleanup/reconciliation reserve and held unknown removal survive restart. Fresh238relatedNode/24focused/8EdDSA/3browser pass0fail/skip; types/lint/generated84(70+14)exit0. No business/schema/build/deployment change; full N00/NA01 OPEN. Real Neon/Google/Admin cleanup, original302, full native containment and independent review remain unverified. [Evidence](evidence/audit-fixes-20261003/N00_MANAGED_CLEANUP_SDK/RESULTS.md). Rollback followingmetadata then source050f0d0 then5ecaa23;noDBundo.
 
 > Latest local checkpoint: 2026-10-05 N00 transport recovery source `2b69e7cf8c0b0c738bfc34b3de44b1877468a0ca`: post-dispatch redirect refusal stays unknown; one-use verifier/state intent survives query/token changes; fsynced receipts and conservative restart hold. Fresh214Node/8crypto/6UIeachactualoutput pass0fail/skip,types/lint/generated84(70+14)exit0. Broader27rootMJS attempt269pass5fail0skip retained;not final-source project acceptance. Original302/trueNeon/Google/nativeaccounting/Managedidentitycleanup/independentreviewOPEN;Auth0retained/deployednull/noDBmigrations. [Evidence](evidence/audit-fixes-20261003/N00_UNKNOWN_WRITE_RECOVERY/RESULTS.md). Rollback followingmetadata then source2b69e7c;noDBundo.

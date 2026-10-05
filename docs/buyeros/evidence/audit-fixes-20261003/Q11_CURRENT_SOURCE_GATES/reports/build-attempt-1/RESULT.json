@@ -1,0 +1,9 @@
+{
+  "phase": "build",
+  "exit": 1,
+  "cause": "Missing tracked vendor/shadcn-tailwind-4.13.0.css in the local source bundle",
+  "actual_build_started": true,
+  "tests_started": false,
+  "removed_label_checked": true,
+  "correction": "Use full git source inventory with excluded docs/inputs/artifacts/backend/evidence, matching the historical builder; retain data/demo/db/vendor application imports"
+}

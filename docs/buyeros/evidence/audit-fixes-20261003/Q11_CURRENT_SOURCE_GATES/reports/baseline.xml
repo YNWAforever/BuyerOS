@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testsuite name="every disposable-API Playwright configuration actually removes its owned container and marker" time="53.818079" disabled="0" errors="0" tests="20" failures="0" skipped="0" hostname="DESKTOP-30TFME5">
+		<testcase name="playwright.admin.config.ts" time="2.920697" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.approval.config.ts" time="2.087300" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.audit-fixes.config.ts" time="1.709164" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.bulk.config.ts" time="3.551237" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.buyer-management.config.ts" time="7.013450" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.buyer.config.ts" time="3.094550" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.config.ts" time="1.884641" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.confirm.config.ts" time="3.041126" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.contact-job.config.ts" time="2.871554" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.cors.config.ts" time="2.038890" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.draft.config.ts" time="2.461039" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.exports.config.ts" time="2.803097" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.ingestion.config.ts" time="2.481166" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.mvp-research.config.ts" time="2.566106" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.mvp.config.ts" time="2.070722" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.offer.config.ts" time="2.989063" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.policy.config.ts" time="2.591490" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.quote.config.ts" time="1.812798" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.run.config.ts" time="1.613304" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+		<testcase name="playwright.workbench.config.ts" time="2.127309" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+	</testsuite>
+	<testcase name="configured audit teardown also removes its labelled UI sentinel and marker" time="2.914774" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+	<testcase name="configured audit teardown refuses a UI container whose owner label differs" time="2.038178" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+	<testcase name="configured database teardown refuses an unrecognized marker without deleting it" time="0.140429" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\e2e-fixture-cleanup.test.mjs"/>
+	<testcase name="tests\vercel-render.test.mjs" time="0.078096" classname="test" file="C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\vercel-render.test.mjs" failure="test failed">
+		<failure type="testCodeFailure" message="test failed">
+[Error: test failed] { code: 'ERR_TEST_FAILURE', failureType: 'testCodeFailure', cause: 'test failed', exitCode: 1, signal: null }
+		</failure>
+	</testcase>
+	<!-- tests 25 -->
+	<!-- suites 0 -->
+	<!-- pass 24 -->
+	<!-- fail 1 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 59090.2789 -->
+</testsuites>

@@ -1,0 +1,9 @@
+{
+  "generated_types_exit": 0,
+  "routes_exit": 0,
+  "routes_operations": 84,
+  "typescript_exit": 0,
+  "lint_exit": 1,
+  "lint_interrupted": true,
+  "lint_reason": "ESLint traversed ignored test-results emitted output; Babel generated-rsc warning retained in lint.log; no lint pass claimed"
+}

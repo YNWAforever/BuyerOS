@@ -1,0 +1,14 @@
+{"phase":"setup","code":0,"signal":null,"timedOut":false}
+{"phase":"install","code":0,"signal":null,"timedOut":false}
+{"phase":"build","code":0,"signal":null,"timedOut":false}
+{"phase":"linuxSSR","code":0,"signal":null,"timedOut":false}
+{"phase":"cleanup","removed":true}
+file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/q11-current-source-gates/build-linux.mjs:47
+ if(kinds.some(p=>!/^[-d]/.test(p)))throw new Error('artifact must contain regular files/directories only');
+                                          ^
+
+Error: artifact must contain regular files/directories only
+    at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/q11-current-source-gates/build-linux.mjs:47:43
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+
+Node.js v24.18.0

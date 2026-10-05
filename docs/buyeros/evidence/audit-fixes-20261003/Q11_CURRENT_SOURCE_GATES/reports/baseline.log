@@ -1,0 +1,60 @@
+▶ every disposable-API Playwright configuration actually removes its owned container and marker
+  ✔ playwright.admin.config.ts (2920.6967ms)
+  ✔ playwright.approval.config.ts (2087.3ms)
+  ✔ playwright.audit-fixes.config.ts (1709.1635ms)
+  ✔ playwright.bulk.config.ts (3551.2372ms)
+  ✔ playwright.buyer-management.config.ts (7013.45ms)
+  ✔ playwright.buyer.config.ts (3094.5503ms)
+  ✔ playwright.config.ts (1884.6406ms)
+  ✔ playwright.confirm.config.ts (3041.1265ms)
+  ✔ playwright.contact-job.config.ts (2871.5537ms)
+  ✔ playwright.cors.config.ts (2038.8901ms)
+  ✔ playwright.draft.config.ts (2461.0388ms)
+  ✔ playwright.exports.config.ts (2803.0967ms)
+  ✔ playwright.ingestion.config.ts (2481.166ms)
+  ✔ playwright.mvp-research.config.ts (2566.106ms)
+  ✔ playwright.mvp.config.ts (2070.7223ms)
+  ✔ playwright.offer.config.ts (2989.0633ms)
+  ✔ playwright.policy.config.ts (2591.4901ms)
+  ✔ playwright.quote.config.ts (1812.7979ms)
+  ✔ playwright.run.config.ts (1613.3037ms)
+  ✔ playwright.workbench.config.ts (2127.3091ms)
+✔ every disposable-API Playwright configuration actually removes its owned container and marker (53818.0788ms)
+✔ configured audit teardown also removes its labelled UI sentinel and marker (2914.7744ms)
+✔ configured audit teardown refuses a UI container whose owner label differs (2038.1778ms)
+✔ configured database teardown refuses an unrecognized marker without deleting it (140.4295ms)
+node:internal/modules/esm/resolve:271
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\.vercel\output\functions\__server.func\index.mjs' imported from C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\tests\vercel-render.test.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:992:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+    at #resolve (node:internal/modules/esm/loader:683:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+    at node:internal/modules/esm/loader:632:32
+    at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/.vercel/output/functions/__server.func/index.mjs'
+}
+
+Node.js v24.18.0
+✖ tests\vercel-render.test.mjs (78.0965ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 24
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 59090.2789
+
+✖ failing tests:
+
+test at tests\vercel-render.test.mjs:1:1
+✖ tests\vercel-render.test.mjs (78.0965ms)
+  'test failed'

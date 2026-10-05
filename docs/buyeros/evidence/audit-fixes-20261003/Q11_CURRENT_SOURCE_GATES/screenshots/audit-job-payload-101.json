@@ -1,0 +1,128 @@
+{
+  "data": {
+    "id": "f19bd335-8c1e-4e28-a804-e53293a53264",
+    "workspace_id": "e0000000-0000-4000-8000-000000000001",
+    "project_id": "e1000000-0000-4000-8000-000000000001",
+    "kind": "bulk_mutation",
+    "status": "completed",
+    "created_at": "2026-10-05T05:44:40.689369+00:00",
+    "updated_at": "2026-10-05T05:44:40.689369+00:00",
+    "data_mode": "live",
+    "requested": 101,
+    "processed": 101,
+    "updated": 34,
+    "unchanged": 0,
+    "blocked": 33,
+    "conflicts": 34,
+    "cancelled": 0,
+    "result_page": {
+      "items": [
+        {
+          "id": "e2000000-0000-4000-8000-000000000001",
+          "status": "updated",
+          "version": 2
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000002",
+          "status": "conflict",
+          "reason_code": "VERSION_CONFLICT"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000003",
+          "status": "blocked",
+          "reason_code": "POLICY_BLOCKED"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000004",
+          "status": "updated",
+          "version": 2
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000005",
+          "status": "conflict",
+          "reason_code": "VERSION_CONFLICT"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000006",
+          "status": "blocked",
+          "reason_code": "POLICY_BLOCKED"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000007",
+          "status": "updated",
+          "version": 2
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000008",
+          "status": "conflict",
+          "reason_code": "VERSION_CONFLICT"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000009",
+          "status": "blocked",
+          "reason_code": "POLICY_BLOCKED"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-00000000000a",
+          "status": "updated",
+          "version": 2
+        },
+        {
+          "id": "e2000000-0000-4000-8000-00000000000b",
+          "status": "conflict",
+          "reason_code": "VERSION_CONFLICT"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-00000000000c",
+          "status": "blocked",
+          "reason_code": "POLICY_BLOCKED"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-00000000000d",
+          "status": "updated",
+          "version": 2
+        },
+        {
+          "id": "e2000000-0000-4000-8000-00000000000e",
+          "status": "conflict",
+          "reason_code": "VERSION_CONFLICT"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-00000000000f",
+          "status": "blocked",
+          "reason_code": "POLICY_BLOCKED"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000010",
+          "status": "updated",
+          "version": 2
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000011",
+          "status": "conflict",
+          "reason_code": "VERSION_CONFLICT"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000012",
+          "status": "blocked",
+          "reason_code": "POLICY_BLOCKED"
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000013",
+          "status": "updated",
+          "version": 2
+        },
+        {
+          "id": "e2000000-0000-4000-8000-000000000014",
+          "status": "conflict",
+          "reason_code": "VERSION_CONFLICT"
+        }
+      ],
+      "offset": 0,
+      "limit": 20,
+      "total": 101
+    }
+  },
+  "request_id": "0955382a-7ec8-48b8-8d55-b5e32c61c239",
+  "data_mode": "live"
+}

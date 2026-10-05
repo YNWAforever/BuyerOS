@@ -1,0 +1,34 @@
+[
+  {
+    "path": "test-results/audit-job-payload-21.json",
+    "existed": false
+  },
+  {
+    "path": "test-results/audit-job-payload-101.json",
+    "existed": false
+  },
+  {
+    "path": "test-results/audit-operations-21.png",
+    "existed": false
+  },
+  {
+    "path": "test-results/audit-operations-101.png",
+    "existed": false
+  },
+  {
+    "path": "test-results/q06-slow-terminal.json",
+    "existed": false
+  },
+  {
+    "path": "test-results/q06-bulk-en.png",
+    "existed": false
+  },
+  {
+    "path": "test-results/q06-backoff.json",
+    "existed": false
+  },
+  {
+    "path": "test-results/q06-bulk-zh-mobile.png",
+    "existed": false
+  }
+]

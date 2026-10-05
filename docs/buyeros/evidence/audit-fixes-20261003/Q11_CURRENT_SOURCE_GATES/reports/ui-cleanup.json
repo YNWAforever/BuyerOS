@@ -1,0 +1,14 @@
+{
+  "checks": [
+    {
+      "name": "buyeros-test-914230d3",
+      "absent": true
+    },
+    {
+      "name": "buyeros-audit-ui-1810c5b8c947",
+      "absent": true
+    }
+  ],
+  "markersAbsent": true,
+  "actualTeardown": true
+}

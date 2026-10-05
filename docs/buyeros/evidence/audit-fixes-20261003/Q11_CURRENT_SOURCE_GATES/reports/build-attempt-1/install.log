@@ -1,0 +1,32 @@
+? Verifying lockfile against supply-chain policies (1059 entries)...
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +135 -1
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+Progress: resolved 135, reused 0, downloaded 4, added 3
+Progress: resolved 135, reused 0, downloaded 54, added 25
+Progress: resolved 135, reused 0, downloaded 98, added 29
+Progress: resolved 135, reused 0, downloaded 135, added 42
+Progress: resolved 135, reused 0, downloaded 135, added 97
+Progress: resolved 135, reused 0, downloaded 135, added 133
+Progress: resolved 135, reused 0, downloaded 135, added 135, done
+[WARN] Request took 10004ms: https://registry.npmjs.org/@instantdb%2Freact
+[WARN] Request took 11684ms: https://registry.npmjs.org/@playwright%2Ftest
+[WARN] Request took 10589ms: https://registry.npmjs.org/@typescript-eslint%2Ftypes
+[WARN] Request took 16189ms: https://registry.npmjs.org/@typescript-eslint%2Fvisitor-keys
+[WARN] Request took 16397ms: https://registry.npmjs.org/@typescript-eslint%2Fscope-manager
+[WARN] Request took 16805ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+[WARN] Request took 17060ms: https://registry.npmjs.org/@typescript-eslint%2Ftypescript-estree
+[WARN] Request took 17353ms: https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin
+[WARN] Request took 11501ms: https://registry.npmjs.org/playwright
+[WARN] Request took 11846ms: https://registry.npmjs.org/playwright-core
+[WARN] Request took 10294ms: https://registry.npmjs.org/typescript
+[WARN] Request took 11416ms: https://registry.npmjs.org/@types%2Fnode
+[WARN] Request took 11178ms: https://registry.npmjs.org/wrangler
+[WARN] Request took 14709ms: https://registry.npmjs.org/next
+✓ Lockfile passes supply-chain policies (1059 entries in 27.4s)
+
+devDependencies:
++ @neondatabase/auth 0.5.0-beta
+
+Done in 29.3s using pnpm v11.25.0

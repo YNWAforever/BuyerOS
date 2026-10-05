@@ -1,0 +1,7 @@
+{
+  "exit": 1,
+  "phase": "Windows staging",
+  "cause": "Win32 long path exceeded legacy path limit in deeply nested package.json; no main output written",
+  "staging_retained": "export-attempt-1",
+  "correction": "Validate archive and internal hard links before using native Windows tar directly into the shorter guarded main path; verify every emitted file hash"
+}

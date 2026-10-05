@@ -1,0 +1,279 @@
+<testsuites id="" name="" tests="11" failures="0" skipped="0" errors="11" time="76.13810500000001">
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-05T05:40:03.021Z" hostname="" tests="11" failures="0" skipped="0" time="0.081" errors="11">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="0.006">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-operations-B10-B11-a-a6b4c-are-readable-in-pages-of-20\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-operations-B10-B11-a-a6b4c-are-readable-in-pages-of-20\trace.zip]]
+]]>
+</system-out>
+<error message="spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT" type="Error">
+<![CDATA[  audit-operations.spec.ts:12:29 › B10 B11 all 21 real producer result IDs are readable in pages of 20 
+
+    Error: spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT
+
+    Error Context: ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B10-B11-a-a6b4c-are-readable-in-pages-of-20\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B10-B11-a-a6b4c-are-readable-in-pages-of-20\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B10-B11-a-a6b4c-are-readable-in-pages-of-20\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="0.005">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-operations-B10-B11-a-9d0b3-are-readable-in-pages-of-20\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-operations-B10-B11-a-9d0b3-are-readable-in-pages-of-20\trace.zip]]
+]]>
+</system-out>
+<error message="spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT" type="Error">
+<![CDATA[  audit-operations.spec.ts:12:29 › B10 B11 all 101 real producer result IDs are readable in pages of 20 
+
+    Error: spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT
+
+    Error Context: ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B10-B11-a-9d0b3-are-readable-in-pages-of-20\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B10-B11-a-9d0b3-are-readable-in-pages-of-20\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B10-B11-a-9d0b3-are-readable-in-pages-of-20\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="0.01">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-operations-B11-zero--6a8cd-se-cannot-replace-newer-job\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-operations-B11-zero--6a8cd-se-cannot-replace-newer-job\trace.zip]]
+]]>
+</system-out>
+<error message="spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT" type="Error">
+<![CDATA[  audit-operations.spec.ts:32:1 › B11 zero results and late job response cannot replace newer job ──
+
+    Error: spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT
+
+    Error Context: ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B11-zero--6a8cd-se-cannot-replace-newer-job\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B11-zero--6a8cd-se-cannot-replace-newer-job\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B11-zero--6a8cd-se-cannot-replace-newer-job\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="0.008">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-operations-B11-late--ab4da-arded-after-workspace-A-B-A\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-operations-B11-late--ab4da-arded-after-workspace-A-B-A\trace.zip]]
+]]>
+</system-out>
+<error message="spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT" type="Error">
+<![CDATA[  audit-operations.spec.ts:43:1 › B11 late result page is discarded after workspace A-B-A ──────────
+
+    Error: spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT
+
+    Error Context: ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B11-late--ab4da-arded-after-workspace-A-B-A\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B11-late--ab4da-arded-after-workspace-A-B-A\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B11-late--ab4da-arded-after-workspace-A-B-A\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B12 unopened 1000-result job reads summary only and never walks result pages" classname="audit-operations.spec.ts" time="0.005">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-operations-B12-unope-a34cd-nd-never-walks-result-pages\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-operations-B12-unope-a34cd-nd-never-walks-result-pages\trace.zip]]
+]]>
+</system-out>
+<error message="spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT" type="Error">
+<![CDATA[  audit-operations.spec.ts:57:1 › B12 unopened 1000-result job reads summary only and never walks result pages 
+
+    Error: spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT
+
+    Error Context: ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B12-unope-a34cd-nd-never-walks-result-pages\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B12-unope-a34cd-nd-never-walks-result-pages\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B12-unope-a34cd-nd-never-walks-result-pages\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once" classname="audit-operations.spec.ts" time="0.006">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-operations-B12-2-5s--fcec5-refreshes-visible-page-once\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-operations-B12-2-5s--fcec5-refreshes-visible-page-once\trace.zip]]
+]]>
+</system-out>
+<error message="spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT" type="Error">
+<![CDATA[  audit-operations.spec.ts:79:1 › B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once 
+
+    Error: spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT
+
+    Error Context: ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B12-2-5s--fcec5-refreshes-visible-page-once\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B12-2-5s--fcec5-refreshes-visible-page-once\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B12-2-5s--fcec5-refreshes-visible-page-once\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B13 hidden summary pause and double visibility resume produce exactly one refresh" classname="audit-operations.spec.ts" time="0.013">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-operations-B13-hidde-e1f81-produce-exactly-one-refresh\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-operations-B13-hidde-e1f81-produce-exactly-one-refresh\trace.zip]]
+]]>
+</system-out>
+<error message="spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT" type="Error">
+<![CDATA[  audit-operations.spec.ts:92:1 › B13 hidden summary pause and double visibility resume produce exactly one refresh 
+
+    Error: spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT
+
+    Error Context: ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-hidde-e1f81-produce-exactly-one-refresh\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-hidde-e1f81-produce-exactly-one-refresh\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-hidde-e1f81-produce-exactly-one-refresh\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B13 actual 429 Retry-After and 503 recover without result-page traffic" classname="audit-operations.spec.ts" time="0.011">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-operations-B13-actua-31a65-without-result-page-traffic\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-operations-B13-actua-31a65-without-result-page-traffic\trace.zip]]
+]]>
+</system-out>
+<error message="spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT" type="Error">
+<![CDATA[  audit-operations.spec.ts:101:1 › B13 actual 429 Retry-After and 503 recover without result-page traffic 
+
+    Error: spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT
+
+    Error Context: ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-actua-31a65-without-result-page-traffic\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-actua-31a65-without-result-page-traffic\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-actua-31a65-without-result-page-traffic\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B16 old summary cannot overwrite another scope after A-B-A" classname="audit-operations.spec.ts" time="0.007">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\trace.zip]]
+]]>
+</system-out>
+<error message="spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT" type="Error">
+<![CDATA[  audit-operations.spec.ts:112:1 › B16 old summary cannot overwrite another scope after A-B-A ──────
+
+    Error: spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT
+
+    Error Context: ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B16-old-s-3f867-e-another-scope-after-A-B-A\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B13 zh-HK 390px summary/results controls remain usable without overflow" classname="audit-operations.spec.ts" time="0.005">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-operations-B13-zh-HK-ba41d-ain-usable-without-overflow\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-operations-B13-zh-HK-ba41d-ain-usable-without-overflow\trace.zip]]
+]]>
+</system-out>
+<error message="spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT" type="Error">
+<![CDATA[  audit-operations.spec.ts:127:1 › B13 zh-HK 390px summary/results controls remain usable without overflow 
+
+    Error: spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT
+
+    Error Context: ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-zh-HK-ba41d-ain-usable-without-overflow\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-zh-HK-ba41d-ain-usable-without-overflow\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-zh-HK-ba41d-ain-usable-without-overflow\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="B13 Operations clears a transient summary error after a valid recovery" classname="audit-operations.spec.ts" time="0.005">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|ui-artifacts\audit-operations-B13-Opera-af05f-rror-after-a-valid-recovery\error-context.md]]
+
+[[ATTACHMENT|ui-artifacts\audit-operations-B13-Opera-af05f-rror-after-a-valid-recovery\trace.zip]]
+]]>
+</system-out>
+<error message="spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT" type="Error">
+<![CDATA[  audit-operations.spec.ts:136:1 › B13 Operations clears a transient summary error after a valid recovery 
+
+    Error: spawn C:\Users\laich\.codex\worktrees\neon-auth-compatibility-local-20261004\BuyerOS\services\worker\.venv\Scripts\python.exe ENOENT
+
+    Error Context: ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-Opera-af05f-rror-after-a-valid-recovery\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-Opera-af05f-rror-after-a-valid-recovery\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\q11-current-source-gates\ui-artifacts\audit-operations-B13-Opera-af05f-rror-after-a-valid-recovery\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

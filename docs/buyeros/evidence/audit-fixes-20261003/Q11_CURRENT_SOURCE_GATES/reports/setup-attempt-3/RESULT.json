@@ -1,0 +1,10 @@
+{
+  "phase": "frozen-install",
+  "exit": 1,
+  "cause": "ERR_PNPM_LOCKFILE_CONFIG_MISMATCH",
+  "root_cause": "Local build input allowlist omitted tracked pnpm-workspace.yaml; lockfile overrides come from that exact repository policy",
+  "actual_build_started": false,
+  "tests_started": false,
+  "removed_label_checked": true,
+  "correction": "Include unchanged workspace policy and reviewed credential-free .npmrc; no no-frozen-lockfile or policy changes"
+}

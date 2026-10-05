@@ -1,0 +1,13 @@
+Listing tests:
+  audit-operations.spec.ts:12:29 › B10 B11 all 21 real producer result IDs are readable in pages of 20
+  audit-operations.spec.ts:12:29 › B10 B11 all 101 real producer result IDs are readable in pages of 20
+  audit-operations.spec.ts:32:1 › B11 zero results and late job response cannot replace newer job
+  audit-operations.spec.ts:43:1 › B11 late result page is discarded after workspace A-B-A
+  audit-operations.spec.ts:57:1 › B12 unopened 1000-result job reads summary only and never walks result pages
+  audit-operations.spec.ts:79:1 › B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once
+  audit-operations.spec.ts:92:1 › B13 hidden summary pause and double visibility resume produce exactly one refresh
+  audit-operations.spec.ts:101:1 › B13 actual 429 Retry-After and 503 recover without result-page traffic
+  audit-operations.spec.ts:112:1 › B16 old summary cannot overwrite another scope after A-B-A
+  audit-operations.spec.ts:127:1 › B13 zh-HK 390px summary/results controls remain usable without overflow
+  audit-operations.spec.ts:136:1 › B13 Operations clears a transient summary error after a valid recovery
+Total: 11 tests in 1 file

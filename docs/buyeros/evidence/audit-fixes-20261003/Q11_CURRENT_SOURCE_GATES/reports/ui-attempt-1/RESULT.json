@@ -1,0 +1,9 @@
+{
+  "exit": 1,
+  "pass": 0,
+  "fail": 11,
+  "skip": 0,
+  "cause": "services/worker/.venv/Scripts/python.exe ENOENT before fixture producer",
+  "classification": "missing local dependency environment; not a product regression",
+  "correction": "uv sync --frozen in services/worker; no assertion/config timeout edits"
+}

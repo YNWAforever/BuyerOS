@@ -1,0 +1,30 @@
+{
+  "imageId": "sha256:48e4b67d85f87bd551df43704e24d252f56cc5f8e9718841aace50f19948f0f9",
+  "node": "v22.23.2",
+  "cpus": 4000000000,
+  "memory": 6442450944,
+  "preset": "vercel",
+  "setup": {
+    "code": 0,
+    "signal": null,
+    "timedOut": false
+  },
+  "install": {
+    "code": 0,
+    "signal": null,
+    "timedOut": false
+  },
+  "build": {
+    "code": 0,
+    "signal": null,
+    "timedOut": false
+  },
+  "render": {
+    "code": 0,
+    "signal": null,
+    "timedOut": false
+  },
+  "networks": [],
+  "renderEntry": ".vercel/output/functions/__server.func/index.mjs",
+  "liveVerification": false
+}

@@ -1,3 +1,9 @@
+# Current release readiness — 2026-10-05
+
+**NOT READY FOR LIVE PILOT.** [CURRENT_STATUS.md](CURRENT_STATUS.md) is the single current local source/gate table. Current source bb7a1ed has genuine build/SSR,300root/18strictAPI/11OperationsUI gates; deployment/schema/runtime/worker/provider/recovery/auth cutover are not verified by this round. No deploy/provider/account/production action occurred.
+
+## Historical T30 record — original 2026-10-01 source scope
+
 # BuyerOS release candidate readiness (T30 preparation)
 
 Status: **NOT READY FOR LIVE PILOT**. Current production deployment `dpl_wdPCQmzg7EkFusgFknHAA2tXdKth` is READY on main source `12327c7ac98849b90b0bd08f63872be7dd302ac6`. GitHub records the owner's external [PR #9](https://github.com/YNWAforever/BuyerOS/pull/9) merge at2026-10-01T01:52:49Z; existing Git integration then deployed main. The agent performed no merge or additional deployment. Application/CI content is identical to reviewed `41810627540dd52c4567f853ae65d51e2bb6365d`; main CI36803187816 passes6/6. Current-source anonymous HTTP/bootstrap checks pass **4/4, 0 failed/skipped**, and the bounded error query returns0 records. All nine saved production variable records are unchanged; paid admission and R2 remain false. The preceding specifically authorized4181062 rollout and the user's refreshed FIMMICK/workspace_admin confirmation remain separately recorded. Human UI evidence does not establish an agent-observed authenticated API/full production staff journey. Worker/Valkey, R2, policy/provider/pilot, manual assistive/non-text and external recovery gates remain open. Deployment documentation/evidence is prepared as a follow-up review; no production migration was run. See [REMAINING_DEVELOPMENT_STATUS.md](REMAINING_DEVELOPMENT_STATUS.md); earlier checkpoints retain their exact source scope.

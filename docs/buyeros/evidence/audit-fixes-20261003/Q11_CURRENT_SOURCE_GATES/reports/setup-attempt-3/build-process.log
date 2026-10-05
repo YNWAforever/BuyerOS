@@ -1,0 +1,12 @@
+{"phase":"setup","code":0,"signal":null,"timedOut":false}
+{"phase":"install","code":1,"signal":null,"timedOut":false}
+{"phase":"cleanup","removed":true}
+file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/q11-current-source-gates/build-linux.mjs:33
+ console.log(JSON.stringify({phase:'install',...install}));if(install.code!==0)throw new Error('frozen install failed');
+                                                                                     ^
+
+Error: frozen install failed
+    at file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/test-results/q11-current-source-gates/build-linux.mjs:33:86
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+
+Node.js v24.18.0

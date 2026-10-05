@@ -1,0 +1,8 @@
+{
+  "phase": "export",
+  "build_exit": 0,
+  "linux_ssr_exit": 0,
+  "export_exit": 1,
+  "cause": "Strict archive type guard refused 405 hard links; 0 symlinks; no extraction performed",
+  "correction": "Validate every hard-link target is an in-archive regular file then copy bytes into new guarded staging; preserve genuine build and original archive"
+}

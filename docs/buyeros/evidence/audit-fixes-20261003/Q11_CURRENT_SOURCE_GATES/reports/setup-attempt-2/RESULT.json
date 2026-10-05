@@ -1,0 +1,9 @@
+{
+  "phase": "frozen-install",
+  "exit": 1,
+  "cause": "ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY",
+  "actual_build_started": false,
+  "tests_started": false,
+  "removed_label_checked": true,
+  "correction": "CI=true in the disposable container only; preserve lockfile and frozen install"
+}

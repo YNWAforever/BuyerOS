@@ -2147,5 +2147,65 @@
       },
       "intent": "bound identity canonical JSON;headers do not change intent"
     }
+  },
+  "latest_local_verification_checkpoint": {
+    "status": "current-source-local-gates-verified;full-Q11-open",
+    "source_sha": "bb7a1ede078085dede0433cafd47078ea63a4e11",
+    "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+    "branch": "codex/q11-current-source-gates",
+    "checked_at": "2026-10-05T05:50:55.784291+00:00",
+    "owner_role": "Release owner / QA",
+    "runtime_code_changes": 0,
+    "tests_changed": 0,
+    "checks": {
+      "root-node": {
+        "pass": 299,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "reported_pass": 300,
+        "junit_leaf_cases": 299,
+        "duration_ms": 100374.5609
+      },
+      "api": {
+        "pass": 18,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "vercel-render-linux": {
+        "pass": 3,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "vercel-render-windows": {
+        "pass": 3,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "ui": {
+        "pass": 11,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      }
+    },
+    "contract_operations": 84,
+    "original_operations": 70,
+    "extensions": 14,
+    "generated_types_exit": 0,
+    "routes_exit": 0,
+    "typescript_exit": 0,
+    "source_lint_exit": 0,
+    "build_exit": 0,
+    "migrations": [],
+    "source_schema_head": "0037_bulk_manifests",
+    "deployed_sha": null,
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/RESULTS.md",
+    "limits": "Fixture identities/SQL rows; API/DB and 11 actual Operations browser cases. No real auth/provider/full staff/recovery/performance/production evidence. Original302 and fullN00 open. No deployment.",
+    "next_eligible": "Q11 local capability/readiness responsible role and concrete next action; N00 real compatibility separately blocked",
+    "rollback": "Revert this metadata/evidence commit only; no runtime/data/DB rollback."
   }
 }

@@ -16,7 +16,7 @@
     "Q10",
     "N00"
   ],
-  "next_eligible": "N00 specifically authorized isolated real-Neon/Google roundtrip, exact admin cleanup/absence and counted native transport; full gate open",
+  "next_eligible": "Q11 local capability/readiness responsible role and concrete next action; N00 real compatibility separately blocked",
   "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
   "tasks": [
     {
@@ -1627,9 +1627,9 @@
     },
     {
       "id": "Q11",
-      "status": "baseline-recorded",
-      "code_status": "baseline-recorded",
-      "verification_status": "baseline-integrity-pass; release gates open",
+      "status": "partial-local-verification;release-gates-open",
+      "code_status": "current-status-docs-updated;runtime-unchanged",
+      "verification_status": "300root/18strictAPI/11UI/3LinuxSSR/3WindowsSSR pass;zero fail/skip;full release unverified",
       "release_status": "not-deployed",
       "source_sha": "576c3b182819b392f8b73697457769d6f16a496c",
       "cases": [],
@@ -1673,6 +1673,66 @@
         "review": "author only; independent review pending",
         "release_status": "not-deployed",
         "limits": "Docker/image/build prerequisite; no fresh UI/DB/live/performance/human UAT; prior failures retained"
+      },
+      "current_source_verification_20261005": {
+        "status": "current-source-local-gates-verified;full-Q11-open",
+        "source_sha": "bb7a1ede078085dede0433cafd47078ea63a4e11",
+        "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+        "branch": "codex/q11-current-source-gates",
+        "checked_at": "2026-10-05T05:50:55.784291+00:00",
+        "owner_role": "Release owner / QA",
+        "runtime_code_changes": 0,
+        "tests_changed": 0,
+        "checks": {
+          "root-node": {
+            "pass": 299,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "reported_pass": 300,
+            "junit_leaf_cases": 299,
+            "duration_ms": 100374.5609
+          },
+          "api": {
+            "pass": 18,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "vercel-render-linux": {
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "vercel-render-windows": {
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "ui": {
+            "pass": 11,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          }
+        },
+        "contract_operations": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "generated_types_exit": 0,
+        "routes_exit": 0,
+        "typescript_exit": 0,
+        "source_lint_exit": 0,
+        "build_exit": 0,
+        "migrations": [],
+        "source_schema_head": "0037_bulk_manifests",
+        "deployed_sha": null,
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/RESULTS.md",
+        "limits": "Fixture identities/SQL rows; API/DB and 11 actual Operations browser cases. No real auth/provider/full staff/recovery/performance/production evidence. Original302 and fullN00 open. No deployment.",
+        "next_eligible": "Q11 local capability/readiness responsible role and concrete next action; N00 real compatibility separately blocked",
+        "rollback": "Revert this metadata/evidence commit only; no runtime/data/DB rollback."
       }
     },
     {
@@ -1817,5 +1877,6 @@
     "status": "current-auth-local-verified;N02/fullQ13open",
     "proposed_schema_head": "0038_workspace_discovery",
     "merged_here": false
-  }
+  },
+  "latest_local_verification_source_sha": "bb7a1ede078085dede0433cafd47078ea63a4e11"
 }
