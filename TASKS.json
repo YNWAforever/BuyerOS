@@ -3416,13 +3416,24 @@
         "proposed_new_files": "docs/buyeros/runbooks/staff-onboarding.md;services/api/tools/reconcile_staff_membership.py;services/api/tests/test_staff_onboarding_db.py",
         "acceptance": "有正確帳戶與 membership 的 UI/API 讀回證據；0-membership 仍不能進 workspace，提供雙語重試和聯絡路徑。沒有有效帳戶時只標受阻，不改密碼或提升自己權限。",
         "rollback": "撤回本批新增 membership 須依正常管理流程並保留 audit；不刪 canonical users 或歷史 actor。",
-        "execution_sha": "",
-        "execution_evidence": "",
-        "code_status": "not-started",
-        "verification_status": "not-run",
+        "execution_sha": "8dabf5435877ccce8249a6a2a6fff0a1b1fbd803",
+        "execution_evidence": "artifacts/c61/C61-03-focused-red.json;artifacts/c61/C61-03-required-first-green.json;artifacts/c61/C61-03-required-final-green.json;artifacts/c61/c61-onboarding-final-green.xml;artifacts/c61/C61-03-tested-source.json;docs/buyeros/runbooks/staff-onboarding.md",
+        "code_status": "controlled default-readonly canonical staff membership CLI and shared admin mutation boundary implemented",
+        "verification_status": "4 focused RED then 36 required GREEN, zero fail/error/skip; signed local JWT, runtime role, current authority, exact restore/replay, real same-lock revoke and last-admin competition verified",
         "release_status": "not-deployed",
-        "blockers": [],
-        "evidence_paths": []
+        "blockers": [
+          "real authorized operator/reviewer/admin accounts in declared target scope",
+          "same-version production/UI account readback",
+          "full API and C61-02 full built/CI gates"
+        ],
+        "evidence_paths": [
+          "artifacts/c61/C61-03-focused-red.json",
+          "artifacts/c61/C61-03-required-first-green.json",
+          "artifacts/c61/C61-03-required-final-green.json",
+          "artifacts/c61/c61-onboarding-final-green.xml",
+          "artifacts/c61/C61-03-tested-source.json",
+          "docs/buyeros/runbooks/staff-onboarding.md"
+        ]
       },
       {
         "task_id": "C61-04",

@@ -1,6 +1,5 @@
 """Versioned management of existing verified tenant memberships only."""
 import uuid
-from hashlib import sha256
 
 from fastapi import APIRouter, Depends, Header, Query, Request, Response
 from sqlalchemy import func, select
@@ -12,7 +11,7 @@ from ..idempotency import begin_idempotency, complete_idempotency, if_match_vers
 from ..schemas import EligibleAssignee, MembershipRead, MembershipUpdate
 from ...db.models import Membership, User
 from ...services.membership_directory import directory_search, eligible_owner_predicate, member_display_name
-from ...services.audit_service import append_audit
+from ...services.membership_admin import require_workspace_admin, lock_membership_admin, apply_membership_update
 
 router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["memberships"])
 
@@ -24,10 +23,7 @@ def _data(row: Membership, name: str | None) -> dict:
 
 
 async def _admin(session, principal, workspace_id):
-    member = await load_membership(session, principal=principal, workspace_id=workspace_id)
-    if "workspace_admin" not in member["roles"]:
-        raise ApiError(403, "PERMISSION_DENIED", "workspace admin required")
-    return member
+    return await require_workspace_admin(session, principal, workspace_id)
 
 
 async def _directory(session, workspace_id, q, offset, limit, *, eligible=False):
@@ -80,8 +76,7 @@ async def update_membership(workspace_id: uuid.UUID, membership_id: uuid.UUID, p
     async with tenant_scoped(workspace_id) as session:
         member = await _admin(session, principal, workspace_id)
         # Serialize admin changes without requiring UPDATE privilege on workspaces.
-        lock_id = int.from_bytes(sha256(f"membership-admin:{workspace_id}".encode()).digest()[:8], "big", signed=True)
-        await session.execute(select(func.pg_advisory_xact_lock(lock_id)))
+        await lock_membership_admin(session, workspace_id)
         member = await _admin(session, principal, workspace_id)
         row = (await session.execute(select(Membership).where(Membership.workspace_id == workspace_id,
             Membership.id == membership_id).with_for_update())).scalar_one_or_none()
@@ -101,22 +96,9 @@ async def update_membership(workspace_id: uuid.UUID, membership_id: uuid.UUID, p
             return envelope(data, request.state.request_id)
         if row.version != expected:
             raise ApiError(412, "STALE_REVISION", "membership version changed")
-        new_roles = list(payload.roles)
-        # At least one active admin must remain after this transaction.
-        if row.active and "workspace_admin" in row.roles and (not payload.active or "workspace_admin" not in new_roles):
-            count = (await session.execute(select(func.count()).select_from(Membership).where(
-                Membership.workspace_id == workspace_id, Membership.active.is_(True),
-                Membership.roles.any("workspace_admin")))).scalar_one()
-            if count <= 1:
-                raise ApiError(409, "LAST_ADMIN", "cannot remove the last active workspace admin")
-        changed = row.roles != new_roles or row.active != payload.active
-        if changed:
-            row.roles = new_roles
-            row.active = payload.active
-            row.version += 1
-            append_audit(session, workspace_id=workspace_id, actor_id=member["user_id"],
-                         action="membership.updated", entity_type="membership", entity_id=row.id,
-                         request_id=request.state.request_id, reason=payload.reason)
+        await apply_membership_update(session, row, workspace_id=workspace_id,
+            actor_id=member['user_id'], roles=list(payload.roles), active=payload.active,
+            reason=payload.reason, request_id=request.state.request_id)
         name = (await session.execute(select(User.display_name).where(User.id == row.user_id))).scalar_one_or_none()
         data = _data(row, name)
         complete_idempotency(outcome, str(row.id), response=data)

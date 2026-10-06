@@ -18,12 +18,14 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 
 @contextlib.asynccontextmanager
-async def tenant_session(engine: AsyncEngine | None, workspace_id: uuid.UUID | None) -> AsyncIterator[AsyncSession]:
+async def tenant_session(engine: AsyncEngine | None, workspace_id: uuid.UUID | None, *, read_only: bool = False) -> AsyncIterator[AsyncSession]:
     if engine is None or workspace_id is None:
         raise ValueError("tenant context requires an engine and a workspace_id")
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as session:
         async with session.begin():
+            if read_only:
+                await session.execute(text("SET TRANSACTION READ ONLY"))
             await session.execute(
                 text("SELECT set_config('app.workspace_id', :ws, true)"), {"ws": str(workspace_id)}
             )

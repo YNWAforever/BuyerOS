@@ -176,7 +176,7 @@ async def tenant_scoped(workspace_id: uuid.UUID):
         yield session
 
 
-async def load_membership(session, *, principal, workspace_id) -> dict:
+async def read_current_membership(session, *, principal, workspace_id) -> dict:
     from sqlalchemy import select
 
     from ..db.models import Membership
@@ -193,6 +193,12 @@ async def load_membership(session, *, principal, workspace_id) -> dict:
     ).scalar_one_or_none()
     if membership is None or not membership.active:
         raise ApiError(404, "NOT_FOUND", "workspace not found")
-    from ..services.api_rate_limit import enforce_rate_limit
-    await enforce_rate_limit(get_rate_engine(), workspace_id, user_id)
     return {"user_id": user_id, "roles": list(membership.roles)}
+
+
+async def load_membership(session, *, principal, workspace_id) -> dict:
+    from ..services.api_rate_limit import enforce_rate_limit
+
+    member = await read_current_membership(session, principal=principal, workspace_id=workspace_id)
+    await enforce_rate_limit(get_rate_engine(), workspace_id, member['user_id'])
+    return member

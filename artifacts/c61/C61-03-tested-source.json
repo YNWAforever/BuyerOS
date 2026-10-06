@@ -1,0 +1,51 @@
+{
+  "source_parent_sha": "8dabf5435877ccce8249a6a2a6fff0a1b1fbd803",
+  "files": [
+    {
+      "path": "services/api/buyeros_api/api/deps.py",
+      "sha256": "0a5a17e76464b2a81fdd84ac580020083c5ac1b877ee5ce234fff32f85dccfd7"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/memberships.py",
+      "sha256": "8fcc1794727ff04b49bc3f0c1fe718079eae54572f1a82d984b97aa77c0369cc"
+    },
+    {
+      "path": "services/api/buyeros_api/db/session.py",
+      "sha256": "fbf2b14879aec4c1fb2eb1bfd0c97421dbf4a7b8f0ed5b9da7e2dc76b68e1bf6"
+    },
+    {
+      "path": "services/api/buyeros_api/services/membership_admin.py",
+      "sha256": "d0d8f4ad5c01bfed2fd51521fa0dbbb7fa75f39e9a70c863173b615fd2ee6518"
+    },
+    {
+      "path": "services/api/buyeros_api/services/staff_onboarding.py",
+      "sha256": "6a06064a5528f76b31d214526e61da99972d12628fc6778c0de67a384c4af6d0"
+    },
+    {
+      "path": "services/api/tools/reconcile_staff_membership.py",
+      "sha256": "2f9393dc4db9f2ee68b5d6658593847b9d53a466158a62a2c7794900e53c7504"
+    },
+    {
+      "path": "services/api/tests/test_staff_onboarding_db.py",
+      "sha256": "9a386b6e5c30eecd8cf9266247b7c9598f4369038aa6680fb0293e42de35d6eb"
+    },
+    {
+      "path": "services/api/tests/test_staff_onboarding_cli.py",
+      "sha256": "f72cc1c670060b35b0aff8c0656796e54d3dca2e7c3c583d19fc841e52ee3e2c"
+    },
+    {
+      "path": "docs/buyeros/runbooks/staff-onboarding.md",
+      "sha256": "cd313c1a9d72902040dfc2bb93176af906b49da2420fbf7b0a6903d6001207ff"
+    }
+  ],
+  "red_cases": 4,
+  "required_green_cases": 36,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "dry_run_durable_writes": 0,
+  "test_environment": "owned loopback PG16, actual non-owner buyeros_api login, cryptographically signed local RS256 fixture. CLI parser/output checks use explicit test doubles; not real account acceptance.",
+  "real_operator_reviewer_admin_accounts": "blocked",
+  "production_membership_writes": 0,
+  "deployment": false
+}
