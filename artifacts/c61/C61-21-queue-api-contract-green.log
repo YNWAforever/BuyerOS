@@ -1,0 +1,67 @@
+................................................F....                    [100%]
+================================== FAILURES ===================================
+_________ test_registry_covers_every_unimplemented_contract_operation _________
+
+    def test_registry_covers_every_unimplemented_contract_operation():
+        """Regression guard: an out-of-slice operation must never silently 404."""
+        implemented = {
+            "getLiveness",
+            "listWorkspaces",
+            "listProjects",
+            "createProject",
+            "getProject",
+            "updateProject",
+            "archiveProject",
+            "listICPVersions",
+            "saveICPVersion",
+            "approveICPVersion",
+            "getReadiness",
+            "getCapabilities",
+            "listBuyers",
+            "getBuyer",
+            "listBuyerEvidence",
+            "getEvidence",
+            "createBuyerSnapshot",
+            "updateBuyer",
+            "reviewBuyers",
+            "listBuyerLists", "createBuyerList", "getBuyerList", "renameBuyerList",
+            "changeListMemberships", "listFilterPresets", "saveFilterPreset",
+            "assignBuyerOwners", "getAsyncJob", "listAsyncJobs", "retryFailedAsyncJob", "cancelAsyncJob",
+            "listMemberships", "updateMembership", "getPreferences", "updatePreferences", "listAuditEvents",
+            "listBudgets", "updateBudget", "startRun", "listRuns", "getRun", "cancelRun", "retryRun", "getRunEvents",
+            "quoteLookup", "getLookupQuote", "cancelLookupQuote", "confirmLookup",
+            "getEnrichmentJob", "cancelEnrichmentJob", "reconcileEnrichmentJob", "receiveProviderCallback",
+            "listPolicyDecisions", "recordPolicyDecision", "listSuppressions", "createSuppression", "removeSuppression",
+            "uploadOfferDocument", "ingestOfferUrl", "getOfferDocument", "listOfferDocuments", "deleteOfferDocument",
+            "listDrafts", "generateDraft", "getDraft", "editDraft",
+            "requestDraftReview", "approveDraft", "disabledDeliveryBoundary",
+            "exportBuyers", "exportDraft", "getExport", "downloadExport", "exportBulkFailures",
+            "getUsage", "listOutcomes", "recordOutcome", "correctOutcome",
+            "listEligibleAssignees", "getAsyncJobSummary", "reviewDraftGrounding",
+            "previewBulkManifest", "getBulkManifest", "executeBulkManifest",
+        }
+        contract = _contract_operations()
+        out_of_slice = set(contract) - implemented
+>       assert out_of_slice == set(UNIMPLEMENTED_OPERATIONS)
+E       AssertionError: assert {'getWorkQueu...erOperations'} == set()
+E         
+E         Extra items in the left set:
+E         'getWorkQueue'
+E         'listProviderOperations'
+E         Use -v to get more diff
+
+tests\test_api_buyers.py:94: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_work_queue_db.py::test_work_queue_count_equals_filtered_list[a0000000-0000-4000-8000-000000000001-expected0]
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-queue-api-contract.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_api_buyers.py::test_registry_covers_every_unimplemented_contract_operation
+1 failed, 52 passed, 2 warnings in 41.19s

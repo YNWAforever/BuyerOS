@@ -1,5 +1,6 @@
 """Durable, grounded draft preparation routes. Delivery remains disabled."""
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Header, Query, Request, Response
 
@@ -47,7 +48,8 @@ async def generate_draft(workspace_id: uuid.UUID, project_id: uuid.UUID,
 async def list_drafts(workspace_id: uuid.UUID, project_id: uuid.UUID, request: Request,
                       principal: Principal = Depends(get_principal),
                       offset: int = Query(default=0, ge=0),
-                      limit: int = Query(default=20, ge=1, le=100)) -> dict:
+                      limit: int = Query(default=20, ge=1, le=100),
+                      approval: Literal["pending"] | None = None) -> dict:
     from sqlalchemy import func, select
     from ...db.drafts import Approval, DraftRevision, OutreachDraft
     from ...db.icp import Project
@@ -62,14 +64,10 @@ async def list_drafts(workspace_id: uuid.UUID, project_id: uuid.UUID, request: R
         ))).scalar_one_or_none()
         if project is None:
             raise ApiError(404, "NOT_FOUND", "project not found")
-        predicate = (OutreachDraft.workspace_id == workspace_id) & (OutreachDraft.project_id == project_id)
-        total = (await session.execute(select(func.count()).select_from(OutreachDraft).where(predicate))).scalar_one()
-        rows = (await session.execute(select(OutreachDraft, DraftRevision).join(
-            DraftRevision,
-            (DraftRevision.workspace_id == OutreachDraft.workspace_id)
-            & (DraftRevision.draft_id == OutreachDraft.id)
-            & (DraftRevision.revision_number == OutreachDraft.current_revision),
-        ).where(predicate).order_by(OutreachDraft.created_at, OutreachDraft.id)
+        from ...services.work_queue import count_query, draft_list_query
+        query = draft_list_query(workspace_id=workspace_id, project_id=project_id, approval=approval)
+        total = (await session.execute(count_query(query))).scalar_one()
+        rows = (await session.execute(query.order_by(OutreachDraft.created_at, OutreachDraft.id)
           .offset(offset).limit(limit))).all()
         ids = [draft.id for draft, _ in rows]
         approvals = (await session.execute(select(Approval).where(

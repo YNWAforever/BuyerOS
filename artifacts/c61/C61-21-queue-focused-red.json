@@ -1,0 +1,26 @@
+{
+  "source_sha": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "source_sha_after": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "started_at_utc": "2026-10-06T21:00:39.345697+00:00",
+  "seconds": 15.454,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "tests/test_work_queue_db.py",
+    "-q",
+    "--junitxml=../../artifacts/c61/c61-queue-red.xml"
+  ],
+  "cwd": "services/api",
+  "exit_code": 1,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-21-queue-focused-red.log",
+  "fresh_junit": true,
+  "tests": 7,
+  "failures": 0,
+  "errors": 7,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-queue-red.xml",
+  "required_gate_exit_code": 1
+}

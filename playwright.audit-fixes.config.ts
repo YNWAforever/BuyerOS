@@ -2,7 +2,7 @@ import {defineConfig} from '@playwright/test';
 // Owned built UI + loopback HTTP/Postgres fixture; never reuse a shared/live server.
 export default defineConfig({
   globalTeardown:'./tests/e2e/audit-teardown.ts',
-  testDir:'./tests/e2e',testMatch:'audit-*.spec.ts',workers:1,timeout:60_000,
+  testDir:'./tests/e2e',testMatch:['audit-*.spec.ts','work-queue-counts.spec.ts'],workers:1,timeout:60_000,
   outputDir:'test-results/audit-fixes',
   reporter:[['list'],['junit',{outputFile:'test-results/audit-fixes.xml'}]],
   use:{baseURL:'http://localhost:5173',browserName:'chromium',viewport:{width:1120,height:800},trace:'retain-on-failure'},

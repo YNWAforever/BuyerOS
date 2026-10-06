@@ -6009,6 +6009,11 @@ paths:
         schema: *id001
       - *id002
       - *id003
+      - name: approval
+        in: query
+        schema:
+          type: string
+          enum: [pending]
       responses:
         '200':
           description: Success; endpoint is PROPOSED, not implemented.
@@ -8054,6 +8059,84 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/BulkManifestExecute'
+  /v1/workspaces/{workspace_id}/projects/{project_id}/work-queue:
+    get:
+      operationId: getWorkQueue
+      summary: Read current project work queue
+      tags:
+      - BO-024
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Bounded actor-scoped job page; workspace admins may view all workspace jobs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkQueueResponse'
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-cost: none
+      x-idempotency: Read-only.
+  /v1/workspaces/{workspace_id}/projects/{project_id}/provider-operations:
+    get:
+      operationId: listProviderOperations
+      summary: List scoped durable provider receipts
+      tags:
+      - BO-024
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Limit'
+      - name: acceptance
+        in: query
+        schema:
+          type: string
+          enum:
+          - unknown
+      responses:
+        '200':
+          description: Bounded actor-scoped job page; workspace admins may view all workspace jobs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderOperationPageResponse'
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-cost: none
+      x-idempotency: Read-only.
 components:
   securitySchemes:
     BearerAuth:
@@ -12447,6 +12530,149 @@ components:
       - reviewed_at
       description: Read-only server-generated immutable project sender identity. This is reviewed preparation context;
         sender-domain/mailbox ownership verification remains a separate later delivery gate.
+    WorkQueueItem:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          type: string
+          enum:
+          - awaiting_review
+          - pending_approval
+          - unassigned
+          - failed_job
+          - unknown_fit
+          - unknown_acceptance
+        count:
+          type: integer
+          minimum: 0
+        filters:
+          type: object
+          additionalProperties: false
+          properties:
+            review:
+              type: string
+              enum:
+              - awaiting_review
+            queue:
+              type: string
+              enum:
+              - unassigned
+              - unknown
+            status:
+              type: string
+              enum:
+              - failed
+            approval:
+              type: string
+              enum:
+              - pending
+            acceptance:
+              type: string
+              enum:
+              - unknown
+          required: []
+      required:
+      - kind
+      - count
+      - filters
+    WorkQueue:
+      type: object
+      additionalProperties: false
+      properties:
+        as_of:
+          type: string
+          format: date-time
+        items:
+          type: array
+          minItems: 6
+          maxItems: 6
+          items:
+            $ref: '#/components/schemas/WorkQueueItem'
+      required:
+      - as_of
+      - items
+    ProviderOperationSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        capability:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - status
+      - capability
+      - created_at
+      - updated_at
+    ProviderOperationPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ProviderOperationSummary'
+        offset:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+      required:
+      - items
+      - offset
+      - limit
+      - total
+    WorkQueueResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/WorkQueue'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
+    ProviderOperationPageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/ProviderOperationPage'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
 x-plan-status: PROPOSED
 x-contract-owner: BO-003; serialize changes with BO-005 schema owner
 x-pilot-constraints:

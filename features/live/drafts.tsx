@@ -1,5 +1,7 @@
 'use client';
 import {useEffect,useMemo,useRef,useState} from 'react';
+import {useSearchParams} from 'next/navigation';
+import {readDraftApproval} from '@/services/live/work-queue';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
 import {LiveCancelled,LiveError,describeLiveError} from '@/services/live/client';
 import {ActionIntent} from '@/services/live/action-intent';
@@ -88,6 +90,7 @@ const words:Record<string,string>={
   'Generate addressed draft':'產生已指定收件人的草稿',
   'Recipient expired; refresh buyer details.':'收件人資料已到期；請重新整理買家詳情。',
   'Prepare a grounded draft; delivery is disabled.':'準備有證據草稿；發送功能已停用。',
+  'Pending approvals':'待批准草稿','Loading drafts…':'正在載入草稿…','Refresh draft list':'重新整理草稿列表',
   'Refresh job':'重新整理工作','Draft list':'草稿列表','Previous page':'上一頁','Next page':'下一頁',
   'Open draft':'開啟草稿','Subject':'主旨','Body':'內容','Save revision':'儲存修訂',
   'Revision':'版本','Claims and sources':'陳述及來源','No drafts yet.':'尚未有草稿。',
@@ -112,6 +115,8 @@ function eligibleEvidence(row:Evidence){
 export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestReview,canApprove,canExport}:{locale:'en'|'zh-HK';canGenerate:boolean;canReviewSender:boolean;canRequestReview:boolean;canApprove:boolean;canExport:boolean}){
   const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot();
   const t=(value:string)=>locale==='zh-HK'?(words[value]||value):value;
+  const searchParams=useSearchParams(),approval=readDraftApproval(searchParams.get('approval'));
+  const listSequence=useRef(0),[listLoading,setListLoading]=useState(true),[listError,setListError]=useState('');
   const [project,setProject]=useState<Project|null>(null),[context,setContext]=useState<Context|null>(null);
   const [choosing,setChoosing]=useState(false),[conflict,setConflict]=useState<Draft|null>(null);
   const transition=useRef(false),choice=useRef<((decision:DirtyDecision)=>void)|null>(null),returnFocus=useRef<HTMLElement|null>(null);
@@ -146,14 +151,14 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     let active=true;
     void (async()=>{
       try{
-        const [p,page,c,j,d]=await Promise.all([
-          getProject(client,session),listDrafts(client,session,0,8),
+        const [p,c,j,d]=await Promise.all([
+          getProject(client,session),
           nextBuyer?loadDraftContext(client,session,nextBuyer):Promise.resolve(null),
           nextJob?getDraftJob(client,session,nextJob):Promise.resolve(null),
           nextDraft?getDraft(client,session,nextDraft):Promise.resolve(null),
         ]);
         if(!active)return;
-        setProject(p);setDrafts(page.items);setTotal(page.total);setOffset(0);setContext(c);setRecipient('');setJob(j);setDraft(d);setApprovalConfirmed(false);setStaleDiff([]);
+        setProject(p);setContext(c);setRecipient('');setJob(j);setDraft(d);setApprovalConfirmed(false);setStaleDiff([]);
         if(c){setSelectedFacts((c.icp?.offer_facts||[]).filter(f=>f.approved).map(f=>f.id));
           setSelectedEvidence(c.evidence.filter(eligibleEvidence).map(e=>e.id));}
         if(d){setSubject(d.subject);setBody(d.body);setDraftLanguage(d.language==='zh-HK'?'zh-HK':'en');}
@@ -164,9 +169,15 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     })();
     return()=>{active=false;};
   },[client,session,scopeKey,scope.workspace,scope.project]);
+  useEffect(()=>{
+    if(scope.workspace&&scope.project)void refreshList(0);
+    return()=>{listSequence.current++;};
+  },[client,session,scopeKey,scope.workspace,scope.project,approval]);
   async function refreshList(nextOffset:number){
-    setError('');try{const page=await listDrafts(client,session,nextOffset,8);setDrafts(page.items);setTotal(page.total);setOffset(nextOffset);}
-    catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
+    const sequence=++listSequence.current,identity=session.identity();setListLoading(true);setListError('');
+    try{const page=await listDrafts(client,session,nextOffset,8,approval);if(sequence===listSequence.current&&session.isCurrent(identity)){setDrafts(page.items);setTotal(page.total);setOffset(nextOffset);}}
+    catch(cause){if(sequence===listSequence.current&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled)){setDrafts([]);setListError(describeLiveError(cause));}}
+    finally{if(sequence===listSequence.current&&session.isCurrent(identity))setListLoading(false);}
   }
   async function persistSender(){
     if(!project||!canReviewSender||busy||!senderConfirmed)return;
@@ -321,9 +332,9 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
       <button type="button" disabled={busy||!canGenerate||!project?.sender_identity||!context.icp||(recipient!==''&&!recipients.some(contact=>contact.id===recipient))||(draftKind==='follow_up'&&!parentDraftId)||selectedFacts.length===0||selectedEvidence.length===0||objective.trim().length<3} onClick={()=>void startDraft()}>{t(recipient?'Generate addressed draft':'Generate unaddressed draft')}</button>
     </section>}
     {job&&<section className="panel" role="status"><h3>{t('Job status')}</h3><p>{job.id} · {t(job.status)}</p><button type="button" disabled={busy} onClick={()=>void refreshJob()}>{t('Refresh job')}</button></section>}
-    {project&&<section className="panel" aria-label={t('Draft list')}><h3>{t('Draft list')}</h3><p>{offset+1}–{Math.min(offset+8,total)} / {total}</p>
-      {drafts.length===0&&<p>{t('No drafts yet.')}</p>}{drafts.map(item=><div className="inline" key={item.id}><span>{item.subject} · {t(item.status)} · v{item.version}</span><button type="button" disabled={busy} onClick={()=>void openDraft(item.id)}>{t('Open draft')}</button></div>)}
-      <div className="inline"><button type="button" disabled={offset===0} onClick={()=>void refreshList(Math.max(0,offset-8))}>{t('Previous page')}</button><button type="button" disabled={offset+8>=total} onClick={()=>void refreshList(offset+8)}>{t('Next page')}</button></div>
+    {project&&<section className="panel" aria-label={t('Draft list')}><h3>{t('Draft list')}</h3>{approval&&<p>{t('Pending approvals')} · approval: pending</p>}{listError?<p role="alert">{listError}</p>:listLoading?<p role="status">{t('Loading drafts…')}</p>:<p>{total?offset+1:0}–{Math.min(offset+8,total)} / {total}</p>}<button type="button" disabled={listLoading} onClick={()=>void refreshList(offset)}>{t('Refresh draft list')}</button>
+      {!listLoading&&!listError&&drafts.length===0&&<p>{t('No drafts yet.')}</p>}{drafts.map(item=><div className="inline" key={item.id}><span>{item.subject} · {t(item.status)} · v{item.version}</span><button type="button" disabled={busy} onClick={()=>void openDraft(item.id)}>{t('Open draft')}</button></div>)}
+      <div className="inline"><button type="button" disabled={listLoading||Boolean(listError)||offset===0} onClick={()=>void refreshList(Math.max(0,offset-8))}>{t('Previous page')}</button><button type="button" disabled={listLoading||Boolean(listError)||offset+8>=total} onClick={()=>void refreshList(offset+8)}>{t('Next page')}</button></div>
     </section>}
     {draft&&<section className="panel" aria-label={t('Open draft')} data-live-unsaved={unsaved?'true':undefined} data-baseline-revision={draft.revision_id} data-baseline-version={draft.version}>
       <h3>{draft.subject}</h3><p>{t('Revision')}: {draft.revision_number} · {t(draft.status)} · {draft.language}</p>

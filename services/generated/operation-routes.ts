@@ -85,4 +85,6 @@ export const operationRoutes = {
   "previewBulkManifest": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests"},
   "getBulkManifest": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}"},
   "executeBulkManifest": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}/execute"},
+  "getWorkQueue": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/work-queue"},
+  "listProviderOperations": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/provider-operations"},
 } as const satisfies Record<keyof operations, {method: string; path: string}>;

@@ -1,0 +1,16 @@
+{
+  "source_sha": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "source_sha_after": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "started_at_utc": "2026-10-06T21:27:35.824797+00:00",
+  "seconds": 6.374,
+  "command": [
+    "node",
+    "scripts/generate-api-types.mjs",
+    "--check"
+  ],
+  "cwd": ".",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-21-generated-contract-final.log",
+  "required_gate_exit_code": 0
+}

@@ -1,0 +1,40 @@
+✔ C61T-09 every card links to its actual typed scope and filtered list (124.9962ms)
+✔ C61T-09 successful summary retains server as_of and real zero counts (8.2191ms)
+✖ C61T-09 held A summary cannot publish after A-B-A scope changes (1.3717ms)
+✔ C61T-09 unavailable, partial or malformed summary never becomes fabricated zero (0.6455ms)
+✔ C61T-09 receipt page uses generated acceptance enum and captured scope (0.5224ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 517.2377
+
+✖ failing tests:
+
+test at tests\work-queue.test.mjs:36:1
+✖ C61T-09 held A summary cannot publish after A-B-A scope changes (1.3717ms)
+  AssertionError [ERR_ASSERTION]: The validation function is expected to return "true". Received false
+  
+  Caught error:
+  
+  Error: scope changed
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/tests/work-queue.test.mjs:39:84)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: scope changed
+        at guard (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/operations.ts:8:23)
+        at Object.requestOperation (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/operations.ts:33:13)
+        at async loadWorkQueue (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/work-queue.ts:12:19)
+        at async waitForActual (node:assert:646:5)
+        at async strict.rejects (node:assert:769:25)
+        at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/tests/work-queue.test.mjs:39:84)
+        at async Test.run (node:internal/test_runner/test:1332:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:911:7),
+    operator: 'rejects',
+    diff: 'simple'
+  }

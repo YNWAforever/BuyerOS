@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="7" time="10.522" timestamp="2026-10-07T05:01:32.319409+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_work_queue_db" name="test_work_queue_count_equals_filtered_list[a0000000-0000-4000-8000-000000000001-expected0]" time="5.002"><failure message="AssertionError: {&quot;code&quot;:&quot;NOT_FOUND&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;f0829ae4-5bec-4068-bfd3-fa8ce30797f0&quot;,&quot;retryable&quot;:false}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">queue_case = (&lt;starlette.testclient.TestClient object at 0x000002096C9A08F0&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:49542/buyeros_test_api')
+project = 'a0000000-0000-4000-8000-000000000001', expected = [4, 2, 3, 2, 3, 2]
+
+    @pytest.mark.parametrize('project,expected',[(PROJECT_A,[4,2,3,2,3,2]),(PROJECT_A2,[6,3,5,3,5,3])])
+    def test_work_queue_count_equals_filtered_list(queue_case,project,expected):
+&gt;    api,dsn=queue_case;summary=get(api,root(project)+'/work-queue')
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_work_queue_db.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+api = &lt;starlette.testclient.TestClient object at 0x000002096C9A08F0&gt;
+path = '/v1/workspaces/11111111-1111-4111-8111-111111111111/projects/a0000000-0000-4000-8000-000000000001/work-queue'
+subject = 'auth0|operator-a', params = None
+
+    def get(api,path,subject=OPERATOR,params=None):
+&gt;    r=api.get(path,headers=_h(subject=subject),params=params);assert r.status_code==200,r.text;return r.json()['data']
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E    AssertionError: {"code":"NOT_FOUND","message":"request failed","request_id":"f0829ae4-5bec-4068-bfd3-fa8ce30797f0","retryable":false}
+E    assert 404 == 200
+E     +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests\test_work_queue_db.py:62: AssertionError</failure></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_count_equals_filtered_list[a0000000-0000-4000-8000-00000000000a-expected1]" time="0.740"><failure message="AssertionError: {&quot;code&quot;:&quot;NOT_FOUND&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;a9882fe6-b3be-476b-af0f-6f3de008e976&quot;,&quot;retryable&quot;:false}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">queue_case = (&lt;starlette.testclient.TestClient object at 0x000002096CB681D0&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:49542/buyeros_test_api')
+project = 'a0000000-0000-4000-8000-00000000000a', expected = [6, 3, 5, 3, 5, 3]
+
+    @pytest.mark.parametrize('project,expected',[(PROJECT_A,[4,2,3,2,3,2]),(PROJECT_A2,[6,3,5,3,5,3])])
+    def test_work_queue_count_equals_filtered_list(queue_case,project,expected):
+&gt;    api,dsn=queue_case;summary=get(api,root(project)+'/work-queue')
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_work_queue_db.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+api = &lt;starlette.testclient.TestClient object at 0x000002096CB681D0&gt;
+path = '/v1/workspaces/11111111-1111-4111-8111-111111111111/projects/a0000000-0000-4000-8000-00000000000a/work-queue'
+subject = 'auth0|operator-a', params = None
+
+    def get(api,path,subject=OPERATOR,params=None):
+&gt;    r=api.get(path,headers=_h(subject=subject),params=params);assert r.status_code==200,r.text;return r.json()['data']
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E    AssertionError: {"code":"NOT_FOUND","message":"request failed","request_id":"a9882fe6-b3be-476b-af0f-6f3de008e976","retryable":false}
+E    assert 404 == 200
+E     +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests\test_work_queue_db.py:62: AssertionError</failure></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_actor_roles_project_and_no_side_effects[auth0|operator-a-2-2]" time="0.499"><failure message="AssertionError: {&quot;code&quot;:&quot;NOT_FOUND&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;bc8d6e95-63bc-4dd2-8fae-0b8c7b435c3a&quot;,&quot;retryable&quot;:false}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">queue_case = (&lt;starlette.testclient.TestClient object at 0x000002096C9300E0&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:49542/buyeros_test_api')
+subject = 'auth0|operator-a', failed = 2, uncertain = 2
+
+    @pytest.mark.parametrize('subject,failed,uncertain',[(OPERATOR,2,2),(REVIEWER,5,5),(ADMIN,7,7),(VIEWER,0,0)])
+    def test_work_queue_actor_roles_project_and_no_side_effects(queue_case,subject,failed,uncertain):
+     api,dsn=queue_case
+     with psycopg.connect(dsn) as db:
+      before={t:db.execute(f'SELECT count(*) FROM {t} WHERE workspace_id=%s',(WORKSPACE_A,)).fetchone()[0] for t in ['outbox_events','provider_operations','budget_reservations','idempotency_records','audit_events','buyer_snapshots']}
+&gt;    first=get(api,root(PROJECT_A)+'/work-queue',subject);second=get(api,root(PROJECT_A)+'/work-queue',subject)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_work_queue_db.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+api = &lt;starlette.testclient.TestClient object at 0x000002096C9300E0&gt;
+path = '/v1/workspaces/11111111-1111-4111-8111-111111111111/projects/a0000000-0000-4000-8000-000000000001/work-queue'
+subject = 'auth0|operator-a', params = None
+
+    def get(api,path,subject=OPERATOR,params=None):
+&gt;    r=api.get(path,headers=_h(subject=subject),params=params);assert r.status_code==200,r.text;return r.json()['data']
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E    AssertionError: {"code":"NOT_FOUND","message":"request failed","request_id":"bc8d6e95-63bc-4dd2-8fae-0b8c7b435c3a","retryable":false}
+E    assert 404 == 200
+E     +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests\test_work_queue_db.py:62: AssertionError</failure></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_actor_roles_project_and_no_side_effects[auth0|reviewer-a-5-5]" time="0.491"><failure message="AssertionError: {&quot;code&quot;:&quot;NOT_FOUND&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;8c8bd949-b046-4851-b32a-6a08b3aab852&quot;,&quot;retryable&quot;:false}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">queue_case = (&lt;starlette.testclient.TestClient object at 0x000002096CD8D9D0&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:49542/buyeros_test_api')
+subject = 'auth0|reviewer-a', failed = 5, uncertain = 5
+
+    @pytest.mark.parametrize('subject,failed,uncertain',[(OPERATOR,2,2),(REVIEWER,5,5),(ADMIN,7,7),(VIEWER,0,0)])
+    def test_work_queue_actor_roles_project_and_no_side_effects(queue_case,subject,failed,uncertain):
+     api,dsn=queue_case
+     with psycopg.connect(dsn) as db:
+      before={t:db.execute(f'SELECT count(*) FROM {t} WHERE workspace_id=%s',(WORKSPACE_A,)).fetchone()[0] for t in ['outbox_events','provider_operations','budget_reservations','idempotency_records','audit_events','buyer_snapshots']}
+&gt;    first=get(api,root(PROJECT_A)+'/work-queue',subject);second=get(api,root(PROJECT_A)+'/work-queue',subject)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_work_queue_db.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+api = &lt;starlette.testclient.TestClient object at 0x000002096CD8D9D0&gt;
+path = '/v1/workspaces/11111111-1111-4111-8111-111111111111/projects/a0000000-0000-4000-8000-000000000001/work-queue'
+subject = 'auth0|reviewer-a', params = None
+
+    def get(api,path,subject=OPERATOR,params=None):
+&gt;    r=api.get(path,headers=_h(subject=subject),params=params);assert r.status_code==200,r.text;return r.json()['data']
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E    AssertionError: {"code":"NOT_FOUND","message":"request failed","request_id":"8c8bd949-b046-4851-b32a-6a08b3aab852","retryable":false}
+E    assert 404 == 200
+E     +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests\test_work_queue_db.py:62: AssertionError</failure></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_actor_roles_project_and_no_side_effects[auth0|admin-a-7-7]" time="0.471"><failure message="AssertionError: {&quot;code&quot;:&quot;NOT_FOUND&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;571eb1ed-f3e7-4aed-8c38-52c8a46deecf&quot;,&quot;retryable&quot;:false}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">queue_case = (&lt;starlette.testclient.TestClient object at 0x000002096CEA3C80&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:49542/buyeros_test_api')
+subject = 'auth0|admin-a', failed = 7, uncertain = 7
+
+    @pytest.mark.parametrize('subject,failed,uncertain',[(OPERATOR,2,2),(REVIEWER,5,5),(ADMIN,7,7),(VIEWER,0,0)])
+    def test_work_queue_actor_roles_project_and_no_side_effects(queue_case,subject,failed,uncertain):
+     api,dsn=queue_case
+     with psycopg.connect(dsn) as db:
+      before={t:db.execute(f'SELECT count(*) FROM {t} WHERE workspace_id=%s',(WORKSPACE_A,)).fetchone()[0] for t in ['outbox_events','provider_operations','budget_reservations','idempotency_records','audit_events','buyer_snapshots']}
+&gt;    first=get(api,root(PROJECT_A)+'/work-queue',subject);second=get(api,root(PROJECT_A)+'/work-queue',subject)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_work_queue_db.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+api = &lt;starlette.testclient.TestClient object at 0x000002096CEA3C80&gt;
+path = '/v1/workspaces/11111111-1111-4111-8111-111111111111/projects/a0000000-0000-4000-8000-000000000001/work-queue'
+subject = 'auth0|admin-a', params = None
+
+    def get(api,path,subject=OPERATOR,params=None):
+&gt;    r=api.get(path,headers=_h(subject=subject),params=params);assert r.status_code==200,r.text;return r.json()['data']
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E    AssertionError: {"code":"NOT_FOUND","message":"request failed","request_id":"571eb1ed-f3e7-4aed-8c38-52c8a46deecf","retryable":false}
+E    assert 404 == 200
+E     +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests\test_work_queue_db.py:62: AssertionError</failure></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_actor_roles_project_and_no_side_effects[auth0|viewer-a-0-0]" time="0.424"><failure message="AssertionError: {&quot;code&quot;:&quot;NOT_FOUND&quot;,&quot;message&quot;:&quot;request failed&quot;,&quot;request_id&quot;:&quot;88b49fb4-f31b-47d2-9fd9-ce9e3a1d44c1&quot;,&quot;retryable&quot;:false}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">queue_case = (&lt;starlette.testclient.TestClient object at 0x000002096D029E50&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:49542/buyeros_test_api')
+subject = 'auth0|viewer-a', failed = 0, uncertain = 0
+
+    @pytest.mark.parametrize('subject,failed,uncertain',[(OPERATOR,2,2),(REVIEWER,5,5),(ADMIN,7,7),(VIEWER,0,0)])
+    def test_work_queue_actor_roles_project_and_no_side_effects(queue_case,subject,failed,uncertain):
+     api,dsn=queue_case
+     with psycopg.connect(dsn) as db:
+      before={t:db.execute(f'SELECT count(*) FROM {t} WHERE workspace_id=%s',(WORKSPACE_A,)).fetchone()[0] for t in ['outbox_events','provider_operations','budget_reservations','idempotency_records','audit_events','buyer_snapshots']}
+&gt;    first=get(api,root(PROJECT_A)+'/work-queue',subject);second=get(api,root(PROJECT_A)+'/work-queue',subject)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_work_queue_db.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+api = &lt;starlette.testclient.TestClient object at 0x000002096D029E50&gt;
+path = '/v1/workspaces/11111111-1111-4111-8111-111111111111/projects/a0000000-0000-4000-8000-000000000001/work-queue'
+subject = 'auth0|viewer-a', params = None
+
+    def get(api,path,subject=OPERATOR,params=None):
+&gt;    r=api.get(path,headers=_h(subject=subject),params=params);assert r.status_code==200,r.text;return r.json()['data']
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E    AssertionError: {"code":"NOT_FOUND","message":"request failed","request_id":"88b49fb4-f31b-47d2-9fd9-ce9e3a1d44c1","retryable":false}
+E    assert 404 == 200
+E     +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests\test_work_queue_db.py:62: AssertionError</failure></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_filters_are_typed_and_receipts_bounded" time="0.885"><failure message="AssertionError: assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code&#10; +    where &lt;Response [200 OK]&gt; = get('/v1/workspaces/11111111-1111-4111-8111-111111111111/projects/a0000000-0000-4000-8000-000000000001/drafts', params={'approval': 'anything'}, headers={'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InRlc3Qta2V5LTEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2lzc3Vlc...UNIl7N8qIX7E9l8VKk6xVabIn9M9w93vsktM-J3b3hSosnFuU2Ig_shuUGsvTTgwGOs0J8aDTaGSr9-_B8A', 'Idempotency-Key': 'snapshot-01'})&#10; +      where get = &lt;starlette.testclient.TestClient object at 0x000002096D1AA120&gt;.get&#10; +      and   {'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InRlc3Qta2V5LTEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2lzc3Vlc...UNIl7N8qIX7E9l8VKk6xVabIn9M9w93vsktM-J3b3hSosnFuU2Ig_shuUGsvTTgwGOs0J8aDTaGSr9-_B8A', 'Idempotency-Key': 'snapshot-01'} = _h(subject='auth0|operator-a')">queue_case = (&lt;starlette.testclient.TestClient object at 0x000002096D1AA120&gt;, 'postgresql://buyeros:buyeros@127.0.0.1:49542/buyeros_test_api')
+
+    def test_work_queue_filters_are_typed_and_receipts_bounded(queue_case):
+     api,_=queue_case
+     for path,query in [(root(PROJECT_A)+'/drafts',{'approval':'anything'}),(root(PROJECT_A)+'/provider-operations',{'acceptance':'accepted'}),(root(PROJECT_A)+'/provider-operations',{'limit':101})]:
+&gt;     assert api.get(path,params=query,headers=_h(subject=OPERATOR)).status_code==422
+E     AssertionError: assert 200 == 422
+E      +  where 200 = &lt;Response [200 OK]&gt;.status_code
+E      +    where &lt;Response [200 OK]&gt; = get('/v1/workspaces/11111111-1111-4111-8111-111111111111/projects/a0000000-0000-4000-8000-000000000001/drafts', params={'approval': 'anything'}, headers={'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InRlc3Qta2V5LTEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2lzc3Vlc...UNIl7N8qIX7E9l8VKk6xVabIn9M9w93vsktM-J3b3hSosnFuU2Ig_shuUGsvTTgwGOs0J8aDTaGSr9-_B8A', 'Idempotency-Key': 'snapshot-01'})
+E      +      where get = &lt;starlette.testclient.TestClient object at 0x000002096D1AA120&gt;.get
+E      +      and   {'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InRlc3Qta2V5LTEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2lzc3Vlc...UNIl7N8qIX7E9l8VKk6xVabIn9M9w93vsktM-J3b3hSosnFuU2Ig_shuUGsvTTgwGOs0J8aDTaGSr9-_B8A', 'Idempotency-Key': 'snapshot-01'} = _h(subject='auth0|operator-a')
+
+tests\test_work_queue_db.py:103: AssertionError</failure></testcase></testsuite></testsuites>

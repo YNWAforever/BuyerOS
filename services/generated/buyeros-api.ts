@@ -1388,6 +1388,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/work-queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read current project work queue */
+        get: operations["getWorkQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/provider-operations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List scoped durable provider receipts */
+        get: operations["listProviderOperations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3404,6 +3438,58 @@ export interface components {
             reviewed_by: string;
             /** Format: date-time */
             reviewed_at: string;
+        };
+        WorkQueueItem: {
+            /** @enum {string} */
+            kind: "awaiting_review" | "pending_approval" | "unassigned" | "failed_job" | "unknown_fit" | "unknown_acceptance";
+            count: number;
+            filters: {
+                /** @enum {string} */
+                review?: "awaiting_review";
+                /** @enum {string} */
+                queue?: "unassigned" | "unknown";
+                /** @enum {string} */
+                status?: "failed";
+                /** @enum {string} */
+                approval?: "pending";
+                /** @enum {string} */
+                acceptance?: "unknown";
+            };
+        };
+        WorkQueue: {
+            /** Format: date-time */
+            as_of: string;
+            items: components["schemas"]["WorkQueueItem"][];
+        };
+        ProviderOperationSummary: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            capability: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        ProviderOperationPage: {
+            items: components["schemas"]["ProviderOperationSummary"][];
+            offset: number;
+            limit: number;
+            total: number;
+        };
+        WorkQueueResponse: {
+            data: components["schemas"]["WorkQueue"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        ProviderOperationPageResponse: {
+            data: components["schemas"]["ProviderOperationPage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
         };
     };
     responses: {
@@ -5885,6 +5971,7 @@ export interface operations {
             query?: {
                 offset?: components["parameters"]["Offset"];
                 limit?: components["parameters"]["Limit"];
+                approval?: "pending";
             };
             header?: never;
             path: {
@@ -6860,6 +6947,56 @@ export interface operations {
             412: components["responses"]["Error"];
             422: components["responses"]["Error"];
             429: components["responses"]["Error"];
+        };
+    };
+    getWorkQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bounded actor-scoped job page; workspace admins may view all workspace jobs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkQueueResponse"];
+                };
+            };
+        };
+    };
+    listProviderOperations: {
+        parameters: {
+            query?: {
+                offset?: components["parameters"]["Offset"];
+                limit?: components["parameters"]["Limit"];
+                acceptance?: "unknown";
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bounded actor-scoped job page; workspace admins may view all workspace jobs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderOperationPageResponse"];
+                };
+            };
         };
     };
 }

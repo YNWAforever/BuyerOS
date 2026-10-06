@@ -1,0 +1,22 @@
+{
+  "source_sha": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "source_sha_after": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "started_at_utc": "2026-10-06T21:18:12.663903+00:00",
+  "seconds": 1.572,
+  "command": [
+    "pnpm.cmd",
+    "exec",
+    "playwright",
+    "test",
+    "tests/e2e/work-queue-counts.spec.ts",
+    "--config",
+    "playwright.audit-fixes.config.ts",
+    "--list"
+  ],
+  "cwd": ".",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-21-queue-browser-discovery.log",
+  "discovered_tests": 3,
+  "required_gate_exit_code": 0
+}

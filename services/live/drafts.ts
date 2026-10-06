@@ -52,9 +52,9 @@ export async function saveSender(client:LiveClient,session:SessionScope,project:
     header:{'If-Match':`"${project.version}"`,'Idempotency-Key':crypto.randomUUID()},
     body:{sender_identity:sender}},ctx);
 }
-export async function listDrafts(client:LiveClient,session:SessionScope,offset:number,limit:number){
+export async function listDrafts(client:LiveClient,session:SessionScope,offset:number,limit:number,approval?:import('./work-queue').ApprovalFilter){
   const {api,ctx}=operation(client,session);
-  return api.requestOperation('listDrafts',{path:{workspace_id:ctx.workspace,project_id:ctx.project!},query:{offset,limit}},ctx);
+  return api.requestOperation('listDrafts',{path:{workspace_id:ctx.workspace,project_id:ctx.project!},query:{offset,limit,approval}},ctx);
 }
 export async function generateDraft(client:LiveClient,session:SessionScope,body:DraftRequest,key:string):Promise<DraftJob>{
   const {api,ctx}=operation(client,session);

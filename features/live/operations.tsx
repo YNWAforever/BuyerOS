@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {useSearchParams} from 'next/navigation';
+import {useRouter,useSearchParams} from 'next/navigation';
+import {listProviderOperations} from '@/services/live/work-queue';
 import {readLatestProfile} from '@/services/live/profile-read';
 import {buildJobQuery,jobQueryParams,readJobStatus,type JobScope} from '@/services/live/job-query';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
@@ -16,7 +17,37 @@ type Page<T>={items:T[];offset:number;limit:number;total:number};
 type Job=components['schemas']['AsyncJob'];
 type Result=components['schemas']['BulkItemResult'];
 
-export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{workspace:string;project:string|null;isAdmin:boolean;onOpenBuyers:()=>void;t:(value:string)=>string}){
+type OperationsProps={workspace:string;project:string|null;isAdmin:boolean;onOpenBuyers:()=>void;t:(value:string)=>string};
+export function LiveOperations(props:OperationsProps){
+ const searchParams=useSearchParams();
+ return searchParams.get('acceptance')==='unknown'?<LiveProviderOperations {...props}/>:<LiveJobOperations {...props}/>;
+}
+function LiveProviderOperations({workspace,project,t}:OperationsProps){
+ const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot(),router=useRouter();
+ const [offsetState,setOffset]=useState<{identity:string;offset:number}>(),[reload,setReload]=useState(0);
+ const offset=offsetState?.identity===snapshot.identity?offsetState.offset:0,key=`${snapshot.identity}:${offset}`;
+ const [result,setResult]=useState<{key:string;page?:components['schemas']['ProviderOperationPage'];error?:string}>();
+ const current=result?.key===key?result:undefined;
+ useEffect(()=>{
+  if(!project)return;const own=new AbortController(),identity=session.identity();
+  void listProviderOperations(client,session,'unknown',offset,20,own.signal)
+   .then(page=>{if(!own.signal.aborted&&session.isCurrent(identity))setResult({key,page});})
+   .catch(cause=>{if(!own.signal.aborted&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled))setResult({key,error:describeLiveError(cause)});});
+  return()=>own.abort();
+ },[client,session,workspace,project,snapshot.identity,key,offset,reload]);
+ return <section className="panel" aria-label={t('Operations')}><h2>{t('Operations')}</h2>
+  <section aria-label={t('Unknown provider acceptance')} aria-busy={Boolean(project&&!current?.page&&!current?.error)}>
+   <h3>{t('Unknown provider acceptance')}</h3><p>acceptance: unknown · {t('Project jobs')}</p>
+   <p>{t('Only scoped durable receipts are included. Accepted requests are not retried.')}</p>
+   {current?.page?<><p>{current.page.total?offset+1:0}–{Math.min(offset+current.page.items.length,current.page.total)} / {current.page.total}</p>
+    {current.page.items.map(row=><article key={row.id}><p>{t(row.status)} · {row.capability}</p><p><time dateTime={row.updated_at}>{row.updated_at}</time></p><details><summary>{t('Technical details')}</summary><code>{row.id}</code></details></article>)}
+    <div className="inline"><button disabled={offset===0} onClick={()=>setOffset({identity:snapshot.identity,offset:Math.max(0,offset-20)})}>{t('Previous')}</button><button disabled={offset+20>=current.page.total} onClick={()=>setOffset({identity:snapshot.identity,offset:offset+20})}>{t('Next')}</button></div></>:current?.error?<p role="alert">{current.error}</p>:<p role="status">{t('Loading…')}</p>}
+   <button type="button" disabled={!project} onClick={()=>{setResult(undefined);setReload(value=>value+1);}}>{t('Refresh receipts')}</button>
+  </section>
+  <button type="button" onClick={()=>router.push('/app?'+new URLSearchParams({workspace,...(project?{project}:{})}))}>{t('Back to daily queue')}</button>
+ </section>;
+}
+function LiveJobOperations({workspace,project,isAdmin,onOpenBuyers,t}:OperationsProps){
   const {client,session}=useWorkspaceSession();
   const scope=useSessionSnapshot(),searchParams=useSearchParams();
   const [readiness,setReadiness]=useState<Readiness|null>(null),[capabilities,setCapabilities]=useState<Capability[]>([]);

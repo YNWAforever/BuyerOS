@@ -88,6 +88,7 @@ def test_registry_covers_every_unimplemented_contract_operation():
         "getUsage", "listOutcomes", "recordOutcome", "correctOutcome",
         "listEligibleAssignees", "getAsyncJobSummary", "reviewDraftGrounding",
         "previewBulkManifest", "getBulkManifest", "executeBulkManifest",
+        "getWorkQueue", "listProviderOperations",
     }
     contract = _contract_operations()
     out_of_slice = set(contract) - implemented
@@ -141,3 +142,13 @@ def test_no_declared_operation_is_left_on_a_501_stub():
     assert contract <= registered
     assert not [route for route in app.routes
                 if getattr(getattr(route, "endpoint", None), "__name__", "").startswith("not_implemented_")]
+
+
+def test_work_queue_reads_require_auth():
+    client = TestClient(create_app(), raise_server_exceptions=False)
+    for resource in ("work-queue", "provider-operations"):
+        response = client.get(
+            f"/v1/workspaces/{WORKSPACE}/projects/{PROJECT}/{resource}"
+        )
+        assert response.status_code == 401, resource
+        assert response.json()["code"] == "UNAUTHENTICATED", resource

@@ -28,13 +28,9 @@ async def list_async_jobs(
         member = await load_membership(session, principal=principal, workspace_id=workspace_id)
         if not permission_for_roles(member["roles"], "listAsyncJobs"):
             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
-        conditions = [AsyncJob.workspace_id == workspace_id]
-        if "workspace_admin" not in member["roles"]:
-            conditions.append(AsyncJob.actor_user_id == member["user_id"])
-        if status is not None:
-            conditions.append(AsyncJob.status == status)
-        if project_id is not None:
-            conditions.append(AsyncJob.project_id == project_id)
+        from ...services.work_queue import async_job_conditions
+        conditions = async_job_conditions(workspace_id=workspace_id, member=member,
+                                          status=status, project_id=project_id)
         total = (await session.execute(select(func.count()).select_from(AsyncJob).where(*conditions))).scalar_one()
         rows = (await session.execute(select(AsyncJob).where(*conditions)
             .order_by(AsyncJob.created_at.desc(), AsyncJob.id.desc())
