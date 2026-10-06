@@ -133,15 +133,15 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
           <button type="button" disabled={offset+list.page.items.length>=list.page.total} onClick={()=>{setList({kind:'loading'});setOffset(offset+10);}}>{t('Next')}</button></div></>}
     </>}
     {runId&&!run&&!detailError&&<p role="status">{t('Loading run…')}</p>}
-    {run&&<article className="run-detail" aria-live="polite">
-      <p><strong>{t('Status')}:</strong> {t(run.status)} · <strong>{t('Stage')}:</strong> {t(run.stage)}</p>
+    {run&&<article className="run-detail">
+      <p role="status" aria-atomic="true"><strong>{t('Status')}:</strong> {t(run.status)} · <strong>{t('Stage')}:</strong> {t(run.stage)}</p>
       <p>{t('Actual yield')}: {run.company_count} / {run.target_companies??'—'} · {t('Raw candidates')}: {run.raw_count} · {t('Assessed')}: {run.assessed_count}</p>
       <p>{t('Research spend')}: USD {run.spent.amount} · {t('Pending hold')}: USD {run.reserved.amount} · {t('Maximum')}: USD {run.max_cost.amount}</p>
-      <p>{t('Attempt')}: {run.attempt} · {t('Event')}: {run.last_event_sequence} · {t('Connection')}: {transport||t('Connecting')}</p>
-      <p role="status">{t('Next step')}: {t(nextStep(run.status))}</p>
-      {run.status==='cancel_requested'&&<p role="status">{t('New work is stopped. A submitted operation is awaiting reconciliation; its hold remains.')}</p>}
-      {run.status==='completed'&&run.target_companies!==undefined&&run.company_count<run.target_companies&&<p role="status">{t('Research completed with fewer companies than the requested target.')}</p>}
-      {['partial','paused_budget','failed'].includes(run.status)&&!['fit_review_required','fit'].includes(run.stage)&&<p role="status">{t('Discovery retry waits for authoritative reconciliation; committed results remain available.')}</p>}
+      <details><summary>{t('Technical details')}</summary><p>{t('Attempt')}: {run.attempt} · {t('Event')}: {run.last_event_sequence} · {t('Connection')}: {transport||t('Connecting')}</p></details>
+      <p>{t('Next step')}: {t(nextStep(run.status))}</p>
+      {run.status==='cancel_requested'&&<p>{t('New work is stopped. A submitted operation is awaiting reconciliation; its hold remains.')}</p>}
+      {run.status==='completed'&&run.target_companies!==undefined&&run.company_count<run.target_companies&&<p>{t('Research completed with fewer companies than the requested target.')}</p>}
+      {['partial','paused_budget','failed'].includes(run.status)&&!['fit_review_required','fit'].includes(run.stage)&&<p>{t('Discovery retry waits for authoritative reconciliation; committed results remain available.')}</p>}
       {run.failure_code&&<p role="alert">{t('Reason')}: {run.failure_code}</p>}
       <div className="run-grid">{canStart&&['queued','running','partial','paused_budget','failed'].includes(run.status)&&<label>{t('Reason for action')} <input value={reason} onChange={event=>setReason(event.target.value)} maxLength={2000}/></label>}
         {canStart&&['queued','running','partial','paused_budget','failed'].includes(run.status)&&<button type="button" disabled={busy||reason.trim().length<3} onClick={()=>void act('cancel')}>{t('Stop new work')}</button>}

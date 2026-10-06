@@ -77,9 +77,10 @@ export function MemberDirectory({workspace,t}:{workspace:string;t:(value:string)
 }
 function MemberRow({member,pending,onSave,t}:{member:Member;pending:boolean;onSave:(m:Member,roles:Role[],active:boolean)=>Promise<void>;t:(value:string)=>string}){
  const [selected,setSelected]=useState<Role[]>(member.roles),[active,setActive]=useState(member.active);
- return <div role="group" aria-label={`${t('Member')} ${member.user_id}`} style={{borderTop:'1px solid var(--border)',paddingBlock:12,minWidth:0}}>
-  <strong>{member.display_name}</strong><br/><code style={{overflowWrap:'anywhere'}}>{member.user_id}</code>
-  <fieldset aria-label={`${t('Roles')} ${member.user_id}`} disabled={pending} style={{minWidth:0}}><legend>{t('Roles')}</legend>
+ const name=member.display_name===member.user_id?t('Staff member (name unavailable)'):member.display_name;
+ return <div role="group" aria-label={`${t('Member')} ${name}`} style={{borderTop:'1px solid var(--border)',paddingBlock:12,minWidth:0}}>
+  <strong>{name}</strong><details><summary>{t('Technical details')}</summary><code style={{overflowWrap:'anywhere'}}>{member.user_id}</code> · {member.id}</details>
+  <fieldset aria-label={`${t('Roles')} ${name}`} disabled={pending} style={{minWidth:0}}><legend>{t('Roles')}</legend>
    {roles.map(role=><label key={role}>{t(role)} <input type="checkbox" checked={selected.includes(role)} onChange={e=>setSelected(current=>e.target.checked?[...current,role]:current.filter(value=>value!==role))}/></label>)}
   </fieldset>
   <label>{t('Active')} <input type="checkbox" disabled={pending} checked={active} onChange={e=>setActive(e.target.checked)}/></label>

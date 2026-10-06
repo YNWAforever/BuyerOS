@@ -4,6 +4,7 @@ import {webcrypto} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {resolve} from 'node:path';
+import {createJourneyInput,observeWorkspaceLocale} from './journey-input';
 export const workspace='e0000000-0000-4000-8000-000000000001';
 export const project='e1000000-0000-4000-8000-000000000001';
 
@@ -16,7 +17,8 @@ export async function resetWorkbenchFixtureRateWindows(){
   expect(JSON.parse(stdout).fixture_initial_rate_windows_reset).toBe(true);
 }
 
-export async function signInWorkbench(page:Page,waitForProject=true,actor:'reviewer'|'access'|'viewer'|'admin'='reviewer',entry=`/app?workspace=${workspace}&project=${project}`){
+export async function signInWorkbench(page:Page,waitForProject=true,actor:'reviewer'|'access'|'viewer'|'admin'='reviewer',entry=`/app?workspace=${workspace}&project=${project}`,input=createJourneyInput()){
+  await input.install(page);
   const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,
     publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
   const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'workbench-fixture',use:'sig'};
@@ -37,8 +39,10 @@ export async function signInWorkbench(page:Page,waitForProject=true,actor:'revie
   page.on('requestfailed',request=>{if(new URL(request.url()).pathname.startsWith('/v1/'))apiEvents.push(`failed ${request.url()} ${request.failure()?.errorText}`);});
   page.on('response',response=>{if(new URL(response.url()).pathname.startsWith('/v1/'))apiEvents.push(`${response.status()} ${response.url()}`);});
   page.on('pageerror',error=>apiEvents.push(`pageerror ${error.name}: ${error.message}`));
+  const localeRead=input.mode==='keyboard'&&waitForProject?observeWorkspaceLocale(page,workspace):null;
+  try{
   await page.goto(entry);
-  await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
+  await input.activate(page.getByRole('button',{name:/^(Sign in|登入)$/}));
   // The fake callback exchanges/verifies its token asynchronously. Negative-access
   // cases must reach the authenticated workspace read before asserting its result.
   await expect.poll(()=>apiEvents.some(event=>event.startsWith('request GET ')&&new URL(event.slice('request GET '.length)).pathname==='/v1/workspaces'),
@@ -47,4 +51,6 @@ export async function signInWorkbench(page:Page,waitForProject=true,actor:'revie
     try{await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});}
     catch(error){throw new Error(`Project selection did not settle; API events: ${apiEvents.join(' | ')}`,{cause:error});}
   }
+  if(localeRead)await localeRead.settle();
+  }finally{localeRead?.dispose();}
 }

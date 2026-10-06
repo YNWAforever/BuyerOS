@@ -8,6 +8,7 @@ from ..api.errors import ApiError
 from ..db.buyers import ProjectBuyer
 from ..db.icp import Project
 from ..db.outcomes import OutcomeEvent
+from ..db.models import User
 from .audit_service import append_audit
 
 
@@ -18,7 +19,7 @@ def _historical_time(value: datetime) -> datetime:
     return value
 
 
-def outcome_data(event: OutcomeEvent) -> dict:
+def outcome_data(event: OutcomeEvent, actor_display_name: str | None = None) -> dict:
     data = {
         "id": str(event.id), "workspace_id": str(event.workspace_id),
         "version": event.version, "created_at": event.created_at.isoformat(),
@@ -28,6 +29,7 @@ def outcome_data(event: OutcomeEvent) -> dict:
         "occurred_at": event.occurred_at.isoformat(),
         "recorded_at": event.created_at.isoformat(),
         "actor_id": str(event.actor_user_id),
+        "actor_display_name": actor_display_name if actor_display_name and actor_display_name.strip() else None,
     }
     if event.provenance_reference:
         data["provenance_reference"] = event.provenance_reference
@@ -36,6 +38,14 @@ def outcome_data(event: OutcomeEvent) -> dict:
     if event.supersedes_id:
         data["supersedes_id"] = str(event.supersedes_id)
     return data
+
+
+async def project_outcome_data(session, event: OutcomeEvent) -> dict:
+    # Display metadata is projected from this event's canonical actor only.
+    # It never establishes identity, membership or permissions.
+    name = (await session.execute(select(User.display_name).where(
+        User.id == event.actor_user_id))).scalar_one_or_none()
+    return outcome_data(event, name)
 
 
 async def _active_project(session, *, workspace_id, project_id, lock=False):
@@ -105,10 +115,11 @@ async def list_outcomes(session, *, workspace_id, project_id, offset, limit):
     await _active_project(session, workspace_id=workspace_id, project_id=project_id)
     scope = (OutcomeEvent.workspace_id == workspace_id, OutcomeEvent.project_id == project_id)
     total = (await session.execute(select(func.count()).select_from(OutcomeEvent).where(*scope))).scalar_one()
-    events = (await session.execute(select(OutcomeEvent).where(*scope)
+    events = (await session.execute(select(OutcomeEvent, User.display_name)
+        .outerjoin(User, User.id == OutcomeEvent.actor_user_id).where(*scope)
         .order_by(OutcomeEvent.created_at.desc(), OutcomeEvent.id.desc())
-        .offset(offset).limit(limit))).scalars().all()
-    return {"items": [outcome_data(event) for event in events],
+        .offset(offset).limit(limit))).all()
+    return {"items": [outcome_data(event, name) for event, name in events],
             "offset": offset, "limit": limit, "total": total}
 
 
