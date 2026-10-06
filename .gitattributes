@@ -1,6 +1,4 @@
-# Keep planning-pack artifacts at LF so SHA256SUMS.txt stays valid on every checkout.
-*.md text eol=lf
-*.json text eol=lf
-*.yaml text eol=lf
-*.yml text eol=lf
-*.txt text eol=lf
+# Preserve supplied C61 evidence bytes and Markdown hard breaks.
+docs/buyeros/inputs/c61-20261006/** -text whitespace=-blank-at-eol,-blank-at-eof
+docs/buyeros/audits/2026-10-06/** -text whitespace=-blank-at-eol,-blank-at-eof
+docs/superpowers/plans/2026-10-06-buyeros-*.md -text whitespace=-blank-at-eol,-blank-at-eof
