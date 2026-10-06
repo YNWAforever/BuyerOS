@@ -3416,10 +3416,10 @@
         "proposed_new_files": "docs/buyeros/runbooks/staff-onboarding.md;services/api/tools/reconcile_staff_membership.py;services/api/tests/test_staff_onboarding_db.py",
         "acceptance": "有正確帳戶與 membership 的 UI/API 讀回證據；0-membership 仍不能進 workspace，提供雙語重試和聯絡路徑。沒有有效帳戶時只標受阻，不改密碼或提升自己權限。",
         "rollback": "撤回本批新增 membership 須依正常管理流程並保留 audit；不刪 canonical users 或歷史 actor。",
-        "execution_sha": "8dabf5435877ccce8249a6a2a6fff0a1b1fbd803",
-        "execution_evidence": "artifacts/c61/C61-03-focused-red.json;artifacts/c61/C61-03-required-first-green.json;artifacts/c61/C61-03-required-final-green.json;artifacts/c61/c61-onboarding-final-green.xml;artifacts/c61/C61-03-tested-source.json;docs/buyeros/runbooks/staff-onboarding.md",
+        "execution_sha": "8b631ab8a911e63c856a674d78b42cddfab29049",
+        "execution_evidence": "artifacts/c61/C61-03-focused-red.json;artifacts/c61/C61-03-required-first-green.json;artifacts/c61/C61-03-required-final-green.json;artifacts/c61/c61-onboarding-final-green.xml;artifacts/c61/C61-03-tested-source.json;docs/buyeros/runbooks/staff-onboarding.md;artifacts/c61/C61-03-04-06-full-api-regression.json;artifacts/c61/c61-api-followup-regression.xml;artifacts/c61/C61-integrated-current-api-bridge.json",
         "code_status": "controlled default-readonly canonical staff membership CLI and shared admin mutation boundary implemented",
-        "verification_status": "4 focused RED then 36 required GREEN, zero fail/error/skip; signed local JWT, runtime role, current authority, exact restore/replay, real same-lock revoke and last-admin competition verified",
+        "verification_status": "4 focused RED then 36 required GREEN, zero fail/error/skip; signed local JWT, runtime role, current authority, exact restore/replay, real same-lock revoke and last-admin competition verified; complete current API 863/863 fresh cases, zero fail/error/skip; unchanged committed API/migration trees connected to integrated source",
         "release_status": "not-deployed",
         "blockers": [
           "real authorized operator/reviewer/admin accounts in declared target scope",
@@ -3432,7 +3432,10 @@
           "artifacts/c61/C61-03-required-final-green.json",
           "artifacts/c61/c61-onboarding-final-green.xml",
           "artifacts/c61/C61-03-tested-source.json",
-          "docs/buyeros/runbooks/staff-onboarding.md"
+          "docs/buyeros/runbooks/staff-onboarding.md",
+          "artifacts/c61/C61-03-04-06-full-api-regression.json",
+          "artifacts/c61/c61-api-followup-regression.xml",
+          "artifacts/c61/C61-integrated-current-api-bridge.json"
         ]
       },
       {
@@ -3452,10 +3455,10 @@
         "proposed_new_files": "services/api/tests/test_error_diagnostics.py",
         "acceptance": "只有能連接 request → driver/SQLSTATE → 實際故障位置的證據才解除 C61-05 的阻塞；僅加 logging 不算 F21 已修。",
         "rollback": "關閉新增診斷或 revert logging；保留事故報告。",
-        "execution_sha": "240c272a15ec01d5615a495d5fb9037e4c041655",
-        "execution_evidence": "artifacts/c61/C61-04-logging-compatibility-red.json;artifacts/c61/C61-04-migration-logging-red.json;artifacts/c61/C61-04-logging-compatibility-green.json;artifacts/c61/C61-04-logging-tested-source.json;artifacts/c61/C61-06-api-regression.json",
+        "execution_sha": "8b631ab8a911e63c856a674d78b42cddfab29049",
+        "execution_evidence": "artifacts/c61/C61-04-logging-compatibility-red.json;artifacts/c61/C61-04-migration-logging-red.json;artifacts/c61/C61-04-logging-compatibility-green.json;artifacts/c61/C61-04-logging-tested-source.json;artifacts/c61/C61-06-api-regression.json;artifacts/c61/C61-03-04-06-full-api-regression.json;artifacts/c61/c61-api-followup-regression.xml;artifacts/c61/C61-integrated-current-api-bridge.json",
         "code_status": "sanitized diagnostics and same-process migration logger preservation implemented",
-        "verification_status": "focused RED ValueError and offline migration logger reproduced; 22 GREEN, zero fail/error/skip; historical root unconfirmed",
+        "verification_status": "focused RED ValueError and offline migration logger reproduced; 22 GREEN, zero fail/error/skip; historical root unconfirmed; complete current API 863/863 fresh cases, zero fail/error/skip; unchanged committed API/migration trees connected to integrated source",
         "release_status": "not-deployed",
         "blockers": [
           "historical request SQLSTATE/runtime/schema/pool metadata unavailable",
@@ -3467,7 +3470,10 @@
           "artifacts/c61/C61-04-migration-logging-red.json",
           "artifacts/c61/C61-04-logging-compatibility-green.json",
           "artifacts/c61/C61-04-logging-tested-source.json",
-          "artifacts/c61/C61-06-api-regression.json"
+          "artifacts/c61/C61-06-api-regression.json",
+          "artifacts/c61/C61-03-04-06-full-api-regression.json",
+          "artifacts/c61/c61-api-followup-regression.xml",
+          "artifacts/c61/C61-integrated-current-api-bridge.json"
         ]
       },
       {
@@ -3512,10 +3518,10 @@
         "proposed_new_files": "services/api/buyeros_api/services/identity_resolver.py;services/api/buyeros_api/services/workspace_directory.py;docs/buyeros/decisions/2026-10-06-workspace-discovery.md;services/api/tests/test_identity_resolver_db.py",
         "acceptance": "owned PG16 benchmark CLI exit 0 且 SQL gate=true；舊 4/22/202/2002 查詢數只作 baseline。EXPLAIN/query 計數/role/RLS 證據齊備；n=30 p99 只標不穩定。",
         "rollback": "先停新查詢入口並切回相容 route；保留新增 schema。若舊路徑恢復 O(W)，記效能退化，不放鬆授權。",
-        "execution_sha": "eca9148b1109ff922361b85d3141e9efb24922d9",
-        "execution_evidence": "artifacts/c61/C61-06-directory-required-green.json;artifacts/c61/c61-directory-required-green.xml;artifacts/c61/C61-06-directory-benchmark-green.json;artifacts/c61/c61-directory-measured.json;artifacts/c61/C61-06-tested-source.json;artifacts/c61/C61-06-commit-source.json;artifacts/c61/C61-06-api-regression.json;artifacts/c61/c61-workspace-directory-upgrade.sql;artifacts/c61/c61-workspace-directory-rollback.sql",
+        "execution_sha": "8b631ab8a911e63c856a674d78b42cddfab29049",
+        "execution_evidence": "artifacts/c61/C61-06-directory-required-green.json;artifacts/c61/c61-directory-required-green.xml;artifacts/c61/C61-06-directory-benchmark-green.json;artifacts/c61/c61-directory-measured.json;artifacts/c61/C61-06-tested-source.json;artifacts/c61/C61-06-commit-source.json;artifacts/c61/C61-06-api-regression.json;artifacts/c61/c61-workspace-directory-upgrade.sql;artifacts/c61/c61-workspace-directory-rollback.sql;artifacts/c61/C61-03-04-06-full-api-regression.json;artifacts/c61/c61-api-followup-regression.xml;artifacts/c61/C61-integrated-current-api-bridge.json",
         "code_status": "bounded readonly canonical-actor workspace directory and additive 0038 payload implemented",
-        "verification_status": "required 39 pass zero fail/error/skip; owned 4-stage 120-sample benchmark SQL 4 each; full API diagnostic follow-up pending",
+        "verification_status": "required 39 pass zero fail/error/skip; owned 4-stage 120-sample benchmark SQL 4 each; full API diagnostic follow-up pending; complete current API 863/863 fresh cases, zero fail/error/skip; unchanged committed API/migration trees connected to integrated source",
         "release_status": "not-deployed",
         "blockers": [
           "full API regression rerun after C61-04 correction",
@@ -3532,7 +3538,10 @@
           "artifacts/c61/C61-06-commit-source.json",
           "artifacts/c61/C61-06-api-regression.json",
           "artifacts/c61/c61-workspace-directory-upgrade.sql",
-          "artifacts/c61/c61-workspace-directory-rollback.sql"
+          "artifacts/c61/c61-workspace-directory-rollback.sql",
+          "artifacts/c61/C61-03-04-06-full-api-regression.json",
+          "artifacts/c61/c61-api-followup-regression.xml",
+          "artifacts/c61/C61-integrated-current-api-bridge.json"
         ]
       },
       {

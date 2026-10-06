@@ -1,55 +1,64 @@
-# BuyerOS current C61 execution status
+# BuyerOS C61 execution status
 
-Execution: 2026-10-07 Asia/Hong_Kong; input audit date: 2026-10-06.
+Execution date: 2026-10-07 Asia/Hong_Kong. Original audit date: 2026-10-06.
+Draft PR #12: https://github.com/YNWAforever/BuyerOS/pull/12 . Published head is
+22f11ab; later local commits are reviewable follow-ups awaiting PR synchronization.
+The original audit, 114 outcomes and task columns remain preserved. New outcomes
+use execution fields; fixture evidence does not close a production finding.
 
-C61-01 is locally verified. C61-02 selective Q source is integrated on
-`d90431dd4a5a448b54fcb29b4920f6d07982e4d9`: 45 fresh Node cases pass,
-typecheck passes, 96 browser cases are discovered. The required PG16 suite
-passed 64/64 with zero fail/error/skip at 35226658; unchanged product subtree
-hashes connect that result to d90431d. The isolation correction passed 23/23.
-Complete built-browser acceptance remains blocked after local ENOSPC and
-Docker fixture startup failure. Zero-case/stale reports do not pass.
+C61-01: input hashes, HEAD/worktrees and Q drift comparison verified locally.
+C61-02: selective Q integration retained; required Q PG suite 64/64, 45 Node
+cases and full built 96/96 at 53bb6cf pass. Initial PR CI exposed a cold JWKS
+race and document preference observer issue. Focused RED then 51 auth/DB cases,
+4 observer units and the fresh full 96-case built suite pass. Earlier interrupted,
+stale, empty and ENOSPC runs remain unsuccessful. JWT trust was not widened.
+Latest hosted CI and integrated complete browser run remain pending.
 
-The draft PR is a reviewable source checkpoint. CI, real provider, production
-API/schema/worker/selector/epoch and human UAT each need separate evidence.
-Production is not updated. Historical 44/812 counts are not current results.
+C61-03: bounded staff reconciliation CLI defaults to read-only, supports existing
+canonical users only and requires current DB admin authority and exact versions.
+36 focused required cases pass. Actual staff accounts and role readback are pending.
+C61-04: sanitized diagnostics and Alembic logging compatibility pass 22 focused
+cases. The historical Oct2 OperationalError root is unconfirmed; C61-05 remains
+blocked on historical evidence. No pool/cold-start explanation is inferred.
+C61-06: migration 0038 restricted directory, canonical resolver and rollback
+payload pass 39 required cases and actual runtime-role warm benchmark. SQL stays
+4 per sample across W=1/10/100/1000. Production migration-owner eligibility,
+index/lock review, deployment and directory performance readback are pending.
+The complete follow-up API suite is 863/863 with fresh JUnit and zero fail/error/
+skip at 92d19d0. Git API/migration tree equality connects it to the integrated
+source; this does not certify later C61-21 edits or the entire repository tree.
 
-C61-04 sanitized diagnostics and historical-root evidence, C61-07 public SDK
-contract review, C61-15 provider gates, C61-06 directory payload and C61-22
-Unicode helper are prepared in the second attached worktree; integrate their
-independent commits deliberately. Historical F21 root remains unconfirmed,
-so C61-05 is blocked. No pool/cold-start cause is inferred.
+C61-07: current public Neon SDK/production contract ADR prepared; six offline
+peer SDK cases reviewed. Target Neon project/branch, real email/Google login,
+JWT trust and portable runtime acceptance are pending. C61-08/09 can start locally.
+C61-15: closed provider registry and immutable activation contract are implemented.
+40 API registry cases and 5 durable worker safety cases pass. No provider selected,
+verified account contract or credential configured; activation/spend stay zero.
+C61-16: existing 33 search/fetch/ingestion safety cases verified; live adapters
+and market/language account acceptance still need implementation/evidence.
 
-Research admission remains503; native delivery403 remains protected.
-Release A (research plus approved export): not accepted.
-Neon-only: not accepted. Native send: not accepted.
+C61-21: typed project work-queue summary and filtered lists are being implemented
+in the second owned worktree. Initial 7 DB RED then 12 focused cases pass; 5
+frontend cases pass and 3 new browser cases are positively discovered. Added
+cross-project/concurrent receipt/contract regression and built execution are pending.
+C61-22: readable source cards, exact read-only keyboard selection and workflow
+are integrated. Native Chromium readonly caret failure was reproduced independently;
+grapheme keyboard movement fixes actual [1,3] DOM selection -> [1,2] server emoji
+citation. 22 core + 15 fresh built draft/dirty/retry/Unicode/approval/export cases
+pass, zero fail/error/skip, with source hashes and exact export artifacts. Human
+screen reader/zoom and real-source semantic/readback acceptance are pending.
 
-All original audit fields/114 outcomes and task fields are preserved.
-Current run results occupy execution fields and the TASKS c61 namespace.
-The dirty original Neon migration checkout and other user branches are intact.
+Research admission still returns honest 503. Native delivery stays protected 403.
+Real provider, built preview with real auth/provider, production readback and human
+UAT have separate gates. Unowned dirty Neon worktree and user branches are untouched.
 
-C61-02 CI follow-up: PR #12 at 22f11ab failed API concurrent cold JWT
-verification and mobile keyboard preference observation. A held-fetch focused
-RED reproduced the real JWKS race; 51 auth/required cases then pass without
-changing JWT trust. Current-document preference observation has 4 unit cases
-and 3 fresh built-browser cases passing, including both U05 locales and T30
-keyboard mobile. The original full UI run was deliberately interrupted and is
-not accepted. Full fresh built/CI acceptance remains pending. C61-02 fixture
-diagnostics now retain bounded subprocess exit/signal metadata on failure;
-the two prior reset failures have no confirmed cause and their timeout is unchanged.
+Release A (research + approved export): NOT ACCEPTED.
+Neon-only: NOT ACCEPTED.
+Native send (C61-20/30): NOT ACCEPTED.
 
-C61-02 full built checkpoint: source 53bb6cfb65e83a39e2f489d35f62c5ffc34035bd
-executes 96/96 cases with fresh JUnit, zero fail/error/skip (20.5 minutes).
-Earlier interrupted/zero-case/ENOSPC attempts remain failures, not acceptance.
-The successful supported Linux Node build serves the actual candidate over the
-owned loopback HTTP/PG16/synthetic OIDC fixture. Provider inputs are fixtures;
-this is no real-provider, production or human UAT result. Latest CI and the
-complete follow-up API suite are still pending.
-
-C61-22 integrated acceptance: 22 core + 15 fresh built cases pass, no skip.
-Native readonly Chromium keyboard RED was reproduced independently; explicit
-read-only grapheme movement now keeps focus and records actual [1,3] DOM emoji
-selection as exact [1,2] server code-point citation. Combining marks, source
-review retry, exact approval/export, stale revisions and dirty buffers pass.
-Earlier 4-locator-failure and 2-real-keyboard-failure runs remain recorded.
-Provider inputs/OIDC are fictional. Human screen reader and live export remain pending.
+Next local work: complete C61-21 built/contract acceptance, then C61-23; C61-08/09
+and live adapter source remain independent ready tasks. C61-05 depends on actual
+historical root evidence. Production/auth/provider spend/send need their specific
+authority and same-version verified payloads. Rollback remains per task source
+commit; 0038 rollback removes only directory function/index after route rollback,
+preserving canonical IDs, FKs, existing memberships, audit, revisions and holds.
