@@ -5,7 +5,8 @@ import {createLiveClient} from '@/services/live/client';
 import {createAuthAdapter, type AuthAdapter, type AuthConfig} from '@/services/live/auth';
 import {useDataMode} from './data-mode';
 
-interface SessionValue {session: SessionScope; client: ReturnType<typeof createLiveClient>; auth: AuthAdapter | null; authError: string | null;}
+export type AuthBootstrap = {kind: 'initializing'} | {kind: 'disabled'} | {kind: 'ready'; auth: AuthAdapter} | {kind: 'configuration_error'; message: string};
+interface SessionValue {authBootstrap: AuthBootstrap; session: SessionScope; client: ReturnType<typeof createLiveClient>; auth: AuthAdapter | null; authError: string | null;}
 const SessionContext = createContext<SessionValue | null>(null);
 const noBrowserChange = () => () => {};
 const inBrowser = () => true;
@@ -17,11 +18,13 @@ export function WorkspaceSessionProvider({children, authConfig}: {children: Reac
   // The server and hydration pass agree on a null adapter; the browser then instantiates it.
   const browser = useSyncExternalStore(noBrowserChange, inBrowser, onServer);
   const issuer = authConfig?.issuer, clientId = authConfig?.clientId, audience = authConfig?.audience;
-  const authState = useMemo((): Pick<SessionValue, 'auth' | 'authError'> => {
-    if (!browser || mode !== 'live') return {auth: null, authError: null};
-    if (!issuer || !clientId || !audience) return {auth: null, authError: null};
-    try {return {auth: createAuthAdapter({issuer, clientId, audience}), authError: null};}
-    catch {return {auth: null, authError: 'Public OIDC configuration is invalid'};}
+  const authState = useMemo((): Pick<SessionValue, 'auth' | 'authError' | 'authBootstrap'> => {
+    if (mode !== 'live') return {auth: null, authError: null, authBootstrap: {kind:'disabled'}};
+    if (!browser) return {auth: null, authError: null, authBootstrap: {kind:'initializing'}};
+    const invalid = (message:string) => ({auth:null, authError:message, authBootstrap:{kind:'configuration_error' as const,message}});
+    if (!issuer || !clientId || !audience) return invalid('Configure an Auth0 public SPA client, issuer, client ID and API audience.');
+    try {const auth=createAuthAdapter({issuer, clientId, audience});return {auth, authError:null, authBootstrap:{kind:'ready',auth}};}
+    catch {return invalid('Public OIDC configuration is invalid');}
   }, [browser, mode, issuer, clientId, audience]);
   useEffect(() => {
     const auth = authState.auth;

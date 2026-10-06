@@ -1,5 +1,17 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'Request ID':'請求編號',
+  'Request failed. Try again after checking the connection.':'請求失敗。請檢查連線後重試。',
+  'Service temporarily unavailable. Retry after checking the status.':'服務暫時無法使用。請確認狀態後重試。',
+  'The selected item was not found in this workspace.':'在此工作區找不到所選項目。',
+  'You do not have permission for this action.':'你沒有執行此操作的權限。',
+  'No workspace membership. Ask an administrator for access.':'沒有工作區會員資格。請向管理員申請存取。',
+  'Check access again':'重新檢查存取',
+  'Contact your workspace administrator.':'請聯絡工作區管理員。',
+  'Copy diagnostics':'複製診斷資料',
+  'Initializing sign-in…':'正在初始化登入…',
+  'Sign in to access your workspaces.':'請登入以存取工作區。',
+
   'Workspace selection':'工作區選擇','Project selection':'專案選擇',
   'Buyer details: {buyer}':'買家詳情：{buyer}','Buyer dossier tabs':'買家詳情頁籤',
   'Previous buyer':'上一個買家','Next buyer':'下一個買家','Close details':'關閉詳情',
@@ -94,9 +106,9 @@ export const liveZh: Record<string,string> = {
   'Choose at least one buyer type.':'請選擇至少一種買家類型。',
   'Enter must-have requirements and confirm them.':'請填寫必要條件並確認。',
   'Loading workspaces…':'載入工作區中…','Loading projects…':'載入專案中…','Retry loading workspaces':'重試載入工作區','Retry loading projects':'重試載入專案',
-  'No workspace membership. Ask an administrator for access.':'沒有工作區權限，請向管理員申請。',
+
   'No projects yet.':'尚未有專案。','Choose workspace':'選擇工作區','Choose project':'選擇專案',
-  'Sign in':'登入','Sign in to access your workspaces.':'登入以存取工作區。',
+  'Sign in':'登入',
   'Profile history':'輪廓歷史','Current approved':'目前已批准','Pending review':'待審批',
   'Approve profile':'批准輪廓','Profile details':'輪廓詳情','Offer facts':'產品事實',
   'Requirements':'買家條件','Markets':'市場','Languages':'語言','Sources':'來源',
