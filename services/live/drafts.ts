@@ -96,3 +96,10 @@ export async function approveExactDraft(client:LiveClient,session:SessionScope,d
       icp_version_id:draft.icp_version_id,policy_decision_ids:review.policy_decision_ids,
       sender_identity_version:review.sender.version_key,confirmation:true}},ctx);
 }
+
+export async function reviewDraftGrounding(client:LiveClient,session:SessionScope,draft:Draft,
+ body:components['schemas']['DraftGroundingReviewRequest'],key:string):Promise<Draft>{
+ const {api,ctx}=operation(client,session);
+ return api.requestOperation('reviewDraftGrounding',{path:{workspace_id:ctx.workspace,draft_id:draft.id},
+  header:{'If-Match':`"${draft.version}"`,'Idempotency-Key':key},body},ctx);
+}
