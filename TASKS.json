@@ -3734,18 +3734,26 @@
         "proposed_new_files": "docs/buyeros/decisions/2026-10-06-provider-selection.md;services/api/buyeros_api/providers/registry.py;services/api/tests/test_provider_registry.py",
         "acceptance": "每類供應商有可驗證 contract；選型/credential/額度缺失只阻塞相應 live gate，離線 contract/fixture 開發可繼續。禁止以解除 503 當功能完成。",
         "rollback": "清空本次未核實 provider activation，維持 capability_blocked。",
-        "execution_sha": "960bde2695ee425b8222c0c495866f45d5d625fe",
-        "execution_evidence": "docs/buyeros/decisions/2026-10-06-provider-selection.md;docs/buyeros/evidence/c61/provider-contract-results.json;artifacts/c61/C61-15-verified.json",
+        "execution_sha": "22d6fd9cefe1ac3ea8cbc98bc34dac87072feb86",
+        "execution_evidence": "docs/buyeros/decisions/2026-10-06-provider-selection.md;docs/buyeros/evidence/c61/provider-contract-results.json;artifacts/c61/C61-15-core-gate-red.json;artifacts/c61/C61-15-core-gate-red.log;artifacts/c61/C61-15-core-gate-green.json;artifacts/c61/C61-15-core-gate-green.log;artifacts/c61/C61-15-worker-gate.json;artifacts/c61/C61-15-worker-gate.log;artifacts/c61/c61-core-gate-red.xml;artifacts/c61/c61-core-gate-green.xml;artifacts/c61/c61-provider-worker-gate.xml",
         "code_status": "complete-local-contract",
-        "verification_status": "passed-local-live-selection-blocked",
+        "verification_status": "40-api-and-5-worker-passed-zero-skip; live-selection-blocked",
         "release_status": "not-deployed",
         "blockers": [
-          "Search/model/contact vendor/account selection, verified tariffs and bounded sandbox allowance not provided"
+          "Vendor selection/account tariff/credential/isolated sandbox allowance pending"
         ],
         "evidence_paths": [
           "docs/buyeros/decisions/2026-10-06-provider-selection.md",
           "docs/buyeros/evidence/c61/provider-contract-results.json",
-          "artifacts/c61/C61-15-verified.json"
+          "artifacts/c61/C61-15-core-gate-red.json",
+          "artifacts/c61/C61-15-core-gate-red.log",
+          "artifacts/c61/C61-15-core-gate-green.json",
+          "artifacts/c61/C61-15-core-gate-green.log",
+          "artifacts/c61/C61-15-worker-gate.json",
+          "artifacts/c61/C61-15-worker-gate.log",
+          "artifacts/c61/c61-core-gate-red.xml",
+          "artifacts/c61/c61-core-gate-green.xml",
+          "artifacts/c61/c61-provider-worker-gate.xml"
         ]
       },
       {

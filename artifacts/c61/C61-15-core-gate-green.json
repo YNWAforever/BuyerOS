@@ -1,0 +1,27 @@
+{
+  "source_sha": "22d6fd9cefe1ac3ea8cbc98bc34dac87072feb86",
+  "source_sha_after": "22d6fd9cefe1ac3ea8cbc98bc34dac87072feb86",
+  "started_at_utc": "2026-10-06T18:06:05.092540+00:00",
+  "seconds": 12.529,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_provider_registry.py",
+    "tests/test_provider_contracts.py",
+    "tests/test_api_health.py",
+    "--junitxml=../../artifacts/c61/c61-core-gate-green.xml"
+  ],
+  "cwd": "services/api",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-15-core-gate-green.log",
+  "tests": 40,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-core-gate-green.xml",
+  "required_gate_exit_code": 0
+}

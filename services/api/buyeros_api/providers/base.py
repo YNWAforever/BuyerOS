@@ -99,7 +99,9 @@ def activation_blockers(capability: ProviderCapability, *, market: str, language
                         role: str, environment: str = "production") -> tuple[str, ...]:
     """Fail closed for evidence or safety gaps; each service is evaluated separately."""
     blockers: list[str] = []
-    if environment != "test" and capability.provider not in SELECTED_LIVE_PROVIDERS:
+    if environment not in {"test", "staging", "production"}:
+        blockers.append("UNKNOWN_ENVIRONMENT")
+    if (capability.provider != "fixture" or environment != "test") and capability.provider not in SELECTED_LIVE_PROVIDERS:
         blockers.append("PROVIDER_UNSELECTED")
     if capability.provider == "fixture" and environment != "test":
         blockers.append("FIXTURE_IN_PRODUCTION")
