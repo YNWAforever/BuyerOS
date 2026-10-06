@@ -1,0 +1,25 @@
+{
+  "source_sha": "e17b699752a3c887abd44601f3148dd62171db09",
+  "source_sha_after": "e17b699752a3c887abd44601f3148dd62171db09",
+  "command": [
+    "node",
+    "--test",
+    "tests/neon-sdk-proxy-redirect.test.mjs",
+    "tests/neon-sdk-token-cache.test.mjs",
+    "tests/neon-sdk-cross-tab-cache.test.mjs",
+    "tests/neon-auth-broadcast-storage.test.mjs"
+  ],
+  "exit_code": 0,
+  "seconds": 2.847,
+  "environment": "L0 owned loopback public SDK fixture; patched peer snapshot; not production adapter or real Neon",
+  "log": "artifacts/c61/C61-07-existing-sdk.log",
+  "counts": {
+    "tests": 6,
+    "pass": 6,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "reporting_wrapper_exception": "cp950 UnicodeEncodeError after command/artifact completion; this UTF-8 validation exits 0",
+  "peer_clean_after": true
+}

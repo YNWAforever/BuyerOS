@@ -3524,13 +3524,23 @@
         "proposed_new_files": "docs/buyeros/decisions/2026-10-06-neon-production-contract.md",
         "acceptance": "fixture 與真實 Neon 分開記錄；真實隔離 branch、built portable 及 Vercel preview 都過產品流程才 N00 完成。--help 只確認 runner 用法，實際 run 用 ADR 中已核對的 flags，不能以 help 成功關單。",
         "rollback": "維持 Auth0 現有路徑；移除未採用 spike overlay。真實 Neon 測試帳戶只依 owner/nonce 精確清理。",
-        "execution_sha": "",
-        "execution_evidence": "",
-        "code_status": "not-started",
-        "verification_status": "not-run",
+        "execution_sha": "08e086eed98881b35dd6ac46e4d89155a8ad153c",
+        "execution_evidence": "docs/buyeros/decisions/2026-10-06-neon-production-contract.md;docs/buyeros/evidence/c61/neon-contract-review.json;artifacts/c61/C61-07-existing-sdk.log;artifacts/c61/C61-07-existing-sdk.json;artifacts/c61/C61-07-preflight-help.log",
+        "code_status": "contract-decision-prepared",
+        "verification_status": "6-sdk-units-passed; candidate-runtime-and-real-gates-open",
         "release_status": "not-deployed",
-        "blockers": [],
-        "evidence_paths": []
+        "blockers": [
+          "Same-candidate normal portable/Vercel auth flow not verified",
+          "Authorized real Neon target/account/method absent",
+          "Google configuration and human UAT absent"
+        ],
+        "evidence_paths": [
+          "docs/buyeros/decisions/2026-10-06-neon-production-contract.md",
+          "docs/buyeros/evidence/c61/neon-contract-review.json",
+          "artifacts/c61/C61-07-existing-sdk.log",
+          "artifacts/c61/C61-07-existing-sdk.json",
+          "artifacts/c61/C61-07-preflight-help.log"
+        ]
       },
       {
         "task_id": "C61-08",
