@@ -1337,6 +1337,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Freeze an actor-bound maintenance selection up to10000 */
+        post: operations["previewBulkManifest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Restore an original actor manifest without executing it */
+        get: operations["getBulkManifest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}/execute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm the exact frozen digest and current operation authority */
+        post: operations["executeBulkManifest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2656,6 +2707,8 @@ export interface components {
             workspace_id: string;
             /** Format: uuid */
             project_id: string;
+            /** Format: uuid */
+            manifest_id?: string;
             /** @enum {string} */
             kind: "offer_ingestion" | "draft_generation" | "export" | "reconciliation" | "bulk_mutation";
             /** @enum {string} */
@@ -2677,6 +2730,97 @@ export interface components {
             /** @enum {string} */
             data_mode: "live";
         };
+        BulkManifestCreate: {
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            /** @enum {string} */
+            operation: "assignBuyerOwners";
+            target: {
+                /** Format: uuid */
+                owner_membership_id: string | null;
+            };
+        } | {
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            /** @enum {string} */
+            operation: "reviewBuyers";
+            target: {
+                /** @enum {string} */
+                status: "accepted" | "rejected" | "needs_information";
+            };
+        } | {
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            /** @enum {string} */
+            operation: "changeListMemberships";
+            target: {
+                /** Format: uuid */
+                list_id: string;
+                /** @enum {string} */
+                operation: "add" | "remove";
+            };
+        };
+        BulkManifestExecute: {
+            digest: string;
+            /** @constant */
+            confirmation: true;
+        };
+        BulkManifest: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workspace_id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            actor_user_id: string;
+            /** @enum {string} */
+            operation: "assignBuyerOwners" | "reviewBuyers" | "changeListMemberships";
+            target: {
+                /** Format: uuid */
+                owner_membership_id: string | null;
+            } | {
+                /** @enum {string} */
+                status: "accepted" | "rejected" | "needs_information";
+            } | {
+                /** Format: uuid */
+                list_id: string;
+                /** @enum {string} */
+                operation: "add" | "remove";
+            };
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            count: number;
+            digest: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** @enum {string} */
+            status: "ready" | "executed";
+            version: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: uuid */
+            job_id?: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            result?: components["schemas"]["BulkResult"];
+        };
+        BulkManifestResponse: {
+            data: components["schemas"]["BulkManifest"];
+            /** @enum {string} */
+            data_mode: "live";
+            request_id: string;
+        };
         AsyncJob: {
             /** Format: uuid */
             id: string;
@@ -2684,6 +2828,8 @@ export interface components {
             workspace_id: string;
             /** Format: uuid */
             project_id: string;
+            /** Format: uuid */
+            manifest_id?: string;
             /** @enum {string} */
             kind: "offer_ingestion" | "draft_generation" | "export" | "reconciliation" | "bulk_mutation";
             /** @enum {string} */
@@ -6592,6 +6738,126 @@ export interface operations {
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
             503: components["responses"]["Error"];
+        };
+    };
+    previewBulkManifest: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkManifestCreate"];
+            };
+        };
+        responses: {
+            /** @description Atomic current frozen selection or durable per-row execution */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkManifestResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+        };
+    };
+    getBulkManifest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+                manifest_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Atomic current frozen selection or durable per-row execution */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkManifestResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+        };
+    };
+    executeBulkManifest: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Strong version ETag, e.g. "4". Compare in mutation transaction; stale is 412 STALE_REVISION, missing is 400. */
+                "If-Match": components["parameters"]["IfMatch"];
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                manifest_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkManifestExecute"];
+            };
+        };
+        responses: {
+            /** @description Atomic current frozen selection or durable per-row execution */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkResultResponse"];
+                };
+            };
+            /** @description Atomic current frozen selection or durable per-row execution */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AsyncJobResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
         };
     };
 }

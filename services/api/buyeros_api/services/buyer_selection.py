@@ -27,8 +27,8 @@ def filters_hash(filters: dict, sort: str) -> str:
     return canonical_hash({"filters": normalized, "sort": sort})
 
 
-async def materialize(session, *, workspace_id, project_id, filters: dict, sort: str, limit: int):
-    """Materialize at most limit IDs plus one clip probe; filters and order run in SQL."""
+async def selection_query(session, *, workspace_id, project_id, filters: dict, sort: str):
+    """Build the same server-side selection for snapshots and manifest cursors."""
     reject_unsupported_filters(filters)
     fit_verdict = (
         select(FitAssessment.verdict)
@@ -132,6 +132,11 @@ async def materialize(session, *, workspace_id, project_id, filters: dict, sort:
                     (fit_verdict == "needs_review", 1),
                     (fit_verdict == "not_a_match", 2), else_=3)
         query = query.order_by(rank, name_order, ProjectBuyer.id)
+    return query
+
+
+async def materialize(session, *, workspace_id, project_id, filters: dict, sort: str, limit: int):
+    query = await selection_query(session, workspace_id=workspace_id, project_id=project_id, filters=filters, sort=sort)
     rows = (await session.execute(query.limit(limit + 1))).all()
     clipped = len(rows) > limit
     return [(buyer_id, version) for buyer_id, version in rows[:limit]], len(rows), clipped

@@ -13,6 +13,8 @@ import {ExportDialog} from './export-dialog';
 import {LiveBuyerManagementControls} from './buyer-management-controls';
 import {BulkJobPanel,LiveBulkActions,isAsyncJob} from './bulk-actions';
 import {liveZh} from './locale';
+import {BulkManifestMaintenance} from './bulk-manifest';
+import {startNewManifest} from '@/services/live/bulk-manifests';
 
 const reviewStatuses=['accepted','rejected','needs_information'] as const;
 const initial=():BuyerQuery=>readBuyerQuery(typeof window==='undefined'?'':window.location.search);
@@ -45,11 +47,18 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
   const [error,setError]=useState('');
   const [reload,setReload]=useState(0);
   const [reviewResult,setReviewResult]=useState<components['schemas']['BulkResult']|null>(null);
+  const [manifestSourceState,setManifestSource]=useState<{identity:string;value:{id:string;manifest_id:string}}|undefined>();
+  const manifestSource=manifestSourceState?.identity===sessionSnapshot.identity?manifestSourceState.value:undefined;
   const [jobId,setJobId]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('bulk_job')??'');
   const reviewIntent=useRef(new ActionIntent<components['schemas']['BulkResult']|components['schemas']['AsyncJob']>());
   const onCommitted=useCallback(()=>setReload(value=>value+1),[]);
   const onJob=useCallback((id:string)=>{setJobId(id);const url=new URL(window.location.href);url.searchParams.set('bulk_job',id);window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);},[]);
   const closeJob=useCallback(()=>{setJobId('');const url=new URL(window.location.href);url.searchParams.delete('bulk_job');window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);},[]);
+  const previewFailedManifest=useCallback((source:{id:string;manifest_id:string})=>{
+    startNewManifest(session);setManifestSource({identity:session.identity(),value:source});
+    const url=new URL(window.location.href);url.searchParams.delete('bulk_manifest');
+    window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);
+  },[session]);
   const lastDetailTrigger=useRef<HTMLButtonElement|null>(null);
   const filterQuery=useMemo<BuyerQuery>(()=>({q:query.q,fit:query.fit,review:query.review,queue:query.queue,sort:query.sort,listId:query.listId,size:12,offset:0}),[query.q,query.fit,query.review,query.queue,query.sort,query.listId]);
   const workspace=scope.workspace,project=scope.project;
@@ -174,7 +183,8 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
     {reviewResult&&<p role="status">{t('Review: {updated} updated; {blocked} blocked; {conflicts} conflicts.').replace('{updated}',String(reviewResult.updated)).replace('{blocked}',String(reviewResult.blocked)).replace('{conflicts}',String(reviewResult.conflicts))} {reviewResult.results.filter(row=>row.status==='blocked'||row.status==='conflict').map(row=>`${row.id}: ${row.reason_code??row.status}`).join('; ')}</p>}
     {canEdit&&<ExportDialog key={`export:${workspace}:${project}`} locale={locale} selection={selection()} canExport={canEdit}/>}
     <LiveBulkActions key={`bulk:${sessionSnapshot.identity}`} locale={locale} selection={selection()} count={selectedCount} canAssign={canAssign} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted}/>
-    {jobId&&<BulkJobPanel key={`job:${sessionSnapshot.identity}:${jobId}`} locale={locale} jobId={jobId} onJob={onJob} onCommitted={onCommitted} onClose={closeJob}/>}
+    {(canAssign||canReview||canEdit)&&<BulkManifestMaintenance key={`manifest:${sessionSnapshot.identity}:${manifestSource?.id??''}`} locale={locale} query={filterQuery} canAssign={canAssign} canReview={canReview} canManage={canEdit} ownMembershipId={ownMembershipId} onJob={onJob} onCommitted={onCommitted} sourceJob={manifestSource}/>}
+    {jobId&&<BulkJobPanel key={`job:${sessionSnapshot.identity}:${jobId}`} locale={locale} jobId={jobId} onManifestRetry={previewFailedManifest} onJob={onJob} onCommitted={onCommitted} onClose={closeJob}/>}
     <LiveBuyerManagementControls key={`management:${workspace}:${project}`} locale={locale} onJob={onJob} query={query} onApplyQuery={patch=>{setSelected({});setAllFiltered(false);setExcluded([]);changeQuery(patch,true);setReload(value=>value+1);}} selection={selection()} canManage={canEdit}/>
     {current&&<LiveBuyerDetail key={current.id} buyer={current} locale={locale} canEdit={canEdit} canQuote={canQuote} canReview={canReview} ownMembershipId={ownMembershipId}
       onReviewAndNext={(nextStatus,nextReason)=>reviewOneAndNext(current.id,current.version,nextStatus,nextReason)}

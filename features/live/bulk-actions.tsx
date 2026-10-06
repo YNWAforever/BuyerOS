@@ -27,7 +27,7 @@ const zhCopy:Record<string,string>={
   'Assigning...':'正在分派…','Bulk job progress':'批量工作進度','Close job':'關閉工作',
   'Loading job...':'正在載入工作…','Refresh job':'更新工作進度','Show job results':'顯示工作結果','Hide job results':'隱藏工作結果','Previous job results':'上一頁工作結果','Next job results':'下一頁工作結果',
   'Export failed IDs and reasons':'匯出失敗買家 ID 與原因',
-  'Retry failed only with current versions':'只按目前版本重試失敗列',
+  'Retry failed only with current versions':'只按目前版本重試失敗列','Preview failed rows with current versions':'按目前版本預覽失敗列',
   'Retrying...':'正在重試…','Cancel pending rows':'取消未處理列','Cancelling...':'正在取消…','queued':'排隊中','running':'處理中',
   'completed':'已完成','failed':'失敗','cancel_requested':'要求取消','cancelled':'已取消',
 };
@@ -124,7 +124,7 @@ function AssignmentConfirmation({preview,enabled,busy,locale,onAssign}:{preview:
   <button type="button" disabled={!enabled||!confirmed||!preview} onClick={()=>{if(preview)void onAssign(preview);}}>{copy(busy?'Assigning...':'Assign selected buyers',locale)}</button></div>;
 }
 
-export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobId:string;onJob:(id:string)=>void;onCommitted:()=>void;onClose:()=>void;locale?:Locale}){
+export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en',onManifestRetry}:{jobId:string;onJob:(id:string)=>void;onCommitted:()=>void;onClose:()=>void;locale?:Locale;onManifestRetry?:(source:{id:string;manifest_id:string})=>void}){
   const {session,client}=useWorkspaceSession(),snapshot=useSessionSnapshot(),{scope}=snapshot;
   const [job,setJob]=useState<JobSummary|null>(null),[resultPage,setResultPage]=useState<ResultPage|null>(null);
   const [error,setError]=useState(''),[busy,setBusy]=useState(false),[retryResult,setRetryResult]=useState<BulkResult|null>(null);
@@ -197,6 +197,7 @@ export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobI
   }
   async function retry(){
     if(!scope.workspace||busy||!failureCount)return;
+    if(job?.manifest_id){onManifestRetry?.({id:jobId,manifest_id:job.manifest_id});return;}
     setBusy(true);setError('');
     try{
       const ctx=buyerOperationContext(session);
@@ -217,7 +218,7 @@ export function BulkJobPanel({jobId,onJob,onCommitted,onClose,locale='en'}:{jobI
       <div className="bulk-action-row"><button type="button" onClick={()=>{setTick(value=>value+1);if(resultsOpen){setResultBusy(true);setResultTick(v=>v+1);}}}>{copy('Refresh job',locale)}</button>
       {['queued','running'].includes(job.status)&&<button type="button" disabled={busy} onClick={()=>void cancel()}>{copy(busy?'Cancelling...':'Cancel pending rows',locale)}</button>}
       {failureCount>0&&<><button type="button" disabled={busy||!['completed','failed'].includes(job.status)} onClick={()=>void downloadFailures()}>{copy('Export failed IDs and reasons',locale)}</button>
-        <button type="button" disabled={busy||!['completed','failed'].includes(job.status)} onClick={()=>void retry()}>{copy(busy?'Retrying...':'Retry failed only with current versions',locale)}</button></>}</div>
+        <button type="button" disabled={busy||!['completed','failed','cancelled'].includes(job.status)||(!!job.manifest_id&&!onManifestRetry)} onClick={()=>void retry()}>{copy(busy?'Retrying...':job.manifest_id?'Preview failed rows with current versions':'Retry failed only with current versions',locale)}</button></>}</div>
       {failureCount>0&&<><p>{locale==='zh-HK'?`失敗列：${failureCount}。報告只包含買家 ID 和內部原因碼。`:`Failed rows: ${failureCount}. Reasons are limited to buyer IDs and internal codes.`}</p>
         <ul>{failures.map(item=><li key={item.id}>{item.id}: {item.reason_code??item.status}</li>)}</ul></>}
       <button type="button" onClick={()=>{setResultBusy(true);setResultsOpen(v=>!v);}}>{copy(resultsOpen?'Hide job results':'Show job results',locale)}</button>

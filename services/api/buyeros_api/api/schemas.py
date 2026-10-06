@@ -585,3 +585,42 @@ class OutcomeCorrectionRequest(_Strict):
     occurred_at: AwareDatetime
     notes: StrictStr = Field(min_length=3, max_length=2000)
     reason: StrictStr = Field(min_length=3, max_length=1000)
+
+
+class ManifestTarget(_Strict):
+    owner_membership_id: uuid.UUID | None = None
+    status: Literal["accepted", "rejected", "needs_information"] | None = None
+    list_id: uuid.UUID | None = None
+    operation: Literal["add", "remove"] | None = None
+
+
+class BulkManifestCreate(_Strict):
+    filters: BuyerFilters
+    excluded_ids: list[uuid.UUID] = Field(max_length=10000)
+    operation: Literal["assignBuyerOwners", "reviewBuyers", "changeListMemberships"]
+    target: ManifestTarget
+    reason: StrictStr = Field(min_length=3, max_length=2000)
+    source_job_id: uuid.UUID | None = None
+
+    @model_validator(mode="after")
+    def _target(self):
+        fields=self.target.model_fields_set
+        required={"assignBuyerOwners":{"owner_membership_id"},"reviewBuyers":{"status"},"changeListMemberships":{"list_id","operation"}}[self.operation]
+        if fields!=required or len(self.reason.strip())<3 or len(set(self.excluded_ids))!=len(self.excluded_ids):
+            raise ValueError("exact operation target, unique exclusions and reason required")
+        if self.operation=="reviewBuyers" and self.target.status is None:
+            raise ValueError("review status required")
+        if self.operation=="changeListMemberships" and (self.target.list_id is None or self.target.operation is None):
+            raise ValueError("list target required")
+        return self
+
+
+class BulkManifestExecute(_Strict):
+    digest: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
+    confirmation: StrictBool
+
+    @field_validator("confirmation")
+    @classmethod
+    def _confirmed(cls,value):
+        if not value:raise ValueError("exact manifest confirmation required")
+        return value
