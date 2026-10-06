@@ -3,6 +3,7 @@ import {useEffect,useRef,useState} from 'react';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
 import {LiveCancelled,describeLiveError} from '@/services/live/client';
 import type {components} from '@/services/generated/buyeros-api';
+import {startJobPoller} from '@/services/live/job-poller';
 import {createOperationClient} from '@/services/live/operations';
 
 type Capability={name:string;status:string;reason_codes:string[];checked_at:string;billable:boolean};
@@ -19,8 +20,10 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
   const [jobId,setJobId]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('bulk_job')||'');
   const [job,setJob]=useState<Job|null>(null),[jobs,setJobs]=useState<Page<Job>|null>(null),[jobOffset,setJobOffset]=useState(0),[jobStatus,setJobStatus]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('job_status')||'');
   const [audit,setAudit]=useState<Page<Audit>|null>(null),[auditOffset,setAuditOffset]=useState(0);
+  const [pollError,setPollError]=useState('');
   const [error,setError]=useState(''),[resultLoading,setResultLoading]=useState(false);
   const jobRequest=useRef({sequence:0,controller:new AbortController()});
+  const pageView=useRef(job);useEffect(()=>{pageView.current=job;},[job]);
   useEffect(()=>()=>{jobRequest.current.sequence++;jobRequest.current.controller.abort();},[scope.identity]);
   const [profileQueue,setProfileQueue]=useState<'loading'|'none'|'pending'|'current'|'stale'|'unavailable'>(project?'loading':'none');
   const [failedCount,setFailedCount]=useState<number|null|'unavailable'>(null);
@@ -89,7 +92,27 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
     }catch(e){if(isCurrent()&&!(e instanceof LiveCancelled))setError(describeLiveError(e));}
     finally{if(isCurrent())setResultLoading(false);}
   }
-  function changeJob(value:string){jobRequest.current.controller.abort();jobRequest.current.sequence++;setJobId(value);setJob(null);setResultLoading(false);}
+  const loadJobRef=useRef(loadJob);useEffect(()=>{loadJobRef.current=loadJob;});
+  const loadedJobId=job?.id;
+  useEffect(()=>{
+    if(!loadedJobId||!pageView.current||['completed','failed','cancelled'].includes(pageView.current.status))return;
+    const basis=session.captureWriteContext(),own=new AbortController();let terminalSeen=false;
+    const ctx={...basis,signal:AbortSignal.any([basis.signal,own.signal]),getToken:async()=>session.token()||'',isCurrent:()=>session.isCurrent(basis.identity)&&!own.signal.aborted};
+    return startJobPoller({signal:ctx.signal,isVisible:()=>!document.hidden,
+      fetchSummary:signal=>createOperationClient(client).requestOperation('getAsyncJobSummary',{path:{workspace_id:workspace,job_id:loadedJobId}}, {...ctx,signal:AbortSignal.any([ctx.signal,signal])}),
+      onValue:summary=>{
+        if(!ctx.isCurrent()||pageView.current?.id!==loadedJobId)return;
+        setPollError('');setJob(current=>current?.id===summary.id?{...current,...summary}:current);
+        if(!terminalSeen&&['completed','failed','cancelled'].includes(summary.status)){
+          terminalSeen=true;
+          const page=pageView.current?.result_page;
+          if(page)void loadJobRef.current(loadedJobId,page.offset);
+        }
+      },onError:cause=>{if(ctx.isCurrent())setPollError(describeLiveError(cause));},
+    });
+  // Page changes do not create another poller; the current page is read via pageView.
+  },[client,session,workspace,scope.identity,loadedJobId]);
+  function changeJob(value:string){jobRequest.current.controller.abort();jobRequest.current.sequence++;setJobId(value);setJob(null);setPollError('');setResultLoading(false);}
   function resultRow(item:Result){return <p key={item.id}><code>{item.id}</code> · {t(item.status)} {item.reason_code||''} <button onClick={()=>void navigator.clipboard?.writeText(item.id)}>{t('Copy buyer ID')}</button></p>;}
   return <section className="panel" aria-label={t('Operations')}><h2>{t('Operations')}</h2>
     <p>{t('Live domain state only. Provider readiness remains blocked until verified.')}</p>
@@ -130,6 +153,6 @@ export function LiveOperations({workspace,project,isAdmin,onOpenBuyers,t}:{works
     {isAdmin&&<div role="region" aria-label={t('Audit trail')}><h3>{t('Audit trail')}</h3>{audit?.items.map(item=><p key={item.id}>{item.occurred_at} · {item.action} · {item.entity_type} {item.entity_id||''} · {item.reason_code||''} {item.request_id&&<code>{item.request_id}</code>}</p>)}
       {audit&&<div className="inline"><button disabled={auditOffset===0} onClick={()=>setAuditOffset(Math.max(0,auditOffset-20))}>{t('Previous')}</button><span>{audit.total?auditOffset+1:0}–{Math.min(auditOffset+20,audit.total)} / {audit.total}</span><button disabled={auditOffset+20>=audit.total} onClick={()=>setAuditOffset(auditOffset+20)}>{t('Next')}</button></div>}
     </div>}
-    {error&&<p role="alert">{error}</p>}
+    {error&&<p role="alert">{error}</p>}{pollError&&<p role="alert">{pollError}</p>}
   </section>;
 }

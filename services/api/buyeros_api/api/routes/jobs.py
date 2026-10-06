@@ -10,7 +10,7 @@ from ..auth import Principal, get_principal
 from ..deps import load_membership, permission_for_roles, tenant_scoped
 from ..errors import ApiError, envelope
 from ..idempotency import begin_idempotency, complete_idempotency
-from ...services.bulk_service import cancel_bulk_job, job_data, read_job_page, retry_failed_only
+from ...services.bulk_service import cancel_bulk_job, job_data, read_job_page, read_job_summary, retry_failed_only
 from ...db.outbox import AsyncJob
 
 router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["jobs"])
@@ -40,6 +40,22 @@ async def list_async_jobs(
             .order_by(AsyncJob.created_at.desc(), AsyncJob.id.desc())
             .offset(offset).limit(limit))).scalars().all()
         data = {"items": [job_data(row) for row in rows], "offset": offset, "limit": limit, "total": total}
+    return envelope(data, request.state.request_id)
+
+
+@router.get("/jobs/{job_id}/summary")
+async def get_async_job_summary(
+    workspace_id: uuid.UUID, job_id: uuid.UUID, request: Request,
+    principal: Principal = Depends(get_principal),
+):
+    async with tenant_scoped(workspace_id) as session:
+        member = await load_membership(session, principal=principal, workspace_id=workspace_id)
+        if not permission_for_roles(member["roles"], "getAsyncJobSummary"):
+            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+        data = await read_job_summary(
+            session, workspace_id=workspace_id, job_id=job_id,
+            actor_user_id=member["user_id"], is_admin="workspace_admin" in member["roles"],
+        )
     return envelope(data, request.state.request_id)
 
 

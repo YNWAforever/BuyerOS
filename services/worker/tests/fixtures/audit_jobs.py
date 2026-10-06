@@ -9,9 +9,22 @@ PROJECT = 'e1000000-0000-4000-8000-000000000001'
 ACTOR = 'e0000000-0000-4000-8000-000000000004'
 
 def main():
+    if sys.argv[1]=='status':
+        job=uuid.UUID(sys.argv[2]);state=sys.argv[3]
+        if state not in ('running','completed','failed','cancelled'):
+            raise ValueError('bounded fixture status only')
+        with psycopg.connect(owner_dsn()) as db:
+            row=db.execute('SELECT project_id,actor_user_id FROM async_jobs WHERE workspace_id=%s AND id=%s',(WORKSPACE,job)).fetchone()
+            if row!=(uuid.UUID(PROJECT),uuid.UUID(ACTOR)):
+                raise RuntimeError('unknown fictional job')
+            db.execute('UPDATE async_jobs SET status=%s WHERE workspace_id=%s AND id=%s',(state,WORKSPACE,job))
+        print(json.dumps({'fixture_only':True,'job_id':str(job),'status':state}));return
     count = int(sys.argv[1])
-    if count not in (0,21,101):
+    if count not in (0,21,101,1000):
         raise ValueError('bounded audit fixture only')
+    state = sys.argv[2] if len(sys.argv)>2 else 'completed'
+    if state not in ('running','completed','failed','cancelled'):
+        raise ValueError('bounded fixture status only')
     with psycopg.connect(owner_dsn()) as db:
         if db.execute('SELECT company_name FROM projects WHERE workspace_id=%s AND id=%s',(WORKSPACE,PROJECT)).fetchone()!=('Fictional Seller',):
             raise RuntimeError('unknown fixture project')
@@ -19,8 +32,8 @@ def main():
         db.execute("INSERT INTO workspaces(id,name,data_mode) VALUES (%s,'Other audit fixture','live') ON CONFLICT DO NOTHING",(other,))
         db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES ('e0000000-0000-4000-8000-000000000105',%s,%s,'{reviewer}',true) ON CONFLICT DO NOTHING",(other,ACTOR))
         job = str(uuid.uuid4())
-        db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,updated,blocked,conflicts) VALUES (%s,%s,%s,%s,'bulk_mutation','bulkUpdateBuyers','{}','completed',%s,%s,%s,%s,%s)",
-            (job,WORKSPACE,PROJECT,ACTOR,max(1,count),count,(count+2)//3,count//3,(count+1)//3))
+        db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,updated,blocked,conflicts) VALUES (%s,%s,%s,%s,'bulk_mutation','bulkUpdateBuyers','{}',%s,%s,%s,%s,%s,%s)",
+            (job,WORKSPACE,PROJECT,ACTOR,state,max(1,count),count,(count+2)//3,count//3,(count+1)//3))
         ids=[]
         for index in range(1,count+1):
             buyer=f'e2000000-0000-4000-8000-{index:012x}'

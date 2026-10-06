@@ -63,6 +63,7 @@ export const operationRoutes = {
   "listDrafts": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/drafts"},
   "generateDraft": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/drafts"},
   "listAsyncJobs": {method: "GET", path: "/v1/workspaces/{workspace_id}/jobs"},
+  "getAsyncJobSummary": {method: "GET", path: "/v1/workspaces/{workspace_id}/jobs/{job_id}/summary"},
   "getAsyncJob": {method: "GET", path: "/v1/workspaces/{workspace_id}/jobs/{job_id}"},
   "cancelAsyncJob": {method: "POST", path: "/v1/workspaces/{workspace_id}/jobs/{job_id}/cancel"},
   "retryFailedAsyncJob": {method: "POST", path: "/v1/workspaces/{workspace_id}/jobs/{job_id}/retry-failed"},

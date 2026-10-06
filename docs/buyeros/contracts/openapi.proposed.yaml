@@ -6225,6 +6225,46 @@ paths:
       x-permitted-roles: [viewer, operator, reviewer, workspace_admin]
       x-cost: none
       x-idempotency: Read-only.
+  /v1/workspaces/{workspace_id}/jobs/{job_id}/summary:
+    get:
+      operationId: getAsyncJobSummary
+      summary: Read actor-bound job status and counters without result rows
+      description: Q06 read-only summary. Current membership, original actor or current workspace administrator are rechecked on every request. No result-page queries or writes.
+      tags: [BO-011]
+      security: [{BearerAuth: []}]
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: job_id
+        in: path
+        required: true
+        schema: *id001
+      responses:
+        '200':
+          description: Durable current summary, never an inferred completion.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncJobSummaryResponse'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+          headers:
+            Retry-After:
+              schema: {type: string}
+      x-permitted-roles: [viewer, operator, reviewer, workspace_admin]
+      x-tenant-authorization: Original actor or current workspace administrator; same guard as getAsyncJob.
+      x-work-package: BO-011
+      x-cost: none
+      x-idempotency: Read-only.
+      x-implementation-status: IMPLEMENTED
   /v1/workspaces/{workspace_id}/jobs/{job_id}:
     get:
       operationId: getAsyncJob
@@ -10532,6 +10572,63 @@ components:
       - offset
       - limit
       - total
+    AsyncJobSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        workspace_id: *id001
+        project_id: *id001
+        kind:
+          type: string
+          enum:
+          - offer_ingestion
+          - draft_generation
+          - export
+          - reconciliation
+          - bulk_mutation
+        status:
+          type: string
+          enum:
+          - queued
+          - running
+          - cancel_requested
+          - cancelled
+          - completed
+          - failed
+          - unknown
+        requested: *id005
+        processed: *id005
+        updated: *id005
+        unchanged: *id005
+        blocked: *id005
+        conflicts: *id005
+        cancelled: *id005
+        result_id: *id001
+        failure_code:
+          type: string
+        created_at: *id004
+        updated_at: *id004
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - id
+      - workspace_id
+      - project_id
+      - kind
+      - status
+      - created_at
+      - updated_at
+      - data_mode
+      - requested
+      - processed
+      - updated
+      - unchanged
+      - blocked
+      - conflicts
+      - cancelled
     AsyncJob:
       type: object
       additionalProperties: false
@@ -11017,6 +11114,21 @@ components:
           type: string
           enum: [live]
       required: [data, request_id, data_mode]
+    AsyncJobSummaryResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/AsyncJobSummary'
+        request_id: *id001
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
     AsyncJobResponse:
       type: object
       additionalProperties: false
