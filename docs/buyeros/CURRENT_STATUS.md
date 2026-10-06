@@ -37,10 +37,15 @@ verified account contract or credential configured; activation/spend stay zero.
 C61-16: existing 33 search/fetch/ingestion safety cases verified; live adapters
 and market/language account acceptance still need implementation/evidence.
 
-C61-21: typed project work-queue summary and filtered lists are being implemented
-in the second owned worktree. Initial 7 DB RED then 12 focused cases pass; 5
-frontend cases pass and 3 new browser cases are positively discovered. Added
-cross-project/concurrent receipt/contract regression and built execution are pending.
+C61-21: typed scoped six-card summary, pending-approval draft filtering and
+private durable receipt pages are integrated. 54 API/contract, 5 frontend units
+and 24 fresh built cases pass with zero fail/error/skip; all six A/B en/zh-HK390
+cards equal actual filtered API totals. Current membership/project/actor
+predicates and read-only repeatable snapshots isolate receipt pages. Dirty
+drafts and exact Unicode approval/export still pass. Errors remain unavailable.
+The first built 22-pass/2-unsuccessful run is retained; both locator defects
+were corrected without weakening counts or increasing timeouts. Same-version
+real account/provider, production readback and human acceptance remain pending.
 C61-22: readable source cards, exact read-only keyboard selection and workflow
 are integrated. Native Chromium readonly caret failure was reproduced independently;
 grapheme keyboard movement fixes actual [1,3] DOM selection -> [1,2] server emoji
@@ -56,7 +61,7 @@ Release A (research + approved export): NOT ACCEPTED.
 Neon-only: NOT ACCEPTED.
 Native send (C61-20/30): NOT ACCEPTED.
 
-Next local work: complete C61-21 built/contract acceptance, then C61-23; C61-08/09
+Next local work: finish C61-23 maintenance/expiry acceptance; C61-08/09
 and live adapter source remain independent ready tasks. C61-05 depends on actual
 historical root evidence. Production/auth/provider spend/send need their specific
 authority and same-version verified payloads. Rollback remains per task source

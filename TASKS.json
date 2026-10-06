@@ -3935,25 +3935,24 @@
         "proposed_new_files": "services/api/buyeros_api/services/work_queue.py;services/api/buyeros_api/api/routes/work_queue.py;services/live/work-queue.ts;tests/e2e/work-queue-counts.spec.ts",
         "acceptance": "將新 spec 收入該 config 的 discovery，0 tests 不算通過；6 張卡片在角色/scope/空/錯誤狀態皆準確；新增 operation 類型生成無 drift。",
         "rollback": "UI gate 回舊導覽但文案要誠實；保留新 API 相容 response，不動業務資料。",
-        "execution_sha": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
-        "execution_evidence": "artifacts/c61/C61-21-queue-api-contract-final-green.json;artifacts/c61/C61-21-queue-ui-unit-final-green.json;artifacts/c61/C61-21-queue-final-typecheck.json;artifacts/c61/C61-21-generated-contract-final.json;artifacts/c61/C61-21-generated-routes-valid.json;artifacts/c61/C61-21-queue-browser-discovery.json;artifacts/c61/C61-21-tested-source.json;artifacts/c61/c61-queue-api-contract-final.xml",
-        "code_status": "typed scoped work queue, pending drafts and private durable receipt pages implemented",
-        "verification_status": "7 valid DB RED -> 54 required API/contract cases; 5 frontend units; tsc and generated types/86 routes match; 3 new browser cases discovered, built run pending; zero fail/error/skip in final suites",
+        "execution_sha": "97adf4480cb6cd82a5122ed0934491a8c1c741a9",
+        "execution_evidence": "artifacts/c61/C61-21-queue-api-contract-final-green.json;artifacts/c61/C61-21-integrated-built-final.json;artifacts/c61/c61-queue-integrated-final.xml;artifacts/c61/C61-21-integrated-tested-source.json;artifacts/c61/C61-21-0-counts.json;artifacts/c61/C61-21-1-counts.json;artifacts/c61/C61-21-scope-race.json",
+        "code_status": "typed six project work counts and filtered draft/receipt lists integrated",
+        "verification_status": "54 required API/DB/contract + 5 frontend units + 24 fresh built regression cases pass, zero fail/error/skip; 24 positive focused discovery; tsc and 86 generated routes/types match; A/B en/zh-HK six actual list totals equal cards; delayed read/cancelled scope and synthetic 503 recover honestly",
         "release_status": "not-deployed",
         "blockers": [
-          "integrated built-browser focused run",
-          "real account/source and production readback",
+          "real account/provider source acceptance",
+          "same-version production readback",
           "human UAT"
         ],
         "evidence_paths": [
           "artifacts/c61/C61-21-queue-api-contract-final-green.json",
-          "artifacts/c61/C61-21-queue-ui-unit-final-green.json",
-          "artifacts/c61/C61-21-queue-final-typecheck.json",
-          "artifacts/c61/C61-21-generated-contract-final.json",
-          "artifacts/c61/C61-21-generated-routes-valid.json",
-          "artifacts/c61/C61-21-queue-browser-discovery.json",
-          "artifacts/c61/C61-21-tested-source.json",
-          "artifacts/c61/c61-queue-api-contract-final.xml"
+          "artifacts/c61/C61-21-integrated-built-final.json",
+          "artifacts/c61/c61-queue-integrated-final.xml",
+          "artifacts/c61/C61-21-integrated-tested-source.json",
+          "artifacts/c61/C61-21-0-counts.json",
+          "artifacts/c61/C61-21-1-counts.json",
+          "artifacts/c61/C61-21-scope-race.json"
         ]
       },
       {

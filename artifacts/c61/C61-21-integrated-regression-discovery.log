@@ -1,0 +1,26 @@
+Listing tests:
+  audit-draft-dirty.spec.ts:16:66 › D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit
+  audit-draft-dirty.spec.ts:16:66 › D02 Open draft Cancel preserves all dirty fields; Discard is explicit
+  audit-draft-dirty.spec.ts:16:66 › D02 Refresh job Cancel preserves all dirty fields; Discard is explicit
+  audit-draft-dirty.spec.ts:24:1 › D02 Save is awaited before opening another draft and persists one revision
+  audit-draft-dirty.spec.ts:31:35 › D02 failed Save 401 keeps buffer and dirty baseline
+  audit-draft-dirty.spec.ts:31:35 › D02 failed Save 412 keeps buffer and dirty baseline
+  audit-draft-dirty.spec.ts:31:35 › D02 failed Save 503 keeps buffer and dirty baseline
+  audit-draft-dirty.spec.ts:40:1 › D02 Refresh does not overwrite the unsaved buffer before a decision
+  audit-draft-dirty.spec.ts:50:1 › D02 delayed refresh cannot materialize a draft into a new project scope
+  audit-draft-dirty.spec.ts:57:1 › D02 zh-HK mobile dialog preserves content and keeps all choices visible
+  audit-draft-reground.spec.ts:24:1 › D01/D03 manual Unicode draft exposes a source review and operator cannot attest
+  audit-draft-reground.spec.ts:63:1 › D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export
+  audit-draft-reground.spec.ts:79:1 › D03 zh-HK mobile code-point split reads every source and exports exact Unicode message
+  audit-draft-reground.spec.ts:90:1 › U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result
+  audit-draft-reground.spec.ts:108:1 › C61T-10 keyboard text selection binds emoji and combining marks to exact server code-point ranges
+  audit-job-scope.spec.ts:15:1 › U15 project A0 B5; card and failed list share scope; explicit workspace5
+  audit-job-scope.spec.ts:26:1 › U15 workspace view remains actor-bound, other actor detail denied; admin read sees all
+  audit-job-scope.spec.ts:32:29 › U15 actual 21 job list fully pages20; scope resets offset and old rows
+  audit-job-scope.spec.ts:32:29 › U15 actual 101 job list fully pages20; scope resets offset and old rows
+  audit-job-scope.spec.ts:39:1 › U15 held B list and count cannot overwrite newer A-B-A generation
+  audit-job-scope.spec.ts:46:1 › U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery
+  work-queue-counts.spec.ts:12:26 › U15/C61T-09 project A en desktop cards equal each real filtered list
+  work-queue-counts.spec.ts:12:26 › U15/C61T-09 project B zh-HK mobile cards equal each real filtered list
+  work-queue-counts.spec.ts:33:1 › C61T-09 held project summary cannot overwrite newer scope; failed refresh stays unavailable
+Total: 24 tests in 4 files

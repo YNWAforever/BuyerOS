@@ -1,0 +1,17 @@
+{
+  "fixture_only": true,
+  "held_scope": "35a66947-a813-4906-8471-291abedf395f",
+  "new_scope": "88ffb70b-0a32-42a0-a65d-cef56fd1715f",
+  "as_of_before_old_response": "2026-10-06T21:40:31.610548+00:00",
+  "old_response_disposition": "fulfilled",
+  "counts_and_as_of_unchanged_after_old_response": true,
+  "synthetic_503_unavailable": true,
+  "restored_counts": {
+    "awaiting_review": 4,
+    "pending_approval": 3,
+    "unassigned": 4,
+    "failed_job": 4,
+    "unknown_fit": 7,
+    "unknown_acceptance": 3
+  }
+}

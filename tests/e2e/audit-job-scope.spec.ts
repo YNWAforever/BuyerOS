@@ -13,12 +13,12 @@ async function login(page:Page,entry?:string){await signInWorkbench(page,true,'r
 function failedCard(page:Page){return page.getByRole('region',{name:'Daily work queue'}).locator('.activity').filter({has:page.getByText('Failed jobs',{exact:true})});}
 test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
 test('U15 project A0 B5; card and failed list share scope; explicit workspace5',async({page})=>{
- const seeded=await seed();await login(page);const card=failedCard(page);await expect(card.locator('p')).toHaveText('0');
+ const seeded=await seed();await login(page);const card=failedCard(page);await expect(card.locator('output')).toHaveText('0');
  await card.getByRole('button',{name:'Open',exact:true}).click();
  const jobs=page.getByRole('region',{name:'Bulk jobs'});await expect(jobs).toContainText('0 jobs in scope');await expect(page).toHaveURL(/job_scope=project/);await expect(page).toHaveURL(/job_status=failed/);
  await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(projectB);await expect(jobs).toContainText('5 jobs in scope');
  const queue=page.getByRole('region',{name:'Work queue',exact:true});await expect(queue).toContainText('Failed jobs: 5');
- await page.getByRole('button',{name:'Overview',exact:true}).click();await expect(failedCard(page).locator('p')).toHaveText('5');await failedCard(page).getByRole('button',{name:'Open',exact:true}).click();
+ await page.getByRole('button',{name:'Overview',exact:true}).click();await expect(failedCard(page).locator('output')).toHaveText('5');await failedCard(page).getByRole('button',{name:'Open',exact:true}).click();
  await page.getByRole('combobox',{name:'Job scope',exact:true}).selectOption('workspace');await expect(jobs).toContainText('Workspace jobs');await expect(jobs).toContainText('5 jobs in scope');
  await expect(page).toHaveURL(/job_scope=workspace/);expect(new Set(await jobs.getByRole('button').filter({hasText:/^[0-9a-f-]{36}$/}).allTextContents())).toEqual(new Set(seeded.own_ids));
  await page.screenshot({path:'test-results/q14-en-scope.png',fullPage:true});writeFileSync('test-results/q14-en-scope.json',JSON.stringify({fixture_only:true,...seeded,url:page.url()},null,2));
