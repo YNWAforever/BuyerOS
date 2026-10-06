@@ -7,7 +7,7 @@ from ..auth import Principal, get_principal
 from ..deps import load_membership, permission_for_roles, tenant_scoped
 from ..errors import ApiError, envelope
 from ..idempotency import begin_idempotency, complete_idempotency, if_match_version
-from ..schemas import DraftApproveRequest, DraftGenerateRequest, DraftReviewRequest, DraftUpdate
+from ..schemas import DraftApproveRequest, DraftGroundingReviewRequest, DraftGenerateRequest, DraftReviewRequest, DraftUpdate
 
 router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["drafts"])
 
@@ -279,3 +279,44 @@ async def disabled_delivery_boundary(workspace_id: uuid.UUID, draft_id: uuid.UUI
                                      principal: Principal = Depends(get_principal)) -> dict:
     # This endpoint must remain side-effect free even for an approved draft.
     raise ApiError(403, "DELIVERY_DISABLED", "delivery is disabled")
+
+
+@router.post("/drafts/{draft_id}/grounding-reviews")
+async def review_draft_grounding(workspace_id: uuid.UUID, draft_id: uuid.UUID,
+                                payload: DraftGroundingReviewRequest, request: Request, response: Response,
+                                principal: Principal = Depends(get_principal),
+                                idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+                                if_match: str | None = Header(default=None, alias="If-Match")) -> dict:
+    from ...services.draft_grounding import review_manual_grounding
+    from ...services.draft_service import draft_data
+    if not idempotency_key:
+        raise ApiError(400, "INVALID_REQUEST", "Idempotency-Key header is required")
+    expected_version = if_match_version(if_match)
+    async with tenant_scoped(workspace_id) as session:
+        member = await load_membership(session, principal=principal, workspace_id=workspace_id)
+        if not permission_for_roles(member["roles"], "reviewDraftGrounding"):
+            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+        outcome = await begin_idempotency(session, workspace_id=workspace_id,
+            actor_id=member["user_id"], operation_id="reviewDraftGrounding", key=idempotency_key,
+            body=payload.model_dump(mode="json"),
+            target={"workspace_id": str(workspace_id), "draft_id": str(draft_id)}, precondition=if_match)
+        if outcome.replay:
+            from ...services.approval_service import _locked_draft, current_approval_context
+            if outcome.response is None:
+                raise ApiError(409, "IDEMPOTENCY_CONFLICT", "legacy replay requires a new key")
+            project, draft, revision = await _locked_draft(session, workspace_id=workspace_id,
+                draft_id=draft_id, actor_id=member["user_id"], roles={"reviewer", "workspace_admin"})
+            if str(revision.id) != outcome.response["data"]["revision_id"]:
+                raise ApiError(412, "STALE_REVISION", "reviewed draft was edited again")
+            await current_approval_context(session, workspace_id=workspace_id,
+                project=project, draft=draft, revision=revision)
+            data = outcome.response["data"]
+            response.headers["ETag"] = f'"{outcome.response["version"]}"'
+            return envelope(data, request.state.request_id)
+        draft, revision = await review_manual_grounding(session, workspace_id=workspace_id,
+            actor_id=member["user_id"], draft_id=draft_id, expected_version=expected_version, payload=payload)
+        data = draft_data(draft, revision)
+        complete_idempotency(outcome, str(draft.id),
+            response={"http_status": 200, "version": draft.state_version, "data": data})
+        response.headers["ETag"] = f'"{draft.state_version}"'
+    return envelope(data, request.state.request_id)

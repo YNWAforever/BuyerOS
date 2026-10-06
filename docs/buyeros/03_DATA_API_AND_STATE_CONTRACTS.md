@@ -455,4 +455,44 @@ The existing `getBuyer` detail may expose up to100 retained non-quarantined cont
 
 ### Q07 fixed-template presentation contract (2026-10-03)
 
-`grounded-template.v1` remains a free deterministic route. `objective` and `tone` are retained in the API/job/revision compatibility metadata and exact context; they do not change subject/body. The UI has no tone selector, explicitly sends `professional`, and labels objective as internal work only. Template language supports en/zh-HK framing (heading, opening, closing); approved offer facts and source citations stay in their original language. Generation promises no automatic translation or configurable CTA. Manual edits retain Q15 Save/Discard/Cancel protection and require a fresh grounding review before exact approval; Q12 remains the separate review implementation gate. No paid model, delivery or authentication cutover is activated by this repair.
+`grounded-template.v1` remains a free deterministic route. `objective` and `tone` are retained in the API/job/revision compatibility metadata and exact context; they do not change subject/body. The UI has no tone selector, explicitly sends `professional`, and labels objective as internal work only. Template language supports en/zh-HK framing (heading, opening, closing); approved offer facts and source citations stay in their original language. Generation promises no automatic translation or configurable CTA. Manual edits retain Q15 Save/Discard/Cancel protection and require a fresh grounding review before exact approval; Q12 supplies the separate local human source review described below; external rollout remains unverified. No paid model, delivery or authentication cutover is activated by this repair.
+
+
+### Q12 local manual source review contract (2026-10-03)
+
+`reviewDraftGrounding` is the single domain operation for edited `needs_review` revisions:
+`POST /v1/workspaces/{workspace_id}/drafts/{draft_id}/grounding-reviews`, with strong
+`If-Match` and an actor/tenant/target/body/precondition-bound `Idempotency-Key`.
+Only a current reviewer/workspace_admin may attest; the actor and timestamp are resolved
+server-side. Ordinary operators may edit and prepare segment classifications. No role,
+recipient, identity or email linking change is implied.
+
+Every non-whitespace subject/body code point must be classified once. Ranges are
+Unicode code points, exclusive at the end; JS callers use `Array.from`, never UTF-16
+string offsets. Exact segment text, factual/non_factual classification and a reason
+are required; factual segments cite selected Evidence id/version and/or an approved
+offer fact id bound to the exact ICP id/content hash. Non-factual segments require
+explicit reasons and cannot claim sources. The reviewer confirms reading the entire
+message and all sources. This records human source qualification, not semantic truth.
+
+The transaction shares existing policy/membership/project/draft locking and current
+recipient/sender/ICP/accepted fit/evidence/retention/purpose/suppression guards. It
+appends an immutable successor retaining subject/body/language byte-for-byte as strings,
+with reviewed_by/time, based-on revision/hash, all segment reasons/references and an
+internal exact source digest/retention/ICP snapshot. The redacted AuditEvent binds the
+successor content digest to the real canonical actor. It clears prior exact review and
+invalidates any remaining approval. No database model/migration was added (head0036).
+
+Manual proof is rechecked at exact review/approval/export and idempotent replay,
+including source contents/digests changing without an Evidence version increment.
+Every later edit removes proof/claims on its new successor and returns to needs_review;
+history stays immutable. Same-key retries after lost committed responses create no
+second revision. UI failure/412 keeps message and review preparation; scope generation
+rejects late responses. Hard refresh drops bearer tokens and requires sign-in again;
+stored proof then comes from the API, never browser token storage.
+
+Rollback pauses only the new grounding entrance, preserving proof validation, old
+needs_review revisions and audit/history. Never replace the shared approval guard or
+set grounded=true manually. Delivery continues to return403 DELIVERY_DISABLED.
+Local fictional HTTP/DB/browser verification does not prove a live provider, policy
+approval, production migration, Auth0/Neon account rollout or deployment.

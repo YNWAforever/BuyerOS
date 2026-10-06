@@ -57,6 +57,7 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
     "getDraft": _VIEWERS,
     "editDraft": frozenset({"operator", "reviewer", "workspace_admin"}),
     "requestDraftReview": frozenset({"operator", "reviewer", "workspace_admin"}),
+    "reviewDraftGrounding": frozenset({"reviewer", "workspace_admin"}),
     "approveDraft": frozenset({"reviewer", "workspace_admin"}),
     "getUsage": _VIEWERS,
     "listOutcomes": _VIEWERS,

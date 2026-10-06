@@ -468,6 +468,38 @@ class DraftUpdate(_Strict):
         return self
 
 
+class GroundingOfferFactRef(_Strict):
+    id: uuid.UUID
+    icp_version_id: uuid.UUID
+    icp_content_hash: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+class GroundingSegment(_Strict):
+    field: Literal["subject", "body"]
+    start: StrictInt = Field(ge=0, le=20000)
+    end: StrictInt = Field(ge=1, le=20000)
+    exact_text: StrictStr = Field(min_length=1, max_length=20000)
+    classification: Literal["factual", "non_factual"]
+    evidence_refs: list[VersionedId] = Field(max_length=50)
+    offer_fact_refs: list[GroundingOfferFactRef] = Field(max_length=20)
+    reason: StrictStr = Field(min_length=3, max_length=400)
+
+
+class DraftGroundingReviewRequest(_Strict):
+    revision_id: uuid.UUID
+    content_hash: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
+    segments: list[GroundingSegment] = Field(min_length=2, max_length=200)
+    reason: StrictStr = Field(min_length=3, max_length=400)
+    confirmation: StrictBool
+
+    @field_validator("confirmation")
+    @classmethod
+    def _read_whole_message(cls, value: bool) -> bool:
+        if not value:
+            raise ValueError("whole-message source review confirmation is required")
+        return value
+
+
 class DraftReviewRequest(_Strict):
     revision_id: uuid.UUID
     content_hash: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")

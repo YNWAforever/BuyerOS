@@ -6816,6 +6816,55 @@ paths:
                   revision_id: 10000000-0000-4000-8000-000000000001
                   content_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   context_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  /v1/workspaces/{workspace_id}/drafts/{draft_id}/grounding-reviews:
+    post:
+      operationId: reviewDraftGrounding
+      summary: Attest every segment of an exact edited message against current sources
+      description: Human source qualification; does not verify semantic truth. Appends an immutable successor without changing subject/body. Current recipient, profile, sender, fit, evidence and policy are rechecked in the locked transaction. No delivery.
+      tags: [BO-021, BO-022, Q12]
+      security:
+      - BearerAuth: []
+      parameters:
+      - {name: workspace_id, in: path, required: true, schema: *id001}
+      - {name: draft_id, in: path, required: true, schema: *id001}
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DraftGroundingReviewRequest'
+      responses:
+        '200':
+          description: Exact text retained in one grounded successor; replay rechecks current eligibility.
+          headers:
+            ETag: {schema: {type: string}, description: Current draft state version}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftResponse'
+        '400': {$ref: '#/components/responses/Error'}
+        '401': {$ref: '#/components/responses/Error'}
+        '403': {$ref: '#/components/responses/Error'}
+        '404': {$ref: '#/components/responses/Error'}
+        '409': {$ref: '#/components/responses/Error'}
+        '412': {$ref: '#/components/responses/Error'}
+        '422': {$ref: '#/components/responses/Error'}
+        '429': {$ref: '#/components/responses/Error'}
+        '500': {$ref: '#/components/responses/Error'}
+        '503': {$ref: '#/components/responses/Error'}
+      x-implementation-status: LOCAL_IMPLEMENTED
+      x-work-package: BO-022
+      x-contract-extension: Q12
+      x-tenant-authorization: Current membership, tenant RLS and exact project/company source scope; actor is server resolved.
+      x-permitted-roles: [reviewer, workspace_admin]
+      x-policy: Current draft preparation, outreach and export contact purposes, suppression and retention required.
+      x-cost: none
+      x-idempotency: Required; exact actor/tenant/target/body/precondition; unknown response retries same key.
+      x-version-precondition: If-Match
+      x-validation: Strict schema and Unicode code-point full coverage; all factual segments require versioned eligible sources.
+      x-errors: [INVALID_REQUEST, PERMISSION_DENIED, STALE_REVISION, EVIDENCE_STALE, IDEMPOTENCY_CONFLICT, INVALID_STATE, POLICY_BLOCKED]
   /v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals:
     post:
       operationId: approveDraft
@@ -10225,6 +10274,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GroundedClaim'
+        grounding_review:
+          $ref: '#/components/schemas/ManualGroundingReview'
         approval_review:
           $ref: '#/components/schemas/DraftApprovalReview'
         approval_id:
@@ -10285,6 +10336,7 @@ components:
           - observation
           - offer_fact
           - labelled_inference
+          - non_factual
       required:
       - text
       - evidence_ids
@@ -10357,6 +10409,62 @@ components:
       - review_id
       - icp_version_id
       - context_hash
+    GroundingOfferFactRef:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        icp_version_id: *id001
+        icp_content_hash: *id015
+      required: [id, icp_version_id, icp_content_hash]
+    GroundingSegment:
+      type: object
+      additionalProperties: false
+      properties:
+        field: {type: string, enum: [subject, body]}
+        start: {type: integer, minimum: 0, maximum: 20000, description: Unicode code-point offset; not UTF-16 code units}
+        end: {type: integer, minimum: 1, maximum: 20000, description: Exclusive Unicode code-point offset}
+        exact_text: {type: string, minLength: 1, maxLength: 20000}
+        classification: {type: string, enum: [factual, non_factual]}
+        evidence_refs:
+          type: array
+          maxItems: 50
+          items: {$ref: '#/components/schemas/VersionedId'}
+        offer_fact_refs:
+          type: array
+          maxItems: 20
+          items: {$ref: '#/components/schemas/GroundingOfferFactRef'}
+        reason: {type: string, minLength: 3, maxLength: 400}
+      required: [field, start, end, exact_text, classification, evidence_refs, offer_fact_refs, reason]
+    DraftGroundingReviewRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        revision_id: *id001
+        content_hash: *id015
+        segments:
+          type: array
+          minItems: 2
+          maxItems: 200
+          items: {$ref: '#/components/schemas/GroundingSegment'}
+        reason: {type: string, minLength: 3, maxLength: 400}
+        confirmation: {type: boolean, const: true}
+      required: [revision_id, content_hash, segments, reason, confirmation]
+    ManualGroundingReview:
+      type: object
+      additionalProperties: false
+      properties:
+        based_on_revision_id: *id001
+        based_on_content_hash: *id015
+        reviewed_by: *id001
+        reviewed_at: *id004
+        reason: {type: string, minLength: 3, maxLength: 400}
+        segments:
+          type: array
+          minItems: 2
+          maxItems: 200
+          items: {$ref: '#/components/schemas/GroundingSegment'}
+      required: [based_on_revision_id, based_on_content_hash, reviewed_by, reviewed_at, reason, segments]
     DraftReviewRequest:
       type: object
       additionalProperties: false
