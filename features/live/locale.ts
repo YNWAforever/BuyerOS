@@ -1,5 +1,9 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'Retry same research':'重試同一次研究','Start new research intent':'開始全新研究意圖',
+  'Check existing runs before starting new research.':'開始新研究前，請先檢查現有研究。',
+  'The result is unknown. Query existing runs or retry the same research; its key is retained.':'結果尚未確定。請查詢現有研究或重試同一次研究；操作識別碼已保留。',
+  'The previous research may already exist. Start a new intent?':'上一次研究可能已建立。是否開始全新意圖？',
   'Previous results':'上一頁結果','Next results':'下一頁結果','Copy buyer ID':'複製買家編號',
   'Request ID':'請求編號',
   'Request failed. Try again after checking the connection.':'請求失敗。請檢查連線後重試。',
