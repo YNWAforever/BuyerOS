@@ -1,0 +1,836 @@
+api	UNKNOWN STEP	﻿2026-10-05T20:21:45.6458461Z Current runner version: '2.337.0'
+api	UNKNOWN STEP	2026-10-05T20:21:45.6509351Z ##[group]Runner Image Provisioner
+api	UNKNOWN STEP	2026-10-05T20:21:45.6510338Z Hosted Compute Agent
+api	UNKNOWN STEP	2026-10-05T20:21:45.6511051Z Version: 20260901.588
+api	UNKNOWN STEP	2026-10-05T20:21:45.6511714Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+api	UNKNOWN STEP	2026-10-05T20:21:45.6512436Z Build Date: 2026-09-01T19:56:44Z
+api	UNKNOWN STEP	2026-10-05T20:21:45.6513207Z Worker ID: {f5798d3b-4d31-41f2-8952-6e466cd5e079}
+api	UNKNOWN STEP	2026-10-05T20:21:45.6513915Z Azure Region: westus3
+api	UNKNOWN STEP	2026-10-05T20:21:45.6514465Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:21:45.6516068Z ##[group]Operating System
+api	UNKNOWN STEP	2026-10-05T20:21:45.6516724Z Ubuntu
+api	UNKNOWN STEP	2026-10-05T20:21:45.6517355Z 24.04.5
+api	UNKNOWN STEP	2026-10-05T20:21:45.6517890Z LTS
+api	UNKNOWN STEP	2026-10-05T20:21:45.6518421Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:21:45.6519247Z ##[group]Runner Image
+api	UNKNOWN STEP	2026-10-05T20:21:45.6519866Z Image: ubuntu-24.04
+api	UNKNOWN STEP	2026-10-05T20:21:45.6520520Z Version: 20260927.320.1
+api	UNKNOWN STEP	2026-10-05T20:21:45.6521804Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+api	UNKNOWN STEP	2026-10-05T20:21:45.6523444Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+api	UNKNOWN STEP	2026-10-05T20:21:45.6524463Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:21:45.6525731Z ##[group]GITHUB_TOKEN Permissions
+api	UNKNOWN STEP	2026-10-05T20:21:45.6527693Z Contents: read
+api	UNKNOWN STEP	2026-10-05T20:21:45.6528389Z Metadata: read
+api	UNKNOWN STEP	2026-10-05T20:21:45.6529179Z Packages: read
+api	UNKNOWN STEP	2026-10-05T20:21:45.6529837Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:21:45.6532034Z Secret source: Actions
+api	UNKNOWN STEP	2026-10-05T20:21:45.6533010Z Cache mode: write
+api	UNKNOWN STEP	2026-10-05T20:21:45.6533810Z Prepare workflow directory
+api	UNKNOWN STEP	2026-10-05T20:21:45.6987943Z Prepare all required actions
+api	UNKNOWN STEP	2026-10-05T20:21:45.7035805Z Getting action download info
+api	UNKNOWN STEP	2026-10-05T20:21:46.0313186Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+api	UNKNOWN STEP	2026-10-05T20:21:46.1222041Z Download action repository 'pnpm/action-setup@v4' (SHA:b906affcce14559ad1aafd4ab0e942779e9f58b1)
+api	UNKNOWN STEP	2026-10-05T20:21:46.9769817Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+api	UNKNOWN STEP	2026-10-05T20:21:47.0646165Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+api	UNKNOWN STEP	2026-10-05T20:21:47.2558566Z Complete job name: api
+api	UNKNOWN STEP	2026-10-05T20:21:47.3114882Z ##[group]Checking docker version
+api	UNKNOWN STEP	2026-10-05T20:21:47.3127606Z ##[command]/usr/bin/docker version --format '{{.Server.APIVersion}}'
+api	UNKNOWN STEP	2026-10-05T20:21:47.3979770Z '1.48'
+api	UNKNOWN STEP	2026-10-05T20:21:47.4002250Z Docker daemon API version: '1.48'
+api	UNKNOWN STEP	2026-10-05T20:21:47.4003290Z ##[command]/usr/bin/docker version --format '{{.Client.APIVersion}}'
+api	UNKNOWN STEP	2026-10-05T20:21:47.4168696Z '1.48'
+api	UNKNOWN STEP	2026-10-05T20:21:47.4181395Z Docker client API version: '1.48'
+api	UNKNOWN STEP	2026-10-05T20:21:47.4187390Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:21:47.4191094Z ##[group]Clean up resources from previous jobs
+api	UNKNOWN STEP	2026-10-05T20:21:47.4196558Z ##[command]/usr/bin/docker ps --all --quiet --no-trunc --filter "label=ee1638"
+api	UNKNOWN STEP	2026-10-05T20:21:47.4347615Z ##[command]/usr/bin/docker network prune --force --filter "label=ee1638"
+api	UNKNOWN STEP	2026-10-05T20:21:47.4486842Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:21:47.4487600Z ##[group]Create local container network
+api	UNKNOWN STEP	2026-10-05T20:21:47.4498207Z ##[command]/usr/bin/docker network create --label ee1638 github_network_e82d438ab4ea48a995faa3dcbb995fcf
+api	UNKNOWN STEP	2026-10-05T20:21:47.5061669Z 440c5965cad5ebd11b6e717cf9d14e96d189c59677f5e8090c41e18250b803fc
+api	UNKNOWN STEP	2026-10-05T20:21:47.5082901Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:21:47.5107446Z ##[group]Starting postgres service container
+api	UNKNOWN STEP	2026-10-05T20:21:47.5129339Z ##[command]/usr/bin/docker pull postgres:16
+api	UNKNOWN STEP	2026-10-05T20:21:48.3140599Z 16: Pulling from library/postgres
+api	UNKNOWN STEP	2026-10-05T20:21:48.5277017Z 6b37362b3da7: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5279124Z b1fdda8975a0: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5280637Z 106e7e3cf19a: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5282084Z ba0e979d0818: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5283624Z ad29720ebbb9: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5285068Z 3a749597affc: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5286426Z 483fb6941c15: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5287696Z 359ae0fc975d: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5289604Z 56d4d190ef07: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5290973Z 74156cf9f063: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5292276Z f7c7d4dd80ba: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5293625Z 749acf6dc637: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5295217Z 4d848243a73e: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5296618Z 6ad4758748c1: Pulling fs layer
+api	UNKNOWN STEP	2026-10-05T20:21:48.5298059Z 56d4d190ef07: Waiting
+api	UNKNOWN STEP	2026-10-05T20:21:48.5299466Z 74156cf9f063: Waiting
+api	UNKNOWN STEP	2026-10-05T20:21:48.5300896Z ba0e979d0818: Waiting
+api	UNKNOWN STEP	2026-10-05T20:21:48.5302391Z f7c7d4dd80ba: Waiting
+api	UNKNOWN STEP	2026-10-05T20:21:48.5303859Z 749acf6dc637: Waiting
+api	UNKNOWN STEP	2026-10-05T20:21:48.5305393Z ad29720ebbb9: Waiting
+api	UNKNOWN STEP	2026-10-05T20:21:48.5306922Z 4d848243a73e: Waiting
+api	UNKNOWN STEP	2026-10-05T20:21:48.5308511Z 3a749597affc: Waiting
+api	UNKNOWN STEP	2026-10-05T20:21:48.5310487Z 6ad4758748c1: Waiting
+api	UNKNOWN STEP	2026-10-05T20:21:48.5312215Z 483fb6941c15: Waiting
+api	UNKNOWN STEP	2026-10-05T20:21:48.5314071Z 359ae0fc975d: Waiting
+api	UNKNOWN STEP	2026-10-05T20:21:48.7212407Z b1fdda8975a0: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:48.7215660Z b1fdda8975a0: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:48.7534572Z 106e7e3cf19a: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:48.8167480Z 6b37362b3da7: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:48.8169877Z 6b37362b3da7: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:48.9016233Z ba0e979d0818: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:48.9019327Z ba0e979d0818: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:48.9706653Z ad29720ebbb9: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:48.9711590Z ad29720ebbb9: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:49.0113625Z 3a749597affc: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:49.0115867Z 3a749597affc: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:49.0835420Z 483fb6941c15: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:49.0837774Z 483fb6941c15: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:49.1556263Z 359ae0fc975d: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:49.1560511Z 359ae0fc975d: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:49.2711274Z 74156cf9f063: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:49.2716176Z 74156cf9f063: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:49.3240521Z f7c7d4dd80ba: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:49.3242962Z f7c7d4dd80ba: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:49.4536606Z 749acf6dc637: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:49.4541365Z 749acf6dc637: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:49.5046276Z 4d848243a73e: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:49.5049668Z 4d848243a73e: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:49.6350163Z 6ad4758748c1: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:49.6351279Z 6ad4758748c1: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:49.6984739Z 56d4d190ef07: Verifying Checksum
+api	UNKNOWN STEP	2026-10-05T20:21:49.6986306Z 56d4d190ef07: Download complete
+api	UNKNOWN STEP	2026-10-05T20:21:50.5981684Z 6b37362b3da7: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:51.5937894Z b1fdda8975a0: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:51.7738605Z 106e7e3cf19a: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:51.8156846Z ba0e979d0818: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:52.1178281Z ad29720ebbb9: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:52.1938709Z 3a749597affc: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:52.2101765Z 483fb6941c15: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:52.2147019Z 359ae0fc975d: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:55.2123699Z 56d4d190ef07: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:55.2243060Z 74156cf9f063: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:55.2358572Z f7c7d4dd80ba: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:55.2447202Z 749acf6dc637: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:55.2542540Z 4d848243a73e: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:55.2633635Z 6ad4758748c1: Pull complete
+api	UNKNOWN STEP	2026-10-05T20:21:55.2675992Z Digest: sha256:1a6ab3f5345eb6dbe04a1349529caabdb0ab09293a09590fad07b2246bfa4b54
+api	UNKNOWN STEP	2026-10-05T20:21:55.2688680Z Status: Downloaded newer image for postgres:16
+api	UNKNOWN STEP	2026-10-05T20:21:55.2694934Z docker.io/library/postgres:16
+api	UNKNOWN STEP	2026-10-05T20:21:55.2755928Z ##[command]/usr/bin/docker create --name 7b464cfe42c74a9b9d7ae5a7dfc9d7b2_postgres16_95d278 --label ee1638 --network github_network_e82d438ab4ea48a995faa3dcbb995fcf --network-alias postgres -p 5432:5432 --health-cmd "pg_isready -U buyeros -d buyeros_test_api" --health-interval 5s --health-timeout 5s --health-retries 10 -e "POSTGRES_USER=buyeros" -e "POSTGRES_PASSWORD=buyeros" -e "POSTGRES_DB=buyeros_test_api" -e GITHUB_ACTIONS=true -e CI=true postgres:16
+api	UNKNOWN STEP	2026-10-05T20:21:55.3017805Z b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7
+api	UNKNOWN STEP	2026-10-05T20:21:55.3031203Z ##[command]/usr/bin/docker start b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7
+api	UNKNOWN STEP	2026-10-05T20:21:55.5182864Z b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7
+api	UNKNOWN STEP	2026-10-05T20:21:55.5212787Z ##[command]/usr/bin/docker ps --all --filter id=b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7 --filter status=running --no-trunc --format "{{.ID}} {{.Status}}"
+api	UNKNOWN STEP	2026-10-05T20:21:55.5344730Z b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7 Up Less than a second (health: starting)
+api	UNKNOWN STEP	2026-10-05T20:21:55.5369017Z ##[command]/usr/bin/docker port b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7
+api	UNKNOWN STEP	2026-10-05T20:21:55.5506672Z 5432/tcp -> 0.0.0.0:5432
+api	UNKNOWN STEP	2026-10-05T20:21:55.5517858Z 5432/tcp -> [::]:5432
+api	UNKNOWN STEP	2026-10-05T20:21:55.5554230Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:21:55.5563511Z ##[group]Waiting for all services to be ready
+api	UNKNOWN STEP	2026-10-05T20:21:55.5579789Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7
+api	UNKNOWN STEP	2026-10-05T20:21:55.5721168Z starting
+api	UNKNOWN STEP	2026-10-05T20:21:55.5744247Z postgres service is starting, waiting 2 seconds before checking again.
+api	UNKNOWN STEP	2026-10-05T20:21:57.5740124Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7
+api	UNKNOWN STEP	2026-10-05T20:21:57.5862013Z starting
+api	UNKNOWN STEP	2026-10-05T20:21:57.5874477Z postgres service is starting, waiting 4 seconds before checking again.
+api	UNKNOWN STEP	2026-10-05T20:22:01.8744413Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7
+api	UNKNOWN STEP	2026-10-05T20:22:01.8876730Z healthy
+api	UNKNOWN STEP	2026-10-05T20:22:01.8893611Z postgres service is healthy.
+api	UNKNOWN STEP	2026-10-05T20:22:01.8894315Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:01.9193907Z ##[group]Run actions/checkout@v4
+api	UNKNOWN STEP	2026-10-05T20:22:01.9194477Z with:
+api	UNKNOWN STEP	2026-10-05T20:22:01.9194688Z   fetch-depth: 0
+api	UNKNOWN STEP	2026-10-05T20:22:01.9194919Z   repository: YNWAforever/BuyerOS
+api	UNKNOWN STEP	2026-10-05T20:22:01.9197410Z   token: ***
+api	UNKNOWN STEP	2026-10-05T20:22:01.9197616Z   ssh-strict: true
+api	UNKNOWN STEP	2026-10-05T20:22:01.9197817Z   ssh-user: git
+api	UNKNOWN STEP	2026-10-05T20:22:01.9198020Z   persist-credentials: true
+api	UNKNOWN STEP	2026-10-05T20:22:01.9198250Z   clean: true
+api	UNKNOWN STEP	2026-10-05T20:22:01.9198453Z   sparse-checkout-cone-mode: true
+api	UNKNOWN STEP	2026-10-05T20:22:01.9198700Z   fetch-tags: false
+api	UNKNOWN STEP	2026-10-05T20:22:01.9199229Z   show-progress: true
+api	UNKNOWN STEP	2026-10-05T20:22:01.9199446Z   lfs: false
+api	UNKNOWN STEP	2026-10-05T20:22:01.9199627Z   submodules: false
+api	UNKNOWN STEP	2026-10-05T20:22:01.9199831Z   set-safe-directory: true
+api	UNKNOWN STEP	2026-10-05T20:22:01.9200077Z   allow-unsafe-pr-checkout: false
+api	UNKNOWN STEP	2026-10-05T20:22:01.9200610Z env:
+api	UNKNOWN STEP	2026-10-05T20:22:01.9201117Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:22:01.9201465Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:22:01.9201759Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:02.0227857Z Syncing repository: YNWAforever/BuyerOS
+api	UNKNOWN STEP	2026-10-05T20:22:02.0230190Z ##[group]Getting Git version info
+api	UNKNOWN STEP	2026-10-05T20:22:02.0230830Z Working directory is '/home/runner/work/BuyerOS/BuyerOS'
+api	UNKNOWN STEP	2026-10-05T20:22:02.0231997Z [command]/usr/bin/git version
+api	UNKNOWN STEP	2026-10-05T20:22:02.0308089Z git version 2.55.0
+api	UNKNOWN STEP	2026-10-05T20:22:02.0340038Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:02.0358100Z Temporarily overriding HOME='/home/runner/work/_temp/7c2deaaf-a8ee-4461-8489-49413c3cabc0' before making global git config changes
+api	UNKNOWN STEP	2026-10-05T20:22:02.0360055Z Adding repository directory to the temporary git global config as a safe directory
+api	UNKNOWN STEP	2026-10-05T20:22:02.0381644Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/BuyerOS/BuyerOS
+api	UNKNOWN STEP	2026-10-05T20:22:02.0434371Z Deleting the contents of '/home/runner/work/BuyerOS/BuyerOS'
+api	UNKNOWN STEP	2026-10-05T20:22:02.0438055Z ##[group]Initializing the repository
+api	UNKNOWN STEP	2026-10-05T20:22:02.0442848Z [command]/usr/bin/git init /home/runner/work/BuyerOS/BuyerOS
+api	UNKNOWN STEP	2026-10-05T20:22:02.0581905Z hint: Using 'master' as the name for the initial branch. This default branch name
+api	UNKNOWN STEP	2026-10-05T20:22:02.0585804Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+api	UNKNOWN STEP	2026-10-05T20:22:02.0586904Z hint: to use in all of your new repositories, which will suppress this warning,
+api	UNKNOWN STEP	2026-10-05T20:22:02.0587844Z hint: call:
+api	UNKNOWN STEP	2026-10-05T20:22:02.0588250Z hint:
+api	UNKNOWN STEP	2026-10-05T20:22:02.0589300Z hint: 	git config --global init.defaultBranch <name>
+api	UNKNOWN STEP	2026-10-05T20:22:02.0590044Z hint:
+api	UNKNOWN STEP	2026-10-05T20:22:02.0590696Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+api	UNKNOWN STEP	2026-10-05T20:22:02.0591685Z hint: 'development'. The just-created branch can be renamed via this command:
+api	UNKNOWN STEP	2026-10-05T20:22:02.0592458Z hint:
+api	UNKNOWN STEP	2026-10-05T20:22:02.0592847Z hint: 	git branch -m <name>
+api	UNKNOWN STEP	2026-10-05T20:22:02.0593315Z hint:
+api	UNKNOWN STEP	2026-10-05T20:22:02.0593906Z hint: Disable this message with "git config set advice.defaultBranchName false"
+api	UNKNOWN STEP	2026-10-05T20:22:02.0594866Z Initialized empty Git repository in /home/runner/work/BuyerOS/BuyerOS/.git/
+api	UNKNOWN STEP	2026-10-05T20:22:02.0600738Z [command]/usr/bin/git remote add origin https://github.com/YNWAforever/BuyerOS
+api	UNKNOWN STEP	2026-10-05T20:22:02.0652600Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:02.0653235Z ##[group]Disabling automatic garbage collection
+api	UNKNOWN STEP	2026-10-05T20:22:02.0657448Z [command]/usr/bin/git config --local gc.auto 0
+api	UNKNOWN STEP	2026-10-05T20:22:02.0690740Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:02.0691340Z ##[group]Setting up auth
+api	UNKNOWN STEP	2026-10-05T20:22:02.0699542Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+api	UNKNOWN STEP	2026-10-05T20:22:02.0734349Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+api	UNKNOWN STEP	2026-10-05T20:22:02.1124802Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+api	UNKNOWN STEP	2026-10-05T20:22:02.1166802Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+api	UNKNOWN STEP	2026-10-05T20:22:02.1414531Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+api	UNKNOWN STEP	2026-10-05T20:22:02.1453591Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+api	UNKNOWN STEP	2026-10-05T20:22:02.1685623Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+api	UNKNOWN STEP	2026-10-05T20:22:02.1728928Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:02.1729380Z ##[group]Fetching the repository
+api	UNKNOWN STEP	2026-10-05T20:22:02.1739660Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +5c97cc797acb3288a18a76802e5b4a49e10e7237:refs/remotes/pull/11/merge
+api	UNKNOWN STEP	2026-10-05T20:22:07.1603449Z From https://github.com/YNWAforever/BuyerOS
+api	UNKNOWN STEP	2026-10-05T20:22:07.1604055Z  * [new branch]      codex/fix-vercel-tslib-ssr               -> origin/codex/fix-vercel-tslib-ssr
+api	UNKNOWN STEP	2026-10-05T20:22:07.1604896Z  * [new branch]      codex/n00-api-request-context            -> origin/codex/n00-api-request-context
+api	UNKNOWN STEP	2026-10-05T20:22:07.1605726Z  * [new branch]      codex/n00-native-ipc-isolation           -> origin/codex/n00-native-ipc-isolation
+api	UNKNOWN STEP	2026-10-05T20:22:07.1606345Z  * [new branch]      codex/vercel-services                    -> origin/codex/vercel-services
+api	UNKNOWN STEP	2026-10-05T20:22:07.1607096Z  * [new branch]      import-b804ba8d                          -> origin/import-b804ba8d
+api	UNKNOWN STEP	2026-10-05T20:22:07.1607847Z  * [new branch]      main                                     -> origin/main
+api	UNKNOWN STEP	2026-10-05T20:22:07.1608421Z  * [new branch]      p10-bearer-identity                      -> origin/p10-bearer-identity
+api	UNKNOWN STEP	2026-10-05T20:22:07.1609333Z  * [new branch]      p11-demo-live-adapter                    -> origin/p11-demo-live-adapter
+api	UNKNOWN STEP	2026-10-05T20:22:07.1610521Z  * [new branch]      p12-project-profile-writes               -> origin/p12-project-profile-writes
+api	UNKNOWN STEP	2026-10-05T20:22:07.1611850Z  * [new branch]      p13-buyer-review                         -> origin/p13-buyer-review
+api	UNKNOWN STEP	2026-10-05T20:22:07.1612667Z  * [new branch]      p14-buyer-lists                          -> origin/p14-buyer-lists
+api	UNKNOWN STEP	2026-10-05T20:22:07.1613497Z  * [new branch]      p8-worker-dispatcher                     -> origin/p8-worker-dispatcher
+api	UNKNOWN STEP	2026-10-05T20:22:07.1614358Z  * [new branch]      p9-api-surface                           -> origin/p9-api-surface
+api	UNKNOWN STEP	2026-10-05T20:22:07.1615218Z  * [new ref]         5c97cc797acb3288a18a76802e5b4a49e10e7237 -> pull/11/merge
+api	UNKNOWN STEP	2026-10-05T20:22:07.1617036Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:07.1617413Z ##[group]Determining the checkout info
+api	UNKNOWN STEP	2026-10-05T20:22:07.1620014Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:07.1620477Z [command]/usr/bin/git sparse-checkout disable
+api	UNKNOWN STEP	2026-10-05T20:22:07.1683005Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+api	UNKNOWN STEP	2026-10-05T20:22:07.1714887Z ##[group]Checking out the ref
+api	UNKNOWN STEP	2026-10-05T20:22:07.1720798Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/11/merge
+api	UNKNOWN STEP	2026-10-05T20:22:08.0529490Z Note: switching to 'refs/remotes/pull/11/merge'.
+api	UNKNOWN STEP	2026-10-05T20:22:08.0530097Z 
+api	UNKNOWN STEP	2026-10-05T20:22:08.0530495Z You are in 'detached HEAD' state. You can look around, make experimental
+api	UNKNOWN STEP	2026-10-05T20:22:08.0531440Z changes and commit them, and you can discard any commits you make in this
+api	UNKNOWN STEP	2026-10-05T20:22:08.0532347Z state without impacting any branches by switching back to a branch.
+api	UNKNOWN STEP	2026-10-05T20:22:08.0532890Z 
+api	UNKNOWN STEP	2026-10-05T20:22:08.0533231Z If you want to create a new branch to retain commits you create, you may
+api	UNKNOWN STEP	2026-10-05T20:22:08.0534137Z do so (now or later) by using -c with the switch command. Example:
+api	UNKNOWN STEP	2026-10-05T20:22:08.0534636Z 
+api	UNKNOWN STEP	2026-10-05T20:22:08.0534859Z   git switch -c <new-branch-name>
+api	UNKNOWN STEP	2026-10-05T20:22:08.0535223Z 
+api	UNKNOWN STEP	2026-10-05T20:22:08.0535533Z Or undo this operation with:
+api	UNKNOWN STEP	2026-10-05T20:22:08.0535859Z 
+api	UNKNOWN STEP	2026-10-05T20:22:08.0536026Z   git switch -
+api	UNKNOWN STEP	2026-10-05T20:22:08.0536266Z 
+api	UNKNOWN STEP	2026-10-05T20:22:08.0537011Z Turn off this advice by setting config variable advice.detachedHead to false
+api	UNKNOWN STEP	2026-10-05T20:22:08.0537768Z 
+api	UNKNOWN STEP	2026-10-05T20:22:08.0538564Z HEAD is now at 5c97cc7 Merge 0e100d986c6a6636812abf97f6b20d36c8c65263 into ad1a54510f6a0fb2485392c878e7e867e9def6be
+api	UNKNOWN STEP	2026-10-05T20:22:08.0585878Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:08.0636327Z [command]/usr/bin/git log -1 --format=%H
+api	UNKNOWN STEP	2026-10-05T20:22:08.0671952Z 5c97cc797acb3288a18a76802e5b4a49e10e7237
+api	UNKNOWN STEP	2026-10-05T20:22:08.0884529Z ##[group]Run pnpm/action-setup@v4
+api	UNKNOWN STEP	2026-10-05T20:22:08.0884814Z with:
+api	UNKNOWN STEP	2026-10-05T20:22:08.0884999Z   version: 11.25.0
+api	UNKNOWN STEP	2026-10-05T20:22:08.0885201Z   dest: ~/setup-pnpm
+api	UNKNOWN STEP	2026-10-05T20:22:08.0885406Z   run_install: null
+api	UNKNOWN STEP	2026-10-05T20:22:08.0885607Z   cache: false
+api	UNKNOWN STEP	2026-10-05T20:22:08.0885826Z   cache_dependency_path: pnpm-lock.yaml
+api	UNKNOWN STEP	2026-10-05T20:22:08.0886121Z   package_json_file: package.json
+api	UNKNOWN STEP	2026-10-05T20:22:08.0886369Z   standalone: false
+api	UNKNOWN STEP	2026-10-05T20:22:08.0886559Z env:
+api	UNKNOWN STEP	2026-10-05T20:22:08.0887092Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:22:08.0887458Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:22:08.0887693Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:08.2357101Z ##[group]Running self-installer...
+api	UNKNOWN STEP	2026-10-05T20:22:08.6747990Z (node:2753) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+api	UNKNOWN STEP	2026-10-05T20:22:08.6749731Z (Use `node --trace-deprecation ...` to show where the warning was created)
+api	UNKNOWN STEP	2026-10-05T20:22:08.8499797Z Progress: resolved 1, reused 0, downloaded 0, added 0
+api	UNKNOWN STEP	2026-10-05T20:22:08.8602561Z Packages: +1
+api	UNKNOWN STEP	2026-10-05T20:22:08.8602973Z +
+api	UNKNOWN STEP	2026-10-05T20:22:09.1971267Z Progress: resolved 1, reused 0, downloaded 1, added 1, done
+api	UNKNOWN STEP	2026-10-05T20:22:09.2363042Z 
+api	UNKNOWN STEP	2026-10-05T20:22:09.2363651Z dependencies:
+api	UNKNOWN STEP	2026-10-05T20:22:09.2364249Z + pnpm 11.25.0 (12.9.1 is available)
+api	UNKNOWN STEP	2026-10-05T20:22:09.2364727Z 
+api	UNKNOWN STEP	2026-10-05T20:22:09.2388176Z Done in 797ms
+api	UNKNOWN STEP	2026-10-05T20:22:09.2551733Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:09.2570491Z Installation Completed!
+api	UNKNOWN STEP	2026-10-05T20:22:09.2742615Z ##[group]Run actions/setup-node@v4
+api	UNKNOWN STEP	2026-10-05T20:22:09.2742911Z with:
+api	UNKNOWN STEP	2026-10-05T20:22:09.2743104Z   node-version: 24
+api	UNKNOWN STEP	2026-10-05T20:22:09.2743307Z   cache: pnpm
+api	UNKNOWN STEP	2026-10-05T20:22:09.2743504Z   always-auth: false
+api	UNKNOWN STEP	2026-10-05T20:22:09.2743721Z   check-latest: false
+api	UNKNOWN STEP	2026-10-05T20:22:09.2746112Z   token: ***
+api	UNKNOWN STEP	2026-10-05T20:22:09.2746309Z env:
+api	UNKNOWN STEP	2026-10-05T20:22:09.2746722Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:22:09.2747072Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:22:09.2747386Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+api	UNKNOWN STEP	2026-10-05T20:22:09.2747696Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:09.4173160Z Found in cache @ /opt/hostedtoolcache/node/24.21.0/x64
+api	UNKNOWN STEP	2026-10-05T20:22:09.4177508Z (node:2767) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+api	UNKNOWN STEP	2026-10-05T20:22:09.4178330Z (Use `node --trace-deprecation ...` to show where the warning was created)
+api	UNKNOWN STEP	2026-10-05T20:22:09.4181083Z ##[group]Environment details
+api	UNKNOWN STEP	2026-10-05T20:22:09.8000260Z node: v24.21.0
+api	UNKNOWN STEP	2026-10-05T20:22:09.8000722Z npm: 11.19.0
+api	UNKNOWN STEP	2026-10-05T20:22:09.8001067Z yarn: 1.22.22
+api	UNKNOWN STEP	2026-10-05T20:22:09.8002089Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:09.8025661Z [command]/home/runner/setup-pnpm/node_modules/.bin/pnpm store path --silent
+api	UNKNOWN STEP	2026-10-05T20:22:10.4341879Z /home/runner/work/BuyerOS/BuyerOS/.sites-runtime/pnpm-store/v11
+api	UNKNOWN STEP	2026-10-05T20:22:10.6540038Z Cache hit for: node-cache-Linux-x64-pnpm-62e1631a2955862ba1dc532cd28844785d294c45cb754b5731eccfa9703f694e
+api	UNKNOWN STEP	2026-10-05T20:22:10.6694317Z (node:2767) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+api	UNKNOWN STEP	2026-10-05T20:22:11.8702721Z Received 37748736 of 273445623 (13.8%), 35.9 MBs/sec
+api	UNKNOWN STEP	2026-10-05T20:22:12.8712562Z Received 205520896 of 273445623 (75.2%), 97.9 MBs/sec
+api	UNKNOWN STEP	2026-10-05T20:22:13.4177068Z Received 273445623 of 273445623 (100.0%), 102.3 MBs/sec
+api	UNKNOWN STEP	2026-10-05T20:22:13.4178300Z Cache Size: ~261 MB (273445623 B)
+api	UNKNOWN STEP	2026-10-05T20:22:13.4295283Z [command]/usr/bin/tar -xf /home/runner/work/_temp/dc2de96e-aa38-45bd-963e-3a9b454c981c/cache.tzst -P -C /home/runner/work/BuyerOS/BuyerOS --use-compress-program unzstd
+api	UNKNOWN STEP	2026-10-05T20:22:17.0424320Z Cache restored successfully
+api	UNKNOWN STEP	2026-10-05T20:22:17.0545726Z Cache restored from key: node-cache-Linux-x64-pnpm-62e1631a2955862ba1dc532cd28844785d294c45cb754b5731eccfa9703f694e
+api	UNKNOWN STEP	2026-10-05T20:22:17.0713802Z ##[group]Run pnpm install --frozen-lockfile
+api	UNKNOWN STEP	2026-10-05T20:22:17.0714219Z ^[[36;1mpnpm install --frozen-lockfile^[[0m
+api	UNKNOWN STEP	2026-10-05T20:22:17.0933651Z shell: /usr/bin/bash -e {0}
+api	UNKNOWN STEP	2026-10-05T20:22:17.0933947Z env:
+api	UNKNOWN STEP	2026-10-05T20:22:17.0934546Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:22:17.0934925Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:22:17.0935253Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+api	UNKNOWN STEP	2026-10-05T20:22:17.0935600Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:17.7098341Z ? Verifying lockfile against supply-chain policies (1059 entries)...
+api	UNKNOWN STEP	2026-10-05T20:22:17.7200125Z Lockfile is up to date, resolution step is skipped
+api	UNKNOWN STEP	2026-10-05T20:22:17.8807108Z Progress: resolved 1, reused 0, downloaded 0, added 0
+api	UNKNOWN STEP	2026-10-05T20:22:18.0271021Z Packages: +869
+api	UNKNOWN STEP	2026-10-05T20:22:18.0310314Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+api	UNKNOWN STEP	2026-10-05T20:22:18.8823911Z Progress: resolved 869, reused 313, downloaded 0, added 0
+api	UNKNOWN STEP	2026-10-05T20:22:19.8872174Z Progress: resolved 869, reused 822, downloaded 0, added 0
+api	UNKNOWN STEP	2026-10-05T20:22:20.1496527Z Packages are copied from the content-addressable store to the virtual store.
+api	UNKNOWN STEP	2026-10-05T20:22:20.1530112Z   Content-addressable store is at: /home/runner/work/BuyerOS/BuyerOS/.sites-runtime/pnpm-store/v11
+api	UNKNOWN STEP	2026-10-05T20:22:20.1559962Z   Virtual store is at:             node_modules/.pnpm
+api	UNKNOWN STEP	2026-10-05T20:22:20.9050734Z Progress: resolved 869, reused 868, downloaded 0, added 5
+api	UNKNOWN STEP	2026-10-05T20:22:21.9062455Z Progress: resolved 869, reused 868, downloaded 0, added 10
+api	UNKNOWN STEP	2026-10-05T20:22:22.9158379Z Progress: resolved 869, reused 868, downloaded 0, added 21
+api	UNKNOWN STEP	2026-10-05T20:22:23.9220469Z Progress: resolved 869, reused 868, downloaded 0, added 40
+api	UNKNOWN STEP	2026-10-05T20:22:24.9266272Z Progress: resolved 869, reused 868, downloaded 0, added 69
+api	UNKNOWN STEP	2026-10-05T20:22:25.9669145Z Progress: resolved 869, reused 868, downloaded 0, added 148
+api	UNKNOWN STEP	2026-10-05T20:22:26.5440632Z ✓ Lockfile passes supply-chain policies (1059 entries in 8.8s)
+api	UNKNOWN STEP	2026-10-05T20:22:26.9668099Z Progress: resolved 869, reused 868, downloaded 0, added 259
+api	UNKNOWN STEP	2026-10-05T20:22:27.9665983Z Progress: resolved 869, reused 868, downloaded 0, added 493
+api	UNKNOWN STEP	2026-10-05T20:22:28.9662624Z Progress: resolved 869, reused 868, downloaded 0, added 695
+api	UNKNOWN STEP	2026-10-05T20:22:29.9669334Z Progress: resolved 869, reused 868, downloaded 0, added 868
+api	UNKNOWN STEP	2026-10-05T20:22:30.0375528Z Progress: resolved 869, reused 868, downloaded 0, added 869, done
+api	UNKNOWN STEP	2026-10-05T20:22:35.1164272Z .../node_modules/unrs-resolver postinstall$ napi-postinstall unrs-resolver 1.11.1 check
+api	UNKNOWN STEP	2026-10-05T20:22:35.1739518Z .../node_modules/unrs-resolver postinstall: Done
+api	UNKNOWN STEP	2026-10-05T20:22:35.3852193Z 
+api	UNKNOWN STEP	2026-10-05T20:22:35.3852862Z dependencies:
+api	UNKNOWN STEP	2026-10-05T20:22:35.3853369Z + @base-ui/react 1.7.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3854115Z + @hookform/resolvers 5.7.1
+api	UNKNOWN STEP	2026-10-05T20:22:35.3854743Z + @shadcn/react 0.3.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3855422Z + class-variance-authority 0.7.1
+api	UNKNOWN STEP	2026-10-05T20:22:35.3859299Z + clsx 2.1.1
+api	UNKNOWN STEP	2026-10-05T20:22:35.3859678Z + cmdk 1.1.1
+api	UNKNOWN STEP	2026-10-05T20:22:35.3860054Z + date-fns 4.4.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3860520Z + drizzle-orm 0.45.2
+api	UNKNOWN STEP	2026-10-05T20:22:35.3860950Z + embla-carousel-react 8.6.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3861397Z + input-otp 1.4.2
+api	UNKNOWN STEP	2026-10-05T20:22:35.3861775Z + lucide-react 1.31.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3862139Z + next 16.3.4
+api	UNKNOWN STEP	2026-10-05T20:22:35.3862500Z + next-themes 0.4.6
+api	UNKNOWN STEP	2026-10-05T20:22:35.3862870Z + radix-ui 1.6.7
+api	UNKNOWN STEP	2026-10-05T20:22:35.3863206Z + react 19.2.6
+api	UNKNOWN STEP	2026-10-05T20:22:35.3863589Z + react-day-picker 10.0.1
+api	UNKNOWN STEP	2026-10-05T20:22:35.3864013Z + react-dom 19.2.6
+api	UNKNOWN STEP	2026-10-05T20:22:35.3864395Z + react-hook-form 7.85.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3864896Z + react-resizable-panels 4.12.2
+api	UNKNOWN STEP	2026-10-05T20:22:35.3865228Z + recharts 3.8.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3865440Z + sonner 2.0.8
+api	UNKNOWN STEP	2026-10-05T20:22:35.3865663Z + tailwind-merge 3.6.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3865889Z + tslib 2.8.1
+api	UNKNOWN STEP	2026-10-05T20:22:35.3866080Z + vaul 1.1.2
+api	UNKNOWN STEP	2026-10-05T20:22:35.3866269Z + zod 3.25.76
+api	UNKNOWN STEP	2026-10-05T20:22:35.3866383Z 
+api	UNKNOWN STEP	2026-10-05T20:22:35.3866480Z devDependencies:
+api	UNKNOWN STEP	2026-10-05T20:22:35.3867138Z + @cloudflare/vite-plugin 1.58.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3867478Z + @cloudflare/vitest-plugin 1.2.4
+api	UNKNOWN STEP	2026-10-05T20:22:35.3867804Z + @cloudflare/workers-types 5.20260921.1
+api	UNKNOWN STEP	2026-10-05T20:22:35.3868104Z + @msw/cloudflare 0.0.1
+api	UNKNOWN STEP	2026-10-05T20:22:35.3868375Z + @neondatabase/auth 0.5.0-beta
+api	UNKNOWN STEP	2026-10-05T20:22:35.3868640Z + @playwright/test 1.63.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3869292Z + @tailwindcss/postcss 4.2.1
+api	UNKNOWN STEP	2026-10-05T20:22:35.3869573Z + @types/node 22.19.19
+api	UNKNOWN STEP	2026-10-05T20:22:35.3869811Z + @types/react 19.2.14
+api	UNKNOWN STEP	2026-10-05T20:22:35.3870063Z + @types/react-dom 19.2.3
+api	UNKNOWN STEP	2026-10-05T20:22:35.3870504Z + @vitejs/plugin-react 6.0.2
+api	UNKNOWN STEP	2026-10-05T20:22:35.3871006Z + @vitejs/plugin-rsc 0.5.26
+api	UNKNOWN STEP	2026-10-05T20:22:35.3871476Z + drizzle-kit 0.31.10
+api	UNKNOWN STEP	2026-10-05T20:22:35.3871890Z + eslint 9.39.4
+api	UNKNOWN STEP	2026-10-05T20:22:35.3872320Z + eslint-config-next 16.3.4
+api	UNKNOWN STEP	2026-10-05T20:22:35.3872760Z + msw 2.14.7
+api	UNKNOWN STEP	2026-10-05T20:22:35.3873171Z + nitro 3.0.260903-beta
+api	UNKNOWN STEP	2026-10-05T20:22:35.3873650Z + openapi-typescript 7.13.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3874202Z + react-server-dom-webpack 19.2.6
+api	UNKNOWN STEP	2026-10-05T20:22:35.3874724Z + tailwindcss 4.2.1
+api	UNKNOWN STEP	2026-10-05T20:22:35.3875159Z + tw-animate-css 1.4.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3875611Z + typescript 5.9.3
+api	UNKNOWN STEP	2026-10-05T20:22:35.3876028Z + vinext 1.0.0-beta.5
+api	UNKNOWN STEP	2026-10-05T20:22:35.3876448Z + vite 8.0.13
+api	UNKNOWN STEP	2026-10-05T20:22:35.3876811Z + vitest 4.1.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3877216Z + wrangler 4.137.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.3877461Z 
+api	UNKNOWN STEP	2026-10-05T20:22:35.4682824Z Done in 18.3s using pnpm v11.25.0
+api	UNKNOWN STEP	2026-10-05T20:22:35.5607198Z ##[group]Run actions/setup-python@v5
+api	UNKNOWN STEP	2026-10-05T20:22:35.5607666Z with:
+api	UNKNOWN STEP	2026-10-05T20:22:35.5607873Z   python-version: 3.12
+api	UNKNOWN STEP	2026-10-05T20:22:35.5608105Z   check-latest: false
+api	UNKNOWN STEP	2026-10-05T20:22:35.5610832Z   token: ***
+api	UNKNOWN STEP	2026-10-05T20:22:35.5611066Z   update-environment: true
+api	UNKNOWN STEP	2026-10-05T20:22:35.5611323Z   allow-prereleases: false
+api	UNKNOWN STEP	2026-10-05T20:22:35.5611560Z   freethreaded: false
+api	UNKNOWN STEP	2026-10-05T20:22:35.5611769Z env:
+api	UNKNOWN STEP	2026-10-05T20:22:35.5612171Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:22:35.5612521Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:22:35.5612825Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+api	UNKNOWN STEP	2026-10-05T20:22:35.5613140Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:35.6943564Z ##[group]Installed versions
+api	UNKNOWN STEP	2026-10-05T20:22:35.7047208Z (node:2963) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+api	UNKNOWN STEP	2026-10-05T20:22:35.7048429Z (Use `node --trace-deprecation ...` to show where the warning was created)
+api	UNKNOWN STEP	2026-10-05T20:22:35.7049376Z Successfully set up CPython (3.12.14)
+api	UNKNOWN STEP	2026-10-05T20:22:35.7049868Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:35.7182996Z ##[group]Run python -m pip install uv==0.11.27
+api	UNKNOWN STEP	2026-10-05T20:22:35.7183598Z ^[[36;1mpython -m pip install uv==0.11.27^[[0m
+api	UNKNOWN STEP	2026-10-05T20:22:35.7256792Z shell: /usr/bin/bash -e {0}
+api	UNKNOWN STEP	2026-10-05T20:22:35.7257052Z env:
+api	UNKNOWN STEP	2026-10-05T20:22:35.7257579Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:22:35.7257951Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:22:35.7258276Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+api	UNKNOWN STEP	2026-10-05T20:22:35.7258664Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:35.7259314Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+api	UNKNOWN STEP	2026-10-05T20:22:35.7259767Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:35.7260163Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:35.7260568Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:35.7261010Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+api	UNKNOWN STEP	2026-10-05T20:22:35.7261362Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:36.8379996Z Collecting uv==0.11.27
+api	UNKNOWN STEP	2026-10-05T20:22:36.9150342Z   Downloading uv-0.11.27-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (11 kB)
+api	UNKNOWN STEP	2026-10-05T20:22:36.9329784Z Downloading uv-0.11.27-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (26.7 MB)
+api	UNKNOWN STEP	2026-10-05T20:22:37.5012275Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 26.7/26.7 MB 49.9 MB/s  0:00:00
+api	UNKNOWN STEP	2026-10-05T20:22:37.5615566Z Installing collected packages: uv
+api	UNKNOWN STEP	2026-10-05T20:22:37.8305069Z Successfully installed uv-0.11.27
+api	UNKNOWN STEP	2026-10-05T20:22:37.8893893Z ##[group]Run uv sync --frozen
+api	UNKNOWN STEP	2026-10-05T20:22:37.8894414Z ^[[36;1muv sync --frozen^[[0m
+api	UNKNOWN STEP	2026-10-05T20:22:37.8973981Z shell: /usr/bin/bash -e {0}
+api	UNKNOWN STEP	2026-10-05T20:22:37.8974247Z env:
+api	UNKNOWN STEP	2026-10-05T20:22:37.8975131Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:22:37.8975748Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:22:37.8976271Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+api	UNKNOWN STEP	2026-10-05T20:22:37.8976965Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:37.8977738Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+api	UNKNOWN STEP	2026-10-05T20:22:37.8978502Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:37.8979477Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:37.8980197Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:37.8980912Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+api	UNKNOWN STEP	2026-10-05T20:22:37.8981577Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:37.9709138Z Using CPython 3.12.14 interpreter at: /opt/hostedtoolcache/Python/3.12.14/x64/bin/python3
+api	UNKNOWN STEP	2026-10-05T20:22:37.9709905Z Creating virtual environment at: .venv
+api	UNKNOWN STEP	2026-10-05T20:22:37.9894458Z    Building buyeros-api @ file:///home/runner/work/BuyerOS/BuyerOS/services/api
+api	UNKNOWN STEP	2026-10-05T20:22:38.0608960Z Downloading sqlalchemy (3.3MiB)
+api	UNKNOWN STEP	2026-10-05T20:22:38.0612782Z Downloading zstandard (5.3MiB)
+api	UNKNOWN STEP	2026-10-05T20:22:38.0617738Z Downloading psycopg-binary (5.0MiB)
+api	UNKNOWN STEP	2026-10-05T20:22:38.0621457Z Downloading botocore (15.2MiB)
+api	UNKNOWN STEP	2026-10-05T20:22:38.0631090Z Downloading cryptography (4.5MiB)
+api	UNKNOWN STEP	2026-10-05T20:22:38.0647275Z Downloading pygments (1.2MiB)
+api	UNKNOWN STEP	2026-10-05T20:22:38.0649364Z Downloading pydantic-core (2.0MiB)
+api	UNKNOWN STEP	2026-10-05T20:22:38.4196605Z  Downloaded pydantic-core
+api	UNKNOWN STEP	2026-10-05T20:22:38.5251145Z  Downloaded zstandard
+api	UNKNOWN STEP	2026-10-05T20:22:38.5282725Z  Downloaded psycopg-binary
+api	UNKNOWN STEP	2026-10-05T20:22:38.5576383Z  Downloaded cryptography
+api	UNKNOWN STEP	2026-10-05T20:22:38.6021805Z  Downloaded pygments
+api	UNKNOWN STEP	2026-10-05T20:22:38.6053829Z  Downloaded sqlalchemy
+api	UNKNOWN STEP	2026-10-05T20:22:38.9218091Z  Downloaded botocore
+api	UNKNOWN STEP	2026-10-05T20:22:38.9303450Z       Built buyeros-api @ file:///home/runner/work/BuyerOS/BuyerOS/services/api
+api	UNKNOWN STEP	2026-10-05T20:22:38.9311561Z Prepared 77 packages in 952ms
+api	UNKNOWN STEP	2026-10-05T20:22:39.0328401Z Installed 77 packages in 101ms
+api	UNKNOWN STEP	2026-10-05T20:22:39.0329533Z  + alembic==1.20.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0330252Z  + annotated-doc==0.0.5
+api	UNKNOWN STEP	2026-10-05T20:22:39.0330972Z  + annotated-types==0.8.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0331437Z  + anyio==4.15.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0331949Z  + attrs==26.1.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0332448Z  + boto3==1.43.103
+api	UNKNOWN STEP	2026-10-05T20:22:39.0332962Z  + botocore==1.43.103
+api	UNKNOWN STEP	2026-10-05T20:22:39.0333838Z  + buyeros-api==0.1.0 (from file:///home/runner/work/BuyerOS/BuyerOS/services/api)
+api	UNKNOWN STEP	2026-10-05T20:22:39.0334822Z  + certifi==2026.7.22
+api	UNKNOWN STEP	2026-10-05T20:22:39.0335448Z  + cffi==2.1.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0335984Z  + charset-normalizer==3.5.2
+api	UNKNOWN STEP	2026-10-05T20:22:39.0336562Z  + click==8.5.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0337085Z  + cryptography==50.0.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0337854Z  + distro==1.9.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0338336Z  + fastapi==0.141.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0339119Z  + greenlet==3.5.6
+api	UNKNOWN STEP	2026-10-05T20:22:39.0339582Z  + h11==0.16.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0340126Z  + httpcore==1.0.9
+api	UNKNOWN STEP	2026-10-05T20:22:39.0340600Z  + httpcore2==2.13.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0341072Z  + httpx==0.28.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0341629Z  + httpx2==2.13.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0342084Z  + idna==3.19
+api	UNKNOWN STEP	2026-10-05T20:22:39.0342638Z  + iniconfig==2.3.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0343116Z  + jmespath==1.1.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0343677Z  + jsonpatch==1.33
+api	UNKNOWN STEP	2026-10-05T20:22:39.0344146Z  + jsonpointer==3.1.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0344829Z  + jsonschema==4.26.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0345495Z  + jsonschema-specifications==2025.9.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0346203Z  + langchain-core==1.6.6
+api	UNKNOWN STEP	2026-10-05T20:22:39.0346740Z  + langchain-protocol==0.0.19
+api	UNKNOWN STEP	2026-10-05T20:22:39.0347372Z  + langgraph==1.2.12
+api	UNKNOWN STEP	2026-10-05T20:22:39.0348031Z  + langgraph-checkpoint==4.2.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0348927Z  + langgraph-checkpoint-postgres==3.1.2
+api	UNKNOWN STEP	2026-10-05T20:22:39.0350078Z  + langgraph-prebuilt==1.1.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0350825Z  + langgraph-sdk==0.4.5
+api	UNKNOWN STEP	2026-10-05T20:22:39.0351442Z  + langsmith==0.14.2
+api	UNKNOWN STEP	2026-10-05T20:22:39.0351913Z  + mako==1.4.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0352383Z  + markupsafe==3.0.3
+api	UNKNOWN STEP	2026-10-05T20:22:39.0352958Z  + orjson==3.12.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0353515Z  + ormsgpack==1.12.2
+api	UNKNOWN STEP	2026-10-05T20:22:39.0354000Z  + packaging==26.3
+api	UNKNOWN STEP	2026-10-05T20:22:39.0354474Z  + pluggy==1.6.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0355044Z  + psycopg==3.3.5
+api	UNKNOWN STEP	2026-10-05T20:22:39.0355536Z  + psycopg-binary==3.3.5
+api	UNKNOWN STEP	2026-10-05T20:22:39.0356159Z  + psycopg-pool==3.3.3
+api	UNKNOWN STEP	2026-10-05T20:22:39.0356654Z  + pycparser==3.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0357222Z  + pydantic==2.13.5
+api	UNKNOWN STEP	2026-10-05T20:22:39.0357709Z  + pydantic-core==2.46.5
+api	UNKNOWN STEP	2026-10-05T20:22:39.0358318Z  + pydantic-settings==2.15.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0358712Z  + pygments==2.21.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0359246Z  + pyjwt==2.14.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0359575Z  + pypdf==6.19.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0359892Z  + pytest==8.4.2
+api	UNKNOWN STEP	2026-10-05T20:22:39.0360249Z  + pytest-asyncio==0.26.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0360675Z  + python-dateutil==2.9.0.post0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0361104Z  + python-dotenv==1.2.3
+api	UNKNOWN STEP	2026-10-05T20:22:39.0361470Z  + python-multipart==0.0.32
+api	UNKNOWN STEP	2026-10-05T20:22:39.0361845Z  + pyyaml==6.0.3
+api	UNKNOWN STEP	2026-10-05T20:22:39.0362172Z  + referencing==0.37.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0362545Z  + requests==2.34.2
+api	UNKNOWN STEP	2026-10-05T20:22:39.0362909Z  + requests-toolbelt==1.0.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0363586Z  + rpds-py==2026.6.3
+api	UNKNOWN STEP	2026-10-05T20:22:39.0363957Z  + s3transfer==0.19.2
+api	UNKNOWN STEP	2026-10-05T20:22:39.0364329Z  + six==1.17.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0364714Z  + sniffio==1.3.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0365092Z  + sqlalchemy==2.0.53
+api	UNKNOWN STEP	2026-10-05T20:22:39.0365479Z  + starlette==1.6.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0365842Z  + tenacity==9.1.4
+api	UNKNOWN STEP	2026-10-05T20:22:39.0366219Z  + truststore==0.10.4
+api	UNKNOWN STEP	2026-10-05T20:22:39.0366619Z  + typing-extensions==4.16.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0367234Z  + typing-inspection==0.4.4
+api	UNKNOWN STEP	2026-10-05T20:22:39.0367617Z  + urllib3==2.8.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0367892Z  + uuid-utils==0.17.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0368292Z  + uvicorn==0.53.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0368672Z  + websockets==16.1.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0369234Z  + xxhash==4.0.1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0369449Z  + zstandard==0.25.0
+api	UNKNOWN STEP	2026-10-05T20:22:39.0507794Z ##[group]Run uv run --frozen python ../../scripts/generate-operation-routes.py --check
+api	UNKNOWN STEP	2026-10-05T20:22:39.0508428Z ^[[36;1muv run --frozen python ../../scripts/generate-operation-routes.py --check^[[0m
+api	UNKNOWN STEP	2026-10-05T20:22:39.0572292Z shell: /usr/bin/bash -e {0}
+api	UNKNOWN STEP	2026-10-05T20:22:39.0572556Z env:
+api	UNKNOWN STEP	2026-10-05T20:22:39.0573102Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:22:39.0573466Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:22:39.0573775Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+api	UNKNOWN STEP	2026-10-05T20:22:39.0574165Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:39.0574625Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+api	UNKNOWN STEP	2026-10-05T20:22:39.0575057Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:39.0575437Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:39.0575830Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:39.0576258Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+api	UNKNOWN STEP	2026-10-05T20:22:39.0576593Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:39.9972969Z Operation route map matches OpenAPI: 84 operations
+api	UNKNOWN STEP	2026-10-05T20:22:40.0114338Z ##[group]Run uv run --frozen python ../../scripts/verify-render-blueprint.py
+api	UNKNOWN STEP	2026-10-05T20:22:40.0115285Z ^[[36;1muv run --frozen python ../../scripts/verify-render-blueprint.py^[[0m
+api	UNKNOWN STEP	2026-10-05T20:22:40.0187507Z shell: /usr/bin/bash -e {0}
+api	UNKNOWN STEP	2026-10-05T20:22:40.0187769Z env:
+api	UNKNOWN STEP	2026-10-05T20:22:40.0188273Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:22:40.0188634Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:22:40.0189194Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+api	UNKNOWN STEP	2026-10-05T20:22:40.0189587Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.0190029Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+api	UNKNOWN STEP	2026-10-05T20:22:40.0190457Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.0190838Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.0191231Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.0191666Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+api	UNKNOWN STEP	2026-10-05T20:22:40.0192008Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:40.5458673Z {"valid": true, "schema_url": "https://render.com/schema/render.yaml.json", "schema_sha256": "a0d4e8a3eb119a1b63657741757e3c25c091b3ce463c4be8c90e8026678d8163", "blueprint_sha256": "fd2338626775471566930ddc0faeb2e6f2a4ec1ed20b0e88a0ebb5c5a320968e"}
+api	UNKNOWN STEP	2026-10-05T20:22:40.5687084Z ##[group]Run mkdir -p artifacts
+api	UNKNOWN STEP	2026-10-05T20:22:40.5687417Z ^[[36;1mmkdir -p artifacts^[[0m
+api	UNKNOWN STEP	2026-10-05T20:22:40.5750295Z shell: /usr/bin/bash -e {0}
+api	UNKNOWN STEP	2026-10-05T20:22:40.5750549Z env:
+api	UNKNOWN STEP	2026-10-05T20:22:40.5751033Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:22:40.5751395Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:22:40.5751709Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+api	UNKNOWN STEP	2026-10-05T20:22:40.5752112Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.5752547Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+api	UNKNOWN STEP	2026-10-05T20:22:40.5753167Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.5753554Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.5753950Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.5754338Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+api	UNKNOWN STEP	2026-10-05T20:22:40.5754705Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:40.5879356Z ##[group]Run uv run --frozen pytest -q --junitxml=artifacts/tests.xml
+api	UNKNOWN STEP	2026-10-05T20:22:40.5879890Z ^[[36;1muv run --frozen pytest -q --junitxml=artifacts/tests.xml^[[0m
+api	UNKNOWN STEP	2026-10-05T20:22:40.5936722Z shell: /usr/bin/bash -e {0}
+api	UNKNOWN STEP	2026-10-05T20:22:40.5936979Z env:
+api	UNKNOWN STEP	2026-10-05T20:22:40.5937452Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:22:40.5937816Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:22:40.5938129Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+api	UNKNOWN STEP	2026-10-05T20:22:40.5938527Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.5939284Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+api	UNKNOWN STEP	2026-10-05T20:22:40.5939738Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.5940124Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.5940520Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:22:40.5940966Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+api	UNKNOWN STEP	2026-10-05T20:22:40.5941300Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:22:59.9355826Z ........................................................................ [  8%]
+api	UNKNOWN STEP	2026-10-05T20:23:12.1462141Z ........................................................................ [ 17%]
+api	UNKNOWN STEP	2026-10-05T20:24:22.5197698Z ........................................................................ [ 26%]
+api	UNKNOWN STEP	2026-10-05T20:24:53.0530550Z ........................................................................ [ 35%]
+api	UNKNOWN STEP	2026-10-05T20:26:39.8950171Z ........................................................................ [ 44%]
+api	UNKNOWN STEP	2026-10-05T20:27:02.0711648Z ........................................................................ [ 53%]
+api	UNKNOWN STEP	2026-10-05T20:27:21.7851815Z ........................................................................ [ 62%]
+api	UNKNOWN STEP	2026-10-05T20:28:15.0668654Z ........................................................................ [ 70%]
+api	UNKNOWN STEP	2026-10-05T20:28:33.3733986Z ........................................................................ [ 79%]
+api	UNKNOWN STEP	2026-10-05T20:28:41.3955981Z ........................................................................ [ 88%]
+api	UNKNOWN STEP	2026-10-05T20:28:55.7065842Z ........................................................................ [ 97%]
+api	UNKNOWN STEP	2026-10-05T20:29:01.0899624Z ....................                                                     [100%]
+api	UNKNOWN STEP	2026-10-05T20:29:01.0900700Z =============================== warnings summary ===============================
+api	UNKNOWN STEP	2026-10-05T20:29:01.0901833Z .venv/lib/python3.12/site-packages/starlette/testclient.py:53
+api	UNKNOWN STEP	2026-10-05T20:29:01.0904654Z   /home/runner/work/BuyerOS/BuyerOS/services/api/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+api	UNKNOWN STEP	2026-10-05T20:29:01.0907293Z     _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+api	UNKNOWN STEP	2026-10-05T20:29:01.0907946Z 
+api	UNKNOWN STEP	2026-10-05T20:29:01.0908205Z tests/test_admin_operations_db.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0908691Z tests/test_api_projects_db.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0909558Z tests/test_backup_restore_t28.py: 1 warning
+api	UNKNOWN STEP	2026-10-05T20:29:01.0910041Z tests/test_budget_atomicity_db.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0910503Z tests/test_bulk_jobs_db.py: 2 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0910958Z tests/test_bulk_manifest_db.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0911434Z tests/test_buyer_management_db.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0911902Z tests/test_buyer_review_db.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0912440Z tests/test_checkpoint_schema_privileges_db.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0913303Z tests/test_cloudflare_bridge_db.py: 1 warning
+api	UNKNOWN STEP	2026-10-05T20:29:01.0913814Z tests/test_cloudflare_local_steps_db.py: 1 warning
+api	UNKNOWN STEP	2026-10-05T20:29:01.0914341Z tests/test_cloudflare_migration_db.py: 4 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0914856Z tests/test_cloudflare_platform_db.py: 1 warning
+api	UNKNOWN STEP	2026-10-05T20:29:01.0915285Z tests/test_cloudflare_preview_diagnostic.py: 1 warning
+api	UNKNOWN STEP	2026-10-05T20:29:01.0915914Z tests/test_cloudflare_provider_steps_db.py: 1 warning
+api	UNKNOWN STEP	2026-10-05T20:29:01.0916380Z tests/test_cloudflare_recovery_boundaries_db.py: 6 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0916804Z tests/test_cloudflare_recovery_db.py: 1 warning
+api	UNKNOWN STEP	2026-10-05T20:29:01.0917201Z tests/test_cloudflare_runtime_control_db.py: 1 warning
+api	UNKNOWN STEP	2026-10-05T20:29:01.0917595Z tests/test_contact_job_migration.py: 5 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0917984Z tests/test_contact_quote_migration.py: 4 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0918389Z tests/test_draft_approval_migration.py: 4 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0919020Z tests/test_draft_integrity_migration.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0919422Z tests/test_export_migration.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0919785Z tests/test_icp_write_integrity_db.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0920155Z tests/test_ingestion_migration.py: 4 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0920512Z tests/test_outcome_migration.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0920868Z tests/test_policy_lifecycle_db.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0921236Z tests/test_project_constraints_db.py: 6 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0921650Z tests/test_research_checkpoint_migration.py: 4 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0922034Z tests/test_research_migration.py: 4 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0922415Z tests/test_retention_authorization_db.py: 5 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0922779Z tests/test_run_migration.py: 4 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0923119Z tests/test_runtime_readiness_db.py: 1 warning
+api	UNKNOWN STEP	2026-10-05T20:29:01.0923493Z tests/test_sender_identity_migration.py: 3 warnings
+api	UNKNOWN STEP	2026-10-05T20:29:01.0924884Z   /home/runner/work/BuyerOS/BuyerOS/services/api/.venv/lib/python3.12/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+api	UNKNOWN STEP	2026-10-05T20:29:01.0926097Z     util.warn_deprecated(
+api	UNKNOWN STEP	2026-10-05T20:29:01.0926257Z 
+api	UNKNOWN STEP	2026-10-05T20:29:01.0926557Z -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+api	UNKNOWN STEP	2026-10-05T20:29:01.0927238Z - generated xml file: /home/runner/work/BuyerOS/BuyerOS/services/api/artifacts/tests.xml -
+api	UNKNOWN STEP	2026-10-05T20:29:01.0927785Z 812 passed, 101 warnings in 376.53s (0:06:16)
+api	UNKNOWN STEP	2026-10-05T20:29:03.0152472Z ##[group]Run python scripts/check-required-tests.py --junit services/api/artifacts/tests.xml
+api	UNKNOWN STEP	2026-10-05T20:29:03.0153204Z ^[[36;1mpython scripts/check-required-tests.py --junit services/api/artifacts/tests.xml^[[0m
+api	UNKNOWN STEP	2026-10-05T20:29:03.0216923Z shell: /usr/bin/bash -e {0}
+api	UNKNOWN STEP	2026-10-05T20:29:03.0217181Z env:
+api	UNKNOWN STEP	2026-10-05T20:29:03.0217681Z   BUYEROS_TEST_DATABASE_URL: ***127.0.0.1:5432/buyeros_test_api
+api	UNKNOWN STEP	2026-10-05T20:29:03.0218050Z   BUYEROS_STRICT_INTEGRATION: 1
+api	UNKNOWN STEP	2026-10-05T20:29:03.0218358Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+api	UNKNOWN STEP	2026-10-05T20:29:03.0219017Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:29:03.0219710Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+api	UNKNOWN STEP	2026-10-05T20:29:03.0220151Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:29:03.0220557Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:29:03.0220998Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+api	UNKNOWN STEP	2026-10-05T20:29:03.0221404Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+api	UNKNOWN STEP	2026-10-05T20:29:03.0221748Z ##[endgroup]
+api	UNKNOWN STEP	2026-10-05T20:29:03.0631228Z passed=812 failed=0 errors=0 skipped=0
+api	UNKNOWN STEP	2026-10-05T20:29:03.0754382Z Post job cleanup.
+api	UNKNOWN STEP	2026-10-05T20:29:03.1980088Z (node:17959) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+api	UNKNOWN STEP	2026-10-05T20:29:03.1981520Z (Use `node --trace-deprecation ...` to show where the warning was created)
+api	UNKNOWN STEP	2026-10-05T20:29:03.2122360Z Post job cleanup.
+api	UNKNOWN STEP	2026-10-05T20:29:03.3420742Z (node:17967) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+api	UNKNOWN STEP	2026-10-05T20:29:03.3422464Z (Use `node --trace-deprecation ...` to show where the warning was created)
+api	UNKNOWN STEP	2026-10-05T20:29:03.3424672Z Cache hit occurred on the primary key node-cache-Linux-x64-pnpm-62e1631a2955862ba1dc532cd28844785d294c45cb754b5731eccfa9703f694e, not saving cache.
+api	UNKNOWN STEP	2026-10-05T20:29:03.3529937Z Post job cleanup.
+api	UNKNOWN STEP	2026-10-05T20:29:03.5159521Z Pruning is unnecessary.
+api	UNKNOWN STEP	2026-10-05T20:29:03.5421259Z Post job cleanup.
+api	UNKNOWN STEP	2026-10-05T20:29:03.6414578Z [command]/usr/bin/git version
+api	UNKNOWN STEP	2026-10-05T20:29:03.6469938Z git version 2.55.0
+api	UNKNOWN STEP	2026-10-05T20:29:03.6504595Z Temporarily overriding HOME='/home/runner/work/_temp/43c06c28-97a2-46f4-beb2-d3bb4631660b' before making global git config changes
+api	UNKNOWN STEP	2026-10-05T20:29:03.6506421Z Adding repository directory to the temporary git global config as a safe directory
+api	UNKNOWN STEP	2026-10-05T20:29:03.6511407Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/BuyerOS/BuyerOS
+api	UNKNOWN STEP	2026-10-05T20:29:03.6560277Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+api	UNKNOWN STEP	2026-10-05T20:29:03.6602247Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+api	UNKNOWN STEP	2026-10-05T20:29:03.6891208Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+api	UNKNOWN STEP	2026-10-05T20:29:03.6921849Z http.https://github.com/.extraheader
+api	UNKNOWN STEP	2026-10-05T20:29:03.6935694Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+api	UNKNOWN STEP	2026-10-05T20:29:03.6974310Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7247176Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+api	UNKNOWN STEP	2026-10-05T20:29:03.7290175Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+api	UNKNOWN STEP	2026-10-05T20:29:03.7670560Z Print service container logs: 7b464cfe42c74a9b9d7ae5a7dfc9d7b2_postgres16_95d278
+api	UNKNOWN STEP	2026-10-05T20:29:03.7674964Z ##[command]/usr/bin/docker logs --details b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7
+api	UNKNOWN STEP	2026-10-05T20:29:03.7808624Z  The files belonging to this database system will be owned by user "postgres".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7809798Z  This user must also own the server process.
+api	UNKNOWN STEP	2026-10-05T20:29:03.7810390Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7810880Z  The database cluster will be initialized with locale "en_US.utf8".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7811673Z  The default database encoding has accordingly been set to "UTF8".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7812141Z  The default text search configuration will be set to "english".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7812507Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7812798Z  Data page checksums are disabled.
+api	UNKNOWN STEP	2026-10-05T20:29:03.7813952Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7814532Z  fixing permissions on existing directory /var/lib/postgresql/data ... ok
+api	UNKNOWN STEP	2026-10-05T20:29:03.7815255Z  creating subdirectories ... ok
+api	UNKNOWN STEP	2026-10-05T20:29:03.7815775Z  selecting dynamic shared memory implementation ... posix
+api	UNKNOWN STEP	2026-10-05T20:29:03.7816346Z  selecting default max_connections ... 100
+api	UNKNOWN STEP	2026-10-05T20:29:03.7816845Z  selecting default shared_buffers ... 128MB
+api	UNKNOWN STEP	2026-10-05T20:29:03.7817319Z  selecting default time zone ... Etc/UTC
+api	UNKNOWN STEP	2026-10-05T20:29:03.7817785Z  creating configuration files ... ok
+api	UNKNOWN STEP	2026-10-05T20:29:03.7818200Z  running bootstrap script ... ok
+api	UNKNOWN STEP	2026-10-05T20:29:03.7818504Z  performing post-bootstrap initialization ... ok
+api	UNKNOWN STEP	2026-10-05T20:29:03.7819139Z  syncing data to disk ... ok
+api	UNKNOWN STEP	2026-10-05T20:29:03.7821066Z  initdb: warning: enabling "trust" authentication for local connections
+api	UNKNOWN STEP	2026-10-05T20:29:03.7822148Z  initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+api	UNKNOWN STEP	2026-10-05T20:29:03.7823117Z  2026-10-05 20:21:56.457 UTC [1] LOG:  starting PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+api	UNKNOWN STEP	2026-10-05T20:29:03.7823890Z  2026-10-05 20:21:56.457 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+api	UNKNOWN STEP	2026-10-05T20:29:03.7824376Z  2026-10-05 20:21:56.457 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+api	UNKNOWN STEP	2026-10-05T20:29:03.7824913Z  2026-10-05 20:21:56.458 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7825493Z  2026-10-05 20:21:56.461 UTC [64] LOG:  database system was shut down at 2026-10-05 20:21:56 UTC
+api	UNKNOWN STEP	2026-10-05T20:29:03.7826058Z  2026-10-05 20:21:56.465 UTC [1] LOG:  database system is ready to accept connections
+api	UNKNOWN STEP	2026-10-05T20:29:03.7826668Z  2026-10-05 20:23:05.752 UTC [484] ERROR:  duplicate key value violates unique constraint "uq_idempotency_records_scope"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7828070Z  2026-10-05 20:23:05.752 UTC [484] STATEMENT:  INSERT INTO idempotency_records (actor_id, operation_id, key, request_hash, status, resource_id, workspace_id, id) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::UUID, $8::UUID) RETURNING idempotency_records.created_at, idempotency_records.updated_at
+api	UNKNOWN STEP	2026-10-05T20:29:03.7830634Z  2026-10-05 20:23:10.973 UTC [584] ERROR:  unrecognized configuration parameter "app.workspace_id"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7831193Z  2026-10-05 20:23:10.973 UTC [584] STATEMENT:  SELECT name FROM projects
+api	UNKNOWN STEP	2026-10-05T20:29:03.7831656Z  2026-10-05 20:24:13.901 UTC [1347] ERROR:  bulk manifest frozen basis is immutable
+api	UNKNOWN STEP	2026-10-05T20:29:03.7832256Z  2026-10-05 20:24:13.901 UTC [1347] CONTEXT:  PL/pgSQL function guard_bulk_manifest_frozen() line 6 at RAISE
+api	UNKNOWN STEP	2026-10-05T20:29:03.7833061Z  2026-10-05 20:24:13.901 UTC [1347] STATEMENT:  UPDATE bulk_manifests SET specification=specification||'{"reason":"tamper"}'::jsonb WHERE id=$1
+api	UNKNOWN STEP	2026-10-05T20:29:03.7833791Z  2026-10-05 20:24:13.904 UTC [1347] ERROR:  permission denied for table bulk_manifest_items
+api	UNKNOWN STEP	2026-10-05T20:29:03.7834676Z  2026-10-05 20:24:13.904 UTC [1347] STATEMENT:  UPDATE bulk_manifest_items SET expected_version=2 WHERE manifest_id=$1
+api	UNKNOWN STEP	2026-10-05T20:29:03.7835259Z  2026-10-05 20:26:56.693 UTC [62] LOG:  checkpoint starting: time
+api	UNKNOWN STEP	2026-10-05T20:29:03.7835667Z  2026-10-05 20:26:59.078 UTC [2731] ERROR:  approval material is immutable
+api	UNKNOWN STEP	2026-10-05T20:29:03.7836225Z  2026-10-05 20:26:59.078 UTC [2731] CONTEXT:  PL/pgSQL function reject_approval_material_update() line 18 at RAISE
+api	UNKNOWN STEP	2026-10-05T20:29:03.7836891Z  2026-10-05 20:26:59.078 UTC [2731] STATEMENT:  UPDATE approvals SET context_fingerprint=$1 WHERE id=$2
+api	UNKNOWN STEP	2026-10-05T20:29:03.7837447Z  2026-10-05 20:26:59.080 UTC [2731] ERROR:  invalidated approval cannot reactivate
+api	UNKNOWN STEP	2026-10-05T20:29:03.7838015Z  2026-10-05 20:26:59.080 UTC [2731] CONTEXT:  PL/pgSQL function reject_approval_material_update() line 6 at RAISE
+api	UNKNOWN STEP	2026-10-05T20:29:03.7838669Z  2026-10-05 20:26:59.080 UTC [2731] STATEMENT:  UPDATE approvals SET invalidated_reason=NULL WHERE id=$1
+api	UNKNOWN STEP	2026-10-05T20:29:03.7839725Z  2026-10-05 20:27:18.451 UTC [3370] ERROR:  duplicate key value violates unique constraint "uq_idempotency_records_scope"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7841124Z  2026-10-05 20:27:18.451 UTC [3370] STATEMENT:  INSERT INTO idempotency_records (actor_id, operation_id, key, request_hash, status, resource_id, workspace_id, id) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::UUID, $8::UUID) RETURNING idempotency_records.created_at, idempotency_records.updated_at
+api	UNKNOWN STEP	2026-10-05T20:29:03.7842499Z  2026-10-05 20:27:18.452 UTC [3362] ERROR:  duplicate key value violates unique constraint "uq_idempotency_records_scope"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7843858Z  2026-10-05 20:27:18.452 UTC [3362] STATEMENT:  INSERT INTO idempotency_records (actor_id, operation_id, key, request_hash, status, resource_id, workspace_id, id) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::UUID, $8::UUID) RETURNING idempotency_records.created_at, idempotency_records.updated_at
+api	UNKNOWN STEP	2026-10-05T20:29:03.7845374Z  2026-10-05 20:27:18.452 UTC [3365] ERROR:  duplicate key value violates unique constraint "uq_idempotency_records_scope"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7846742Z  2026-10-05 20:27:18.452 UTC [3365] STATEMENT:  INSERT INTO idempotency_records (actor_id, operation_id, key, request_hash, status, resource_id, workspace_id, id) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::UUID, $8::UUID) RETURNING idempotency_records.created_at, idempotency_records.updated_at
+api	UNKNOWN STEP	2026-10-05T20:29:03.7848131Z  2026-10-05 20:27:18.452 UTC [3359] ERROR:  duplicate key value violates unique constraint "uq_idempotency_records_scope"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7849828Z  2026-10-05 20:27:18.452 UTC [3359] STATEMENT:  INSERT INTO idempotency_records (actor_id, operation_id, key, request_hash, status, resource_id, workspace_id, id) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::UUID, $8::UUID) RETURNING idempotency_records.created_at, idempotency_records.updated_at
+api	UNKNOWN STEP	2026-10-05T20:29:03.7851222Z  2026-10-05 20:27:18.452 UTC [3356] ERROR:  duplicate key value violates unique constraint "uq_idempotency_records_scope"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7852588Z  2026-10-05 20:27:18.452 UTC [3356] STATEMENT:  INSERT INTO idempotency_records (actor_id, operation_id, key, request_hash, status, resource_id, workspace_id, id) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::UUID, $8::UUID) RETURNING idempotency_records.created_at, idempotency_records.updated_at
+api	UNKNOWN STEP	2026-10-05T20:29:03.7853951Z  2026-10-05 20:27:18.452 UTC [3367] ERROR:  duplicate key value violates unique constraint "uq_idempotency_records_scope"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7855295Z  2026-10-05 20:27:18.452 UTC [3367] STATEMENT:  INSERT INTO idempotency_records (actor_id, operation_id, key, request_hash, status, resource_id, workspace_id, id) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::UUID, $8::UUID) RETURNING idempotency_records.created_at, idempotency_records.updated_at
+api	UNKNOWN STEP	2026-10-05T20:29:03.7856789Z  2026-10-05 20:27:18.452 UTC [3360] ERROR:  duplicate key value violates unique constraint "uq_idempotency_records_scope"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7858162Z  2026-10-05 20:27:18.452 UTC [3360] STATEMENT:  INSERT INTO idempotency_records (actor_id, operation_id, key, request_hash, status, resource_id, workspace_id, id) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::UUID, $8::UUID) RETURNING idempotency_records.created_at, idempotency_records.updated_at
+api	UNKNOWN STEP	2026-10-05T20:29:03.7859784Z  2026-10-05 20:27:18.452 UTC [3358] ERROR:  duplicate key value violates unique constraint "uq_idempotency_records_scope"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7861169Z  2026-10-05 20:27:18.452 UTC [3358] STATEMENT:  INSERT INTO idempotency_records (actor_id, operation_id, key, request_hash, status, resource_id, workspace_id, id) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::UUID, $8::UUID) RETURNING idempotency_records.created_at, idempotency_records.updated_at
+api	UNKNOWN STEP	2026-10-05T20:29:03.7862551Z  2026-10-05 20:27:18.456 UTC [3372] ERROR:  duplicate key value violates unique constraint "uq_idempotency_records_scope"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7863922Z  2026-10-05 20:27:18.456 UTC [3372] STATEMENT:  INSERT INTO idempotency_records (actor_id, operation_id, key, request_hash, status, resource_id, workspace_id, id) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::UUID, $8::UUID) RETURNING idempotency_records.created_at, idempotency_records.updated_at
+api	UNKNOWN STEP	2026-10-05T20:29:03.7865304Z  2026-10-05 20:28:05.852 UTC [4287] ERROR:  duplicate key value violates unique constraint "uq_idempotency_records_scope"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7866674Z  2026-10-05 20:28:05.852 UTC [4287] STATEMENT:  INSERT INTO idempotency_records (actor_id, operation_id, key, request_hash, status, resource_id, workspace_id, id) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::UUID, $8::UUID) RETURNING idempotency_records.created_at, idempotency_records.updated_at
+api	UNKNOWN STEP	2026-10-05T20:29:03.7868273Z  2026-10-05 20:28:27.374 UTC [4990] ERROR:  insert or update on table "projects" violates foreign key constraint "fk_projects_active_icp_same_project"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7869789Z  2026-10-05 20:28:27.374 UTC [4990] DETAIL:  Key (workspace_id, id, active_icp_version_id)=(11111111-1111-4111-8111-111111111111, a0000000-0000-4000-8000-000000000001, a1000000-0000-4000-8000-000000000002) is not present in table "icp_versions".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7870883Z  2026-10-05 20:28:27.374 UTC [4990] STATEMENT:  UPDATE projects SET active_icp_version_id = $1 WHERE id = $2
+api	UNKNOWN STEP	2026-10-05T20:29:03.7871685Z  2026-10-05 20:28:27.375 UTC [4990] ERROR:  insert or update on table "icp_versions" violates foreign key constraint "fk_icp_versions_parent_same_project"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7872906Z  2026-10-05 20:28:27.375 UTC [4990] DETAIL:  Key (workspace_id, project_id, parent_id)=(11111111-1111-4111-8111-111111111111, a0000000-0000-4000-8000-000000000001, a1000000-0000-4000-8000-000000000002) is not present in table "icp_versions".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7873948Z  2026-10-05 20:28:27.375 UTC [4990] STATEMENT:  UPDATE icp_versions SET parent_id = $1 WHERE id = $2
+api	UNKNOWN STEP	2026-10-05T20:29:03.7874729Z  2026-10-05 20:28:27.377 UTC [4990] ERROR:  insert or update on table "list_memberships" violates foreign key constraint "fk_list_memberships_buyer_project"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7875962Z  2026-10-05 20:28:27.377 UTC [4990] DETAIL:  Key (workspace_id, project_id, buyer_id)=(11111111-1111-4111-8111-111111111111, a0000000-0000-4000-8000-000000000001, a3000000-0000-4000-8000-000000000002) is not present in table "project_buyers".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7877142Z  2026-10-05 20:28:27.377 UTC [4990] STATEMENT:  INSERT INTO list_memberships(id,workspace_id,project_id,list_id,buyer_id) VALUES ($1,$2,$3,$4,$5)
+api	UNKNOWN STEP	2026-10-05T20:29:03.7878056Z  2026-10-05 20:28:27.378 UTC [4990] ERROR:  insert or update on table "fit_assessments" violates foreign key constraint "fk_fit_assessments_icp_project"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7879631Z  2026-10-05 20:28:27.378 UTC [4990] DETAIL:  Key (workspace_id, project_id, icp_version_id)=(11111111-1111-4111-8111-111111111111, a0000000-0000-4000-8000-000000000001, a1000000-0000-4000-8000-000000000002) is not present in table "icp_versions".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7881185Z  2026-10-05 20:28:27.378 UTC [4990] STATEMENT:  INSERT INTO fit_assessments(id,workspace_id,project_id,project_buyer_id,icp_version_id,evidence_set_hash,verdict,rationale,evidence_ids) VALUES ($1,$2,$3,$4,$5,'sha256:bad','match','bad','[]'::jsonb)
+api	UNKNOWN STEP	2026-10-05T20:29:03.7882395Z  2026-10-05 20:28:27.379 UTC [4990] ERROR:  insert or update on table "search_runs" violates foreign key constraint "fk_search_runs_icp_project"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7883574Z  2026-10-05 20:28:27.379 UTC [4990] DETAIL:  Key (workspace_id, project_id, icp_version_id)=(11111111-1111-4111-8111-111111111111, a0000000-0000-4000-8000-000000000001, a1000000-0000-4000-8000-000000000002) is not present in table "icp_versions".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7884985Z  2026-10-05 20:28:27.379 UTC [4990] STATEMENT:  INSERT INTO search_runs(id,workspace_id,project_id,icp_version_id,status,limits,target_companies,raw_result_count) VALUES ($1,$2,$3,$4,'queued','{}'::jsonb,0,0)
+api	UNKNOWN STEP	2026-10-05T20:29:03.7886127Z  2026-10-05 20:28:27.381 UTC [4990] ERROR:  insert or update on table "buyer_snapshot_items" violates foreign key constraint "fk_buyer_snapshot_items_buyer_project"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7887366Z  2026-10-05 20:28:27.381 UTC [4990] DETAIL:  Key (workspace_id, project_id, buyer_id)=(11111111-1111-4111-8111-111111111111, a0000000-0000-4000-8000-000000000001, a3000000-0000-4000-8000-000000000002) is not present in table "project_buyers".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7888649Z  2026-10-05 20:28:27.381 UTC [4990] STATEMENT:  INSERT INTO buyer_snapshot_items(id,workspace_id,project_id,snapshot_id,ordinal,buyer_id,buyer_version) VALUES ($1,$2,$3,$4,1,$5,1)
+api	UNKNOWN STEP	2026-10-05T20:29:03.7889822Z  2026-10-05 20:28:27.383 UTC [4990] ERROR:  fit evidence must belong to the buyer project and company
+api	UNKNOWN STEP	2026-10-05T20:29:03.7890447Z  2026-10-05 20:28:27.383 UTC [4990] CONTEXT:  PL/pgSQL function check_fit_evidence_project() line 13 at RAISE
+api	UNKNOWN STEP	2026-10-05T20:29:03.7891530Z  2026-10-05 20:28:27.383 UTC [4990] STATEMENT:  INSERT INTO fit_assessments(id,workspace_id,project_id,project_buyer_id,icp_version_id,evidence_set_hash,verdict,rationale,evidence_ids) VALUES ($1,$2,$3,$4,$5,'sha256:bad','match','bad',$6::jsonb)
+api	UNKNOWN STEP	2026-10-05T20:29:03.7892726Z  2026-10-05 20:28:27.385 UTC [4990] ERROR:  insert or update on table "human_reviews" violates foreign key constraint "fk_human_reviews_fit_buyer"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7893955Z  2026-10-05 20:28:27.385 UTC [4990] DETAIL:  Key (workspace_id, project_buyer_id, fit_assessment_id)=(11111111-1111-4111-8111-111111111111, a3000000-0000-4000-8000-000000000001, a6000000-0000-4000-8000-000000000001) is not present in table "fit_assessments".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7895302Z  2026-10-05 20:28:27.385 UTC [4990] STATEMENT:  INSERT INTO human_reviews(id,workspace_id,project_buyer_id,fit_assessment_id,state,actor_user_id) VALUES ($1,$2,$3,$4,'accepted',$5)
+api	UNKNOWN STEP	2026-10-05T20:29:03.7896096Z  2026-10-05 20:28:27.445 UTC [4994] ERROR:  invalid input syntax for type uuid: ""
+api	UNKNOWN STEP	2026-10-05T20:29:03.7896545Z  2026-10-05 20:28:27.445 UTC [4994] STATEMENT:  SELECT name FROM projects
+api	UNKNOWN STEP	2026-10-05T20:29:03.7896979Z  2026-10-05 20:28:52.357 UTC [5464] ERROR:  sender identity content is immutable
+api	UNKNOWN STEP	2026-10-05T20:29:03.7897530Z  2026-10-05 20:28:52.357 UTC [5464] CONTEXT:  PL/pgSQL function reject_sender_content_update() line 10 at RAISE
+api	UNKNOWN STEP	2026-10-05T20:29:03.7898209Z  2026-10-05 20:28:52.357 UTC [5464] STATEMENT:  UPDATE sender_identity_versions SET display_name='forged' WHERE id=$1
+api	UNKNOWN STEP	2026-10-05T20:29:03.7899340Z  2026-10-05 20:28:52.360 UTC [5464] ERROR:  insert or update on table "projects" violates foreign key constraint "fk_projects_active_sender_same_project"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7900676Z  2026-10-05 20:28:52.360 UTC [5464] DETAIL:  Key (workspace_id, id, active_sender_identity_version_id)=(11111111-1111-4111-8111-111111111111, a0000000-0000-4000-8000-000000000001, 0562d932-4c10-4027-b440-c4afd3fd0223) is not present in table "sender_identity_versions".
+api	UNKNOWN STEP	2026-10-05T20:29:03.7901993Z  2026-10-05 20:28:52.360 UTC [5464] STATEMENT:  UPDATE projects SET active_sender_identity_version_id=$1 WHERE id=$2
+api	UNKNOWN STEP	2026-10-05T20:29:03.7902651Z  2026-10-05 20:28:55.468 UTC [5612] ERROR:  unrecognized configuration parameter "app.workspace_id"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7903169Z  2026-10-05 20:28:55.468 UTC [5612] STATEMENT:  SELECT count(*) FROM projects
+api	UNKNOWN STEP	2026-10-05T20:29:03.7903703Z  2026-10-05 20:28:55.584 UTC [5619] ERROR:  new row violates row-level security policy for table "projects"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7904344Z  2026-10-05 20:28:55.584 UTC [5619] STATEMENT:  INSERT INTO projects(id, workspace_id, name) VALUES ($1, $2, $3)
+api	UNKNOWN STEP	2026-10-05T20:29:03.7904811Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7904981Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7905214Z  Success. You can now start the database server using:
+api	UNKNOWN STEP	2026-10-05T20:29:03.7905505Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7905737Z      pg_ctl -D /var/lib/postgresql/data -l logfile start
+api	UNKNOWN STEP	2026-10-05T20:29:03.7906027Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7906664Z  waiting for server to start....2026-10-05 20:21:56.151 UTC [48] LOG:  starting PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+api	UNKNOWN STEP	2026-10-05T20:29:03.7907530Z  2026-10-05 20:21:56.152 UTC [48] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+api	UNKNOWN STEP	2026-10-05T20:29:03.7908085Z  2026-10-05 20:21:56.154 UTC [51] LOG:  database system was shut down at 2026-10-05 20:21:56 UTC
+api	UNKNOWN STEP	2026-10-05T20:29:03.7908597Z  2026-10-05 20:21:56.158 UTC [48] LOG:  database system is ready to accept connections
+api	UNKNOWN STEP	2026-10-05T20:29:03.7909240Z   done
+api	UNKNOWN STEP	2026-10-05T20:29:03.7909421Z  server started
+api	UNKNOWN STEP	2026-10-05T20:29:03.7909620Z  CREATE DATABASE
+api	UNKNOWN STEP	2026-10-05T20:29:03.7909823Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7910203Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7910520Z  /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+api	UNKNOWN STEP	2026-10-05T20:29:03.7910920Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7911285Z  waiting for server to shut down...2026-10-05 20:21:56.337 UTC [48] LOG:  received fast shutdown request
+api	UNKNOWN STEP	2026-10-05T20:29:03.7911823Z  .2026-10-05 20:21:56.338 UTC [48] LOG:  aborting any active transactions
+api	UNKNOWN STEP	2026-10-05T20:29:03.7912412Z  2026-10-05 20:21:56.340 UTC [48] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+api	UNKNOWN STEP	2026-10-05T20:29:03.7912956Z  2026-10-05 20:21:56.341 UTC [49] LOG:  shutting down
+api	UNKNOWN STEP	2026-10-05T20:29:03.7913343Z  2026-10-05 20:21:56.341 UTC [49] LOG:  checkpoint starting: shutdown immediate
+api	UNKNOWN STEP	2026-10-05T20:29:03.7914442Z  2026-10-05 20:21:56.356 UTC [49] LOG:  checkpoint complete: wrote 926 buffers (5.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.013 s, sync=0.002 s, total=0.016 s; sync files=301, longest=0.001 s, average=0.001 s; distance=4273 kB, estimate=4273 kB; lsn=0/191F0F0, redo lsn=0/191F0F0
+api	UNKNOWN STEP	2026-10-05T20:29:03.7915506Z  2026-10-05 20:21:56.363 UTC [48] LOG:  database system is shut down
+api	UNKNOWN STEP	2026-10-05T20:29:03.7915830Z   done
+api	UNKNOWN STEP	2026-10-05T20:29:03.7916006Z  server stopped
+api	UNKNOWN STEP	2026-10-05T20:29:03.7916201Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7916433Z  PostgreSQL init process complete; ready for start up.
+api	UNKNOWN STEP	2026-10-05T20:29:03.7916728Z  
+api	UNKNOWN STEP	2026-10-05T20:29:03.7922889Z Stop and remove container: 7b464cfe42c74a9b9d7ae5a7dfc9d7b2_postgres16_95d278
+api	UNKNOWN STEP	2026-10-05T20:29:03.7928353Z ##[command]/usr/bin/docker rm --force b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7
+api	UNKNOWN STEP	2026-10-05T20:29:04.0206967Z b008bdbc54ccb1067913a030ec29ebe12dc885c4f2ff2b7ad5cfb97e270696c7
+api	UNKNOWN STEP	2026-10-05T20:29:04.0236857Z Remove container network: github_network_e82d438ab4ea48a995faa3dcbb995fcf
+api	UNKNOWN STEP	2026-10-05T20:29:04.0241564Z ##[command]/usr/bin/docker network rm github_network_e82d438ab4ea48a995faa3dcbb995fcf
+api	UNKNOWN STEP	2026-10-05T20:29:04.1269879Z github_network_e82d438ab4ea48a995faa3dcbb995fcf
+api	UNKNOWN STEP	2026-10-05T20:29:04.1343722Z Cleaning up orphan processes
+api	UNKNOWN STEP	2026-10-05T20:29:04.1693970Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/setup-python@v5, pnpm/action-setup@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

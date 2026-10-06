@@ -1,0 +1,9 @@
+{
+  "prior_input_evidence_files": 3800,
+  "prior_bytes_preserved": true,
+  "other_root_tasks_preserved": 24,
+  "legacy_tasks_preserved": 31,
+  "other_case_rows_preserved": 97,
+  "original_audit_columns_preserved": 15,
+  "runtime_test_schema_changes": 0
+}

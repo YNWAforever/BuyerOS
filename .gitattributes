@@ -57,3 +57,8 @@ docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/source.patch -whitespace
 docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/*log -whitespace
 docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/*xml -whitespace
 docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/attempt1-contexts/** -whitespace
+
+# Preserve hosted CI provenance and producer reports byte-for-byte.
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_HOSTED/** -text whitespace=cr-at-eol
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_HOSTED/*.log -whitespace
+docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_HOSTED/reports/*.xml -whitespace

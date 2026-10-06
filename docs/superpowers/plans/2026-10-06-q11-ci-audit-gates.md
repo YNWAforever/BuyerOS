@@ -31,3 +31,7 @@ Revert following checkpoint then this repair source; no schema/data rollback, re
 ## Local execution checkpoint
 
 Task1 local gates: strict API812pass/0fail-error-skip (172warnings,1990.14s); final workbench8pass/0fail-error-skip; Q01 discovery7 then actual built Linux entry7pass/0fail-error-skip; types/scopedlint/generated84/routes exit0. Genuine old workbench RED1failure and first corrected full5pass/3beforeEach errors retained; no assertion/timeout weakening. Original shallow git show failure is repaired by supplying full history. Scope includes isolated Playwright output to protect sibling temporary evidence. Required evidence preservation/cleanup verification and Task2 publication are recorded in the following committed checkpoint.
+
+## Hosted readback completion — 2026-10-06
+
+Task2 readback complete for head0e100d9: all8 hosted jobs SUCCESS; actual PR merge5c97cc7 tree equals branch tree. Hosted API812; continuity4/8/1/3/1 pass,zero fail/error/skip; required checkers0. Initial continuity CANCELLED before test steps due to GitHub hosted-runner acquisition; targeted retry only,seven successful timestamps retained. Evidence Q11_PR11_HOSTED; full Q11/N00/NA01 and release gates open. Metadata-only follow-up does not change application/tests/schema or authorize merge/deploy.

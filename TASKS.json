@@ -2991,7 +2991,183 @@
           "prior_run": 37360072047,
           "prior_head": "38c55228489a12bfc493f27d2ed27e177117366e",
           "prior_results": "six jobs pass;API810pass2fail0skip;continuity workbench7pass1fail0skip",
-          "updated_run": "pending push/readback;not claimed passed"
+          "updated_run": 37368187565,
+          "hosted_readback_20261006": {
+            "task": "Q11 PR11 hosted CI readback",
+            "date_hk": "2026-10-06",
+            "reviewed_test_config_source_sha": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
+            "reviewed_application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+            "ci_head_sha": "0e100d986c6a6636812abf97f6b20d36c8c65263",
+            "tested_merge_sha": "5c97cc797acb3288a18a76802e5b4a49e10e7237",
+            "tested_tree_sha": "974f6ef6ee93301f3e168da041e5ed430ccc67c3",
+            "merge_tree_matches_reviewed_branch": true,
+            "run_id": 37368187565,
+            "run_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/37368187565/attempts/2",
+            "final_attempt": 2,
+            "required_jobs_success": 8,
+            "first_attempt_continuity": "cancelled before steps: hosted runner not acquired; no tests counted",
+            "retry": "only continuity; seven successful job timestamps retained",
+            "checks": {
+              "research": {
+                "pass": 4,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "producer_seconds": 123.106,
+                "report": "reports/t30-browser.xml",
+                "testcases": [
+                  {
+                    "name": "T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+                    "classname": "mvp-a-research.spec.ts",
+                    "time": "35.982"
+                  },
+                  {
+                    "name": "T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+                    "classname": "mvp-a-research.spec.ts",
+                    "time": "29.048"
+                  },
+                  {
+                    "name": "T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+                    "classname": "mvp-a-research.spec.ts",
+                    "time": "29.224"
+                  },
+                  {
+                    "name": "T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+                    "classname": "mvp-a-research.spec.ts",
+                    "time": "28.852"
+                  }
+                ],
+                "local_report_checker_exit": 0
+              },
+              "workbench": {
+                "pass": 8,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "producer_seconds": 46.502,
+                "report": "reports/workbench.xml",
+                "testcases": [
+                  {
+                    "name": "T27 usage, queue filters and manual outcome history survive refresh in both locales",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "7.729"
+                  },
+                  {
+                    "name": "T29 API-backed workbench reflows across routes and widths in en",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "4.827"
+                  },
+                  {
+                    "name": "T29 API-backed workbench reflows across routes and widths in zh-HK",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "4.644"
+                  },
+                  {
+                    "name": "T29 manual locale remains usable while preference loads and saves with its current version",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "5.16"
+                  },
+                  {
+                    "name": "T29 operations resolves a failed profile lookup without a permanent spinner",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "3.128"
+                  },
+                  {
+                    "name": "T29 live operations and results text meets measured AA contrast in both locales",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "3.929"
+                  },
+                  {
+                    "name": "T29 scope list timeout offers a bounded retry with current identity",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "12.948"
+                  },
+                  {
+                    "name": "T29 live form controls have a visible three-to-one boundary in both locales",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "4.137"
+                  }
+                ],
+                "local_report_checker_exit": 0
+              },
+              "buyers": {
+                "pass": 1,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "producer_seconds": 7.358,
+                "report": "reports/buyers.xml",
+                "testcases": [
+                  {
+                    "name": "T08 real snapshot pages, selection scope, URL filters and dossier",
+                    "classname": "buyer-results.spec.ts",
+                    "time": "7.358"
+                  }
+                ],
+                "local_report_checker_exit": 0
+              },
+              "buyer_management": {
+                "pass": 3,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "producer_seconds": 10.203,
+                "report": "reports/buyer-management.xml",
+                "testcases": [
+                  {
+                    "name": "T09 durable list, preset, note, owner and individual review journey",
+                    "classname": "buyer-management.spec.ts",
+                    "time": "5.531"
+                  },
+                  {
+                    "name": "T09 viewer cannot mutate buyers or lists",
+                    "classname": "buyer-management.spec.ts",
+                    "time": "2.087"
+                  },
+                  {
+                    "name": "T29 zh-HK list and saved filter actions use localized accessible names and feedback",
+                    "classname": "buyer-management.spec.ts",
+                    "time": "2.585"
+                  }
+                ],
+                "local_report_checker_exit": 0
+              },
+              "mvp_partial_journey": {
+                "pass": 1,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "producer_seconds": 8.499,
+                "report": "reports/mvp-acceptance.xml",
+                "testcases": [
+                  {
+                    "name": "T30 partial fixture walkthrough: review, list, assign, exact approval, export and manual outcome",
+                    "classname": "mvp-a-journey.spec.ts",
+                    "time": "8.499"
+                  }
+                ],
+                "local_report_checker_exit": 0
+              },
+              "api": {
+                "pass": 812,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "warnings": 101,
+                "producer_seconds": 376.53,
+                "scope": "attempt1 retained successful hosted job",
+                "source": "api-ci-green.log; required producer checker0; API XML not uploaded by current workflow"
+              }
+            },
+            "production_verification": false,
+            "deployed_sha": null,
+            "new_migrations": [],
+            "independent_review": "pending; author readback only; no agents",
+            "full_q11_n00_na01": "OPEN",
+            "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_HOSTED/RESULTS.md",
+            "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+            "rollback": "revert this evidence/status checkpoint only; no application/schema changes or DB undo; retain prior source and all admitted/unknown holds"
+          }
         },
         "failure_history": [
           "wrong-cwd registry setup FileNotFound;correct-cwd six-extension RED",
@@ -3151,5 +3327,7 @@
     "merged_here": false
   },
   "latest_local_verification_source_sha": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
-  "latest_local_verification_scope": "Q11 PR11 test/CI repair;N00/application checkpoint unchanged"
+  "latest_local_verification_scope": "Q11 PR11 test/CI repair;N00/application checkpoint unchanged",
+  "latest_hosted_verification_source": "0e100d986c6a6636812abf97f6b20d36c8c65263",
+  "latest_hosted_verification_scope": "Q11 PR11 all8 hosted jobs success at tested merge tree; fixture/Postgres only; N00 and release gates open"
 }
