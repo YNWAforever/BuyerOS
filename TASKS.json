@@ -3380,24 +3380,23 @@
         "proposed_new_files": "docs/buyeros/evidence/c61/integration-results.md",
         "acceptance": "隔離 PG16 strict tests：0 fail/error/skip；fixture UI 與 API/DB 對照一致。既有 44 units / 812 API 是歷史參照，不能硬編碼未來總數或把它們相加。",
         "rollback": "按修復組 revert；保留 append-only、manifest、accepted/unknown operation 記錄；禁止破壞式降 schema。",
-        "execution_sha": "c2976fb232311cbaa9b9c6c9194377cd76a2a039",
-        "execution_evidence": "artifacts/c61/C61-02-cold-jwks-green.json;artifacts/c61/C61-02-cold-jwks-tested-source.json;artifacts/c61/C61-02-preference-document-valid-red.json;artifacts/c61/C61-02-preference-document-green.json;artifacts/c61/C61-02-ci-defects-focused-built.json;artifacts/c61/c61-ci-defects-focused-built.xml;artifacts/c61/C61-02-preference-tested-source.json",
-        "code_status": "selected Q integration plus verified cold-JWKS race and document-scoped preference observer",
-        "verification_status": "required PG16 Q 64; cold-JWKS and auth 51; preference helper 4; built CI defects focused 3 pass, all zero skip. Full UI and fresh CI pending",
+        "execution_sha": "53bb6cfb65e83a39e2f489d35f62c5ffc34035bd",
+        "execution_evidence": "artifacts/c61/C61-02-current-full-built.json;artifacts/c61/c61-current-full-built.xml;artifacts/c61/C61-02-cold-jwks-green.json;artifacts/c61/C61-02-preference-tested-source.json;artifacts/c61/C61-02-db.json;artifacts/c61/C61-02-source-bridge.json",
+        "code_status": "selected Q integration and focused CI defects repaired",
+        "verification_status": "complete fresh built suite 96 pass, zero fail/error/skip at 53bb6cf; auth/cold-JWKS 51; required PG16 Q 64 at earlier unchanged-Q subtree source; fresh full API/CI pending",
         "release_status": "not-deployed",
         "blockers": [
-          "complete fresh built UI suite and latest CI",
+          "latest CI and full API follow-up suite",
           "production same-version readback",
           "real provider and human UAT"
         ],
         "evidence_paths": [
+          "artifacts/c61/C61-02-current-full-built.json",
+          "artifacts/c61/c61-current-full-built.xml",
           "artifacts/c61/C61-02-cold-jwks-green.json",
-          "artifacts/c61/C61-02-cold-jwks-tested-source.json",
-          "artifacts/c61/C61-02-preference-document-valid-red.json",
-          "artifacts/c61/C61-02-preference-document-green.json",
-          "artifacts/c61/C61-02-ci-defects-focused-built.json",
-          "artifacts/c61/c61-ci-defects-focused-built.xml",
-          "artifacts/c61/C61-02-preference-tested-source.json"
+          "artifacts/c61/C61-02-preference-tested-source.json",
+          "artifacts/c61/C61-02-db.json",
+          "artifacts/c61/C61-02-source-bridge.json"
         ]
       },
       {

@@ -37,3 +37,11 @@ keyboard mobile. The original full UI run was deliberately interrupted and is
 not accepted. Full fresh built/CI acceptance remains pending. C61-02 fixture
 diagnostics now retain bounded subprocess exit/signal metadata on failure;
 the two prior reset failures have no confirmed cause and their timeout is unchanged.
+
+C61-02 full built checkpoint: source 53bb6cfb65e83a39e2f489d35f62c5ffc34035bd
+executes 96/96 cases with fresh JUnit, zero fail/error/skip (20.5 minutes).
+Earlier interrupted/zero-case/ENOSPC attempts remain failures, not acceptance.
+The successful supported Linux Node build serves the actual candidate over the
+owned loopback HTTP/PG16/synthetic OIDC fixture. Provider inputs are fixtures;
+this is no real-provider, production or human UAT result. Latest CI and the
+complete follow-up API suite are still pending.
