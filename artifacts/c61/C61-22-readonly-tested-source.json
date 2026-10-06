@@ -1,0 +1,35 @@
+{
+  "tested_parent_sha": "f7cb47798017a3646d1339830495a20ff9792d15",
+  "test_head_unchanged": true,
+  "files": [
+    {
+      "path": "features/live/draft-grounding-review.tsx",
+      "sha256": "1a9c5e8d5fa1f0fa9b31a253dec6840aeb3380ea7b81313012e4569243e9e1bb",
+      "git_blob": "4d3e4f33313e0866564848a8b3aa2e235c24b794"
+    },
+    {
+      "path": "services/live/text-selection-offsets.ts",
+      "sha256": "b30d94782e415a45e169ba5f2b87717471036eff2f9c97b97912e9a977aa6cce",
+      "git_blob": "c8dfb66f8de822e1797bdf3b75fa50c922867705"
+    },
+    {
+      "path": "tests/text-selection-offsets.test.mjs",
+      "sha256": "48bd91646f021ac54ec6c3b8a60c6b574378f9844d90661b08258141df638dea",
+      "git_blob": "134c3afb14c41714077c6b9cc0fa677291fedc6a"
+    },
+    {
+      "path": "tests/e2e/audit-draft-reground.spec.ts",
+      "sha256": "e3c19fb360e34359b67cf73d04ba397a0f564fb13b436d4385205822139ec59a",
+      "git_blob": "b38807726fef83913f8aef908d939c08986311a6"
+    }
+  ],
+  "core_cases": 22,
+  "built_cases": 15,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "typecheck_exit": 0,
+  "environment": "Built portable candidate + owned HTTP/PG16, synthetic OIDC and source/provider inputs; L0 core controls",
+  "root_cause": "Native Chromium readonly textarea caret did not move via focus/Tab/click, while editable control produced [1,3]; explicit read-only grapheme keyboard selection fixes actual product behavior",
+  "production_or_provider_or_human_accepted": false
+}

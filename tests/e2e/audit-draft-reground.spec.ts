@@ -35,9 +35,9 @@ async function reviewerPage(page:Page,id:string,locale='en'){
  return page.getByRole('region',{name:/^(Open draft|開啟草稿)$/,exact:true});
 }
 async function classify(page:Page,split=false){
- const grounding=page.getByRole('region',{name:/^(Manual source review|人工來源覆核)$/,exact:true});await expect(grounding).toBeVisible();await expect(grounding.getByRole('group')).toHaveCount(5);await expect(grounding.getByRole('status')).toHaveCount(0);
- if(split){const first=grounding.getByRole('group').first(),selection=first.getByRole('textbox',{name:'選取段落文字',exact:true});await selection.focus();await selection.press('Home');await selection.press('ArrowRight');await selection.press('ArrowRight');await first.getByRole('button',{name:'使用選取文字',exact:true}).click();}
- const groups=grounding.getByRole('group');const count=await groups.count();expect(count).toBe(split?6:5);
+ const grounding=page.getByRole('region',{name:/^(Manual source review|人工來源覆核)$/,exact:true});await expect(grounding).toBeVisible();await expect(grounding.getByRole('group',{name:/^(Segment|段落) \d+$/,exact:true})).toHaveCount(5);await expect(grounding.getByRole('status')).toHaveCount(0);
+ if(split){const first=grounding.getByRole('group',{name:/^(Segment|段落) \d+$/,exact:true}).first(),selection=first.getByRole('textbox',{name:'選取段落文字',exact:true});await selection.focus();await selection.press('Home');await selection.press('ArrowRight');await selection.press('ArrowRight');await first.getByRole('button',{name:'使用選取文字',exact:true}).click();}
+ const groups=grounding.getByRole('group',{name:/^(Segment|段落) \d+$/,exact:true});const count=await groups.count();expect(count).toBe(split?6:5);
  for(let i=0;i<count;i++){
   const group=groups.nth(i),text=await group.locator('pre').innerText();const factual=text==='Fictional industrial sensors'||text.startsWith('Fixture public');
   await group.getByRole('combobox').selectOption(factual?'factual':'non_factual');await group.getByRole('textbox',{name:/^(Segment reason|段落理由)$/,exact:true}).fill(factual?'Read original retained source':'Greeting, invitation or closing; no factual assertion');
@@ -113,12 +113,15 @@ test('C61T-10 keyboard text selection binds emoji and combining marks to exact s
  try{
   await reviewerPage(reviewer,created.id);
   const grounding=reviewer.getByRole('region',{name:'Manual source review',exact:true});await expect(grounding.getByRole('status')).toHaveCount(0);
-  const first=grounding.getByRole('group').first(),selection=first.getByRole('textbox',{name:'Select segment text',exact:true});
+  const first=grounding.getByRole('group',{name:/^(Segment|段落) \d+$/,exact:true}).first(),selection=first.getByRole('textbox',{name:'Select segment text',exact:true});
   await expect(selection).toHaveValue(text);await expect(selection).toHaveAttribute('readonly','');
-  await selection.focus();await selection.press('Home');await selection.press('ArrowRight');await selection.press('Shift+ArrowRight');
+  const keyboardStates:unknown[]=[];
+  async function state(label:string){keyboardStates.push({label,...await selection.evaluate((el:HTMLTextAreaElement)=>({focused:document.activeElement===el,start:el.selectionStart,end:el.selectionEnd,disabled:el.matches(':disabled'),value:el.value}))});await writeFile('test-results/c61-selection-keyboard-diagnostic.json',JSON.stringify({fixture_only:true,keyboardStates},null,2));}
+  await selection.focus();await state('focused');await expect(selection).toBeFocused();
+  await selection.press('Home');await state('Home');await selection.press('ArrowRight');await state('ArrowRight');await selection.press('Shift+ArrowRight');await state('Shift+ArrowRight');
   expect(await selection.evaluate((el:HTMLTextAreaElement)=>[el.selectionStart,el.selectionEnd])).toEqual([1,3]);
   await first.getByRole('button',{name:'Use selected text',exact:true}).click();
-  const groups=grounding.getByRole('group');await expect(groups).toHaveCount(7);await expect(groups.first().getByRole('textbox',{name:'Select segment text',exact:true})).toBeFocused();
+  const groups=grounding.getByRole('group',{name:/^(Segment|段落) \d+$/,exact:true});await expect(groups).toHaveCount(7);await expect(groups.first().getByRole('textbox',{name:'Select segment text',exact:true})).toBeFocused();
   expect(await groups.locator('pre').allTextContents()).toEqual(['中','😀','é文',...body.split('\n')]);
   for(let i=0;i<7;i++){
    const group=groups.nth(i),part=await group.locator('pre').innerText(),factual=part==='Fictional industrial sensors'||part.startsWith('Fixture public');

@@ -1,0 +1,219 @@
+<testsuites id="" name="" tests="15" failures="4" skipped="0" errors="0" time="229.06484600000002">
+<testsuite name="audit-draft-dirty.spec.ts" timestamp="2026-10-06T20:53:33.579Z" hostname="" tests="10" failures="0" skipped="0" time="66.171" errors="0">
+<testcase name="D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="10.306">
+</testcase>
+<testcase name="D02 Open draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="6.602">
+</testcase>
+<testcase name="D02 Refresh job Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="10.274">
+</testcase>
+<testcase name="D02 Save is awaited before opening another draft and persists one revision" classname="audit-draft-dirty.spec.ts" time="5.207">
+</testcase>
+<testcase name="D02 failed Save 401 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.829">
+</testcase>
+<testcase name="D02 failed Save 412 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.632">
+</testcase>
+<testcase name="D02 failed Save 503 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.352">
+</testcase>
+<testcase name="D02 Refresh does not overwrite the unsaved buffer before a decision" classname="audit-draft-dirty.spec.ts" time="6.527">
+</testcase>
+<testcase name="D02 delayed refresh cannot materialize a draft into a new project scope" classname="audit-draft-dirty.spec.ts" time="5.429">
+</testcase>
+<testcase name="D02 zh-HK mobile dialog preserves content and keeps all choices visible" classname="audit-draft-dirty.spec.ts" time="5.013">
+</testcase>
+</testsuite>
+<testsuite name="audit-draft-reground.spec.ts" timestamp="2026-10-06T20:53:33.579Z" hostname="" tests="5" failures="4" skipped="0" time="76.641" errors="0">
+<testcase name="D01/D03 manual Unicode draft exposes a source review and operator cannot attest" classname="audit-draft-reground.spec.ts" time="11.054">
+</testcase>
+<testcase name="D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export" classname="audit-draft-reground.spec.ts" time="17.288">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-draft-reground-D01-U-5bf71--then-exact-approval-export\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-draft-reground-D01-U-5bf71--then-exact-approval-export\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveCount(expected) failed" type="expect.toHaveCount">
+<![CDATA[  audit-draft-reground.spec.ts:63:1 › D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('region', { name: /^(Manual source review|人工來源覆核)$/ }).getByRole('group')
+    Expected: 5
+    Received: 12
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('region', { name: /^(Manual source review|人工來源覆核)$/ }).getByRole('group') with timeout 5000ms
+      - waiting for getByRole('region', { name: /^(Manual source review|人工來源覆核)$/ }).getByRole('group')
+        4 × locator resolved to 11 elements
+          - unexpected value "11"
+        10 × locator resolved to 12 elements
+           - unexpected value "12"
+
+
+      36 | }
+      37 | async function classify(page:Page,split=false){
+    > 38 |  const grounding=page.getByRole('region',{name:/^(Manual source review|人工來源覆核)$/,exact:true});await expect(grounding).toBeVisible();await expect(grounding.getByRole('group')).toHaveCount(5);await expect(grounding.getByRole('status')).toHaveCount(0);
+         |                                                                                                                                                                                ^
+      39 |  if(split){const first=grounding.getByRole('group').first(),selection=first.getByRole('textbox',{name:'選取段落文字',exact:true});await selection.focus();await selection.press('Home');await selection.press('ArrowRight');await selection.press('ArrowRight');await first.getByRole('button',{name:'使用選取文字',exact:true}).click();}
+      40 |  const groups=grounding.getByRole('group');const count=await groups.count();expect(count).toBe(split?6:5);
+      41 |  for(let i=0;i<count;i++){
+        at classify (C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:38:176)
+        at C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:66:81
+
+    Error Context: ..\..\test-results\audit-fixes\audit-draft-reground-D01-U-5bf71--then-exact-approval-export\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-draft-reground-D01-U-5bf71--then-exact-approval-export\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ..\..\test-results\audit-fixes\audit-draft-reground-D01-U-5bf71--then-exact-approval-export\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="D03 zh-HK mobile code-point split reads every source and exports exact Unicode message" classname="audit-draft-reground.spec.ts" time="15.48">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-draft-reground-D03-z-3f480-ports-exact-Unicode-message\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-draft-reground-D03-z-3f480-ports-exact-Unicode-message\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveCount(expected) failed" type="expect.toHaveCount">
+<![CDATA[  audit-draft-reground.spec.ts:79:1 › D03 zh-HK mobile code-point split reads every source and exports exact Unicode message 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('region', { name: /^(Manual source review|人工來源覆核)$/ }).getByRole('group')
+    Expected: 5
+    Received: 12
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('region', { name: /^(Manual source review|人工來源覆核)$/ }).getByRole('group') with timeout 5000ms
+      - waiting for getByRole('region', { name: /^(Manual source review|人工來源覆核)$/ }).getByRole('group')
+        3 × locator resolved to 11 elements
+          - unexpected value "11"
+        11 × locator resolved to 12 elements
+           - unexpected value "12"
+
+
+      36 | }
+      37 | async function classify(page:Page,split=false){
+    > 38 |  const grounding=page.getByRole('region',{name:/^(Manual source review|人工來源覆核)$/,exact:true});await expect(grounding).toBeVisible();await expect(grounding.getByRole('group')).toHaveCount(5);await expect(grounding.getByRole('status')).toHaveCount(0);
+         |                                                                                                                                                                                ^
+      39 |  if(split){const first=grounding.getByRole('group').first(),selection=first.getByRole('textbox',{name:'選取段落文字',exact:true});await selection.focus();await selection.press('Home');await selection.press('ArrowRight');await selection.press('ArrowRight');await first.getByRole('button',{name:'使用選取文字',exact:true}).click();}
+      40 |  const groups=grounding.getByRole('group');const count=await groups.count();expect(count).toBe(split?6:5);
+      41 |  for(let i=0;i<count;i++){
+        at classify (C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:38:176)
+        at C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:82:79
+
+    Error Context: ..\..\test-results\audit-fixes\audit-draft-reground-D03-z-3f480-ports-exact-Unicode-message\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-draft-reground-D03-z-3f480-ports-exact-Unicode-message\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ..\..\test-results\audit-fixes\audit-draft-reground-D03-z-3f480-ports-exact-Unicode-message\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result" classname="audit-draft-reground.spec.ts" time="16.174">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-draft-reground-U09-r-578a3-jects-delayed-review-result\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-draft-reground-U09-r-578a3-jects-delayed-review-result\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveCount(expected) failed" type="expect.toHaveCount">
+<![CDATA[  audit-draft-reground.spec.ts:90:1 › U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('region', { name: /^(Manual source review|人工來源覆核)$/ }).getByRole('group')
+    Expected: 5
+    Received: 12
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('region', { name: /^(Manual source review|人工來源覆核)$/ }).getByRole('group') with timeout 5000ms
+      - waiting for getByRole('region', { name: /^(Manual source review|人工來源覆核)$/ }).getByRole('group')
+        3 × locator resolved to 11 elements
+          - unexpected value "11"
+        11 × locator resolved to 12 elements
+           - unexpected value "12"
+
+
+      36 | }
+      37 | async function classify(page:Page,split=false){
+    > 38 |  const grounding=page.getByRole('region',{name:/^(Manual source review|人工來源覆核)$/,exact:true});await expect(grounding).toBeVisible();await expect(grounding.getByRole('group')).toHaveCount(5);await expect(grounding.getByRole('status')).toHaveCount(0);
+         |                                                                                                                                                                                ^
+      39 |  if(split){const first=grounding.getByRole('group').first(),selection=first.getByRole('textbox',{name:'選取段落文字',exact:true});await selection.focus();await selection.press('Home');await selection.press('ArrowRight');await selection.press('ArrowRight');await first.getByRole('button',{name:'使用選取文字',exact:true}).click();}
+      40 |  const groups=grounding.getByRole('group');const count=await groups.count();expect(count).toBe(split?6:5);
+      41 |  for(let i=0;i<count;i++){
+        at classify (C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:38:176)
+        at C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:93:69
+
+    Error Context: ..\..\test-results\audit-fixes\audit-draft-reground-U09-r-578a3-jects-delayed-review-result\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-draft-reground-U09-r-578a3-jects-delayed-review-result\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ..\..\test-results\audit-fixes\audit-draft-reground-U09-r-578a3-jects-delayed-review-result\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="C61T-10 keyboard text selection binds emoji and combining marks to exact server code-point ranges" classname="audit-draft-reground.spec.ts" time="16.645">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveValue(expected) failed" type="expect.toHaveValue">
+<![CDATA[  audit-draft-reground.spec.ts:108:1 › C61T-10 keyboard text selection binds emoji and combining marks to exact server code-point ranges 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator: getByRole('region', { name: 'Manual source review', exact: true }).getByRole('group').first().getByRole('textbox', { name: 'Select segment text', exact: true })
+    Expected: "中😀é文"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveValue" getByRole('region', { name: 'Manual source review', exact: true }).getByRole('group').first().getByRole('textbox', { name: 'Select segment text', exact: true }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Manual source review', exact: true }).getByRole('group').first().getByRole('textbox', { name: 'Select segment text', exact: true })
+
+
+      115 |   const grounding=reviewer.getByRole('region',{name:'Manual source review',exact:true});await expect(grounding.getByRole('status')).toHaveCount(0);
+      116 |   const first=grounding.getByRole('group').first(),selection=first.getByRole('textbox',{name:'Select segment text',exact:true});
+    > 117 |   await expect(selection).toHaveValue(text);await expect(selection).toHaveAttribute('readonly','');
+          |                           ^
+      118 |   await selection.focus();await selection.press('Home');await selection.press('ArrowRight');await selection.press('Shift+ArrowRight');
+      119 |   expect(await selection.evaluate((el:HTMLTextAreaElement)=>[el.selectionStart,el.selectionEnd])).toEqual([1,3]);
+      120 |   await first.getByRole('button',{name:'Use selected text',exact:true}).click();
+        at C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:117:27
+
+    Error Context: ..\..\test-results\audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ..\..\test-results\audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

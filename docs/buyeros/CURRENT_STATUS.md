@@ -45,3 +45,11 @@ The successful supported Linux Node build serves the actual candidate over the
 owned loopback HTTP/PG16/synthetic OIDC fixture. Provider inputs are fixtures;
 this is no real-provider, production or human UAT result. Latest CI and the
 complete follow-up API suite are still pending.
+
+C61-22 integrated acceptance: 22 core + 15 fresh built cases pass, no skip.
+Native readonly Chromium keyboard RED was reproduced independently; explicit
+read-only grapheme movement now keeps focus and records actual [1,3] DOM emoji
+selection as exact [1,2] server code-point citation. Combining marks, source
+review retry, exact approval/export, stale revisions and dirty buffers pass.
+Earlier 4-locator-failure and 2-real-keyboard-failure runs remain recorded.
+Provider inputs/OIDC are fictional. Human screen reader and live export remain pending.

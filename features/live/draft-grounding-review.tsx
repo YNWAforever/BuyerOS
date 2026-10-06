@@ -5,7 +5,7 @@ import {ActionIntent} from '@/services/live/action-intent';
 import {LiveCancelled,describeLiveError} from '@/services/live/client';
 import {loadDraftContext,reviewDraftGrounding,type Draft,type Evidence,type Icp,type Buyer} from '@/services/live/drafts';
 import {prepareGroundingSegments,splitGroundingSegment,type SegmentPreparation,type GroundingSegment} from '@/services/live/draft-grounding';
-import {selectionToCodePoints} from '@/services/live/text-selection-offsets';
+import {selectionToCodePoints,moveReadonlySelection} from '@/services/live/text-selection-offsets';
 
 export function DraftSourceCard({evidence,company,t}:{evidence:Evidence;company:string;t:(value:string)=>string}){
  let url:string|undefined;try{const parsed=new URL(evidence.source_url||'');if(['https:','http:'].includes(parsed.protocol)&&!parsed.username&&!parsed.password)url=parsed.href;}catch{}
@@ -68,7 +68,13 @@ export function DraftGroundingReview({draft,canReview,busy,dirty,t,onBusy,onRevi
   {segments.map((s,index)=><fieldset key={`${s.field}:${s.start}:${s.end}`} disabled={busy||dirty} aria-label={`${t('Segment')} ${index+1}`}>
    <legend>{t('Segment')} {index+1} · {t(s.field==='subject'?'Subject':'Body')} · [{s.start}, {s.end})</legend>
    <pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{s.exact_text}</pre>
-   <textarea ref={element=>{selectionRefs.current[index]=element;}} aria-label={t('Select segment text')} readOnly value={s.exact_text} rows={3} style={{width:'100%',minWidth:0,boxSizing:'border-box'}} onSelect={event=>{try{const target=event.currentTarget;const range=selectionToCodePoints(s.exact_text,target.selectionStart,target.selectionEnd);setSelections(value=>({...value,[index]:range}));setError('');}catch(cause){setSelections(value=>{const next={...value};delete next[index];return next;});setError(describeLiveError(cause));}}}/>
+   <textarea ref={element=>{selectionRefs.current[index]=element;}} aria-label={t('Select segment text')} readOnly value={s.exact_text} rows={3} style={{width:'100%',minWidth:0,boxSizing:'border-box'}} onKeyDown={event=>{
+    const key=event.key;if(event.altKey||event.ctrlKey||event.metaKey||!(key==='ArrowLeft'||key==='ArrowRight'||key==='Home'||key==='End'))return;
+    event.preventDefault();const target=event.currentTarget;
+    try{const next=moveReadonlySelection(s.exact_text,{start:target.selectionStart,end:target.selectionEnd,direction:target.selectionDirection},key,event.shiftKey);
+     target.setSelectionRange(next.start,next.end,next.direction);setSelections(value=>({...value,[index]:selectionToCodePoints(s.exact_text,next.start,next.end)}));setError('');
+    }catch(cause){setError(describeLiveError(cause));}
+   }} onSelect={event=>{try{const target=event.currentTarget;const range=selectionToCodePoints(s.exact_text,target.selectionStart,target.selectionEnd);setSelections(value=>({...value,[index]:range}));setError('');}catch(cause){setSelections(value=>{const next={...value};delete next[index];return next;});setError(describeLiveError(cause));}}}/>
    <button type="button" disabled={!selections[index]||![selections[index]?.start,selections[index]?.end].some(v=>v>0&&v<Array.from(s.exact_text).length)||segments.length+new Set([selections[index]?.start,selections[index]?.end].filter(v=>v>0&&v<Array.from(s.exact_text).length)).size>200} onClick={()=>useSelection(index)}>{t('Use selected text')}</button>
    <label>{t('Classification')} <select value={s.classification} onChange={e=>update(index,{classification:e.target.value as SegmentPreparation['classification'],evidence_refs:[],offer_fact_refs:[]})}>
     <option value="">{t('Choose classification')}</option><option value="factual">{t('Factual — cite a source')}</option><option value="non_factual">{t('Non-factual — explain why')}</option>

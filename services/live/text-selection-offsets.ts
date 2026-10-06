@@ -22,3 +22,26 @@ export function selectionToCodePoints(text: string, startUTF16: number, endUTF16
   if (start === undefined || end === undefined) throw new RangeError('Selection splits a surrogate pair');
   return { start, end };
 }
+
+export type ReadonlySelection = {start:number;end:number;direction:'none'|'forward'|'backward'};
+/** Some Chromium platforms do not move a read-only textarea caret with arrows.
+ * Keep its keyboard selection usable without making the cited text editable.
+ * Returned positions are DOM UTF-16 offsets; citation conversion stays separate.
+ */
+export function moveReadonlySelection(text:string,selection:ReadonlySelection,
+  key:'ArrowLeft'|'ArrowRight'|'Home'|'End',extend:boolean):ReadonlySelection {
+  selectionToCodePoints(text,selection.start,selection.end);
+  if(!['none','forward','backward'].includes(selection.direction))throw new RangeError('Invalid selection direction');
+  const anchor=selection.direction==='backward'?selection.end:selection.start;
+  const focus=selection.direction==='backward'?selection.start:selection.end;
+  const boundaries=[0,...Array.from(new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(text),part=>part.index+part.segment.length)];
+  let next:number;
+  if(!extend&&selection.start!==selection.end&&(key==='ArrowLeft'||key==='ArrowRight')){
+    next=key==='ArrowLeft'?selection.start:selection.end;
+  }else if(key==='Home')next=0;
+  else if(key==='End')next=text.length;
+  else if(key==='ArrowLeft')next=boundaries.filter(offset=>offset<focus).at(-1)??0;
+  else next=boundaries.find(offset=>offset>focus)??text.length;
+  if(!extend||next===anchor)return {start:next,end:next,direction:'none'};
+  return {start:Math.min(anchor,next),end:Math.max(anchor,next),direction:next<anchor?'backward':'forward'};
+}

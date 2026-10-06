@@ -1,0 +1,90 @@
+{
+  "fixture_only": true,
+  "layer": "isolated native Chromium DOM; no BuyerOS product acceptance",
+  "states": [
+    {
+      "label": "readonly-focus",
+      "key": "Home",
+      "focused": true,
+      "start": 0,
+      "end": 0
+    },
+    {
+      "label": "readonly-focus",
+      "key": "ArrowRight",
+      "focused": true,
+      "start": 0,
+      "end": 0
+    },
+    {
+      "label": "readonly-focus",
+      "key": "Shift+ArrowRight",
+      "focused": true,
+      "start": 0,
+      "end": 0
+    },
+    {
+      "label": "readonly-click",
+      "key": "Home",
+      "focused": true,
+      "start": 6,
+      "end": 6
+    },
+    {
+      "label": "readonly-click",
+      "key": "ArrowRight",
+      "focused": true,
+      "start": 6,
+      "end": 6
+    },
+    {
+      "label": "readonly-click",
+      "key": "Shift+ArrowRight",
+      "focused": true,
+      "start": 6,
+      "end": 6
+    },
+    {
+      "label": "readonly-tab",
+      "key": "Home",
+      "focused": true,
+      "start": 0,
+      "end": 0
+    },
+    {
+      "label": "readonly-tab",
+      "key": "ArrowRight",
+      "focused": true,
+      "start": 0,
+      "end": 0
+    },
+    {
+      "label": "readonly-tab",
+      "key": "Shift+ArrowRight",
+      "focused": true,
+      "start": 0,
+      "end": 0
+    },
+    {
+      "label": "editable-focus",
+      "key": "Home",
+      "focused": true,
+      "start": 0,
+      "end": 0
+    },
+    {
+      "label": "editable-focus",
+      "key": "ArrowRight",
+      "focused": true,
+      "start": 1,
+      "end": 1
+    },
+    {
+      "label": "editable-focus",
+      "key": "Shift+ArrowRight",
+      "focused": true,
+      "start": 1,
+      "end": 3
+    }
+  ]
+}

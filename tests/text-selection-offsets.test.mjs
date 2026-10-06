@@ -37,3 +37,31 @@ test('C61T-10 malformed lone surrogate source cannot acquire a citation range', 
  const convert=await load();
  for(const text of ['甲\ud800乙','甲\udc00乙'])assert.throws(()=>convert(text,0,1),RangeError);
 });
+
+async function movement(){const {moveReadonlySelection}=await import('../services/live/text-selection-offsets.ts');assert.equal(typeof moveReadonlySelection,'function');return moveReadonlySelection;}
+test('C61T-10 read-only keyboard caret moves by graphemes and selects exact emoji',async()=>{
+ const move=await movement(),text='中😀é文';
+ const one=move(text,{start:0,end:0,direction:'none'},'ArrowRight',false);assert.deepEqual(one,{start:1,end:1,direction:'none'});
+ const selected=move(text,one,'ArrowRight',true);assert.deepEqual(selected,{start:1,end:3,direction:'forward'});
+ assert.deepEqual(move(text,{start:3,end:3,direction:'none'},'ArrowRight',true),{start:3,end:5,direction:'forward'});
+ assert.deepEqual(move('甲👩‍💻乙',{start:1,end:1,direction:'none'},'ArrowRight',true),{start:1,end:6,direction:'forward'});
+});
+test('C61T-10 Shift arrows retain their anchor when shrinking or reversing selection',async()=>{
+ const move=await movement(),text='中😀é文';
+ assert.deepEqual(move(text,{start:1,end:3,direction:'forward'},'ArrowLeft',true),{start:1,end:1,direction:'none'});
+ assert.deepEqual(move(text,{start:1,end:3,direction:'backward'},'ArrowLeft',true),{start:0,end:3,direction:'backward'});
+ assert.deepEqual(move(text,{start:1,end:3,direction:'backward'},'ArrowRight',false),{start:3,end:3,direction:'none'});
+ assert.deepEqual(move(text,{start:1,end:3,direction:'forward'},'ArrowLeft',false),{start:1,end:1,direction:'none'});
+});
+test('C61T-10 read-only Home End and limits preserve the exact unchanged text',async()=>{
+ const move=await movement(),text='中😀é文';
+ assert.deepEqual(move(text,{start:3,end:3,direction:'none'},'Home',false),{start:0,end:0,direction:'none'});
+ assert.deepEqual(move(text,{start:3,end:3,direction:'none'},'End',true),{start:3,end:6,direction:'forward'});
+ assert.deepEqual(move(text,{start:0,end:0,direction:'none'},'ArrowLeft',true),{start:0,end:0,direction:'none'});
+ assert.deepEqual(move('',{start:0,end:0,direction:'none'},'ArrowRight',false),{start:0,end:0,direction:'none'});
+});
+test('C61T-10 read-only movement rejects malformed or half-surrogate ranges',async()=>{
+ const move=await movement();
+ for(const range of [{start:2,end:2,direction:'none'},{start:-1,end:1,direction:'none'}])assert.throws(()=>move('中😀文',range,'ArrowRight',true),RangeError);
+ assert.throws(()=>move('甲\ud800乙',{start:0,end:0,direction:'none'},'ArrowRight',true),RangeError);
+});
