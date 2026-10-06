@@ -86,9 +86,17 @@ def test_registry_covers_every_unimplemented_contract_operation():
         "requestDraftReview", "approveDraft", "disabledDeliveryBoundary",
         "exportBuyers", "exportDraft", "getExport", "downloadExport", "exportBulkFailures",
         "getUsage", "listOutcomes", "recordOutcome", "correctOutcome",
+        "listEligibleAssignees", "getAsyncJobSummary", "reviewDraftGrounding",
+        "previewBulkManifest", "getBulkManifest", "executeBulkManifest",
     }
-    out_of_slice = set(_contract_operations()) - implemented
+    contract = _contract_operations()
+    out_of_slice = set(contract) - implemented
     assert out_of_slice == set(UNIMPLEMENTED_OPERATIONS)
+    # A declared implementation must have its actual contract method/path.
+    runtime_paths = create_app().openapi()["paths"]
+    for operation_id in implemented:
+        method, path = contract[operation_id]
+        assert method in runtime_paths.get(path, {}), operation_id
 
 
 def test_unimplemented_declared_path_fails_closed_then_501():
