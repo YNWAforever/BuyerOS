@@ -1,0 +1,27 @@
+{
+  "source_sha": "22f11abfbde4f3c422b866d0a7eec2a9c9742951",
+  "source_sha_after": "22f11abfbde4f3c422b866d0a7eec2a9c9742951",
+  "started_at_utc": "2026-10-06T20:11:38.145045+00:00",
+  "seconds": 325.766,
+  "command": [
+    "pnpm.cmd",
+    "exec",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.audit-fixes.config.ts",
+    "--grep",
+    "T30 keyboard en mobile|U05 revoked open-page read clears private scope"
+  ],
+  "cwd": ".",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-02-ci-defects-focused-built.log",
+  "fresh_junit": true,
+  "tests": 3,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "test-results/audit-fixes.xml",
+  "required_gate_exit_code": 0
+}

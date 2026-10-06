@@ -27,3 +27,13 @@ Neon-only: not accepted. Native send: not accepted.
 All original audit fields/114 outcomes and task fields are preserved.
 Current run results occupy execution fields and the TASKS c61 namespace.
 The dirty original Neon migration checkout and other user branches are intact.
+
+C61-02 CI follow-up: PR #12 at 22f11ab failed API concurrent cold JWT
+verification and mobile keyboard preference observation. A held-fetch focused
+RED reproduced the real JWKS race; 51 auth/required cases then pass without
+changing JWT trust. Current-document preference observation has 4 unit cases
+and 3 fresh built-browser cases passing, including both U05 locales and T30
+keyboard mobile. The original full UI run was deliberately interrupted and is
+not accepted. Full fresh built/CI acceptance remains pending. C61-02 fixture
+diagnostics now retain bounded subprocess exit/signal metadata on failure;
+the two prior reset failures have no confirmed cause and their timeout is unchanged.

@@ -1,0 +1,30 @@
+{
+  "source_parent_sha": "c2976fb232311cbaa9b9c6c9194377cd76a2a039",
+  "run_parent_sha": "22f11abfbde4f3c422b866d0a7eec2a9c9742951",
+  "files": [
+    {
+      "path": "tests/e2e/fixtures/journey-input.ts",
+      "sha256": "71004baa309e9e112f4eb5fe715b7acabd7fef795984ccfbfc32049c539e8f36"
+    },
+    {
+      "path": "tests/e2e/audit-access-revocation.spec.ts",
+      "sha256": "b2d87d65c038f7efd0484eeb82a27b923cf6b33ecc539929c7f512337b5acc7a"
+    },
+    {
+      "path": "tests/audit-preference-observer.test.mjs",
+      "sha256": "d5c75dd0c43bb3935b0aebb684c93976a32dc0514e3ac21ce9173d55c1250231"
+    },
+    {
+      "path": "services/api/buyeros_api/api/jwks.py",
+      "sha256": "b53ead26dcceb0cacdefc8b6b7aa4a8ef9cf017401f8a7e3dcb9e9d253c97f6f"
+    }
+  ],
+  "focused_builtin_browser_cases": 3,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "helper_unit_cases": 4,
+  "full_built_ui_accepted": false,
+  "real_provider_accepted": false,
+  "production_accepted": false
+}

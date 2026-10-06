@@ -57,25 +57,43 @@ export function createJourneyInput(mode:JourneyInputMode='pointer'){
  * A native unchanged selection does not emit change; initial English can precede
  * an existing zh-HK preference. This observes HTTP/DOM only, never writes storage.
  */
-export function observeWorkspaceLocale(page:Page,workspace:string){
- const reads:Promise<{body:{data:{locale:string}}}|{error:unknown}>[]=[];
- const record=(response:Response)=>{
-  if(response.request().method()==='GET'&&response.status()===200&&new URL(response.url()).pathname===`/v1/workspaces/${workspace}/preferences`){
-   // Buffer while this document still owns the response. A callback navigation
-   // can evict Chromium's response body before a later settle() call.
-   reads.push(response.json().then(body=>({body}),error=>({error})));
-  }
+/** A response belongs to the document that started its request. Never use an
+ * evicted body, or replace a current read error with a synthetic locale. */
+export function createDocumentReads<T>(){
+ let generation=0;const requests=new WeakMap<object,number>();
+ type Read={generation:number;body:T}|{generation:number;error:unknown};
+ let reads:Promise<Read>[]=[];
+ return {
+  advance(){generation++;reads=[];},
+  start(request:object){requests.set(request,generation);},
+  record(request:object,read:()=>Promise<T>){
+   const document=requests.get(request);if(document===undefined||document!==generation)return;
+   reads.push(read().then(body=>({generation:document,body}),error=>({generation:document,error})));
+  },
+  async latest():Promise<T|undefined>{
+   const candidate=reads.at(-1);if(!candidate)return;
+   const result=await candidate;if(result.generation!==generation||candidate!==reads.at(-1))return;
+   if('error' in result)throw result.error;return result.body;
+  },
  };
- page.on('response',record);
+}
+
+export function observeWorkspaceLocale(page:Page,workspace:string){
+ const reads=createDocumentReads<{data:{locale:string}}>();
+ const matches=(request:import('@playwright/test').Request)=>request.method()==='GET'&&new URL(request.url()).pathname===`/v1/workspaces/${workspace}/preferences`;
+ const start=(request:import('@playwright/test').Request)=>{if(matches(request))reads.start(request);};
+ const navigation=(frame:import('@playwright/test').Frame)=>{if(frame===page.mainFrame())reads.advance();};
+ const record=(response:Response)=>{if(response.status()===200&&matches(response.request()))reads.record(response.request(),()=>response.json());};
+ page.on('request',start);page.on('framenavigated',navigation);page.on('response',record);
  return {
   async settle(){
-   await expect.poll(()=>reads.length,{timeout:30_000,message:'Real fixture workspace preference read must complete before native language choice'}).toBeGreaterThan(0);
-   const read=await reads.at(-1)!;if('error' in read)throw read.error;
-   const body=read.body;expect(['en','zh-HK']).toContain(body.data.locale);
+   let body:{data:{locale:string}}|undefined;
+   await expect.poll(async()=>{body=await reads.latest();return body!==undefined;},{timeout:30_000,message:'Current document real fixture preference read must complete before native language choice'}).toBe(true);
+   expect(['en','zh-HK']).toContain(body!.data.locale);
    const saved=await page.evaluate(()=>{try{return localStorage.getItem('buyeros.locale');}catch{return null;}});
-   const expected=saved==='en'||saved==='zh-HK'?saved:body.data.locale;
+   const expected=saved==='en'||saved==='zh-HK'?saved:body!.data.locale;
    await expect(page.locator('header select')).toHaveValue(expected,{timeout:30_000});
   },
-  dispose(){page.off('response',record);},
+  dispose(){page.off('request',start);page.off('framenavigated',navigation);page.off('response',record);},
  };
 }

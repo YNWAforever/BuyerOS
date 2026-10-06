@@ -3380,29 +3380,24 @@
         "proposed_new_files": "docs/buyeros/evidence/c61/integration-results.md",
         "acceptance": "隔離 PG16 strict tests：0 fail/error/skip；fixture UI 與 API/DB 對照一致。既有 44 units / 812 API 是歷史參照，不能硬編碼未來總數或把它們相加。",
         "rollback": "按修復組 revert；保留 append-only、manifest、accepted/unknown operation 記錄；禁止破壞式降 schema。",
-        "execution_sha": "d90431dd4a5a448b54fcb29b4920f6d07982e4d9",
-        "execution_evidence": "docs/buyeros/evidence/c61/integration-results.md;artifacts/c61/integration-groups.json;artifacts/c61/C61-02-source-bridge.json;artifacts/c61/C61-02-db.json;artifacts/c61/c61-q.xml;artifacts/c61/C61-02-final-head-node.json;artifacts/c61/C61-02-final-head-types.json;artifacts/c61/C61-02-final-head-discovery.json;artifacts/c61/C61-02-second-isolation-focused.json;artifacts/c61/C61-02-second-isolation-focused.xml;artifacts/c61/C61-02-built-ui-enospc-record.json;artifacts/c61/C61-02-built-ui-after-space-recovery.json",
-        "code_status": "selective_Q_source_integrated",
-        "verification_status": "focused_fixtures_pass; required_DB_64_zero_skip; full_built_UI_gate_blocked_environment",
+        "execution_sha": "c2976fb232311cbaa9b9c6c9194377cd76a2a039",
+        "execution_evidence": "artifacts/c61/C61-02-cold-jwks-green.json;artifacts/c61/C61-02-cold-jwks-tested-source.json;artifacts/c61/C61-02-preference-document-valid-red.json;artifacts/c61/C61-02-preference-document-green.json;artifacts/c61/C61-02-ci-defects-focused-built.json;artifacts/c61/c61-ci-defects-focused-built.xml;artifacts/c61/C61-02-preference-tested-source.json",
+        "code_status": "selected Q integration plus verified cold-JWKS race and document-scoped preference observer",
+        "verification_status": "required PG16 Q 64; cold-JWKS and auth 51; preference helper 4; built CI defects focused 3 pass, all zero skip. Full UI and fresh CI pending",
         "release_status": "not-deployed",
         "blockers": [
-          "Local Docker engine recovery/full 96-case built suite",
-          "Remote CI pending",
-          "Real provider, production readback and human UAT not accepted"
+          "complete fresh built UI suite and latest CI",
+          "production same-version readback",
+          "real provider and human UAT"
         ],
         "evidence_paths": [
-          "docs/buyeros/evidence/c61/integration-results.md",
-          "artifacts/c61/integration-groups.json",
-          "artifacts/c61/C61-02-source-bridge.json",
-          "artifacts/c61/C61-02-db.json",
-          "artifacts/c61/c61-q.xml",
-          "artifacts/c61/C61-02-final-head-node.json",
-          "artifacts/c61/C61-02-final-head-types.json",
-          "artifacts/c61/C61-02-final-head-discovery.json",
-          "artifacts/c61/C61-02-second-isolation-focused.json",
-          "artifacts/c61/C61-02-second-isolation-focused.xml",
-          "artifacts/c61/C61-02-built-ui-enospc-record.json",
-          "artifacts/c61/C61-02-built-ui-after-space-recovery.json"
+          "artifacts/c61/C61-02-cold-jwks-green.json",
+          "artifacts/c61/C61-02-cold-jwks-tested-source.json",
+          "artifacts/c61/C61-02-preference-document-valid-red.json",
+          "artifacts/c61/C61-02-preference-document-green.json",
+          "artifacts/c61/C61-02-ci-defects-focused-built.json",
+          "artifacts/c61/c61-ci-defects-focused-built.xml",
+          "artifacts/c61/C61-02-preference-tested-source.json"
         ]
       },
       {

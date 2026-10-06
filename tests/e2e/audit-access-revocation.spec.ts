@@ -6,7 +6,9 @@ import {signInWorkbench,workspace,project,resetWorkbenchFixtureRateWindows} from
 const other='e0000000-0000-4000-8000-000000000101';
 const member='e0000000-0000-4000-8000-000000000003';
 async function fixture(action='inspect',script='audit_access_revocation.py'){
- const cwd=resolve('services/worker');return JSON.parse((await promisify(execFile)(resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python'),[`tests/fixtures/${script}`,action],{cwd,timeout:30_000})).stdout);
+ const cwd=resolve('services/worker'),started=Date.now();
+ try{return JSON.parse((await promisify(execFile)(resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python'),[`tests/fixtures/${script}`,action],{cwd,timeout:30_000})).stdout);}
+ catch(error){const failure=error as {code?:number|string;signal?:string;killed?:boolean};await test.info().attach('Owned fixture subprocess failure',{body:JSON.stringify({fixture_only:true,script,action,timeout_ms:30_000,elapsed_ms:Date.now()-started,code:failure.code??null,signal:failure.signal??null,killed:failure.killed??null}),contentType:'application/json'});throw error;}
 }
 async function changeAccess(page:Page,active=false,roles=['operator']){
  const response=await page.request.patch(`http://127.0.0.1:8000/v1/workspaces/${workspace}/memberships/${member}`,{headers:{Authorization:'Bearer fixture-admin','If-Match':'"1"','Idempotency-Key':crypto.randomUUID()},data:{active,roles,reason:'U05 fictional access change'}});
