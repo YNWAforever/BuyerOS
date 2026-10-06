@@ -1,0 +1,27 @@
+{
+  "date_hk": "2026-10-06",
+  "python": "Python 3.14.6",
+  "node": "v24.18.0",
+  "commands": [
+    "services/api: uv run --frozen pytest -q --junitxml=../../test-results/pr11-ci-followup-20261006/api-full.xml",
+    "root: node node_modules/@playwright/test/cli.js test --config playwright.workbench.config.ts tests/e2e/daily-workbench.spec.ts --reporter=line,junit",
+    "root: BUYEROS_AUDIT_UI_RUNTIME=built node node_modules/@playwright/test/cli.js test --config playwright.audit-fixes.config.ts tests/e2e/audit-auth-entry.spec.ts --reporter=line,junit",
+    "root: services/api/.venv/Scripts/python.exe scripts/check-required-tests.py --junit REPORT",
+    "root: node node_modules/typescript/bin/tsc --noEmit",
+    "root: node node_modules/eslint/bin/eslint.js tests/e2e/daily-workbench.spec.ts playwright.workbench.config.ts --max-warnings=0",
+    "root: node scripts/generate-api-types.mjs --check",
+    "root: uv run --frozen --project services/api python scripts/generate-operation-routes.py --check"
+  ],
+  "database": "owned loopback Docker PostgreSQL16, destructive guard retained",
+  "source_base": "38c55228489a12bfc493f27d2ed27e177117366e",
+  "strict_integration": "1",
+  "frontend": "existing .vercel/output built application fixture, application source unchanged",
+  "cleared_env": [
+    "DATABASE_URL",
+    "BUYEROS_TEST_DATABASE_URL",
+    "BUYEROS_DATABASE_URL",
+    "BUYEROS_EXECUTION_DATABASE_URL",
+    "BUYEROS_RUNTIME_ADMIN_DATABASE_URL"
+  ],
+  "auth": "fictional OIDC fixtures; no live Auth0/Neon"
+}

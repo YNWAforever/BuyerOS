@@ -1,0 +1,17 @@
+{
+  "first_copy_exit": 1,
+  "reason": "WinError3 at four long screenshot destination paths;partial copies preserved",
+  "copy_recovery_exit": 0,
+  "source_files": 70,
+  "mapped_copies": 70,
+  "shortened_destinations": 5,
+  "provisional_count_check_exit": 1,
+  "provisional_expected": 4,
+  "actual": 5,
+  "final_count_check_exit": 0,
+  "tests_source_unchanged": true,
+  "first_index_blob_readback_git_exit": 128,
+  "reason_index": "Git stat rejected one redundant long partial-copy path",
+  "recovery": "Verified identical bytes and owned absolute path,removed only redundant unmapped partial copy;original and mapped shorter copy retained",
+  "persistent_git_config_changed": false
+}

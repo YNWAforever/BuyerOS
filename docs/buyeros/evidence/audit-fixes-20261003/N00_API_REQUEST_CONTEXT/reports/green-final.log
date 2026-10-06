@@ -1,0 +1,26 @@
+✔ API request context persists each manual auth hop before HTTP and forwards only explicit in-memory headers (315.6077ms)
+✔ API context backend unknown intent stays held across fresh context and journal with renewed bearer (118.9763ms)
+✔ lost gateway response never autoretries an accepted write and restart retains the hold (99.7654ms)
+✔ unexpected gateway wire redirect cannot leak owner nonce to a foreign owned sink (82.6682ms)
+✔ unowned gateway, foreign journal, bad nonce and injected raw context are refused before HTTP (52.7022ms)
+✔ invalid, administrative and oversized requests are refused before even the gateway wire (66.617ms)
+✔ API context keeps the original auth budget and cleanup reserve intact (5077.7829ms)
+✔ disposed or rebound owned gateway cannot be silently adopted by an old API context (44.8993ms)
+✔ gateway ownership changing during body rejects the stale receipt (106.9762ms)
+✔ gateway ownership changing during dispose rejects the stale receipt (74.8062ms)
+✔ N00 built fixture is isolated from playwright.audit-fixes.config.ts (2795.397ms)
+✔ N00 built fixture is isolated from playwright.audit-regression.config.ts (1373.0891ms)
+✔ N00 dedicated config discovers all seven built-output cases (1331.7577ms)
+✔ N00 counted config discovers the same seven cases with separate producer outputs (1085.7782ms)
+✔ all N00 output profiles stay isolated from playwright.audit-fixes.config.ts (2480.8361ms)
+✔ all N00 output profiles stay isolated from playwright.audit-regression.config.ts (1578.1381ms)
+✔ runtime flow config discovers all six actual-output cases including unknown sign-out (1073.477ms)
+✔ execution config discovers all six cases including counted APIRequestContext (5382.6812ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17454.2441

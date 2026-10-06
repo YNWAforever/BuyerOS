@@ -1,0 +1,9 @@
+{
+  "fixture_only": true,
+  "baseline": "b083ea43988ed73e9d8e9ab112ba3d6305f2c941",
+  "shallow_exit": 128,
+  "full_history_exit": 0,
+  "exact_source_bytes_equal": true,
+  "source_sha256": "9731c9a299d99c902070cccec577c05a4579c27a56c782d9dcce215b2ed543dd",
+  "transport": "local file URL; no remote mutation"
+}

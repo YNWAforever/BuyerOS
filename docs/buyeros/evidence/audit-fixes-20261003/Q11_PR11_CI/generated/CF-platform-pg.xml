@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="2" failures="0" errors="0" time="4.008">
+    <testsuite name="services/cloudflare-jobs/tests/platform-pg.integration.ts" timestamp="2026-10-05T19:41:50.464Z" hostname="DESKTOP-30TFME5" tests="2" failures="0" errors="0" skipped="0" time="4.008">
+        <testcase classname="services/cloudflare-jobs/tests/platform-pg.integration.ts" name="actual Queue binding commits one API-owned mutation; duplicate delivery keeps its receipt" time="3.058">
+        </testcase>
+        <testcase classname="services/cloudflare-jobs/tests/platform-pg.integration.ts" name="actual Queue probe commits an opaque current-epoch API receipt" time="0.948">
+        </testcase>
+    </testsuite>
+</testsuites>

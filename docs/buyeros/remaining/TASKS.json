@@ -2047,145 +2047,237 @@
   "reviewed_source_sha_scope": "Historical T30 application; hosting_migration_proposal.reviewed_source_sha is current Cloudflare RC.",
   "deployed_source_sha_scope": "Existing main app12327c7 freshly read-only verified2026-10-02HK; production remains0033 and unchanged. hosting_migration_proposal separately records approved isolatedpreview595865f/0035 and shutdown; noCloudflare productioncutover.",
   "latest_local_auth_checkpoint": {
-    "status": "local-fixed-native-worker-verified;full-N00-open",
-    "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
-    "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
-    "branch": "codex/n00-native-ipc-isolation",
-    "checked_at": "2026-10-05T13:43:35.000910+00:00",
-    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+    "status": "local-counted-APIRequestContext-verified;full-N00-open",
+    "source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
+    "base_sha": "ad1a54510f6a0fb2485392c878e7e867e9def6be",
+    "branch": "codex/n00-api-request-context",
+    "checked_at": "2026-10-05T17:21:02.560778+00:00",
+    "date_hk": "2026-10-06",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_API_REQUEST_CONTEXT/RESULTS.md",
     "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
     "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
     "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+    "native_worker_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
     "checks": {
-      "red-ipc": {
-        "leaf_cases": 2,
+      "red-node": {
+        "leaf_cases": 8,
+        "fail": 8,
+        "error": 0,
+        "skip": 0,
         "pass": 0,
+        "attributes": {},
+        "reported": {
+          "tests": "8",
+          "pass": "0",
+          "fail": "8",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "1007.4626"
+        }
+      },
+      "red-browser": {
+        "leaf_cases": 6,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "pass": 5,
+        "attributes": {
+          "id": "",
+          "name": "",
+          "tests": "6",
+          "failures": "1",
+          "skipped": "0",
+          "errors": "0",
+          "time": "13.954609"
+        },
+        "reported": {}
+      },
+      "envelope-red": {
+        "leaf_cases": 8,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "pass": 7,
+        "attributes": {},
+        "reported": {
+          "tests": "8",
+          "pass": "7",
+          "fail": "1",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "6375.6904"
+        }
+      },
+      "root-first": {
+        "leaf_cases": 315,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "pass": 314,
+        "attributes": {},
+        "reported": {
+          "tests": "316",
+          "pass": "315",
+          "fail": "1",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "212366.4882"
+        }
+      },
+      "race-red": {
+        "leaf_cases": 9,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "pass": 8,
+        "attributes": {},
+        "reported": {
+          "tests": "9",
+          "pass": "8",
+          "fail": "1",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "5499.6881"
+        }
+      },
+      "race-red-both": {
+        "leaf_cases": 10,
         "fail": 2,
         "error": 0,
         "skip": 0,
-        "attributes": {}
+        "pass": 8,
+        "attributes": {},
+        "reported": {
+          "tests": "10",
+          "pass": "8",
+          "fail": "2",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "5400.9806"
+        }
       },
-      "red-isolation-behavior": {
-        "leaf_cases": 3,
-        "pass": 2,
-        "fail": 1,
-        "error": 0,
-        "skip": 0,
-        "attributes": {}
-      },
-      "root-first": {
-        "leaf_cases": 307,
-        "pass": 306,
-        "fail": 1,
-        "error": 0,
-        "skip": 0,
-        "attributes": {}
-      },
-      "root-green": {
-        "leaf_cases": 307,
-        "pass": 307,
+      "green-final": {
+        "leaf_cases": 18,
         "fail": 0,
         "error": 0,
         "skip": 0,
+        "pass": 18,
         "attributes": {},
         "reported": {
-          "tests": "308",
-          "pass": "308",
+          "tests": "18",
+          "pass": "18",
           "fail": "0",
           "cancelled": "0",
           "skipped": "0",
           "todo": "0",
-          "duration_ms": "466803.7974"
+          "duration_ms": "17454.2441"
         }
       },
-      "browser": {
-        "leaf_cases": 5,
-        "pass": 5,
+      "root-final": {
+        "leaf_cases": 317,
         "fail": 0,
         "error": 0,
         "skip": 0,
+        "pass": 317,
+        "attributes": {},
+        "reported": {
+          "tests": "318",
+          "pass": "318",
+          "fail": "0",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "519306.7825"
+        }
+      },
+      "browser-final": {
+        "leaf_cases": 6,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "pass": 6,
         "attributes": {
           "id": "",
           "name": "",
-          "tests": "5",
+          "tests": "6",
           "failures": "0",
           "skipped": "0",
           "errors": "0",
-          "time": "13.736473000000002"
-        }
+          "time": "47.728449"
+        },
+        "reported": {}
       },
       "crypto": {
         "leaf_cases": 8,
-        "pass": 8,
         "fail": 0,
         "error": 0,
         "skip": 0,
+        "pass": 8,
         "attributes": {
           "name": "pytest tests"
-        }
+        },
+        "reported": {}
       }
     },
     "static_gates": {
       "lint": 0,
       "types": 0,
-      "contracts": 0,
       "routes": 0,
-      "browser": 0,
-      "crypto": 0
+      "contracts": 0,
+      "crypto": 0,
+      "browser": 0
     },
-    "native_observation": {
-      "fixture_only": true,
-      "positive_control": {
-        "http_requests": 3,
-        "native_tcp_connected": true
+    "actual_context_observation": [
+      {
+        "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+        "name": "api-context-receipt",
+        "observation": {
+          "fixture_only": true,
+          "external_verified": false,
+          "http_requests": 2,
+          "reservations": 2,
+          "private_cookie_isolation": true,
+          "raw_context_os_contained": false
+        }
       },
-      "direct_http_requests": 0,
-      "probes": {
-        "http_connected": false,
-        "fetch_connected": false,
-        "tcp_connected": false,
-        "subprocess_connected": false
+      {
+        "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+        "name": "owned-api-context-cleanup",
+        "observation": {
+          "fixture_only": true,
+          "external_verified": false,
+          "owned_context_disposed": true
+        }
       },
-      "worker_policy": {
-        "network": "none",
-        "read_only": true,
-        "user": "node",
-        "cap_drop": [
-          "ALL"
-        ],
-        "pids_limit": 64,
-        "memory": 134217728,
-        "nano_cpus": 1000000000,
-        "published_ports": 0,
-        "mounts": 0,
-        "environment_names": [
-          "BUYEROS_STRICT_INTEGRATION",
-          "PATH",
-          "NODE_VERSION",
-          "YARN_VERSION"
-        ]
-      },
-      "cleanup": {
-        "complete": true,
-        "containers_absent": [
-          "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
-          "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
-          "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
-        ],
-        "network_absent": true,
-        "fixture_only": true,
-        "inspect_retries": 0
+      {
+        "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+        "name": "owned-cleanup",
+        "observation": {
+          "fixture_only": true,
+          "external_verified": false,
+          "owned_journal_removed": true,
+          "owned_servers_closed": true
+        }
       }
-    },
-    "new_node_cases": 3,
+    ],
+    "new_node_cases": 10,
+    "new_browser_cases": 1,
     "new_build": false,
     "fixture_only": true,
     "canonical_db_connection": false,
+    "required_DB_suite_for_new_protocol_cases": false,
+    "DB_skips": 0,
     "real_Neon_verified": false,
     "parent_os_contained": false,
     "browser_os_contained": false,
+    "raw_APIRequestContext_os_contained": false,
     "arbitrary_provider_cli_contained": false,
-    "external_requests": 0,
+    "external_auth_requests": 0,
     "full_N00_open": true,
     "original302_rerun": false,
     "schema_head": "0037_bulk_manifests",
@@ -2195,160 +2287,120 @@
     "extensions": 14,
     "independent_review": "pending",
     "deployed_sha": null,
-    "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
-    "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+    "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+    "rollback": "Revert following metadata commit then source4ba0a5d7757d5c9e4991593a13c0a2df217be511;reverse patch check0 only;retain admitted/unknown journal holds;no DB/data rollback."
   },
   "latest_local_verification_checkpoint": {
-    "status": "local-fixed-native-worker-verified;full-N00-open",
-    "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
-    "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
-    "branch": "codex/n00-native-ipc-isolation",
-    "checked_at": "2026-10-05T13:43:35.000910+00:00",
-    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+    "task": "Q11 PR11 CI follow-up",
+    "date_hk": "2026-10-06",
+    "base_sha": "38c55228489a12bfc493f27d2ed27e177117366e",
+    "source_sha": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
     "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
-    "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
-    "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+    "status": "local-required-gates-verified;full-Q11-and-N00-open",
+    "code_scope": "one workflow,one Playwright config,two test files,one plan;application/auth/schema unchanged",
     "checks": {
-      "red-ipc": {
-        "leaf_cases": 2,
-        "pass": 0,
-        "fail": 2,
-        "error": 0,
-        "skip": 0,
-        "attributes": {}
-      },
-      "red-isolation-behavior": {
-        "leaf_cases": 3,
-        "pass": 2,
-        "fail": 1,
-        "error": 0,
-        "skip": 0,
-        "attributes": {}
-      },
-      "root-first": {
-        "leaf_cases": 307,
-        "pass": 306,
-        "fail": 1,
-        "error": 0,
-        "skip": 0,
-        "attributes": {}
-      },
-      "root-green": {
-        "leaf_cases": 307,
-        "pass": 307,
+      "api": {
+        "cases": 812,
         "fail": 0,
         "error": 0,
         "skip": 0,
-        "attributes": {},
-        "reported": {
-          "tests": "308",
-          "pass": "308",
-          "fail": "0",
-          "cancelled": "0",
-          "skipped": "0",
-          "todo": "0",
-          "duration_ms": "466803.7974"
-        }
+        "pass": 812,
+        "duration_seconds": 1974.703,
+        "producer_total_seconds": 1990.119
       },
-      "browser": {
-        "leaf_cases": 5,
-        "pass": 5,
+      "workbench": {
+        "cases": 8,
         "fail": 0,
         "error": 0,
         "skip": 0,
-        "attributes": {
-          "id": "",
-          "name": "",
-          "tests": "5",
-          "failures": "0",
-          "skipped": "0",
-          "errors": "0",
-          "time": "13.736473000000002"
-        }
-      },
-      "crypto": {
-        "leaf_cases": 8,
         "pass": 8,
+        "duration_seconds": 63.097,
+        "producer_total_seconds": 85.567841
+      },
+      "auth_entry": {
+        "cases": 7,
         "fail": 0,
         "error": 0,
         "skip": 0,
-        "attributes": {
-          "name": "pytest tests"
-        }
+        "pass": 7,
+        "duration_seconds": 35.219,
+        "producer_total_seconds": 127.74405
+      },
+      "workbench_red": {
+        "cases": 1,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "pass": 0,
+        "duration_seconds": 14.739,
+        "producer_total_seconds": 67.732543
+      },
+      "workbench_first_full": {
+        "cases": 8,
+        "fail": 0,
+        "error": 3,
+        "skip": 0,
+        "pass": 5,
+        "duration_seconds": 226.135,
+        "producer_total_seconds": 297.457946
+      },
+      "types": {
+        "exit_code": 0,
+        "report": "types.log"
+      },
+      "lint": {
+        "exit_code": 0,
+        "report": "lint.log"
+      },
+      "generated_contract": {
+        "exit_code": 0,
+        "operations": 84,
+        "report": "contracts.log"
+      },
+      "operation_routes": {
+        "exit_code": 0,
+        "operations": 84,
+        "report": "routes.log"
       }
     },
-    "static_gates": {
-      "lint": 0,
-      "types": 0,
-      "contracts": 0,
-      "routes": 0,
-      "browser": 0,
-      "crypto": 0
+    "contracts": {
+      "original": 70,
+      "extensions": 14,
+      "total": 84,
+      "changes": 0
     },
-    "native_observation": {
-      "fixture_only": true,
-      "positive_control": {
-        "http_requests": 3,
-        "native_tcp_connected": true
-      },
-      "direct_http_requests": 0,
-      "probes": {
-        "http_connected": false,
-        "fetch_connected": false,
-        "tcp_connected": false,
-        "subprocess_connected": false
-      },
-      "worker_policy": {
-        "network": "none",
-        "read_only": true,
-        "user": "node",
-        "cap_drop": [
-          "ALL"
-        ],
-        "pids_limit": 64,
-        "memory": 134217728,
-        "nano_cpus": 1000000000,
-        "published_ports": 0,
-        "mounts": 0,
-        "environment_names": [
-          "BUYEROS_STRICT_INTEGRATION",
-          "PATH",
-          "NODE_VERSION",
-          "YARN_VERSION"
-        ]
-      },
-      "cleanup": {
-        "complete": true,
-        "containers_absent": [
-          "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
-          "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
-          "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
-        ],
-        "network_absent": true,
-        "fixture_only": true,
-        "inspect_retries": 0
-      }
-    },
-    "new_node_cases": 3,
-    "new_build": false,
-    "fixture_only": true,
-    "canonical_db_connection": false,
-    "real_Neon_verified": false,
-    "parent_os_contained": false,
-    "browser_os_contained": false,
-    "arbitrary_provider_cli_contained": false,
-    "external_requests": 0,
-    "full_N00_open": true,
-    "original302_rerun": false,
-    "schema_head": "0037_bulk_manifests",
-    "migrations": 0,
-    "operation_count": 84,
-    "original_operations": 70,
-    "extensions": 14,
-    "independent_review": "pending",
+    "alembic_heads": [
+      "0037_bulk_manifests"
+    ],
+    "new_migrations": [],
+    "live_verification": false,
     "deployed_sha": null,
-    "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
-    "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+    "review": "author only;independent pending;no agents",
+    "remaining": [
+      "full Q11 external release comparison",
+      "full N00/F20/NA01 OS boundary",
+      "real Neon/Google/Admin cleanup",
+      "original strict302 acceptance",
+      "independent review",
+      "eight-module live staff acceptance"
+    ],
+    "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/RESULTS.md",
+    "rollback": "revert following evidence/status commit then 546a03770b32430f9ff90b7ac21c00fa74dd2166;no schema/data rollback;preserve admitted/unknown N00 holds",
+    "ci": {
+      "prior_run": 37360072047,
+      "prior_head": "38c55228489a12bfc493f27d2ed27e177117366e",
+      "prior_results": "six jobs pass;API810pass2fail0skip;continuity workbench7pass1fail0skip",
+      "updated_run": "pending push/readback;not claimed passed"
+    },
+    "failure_history": [
+      "wrong-cwd registry setup FileNotFound;correct-cwd six-extension RED",
+      "old T29 enabled-language expectation RED1fail",
+      "unscoped old Playwright output cleanup deleted ignored sibling reports/clone;interrupted startup counted no tests",
+      "first corrected full workbench5pass3beforeEach errors0skip;final serialized8pass;unchanged30s caps",
+      "CP950 console evidence read failure;corrected PYTHONUTF8;not a test failure",
+      "source-plan EOF whitespace REDexit2 then GREEN0"
+    ]
   },
   "prior_q11_current_source_verification_20261005": {
     "status": "current-source-local-gates-verified;full-Q11-open",
@@ -3040,5 +3092,729 @@
     "deployed_sha": null,
     "next_eligible": "N00 prepare explicit counted transports and disposable OS egress isolation for Node native HTTP/APIRequestContext/provider CLI; no real execution until containment, cleanup and fresh exact authorization",
     "rollback": "Revert following metadata commit then source362b60d; no DB/data rollback, retain admitted/unknown journal holds."
+  },
+  "prior_native_ipc_auth_checkpoint_20261006": {
+    "status": "local-fixed-native-worker-verified;full-N00-open",
+    "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+    "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+    "branch": "codex/n00-native-ipc-isolation",
+    "checked_at": "2026-10-05T13:43:35.000910+00:00",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+    "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+    "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+    "checks": {
+      "red-ipc": {
+        "leaf_cases": 2,
+        "pass": 0,
+        "fail": 2,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "red-isolation-behavior": {
+        "leaf_cases": 3,
+        "pass": 2,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "root-first": {
+        "leaf_cases": 307,
+        "pass": 306,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "root-green": {
+        "leaf_cases": 307,
+        "pass": 307,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {},
+        "reported": {
+          "tests": "308",
+          "pass": "308",
+          "fail": "0",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "466803.7974"
+        }
+      },
+      "browser": {
+        "leaf_cases": 5,
+        "pass": 5,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {
+          "id": "",
+          "name": "",
+          "tests": "5",
+          "failures": "0",
+          "skipped": "0",
+          "errors": "0",
+          "time": "13.736473000000002"
+        }
+      },
+      "crypto": {
+        "leaf_cases": 8,
+        "pass": 8,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {
+          "name": "pytest tests"
+        }
+      }
+    },
+    "static_gates": {
+      "lint": 0,
+      "types": 0,
+      "contracts": 0,
+      "routes": 0,
+      "browser": 0,
+      "crypto": 0
+    },
+    "native_observation": {
+      "fixture_only": true,
+      "positive_control": {
+        "http_requests": 3,
+        "native_tcp_connected": true
+      },
+      "direct_http_requests": 0,
+      "probes": {
+        "http_connected": false,
+        "fetch_connected": false,
+        "tcp_connected": false,
+        "subprocess_connected": false
+      },
+      "worker_policy": {
+        "network": "none",
+        "read_only": true,
+        "user": "node",
+        "cap_drop": [
+          "ALL"
+        ],
+        "pids_limit": 64,
+        "memory": 134217728,
+        "nano_cpus": 1000000000,
+        "published_ports": 0,
+        "mounts": 0,
+        "environment_names": [
+          "BUYEROS_STRICT_INTEGRATION",
+          "PATH",
+          "NODE_VERSION",
+          "YARN_VERSION"
+        ]
+      },
+      "cleanup": {
+        "complete": true,
+        "containers_absent": [
+          "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
+          "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
+          "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
+        ],
+        "network_absent": true,
+        "fixture_only": true,
+        "inspect_retries": 0
+      }
+    },
+    "new_node_cases": 3,
+    "new_build": false,
+    "fixture_only": true,
+    "canonical_db_connection": false,
+    "real_Neon_verified": false,
+    "parent_os_contained": false,
+    "browser_os_contained": false,
+    "arbitrary_provider_cli_contained": false,
+    "external_requests": 0,
+    "full_N00_open": true,
+    "original302_rerun": false,
+    "schema_head": "0037_bulk_manifests",
+    "migrations": 0,
+    "operation_count": 84,
+    "original_operations": 70,
+    "extensions": 14,
+    "independent_review": "pending",
+    "deployed_sha": null,
+    "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+    "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+  },
+  "prior_native_ipc_verification_checkpoint_20261006": {
+    "status": "local-fixed-native-worker-verified;full-N00-open",
+    "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+    "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+    "branch": "codex/n00-native-ipc-isolation",
+    "checked_at": "2026-10-05T13:43:35.000910+00:00",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+    "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+    "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+    "checks": {
+      "red-ipc": {
+        "leaf_cases": 2,
+        "pass": 0,
+        "fail": 2,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "red-isolation-behavior": {
+        "leaf_cases": 3,
+        "pass": 2,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "root-first": {
+        "leaf_cases": 307,
+        "pass": 306,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "root-green": {
+        "leaf_cases": 307,
+        "pass": 307,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {},
+        "reported": {
+          "tests": "308",
+          "pass": "308",
+          "fail": "0",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "466803.7974"
+        }
+      },
+      "browser": {
+        "leaf_cases": 5,
+        "pass": 5,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {
+          "id": "",
+          "name": "",
+          "tests": "5",
+          "failures": "0",
+          "skipped": "0",
+          "errors": "0",
+          "time": "13.736473000000002"
+        }
+      },
+      "crypto": {
+        "leaf_cases": 8,
+        "pass": 8,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {
+          "name": "pytest tests"
+        }
+      }
+    },
+    "static_gates": {
+      "lint": 0,
+      "types": 0,
+      "contracts": 0,
+      "routes": 0,
+      "browser": 0,
+      "crypto": 0
+    },
+    "native_observation": {
+      "fixture_only": true,
+      "positive_control": {
+        "http_requests": 3,
+        "native_tcp_connected": true
+      },
+      "direct_http_requests": 0,
+      "probes": {
+        "http_connected": false,
+        "fetch_connected": false,
+        "tcp_connected": false,
+        "subprocess_connected": false
+      },
+      "worker_policy": {
+        "network": "none",
+        "read_only": true,
+        "user": "node",
+        "cap_drop": [
+          "ALL"
+        ],
+        "pids_limit": 64,
+        "memory": 134217728,
+        "nano_cpus": 1000000000,
+        "published_ports": 0,
+        "mounts": 0,
+        "environment_names": [
+          "BUYEROS_STRICT_INTEGRATION",
+          "PATH",
+          "NODE_VERSION",
+          "YARN_VERSION"
+        ]
+      },
+      "cleanup": {
+        "complete": true,
+        "containers_absent": [
+          "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
+          "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
+          "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
+        ],
+        "network_absent": true,
+        "fixture_only": true,
+        "inspect_retries": 0
+      }
+    },
+    "new_node_cases": 3,
+    "new_build": false,
+    "fixture_only": true,
+    "canonical_db_connection": false,
+    "real_Neon_verified": false,
+    "parent_os_contained": false,
+    "browser_os_contained": false,
+    "arbitrary_provider_cli_contained": false,
+    "external_requests": 0,
+    "full_N00_open": true,
+    "original302_rerun": false,
+    "schema_head": "0037_bulk_manifests",
+    "migrations": 0,
+    "operation_count": 84,
+    "original_operations": 70,
+    "extensions": 14,
+    "independent_review": "pending",
+    "deployed_sha": null,
+    "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+    "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+  },
+  "prior_api_request_context_verification_checkpoint_20261006": {
+    "status": "local-counted-APIRequestContext-verified;full-N00-open",
+    "source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
+    "base_sha": "ad1a54510f6a0fb2485392c878e7e867e9def6be",
+    "branch": "codex/n00-api-request-context",
+    "checked_at": "2026-10-05T17:21:02.560778+00:00",
+    "date_hk": "2026-10-06",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_API_REQUEST_CONTEXT/RESULTS.md",
+    "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+    "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+    "native_worker_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+    "checks": {
+      "red-node": {
+        "leaf_cases": 8,
+        "fail": 8,
+        "error": 0,
+        "skip": 0,
+        "pass": 0,
+        "attributes": {},
+        "reported": {
+          "tests": "8",
+          "pass": "0",
+          "fail": "8",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "1007.4626"
+        }
+      },
+      "red-browser": {
+        "leaf_cases": 6,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "pass": 5,
+        "attributes": {
+          "id": "",
+          "name": "",
+          "tests": "6",
+          "failures": "1",
+          "skipped": "0",
+          "errors": "0",
+          "time": "13.954609"
+        },
+        "reported": {}
+      },
+      "envelope-red": {
+        "leaf_cases": 8,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "pass": 7,
+        "attributes": {},
+        "reported": {
+          "tests": "8",
+          "pass": "7",
+          "fail": "1",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "6375.6904"
+        }
+      },
+      "root-first": {
+        "leaf_cases": 315,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "pass": 314,
+        "attributes": {},
+        "reported": {
+          "tests": "316",
+          "pass": "315",
+          "fail": "1",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "212366.4882"
+        }
+      },
+      "race-red": {
+        "leaf_cases": 9,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "pass": 8,
+        "attributes": {},
+        "reported": {
+          "tests": "9",
+          "pass": "8",
+          "fail": "1",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "5499.6881"
+        }
+      },
+      "race-red-both": {
+        "leaf_cases": 10,
+        "fail": 2,
+        "error": 0,
+        "skip": 0,
+        "pass": 8,
+        "attributes": {},
+        "reported": {
+          "tests": "10",
+          "pass": "8",
+          "fail": "2",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "5400.9806"
+        }
+      },
+      "green-final": {
+        "leaf_cases": 18,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "pass": 18,
+        "attributes": {},
+        "reported": {
+          "tests": "18",
+          "pass": "18",
+          "fail": "0",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "17454.2441"
+        }
+      },
+      "root-final": {
+        "leaf_cases": 317,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "pass": 317,
+        "attributes": {},
+        "reported": {
+          "tests": "318",
+          "pass": "318",
+          "fail": "0",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "519306.7825"
+        }
+      },
+      "browser-final": {
+        "leaf_cases": 6,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "pass": 6,
+        "attributes": {
+          "id": "",
+          "name": "",
+          "tests": "6",
+          "failures": "0",
+          "skipped": "0",
+          "errors": "0",
+          "time": "47.728449"
+        },
+        "reported": {}
+      },
+      "crypto": {
+        "leaf_cases": 8,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "pass": 8,
+        "attributes": {
+          "name": "pytest tests"
+        },
+        "reported": {}
+      }
+    },
+    "static_gates": {
+      "lint": 0,
+      "types": 0,
+      "routes": 0,
+      "contracts": 0,
+      "crypto": 0,
+      "browser": 0
+    },
+    "actual_context_observation": [
+      {
+        "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+        "name": "api-context-receipt",
+        "observation": {
+          "fixture_only": true,
+          "external_verified": false,
+          "http_requests": 2,
+          "reservations": 2,
+          "private_cookie_isolation": true,
+          "raw_context_os_contained": false
+        }
+      },
+      {
+        "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+        "name": "owned-api-context-cleanup",
+        "observation": {
+          "fixture_only": true,
+          "external_verified": false,
+          "owned_context_disposed": true
+        }
+      },
+      {
+        "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+        "name": "owned-cleanup",
+        "observation": {
+          "fixture_only": true,
+          "external_verified": false,
+          "owned_journal_removed": true,
+          "owned_servers_closed": true
+        }
+      }
+    ],
+    "new_node_cases": 10,
+    "new_browser_cases": 1,
+    "new_build": false,
+    "fixture_only": true,
+    "canonical_db_connection": false,
+    "required_DB_suite_for_new_protocol_cases": false,
+    "DB_skips": 0,
+    "real_Neon_verified": false,
+    "parent_os_contained": false,
+    "browser_os_contained": false,
+    "raw_APIRequestContext_os_contained": false,
+    "arbitrary_provider_cli_contained": false,
+    "external_auth_requests": 0,
+    "full_N00_open": true,
+    "original302_rerun": false,
+    "schema_head": "0037_bulk_manifests",
+    "migrations": 0,
+    "operation_count": 84,
+    "original_operations": 70,
+    "extensions": 14,
+    "independent_review": "pending",
+    "deployed_sha": null,
+    "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+    "rollback": "Revert following metadata commit then source4ba0a5d7757d5c9e4991593a13c0a2df217be511;reverse patch check0 only;retain admitted/unknown journal holds;no DB/data rollback."
+  },
+  "latest_hosted_verification_20261006": {
+    "task": "Q11 PR11 hosted CI readback",
+    "date_hk": "2026-10-06",
+    "reviewed_test_config_source_sha": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
+    "reviewed_application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "ci_head_sha": "0e100d986c6a6636812abf97f6b20d36c8c65263",
+    "tested_merge_sha": "5c97cc797acb3288a18a76802e5b4a49e10e7237",
+    "tested_tree_sha": "974f6ef6ee93301f3e168da041e5ed430ccc67c3",
+    "merge_tree_matches_reviewed_branch": true,
+    "run_id": 37368187565,
+    "run_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/37368187565/attempts/2",
+    "final_attempt": 2,
+    "required_jobs_success": 8,
+    "first_attempt_continuity": "cancelled before steps: hosted runner not acquired; no tests counted",
+    "retry": "only continuity; seven successful job timestamps retained",
+    "checks": {
+      "research": {
+        "pass": 4,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "producer_seconds": 123.106,
+        "report": "reports/t30-browser.xml",
+        "testcases": [
+          {
+            "name": "T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+            "classname": "mvp-a-research.spec.ts",
+            "time": "35.982"
+          },
+          {
+            "name": "T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+            "classname": "mvp-a-research.spec.ts",
+            "time": "29.048"
+          },
+          {
+            "name": "T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+            "classname": "mvp-a-research.spec.ts",
+            "time": "29.224"
+          },
+          {
+            "name": "T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+            "classname": "mvp-a-research.spec.ts",
+            "time": "28.852"
+          }
+        ],
+        "local_report_checker_exit": 0
+      },
+      "workbench": {
+        "pass": 8,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "producer_seconds": 46.502,
+        "report": "reports/workbench.xml",
+        "testcases": [
+          {
+            "name": "T27 usage, queue filters and manual outcome history survive refresh in both locales",
+            "classname": "daily-workbench.spec.ts",
+            "time": "7.729"
+          },
+          {
+            "name": "T29 API-backed workbench reflows across routes and widths in en",
+            "classname": "daily-workbench.spec.ts",
+            "time": "4.827"
+          },
+          {
+            "name": "T29 API-backed workbench reflows across routes and widths in zh-HK",
+            "classname": "daily-workbench.spec.ts",
+            "time": "4.644"
+          },
+          {
+            "name": "T29 manual locale remains usable while preference loads and saves with its current version",
+            "classname": "daily-workbench.spec.ts",
+            "time": "5.16"
+          },
+          {
+            "name": "T29 operations resolves a failed profile lookup without a permanent spinner",
+            "classname": "daily-workbench.spec.ts",
+            "time": "3.128"
+          },
+          {
+            "name": "T29 live operations and results text meets measured AA contrast in both locales",
+            "classname": "daily-workbench.spec.ts",
+            "time": "3.929"
+          },
+          {
+            "name": "T29 scope list timeout offers a bounded retry with current identity",
+            "classname": "daily-workbench.spec.ts",
+            "time": "12.948"
+          },
+          {
+            "name": "T29 live form controls have a visible three-to-one boundary in both locales",
+            "classname": "daily-workbench.spec.ts",
+            "time": "4.137"
+          }
+        ],
+        "local_report_checker_exit": 0
+      },
+      "buyers": {
+        "pass": 1,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "producer_seconds": 7.358,
+        "report": "reports/buyers.xml",
+        "testcases": [
+          {
+            "name": "T08 real snapshot pages, selection scope, URL filters and dossier",
+            "classname": "buyer-results.spec.ts",
+            "time": "7.358"
+          }
+        ],
+        "local_report_checker_exit": 0
+      },
+      "buyer_management": {
+        "pass": 3,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "producer_seconds": 10.203,
+        "report": "reports/buyer-management.xml",
+        "testcases": [
+          {
+            "name": "T09 durable list, preset, note, owner and individual review journey",
+            "classname": "buyer-management.spec.ts",
+            "time": "5.531"
+          },
+          {
+            "name": "T09 viewer cannot mutate buyers or lists",
+            "classname": "buyer-management.spec.ts",
+            "time": "2.087"
+          },
+          {
+            "name": "T29 zh-HK list and saved filter actions use localized accessible names and feedback",
+            "classname": "buyer-management.spec.ts",
+            "time": "2.585"
+          }
+        ],
+        "local_report_checker_exit": 0
+      },
+      "mvp_partial_journey": {
+        "pass": 1,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "producer_seconds": 8.499,
+        "report": "reports/mvp-acceptance.xml",
+        "testcases": [
+          {
+            "name": "T30 partial fixture walkthrough: review, list, assign, exact approval, export and manual outcome",
+            "classname": "mvp-a-journey.spec.ts",
+            "time": "8.499"
+          }
+        ],
+        "local_report_checker_exit": 0
+      },
+      "api": {
+        "pass": 812,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "warnings": 101,
+        "producer_seconds": 376.53,
+        "scope": "attempt1 retained successful hosted job",
+        "source": "api-ci-green.log; required producer checker0; API XML not uploaded by current workflow"
+      }
+    },
+    "production_verification": false,
+    "deployed_sha": null,
+    "new_migrations": [],
+    "independent_review": "pending; author readback only; no agents",
+    "full_q11_n00_na01": "OPEN",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_HOSTED/RESULTS.md",
+    "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+    "rollback": "revert this evidence/status checkpoint only; no application/schema changes or DB undo; retain prior source and all admitted/unknown holds"
   }
 }

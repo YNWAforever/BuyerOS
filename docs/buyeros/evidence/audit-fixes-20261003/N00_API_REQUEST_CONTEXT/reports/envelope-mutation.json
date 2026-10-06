@@ -1,0 +1,7 @@
+{
+  "removed_only": "local serialized-envelope guard",
+  "actual_red_exit": 1,
+  "original_source_restored": true,
+  "test_assertions_weakened": false,
+  "request": "16400 quote characters fit auth body cap but exceed escaped gateway JSON cap"
+}

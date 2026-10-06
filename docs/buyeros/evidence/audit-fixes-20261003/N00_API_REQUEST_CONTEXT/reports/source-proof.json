@@ -1,0 +1,53 @@
+{
+  "source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
+  "base_sha": "ad1a54510f6a0fb2485392c878e7e867e9def6be",
+  "branch": "codex/n00-api-request-context",
+  "files": [
+    {
+      "path": "docs/superpowers/plans/2026-10-06-n00-api-request-context.md",
+      "tested_working_sha256": "40c9725f0d552cbfd3e9332ddb6356be1be9539540c144b9fc3ed5c28ce6704c",
+      "index_blob_sha256": "40e2470b94bd2827cff662e0eba4cec9822daa059f74556a36e164700b6da549",
+      "LF_normalized_working_matches_index": true,
+      "committed_blob_sha256": "40e2470b94bd2827cff662e0eba4cec9822daa059f74556a36e164700b6da549"
+    },
+    {
+      "path": "scripts/neon-api-request-context.d.mts",
+      "tested_working_sha256": "e51d12517fdd8429e313ef59ade238657a4f10537529ae478457c7881fb8e331",
+      "index_blob_sha256": "d55a53ef0a02930ac5b2a269a9b03ea75988077cc7e5738ba68602f8747844ad",
+      "LF_normalized_working_matches_index": true,
+      "committed_blob_sha256": "d55a53ef0a02930ac5b2a269a9b03ea75988077cc7e5738ba68602f8747844ad"
+    },
+    {
+      "path": "scripts/neon-api-request-context.mjs",
+      "tested_working_sha256": "505a1d463dfe22e59babee94f0139d9c61885960b1e280eabc13debf33336def",
+      "index_blob_sha256": "9222177c3ce8ec83668070a58d4addf7070810256bd063464b6744f7ca2e1180",
+      "LF_normalized_working_matches_index": true,
+      "committed_blob_sha256": "9222177c3ce8ec83668070a58d4addf7070810256bd063464b6744f7ca2e1180"
+    },
+    {
+      "path": "tests/e2e/audit-neon-execution.spec.ts",
+      "tested_working_sha256": "6575fa0423e7dd989614e3fff58657fdcada3fd1111a4f8ab7b8a8a5390d754e",
+      "index_blob_sha256": "24c38dd613cc12ec51aa3e7de7df571b7bac4378f7d29726e5785b793db5bcdc",
+      "LF_normalized_working_matches_index": true,
+      "committed_blob_sha256": "24c38dd613cc12ec51aa3e7de7df571b7bac4378f7d29726e5785b793db5bcdc"
+    },
+    {
+      "path": "tests/neon-api-request-context.test.mjs",
+      "tested_working_sha256": "ea976f1b81a9fcda21b3bcf7690bf7a176bf842889c628496385f716e268be12",
+      "index_blob_sha256": "90c47e6d740b29077d7f346f4a05455fade9e869b4318ee02f0e2846ae608c33",
+      "LF_normalized_working_matches_index": true,
+      "committed_blob_sha256": "90c47e6d740b29077d7f346f4a05455fade9e869b4318ee02f0e2846ae608c33"
+    },
+    {
+      "path": "tests/neon-compatibility-discovery.test.mjs",
+      "tested_working_sha256": "10e69d1286e3c1c0cf867aa9c11588f5bd2162b41684493b49e642bac66d6168",
+      "index_blob_sha256": "e8177aa4cf6e14fa57077cda44ef0dee56a48dfad00bee8ae3a1462e4afd8446",
+      "LF_normalized_working_matches_index": true,
+      "committed_blob_sha256": "e8177aa4cf6e14fa57077cda44ef0dee56a48dfad00bee8ae3a1462e4afd8446"
+    }
+  ],
+  "source_reverse_apply_check_exit": 0,
+  "rollback_executed": false,
+  "insertions": 155,
+  "deletions": 4
+}

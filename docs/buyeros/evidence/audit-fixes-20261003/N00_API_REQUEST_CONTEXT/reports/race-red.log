@@ -1,0 +1,33 @@
+✔ API request context persists each manual auth hop before HTTP and forwards only explicit in-memory headers (167.3726ms)
+✔ API context backend unknown intent stays held across fresh context and journal with renewed bearer (76.7303ms)
+✔ lost gateway response never autoretries an accepted write and restart retains the hold (87.8096ms)
+✔ unexpected gateway wire redirect cannot leak owner nonce to a foreign owned sink (61.4435ms)
+✔ unowned gateway, foreign journal, bad nonce and injected raw context are refused before HTTP (33.362ms)
+✔ invalid, administrative and oversized requests are refused before even the gateway wire (40.5441ms)
+✔ API context keeps the original auth budget and cleanup reserve intact (3129.7718ms)
+✔ disposed or rebound owned gateway cannot be silently adopted by an old API context (24.5849ms)
+✖ gateway ownership changing during body delivery or response disposal rejects the stale receipt (64.6371ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5499.6881
+
+✖ failing tests:
+
+test at tests\neon-api-request-context.test.mjs:60:1
+✖ gateway ownership changing during body delivery or response disposal rejects the stale receipt (64.6371ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/tests/neon-api-request-context.test.mjs:68:94)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /GATEWAY/,
+    operator: 'rejects',
+    diff: 'simple'
+  }

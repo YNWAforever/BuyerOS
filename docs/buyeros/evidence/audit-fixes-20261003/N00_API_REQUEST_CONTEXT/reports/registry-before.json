@@ -1,0 +1,3044 @@
+{
+  "format_version": 1,
+  "plan_status": "execution_in_progress",
+  "executor": "Codex GPT-6 Sol",
+  "audit_baseline": "5e61f401bf1bcdf80ea1ce254dd9c62e8eedbab0",
+  "date_hk": "2026-10-01",
+  "tasks": [
+    {
+      "id": "T00",
+      "title": "更新基線、合約與可執行測試環境",
+      "phase": "F0",
+      "depends_on": [],
+      "audit": [
+        "A17"
+      ],
+      "bo": "BO-000/001/003/028",
+      "modify": [
+        "docs/buyeros/PROGRESS.md",
+        "docs/buyeros/tasks/index.json",
+        "docs/buyeros/contracts/openapi.proposed.yaml",
+        "services/api/tests/conftest.py",
+        "services/worker/tests/conftest.py",
+        "package.json",
+        "README.md"
+      ],
+      "create": [
+        "docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md",
+        "docs/buyeros/decisions/2026-09-27-contract-delta.md",
+        "scripts/check-required-tests.py",
+        "scripts/generate-api-types.mjs",
+        ".github/workflows/buyeros-ci.yml",
+        "playwright.config.ts",
+        "tests/e2e/harness.spec.ts"
+      ],
+      "interfaces": "輸入：本包三份 audit、當前 HEAD/diff、既有 70 operationIds。輸出：按 operation 的 code/integrated/tested/deployed 四欄 ledger、OpenAPI delta、可重建 TS schema 與 CI。`check-required-tests.py --junit PATH` 對指定必要 suite 的 failure/error/skip 任一非零回 exit 1。新增測試工具與 scripts 必須在本任務建立後，後續命令才能使用。",
+      "tests": "`test_required_suite_skip_fails_gate`：含一項 skipped 的 JUnit fixture 必須 exit 1；完整 pass 為 0。`test_contract_required_fields`：缺任一 required response field、錯 enum、錯型別均失敗，不再只驗 keys 子集合。`harness.spec.ts`：隔離 API/DB 測試頁能在 preserved runtime 載入，不能以 demo 回應替代 live fixture。",
+      "steps": "先核對 remote/HEAD/AGENTS/工作樹，對 audit baseline 做 diff；已有修復用新證據標 resolved，避免覆蓋。讀完整原 BO 文件但把旧 proposed 路徑映射到現有 `api/routes`、`db`、`services`，不重新建立 `main.py/db.py` 第二套骨架。\n建立 CI 專用可丟棄 PostgreSQL 16 與 Valkey，API/worker 分開 test DB；現有 fixture 會 DELETE/ALTER ROLE，禁止接真實資料庫。新增 strict-integration 開關，在 CI 資料庫缺失直接失敗。\n鎖定並加入所需 Playwright、HTTP schema validation 及 OpenAPI TS generator 開發依賴，沿用 pnpm/uv locks；先盤點既有 generated/types。根據 SPEC 的明確 delta 同步 schemas、role map、生成器；每個後續任務提交自己的 response contract tests。把 missing provider/auth 設定分為「程式可用 fixtures 驗證」與「live activation blocked」。",
+      "command": "根目錄：node tests/domain-checks.mjs；node tests/live-adapter-checks.mjs；pnpm exec tsc --noEmit；pnpm lint；pnpm build。API/worker 各目錄：uv sync --frozen；uv run --frozen pytest -q --junitxml=artifacts/tests.xml。之後根目錄：python scripts/check-required-tests.py --junit services/api/artifacts/tests.xml（worker 同理）。新增 harness 後：pnpm exec playwright test tests/e2e/harness.spec.ts。",
+      "rollback": "僅變更開發工具／文件／合約；新增 CI 失敗不能靠降低 required coverage 或允許 skip 解決。",
+      "operations": [],
+      "status": "implemented_release_gate_open",
+      "verification": {
+        "domain_checks": "11 passed",
+        "live_adapter_checks": "60 passed",
+        "generated_types": "1 passed",
+        "typescript": "passed",
+        "build": "passed",
+        "api_pytest": "283 passed, 0 failed, 0 skipped",
+        "worker_pytest": "87 passed, 0 failed, 0 skipped",
+        "browser_smoke": "Hosted PR #7 CI run 36598703202 on f8eaec7: 1 passed with isolated PostgreSQL 16 and fake identity; missing bearer remains 401.",
+        "lint": "failed: 7 errors in unchanged features/workspace.tsx, 6 warnings in unchanged files; new T00 JS/TS files pass",
+        "deployed": "not run"
+      }
+    },
+    {
+      "id": "T01",
+      "title": "共用 idempotency：固定 target、precondition 與原始結果",
+      "phase": "F1",
+      "depends_on": [
+        "T00"
+      ],
+      "audit": [
+        "A03",
+        "A08"
+      ],
+      "bo": "BO-003/007",
+      "modify": [
+        "services/api/buyeros_api/api/idempotency.py",
+        "services/api/buyeros_api/api/routes/projects.py",
+        "services/api/buyeros_api/db/contact.py"
+      ],
+      "create": [
+        "services/api/tests/test_idempotency_replay_db.py"
+      ],
+      "interfaces": "在 `api/idempotency.py` 定義 `request_fingerprint(operation_id: str, target: dict, precondition: str | None, body: dict) -> str`；擴充現有 begin/complete helper，scope 仍為 workspace/actor/operation/key，target 放 fingerprint。`complete_idempotency` 保存 status、version、resource_id 與最小 replay payload；不要新增第二套 ledger。",
+      "tests": "`test_same_key_same_request_replays_exact_result`：原 project 後來已更新，重試仍回原 mutation 結果。`test_same_key_other_target_conflicts`：A/B 同 body/key→409，B 無變動。`test_changed_if_match_conflicts`：同 key 改 precondition→409。`test_twenty_concurrent_same_keys_one_write`：20 connections→一個結果 identity，無 500。權限已撤銷的 replay 仍拒絕。",
+      "steps": "先在真 PostgreSQL 加 failing replay/concurrency tests。\n把 canonical serializer version 納入 record；取得 ledger 後檢查完整 fingerprint 和 recorded target，再做業務鎖。對 completed replay 先重驗現在身份與讀取權限，不能藉 replay 暴露已失權內容；敏感 export/contact 只保存不含 PII 的結果指標並重新授權。\n對歷史缺少 target 的 project update/archive records 不猜測，回可識別 conflict／要求新動作 key，保留歷史；新 create 回傳最初 resource/version。同 transaction 完成 ledger、mutation、audit/outbox（如適用）；存在 in-progress record 回固定資源或 bounded retry，不能重複執行。需要欄位才新增下一個 Alembic revision。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_idempotency_replay_db.py tests/test_api_projects_db.py",
+      "rollback": "關閉受影響寫入入口；保留 ledger，不清空 keys 來「修復」重試。Additive migration 優先 roll-forward。",
+      "operations": [
+        "createProject",
+        "updateProject",
+        "archiveProject"
+      ],
+      "status": "implemented_fixture_verified",
+      "verification": {
+        "red": "3 replay/target/precondition tests failed before fix; ledger payload test failed before metadata fix",
+        "task_and_contract_checks": "42 passed, 0 failed, 0 skipped on disposable PostgreSQL",
+        "shared_buyer_regression": "35 passed, 0 failed, 0 skipped",
+        "concurrency": "20 same-key requests returned one version 2 result",
+        "migration": "none; existing 0011 JSONB response column reused",
+        "ui": "not run for T01",
+        "deployed": "not run"
+      }
+    },
+    {
+      "id": "T02",
+      "title": "嚴格 ICP schema、真正重試安全與版本編號",
+      "phase": "F1",
+      "depends_on": [
+        "T01"
+      ],
+      "audit": [
+        "A03",
+        "A04"
+      ],
+      "bo": "BO-007",
+      "modify": [
+        "services/api/buyeros_api/api/schemas.py",
+        "services/api/buyeros_api/api/routes/icp.py",
+        "services/api/buyeros_api/api/errors.py",
+        "services/api/buyeros_api/db/icp.py"
+      ],
+      "create": [
+        "services/api/tests/test_icp_write_integrity_db.py",
+        "services/api/tests/test_icp_validation_http.py"
+      ],
+      "interfaces": "Pydantic `ICPSaveRequest`、`ICPApproveRequest` 對應 OpenAPI；新增 save `basis_offer_revision: int >= 1` 與 approve `expected_project_version: int >= 1`（SPEC delta）。`save_icp_version` 回完整 ICPVersionResponse，沿用 route signature，由 framework 解析 strict body。",
+      "tests": "`test_invalid_icp_never_writes`：{}、requirements string、markets number、unknown field、壞 UUID、少於1 fact/requirement、超上限、1字元 key→400/422且零 row。`test_malformed_json_envelope`：422 INVALID_REQUEST + request_id/header，非500。`test_retried_save_one_version`：同 key 同資料得同 id/number。`test_parallel_distinct_saves`：有序不同 number，無未處理 unique error。",
+      "steps": "依現版 OpenAPI 複製必填、長度和 nested enum，保留 stable fact/requirement UUID；approved=true 不能自行授予審批權。先加入 basis 欄位，未能驗 basis 的狀態不得允許 approved；T03 完成 binding。\n套用 T01 helper，在 Project 鎖內配置下一個 ICP number，檢查 parent/document 所有權及同 project；存 immutable content/hash。不可只 patch mock tests。\n用框架 JSON validation 統一422；確保所有錯誤都有 request_id、retryability 及安全 message，5xx detail 不回 stack/secret。所有 8..200 Idempotency-Key 路徑一致。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_icp_validation_http.py tests/test_icp_write_integrity_db.py tests/test_api_routes_contract.py",
+      "rollback": "不能改舊 ICP 內容或 hash；舊不合規資料標 legacy/unapprovable，要求另存有效 successor。",
+      "operations": [
+        "saveICPVersion"
+      ],
+      "status": "implemented_fixture_verified"
+    },
+    {
+      "id": "T03",
+      "title": "Offer basis、審批鎖序與 stale/archive 保護",
+      "phase": "F1",
+      "depends_on": [
+        "T02"
+      ],
+      "audit": [
+        "A06",
+        "A09"
+      ],
+      "bo": "BO-007",
+      "modify": [
+        "services/api/buyeros_api/api/routes/projects.py",
+        "services/api/buyeros_api/api/routes/icp.py",
+        "services/api/buyeros_api/db/icp.py",
+        "services/api/buyeros_api/services/icp_service.py"
+      ],
+      "create": [
+        "services/api/tests/test_profile_approval_races_db.py"
+      ],
+      "interfaces": "Project 增 `offer_revision`；ICP 增 `basis_offer_revision`。內部 `approve_icp(session: AsyncSession, project_id: UUID, icp_id: UUID, expected_project_version: int, content_hash: str, actor_id: UUID) -> dict` 放 `services/icp_service.py`，回 ICPVersion 合約資料。Project.version 與 offer_revision 分開。",
+      "tests": "`test_saved_v2_approval_preserves_v1_history`；`test_offer_change_stales_pending_basis`：保存v2後改offer→舊v2批准412。`test_approve_archived_project_denied`。`test_approve_update_archive_races`：獨立 connections+barrier 重複競爭，無未處理 deadlock；stale expected_project_version 的批准失敗。同一批准重試回 T01 原結果。",
+      "steps": "所有競爭路徑固定 idempotency→Project→ICP（涉及多筆按 UUID排序）；批准、update、archive 共用順序。Material offer/market/language edit 增 offer_revision；rename 不必令研究 basis 失效。\nSave 要求 caller basis 等於鎖內現值；approve 比較 ICP hash/number、basis、project.version、active status、角色；更新 active pointer 與 Project.version 同 transaction。歷史 approved/superseded 留存，不能重寫。\n回傳完整 profile 內容/來源/requirements及 current/saved/stale 標示，list 加 offset/limit<=100；補 approval audit；歷史 basis 不明不回填成「已證明」，採 successor 修復。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_profile_approval_races_db.py tests/test_icp_write_integrity_db.py tests/test_api_projects_db.py",
+      "rollback": "先停 profile approval；不還原或刪除已批准歷史。Pointer 修正須有 audit 與版本比對。",
+      "operations": [
+        "listProjects",
+        "getProject",
+        "listICPVersions",
+        "approveICPVersion"
+      ],
+      "status": "implemented_fixture_verified"
+    },
+    {
+      "id": "T04",
+      "title": "DB 同專案限制、RLS、JWKS 及 runtime lifecycle",
+      "phase": "F1",
+      "depends_on": [
+        "T03"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-004/005/026",
+      "modify": [
+        "services/api/buyeros_api/db/models.py",
+        "services/api/buyeros_api/db/buyers.py",
+        "services/api/buyeros_api/db/icp.py",
+        "services/api/buyeros_api/api/jwks.py",
+        "services/api/buyeros_api/api/deps.py",
+        "services/api/buyeros_api/api/app.py"
+      ],
+      "create": [
+        "services/api/tests/test_project_constraints_db.py",
+        "services/api/tests/test_auth_cache_lifecycle.py"
+      ],
+      "interfaces": "沿用 SQLAlchemy models／tenant_session；為 project-bound links 實施 `(workspace_id, project_id, id)` composite reference。新增 JWKS `max_stale_seconds` 可配置 hard ceiling；建議預設3600秒、normal refresh300秒，屬本計劃安全預設，不是供應商保證。",
+      "tests": "`test_same_tenant_cross_project_links_rejected` 包含 buyer/list、assessment/evidence/run/ICP、active pointer。`test_runtime_role_pool_reuse_isolated` 以非owner/NOBYPASSRLS測 A/B/無context。`test_jwks_stale_ceiling`：舊key outage超3600秒拒絕、未知kid刷新失败拒絕、撤銷membership立即拒絕。`test_app_shutdown_disposes_pool`。",
+      "steps": "先列既有不一致 rows/count，migration 不自動刪資料；違例產 remediation report。以可驗證 migration 增 unique/composite FK/index，避免 active pointer 循環插入死結，允許初始化 null 再指定合法ICP。\nJWKS 用 monotonic time、有界 refresh/backoff；fetch失敗不能無限延壽，signature/iss/aud/exp/alg 檢查不可放寬。\nAPI lifespan 接 dispose_engines；檢查每 route 角色映射及新operation無權限預設拒絕（不得因 admin wildcard 默許未定義能力）。Runtime與migration roles分離，加入物件/event/export/count隔離測試。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_project_constraints_db.py tests/test_auth_cache_lifecycle.py tests/test_jwks_cache.py tests/test_tenant_isolation_db.py tests/test_api_tenant_isolation.py",
+      "rollback": "新增 constraint 先於擴大 writes；有 legacy violations 則停該 migration 並列具體 rows，不作 destructive cleanup。",
+      "operations": [],
+      "status": "implemented_fixture_verified"
+    },
+    {
+      "id": "T05",
+      "title": "OIDC 登入、reactive session、工作區及專案導航",
+      "phase": "F2",
+      "depends_on": [
+        "T04"
+      ],
+      "audit": [
+        "A01",
+        "A07",
+        "A16"
+      ],
+      "bo": "BO-004/006/025",
+      "modify": [
+        "features/providers/workspace-session.tsx",
+        "services/live/session.ts",
+        "features/live/overview.tsx",
+        "features/workspace.tsx",
+        "app/[...slug]/page.tsx"
+      ],
+      "create": [
+        "services/live/auth.ts",
+        "features/live/workspace-picker.tsx",
+        "app/auth/callback/page.tsx",
+        "tests/e2e/live-auth-scope.spec.ts"
+      ],
+      "interfaces": "`AuthAdapter` in auth.ts：`signIn(returnPath: string): Promise<void>`、`completeCallback(): Promise<void>`、`getAccessToken(): Promise<string>`、`signOut(): Promise<void>`。SessionScope 加 `subscribe(listener): () => void`、stable `getSnapshot()`；`captureWriteContext(): {identity, actor, workspace, project, signal}`，token仍私有。",
+      "tests": "`live-auth-scope.spec.ts`：無membership、1/多workspace、callback state/nonce/PKCE錯、token expiry、logout、A→B→A晚到結果、project不存在、reload皆正確。無授權workspace不發write；不把 token 放URL/localStorage/log。測試 OIDC issuer 僅在隔離 harness，正式 build 不能啟用 fixture auth。",
+      "steps": "沿用 ADR Auth0 public SPA+PKCE；核查現有 Auth0 app是否仍是confidential型態，缺正確設定用清楚blocked狀態，不能把client secret塞前端。API membership為authority；初始管理員由一次性受控bootstrap建立，禁止首個登入者自動成admin。\n對現有 `/app` 路徑以 `workspace/project/profile` query scope 保存deep link；既有run route保留，unknown id明確404。Provider通知React，membership/project選取後才read/write；每次新scope增加generation並取消舊工作。\n登入恢復時重新驗scope；清空舊敏感cache；UI按 server roles顯示動作。此任務可在test issuer完成，正式Auth0 round trip另列activation gate。",
+      "command": "根目錄：node tests/live-adapter-checks.mjs；pnpm exec playwright test tests/e2e/live-auth-scope.spec.ts",
+      "rollback": "身份接駁異常就關閉live entry，保留demo獨立入口；禁止live錯誤自動切demo。",
+      "operations": [
+        "listWorkspaces"
+      ],
+      "status": "implemented_fixture_verified"
+    },
+    {
+      "id": "T06",
+      "title": "CORS、typed live client 及通用 scope 保護",
+      "phase": "F2",
+      "depends_on": [
+        "T05"
+      ],
+      "audit": [
+        "A02",
+        "A07",
+        "A17"
+      ],
+      "bo": "BO-003/006",
+      "modify": [
+        "services/api/buyeros_api/api/app.py",
+        "services/api/buyeros_api/settings.py",
+        "services/live/client.ts",
+        "services/live/writes.ts",
+        "services/generated/buyeros-api.ts"
+      ],
+      "create": [
+        "services/live/operations.ts",
+        "services/api/tests/test_cors_http.py",
+        "tests/e2e/live-cors-errors.spec.ts"
+      ],
+      "interfaces": "`requestOperation<K extends keyof operations>(id: K, input: OperationInput<K>, ctx: WriteContext): Promise<OperationOutput<K>>` 在 operations.ts；OperationInput/Output 從 T00 generated OpenAPI types 推導，WriteContext為T05 capture結果加取token函式，不複製 DTO。",
+      "tests": "`test_preflight_allowed_origin`：Authorization/JSON/Idempotency-Key/If-Match成功；拒絕origin无allow-origin。401/412/422仍可讀request-id；ETag exposed。`test_scope_changed_between_writes`：create後切workspace，不送第二request、不改新session。abort後server可能已提交，重試回同結果。",
+      "steps": "CORS包住成功及error response；明確 allowlist、GET/POST/PATCH/DELETE/OPTIONS、所需header；bearer API不採 ambient cookie auth，不加wildcard。\n先從service boundary替換generic unchecked casts；所有mutations採固定scope、AbortSignal、步驟前後generation check。錯誤轉已翻譯可執行提示，401重新登入、412比較、409重新選取/quote，不通用盲重试。\n由action建立且綁定immutable payload的key；double click共用inflight，改payload是新動作，失去response保持原key。列出request-id供copy。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_cors_http.py。根目錄：node tests/live-adapter-checks.mjs；pnpm exec playwright test tests/e2e/live-cors-errors.spec.ts",
+      "rollback": "回退client變更前保留server正確CORS/auth；不要以放寬origin或吞掉401令畫面「恢復」。",
+      "operations": [],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T07",
+      "title": "完整 Offer Wizard、內容審批與 live shell",
+      "phase": "F2",
+      "depends_on": [
+        "T06"
+      ],
+      "audit": [
+        "A05",
+        "A06",
+        "A11",
+        "A16"
+      ],
+      "bo": "BO-007/025",
+      "modify": [
+        "features/live/offer-wizard.tsx",
+        "features/live/profile.tsx",
+        "features/discovery/wizard.tsx",
+        "features/workspace.tsx",
+        "services/live/profile.ts",
+        "services/live/writes.ts",
+        "services/live/mapping.ts"
+      ],
+      "create": [
+        "features/live/project-manager.tsx",
+        "tests/e2e/offer-profile.spec.ts"
+      ],
+      "interfaces": "`saveProfile({mode: \"create\"|\"edit\", projectId?, expectedProjectVersion?, basisOfferRevision?, offer, actionKey, ctx}) -> Promise<{project, icpVersion}>`，兩個結果用generated response types；create/edit意圖明確，不以selected project猜測。`approveProfile`傳 exact ICP hash/number和 expectedProjectVersion。",
+      "tests": "`offer-profile.spec.ts`：建立→保存→approve v1→修改product/value→save v2→reload→查看差異→approve v2；確認PATCH真的送出且重讀一致。create已成功但ICP失敗→原key恢復不建第二project。busy雙擊單次write；viewer不可寫、operator不可approve；en/zh-HK、錯誤focus、未存離開提示。",
+      "steps": "Validate全表單再首次write；用user_entered stable facts保存產品與價值，不再offer_facts=[]。已有專案以If-Match PATCH，依返回offer_revision保存ICP；step result以非PII action metadata恢復，refresh後可選已建立project再繼續。多步不是假裝原子，顯示「專案已保存／輪廓待保存」。\n儲存導航到新profile ID；current與pending分欄，展示requirements/must/nice/exclude、facts、markets/languages、sources和diff；批准只對正在顯示的exact version。\n抽出mode-aware Wizard actions，移除live demo文案和noop search，busy disable、取消/恢復、field errors；sidebar用真identity/project/budget空值。Markets/languages選項由capabilities約束，不硬編只支援DE/NL/BE。Settings可用性不依discovery。專案edit/archive manager有reason與history入口。",
+      "command": "根目錄：node tests/live-adapter-checks.mjs；pnpm exec playwright test tests/e2e/offer-profile.spec.ts；pnpm exec tsc --noEmit；pnpm build",
+      "rollback": "保留舊approved profile可讀；關閉問題write入口，不把不完整save顯示成功。",
+      "operations": [],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T08",
+      "title": "穩定買家 snapshot、分頁及完整 dossier read model",
+      "phase": "F3",
+      "depends_on": [
+        "T07"
+      ],
+      "audit": [
+        "A10",
+        "A15"
+      ],
+      "bo": "BO-008/014",
+      "modify": [
+        "services/api/buyeros_api/api/routes/buyers.py",
+        "services/api/buyeros_api/services/snapshot_service.py",
+        "services/api/buyeros_api/db/buyers.py",
+        "features/buyers/detail.tsx"
+      ],
+      "create": [
+        "services/live/buyers.ts",
+        "features/live/buyer-results.tsx",
+        "services/api/tests/test_snapshot_access_db.py",
+        "tests/e2e/buyer-results.spec.ts"
+      ],
+      "interfaces": "`create_snapshot(session, actor_id: UUID, project_id: UUID, request: SnapshotCreate) -> BuyerSnapshot`；`resolve_selection(session, actor_id, project_id, selection: Selection) -> list[tuple[UUID,int]]`（SnapshotCreate/Selection為OpenAPI schemas）。列表回BuyerPage，drawer讀identity/evidence/fit/review/contact維度分離資料。",
+      "tests": "`test_actor_expiry_filter_guard`：同tenant他人snapshot、跨project、900秒expiry、filter變更都拒絕。`test_stable_pagination_while_new_results_arrive`：並行insert不移位/重複；limit101→422；1001 selection拒絕。`buyer-results.spec.ts`：8/12/24 rows、本頁/全篩選/排除、URL filters、drawer next/previous。",
+      "steps": "在資料庫materialize最多1000 versioned IDs，TTL900秒，stable sort最後用buyer_id tie-break；limit1..100，default20，SQL分页，不全部取回再slice。對大於1000 filter顯示bounded count及縮窄提示，不聲稱已選全部。\n逐次read與mutation重驗actor/project/membership/expiry，不以snapshot代替權限。讀取permissions改變顯示明確row unavailable，不能洩露被撤權contact。\nDossier回應必要完整fields及permitted sources，避免N+1，null資料不冒充sample；fixture只經test harness種入隔離DB。T17/T19日後寫入相同model，無需第二套resultsUI。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_snapshot_access_db.py tests/test_api_buyers.py。根目錄：pnpm exec playwright test tests/e2e/buyer-results.spec.ts",
+      "rollback": "停snapshot create或顯示重選；不延長已過期selection去繞過409。",
+      "operations": [
+        "createBuyerSnapshot",
+        "listBuyers",
+        "getBuyer",
+        "listBuyerEvidence",
+        "getEvidence"
+      ],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T09",
+      "title": "人工審閱、owner/note、清單及保存篩選",
+      "phase": "F3",
+      "depends_on": [
+        "T08"
+      ],
+      "audit": [
+        "A12"
+      ],
+      "bo": "BO-008",
+      "modify": [
+        "services/api/buyeros_api/db/buyers.py",
+        "services/api/buyeros_api/api/routes/buyers.py",
+        "services/api/buyeros_api/services/approval_service.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/buyer_management.py",
+        "services/api/buyeros_api/services/buyer_management.py",
+        "services/api/tests/test_buyer_management_db.py",
+        "tests/e2e/buyer-management.spec.ts"
+      ],
+      "interfaces": "`review_buyers(session, actor_id, project_id, request: BuyerReviewRequest) -> BulkResult`（以實際OpenAPI request schema名生成alias）；`update_buyer(..., expected_version: int, patch: BuyerUpdate) -> Buyer`。List/preset採既有operationIds和schemas，不另建 lead/campaign domain。",
+      "tests": "接受/拒絕/needs_information均append review並綁當時ICP/assessment；stale assessment不可當current accepted。foreign/inactive owner拒絕。same-project list重加unchanged、跨project拒絕。note變更不改draft正文revision；material review撤銷即invalidate approval。filter保存reload同scope。",
+      "steps": "以T08 selection解析器＋per-item version locks做審閱；不能允許一次POST任意覆寫fit/contact/policy。寫入review event、buyer.version、audit。\n實作list create/read/rename/membership及preset list/save，name長度等沿用schemas；已在清單是unchanged；移除清單成員不刪buyer。\nUI單列及批量review共用server result；drawer保留Overview/Evidence/Contacts/Activity，允許人工檢查證據後「儲存並下一筆」。Owner/note inline edit顯示pending和412，不覆蓋他人修改。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_buyer_management_db.py。根目錄：pnpm exec playwright test tests/e2e/buyer-management.spec.ts",
+      "rollback": "以superseding review或版本化更正回復；不刪除review/audit history。",
+      "operations": [
+        "updateBuyer",
+        "reviewBuyers",
+        "listBuyerLists",
+        "createBuyerList",
+        "getBuyerList",
+        "renameBuyerList",
+        "changeListMemberships",
+        "listFilterPresets",
+        "saveFilterPreset"
+      ],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T10",
+      "title": "用途政策、suppression 及同步失效判定",
+      "phase": "F3",
+      "depends_on": [
+        "T09"
+      ],
+      "audit": [
+        "A12",
+        "A18"
+      ],
+      "bo": "BO-009/026",
+      "modify": [
+        "services/api/buyeros_api/services/policy_service.py",
+        "services/api/buyeros_api/db/policy.py",
+        "services/api/buyeros_api/services/approval_service.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/policy.py",
+        "services/api/tests/test_policy_lifecycle_db.py",
+        "features/live/policy-settings.tsx"
+      ],
+      "interfaces": "沿用 `policy_service` pure helpers，新增 `evaluate_current_policy(session, subject: dict, purpose: str, now: datetime) -> dict`，結果為合約PolicyDecision/effective gates。權限目的分 contact research、draft preparation、account/contact export、outreach。",
+      "tests": "valid contact+accepted buyer+unknown policy仍拒絕；suppression新增立即阻止未提交工作與export；remove不復活舊approval；expiry回unknown；workspace/project/contact最嚴格rule生效。mutation與dispatch race用同subject gate證明無穿透；late result可settle但quarantine不展示。",
+      "steps": "提供list/write policy和suppression add/remove，理由、scope、purpose、expiry、actor審計完整；client無法自行將policy設permitted。\n建立server同步gate供T18/T21/T22/T24/T25/T26使用；異步fan-out只加速cache invalidation，不能作唯一保護。分離 provider validity、suppression、fit和人手審閱status。\nUI寫清blocked reason與authorized next step；policy controller/retention仍需真實批准，test fixture許可不啟用真實候選人資料。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_policy_lifecycle_db.py tests/test_policy.py tests/test_approval.py",
+      "rollback": "rollback採更嚴格blocked狀態；撤销事件留存，不自動重新准許已阻擋工作。",
+      "operations": [
+        "listPolicyDecisions",
+        "recordPolicyDecision",
+        "listSuppressions",
+        "createSuppression",
+        "removeSuppression"
+      ],
+      "status": "implemented_disposable_integration_verified_policy_activation_blocked"
+    },
+    {
+      "id": "T11",
+      "title": "可恢復批量操作、分派與逐列結果",
+      "phase": "F3",
+      "depends_on": [
+        "T10"
+      ],
+      "audit": [
+        "A12",
+        "A13"
+      ],
+      "bo": "BO-008/024（audit新增bulk owner）",
+      "modify": [
+        "services/api/buyeros_api/db/outbox.py",
+        "services/api/buyeros_api/api/routes/buyer_management.py",
+        "services/api/buyeros_api/services/buyer_management.py",
+        "features/live/buyer-results.tsx"
+      ],
+      "create": [
+        "services/api/buyeros_api/services/bulk_service.py",
+        "services/api/buyeros_api/api/routes/jobs.py",
+        "services/worker/buyeros_worker/handlers/bulk_mutate.py",
+        "features/live/bulk-actions.tsx",
+        "services/api/tests/test_bulk_jobs_db.py",
+        "tests/e2e/bulk-actions.spec.ts"
+      ],
+      "interfaces": "新contract operation `assignBuyerOwners` 見SPEC。現有review/list mutation增加明確202 AsyncJobResponse選項；<=100列可同步，101..1000列背景job；`getAsyncJob`回progress和bounded result pages。`apply_bulk_chunk(session, job_id: UUID, limit: int = 50) -> dict` 回committed counts，item unique(job,buyer)。",
+      "tests": "`test_bulk_partial_result_and_resume`：混合合法/stale/blocked rows→updated/unchanged/blocked/conflict總和=requested；worker第2chunk crash後續跑不重做第1chunk。`test_retry_failed_only_new_versions`：重選current versions且只含失敗項。snapshot1010拒絕、wrong actor拒絕、job read外租戶404。UI有預覽/確認/進度/失敗原因匯出。",
+      "steps": "先持久job/intents，重用既有outbox/runtime，T15再強化運行；新增bulk handler不直接送broker。固定selection及排除IDs，每項重驗角色/版本/owner資格。先鎖job control再排序buyer，per-item audit同transaction。\nUI流程選取→预覽範圍/原因→確認→可reload job→逐列結果→只重試衝突/失敗；沒有假all-success toast。owner可清空，但不能指向停用membership。\n早期failure report只含內部buyer_id/原因，不含contact/個人資料；仍要current job授權。稍後T26共用完整authorized export framework。取消只停止未執行items，已提交項目顯示已完成，不聲稱全批rollback。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_bulk_jobs_db.py。根目錄：pnpm exec playwright test tests/e2e/bulk-actions.spec.ts",
+      "rollback": "暫停新bulk job；已完成列保留，必要補償操作須用新command及audit。",
+      "operations": [
+        "getAsyncJob"
+      ],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T12",
+      "title": "Settings、成員角色、audit 與營運工作台",
+      "phase": "F3",
+      "depends_on": [
+        "T11"
+      ],
+      "audit": [
+        "A11",
+        "A13"
+      ],
+      "bo": "BO-024/025/026/028（成員管理新增）",
+      "modify": [
+        "services/api/buyeros_api/api/routes/health.py",
+        "services/api/buyeros_api/db/models.py",
+        "features/live/overview.tsx",
+        "features/workspace.tsx"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/settings.py",
+        "services/api/buyeros_api/api/routes/memberships.py",
+        "services/api/buyeros_api/api/routes/audit.py",
+        "features/live/settings.tsx",
+        "features/live/operations.tsx",
+        "services/api/tests/test_admin_operations_db.py",
+        "tests/e2e/admin-settings.spec.ts"
+      ],
+      "interfaces": "新 `listMemberships/updateMembership` operation見SPEC；僅管理已存在且由核實 identity bootstrap 建立之membership，不新增自助跨租戶邀請。`readiness_payload` 以實際DB/broker/worker heartbeat產生狀態；capabilities ready須綁已驗證配置/health而非環境變數存在。",
+      "tests": "viewer/operator直接呼叫admin route被拒絕；不能移除最後active workspace_admin；role改變立即影響既有session。archive reason在audit可見；audit無token/contact正文。未配置research仍可打開Settings；worker heartbeat過期degraded；budget零/缺值不NaN。preferences zh-HK reload後保留。",
+      "steps": "Preference按actor/workspace持久化；roles精確沿用viewer/operator/reviewer/workspace_admin，UI「管理員」不是新role enum。membership變更If-Match+reason+audit，拒絕無限權限升級。\n工作台先顯示已有真實read model可支持的待批/待審/失敗job，其他卡片明示未接通；T27补complete metrics，不能填sample counts。Operations提供request-id、job filter、integration status、retry eligibility，不能查看secrets。\n新增共用audit append helper並回接T01–T11 mutations；health public liveness保持最小，readiness受權限；部署後T15接heartbeat。所有尚未提供的控制項disabled並給原因。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_admin_operations_db.py tests/test_api_health.py。根目錄：pnpm exec playwright test tests/e2e/admin-settings.spec.ts",
+      "rollback": "保留最後admin與只讀audit；角色回復使用可追蹤的版本化變更。",
+      "operations": [
+        "getLiveness",
+        "getReadiness",
+        "getCapabilities",
+        "getPreferences",
+        "updatePreferences",
+        "listAuditEvents"
+      ],
+      "status": "implemented_integration_verified_disposable_db_fake_identity"
+    },
+    {
+      "id": "T13",
+      "title": "原子預算、Decimal ledger、period rollover",
+      "phase": "F4",
+      "depends_on": [
+        "T12"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-010/024",
+      "modify": [
+        "services/api/buyeros_api/services/budget_service.py",
+        "services/api/buyeros_api/services/settlement.py",
+        "services/api/buyeros_api/db/budget.py",
+        "services/api/buyeros_api/api/routes/projects.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/budgets.py",
+        "services/api/tests/test_budget_atomicity_db.py",
+        "services/api/tests/test_budget_rollover_db.py"
+      ],
+      "interfaces": "`reserve_operation(session, operation_id: UUID, scope: dict, upper_bound: Decimal, currency: str, price_version: str) -> UUID`；`settle_operation(session, operation_id: UUID, actual: Decimal, external_event_id: str) -> dict`。Money為NUMERIC(20,6)/Decimal/USD string；SignedMoney供net metrics，禁止float。",
+      "tests": "20個並行確認上限不得超支；一次operation在workspace/project/run/category投影不能重複計算。quote不reserve；unknown hold跨日/月仍保留；UTC rollover race、late refund、zero new-period limit、limit reduction below settled+held拒絕。settle重複event一次effect，未有cost evidence不可當免費。",
+      "steps": "重用既有budget/reservation/events表，在短transaction按固定workspace→project→run→category和ID鎖；先policy/admission再計算cap。零額project/category accounts隨project建立；migration對歷史project補零額，不給預算授權。\n新period零limit，carried unknown holds計入有效reserved，超cap則freeze新admission但繼續reconcile。reservation origin不改，退款append reversal不改舊ledger。\n提供listBudgets/updateBudget，server budget role依contract，If-Match/reason/audit；UI用字串money formatting，remaining<0顯示freeze不負數進度。Reserve和job/outbox同transaction接口供T18/T22使用；沒有可信provider上限就blocked。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_budget_atomicity_db.py tests/test_budget_rollover_db.py tests/test_budget.py tests/test_settlement.py",
+      "rollback": "kill switch停止新paid admission；保留settle/reconcile/read。用compensating events修正，禁止DELETE財務歷史。",
+      "operations": [
+        "listBudgets",
+        "updateBudget"
+      ],
+      "status": "implemented_disposable_integration_verified",
+      "checkpoint": "T13 strict API 397 passed/0 skipped (t13-api-settled.xml); targeted final 13 passed/0 skipped; 0018 migration chain 8 passed including empty downgrade/re-upgrade and legacy-row refusal. Fresh disposable PostgreSQL + fake-OIDC browser T13 1 passed; budget save/reload/zh-HK/390px/viewer denial. No live provider, Auth0 or deployment."
+    },
+    {
+      "id": "T14",
+      "title": "供應商能力契約、價格證據與可替换 adapter",
+      "phase": "F4",
+      "depends_on": [
+        "T13"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-002/013/017/019/021",
+      "modify": [
+        "services/api/buyeros_api/providers/search.py",
+        "services/api/buyeros_api/services/provider_op.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/providers/base.py",
+        "services/api/buyeros_api/providers/contact.py",
+        "services/api/buyeros_api/providers/model.py",
+        "docs/buyeros/provider-capabilities.md",
+        "services/api/tests/test_provider_contracts.py"
+      ],
+      "interfaces": "`ProviderCapability` fields：provider/adapter_version/service/markets/languages/auth_model/pricing_version/max_liability/idempotency/status/callback/cancel/retention/verified_at/source_urls。Adapter methods `estimate(request)->Money`、`submit(intent)->SubmissionResult`、`status(provider_ref)->StatusResult`；types在base.py定義，result包含accepted/unknown、provider_ref、observed_usage、redacted_digest，不含假vendor guarantees。",
+      "tests": "unsupported market/role、無bounded tariff、unknown status semantics→capability blocked。deterministic fixture驗timeout-after-acceptance=unknown、duplicate ref不重settle、price change需reconfirm。search/model/contact獨立capabilities，不能因searchready就讓contactready。fixture adapter在正式配置不可選。",
+      "steps": "從現有BO-002/upstream記錄開始；以官方最新docs核實選定search、model、contact供應商。不要從規劃placeholder發明vendor endpoint/webhook schema，不為了完成計劃自動採購。\n建立redacted fixture和schema驗證；每個model route/prompt版本記錄tools、tokens、deadline、repair上限；原始頁面不能控制tools。供應商未決仍實作protocol＋fixtures，狀態是implemented-fixture/activation-blocked。\n完成重用/授權inventory；GPL finder/orchestrator不默認複製進產品，現有permissive helpers先用。供應商實際payload、價目證據及授權條件就緒後才合入live adapter；不需因此停止無關修復。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_provider_contracts.py tests/test_search_adapter.py tests/test_provider_op.py",
+      "rollback": "停該capability的新submit，保留舊adapter版本供已在途operation reconciliation。",
+      "operations": [],
+      "status": "implemented_fixture_verified_activation_blocked",
+      "checkpoint": "T14 red import failure observed; final strict targeted command 16 passed/0 failed/errors/skipped (t14-targeted-green.xml). Synthetic adapter, exact USD money, unknown hold, duplicate provider ref/one ledger event and separate service gates verified. Named live provider/price/rights/status evidence absent; live allowlist empty. No migration or provider call."
+    },
+    {
+      "id": "T15",
+      "title": "Dispatcher 服務、worker engine、lease 與外部呼叫交易邊界",
+      "phase": "F4",
+      "depends_on": [
+        "T14"
+      ],
+      "audit": [
+        "A14",
+        "A15"
+      ],
+      "bo": "BO-011/027",
+      "modify": [
+        "services/worker/buyeros_worker/dispatcher.py",
+        "services/worker/buyeros_worker/tasks.py",
+        "services/worker/buyeros_worker/engine.py",
+        "services/worker/buyeros_worker/cli.py",
+        "services/worker/buyeros_worker/app.py",
+        "services/worker/buyeros_worker/leases.py"
+      ],
+      "create": [
+        "services/worker/buyeros_worker/external_runner.py",
+        "services/worker/tests/test_dispatcher_runtime.py",
+        "services/worker/tests/test_external_runner_db.py",
+        "docs/buyeros/runbooks/worker-runtime.md"
+      ],
+      "interfaces": "CLI新增 `buyeros-worker dispatch --loop`（保留one-shot）；`dispatch_cycle(max_total: int, time_budget_seconds: float) -> dict` 有公平workspace cursor及上限。`execute_external(intent_id, generation)`：prepare+commit→network→finalize+commit三段，回持久operation status。",
+      "tests": "新ready row在只有worker+beat時不會被當已處理；啟動dispatcher後可達terminal。broker outage/restart、publish後crash、lease過期、duplicate delivery、stale generation不能覆蓋。慢vendor network時DB transaction已關閉；100workspaces無永久starvation；engine不可跨fork/event-loop重用。",
+      "steps": "提供受監督dispatcher loop/heartbeat/優雅shutdown，保留single Valkey broker，不引入第二queue。依cycle max_total/time budget輪轉，空workspace不無限交易；loop失敗backoff可觀測。\nCelery child process明確選一個長存event-loop/engine lifecycle或可驗證sync execution方式；不可把AsyncEngine跨每次asyncio.run loop硬共享。關閉時dispose，限制connection pool。\n純DB handler仍可原子transaction；所有network handler重構成短prepare（寫submitting、provider identity與lease token）→外部call→短finalize（fence+result+ledger+event）。Unknown不能把outbox簡單done當業務成功；reconcile另有durable intent。把T11 bulk handler接入runtime。",
+      "command": "services/worker：uv run --frozen pytest -q tests/test_dispatcher_runtime.py tests/test_external_runner_db.py tests/test_valkey_integration.py tests/test_worker_integrity_db.py",
+      "rollback": "pause dispatcher只停止新publish；retain DB intents/leases及必要reconciliation；不可flush broker或刪outbox求乾淨。",
+      "operations": [],
+      "status": "implemented_disposable_integration_verified_provider_activation_blocked",
+      "checkpoint": "T15 red CLI/cycle failures 3/3, ready-row guard failure, missing durable reconcile import, missing Celery route, price-change reconciliation failure and real Celery Windows Proactor failure observed. Exact strict four-file command 19 passed/0 failed/errors/skipped (t15-task-green.xml); full strict worker 104 passed/0 failed/errors/skipped (t15-worker-green.xml). Disposable PostgreSQL and Valkey proved dispatcher claim, separate Celery process delivery, fenced provider fixture submit, durable reconcile intent, no transaction over network, unknown hold retention and no repeat submit. No T15 migration or real provider call. Next T16; vendor activation remains blocked."
+    },
+    {
+      "id": "T16",
+      "title": "Offer 檔案／URL ingestion 與真實 evidence fetch",
+      "phase": "F5",
+      "depends_on": [
+        "T15"
+      ],
+      "audit": [
+        "A14"
+      ],
+      "bo": "BO-012",
+      "modify": [
+        "services/api/buyeros_api/services/safe_fetch.py",
+        "services/worker/buyeros_worker/handlers/fetch_evidence.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/offer_documents.py",
+        "services/api/buyeros_api/services/ingestion_service.py",
+        "services/worker/buyeros_worker/handlers/ingest_offer.py",
+        "services/api/tests/test_ingestion_security.py",
+        "services/worker/tests/test_fetch_persistence.py"
+      ],
+      "interfaces": "`fetch_permitted_document(intent, transport, object_store) -> dict` 回retrieved/quarantined/blocked及source_id/digest/bytes，不允許僅URL驗證就done。`ingest_offer_document`輸出candidate facts，必須人審後才作approved offer facts。",
+      "tests": "SSRF private/loopback/IPv6/metadata/DNS rebinding/每次redirect、compressed bomb/decoded>2097152 bytes、timeout、錯MIME、惡意HTML與prompt injection均拒絕或quarantine。upload偽副檔名/解析bomb不可觸發worker任意網絡。foreign object/download拒絕；delete傳播stale evidence。",
+      "steps": "Upload quarantine→size/type/magic驗證→受限parser→candidate facts；按OpenAPI上限，不執行macros/embedded scripts，不將未掃描object公開。URL fetch限制scheme、每跳resolvedIP、連線目標、redirect數和總deadline；不跟頁面文字指示拿secret/callcontact。\n真保存permitted excerpt/source digest/language/retrieved_at及private object reference；worker terminal必須有持久結果。尚未配置object store/fetch permission回blocked，不成功造資料。\nR2為既有決策，實作S3-compatible abstraction；重新核實「APAC jurisdiction」是否真的可配置，location hint不能聲稱是jurisdiction或資料落地保證。敏感下載走API current auth/policy，避免可撤銷要求被直連URL繞過。UI檔案狀態/刪除/失敗可恢復。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_ingestion_security.py tests/test_safe_fetch.py。services/worker：uv run --frozen pytest -q tests/test_fetch_persistence.py tests/test_fetch_evidence.py",
+      "rollback": "關閉ingestion/fetch入口並保留quarantine；不把原validated-only done records標成retrieved，需明確reprocess新intent。",
+      "operations": [
+        "uploadOfferDocument",
+        "ingestOfferUrl",
+        "getOfferDocument",
+        "deleteOfferDocument"
+      ],
+      "status": "code_complete_fixture_verified_external_activation_blocked",
+      "checkpoint": "T16 code complete in this local execution scope; no external activation. Red evidence: validated-only fetch falsely done (1), missing upload routes (3), missing private worker boundary (1), URL 501, profile citation rejection, absent pagination, PDF parser import (2), and source provenance absent. Final strict API suite: BUYEROS_STRICT_INTEGRATION=1 uv run --frozen pytest -q --tb=short --junitxml=artifacts/t16-api-full-green.xml => 437 passed, 0 failed/errors/skipped, 67 warnings; JUnit gate 437/0/0/0. Final strict worker suite => 111 passed, 0 failed/errors/skipped, 4 warnings (artifacts/t16-worker-final.xml); JUnit gate 111/0/0/0. Final security/API target 32 passed; PDF security target 3 passed. Generated types and 77-operation route map, TypeScript, focused ESLint, Vinext build, git diff --check passed. Disposable Playwright pnpm.cmd exec playwright test --config playwright.ingestion.config.ts --reporter=line => 1 passed in 3.6m: fake OIDC, persisted text upload/reload, en/zh-HK, 390px no overflow, viewer denial. Screenshots visually inspected: test-results/t16-offer-upload-en-fixture.png and t16-offer-upload-zh-mobile-fixture.png. One 0019 Alembic head; disposable empty 0019->0018->0019 and populated downgrade refusal passed. Private R2 adapter remains disabled; no live R2/egress, Cloudflare account, production migration, provider call or deploy. PDF subprocess has Linux CPU/memory and cross-platform wall/page/byte caps; Linux deployment smoke remains. Private-bucket orphan lifecycle, exact source-permission activation and APAC residence decision remain external gates. Next eligible T17; no commit/push/merge/delivery."
+    },
+    {
+      "id": "T17",
+      "title": "Canonical company、evidence 與 assessment 持久化",
+      "phase": "F5",
+      "depends_on": [
+        "T16"
+      ],
+      "audit": [
+        "A10",
+        "A18"
+      ],
+      "bo": "BO-014",
+      "modify": [
+        "services/api/buyeros_api/services/canonicalize.py",
+        "services/api/buyeros_api/db/buyers.py",
+        "services/api/buyeros_api/db/runs.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/services/evidence_service.py",
+        "services/api/tests/test_evidence_persistence_db.py"
+      ],
+      "interfaces": "`persist_candidate_evidence(session, run_id: UUID, provider_operation_id: UUID, candidate: dict, sources: list[dict]) -> UUID` 回project_buyer id；company tenant-local，unique(project,company)。保留raw→canonical映射，source/evidence immutable版本。",
+      "tests": "重播同provider results不多company/buyer；同domain不同legal entity不自動merge；同company三contact仍一company；跨tenant同domain不共享PII。evidence不在相同project/permission/context時拒絕；過期source不能仍作current支援。",
+      "steps": "正規化URL/domain用現有helpers，建立確定性alias規則及ambiguous review狀態，不用fuzzy name合併實體。\n寫入candidate/company/buyer/evidence/run counters/events同transaction，row version及索引完整；所有claim/evidence留provenance與observed/retrieved timestamps。\n接T08 read model展示真source、snippet、language、unknown/conflicting evidence；無contact時留空且不產生.example；review UI可見資料freshness。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_evidence_persistence_db.py tests/test_canonicalize.py tests/test_models_constraints.py",
+      "rollback": "不 destructive merge；錯誤canonical關係透過可審计的split/supersede修正，保留原raw linkage。",
+      "operations": [],
+      "status": "code_complete_fixture_verified_external_activation_blocked"
+    },
+    {
+      "id": "T18",
+      "title": "Run admission、bounded multilingual discovery",
+      "phase": "F5",
+      "depends_on": [
+        "T17"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-010/013",
+      "modify": [
+        "services/api/buyeros_api/services/query_plan.py",
+        "services/api/buyeros_api/db/runs.py",
+        "services/api/buyeros_api/services/outbox_service.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/runs.py",
+        "services/worker/buyeros_worker/handlers/discover.py",
+        "services/api/tests/test_run_admission_db.py",
+        "services/worker/tests/test_discovery_limits.py"
+      ],
+      "interfaces": "`admit_run(session, actor_id: UUID, project_id: UUID, request: RunCreate) -> dict` 產RunResponse/202及outbox。`build_query_plan(icp, capabilities, remaining_limits) -> dict` schema `query-plan.v1`。T13每外部intent reserve，T14 adapter，T15 runner。",
+      "tests": "未approved/stale ICP、archived project、invalid market、零budget皆不dispatch；idempotent start一次job。跨三round/retry/restart總queries<=12、raw<=300、pages<=200、tokens<=100000、duration<=1800s、concurrency<=4、target<=100；測每項N與N+1，不只happy path。",
+      "steps": "保存immutable requestedlimits/capability/ICP/price basis，先admission再outbox。上限以SPEC表與原RunLimits較嚴者為準，時間從第一次externaldispatch且restart不reset。\nQuery按approved market/language及requirements產生；DE/NL/BE是sample strategy，不是全產品硬限制。只用已驗provider filters；structured schema驗證、最多一次bounded escalation及允許repair，所有model calls計費/計tokens。\n取得candidates走T17、evidence走T16；失敗保留partial results/cost。Graph停在人手review，禁止自動contact/draft/send。新增handler之前fail-closed能力保持，fixture測通不等於productionready。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_run_admission_db.py。services/worker：uv run --frozen pytest -q tests/test_discovery_limits.py",
+      "rollback": "停止新run/childdispatch，保留partial結果、holds及reconcile，不刪run重設使用量。",
+      "operations": [
+        "startRun"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T19",
+      "title": "LangGraph checkpoints、evidence-first fit 及評估集",
+      "phase": "F5",
+      "depends_on": [
+        "T18"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-011/015",
+      "modify": [
+        "services/api/buyeros_api/services/fit.py",
+        "services/worker/buyeros_worker/handlers/discover.py"
+      ],
+      "create": [
+        "services/worker/buyeros_worker/graphs/research.py",
+        "services/worker/buyeros_worker/checkpoints.py",
+        "services/worker/tests/test_research_graph.py",
+        "services/worker/tests/test_research_restart_db.py",
+        "tests/fixtures/research-eval.json"
+      ],
+      "interfaces": "`build_research_graph(checkpointer, provider_runner)`；checkpoint key `(workspace_id,run_id,workflow_version,attempt)`。Fit output需verdict、supported requirement IDs/evidence versions、contradictions/unknowns、concise rationale、next action；不保存隱藏思考鏈。",
+      "tests": "進程在每個node前/後被kill，resume不重做已提交provider operation；同workspace不同run/不同workspace checkpoint不混。偽evidenceID/硬排除未知/過期來源→needs_review或拒絕，不Match。注入內容要求洩secret/contact/send永不進tools。evaluation fixtures包含match/notmatch/unknown/矛盾/跨語言及重複。",
+      "steps": "先驗證並pin LangGraph/Postgres saver版本和schema，Alembic owner建表，runtime禁止setupDDL；保持singleCelery執行途徑，不建第二job系統。\nHard exclusions先deterministic；fit模型只能引用allowlisted evidence/requirement IDs；verifier逐claim檢查可讀來源和版本，repair最多一次且計budget/tokens。\nDB為business truth，checkpoint只存IDs/counters；重啟先查provider intent state再繼續，unknown不當新operation。驗收集報confusion/unsupported-claim率與人審差異，絕不把fit分數寫成購買機率。",
+      "command": "services/worker：uv run --frozen pytest -q tests/test_research_graph.py tests/test_research_restart_db.py。services/api：uv run --frozen pytest -q tests/test_fit.py",
+      "rollback": "保留workflow/adapter版本供在途run恢復；不強行以新graph載入不相容checkpoint，需版本化resume或可觀測blocked。",
+      "operations": [],
+      "status": "implemented_fixture_verified_model_route_blocked"
+    },
+    {
+      "id": "T20",
+      "title": "Run 進度、SSE replay、取消／重試及日常 UI",
+      "phase": "F5",
+      "depends_on": [
+        "T19"
+      ],
+      "audit": [
+        "A11",
+        "A13",
+        "A16"
+      ],
+      "bo": "BO-016/025",
+      "modify": [
+        "services/api/buyeros_api/api/routes/runs.py",
+        "services/api/buyeros_api/services/run_events.py",
+        "services/worker/buyeros_worker/run_emitter.py",
+        "services/worker/buyeros_worker/run_lifecycle.py"
+      ],
+      "create": [
+        "services/live/runs.ts",
+        "features/live/run-progress.tsx",
+        "services/api/tests/test_run_events_http.py",
+        "tests/e2e/run-lifecycle.spec.ts"
+      ],
+      "interfaces": "既有 getRunEvents 支援 authenticated fetch SSE及JSON polling，cursor=sequence；run state/event在同transaction提交。`subscribeRun({runId, afterSequence, ctx, onEvent}) -> () => void`，不得token置URL。",
+      "tests": "refresh/reconnect/duplicate/out-of-order/gap與token expiry；SSE unavailable自動poll同cursor；scope switch終止舊stream。cancel beforedispatch可release，提交中unknown保留hold。retry不resetglobal limits，不重買unknown。run少於target但正常完成明確顯示actual yield。",
+      "steps": "實作list/get/cancel/retry/events，角色與project檢查一致；取消flag與taskstate分離；retry只涵蓋可證明safe的未完成節點並保持economicintent。\nUI顯示queued/running/partial/paused_budget/failed及可保留的results；count/progress由committed events，不用demo timer。顯示current stage、費用/hold、nextstep和request-id。\n停止按鈕在未知submission時提示「已停止新增工作，部分結果待核對」；保留job/run URL與清晰404，錄製雙語E2E。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_run_events_http.py tests/test_run_events.py。根目錄：pnpm exec playwright test tests/e2e/run-lifecycle.spec.ts",
+      "rollback": "可暫停SSE改poll，但不能移除auth或把未完成run強制completed。",
+      "operations": [
+        "listRuns",
+        "getRun",
+        "cancelRun",
+        "retryRun",
+        "getRunEvents"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T21",
+      "title": "可選聯絡人報價：eligible preview、不扣費",
+      "phase": "F6",
+      "depends_on": [
+        "T20"
+      ],
+      "audit": [
+        "A12",
+        "A18"
+      ],
+      "bo": "BO-017",
+      "modify": [
+        "services/api/buyeros_api/services/quote_service.py",
+        "services/api/buyeros_api/db/contact.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/quotes.py",
+        "features/live/contact-quote.tsx",
+        "services/api/tests/test_lookup_quotes_db.py",
+        "tests/e2e/contact-quote.spec.ts"
+      ],
+      "interfaces": "`quote_lookup(session, actor_id, project_id, request: LookupQuoteRequest) -> LookupQuote`（schema alias對應現版OpenAPI）；綁selection versions、policy/suppression/context、capability/price_version、roles、max cost和expiry。",
+      "tests": "quote不reserve、不enqueue、不network；accepted+currentMatch+contactResearch permitted+unsuppressed才eligible。changed price/selection/context需新quote；過期quote不可confirm；different actor不可read/consume。UI逐列eligible/blocked原因、requested role、maximumcost和budget清楚。",
+      "steps": "採T08 frozen selection、T10 current gates及T14已驗bounded pricing產quote；server而非client算eligible/maxcost。Notfound/providercredit/subscription不同單位清楚列出，不虚構固定USD0.30。\n實作get/cancelquote，不釋放已consumed job之hold；quote取消只影響未consume。UI明確「查看報價」與「確認查找」分開，後者由T22接。\npartial eligibility先展示，confirm必須對exact quoted eligible set；context變動不能悄悄按另一subset收費。沒聯絡人仍可日後做unaddressed draft，contact lookup不是強制步驟。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_lookup_quotes_db.py tests/test_quote.py。根目錄：pnpm exec playwright test tests/e2e/contact-quote.spec.ts",
+      "rollback": "取消未consume quote；已consume只能走job cancel/reconcile，不能解除既有hold。",
+      "operations": [
+        "quoteLookup",
+        "getLookupQuote",
+        "cancelLookupQuote"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T22",
+      "title": "確認報價：一次 job、一次 reservation、一次 outbox",
+      "phase": "F6",
+      "depends_on": [
+        "T21"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-018",
+      "modify": [
+        "services/api/buyeros_api/services/confirm_service.py",
+        "services/api/buyeros_api/api/routes/quotes.py",
+        "services/api/buyeros_api/db/contact.py"
+      ],
+      "create": [
+        "services/api/tests/test_contact_confirm_atomicity_db.py"
+      ],
+      "interfaces": "`confirm_lookup(session, actor_id, quote_id: UUID, request: LookupConfirmRequest, idempotency_key: str) -> dict` 回202 EnrichmentJobResponse；消耗quote/reservation/providerintents/outbox/audit/idempotency在同一transaction。",
+      "tests": "20 concurrent confirmations、samekey/samebody、samekey/differentbody、twokeys/samequote均最多一job/hold；不足預算零新outbox；價格/permission/版本變動回QUOTE_CHANGED。lostresponse重試回原job，非新providercall。race suppression vs confirm要有明確winner及後續dispatchguard。",
+      "steps": "固定lock順序：idempotency→quote→sorted subject/buyer gates→budget hierarchy→job/outbox。重驗actor/expiry/quotehash、price/context及duplicateactive lookup，不沿用UI preview作authority。\nT13 reserve接口同transaction分配operationbound，不能runhold+childhold doublecount；quote consumed pointer唯一。\n回202顯示已排隊，requesttimeout先查原job或原key重試；不能在UI直接顯示聯絡人成功或扣款完成。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_contact_confirm_atomicity_db.py tests/test_budget_atomicity_db.py tests/test_confirm.py",
+      "rollback": "關閉confirm admission，保留existing jobs/holds及reconciliation；禁止釋放可能已提交reservation。",
+      "operations": [
+        "confirmLookup"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T23",
+      "title": "Contact submit、callbacks、unknown reconciliation 與取消",
+      "phase": "F6",
+      "depends_on": [
+        "T22"
+      ],
+      "audit": [
+        "A13",
+        "A18"
+      ],
+      "bo": "BO-019/020",
+      "modify": [
+        "services/api/buyeros_api/services/provider_op.py",
+        "services/api/buyeros_api/services/callback.py",
+        "services/api/buyeros_api/services/settlement.py",
+        "services/worker/buyeros_worker/handlers/capability_blocked.py"
+      ],
+      "create": [
+        "services/worker/buyeros_worker/handlers/contact_submit.py",
+        "services/worker/buyeros_worker/handlers/reconcile.py",
+        "services/api/buyeros_api/api/routes/enrichment.py",
+        "services/api/buyeros_api/api/routes/provider_callbacks.py",
+        "services/api/tests/test_provider_callbacks_db.py",
+        "services/worker/tests/test_contact_uncertainty_db.py",
+        "tests/e2e/contact-job.spec.ts"
+      ],
+      "interfaces": "T15 `execute_external` 調T14 contactadapter；callback `verify_raw_callback(provider, raw_bytes: bytes, headers: dict) -> dict` 驗真vendor協議再normalized event。由persisted provideroperation定位tenant，不收callback自稱workspace。",
+      "tests": "vendoraccept後workercrash、timeout/connectionreset→unknown且hold保留；sameproviderref重送不重收；outoforder不倒退、digestconflict隔離、bad signature/replay拒絕。cancel前後不同語意；suppression後late resultquarantine、charge合法settle；unknown無safevendoridempotency不得自動resubmit。",
+      "steps": "提交前重新核對policy/suppression/cancel/budget，寫submitting+stable providerkey後commit，網絡不持DB鎖。finalize校驗fencinggeneration，結果、ledger、event同transaction。\nstatus/callback/reconcile使用provider真實capability；無法確認時Operations明示unknown及負責人，不假定failedfree。手動reconcile也要證據reference、reason及權限，不提供任意「標記無扣費」捷徑。\nget/cancel/reconcilejob回per-operation outcomes與funds；contact加provenance、checked_at、validity，值加密/最小化/按purpose授權。UI不把validity當outreach permission。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_provider_callbacks_db.py tests/test_callback.py。services/worker：uv run --frozen pytest -q tests/test_contact_uncertainty_db.py。根目錄：pnpm exec playwright test tests/e2e/contact-job.spec.ts",
+      "rollback": "停止新的submit，保留callback/status/reconcile收斂；未核實unknown不得release資金或重建operation。",
+      "operations": [
+        "getEnrichmentJob",
+        "cancelEnrichmentJob",
+        "reconcileEnrichmentJob",
+        "receiveProviderCallback"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T24",
+      "title": "Sender 身份版本及 grounded draft 產生／編輯",
+      "phase": "F6",
+      "depends_on": [
+        "T23"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-007/021",
+      "modify": [
+        "services/api/buyeros_api/services/draft_service.py",
+        "services/api/buyeros_api/db/drafts.py",
+        "services/api/buyeros_api/api/schemas.py",
+        "services/api/buyeros_api/api/routes/projects.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/drafts.py",
+        "services/worker/buyeros_worker/handlers/draft_generate.py",
+        "features/live/drafts.tsx",
+        "services/api/tests/test_sender_identity_db.py",
+        "services/worker/tests/test_grounded_drafts.py",
+        "tests/e2e/draft-editor.spec.ts"
+      ],
+      "interfaces": "恢復既有ProjectUpdate.sender_identity schema，server產immutable sender_identity_versions與active version_key；reviewer/workspace_admin才可改。`generate_draft(session, actor_id, project_id, request: DraftGenerateRequest) -> AsyncJobResponse`；edit creates new immutable revision，If-Match守護。",
+      "tests": "forged/stale/foreign sender version不可用；sender update與approve race安全。無contact可產unaddressed draft但不能addressed approve/export。不支持的證書/客戶關係/數字承諾必須拒絕或unknown；修改/翻譯/followup建立新revision；generate retry不重扣費。",
+      "steps": "Sender是配置metadata審核，不連mailbox、不證明domainownership。改sender帶confirm/reason/audit，失效相關approval；project role map不能讓一般operator偷偷改sender。\n從approvedofferfacts+permittedbuyerevidence產initial或explicitfollowup；purpose/objective/tone/language/route/promptversion固定，T13/14/15處理model成本/uncertainty。\n草稿list/get/edit持久化，claim-evidence map可檢查；人工修改若增加事實需來源或標示待核實，禁止直接沿用舊approval。UI保存狀態、版本diff、errorfocus、未存離開提示及可選recipient。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_sender_identity_db.py tests/test_draft.py。services/worker：uv run --frozen pytest -q tests/test_grounded_drafts.py。根目錄：pnpm exec playwright test tests/e2e/draft-editor.spec.ts",
+      "rollback": "暫停generation但保留已存draft可讀；不覆寫approvedrevision，sender rollback以新version作審核。",
+      "operations": [
+        "listDrafts",
+        "generateDraft",
+        "getDraft",
+        "editDraft"
+      ],
+      "status": "implemented_fixture_verified_live_provider_blocked"
+    },
+    {
+      "id": "T25",
+      "title": "Exact-context 草稿審批與不可寄送邊界",
+      "phase": "F6",
+      "depends_on": [
+        "T24"
+      ],
+      "audit": [
+        "A18"
+      ],
+      "bo": "BO-022/030",
+      "modify": [
+        "services/api/buyeros_api/services/approval_service.py",
+        "services/api/buyeros_api/services/approval_fingerprint.py",
+        "services/generated/approval-golden-vectors.json",
+        "services/api/buyeros_api/api/routes/drafts.py"
+      ],
+      "create": [
+        "services/api/tests/test_draft_approval_context_db.py",
+        "tests/e2e/draft-approval.spec.ts"
+      ],
+      "interfaces": "`approve_draft(session, actor_id, draft_id, expected_version, confirmation) -> DraftApprovalResponse` 從server currentcontext計fingerprint；canonical schema/version與Python/TS golden vectors同步。`disabledDeliveryBoundary` 永遠403 DELIVERY_DISABLED且零dispatch。",
+      "tests": "edit/approve race只有一個符合precondition；recipientvalue/contactversion、sender、ICP/evidence/policy、suppression、review變動全部stale。presentationlocale不改message；翻譯是newrevision。client偽hash不能通過；removedmembership拒絕；approved draft呼叫deliver仍403/zerooutbox。",
+      "steps": "requestreview可由指定writer，approve依reviewer/admin；固定鎖序並同步重驗buyer/recipient/policy/sender與sourceaccess，不等背景invalidator。\n把所有materialcontext欄位纳canonicalserialization，明確schema版本；區分ICP raw64hash與draft fingerprint既有sha256前綴，不能混用或改寫historicalhash。\nUI完整展示收件人、寄件身份、正文、來源與條件，必須明確確認exactrevision。任何stale給diff與重新review入口；不顯示Send CTA，API防線不依UI隱藏。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_draft_approval_context_db.py tests/test_approval_fingerprint.py。根目錄：pnpm exec playwright test tests/e2e/draft-approval.spec.ts",
+      "rollback": "停approval/export，保留immutable歷史；禁止回復失效approval以便下載。",
+      "operations": [
+        "requestDraftReview",
+        "approveDraft",
+        "disabledDeliveryBoundary"
+      ],
+      "status": "implemented_fixture_verified_live_activation_blocked"
+    },
+    {
+      "id": "T26",
+      "title": "授權 CSV／草稿 copy/download、撤銷與防注入",
+      "phase": "F6",
+      "depends_on": [
+        "T25"
+      ],
+      "audit": [
+        "A12",
+        "A18"
+      ],
+      "bo": "BO-023",
+      "modify": [
+        "services/api/buyeros_api/services/csv_export.py",
+        "services/api/buyeros_api/db/drafts.py"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/exports.py",
+        "services/api/buyeros_api/services/export_service.py",
+        "features/live/export-dialog.tsx",
+        "services/api/tests/test_exports_authorization_db.py",
+        "tests/e2e/exports.spec.ts"
+      ],
+      "interfaces": "`create_export(session, actor_id, request) -> ExportResponse`；`authorize_export_content(session, actor_id, export_id: UUID) -> dict` 在download/copy時重新取current policy/context，透過authAPI返回stream。expiry預設900秒，privateobject只由server取。",
+      "tests": "snapshot過期/foreignactor拒絕；exportcreated後revokepolicy/recipient/suppression→download拒絕；copy不绕过同guard。CSV = + - @、leading whitespace/control/tab/CR、Unicode/newline/quotes neutralized；deniedrow counts顯示。export/copy不令任何outcome變sent。",
+      "steps": "company-only與contact-inclusive policy分開；addresseddraft須currentexactapproval與eligiblecontact。非addresseddraft匯出若保留需明顯unapproved/unaddressed且符合獨立policy，不冒稱可寄送。\n使用white-listcolumns、consistentescaping與formula-defense，限定selection/byte上限；job與audit記scope/reasons，不記PII正文。\nUI預覽allowed/excluded及原因，完成後提供有期限下載/approvedcopy；撤權即失效，rawR2URL不可繞過。將T11 failure-report接入同框架。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_exports_authorization_db.py tests/test_csv_export.py。根目錄：pnpm exec playwright test tests/e2e/exports.spec.ts",
+      "rollback": "停新export並revoke現有downloadreferences；保留audit，不刪financial/event歷史。",
+      "operations": [
+        "exportBuyers",
+        "exportDraft",
+        "getExport",
+        "downloadExport"
+      ],
+      "status": "implemented_fixture_verified_live_activation_blocked"
+    },
+    {
+      "id": "T27",
+      "title": "真實 usage、manual outcomes 及團隊工作台",
+      "phase": "F6",
+      "depends_on": [
+        "T26"
+      ],
+      "audit": [
+        "A13",
+        "A15"
+      ],
+      "bo": "BO-024",
+      "modify": [
+        "services/api/buyeros_api/services/usage.py",
+        "services/api/buyeros_api/db/outcomes.py",
+        "features/live/overview.tsx"
+      ],
+      "create": [
+        "services/api/buyeros_api/api/routes/outcomes.py",
+        "services/api/buyeros_api/api/routes/usage.py",
+        "features/live/results.tsx",
+        "services/api/tests/test_usage_outcomes_db.py",
+        "tests/e2e/daily-workbench.spec.ts"
+      ],
+      "interfaces": "`get_usage(session, project_id, from_utc, to_utc, as_of) -> UsageResponse`；`recordOutcome/correctOutcome` append鏈而非overwrite。區間為UTC半開[from,to)，UI以使用者時區說明。",
+      "tests": "同company三contacts denominator=1；zero denominator→null/「—」；failed/partial/cancelled真實cost仍計入；held分列且不doublecount，refund可SignedMoney負值。manualoutcome actor/occurred_at/recorded_at可追溯、correction不刪原記錄；locale轉換不移動period。",
+      "steps": "依03 contracts §9準確定義currentaccepted/newlyaccepted/contactable及blendedcost，不將報價當actualspend、不把人手記錄當已自動送信。\nDashboard「待審／待批准／未分派／失敗／unknown」每張卡點入相同serverfilter，顯示project和as_of，不混期間cost與目前存量。\n支援Outcome新增/更正、authorizedactivity/audit、使用量period filters；索引/aggregation bounded，易懂空狀態及支援request-id。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_usage_outcomes_db.py tests/test_usage.py。根目錄：pnpm exec playwright test tests/e2e/daily-workbench.spec.ts",
+      "rollback": "暫停錯誤metric卡並標不可用；修正projection可rebuild，immutableledger/outcomehistory不可改。",
+      "operations": [
+        "getUsage",
+        "listOutcomes",
+        "recordOutcome",
+        "correctOutcome"
+      ],
+      "status": "implemented_fixture_verified_live_activation_blocked"
+    },
+    {
+      "id": "T28",
+      "title": "Retention、秘密保護、故障恢复及 kill switches",
+      "phase": "F7",
+      "depends_on": [
+        "T27"
+      ],
+      "audit": [
+        "A13",
+        "A18"
+      ],
+      "bo": "BO-026/027",
+      "modify": [
+        "services/api/buyeros_api/settings.py",
+        "services/api/buyeros_api/db/policy.py",
+        "services/worker/buyeros_worker/app.py"
+      ],
+      "create": [
+        "services/worker/buyeros_worker/handlers/retention.py",
+        "services/api/tests/test_retention_authorization_db.py",
+        "services/worker/tests/test_crash_recovery_matrix.py",
+        "docs/buyeros/runbooks/recovery.md",
+        "docs/buyeros/runbooks/retention.md"
+      ],
+      "interfaces": "`expire_subject_data(session, subject_id, policy_version, now) -> dict` 產invalidation/retention audit與durable objectdeletejob；feature kill switches分read/admit/dispatch/reconcile，預設關閉未驗證paidcapability。",
+      "tests": "source/contactexpiry傳播object/cache/checkpoint/evidence/fit/approval/export，不能殘留currentclaim；tokens/DSNs/contact正文不在logs/events/browserbundle。API/worker/broker在commit前後kill，恢復不lostjob、不duplicatesettlement；killnewdispatch仍能reconcileunknown。備份restore後RLS與ledger對帳一致。",
+      "steps": "Retention期限沿owner/controller/source約束，未決部分保持configurationblocked，不能拿工程預設當合法性聲明。保存最低必要audit/financialhash，刪PIIpayload並使derivedcontent失效。\n加入request/job/intent correlation、queueage/lease/unknownhold/error metrics及精簡告警；secret集中serverconfig、redaction與rotationrunbook。\n實作故障矩陣（beforeintent/aftercommit/beforepublish/afteraccept/beforefinalize/afterfinalize）；備份還原和rollforward rehearsal只在disposable/staging，提供操作證據。安全檢查與rate limits覆蓋expensive reads/writes，而非只登入。",
+      "command": "services/api：uv run --frozen pytest -q tests/test_retention_authorization_db.py。services/worker：uv run --frozen pytest -q tests/test_crash_recovery_matrix.py",
+      "rollback": "freezeadmission，保留secure reads/reconcile；刪除不可逆資料之前dry-run與範圍核對，這不授權修改正式資料。",
+      "operations": [],
+      "status": "implemented_disposable_older_backup_replay_verified_external_journal_and_activation_open",
+      "verification": {
+        "focused_api": "16 passed, 0 failed/skipped, 13 warnings; t28-api-final-focus.xml",
+        "full_api": "565 passed, 0 failed/errors/skipped, 109 warnings; t28-api-strict-retry.xml; JUnit gate 565/0/0/0",
+        "worker": "168 passed, 0 failed/errors/skipped, 4 warnings; t28-worker-final-clean.xml; JUnit gate 168/0/0/0",
+        "older_backup_replay": "red restored pre-tombstone source excerpt; green strict disposable two-container API T28 focus 10 passed, 0 failed/errors/skipped, 14 warnings in 55.03s; fixture journal outside DB, READ_DISABLED before/after, RLS, ledger, one delete intent, idempotent replay; external journal custody/completeness and physical deletion not verified",
+        "full_api_after_older_backup": "569 passed, 0 failed/errors/skipped, 110 warnings in 430.47s; t28-older-backup-full-api.xml; required JUnit gate 569/0/0/0; zero running buyeros-test containers afterward"
+      }
+    },
+    {
+      "id": "T29",
+      "title": "效能實測、前端拆分、雙語／手機／無障礙",
+      "phase": "F7",
+      "depends_on": [
+        "T28"
+      ],
+      "audit": [
+        "A11",
+        "A15",
+        "A16"
+      ],
+      "bo": "BO-025/027/028",
+      "modify": [
+        "features/workspace.tsx",
+        "features/ui.tsx",
+        "app/globals.css",
+        "services/live/client.ts",
+        "services/worker/buyeros_worker/dispatcher.py"
+      ],
+      "create": [
+        "features/workspace/shell.tsx",
+        "features/workspace/navigation.tsx",
+        "features/workspace/route-view.tsx",
+        "features/workspace/modals.tsx",
+        "tests/e2e/responsive-accessibility.spec.ts",
+        "scripts/benchmark-buyeros.py",
+        "docs/buyeros/performance-baseline.md"
+      ],
+      "interfaces": "保留對外 Workspace component與routepaths；抽出的shell/navigation/route-view/modals只移責任，不更換frontend。`benchmark-buyeros.py --fixture-size 1000|10000 --workspaces 1|10|100` 輸出機器/commit/dataset/concurrency/P50/P95/querycount/bytes/queueage，targets為本計劃建議驗收值。",
+      "tests": "SQLboundedpages<=100，snapshot<=1000；1000/10000buyers、100projects、100ICPrevisions、10並行staff requests不N+1。390/768/1280/1440px、keyboard、focusreturn、200%zoom、labels/ARIA/contrast、en/zh-HK flows；tablemobilecards與bulkactions可用，無body橫向溢出。",
+      "steps": "先記baseline再優化：EXPLAIN ANALYZE支撐索引；量querycount、P95、responsebytes、DBconnection及dispatchfairness；必要才virtualrows，不把demo24rows當性能證據。\n分次extractworkspace責任，每次跑既有journeyE2E，非首屏draft/adminlazyload、route-levelloading；避免為漂亮diff一次重寫全部48KB component。\n統一locale keys含errors/status/ARIA及html lang；UI數字格式/日期/空值一致、live不hardcoded示例姓名。性能目標見SPEC，記device/network/samplecount，不將lab數字稱productionp75。",
+      "command": "根目錄：pnpm exec playwright test tests/e2e/responsive-accessibility.spec.ts；pnpm exec tsc --noEmit；pnpm lint；pnpm build；python scripts/benchmark-buyeros.py --fixture-size 10000 --workspaces 100",
+      "rollback": "每次小extract可獨立revert；index先確認寫入成本，禁止未量測大量新增index或降低功能換分數。",
+      "operations": [],
+      "status": "partial_ui_and_disposable_performance_verified_postfix_and_release_gates_open",
+      "verification": {
+        "lint": "pnpm.cmd lint exited 0 after T29 action-dialog extraction",
+        "typecheck": "pnpm.cmd exec tsc --noEmit exited 0 after T29 action-dialog extraction",
+        "build": "pnpm.cmd build exited 0 after T29 action-dialog extraction; nonfatal >500 kB client chunk advisory remains",
+        "responsive_demo_fixture": "Final 17 passed, 0 failed/skipped in 1.6m against directly started local Vinext after Outreach extraction; en/zh-HK, 320-1440 CSS pixels, 720px representative reflow, focus return, AX names, navigation/dialog/project/Overview/discovery/Outreach callbacks, mobile bulk, Settings privacy/suppression and quote/list action dialogs. Actual browser 200% zoom unverified.",
+        "responsive_api_fixture": "fresh full workbench suite 8 passed, 0 failed/skipped in 2.7m after scoped form-control contrast fix; en/zh-HK, fixture OIDC/disposable PostgreSQL, 320-1440 CSS pixels",
+        "performance_pre_rate_pool_fix": "10k buyers/100 workspaces; ten distinct fixture staff P95 274.030ms, 11 SQL/request; buyer PATCH P95 62.865ms, run admission P95 88.219ms; 100-workspace broker publish P95 4.039s. All in-process/disposable, no provider/deployed proof.",
+        "rate_pool_regression": "red HTTP 500 SQLAlchemy TimeoutError with one tenant slot; green 2 passed, 0 failed/skipped, 8 warnings in 46.56s on disposable PostgreSQL; strict full API rerun pending after Docker setup stalled",
+        "screenshots": "artifacts/t29-screenshots/*-post-retry.png contains four en/zh-HK 390/1440 fixture screenshots; regenerated zh-results-usage-390-post-extraction.png visually inspected after the 17-test suite with SHA256 E3E8B8BEB965BEB206DE02482D60DD511A05FF1FFCAAB3464138F2845956BF28",
+        "remaining": "Actual Chromium tab zoom is verified for the disposable API-backed six-route workbench in en/zh-HK. T30 complete same-dataset addressed fixture journey passes4/4. Screen reader, unmeasured non-text controls/icons and external activation remain open.",
+        "performance_post_rate_pool_fix": "10k buyers/100 workspaces; sequential read P95 39.377ms, ten distinct fixture staff P95 244.895ms, 11 SQL/request, 10 DB connections; buyer PATCH P95 60.865ms, run admission P95 168.524ms, 100-workspace broker publish P95 2.280s. API 1/1, dispatcher 1/1, mutation 1/1; in-process/disposable only.",
+        "accessibility": "measured browser-computed text contrast for visible Overview, Results and Operations text in en/zh-HK; new form-control boundary/fill regression red 16 Results controls at 1.0-1.27:1, green focused 1/1 in 1.9m and full workbench 8/8 in 2.7m. Actual zoom, screen reader and unmeasured non-text elements pending",
+        "scope_list_timeout": "red permanent spinner on held first GET; bounded timeout/retry green focused 1 passed in 3.1m and included in full 7/7 suite",
+        "strict_api": "567 passed, 0 failed/errors/skipped, 109 warnings in 310.90s; required JUnit gate 567/0/0/0 after admission-pool fix",
+        "strict_worker": "168 passed, 0 failed/errors/skipped, 4 warnings in 41.33s; required JUnit gate 168/0/0/0",
+        "actual_zoom": "2026-09-30: isolated Chromium extension tabs.setZoom/getZoom 2.0; observed 1440->720 CSS px and DPR 1->2. Final pnpm.cmd exec playwright test --config playwright.zoom.config.ts tests/e2e/actual-browser-zoom.spec.ts --reporter=line passed 2/2, 0 failed/skipped in 22.9s across six fictional demo routes in en/zh-HK; element bounds, text clipping and document overflow asserted. Screen reader, remaining non-text contrast and API-backed actual zoom unverified. Misleading CDP/Playwright zoom captures were removed; prior responsive screenshots retained. API-backed actual tab zoom/localized buyer controls subsequently passed2/2 on2026-10-01 HK; see api_actual_zoom_localization.",
+        "navigation_extraction": "Demo sidebar and top-bar shell moved into features/workspace/navigation.tsx and shell.tsx with parent-owned route/usage/locale callbacks preserved; focused sidebar Playwright 1/1 in 2.3m, final full demo responsive/accessibility 7/7 in 4.1m; pnpm lint, tsc --noEmit and Vinext production build passed. Demo fixtures, not live identity/provider or actual 200% zoom.",
+        "modal_extraction": "features/workspace/modals.tsx owns fictional source and connection requirements dialogs with parent-owned open state; focused browser 1/1 in 2.1m, full demo responsive 8/8 in 3.1m; full lint, tsc --noEmit and Vinext build pass. Route view/general action modal extraction remains open.",
+        "route_heading_extraction": "features/workspace/route-view.tsx owns demo project strip, localized page heading and sample/new-search actions; parent still owns route and modal state. Focused browser 1/1 in 2.8m; final full demo suite 9/9 in 3.4m; full lint, tsc --noEmit and Vinext build passed. Route bodies remain in parent.",
+        "results_route_extraction": "Red zh-HK Results browser 1 failed at untranslated usage labels; Results body extracted to route-view.tsx with parent-owned outcome updates; focused green 1/1 in 2.7m, 390px mobile bulk 1/1 in 1.7m, full demo 11/11 in 3.0m. 390px screenshot SHA256 CED75E7A0DA08CCDA31D2CFB917E81044CA209EED18859C2E599538E9878FE0C visually inspected. Lint, typecheck, build, generated API types and 78-operation route map pass. No schema change.",
+        "settings_route_extraction": "Demo Settings body extracted into route-view.tsx with typed callbacks; parent retains locale, storage and suppression state. Existing Field already localized Company. Settings save/privacy/suppression browser baseline 1/1 in 1.8m and post-extraction 1/1 in 2.7m; final full demo suite 12/12 in 4.2m. Typecheck, lint and Vinext build pass; no schema change.",
+        "settings_connection_locale": "Focused zh-HK browser failed 1/1 with raw Research in Settings connection list; applying t(connection) passed focused 1/1 in 1.7m. Playwright-managed cold full rerun failed before tests due verified stale lock, then a worker-runner startup error; direct local pnpm dev started and warm-server full browser suite passed 12/12 in 1.2m. Final lint, tsc and build pass; startup root cause remains unproven.",
+        "action_dialog_extraction": "DemoActionDialog presentation extracted to features/workspace/modals.tsx with parent-owned actions and reservations. Quote cancel/confirm baseline 1/1 in 4.4s; post-extraction focused 4/4 in 11.8s; Settings unsuppress and list create/rename focused 2/2 in 6.6s; final full demo responsive 14/14 in 1.2m, 0 failed/skipped. pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, generated API type check, 78-operation route check and git diff --check exited 0. Sole Alembic head 0033_api_rate_windows; no migration. Direct dev server stopped, verified stale lock removed; managed cold-start cause unproven.",
+        "overview_route_extraction": "DemoOverviewView extracted from features/workspace.tsx to route-view.tsx with parent-owned metric/project navigation. New Overview browser regression first failed from premature click before hydration, then baseline 1/1 in 5.1s after explicit readiness waits and post-extraction 1/1 in 6.6s. Initial lint had one unused icon warning, removed; final full browser 15/15 in 1.2m, 0 failed/skipped. pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, generated API type check, 78-operation route check and git diff --check exited 0; build has nonfatal >500 kB advisory. No schema/provider change, migration or production action.",
+        "lists_route_extraction": "DemoListsView extracted fictional Lists strip/actions to route-view.tsx; parent retains selected list, routing, modal mutations and buyer table. Extended list-create/rename browser with route selection: baseline 1/1 in 9.1s, post-extraction 1/1 in 4.5s, final full responsive suite 15/15 in 1.2m with 0 failed/skipped. pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, generated API type check, 78-operation route check and git diff --check exited 0. No schema/provider change or migration; nonfatal >500 kB build advisory remains.",
+        "discovery_route_extraction": "DemoDiscoveryRunView extracted the fictional run summary, status panel, review prompt and history into route-view.tsx with parent-owned filters, run cancel/retry and navigation; shared buyer table remains parent-owned. New discovery filter/history browser regression baseline 1/1 in 10.7s and post-extraction 1/1 in 11.4s; final full demo suite 16/16 in 1.4m with 0 failed/skipped. Initial lint warned about four obsolete parent imports, removed; final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, generated API types, 78-operation route check and git diff --check exited 0. Sole Alembic head 0033_api_rate_windows. No schema/provider change. API-backed browser and strict DB gates not rerun because local Docker cannot start isolated fixtures.",
+        "outreach_route_extraction": "DemoOutreachView extracted fictional recipient queue, editor and review panel into route-view.tsx; parent retains draft selection, edit, review request, exact approval and modal state. New browser regression first failed because test edited sender/policy after review request, correctly invalidating review; corrected pre-extraction baseline 1/1 in 4.4s, post-extraction focused 1/1 in 7.0s, final full responsive 17/17 in 1.6m with 0 failed/skipped. Initial lint had three obsolete parent-import warnings, removed; final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, generated API types, 78-operation route check and git diff --check exited 0. No schema/live provider or delivery change. API-backed/browser strict gates remain blocked by local Docker.",
+        "buyer_table_extraction": "Shared fictional buyer table moved to features/workspace/buyer-table.tsx with typed presentation props; DemoWorkspace retains filter, selection, pagination, export, list mutation and buyer navigation state. New desktop real-page regression baseline 1/1 in 6.3s and post-extraction focused 2/2 in 13.2s. Initial regression failed after a full page reload discarded expected session-only list state; corrected to in-app navigation. Mobile screenshot exposed a sidebar sheet remaining open after route selection; added hidden-sheet assertion, observed red 1/1, then closed mobile sheet on navigation in navigation.tsx and observed green 1/1. Strengthened 390px test saves a page-two buyer absent from the seed list, confirms list grows 3->4, and passed focused 1/1 in 8.4s. Final direct Vinext responsive/accessibility suite 18/18, 0 failed/skipped in 1.7m. Final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, node scripts/generate-api-types.mjs --check, services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; build retains nonfatal >500 kB chunk advisory. Visually inspected en buyer page-two 1280 screenshot SHA256 0C51B0EDBB6762344C6CF86DB267DCDB2C56AAEA49242BAAC631A43013B49634 and en saved-list 390 screenshot SHA256 C716797B484F3FE64D7FB9BA8892D3D9BD7EA90F4910222E7F7574FED8A98E96. No schema/provider/delivery change; current strict DB gate still blocked by local Docker startup.",
+        "full_buyer_route_extraction": "DemoFullBuyerView moved fictional full-buyer route wrapper and missing-record recovery to features/workspace/route-view.tsx; parent retains route/data/action/source/update callbacks and shared BuyerDetail drawer. Baseline new full-dossier regression red 1/1 because hidden Full-page view was assumed as return control; revised to require a visible Return to buyers action, observed red 1/1, then green 1/1 in 5.2s after adding accessible return. zh-HK 390px dossier passed 1/1; added untranslated note-placeholder assertion red 1/1, localized it in BuyerDetail/locales and focused green 2/2 in 8.8s. Final direct Vinext responsive/accessibility suite 20/20, 0 failed/skipped in 1.5m. Final pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, pnpm.cmd build, node scripts/generate-api-types.mjs --check and services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; build retains nonfatal >500 kB chunk advisory. Visually inspected zh-buyer-full-390-post-extraction.png SHA256 9D93F87A9FFD949527022B1375ADF9CE7369518FFD06B83C5476E78C36A3656D. No schema/provider/delivery change.",
+        "nontext_buyer_controls": "New browser-computed contrast regression for visible demo buyer search and desktop filter boundaries in en/zh-HK at 390/1280 CSS px: red 1/1, search border rgb(224,229,238) measured 1.26:1 on white; scoped CSS changed border to #6d7c8f (4.26:1 on white), focused green 1/1 in 5.6s. Final directly started Vinext responsive/accessibility suite 21/21, 0 failed/skipped in 1.6m. Final pnpm.cmd build, pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, node scripts/generate-api-types.mjs --check and services/api/.venv/Scripts/python.exe scripts/generate-operation-routes.py --check (78 operations) exited 0; nonfatal >500 kB client chunk advisory remains. Final desktop/mobile screenshots visually inspected with SHA256 0C51B0EDBB6762344C6CF86DB267DCDB2C56AAEA49242BAAC631A43013B49634 and C716797B484F3FE64D7FB9BA8892D3D9BD7EA90F4910222E7F7574FED8A98E96.",
+        "release_reconciliation": "2026-09-29: 410 unstaged paths, 0 staged; current strict API blocked at disposable Docker startup, earlier 569/569 API and 169/169 worker are historical fixture runs. Desktop browser-control initialization failed under Windows ACL, but an isolated Chromium extension subsequently verified actual 200% zoom 2/2 on demo routes; screen reader remains unverified. Demo responsive/accessibility remains prior 21/21; no new browser pass claimed.",
+        "api_actual_zoom_localization": {
+          "date_hk": "2026-10-01",
+          "source_sha": "1f348666e913a275249803daab0654ac75029fcf",
+          "source_base_sha": "e5d7968a92c18cc347a72efd2d02078b64598d6d",
+          "scope": "Local Chromium 153.0.8010.12, fake OIDC reviewer, real HTTP API with restricted runtime role, owned disposable PostgreSQL; no live Auth0/provider verification",
+          "regressions": [
+            {
+              "case": "localized buyer region/heading/counter/search/pagination/selection",
+              "red": "zh-HK failed at missing localized buyer region/heading, exit1, 1 failed",
+              "green": "both locales pass actual 200% zoom with real pagination/filter/selection/reset"
+            },
+            {
+              "case": "localized queue All option",
+              "red": "zh-HK failed option count0 expected1, exit1, 1 failed",
+              "green": "localized All option included in final two-locale pass"
+            }
+          ],
+          "zoom": {
+            "method": "isolated Chromium extension tabs.setZoom/getZoom(2)",
+            "before_css_width": 1440,
+            "before_dpr": 1,
+            "after_css_width": 720,
+            "after_dpr": 2,
+            "routes_per_locale": 6,
+            "locales": [
+              "en",
+              "zh-HK"
+            ],
+            "passed": 2,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "20.7s",
+            "command": "BUYEROS_STRICT_INTEGRATION=1 BUYEROS_REUSE_TEST_SERVER=1 pnpm.cmd exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --reporter=line",
+            "measured": "page overflow, root bounds, clipped heading/paragraph text, real next/previous rows, query snapshot total, selection reset"
+          },
+          "buyer_regression": {
+            "command": "pnpm.cmd exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --reporter=line",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "15.7s"
+          },
+          "workbench": {
+            "command": "pnpm.cmd exec playwright test --config playwright.workbench.config.ts tests/e2e/daily-workbench.spec.ts --reporter=line",
+            "passed": 8,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "49.1s"
+          },
+          "responsive_demo": {
+            "command": "pnpm.cmd exec playwright test --config playwright.responsive.config.ts tests/e2e/responsive-accessibility.spec.ts --reporter=line",
+            "passed": 21,
+            "failed": 0,
+            "skipped": 0,
+            "duration": "3.1m",
+            "scope": "fictional demo; effective viewport cases are not actual tab zoom"
+          },
+          "static_checks": {
+            "typecheck": "pnpm.cmd exec tsc --noEmit exit0",
+            "lint": "pnpm.cmd lint exit0",
+            "build": "pnpm.cmd build exit0; unchanged nonfatal >500kB chunk advisory",
+            "domain_checks": 11,
+            "live_adapter_checks": 73,
+            "oidc_auth_checks": 8,
+            "generated_types": 1,
+            "operation_routes": 78,
+            "alembic_head": "0033_api_rate_windows",
+            "staged_diff_check": "exit0 after removing new test helper trailing blank line"
+          },
+          "ci": "Separate browser-zoom job with own loopback buyeros_test_zoom database; five-job hosted gate pending push/result",
+          "capture": "Four unscrolled physical viewport PNGs at1440x900 plus two measured JSON reports. Distorted fullPage/zoomed-scroll captures were replaced; no full-page visual proof claimed.",
+          "artifacts": [
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en-buyers.png",
+              "sha256": "c8418ef912bbafb9a14555f1552852dead934ab38061ef0bdc5f164449073e7b"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en-operations.png",
+              "sha256": "7db37bcace598fa4f3913b8644d7533466bc6b7003c1f0359ef31641bb66f792"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-en.json",
+              "sha256": "1bd249382507d3fa9490678f1a1fabcc21919344f6d57607631d91f32254a226"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK-buyers.png",
+              "sha256": "0694cb935b2c8134bb5ac1fac33f7d9fe6070032bedcc1e60af31f0f3364fedc"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK-operations.png",
+              "sha256": "f04e62d29f67378b9c127115271f0847ecb8c789e80ff8fa56a8ba44f43a2f93"
+            },
+            {
+              "path": "artifacts/t29-screenshots/t29-api-fixture-actual-zoom-20261001-zh-HK.json",
+              "sha256": "53230bac7e1cdedeafe06c4125a23021236c4073502f31699b4e681914b7a123"
+            }
+          ],
+          "startup": "First Playwright-managed frontend exited ECONNRESET before tests. Same environment direct startup served HTTP200; exact failed-attempt marker cleanup removed its owned orphan container; root cause remains unproven.",
+          "migration": "none; no new revision",
+          "production_changes": "none; deployed source62d40bc unchanged",
+          "performance": "No new benchmark or field P75 claim; preceding in-process/disposable conditions remain their original scope",
+          "review": "Inline author self-review; no subagent dispatched under user constraint",
+          "remaining": [
+            "screen-reader use",
+            "unmeasured non-text controls/icons",
+            "T30 complete same-dataset creation to addressed approval/export/outcome journey",
+            "external provider/policy/worker/R2/pilot gates"
+          ],
+          "hosted_ci": {
+            "run": "https://github.com/YNWAforever/BuyerOS/actions/runs/36752690146",
+            "source_sha": "479141f5f04455cdc19c786cb40a3a0fd9f4b4d2",
+            "jobs": "all five success",
+            "api": "569 passed, 0 failed/errors/skipped, 79 warnings, 119.95s",
+            "worker": "169 passed, 0 failed/errors/skipped",
+            "browser_zoom": "2 passed, 24.7s",
+            "browser_smoke": "1 passed, 22.7s",
+            "frontend": "success including generated/type/lint/framework and Vercel builds"
+          }
+        }
+      }
+    },
+    {
+      "id": "T30",
+      "title": "整體驗收、部署證據、可審閱 pilot release",
+      "phase": "F7",
+      "depends_on": [
+        "T29"
+      ],
+      "audit": [
+        "A17"
+      ],
+      "bo": "BO-028/029/030",
+      "modify": [
+        "docs/buyeros/PROGRESS.md",
+        "docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md",
+        "docs/buyeros/tasks/index.json"
+      ],
+      "create": [
+        "tests/e2e/mvp-a-journey.spec.ts",
+        "docs/buyeros/runbooks/release.md",
+        "docs/buyeros/RELEASE_READINESS.md",
+        "docs/buyeros/PILOT_EXECUTION_RECORD.md"
+      ],
+      "interfaces": "輸入：所有task evidence/mergedHEAD、schema revision、CI artifacts、auth/provider/hosting configuration records。輸出：releasecandidate+stagingproof、blockedlist、rollbackplan及可供owner最後批准的pilot實際範圍/最高費用。本plan的保存不是production/spend授權。",
+      "tests": "真HTTP+DB+worker+broker fixture journey：登入→create/editoffer→approve→research→review→list/assign→optionalquoteconfirm→groundeddraft→approve→authorizedexport→manualoutcome→reload，雙角色雙語。缺requiredDBsuite不得skip當pass。deliverendpoint始終403/零mailbox連線。approvedconfig下另驗真Auth0與boundedprovider，未獲授權則NOT RUN。",
+      "steps": "把unit/integration/DOM/chaos/performance與migrationrestore結果綁定releaseSHA；70原operations全部有明確disposition，新extension也列出；不要求把disabledDelivery改成功。對未可啟用vendor操作用503 blocked而非decorativeready，清楚區分implemented-fixture與liveverified。\n準備Render API/worker/dispatcher/Valkey、Neon runtimepool/directmigration、privateR2及Auth0callback具體configdiff、health/rollback/checklist；沿既有服務，不自動另開雲資源。部署若已授權可執行，否則做到可審閱releasecandidate再列明尚需批准的具體action。\n小pilot限定已批准workspace/users/markets/caps/provider/retention和stopconditions；實际呼叫前budgetsignedoff、unknownrecovery演練完成。保留無contact路徑。最後交changedfiles、testresults、screenshots、release/deployedSHA、migration/rollback與remainingblocks。BO-030只保留disabledboundary，發信另一期。",
+      "command": "根目錄：pnpm exec playwright test tests/e2e/mvp-a-journey.spec.ts；執行 T00 全套 CI＋required no-skip gates；照 release.md 在明確target核對 readiness/部署SHA。此處不是一條可無條件執行的 production deploy 指令。",
+      "rollback": "先關admission/dispatch，保留reconciliation；回退compatibleapp或rollforward資料，保留ledger/history。不得為回退重置DB或清queue。",
+      "operations": [],
+      "status": "implemented_full_fixture_journey_verified_production_anonymous_and_human_scope_verified_live_gates_open",
+      "verification": {
+        "release_preparation": "RELEASE_READINESS.md, runbooks/release.md, PILOT_EXECUTION_RECORD.md and pilot/evaluation-protocol.md drafted without external action",
+        "full_staff_journey": "Complete fixture continuity4/4 on reviewed source4181062: UI offer creation/edit, exact ICP approval, bounded research via real disposable DB/broker/worker, review/list/assignment, grounded addressed generation, exact approval, authorized export, manual outcome and refresh in en/zh-HK desktop/mobile. Test OIDC/search/contact remain fictional. Deployed4181062 has anonymous/bootstrap4/4 and refreshed human FIMMICK/admin visibility; full authenticated production staff/provider/worker continuity remains unverified.",
+        "deployment": "2026-09-30 HK: user specifically approved redeploying tested source 62d40bc7687477f42e971ae5143485806630f1a6 with the nine saved production variables. vercel redeploy exited 0; dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3 READY, target production, exact source SHA verified. Public frontend routes /, /app, /auth/callback HTTP200, /v1/workspaces HTTP401 UNAUTHENTICATED. Anonymous acceptance 4 passed/0 failed/cancelled/skipped in 5271.2125ms. Actual Sign in reaches Auth0 Universal Login with approved public parameters and PKCE S256. No real staff session, membership seed, migration or paid/provider activation.",
+        "partial_ui_journey": "1 passed, 0 failed/skipped in 2.7m: same seeded project/buyer evidence, list, assignment, exact approval, authorized export, manual outcome, refresh, zh-HK mobile; viewer export 403 and delivery 403; fixture OIDC/disposable PostgreSQL only",
+        "screenshots": "artifacts/t30-screenshots/en-fixture.png and zh-mobile-fixture.png visually inspected with SHA256 recorded in REMAINING_DEVELOPMENT_STATUS.md",
+        "fixture_cleanup": "red guard listed 17 specialized configs missing globalTeardown; green node test 1/1 after wiring existing teardown; T30 partial rerun 1/1 in 2.1m and zero running buyeros-test containers/absent marker afterward",
+        "broker_worker_research": "separate disposable PostgreSQL16/Valkey8/Celery fixture 1 passed, 0 failed/skipped, 4 warnings in 24.21s; cited evidence, buyer, USD 0.050000 cost, cleared hold and terminal outbox; no external provider",
+        "same_dataset_research_to_draft": "pnpm.cmd exec playwright test --config playwright.mvp-research.config.ts --reporter=line: 1 passed, 0 failed/skipped in 2.4m after adding UI offer edit and exact reviewer approval; one disposable PostgreSQL project, fake OIDC, two separate Valkey/Celery passes, completed match fit, accepted/listed/assigned buyer and zero-cost grounded draft containing the edited offer fact; no live provider; current-CSS rerun 1/1 in 3.6m",
+        "same_dataset_screenshots": "artifacts/t30-screenshots/ui-worker-grounded-en-fixture.png SHA256 AA8E683EE487771C8C203B61777C60B3C72679044CBB5B8D9527990B7B047A3A; ui-worker-grounded-zh-mobile-fixture.png SHA256 29EF16FE5945FC9BAFDB4C6C51C53B7DBD25826FCA3022527AF5E1A13F9D7E54; visually inspected",
+        "strict_worker": "169 passed, 0 failed/errors/skipped, 4 warnings in 47.82s; JUnit gate 169/0/0/0 after approval projection fix",
+        "strict_api": "569 passed, 0 failed/errors/skipped, 109 warnings in 255.96s; JUnit gate 569/0/0/0 after approval projection fix",
+        "final_local_checks": "pnpm.cmd build, pnpm.cmd lint, pnpm.cmd exec tsc --noEmit, 78-operation route check, generated API type check, fixture teardown guard 1/1, TASKS JSON, sole Alembic head 0033 and git diff --check passed",
+        "saved_fact_authority": "red DB regression 1 failed; green 1 passed, 8 warnings in 9.77s; saved content/hash unchanged; reviewer-approved user/document facts derived at read/admission/worker/recheck, model inference excluded; focused API 31/31, worker 5/5, T07 browser 1/1 in 2.1m",
+        "addressed_gate_code_audit": "Code audit: admit_grounded_template returns 503 PROVIDER_UNAVAILABLE for nonzero max_cost and any recipient_contact_id; edit_draft returns 503 for non-null recipient_contact_id. Same-project generated unaddressed draft cannot safely become addressed without a named provider/policy activation; no approval record or live call was fabricated.",
+        "finishing_branch_gate": "2026-09-29 user-invoked finishing-a-development-branch gate on HEAD f43a9d88 plus 402 unstaged paths: domain checks 11/11, live-adapter checks 73/73, Node tests 3/3 with zero skips, pnpm lint, tsc --noEmit, Vinext build, generated API types and 78-operation route check passed. Current strict API full run produced widespread setup errors and was interrupted without a valid full count; fail-fast rerun had 1 setup error in 89.33s because services/api/tests/conftest.py disposable docker run timed out after 30 seconds. Seven containers created by this run remain in Created state after Docker inspect and rm stalled; no running fixture container was observed. Strict worker and browser journey were not rerun after the API gate failed. Earlier API 569/569 and worker 169/169 are historical fixture evidence only. Skill completion/merge/PR menu is ineligible while T29/T30 partial and current full strict gate is red.",
+        "docker_control_probe": "2026-09-29 bounded Docker probe: docker info and ps respond, but inspect timed out after 15s and start timed out after 20s for one exact no-volume buyeros-test container created by the failed strict API fixture; it remained Created. Seven own Created containers remain, none running. Docker Desktop hosts many active unrelated project containers, so restart was not performed. The current strict API/worker fixture gate remains blocked by local Docker; earlier 569/569 and 169/169 are historical only. No DB skip was converted to pass.",
+        "release_reconciliation": "2026-09-29: RELEASE_READINESS.md corrected to 410-path inventory and historical strict-test wording. API_OPERATION_STATUS.csv has 78 rows, all handler_present and deployed=unverified. One exact no-volume BuyerOS container inspect stalled; 13 BuyerOS test containers remain Created while approximately 122 unrelated containers run, so no disruptive Docker Desktop restart was performed. Current strict API gate is blocked at fixture setup; worker/API-backed browser not rerun. No external action, commit or deployment.",
+        "current_local_release_checks": "2026-09-29: domain 11/11, live-adapter 73/73, Node contract/cleanup 3/3 with zero skips; tsc, lint, Vinext build, API type check, 78-route map and diff --check exit 0. Pack-to-ledger 70/70 original plus eight extensions; 78/78 handlers, 78/78 deployed unverified. Sole Alembic head 0033_api_rate_windows. Current strict DB fixture remains blocked and is not counted as passing.",
+        "docker_maintenance_attempt": "2026-09-30: user confirmed restart. Normal docker desktop restart exited 1, context deadline exceeded stopping Desktop; Linux engine pipe unavailable. Synchronous start hung/interrupted; bounded detached start exited 0 with Starting Docker Desktop, latest status starting but engine readiness unverified. No current strict DB pass, no force kill or unrelated container removal. Draft PR authorized and being prepared.",
+        "published_pr_ci": "2026-09-30 HK: draft PR #7; CI run 36598703202 on code commit f8eaec7 passed frontend, API 569/569 zero skips, worker 169/169 zero skips, browser smoke 1/1. Initial smoke red 401 from missing fixture bearer, fixed in test with explicit negative 401. Local Docker restart failed from WSL CommandTimedOut; full T30 journey and live activation remain open.",
+        "production_neon_initialization": "2026-09-30 HK, explicitly user-approved: nameless-bar-15324691 / br-autumn-block-b3exsqii / neondb upgraded through existing sole head 0033_api_rate_windows; 33 migrations succeeded, 0 failed. Fresh catalog read: public 50, buyeros_graph 4, neon_auth 9 tables; Neon Auth column-definition hash unchanged. Pre-initialization no-compute restore branch br-odd-sky-b39qyb5m retained; production restore/downgrade not executed.",
+        "production_runtime_configuration": "Restricted buyeros_api LOGIN, no superuser/createdb/createrole/bypassrls or schema ownership. Pooled client TLS, 45 tenant tables with active/forced RLS, callback table denial, Neon Auth denial and application SQLAlchemy async connection passed. BUYEROS_DATABASE_URL saved sensitive/production in Vercel and metadata reverified. No production fixtures, domain seeds or worker login. Two check-harness assumptions were corrected before successful storage; details in REMAINING_DEVELOPMENT_STATUS.md.",
+        "auth0_activation": "2026-09-30 HK, explicitly approved: created BuyerOS API 6abc62c95f1a148990e0595d / https://buyer-os-nu.vercel.app/v1, RS256, 3600-second tokens, offline access false. Client iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R now public SPA, token endpoint auth none, authorization_code only; both production callback/logout/origin sets registered, existing localhost entries retained. Exact management read-back passed. Public probes: 4 passed, 0 failed/skipped; both callbacks yield login_required, invalid callback 403, unknown audience access_denied. No staff token/session obtained. Auth0 configuration blocker resolved; subsequent approved source62d40bc deployment verifies HTTP200 login entry and exact client/audience/callback with PKCE S256. Actual staff token/callback round trip remains pending.",
+        "vercel_auth0_environment": "Nine production keys reverified by metadata after the approved source62d40bc deployment: database sensitive; paid admission/R2 false; runtime service binding not manually set; migration owner absent. Deployment dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3 applies approved client/audience/callback, proven by actual browser authorization request.",
+        "auth0_redeploy_preparation": "Historical 2026-09-30 HK preparation on main0852552: proxy5/5, Windows build exit0, compiled handler200 with public Auth0 props; browser-chunk-only assertion corrected to the actual server-rendered config path. Later hosted/Linux SSR failure and its regression/fix are recorded separately. Specific source62d40bc production deployment is now approved and verified; actual staff token/callback round trip remains pending. No local Windows prebuilt bundle was deployed.",
+        "live_sign_in_entry": "2026-09-30 HK, source62d40bc: Playwright /app HTTP200, title FIMMICK BuyerOS, enabled Sign in, zero application console/page errors. Click reaches exact Auth0 tenant /u/login, title Log in | BuyerOS, one visible blank email field. Authorization request asserts exact public client, API audience, primary callback, code and PKCE S256 with challenge present. No credentials entered/token/session obtained. Two screenshots visually inspected; hashes recorded in execution checkpoint.",
+        "deployed_runtime_regression": "node --test tests/deployment/vercel-runtime.mjs with BUYEROS_VERCEL_VERIFY_URL=https://buyer-os-nu.vercel.app/: exit0, 4 passed/0 failed/cancelled/skipped in 5271.2125ms on deployed source62d40bc. Earlier source0852552 red: 1 passed/3 failed/0 cancelled/skipped in 3743.3519ms. Anonymous HTML/proxy only, no data mutation or provider call.",
+        "linux_ssr_regression": "2026-09-30: exact Node24.18 Linux committed-source baseline builds but SSR tslib default crashes. Named emitted-function regression red 0 passed/3 failed/0 skips in 2050.061956ms. Nitro Node-platform hypothesis did not change error and was reverted. Targeted public tslib ESM alias plus explicit already-locked 2.8.1: frozen build exit0, regression 3 passed/0 failed/0 cancelled/skipped in 192.785908ms, direct/isolated process HTML200 with original build path absent. tsc/lint each exit0, proxy5/5, auth8/8. Source published in draft PR9 and deployed with specific user approval; live regression4/4. Real staff journey remains pending.",
+        "linux_ssr_source_commit": "531774989f842ff8d65cd2fad5164f819301fe16",
+        "hosted_ci_after_ssr_fix": {
+          "head_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+          "run_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36662932533",
+          "jobs_passed": 4,
+          "jobs_failed": 0,
+          "api": {
+            "passed": 569,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 79,
+            "seconds": 121.98
+          },
+          "worker": {
+            "passed": 169,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 1,
+            "seconds": 22.0
+          },
+          "browser_fixture": {
+            "passed": 1,
+            "seconds": 15.7
+          },
+          "render_function": {
+            "passed": 3,
+            "failed": 0,
+            "skipped": 0,
+            "duration_ms": 229.913351
+          },
+          "scope": "Disposable database and fake identity/provider fixtures; narrower than complete staff journey"
+        },
+        "vercel_fix_preview": {
+          "id": "dpl_ABTjYtq5QcWqZD1vzwubehuMU2KM",
+          "source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+          "state": "READY",
+          "frontend_status": 200,
+          "frontend_routes": [
+            "/",
+            "/app",
+            "/auth/callback"
+          ],
+          "unauthenticated_api_status": 401,
+          "production_auth0_variables_applied": false,
+          "production_fix_deployed": true
+        },
+        "publication": "Draft PR #9 attached; code commit 531774989f842ff8d65cd2fad5164f819301fe16; tested PR head 62d40bc7687477f42e971ae5143485806630f1a6; final checkpoint changes documentation only.",
+        "vercel_fix_production": {
+          "deployment_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+          "source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+          "state": "READY",
+          "target": "production",
+          "public_origin": "https://buyer-os-nu.vercel.app",
+          "frontend_http_status": 200,
+          "frontend_routes": [
+            "/",
+            "/app",
+            "/auth/callback"
+          ],
+          "public_config_in_authorize_request": true,
+          "unauthenticated_api_status": 401,
+          "unauthenticated_api_code": "UNAUTHENTICATED",
+          "acceptance": {
+            "passed": 4,
+            "failed": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "duration_ms": 5271.2125
+          },
+          "browser": {
+            "initial_html_status": 200,
+            "application_errors": [],
+            "universal_login_origin": "https://dev-oaug20cdxqqgn1s8.us.auth0.com",
+            "universal_login_path": "/u/login",
+            "visible_blank_email_field": true,
+            "credentials_entered": false
+          },
+          "authorize_request": {
+            "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R",
+            "audience": "https://buyer-os-nu.vercel.app/v1",
+            "redirect_uri": "https://buyer-os-nu.vercel.app/auth/callback",
+            "response_type": "code",
+            "code_challenge_method": "S256",
+            "pkce_challenge_present": true
+          },
+          "real_staff_session_verified": false
+        },
+        "hosted_ci_followup": {
+          "head_sha": "2a2682e55b81f99a1a0838b6dcfe34a8d990841c",
+          "run_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36663605615",
+          "jobs_passed": 4,
+          "jobs_failed": 0,
+          "scope": "Documentation-only follow-up; fresh PR check metadata confirms four hosted CI jobs and both Vercel checks SUCCESS. Exact counts for previously tested/deployed source remain in hosted_ci_after_ssr_fix."
+        },
+        "live_screenshots": [
+          {
+            "path": "artifacts/t30-screenshots/vercel-sign-in-fixed-20260930.png",
+            "sha256": "4e9a9d74409ec6ad972b37721f8fecbe721022ef00ab225db50ba68f2ce1b56c",
+            "visually_inspected": true
+          },
+          {
+            "path": "artifacts/t30-screenshots/auth0-universal-login-fixed-20260930.png",
+            "sha256": "4a7717ad740092166a01665f701fd23e377a8329b6bd4390179d44c992b7e9b2",
+            "visually_inspected": true
+          }
+        ],
+        "initial_workspace_diagnosis": {
+          "user_report": "Signed in but no workspace",
+          "live_read_only_database": {
+            "users": 0,
+            "workspaces": 0,
+            "schema_head": "0033_api_rate_windows"
+          },
+          "membership_listing_fixture": {
+            "passed": 2,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 8,
+            "seconds": 6.76
+          },
+          "initial_membership_seeded": true,
+          "proposal": "docs/buyeros/INITIAL_WORKSPACE_PROPOSAL.json",
+          "owner_identity": "Verified exact supplied email, email_verified true, unblocked Google-linked Auth0 user, one match, same immutable subject in successful BuyerOS client login. Exact subject remains ignored; public SHA256 reference in proposal.",
+          "management_lookup": "Fresh authorization succeeded; exact account/login verified; no runtime Auth0 configuration changed.",
+          "prepared_transaction_fixture": {
+            "scope": "Session-local ignored administrative helper, disposable PostgreSQL, fixture identity only; no application endpoint or production mutation",
+            "source_sha256": "51f7827b778f41e1d1f676928deefcd346c9db14750278ff9d9818fb76651c84",
+            "tests_sha256": "e7afa9273a5b4a08176ee58527204b5a4efeef201d9ef5efd074cd7b17e81ebb",
+            "passed": 3,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+            "warnings": 4,
+            "seconds": 9.54,
+            "checks": [
+              "Initial workspace_admin membership is visible through restricted API role; unrelated fixture actor sees no workspace",
+              "Retry does not duplicate or change membership/audit; conflicting existing workspace is preserved and rejected",
+              "Database failure at membership insert rolls back user/workspace/audit"
+            ],
+            "production_applied": false,
+            "live_identity_verified_by_tests": false
+          },
+          "production_preflight": {
+            "database": "nameless-bar-15324691/br-autumn-block-b3exsqii/neondb",
+            "head": "0033_api_rate_windows",
+            "users": 0,
+            "workspaces": 0,
+            "changes_applied": false
+          },
+          "identity_verification": {
+            "email_exact_match": true,
+            "email_verified": true,
+            "blocked": false,
+            "subject_sha256": "cfe7cd302e6627375d838e3af5fd04fec145b607025d77046e8aac11cc784efb",
+            "matches": 1,
+            "providers": [
+              "google-oauth2"
+            ],
+            "latest_successful_login": {
+              "date": "2026-09-30T14:31:37.074Z",
+              "type": "s",
+              "client_id": "iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R"
+            },
+            "real_staff_api_session_verified": false
+          },
+          "approved_setup_execution": {
+            "authorization_source": "Direct user reply to the named FIMMICK production workspace and verified-account administrator proposal in this execution session",
+            "authorization_reply": "Approve this workspace setup",
+            "scope": "One verified application user, FIMMICK live workspace, active workspace_admin membership and redacted bootstrap audit",
+            "bootstrap_result": {
+              "workspace_id": "900cd19b-4e03-4446-bdd6-7cb199d96060",
+              "membership_id": "d8190b6e-c290-41d6-8dd2-3d0c90b824cc",
+              "changes_applied": true,
+              "replay": false
+            },
+            "combined_apply_and_role_check_exit_code": 1,
+            "apply_commit": "succeeded before the subsequent role-switch permission check failed",
+            "role_check_failure": "neondb_owner cannot SET ROLE buyeros_api; no new role grant or RLS weakening performed",
+            "followup_read_only_verification_exit_code": 0,
+            "database_verification": {
+              "database_counts": {
+                "users": 1,
+                "workspaces": 1,
+                "target_memberships": 1,
+                "target_bootstrap_audits": 1
+              },
+              "exact_identity_and_membership_readback": "passed",
+              "workspace": "FIMMICK",
+              "roles": [
+                "workspace_admin"
+              ],
+              "active": true,
+              "version": 1,
+              "schema_heads": [
+                "0033_api_rate_windows"
+              ],
+              "api_role_catalog": {
+                "select_users_workspaces_memberships": [
+                  true,
+                  true,
+                  true
+                ],
+                "membership_rls_enabled": true,
+                "membership_rls_forced": true,
+                "login": true,
+                "superuser": false,
+                "createdb": false,
+                "createrole": false,
+                "bypassrls": false
+              },
+              "verification_method": "Read-only owner connection plus catalog permissions; not an authenticated API request or actual runtime-role connection",
+              "role_switch_attempt": "Denied: neondb_owner cannot SET ROLE buyeros_api; no additional role membership granted",
+              "real_staff_api_session_verified": false,
+              "migration": "none",
+              "deployment": "unchanged",
+              "provider_delivery_activation": "none"
+            },
+            "anonymous_deployed_regression": {
+              "passed": 4,
+              "failed": 0,
+              "cancelled": 0,
+              "skipped": 0,
+              "duration_ms": 3877.6165
+            },
+            "staff_ui_confirmation": "Confirmed by the user on 2026-10-01 HK: FIMMICK and admin role are visible. This is human-reported UI access, not an agent-observed authenticated API trace or full journey.",
+            "migration": "none; existing sole head0033 unchanged",
+            "deployed_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+            "rollback": "No production rollback performed; failed-insert atomic rollback verified only on disposable fixture",
+            "provider_delivery_activation": "none",
+            "bo_owner_approval_records_modified": false,
+            "human_staff_ui_confirmation": {
+              "date_hk": "2026-10-01",
+              "source": "Direct user reply to refresh/sign-in workspace confirmation question",
+              "answer": "FIMMICK and admin role are visible",
+              "method": "human reported UI confirmation",
+              "authenticated_api_trace_observed_by_agent": false,
+              "full_staff_journey_verified": false
+            }
+          },
+          "current_initial_setup_state": "Four approved rows persisted and read back; the user confirmed FIMMICK and admin role visible on 2026-10-01 HK. Full staff continuity and agent-observed authenticated API trace remain unverified."
+        },
+        "ongoing_continuity_slice_20261001": {
+          "status": "reviewed_source_deployed_anonymous_and_human_scope_verified_live_gates_open",
+          "base_source_sha": "479141f5f04455cdc19c786cb40a3a0fd9f4b4d2",
+          "working_tree": "Reviewed application/test source4181062 was deployed under exact authorization, with actual anonymous4/4 and refreshed human FIMMICK/admin visibility. The owner subsequently merged PR9; existing Git integration deployed main12327c7 with identical app/CI content, main CI6/6 and current-source HTTP4/4. Following checkpoints change documentation/evidence only. The agent performed no merge, migration, direct database mutation or external worker/provider activation.",
+          "observed_red": [
+            "Addressed API admission 5 failed against current 503 boundary",
+            "Worker addressed recipient/race 4 failed against ignored context",
+            "Canonical getBuyer contacts absent 1 failed",
+            "UI-created project research 422 unsupported buyer role; display Distributor was saved instead of distributor",
+            "Actual UI recipient selector missing after same-project worker research",
+            "Worker inactive operator still materialized draft 1 failed",
+            "Contact expired after exact review still approved 201: 1 failed",
+            "zh-HK list accessible region absent: 1 failed before localization",
+            "zh-HK project selection accessible region absent: 1 failed before selector/dossier localization"
+          ],
+          "current_green": [
+            "Full final API: 577 passed, 0 failed/errors/skipped, 110 warnings, 220.26s; JUnit required gate exit0",
+            "Full final worker: 174 passed, 0 failed/errors/skipped, 4 warnings, 86.36s; JUnit required gate exit0",
+            "Rollback guards: 3 passed, 0 failed/errors/skipped, 12 warnings, 8.91s; 0032 retained contact dates and independent0028 approval history remain intact",
+            "Buyer/list regressions: 3 passed, 0 failed/skipped, 1.8m; English durable management, viewer denial, zh-HK accessible controls and feedback",
+            "Domain11/adapter74/auth8/generated1/routes78; TypeScript/lint/build exit0; final no-skip artifacts retained under artifacts/t30-tests",
+            "Full continuous UI-created project/edit/ICP approval/bounded research/review/list/assignment/grounded addressed generation/exact approval/authorized download/manual outcome/refresh: 4 passed, 0 failed/errors/skipped, 4.8m; en and zh-HK, initial1280x800 and390x844; explicit draft language verified in downloaded text; viewer export403 and approved delivery403 DELIVERY_DISABLED in each case.",
+            "Final workbench: 8 passed, 0 failed/errors/skipped, 2.8m; scope retry, partial errors, preference recovery, responsive routes and measured contrast; required JUnit gate exit0.",
+            "Final actual Chromium 200% API-backed zoom: 2 passed, 0 failed/errors/skipped, 2.1m; six routes en/zh-HK. Required JUnit retained; earlier zoom screenshots keep their original T29 source.",
+            "Final real buyer snapshot pagination/dossier: 1 passed, 0 failed/errors/skipped, 2.3m.",
+            "Final durable list/preset/note/owner/review, viewer denial and localized list feedback: 3 passed, 0 failed/errors/skipped, 2.0m; required JUnit retained.",
+            "Final TypeScript and lint exit0 after the guarded per-case workbench fixture hook.",
+            "Original named mvp-a-journey.spec.ts acceptance: 1 passed, 0 failed/errors/skipped, 2.5m; seeded addressed approval/export/outcome regression, separate from four UI-created continuous journeys."
+          ],
+          "new_source_scope": "Stored retained recipient/purpose/suppression binding for zero-cost templates; worker current recipient/policy/member recheck; eligible contact detail on existing getBuyer; raw fit hash projection; wizard canonical buyer type roundtrip; synchronous approval recipient expiry; continuous UI-created project, edits, approvals, real fixture broker/worker research and generated addressed draft/export/outcome test.",
+          "fixture_boundary": "Fresh owned loopback PostgreSQL16 and Valkey8; fake OIDC/search. Guarded helper supplies only fictional policy/budget prerequisites and existing valid fictional contact input to a UI-created project. Independent cases initialize only their named fake actors rate counters before research/login; production limiter and all limits within each case remain active. No project/buyer/ICP/review/draft/approval/outcome seed in this helper; no live lookup/provider verification.",
+          "remaining": "Human source review, agent-observed authenticated domain API acceptance and complete production staff continuity remain open. Current owner-merged12327c7 has identical application/CI content to reviewed4181062, main CI6/6 and current-source HTTP4/4. Refreshed human FIMMICK/admin visibility was confirmed on4181062. Actual assistive/non-text accessibility, external recovery journal custody, compatible continuous worker/Valkey/R2 and named policy/provider/pilot activation remain open.",
+          "diagnostic_failures": [
+            "Final API preceding repair: 576 passed/1 failed/0 errors/skips; valid retention caused0032 rollback guard to fire before0028. Fixed test to assert both without deleting dates.",
+            "First bilingual fixture repeat: 1 passed/1 failed at duplicate known contact input for shared canonical company; fixture now reuses and verifies its unchanged valid input.",
+            "Initial bilingual test construction had incomplete labels/expectation table and was repaired; those attempts are not product defect RED evidence.",
+            "Initial four-case continuity matrix: 2 passed/2 failed; sanitized API capture proved429 RATE_LIMITED caused by prior independent cases reusing fictional actors. Reset only initial fake-actor windows once for a new unresearched UI project; final4 passed.",
+            "First final workbench rerun: 7 passed/1 failed at429 on shared fictional reviewer. Guarded counter isolation once before each independent case; final8 passed. No retry, production limit increase or suppression inside a case."
+          ],
+          "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+          "publication": "source4181062 pushed to existing draft PR9; no merge/new production deployment",
+          "hosted_ci": {
+            "head_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+            "run_id": 36772517309,
+            "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36772517309",
+            "status": "completed",
+            "conclusion": "success",
+            "jobs": [
+              {
+                "id": 110082194682,
+                "name": "worker",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              {
+                "id": 110082194989,
+                "name": "browser-continuity",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              {
+                "id": 110082195067,
+                "name": "api",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              {
+                "id": 110082195138,
+                "name": "frontend",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              {
+                "id": 110082195141,
+                "name": "browser-zoom",
+                "status": "completed",
+                "conclusion": "success"
+              },
+              {
+                "id": 110082195174,
+                "name": "browser-smoke",
+                "status": "completed",
+                "conclusion": "success"
+              }
+            ],
+            "logs": {
+              "api": {
+                "log_sha256": "d36641fa4f2f920bb5adad4ed5ac445f962ffe35cec475938d7af8c3e081e436",
+                "exact_summary": [
+                  "2026-09-30T20:28:11.8674956Z 577 passed, 81 warnings in 135.14s (0:02:15)",
+                  "2026-09-30T20:28:13.1254541Z passed=577 failed=0 errors=0 skipped=0"
+                ]
+              },
+              "worker": {
+                "log_sha256": "d82d08ae4790aab20754e97bffa0519ea74a8a9ddbe31202f3376b4ab57064f6",
+                "exact_summary": [
+                  "2026-09-30T20:26:21.1285404Z 174 passed, 1 warning in 26.09s",
+                  "2026-09-30T20:26:21.9868717Z passed=174 failed=0 errors=0 skipped=0"
+                ]
+              },
+              "continuity": {
+                "log_sha256": "c20adfadbf7853e3c7850b181771e2e14d1d46feb9df3cbc6963673a0dca7a1f",
+                "exact_summary": [
+                  "2026-09-30T20:28:50.2413243Z   4 passed (2.5m)",
+                  "2026-09-30T20:28:50.3256501Z passed=4 failed=0 errors=0 skipped=0",
+                  "2026-09-30T20:29:56.6440497Z   8 passed (1.1m)",
+                  "2026-09-30T20:29:56.7333097Z passed=8 failed=0 errors=0 skipped=0",
+                  "2026-09-30T20:30:25.3731624Z   1 passed (27.6s)",
+                  "2026-09-30T20:30:25.4594461Z passed=1 failed=0 errors=0 skipped=0",
+                  "2026-09-30T20:30:56.8673820Z   3 passed (30.4s)",
+                  "2026-09-30T20:30:56.9549579Z passed=3 failed=0 errors=0 skipped=0",
+                  "2026-09-30T20:31:25.3411543Z   1 passed (27.3s)",
+                  "2026-09-30T20:31:25.4273866Z passed=1 failed=0 errors=0 skipped=0"
+                ]
+              },
+              "zoom": {
+                "log_sha256": "2a914e6b7012ecb0e0968b4d7f43ac0c8f4014ab5e4e787560ad1fe4dbea8e2b",
+                "exact_summary": [
+                  "2026-09-30T20:32:51.4986252Z   2 passed (31.5s)",
+                  "2026-09-30T20:32:51.5806946Z passed=2 failed=0 errors=0 skipped=0"
+                ]
+              },
+              "smoke": {
+                "log_sha256": "a106c6bf76180ff98102997096572f6c07f3d4bab8b123341f29e71516079838",
+                "exact_summary": [
+                  "2026-09-30T20:27:21.6589383Z   1 passed (18.7s)"
+                ]
+              },
+              "frontend": {
+                "log_sha256": "60d6f2ad3b71b1f63d9d130624098cb72161e57e28a694235f0990708a1441e1",
+                "exact_summary": [
+                  "2026-09-30T20:26:06.4496449Z ℹ tests 1",
+                  "2026-09-30T20:26:06.4497016Z ℹ pass 1",
+                  "2026-09-30T20:26:06.4510646Z ℹ fail 0",
+                  "2026-09-30T20:26:06.4520910Z ℹ skipped 0",
+                  "2026-09-30T20:26:06.6097984Z ℹ tests 5",
+                  "2026-09-30T20:26:06.6098703Z ℹ pass 5",
+                  "2026-09-30T20:26:06.6110507Z ℹ fail 0",
+                  "2026-09-30T20:26:06.6131184Z ℹ skipped 0",
+                  "2026-09-30T20:26:47.3740751Z ℹ tests 3",
+                  "2026-09-30T20:26:47.3750428Z ℹ pass 3",
+                  "2026-09-30T20:26:47.3765568Z ℹ fail 0",
+                  "2026-09-30T20:26:47.3766265Z ℹ skipped 0"
+                ]
+              }
+            },
+            "identity_provider_scope": "Fictional OIDC/search/contact, actual disposable DB/broker/worker; no live provider proof."
+          },
+          "preview": "READY source4181062; direct app/API requests302 to Vercel SSO, so anonymous HTTP acceptance is blocked and not counted as pass",
+          "documentation_checkpoint_ci": {
+            "head_sha": "326de151aa429a5243372b0fe39cf03d39be17a2",
+            "run_id": 36775490988,
+            "url": "https://github.com/YNWAforever/BuyerOS/actions/runs/36775490988",
+            "status": "completed",
+            "conclusion": "success",
+            "successful_jobs": 6,
+            "evidence": "artifacts/t30-ci-head-checkpoint-20261001.json",
+            "scope": "Fresh metadata verifies all six jobs and PR checks at this source. Exact test counts remain attributed to reviewed code4181062/run36772517309; no new deployment or owner approval is claimed.",
+            "checkpoint_checks": "JSON/source attribution checks passed; git diff --quiet from4181062 excluding docs/artifacts exit0; git diff --check exit0. Documentation/evidence only; no additional application test results claimed."
+          },
+          "production_deployment_20261001": {
+            "source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+            "deployment_id": "dpl_5Yt2v611QZwJntN8sBnwyWojJQvT",
+            "target": "production",
+            "state": "READY",
+            "url": "https://buyer-os-nu.vercel.app",
+            "project_id": "prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw",
+            "command": "vercel.cmd redeploy dpl_9vrsNEUsyzfGjbr745ersK6XWEVF --target production --scope ynwaforevers-projects --no-wait",
+            "authorization": "User continued immediately after the explicit final question naming4181062 and the existing production project; exact deployment authorization was announced before execution. BO owner approval records were not changed.",
+            "build_duration_seconds": 74.433,
+            "saved_production_variables": "All nine IDs/names/types/update timestamps unchanged; paid admission false, R2 false, binding URL platform-injected.",
+            "http_acceptance": "node artifacts/t30-production-acceptance-4181062-20261001.mjs exited0:4 passed/0 failed/skipped. Root/app200 and public Auth0 bootstrap; missing/malformed bearer401 exact UNAUTHENTICATED contract, request IDs and no data rows.",
+            "error_scan": "Deployment-filtered error-level10m query exited0:0 returned records/0 unparsed lines; max100. Does not establish continuous monitoring or drains.",
+            "human_scope_confirmation": "User confirmed FIMMICK and workspace_admin visible after refreshing/signing in on the updated production deployment. Human UI evidence, not an agent-observed API trace or full journey.",
+            "checkpoint_checks": "node --check acceptance artifact exit0; UTF-8 JSON5 parsed/source-state-count assertions pass; API generate-operation-routes.py --check matches78 operations; application/CI diff from4181062 excluding docs/artifacts empty; git diff --check exit0. No new API/worker fixture count is claimed.",
+            "evidence_prefix": "artifacts/t30-production-*-4181062-20261001.*",
+            "previous_deployment_id": "dpl_GEgeCkt2iBUhvvLDEXD7yn74y1Q3",
+            "previous_source_sha": "62d40bc7687477f42e971ae5143485806630f1a6",
+            "migrations_run": 0,
+            "direct_database_mutation_commands": 0,
+            "paid_provider_requests": 0,
+            "external_worker_activated": false,
+            "delivery_activated": false,
+            "scope": "App/API deployment and bounded anonymous production checks only. No live pilot or full deployed staff/provider/worker verification."
+          },
+          "external_main_successor_20261001": {
+            "source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+            "reviewed_application_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+            "deployment_id": "dpl_wdPCQmzg7EkFusgFknHAA2tXdKth",
+            "state": "READY",
+            "url": "https://buyer-os-nu.vercel.app",
+            "external_merge": "GitHub records PR9/head a594219 merged by YNWAforever at2026-10-01T01:52:49Z into12327c7. Existing Git integration deployed main. Agent performed no merge or additional deployment.",
+            "application_equivalence": "git diff --quiet reviewed4181062 origin/main excluding docs/artifacts exit0; origin/main12327c7. No domain/worker/CI/contract change.",
+            "main_ci": "Run36803187816 source12327c7:6 jobs completed SUCCESS; metadata retained in external-merge artifact.",
+            "http_acceptance": "node artifacts/t30-production-acceptance-12327c7-20261001.mjs exit0:4 passed/0 failed/skipped at2026-10-01T02:09:33.444Z; exact same anonymous/bootstrap boundary checks at successor source.",
+            "error_scan": "Current deployment-filtered10m error query exit0:0 records/0 unparsed lines; bounded query, not continuous monitoring.",
+            "configuration": "Nine saved production variable records unchanged; paid admission and R2 false; platform binding preserved.",
+            "evidence": "artifacts/t30-external-merge-production-12327c7-20261001.json and t30-production-acceptance/error-scan-12327c7-20261001.*",
+            "human_scope": "Human FIMMICK/admin confirmation pertains to preceding4181062; current successor has identical app/CI content and unchanged configuration. Agent authenticated domain trace/full staff journey remain unverified.",
+            "follow_up_review": "5e89eb1 deployment evidence is newer than merged PR9 head. The checkpoint through35eb899 contains documentation/evidence only; subsequent requested Render preparation is separately tracked. Preserve original source records."
+          },
+          "render_worker_setup_20261001": {
+            "status": "prepared_local_and_hosted_verified_not_provisioned_paid_resource_and_account_gates_open",
+            "reviewed_source_sha": "e061d33a32a46502a084d5a5c26d9262904a7b60",
+            "request": "User asked the agent to create the worker after the existing-target question; no priced provisioning or production worker role grant is fabricated.",
+            "proposal": "root render.yaml: buyer-os-worker and buyer-os-dispatcher, one0.5c-512mb instance each; one buyer-os-broker256mb; allSingapore. BaseUS$24/month before tax/workspace/usage extras, current primary pricing verified2026-10-01. Paid previews/autodeployoff.",
+            "runtime": "Both callers bind the same internal broker. WORKER_RUNTIME_ENABLEDfalse starts standby without BuyerOS imports, connections or queued jobs. Activation requires production, dedicated buyeros_worker_runtime login/TLS and remote broker; name checks do not verify catalog privileges. Canonical Celery concurrency1/prefetch1/recoverybeat and existing bounded dispatcher CLI remain owners.",
+            "local_checks": "Named unittest red0/9/0 exit1 (0.002s); green9/0/0 exit0 (0.023s). Official schema first rejected unquoted YAMLoff; quoted enums pass unchanged validator. Worker/dispatcher --check2/2 standby; canonical module help imports2/2. No database/broker/provider contacted by these checks.",
+            "evidence": "artifacts/t30-tests/render-worker-launch-red/green-20261001.txt; artifacts/t30-render-blueprint-validation-20261001.json; artifacts/t30-render-worker-ci-e061d33-20261001.json; runbooks/render-worker-setup.md exact variables/cost/rollback.",
+            "hosted_checks": "Run36807776580 at e061d33 completed6/6 SUCCESS. Required API577/0/0/0 (78 warnings129.79s), worker174/0/0/0 (1 warning22.33s), browser continuity4+8+1+3+1 and zoom2 required no-skip gates pass; smoke1. Launcher9/0/0 in0.006s, real Linux standby/SIGTERM2/0/0, official schema and exact frozen no-dev production build/two standby CLI checks/two canonical imports pass on Python3.12.14/uv0.11.27. Actual fixture containers, fictional identity/search/contact; no deployed Render integration claimed.",
+            "configuration_missing": "Authenticated Render account/workspace and concreteUS$24/month standby-resource decision. Official CLI2.28.0 archive digest verified and safely extracted in ignored checkout-local storage; device authorization is pending. Later runtime activation needs exact production worker role/credential/catalog/queue approval; no migration/source seed or paid provider is part of this proposal.",
+            "provisioned": false,
+            "worker_activated": false,
+            "broker_live_verified": false,
+            "production_schema_changed": false,
+            "paid_provider_enabled": false,
+            "delivery_enabled": false
+          }
+        }
+      }
+    }
+  ],
+  "proposed_new_operations": [
+    {
+      "operation_id": "assignBuyerOwners",
+      "task": "T11"
+    },
+    {
+      "operation_id": "listMemberships",
+      "task": "T12"
+    },
+    {
+      "operation_id": "updateMembership",
+      "task": "T12"
+    },
+    {
+      "operation_id": "retryFailedAsyncJob",
+      "task": "T11"
+    },
+    {
+      "operation_id": "cancelAsyncJob",
+      "task": "T11"
+    },
+    {
+      "operation_id": "listAsyncJobs",
+      "task": "T12"
+    }
+  ],
+  "warnings": [
+    "Supplied task tests were proposals; current execution results are in REMAINING_DEVELOPMENT_STATUS.md.",
+    "Audit 338 passed/53 skipped is historical baseline evidence, not release verification.",
+    "T28 external recovery journal custody/completeness, T29 assistive/non-text review and T30 live authorization/provider/release gates remain open; the complete fixture journey passes all four locale/layout cases; preserve newer source and unrelated changes."
+  ],
+  "reviewed_source_sha": "41810627540dd52c4567f853ae65d51e2bb6365d",
+  "execution_registry_note": "Repository copy is the execution tracker; the supplied Downloads pack remains immutable.",
+  "next_eligible_task": "Independent review and current production role/schema/drain/epoch, quota/locality/alerts inspection to prepare the exact production activation proposal. Provider/R2/pilot gates separate; do not restart completed tasks.",
+  "hosting_migration_proposal": {
+    "status": "local_release_candidate_and_isolated_hosted_fixture_verified_production_activation_pending",
+    "date_hk": "2026-10-01",
+    "source_sha": "aed7a7eb2b7370c10cd7a41306eecf09d378ad42",
+    "design": "docs/superpowers/specs/2026-10-01-cloudflare-job-migration-design.md",
+    "plan": "docs/superpowers/plans/2026-10-01-cloudflare-job-migration.md",
+    "execution_method": "same_session_executing_plans_no_agents",
+    "architecture_exception_approved": true,
+    "implementation_approved": true,
+    "approval_evidence": "Direct user message approve after the Cloudflare design/implementation plan handoff, 2026-10-01 HK. Authorizes local CF00-CF08 implementation and the transport architecture exception only; no owner/provider or production activation record is inferred.",
+    "paid_resources_approved": true,
+    "production_activation_approved": false,
+    "tasks": [
+      {
+        "id": "CF00",
+        "depends_on": [],
+        "status": "complete_local_and_isolated_hosted_fixture_verified_production_pending",
+        "evidence": "artifacts/cloudflare/CF00-checkpoint.json",
+        "hosted_evidence": "artifacts/cloudflare/CF00-hosted-preview-checkpoint.json"
+      },
+      {
+        "id": "CF01",
+        "depends_on": [
+          "CF00"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF01-checkpoint.json"
+      },
+      {
+        "id": "CF02",
+        "depends_on": [
+          "CF01"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF02-checkpoint.json"
+      },
+      {
+        "id": "CF03",
+        "depends_on": [
+          "CF02"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF03-checkpoint.json"
+      },
+      {
+        "id": "CF04",
+        "depends_on": [
+          "CF03"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF04-checkpoint.json"
+      },
+      {
+        "id": "CF05",
+        "depends_on": [
+          "CF04"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF05-checkpoint.json"
+      },
+      {
+        "id": "CF06",
+        "depends_on": [
+          "CF05"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF06-checkpoint.json"
+      },
+      {
+        "id": "CF07",
+        "depends_on": [
+          "CF06"
+        ],
+        "status": "complete",
+        "evidence": "artifacts/cloudflare/CF07-checkpoint.json"
+      },
+      {
+        "id": "CF08",
+        "depends_on": [
+          "CF07"
+        ],
+        "status": "complete_local_external_activation_pending",
+        "evidence": "artifacts/cloudflare/CF08-checkpoint.json"
+      }
+    ],
+    "reviewed_source_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
+    "handoff": "docs/buyeros/CLOUDFLARE_RELEASE_CANDIDATE_HANDOFF_20261001.md",
+    "hosted_integration_verified": true,
+    "deployed_source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+    "preview_setup_approved": true,
+    "preview_preparation": {
+      "status": "complete_local_and_bounded_hosted_preview_verified_now_fenced",
+      "reviewed_source_sha": "07a7537befbf1e2290ee7079e18a258083615ed6",
+      "evidence": "artifacts/cloudflare/CF00-preview-preparation-checkpoint.json",
+      "test_counts": {
+        "passed": 48,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "actual_duration_seconds": 61,
+      "schema_change": false,
+      "hosted_verified": false,
+      "resource_created": false,
+      "runtime_diagnostic_in_release_api": false,
+      "billing_inspection": "Cloudflare subscriptions GET403; standard account setting is not Paid proof. Vercel team Pro active, Neon owner Free. No plan upgrade.",
+      "linux_ci_verified": true,
+      "retained_fixture_log_issue": "11 anonymous built-fixture Error messages, not attributed expected;7 asserted cases passed.12 new journey PNGs outside upload path; prior local PNGs retained and2 current fresh special-case PNGs verified.",
+      "hosted_evidence": "artifacts/cloudflare/CF00-hosted-preview-checkpoint.json"
+    },
+    "remote_ci": {
+      "branch_head": "91b1f9b09ff7635d7967342f7b5577da881d91b5",
+      "test_merge": "d78fcadf5f938502a606c4c1865ade4a4215d06b",
+      "equal_tree_sha": "296c6b3379c734a0c6a0679c9d6b93c6a1d1b6da",
+      "run_id": 36875943355,
+      "scope": "Reviewed preview preparation07a7537 plus checkpoint91b1f9b; actual local Linux integration and fictional identities/providers, not protected hosted proof. Subsequent evidence-only commits are separate.",
+      "successful_jobs": 8,
+      "api_counts": {
+        "passed": 679,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "evidence": "artifacts/cloudflare/CF00-preview-remote-ci-91b1f9b.json"
+    },
+    "git_triggered_app_api_preview": {
+      "id": "dpl_2mtfFRQNvQqrkFizapMMjFRdujKk",
+      "url": "buyer-lmxv6y27g-ynwaforevers-projects.vercel.app",
+      "state": "READY",
+      "target": null,
+      "source": "git",
+      "sha": "91b1f9b09ff7635d7967342f7b5577da881d91b5",
+      "regions": [
+        "iad1"
+      ],
+      "alias": [
+        "buyer-os-git-codex-fix-vercel-tslib-ssr-ynwaforevers-projects.vercel.app"
+      ],
+      "scope": "Last observed existing-project Git app/API branch preview only. Prepared diagnostic outside release entrypoint. No protected native/controller/schema/selector/production proof."
+    },
+    "deployed_source_sha_scope": "Approved isolated native and ID-only operational preview only, now selectorfalse/epoch3, loginsNOLOGIN, controller/Cronoff, bypassrevoked, Neonidle; noproductionCloudflarecutover",
+    "paid_resources_approval_scope": "Conditional Workers Paid US$5/month account base plus shared metered overages only if required for the maximum2hour isolated preview. No new paid Neon/Vercel plan or production/provider activation.",
+    "preview_setup_approval_evidence": "Direct human approve after exact bounded protected-preview/conditional Workers Paid question, recorded2026-10-01T14:48:41Z; expires16:48:41Z. Not an independent reviewer or provider-owner record.",
+    "hosted_preview_session": {
+      "status": "isolated_hosted_preview_complete_fenced_and_suspended",
+      "evidence": "artifacts/cloudflare/CF00-hosted-preview-checkpoint.json",
+      "source_sha": "595865f5e4dce418e2b96d4819f72633378eba2b",
+      "expires_at": "2026-10-01T16:48:41Z",
+      "shutdown_completed_at": "2026-10-01T16:26:11.821617+00:00",
+      "native_verified": true,
+      "two_hop_61_seconds_verified": true,
+      "operational_receipt_verified": true,
+      "production_activation": false,
+      "billing_plan_changed": false,
+      "session_closed": true
+    },
+    "reviewed_source_sha_scope": "Author-reviewed permission correction23 source files; local focused23/PG18compat37/worker186/gateway4 and current full CI36905204388 eight jobs SUCCESS at identical-code a50ce72 verified. Independent review pending. Prior hosted595865f at0035 remains separate.",
+    "hosted_integration_verified_scope": "Isolated approved fictional native/PDF/checkpoint/protection/61-second two-hop and one ID-only Queue/Workflow/HMAC/API/Neon receipt only; no staff/customer/provider/production verification",
+    "post_hosted_regression_ci": {
+      "run_id": 36893525903,
+      "source_sha": "79d6caf8b51aac00560cf6d69b0198c8614df528",
+      "status": "success",
+      "jobs": 8,
+      "evidence": "artifacts/cloudflare/ci-79d6caf-hosted-successor/manifest.json",
+      "manifest_sha256": "6545ce70409d4e18e8c56a026b255c8dafd60952f7c15934023184f8eb98a865",
+      "counts": {
+        "api": 686,
+        "worker": 186,
+        "controller": 27,
+        "pg18": 29,
+        "operating": 2,
+        "staff_journey": 7,
+        "legacy": [
+          4,
+          8,
+          1,
+          3,
+          1
+        ],
+        "zoom": 2,
+        "smoke": 1
+      },
+      "required_failures": 0,
+      "required_errors": 0,
+      "required_skips": 0,
+      "fresh_ui_screenshots": 14,
+      "source_files_verified": 19,
+      "test_merge_sha": "d3a72bfc68d80e1b788ba6ded65075d61242f270",
+      "test_merge_tree_equals_source": true,
+      "scope": "Actual local runtime/PG/UI with fictional identity/providers; hosted native and operational proof at595865f separate"
+    },
+    "production_preflight": {
+      "status": "permission_correction_local_and_ci_verified_exact_production_setup_approval_pending",
+      "production_schema": "0033_api_rate_windows",
+      "current_repository_head": "0036_checkpoint_schema_grants",
+      "production_mutations": false,
+      "production_runtime_login_configured": false,
+      "current_permission_tests": {
+        "focused": 23,
+        "pg18": 37,
+        "worker": 186,
+        "gateway_release": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "ci_before_correction": {
+        "source_sha": "8ffd91fccee5d9fad25b108759c39686a5dac171",
+        "run_id": 36895867947,
+        "status": "success",
+        "jobs": 8
+      },
+      "production_activation_approved": false,
+      "next_eligible_task": "Human source-review disposition and exact guarded production setup decision; keep expired preview fenced and independent provider/policy gates separate.",
+      "source_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
+      "evidence": "artifacts/cloudflare/CF08-production-preparation-checkpoint.json",
+      "proposal": "docs/buyeros/runbooks/cloudflare-production-setup-proposal-20261002.md",
+      "controller_config": "artifacts/cloudflare/CF08-production-controller-proposal.json",
+      "production_setup_proposal_approved": false,
+      "continuous_dispatch_proposed_in_this_stage": false,
+      "current_source_ci": {
+        "run_id": 36905204388,
+        "source_sha": "a50ce72809518925a6c6c1f7e0e643fef5d37c49",
+        "implementation_sha": "6ef38d184023163b8b671350ad151e25f72e3e84",
+        "status": "success",
+        "jobs": 8,
+        "counts": {
+          "api": 694,
+          "worker": 186,
+          "controller": 27,
+          "pg18": 37,
+          "operating": 2,
+          "staff_journey": 7,
+          "legacy": [
+            4,
+            8,
+            1,
+            3,
+            1
+          ],
+          "zoom": 2,
+          "smoke": 1
+        },
+        "required_failures": 0,
+        "required_errors": 0,
+        "required_skips": 0,
+        "evidence": "artifacts/cloudflare/ci-a50ce72-hosted-successor/manifest.json",
+        "manifest_sha256": "1be37764ef1820b93901f32a49b57f5190263d6446d3f6a70506b52863fdf29c",
+        "test_merge_sha": "9815444778731425c0dd6646b5485322cf9f7c63",
+        "test_merge_tree_equals_source": true,
+        "acceptance_source_files_verified": 19,
+        "permission_correction_source_files_verified": 23,
+        "fresh_ui_screenshots": 14,
+        "scope": "Actual Linux local Workers/native FastAPI/owned PostgreSQL and built UI; fictional identity/provider inputs. No production or live-provider verification."
+      },
+      "current_ci_checkpoint": "artifacts/cloudflare/CF08-production-current-ci-checkpoint.json",
+      "ui_visual_review": "artifacts/cloudflare/CF08-production-preparation-ui-review.json"
+    }
+  },
+  "deployed_source_sha": "12327c7ac98849b90b0bd08f63872be7dd302ac6",
+  "reviewed_source_sha_scope": "Historical T30 application; hosting_migration_proposal.reviewed_source_sha is current Cloudflare RC.",
+  "deployed_source_sha_scope": "Existing main app12327c7 freshly read-only verified2026-10-02HK; production remains0033 and unchanged. hosting_migration_proposal separately records approved isolatedpreview595865f/0035 and shutdown; noCloudflare productioncutover.",
+  "latest_local_auth_checkpoint": {
+    "status": "local-fixed-native-worker-verified;full-N00-open",
+    "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+    "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+    "branch": "codex/n00-native-ipc-isolation",
+    "checked_at": "2026-10-05T13:43:35.000910+00:00",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+    "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+    "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+    "checks": {
+      "red-ipc": {
+        "leaf_cases": 2,
+        "pass": 0,
+        "fail": 2,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "red-isolation-behavior": {
+        "leaf_cases": 3,
+        "pass": 2,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "root-first": {
+        "leaf_cases": 307,
+        "pass": 306,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "root-green": {
+        "leaf_cases": 307,
+        "pass": 307,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {},
+        "reported": {
+          "tests": "308",
+          "pass": "308",
+          "fail": "0",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "466803.7974"
+        }
+      },
+      "browser": {
+        "leaf_cases": 5,
+        "pass": 5,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {
+          "id": "",
+          "name": "",
+          "tests": "5",
+          "failures": "0",
+          "skipped": "0",
+          "errors": "0",
+          "time": "13.736473000000002"
+        }
+      },
+      "crypto": {
+        "leaf_cases": 8,
+        "pass": 8,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {
+          "name": "pytest tests"
+        }
+      }
+    },
+    "static_gates": {
+      "lint": 0,
+      "types": 0,
+      "contracts": 0,
+      "routes": 0,
+      "browser": 0,
+      "crypto": 0
+    },
+    "native_observation": {
+      "fixture_only": true,
+      "positive_control": {
+        "http_requests": 3,
+        "native_tcp_connected": true
+      },
+      "direct_http_requests": 0,
+      "probes": {
+        "http_connected": false,
+        "fetch_connected": false,
+        "tcp_connected": false,
+        "subprocess_connected": false
+      },
+      "worker_policy": {
+        "network": "none",
+        "read_only": true,
+        "user": "node",
+        "cap_drop": [
+          "ALL"
+        ],
+        "pids_limit": 64,
+        "memory": 134217728,
+        "nano_cpus": 1000000000,
+        "published_ports": 0,
+        "mounts": 0,
+        "environment_names": [
+          "BUYEROS_STRICT_INTEGRATION",
+          "PATH",
+          "NODE_VERSION",
+          "YARN_VERSION"
+        ]
+      },
+      "cleanup": {
+        "complete": true,
+        "containers_absent": [
+          "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
+          "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
+          "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
+        ],
+        "network_absent": true,
+        "fixture_only": true,
+        "inspect_retries": 0
+      }
+    },
+    "new_node_cases": 3,
+    "new_build": false,
+    "fixture_only": true,
+    "canonical_db_connection": false,
+    "real_Neon_verified": false,
+    "parent_os_contained": false,
+    "browser_os_contained": false,
+    "arbitrary_provider_cli_contained": false,
+    "external_requests": 0,
+    "full_N00_open": true,
+    "original302_rerun": false,
+    "schema_head": "0037_bulk_manifests",
+    "migrations": 0,
+    "operation_count": 84,
+    "original_operations": 70,
+    "extensions": 14,
+    "independent_review": "pending",
+    "deployed_sha": null,
+    "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+    "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+  },
+  "latest_local_verification_checkpoint": {
+    "status": "local-fixed-native-worker-verified;full-N00-open",
+    "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+    "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+    "branch": "codex/n00-native-ipc-isolation",
+    "checked_at": "2026-10-05T13:43:35.000910+00:00",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+    "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+    "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+    "checks": {
+      "red-ipc": {
+        "leaf_cases": 2,
+        "pass": 0,
+        "fail": 2,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "red-isolation-behavior": {
+        "leaf_cases": 3,
+        "pass": 2,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "root-first": {
+        "leaf_cases": 307,
+        "pass": 306,
+        "fail": 1,
+        "error": 0,
+        "skip": 0,
+        "attributes": {}
+      },
+      "root-green": {
+        "leaf_cases": 307,
+        "pass": 307,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {},
+        "reported": {
+          "tests": "308",
+          "pass": "308",
+          "fail": "0",
+          "cancelled": "0",
+          "skipped": "0",
+          "todo": "0",
+          "duration_ms": "466803.7974"
+        }
+      },
+      "browser": {
+        "leaf_cases": 5,
+        "pass": 5,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {
+          "id": "",
+          "name": "",
+          "tests": "5",
+          "failures": "0",
+          "skipped": "0",
+          "errors": "0",
+          "time": "13.736473000000002"
+        }
+      },
+      "crypto": {
+        "leaf_cases": 8,
+        "pass": 8,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "attributes": {
+          "name": "pytest tests"
+        }
+      }
+    },
+    "static_gates": {
+      "lint": 0,
+      "types": 0,
+      "contracts": 0,
+      "routes": 0,
+      "browser": 0,
+      "crypto": 0
+    },
+    "native_observation": {
+      "fixture_only": true,
+      "positive_control": {
+        "http_requests": 3,
+        "native_tcp_connected": true
+      },
+      "direct_http_requests": 0,
+      "probes": {
+        "http_connected": false,
+        "fetch_connected": false,
+        "tcp_connected": false,
+        "subprocess_connected": false
+      },
+      "worker_policy": {
+        "network": "none",
+        "read_only": true,
+        "user": "node",
+        "cap_drop": [
+          "ALL"
+        ],
+        "pids_limit": 64,
+        "memory": 134217728,
+        "nano_cpus": 1000000000,
+        "published_ports": 0,
+        "mounts": 0,
+        "environment_names": [
+          "BUYEROS_STRICT_INTEGRATION",
+          "PATH",
+          "NODE_VERSION",
+          "YARN_VERSION"
+        ]
+      },
+      "cleanup": {
+        "complete": true,
+        "containers_absent": [
+          "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
+          "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
+          "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
+        ],
+        "network_absent": true,
+        "fixture_only": true,
+        "inspect_retries": 0
+      }
+    },
+    "new_node_cases": 3,
+    "new_build": false,
+    "fixture_only": true,
+    "canonical_db_connection": false,
+    "real_Neon_verified": false,
+    "parent_os_contained": false,
+    "browser_os_contained": false,
+    "arbitrary_provider_cli_contained": false,
+    "external_requests": 0,
+    "full_N00_open": true,
+    "original302_rerun": false,
+    "schema_head": "0037_bulk_manifests",
+    "migrations": 0,
+    "operation_count": 84,
+    "original_operations": 70,
+    "extensions": 14,
+    "independent_review": "pending",
+    "deployed_sha": null,
+    "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+    "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+  },
+  "prior_q11_current_source_verification_20261005": {
+    "status": "current-source-local-gates-verified;full-Q11-open",
+    "source_sha": "bb7a1ede078085dede0433cafd47078ea63a4e11",
+    "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+    "branch": "codex/q11-current-source-gates",
+    "checked_at": "2026-10-05T05:50:55.784291+00:00",
+    "owner_role": "Release owner / QA",
+    "runtime_code_changes": 0,
+    "tests_changed": 0,
+    "checks": {
+      "root-node": {
+        "pass": 299,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "reported_pass": 300,
+        "junit_leaf_cases": 299,
+        "duration_ms": 100374.5609
+      },
+      "api": {
+        "pass": 18,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "vercel-render-linux": {
+        "pass": 3,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "vercel-render-windows": {
+        "pass": 3,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "ui": {
+        "pass": 11,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      }
+    },
+    "contract_operations": 84,
+    "original_operations": 70,
+    "extensions": 14,
+    "generated_types_exit": 0,
+    "routes_exit": 0,
+    "typescript_exit": 0,
+    "source_lint_exit": 0,
+    "build_exit": 0,
+    "migrations": [],
+    "source_schema_head": "0037_bulk_manifests",
+    "deployed_sha": null,
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/RESULTS.md",
+    "limits": "Fixture identities/SQL rows; API/DB and 11 actual Operations browser cases. No real auth/provider/full staff/recovery/performance/production evidence. Original302 and fullN00 open. No deployment.",
+    "next_eligible": "Q11 local capability/readiness responsible role and concrete next action; N00 real compatibility separately blocked",
+    "rollback": "Revert this metadata/evidence commit only; no runtime/data/DB rollback."
+  },
+  "prior_q11_capability_guidance_checkpoint_20261005": {
+    "checked_at": "2026-10-05T06:46:36.763406+00:00",
+    "checks": {
+      "api-red": {
+        "cases": 1,
+        "pass": 0,
+        "fail": 1,
+        "error": 0,
+        "skip": 0
+      },
+      "ui-red": {
+        "cases": 1,
+        "pass": 0,
+        "fail": 1,
+        "error": 0,
+        "skip": 0
+      },
+      "review-red": {
+        "cases": 1,
+        "pass": 0,
+        "fail": 1,
+        "error": 0,
+        "skip": 0
+      },
+      "api-green": {
+        "cases": 19,
+        "pass": 19,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "ui-green-first": {
+        "cases": 15,
+        "pass": 15,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "ui-final": {
+        "cases": 5,
+        "pass": 5,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "root-node": {
+        "cases": 299,
+        "pass": 299,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "reported_pass": 300,
+        "duration_ms": 67414.0489
+      },
+      "vercel-render-linux": {
+        "cases": 3,
+        "pass": 3,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "vercel-render-windows": {
+        "cases": 3,
+        "pass": 3,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      }
+    },
+    "typescript_exit": 0,
+    "source_lint_exit": 0,
+    "generated_contracts_exit": 0,
+    "operation_routes_exit": 0,
+    "build_exit": 0,
+    "original_artifacts_unchanged": 3200,
+    "all_prior_artifacts_unchanged": 3370,
+    "foreign_worktrees_unchanged": 3,
+    "review": "author only; independent review pending",
+    "live_verification": false,
+    "status": "local-guidance-and-regression-verified;full-Q11-open",
+    "source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "base_sha": "f53ebec2a02a354edf6a8a858c4ca2e10f7f5fca",
+    "branch": "codex/q11-capability-guidance",
+    "owner_role": "Release owner / SRE",
+    "code_changes": "bounded capability responsibility/action contract and API; generated typed, scope-current en/zh-HK UI; archive-only compiler exclusions",
+    "contract_operations": 84,
+    "original_operations": 70,
+    "extensions": 14,
+    "new_operations": 0,
+    "migrations": [],
+    "source_schema_head": "0037_bulk_manifests",
+    "deployed_sha": null,
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_CAPABILITY_GUIDANCE/RESULTS.md",
+    "limits": "API/PostgreSQL/RLS and actual browser use fictional identities. Final5 new UI; intermediate15=11 Operations+4 guidance before final contradiction guard. No real auth/provider/full staff/UAT/recovery/performance/production proof. FullQ11/N00 and F10/F13 external gates OPEN.",
+    "next_eligible": "N00 remaining local original-redirect/native containment/accounting gap audit; actual Neon/provider/production work still needs its own concrete evidence and authorization",
+    "rollback": "Revert the following metadata commit, then source 5aaf6492ec10078e4f1a4fa5b17efd41c5673eba as one contract/API/UI/test unit. No DB/data rollback."
+  },
+  "prior_native_sdk_cleanup_checkpoint_20261005": {
+    "source_sha": "2b69e7cf8c0b0c738bfc34b3de44b1877468a0ca",
+    "base_sha": "58b3cff65625c5abe55a0f8ab316b604989d8063",
+    "status": "local-unknown-auth-transport-recovery-verified;N00open",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_UNKNOWN_WRITE_RECOVERY/RESULTS.md",
+    "checks": {
+      "related_Node": {
+        "pass": 214,
+        "fail": 0,
+        "skip": 0
+      },
+      "crypto": {
+        "pass": 8,
+        "fail": 0,
+        "skip": 0
+      },
+      "built_portable": {
+        "pass": 6,
+        "fail": 0,
+        "skip": 0
+      },
+      "built_Vercel": {
+        "pass": 6,
+        "fail": 0,
+        "skip": 0
+      },
+      "broad_root_MJS_attempt": {
+        "reported": 274,
+        "pass": 269,
+        "fail": 5,
+        "skip": 0,
+        "final_source_acceptance": false
+      }
+    },
+    "new_Node_cases": 13,
+    "new_UI_case_per_target": 1,
+    "types_exit": 0,
+    "lint_exit": 0,
+    "contracts_exit": 0,
+    "operations": 84,
+    "provider_calls": 0,
+    "migrations": [],
+    "deployed_sha": null,
+    "full_gate_passed": false,
+    "limits": [
+      "original302/trueNeon/Google/fullnativeaccounting/Managedidentitycleanup/independentreviewOPEN",
+      "broadsuiteRED;2intentfailuresnowrelatedGREEN;offerDocker30stimeout+parent+missingmainVercelentryremain",
+      "unresolvedrestartjournalsholdallstatechangespendingtrustedreconciliation"
+    ],
+    "managed_identity_sdk_cleanup": {
+      "source_sha": "050f0d03e49e867c9e5364865d3dc5f17bdc8fec",
+      "base_sha": "6c396a452fc48279ff093dc6984fdc0ad3a7e2a5",
+      "status": "local-native-SDK-managed-identity-cleanup-rehearsal-verified;N00open",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_MANAGED_CLEANUP_SDK/RESULTS.md",
+      "checks": {
+        "related_Node": {
+          "pass": 238,
+          "fail": 0,
+          "skip": 0
+        },
+        "focused_Node": {
+          "pass": 24,
+          "fail": 0,
+          "skip": 0
+        },
+        "crypto": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        },
+        "owned_browser": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "types_exit": 0,
+      "lint_exit": 0,
+      "contracts_exit": 0,
+      "operations": 84,
+      "provider_calls": 0,
+      "migrations": [],
+      "builds": 0,
+      "deployed_sha": null,
+      "full_gate_passed": false,
+      "limits": [
+        "real-Neon/Google/Admincleanup/schema/absence require fresh isolated authority",
+        "original302/fullnativecontainment/independentreview/staffUAT OPEN",
+        "priorbroadrootRED;not rerun"
+      ],
+      "source_commits": [
+        "5ecaa23abf6e3148a6964a1886b70442c3615987",
+        "050f0d03e49e867c9e5364865d3dc5f17bdc8fec"
+      ],
+      "author_review_red": {
+        "pass": 23,
+        "fail": 1,
+        "skip": 0
+      },
+      "intent": "bound identity canonical JSON;headers do not change intent"
+    }
+  },
+  "prior_proxy_deadline_verification_checkpoint_20261005": {
+    "checks": {
+      "red": {
+        "cases": 3,
+        "pass": 1,
+        "fail": 2,
+        "error": 0,
+        "skip": 0
+      },
+      "red-final": {
+        "cases": 4,
+        "pass": 1,
+        "fail": 3,
+        "error": 0,
+        "skip": 0
+      },
+      "focused-green": {
+        "cases": 28,
+        "pass": 28,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "root-green": {
+        "cases": 303,
+        "pass": 303,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "reported_pass": 304,
+        "duration_ms": 106071.156
+      },
+      "crypto": {
+        "cases": 8,
+        "pass": 8,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      }
+    },
+    "built_reuse_ui": [
+      {
+        "target": "portable",
+        "nonce": "2314a4a2e7e8",
+        "pass": 6,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "time": "17.345563",
+        "fixture_only": true,
+        "fresh_host_proxy": true,
+        "new_build": false,
+        "metrics": {
+          "received": 38,
+          "forwarded": 37,
+          "locally_rejected": 2,
+          "unknown": 1
+        },
+        "requests": 38,
+        "outcomes": {
+          "accepted": 35,
+          "rejected": 2,
+          "unknown": 1,
+          "pending": 0
+        },
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": []
+          },
+          "external_resources": 0,
+          "owned_journal_removed": true
+        }
+      },
+      {
+        "target": "vercel",
+        "nonce": "5d6402f65c01",
+        "pass": 6,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "time": "8.442167999999999",
+        "fixture_only": true,
+        "fresh_host_proxy": true,
+        "new_build": false,
+        "metrics": {
+          "received": 38,
+          "forwarded": 37,
+          "locally_rejected": 2,
+          "unknown": 1
+        },
+        "requests": 38,
+        "outcomes": {
+          "accepted": 35,
+          "rejected": 2,
+          "unknown": 1,
+          "pending": 0
+        },
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": []
+          },
+          "external_resources": 0,
+          "owned_journal_removed": true
+        }
+      }
+    ],
+    "types_exit": 0,
+    "lint_exit": 0,
+    "contracts_exit": 0,
+    "routes_exit": 0,
+    "new_builds": 0,
+    "migrations": [],
+    "protocol_required_DB_suite_applicable": false,
+    "protocol_DB_connections": 0,
+    "root_suite_environment_has_separate_guarded_disposable_tests": true,
+    "external_auth_requests": 0,
+    "real_Neon_verified": false,
+    "original302_gate": "open;unchanged;not rerun this slice",
+    "independent_review": "pending;author only",
+    "full_N00_gate_passed": false,
+    "deployed_sha": null,
+    "status": "local-proxy-deadlines-verified;full-N00-open",
+    "source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+    "base_sha": "233848b263cfdefc49d6dc5f53df2d534afdba16",
+    "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "branch": "codex/n00-proxy-dispatch-deadline",
+    "checked_at": "2026-10-05T08:08:51.042633+00:00",
+    "owner_role": "Identity / QA",
+    "source_files": 3,
+    "insertions": 105,
+    "deletions": 8,
+    "protocol_code_changes": "absolute ingress body deadline, TTL recheck immediately before physical dispatch, remaining TTL clamps upstream timeout; unknown hold retained",
+    "new_operations": 0,
+    "operation_count": 84,
+    "original_operations": 70,
+    "extensions": 14,
+    "source_schema_head": "0037_bulk_manifests",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_PROXY_DISPATCH_DEADLINE/RESULTS.md",
+    "rollback": "Revert following metadata commit then9e1ef78 as one local harness/test unit;no DB/data undo;never erase admitted/unknown journal state.",
+    "next_eligible": "N00 local native browser/CLI containment gap audit; full real-Neon/Google/Admincleanup/original302 requires separate evidence and fresh exact authorization;N01/N02 prerequisite unchanged"
+  },
+  "prior_proxy_deadline_auth_checkpoint_20261005": {
+    "checks": {
+      "red": {
+        "cases": 3,
+        "pass": 1,
+        "fail": 2,
+        "error": 0,
+        "skip": 0
+      },
+      "red-final": {
+        "cases": 4,
+        "pass": 1,
+        "fail": 3,
+        "error": 0,
+        "skip": 0
+      },
+      "focused-green": {
+        "cases": 28,
+        "pass": 28,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "root-green": {
+        "cases": 303,
+        "pass": 303,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "reported_pass": 304,
+        "duration_ms": 106071.156
+      },
+      "crypto": {
+        "cases": 8,
+        "pass": 8,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      }
+    },
+    "built_reuse_ui": [
+      {
+        "target": "portable",
+        "nonce": "2314a4a2e7e8",
+        "pass": 6,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "time": "17.345563",
+        "fixture_only": true,
+        "fresh_host_proxy": true,
+        "new_build": false,
+        "metrics": {
+          "received": 38,
+          "forwarded": 37,
+          "locally_rejected": 2,
+          "unknown": 1
+        },
+        "requests": 38,
+        "outcomes": {
+          "accepted": 35,
+          "rejected": 2,
+          "unknown": 1,
+          "pending": 0
+        },
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": []
+          },
+          "external_resources": 0,
+          "owned_journal_removed": true
+        }
+      },
+      {
+        "target": "vercel",
+        "nonce": "5d6402f65c01",
+        "pass": 6,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "time": "8.442167999999999",
+        "fixture_only": true,
+        "fresh_host_proxy": true,
+        "new_build": false,
+        "metrics": {
+          "received": 38,
+          "forwarded": 37,
+          "locally_rejected": 2,
+          "unknown": 1
+        },
+        "requests": 38,
+        "outcomes": {
+          "accepted": 35,
+          "rejected": 2,
+          "unknown": 1,
+          "pending": 0
+        },
+        "cleanup": {
+          "fixture_only": true,
+          "private_root_removed": true,
+          "runtime_configuration_removed": true,
+          "owned_children_absent": true,
+          "owned_root_removal": {
+            "removed": true,
+            "marker_retained_until_children_removed": true,
+            "private_configuration_removed_first": true,
+            "transient_errors": []
+          },
+          "external_resources": 0,
+          "owned_journal_removed": true
+        }
+      }
+    ],
+    "types_exit": 0,
+    "lint_exit": 0,
+    "contracts_exit": 0,
+    "routes_exit": 0,
+    "new_builds": 0,
+    "migrations": [],
+    "protocol_required_DB_suite_applicable": false,
+    "protocol_DB_connections": 0,
+    "root_suite_environment_has_separate_guarded_disposable_tests": true,
+    "external_auth_requests": 0,
+    "real_Neon_verified": false,
+    "original302_gate": "open;unchanged;not rerun this slice",
+    "independent_review": "pending;author only",
+    "full_N00_gate_passed": false,
+    "deployed_sha": null,
+    "status": "local-proxy-deadlines-verified;full-N00-open",
+    "source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+    "base_sha": "233848b263cfdefc49d6dc5f53df2d534afdba16",
+    "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "branch": "codex/n00-proxy-dispatch-deadline",
+    "checked_at": "2026-10-05T08:08:51.042633+00:00",
+    "owner_role": "Identity / QA",
+    "source_files": 3,
+    "insertions": 105,
+    "deletions": 8,
+    "protocol_code_changes": "absolute ingress body deadline, TTL recheck immediately before physical dispatch, remaining TTL clamps upstream timeout; unknown hold retained",
+    "new_operations": 0,
+    "operation_count": 84,
+    "original_operations": 70,
+    "extensions": 14,
+    "source_schema_head": "0037_bulk_manifests",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_PROXY_DISPATCH_DEADLINE/RESULTS.md",
+    "rollback": "Revert following metadata commit then9e1ef78 as one local harness/test unit;no DB/data undo;never erase admitted/unknown journal state.",
+    "next_eligible": "N00 local native browser/CLI containment gap audit; full real-Neon/Google/Admincleanup/original302 requires separate evidence and fresh exact authorization;N01/N02 prerequisite unchanged"
+  },
+  "prior_native_browser_auth_checkpoint_20261005": {
+    "checks": {
+      "red": {
+        "cases": 5,
+        "pass": 4,
+        "fail": 1,
+        "error": 0,
+        "skip": 0
+      },
+      "green": {
+        "cases": 5,
+        "pass": 5,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "duration_ms": 3231.391,
+        "global_errors": 0
+      },
+      "crypto": {
+        "cases": 8,
+        "pass": 8,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "root-green": {
+        "cases": 304,
+        "pass": 304,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "reported_pass": 305,
+        "duration_ms": 125948.7707
+      }
+    },
+    "static_gates": {
+      "lint": 0,
+      "routes": 0,
+      "types": 0,
+      "contracts": 0
+    },
+    "new_build": false,
+    "external_http_requests": 0,
+    "real_Neon_verified": false,
+    "full_N00_open": true,
+    "source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+    "base_sha": "ebe830e16f15d432ad326e7f298d629c8ca59a6f",
+    "branch": "codex/n00-browser-websocket-refusal",
+    "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+    "checked_at": "2026-10-05T12:01:07.670479+00:00",
+    "status": "local-browser-WebSocket-refusal-verified; full-N00-open",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_BROWSER_NATIVE_CONTAINMENT/RESULTS.md",
+    "schema_head": "0037_bulk_manifests",
+    "migrations": 0,
+    "operation_count": 84,
+    "independent_review": "pending",
+    "deployed_sha": null,
+    "next_eligible": "N00 prepare explicit counted transports and disposable OS egress isolation for Node native HTTP/APIRequestContext/provider CLI; no real execution until containment, cleanup and fresh exact authorization",
+    "rollback": "Revert following metadata commit then source362b60d; no DB/data rollback, retain admitted/unknown journal holds."
+  },
+  "prior_native_browser_verification_checkpoint_20261005": {
+    "checks": {
+      "red": {
+        "cases": 5,
+        "pass": 4,
+        "fail": 1,
+        "error": 0,
+        "skip": 0
+      },
+      "green": {
+        "cases": 5,
+        "pass": 5,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "duration_ms": 3231.391,
+        "global_errors": 0
+      },
+      "crypto": {
+        "cases": 8,
+        "pass": 8,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "root-green": {
+        "cases": 304,
+        "pass": 304,
+        "fail": 0,
+        "error": 0,
+        "skip": 0,
+        "reported_pass": 305,
+        "duration_ms": 125948.7707
+      }
+    },
+    "static_gates": {
+      "lint": 0,
+      "routes": 0,
+      "types": 0,
+      "contracts": 0
+    },
+    "new_build": false,
+    "external_http_requests": 0,
+    "real_Neon_verified": false,
+    "full_N00_open": true,
+    "source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+    "base_sha": "ebe830e16f15d432ad326e7f298d629c8ca59a6f",
+    "branch": "codex/n00-browser-websocket-refusal",
+    "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+    "checked_at": "2026-10-05T12:01:07.670479+00:00",
+    "status": "local-browser-WebSocket-refusal-verified; full-N00-open",
+    "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_BROWSER_NATIVE_CONTAINMENT/RESULTS.md",
+    "schema_head": "0037_bulk_manifests",
+    "migrations": 0,
+    "operation_count": 84,
+    "independent_review": "pending",
+    "deployed_sha": null,
+    "next_eligible": "N00 prepare explicit counted transports and disposable OS egress isolation for Node native HTTP/APIRequestContext/provider CLI; no real execution until containment, cleanup and fresh exact authorization",
+    "rollback": "Revert following metadata commit then source362b60d; no DB/data rollback, retain admitted/unknown journal holds."
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "final_workbench_frames": [
+    {
+      "name": "locale-restored-zh.png",
+      "sha256": "29756291b52c5860560c58d2f3778b11c8619dc592a126de68c911bb6e0d3f40"
+    },
+    {
+      "name": "operations-en-390.png",
+      "sha256": "44fed177fc1bb4952faf214d5bf57e2dcc4b03badbc0cc9b656b065d6966290e"
+    },
+    {
+      "name": "operations-zh-HK-390.png",
+      "sha256": "2ecb5025fcfb13759664135b77a4269fb60d90c71a50a01306c487d2a06399be"
+    }
+  ],
+  "scope": "fictional OIDC and owned HTTP/PostgreSQL; final eight-case suite; screenshots are not live acceptance",
+  "locale_reload_frame": "locale+project restored; background usage/profile reads still pending in this frame"
+}

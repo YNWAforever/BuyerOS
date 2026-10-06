@@ -1,0 +1,16 @@
+✔ API request context persists each manual auth hop before HTTP and forwards only explicit in-memory headers (264.1282ms)
+✔ API context backend unknown intent stays held across fresh context and journal with renewed bearer (104.8597ms)
+✔ lost gateway response never autoretries an accepted write and restart retains the hold (94.6787ms)
+✔ unexpected gateway wire redirect cannot leak owner nonce to a foreign owned sink (72.3104ms)
+✔ unowned gateway, foreign journal, bad nonce and injected raw context are refused before HTTP (42.4018ms)
+✔ invalid, administrative and oversized requests are refused before even the gateway wire (52.076ms)
+✔ API context keeps the original auth budget and cleanup reserve intact (4898.8342ms)
+✔ disposed or rebound owned gateway cannot be silently adopted by an old API context (35.9099ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7031.4948

@@ -1,0 +1,65 @@
+{
+  "api": {
+    "cases": 812,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "pass": 812,
+    "duration_seconds": 1974.703,
+    "producer_total_seconds": 1990.119
+  },
+  "workbench": {
+    "cases": 8,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "pass": 8,
+    "duration_seconds": 63.097,
+    "producer_total_seconds": 85.567841
+  },
+  "auth_entry": {
+    "cases": 7,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "pass": 7,
+    "duration_seconds": 35.219,
+    "producer_total_seconds": 127.74405
+  },
+  "workbench_red": {
+    "cases": 1,
+    "fail": 1,
+    "error": 0,
+    "skip": 0,
+    "pass": 0,
+    "duration_seconds": 14.739,
+    "producer_total_seconds": 67.732543
+  },
+  "workbench_first_full": {
+    "cases": 8,
+    "fail": 0,
+    "error": 3,
+    "skip": 0,
+    "pass": 5,
+    "duration_seconds": 226.135,
+    "producer_total_seconds": 297.457946
+  },
+  "types": {
+    "exit_code": 0,
+    "report": "types.log"
+  },
+  "lint": {
+    "exit_code": 0,
+    "report": "lint.log"
+  },
+  "generated_contract": {
+    "exit_code": 0,
+    "operations": 84,
+    "report": "contracts.log"
+  },
+  "operation_routes": {
+    "exit_code": 0,
+    "operations": 84,
+    "report": "routes.log"
+  }
+}

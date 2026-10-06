@@ -1,0 +1,5 @@
+research: passed=4 failed=0 errors=0 skipped=0
+workbench: passed=8 failed=0 errors=0 skipped=0
+buyers: passed=1 failed=0 errors=0 skipped=0
+buyer_management: passed=3 failed=0 errors=0 skipped=0
+mvp_partial_journey: passed=1 failed=0 errors=0 skipped=0

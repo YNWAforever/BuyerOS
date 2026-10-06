@@ -1,0 +1,172 @@
+diff --git a/.github/workflows/buyeros-ci.yml b/.github/workflows/buyeros-ci.yml
+index b857907..46ea758 100644
+--- a/.github/workflows/buyeros-ci.yml
++++ b/.github/workflows/buyeros-ci.yml
+@@ -74,6 +74,9 @@ jobs:
+       BUYEROS_STRICT_INTEGRATION: '1'
+     steps:
+       - uses: actions/checkout@v4
++        with:
++          # Q06 replays exact historical polling source, not a synthetic baseline.
++          fetch-depth: 0
+       # The mandatory owned-PG test drives the actual local Queue/Workflow runtime.
+       - uses: pnpm/action-setup@v4
+         with:
+diff --git a/docs/superpowers/plans/2026-10-06-q11-ci-audit-gates.md b/docs/superpowers/plans/2026-10-06-q11-ci-audit-gates.md
+new file mode 100644
+index 0000000..5919cf0
+--- /dev/null
++++ b/docs/superpowers/plans/2026-10-06-q11-ci-audit-gates.md
+@@ -0,0 +1,33 @@
++# Q11 PR11 CI audit gates — 2026-10-06
++
++Spec: 2026-10-03-buyeros-gpt61-fixes.md Global Constraints/Q01/Q05/Q06/Q08/Q11/Q12. BASE 38c55228489a12bfc493f27d2ed27e177117366e, isolated worktree/branch codex/n00-api-request-context, published Draft PR11. Current CI37360072047: six jobs pass; API810pass2fail0skip; workbench7pass1fail0skip.
++
++## Global Constraints
++
++No agents, merge, manual deployment, production DB/schema/accounts/membership/linking/mail/providers/paid resources or Cloudflare cutover. Preserve historical evidence, live authentication/application behavior, destructive DB guards and original N00/NA01/302 limitations. Owned loopback Docker fixtures only, BUYEROS_STRICT_INTEGRATION=1, no required skips. Current push authorization covers repairs to this existing PR; no other shared branch update.
++
++## Review Focus
++
++Do not disable language to satisfy a stale pre-Q01 test. Await actual preference GET before versioned PATCH, preserve a manual locale while GET is held, assert zero premature writes and exact If-Match version, verify reload against actual persistent preference. Do not remove operation coverage: explicitly declare six already-implemented extensions and assert every declared contract method/path exists in runtime OpenAPI. Historical Q06 comparison must run exact baseline source b083ea4 and retain real HTTP bytes/SQL replay; supply history instead of substituting a synthetic baseline or suppressing failure.
++
++## Task 1: Repair CI prerequisites and current contract assertions
++
++Interfaces/predecessors: runtime route registry/OpenAPI and unchanged 84-operation proposal; Q01 updateLocale local-display and guarded versioned save; Q06 job-poller-traffic historical git show. The API job requires complete Git history, browser job requires current Q01 language behavior. No domain API or migration owner change.
++
++- Reproduce registry RED from services/api (nonzero actual six-extension mismatch), and old T29 language RED in owned HTTP/Postgres/browser fixture. Retain initial wrong-cwd FileNotFound setup failure separately.
++- Add missing implemented extension IDs plus method/path coverage of all declared operations.
++- Configure only API checkout fetch-depth:0 for exact historical Q06 baseline. Prove shallow history cannot read it and complete local history can; do not change benchmark scheduling/baseline/constants.
++- Replace obsolete language-disabled assertion with stronger held-GET/manual-language/no-premature-PATCH/exact-If-Match/persisted-reload checks. Preserve existing later status/locale assertions.
++- Run targeted API contract/Q06 strict persistent suites, full strict API suite, required zero-skip checker, full daily-workbench suite, Q01 auth-entry suite, types/lint/generated84/routes; inspect diff and preserve original evidence/task objects. No new build for unchanged app source; report built fixture scope separately.
++- Commit source/tests/config, record exact commands, reports, failures, source SHA and rollback; update current Q11 checkpoint and TASKS.json without closing full Q11/N00/F20/NA01.
++
++## Task 2: Publish the reviewed CI repair and read back
++
++After required local checks are green, push only the authorized current PR branch, verify remote SHA/PR diff and attach existing PR. Read back CI results and report hosted checks separately from local proof. No merge or production/live acceptance. Retain worktree.
++
++## Rollback and next
++
++Revert following checkpoint then this repair source; no schema/data rollback, retain original N00 hold journal. Full N00 OS containment composition and real auth/cleanup remain open. Cached runtime inspection found no dedicated Linux Chromium image; this is a feasibility input, not a blocking product-wide provider decision. Independent review remains pending under no-agents restriction.
++## Local execution checkpoint
++
++Task1 local gates: strict API812pass/0fail-error-skip (172warnings,1990.14s); final workbench8pass/0fail-error-skip; Q01 discovery7 then actual built Linux entry7pass/0fail-error-skip; types/scopedlint/generated84/routes exit0. Genuine old workbench RED1failure and first corrected full5pass/3beforeEach errors retained; no assertion/timeout weakening. Original shallow git show failure is repaired by supplying full history. Scope includes isolated Playwright output to protect sibling temporary evidence. Required evidence preservation/cleanup verification and Task2 publication are recorded in the following committed checkpoint.
+diff --git a/playwright.workbench.config.ts b/playwright.workbench.config.ts
+index e26867a..a7824fd 100644
+--- a/playwright.workbench.config.ts
++++ b/playwright.workbench.config.ts
+@@ -3,6 +3,7 @@ const reuse=process.env.BUYEROS_REUSE_TEST_SERVER==='1';
+ export default defineConfig({
+   globalTeardown:'./tests/e2e/teardown.ts',
+   testDir:'./tests/e2e',testMatch:'daily-workbench.spec.ts',workers:1,
++  outputDir:'test-results/workbench/browser',
+   use:{baseURL:'http://localhost:5173',browserName:'chromium',viewport:{width:1120,height:800}},
+   webServer:[
+     {command:'uv run --frozen python tools/serve_e2e_fixture.py',cwd:'services/api',url:'http://127.0.0.1:8000/health/live',timeout:600_000,reuseExistingServer:reuse,
+diff --git a/services/api/tests/test_api_buyers.py b/services/api/tests/test_api_buyers.py
+index 30a76d1..f13ef7f 100644
+--- a/services/api/tests/test_api_buyers.py
++++ b/services/api/tests/test_api_buyers.py
+@@ -86,9 +86,17 @@ def test_registry_covers_every_unimplemented_contract_operation():
+         "requestDraftReview", "approveDraft", "disabledDeliveryBoundary",
+         "exportBuyers", "exportDraft", "getExport", "downloadExport", "exportBulkFailures",
+         "getUsage", "listOutcomes", "recordOutcome", "correctOutcome",
++        "listEligibleAssignees", "getAsyncJobSummary", "reviewDraftGrounding",
++        "previewBulkManifest", "getBulkManifest", "executeBulkManifest",
+     }
+-    out_of_slice = set(_contract_operations()) - implemented
++    contract = _contract_operations()
++    out_of_slice = set(contract) - implemented
+     assert out_of_slice == set(UNIMPLEMENTED_OPERATIONS)
++    # A declared implementation must have its actual contract method/path.
++    runtime_paths = create_app().openapi()["paths"]
++    for operation_id in implemented:
++        method, path = contract[operation_id]
++        assert method in runtime_paths.get(path, {}), operation_id
+ 
+ 
+ def test_unimplemented_declared_path_fails_closed_then_501():
+diff --git a/tests/e2e/daily-workbench.spec.ts b/tests/e2e/daily-workbench.spec.ts
+index 9ec17e8..86319da 100644
+--- a/tests/e2e/daily-workbench.spec.ts
++++ b/tests/e2e/daily-workbench.spec.ts
+@@ -118,40 +118,63 @@ for (const locale of ['en','zh-HK'] as const) {
+   });
+ }
+ 
+-test('T29 locale waits for current preference version and survives a fresh sign-in',async({page})=>{
++test('T29 manual locale remains usable while preference loads and saves with its current version',async({page})=>{
+   test.setTimeout(120_000);
+-  let releasePreference:()=>void=()=>{};
++  let releasePreference:()=>void=()=>{},preferenceReads=0;
++  const preferenceWrites:string[]=[];
+   const heldPreference=new Promise<void>(resolve=>{releasePreference=resolve;});
+-  await page.route(`${browserApiOrigin}/v1/workspaces/${workspace}/preferences`,async route=>{
+-    if(route.request().method()==='GET') await heldPreference;
++  const preferencePath=`/v1/workspaces/${workspace}/preferences`;
++  const isPreference=(response:import('@playwright/test').Response)=>new URL(response.url()).pathname===preferencePath;
++  await page.route(`${browserApiOrigin}${preferencePath}`,async route=>{
++    if(route.request().method()==='GET'){preferenceReads++;await heldPreference;}
++    else if(route.request().method()==='PATCH')preferenceWrites.push(route.request().headers()['if-match']);
+     await route.continue();
+   });
++  const loadedPreference=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='GET'&&response.status()===200,{timeout:30_000});
+   try{
+     await signIn(page,false);
+     await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue(workspace,{timeout:30_000});
+-    await expect(page.locator('header select')).toBeDisabled();
++    await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});
++    await expect.poll(()=>preferenceReads,{timeout:30_000}).toBeGreaterThan(0);
++    await expect(page.locator('header select')).toBeEnabled();
++    await page.locator('header select').selectOption('zh-HK');
++    await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++    expect(preferenceWrites).toEqual([]);
+   }finally{
+     releasePreference();
+   }
+-  await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});
++  const loadedResponse=await loadedPreference;
++  expect(await loadedResponse.finished()).toBeNull();
++  const loaded=(await loadedResponse.json()).data;
++  expect(Number.isInteger(loaded.version)).toBe(true);
++  await expect(page.locator('header select')).toHaveValue('zh-HK');
++  await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++  const reset=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='PATCH',{timeout:30_000});
++  await page.locator('header select').selectOption('en');
++  const resetResponse=await reset;
++  expect(resetResponse.status()).toBe(200);
++  expect(await resetResponse.request().headerValue('if-match')).toBe(`"${loaded.version}"`);
++  const resetVersion=(await resetResponse.json()).data.version;
+   await expect(page.locator('header select')).toBeEnabled({timeout:30_000});
+-  if(await page.locator('header select').inputValue()==='zh-HK'){
+-    const reset=page.waitForResponse(response=>response.url().includes('/preferences')
+-      && response.request().method()==='PATCH',{timeout:30_000});
+-    await page.locator('header select').selectOption('en');
+-    expect((await reset).status()).toBe(200);
+-  }
+-  const saved=page.waitForResponse(response=>response.url().includes('/preferences')
+-    && response.request().method()==='PATCH',{timeout:30_000});
++  const saved=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='PATCH',{timeout:30_000});
+   await page.locator('header select').selectOption('zh-HK');
+-  expect((await saved).status()).toBe(200);
++  const savedResponse=await saved;
++  expect(savedResponse.status()).toBe(200);
++  expect(await savedResponse.request().headerValue('if-match')).toBe(`"${resetVersion}"`);
++  const savedVersion=(await savedResponse.json()).data.version;
++  expect(preferenceWrites).toEqual([`"${loaded.version}"`,`"${resetVersion}"`]);
+   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++  const restoredPreference=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='GET'&&response.status()===200,{timeout:30_000});
+   await page.reload();
+-  await page.getByRole('button',{name:'Sign in'}).click();
++  await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
+   await expect(page.getByRole('combobox',{name:/^(Project|專案)$/}))
+     .toHaveValue(project,{timeout:30_000});
++  const restored=(await (await restoredPreference).json()).data;
++  expect(restored.locale).toBe('zh-HK');
++  expect(restored.version).toBe(savedVersion);
+   await expect(page.locator('header select')).toHaveValue('zh-HK',{timeout:30_000});
+   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
++  await page.screenshot({path:'test-results/pr11-ci-followup-20261006/locale-restored-zh.png',fullPage:true});
+ });
+ 
+ test('T29 operations resolves a failed profile lookup without a permanent spinner',async({page})=>{

@@ -1,0 +1,152 @@
+{
+  "research": {
+    "pass": 4,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "producer_seconds": 123.106,
+    "report": "reports/t30-browser.xml",
+    "testcases": [
+      {
+        "name": "T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+        "classname": "mvp-a-research.spec.ts",
+        "time": "35.982"
+      },
+      {
+        "name": "T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+        "classname": "mvp-a-research.spec.ts",
+        "time": "29.048"
+      },
+      {
+        "name": "T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+        "classname": "mvp-a-research.spec.ts",
+        "time": "29.224"
+      },
+      {
+        "name": "T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+        "classname": "mvp-a-research.spec.ts",
+        "time": "28.852"
+      }
+    ],
+    "local_report_checker_exit": 0
+  },
+  "workbench": {
+    "pass": 8,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "producer_seconds": 46.502,
+    "report": "reports/workbench.xml",
+    "testcases": [
+      {
+        "name": "T27 usage, queue filters and manual outcome history survive refresh in both locales",
+        "classname": "daily-workbench.spec.ts",
+        "time": "7.729"
+      },
+      {
+        "name": "T29 API-backed workbench reflows across routes and widths in en",
+        "classname": "daily-workbench.spec.ts",
+        "time": "4.827"
+      },
+      {
+        "name": "T29 API-backed workbench reflows across routes and widths in zh-HK",
+        "classname": "daily-workbench.spec.ts",
+        "time": "4.644"
+      },
+      {
+        "name": "T29 manual locale remains usable while preference loads and saves with its current version",
+        "classname": "daily-workbench.spec.ts",
+        "time": "5.16"
+      },
+      {
+        "name": "T29 operations resolves a failed profile lookup without a permanent spinner",
+        "classname": "daily-workbench.spec.ts",
+        "time": "3.128"
+      },
+      {
+        "name": "T29 live operations and results text meets measured AA contrast in both locales",
+        "classname": "daily-workbench.spec.ts",
+        "time": "3.929"
+      },
+      {
+        "name": "T29 scope list timeout offers a bounded retry with current identity",
+        "classname": "daily-workbench.spec.ts",
+        "time": "12.948"
+      },
+      {
+        "name": "T29 live form controls have a visible three-to-one boundary in both locales",
+        "classname": "daily-workbench.spec.ts",
+        "time": "4.137"
+      }
+    ],
+    "local_report_checker_exit": 0
+  },
+  "buyers": {
+    "pass": 1,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "producer_seconds": 7.358,
+    "report": "reports/buyers.xml",
+    "testcases": [
+      {
+        "name": "T08 real snapshot pages, selection scope, URL filters and dossier",
+        "classname": "buyer-results.spec.ts",
+        "time": "7.358"
+      }
+    ],
+    "local_report_checker_exit": 0
+  },
+  "buyer_management": {
+    "pass": 3,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "producer_seconds": 10.203,
+    "report": "reports/buyer-management.xml",
+    "testcases": [
+      {
+        "name": "T09 durable list, preset, note, owner and individual review journey",
+        "classname": "buyer-management.spec.ts",
+        "time": "5.531"
+      },
+      {
+        "name": "T09 viewer cannot mutate buyers or lists",
+        "classname": "buyer-management.spec.ts",
+        "time": "2.087"
+      },
+      {
+        "name": "T29 zh-HK list and saved filter actions use localized accessible names and feedback",
+        "classname": "buyer-management.spec.ts",
+        "time": "2.585"
+      }
+    ],
+    "local_report_checker_exit": 0
+  },
+  "mvp_partial_journey": {
+    "pass": 1,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "producer_seconds": 8.499,
+    "report": "reports/mvp-acceptance.xml",
+    "testcases": [
+      {
+        "name": "T30 partial fixture walkthrough: review, list, assign, exact approval, export and manual outcome",
+        "classname": "mvp-a-journey.spec.ts",
+        "time": "8.499"
+      }
+    ],
+    "local_report_checker_exit": 0
+  },
+  "api": {
+    "pass": 812,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "warnings": 101,
+    "producer_seconds": 376.53,
+    "scope": "attempt1 retained successful hosted job",
+    "source": "api-ci-green.log; required producer checker0; API XML not uploaded by current workflow"
+  }
+}

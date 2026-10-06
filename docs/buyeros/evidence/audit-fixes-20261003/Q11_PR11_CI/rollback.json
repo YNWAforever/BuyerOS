@@ -1,0 +1,9 @@
+{
+  "source_sha": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
+  "reverse_applicability_exit": 0,
+  "actual_rollback_executed": false,
+  "new_migrations": 0,
+  "production_or_data_rehearsal": false,
+  "metadata_reverse_applicability": "checked after following commit",
+  "journal": "preserve admitted/accepted/unknown holds"
+}

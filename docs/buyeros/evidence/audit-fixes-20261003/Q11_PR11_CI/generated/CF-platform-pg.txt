@@ -1,0 +1,14 @@
+
+ RUN  v4.1.0 C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS
+
+Using secrets defined in process.env
+ ✓ services/cloudflare-jobs/tests/platform-pg.integration.ts (2 tests) 4008ms
+   ✓ actual Queue binding commits one API-owned mutation; duplicate delivery keeps its receipt  3058ms
+   ✓ actual Queue probe commits an opaque current-epoch API receipt  948ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  03:41:32
+   Duration  17.46s (transform 639ms, setup 0ms, import 1.06s, tests 4.01s, environment 1ms)
+
+JUNIT report written to C:/Users/laich/.codex/worktrees/neon-auth-compatibility-local-20261004/BuyerOS/artifacts/cloudflare/CF-platform-pg.xml

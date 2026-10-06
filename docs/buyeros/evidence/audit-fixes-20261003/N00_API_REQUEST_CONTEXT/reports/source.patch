@@ -1,0 +1,208 @@
+diff --git a/docs/superpowers/plans/2026-10-06-n00-api-request-context.md b/docs/superpowers/plans/2026-10-06-n00-api-request-context.md
+new file mode 100644
+index 0000000..393ca3f
+--- /dev/null
++++ b/docs/superpowers/plans/2026-10-06-n00-api-request-context.md
+@@ -0,0 +1,27 @@
++# N00 counted APIRequestContext adapter — local only
++
++Spec: 2026-10-03-buyeros-gpt61-fixes.md N00/F20/NA01, current Neon contract and predecessor native IPC checkpoint. BASE ad1a54510f6a0fb2485392c878e7e867e9def6be. Reuse isolated worktree, branch codex/n00-api-request-context.
++
++## Global Constraints
++
++No agents, external provider/Neon/Auth0/account/mail/identity/membership/paid/production DB/migration/Cloudflare/push/deploy actions. Preserve canonical actors/RLS, Auth0 and delivery403. Original302, tests and DB guards stay unchanged. Fixed fixture adapter does not contain arbitrary raw APIRequestContext or parent/browser OS egress. Original evidence and other worktrees preserved.
++
++## Review Focus
++
++One existing boundary/journal owns reservations and holds; never use a second budget/intent serializer. Fixed gateway URL must be branded and paired with execution/journal/nonce. No caller URLs/contexts/storage/proxy/retry settings; standalone in-memory context only. Explicit zero automatic redirects/retries, bounded deadline, no secret-bearing transport errors. Unknown/accepted writes remain held across fresh contexts/journals and renewed headers. Dispose actual APIResponse/context resources; stale/closed/rebound gateway cannot be adopted. Do not claim live Neon/full N00 or general OS containment.
++
++## Task 1: Adapter plus actual Chromium consumer
++
++Interfaces/predecessors: assertFixtureExecutionBoundary, ownedFixtureSdkUrl, FixtureExecutionBoundary.holds/dispatch, existing gateway /dispatch JSON envelope and RealRunJournal; predecessor source779138a fixture native IPC. FixtureApiRequest input omits channel and allows GET/HEAD/POST only; dispatch returns existing ExecutionReceipt; dispose owns only its standalone context. Channel fixed browser. Domain API/migration/identity contracts unchanged.
++
++- [x] Write meaningful actual Playwright APIRequestContext regressions: counted/manual hops and pre-dispatch persistence, backend unknown across restart, committed-but-lost gateway response/no autoretry, unexpected wire redirect/no sink leak, ownership/injected context refusal, invalid/oversized paths and body before wire, 180budget stop, rebound/disposed context refusal plus separate owner-change-during-body/disposal cases (10new Node cases total). Expected RED: missing adapter export; nonzero tests, no skip.
++- [x] Add one actual Chromium fixture consumer with browser cookie isolation and two counted manual auth hops. Expected RED: old5pass/new1fail, zero globalerrors, no import-only 0test failure.
++- [x] Implement minimal fixture-only adapter into original journal owner. Explicit maxRedirects0/maxRetries0, timeout20..3000ms, owner/target checks before and after await; no raw context exposed. Unknown errors sanitized; accepted/unknown ledger retained. Reuse validation through holds; do not reserve twice. Expected focused new cases GREEN.
++- [x] Run whole root MJS suite serially, dedicated whole Chromium suite, strict EdDSA crypto, types/scopedlint/generated84/routes and read-only Alembic heads. No new build for host-only harness; retained app SSR scope disclosed. Expected nonzero GREEN/0skip; record every failure and keep raw attempts.
++- [x] Author review actual source/diff and preservation preflight:3659 artifacts and three unrelated worktrees unchanged. Independent review pending under user no-agents instruction. Full N00 stays OPEN.
++
++Checkpoint handoff: prepare source then metadata local commits; check manifest/index/commit bytes and reverse patch applicability; record final preservation after tracker update. This is a bounded local fixture slice, not full N00 completion.
++
++## Rollback and next
++
++Revert following metadata then source; no schema/data undo; never erase admitted/unknown journal holds. Next local: parent/browser/control-plane OS isolation feasibility and exact composition; genuine fresh Neon/human account/cleanup scope remains separately authorized. No fresh real approval inferred from continue.
+diff --git a/scripts/neon-api-request-context.d.mts b/scripts/neon-api-request-context.d.mts
+new file mode 100644
+index 0000000..dd422cf
+--- /dev/null
++++ b/scripts/neon-api-request-context.d.mts
+@@ -0,0 +1,7 @@
++import type {Server} from 'node:http';
++import type {ExecutionRequest,ExecutionReceipt,FixtureExecutionBoundary} from './neon-execution-boundary.mjs';
++import type {RealRunJournal} from './neon-real-preflight.mjs';
++export type FixtureApiRequest=Omit<ExecutionRequest,'channel'|'method'>&{method:'GET'|'HEAD'|'POST'};
++export interface FixtureApiRequestContext {dispatch(input:FixtureApiRequest):Promise<ExecutionReceipt>;dispose():Promise<{fixture_only:true;external_verified:false;owned_context_disposed:true}>;}
++/** Own standalone fictional context; no arbitrary native/parent/browser OS containment. */
++export function createFixtureApiRequestContext(options:{gateway:Server;execution:FixtureExecutionBoundary;journal:RealRunJournal;nonce:string;timeoutMs?:number}):Promise<FixtureApiRequestContext>;
+diff --git a/scripts/neon-api-request-context.mjs b/scripts/neon-api-request-context.mjs
+new file mode 100644
+index 0000000..8473cf9
+--- /dev/null
++++ b/scripts/neon-api-request-context.mjs
+@@ -0,0 +1,36 @@
++/** Counted fictional APIRequestContext consumer only. Raw contexts/parent OS are NOT confined. */
++import {request} from '@playwright/test';
++import {assertFixtureExecutionBoundary,ownedFixtureSdkUrl} from './neon-execution-boundary.mjs';
++const safe=new Set(['GET','HEAD']),methods=new Set(['GET','HEAD','POST']);
++function need(value,code){if(!value)throw new Error('N00_APIREQUEST_'+code);}
++export async function createFixtureApiRequestContext(options){
++ need(options&&Object.keys(options).every(k=>['gateway','execution','journal','nonce','timeoutMs'].includes(k)),'CONTEXT');
++ const {gateway,execution,journal,nonce,timeoutMs=3000}=options;
++ need(Number.isInteger(timeoutMs)&&timeoutMs>=20&&timeoutMs<=3000,'TIMEOUT');
++ const owned={gateway,execution,journal,nonce},url=ownedFixtureSdkUrl(owned),origin=new URL(url).origin,fingerprint=journal.snapshot().target.fingerprint;
++ function current(){assertFixtureExecutionBoundary(execution,journal);need(ownedFixtureSdkUrl(owned)===url,'BOUND_GATEWAY');need(journal.snapshot().target.fingerprint===fingerprint,'BOUND_TARGET');}
++ let context;try{context=await request.newContext({timeout:timeoutMs,ignoreHTTPSErrors:false,storageState:{cookies:[],origins:[]},extraHTTPHeaders:{'x-n00-owner':nonce}});}catch{throw new Error('N00_APIREQUEST_CONTEXT_FAILED');}
++ try{current();}catch(error){try{await context.dispose();}catch{throw new Error('N00_APIREQUEST_CONTEXT_CLEANUP_FAILED');}throw error;}
++ let disposed=false,disposal;
++ function payload(input){
++  need(input&&Object.keys(input).every(k=>['path','method','body','headers'].includes(k))&&methods.has(input.method),'REQUEST');
++  let headers;try{headers=[...new Headers(input.headers)];}catch{throw new Error('N00_APIREQUEST_REQUEST');}
++  const value={channel:'browser',method:input.method,path:input.path,body:input.body===undefined?'':input.body,headers};
++  // Reuse original validation/holds; the gateway is the only reservation/dispatch owner.
++  const held=execution.holds(value);if(!safe.has(value.method)&&held)throw new Error('N00_EXECUTION_HELD_INTENT');
++  const data=JSON.stringify(value);need(Buffer.byteLength(data)<=32768,'ENVELOPE_LIMIT');return data;
++ }
++ return Object.freeze({async dispatch(input){
++  need(!disposed,'DISPOSED');current();const data=payload(input);let response;
++  try{response=await context.fetch(origin+'/dispatch',{method:'POST',data,headers:{'content-type':'application/json'},maxRedirects:0,maxRetries:0,timeout:timeoutMs});}catch{throw new Error('N00_APIREQUEST_TRANSPORT_UNKNOWN');}
++  try {
++   need(!disposed,'DISPOSED');current();need(response.status()<300||response.status()>=400,'WIRE_REDIRECT_REFUSED');
++   const body=await response.body();need(!disposed,'DISPOSED');current();need(body.length<=8388608,'WIRE_RESPONSE_LIMIT');let value;try{value=JSON.parse(body.toString('utf8'));}catch{throw new Error('N00_APIREQUEST_WIRE_RESPONSE');}
++   if(response.status()!==200){if(value&&typeof value.code==='string'&&value.code.length<=96&&/^N00_[A-Z0-9_]+$/.test(value.code))throw new Error(value.code);throw new Error('N00_APIREQUEST_WIRE_RESPONSE');}
++   need(value&&Number.isInteger(value.status)&&value.status>=100&&value.status<=599&&typeof value.body==='string'&&(value.location===null||typeof value.location==='string'&&value.location.startsWith('/fixture/auth/'))&&['accepted','rejected','unknown'].includes(value.outcome)&&value.fixture_only===true&&value.external_verified===false&&/^execution-http-\d+\.json$/.test(value.evidenceRef)&&Array.isArray(value.headers)&&value.headers.every(h=>Array.isArray(h)&&h.length===2&&h.every(v=>typeof v==='string')),'WIRE_RESPONSE');
++   return value;
++  }finally{try{await response.dispose();}catch{throw new Error('N00_APIREQUEST_RESPONSE_CLEANUP_FAILED');}need(!disposed,'DISPOSED');current();}
++ },async dispose(){
++  if(!disposal){disposed=true;disposal=context.dispose().then(()=>({fixture_only:true,external_verified:false,owned_context_disposed:true})).catch(()=>{throw new Error('N00_APIREQUEST_CONTEXT_CLEANUP_FAILED');});}return disposal;
++ }});
++}
+diff --git a/tests/e2e/audit-neon-execution.spec.ts b/tests/e2e/audit-neon-execution.spec.ts
+index 32d2252..eec64c0 100644
+--- a/tests/e2e/audit-neon-execution.spec.ts
++++ b/tests/e2e/audit-neon-execution.spec.ts
+@@ -79,3 +79,15 @@ test('NA01 containment: blocked service workers issue no physical script request
+   await testInfo.attach('service-worker-observations',{body:JSON.stringify({fixture_only:true,external_verified:false,registration:result,physical_script_requests:scriptRequests,auth_hops:0,reservations:0}),contentType:'application/json'});
+  }finally{const proof=await fixture.cleanup();await testInfo.attach('owned-cleanup',{body:JSON.stringify(proof),contentType:'application/json'});}
+ });
++
++
++test('NA01 counted APIRequestContext: private cookies and two manual hops through the original journal',async({page},testInfo)=>{
++ const adapter=await import('../../scripts/neon-api-request-context.mjs').catch(error=>{if(error.code!=='ERR_MODULE_NOT_FOUND')throw error;return null;});expect(typeof adapter?.createFixtureApiRequestContext).toBe('function');if(!adapter)throw new Error('Missing counted API request context');
++ const fixture=await executionFixture(undefined);let client:Awaited<ReturnType<typeof adapter.createFixtureApiRequestContext>>|undefined;
++ try {
++  const execution=createFixtureExecutionBoundary({backend:fixture.backend,journal:fixture.journal}),gateway=createFixtureExecutionGateway({execution,nonce});fixture.servers.push(gateway);const url=await listen(gateway);const cookies:(string|null)[]=[];gateway.on('request',req=>{if(req.url==='/dispatch')cookies.push(req.headers.cookie??null);});
++  await page.context().addCookies([{name:'fictional-browser-session',value:'fictional-private-browser-cookie',url}]);await containBrowser(page.context(),new Set([url]));await page.goto(url);
++  client=await adapter.createFixtureApiRequestContext({gateway,execution,journal:fixture.journal,nonce});const first=await client.dispatch({method:'GET',path:'/fixture/auth/redirect'});expect(first.status).toBe(302);expect(fixture.model.hits).toHaveLength(1);expect(first.location).toBe('/fixture/auth/token');if(!first.location)throw new Error('Missing manual hop');const second=await client.dispatch({method:'GET',path:first.location});expect(second.status).toBe(200);expect(fixture.model.hits).toHaveLength(2);expect(fixture.journal.snapshot().requests.map((v:{outcome:string})=>v.outcome)).toEqual(['accepted','accepted']);expect(cookies).toEqual([null,null]);
++  await page.evaluate(()=>document.body.appendChild(Object.assign(document.createElement('output'),{textContent:'Counted API context hops: 2; private cookie isolation: true; fixture only: true'})));await expect(page.locator('output')).toContainText('Counted API context hops: 2');await page.screenshot({path:testInfo.outputPath('api-context-fixture.png')});await testInfo.attach('api-context-receipt',{body:JSON.stringify({fixture_only:true,external_verified:false,http_requests:2,reservations:2,private_cookie_isolation:true,raw_context_os_contained:false}),contentType:'application/json'});
++ }finally {if(client)await testInfo.attach('owned-api-context-cleanup',{body:JSON.stringify(await client.dispose()),contentType:'application/json'});const proof=await fixture.cleanup();await testInfo.attach('owned-cleanup',{body:JSON.stringify(proof),contentType:'application/json'});}
++});
+diff --git a/tests/neon-api-request-context.test.mjs b/tests/neon-api-request-context.test.mjs
+new file mode 100644
+index 0000000..29e9c1a
+--- /dev/null
++++ b/tests/neon-api-request-context.test.mjs
+@@ -0,0 +1,69 @@
++import assert from 'node:assert/strict';
++import {test} from 'node:test';
++import {createServer} from 'node:http';
++import {readFileSync} from 'node:fs';
++import {join} from 'node:path';
++import {RealRunJournal} from '../scripts/neon-real-preflight.mjs';
++import {createFixtureExecutionBoundary,createFixtureExecutionGateway} from '../scripts/neon-execution-boundary.mjs';
++import {executionFixture,listen,close} from './fixtures/neon-execution/fixture.mjs';
++const adapter=await import('../scripts/neon-api-request-context.mjs').catch(error=>{if(error.code!=='ERR_MODULE_NOT_FOUND')throw error;return {};});
++const nonce='fictional-api-context-owner-'.padEnd(43,'x');
++const call=(path='/fixture/auth/token',method='GET',body='',headers={})=>({path,method,body,headers});
++async function wire(t,handler,options={}){assert.equal(typeof adapter.createFixtureApiRequestContext,'function','counted APIRequestContext adapter is missing');const f=await executionFixture(handler);t.after(()=>f.cleanup());f.execution=createFixtureExecutionBoundary({backend:f.backend,journal:f.journal,...options});f.gateway=createFixtureExecutionGateway({execution:f.execution,nonce});f.servers.push(f.gateway);await listen(f.gateway);f.options={gateway:f.gateway,execution:f.execution,journal:f.journal,nonce};f.client=await adapter.createFixtureApiRequestContext(f.options);t.after(()=>f.client.dispose());return f;}
++
++test('API request context persists each manual auth hop before HTTP and forwards only explicit in-memory headers',async t=>{
++ const pending=[],received=[];const f=await wire(t,(req,res,{journal})=>{pending.push(journal.snapshot().requests.at(-1)?.outcome);received.push({cookie:req.headers.cookie??null,bearer:req.headers.authorization??null});if(req.url==='/fixture/auth/redirect'){res.statusCode=302;res.setHeader('Location','/fixture/auth/token');res.setHeader('Set-Cookie','fixture_session=fictional-private; Path=/');res.end();return true;}});
++ const first=await f.client.dispatch(call('/fixture/auth/redirect'));assert.equal(first.status,302);assert.equal(first.location,'/fixture/auth/token');assert.equal(f.model.hits.length,1);assert.equal(f.journal.snapshot().requests.length,1);
++ const second=await f.client.dispatch(call(first.location,'GET','',new Headers({Authorization:'fictional-memory-bearer'})));assert.equal(second.status,200);assert.equal(second.fixture_only,true);assert.equal(second.external_verified,false);assert.equal(JSON.parse(second.body).token,'fictional.a.b');assert.deepEqual(pending,['pending','pending']);assert.deepEqual(received,[{cookie:null,bearer:null},{cookie:null,bearer:'fictional-memory-bearer'}]);assert.deepEqual(f.journal.snapshot().requests.map(v=>v.outcome),['accepted','accepted']);
++ for(const v of f.journal.snapshot().requests)assert.doesNotMatch(readFileSync(join(f.root,v.evidenceRef),'utf8'),/fictional-memory-bearer|fictional-private|fictional.a.b/);
++});
++
++test('API context backend unknown intent stays held across fresh context and journal with renewed bearer',async t=>{
++ const f=await wire(t),first=await f.client.dispatch(call('/fixture/auth/commit','POST','{"one":"intent"}'));assert.equal(first.outcome,'unknown');assert.equal(first.status,503);assert.equal(f.model.commits,1);await f.client.dispose();
++ const journal=new RealRunJournal(f.root),execution=createFixtureExecutionBoundary({backend:f.backend,journal}),gateway=createFixtureExecutionGateway({execution,nonce});f.servers.push(gateway);await listen(gateway);const second=await adapter.createFixtureApiRequestContext({gateway,execution,journal,nonce});t.after(()=>second.dispose());
++ await assert.rejects(second.dispatch(call('/fixture/auth/commit','POST','{"one":"intent"}',{Authorization:'fictional-renewed-bearer'})),/HELD_INTENT/);assert.equal(f.model.commits,1);assert.equal(f.model.hits.length,1);assert.equal(journal.snapshot().requests.length,1);assert.equal(journal.snapshot().requests[0].outcome,'unknown');
++});
++
++test('lost gateway response never autoretries an accepted write and restart retains the hold',async t=>{
++ const f=await wire(t,(req,res,{model})=>{if(req.url!=='/fixture/auth/accepted')return;model.commits++;res.statusCode=202;res.end('{"accepted":true}');return true;});let wires=0;
++ f.gateway.prependListener('request',(_req,res)=>{wires++;const end=res.end.bind(res);res.end=(...args)=>{if(wires===1){res.destroy();return res;}return end(...args);};});
++ await assert.rejects(f.client.dispatch(call('/fixture/auth/accepted','POST','{"one":"intent"}')),/TRANSPORT_UNKNOWN/);assert.equal(wires,1);assert.equal(f.model.commits,1);assert.equal(f.journal.snapshot().requests[0].outcome,'accepted');await f.client.dispose();
++ const journal=new RealRunJournal(f.root),execution=createFixtureExecutionBoundary({backend:f.backend,journal}),gateway=createFixtureExecutionGateway({execution,nonce});f.servers.push(gateway);await listen(gateway);const restarted=await adapter.createFixtureApiRequestContext({gateway,execution,journal,nonce});t.after(()=>restarted.dispose());await assert.rejects(restarted.dispatch(call('/fixture/auth/accepted','POST','{"one":"intent"}',{Authorization:'fictional-renewed-bearer'})),/HELD_INTENT/);assert.equal(f.model.commits,1);assert.equal(journal.snapshot().requests.length,1);
++});
++
++test('unexpected gateway wire redirect cannot leak owner nonce to a foreign owned sink',async t=>{
++ const f=await wire(t);let sinkHits=0;const sink=createServer((_req,res)=>{sinkHits++;res.end('{}');});f.servers.push(sink);const sinkUrl=await listen(sink);
++ f.gateway.prependListener('request',(_req,res)=>{const end=res.end.bind(res);res.end=()=>{res.statusCode=302;res.setHeader('Location',sinkUrl+'/leak');return end();};});
++ await assert.rejects(f.client.dispatch(call()),/WIRE_REDIRECT_REFUSED/);assert.equal(sinkHits,0);assert.equal(f.model.hits.length,1);assert.equal(f.journal.snapshot().requests.length,1);
++});
++
++test('unowned gateway, foreign journal, bad nonce and injected raw context are refused before HTTP',async t=>{
++ const f=await wire(t),other=await executionFixture();t.after(()=>other.cleanup());
++ const bad=[{...f.options,gateway:createServer()},{...f.options,journal:other.journal},{...f.options,nonce:'wrong'},{...f.options,requestContext:{fetch:()=>{throw new Error('uncontained');}}}];for(const options of bad)await assert.rejects(adapter.createFixtureApiRequestContext(options),/N00_/);assert.equal(f.model.hits.length,0);assert.equal(f.journal.snapshot().requests.length,0);
++});
++
++test('invalid, administrative and oversized requests are refused before even the gateway wire',async t=>{
++ const f=await wire(t);let wires=0;f.gateway.on('request',()=>{wires++;});
++ const bad=[call(f.url+'/fixture/auth/token'),call('/fixture/auth/../token'),call('/fixture/auth/admin/remove-user','POST','{"userId":"fictional-execution-identity"}'),call('/fixture/control/target'),call('/fixture/auth/token','GET','not-empty'),call('/fixture/auth/token','POST','x'.repeat(32769)),call('/fixture/auth/token','POST','"'.repeat(16400)),call('/fixture/auth/token','PUT'),{...call(),channel:'control'}];for(const input of bad)await assert.rejects(f.client.dispatch(input),/N00_/);assert.equal(wires,0);assert.equal(f.model.hits.length,0);assert.equal(f.journal.snapshot().requests.length,0);
++});
++
++test('API context keeps the original auth budget and cleanup reserve intact',async t=>{
++ const f=await wire(t);for(let i=0;i<180;i++){f.journal.reserveRequest('auth','previous-'+i);f.journal.settleRequest('previous-'+i,'accepted','historical-fixture.json');}
++ await assert.rejects(f.client.dispatch(call()),/BUDGET/);assert.equal(f.model.hits.length,0);assert.equal(f.journal.snapshot().requests.length,180);
++});
++
++test('disposed or rebound owned gateway cannot be silently adopted by an old API context',async t=>{
++ const f=await wire(t);await close(f.gateway);await listen(f.gateway);await assert.rejects(f.client.dispatch(call()),/BOUND_GATEWAY/);assert.equal(f.model.hits.length,0);await f.client.dispose();await f.client.dispose();await assert.rejects(f.client.dispatch(call()),/DISPOSED/);assert.equal(f.journal.snapshot().requests.length,0);
++});
++
++
++
++for(const phase of ['body','dispose'])test(`gateway ownership changing during ${phase} rejects the stale receipt`,{timeout:10000},async t=>{
++ const {request}=await import('@playwright/test');
++ const f=await wire(t),url='http://127.0.0.1:'+f.gateway.address().port,probe=await request.newContext();t.after(()=>probe.dispose());const sample=await probe.get(url+'/');const prototype=Object.getPrototypeOf(sample),original=prototype[phase];await sample.dispose();
++ let entered,release;const blocked=new Promise(ok=>{entered=ok;}),resume=new Promise(ok=>{release=ok;});
++ // Delegate the real public APIResponse method; pause its result only at this owned wire boundary.
++ prototype[phase]=async function(...args){const value=await original.apply(this,args);if(this.url()===url+'/dispatch'){entered();await resume;}return value;};
++ t.after(()=>{release();prototype[phase]=original;});
++ try{const pending=f.client.dispatch(call());await blocked;await close(f.gateway);release();await assert.rejects(pending,/GATEWAY/);assert.equal(f.model.hits.length,1);assert.equal(f.journal.snapshot().requests.length,1);}finally{release();prototype[phase]=original;}
++});
+diff --git a/tests/neon-compatibility-discovery.test.mjs b/tests/neon-compatibility-discovery.test.mjs
+index 43fb4ff..f788f55 100644
+--- a/tests/neon-compatibility-discovery.test.mjs
++++ b/tests/neon-compatibility-discovery.test.mjs
+@@ -2,11 +2,11 @@ import {test} from 'node:test';
+ import assert from 'node:assert/strict';
+ import {spawnSync} from 'node:child_process';
+ import {fixtureChildEnvironment} from '../scripts/neon-compatibility-harness.mjs';
+-function discovered(config){
++function discovered(config,includeTitles=false){
+  const result=spawnSync(process.execPath,['node_modules/@playwright/test/cli.js','test','--config',config,'--list','--reporter=json'],{encoding:'utf8',timeout:60_000,env:{...fixtureChildEnvironment(process.env),BUYEROS_N00_TARGET:'portable'}});
+  assert.equal(result.status,0,result.stderr||result.error?.message);
+- const files=[];function visit(suite){for(const spec of suite.specs??[])files.push(spec.file);for(const child of suite.suites??[])visit(child);}
+- for(const suite of JSON.parse(result.stdout).suites)visit(suite);return files;
++ const files=[],titles=[];function visit(suite){for(const spec of suite.specs??[]){files.push(spec.file);titles.push(spec.title);}for(const child of suite.suites??[])visit(child);}
++ for(const suite of JSON.parse(result.stdout).suites)visit(suite);return includeTitles?{files,titles}:files;
+ }
+ for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regression.config.ts'])test(`N00 built fixture is isolated from ${config}`,()=>{const files=discovered(config);assert.ok(files.some(file=>file.endsWith('audit-auth-entry.spec.ts')),'existing Q01 tests stay selected');assert.equal(files.filter(file=>file.endsWith('audit-neon-compat.spec.ts')).length,0,'different runtime/upstream ports must not enter the DB workbench');});
+ test('N00 dedicated config discovers all seven built-output cases',()=>{const files=discovered('playwright.neon-auth.config.ts');assert.equal(files.length,7);assert.ok(files.every(file=>file.endsWith('audit-neon-compat.spec.ts')));});
+@@ -17,4 +17,4 @@ for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regres
+ test('runtime flow config discovers all six actual-output cases including unknown sign-out',()=>{const files=discovered('playwright.neon-runtime-flow.config.ts');assert.equal(files.length,6);assert.ok(files.every(file=>file.endsWith('audit-neon-runtime-flow.spec.ts')));});
+ 
+ 
+-test('execution config discovers the original three flows and both native browser guard cases',()=>{const files=discovered('playwright.neon-execution.config.ts');assert.equal(files.length,5);assert.ok(files.every(file=>file.endsWith('audit-neon-execution.spec.ts')));});
++test('execution config discovers all six cases including counted APIRequestContext',()=>{const {files,titles}=discovered('playwright.neon-execution.config.ts',true);assert.equal(files.length,6);assert.ok(files.every(file=>file.endsWith('audit-neon-execution.spec.ts')));assert.ok(titles.includes('NA01 counted APIRequestContext: private cookies and two manual hops through the original journal'));});

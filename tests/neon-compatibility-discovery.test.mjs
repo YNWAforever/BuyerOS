@@ -2,11 +2,11 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {fixtureChildEnvironment} from '../scripts/neon-compatibility-harness.mjs';
-function discovered(config){
+function discovered(config,includeTitles=false){
  const result=spawnSync(process.execPath,['node_modules/@playwright/test/cli.js','test','--config',config,'--list','--reporter=json'],{encoding:'utf8',timeout:60_000,env:{...fixtureChildEnvironment(process.env),BUYEROS_N00_TARGET:'portable'}});
  assert.equal(result.status,0,result.stderr||result.error?.message);
- const files=[];function visit(suite){for(const spec of suite.specs??[])files.push(spec.file);for(const child of suite.suites??[])visit(child);}
- for(const suite of JSON.parse(result.stdout).suites)visit(suite);return files;
+ const files=[],titles=[];function visit(suite){for(const spec of suite.specs??[]){files.push(spec.file);titles.push(spec.title);}for(const child of suite.suites??[])visit(child);}
+ for(const suite of JSON.parse(result.stdout).suites)visit(suite);return includeTitles?{files,titles}:files;
 }
 for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regression.config.ts'])test(`N00 built fixture is isolated from ${config}`,()=>{const files=discovered(config);assert.ok(files.some(file=>file.endsWith('audit-auth-entry.spec.ts')),'existing Q01 tests stay selected');assert.equal(files.filter(file=>file.endsWith('audit-neon-compat.spec.ts')).length,0,'different runtime/upstream ports must not enter the DB workbench');});
 test('N00 dedicated config discovers all seven built-output cases',()=>{const files=discovered('playwright.neon-auth.config.ts');assert.equal(files.length,7);assert.ok(files.every(file=>file.endsWith('audit-neon-compat.spec.ts')));});
@@ -17,4 +17,4 @@ for(const config of ['playwright.audit-fixes.config.ts','playwright.audit-regres
 test('runtime flow config discovers all six actual-output cases including unknown sign-out',()=>{const files=discovered('playwright.neon-runtime-flow.config.ts');assert.equal(files.length,6);assert.ok(files.every(file=>file.endsWith('audit-neon-runtime-flow.spec.ts')));});
 
 
-test('execution config discovers the original three flows and both native browser guard cases',()=>{const files=discovered('playwright.neon-execution.config.ts');assert.equal(files.length,5);assert.ok(files.every(file=>file.endsWith('audit-neon-execution.spec.ts')));});
+test('execution config discovers all six cases including counted APIRequestContext',()=>{const {files,titles}=discovered('playwright.neon-execution.config.ts',true);assert.equal(files.length,6);assert.ok(files.every(file=>file.endsWith('audit-neon-execution.spec.ts')));assert.ok(titles.includes('NA01 counted APIRequestContext: private cookies and two manual hops through the original journal'));});

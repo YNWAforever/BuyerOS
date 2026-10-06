@@ -1,0 +1,282 @@
+[
+  {
+    "source": "alembic-heads.log",
+    "evidence": "reports/alembic-heads.log"
+  },
+  {
+    "source": "all-attempt-counts.json",
+    "evidence": "reports/all-attempt-counts.json"
+  },
+  {
+    "source": "author-review.json",
+    "evidence": "reports/author-review.json"
+  },
+  {
+    "source": "browser-final-artifacts/.last-run.json",
+    "evidence": "reports/browser-final-artifacts/.last-run.json"
+  },
+  {
+    "source": "browser-final-artifacts/audit-neon-execution-NA01--d29ea-he-same-durable-HTTP-budget/accounting-fixture.png",
+    "evidence": "reports/short-path-artifacts/browser-final-artifacts-4-accounting-fixture.png"
+  },
+  {
+    "source": "browser-final-artifacts/audit-neon-execution-NA01--e9c48-hrough-the-original-journal/api-context-fixture.png",
+    "evidence": "reports/short-path-artifacts/browser-final-artifacts-5-api-context-fixture.png"
+  },
+  {
+    "source": "browser-final-observations.json",
+    "evidence": "reports/browser-final-observations.json"
+  },
+  {
+    "source": "browser-final.json",
+    "evidence": "reports/browser-final.json"
+  },
+  {
+    "source": "browser-final.log",
+    "evidence": "reports/browser-final.log"
+  },
+  {
+    "source": "browser-final.xml",
+    "evidence": "reports/browser-final.xml"
+  },
+  {
+    "source": "browser-observations.json",
+    "evidence": "reports/browser-observations.json"
+  },
+  {
+    "source": "cases-before.csv",
+    "evidence": "reports/cases-before.csv"
+  },
+  {
+    "source": "contracts.log",
+    "evidence": "reports/contracts.log"
+  },
+  {
+    "source": "crypto.log",
+    "evidence": "reports/crypto.log"
+  },
+  {
+    "source": "crypto.xml",
+    "evidence": "reports/crypto.xml"
+  },
+  {
+    "source": "envelope-mutation.json",
+    "evidence": "reports/envelope-mutation.json"
+  },
+  {
+    "source": "envelope-red.log",
+    "evidence": "reports/envelope-red.log"
+  },
+  {
+    "source": "envelope-red.xml",
+    "evidence": "reports/envelope-red.xml"
+  },
+  {
+    "source": "environment.json",
+    "evidence": "reports/environment.json"
+  },
+  {
+    "source": "foreign-final.json",
+    "evidence": "reports/foreign-final.json"
+  },
+  {
+    "source": "green-browser-artifacts/.last-run.json",
+    "evidence": "reports/green-browser-artifacts/.last-run.json"
+  },
+  {
+    "source": "green-browser-artifacts/audit-neon-execution-NA01--d29ea-he-same-durable-HTTP-budget/accounting-fixture.png",
+    "evidence": "reports/short-path-artifacts/green-browser-artifacts-21-accounting-fixture.png"
+  },
+  {
+    "source": "green-browser-artifacts/audit-neon-execution-NA01--e9c48-hrough-the-original-journal/api-context-fixture.png",
+    "evidence": "reports/short-path-artifacts/green-browser-artifacts-22-api-context-fixture.png"
+  },
+  {
+    "source": "green-browser.json",
+    "evidence": "reports/green-browser.json"
+  },
+  {
+    "source": "green-browser.log",
+    "evidence": "reports/green-browser.log"
+  },
+  {
+    "source": "green-browser.xml",
+    "evidence": "reports/green-browser.xml"
+  },
+  {
+    "source": "green-final.log",
+    "evidence": "reports/green-final.log"
+  },
+  {
+    "source": "green-final.xml",
+    "evidence": "reports/green-final.xml"
+  },
+  {
+    "source": "green-node-final.log",
+    "evidence": "reports/green-node-final.log"
+  },
+  {
+    "source": "green-node-final.xml",
+    "evidence": "reports/green-node-final.xml"
+  },
+  {
+    "source": "green-node.log",
+    "evidence": "reports/green-node.log"
+  },
+  {
+    "source": "green-node.xml",
+    "evidence": "reports/green-node.xml"
+  },
+  {
+    "source": "lint-final.log",
+    "evidence": "reports/lint-final.log"
+  },
+  {
+    "source": "lint-first.log",
+    "evidence": "reports/lint-first.log"
+  },
+  {
+    "source": "operations-before.csv",
+    "evidence": "reports/operations-before.csv"
+  },
+  {
+    "source": "other-gates.json",
+    "evidence": "reports/other-gates.json"
+  },
+  {
+    "source": "owned-absence-final.json",
+    "evidence": "reports/owned-absence-final.json"
+  },
+  {
+    "source": "preservation-before.json",
+    "evidence": "reports/preservation-before.json"
+  },
+  {
+    "source": "race-red-both.log",
+    "evidence": "reports/race-red-both.log"
+  },
+  {
+    "source": "race-red-both.xml",
+    "evidence": "reports/race-red-both.xml"
+  },
+  {
+    "source": "race-red.log",
+    "evidence": "reports/race-red.log"
+  },
+  {
+    "source": "race-red.xml",
+    "evidence": "reports/race-red.xml"
+  },
+  {
+    "source": "red-browser-artifacts/.last-run.json",
+    "evidence": "reports/red-browser-artifacts/.last-run.json"
+  },
+  {
+    "source": "red-browser-artifacts/audit-neon-execution-NA01--d29ea-he-same-durable-HTTP-budget/accounting-fixture.png",
+    "evidence": "reports/short-path-artifacts/red-browser-artifacts-43-accounting-fixture.png"
+  },
+  {
+    "source": "red-browser-artifacts/audit-neon-execution-NA01--e9c48-hrough-the-original-journal/error-context.md",
+    "evidence": "reports/red-browser-artifacts/audit-neon-execution-NA01--e9c48-hrough-the-original-journal/error-context.md"
+  },
+  {
+    "source": "red-browser-artifacts/audit-neon-execution-NA01--e9c48-hrough-the-original-journal/trace.zip",
+    "evidence": "reports/red-browser-artifacts/audit-neon-execution-NA01--e9c48-hrough-the-original-journal/trace.zip"
+  },
+  {
+    "source": "red-browser.json",
+    "evidence": "reports/red-browser.json"
+  },
+  {
+    "source": "red-browser.log",
+    "evidence": "reports/red-browser.log"
+  },
+  {
+    "source": "red-browser.xml",
+    "evidence": "reports/red-browser.xml"
+  },
+  {
+    "source": "red-green-counts.json",
+    "evidence": "reports/red-green-counts.json"
+  },
+  {
+    "source": "red-node.log",
+    "evidence": "reports/red-node.log"
+  },
+  {
+    "source": "red-node.xml",
+    "evidence": "reports/red-node.xml"
+  },
+  {
+    "source": "registry-before.json",
+    "evidence": "reports/registry-before.json"
+  },
+  {
+    "source": "root-final.log",
+    "evidence": "reports/root-final.log"
+  },
+  {
+    "source": "root-final.xml",
+    "evidence": "reports/root-final.xml"
+  },
+  {
+    "source": "root-first.log",
+    "evidence": "reports/root-first.log"
+  },
+  {
+    "source": "root-first.xml",
+    "evidence": "reports/root-first.xml"
+  },
+  {
+    "source": "root-green.log",
+    "evidence": "reports/root-green.log"
+  },
+  {
+    "source": "root-green.xml",
+    "evidence": "reports/root-green.xml"
+  },
+  {
+    "source": "root-tasks-before.json",
+    "evidence": "reports/root-tasks-before.json"
+  },
+  {
+    "source": "root-test-files.json",
+    "evidence": "reports/root-test-files.json"
+  },
+  {
+    "source": "routes.log",
+    "evidence": "reports/routes.log"
+  },
+  {
+    "source": "source-precommit-proof.json",
+    "evidence": "reports/source-precommit-proof.json"
+  },
+  {
+    "source": "source-proof.json",
+    "evidence": "reports/source-proof.json"
+  },
+  {
+    "source": "source-reverse-check.log",
+    "evidence": "reports/source-reverse-check.log"
+  },
+  {
+    "source": "source.patch",
+    "evidence": "reports/source.patch"
+  },
+  {
+    "source": "static-final.json",
+    "evidence": "reports/static-final.json"
+  },
+  {
+    "source": "static-first.json",
+    "evidence": "reports/static-first.json"
+  },
+  {
+    "source": "types-final.log",
+    "evidence": "reports/types-final.log"
+  },
+  {
+    "source": "types-first.log",
+    "evidence": "reports/types-first.log"
+  }
+]
