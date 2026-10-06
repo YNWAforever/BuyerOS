@@ -101,6 +101,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/eligible-assignees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search current active workspace members eligible for buyer ownership */
+        get: operations["listEligibleAssignees"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/memberships/{membership_id}": {
         parameters: {
             query?: never;
@@ -1346,6 +1363,8 @@ export interface components {
             workspace_id: string;
             /** Format: uuid */
             user_id: string;
+            /** @description Authorized display name or full canonical user ID fallback; no email or issuer projection. */
+            display_name: string;
             roles: ("viewer" | "operator" | "reviewer" | "workspace_admin")[];
             active: boolean;
             version: number;
@@ -1354,6 +1373,27 @@ export interface components {
             roles: ("viewer" | "operator" | "reviewer" | "workspace_admin")[];
             active: boolean;
             reason: string;
+        };
+        EligibleAssignee: {
+            /** Format: uuid */
+            membership_id: string;
+            /** Format: uuid */
+            user_id: string;
+            display_name: string;
+            version: number;
+        };
+        EligibleAssigneePage: {
+            items: components["schemas"]["EligibleAssignee"][];
+            offset: number;
+            limit: number;
+            total: number;
+        };
+        EligibleAssigneePageResponse: {
+            data: components["schemas"]["EligibleAssigneePage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
         };
         MembershipPage: {
             items: components["schemas"]["Membership"][];
@@ -3274,6 +3314,8 @@ export interface operations {
             query?: {
                 offset?: number;
                 limit?: number;
+                /** @description Literal case-insensitive substring of display name, full user ID or membership ID. */
+                q?: string;
             };
             header?: never;
             path: {
@@ -3292,6 +3334,41 @@ export interface operations {
                     "application/json": components["schemas"]["MembershipPageResponse"];
                 };
             };
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+        };
+    };
+    listEligibleAssignees: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+                /** @description Literal case-insensitive substring of display name, full user ID or membership ID. */
+                q?: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Eligible assignee page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EligibleAssigneePageResponse"];
+                };
+            };
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            422: components["responses"]["Error"];
         };
     };
     updateMembership: {

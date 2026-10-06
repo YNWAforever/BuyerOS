@@ -402,6 +402,14 @@ paths:
           minimum: 1
           maximum: 100
           default: 20
+      - name: q
+        in: query
+        required: false
+        description: Literal case-insensitive substring of display name, full user ID or membership ID.
+        schema:
+          type: string
+          maxLength: 200
+          default: ''
       responses:
         '200':
           description: Authorized member page
@@ -409,7 +417,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipPageResponse'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
       x-permitted-roles: [workspace_admin]
+      x-cost: none
+      x-idempotency: Read-only.
+  /v1/workspaces/{workspace_id}/eligible-assignees:
+    get:
+      operationId: listEligibleAssignees
+      summary: Search current active workspace members eligible for buyer ownership
+      tags: [BO-024]
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      - name: q
+        in: query
+        required: false
+        description: Literal case-insensitive substring of display name, full user ID or membership ID.
+        schema:
+          type: string
+          maxLength: 200
+          default: ''
+      responses:
+        '200':
+          description: Eligible assignee page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibleAssigneePageResponse'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles: [operator, workspace_admin]
+      x-tenant-authorization: Current membership; target eligibility matches assignBuyerOwners and is rechecked on submission.
       x-cost: none
       x-idempotency: Read-only.
   /v1/workspaces/{workspace_id}/memberships/{membership_id}:
@@ -7930,6 +8000,11 @@ components:
         id: *id001
         workspace_id: *id001
         user_id: *id001
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Authorized display name or full canonical user ID fallback; no email or issuer projection.
         roles:
           type: array
           minItems: 1
@@ -7942,7 +8017,7 @@ components:
         version:
           type: integer
           minimum: 1
-      required: [id, workspace_id, user_id, roles, active, version]
+      required: [id, workspace_id, user_id, display_name, roles, active, version]
     MembershipUpdate:
       type: object
       additionalProperties: false
@@ -7962,6 +8037,46 @@ components:
           minLength: 3
           maxLength: 2000
       required: [roles, active, reason]
+    EligibleAssignee:
+      type: object
+      additionalProperties: false
+      properties:
+        membership_id: *id001
+        user_id: *id001
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        version:
+          type: integer
+          minimum: 1
+      required: [membership_id, display_name, user_id, version]
+    EligibleAssigneePage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EligibleAssignee'
+        offset: *id005
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total: *id005
+      required: [items, offset, limit, total]
+    EligibleAssigneePageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/EligibleAssigneePage'
+        request_id: *id001
+        data_mode:
+          type: string
+          enum: [live]
+      required: [data, request_id, data_mode]
     MembershipPage:
       type: object
       additionalProperties: false
