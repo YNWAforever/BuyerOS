@@ -6,3 +6,4 @@ docs/superpowers/plans/2026-10-06-buyeros-*.md -text whitespace=-blank-at-eol,-b
 # Raw C61 execution evidence keeps captured bytes and console whitespace.
 artifacts/c61/*.log -text -whitespace
 artifacts/c61/*.xml -text -whitespace
+# Preserve raw C61 console and JUnit evidence bytes.

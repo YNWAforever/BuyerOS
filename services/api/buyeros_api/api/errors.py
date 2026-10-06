@@ -82,7 +82,7 @@ def database_error_diagnostics(request: Request, exc: Exception) -> dict:
     }.get(sqlstate, "unconfirmed")
     if isinstance(exc, PoolTimeout):
         classification = "pool_timeout"
-    names = {"OperationalError", "ProgrammingError", "InterfaceError", "DBAPIError", "TimeoutError", "IntegrityError"}
+    names = {"OperationalError", "ProgrammingError", "InterfaceError", "DBAPIError", "TimeoutError", "IntegrityError", "ValueError"}
     error_class = type(exc).__name__ if type(exc).__name__ in names else "UnexpectedError"
     context = getattr(request.state, "database_diagnostics", None)
     context = context if isinstance(context, dict) else {}

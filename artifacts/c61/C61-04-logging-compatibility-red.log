@@ -1,0 +1,35 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+______________ test_internal_error_logs_only_type_and_request_id ______________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001C30FA3B9B0>
+
+    def test_internal_error_logs_only_type_and_request_id(caplog):
+        import asyncio
+        import logging
+        from fastapi import Request
+        from buyeros_api.api.errors import internal_error_handler
+    
+        request = Request({"type": "http", "method": "GET", "path": "/v1/test", "headers": []})
+        request.state.request_id = "a393efc1-36a6-4edb-8727-8626f73ecfb6"
+        with caplog.at_level(logging.ERROR, logger="buyeros_api.api.errors"):
+            response = asyncio.run(internal_error_handler(request, ValueError("CANARY_PRIVATE_TOKEN")))
+        assert response.status_code == 500
+        assert b"CANARY_PRIVATE_TOKEN" not in response.body
+>       assert "ValueError" in caplog.text
+E       assert 'ValueError' in 'ERROR    buyeros_api.api.errors:errors.py:112 unexpected_api_error request_id=a393efc1-36a6-4edb-8727-8626f73ecfb6 ty...id":"a393efc1-36a6-4edb-8727-8626f73ecfb6","runtime_role":null,"schema_head":null,"source_sha":null,"sqlstate":null}\n'
+E        +  where 'ERROR    buyeros_api.api.errors:errors.py:112 unexpected_api_error request_id=a393efc1-36a6-4edb-8727-8626f73ecfb6 ty...id":"a393efc1-36a6-4edb-8727-8626f73ecfb6","runtime_role":null,"schema_head":null,"source_sha":null,"sqlstate":null}\n' = <_pytest.logging.LogCaptureFixture object at 0x000001C30FA3B9B0>.text
+
+tests\test_api_app.py:103: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:112 unexpected_api_error request_id=a393efc1-36a6-4edb-8727-8626f73ecfb6 type=UnexpectedError diagnostics={"classification":"unconfirmed","connection_timeout":null,"error_class":"UnexpectedError","pool_wait_ms":null,"request_id":"a393efc1-36a6-4edb-8727-8626f73ecfb6","runtime_role":null,"schema_head":null,"source_sha":null,"sqlstate":null}
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-logging-compat-red.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_api_app.py::test_internal_error_logs_only_type_and_request_id
+1 failed, 1 warning in 2.75s

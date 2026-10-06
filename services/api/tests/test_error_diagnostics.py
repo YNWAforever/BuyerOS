@@ -115,3 +115,35 @@ def test_generic_timeout_does_not_prove_connect_timeout(caplog):
     with caplog.at_level(logging.ERROR):
         asyncio.run(internal_error_handler(request(), TimeoutError('private')))
     assert caplog.records[-1].diagnostic['classification'] == 'unconfirmed'
+
+
+def test_alembic_configuration_preserves_api_diagnostic_logger(monkeypatch):
+    from io import StringIO
+    from pathlib import Path
+    from alembic import command
+    from alembic.config import Config
+    from buyeros_api.settings import get_settings
+
+    root = Path(__file__).resolve().parents[1]
+    logger = logging.getLogger('buyeros_api.api.errors')
+    monkeypatch.setattr(logger, 'disabled', False)
+    monkeypatch.setenv('BUYEROS_DATABASE_URL', 'postgresql://fixture:fixture@127.0.0.1/buyeros_test_offline')
+    monkeypatch.setenv('BUYEROS_DATABASE_MIGRATION_URL', 'postgresql://fixture:fixture@127.0.0.1/buyeros_test_offline')
+    get_settings.cache_clear()
+    config = Config(str(root / 'alembic.ini'), output_buffer=StringIO())
+    config.set_main_option('script_location', str(root / 'alembic'))
+    try:
+        command.upgrade(config, '0037_bulk_manifests:head', sql=True)
+        assert logger.disabled is False, 'migration logging disabled the existing API diagnostic logger'
+    finally:
+        get_settings.cache_clear()
+
+
+def test_unknown_exception_class_name_cannot_disclose_secret_metadata(caplog):
+    error_type = type('CANARY_PRIVATE_TOKEN', (Exception,), {})
+    with caplog.at_level(logging.ERROR, logger='buyeros_api.api.errors'):
+        response = asyncio.run(internal_error_handler(request(), error_type(SECRETS[0])))
+    assert response.status_code == 500
+    assert caplog.records[-1].diagnostic['error_class'] == 'UnexpectedError'
+    assert 'CANARY_PRIVATE_TOKEN' not in caplog.text
+    assert SECRETS[0] not in caplog.text

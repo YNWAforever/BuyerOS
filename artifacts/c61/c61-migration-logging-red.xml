@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.083" timestamp="2026-10-07T04:25:39.068675+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_error_diagnostics" name="test_alembic_configuration_preserves_api_diagnostic_logger" time="0.825"><failure message="AssertionError: migration logging disabled the existing API diagnostic logger&#10;assert True is False&#10; +  where True = &lt;Logger buyeros_api.api.errors (WARNING)&gt;.disabled">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002A9043A1F40&gt;
+
+    def test_alembic_configuration_preserves_api_diagnostic_logger(monkeypatch):
+        from io import StringIO
+        from pathlib import Path
+        from alembic import command
+        from alembic.config import Config
+        from buyeros_api.settings import get_settings
+    
+        root = Path(__file__).resolve().parents[1]
+        logger = logging.getLogger('buyeros_api.api.errors')
+        monkeypatch.setattr(logger, 'disabled', False)
+        monkeypatch.setenv('BUYEROS_DATABASE_URL', 'postgresql://fixture:fixture@127.0.0.1/buyeros_test_offline')
+        monkeypatch.setenv('BUYEROS_DATABASE_MIGRATION_URL', 'postgresql://fixture:fixture@127.0.0.1/buyeros_test_offline')
+        get_settings.cache_clear()
+        config = Config(str(root / 'alembic.ini'), output_buffer=StringIO())
+        config.set_main_option('script_location', str(root / 'alembic'))
+        try:
+            command.upgrade(config, '0037_bulk_manifests:head', sql=True)
+&gt;           assert logger.disabled is False, 'migration logging disabled the existing API diagnostic logger'
+E           AssertionError: migration logging disabled the existing API diagnostic logger
+E           assert True is False
+E            +  where True = &lt;Logger buyeros_api.api.errors (WARNING)&gt;.disabled
+
+tests\test_error_diagnostics.py:137: AssertionError</failure></testcase></testsuite></testsuites>
