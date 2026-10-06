@@ -2,7 +2,7 @@
 
 import uuid
 
-from sqlalchemy import Boolean, ForeignKeyConstraint, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKeyConstraint, Integer, String, UniqueConstraint, Index, text
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -38,6 +38,7 @@ class Membership(Base, TenantMixin):
         UniqueConstraint("workspace_id", "user_id", name="uq_memberships_workspace_user"),
         ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_memberships_workspace"),
         ForeignKeyConstraint(["user_id"], ["users.id"], name="fk_memberships_user"),
+        Index("ix_memberships_active_user_workspace", "user_id", "workspace_id", postgresql_where=text("active IS TRUE")),
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)

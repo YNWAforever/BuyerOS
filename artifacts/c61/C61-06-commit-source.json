@@ -1,0 +1,154 @@
+{
+  "parent_sha": "eca9148b1109ff922361b85d3141e9efb24922d9",
+  "required_suite": "39 pass, 0 fail/error/skip",
+  "owned_benchmark": "1 required case, 4 stages x 30 warm requests, 4 SQL/request, zero error denominator 120",
+  "full_api": "832 executed; 818 pass, 14 C61-04 diagnostic failures, zero error/skip; C61-04 minimal fixes separately verified 22, full rerun pending",
+  "files": [
+    {
+      "path": "services/api/buyeros_api/api/deps.py",
+      "sha256": "2a7184f04d7dd10eded0bb3446b2e9cf69f5469913c4de3e05054c9796a49509"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/workspaces.py",
+      "sha256": "9f4d54b542d486c518b5e29da7830044ceee66721a005bc779fc79a14eb9b534"
+    },
+    {
+      "path": "services/api/buyeros_api/db/models.py",
+      "sha256": "b0d5a7169d8c79f84c5e72a3f6936a673188632435689e006c83ce169ca0a251"
+    },
+    {
+      "path": "services/api/buyeros_api/db/session.py",
+      "sha256": "1cb7c2b23332fc614bed6b857ecfcbccb3e8a7ce0ee7be49cca1aa49b0d9addf"
+    },
+    {
+      "path": "services/api/buyeros_api/services/worker_recovery.py",
+      "sha256": "a5ec33da27cd2babd2513e52cd730f0bc00459afb305cd4fda9697ff9f456c03"
+    },
+    {
+      "path": "services/api/tests/test_admin_operations_db.py",
+      "sha256": "4d06f8b62309c152f37722bde842c890da79a6d4c9431c07fe79aebf81a693e7"
+    },
+    {
+      "path": "services/api/tests/test_backup_restore_t28.py",
+      "sha256": "b5ca3b8d344a2977b432a2f4db65b3fcdeb3acdd10f6b7bcb2c1780136c86608"
+    },
+    {
+      "path": "services/api/tests/test_budget_atomicity_db.py",
+      "sha256": "83681649e45e40026d54c9f2f8c4ce1cedae35fe76646e54ed456b727e3071f7"
+    },
+    {
+      "path": "services/api/tests/test_bulk_jobs_db.py",
+      "sha256": "48039b94ba56122449d5dc2c4f4e9bec9c8c8b79f0917b6c25c8c8ebee3371d7"
+    },
+    {
+      "path": "services/api/tests/test_bulk_manifest_db.py",
+      "sha256": "67ceb541eaae7d67eb11a4c30b006668d86fe14356c7fff4403e3fd23532d52b"
+    },
+    {
+      "path": "services/api/tests/test_buyer_management_db.py",
+      "sha256": "55fdcbeecce7261706ed751934b969c058e7cf988959c75f1e26692c9c0a2baa"
+    },
+    {
+      "path": "services/api/tests/test_checkpoint_schema_privileges_db.py",
+      "sha256": "fa7ab0beb46ab8b3874c90053c46f352e19bbd247ee80f4b1d4e722c3fc0b8df"
+    },
+    {
+      "path": "services/api/tests/test_cloudflare_migration_db.py",
+      "sha256": "b8815ac03efaab6aafac27909cdefc5162eab26fd3e2312acfa654163c2851e3"
+    },
+    {
+      "path": "services/api/tests/test_cloudflare_recovery_boundaries_db.py",
+      "sha256": "85d66cae9365a28b11f316a08acec79d9a706a0e48e6559c7bb873e00c5f0a2a"
+    },
+    {
+      "path": "services/api/tests/test_contact_job_migration.py",
+      "sha256": "59a9c6705f4e527d9ec28fa16750ea88a45d2e37a98bcd999e5728fc8d434cd5"
+    },
+    {
+      "path": "services/api/tests/test_contact_quote_migration.py",
+      "sha256": "02afeb79d4e8139bac7c75b69a5eac9ac41310a50275135c02cf2439b553b2b5"
+    },
+    {
+      "path": "services/api/tests/test_draft_approval_migration.py",
+      "sha256": "acaa7cac87a9aa3853ce9285577f3312576af980d1a7f94dcbabd4e4b32c7680"
+    },
+    {
+      "path": "services/api/tests/test_draft_integrity_migration.py",
+      "sha256": "0029bf5daebdf9a2e90634d41d60f70abdfd0de70916d7f44b4a83725ff0b42a"
+    },
+    {
+      "path": "services/api/tests/test_export_migration.py",
+      "sha256": "7ee473d6ebd37c1d532707d87135ff46207112b61a5762c428b04c84dc2e8597"
+    },
+    {
+      "path": "services/api/tests/test_outcome_migration.py",
+      "sha256": "028fd3997e60bd7cb5c7f9cc2edaf5a9b53080eaed2cfc3cc8c8860f8ac718c2"
+    },
+    {
+      "path": "services/api/tests/test_policy_lifecycle_db.py",
+      "sha256": "66719ce93da91b6b0aa439cd60159a2b718758698389b3a09239c95c52da68bf"
+    },
+    {
+      "path": "services/api/tests/test_project_constraints_db.py",
+      "sha256": "acd4670ea4f84d8ad6734b63dff18b0feaccfdef6c373ea68855436a7b057e0f"
+    },
+    {
+      "path": "services/api/tests/test_research_checkpoint_migration.py",
+      "sha256": "faf1092b99d568696acf41d5877d5dc2fb343aa98ab1649d4eb72de199727660"
+    },
+    {
+      "path": "services/api/tests/test_retention_authorization_db.py",
+      "sha256": "3a835c848b234771bc041071cc9a2cacb99d3cf10c5376c2321452f9bdefe03e"
+    },
+    {
+      "path": "services/api/tests/test_sender_identity_migration.py",
+      "sha256": "ce57f11bd5e17d9501abf551b33510975d2e776cd8886ee7514e166e5ea0da9e"
+    },
+    {
+      "path": "services/api/tests/test_workspace_listing_db.py",
+      "sha256": "070f5719661dae7915d636adbedd0f6d05bd1349001b8d6ebb2a11ac983770fe"
+    },
+    {
+      "path": "services/api/alembic/versions/0038_c61_workspace_directory.py",
+      "sha256": "8970021770a72946cea409a446ebeb55ced9ce16e397ac18d4b9e77bda39d7ee"
+    },
+    {
+      "path": "services/api/buyeros_api/services/identity_resolver.py",
+      "sha256": "9045d108499f886d26d18686642c9ca9022aa4caea2bd8a158ecbb40cf591fb3"
+    },
+    {
+      "path": "services/api/buyeros_api/services/workspace_directory.py",
+      "sha256": "92ba100352d0a5a2b7f0ffb5e9e7b9ba8bd57a62e7f97cae3087a8d840ab65d1"
+    },
+    {
+      "path": "services/api/tests/benchmark_workspace_directory_case.py",
+      "sha256": "e39d3746b973deb0c9edc06bcc837a7d6ca4ef4a35380d3588c8c79193f7a442"
+    },
+    {
+      "path": "services/api/tests/test_identity_resolver_db.py",
+      "sha256": "6b1105f155e4c63dc35d3921ddaf965792c82a189d6ae8a3cbf61cb8675dcd33"
+    },
+    {
+      "path": "services/api/tests/test_workspace_benchmark_tools.py",
+      "sha256": "67b950c02ff9705489aea5f93abe556e50955e43453f17a36aa36eea0eb46db1"
+    },
+    {
+      "path": "services/api/tests/test_workspace_directory_function_db.py",
+      "sha256": "5a3419a5c10d09329304870861f4036300bdc197a01fefb4166849d7aedcac50"
+    },
+    {
+      "path": "services/api/tools/quality_metrics.py",
+      "sha256": "c510a40589984995c8f1ddc3bcf9eeab5211ffd7d23ce7116fa36a9491dbc0e9"
+    },
+    {
+      "path": "scripts/benchmark-workspace-directory.py",
+      "sha256": "ba7d5dbc9a2dfc3a1a5b02b75386a18d7e8b80880f56df27436384202534a2a0"
+    },
+    {
+      "path": "docs/buyeros/decisions/2026-10-06-workspace-discovery.md",
+      "sha256": "e0f1fb59f1db6035d9d78a09dad3735aba87665b4f24b83a9e2ecd5e795de74a"
+    }
+  ],
+  "fixture_only": true,
+  "production_accepted": false
+}

@@ -1,0 +1,97 @@
+.FFFF..                                                                  [100%]
+================================== FAILURES ===================================
+_ test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuites tests="0"/>] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E018350>
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects0')
+xml = '<testsuites tests="0"/>'
+
+    @pytest.mark.parametrize('xml',[
+        '<testsuites tests="0"/>',
+        '<testsuite><testcase><skipped/></testcase></testsuite>',
+        '<testsuite><testcase><failure/></testcase></testsuite>',
+        '<testsuite><testcase><error/></testcase></testsuite>',
+    ])
+    def test_directory_capture_rejects_empty_or_nonpassing_required_junit(monkeypatch,tmp_path,xml):
+>       assert fake_capture(monkeypatch,tmp_path,xml).main()==1
+E       assert 0 == 1
+E        +  where 0 = <function main at 0x000002E71E2C0AE0>()
+E        +    where <function main at 0x000002E71E2C0AE0> = <module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'>.main
+E        +      where <module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'> = fake_capture(<_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E018350>, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects0'), '<testsuites tests="0"/>')
+
+tests\test_workspace_benchmark_tools.py:53: AssertionError
+---------------------------- Captured stdout call -----------------------------
+Capture verified; frozen directory SQL gate passed=True; live_verified=false
+_ test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuite><testcase><skipped/></testcase></testsuite>] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1E7230>
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects1')
+xml = '<testsuite><testcase><skipped/></testcase></testsuite>'
+
+    @pytest.mark.parametrize('xml',[
+        '<testsuites tests="0"/>',
+        '<testsuite><testcase><skipped/></testcase></testsuite>',
+        '<testsuite><testcase><failure/></testcase></testsuite>',
+        '<testsuite><testcase><error/></testcase></testsuite>',
+    ])
+    def test_directory_capture_rejects_empty_or_nonpassing_required_junit(monkeypatch,tmp_path,xml):
+>       assert fake_capture(monkeypatch,tmp_path,xml).main()==1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = <function main at 0x000002E71E314860>()
+E        +    where <function main at 0x000002E71E314860> = <module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'>.main
+E        +      where <module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'> = fake_capture(<_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1E7230>, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects1'), '<testsuite><testcase><skipped/></testcase></testsuite>')
+
+tests\test_workspace_benchmark_tools.py:53: AssertionError
+---------------------------- Captured stdout call -----------------------------
+Capture verified; frozen directory SQL gate passed=True; live_verified=false
+_ test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuite><testcase><failure/></testcase></testsuite>] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1EF140>
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects2')
+xml = '<testsuite><testcase><failure/></testcase></testsuite>'
+
+    @pytest.mark.parametrize('xml',[
+        '<testsuites tests="0"/>',
+        '<testsuite><testcase><skipped/></testcase></testsuite>',
+        '<testsuite><testcase><failure/></testcase></testsuite>',
+        '<testsuite><testcase><error/></testcase></testsuite>',
+    ])
+    def test_directory_capture_rejects_empty_or_nonpassing_required_junit(monkeypatch,tmp_path,xml):
+>       assert fake_capture(monkeypatch,tmp_path,xml).main()==1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = <function main at 0x000002E71E314A40>()
+E        +    where <function main at 0x000002E71E314A40> = <module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'>.main
+E        +      where <module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'> = fake_capture(<_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1EF140>, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects2'), '<testsuite><testcase><failure/></testcase></testsuite>')
+
+tests\test_workspace_benchmark_tools.py:53: AssertionError
+---------------------------- Captured stdout call -----------------------------
+Capture verified; frozen directory SQL gate passed=True; live_verified=false
+_ test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuite><testcase><error/></testcase></testsuite>] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1E7140>
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects3')
+xml = '<testsuite><testcase><error/></testcase></testsuite>'
+
+    @pytest.mark.parametrize('xml',[
+        '<testsuites tests="0"/>',
+        '<testsuite><testcase><skipped/></testcase></testsuite>',
+        '<testsuite><testcase><failure/></testcase></testsuite>',
+        '<testsuite><testcase><error/></testcase></testsuite>',
+    ])
+    def test_directory_capture_rejects_empty_or_nonpassing_required_junit(monkeypatch,tmp_path,xml):
+>       assert fake_capture(monkeypatch,tmp_path,xml).main()==1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = <function main at 0x000002E71E315080>()
+E        +    where <function main at 0x000002E71E315080> = <module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'>.main
+E        +      where <module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'> = fake_capture(<_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1E7140>, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects3'), '<testsuite><testcase><error/></testcase></testsuite>')
+
+tests\test_workspace_benchmark_tools.py:53: AssertionError
+---------------------------- Captured stdout call -----------------------------
+Capture verified; frozen directory SQL gate passed=True; live_verified=false
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-directory-tools-red.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_workspace_benchmark_tools.py::test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuites tests="0"/>]
+FAILED tests/test_workspace_benchmark_tools.py::test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuite><testcase><skipped/></testcase></testsuite>]
+FAILED tests/test_workspace_benchmark_tools.py::test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuite><testcase><failure/></testcase></testsuite>]
+FAILED tests/test_workspace_benchmark_tools.py::test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuite><testcase><error/></testcase></testsuite>]
+4 failed, 3 passed in 1.31s

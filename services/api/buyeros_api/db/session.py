@@ -28,3 +28,12 @@ async def tenant_session(engine: AsyncEngine | None, workspace_id: uuid.UUID | N
                 text("SELECT set_config('app.workspace_id', :ws, true)"), {"ws": str(workspace_id)}
             )
             yield session
+
+
+@contextlib.asynccontextmanager
+async def workspace_directory_session(engine: AsyncEngine) -> AsyncIterator[AsyncSession]:
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    async with maker() as session:
+        async with session.begin():
+            await session.execute(text("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY"))
+            yield session

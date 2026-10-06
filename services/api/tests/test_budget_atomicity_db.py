@@ -211,7 +211,7 @@ def test_0018_empty_downgrade_upgrade_and_force_rls(migrated):
         conn.execute("DELETE FROM workspaces WHERE id=%s", (legacy_workspace,))
     command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0038_c61_workspace_directory"
         assert conn.execute("SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname='budget_reservation_allocations'").fetchone() == (True, True)
 
 

@@ -22,7 +22,7 @@ def test_0017_preferences_rls_and_empty_rollback(migrated):
         assert conn.execute("SELECT to_regclass('workspace_preferences')").fetchone()[0] is None
     command.upgrade(config,'head')
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0037_bulk_manifests'
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0038_c61_workspace_directory'
 
 
 def _member_id(seeded, subject):

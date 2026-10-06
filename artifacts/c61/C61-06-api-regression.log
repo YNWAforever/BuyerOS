@@ -1,0 +1,322 @@
+..............F......................................................... [  8%]
+........................................................................ [ 17%]
+........................................................................ [ 25%]
+........................................................................ [ 34%]
+........................................................................ [ 43%]
+........................................................................ [ 51%]
+......FFFFFFFFFFFFF..................................................... [ 60%]
+........................................................................ [ 69%]
+........................................................................ [ 77%]
+........................................................................ [ 86%]
+........................................................................ [ 95%]
+........................................                                 [100%]
+================================== FAILURES ===================================
+______________ test_internal_error_logs_only_type_and_request_id ______________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B93ECE5010>
+
+    def test_internal_error_logs_only_type_and_request_id(caplog):
+        import asyncio
+        import logging
+        from fastapi import Request
+        from buyeros_api.api.errors import internal_error_handler
+    
+        request = Request({"type": "http", "method": "GET", "path": "/v1/test", "headers": []})
+        request.state.request_id = "a393efc1-36a6-4edb-8727-8626f73ecfb6"
+        with caplog.at_level(logging.ERROR, logger="buyeros_api.api.errors"):
+            response = asyncio.run(internal_error_handler(request, ValueError("CANARY_PRIVATE_TOKEN")))
+        assert response.status_code == 500
+        assert b"CANARY_PRIVATE_TOKEN" not in response.body
+>       assert "ValueError" in caplog.text
+E       assert 'ValueError' in 'ERROR    buyeros_api.api.errors:errors.py:112 unexpected_api_error request_id=a393efc1-36a6-4edb-8727-8626f73ecfb6 ty...id":"a393efc1-36a6-4edb-8727-8626f73ecfb6","runtime_role":null,"schema_head":null,"source_sha":null,"sqlstate":null}\n'
+E        +  where 'ERROR    buyeros_api.api.errors:errors.py:112 unexpected_api_error request_id=a393efc1-36a6-4edb-8727-8626f73ecfb6 ty...id":"a393efc1-36a6-4edb-8727-8626f73ecfb6","runtime_role":null,"schema_head":null,"source_sha":null,"sqlstate":null}\n' = <_pytest.logging.LogCaptureFixture object at 0x000001B93ECE5010>.text
+
+tests\test_api_app.py:103: AssertionError
+---------------------------- Captured stderr call -----------------------------
+ERROR [buyeros_api.api.errors] unexpected_api_error request_id=a393efc1-36a6-4edb-8727-8626f73ecfb6 type=UnexpectedError diagnostics={"classification":"unconfirmed","connection_timeout":null,"error_class":"UnexpectedError","pool_wait_ms":null,"request_id":"a393efc1-36a6-4edb-8727-8626f73ecfb6","runtime_role":null,"schema_head":null,"source_sha":null,"sqlstate":null}
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:112 unexpected_api_error request_id=a393efc1-36a6-4edb-8727-8626f73ecfb6 type=UnexpectedError diagnostics={"classification":"unconfirmed","connection_timeout":null,"error_class":"UnexpectedError","pool_wait_ms":null,"request_id":"a393efc1-36a6-4edb-8727-8626f73ecfb6","runtime_role":null,"schema_head":null,"source_sha":null,"sqlstate":null}
+___ test_database_error_diagnostics_redacts_secrets[42P01-missing_relation] ___
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B944FD23F0>
+state = '42P01', classification = 'missing_relation'
+
+    @pytest.mark.parametrize(('state', 'classification'), [
+        ('42P01', 'missing_relation'), ('42501', 'insufficient_privilege'),
+        ('08006', 'connection_failure'),
+    ])
+    def test_database_error_diagnostics_redacts_secrets(caplog, state, classification):
+        class DriverError(Exception):
+            sqlstate = state
+        error = OperationalError('SELECT ' + SECRETS[2], {'password': SECRETS[0]}, DriverError(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(request(), error))
+>       fields = getattr(caplog.records[-1], 'diagnostic', {})
+                         ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:32: IndexError
+_ test_database_error_diagnostics_redacts_secrets[42501-insufficient_privilege] _
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B93EAE3020>
+state = '42501', classification = 'insufficient_privilege'
+
+    @pytest.mark.parametrize(('state', 'classification'), [
+        ('42P01', 'missing_relation'), ('42501', 'insufficient_privilege'),
+        ('08006', 'connection_failure'),
+    ])
+    def test_database_error_diagnostics_redacts_secrets(caplog, state, classification):
+        class DriverError(Exception):
+            sqlstate = state
+        error = OperationalError('SELECT ' + SECRETS[2], {'password': SECRETS[0]}, DriverError(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(request(), error))
+>       fields = getattr(caplog.records[-1], 'diagnostic', {})
+                         ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:32: IndexError
+__ test_database_error_diagnostics_redacts_secrets[08006-connection_failure] __
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B9422692E0>
+state = '08006', classification = 'connection_failure'
+
+    @pytest.mark.parametrize(('state', 'classification'), [
+        ('42P01', 'missing_relation'), ('42501', 'insufficient_privilege'),
+        ('08006', 'connection_failure'),
+    ])
+    def test_database_error_diagnostics_redacts_secrets(caplog, state, classification):
+        class DriverError(Exception):
+            sqlstate = state
+        error = OperationalError('SELECT ' + SECRETS[2], {'password': SECRETS[0]}, DriverError(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(request(), error))
+>       fields = getattr(caplog.records[-1], 'diagnostic', {})
+                         ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:32: IndexError
+____ test_pool_timeout_is_distinguished_without_logging_exception_message _____
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B94538A6F0>
+
+    def test_pool_timeout_is_distinguished_without_logging_exception_message(caplog):
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(request(), PoolTimeout(SECRETS[0])))
+>       fields = getattr(caplog.records[-1], 'diagnostic', {})
+                         ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:50: IndexError
+_____________ test_unknown_operational_failure_stays_unconfirmed ______________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B944F75640>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B944F74200>
+
+    def test_unknown_operational_failure_stays_unconfirmed(caplog, monkeypatch):
+        monkeypatch.delenv('BUYEROS_SOURCE_SHA', raising=False)
+        monkeypatch.delenv('VERCEL_GIT_COMMIT_SHA', raising=False)
+        error = OperationalError(SECRETS[0], {'bind': SECRETS[2]}, Exception(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(request(), error))
+>       fields = getattr(caplog.records[-1], 'diagnostic', {})
+                         ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:63: IndexError
+_____ test_diagnostic_context_rejects_secret_bearing_and_invalid_metadata _____
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B944596180>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B944594A70>
+
+    def test_diagnostic_context_rejects_secret_bearing_and_invalid_metadata(caplog, monkeypatch):
+        value = request()
+        value.state.database_diagnostics = {
+            'schema_head': SECRETS[0], 'runtime_role': SECRETS[1],
+            'pool_wait_ms': SECRETS[2], 'connection_timeout': SECRETS[0],
+        }
+        monkeypatch.setenv('BUYEROS_SOURCE_SHA', SECRETS[0])
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(value, OperationalError(SECRETS[0], {}, Exception(SECRETS[1]))))
+>       fields = getattr(caplog.records[-1], 'diagnostic', {})
+                         ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:79: IndexError
+___________ test_bad_pool_timing_cannot_break_error_envelope[True] ____________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B944597380>
+wait = True
+
+    @pytest.mark.parametrize('wait', [True, float('nan'), float('inf'), -1, 10**400])
+    def test_bad_pool_timing_cannot_break_error_envelope(caplog, wait):
+        value = request()
+        value.state.database_diagnostics = {'pool_wait_ms': wait}
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(value, Exception('private')))
+        assert response.status_code == 500
+>       assert caplog.records[-1].diagnostic['pool_wait_ms'] is None
+               ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:92: IndexError
+____________ test_bad_pool_timing_cannot_break_error_envelope[nan] ____________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B944595970>
+wait = nan
+
+    @pytest.mark.parametrize('wait', [True, float('nan'), float('inf'), -1, 10**400])
+    def test_bad_pool_timing_cannot_break_error_envelope(caplog, wait):
+        value = request()
+        value.state.database_diagnostics = {'pool_wait_ms': wait}
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(value, Exception('private')))
+        assert response.status_code == 500
+>       assert caplog.records[-1].diagnostic['pool_wait_ms'] is None
+               ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:92: IndexError
+____________ test_bad_pool_timing_cannot_break_error_envelope[inf] ____________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B9445944D0>
+wait = inf
+
+    @pytest.mark.parametrize('wait', [True, float('nan'), float('inf'), -1, 10**400])
+    def test_bad_pool_timing_cannot_break_error_envelope(caplog, wait):
+        value = request()
+        value.state.database_diagnostics = {'pool_wait_ms': wait}
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(value, Exception('private')))
+        assert response.status_code == 500
+>       assert caplog.records[-1].diagnostic['pool_wait_ms'] is None
+               ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:92: IndexError
+____________ test_bad_pool_timing_cannot_break_error_envelope[-1] _____________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B94221FC80>
+wait = -1
+
+    @pytest.mark.parametrize('wait', [True, float('nan'), float('inf'), -1, 10**400])
+    def test_bad_pool_timing_cannot_break_error_envelope(caplog, wait):
+        value = request()
+        value.state.database_diagnostics = {'pool_wait_ms': wait}
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(value, Exception('private')))
+        assert response.status_code == 500
+>       assert caplog.records[-1].diagnostic['pool_wait_ms'] is None
+               ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:92: IndexError
+_ test_bad_pool_timing_cannot_break_error_envelope[10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000] _
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B9445970B0>
+wait = 100000000000000000...0000000000000000000
+
+    @pytest.mark.parametrize('wait', [True, float('nan'), float('inf'), -1, 10**400])
+    def test_bad_pool_timing_cannot_break_error_envelope(caplog, wait):
+        value = request()
+        value.state.database_diagnostics = {'pool_wait_ms': wait}
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(value, Exception('private')))
+        assert response.status_code == 500
+>       assert caplog.records[-1].diagnostic['pool_wait_ms'] is None
+               ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:92: IndexError
+__________ test_observed_connect_timeout_distinct_from_pool_timeout ___________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B944596C00>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B944596CC0>
+
+    def test_observed_connect_timeout_distinct_from_pool_timeout(caplog, monkeypatch):
+        value = request()
+        value.state.database_diagnostics = {
+            'connection_timeout': True, 'pool_wait_ms': 3.5,
+            'schema_head': '0037_bulk_manifests', 'runtime_role': 'buyeros_api',
+        }
+        monkeypatch.setenv('BUYEROS_SOURCE_SHA', 'a' * 40)
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(value, TimeoutError(SECRETS[0])))
+>       fields = caplog.records[-1].diagnostic
+                 ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:104: IndexError
+_____________ test_generic_timeout_does_not_prove_connect_timeout _____________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B944594A70>
+
+    def test_generic_timeout_does_not_prove_connect_timeout(caplog):
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(request(), TimeoutError('private')))
+>       assert caplog.records[-1].diagnostic['classification'] == 'unconfirmed'
+               ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests\test_error_diagnostics.py:117: IndexError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_admin_operations_db.py: 3 warnings
+tests/test_api_projects_db.py: 3 warnings
+tests/test_backup_restore_t28.py: 1 warning
+tests/test_budget_atomicity_db.py: 3 warnings
+tests/test_bulk_jobs_db.py: 2 warnings
+tests/test_bulk_manifest_db.py: 3 warnings
+tests/test_buyer_management_db.py: 3 warnings
+tests/test_buyer_review_db.py: 3 warnings
+tests/test_checkpoint_schema_privileges_db.py: 3 warnings
+tests/test_cloudflare_bridge_db.py: 1 warning
+tests/test_cloudflare_local_steps_db.py: 1 warning
+tests/test_cloudflare_migration_db.py: 4 warnings
+tests/test_cloudflare_platform_db.py: 1 warning
+tests/test_cloudflare_preview_diagnostic.py: 1 warning
+tests/test_cloudflare_provider_steps_db.py: 1 warning
+tests/test_cloudflare_recovery_boundaries_db.py: 6 warnings
+tests/test_cloudflare_recovery_db.py: 1 warning
+tests/test_cloudflare_runtime_control_db.py: 1 warning
+tests/test_contact_job_migration.py: 5 warnings
+tests/test_contact_quote_migration.py: 4 warnings
+tests/test_draft_approval_migration.py: 4 warnings
+tests/test_draft_integrity_migration.py: 3 warnings
+tests/test_export_migration.py: 3 warnings
+tests/test_icp_write_integrity_db.py: 3 warnings
+tests/test_ingestion_migration.py: 4 warnings
+tests/test_outcome_migration.py: 3 warnings
+tests/test_policy_lifecycle_db.py: 3 warnings
+tests/test_project_constraints_db.py: 6 warnings
+tests/test_research_checkpoint_migration.py: 4 warnings
+tests/test_research_migration.py: 4 warnings
+tests/test_retention_authorization_db.py: 5 warnings
+tests/test_run_migration.py: 4 warnings
+tests/test_runtime_readiness_db.py: 1 warning
+tests/test_sender_identity_migration.py: 3 warnings
+tests/test_workspace_directory_function_db.py: 2 warnings
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-api-regression.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_api_app.py::test_internal_error_logs_only_type_and_request_id
+FAILED tests/test_error_diagnostics.py::test_database_error_diagnostics_redacts_secrets[42P01-missing_relation]
+FAILED tests/test_error_diagnostics.py::test_database_error_diagnostics_redacts_secrets[42501-insufficient_privilege]
+FAILED tests/test_error_diagnostics.py::test_database_error_diagnostics_redacts_secrets[08006-connection_failure]
+FAILED tests/test_error_diagnostics.py::test_pool_timeout_is_distinguished_without_logging_exception_message
+FAILED tests/test_error_diagnostics.py::test_unknown_operational_failure_stays_unconfirmed
+FAILED tests/test_error_diagnostics.py::test_diagnostic_context_rejects_secret_bearing_and_invalid_metadata
+FAILED tests/test_error_diagnostics.py::test_bad_pool_timing_cannot_break_error_envelope[True]
+FAILED tests/test_error_diagnostics.py::test_bad_pool_timing_cannot_break_error_envelope[nan]
+FAILED tests/test_error_diagnostics.py::test_bad_pool_timing_cannot_break_error_envelope[inf]
+FAILED tests/test_error_diagnostics.py::test_bad_pool_timing_cannot_break_error_envelope[-1]
+FAILED tests/test_error_diagnostics.py::test_bad_pool_timing_cannot_break_error_envelope[10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000]
+FAILED tests/test_error_diagnostics.py::test_observed_connect_timeout_distinct_from_pool_timeout
+FAILED tests/test_error_diagnostics.py::test_generic_timeout_does_not_prove_connect_timeout
+14 failed, 818 passed, 103 warnings in 1785.83s (0:29:45)

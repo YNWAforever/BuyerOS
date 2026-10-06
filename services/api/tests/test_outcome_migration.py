@@ -11,7 +11,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import api
 from tests.test_lookup_quotes_db import OPERATOR, WORKSPACE_A, PROJECT, quote_case
 
-HEAD = "0037_bulk_manifests"
+HEAD = "0038_c61_workspace_directory"
 
 
 def _config():

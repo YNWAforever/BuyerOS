@@ -3501,13 +3501,28 @@
         "proposed_new_files": "services/api/buyeros_api/services/identity_resolver.py;services/api/buyeros_api/services/workspace_directory.py;docs/buyeros/decisions/2026-10-06-workspace-discovery.md;services/api/tests/test_identity_resolver_db.py",
         "acceptance": "owned PG16 benchmark CLI exit 0 且 SQL gate=true；舊 4/22/202/2002 查詢數只作 baseline。EXPLAIN/query 計數/role/RLS 證據齊備；n=30 p99 只標不穩定。",
         "rollback": "先停新查詢入口並切回相容 route；保留新增 schema。若舊路徑恢復 O(W)，記效能退化，不放鬆授權。",
-        "execution_sha": "",
-        "execution_evidence": "",
-        "code_status": "not-started",
-        "verification_status": "not-run",
+        "execution_sha": "eca9148b1109ff922361b85d3141e9efb24922d9",
+        "execution_evidence": "artifacts/c61/C61-06-directory-required-green.json;artifacts/c61/c61-directory-required-green.xml;artifacts/c61/C61-06-directory-benchmark-green.json;artifacts/c61/c61-directory-measured.json;artifacts/c61/C61-06-tested-source.json;artifacts/c61/C61-06-commit-source.json;artifacts/c61/C61-06-api-regression.json;artifacts/c61/c61-workspace-directory-upgrade.sql;artifacts/c61/c61-workspace-directory-rollback.sql",
+        "code_status": "bounded readonly canonical-actor workspace directory and additive 0038 payload implemented",
+        "verification_status": "required 39 pass zero fail/error/skip; owned 4-stage 120-sample benchmark SQL 4 each; full API diagnostic follow-up pending",
         "release_status": "not-deployed",
-        "blockers": [],
-        "evidence_paths": []
+        "blockers": [
+          "full API regression rerun after C61-04 correction",
+          "real Neon migration-owner eligibility and index lock-window review",
+          "C61-02 full built acceptance",
+          "same-version production performance/readback"
+        ],
+        "evidence_paths": [
+          "artifacts/c61/C61-06-directory-required-green.json",
+          "artifacts/c61/c61-directory-required-green.xml",
+          "artifacts/c61/C61-06-directory-benchmark-green.json",
+          "artifacts/c61/c61-directory-measured.json",
+          "artifacts/c61/C61-06-tested-source.json",
+          "artifacts/c61/C61-06-commit-source.json",
+          "artifacts/c61/C61-06-api-regression.json",
+          "artifacts/c61/c61-workspace-directory-upgrade.sql",
+          "artifacts/c61/c61-workspace-directory-rollback.sql"
+        ]
       },
       {
         "task_id": "C61-07",

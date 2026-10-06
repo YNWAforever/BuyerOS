@@ -1,0 +1,24 @@
+{
+  "source_sha": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "source_sha_after": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "started_at_utc": "2026-10-06T19:08:25.688908+00:00",
+  "seconds": 24.136,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "--collect-only",
+    "-q",
+    "tests/test_workspace_listing_db.py",
+    "tests/test_identity_resolver_db.py",
+    "tests/test_workspace_directory_function_db.py",
+    "tests/test_workspace_benchmark_tools.py"
+  ],
+  "cwd": "services/api",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-06-directory-discovery.log",
+  "discovered_tests": 23,
+  "required_gate_exit_code": 0
+}

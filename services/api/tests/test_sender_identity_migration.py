@@ -9,7 +9,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0037_bulk_manifests"
+HEAD = "0038_c61_workspace_directory"
 PROJECT_A = "a0000000-0000-4000-8000-000000000001"
 
 

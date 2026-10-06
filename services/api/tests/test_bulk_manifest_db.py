@@ -269,7 +269,7 @@ def test_0037_empty_roundtrip_and_data_preserving_downgrade_refusal(api,seeded,m
     _seed_many(seeded,2);manifest=_preview(api,_admin_membership(seeded));monkeypatch.setenv('BUYEROS_DATABASE_URL',seeded);get_settings.cache_clear()
     with pytest.raises(RuntimeError,match='durable manifests'):command.downgrade(config,'0036_checkpoint_schema_grants')
     with psycopg.connect(seeded) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0037_bulk_manifests'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0038_c61_workspace_directory'
         assert db.execute('SELECT count(*) FROM bulk_manifest_items WHERE manifest_id=%s',(manifest['id'],)).fetchone()[0]==2
     monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(seeded));get_settings.cache_clear()
 

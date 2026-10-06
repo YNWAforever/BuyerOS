@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="6" time="12.310" timestamp="2026-10-07T02:20:04.354105+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_workspace_directory_function_db" name="test_directory_function_acl_keeps_tenant_policy_and_runtime_nonprivileged" time="7.994"><failure message="AssertionError: restricted readonly directory function missing&#10;assert None is not None">directory_case = {'add': &lt;function directory_case.&lt;locals&gt;.add_workspace at 0x000001E48FC407C0&gt;, 'dsn': 'postgresql://buyeros:buyeros@1...bjects': ['q13-fixture-0887b4b6-b242-4bba-a21b-77621e70f1bf', 'q13-fixture-6a3787ed-c53d-47d4-b9cd-56cce65b1f31'], ...}
+
+    def test_directory_function_acl_keeps_tenant_policy_and_runtime_nonprivileged(directory_case):
+        case=directory_case
+        with psycopg.connect(case['dsn']) as owner:
+            function=owner.execute("SELECT p.prosecdef,p.provolatile,p.proconfig,pg_get_userbyid(p.proowner) "
+                "FROM pg_proc p WHERE p.oid=to_regprocedure(%s)",(FUNCTION,)).fetchone()
+&gt;           assert function is not None, 'restricted readonly directory function missing'
+E           AssertionError: restricted readonly directory function missing
+E           assert None is not None
+
+tests\test_workspace_directory_function_db.py:20: AssertionError</failure></testcase><testcase classname="tests.test_workspace_directory_function_db" name="test_directory_function_rejects_missing_malformed_or_forged_actor[None]" time="0.109"><failure message="psycopg.errors.UndefinedFunction: function public.buyeros_workspace_directory(uuid, integer, integer) does not exist&#10;LINE 1: SELECT public.buyeros_workspace_directory($1,0,20)&#10;               ^&#10;HINT:  No function matches the given name and argument types. You might need to add explicit type casts.">directory_case = {'add': &lt;function directory_case.&lt;locals&gt;.add_workspace at 0x000001E48FE5A200&gt;, 'dsn': 'postgresql://buyeros:buyeros@1...bjects': ['q13-fixture-f9f58903-f525-4f46-b4fa-b796980dd617', 'q13-fixture-fe576cb1-9386-4ca7-a5ec-264153d06562'], ...}
+context = None
+
+    @pytest.mark.parametrize('context',[None,'','not-a-uuid','different'])
+    def test_directory_function_rejects_missing_malformed_or_forged_actor(directory_case,context):
+        case=directory_case;case['add'](0)
+        with psycopg.connect(runtime_role_dsn(case['dsn'])) as runtime:
+            if context is not None:
+                actor=str(case['users'][1]) if context=='different' else context
+                runtime.execute("SELECT set_config('app.user_id',%s,true)",(actor,))
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+&gt;               runtime.execute('SELECT public.buyeros_workspace_directory(%s,0,20)',(case['users'][0],))
+
+tests\test_workspace_directory_function_db.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1e48fde61e0&gt;
+query = 'SELECT public.buyeros_workspace_directory(%s,0,20)'
+params = (UUID('f9f58903-f525-4f46-b4fa-b796980dd617'),)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UndefinedFunction: function public.buyeros_workspace_directory(uuid, integer, integer) does not exist
+E           LINE 1: SELECT public.buyeros_workspace_directory($1,0,20)
+E                          ^
+E           HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UndefinedFunction</failure></testcase><testcase classname="tests.test_workspace_directory_function_db" name="test_directory_function_rejects_missing_malformed_or_forged_actor[]" time="0.135"><failure message="psycopg.errors.UndefinedFunction: function public.buyeros_workspace_directory(uuid, integer, integer) does not exist&#10;LINE 1: SELECT public.buyeros_workspace_directory($1,0,20)&#10;               ^&#10;HINT:  No function matches the given name and argument types. You might need to add explicit type casts.">directory_case = {'add': &lt;function directory_case.&lt;locals&gt;.add_workspace at 0x000001E48FE59C60&gt;, 'dsn': 'postgresql://buyeros:buyeros@1...bjects': ['q13-fixture-9270cc46-43e7-439f-a622-5e7ad4e08ecf', 'q13-fixture-c4bb98ce-d211-4cdf-9a70-93c0fc89f272'], ...}
+context = ''
+
+    @pytest.mark.parametrize('context',[None,'','not-a-uuid','different'])
+    def test_directory_function_rejects_missing_malformed_or_forged_actor(directory_case,context):
+        case=directory_case;case['add'](0)
+        with psycopg.connect(runtime_role_dsn(case['dsn'])) as runtime:
+            if context is not None:
+                actor=str(case['users'][1]) if context=='different' else context
+                runtime.execute("SELECT set_config('app.user_id',%s,true)",(actor,))
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+&gt;               runtime.execute('SELECT public.buyeros_workspace_directory(%s,0,20)',(case['users'][0],))
+
+tests\test_workspace_directory_function_db.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1e48fde7260&gt;
+query = 'SELECT public.buyeros_workspace_directory(%s,0,20)'
+params = (UUID('9270cc46-43e7-439f-a622-5e7ad4e08ecf'),)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UndefinedFunction: function public.buyeros_workspace_directory(uuid, integer, integer) does not exist
+E           LINE 1: SELECT public.buyeros_workspace_directory($1,0,20)
+E                          ^
+E           HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UndefinedFunction</failure></testcase><testcase classname="tests.test_workspace_directory_function_db" name="test_directory_function_rejects_missing_malformed_or_forged_actor[not-a-uuid]" time="0.121"><failure message="psycopg.errors.UndefinedFunction: function public.buyeros_workspace_directory(uuid, integer, integer) does not exist&#10;LINE 1: SELECT public.buyeros_workspace_directory($1,0,20)&#10;               ^&#10;HINT:  No function matches the given name and argument types. You might need to add explicit type casts.">directory_case = {'add': &lt;function directory_case.&lt;locals&gt;.add_workspace at 0x000001E48FE5A3E0&gt;, 'dsn': 'postgresql://buyeros:buyeros@1...bjects': ['q13-fixture-5c1b7921-6e62-4be3-a2f7-d32f0aedb956', 'q13-fixture-df496142-c067-4657-9699-125bbf6f14df'], ...}
+context = 'not-a-uuid'
+
+    @pytest.mark.parametrize('context',[None,'','not-a-uuid','different'])
+    def test_directory_function_rejects_missing_malformed_or_forged_actor(directory_case,context):
+        case=directory_case;case['add'](0)
+        with psycopg.connect(runtime_role_dsn(case['dsn'])) as runtime:
+            if context is not None:
+                actor=str(case['users'][1]) if context=='different' else context
+                runtime.execute("SELECT set_config('app.user_id',%s,true)",(actor,))
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+&gt;               runtime.execute('SELECT public.buyeros_workspace_directory(%s,0,20)',(case['users'][0],))
+
+tests\test_workspace_directory_function_db.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1e48fde6630&gt;
+query = 'SELECT public.buyeros_workspace_directory(%s,0,20)'
+params = (UUID('5c1b7921-6e62-4be3-a2f7-d32f0aedb956'),)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UndefinedFunction: function public.buyeros_workspace_directory(uuid, integer, integer) does not exist
+E           LINE 1: SELECT public.buyeros_workspace_directory($1,0,20)
+E                          ^
+E           HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UndefinedFunction</failure></testcase><testcase classname="tests.test_workspace_directory_function_db" name="test_directory_function_rejects_missing_malformed_or_forged_actor[different]" time="0.137"><failure message="psycopg.errors.UndefinedFunction: function public.buyeros_workspace_directory(uuid, integer, integer) does not exist&#10;LINE 1: SELECT public.buyeros_workspace_directory($1,0,20)&#10;               ^&#10;HINT:  No function matches the given name and argument types. You might need to add explicit type casts.">directory_case = {'add': &lt;function directory_case.&lt;locals&gt;.add_workspace at 0x000001E48FD1DBC0&gt;, 'dsn': 'postgresql://buyeros:buyeros@1...bjects': ['q13-fixture-3b3c26f5-ad7a-4e7e-99c7-497738745d94', 'q13-fixture-a6366a47-324c-4a6c-b67a-4141cb6b4671'], ...}
+context = 'different'
+
+    @pytest.mark.parametrize('context',[None,'','not-a-uuid','different'])
+    def test_directory_function_rejects_missing_malformed_or_forged_actor(directory_case,context):
+        case=directory_case;case['add'](0)
+        with psycopg.connect(runtime_role_dsn(case['dsn'])) as runtime:
+            if context is not None:
+                actor=str(case['users'][1]) if context=='different' else context
+                runtime.execute("SELECT set_config('app.user_id',%s,true)",(actor,))
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+&gt;               runtime.execute('SELECT public.buyeros_workspace_directory(%s,0,20)',(case['users'][0],))
+
+tests\test_workspace_directory_function_db.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1e48bf49130&gt;
+query = 'SELECT public.buyeros_workspace_directory(%s,0,20)'
+params = (UUID('3b3c26f5-ad7a-4e7e-99c7-497738745d94'),)
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UndefinedFunction: function public.buyeros_workspace_directory(uuid, integer, integer) does not exist
+E           LINE 1: SELECT public.buyeros_workspace_directory($1,0,20)
+E                          ^
+E           HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UndefinedFunction</failure></testcase><testcase classname="tests.test_workspace_directory_function_db" name="test_directory_session_is_readonly_and_one_snapshot_with_next_request_revocation" time="0.837"><failure message="ImportError: cannot import name 'workspace_directory_session' from 'buyeros_api.db.session' (C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\buyeros_api\db\session.py)">directory_case = {'add': &lt;function directory_case.&lt;locals&gt;.add_workspace at 0x000001E48FD1C720&gt;, 'dsn': 'postgresql://buyeros:buyeros@1...bjects': ['q13-fixture-7acea31e-e3cf-49bc-8d96-581d6ad9c08e', 'q13-fixture-d5b59c15-c15c-4061-afe3-74080340e66d'], ...}
+
+    def test_directory_session_is_readonly_and_one_snapshot_with_next_request_revocation(directory_case):
+&gt;       from buyeros_api.db.session import workspace_directory_session
+E       ImportError: cannot import name 'workspace_directory_session' from 'buyeros_api.db.session' (C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\buyeros_api\db\session.py)
+
+tests\test_workspace_directory_function_db.py:45: ImportError</failure></testcase></testsuite></testsuites>

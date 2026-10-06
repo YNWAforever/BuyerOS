@@ -179,21 +179,20 @@ async def tenant_scoped(workspace_id: uuid.UUID):
 async def load_membership(session, *, principal, workspace_id) -> dict:
     from sqlalchemy import select
 
-    from ..db.models import Membership, User
+    from ..db.models import Membership
+    from ..services.identity_resolver import resolve_user_id
     from .errors import ApiError
 
-    user = (
-        await session.execute(select(User).where(User.issuer == principal.issuer, User.subject == principal.subject))
-    ).scalar_one_or_none()
-    if user is None:
+    user_id = await resolve_user_id(session, principal)
+    if user_id is None:
         raise ApiError(404, "NOT_FOUND", "workspace not found")
     membership = (
         await session.execute(
-            select(Membership).where(Membership.workspace_id == workspace_id, Membership.user_id == user.id)
+            select(Membership).where(Membership.workspace_id == workspace_id, Membership.user_id == user_id)
         )
     ).scalar_one_or_none()
     if membership is None or not membership.active:
         raise ApiError(404, "NOT_FOUND", "workspace not found")
     from ..services.api_rate_limit import enforce_rate_limit
-    await enforce_rate_limit(get_rate_engine(), workspace_id, user.id)
-    return {"user_id": user.id, "roles": list(membership.roles)}
+    await enforce_rate_limit(get_rate_engine(), workspace_id, user_id)
+    return {"user_id": user_id, "roles": list(membership.roles)}

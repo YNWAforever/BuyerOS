@@ -22,7 +22,7 @@ def test_0022_empty_round_trip_and_retained_checkpoint_refusal():
     try:
         command.upgrade(config, "head")
         with psycopg.connect(dsn) as db:
-            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0038_c61_workspace_directory"
             assert db.execute("SELECT max(v) FROM buyeros_graph.checkpoint_migrations").fetchone()[0] == 9
             for table in ("checkpoints", "checkpoint_blobs", "checkpoint_writes"):
                 assert db.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class "
@@ -42,7 +42,7 @@ def test_0022_empty_round_trip_and_retained_checkpoint_refusal():
         with pytest.raises(RuntimeError, match="retained research checkpoint state"):
             command.downgrade(config, "0021_run_bounds")
         with psycopg.connect(dsn) as db:
-            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0037_bulk_manifests"
+            assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0038_c61_workspace_directory"
             assert db.execute("SELECT count(*) FROM buyeros_graph.checkpoints").fetchone()[0] == 1
     finally:
         if previous is None:
