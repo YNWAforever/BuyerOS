@@ -1,0 +1,26 @@
+{
+  "name": "Q07",
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_draft.py",
+    "tests/test_draft_persistence_db.py",
+    "--junitxml=../../artifacts/c61/Q07-db.xml"
+  ],
+  "cwd": "services\\api",
+  "source_sha": "dda5cfc8e0cbd5ca8975baabbea6800381bc8dee",
+  "tested_tree": "14dd2614417aa343eda05a1ca1846840cd25b365",
+  "started_at_utc": "2026-10-06T17:03:21.501526+00:00",
+  "seconds": 31.59,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q07.log",
+  "tests": 18,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/Q07-db.xml"
+}

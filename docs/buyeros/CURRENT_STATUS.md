@@ -1,26 +1,29 @@
 # BuyerOS current C61 execution status
 
-Execution date: 2026-10-07 Asia/Hong_Kong. Plan evidence date: 2026-10-06.
+Execution: 2026-10-07 Asia/Hong_Kong; input audit date: 2026-10-06.
 
-C61-01 evidence and integration baseline is locally verified. C61-02 is next.
-This branch starts at remote main `a78859fe474f5722be3755b10e2586436b53bf97`;
-the existing reviewed Q source is `bbaf8ecd1f7ef755b89cdc29c8e01c505ad96442`.
-There are no new product-test, deployed, signed-in live, provider, or human UAT
-acceptance claims in this documentary checkpoint. Historical 44/812 results
-are retained as historical evidence, never as this branch's test results.
+C61-01 is locally verified. C61-02 selective Q source is integrated on
+`d90431dd4a5a448b54fcb29b4920f6d07982e4d9`: 45 fresh Node cases pass,
+typecheck passes, 96 browser cases are discovered. The required PG16 suite
+passed 64/64 with zero fail/error/skip at 35226658; unchanged product subtree
+hashes connect that result to d90431d. The isolation correction passed 23/23.
+Complete built-browser acceptance remains blocked after local ENOSPC and
+Docker fixture startup failure. Zero-case/stale reports do not pass.
 
-The original dirty Neon migration checkout is preserved. Native worktree
-`c61-fixes-20261007/BuyerOS`, branch `codex/c61-fixes-20261007`, contains this
-execution. Q source commits are adopted selectively with focused reruns.
-Neon spike history and its external activation are not merged wholesale.
+The draft PR is a reviewable source checkpoint. CI, real provider, production
+API/schema/worker/selector/epoch and human UAT each need separate evidence.
+Production is not updated. Historical 44/812 counts are not current results.
 
-Current production alias/API/schema/worker/selector/epoch readbacks are unknown.
-Research admission remains capability blocked; delivery remains disabled.
-F21 workspace 500 root cause remains unconfirmed; C61-05 is blocked.
+C61-04 sanitized diagnostics and historical-root evidence, C61-07 public SDK
+contract review, C61-15 provider gates, C61-06 directory payload and C61-22
+Unicode helper are prepared in the second attached worktree; integrate their
+independent commits deliberately. Historical F21 root remains unconfirmed,
+so C61-05 is blocked. No pool/cold-start cause is inferred.
 
-Release A (research + approved export): not accepted.
+Research admission remains503; native delivery403 remains protected.
+Release A (research plus approved export): not accepted.
 Neon-only: not accepted. Native send: not accepted.
 
-The per-task execution namespace in TASKS.json and execution CSV copies in
-`docs/buyeros/evidence/c61/` are current. Original audit/114-case results and
-supplied task status fields remain unchanged in `docs/buyeros/inputs/`.
+All original audit fields/114 outcomes and task fields are preserved.
+Current run results occupy execution fields and the TASKS c61 namespace.
+The dirty original Neon migration checkout and other user branches are intact.

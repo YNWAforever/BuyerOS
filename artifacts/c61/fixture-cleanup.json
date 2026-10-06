@@ -1,0 +1,16 @@
+{
+  "name": "fixture-cleanup",
+  "command": [
+    "node",
+    "--test",
+    "tests/deployment/fixture-cleanup.test.mjs"
+  ],
+  "cwd": ".",
+  "source_sha": "b250c269d50daa428f36487d18f48027a7723d64",
+  "tested_tree": "1dcb210d4f8502c9770c2a27853bbaffc929f5f1",
+  "started_at_utc": "2026-10-06T17:08:56.216259+00:00",
+  "seconds": 0.798,
+  "exit_code": 1,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\fixture-cleanup.log"
+}

@@ -1,0 +1,28 @@
+{
+  "source_sha": "35226658ebc15367fd643b207184464e6108d6f6",
+  "source_sha_after": "35226658ebc15367fd643b207184464e6108d6f6",
+  "started_at_utc": "2026-10-06T17:25:36.827660+00:00",
+  "seconds": 123.687,
+  "command": [
+    "pnpm.cmd",
+    "exec",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.audit-fixes.config.ts",
+    "audit-access-revocation",
+    "--grep",
+    "revoked open-page read clears private scope en",
+    "--max-failures=1"
+  ],
+  "cwd": ".",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-02-built-focused.log",
+  "tests": 1,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "test-results/audit-fixes.xml",
+  "required_gate_exit_code": 0
+}

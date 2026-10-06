@@ -1,0 +1,25 @@
+{
+  "name": "Q05",
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_bulk_jobs_db.py",
+    "--junitxml=../../artifacts/c61/Q05-db.xml"
+  ],
+  "cwd": "services\\api",
+  "source_sha": "c61ad8f5387af1c645e78eef546aef254a8eefea",
+  "tested_tree": "929d471dbd491cc8b301a05a98fb7e967042d3e5",
+  "started_at_utc": "2026-10-06T17:02:51.622209+00:00",
+  "seconds": 27.076,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q05.log",
+  "tests": 13,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/Q05-db.xml"
+}

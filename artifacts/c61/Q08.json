@@ -1,0 +1,25 @@
+{
+  "name": "Q08",
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_bulk_manifest_db.py",
+    "--junitxml=../../artifacts/c61/Q08-db.xml"
+  ],
+  "cwd": "services\\api",
+  "source_sha": "9615bd1b1afb29e19087173f9498d1a1bb699e95",
+  "tested_tree": "3bfc60d4e29d347948e47e05db2f20c5471638bc",
+  "started_at_utc": "2026-10-06T17:06:30.018962+00:00",
+  "seconds": 124.349,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q08.log",
+  "tests": 19,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/Q08-db.xml"
+}

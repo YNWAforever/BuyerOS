@@ -1,0 +1,17 @@
+{
+  "source_sha": "d90431dd4a5a448b54fcb29b4920f6d07982e4d9",
+  "source_sha_after": "d90431dd4a5a448b54fcb29b4920f6d07982e4d9",
+  "started_at_utc": "2026-10-06T19:11:18.229947+00:00",
+  "seconds": 30.568,
+  "command": [
+    "pnpm.cmd",
+    "exec",
+    "tsc",
+    "--noEmit"
+  ],
+  "cwd": ".",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-02-final-head-types.log",
+  "required_gate_exit_code": 0
+}

@@ -1,0 +1,20 @@
+{
+  "tested_db_source": "35226658ebc15367fd643b207184464e6108d6f6",
+  "current_code_source": "d90431dd4a5a448b54fcb29b4920f6d07982e4d9",
+  "changed_paths": [
+    ".github/workflows/buyeros-ci.yml",
+    "playwright.audit-fixes.config.ts",
+    "services/worker/tests/fixtures/audit_memberships.py",
+    "services/worker/tests/fixtures/prepare_browser_project.py",
+    "tests/e2e/audit-memberships.spec.ts",
+    "tests/e2e/audit-research-intent.spec.ts",
+    "tests/e2e/fixtures/journey-input.ts",
+    "tests/e2e/fixtures/workbench-auth.ts"
+  ],
+  "unchanged_product_subtrees": {
+    "services/api": "d3278cc34212630d9c4ec4beca94235970574632",
+    "features": "72a61efb780afc7dd94468425f20e845d168dd32",
+    "services/live": "12be02ff5a8ee0469803f37634683230ba5ea0e9",
+    "docs/buyeros/contracts": "2c8ff7a7b85fdd1c3af675d125a436aa9852d767"
+  }
+}

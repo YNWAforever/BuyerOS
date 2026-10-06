@@ -1,0 +1,19 @@
+✔ B12 2.5s RTT has one in-flight and waits 2s after settlement (2.8868ms)
+✔ B13 hidden pauses/aborts quietly; repeated visibility signals resume once (0.7197ms)
+✔ B13 transient failures use 2/4/8/16/30/30s and reset after success (2.0703ms)
+✔ B13 429 honors Retry-After seconds and HTTP dates, invalid header uses backoff (1.2712ms)
+✔ B13 actual live client preserves Retry-After metadata without response secrets (23.5721ms)
+✔ B12 request timeout aborts before a retry and late value is ignored (0.572ms)
+✔ B12 cancel/unmount suppresses late values/errors and all later requests (0.2045ms)
+✔ B16 A-B-A lifetimes reject the obsolete result even with same scope IDs (0.6392ms)
+✔ B12 terminal summary is delivered once and stops through refresh/visibility changes (0.4343ms)
+✔ B13 access denied stops rather than polling a revoked account (0.4532ms)
+✔ B13 rapid hidden-visible during abort settlement resumes once immediately (0.2706ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 447.9143
