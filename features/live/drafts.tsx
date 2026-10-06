@@ -3,11 +3,16 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
 import {LiveCancelled,LiveError,describeLiveError} from '@/services/live/client';
 import {ActionIntent} from '@/services/live/action-intent';
+import {DraftDirtyDialog,guardDraftTransition,type DirtyDecision} from './draft-dirty-guard';
 import {ExportDialog} from './export-dialog';
 import {approveExactDraft,editDraft,generateDraft,getDraft,getDraftJob,getProject,listDrafts,loadDraftContext,requestDraftReview,saveSender,
   type Draft,type DraftJob,type Evidence,type Icp,type Project,type Buyer} from '@/services/live/drafts';
 
 const words:Record<string,string>={
+  'Unsaved draft changes':'草稿有未儲存的更改','Save your changes, discard them, or stay with this draft.':'請儲存或捨棄更改，或繼續編輯此草稿。',
+  'Save':'儲存','Discard':'捨棄','Cancel':'取消','Draft conflict comparison':'草稿衝突比對',
+  'Local unsaved content':'本地未儲存內容','Latest persisted content':'最新已儲存內容','Copy local content':'複製本地內容',
+
   'Delivery is disabled.':'寄送功能已停用。',
   'review_requested':'\u5f85\u5be9\u6838',
   'approved':'\u5df2\u6279\u51c6',
@@ -60,6 +65,8 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot();
   const t=(value:string)=>locale==='zh-HK'?(words[value]||value):value;
   const [project,setProject]=useState<Project|null>(null),[context,setContext]=useState<Context|null>(null);
+  const [choosing,setChoosing]=useState(false),[conflict,setConflict]=useState<Draft|null>(null);
+  const transition=useRef(false),choice=useRef<((decision:DirtyDecision)=>void)|null>(null),returnFocus=useRef<HTMLElement|null>(null);
   const [job,setJob]=useState<DraftJob|null>(null);
   const [draft,setDraft]=useState<Draft|null>(null),[drafts,setDrafts]=useState<Draft[]>([]);
   const [total,setTotal]=useState(0),[offset,setOffset]=useState(0);
@@ -74,9 +81,11 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
   const [approvalConfirmed,setApprovalConfirmed]=useState(false),[staleDiff,setStaleDiff]=useState<string[]>([]);
   const errorRef=useRef<HTMLParagraphElement>(null),generateIntent=useRef(new ActionIntent<DraftJob>());
-  const scope=snapshot.scope,scopeKey=`${scope.workspace}:${scope.project}:${snapshot.authenticated}`;
+  const scope=snapshot.scope,scopeKey=snapshot.identity;
   const unsaved=Boolean(draft&&(subject!==draft.subject||body!==draft.body||draftLanguage!==draft.language));
+  useEffect(()=>()=>{choice.current?.('cancel');choice.current=null;},[snapshot.identity]);
   useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
+  useEffect(()=>{if(!busy&&returnFocus.current){const target=returnFocus.current;returnFocus.current=null;if(target.isConnected)target.focus();}},[busy]);
   useEffect(()=>{
     if(!unsaved)return;
     const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};
@@ -138,22 +147,44 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
     finally{setBusy(false);}
   }
+  function applyDraft(opened:Draft,identity:string){
+    if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');
+    setDraft(opened);setSubject(opened.subject);setBody(opened.body);setDraftLanguage(opened.language==='zh-HK'?'zh-HK':'en');
+    setApprovalConfirmed(false);setStaleDiff([]);setConflict(null);replaceQuery({draft:opened.id});
+  }
+  function decide(value:DirtyDecision){const resolve=choice.current;choice.current=null;setChoosing(false);resolve?.(value);}
+  function choose():Promise<DirtyDecision>{setChoosing(true);return new Promise(resolve=>{choice.current=resolve;});}
+  async function persistRevision(identity:string){
+    if(!draft||!canGenerate)throw new Error('Draft edit permission required');
+    if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');
+    const updated=await editDraft(client,session,draft,{subject,body,language:draftLanguage},crypto.randomUUID());
+    if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');
+    applyDraft(updated,identity);setNotice(t('Human edits require a new grounding review before approval.'));
+    await refreshList(offset);
+  }
+  async function performTransition(proceed:(identity:string)=>Promise<void>,saveOnly=false){
+    if(busy||transition.current)return;
+    const identity=session.identity(),initiator=document.activeElement;transition.current=true;setBusy(true);setError('');
+    const guard=()=>{if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');};
+    try{
+      if(saveOnly)await persistRevision(identity);
+      else {const proceeded=await guardDraftTransition({dirty:unsaved,choose,save:()=>persistRevision(identity),proceed:async()=>{guard();await proceed(identity);guard();}});
+        if(!proceeded&&initiator instanceof HTMLElement&&session.isCurrent(identity))returnFocus.current=initiator;}
+    }catch(cause){
+      if(session.isCurrent(identity)&&!(cause instanceof LiveCancelled)){
+        setError(describeLiveError(cause));
+        if(cause instanceof LiveError&&cause.status===412&&draft){
+          try{const latest=await getDraft(client,session,draft.id);guard();setConflict(latest);}catch {/* Preserve local buffer if comparison is unavailable. */}
+        }
+      }
+    }finally{transition.current=false;if(session.isCurrent(identity))setBusy(false);}
+  }
   async function refreshJob(){
-    if(!job||busy)return;setBusy(true);setError('');
-    try{const updated=await getDraftJob(client,session,job.id);setJob(updated);
-      if(updated.status==='completed'&&updated.result_id){const opened=await getDraft(client,session,updated.result_id);
-        setDraft(opened);setSubject(opened.subject);setBody(opened.body);
-        setDraftLanguage(opened.language==='zh-HK'?'zh-HK':'en');replaceQuery({draft:opened.id});
-        await refreshList(0);}
-    }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
-    finally{setBusy(false);}
+    if(!job)return;
+    await performTransition(async identity=>{const updated=await getDraftJob(client,session,job.id);if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');setJob(updated);
+      if(updated.status==='completed'&&updated.result_id){const opened=await getDraft(client,session,updated.result_id);applyDraft(opened,identity);await refreshList(0);}});
   }
-  async function openDraft(id:string){
-    if(unsaved&&!window.confirm(t('Save changes before leaving this page?')))return;
-    setError('');try{const opened=await getDraft(client,session,id);setDraft(opened);setSubject(opened.subject);
-      setBody(opened.body);setDraftLanguage(opened.language==='zh-HK'?'zh-HK':'en');setApprovalConfirmed(false);setStaleDiff([]);replaceQuery({draft:id});}
-    catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
-  }
+  async function openDraft(id:string){await performTransition(async identity=>applyDraft(await getDraft(client,session,id),identity));}
   async function prepareFollowUp(){
     if(!draft||busy)return;setBusy(true);setError('');
     try{const loaded=await loadDraftContext(client,session,draft.buyer_id);setContext(loaded);setRecipient('');
@@ -163,23 +194,8 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
     finally{setBusy(false);}
   }
-  async function saveRevision(){
-    if(!draft||!unsaved||busy||!canGenerate)return;setBusy(true);setError('');setNotice('');
-    try{const updated=await editDraft(client,session,draft,{subject,body,language:draftLanguage},crypto.randomUUID());
-      setDraft(updated);setSubject(updated.subject);setBody(updated.body);setNotice(t('Human edits require a new grounding review before approval.'));
-      await refreshList(offset);
-    }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
-    finally{setBusy(false);}
-  }
-  async function refreshCurrentDraft(){
-    if(!draft||busy)return;
-    setBusy(true);setError('');
-    try{const latest=await getDraft(client,session,draft.id);setDraft(latest);
-      setSubject(latest.subject);setBody(latest.body);setDraftLanguage(latest.language==='zh-HK'?'zh-HK':'en');
-      setApprovalConfirmed(false);setStaleDiff([]);await refreshList(offset);
-    }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
-    finally{setBusy(false);}
-  }
+  async function saveRevision(){if(!draft||!unsaved||!canGenerate)return;await performTransition(async()=>{},true);}
+  async function refreshCurrentDraft(){if(!draft)return;await performTransition(async identity=>{applyDraft(await getDraft(client,session,draft.id),identity);await refreshList(offset);});}
   async function explainApprovalFailure(cause:unknown,previous:Draft){
     if(cause instanceof LiveCancelled)return;
     setError(describeLiveError(cause));
@@ -221,6 +237,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   const recipients=context?.buyer.contacts.filter(contact=>contact.access_state==='visible'&&contact.value
     &&contact.validity==='provider_marked_valid'&&contact.checked_at&&contact.retention_until)||[];
   return <section className="panel live-draft-editor" aria-label={t('Drafts')}>
+    {choosing&&<DraftDirtyDialog decide={decide} canSave={canGenerate} t={t}/>}
     <h2>{t('Drafts')}</h2><p>{t('Prepare a grounded draft; delivery is disabled.')}</p>
     {error&&<p ref={errorRef} tabIndex={-1} role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
     {!project&&<p role="status">Loading draft workspace...</p>}
@@ -250,22 +267,27 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
       </select></label>
       <div className="live-draft-fields"><label>{t('Objective')} <input value={objective} maxLength={1000} onChange={e=>setObjective(e.target.value)}/></label>
         <label>{t('Tone')} <select value={tone} onChange={e=>setTone(e.target.value as typeof tone)}><option value="professional">professional</option><option value="concise">concise</option><option value="warm">warm</option></select></label>
-        <label>{t('Language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
+        <label>{t('Language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)} disabled={busy||!canGenerate}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
       <button type="button" disabled={busy||!canGenerate||!project?.sender_identity||!context.icp||(recipient!==''&&!recipients.some(contact=>contact.id===recipient))||(draftKind==='follow_up'&&!parentDraftId)||selectedFacts.length===0||selectedEvidence.length===0||objective.trim().length<3} onClick={()=>void startDraft()}>{t(recipient?'Generate addressed draft':'Generate unaddressed draft')}</button>
     </section>}
     {job&&<section className="panel" role="status"><h3>{t('Job status')}</h3><p>{job.id} · {t(job.status)}</p><button type="button" disabled={busy} onClick={()=>void refreshJob()}>{t('Refresh job')}</button></section>}
     {project&&<section className="panel" aria-label={t('Draft list')}><h3>{t('Draft list')}</h3><p>{offset+1}–{Math.min(offset+8,total)} / {total}</p>
-      {drafts.length===0&&<p>{t('No drafts yet.')}</p>}{drafts.map(item=><div className="inline" key={item.id}><span>{item.subject} · {t(item.status)} · v{item.version}</span><button type="button" onClick={()=>void openDraft(item.id)}>{t('Open draft')}</button></div>)}
+      {drafts.length===0&&<p>{t('No drafts yet.')}</p>}{drafts.map(item=><div className="inline" key={item.id}><span>{item.subject} · {t(item.status)} · v{item.version}</span><button type="button" disabled={busy} onClick={()=>void openDraft(item.id)}>{t('Open draft')}</button></div>)}
       <div className="inline"><button type="button" disabled={offset===0} onClick={()=>void refreshList(Math.max(0,offset-8))}>{t('Previous page')}</button><button type="button" disabled={offset+8>=total} onClick={()=>void refreshList(offset+8)}>{t('Next page')}</button></div>
     </section>}
-    {draft&&<section className="panel" aria-label={t('Open draft')} data-live-unsaved={unsaved?'true':undefined}>
+    {draft&&<section className="panel" aria-label={t('Open draft')} data-live-unsaved={unsaved?'true':undefined} data-baseline-revision={draft.revision_id} data-baseline-version={draft.version}>
       <h3>{draft.subject}</h3><p>{t('Revision')}: {draft.revision_number} · {t(draft.status)} · {draft.language}</p>
       <p>{t('Delivery is disabled.')}</p>
-      <div className="live-draft-fields"><label>{t('Subject')} <input value={subject} maxLength={300} onChange={e=>setSubject(e.target.value)} disabled={!canGenerate}/></label>
-        <label>{t('Body')} <textarea value={body} maxLength={20000} rows={10} onChange={e=>setBody(e.target.value)} disabled={!canGenerate}/></label>
-        <label>{t('Language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)} disabled={!canGenerate}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
+      <div className="live-draft-fields"><label>{t('Subject')} <input value={subject} maxLength={300} onChange={e=>setSubject(e.target.value)} disabled={busy||!canGenerate}/></label>
+        <label>{t('Body')} <textarea value={body} maxLength={20000} rows={10} onChange={e=>setBody(e.target.value)} disabled={busy||!canGenerate}/></label>
+        <label>{t('Language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)} disabled={busy||!canGenerate}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
       <div className="inline"><button type="button" disabled={!unsaved||busy||!canGenerate} onClick={()=>void saveRevision()}>{t('Save revision')}</button>
       {canGenerate&&<button type="button" disabled={busy} onClick={()=>void prepareFollowUp()}>{t('Prepare follow-up')}</button>}</div>
+      {conflict&&<section className="panel" aria-label={t('Draft conflict comparison')}>
+        <h4>{t('Draft conflict comparison')}</h4><h5>{t('Local unsaved content')}</h5><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{subject+'\n'+body+'\n'+draftLanguage}</pre>
+        <button onClick={()=>void navigator.clipboard?.writeText(subject+'\n'+body+'\n'+draftLanguage)}>{t('Copy local content')}</button>
+        <h5>{t('Latest persisted content')}</h5><p>{t('Revision')}: {conflict.revision_number} · v{conflict.version}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{conflict.subject+'\n'+conflict.body+'\n'+conflict.language}</pre>
+      </section>}
       <h4>{t('Claims and sources')}</h4>{draft.claims.map((claim,index)=><p key={index}>{claim.text} · {claim.offer_fact_ids.join(', ')} {claim.evidence_ids.join(', ')}</p>)}
       {draft.claims.length===0&&<p>{t('Human edits require a new grounding review before approval.')}</p>}
       <section className="panel" aria-label={t('Exact revision review')}>
