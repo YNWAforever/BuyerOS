@@ -1,4 +1,11 @@
+import json
 import logging
+import math
+import os
+import re
+import uuid
+
+from sqlalchemy.exc import DBAPIError, TimeoutError as PoolTimeout
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -54,11 +61,59 @@ async def http_error_handler(request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=status_code, content=error_body(request, code=code, message="request failed"))
 
 
+def database_error_diagnostics(request: Request, exc: Exception) -> dict:
+    """Allowlisted metadata only: never stringify errors, DSNs, binds or traces.
+
+    Timings/schema/role are null unless supplied by a trusted backend component.
+    They are observations, not inferred from a successful retry or an error name.
+    """
+    raw_id = getattr(request.state, "request_id", None)
+    try:
+        request_id = str(uuid.UUID(raw_id)) if isinstance(raw_id, str) else None
+    except ValueError:
+        request_id = None
+    original = exc.orig if isinstance(exc, DBAPIError) else None
+    raw_state = getattr(original, "sqlstate", None)
+    sqlstate = raw_state if isinstance(raw_state, str) and re.fullmatch(r"[0-9A-Z]{5}", raw_state) else None
+    classification = {
+        "42P01": "missing_relation", "42501": "insufficient_privilege",
+        "08001": "connection_failure", "08003": "connection_failure",
+        "08006": "connection_failure", "57P01": "connection_failure",
+    }.get(sqlstate, "unconfirmed")
+    if isinstance(exc, PoolTimeout):
+        classification = "pool_timeout"
+    names = {"OperationalError", "ProgrammingError", "InterfaceError", "DBAPIError", "TimeoutError", "IntegrityError"}
+    error_class = type(exc).__name__ if type(exc).__name__ in names else "UnexpectedError"
+    context = getattr(request.state, "database_diagnostics", None)
+    context = context if isinstance(context, dict) else {}
+    wait = context.get("pool_wait_ms")
+    try:
+        wait = wait if type(wait) in (int, float) and math.isfinite(wait) and wait >= 0 else None
+    except OverflowError:
+        wait = None
+    timeout = context.get("connection_timeout")
+    timeout = timeout if type(timeout) is bool else None
+    if timeout is True and isinstance(exc, TimeoutError):
+        classification = "connection_timeout"
+    schema = context.get("schema_head")
+    schema = schema if isinstance(schema, str) and re.fullmatch(r"[0-9]{4}_[a-z_]+", schema) else None
+    role = context.get("runtime_role")
+    role = role if role in ("buyeros_api", "buyeros_worker") else None
+    sha = os.environ.get("BUYEROS_SOURCE_SHA", os.environ.get("VERCEL_GIT_COMMIT_SHA"))
+    sha = sha if isinstance(sha, str) and re.fullmatch(r"[0-9a-f]{40}", sha) else None
+    return {"request_id": request_id, "error_class": error_class, "sqlstate": sqlstate,
+            "classification": classification, "pool_wait_ms": wait, "connection_timeout": timeout,
+            "schema_head": schema, "runtime_role": role, "source_sha": sha}
+
+
 async def internal_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Unexpected failures retain the public envelope without disclosing internals."""
+    diagnostic = database_error_diagnostics(request, exc)
     logging.getLogger(__name__).error(
-        "unexpected_api_error request_id=%s type=%s",
-        getattr(request.state, "request_id", ""), type(exc).__name__,
+        "unexpected_api_error request_id=%s type=%s diagnostics=%s",
+        diagnostic["request_id"], diagnostic["error_class"],
+        json.dumps(diagnostic, sort_keys=True, separators=(",", ":")),
+        extra={"diagnostic": diagnostic},
     )
     return JSONResponse(
         status_code=500,

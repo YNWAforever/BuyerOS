@@ -13,5 +13,5 @@ C61T-11,C61-23,TTL到期加部分成功重試,manifest到期／80success20failed
 C61T-12,C61-20,Send timeout/政策撤銷防雙寄,sandbox收件人、有效approval與policy,accepted後response lost；另案policy撤銷,原intent一次；unknown不盲重送；撤銷者不得submit,test_delivery_same_intent_once,not-run,
 C61T-13,C61-20,Webhook亂序／重複／偽造,已存在message與已處理event,重複、倒序及錯簽章事件,唯一event；不倒退state；偽造拒絕；accepted≠delivered,test_webhook_duplicate_out_of_order,not-run,
 C61T-14,C61-28,CI evidence不能混SHA或空跑,mixed SHA、0-case或skip的JUnit,跑release evidence checker,exit1；release_ready=false；列明blocking ids,test_release_evidence_rejects_incomplete_reports,not-run,
-C61T-15,C61-04,錯誤診斷不漏機密,包含DSN/password/token/SQLbind的error fixture,產生structured error log,無敏感字串；保留request_id/error_class/SQLSTATE,test_database_error_diagnostics_redacts_secrets,not-run,
+C61T-15,C61-04,錯誤診斷不漏機密,包含DSN/password/token/SQLbind的error fixture,產生structured error log,無敏感字串；保留request_id/error_class/SQLSTATE,test_database_error_diagnostics_redacts_secrets,passed-local-diagnostics; historical-root-cause-blocked,docs/buyeros/evidence/c61/workspace-diagnostics.json
 C61T-16,C61-30,完整站內寄送資料链及關閉gate,核准sandbox recipient與同一research/draft dataset,Offer→research→approve→send→callback，再deliveryoff,一次真實receipt；outcome可追查；gateoff仍403,c61_delivery_sandbox_journey,not-run,

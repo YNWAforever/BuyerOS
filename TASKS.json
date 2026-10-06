@@ -3441,13 +3441,21 @@
         "proposed_new_files": "services/api/tests/test_error_diagnostics.py",
         "acceptance": "只有能連接 request → driver/SQLSTATE → 實際故障位置的證據才解除 C61-05 的阻塞；僅加 logging 不算 F21 已修。",
         "rollback": "關閉新增診斷或 revert logging；保留事故報告。",
-        "execution_sha": "",
-        "execution_evidence": "",
-        "code_status": "not-started",
-        "verification_status": "not-run",
+        "execution_sha": "35226658ebc15367fd643b207184464e6108d6f6",
+        "execution_evidence": "docs/buyeros/evidence/c61/workspace-diagnostics.json",
+        "code_status": "complete-local",
+        "verification_status": "passed-local-root-cause-blocked",
         "release_status": "not-deployed",
-        "blockers": [],
-        "evidence_paths": []
+        "blockers": [
+          "Historical driver/SQLSTATE/timing/schema-role evidence unavailable; C61-05 not unlocked"
+        ],
+        "evidence_paths": [
+          "docs/buyeros/incidents/2026-10-03-workspace-500.md",
+          "docs/buyeros/evidence/c61/workspace-diagnostics.json",
+          "artifacts/c61/C61-04-red.json",
+          "artifacts/c61/C61-04-edge-red.json",
+          "artifacts/c61/C61-04-verified.json"
+        ]
       },
       {
         "task_id": "C61-05",
