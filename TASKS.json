@@ -3724,13 +3724,19 @@
         "proposed_new_files": "docs/buyeros/decisions/2026-10-06-provider-selection.md;services/api/buyeros_api/providers/registry.py;services/api/tests/test_provider_registry.py",
         "acceptance": "每類供應商有可驗證 contract；選型/credential/額度缺失只阻塞相應 live gate，離線 contract/fixture 開發可繼續。禁止以解除 503 當功能完成。",
         "rollback": "清空本次未核實 provider activation，維持 capability_blocked。",
-        "execution_sha": "",
-        "execution_evidence": "",
-        "code_status": "not-started",
-        "verification_status": "not-run",
+        "execution_sha": "960bde2695ee425b8222c0c495866f45d5d625fe",
+        "execution_evidence": "docs/buyeros/decisions/2026-10-06-provider-selection.md;docs/buyeros/evidence/c61/provider-contract-results.json;artifacts/c61/C61-15-verified.json",
+        "code_status": "complete-local-contract",
+        "verification_status": "passed-local-live-selection-blocked",
         "release_status": "not-deployed",
-        "blockers": [],
-        "evidence_paths": []
+        "blockers": [
+          "Search/model/contact vendor/account selection, verified tariffs and bounded sandbox allowance not provided"
+        ],
+        "evidence_paths": [
+          "docs/buyeros/decisions/2026-10-06-provider-selection.md",
+          "docs/buyeros/evidence/c61/provider-contract-results.json",
+          "artifacts/c61/C61-15-verified.json"
+        ]
       },
       {
         "task_id": "C61-16",

@@ -42,6 +42,7 @@ export function LiveSettings({workspace,locale,isAdmin,onVersion,currentVersion,
     <label>{t('Default markets')} <input aria-label={t('Default markets')} value={markets} onChange={e=>setMarkets(e.target.value)} placeholder="HK, US"/></label>
     <button disabled={!pref||pending} onClick={()=>void saveMarkets()}>{t('Save preferences')}</button>
     <p className="muted">{t('Research provider')} · {t('Not connected')}</p>
+    <p className="muted">{t('Ask an administrator to select a research provider and confirm its price, budget and connection test.')}</p>
     {canViewBudget&&<BudgetSettings workspace={workspace} isAdmin={isAdmin} t={t}/>}
     {isAdmin&&<MemberDirectory key={`${workspace}-${scope.identity}`} workspace={workspace} t={t}/>}
     {error&&<p role="alert">{t(error)}</p>}{status&&<p role="status">{t(status)}</p>}

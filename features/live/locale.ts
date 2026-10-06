@@ -1,5 +1,6 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'Ask an administrator to select a research provider and confirm its price, budget and connection test.':'請管理員選定研究供應商，確認價格、預算及接駁測試。',
   'Owner assignment results':'負責人分派結果','Selected colleague (name unavailable)':'已選同事（未提供姓名）',
   'Staff-selected buyer':'職員已選買家',
   'The offer changed. This profile cannot be approved.':'產品資料已更改，不能批准此輪廓。','Offer revision':'產品資料版本','Reload profile':'重新載入輪廓',
