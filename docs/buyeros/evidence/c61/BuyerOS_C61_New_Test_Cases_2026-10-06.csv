@@ -8,7 +8,7 @@ C61T-06,C61-16,抓取redirect與DNS重解析邊界,授權受控URL fixture,publi
 C61T-07,C61-17,研究完成前 Offer/ICP 變更,模型正在跑，offer/ICP有新revision,舊basis結果回來persist,拒絕stale match或needs_review；不覆蓋新basis,test_stale_basis_cannot_persist_match,not-run,
 C61T-08,C61-19,Provider受理後worker崩潰,provider已accepted，DB finalization前kill,worker重啟和lease重领,只status reconciliation；provider submit不重複；hold保持,test_crash_after_provider_acceptance_reconciles,not-run,
 C61T-09,C61-21,Overview數量、列表與刷新時間一致,兩project各類count不同,逐卡打開filter；刷新後切project,count等於相同predicate的total；as_of更新；無晚到scope覆寫,test_work_queue_count_equals_filtered_list,not-run,
-C61T-10,C61-22,Emoji/combining mark 文字分段,正文：中😀é文，包含换行與中文,選取emoji及combining片段，保存/重開,UTF16轉code-point正確；無半surrogate；coverage完整,test_selection_with_emoji_and_combining_marks,not-run,
+C61T-10,C61-22,Emoji/combining mark 文字分段,正文：中😀é文，包含换行與中文,選取emoji及combining片段，保存/重開,UTF16轉code-point正確；無半surrogate；coverage完整,test_selection_with_emoji_and_combining_marks,L0-verified; built-keyboard-case-discovered; execution-pending,artifacts/c61/C61-22-selection-red.json;artifacts/c61/C61-22-source-controls-valid-red.json;artifacts/c61/C61-22-final-core-green.json;artifacts/c61/C61-22-final-controls-and-types.json;artifacts/c61/C61-22-browser-discovery.json;artifacts/c61/C61-22-tested-source.json
 C61T-11,C61-23,TTL到期加部分成功重試,manifest到期／80success20failed,點resume或retry failed,過期需新preview；只納入20 failed；成功80不重做,test_expired_manifest_requires_new_preview,not-run,
 C61T-12,C61-20,Send timeout/政策撤銷防雙寄,sandbox收件人、有效approval與policy,accepted後response lost；另案policy撤銷,原intent一次；unknown不盲重送；撤銷者不得submit,test_delivery_same_intent_once,not-run,
 C61T-13,C61-20,Webhook亂序／重複／偽造,已存在message與已處理event,重複、倒序及錯簽章事件,唯一event；不倒退state；偽造拒絕；accepted≠delivered,test_webhook_duplicate_out_of_order,not-run,

@@ -22,6 +22,26 @@ const words:Record<string,string>={
   "Factual — cite a source":"事實陳述：須引用來源",
   "Non-factual — explain why":"非事實陳述：請說明理由",
   "Segment reason":"段落理由",
+  "Source":"來源",
+  "Source title not supplied":"未提供來源標題",
+  "Company":"公司",
+  "Source URL unavailable":"來源網址不可用",
+  "Observed":"觀察日期",
+  "Retrieved":"擷取日期",
+  "Not supplied":"未提供",
+  "Source details":"來源詳情",
+  "Revision details":"版本詳情",
+  "Company unavailable":"公司資料不可用",
+  "Select segment text":"選取段落文字",
+  "Use selected text":"使用選取文字",
+  "Advanced segment offsets":"進階段落位置",
+  "Sender details":"寄件人詳情",
+  "Draft workflow":"草稿流程",
+  "1. Edit and save":"1. 修改及儲存",
+  "2. Review current sources":"2. 覆核目前來源",
+  "3. Approve this exact revision":"3. 批准此精確版本",
+  "4. Prepare approved export":"4. 準備已批准匯出",
+  "Select text with Shift + Arrow, or place the caret, then use the selection to split. The exact message stays read-only.":"使用 Shift + 方向鍵選取文字或放置游標，再使用選取範圍分段。精確訊息維持唯讀。",
   "Evidence":"證據",
   "Offer fact":"產品事實",
   "Split position (code points)":"分段位置（Unicode 字元）",
@@ -272,7 +292,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     {project&&<section className="panel" aria-label={t('Sender identity')}><h3>{t('Sender identity')}</h3>
       {project.sender_identity?<p>{t('Reviewed sender')}: {project.sender_identity.display_name} · {project.sender_identity.organization} · {project.sender_identity.business_email} · {project.sender_identity.version_key}</p>
         :<p>{t('No reviewed sender. A reviewer must save one before drafting.')}</p>}
-      {canReviewSender&&<div className="live-draft-fields">
+      <details open={!project.sender_identity}><summary>{t('Sender details')}</summary>{canReviewSender&&<div className="live-draft-fields">
         <label>{t('Display name')} <input value={senderName} maxLength={160} onChange={e=>setSenderName(e.target.value)}/></label>
         <label>{t('Role title')} <input value={senderRole} maxLength={160} onChange={e=>setSenderRole(e.target.value)}/></label>
         <label>{t('Organization')} <input value={senderOrg} maxLength={200} onChange={e=>setSenderOrg(e.target.value)}/></label>
@@ -281,7 +301,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
         <label>{t('Reason for change')} <input value={senderReason} maxLength={400} onChange={e=>setSenderReason(e.target.value)}/></label>
         <label><input type="checkbox" checked={senderConfirmed} onChange={e=>setSenderConfirmed(e.target.checked)}/> {t('I confirm this sender identity')}</label>
         <button type="button" disabled={busy||!senderConfirmed||senderReason.trim().length<3} onClick={()=>void persistSender()}>{t('Save sender')}</button>
-      </div>}
+      </div>}</details>
     </section>}
     {context&&<section className="panel" aria-label={t('Prepare grounded draft')}><h3>{t('Prepare grounded draft')}</h3>
       <p><strong>{t('Free fixed template')}</strong></p>
@@ -307,7 +327,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     </section>}
     {draft&&<section className="panel" aria-label={t('Open draft')} data-live-unsaved={unsaved?'true':undefined} data-baseline-revision={draft.revision_id} data-baseline-version={draft.version}>
       <h3>{draft.subject}</h3><p>{t('Revision')}: {draft.revision_number} · {t(draft.status)} · {draft.language}</p>
-      <p>{t('Delivery is disabled.')}</p>
+      <nav aria-label={t('Draft workflow')}><ol><li>{t('1. Edit and save')}</li><li>{t('2. Review current sources')}</li><li>{t('3. Approve this exact revision')}</li><li>{t('4. Prepare approved export')}</li></ol></nav><p>{t('Delivery is disabled.')}</p>
       <div className="live-draft-fields"><label>{t('Subject')} <input value={subject} maxLength={300} onChange={e=>setSubject(e.target.value)} disabled={busy||!canGenerate}/></label>
         <label>{t('Body')} <textarea value={body} maxLength={20000} rows={10} onChange={e=>setBody(e.target.value)} disabled={busy||!canGenerate}/></label>
         <label>{t('Language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)} disabled={busy||!canGenerate}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>

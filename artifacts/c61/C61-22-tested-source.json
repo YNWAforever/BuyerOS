@@ -1,0 +1,40 @@
+{
+  "source_parent_sha": "e19304584a2bb047001202acfe37cd9a3b205353",
+  "unit_test_parent_sha": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "files": [
+    {
+      "path": "features/live/draft-grounding-review.tsx",
+      "sha256": "28c8be2716b52e84e902b9f2c4d4986c99c9f027e1f7da61e5748552a63a8f65"
+    },
+    {
+      "path": "features/live/drafts.tsx",
+      "sha256": "57660526671bfb970c5a850b590dc2cf53dc68997f6a48e2ebbfdecbbd89bad0"
+    },
+    {
+      "path": "services/live/text-selection-offsets.ts",
+      "sha256": "6f95cac2a119edda9a5ecda9ec5228182621be35af92820fc803670bd71a49d0"
+    },
+    {
+      "path": "tests/draft-grounding-controls.test.mjs",
+      "sha256": "26d1f552a8d60416898c7157194be280e6434e5039d0904f88f9699bce3bb5fd"
+    },
+    {
+      "path": "tests/text-selection-offsets.test.mjs",
+      "sha256": "248fd170e024c9cd6d5d60857acc7ead16eee7f8b4bb3f87e9fc21b973a3eab1"
+    },
+    {
+      "path": "tests/e2e/audit-draft-reground.spec.ts",
+      "sha256": "ed16224ebf86a89a0f7754a2dbdd6471e20087d9cbadb87b0db8eea830c12473"
+    }
+  ],
+  "core_cases": 18,
+  "failed": 0,
+  "skipped": 0,
+  "cancelled": 0,
+  "typecheck_exit": 0,
+  "browser_discovery": 15,
+  "browser_execution": "pending",
+  "environment": "L0 Node pure offsets and SSR component contracts; no DB/browser/provider/human execution claim from these tests",
+  "C61T-10": "Unicode pure conversion verified; real keyboard textarea selection/save/re-ground/POST offsets case discovered but not executed",
+  "production_accepted": false
+}

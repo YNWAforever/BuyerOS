@@ -3951,13 +3951,24 @@
         "proposed_new_files": "services/live/text-selection-offsets.ts;tests/text-selection-offsets.test.mjs",
         "acceptance": "中英混合/emoji/換行/長稿可完成改稿至下載；grounding 完整覆蓋不等於語義真實，真人覆核仍保留。",
         "rollback": "revert UI helper，不改 immutable revision/approval/grounding history；不能回退成丟棄未儲存內容。",
-        "execution_sha": "",
-        "execution_evidence": "",
-        "code_status": "not-started",
-        "verification_status": "not-run",
+        "execution_sha": "e19304584a2bb047001202acfe37cd9a3b205353",
+        "execution_evidence": "artifacts/c61/C61-22-selection-red.json;artifacts/c61/C61-22-source-controls-valid-red.json;artifacts/c61/C61-22-final-core-green.json;artifacts/c61/C61-22-final-controls-and-types.json;artifacts/c61/C61-22-browser-discovery.json;artifacts/c61/C61-22-tested-source.json",
+        "code_status": "readable evidence source cards, keyboard text-segment selection with exact code-point conversion, workflow and retained advanced offsets implemented",
+        "verification_status": "focused RED then L0 18 core/SSR cases green zero skip; typecheck passes; positive 15 focused browser discovery; built execution pending",
         "release_status": "not-deployed",
-        "blockers": [],
-        "evidence_paths": []
+        "blockers": [
+          "focused built draft/dirty/Unicode browser execution",
+          "en/zh-HK mobile/desktop/zoom and actual screen-reader human UAT",
+          "same-version approved-export readback"
+        ],
+        "evidence_paths": [
+          "artifacts/c61/C61-22-selection-red.json",
+          "artifacts/c61/C61-22-source-controls-valid-red.json",
+          "artifacts/c61/C61-22-final-core-green.json",
+          "artifacts/c61/C61-22-final-controls-and-types.json",
+          "artifacts/c61/C61-22-browser-discovery.json",
+          "artifacts/c61/C61-22-tested-source.json"
+        ]
       },
       {
         "task_id": "C61-23",

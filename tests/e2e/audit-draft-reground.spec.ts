@@ -36,11 +36,11 @@ async function reviewerPage(page:Page,id:string,locale='en'){
 }
 async function classify(page:Page,split=false){
  const grounding=page.getByRole('region',{name:/^(Manual source review|人工來源覆核)$/,exact:true});await expect(grounding).toBeVisible();await expect(grounding.getByRole('group')).toHaveCount(5);await expect(grounding.getByRole('status')).toHaveCount(0);
- if(split){const first=grounding.getByRole('group').first();await first.getByRole('spinbutton').fill('2');await first.getByRole('button',{name:'分開段落',exact:true}).click();}
+ if(split){const first=grounding.getByRole('group').first(),selection=first.getByRole('textbox',{name:'選取段落文字',exact:true});await selection.focus();await selection.press('Home');await selection.press('ArrowRight');await selection.press('ArrowRight');await first.getByRole('button',{name:'使用選取文字',exact:true}).click();}
  const groups=grounding.getByRole('group');const count=await groups.count();expect(count).toBe(split?6:5);
  for(let i=0;i<count;i++){
   const group=groups.nth(i),text=await group.locator('pre').innerText();const factual=text==='Fictional industrial sensors'||text.startsWith('Fixture public');
-  await group.getByRole('combobox').selectOption(factual?'factual':'non_factual');await group.getByRole('textbox').fill(factual?'Read original retained source':'Greeting, invitation or closing; no factual assertion');
+  await group.getByRole('combobox').selectOption(factual?'factual':'non_factual');await group.getByRole('textbox',{name:/^(Segment reason|段落理由)$/,exact:true}).fill(factual?'Read original retained source':'Greeting, invitation or closing; no factual assertion');
   if(factual)await group.getByRole('checkbox',{name:text.startsWith('Fixture')?/^(Evidence|證據)/:/^(Offer fact|產品事實)/}).check();
  }
  await grounding.getByRole('textbox',{name:/^(Overall review reason|整體覆核理由)$/,exact:true}).fill('Full message and every versioned source read');
@@ -101,5 +101,37 @@ test('U09 real stale revision preserves source form and exact buffers; scope cha
   await reviewer.route(path,async route=>{const response=await route.fetch();expect(response.status()).toBe(200);received();await held;await route.fulfill({response}).catch(()=>{});});
   await prepared.submit.click();await started;await reviewer.getByRole('combobox',{name:'Project',exact:true}).selectOption('e9100000-0000-4000-8000-000000000001');release();
   await expect(reviewer.getByRole('region',{name:'Open draft',exact:true})).toHaveCount(0);await reviewer.waitForTimeout(300);await expect(reviewer.getByRole('region',{name:'Open draft',exact:true})).toHaveCount(0);
+ }finally{await resetLocale(reviewer);await ctx.close();}
+});
+
+
+test('C61T-10 keyboard text selection binds emoji and combining marks to exact server code-point ranges',async({page,browser})=>{
+ const created=await editedDraft(page);const text='中😀é文';
+ await created.editor.getByRole('textbox',{name:'Subject',exact:true}).fill(text);
+ await created.editor.getByRole('button',{name:'Save revision',exact:true}).click();await expect(created.editor).not.toHaveAttribute('data-live-unsaved','true');
+ const ctx=await browser.newContext(),reviewer=await ctx.newPage();
+ try{
+  await reviewerPage(reviewer,created.id);
+  const grounding=reviewer.getByRole('region',{name:'Manual source review',exact:true});await expect(grounding.getByRole('status')).toHaveCount(0);
+  const first=grounding.getByRole('group').first(),selection=first.getByRole('textbox',{name:'Select segment text',exact:true});
+  await expect(selection).toHaveValue(text);await expect(selection).toHaveAttribute('readonly','');
+  await selection.focus();await selection.press('Home');await selection.press('ArrowRight');await selection.press('Shift+ArrowRight');
+  expect(await selection.evaluate((el:HTMLTextAreaElement)=>[el.selectionStart,el.selectionEnd])).toEqual([1,3]);
+  await first.getByRole('button',{name:'Use selected text',exact:true}).click();
+  const groups=grounding.getByRole('group');await expect(groups).toHaveCount(7);await expect(groups.first().getByRole('textbox',{name:'Select segment text',exact:true})).toBeFocused();
+  expect(await groups.locator('pre').allTextContents()).toEqual(['中','😀','é文',...body.split('\n')]);
+  for(let i=0;i<7;i++){
+   const group=groups.nth(i),part=await group.locator('pre').innerText(),factual=part==='Fictional industrial sensors'||part.startsWith('Fixture public');
+   await group.getByRole('combobox').selectOption(factual?'factual':'non_factual');
+   await group.getByRole('textbox',{name:'Segment reason',exact:true}).fill(factual?'Read current retained original source':'Fixture text reviewed as non-factual');
+   if(factual)await group.getByRole('checkbox',{name:part.startsWith('Fixture')?/^Evidence/:/^Offer fact/}).check();
+  }
+  await grounding.getByRole('textbox',{name:'Overall review reason',exact:true}).fill('Read every exact segment and its current source');
+  await grounding.getByRole('checkbox',{name:/^I read the entire exact message/}).check();
+  const pending=reviewer.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith('/grounding-reviews'));
+  await grounding.getByRole('button',{name:'Submit source review',exact:true}).click();const response=await pending;expect(response.status(),await response.text()).toBe(200);
+  const result=(await response.json()).data;expect(result.subject).toBe(text);
+  expect(result.grounding_review.segments.slice(0,3).map((segment:{start:number;end:number;exact_text:string})=>[segment.start,segment.end,segment.exact_text])).toEqual([[0,1,'中'],[1,2,'😀'],[2,5,'é文']]);
+  await writeFile('test-results/c61-unicode-selection.json',JSON.stringify({fixture_only:true,actual_utf16_selection:[1,3],draft:result},null,2));
  }finally{await resetLocale(reviewer);await ctx.close();}
 });

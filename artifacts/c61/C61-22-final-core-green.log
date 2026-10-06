@@ -1,0 +1,26 @@
+✔ D03 Unicode code-point offsets retain emoji, CRLF, Chinese and unmodified text (1.1825ms)
+✔ D03 split code-point ranges reclassify both pieces without destroying text (1.4354ms)
+✔ D02 save has the required transition order (2.2482ms)
+✔ D02 discard has the required transition order (0.2417ms)
+✔ D02 cancel has the required transition order (0.1581ms)
+✔ D02 rejected save 412 cannot proceed (0.7478ms)
+✔ D02 rejected save 503 cannot proceed (0.2419ms)
+✔ D02 clean transition does not prompt or write (0.198ms)
+✔ D02 asynchronous Save completes before proceeding (10.3159ms)
+✔ C61T-10 current source-review segments expose keyboard text selection without editing exact text (19.3177ms)
+✔ D03 source card retains source title, URL, dates and actual company; unsafe links stay text (2.1666ms)
+✔ C61T-10 selected Chinese emoji converts UTF-16 to exact code points (104.2478ms)
+✔ C61T-10 combining marks and CRLF remain separate unchanged code points (0.5636ms)
+✔ C61T-10 half-surrogate selection and caret boundaries are rejected (1.555ms)
+✔ C61T-10 keyboard caret and empty text have exact boundaries (0.313ms)
+✔ C61T-10 invalid offsets fail without clamping or normalizing (0.8626ms)
+✔ C61T-10 ZWJ emoji counts code points without changing source bytes (1.019ms)
+✔ C61T-10 malformed lone surrogate source cannot acquire a citation range (0.7352ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3362.2446

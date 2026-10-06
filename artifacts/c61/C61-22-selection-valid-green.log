@@ -1,0 +1,17 @@
+✔ D03 Unicode code-point offsets retain emoji, CRLF, Chinese and unmodified text (1.1668ms)
+✔ D03 split code-point ranges reclassify both pieces without destroying text (1.4101ms)
+✔ C61T-10 selected Chinese emoji converts UTF-16 to exact code points (48.875ms)
+✔ C61T-10 combining marks and CRLF remain separate unchanged code points (0.6406ms)
+✔ C61T-10 half-surrogate selection and caret boundaries are rejected (0.8546ms)
+✔ C61T-10 keyboard caret and empty text have exact boundaries (0.386ms)
+✔ C61T-10 invalid offsets fail without clamping or normalizing (0.4807ms)
+✔ C61T-10 ZWJ emoji counts code points without changing source bytes (0.326ms)
+✔ C61T-10 malformed lone surrogate source cannot acquire a citation range (0.3342ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 836.3347

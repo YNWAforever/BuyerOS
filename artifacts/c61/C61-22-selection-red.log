@@ -1,0 +1,136 @@
+✖ C61T-10 selected Chinese emoji converts UTF-16 to exact code points (2.8359ms)
+✖ C61T-10 combining marks and CRLF remain separate unchanged code points (1.7723ms)
+✖ C61T-10 half-surrogate selection and caret boundaries are rejected (1.0896ms)
+✖ C61T-10 keyboard caret and empty text have exact boundaries (0.7955ms)
+✖ C61T-10 invalid offsets fail without clamping or normalizing (0.6678ms)
+✖ C61T-10 ZWJ emoji counts code points without changing source bytes (0.8074ms)
+✖ C61T-10 malformed lone surrogate source cannot acquire a citation range (0.647ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 0
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1443.9748
+
+✖ failing tests:
+
+test at tests\text-selection-offsets.test.mjs:5:1
+✖ C61T-10 selected Chinese emoji converts UTF-16 to exact code points (2.8359ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\text-selection-offsets.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\text-selection-offsets.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+      at #resolve (node:internal/modules/esm/loader:683:17)
+      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+      at node:internal/modules/esm/loader:632:32
+      at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/text-selection-offsets.ts'
+  }
+
+test at tests\text-selection-offsets.test.mjs:11:1
+✖ C61T-10 combining marks and CRLF remain separate unchanged code points (1.7723ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\text-selection-offsets.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\text-selection-offsets.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+      at #resolve (node:internal/modules/esm/loader:683:17)
+      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+      at node:internal/modules/esm/loader:632:32
+      at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/text-selection-offsets.ts'
+  }
+
+test at tests\text-selection-offsets.test.mjs:17:1
+✖ C61T-10 half-surrogate selection and caret boundaries are rejected (1.0896ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\text-selection-offsets.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\text-selection-offsets.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+      at #resolve (node:internal/modules/esm/loader:683:17)
+      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+      at node:internal/modules/esm/loader:632:32
+      at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/text-selection-offsets.ts'
+  }
+
+test at tests\text-selection-offsets.test.mjs:21:1
+✖ C61T-10 keyboard caret and empty text have exact boundaries (0.7955ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\text-selection-offsets.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\text-selection-offsets.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+      at #resolve (node:internal/modules/esm/loader:683:17)
+      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+      at node:internal/modules/esm/loader:632:32
+      at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/text-selection-offsets.ts'
+  }
+
+test at tests\text-selection-offsets.test.mjs:26:1
+✖ C61T-10 invalid offsets fail without clamping or normalizing (0.6678ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\text-selection-offsets.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\text-selection-offsets.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+      at #resolve (node:internal/modules/esm/loader:683:17)
+      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+      at node:internal/modules/esm/loader:632:32
+      at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/text-selection-offsets.ts'
+  }
+
+test at tests\text-selection-offsets.test.mjs:30:1
+✖ C61T-10 ZWJ emoji counts code points without changing source bytes (0.8074ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\text-selection-offsets.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\text-selection-offsets.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+      at #resolve (node:internal/modules/esm/loader:683:17)
+      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+      at node:internal/modules/esm/loader:632:32
+      at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/text-selection-offsets.ts'
+  }
+
+test at tests\text-selection-offsets.test.mjs:36:1
+✖ C61T-10 malformed lone surrogate source cannot acquire a citation range (0.647ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\text-selection-offsets.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\text-selection-offsets.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+      at #resolve (node:internal/modules/esm/loader:683:17)
+      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+      at node:internal/modules/esm/loader:632:32
+      at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/text-selection-offsets.ts'
+  }
