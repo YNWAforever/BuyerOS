@@ -79,7 +79,7 @@ class JwksKeyCache:
     async def _refetch(self, seen_attempt: float | None) -> None:
         async with self._lock:
             # Another caller already refetched (or tried) while we waited for the lock.
-            if self._last_attempt_at != seen_attempt:
+            if self._last_attempt_at != seen_attempt or not self._cooldown_elapsed():
                 return
             self._last_attempt_at = self._now()
             document = await self._fetch_jwks()
@@ -104,7 +104,9 @@ class JwksKeyCache:
             return self._keys[kid]
         # Every refetch is rate limited, not just the unknown-kid one: an outage keeps the
         # cache permanently stale, so without this a bogus kid would drive one fetch per request.
-        if self._cooldown_elapsed():
+        # A concurrent cold miss must join the fetch already holding this lock.
+        # Recheck cooldown under the lock, so joining never performs another fetch.
+        if self._cooldown_elapsed() or self._lock.locked():
             seen_attempt = self._last_attempt_at
             try:
                 await self._refetch(seen_attempt)

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="3.643" timestamp="2026-10-07T04:01:49.840447+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_jwks_cold_concurrency" name="test_valid_parallel_signed_tokens_wait_for_same_cold_jwks_fetch" time="0.014"><failure message="AssertionError: valid concurrent token rejected while its only JWKS fetch is pending&#10;assert not True&#10; +  where True = &lt;built-in method done of _asyncio.Task object at 0x000002A51EBE68C0&gt;()&#10; +    where &lt;built-in method done of _asyncio.Task object at 0x000002A51EBE68C0&gt; = &lt;Task finished name='Task-3' coro=&lt;TokenVerifier.verify() done, defined at C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\services\api\buyeros_api\api\verifier.py:29&gt; exception=AuthError('key set unavailable')&gt;.done">def test_valid_parallel_signed_tokens_wait_for_same_cold_jwks_fetch():
+        async def exercise():
+            tokens=[fx.make_token(sub='cold-a'),fx.make_token(sub='cold-b')]
+            started,release=asyncio.Event(),asyncio.Event();calls=0
+            async def fetch():
+                nonlocal calls
+                calls+=1;started.set();await release.wait();return fx.jwks_document()
+            verifier=TokenVerifier(JwksKeyCache(fetch),issuer=fx.ISSUER,audience=fx.AUDIENCE)
+            first=asyncio.create_task(verifier.verify(tokens[0]));await started.wait()
+            second=asyncio.create_task(verifier.verify(tokens[1]));await asyncio.sleep(0)
+            try:
+                assert not second.done(),'valid concurrent token rejected while its only JWKS fetch is pending'
+            finally:
+                release.set();results=await asyncio.gather(first,second,return_exceptions=True)
+            assert calls==1 and [r.subject for r in results]==['cold-a','cold-b']
+&gt;       asyncio.run(exercise())
+
+tests\test_jwks_cold_concurrency.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    async def exercise():
+        tokens=[fx.make_token(sub='cold-a'),fx.make_token(sub='cold-b')]
+        started,release=asyncio.Event(),asyncio.Event();calls=0
+        async def fetch():
+            nonlocal calls
+            calls+=1;started.set();await release.wait();return fx.jwks_document()
+        verifier=TokenVerifier(JwksKeyCache(fetch),issuer=fx.ISSUER,audience=fx.AUDIENCE)
+        first=asyncio.create_task(verifier.verify(tokens[0]));await started.wait()
+        second=asyncio.create_task(verifier.verify(tokens[1]));await asyncio.sleep(0)
+        try:
+&gt;           assert not second.done(),'valid concurrent token rejected while its only JWKS fetch is pending'
+E           AssertionError: valid concurrent token rejected while its only JWKS fetch is pending
+E           assert not True
+E            +  where True = &lt;built-in method done of _asyncio.Task object at 0x000002A51EBE68C0&gt;()
+E            +    where &lt;built-in method done of _asyncio.Task object at 0x000002A51EBE68C0&gt; = &lt;Task finished name='Task-3' coro=&lt;TokenVerifier.verify() done, defined at C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\services\api\buyeros_api\api\verifier.py:29&gt; exception=AuthError('key set unavailable')&gt;.done
+
+tests\test_jwks_cold_concurrency.py:20: AssertionError</failure></testcase><testcase classname="tests.test_jwks_cold_concurrency" name="test_cold_fetch_outage_rejects_all_waiters_without_refetch_or_trust_fallback" time="0.005" /></testsuite></testsuites>
