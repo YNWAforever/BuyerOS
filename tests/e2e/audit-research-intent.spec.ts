@@ -11,6 +11,9 @@ test('B05 B06 committed lost 202 and manual Retry share one durable research int
   // Another isolated case may have persisted zh-HK in this owned shared fixture.
   await page.getByRole('combobox',{name:/^(Language|語言)$/}).first().selectOption('en');
   await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(project);await page.getByRole('button',{name:'Research runs',exact:true}).click();
+  // Other complete journeys legitimately retain their accepted operations.
+  // Observe this case's delta without deleting their records.
+  const baseline=await counts();
   const posted:{key:string|null;body:unknown;id:string}[]=[];
   await page.route(`**/v1/workspaces/${workspace}/projects/${project}/runs`,async route=>{
     if(route.request().method()!=='POST')return route.continue();
@@ -27,9 +30,9 @@ test('B05 B06 committed lost 202 and manual Retry share one durable research int
   await page.getByRole('button',{name:'Operations',exact:true}).click();await expect(page).toHaveURL(/\/app\/operations\?/);await expect(page.getByRole('region',{name:'Job lookup'})).toBeVisible();await page.getByRole('button',{name:'Research runs',exact:true}).click();await expect(page).toHaveURL(/\/app\/runs\?/);
   await expect(page.getByLabel('Target companies')).toHaveValue('35');await expect(page.getByLabel('Maximum research cost (USD)')).toHaveValue('2.000000');
   await page.getByRole('button',{name:/^(Start research|Retry same research)$/}).click();await expect.poll(()=>posted.length).toBe(2);
-  const recovered=await counts();writeFileSync('test-results/audit-research-intent.json',JSON.stringify({posted,committed,recovered},null,2));
+  const recovered=await counts();writeFileSync('test-results/audit-research-intent.json',JSON.stringify({baseline,posted,committed,recovered,new_provider_operations:recovered.provider_operations-baseline.provider_operations,new_reservations:recovered.reservations-baseline.reservations},null,2));
   expect(posted[1].key).toBe(posted[0].key);expect(posted[1].body).toEqual(posted[0].body);expect(posted[1].id).toBe(posted[0].id);
-  expect(recovered.runs).toBe(1);expect(recovered.admission_outbox).toBe(1);expect(recovered.economic_intents).toBe(1);expect(recovered.provider_operations).toBe(0);expect(recovered.reservations).toBe(0);
+  expect(recovered.runs).toBe(1);expect(recovered.admission_outbox).toBe(1);expect(recovered.economic_intents).toBe(1);expect(recovered.provider_operations-baseline.provider_operations).toBe(0);expect(recovered.reservations-baseline.reservations).toBe(0);
   await expect(page).toHaveURL(new RegExp(`/app/discover/${posted[0].id}`));await page.screenshot({path:'test-results/audit-research-recovered.png',fullPage:true});
   await page.reload();await expect(page.getByRole('button',{name:'Sign in',exact:true})).toBeVisible();expect(posted).toHaveLength(2);
 });

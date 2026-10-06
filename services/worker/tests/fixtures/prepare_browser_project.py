@@ -29,7 +29,8 @@ def main():
             # Called once before an independent test, before its first login.
             # The limiter remains enabled for every request inside that case.
             db.execute("DELETE FROM api_rate_windows WHERE workspace_id=%s AND actor_id IN "
-                "('e0000000-0000-4000-8000-000000000004','e0000000-0000-4000-8000-000000000006')",
+                "('e0000000-0000-4000-8000-000000000002','e0000000-0000-4000-8000-000000000004',"
+                "'e0000000-0000-4000-8000-000000000006','e0000000-0000-4000-8000-000000000008')",
                 (WORKSPACE,))
             # Independent cases reuse fictional accounts. Persisted preferences
             # are reset only before login, never inside the case that verifies them.

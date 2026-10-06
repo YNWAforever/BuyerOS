@@ -26,6 +26,10 @@ def main():
         db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES "
             "('e0000000-0000-4000-8000-000000000105',%s,%s,'{reviewer}',true) "
             "ON CONFLICT(id) DO UPDATE SET roles='{reviewer}',active=true",(other,reviewer))
+        operator='e0000000-0000-4000-8000-000000000002'
+        db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES "
+            "('e0050000-0000-4000-8000-000000000002',%s,%s,'{operator}',true) "
+            "ON CONFLICT(id) DO UPDATE SET roles='{operator}',active=true",(other,operator))
         print(json.dumps({'fixture_only':True,'ids':[str(r[1]) for r in rows],
-            'target':str(rows[100][1]),'member':str(rows[100][0]),'other_ids':[reviewer,ADMIN]}))
+            'target':str(rows[100][1]),'member':str(rows[100][0]),'other_ids':[reviewer,ADMIN,operator]}))
 if __name__=='__main__':main()

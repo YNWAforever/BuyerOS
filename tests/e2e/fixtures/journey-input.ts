@@ -58,13 +58,20 @@ export function createJourneyInput(mode:JourneyInputMode='pointer'){
  * an existing zh-HK preference. This observes HTTP/DOM only, never writes storage.
  */
 export function observeWorkspaceLocale(page:Page,workspace:string){
- const reads:Response[]=[];
- const record=(response:Response)=>{if(response.request().method()==='GET'&&response.status()===200&&new URL(response.url()).pathname===`/v1/workspaces/${workspace}/preferences`)reads.push(response);};
+ const reads:Promise<{body:{data:{locale:string}}}|{error:unknown}>[]=[];
+ const record=(response:Response)=>{
+  if(response.request().method()==='GET'&&response.status()===200&&new URL(response.url()).pathname===`/v1/workspaces/${workspace}/preferences`){
+   // Buffer while this document still owns the response. A callback navigation
+   // can evict Chromium's response body before a later settle() call.
+   reads.push(response.json().then(body=>({body}),error=>({error})));
+  }
+ };
  page.on('response',record);
  return {
   async settle(){
    await expect.poll(()=>reads.length,{timeout:30_000,message:'Real fixture workspace preference read must complete before native language choice'}).toBeGreaterThan(0);
-   const body=await reads.at(-1)!.json();expect(['en','zh-HK']).toContain(body.data.locale);
+   const read=await reads.at(-1)!;if('error' in read)throw read.error;
+   const body=read.body;expect(['en','zh-HK']).toContain(body.data.locale);
    const saved=await page.evaluate(()=>{try{return localStorage.getItem('buyeros.locale');}catch{return null;}});
    const expected=saved==='en'||saved==='zh-HK'?saved:body.data.locale;
    await expect(page.locator('header select')).toHaveValue(expected,{timeout:30_000});
