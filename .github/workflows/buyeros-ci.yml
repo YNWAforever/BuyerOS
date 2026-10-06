@@ -21,6 +21,7 @@ jobs:
       - run: node tests/domain-checks.mjs
       - run: node tests/live-adapter-checks.mjs
       - run: node tests/live-auth-checks.mjs
+      - run: node --test tests/audit-*.test.mjs tests/job-poller-checks.mjs
       - run: node --test tests/api-types-generation.test.mjs
       - run: node --test tests/vercel-services.test.mjs tests/deployment/cloudflare-python-runtime.test.mjs tests/deployment/cloudflare-acceptance.test.mjs tests/deployment/built-ui-fixture.test.mjs
       - run: pnpm exec tsc --noEmit
@@ -332,4 +333,45 @@ jobs:
           path: |
             test-results/
             artifacts/ci-t30/
+          if-no-files-found: error
+
+  audit-fixes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Owned PG16 and built fixture only; no provider/production credentials.
+    env:
+      BUYEROS_STRICT_INTEGRATION: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install uv==0.11.27
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --frozen
+        working-directory: services/api
+      - run: uv sync --frozen
+        working-directory: services/worker
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: |
+          mkdir -p artifacts/c61
+          pnpm exec playwright test --config playwright.audit-fixes.config.ts --list > artifacts/c61/playwright-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61/playwright-discovery.txt').read_text(); match=re.search(r'Total: (\d+) tests',text); assert match and int(match[1])>0, 'empty Playwright discovery'"
+      - run: pnpm exec playwright test --config playwright.audit-fixes.config.ts
+      - run: python scripts/check-required-tests.py --junit test-results/audit-fixes.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-c61-audit-built-fixture
+          path: |
+            artifacts/c61/playwright-discovery.txt
+            test-results/audit-fixes.xml
+            test-results/audit-fixes/
           if-no-files-found: error
