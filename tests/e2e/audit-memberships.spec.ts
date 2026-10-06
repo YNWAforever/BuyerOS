@@ -5,7 +5,7 @@ import {resolve} from 'node:path';
 import {writeFileSync} from 'node:fs';
 import {signInWorkbench,workspace,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
 const other='e0000000-0000-4000-8000-000000000101';
-async function fixture():Promise<{ids:string[];target:string;member:string}>{
+async function fixture():Promise<{ids:string[];target:string;member:string;other_ids:string[]}>{
  const cwd=resolve('services/worker');const python=resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
  return JSON.parse((await promisify(execFile)(python,['tests/fixtures/audit_memberships.py'],{cwd,timeout:30_000})).stdout);
 }
@@ -87,11 +87,11 @@ test('S06 viewer cannot read the admin directory or eligible assignees',async({p
 });
 
 test('U06 stale page response cannot restore old A-B-A directory',async({page})=>{
- await fixture();const region=await open(page);await expect(region.locator('code')).toHaveCount(20);
+ const seeded=await fixture();const region=await open(page);await expect(region.locator('code')).toHaveCount(20);
  let release:()=>void=()=>{},received:()=>void=()=>{};const held=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);
  await page.route(`**/v1/workspaces/${workspace}/memberships?offset=20&limit=20**`,async route=>{const response=await route.fetch();received();await held;await route.fulfill({response}).catch(()=>{});});
  await region.getByRole('button',{name:'Next members'}).click();await started;
- await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(other);await expect(region.locator('code')).toHaveCount(1);
+ await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(other);await expect(region.locator('code')).toHaveText(seeded.other_ids);
  await page.getByRole('combobox',{name:'Workspace',exact:true}).selectOption(workspace);await expect(region.locator('code')).toHaveCount(20);release();
  await expect(region.locator('code').first()).toHaveText('e0000000-0000-4000-8000-000000000002');await page.waitForTimeout(300);
  await expect(region.getByText('1–20 / 250',{exact:true})).toBeVisible();

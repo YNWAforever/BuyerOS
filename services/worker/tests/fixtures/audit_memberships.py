@@ -20,5 +20,12 @@ def main():
         other='e0000000-0000-4000-8000-000000000101'
         db.execute("INSERT INTO workspaces(id,name,data_mode) VALUES (%s,'Other audit fixture','live') ON CONFLICT DO NOTHING",(other,))
         db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES ('e0000000-0000-4000-8000-000000000109',%s,%s,'{workspace_admin}',true) ON CONFLICT DO NOTHING",(other,ADMIN))
-        print(json.dumps({'fixture_only':True,'ids':[str(r[1]) for r in rows],'target':str(rows[100][1]),'member':str(rows[100][0])}))
+        # Establish this case's other-workspace directory explicitly. Previous
+        # job cases also need the fictional reviewer; do not assume only one row.
+        reviewer='e0000000-0000-4000-8000-000000000004'
+        db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES "
+            "('e0000000-0000-4000-8000-000000000105',%s,%s,'{reviewer}',true) "
+            "ON CONFLICT(id) DO UPDATE SET roles='{reviewer}',active=true",(other,reviewer))
+        print(json.dumps({'fixture_only':True,'ids':[str(r[1]) for r in rows],
+            'target':str(rows[100][1]),'member':str(rows[100][0]),'other_ids':[reviewer,ADMIN]}))
 if __name__=='__main__':main()

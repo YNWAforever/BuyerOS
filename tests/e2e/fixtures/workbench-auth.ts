@@ -14,7 +14,9 @@ export async function resetWorkbenchFixtureRateWindows(){
   const python=resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
   const {stdout}=await promisify(execFile)(python,['tests/fixtures/prepare_browser_project.py','isolate-workbench'],
     {cwd,timeout:30_000});
-  expect(JSON.parse(stdout).fixture_initial_rate_windows_reset).toBe(true);
+  const initialized=JSON.parse(stdout);
+  expect(initialized.fixture_initial_rate_windows_reset).toBe(true);
+  expect(initialized.fixture_initial_locale_reset).toBe(true);
 }
 
 export async function signInWorkbench(page:Page,waitForProject=true,actor:'reviewer'|'access'|'viewer'|'admin'='reviewer',entry=`/app?workspace=${workspace}&project=${project}`,input=createJourneyInput()){

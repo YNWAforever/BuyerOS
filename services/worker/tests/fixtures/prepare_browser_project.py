@@ -31,7 +31,15 @@ def main():
             db.execute("DELETE FROM api_rate_windows WHERE workspace_id=%s AND actor_id IN "
                 "('e0000000-0000-4000-8000-000000000004','e0000000-0000-4000-8000-000000000006')",
                 (WORKSPACE,))
-            print(json.dumps({"fixture_initial_rate_windows_reset": True}))
+            # Independent cases reuse fictional accounts. Persisted preferences
+            # are reset only before login, never inside the case that verifies them.
+            db.execute("UPDATE workspace_preferences SET locale='en' WHERE workspace_id=%s "
+                "AND user_id IN ('e0000000-0000-4000-8000-000000000002',"
+                "'e0000000-0000-4000-8000-000000000004',"
+                "'e0000000-0000-4000-8000-000000000006',"
+                "'e0000000-0000-4000-8000-000000000008')", (WORKSPACE,))
+            print(json.dumps({"fixture_initial_rate_windows_reset": True,
+                              "fixture_initial_locale_reset": True}))
         return
     if len(sys.argv) not in {3, 4} or sys.argv[1] not in {"prepare", "contact"}:
         raise SystemExit("usage: prepare_browser_project.py prepare PROJECT_ID | contact PROJECT_ID RUN_ID | isolate-workbench")
