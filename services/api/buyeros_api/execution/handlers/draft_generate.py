@@ -26,6 +26,11 @@ def _sources(facts: list[dict], evidence: list[dict]) -> tuple[list[dict], list[
 
 def render_grounded_template(*, facts: list[dict], evidence: list[dict], objective: str,
                              tone: str, language: str, kind: str) -> dict:
+    """Fixed, zero-cost text; objective/tone are compatibility metadata only.
+
+    Language changes template framing, never translates approved facts/excerpts.
+    Manual edits require a separate grounding review before exact approval.
+    """
     facts, evidence = _sources(facts, evidence)
     if tone not in {"professional", "concise", "warm"} or kind not in {"initial", "follow_up"}:
         raise ValueError("unsupported draft style")
