@@ -1,0 +1,56 @@
+<testsuites id="" name="" tests="23" failures="0" skipped="0" errors="0" time="849.459969">
+<testsuite name="audit-bulk-manifest.spec.ts" timestamp="2026-10-06T18:27:03.643Z" hostname="" tests="9" failures="0" skipped="0" time="186.919" errors="0">
+<testcase name="B01 B14 100 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="20.383">
+</testcase>
+<testcase name="B01 B14 101 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="26.223">
+</testcase>
+<testcase name="B01 B14 1001 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="53.308">
+</testcase>
+<testcase name="B15 lost preview and committed 202 retry one frozen body/key and restore after re-login" classname="audit-bulk-manifest.spec.ts" time="13.887">
+</testcase>
+<testcase name="B08 failed rows get a new exact digest and current versions; successes are retained" classname="audit-bulk-manifest.spec.ts" time="15.398">
+</testcase>
+<testcase name="B16 late preview cannot cross A-B-A; viewer has no maintenance; zh-HK mobile exact confirmation" classname="audit-bulk-manifest.spec.ts" time="8.909">
+</testcase>
+<testcase name="B01 reviewer executes current fit-bound review" classname="audit-bulk-manifest.spec.ts" time="15.804">
+</testcase>
+<testcase name="B01 typed list target supports confirmed add and explicit new remove preview" classname="audit-bulk-manifest.spec.ts" time="11.234">
+</testcase>
+<testcase name="B09 UI cancel preserves the committed first50 and cancels only pending51" classname="audit-bulk-manifest.spec.ts" time="21.773">
+</testcase>
+</testsuite>
+<testsuite name="audit-keyboard.spec.ts" timestamp="2026-10-06T18:27:03.643Z" hostname="" tests="4" failures="0" skipped="0" time="434.369" errors="0">
+<testcase name="T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="118.975">
+</testcase>
+<testcase name="T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="89.118">
+</testcase>
+<testcase name="T30 keyboard zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="105.815">
+</testcase>
+<testcase name="T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="120.461">
+</testcase>
+</testsuite>
+<testsuite name="audit-memberships.spec.ts" timestamp="2026-10-06T18:27:03.643Z" hostname="" tests="9" failures="0" skipped="0" time="78.807" errors="0">
+<testcase name="U06 all 250 real members are readable in 13 pages and member 101 is searchable" classname="audit-memberships.spec.ts" time="18.07">
+</testcase>
+<testcase name="U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable" classname="audit-memberships.spec.ts" time="6.287">
+</testcase>
+<testcase name="B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority" classname="audit-memberships.spec.ts" time="8.239">
+</testcase>
+<testcase name="U07 duplicate names and suffixes remain distinct during a versioned role change" classname="audit-memberships.spec.ts" time="6.542">
+</testcase>
+<testcase name="U08 sole admin refusal is understandable and does not claim success" classname="audit-memberships.spec.ts" time="7.067">
+</testcase>
+<testcase name="S06 viewer cannot read the admin directory or eligible assignees" classname="audit-memberships.spec.ts" time="7.561">
+</testcase>
+<testcase name="U06 stale page response cannot restore old A-B-A directory" classname="audit-memberships.spec.ts" time="7.806">
+</testcase>
+<testcase name="U06 zh-HK mobile search and failed page read recover without synthetic rows" classname="audit-memberships.spec.ts" time="9.322">
+</testcase>
+<testcase name="U07 lost committed role response requires a read before any further role write" classname="audit-memberships.spec.ts" time="7.913">
+</testcase>
+</testsuite>
+<testsuite name="audit-research-intent.spec.ts" timestamp="2026-10-06T18:27:03.643Z" hostname="" tests="1" failures="0" skipped="0" time="11.867" errors="0">
+<testcase name="B05 B06 committed lost 202 and manual Retry share one durable research intent" classname="audit-research-intent.spec.ts" time="11.867">
+</testcase>
+</testsuite>
+</testsuites>

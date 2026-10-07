@@ -1,0 +1,47 @@
+✔ D03 Unicode code-point offsets retain emoji, CRLF, Chinese and unmodified text (1.1703ms)
+✔ D03 split code-point ranges reclassify both pieces without destroying text (3.9183ms)
+✔ D02 save has the required transition order (2.0052ms)
+✔ D02 discard has the required transition order (0.2196ms)
+✔ D02 cancel has the required transition order (0.1256ms)
+✔ D02 rejected save 412 cannot proceed (1.196ms)
+✔ D02 rejected save 503 cannot proceed (0.3121ms)
+✔ D02 clean transition does not prompt or write (0.3217ms)
+✔ D02 asynchronous Save completes before proceeding (28.7065ms)
+✖ C61T-10 current source-review segments expose keyboard text selection without editing exact text (52.3679ms)
+✔ D03 source card retains source title, URL, dates and actual company; unsafe links stay text (10.3048ms)
+✔ C61T-10 selected Chinese emoji converts UTF-16 to exact code points (198.3264ms)
+✔ C61T-10 combining marks and CRLF remain separate unchanged code points (12.4606ms)
+✔ C61T-10 half-surrogate selection and caret boundaries are rejected (1.8689ms)
+✔ C61T-10 keyboard caret and empty text have exact boundaries (0.3572ms)
+✔ C61T-10 invalid offsets fail without clamping or normalizing (0.4926ms)
+✔ C61T-10 ZWJ emoji counts code points without changing source bytes (0.7996ms)
+✔ C61T-10 malformed lone surrogate source cannot acquire a citation range (0.4799ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 17
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2141.8528
+
+✖ failing tests:
+
+test at tests\draft-grounding-controls.test.mjs:27:1
+✖ C61T-10 current source-review segments expose keyboard text selection without editing exact text (52.3679ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /<textarea[^>]*aria-label="Select segment text"[^>]*readonly/. Input:
+  
+  '<section class="panel" aria-label="Manual source review"><h4>Manual source review</h4><p>Classify every segment, read each cited source and the whole message. This records your source review; it does not verify semantic truth.</p><p>Revision: 3</p><details><summary>Revision details</summary><p>revision · sha256:fixture</p></details><p role="status">Loading current sources...</p><p>Select text with Shift + Arrow, or place the caret, then use the selection to split. The exact message stays read-only.</p><fieldset aria-label="Segment 1"><legend>Segment 1 · Subject · [0, 5)</legend><pre style="white-space:pre-wrap;overflow-wrap:anywhere">中😀é文</pre><textarea aria-label="Select segment text" readOnly="" rows="3" style="width:100%;min-width:0;box-sizing:border-box">中😀é文</textarea><button type="button" disabled="">Use selected text</button><label>Classification <select><option value="" selected="">Choose classification</option><option value="factual">Factual — cite a source</option><option value="non_factual">Non-factual — explain why</option></select></label><label>Segment reason <input maxLength="400" value=""/></label><details><summary>Advanced segment offsets</summary><label>Split position (code points) <input type="number" min="1" max="4" value=""/></label><button type="button" disabled="">Split segment</button></details></fieldset><fieldset aria-label="Segment 2"><legend>Segment 2 · Body · [0, 8)</legend><pre style="white-space:pre-wrap;overflow-wrap:anywhere">Greeting</pre><textarea aria-label="Select segment text" readOnly="" rows="3" style="width:100%;min-width:0;box-sizing:border-box">Greeting</textarea><button type="button" disabled="">Use selected text</button><label>Classification <select><option value="" selected="">Choose classification</option><option value="factual">Factual — cite a source</option><option value="non_factual">Non-factual — explain why</option></select></label><label>Segment reason <input maxLength="400" value=""/></label><details><summary>Advanced segment offsets</summary><label>Split position (code points) <input type="number" min="1" max="7" value=""/></label><button type="button" disabled="">Split segment</button></details></fieldset><label>Overall review reason <input maxLength="400" value=""/></label><label><input type="checkbox" disabled=""/>I read the entire exact message and every cited source, including all non-factual classifications.</label><button type="button" disabled="">Submit source review</button></section>'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/tests/draft-grounding-controls.test.mjs:28:27)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '<section class="panel" aria-label="Manual source review"><h4>Manual source review</h4><p>Classify every segment, read each cited source and the whole message. This records your source review; it does not verify semantic truth.</p><p>Revision: 3</p><details><summary>Revision details</summary><p>revision · sha256:fixture</p></details><p role="status">Loading current sources...</p><p>Select text with Shift + Arrow, or place the caret, then use the selection to split. The exact message stays read-only.</p><fieldset aria-label="Segment 1"><legend>Segment 1 · Subject · [0, 5)</legend><pre style="white-space:pre-wrap;overflow-wrap:anywhere">中😀é文</pre><textarea aria-label="Select segment text" readOnly="" rows="3" style="width:100%;min-width:0;box-sizing:border-box">中😀é文</textarea><button type="button" disabled="">Use selected text</button><label>Classification <select><option value="" selected="">Choose classification</option><option value="factual">Factual — cite a source</option><option value="non_factual">Non-factual — explain why</option></select></label><label>Segment reason <input maxLength="400" value=""/></label><details><summary>Advanced segment offsets</summary><label>Split position (code points) <input type="number" min="1" max="4" value=""/></label><button type="button" disabled="">Split segment</button></details></fieldset><fieldset aria-label="Segment 2"><legend>Segment 2 · Body · [0, 8)</legend><pre style="white-space:pre-wrap;overflow-wrap:anywhere">Greeting</pre><textarea aria-label="Select segment text" readOnly="" rows="3" style="width:100%;min-width:0;box-sizing:border-box">Greeting</textarea><button type="button" disabled="">Use selected text</button><label>Classification <select><option value="" selected="">Choose classification</option><option value="factual">Factual — cite a source</option><option value="non_factual">Non-factual — explain why</option></select></label><label>Segment reason <input maxLength="400" value=""/></label><details><summary>Advanced segment offsets</summary><label>Split position (code points) <input type="number" min="1" max="7" value=""/></label><button type="button" disabled="">Split segment</button></details></fieldset><label>Overall review reason <input maxLength="400" value=""/></label><label><input type="checkbox" disabled=""/>I read the entire exact message and every cited source, including all non-factual classifications.</label><button type="button" disabled="">Submit source review</button></section>',
+    expected: /<textarea[^>]*aria-label="Select segment text"[^>]*readonly/,
+    operator: 'match',
+    diff: 'simple'
+  }

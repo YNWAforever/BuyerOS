@@ -1,0 +1,14 @@
+{
+  "integrated_source_sha": "8b631ab8a911e63c856a674d78b42cddfab29049",
+  "tested_source_sha": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "identical_api_product_trees": {
+    "services/api/buyeros_api": "15b344aab4d64f1c817242b8868c8ae5e648c269",
+    "services/api/alembic": "7f1f35f1d7dba73bcf2c5932a633210494cf7190"
+  },
+  "fresh_cases": 863,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "scope": "API implementation + migration trees only; current UI/C61-21 code require their own acceptance",
+  "environment": "Owned runtime-role PG16/API with synthetic identity and provider inputs; no production/provider/human acceptance"
+}

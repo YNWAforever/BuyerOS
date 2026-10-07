@@ -101,6 +101,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/eligible-assignees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search current active workspace members eligible for buyer ownership */
+        get: operations["listEligibleAssignees"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/memberships/{membership_id}": {
         parameters: {
             query?: never;
@@ -972,6 +989,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/jobs/{job_id}/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read actor-bound job status and counters without result rows
+         * @description Q06 read-only summary. Current membership, original actor or current workspace administrator are rechecked on every request. No result-page queries or writes.
+         */
+        get: operations["getAsyncJobSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/jobs/{job_id}": {
         parameters: {
             query?: never;
@@ -1070,6 +1107,26 @@ export interface paths {
          * @description PROPOSED.
          */
         post: operations["requestDraftReview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/drafts/{draft_id}/grounding-reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Attest every segment of an exact edited message against current sources
+         * @description Human source qualification; does not verify semantic truth. Appends an immutable successor without changing subject/body. Current recipient, profile, sender, fit, evidence and policy are rechecked in the locked transaction. No delivery.
+         */
+        post: operations["reviewDraftGrounding"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1280,6 +1337,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Freeze an actor-bound maintenance selection up to10000 */
+        post: operations["previewBulkManifest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Restore an original actor manifest without executing it */
+        get: operations["getBulkManifest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}/execute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm the exact frozen digest and current operation authority */
+        post: operations["executeBulkManifest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/work-queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read current project work queue */
+        get: operations["getWorkQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/provider-operations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List scoped durable provider receipts */
+        get: operations["listProviderOperations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1346,6 +1488,8 @@ export interface components {
             workspace_id: string;
             /** Format: uuid */
             user_id: string;
+            /** @description Authorized display name or full canonical user ID fallback; no email or issuer projection. */
+            display_name: string;
             roles: ("viewer" | "operator" | "reviewer" | "workspace_admin")[];
             active: boolean;
             version: number;
@@ -1354,6 +1498,27 @@ export interface components {
             roles: ("viewer" | "operator" | "reviewer" | "workspace_admin")[];
             active: boolean;
             reason: string;
+        };
+        EligibleAssignee: {
+            /** Format: uuid */
+            membership_id: string;
+            /** Format: uuid */
+            user_id: string;
+            display_name: string;
+            version: number;
+        };
+        EligibleAssigneePage: {
+            items: components["schemas"]["EligibleAssignee"][];
+            offset: number;
+            limit: number;
+            total: number;
+        };
+        EligibleAssigneePageResponse: {
+            data: components["schemas"]["EligibleAssigneePage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
         };
         MembershipPage: {
             items: components["schemas"]["Membership"][];
@@ -2354,6 +2519,7 @@ export interface components {
             /** Format: uuid */
             parent_draft_id?: string;
             claims: components["schemas"]["GroundedClaim"][];
+            grounding_review?: components["schemas"]["ManualGroundingReview"];
             approval_review?: components["schemas"]["DraftApprovalReview"];
             approval_id: string | null;
             /** @constant */
@@ -2365,7 +2531,7 @@ export interface components {
             evidence_ids: string[];
             offer_fact_ids: string[];
             /** @enum {string} */
-            kind: "observation" | "offer_fact" | "labelled_inference";
+            kind: "observation" | "offer_fact" | "labelled_inference" | "non_factual";
         };
         DraftApprovalReview: {
             recipient: {
@@ -2398,6 +2564,47 @@ export interface components {
             /** Format: uuid */
             icp_version_id: string;
             context_hash: string;
+        };
+        GroundingOfferFactRef: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            icp_version_id: string;
+            icp_content_hash: string;
+        };
+        GroundingSegment: {
+            /** @enum {string} */
+            field: "subject" | "body";
+            /** @description Unicode code-point offset; not UTF-16 code units */
+            start: number;
+            /** @description Exclusive Unicode code-point offset */
+            end: number;
+            exact_text: string;
+            /** @enum {string} */
+            classification: "factual" | "non_factual";
+            evidence_refs: components["schemas"]["VersionedId"][];
+            offer_fact_refs: components["schemas"]["GroundingOfferFactRef"][];
+            reason: string;
+        };
+        DraftGroundingReviewRequest: {
+            /** Format: uuid */
+            revision_id: string;
+            content_hash: string;
+            segments: components["schemas"]["GroundingSegment"][];
+            reason: string;
+            /** @constant */
+            confirmation: true;
+        };
+        ManualGroundingReview: {
+            /** Format: uuid */
+            based_on_revision_id: string;
+            based_on_content_hash: string;
+            /** Format: uuid */
+            reviewed_by: string;
+            /** Format: date-time */
+            reviewed_at: string;
+            reason: string;
+            segments: components["schemas"]["GroundingSegment"][];
         };
         DraftReviewRequest: {
             /** Format: uuid */
@@ -2527,6 +2734,127 @@ export interface components {
             limit: number;
             total: number;
         };
+        AsyncJobSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workspace_id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            manifest_id?: string;
+            /** @enum {string} */
+            kind: "offer_ingestion" | "draft_generation" | "export" | "reconciliation" | "bulk_mutation";
+            /** @enum {string} */
+            status: "queued" | "running" | "cancel_requested" | "cancelled" | "completed" | "failed" | "unknown";
+            requested: number;
+            processed: number;
+            updated: number;
+            unchanged: number;
+            blocked: number;
+            conflicts: number;
+            cancelled: number;
+            /** Format: uuid */
+            result_id?: string;
+            failure_code?: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        BulkManifestCreate: {
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            /** @enum {string} */
+            operation: "assignBuyerOwners";
+            target: {
+                /** Format: uuid */
+                owner_membership_id: string | null;
+            };
+        } | {
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            /** @enum {string} */
+            operation: "reviewBuyers";
+            target: {
+                /** @enum {string} */
+                status: "accepted" | "rejected" | "needs_information";
+            };
+        } | {
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            /** @enum {string} */
+            operation: "changeListMemberships";
+            target: {
+                /** Format: uuid */
+                list_id: string;
+                /** @enum {string} */
+                operation: "add" | "remove";
+            };
+        };
+        BulkManifestExecute: {
+            digest: string;
+            /** @constant */
+            confirmation: true;
+        };
+        BulkManifest: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workspace_id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            actor_user_id: string;
+            /** @enum {string} */
+            operation: "assignBuyerOwners" | "reviewBuyers" | "changeListMemberships";
+            target: {
+                /** Format: uuid */
+                owner_membership_id: string | null;
+            } | {
+                /** @enum {string} */
+                status: "accepted" | "rejected" | "needs_information";
+            } | {
+                /** Format: uuid */
+                list_id: string;
+                /** @enum {string} */
+                operation: "add" | "remove";
+            };
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            count: number;
+            digest: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** @enum {string} */
+            status: "ready" | "executed";
+            version: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: uuid */
+            job_id?: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            result?: components["schemas"]["BulkResult"];
+        };
+        BulkManifestResponse: {
+            data: components["schemas"]["BulkManifest"];
+            /** @enum {string} */
+            data_mode: "live";
+            request_id: string;
+        };
         AsyncJob: {
             /** Format: uuid */
             id: string;
@@ -2534,6 +2862,8 @@ export interface components {
             workspace_id: string;
             /** Format: uuid */
             project_id: string;
+            /** Format: uuid */
+            manifest_id?: string;
             /** @enum {string} */
             kind: "offer_ingestion" | "draft_generation" | "export" | "reconciliation" | "bulk_mutation";
             /** @enum {string} */
@@ -2603,6 +2933,8 @@ export interface components {
             project_id: string;
             /** Format: uuid */
             actor_id: string;
+            /** @description Current display name of this event's canonical actor; never identity or role authority. */
+            actor_display_name: string | null;
             /** Format: date-time */
             recorded_at: string;
             /** Format: uuid */
@@ -2757,6 +3089,13 @@ export interface components {
         };
         AsyncJobPageResponse: {
             data: components["schemas"]["AsyncJobPage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        AsyncJobSummaryResponse: {
+            data: components["schemas"]["AsyncJobSummary"];
             /** Format: uuid */
             request_id: string;
             /** @enum {string} */
@@ -3100,6 +3439,58 @@ export interface components {
             /** Format: date-time */
             reviewed_at: string;
         };
+        WorkQueueItem: {
+            /** @enum {string} */
+            kind: "awaiting_review" | "pending_approval" | "unassigned" | "failed_job" | "unknown_fit" | "unknown_acceptance";
+            count: number;
+            filters: {
+                /** @enum {string} */
+                review?: "awaiting_review";
+                /** @enum {string} */
+                queue?: "unassigned" | "unknown";
+                /** @enum {string} */
+                status?: "failed";
+                /** @enum {string} */
+                approval?: "pending";
+                /** @enum {string} */
+                acceptance?: "unknown";
+            };
+        };
+        WorkQueue: {
+            /** Format: date-time */
+            as_of: string;
+            items: components["schemas"]["WorkQueueItem"][];
+        };
+        ProviderOperationSummary: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            capability: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        ProviderOperationPage: {
+            items: components["schemas"]["ProviderOperationSummary"][];
+            offset: number;
+            limit: number;
+            total: number;
+        };
+        WorkQueueResponse: {
+            data: components["schemas"]["WorkQueue"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        ProviderOperationPageResponse: {
+            data: components["schemas"]["ProviderOperationPage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
     };
     responses: {
         /** @description Structured error; reason code determines safe user recovery. 202 never implies job completion. */
@@ -3274,6 +3665,8 @@ export interface operations {
             query?: {
                 offset?: number;
                 limit?: number;
+                /** @description Literal case-insensitive substring of display name, full user ID or membership ID. */
+                q?: string;
             };
             header?: never;
             path: {
@@ -3292,6 +3685,41 @@ export interface operations {
                     "application/json": components["schemas"]["MembershipPageResponse"];
                 };
             };
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+        };
+    };
+    listEligibleAssignees: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+                /** @description Literal case-insensitive substring of display name, full user ID or membership ID. */
+                q?: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Eligible assignee page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EligibleAssigneePageResponse"];
+                };
+            };
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            422: components["responses"]["Error"];
         };
     };
     updateMembership: {
@@ -5543,6 +5971,7 @@ export interface operations {
             query?: {
                 offset?: components["parameters"]["Offset"];
                 limit?: components["parameters"]["Limit"];
+                approval?: "pending";
             };
             header?: never;
             path: {
@@ -5647,6 +6076,33 @@ export interface operations {
                     "application/json": components["schemas"]["AsyncJobPageResponse"];
                 };
             };
+        };
+    };
+    getAsyncJobSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Durable current summary, never an inferred completion. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AsyncJobSummaryResponse"];
+                };
+            };
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            429: components["responses"]["Error"];
         };
     };
     getAsyncJob: {
@@ -5870,6 +6326,50 @@ export interface operations {
                     /** @description Server correlation ID */
                     "X-Request-ID"?: string;
                     /** @description Version ETag when response is one versioned entity */
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    reviewDraftGrounding: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Strong version ETag, e.g. "4". Compare in mutation transaction; stale is 412 STALE_REVISION, missing is 400. */
+                "If-Match": components["parameters"]["IfMatch"];
+            };
+            path: {
+                workspace_id: string;
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftGroundingReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Exact text retained in one grounded successor; replay rechecks current eligibility. */
+            200: {
+                headers: {
+                    /** @description Current draft state version */
                     ETag?: string;
                     [name: string]: unknown;
                 };
@@ -6327,6 +6827,176 @@ export interface operations {
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
             503: components["responses"]["Error"];
+        };
+    };
+    previewBulkManifest: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkManifestCreate"];
+            };
+        };
+        responses: {
+            /** @description Atomic current frozen selection or durable per-row execution */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkManifestResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+        };
+    };
+    getBulkManifest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+                manifest_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Atomic current frozen selection or durable per-row execution */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkManifestResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+        };
+    };
+    executeBulkManifest: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Strong version ETag, e.g. "4". Compare in mutation transaction; stale is 412 STALE_REVISION, missing is 400. */
+                "If-Match": components["parameters"]["IfMatch"];
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                manifest_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkManifestExecute"];
+            };
+        };
+        responses: {
+            /** @description Atomic current frozen selection or durable per-row execution */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkResultResponse"];
+                };
+            };
+            /** @description Atomic current frozen selection or durable per-row execution */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AsyncJobResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+        };
+    };
+    getWorkQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bounded actor-scoped job page; workspace admins may view all workspace jobs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkQueueResponse"];
+                };
+            };
+        };
+    };
+    listProviderOperations: {
+        parameters: {
+            query?: {
+                offset?: components["parameters"]["Offset"];
+                limit?: components["parameters"]["Limit"];
+                acceptance?: "unknown";
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bounded actor-scoped job page; workspace admins may view all workspace jobs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderOperationPageResponse"];
+                };
+            };
         };
     };
 }

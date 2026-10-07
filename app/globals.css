@@ -194,3 +194,21 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
 /* Buyer search and visible desktop filter boundaries are distinguishable on white panels. */
 .main-shell .results-panel .searchbox,
 .main-shell .results-panel .desktop-filters .pick{border:1px solid #6d7c8f}
+
+/* Keep frozen manifest metadata and paginated targets usable on narrow staff screens. */
+.bulk-manifest-panel { min-width: 0; }
+.bulk-manifest-panel fieldset { min-inline-size: 0; }
+.bulk-manifest-panel label { display: block; min-width: 0; }
+.bulk-manifest-panel input:not([type="checkbox"]),
+.bulk-manifest-panel select,
+.bulk-manifest-panel textarea { width: 100%; min-width: 0; max-width: 100%; }
+
+/* Q09: selection summary stays reachable without keeping inactive forms onscreen. */
+.live-selection-bar {position:sticky;top:8px;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface,white);box-shadow:0 2px 8px #0001;}
+.live-selection-bar a {color:var(--foreground);text-decoration:underline;}
+.live-workspace :is(button,a,input,select,textarea,summary):focus-visible {outline:3px solid var(--primary,#3256be);outline-offset:3px;}
+.live-workspace details code {overflow-wrap:anywhere;}
+
+.live-scope-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+.live-scope-grid > .panel {min-width:0;margin-bottom:0;}
+@media (max-width:720px) {.live-scope-grid {grid-template-columns:minmax(0,1fr);}}

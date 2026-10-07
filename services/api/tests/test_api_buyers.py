@@ -86,9 +86,18 @@ def test_registry_covers_every_unimplemented_contract_operation():
         "requestDraftReview", "approveDraft", "disabledDeliveryBoundary",
         "exportBuyers", "exportDraft", "getExport", "downloadExport", "exportBulkFailures",
         "getUsage", "listOutcomes", "recordOutcome", "correctOutcome",
+        "listEligibleAssignees", "getAsyncJobSummary", "reviewDraftGrounding",
+        "previewBulkManifest", "getBulkManifest", "executeBulkManifest",
+        "getWorkQueue", "listProviderOperations",
     }
-    out_of_slice = set(_contract_operations()) - implemented
+    contract = _contract_operations()
+    out_of_slice = set(contract) - implemented
     assert out_of_slice == set(UNIMPLEMENTED_OPERATIONS)
+    # A declared implementation must have its actual contract method/path.
+    runtime_paths = create_app().openapi()["paths"]
+    for operation_id in implemented:
+        method, path = contract[operation_id]
+        assert method in runtime_paths.get(path, {}), operation_id
 
 
 def test_unimplemented_declared_path_fails_closed_then_501():
@@ -133,3 +142,13 @@ def test_no_declared_operation_is_left_on_a_501_stub():
     assert contract <= registered
     assert not [route for route in app.routes
                 if getattr(getattr(route, "endpoint", None), "__name__", "").startswith("not_implemented_")]
+
+
+def test_work_queue_reads_require_auth():
+    client = TestClient(create_app(), raise_server_exceptions=False)
+    for resource in ("work-queue", "provider-operations"):
+        response = client.get(
+            f"/v1/workspaces/{WORKSPACE}/projects/{PROJECT}/{resource}"
+        )
+        assert response.status_code == 401, resource
+        assert response.json()["code"] == "UNAUTHENTICATED", resource

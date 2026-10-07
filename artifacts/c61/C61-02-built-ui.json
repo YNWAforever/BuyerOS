@@ -1,0 +1,25 @@
+{
+  "source_sha": "b8b760921843c34473b2c4de7162c43cbe5a8413",
+  "source_sha_after": "b8b760921843c34473b2c4de7162c43cbe5a8413",
+  "started_at_utc": "2026-10-06T17:30:17.250622+00:00",
+  "seconds": 1342.371,
+  "command": [
+    "pnpm.cmd",
+    "exec",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.audit-fixes.config.ts",
+    "--max-failures=3"
+  ],
+  "cwd": ".",
+  "exit_code": 1,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-02-built-ui.log",
+  "tests": 96,
+  "failures": 1,
+  "errors": 2,
+  "skipped": 12,
+  "junit": "test-results/audit-fixes.xml",
+  "required_gate_exit_code": 1
+}

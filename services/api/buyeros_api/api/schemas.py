@@ -391,6 +391,23 @@ class PreferencesUpdate(_Strict):
         return self
 
 
+class MembershipRead(_Strict):
+    id: uuid.UUID
+    workspace_id: uuid.UUID
+    user_id: uuid.UUID
+    display_name: StrictStr = Field(min_length=1, max_length=200)
+    roles: list[Literal["viewer", "operator", "reviewer", "workspace_admin"]]
+    active: StrictBool
+    version: int = Field(ge=1)
+
+
+class EligibleAssignee(_Strict):
+    membership_id: uuid.UUID
+    user_id: uuid.UUID
+    display_name: StrictStr = Field(min_length=1, max_length=200)
+    version: int = Field(ge=1)
+
+
 class MembershipUpdate(_Strict):
     roles: list[Literal["viewer", "operator", "reviewer", "workspace_admin"]] = Field(min_length=1, max_length=4)
     active: StrictBool
@@ -449,6 +466,38 @@ class DraftUpdate(_Strict):
             if getattr(self, field) is None:
                 raise ValueError(f"{field} cannot be null")
         return self
+
+
+class GroundingOfferFactRef(_Strict):
+    id: uuid.UUID
+    icp_version_id: uuid.UUID
+    icp_content_hash: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+class GroundingSegment(_Strict):
+    field: Literal["subject", "body"]
+    start: StrictInt = Field(ge=0, le=20000)
+    end: StrictInt = Field(ge=1, le=20000)
+    exact_text: StrictStr = Field(min_length=1, max_length=20000)
+    classification: Literal["factual", "non_factual"]
+    evidence_refs: list[VersionedId] = Field(max_length=50)
+    offer_fact_refs: list[GroundingOfferFactRef] = Field(max_length=20)
+    reason: StrictStr = Field(min_length=3, max_length=400)
+
+
+class DraftGroundingReviewRequest(_Strict):
+    revision_id: uuid.UUID
+    content_hash: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
+    segments: list[GroundingSegment] = Field(min_length=2, max_length=200)
+    reason: StrictStr = Field(min_length=3, max_length=400)
+    confirmation: StrictBool
+
+    @field_validator("confirmation")
+    @classmethod
+    def _read_whole_message(cls, value: bool) -> bool:
+        if not value:
+            raise ValueError("whole-message source review confirmation is required")
+        return value
 
 
 class DraftReviewRequest(_Strict):
@@ -536,3 +585,42 @@ class OutcomeCorrectionRequest(_Strict):
     occurred_at: AwareDatetime
     notes: StrictStr = Field(min_length=3, max_length=2000)
     reason: StrictStr = Field(min_length=3, max_length=1000)
+
+
+class ManifestTarget(_Strict):
+    owner_membership_id: uuid.UUID | None = None
+    status: Literal["accepted", "rejected", "needs_information"] | None = None
+    list_id: uuid.UUID | None = None
+    operation: Literal["add", "remove"] | None = None
+
+
+class BulkManifestCreate(_Strict):
+    filters: BuyerFilters
+    excluded_ids: list[uuid.UUID] = Field(max_length=10000)
+    operation: Literal["assignBuyerOwners", "reviewBuyers", "changeListMemberships"]
+    target: ManifestTarget
+    reason: StrictStr = Field(min_length=3, max_length=2000)
+    source_job_id: uuid.UUID | None = None
+
+    @model_validator(mode="after")
+    def _target(self):
+        fields=self.target.model_fields_set
+        required={"assignBuyerOwners":{"owner_membership_id"},"reviewBuyers":{"status"},"changeListMemberships":{"list_id","operation"}}[self.operation]
+        if fields!=required or len(self.reason.strip())<3 or len(set(self.excluded_ids))!=len(self.excluded_ids):
+            raise ValueError("exact operation target, unique exclusions and reason required")
+        if self.operation=="reviewBuyers" and self.target.status is None:
+            raise ValueError("review status required")
+        if self.operation=="changeListMemberships" and (self.target.list_id is None or self.target.operation is None):
+            raise ValueError("list target required")
+        return self
+
+
+class BulkManifestExecute(_Strict):
+    digest: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
+    confirmation: StrictBool
+
+    @field_validator("confirmation")
+    @classmethod
+    def _confirmed(cls,value):
+        if not value:raise ValueError("exact manifest confirmation required")
+        return value

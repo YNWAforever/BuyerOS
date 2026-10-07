@@ -1,0 +1,18 @@
+.......................................                                  [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_workspace_listing_db.py::test_list_workspaces_reads_a_real_membership_under_runtime_role
+tests/test_workspace_directory_function_db.py::test_directory_optional_expansion_round_trip_preserves_canonical_rows
+tests/test_workspace_directory_function_db.py::test_directory_optional_expansion_round_trip_preserves_canonical_rows
+tests/test_checkpoint_schema_privileges_db.py::test_worker_cannot_mutate_checkpoint_schema_versions[INSERT INTO buyeros_graph.checkpoint_migrations(v) VALUES(99)]
+tests/test_checkpoint_schema_privileges_db.py::test_0036_round_trip_keeps_schema_version_grants_read_only
+tests/test_checkpoint_schema_privileges_db.py::test_0036_round_trip_keeps_schema_version_grants_read_only
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-directory-required-green.xml -
+39 passed, 7 warnings in 232.57s (0:03:52)

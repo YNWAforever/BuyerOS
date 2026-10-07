@@ -1,5 +1,6 @@
 import uuid
 
+from ...services.membership_directory import eligible_owner_predicate
 from fastapi import APIRouter, Depends, Header, Query, Request, Response
 
 from ..auth import Principal, get_principal
@@ -254,9 +255,8 @@ async def update_buyer(
                 owner = (
                     await session.execute(
                         select(Membership).where(
-                            Membership.workspace_id == workspace_id,
                             Membership.id == owner_membership_id,
-                            Membership.active.is_(True),
+                            eligible_owner_predicate(workspace_id),
                         )
                     )
                 ).scalar_one_or_none()

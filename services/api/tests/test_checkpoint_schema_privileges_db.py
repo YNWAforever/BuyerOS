@@ -71,7 +71,7 @@ def test_0036_round_trip_keeps_schema_version_grants_read_only(migrated, schema_
     config = Config(str(ALEMBIC_INI))
     config.set_main_option('script_location', str(SERVICE_ROOT / 'alembic'))
     with psycopg.connect(migrated) as owner:
-        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0036_checkpoint_schema_grants'
+        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0038_c61_workspace_directory'
     # A compatibility downgrade retains security hardening and all checkpoint data.
     command.downgrade(config, '0035_worker_recovery_probe')
     with psycopg.connect(schema_worker) as worker:
@@ -80,7 +80,7 @@ def test_0036_round_trip_keeps_schema_version_grants_read_only(migrated, schema_
         assert worker.execute("SELECT max(v),count(*) FROM buyeros_graph.checkpoint_migrations").fetchone() == (9, 10)
     command.upgrade(config, 'head')
     with psycopg.connect(migrated) as owner:
-        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0036_checkpoint_schema_grants'
+        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0038_c61_workspace_directory'
         assert owner.execute('SELECT count(*) FROM buyeros_graph.checkpoints').fetchone()[0] > 0
 
 
@@ -93,3 +93,14 @@ def test_operator_previews_current_head_without_mutating_selector(migrated):
     assert result['applied'] is False and result['epoch'] == before[2]
     with psycopg.connect(migrated) as owner:
         assert owner.execute('SELECT backend,enabled,epoch FROM worker_runtime_control').fetchone() == before
+
+def test_runtime_selector_still_rejects_unknown_schema_head(migrated):
+    from buyeros_api.services.worker_recovery import set_execution_runtime
+    with psycopg.connect(migrated,autocommit=True) as db:
+        before=db.execute('SELECT backend,enabled,epoch FROM worker_runtime_control').fetchone()
+        db.execute("UPDATE alembic_version SET version_num='fixture_unknown_schema'")
+        try:
+            with pytest.raises(ValueError,match='compatible 0035/0036/0037'):
+                set_execution_runtime(migrated,expected_epoch=before[2],backend='cloudflare',enabled=False,reason='Owned unknown schema dry run')
+            assert db.execute('SELECT backend,enabled,epoch FROM worker_runtime_control').fetchone()==before
+        finally:db.execute("UPDATE alembic_version SET version_num='0038_c61_workspace_directory'")

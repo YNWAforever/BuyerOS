@@ -24,9 +24,15 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
     "getBuyerList": _VIEWERS,
     "renameBuyerList": frozenset({"operator", "reviewer", "workspace_admin"}),
     "changeListMemberships": frozenset({"operator", "reviewer", "workspace_admin"}),
+    "previewBulkManifest": frozenset({"operator", "reviewer", "workspace_admin"}),
+    "executeBulkManifest": frozenset({"operator", "reviewer", "workspace_admin"}),
+    "getBulkManifest": _VIEWERS,
     "assignBuyerOwners": frozenset({"operator", "workspace_admin"}),
     "getAsyncJob": _VIEWERS,
+    "getAsyncJobSummary": _VIEWERS,
     "listAsyncJobs": _VIEWERS,
+    "getWorkQueue": _VIEWERS,
+    "listProviderOperations": _VIEWERS,
     "listFilterPresets": _VIEWERS,
     "saveFilterPreset": _VIEWERS,
     "listPolicyDecisions": frozenset({"workspace_admin"}),
@@ -56,6 +62,7 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
     "getDraft": _VIEWERS,
     "editDraft": frozenset({"operator", "reviewer", "workspace_admin"}),
     "requestDraftReview": frozenset({"operator", "reviewer", "workspace_admin"}),
+    "reviewDraftGrounding": frozenset({"reviewer", "workspace_admin"}),
     "approveDraft": frozenset({"reviewer", "workspace_admin"}),
     "getUsage": _VIEWERS,
     "listOutcomes": _VIEWERS,
@@ -171,24 +178,29 @@ async def tenant_scoped(workspace_id: uuid.UUID):
         yield session
 
 
-async def load_membership(session, *, principal, workspace_id) -> dict:
+async def read_current_membership(session, *, principal, workspace_id) -> dict:
     from sqlalchemy import select
 
-    from ..db.models import Membership, User
+    from ..db.models import Membership
+    from ..services.identity_resolver import resolve_user_id
     from .errors import ApiError
 
-    user = (
-        await session.execute(select(User).where(User.issuer == principal.issuer, User.subject == principal.subject))
-    ).scalar_one_or_none()
-    if user is None:
+    user_id = await resolve_user_id(session, principal)
+    if user_id is None:
         raise ApiError(404, "NOT_FOUND", "workspace not found")
     membership = (
         await session.execute(
-            select(Membership).where(Membership.workspace_id == workspace_id, Membership.user_id == user.id)
+            select(Membership).where(Membership.workspace_id == workspace_id, Membership.user_id == user_id)
         )
     ).scalar_one_or_none()
     if membership is None or not membership.active:
         raise ApiError(404, "NOT_FOUND", "workspace not found")
+    return {"user_id": user_id, "roles": list(membership.roles)}
+
+
+async def load_membership(session, *, principal, workspace_id) -> dict:
     from ..services.api_rate_limit import enforce_rate_limit
-    await enforce_rate_limit(get_rate_engine(), workspace_id, user.id)
-    return {"user_id": user.id, "roles": list(membership.roles)}
+
+    member = await read_current_membership(session, principal=principal, workspace_id=workspace_id)
+    await enforce_rate_limit(get_rate_engine(), workspace_id, member['user_id'])
+    return member

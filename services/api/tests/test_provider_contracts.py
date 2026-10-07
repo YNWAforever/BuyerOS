@@ -143,3 +143,16 @@ def test_provider_money_rejects_float_excess_precision_and_unsupported_currency(
                              (Decimal("100000000000000.000000"), "USD")):
         with pytest.raises(ValueError):
             Money(amount, currency)
+
+
+def test_unselected_live_provider_is_blocked_even_in_test_mode():
+    # The execution core also uses this gate directly, without a registry.
+    reasons = activation_blockers(capability(provider="candidate"), market="HK",
+                                  language="en", role="company", environment="test")
+    assert "PROVIDER_UNSELECTED" in reasons
+
+
+def test_unknown_environment_is_not_a_provider_activation_path():
+    reasons = activation_blockers(capability(), market="HK", language="en",
+                                  role="company", environment="typo")
+    assert "UNKNOWN_ENVIRONMENT" in reasons

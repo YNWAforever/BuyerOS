@@ -1,0 +1,15 @@
+{
+  "name": "Q03",
+  "command": [
+    "node",
+    "tests/live-adapter-checks.mjs"
+  ],
+  "cwd": ".",
+  "source_sha": "f37527613ca473ed794a0c2a0f99a02aa88d6e12",
+  "tested_tree": "a7db2796f96f4179f2167b236404c2dadb19263a",
+  "started_at_utc": "2026-10-06T17:01:41.106840+00:00",
+  "seconds": 0.882,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q03.log"
+}

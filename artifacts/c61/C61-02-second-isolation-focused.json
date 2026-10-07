@@ -1,0 +1,35 @@
+{
+  "source_sha": "9edb6cf0b75b706a42501370dd0c9876046e7eaf",
+  "source_sha_after": "9edb6cf0b75b706a42501370dd0c9876046e7eaf",
+  "started_at_utc": "2026-10-06T18:24:50.516219+00:00",
+  "seconds": 856.182,
+  "command": [
+    "pnpm.cmd",
+    "exec",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.audit-fixes.config.ts",
+    "audit-bulk-manifest.spec.ts",
+    "audit-keyboard.spec.ts",
+    "audit-memberships.spec.ts",
+    "audit-research-intent.spec.ts"
+  ],
+  "cwd": ".",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-02-second-isolation-focused.log",
+  "tests": 23,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/C61-02-second-isolation-focused.xml",
+  "required_gate_exit_code": 0,
+  "tested_tree": "fd031c683b85d5ea63b50b2a6622ec193ade1e77",
+  "tested_changes": [
+    "services/worker/tests/fixtures/audit_memberships.py",
+    "services/worker/tests/fixtures/prepare_browser_project.py",
+    "tests/e2e/audit-research-intent.spec.ts",
+    "tests/e2e/fixtures/journey-input.ts"
+  ]
+}

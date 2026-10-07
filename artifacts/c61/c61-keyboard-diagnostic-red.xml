@@ -1,0 +1,48 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="68.74131200000001">
+<testsuite name="audit-draft-reground.spec.ts" timestamp="2026-10-06T21:04:24.544Z" hostname="" tests="1" failures="1" skipped="0" time="11.792" errors="0">
+<testcase name="C61T-10 keyboard text selection binds emoji and combining marks to exact server code-point ranges" classname="audit-draft-reground.spec.ts" time="11.792">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toEqual(expected) // deep equality" type="expect.toEqual">
+<![CDATA[  audit-draft-reground.spec.ts:108:1 › C61T-10 keyboard text selection binds emoji and combining marks to exact server code-point ranges 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   1,
+    -   3,
+    +   0,
+    +   0,
+      ]
+
+      120 |   await selection.focus();await state('focused');await expect(selection).toBeFocused();
+      121 |   await selection.press('Home');await state('Home');await selection.press('ArrowRight');await state('ArrowRight');await selection.press('Shift+ArrowRight');await state('Shift+ArrowRight');
+    > 122 |   expect(await selection.evaluate((el:HTMLTextAreaElement)=>[el.selectionStart,el.selectionEnd])).toEqual([1,3]);
+          |                                                                                                   ^
+      123 |   await first.getByRole('button',{name:'Use selected text',exact:true}).click();
+      124 |   const groups=grounding.getByRole('group',{name:/^(Segment|段落) \d+$/,exact:true});await expect(groups).toHaveCount(7);await expect(groups.first().getByRole('textbox',{name:'Select segment text',exact:true})).toBeFocused();
+      125 |   expect(await groups.locator('pre').allTextContents()).toEqual(['中','😀','é文',...body.split('\n')]);
+        at C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:122:99
+
+    Error Context: ..\..\test-results\audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ..\..\test-results\audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

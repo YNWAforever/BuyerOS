@@ -1,0 +1,74 @@
+{
+  "task_id": "C61-07",
+  "reviewed_peer_source_sha": "e17b699752a3c887abd44601f3148dd62171db09",
+  "candidate_source_sha": "08e086eed98881b35dd6ac46e4d89155a8ad153c",
+  "official_documents": [
+    {
+      "url": "https://neon.com/docs/auth/quick-start/nextjs-api-only.md",
+      "retrieved_date_utc": "2026-10-06/07",
+      "bytes": 15371,
+      "sha256": "0b2529fbdb0d7d63389a44fbd5effce4d81aac0c6074df62676c1f997be9ee38"
+    },
+    {
+      "url": "https://neon.com/docs/auth/guides/plugins/jwt.md",
+      "retrieved_date_utc": "2026-10-06/07",
+      "bytes": 12710,
+      "sha256": "014f124e9ced47359029cb7e7ae960a903bb123147e9ebed7331c5a2efa7ceaf"
+    },
+    {
+      "url": "https://neon.com/docs/auth/production-checklist.md",
+      "retrieved_date_utc": "2026-10-06/07",
+      "bytes": 7341,
+      "sha256": "3322661e9ee70604864b95ebfd64a7a121812476a2c857641c45eef3a83df212"
+    }
+  ],
+  "sdk_version": "0.5.0-beta",
+  "better_auth_version": "1.6.23",
+  "registry_version_checked": "0.5.0-beta",
+  "public_sdk_fixtures": {
+    "source_sha": "e17b699752a3c887abd44601f3148dd62171db09",
+    "source_sha_after": "e17b699752a3c887abd44601f3148dd62171db09",
+    "command": [
+      "node",
+      "--test",
+      "tests/neon-sdk-proxy-redirect.test.mjs",
+      "tests/neon-sdk-token-cache.test.mjs",
+      "tests/neon-sdk-cross-tab-cache.test.mjs",
+      "tests/neon-auth-broadcast-storage.test.mjs"
+    ],
+    "exit_code": 0,
+    "seconds": 2.847,
+    "environment": "L0 owned loopback public SDK fixture; patched peer snapshot; not production adapter or real Neon",
+    "log": "artifacts/c61/C61-07-existing-sdk.log",
+    "counts": {
+      "tests": 6,
+      "pass": 6,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "reporting_wrapper_exception": "cp950 UnicodeEncodeError after command/artifact completion; this UTF-8 validation exits 0",
+    "peer_clean_after": true
+  },
+  "help_contract": {
+    "command": [
+      "node",
+      "scripts/neon-real-preflight.mjs",
+      "--help"
+    ],
+    "exit_code": 1,
+    "actual_usage": "check TARGET_JSON",
+    "no_http": true,
+    "path": "artifacts/c61/C61-07-preflight-help.log"
+  },
+  "matrix": {
+    "peer_public_sdk_units": "6 pass, 0 fail/error/skip; loopback patched SDK fixture",
+    "candidate_built_portable": "not-run",
+    "candidate_built_vercel": "not-run",
+    "real_neon_email": "blocked: target/account/method authorization absent",
+    "real_google": "blocked: target and Google configuration absent",
+    "real_authenticated_workspace_api": "blocked: canonical identity migration/trust not delivered",
+    "production_auth": "not-activated"
+  },
+  "n00_accepted": false
+}

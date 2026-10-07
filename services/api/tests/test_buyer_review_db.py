@@ -164,6 +164,8 @@ def api(seeded, monkeypatch):
             "DELETE FROM outbox_events WHERE workspace_id = %s",
             "DELETE FROM async_job_items WHERE workspace_id = %s",
             "DELETE FROM async_jobs WHERE workspace_id = %s",
+            "DELETE FROM bulk_manifest_items WHERE workspace_id = %s",
+            "DELETE FROM bulk_manifests WHERE workspace_id = %s",
             "DELETE FROM filter_presets WHERE workspace_id = %s",
             "DELETE FROM policy_decisions WHERE workspace_id = %s",
             "DELETE FROM suppressions WHERE workspace_id = %s",

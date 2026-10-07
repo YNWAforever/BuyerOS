@@ -1,5 +1,5 @@
 'use client';
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {usePathname, useRouter} from 'next/navigation';
 import {useWorkspaceSession, useSessionSnapshot} from '@/features/providers/workspace-session';
 import {toWorkspaces, toProjects, toIcpVersions, type LiveWorkspace, type LiveProject} from '@/services/live/mapping';
@@ -12,7 +12,7 @@ import {LiveProjectManager} from './project-manager';
 import {LivePolicySettings} from './policy-settings';
 import {LiveSettings} from './settings';
 import {LiveOperations} from './operations';
-import {LiveOverview,LiveWorkQueue} from './overview';
+import {LiveWorkQueue} from './overview';
 import {LiveResults,LiveUsage} from './results';
 import {LiveRunProgress} from './run-progress';
 import {LiveDraftEditor} from './drafts';
@@ -54,18 +54,23 @@ function updateUrl(router: ReturnType<typeof useRouter>, changes: Record<string,
   window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
 }
 export function LiveWorkspace() {
-  const {session, client, auth, authError} = useWorkspaceSession();
+  const {session, client, auth, authError, authBootstrap} = useWorkspaceSession();
   const snapshot = useSessionSnapshot();
   const router = useRouter(), pathname = usePathname() || '/app';
   const [workspaces, setWorkspaces] = useState<LoadState<LiveWorkspace>>({kind:'loading'});
   const [projects, setProjects] = useState<LoadState<LiveProject>>({kind:'loading'});
   const [selectionError, setSelectionError] = useState('');
   const [workspaceRefresh,setWorkspaceRefresh]=useState(0);
+  const [accessError,setAccessError]=useState('');
+  const checkingAccess=useRef(false),allowAutoSelection=useRef(true),pendingAccessCheck=useRef<string|null>(null);
   const [projectRefresh, setProjectRefresh] = useState(0);
   const [locale, setLocale] = useState<'en'|'zh-HK'>('en');
   const [prefVersion,setPrefVersion]=useState(1),[localeSaving,setLocaleSaving]=useState(false),[localeError,setLocaleError]=useState('');
   const [localeReadyFor,setLocaleReadyFor]=useState<string|null>(null);
+  const manualLocale = useRef(false);
+  useEffect(()=>{try {const saved=localStorage.getItem('buyeros.locale');if(saved==='en'||saved==='zh-HK'){manualLocale.current=true;queueMicrotask(()=>setLocale(saved));}}catch {/* Locale storage is optional. */}},[]);
   const t = (value:string) => locale === 'zh-HK' ? (liveZh[value] || zh[value] || value) : value;
+  const localizeError=(message:string)=>{const [guidance,id]=message.split(' Request ID: ');return t(guidance)+(id?` ${t('Request ID')}: ${id}`:'');};
   useEffect(() => {document.documentElement.lang=locale;},[locale]);
   const workspace = snapshot.scope.workspace, project = snapshot.scope.project;
   const authorized = workspaces.kind === 'ready' && workspaces.items.some(item => item.id === workspace);
@@ -83,33 +88,73 @@ export function LiveWorkspace() {
     const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
     void client.request<{locale:'en'|'zh-HK';version:number}>({path:`/v1/workspaces/${workspace}/preferences`,token,scope:identity,
       signal:AbortSignal.any([own.signal,session.controller().signal])}).then(value=>{
-      if(!own.signal.aborted&&session.isCurrent(identity)){setLocale(value.locale);setPrefVersion(value.version);setLocaleReadyFor(identity);setLocaleError('');}
+      if(!own.signal.aborted&&session.isCurrent(identity)){if(!manualLocale.current)setLocale(value.locale);setPrefVersion(value.version);setLocaleReadyFor(identity);setLocaleError('');}
     }).catch(error=>{if(!own.signal.aborted&&session.isCurrent(identity)&&!(error instanceof LiveCancelled))setLocaleError(describeLiveError(error));});
     return()=>own.abort();
   },[authorized,workspace,snapshot.authenticated,snapshot.identity,client,session]);
   async function updateLocale(value:'en'|'zh-HK'){
+    manualLocale.current=true;setLocale(value);
+    try {localStorage.setItem('buyeros.locale',value);}catch {/* Display locale works without storage. */}
     if(!localeReady||!workspace||localeSaving)return;
-    const previous=locale,identity=session.identity(),token=session.token();if(!token)return;
-    setLocale(value);setLocaleSaving(true);setLocaleError('');
+    const identity=session.identity(),token=session.token();if(!token)return;
+    setLocaleSaving(true);setLocaleError('');
     try{
       const updated=await client.request<{locale:'en'|'zh-HK';version:number}>({path:`/v1/workspaces/${workspace}/preferences`,
         method:'PATCH',token,scope:identity,body:{locale:value},ifMatch:`"${prefVersion}"`,idempotencyKey:crypto.randomUUID()});
-      if(session.isCurrent(identity)){setLocale(updated.locale);setPrefVersion(updated.version);}
-    }catch(error){if(session.isCurrent(identity)&&!(error instanceof LiveCancelled)){setLocale(previous);setLocaleError(describeLiveError(error));}}
+      if(session.isCurrent(identity))setPrefVersion(updated.version);
+    }catch(error){if(session.isCurrent(identity)&&!(error instanceof LiveCancelled))setLocaleError(describeLiveError(error));}
     finally{setLocaleSaving(false);}
+  }
+  function retryAccess(){
+    setSelectionError('');setAccessError('');
+    // Preserve a legitimate member's editor while checking; a failed read is not revocation.
+    setWorkspaces(current=>current.kind==='ready'?current:{kind:'loading'});
+    setWorkspaceRefresh(value=>value+1);
+  }
+  useEffect(()=>client.subscribeAccessDenied(event=>{
+    if(!session.isCurrent(event.scope)||event.workspace!==session.current().workspace)return;
+    if(checkingAccess.current){pendingAccessCheck.current=event.scope;return;}
+    checkingAccess.current=true;
+    setWorkspaceRefresh(value=>value+1);
+  }),[client,session]);
+  const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
+  function copyDiagnostics(){
+    const message=workspaces.kind==='error'?workspaces.message:'';
+    const requestId=message.match(/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/i)?.[0]??null;
+    // Allow-listed support fields only: no token, OAuth code, email or user claims.
+    void navigator.clipboard?.writeText(JSON.stringify({request_id:requestId,time:new Date().toISOString(),
+      workspace_id:workspace,project_id:project,login_method:'auth0'},null,2));
   }
   useEffect(() => {
     if (!snapshot.authenticated) return;
-    const own = new AbortController();
+    const own = new AbortController(),identity=session.identity();
+    checkingAccess.current=true;
     const signal = AbortSignal.any([session.controller().signal, own.signal, AbortSignal.timeout(10_000)]);
     void allPages(client,session,'/v1/workspaces',toWorkspaces,signal).then(items => {
-      if (own.signal.aborted) return;
-      setWorkspaces({kind:'ready',items});
+      if (own.signal.aborted || !session.isCurrent(identity)) return;
+      setAccessError('');setWorkspaces({kind:'ready',items});
+      const current=session.current().workspace;
+      if(current&&!items.some(item=>item.id===current)){
+        allowAutoSelection.current=false;setSelectionError('Workspace not found (404)');
+        setProjects({kind:'loading'});setLocaleReadyFor(null);setLocaleError('');
+        updateUrl(router,{workspace:null,project:null,profile:null,bulk_job:null,bulk_manifest:null,draft:null,draft_job:null});
+        session.next({workspace:null,project:null});return;
+      }
       const target = requested('workspace');
-      if (target && !items.some(item => item.id === target)) {setSelectionError('Workspace not found (404)'); session.next({workspace:null,project:null}); return;}
-      if (!target && items.length === 1) {session.next({workspace:items[0].id,project:null}); updateUrl(router,{workspace:items[0].id,project:null});}
-      else if (target && session.current().workspace !== target) session.next({workspace:target,project:null});
-    }).catch(error => {if (own.signal.aborted || error instanceof LiveCancelled) return; if (error instanceof LiveError && error.status === 401) {session.setToken(undefined);return;} setWorkspaces({kind:'error',message:describeLiveError(error)});});
+      if (target && !items.some(item => item.id === target)) {setSelectionError('Workspace not found (404)'); return;}
+      if (!target && items.length === 1 && allowAutoSelection.current) {session.next({workspace:items[0].id,project:null}); updateUrl(router,{workspace:items[0].id,project:null});}
+      else if (target && current !== target) session.next({workspace:target,project:null});
+    }).catch(error => {
+      if (own.signal.aborted || !session.isCurrent(identity) || error instanceof LiveCancelled) return;
+      if (error instanceof LiveError && error.status === 401) {session.setToken(undefined);return;}
+      const message=describeLiveError(error);setAccessError(message);
+      setWorkspaces(previous=>previous.kind==='ready'?previous:{kind:'error',message});
+    }).finally(()=>{
+      if(own.signal.aborted||!session.isCurrent(identity))return;
+      checkingAccess.current=false;
+      const followup=pendingAccessCheck.current===identity;pendingAccessCheck.current=null;
+      if(followup)setWorkspaceRefresh(value=>value+1);
+    });
     return () => own.abort();
   }, [client,router,session,snapshot.authenticated,snapshot.scope.actor,snapshot.identity,workspaceRefresh]);
   useEffect(()=>{
@@ -152,7 +197,7 @@ export function LiveWorkspace() {
   function chooseWorkspace(id:string) {
     if(!mayLeaveOffer())return;
     if (workspaces.kind !== 'ready' || !workspaces.items.some(item => item.id === id)) return;
-    setSelectionError(''); setProjects({kind:'loading'});
+    allowAutoSelection.current=true;setAccessError('');setSelectionError(''); setProjects({kind:'loading'});
     session.next({workspace:id,project:null}); updateUrl(router,{workspace:id,project:null,profile:null});
   }
   function chooseProject(id:string) {
@@ -173,28 +218,31 @@ export function LiveWorkspace() {
     const target=new URL(path,window.location.origin);for(const [key,value] of params)target.searchParams.set(key,value);
     router.push(target.pathname+target.search);
   }
-  if (!auth) return <main className="main-shell"><section className="panel" role="status"><h1>Live sign-in unavailable</h1><p>{authError || 'Configure an Auth0 public SPA client, issuer, client ID and API audience.'}</p></section></main>;
-  if (!snapshot.authenticated) return <main className="main-shell"><section className="panel"><h1>FIMMICK BuyerOS</h1><p>Sign in to access your workspaces.</p><button onClick={() => void auth.signIn(pathname + window.location.search)}>Sign in</button></section></main>;
+  if (!auth) return <main className="main-shell">{languagePicker}<section className="panel" role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&<p>{authError}</p>}</section></main>;
+  if (!snapshot.authenticated) return <main className="main-shell">{languagePicker}<section className="panel"><h1>FIMMICK BuyerOS</h1><p>{t('Sign in to access your workspaces.')}</p><button onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></section></main>;
   return <main className="main-shell live-workspace"><div className="content">
-    <header className="topbar live-topbar"><b>FIMMICK BuyerOS</b><span>{t('Live workspace')}</span><label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving||!localeReady}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label><button onClick={() => {session.setToken(undefined); void auth.signOut();}}>{t('Sign out')}</button></header>
+    <header className="topbar live-topbar"><b>FIMMICK BuyerOS</b><span>{t('Live workspace')}</span>{languagePicker}<button onClick={() => {session.setToken(undefined); void auth.signOut();}}>{t('Sign out')}</button></header>
     <LiveNavigation t={t} navigate={navigate} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>
-    <section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
+    <div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
       {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
-      {workspaces.kind === 'error' && <><p role="alert">{workspaces.message}</p><button onClick={()=>{setWorkspaces({kind:'loading'});setWorkspaceRefresh(value=>value+1);}}>{t('Retry loading workspaces')}</button></>}
-      {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>{t('No workspace membership. Ask an administrator for access.')}</p>)}
+      {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
+      {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p></>)}
+      {workspaces.kind==='ready'&&<><button onClick={retryAccess}>{t('Check access again')}</button>{accessError&&<p role="alert">{localizeError(accessError)}</p>}</>}
+      {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={copyDiagnostics}>{t('Copy diagnostics')}</button></>}
       {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
     </section>
-    {selectionError && <section className="panel" role="alert">{selectionError}</section>}
-    {localeError && <section className="panel" role="alert">{localeError}</section>}
     {authorized && <section className="panel" aria-label={t('Project selection')}><h2>{t('Projects')}</h2>
       {projects.kind === 'loading' && <p role="status">{t('Loading projects…')}</p>}
-      {projects.kind === 'error' && <><p role="alert">{projects.message}</p><button onClick={()=>{setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}>{t('Retry loading projects')}</button></>}
+      {projects.kind === 'error' && <><p role="alert">{localizeError(projects.message)}</p><button onClick={()=>{setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}>{t('Retry loading projects')}</button></>}
       {projects.kind === 'ready' && (projects.items.length ? <label>{t('Project')} <select aria-label={t('Project')} value={project || ''} onChange={event=>chooseProject(event.target.value)}><option value="">{t('Choose project')}</option>{projects.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>{t('No projects yet.')}</p>)}
       {(canCreate||canEdit&&projectKnown&&projectActive) && <div className="inline">{canCreate&&<button onClick={()=>navigate('/app/discover/new')}>{t('New project')}</button>}{canEdit&&projectKnown&&projectActive&&<button onClick={()=>navigate('/app/discover/edit')}>{t('Edit offer')}</button>}</div>}
     </section>}
+    </div>
+    {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
+    {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
     {authorized && canCreate && pathname === '/app/discover/new' && <LiveOfferWizard key={`new-${workspace}`} mode="create" onSaved={saved} t={t}/>}
     {authorized && canEdit && projectKnown && projectActive && pathname === '/app/discover/edit' && <LiveOfferWizard key={`edit-${workspace}-${project}`} mode="edit" projectId={project!} onSaved={saved} t={t}/>}
-    {authorized && projectKnown && pathname === '/app' && <><LiveOverview t={t}/><LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/><LiveUsage key={`usage-${workspace}-${project}`} locale={locale} t={t}/><LiveProfilePanel key={`${workspace}-${project}`} canApprove={canApprove&&projectActive} t={t}/>{canArchive&&<LiveProjectManager key={`manager-${workspace}-${project}`} projectId={project!} t={t} onArchived={()=>{session.next({project:null});updateUrl(router,{project:null,profile:null});setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}/>}</>}
+    {authorized && projectKnown && pathname === '/app' && <><LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/><LiveUsage key={`usage-${workspace}-${project}`} locale={locale} t={t}/><LiveProfilePanel key={`${workspace}-${project}`} canApprove={canApprove&&projectActive} t={t}/>{canArchive&&<LiveProjectManager key={`manager-${workspace}-${project}`} projectId={project!} t={t} onArchived={()=>{session.next({project:null});updateUrl(router,{project:null,profile:null});setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}/>}</>}
     {authorized && projectKnown && pathname === '/app/results' && <LiveResults key={`results-${workspace}-${project}`} locale={locale} canReview={canApprove} canEdit={canEdit} canQuote={canEdit} canAssign={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId??null:null} t={t}/>}
     {authorized && projectKnown && pathname === '/app/discover' && <LiveBuyers locale={locale} canReview={canApprove} canEdit={canBuyerEdit} canQuote={canEdit} canAssign={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId:null}/>}
     {authorized && projectKnown && (pathname === '/app/runs' || /^\/app\/discover\/[^/]+$/.test(pathname) && !['new','edit'].includes(pathname.split('/')[3])) && <LiveRunProgress key={`runs-${workspace}-${project}-${pathname}`} runId={pathname.startsWith('/app/discover/')?pathname.split('/')[3]:undefined} canStart={canEdit&&projectActive} t={t} onOpenBuyers={()=>navigate('/app/discover')}/>}

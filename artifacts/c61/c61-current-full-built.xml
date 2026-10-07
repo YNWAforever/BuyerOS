@@ -1,0 +1,224 @@
+<testsuites id="" name="" tests="96" failures="0" skipped="0" errors="0" time="1232.5639009999998">
+<testsuite name="audit-access-revocation.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="10" failures="0" skipped="0" time="97.861" errors="0">
+<testcase name="U05 revoked open-page read clears private scope en" classname="audit-access-revocation.spec.ts" time="13.949">
+</testcase>
+<testcase name="U05 revoked open-page read clears private scope zh-HK" classname="audit-access-revocation.spec.ts" time="10.881">
+</testcase>
+<testcase name="U05 explicit recheck cancels held pre-withdrawal buyer rows" classname="audit-access-revocation.spec.ts" time="9.153">
+</testcase>
+<testcase name="U05 older access check cannot restore withdrawn A after another recheck" classname="audit-access-revocation.spec.ts" time="8.159">
+</testcase>
+<testcase name="U05 delayed A access result cannot clear current B" classname="audit-access-revocation.spec.ts" time="7.914">
+</testcase>
+<testcase name="U05 denial during a held access check schedules a fresh membership read" classname="audit-access-revocation.spec.ts" time="10.71">
+</testcase>
+<testcase name="U05 forbidden save rechecks downgraded role while retaining dirty Unicode draft" classname="audit-access-revocation.spec.ts" time="10.308">
+</testcase>
+<testcase name="U05 revoked save is denied without creating a revision or replaying" classname="audit-access-revocation.spec.ts" time="10.077">
+</testcase>
+<testcase name="U05 missing job does not revoke an active membership" classname="audit-access-revocation.spec.ts" time="8.372">
+</testcase>
+<testcase name="U05 failed access recheck preserves scope and supports explicit recovery" classname="audit-access-revocation.spec.ts" time="8.338">
+</testcase>
+</testsuite>
+<testsuite name="audit-auth-entry.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="7" failures="0" skipped="0" time="24.827" errors="0">
+<testcase name="U13 initialization has no false configuration alert before hydration" classname="audit-auth-entry.spec.ts" time="3">
+</testcase>
+<testcase name="U02 U03 no membership permits locale switching and read-only access retry" classname="audit-auth-entry.spec.ts" time="3.605">
+</testcase>
+<testcase name="U03 403 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="3.653">
+</testcase>
+<testcase name="U03 404 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="3.438">
+</testcase>
+<testcase name="U03 500 access errors retain locale and retry" classname="audit-auth-entry.spec.ts" time="4.44">
+</testcase>
+<testcase name="U03 manual locale choice survives a delayed member preference response" classname="audit-auth-entry.spec.ts" time="3.749">
+</testcase>
+<testcase name="U03 expired access returns to sign-in with the selected locale" classname="audit-auth-entry.spec.ts" time="2.942">
+</testcase>
+</testsuite>
+<testsuite name="audit-bulk-confirmation.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="8" failures="0" skipped="0" time="66.369" errors="0">
+<testcase name="B02 adding a sixth buyer clears the previously confirmed five" classname="audit-bulk-confirmation.spec.ts" time="5.563">
+</testcase>
+<testcase name="B02 reason, target and exclusions clear confirmation; unchanged selection survives paging" classname="audit-bulk-confirmation.spec.ts" time="5.686">
+</testcase>
+<testcase name="B03 searchable colleagues assign ten buyers through a real durable API; clear owner also works" classname="audit-bulk-confirmation.spec.ts" time="14.054">
+</testcase>
+<testcase name="B04 inactive owner is rejected and a stale buyer reports conflict without overwriting" classname="audit-bulk-confirmation.spec.ts" time="16.603">
+</testcase>
+<testcase name="B16 committed response loss locks changes and reconciles the same key after a route remount" classname="audit-bulk-confirmation.spec.ts" time="7.712">
+</testcase>
+<testcase name="B16 late committed B job cannot overwrite A; returning to B reconciles its exact job link" classname="audit-bulk-confirmation.spec.ts" time="8.368">
+</testcase>
+<testcase name="B03 zh-HK mobile colleague search recovers a failed read" classname="audit-bulk-confirmation.spec.ts" time="4.565">
+</testcase>
+<testcase name="B03 viewer cannot assign through UI or direct API" classname="audit-bulk-confirmation.spec.ts" time="3.818">
+</testcase>
+</testsuite>
+<testsuite name="audit-bulk-manifest.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="9" failures="0" skipped="0" time="111.555" errors="0">
+<testcase name="B01 B14 100 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="8.624">
+</testcase>
+<testcase name="B01 B14 101 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="15.006">
+</testcase>
+<testcase name="B01 B14 1001 actual rows require frozen preview and explicit execution" classname="audit-bulk-manifest.spec.ts" time="21.064">
+</testcase>
+<testcase name="B15 lost preview and committed 202 retry one frozen body/key and restore after re-login" classname="audit-bulk-manifest.spec.ts" time="12.171">
+</testcase>
+<testcase name="B08 failed rows get a new exact digest and current versions; successes are retained" classname="audit-bulk-manifest.spec.ts" time="12.875">
+</testcase>
+<testcase name="B16 late preview cannot cross A-B-A; viewer has no maintenance; zh-HK mobile exact confirmation" classname="audit-bulk-manifest.spec.ts" time="8.378">
+</testcase>
+<testcase name="B01 reviewer executes current fit-bound review" classname="audit-bulk-manifest.spec.ts" time="11.438">
+</testcase>
+<testcase name="B01 typed list target supports confirmed add and explicit new remove preview" classname="audit-bulk-manifest.spec.ts" time="8.104">
+</testcase>
+<testcase name="B09 UI cancel preserves the committed first50 and cancels only pending51" classname="audit-bulk-manifest.spec.ts" time="13.895">
+</testcase>
+</testsuite>
+<testsuite name="audit-daily-journey.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="4" failures="0" skipped="0" time="148.798" errors="0">
+<testcase name="Q09 U09 › T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="40.609">
+</testcase>
+<testcase name="Q09 U09 › T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="35.595">
+</testcase>
+<testcase name="Q09 U09 › T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="37.652">
+</testcase>
+<testcase name="Q09 U09 › T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-daily-journey.spec.ts" time="34.942">
+</testcase>
+</testsuite>
+<testsuite name="audit-daily-ux.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="7" failures="0" skipped="0" time="36.113" errors="0">
+<testcase name="WF01 latest offer metadata uses bounded one-row pages rather than downloading ICP history" classname="audit-daily-ux.spec.ts" time="3.199">
+</testcase>
+<testcase name="U09 no selection hides batch forms; explicit selection exposes a sticky named action summary" classname="audit-daily-ux.spec.ts" time="3.652">
+</testcase>
+<testcase name="WF01 project-only partial save preserves every input and same intent creates one project and ICP" classname="audit-daily-ux.spec.ts" time="4.291">
+</testcase>
+<testcase name="WF02 held reviewer cannot approve the previous offer revision or start research" classname="audit-daily-ux.spec.ts" time="7.98">
+</testcase>
+<testcase name="U10 U11 en keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="5.443">
+</testcase>
+<testcase name="U10 U11 zh-HK keyboard, named controls, responsive scope and concise announcements" classname="audit-daily-ux.spec.ts" time="6.857">
+</testcase>
+<testcase name="U09 manual outcome names, UTC zero denominators and append-only correction survive refresh" classname="audit-daily-ux.spec.ts" time="4.691">
+</testcase>
+</testsuite>
+<testsuite name="audit-draft-dirty.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="10" failures="0" skipped="0" time="51.729" errors="0">
+<testcase name="D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="5.173">
+</testcase>
+<testcase name="D02 Open draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="5.481">
+</testcase>
+<testcase name="D02 Refresh job Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="6.802">
+</testcase>
+<testcase name="D02 Save is awaited before opening another draft and persists one revision" classname="audit-draft-dirty.spec.ts" time="5.253">
+</testcase>
+<testcase name="D02 failed Save 401 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.016">
+</testcase>
+<testcase name="D02 failed Save 412 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.692">
+</testcase>
+<testcase name="D02 failed Save 503 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="4.385">
+</testcase>
+<testcase name="D02 Refresh does not overwrite the unsaved buffer before a decision" classname="audit-draft-dirty.spec.ts" time="5.121">
+</testcase>
+<testcase name="D02 delayed refresh cannot materialize a draft into a new project scope" classname="audit-draft-dirty.spec.ts" time="4.309">
+</testcase>
+<testcase name="D02 zh-HK mobile dialog preserves content and keeps all choices visible" classname="audit-draft-dirty.spec.ts" time="4.497">
+</testcase>
+</testsuite>
+<testsuite name="audit-draft-reground.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="4" failures="0" skipped="0" time="45.878" errors="0">
+<testcase name="D01/D03 manual Unicode draft exposes a source review and operator cannot attest" classname="audit-draft-reground.spec.ts" time="9.091">
+</testcase>
+<testcase name="D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export" classname="audit-draft-reground.spec.ts" time="12.761">
+</testcase>
+<testcase name="D03 zh-HK mobile code-point split reads every source and exports exact Unicode message" classname="audit-draft-reground.spec.ts" time="11.768">
+</testcase>
+<testcase name="U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result" classname="audit-draft-reground.spec.ts" time="12.258">
+</testcase>
+</testsuite>
+<testsuite name="audit-job-scope.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="6" failures="0" skipped="0" time="33.453" errors="0">
+<testcase name="U15 project A0 B5; card and failed list share scope; explicit workspace5" classname="audit-job-scope.spec.ts" time="7.065">
+</testcase>
+<testcase name="U15 workspace view remains actor-bound, other actor detail denied; admin read sees all" classname="audit-job-scope.spec.ts" time="5.636">
+</testcase>
+<testcase name="U15 actual 21 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="4.542">
+</testcase>
+<testcase name="U15 actual 101 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="6.17">
+</testcase>
+<testcase name="U15 held B list and count cannot overwrite newer A-B-A generation" classname="audit-job-scope.spec.ts" time="4.903">
+</testcase>
+<testcase name="U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery" classname="audit-job-scope.spec.ts" time="5.137">
+</testcase>
+</testsuite>
+<testsuite name="audit-keyboard-workbench.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="4" failures="0" skipped="0" time="107.645" errors="0">
+<testcase name="U09 U10 keyboard en desktop task3 cross-page assignment, persisted conflict and exact failed-only manifest" classname="audit-keyboard-workbench.spec.ts" time="32.022">
+</testcase>
+<testcase name="U09 U10 keyboard en desktop task5 versioned member change, failed-job paging and scope recovery" classname="audit-keyboard-workbench.spec.ts" time="24.974">
+</testcase>
+<testcase name="U09 U10 keyboard zh-HK mobile task3 cross-page assignment, persisted conflict and exact failed-only manifest" classname="audit-keyboard-workbench.spec.ts" time="28.79">
+</testcase>
+<testcase name="U09 U10 keyboard zh-HK mobile task5 versioned member change, failed-job paging and scope recovery" classname="audit-keyboard-workbench.spec.ts" time="21.859">
+</testcase>
+</testsuite>
+<testsuite name="audit-keyboard.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="4" failures="0" skipped="0" time="219.687" errors="0">
+<testcase name="T30 keyboard en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="53.7">
+</testcase>
+<testcase name="T30 keyboard en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="53.948">
+</testcase>
+<testcase name="T30 keyboard zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="55.049">
+</testcase>
+<testcase name="T30 keyboard zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset" classname="audit-keyboard.spec.ts" time="56.99">
+</testcase>
+</testsuite>
+<testsuite name="audit-memberships.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="9" failures="0" skipped="0" time="59.918" errors="0">
+<testcase name="U06 all 250 real members are readable in 13 pages and member 101 is searchable" classname="audit-memberships.spec.ts" time="7.925">
+</testcase>
+<testcase name="U09 member and role accessible names use display names while duplicate canonical IDs remain inspectable" classname="audit-memberships.spec.ts" time="7.599">
+</testcase>
+<testcase name="B03 U09 duplicate owner choices retain complete canonical disambiguation without changing membership authority" classname="audit-memberships.spec.ts" time="5.833">
+</testcase>
+<testcase name="U07 duplicate names and suffixes remain distinct during a versioned role change" classname="audit-memberships.spec.ts" time="6.972">
+</testcase>
+<testcase name="U08 sole admin refusal is understandable and does not claim success" classname="audit-memberships.spec.ts" time="6.277">
+</testcase>
+<testcase name="S06 viewer cannot read the admin directory or eligible assignees" classname="audit-memberships.spec.ts" time="5.335">
+</testcase>
+<testcase name="U06 stale page response cannot restore old A-B-A directory" classname="audit-memberships.spec.ts" time="7.003">
+</testcase>
+<testcase name="U06 zh-HK mobile search and failed page read recover without synthetic rows" classname="audit-memberships.spec.ts" time="6.108">
+</testcase>
+<testcase name="U07 lost committed role response requires a read before any further role write" classname="audit-memberships.spec.ts" time="6.866">
+</testcase>
+</testsuite>
+<testsuite name="audit-operations.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="11" failures="0" skipped="0" time="118.901" errors="0">
+<testcase name="B10 B11 all 21 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="5.342">
+</testcase>
+<testcase name="B10 B11 all 101 real producer result IDs are readable in pages of 20" classname="audit-operations.spec.ts" time="5.273">
+</testcase>
+<testcase name="B11 zero results and late job response cannot replace newer job" classname="audit-operations.spec.ts" time="7.383">
+</testcase>
+<testcase name="B11 late result page is discarded after workspace A-B-A" classname="audit-operations.spec.ts" time="6.442">
+</testcase>
+<testcase name="B12 unopened 1000-result job reads summary only and never walks result pages" classname="audit-operations.spec.ts" time="13.225">
+</testcase>
+<testcase name="B12 2.5s summary RTT never overlaps or preloads results; terminal refreshes visible page once" classname="audit-operations.spec.ts" time="29.523">
+</testcase>
+<testcase name="B13 hidden summary pause and double visibility resume produce exactly one refresh" classname="audit-operations.spec.ts" time="12.443">
+</testcase>
+<testcase name="B13 actual 429 Retry-After and 503 recover without result-page traffic" classname="audit-operations.spec.ts" time="12.35">
+</testcase>
+<testcase name="B16 old summary cannot overwrite another scope after A-B-A" classname="audit-operations.spec.ts" time="11.2">
+</testcase>
+<testcase name="B13 zh-HK 390px summary/results controls remain usable without overflow" classname="audit-operations.spec.ts" time="6.237">
+</testcase>
+<testcase name="B13 Operations clears a transient summary error after a valid recovery" classname="audit-operations.spec.ts" time="9.483">
+</testcase>
+</testsuite>
+<testsuite name="audit-research-intent.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="1" failures="0" skipped="0" time="10.207" errors="0">
+<testcase name="B05 B06 committed lost 202 and manual Retry share one durable research intent" classname="audit-research-intent.spec.ts" time="10.207">
+</testcase>
+</testsuite>
+<testsuite name="audit-template-copy.spec.ts" timestamp="2026-10-06T20:28:34.743Z" hostname="" tests="2" failures="0" skipped="0" time="25.321" errors="0">
+<testcase name="A02 fixed-template promise matches two actual outputs; manual edits keep Q15 dirty protection" classname="audit-template-copy.spec.ts" time="14.69">
+</testcase>
+<testcase name="A07 zh-HK mobile template keeps original English citations through exact approval and authorized export" classname="audit-template-copy.spec.ts" time="10.631">
+</testcase>
+</testsuite>
+</testsuites>

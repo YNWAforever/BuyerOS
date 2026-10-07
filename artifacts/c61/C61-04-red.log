@@ -1,0 +1,142 @@
+FFFFFF                                                                   [100%]
+================================== FAILURES ===================================
+___ test_database_error_diagnostics_redacts_secrets[42P01-missing_relation] ___
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B1CAC47650>
+state = '42P01', classification = 'missing_relation'
+
+    @pytest.mark.parametrize(('state', 'classification'), [
+        ('42P01', 'missing_relation'), ('42501', 'insufficient_privilege'),
+        ('08006', 'connection_failure'),
+    ])
+    def test_database_error_diagnostics_redacts_secrets(caplog, state, classification):
+        class DriverError(Exception):
+            sqlstate = state
+        error = OperationalError('SELECT ' + SECRETS[2], {'password': SECRETS[0]}, DriverError(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(request(), error))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+>       assert fields.get('sqlstate') == state
+E       AssertionError: assert None == '42P01'
+E        +  where None = <built-in method get of dict object at 0x000001B1CAD8E680>('sqlstate')
+E        +    where <built-in method get of dict object at 0x000001B1CAD8E680> = {}.get
+
+tests\test_error_diagnostics.py:33: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=1d123054-2633-40b7-8e07-b6aed83dad98 type=OperationalError
+_ test_database_error_diagnostics_redacts_secrets[42501-insufficient_privilege] _
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B1CB1293D0>
+state = '42501', classification = 'insufficient_privilege'
+
+    @pytest.mark.parametrize(('state', 'classification'), [
+        ('42P01', 'missing_relation'), ('42501', 'insufficient_privilege'),
+        ('08006', 'connection_failure'),
+    ])
+    def test_database_error_diagnostics_redacts_secrets(caplog, state, classification):
+        class DriverError(Exception):
+            sqlstate = state
+        error = OperationalError('SELECT ' + SECRETS[2], {'password': SECRETS[0]}, DriverError(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(request(), error))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+>       assert fields.get('sqlstate') == state
+E       AssertionError: assert None == '42501'
+E        +  where None = <built-in method get of dict object at 0x000001B1CB485C40>('sqlstate')
+E        +    where <built-in method get of dict object at 0x000001B1CB485C40> = {}.get
+
+tests\test_error_diagnostics.py:33: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=1d123054-2633-40b7-8e07-b6aed83dad98 type=OperationalError
+__ test_database_error_diagnostics_redacts_secrets[08006-connection_failure] __
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B1CAE8AED0>
+state = '08006', classification = 'connection_failure'
+
+    @pytest.mark.parametrize(('state', 'classification'), [
+        ('42P01', 'missing_relation'), ('42501', 'insufficient_privilege'),
+        ('08006', 'connection_failure'),
+    ])
+    def test_database_error_diagnostics_redacts_secrets(caplog, state, classification):
+        class DriverError(Exception):
+            sqlstate = state
+        error = OperationalError('SELECT ' + SECRETS[2], {'password': SECRETS[0]}, DriverError(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(request(), error))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+>       assert fields.get('sqlstate') == state
+E       AssertionError: assert None == '08006'
+E        +  where None = <built-in method get of dict object at 0x000001B1CB588AC0>('sqlstate')
+E        +    where <built-in method get of dict object at 0x000001B1CB588AC0> = {}.get
+
+tests\test_error_diagnostics.py:33: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=1d123054-2633-40b7-8e07-b6aed83dad98 type=OperationalError
+____ test_pool_timeout_is_distinguished_without_logging_exception_message _____
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B1CAE89CA0>
+
+    def test_pool_timeout_is_distinguished_without_logging_exception_message(caplog):
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(request(), PoolTimeout(SECRETS[0])))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+>       assert fields.get('classification') == 'pool_timeout'
+E       AssertionError: assert None == 'pool_timeout'
+E        +  where None = <built-in method get of dict object at 0x000001B1CAD8CD80>('classification')
+E        +    where <built-in method get of dict object at 0x000001B1CAD8CD80> = {}.get
+
+tests\test_error_diagnostics.py:51: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=1d123054-2633-40b7-8e07-b6aed83dad98 type=TimeoutError
+_____________ test_unknown_operational_failure_stays_unconfirmed ______________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B1CAC478F0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1CAC475F0>
+
+    def test_unknown_operational_failure_stays_unconfirmed(caplog, monkeypatch):
+        monkeypatch.delenv('BUYEROS_SOURCE_SHA', raising=False)
+        monkeypatch.delenv('VERCEL_GIT_COMMIT_SHA', raising=False)
+        error = OperationalError(SECRETS[0], {'bind': SECRETS[2]}, Exception(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(request(), error))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+>       assert fields.get('classification') == 'unconfirmed'
+E       AssertionError: assert None == 'unconfirmed'
+E        +  where None = <built-in method get of dict object at 0x000001B1CB58BF00>('classification')
+E        +    where <built-in method get of dict object at 0x000001B1CB58BF00> = {}.get
+
+tests\test_error_diagnostics.py:64: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=1d123054-2633-40b7-8e07-b6aed83dad98 type=OperationalError
+_____ test_diagnostic_context_rejects_secret_bearing_and_invalid_metadata _____
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001B1CAC5AF30>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1CAC586E0>
+
+    def test_diagnostic_context_rejects_secret_bearing_and_invalid_metadata(caplog, monkeypatch):
+        value = request()
+        value.state.database_diagnostics = {
+            'schema_head': SECRETS[0], 'runtime_role': SECRETS[1],
+            'pool_wait_ms': SECRETS[2], 'connection_timeout': SECRETS[0],
+        }
+        monkeypatch.setenv('BUYEROS_SOURCE_SHA', SECRETS[0])
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(value, OperationalError(SECRETS[0], {}, Exception(SECRETS[1]))))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+>       assert fields.get('request_id') == REQUEST_ID
+E       AssertionError: assert None == '1d123054-2633-40b7-8e07-b6aed83dad98'
+E        +  where None = <built-in method get of dict object at 0x000001B1CB177E40>('request_id')
+E        +    where <built-in method get of dict object at 0x000001B1CB177E40> = {}.get
+
+tests\test_error_diagnostics.py:80: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:59 unexpected_api_error request_id=1d123054-2633-40b7-8e07-b6aed83dad98 type=OperationalError
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-diag-red.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_error_diagnostics.py::test_database_error_diagnostics_redacts_secrets[42P01-missing_relation]
+FAILED tests/test_error_diagnostics.py::test_database_error_diagnostics_redacts_secrets[42501-insufficient_privilege]
+FAILED tests/test_error_diagnostics.py::test_database_error_diagnostics_redacts_secrets[08006-connection_failure]
+FAILED tests/test_error_diagnostics.py::test_pool_timeout_is_distinguished_without_logging_exception_message
+FAILED tests/test_error_diagnostics.py::test_unknown_operational_failure_stays_unconfirmed
+FAILED tests/test_error_diagnostics.py::test_diagnostic_context_rejects_secret_bearing_and_invalid_metadata
+6 failed in 3.39s

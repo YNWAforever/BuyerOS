@@ -57,7 +57,7 @@ def test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback(migrated
     config = Config(str(ALEMBIC_INI))
     config.set_main_option("script_location", str(SERVICE_ROOT / "alembic"))
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0038_c61_workspace_directory"
         for table in ("async_jobs", "async_job_items"):
             assert conn.execute("SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname=%s",
                                 (table,)).fetchone() == (True, True)
@@ -308,3 +308,91 @@ def test_cancel_bulk_job_preserves_committed_rows_and_stops_pending(api, seeded)
     assert {row["status"] for row in status["result_page"]["items"]} == {"updated", "blocked", "cancelled"}
     with psycopg.connect(seeded) as conn:
         assert conn.execute("SELECT version FROM project_buyers WHERE id=%s", (buyer_id,)).fetchone()[0] == 2
+
+
+def test_q05_b07_mixed_100_rows_match_durable_state_and_reason_digest(api, seeded):
+    from buyeros_api.db.icp import canonical_hash
+    from tests.contract_validation import assert_contract_response
+
+    owner_id = _admin_membership(seeded)
+    owner_user = uuid.uuid5(uuid.NAMESPACE_URL, ADMIN)
+    updated = [_seed_buyer(seeded, name=f"Q05 update {i:02d}") for i in range(25)]
+    unchanged = [_seed_buyer(seeded, name=f"Q05 unchanged {i:02d}", owner_user_id=str(owner_user)) for i in range(25)]
+    stale = [_seed_buyer(seeded, name=f"Q05 stale {i:02d}") for i in range(25)]
+    missing = [str(uuid.uuid4()) for _ in range(25)]
+    body = {"selection": {"kind": "explicit", "buyers": [
+        {"id": value, "version": 99 if value in stale else 1}
+        for value in updated + unchanged + stale + missing
+    ]}, "owner_membership_id": owner_id, "reason": "Q05 exact mixed assignment reason"}
+    path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-owner-assignments"
+    response = api.post(path, json=body, headers=_h(subject=OPERATOR, key="q05-mixed-100"))
+    assert response.status_code == 200, response.text
+    assert_contract_response("BulkResultResponse", response.json())
+    data = response.json()["data"]
+    assert (data["requested"], data["updated"], data["unchanged"], data["blocked"], data["conflicts"]) == (100, 25, 25, 25, 25)
+    assert data["requested"] == sum(data[key] for key in ("updated", "unchanged", "blocked", "conflicts"))
+    results = {row["id"]: row for row in data["results"]}
+    assert len(results) == 100
+    for ids, expected in ((updated, "updated"), (unchanged, "unchanged"), (stale, "conflict"), (missing, "blocked")):
+        assert all(results[value]["status"] == expected for value in ids)
+    expected_digest = canonical_hash({"owner_membership_id": owner_id, "reason": body["reason"]})
+    with psycopg.connect(seeded) as db:
+        for value in updated + unchanged + stale:
+            state = db.execute("SELECT owner_user_id,version FROM project_buyers WHERE id=%s", (value,)).fetchone()
+            assert state == ((None, 1) if value in stale else (owner_user, 2 if value in updated else 1))
+        events = db.execute("SELECT subject_id,actor_id,detail_digest FROM audit_events WHERE workspace_id=%s AND action='buyer.owner_assigned'", (WORKSPACE_A,)).fetchall()
+        assert {str(row[0]) for row in events} == set(updated)
+        assert len(events) == 25 and all(row[1] == uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR) and row[2] == expected_digest for row in events)
+    replay = api.post(path, json=body, headers=_h(subject=OPERATOR, key="q05-mixed-100"))
+    assert replay.status_code == 200 and replay.json()["data"] == data
+    with psycopg.connect(seeded) as db:
+        assert db.execute("SELECT count(*) FROM audit_events WHERE workspace_id=%s AND action='buyer.owner_assigned'", (WORKSPACE_A,)).fetchone()[0] == 25
+
+
+def test_q05_b04_owner_deactivated_after_preview_is_rejected_without_changes(api, seeded):
+    owner_id = _admin_membership(seeded)
+    buyer_id = _seed_buyer(seeded, name="Q05 inactive owner")
+    with psycopg.connect(seeded, autocommit=True) as db:
+        db.execute("UPDATE memberships SET active=false,version=version+1 WHERE id=%s", (owner_id,))
+    path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-owner-assignments"
+    body = {"selection": {"kind": "explicit", "buyers": [{"id": buyer_id, "version": 1}]}, "owner_membership_id": owner_id, "reason": "Q05 owner revalidation"}
+    response = api.post(path, json=body, headers=_h(subject=OPERATOR, key="q05-inactive-owner"))
+    assert response.status_code == 422, response.text
+    with psycopg.connect(seeded) as db:
+        assert db.execute("SELECT owner_user_id,version FROM project_buyers WHERE id=%s", (buyer_id,)).fetchone() == (None, 1)
+        assert db.execute("SELECT count(*) FROM audit_events WHERE workspace_id=%s AND action='buyer.owner_assigned'", (WORKSPACE_A,)).fetchone()[0] == 0
+
+
+def test_q05_b04_queued_owner_deactivation_blocks_each_row_and_survives_restart(api, seeded):
+    from buyeros_api.api.deps import tenant_scoped
+    from buyeros_api.services.bulk_service import apply_bulk_chunk
+    from tests.contract_validation import assert_contract_response
+
+    owner_id = _admin_membership(seeded)
+    buyer_id = _seed_buyer(seeded, name="Q05 queued owner revalidation")
+    ids = [buyer_id] + [str(uuid.uuid4()) for _ in range(100)]
+    path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/buyer-owner-assignments"
+    body = {"selection": {"kind": "explicit", "buyers": [{"id": value, "version": 1} for value in ids]}, "owner_membership_id": owner_id, "reason": "Q05 queued owner revalidation"}
+    admitted = api.post(path, json=body, headers=_h(subject=OPERATOR, key="q05-owner-queued"))
+    assert admitted.status_code == 202, admitted.text
+    job_id = uuid.UUID(admitted.json()["data"]["id"])
+    with psycopg.connect(seeded, autocommit=True) as db:
+        db.execute("UPDATE memberships SET active=false,version=version+1 WHERE id=%s", (owner_id,))
+    async def run_chunk():
+        async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
+            await apply_bulk_chunk(session, job_id)
+    # Recreate transaction/session/event loop for every chunk, then replay the terminal chunk.
+    for _ in range(4):
+        asyncio.run(run_chunk())
+    result_path = f"/v1/workspaces/{WORKSPACE_A}/jobs/{job_id}"
+    result = api.get(result_path + "?offset=0&limit=100", headers=_h(subject=OPERATOR))
+    assert result.status_code == 200, result.text
+    assert_contract_response("AsyncJobResponse", result.json())
+    data = result.json()["data"]
+    assert (data["status"], data["requested"], data["processed"], data["updated"], data["blocked"], data["conflicts"]) == ("completed", 101, 101, 0, 101, 0)
+    rows = data["result_page"]["items"] + api.get(result_path + "?offset=100&limit=100", headers=_h(subject=OPERATOR)).json()["data"]["result_page"]["items"]
+    assert {row["id"] for row in rows} == set(ids)
+    assert all(row["status"] == "blocked" and row["reason_code"] == "owner_membership_inactive" for row in rows)
+    with psycopg.connect(seeded) as db:
+        assert db.execute("SELECT owner_user_id,version FROM project_buyers WHERE id=%s", (buyer_id,)).fetchone() == (None, 1)
+        assert db.execute("SELECT count(*) FROM async_job_items WHERE job_id=%s AND status='blocked'", (job_id,)).fetchone()[0] == 101

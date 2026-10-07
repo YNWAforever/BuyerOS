@@ -1,0 +1,15 @@
+[WebServer] Traceback (most recent call last):
+[WebServer]   File "C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\services\api\tools\serve_e2e_fixture.py", line 583, in <module>
+[WebServer]     main()
+[WebServer]   File "C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\services\api\tools\serve_e2e_fixture.py", line 433, in main
+[WebServer]     container, owner_dsn = _start_container()
+[WebServer]                            ^^^^^^^^^^^^^^^^^^
+[WebServer]   File "C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\services\api\tests\conftest.py", line 109, in _start_container
+[WebServer]     _unavailable(last_error)
+[WebServer]   File "C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\services\api\tests\conftest.py", line 55, in _unavailable
+[WebServer]     pytest.fail("Docker/disposable integration database required: " + message)
+[WebServer]   File "C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\services\api\.venv\Lib\site-packages\_pytest\outcomes.py", line 177, in fail
+[WebServer]     raise Failed(msg=reason, pytrace=pytrace)
+[WebServer] Failed: Docker/disposable integration database required: could not start postgres container: docker command timed out
+Error: Process from config.webServer was not able to start. Exit code: 1
+

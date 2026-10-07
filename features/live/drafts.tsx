@@ -1,13 +1,63 @@
 'use client';
 import {useEffect,useMemo,useRef,useState} from 'react';
+import {useSearchParams} from 'next/navigation';
+import {readDraftApproval} from '@/services/live/work-queue';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
 import {LiveCancelled,LiveError,describeLiveError} from '@/services/live/client';
 import {ActionIntent} from '@/services/live/action-intent';
+import {DraftDirtyDialog,guardDraftTransition,type DirtyDecision} from './draft-dirty-guard';
 import {ExportDialog} from './export-dialog';
+import {DraftGroundingReview} from './draft-grounding-review';
 import {approveExactDraft,editDraft,generateDraft,getDraft,getDraftJob,getProject,listDrafts,loadDraftContext,requestDraftReview,saveSender,
   type Draft,type DraftJob,type Evidence,type Icp,type Project,type Buyer} from '@/services/live/drafts';
 
 const words:Record<string,string>={
+  "Reload current sources":"重新載入目前來源",
+  "Manual source review":"人工來源覆核",
+  "Classify every segment, read each cited source and the whole message. This records your source review; it does not verify semantic truth.":"請分類每個段落，閱讀引用來源及整篇訊息。這會記錄你的來源覆核，不代表系統已驗證語義真確。",
+  "Save the message before preparing its source review.":"請先儲存訊息，再準備來源覆核。",
+  "A reviewer must submit this source review.":"此來源覆核須由審核員提交。",
+  "Loading current sources...":"正在載入目前來源…",
+  "Segment":"段落",
+  "Classification":"分類",
+  "Choose classification":"請選擇分類",
+  "Factual — cite a source":"事實陳述：須引用來源",
+  "Non-factual — explain why":"非事實陳述：請說明理由",
+  "Segment reason":"段落理由",
+  "Source":"來源",
+  "Source title not supplied":"未提供來源標題",
+  "Company":"公司",
+  "Source URL unavailable":"來源網址不可用",
+  "Observed":"觀察日期",
+  "Retrieved":"擷取日期",
+  "Not supplied":"未提供",
+  "Source details":"來源詳情",
+  "Revision details":"版本詳情",
+  "Company unavailable":"公司資料不可用",
+  "Select segment text":"選取段落文字",
+  "Use selected text":"使用選取文字",
+  "Advanced segment offsets":"進階段落位置",
+  "Sender details":"寄件人詳情",
+  "Draft workflow":"草稿流程",
+  "1. Edit and save":"1. 修改及儲存",
+  "2. Review current sources":"2. 覆核目前來源",
+  "3. Approve this exact revision":"3. 批准此精確版本",
+  "4. Prepare approved export":"4. 準備已批准匯出",
+  "Select text with Shift + Arrow, or place the caret, then use the selection to split. The exact message stays read-only.":"使用 Shift + 方向鍵選取文字或放置游標，再使用選取範圍分段。精確訊息維持唯讀。",
+  "Evidence":"證據",
+  "Offer fact":"產品事實",
+  "Split position (code points)":"分段位置（Unicode 字元）",
+  "Split segment":"分開段落",
+  "Overall review reason":"整體覆核理由",
+  "I read the entire exact message and every cited source, including all non-factual classifications.":"我已閱讀整篇精確訊息及所有引用來源，包括每項非事實分類。",
+  "Submit source review":"提交來源覆核",
+  "Source review recorded; request a new exact review.":"來源覆核已記錄；請重新要求精確審核。",
+  "Reviewed by":"覆核員",
+
+  'Unsaved draft changes':'草稿有未儲存的更改','Save your changes, discard them, or stay with this draft.':'請儲存或捨棄更改，或繼續編輯此草稿。',
+  'Save':'儲存','Discard':'捨棄','Cancel':'取消','Draft conflict comparison':'草稿衝突比對',
+  'Local unsaved content':'本地未儲存內容','Latest persisted content':'最新已儲存內容','Copy local content':'複製本地內容',
+
   'Delivery is disabled.':'寄送功能已停用。',
   'review_requested':'\u5f85\u5be9\u6838',
   'approved':'\u5df2\u6279\u51c6',
@@ -29,12 +79,18 @@ const words:Record<string,string>={
   'Display name':'顯示名稱','Role title':'職銜','Organization':'機構','Business email':'工作電郵',
   'Country':'國家','Reason for change':'更改原因','I confirm this sender identity':'我確認此寄件人身份',
   'Save sender':'儲存寄件人','Prepare grounded draft':'準備有證據草稿','Approved offer facts':'已批准的產品事實',
-  'Supporting buyer evidence':'支持買家的證據','Objective':'目的','Tone':'語氣','Language':'語言',
+  'Supporting buyer evidence':'支持買家的證據','Language':'語言',
+  'Free fixed template':'免費固定模板',
+  'Internal work objective — does not change the template body':'內部工作目的，不會改變模板正文',
+  'Template language':'模板語言',
+  'Template language changes only fixed headings, opening and closing; offer facts and source citations stay in their original language and are not automatically translated.':'模板語言只改變固定標題、開場及結尾；產品事實與來源引用保留原語言，不會自動翻譯。',
+  'Edit the draft manually after generation; changes need a new grounding review before approval.':'產生後請人手修改草稿；更改須重新審核證據才可批准。',
   'Generate unaddressed draft':'產生未指定收件人的草稿','Job status':'工作狀態',
   'Recipient (optional)':'收件人（可選）','No recipient — unaddressed draft':'不指定收件人 — 未指定收件人的草稿',
   'Generate addressed draft':'產生已指定收件人的草稿',
   'Recipient expired; refresh buyer details.':'收件人資料已到期；請重新整理買家詳情。',
   'Prepare a grounded draft; delivery is disabled.':'準備有證據草稿；發送功能已停用。',
+  'Pending approvals':'待批准草稿','Loading drafts…':'正在載入草稿…','Refresh draft list':'重新整理草稿列表',
   'Refresh job':'重新整理工作','Draft list':'草稿列表','Previous page':'上一頁','Next page':'下一頁',
   'Open draft':'開啟草稿','Subject':'主旨','Body':'內容','Save revision':'儲存修訂',
   'Revision':'版本','Claims and sources':'陳述及來源','No drafts yet.':'尚未有草稿。',
@@ -59,12 +115,16 @@ function eligibleEvidence(row:Evidence){
 export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestReview,canApprove,canExport}:{locale:'en'|'zh-HK';canGenerate:boolean;canReviewSender:boolean;canRequestReview:boolean;canApprove:boolean;canExport:boolean}){
   const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot();
   const t=(value:string)=>locale==='zh-HK'?(words[value]||value):value;
+  const searchParams=useSearchParams(),approval=readDraftApproval(searchParams.get('approval'));
+  const listSequence=useRef(0),[listLoading,setListLoading]=useState(true),[listError,setListError]=useState('');
   const [project,setProject]=useState<Project|null>(null),[context,setContext]=useState<Context|null>(null);
+  const [choosing,setChoosing]=useState(false),[conflict,setConflict]=useState<Draft|null>(null);
+  const transition=useRef(false),choice=useRef<((decision:DirtyDecision)=>void)|null>(null),returnFocus=useRef<HTMLElement|null>(null);
   const [job,setJob]=useState<DraftJob|null>(null);
   const [draft,setDraft]=useState<Draft|null>(null),[drafts,setDrafts]=useState<Draft[]>([]);
   const [total,setTotal]=useState(0),[offset,setOffset]=useState(0);
   const [selectedFacts,setSelectedFacts]=useState<string[]>([]),[selectedEvidence,setSelectedEvidence]=useState<string[]>([]);
-  const [objective,setObjective]=useState('Introduce the approved offer'),[tone,setTone]=useState<'professional'|'concise'|'warm'>('professional');
+  const [objective,setObjective]=useState('Introduce the approved offer');
   const [recipient,setRecipient]=useState('');
   const [draftKind,setDraftKind]=useState<'initial'|'follow_up'>('initial'),[parentDraftId,setParentDraftId]=useState<string|null>(null);
   const [subject,setSubject]=useState(''),[body,setBody]=useState(''),[draftLanguage,setDraftLanguage]=useState<'en'|'zh-HK'>('en');
@@ -74,9 +134,11 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
   const [approvalConfirmed,setApprovalConfirmed]=useState(false),[staleDiff,setStaleDiff]=useState<string[]>([]);
   const errorRef=useRef<HTMLParagraphElement>(null),generateIntent=useRef(new ActionIntent<DraftJob>());
-  const scope=snapshot.scope,scopeKey=`${scope.workspace}:${scope.project}:${snapshot.authenticated}`;
+  const scope=snapshot.scope,scopeKey=snapshot.identity;
   const unsaved=Boolean(draft&&(subject!==draft.subject||body!==draft.body||draftLanguage!==draft.language));
+  useEffect(()=>()=>{choice.current?.('cancel');choice.current=null;},[snapshot.identity]);
   useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
+  useEffect(()=>{if(!busy&&returnFocus.current){const target=returnFocus.current;returnFocus.current=null;if(target.isConnected)target.focus();}},[busy]);
   useEffect(()=>{
     if(!unsaved)return;
     const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};
@@ -89,14 +151,14 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     let active=true;
     void (async()=>{
       try{
-        const [p,page,c,j,d]=await Promise.all([
-          getProject(client,session),listDrafts(client,session,0,8),
+        const [p,c,j,d]=await Promise.all([
+          getProject(client,session),
           nextBuyer?loadDraftContext(client,session,nextBuyer):Promise.resolve(null),
           nextJob?getDraftJob(client,session,nextJob):Promise.resolve(null),
           nextDraft?getDraft(client,session,nextDraft):Promise.resolve(null),
         ]);
         if(!active)return;
-        setProject(p);setDrafts(page.items);setTotal(page.total);setOffset(0);setContext(c);setRecipient('');setJob(j);setDraft(d);setApprovalConfirmed(false);setStaleDiff([]);
+        setProject(p);setContext(c);setRecipient('');setJob(j);setDraft(d);setApprovalConfirmed(false);setStaleDiff([]);
         if(c){setSelectedFacts((c.icp?.offer_facts||[]).filter(f=>f.approved).map(f=>f.id));
           setSelectedEvidence(c.evidence.filter(eligibleEvidence).map(e=>e.id));}
         if(d){setSubject(d.subject);setBody(d.body);setDraftLanguage(d.language==='zh-HK'?'zh-HK':'en');}
@@ -107,9 +169,15 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     })();
     return()=>{active=false;};
   },[client,session,scopeKey,scope.workspace,scope.project]);
+  useEffect(()=>{
+    if(scope.workspace&&scope.project)void refreshList(0);
+    return()=>{listSequence.current++;};
+  },[client,session,scopeKey,scope.workspace,scope.project,approval]);
   async function refreshList(nextOffset:number){
-    setError('');try{const page=await listDrafts(client,session,nextOffset,8);setDrafts(page.items);setTotal(page.total);setOffset(nextOffset);}
-    catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
+    const sequence=++listSequence.current,identity=session.identity();setListLoading(true);setListError('');
+    try{const page=await listDrafts(client,session,nextOffset,8,approval);if(sequence===listSequence.current&&session.isCurrent(identity)){setDrafts(page.items);setTotal(page.total);setOffset(nextOffset);}}
+    catch(cause){if(sequence===listSequence.current&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled)){setDrafts([]);setListError(describeLiveError(cause));}}
+    finally{if(sequence===listSequence.current&&session.isCurrent(identity))setListLoading(false);}
   }
   async function persistSender(){
     if(!project||!canReviewSender||busy||!senderConfirmed)return;
@@ -128,7 +196,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     setBusy(true);setError('');setNotice('');
     const bodyRequest={buyer_id:context.buyer.id,buyer_version:context.buyer.version,
       recipient_contact_id:recipient||undefined,
-      objective:objective.trim(),tone,language:draftLanguage,approved_offer_fact_ids:selectedFacts,
+      objective:objective.trim(),tone:'professional' as const,language:draftLanguage,approved_offer_fact_ids:selectedFacts,
       evidence_refs:context.evidence.filter(e=>selectedEvidence.includes(e.id)).map(e=>({id:e.id,version:e.version})),
       kind:draftKind,parent_draft_id:draftKind==='follow_up'?parentDraftId||undefined:undefined,
       max_cost:{amount:'0.000000',currency:'USD' as const}};
@@ -138,22 +206,44 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
     finally{setBusy(false);}
   }
+  function applyDraft(opened:Draft,identity:string){
+    if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');
+    setDraft(opened);setSubject(opened.subject);setBody(opened.body);setDraftLanguage(opened.language==='zh-HK'?'zh-HK':'en');
+    setApprovalConfirmed(false);setStaleDiff([]);setConflict(null);replaceQuery({draft:opened.id});
+  }
+  function decide(value:DirtyDecision){const resolve=choice.current;choice.current=null;setChoosing(false);resolve?.(value);}
+  function choose():Promise<DirtyDecision>{setChoosing(true);return new Promise(resolve=>{choice.current=resolve;});}
+  async function persistRevision(identity:string){
+    if(!draft||!canGenerate)throw new Error('Draft edit permission required');
+    if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');
+    const updated=await editDraft(client,session,draft,{subject,body,language:draftLanguage},crypto.randomUUID());
+    if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');
+    applyDraft(updated,identity);setNotice(t('Human edits require a new grounding review before approval.'));
+    await refreshList(offset);
+  }
+  async function performTransition(proceed:(identity:string)=>Promise<void>,saveOnly=false){
+    if(busy||transition.current)return;
+    const identity=session.identity(),initiator=document.activeElement;transition.current=true;setBusy(true);setError('');
+    const guard=()=>{if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');};
+    try{
+      if(saveOnly)await persistRevision(identity);
+      else {const proceeded=await guardDraftTransition({dirty:unsaved,choose,save:()=>persistRevision(identity),proceed:async()=>{guard();await proceed(identity);guard();}});
+        if(!proceeded&&initiator instanceof HTMLElement&&session.isCurrent(identity))returnFocus.current=initiator;}
+    }catch(cause){
+      if(session.isCurrent(identity)&&!(cause instanceof LiveCancelled)){
+        setError(describeLiveError(cause));
+        if(cause instanceof LiveError&&cause.status===412&&draft){
+          try{const latest=await getDraft(client,session,draft.id);guard();setConflict(latest);}catch {/* Preserve local buffer if comparison is unavailable. */}
+        }
+      }
+    }finally{transition.current=false;if(session.isCurrent(identity))setBusy(false);}
+  }
   async function refreshJob(){
-    if(!job||busy)return;setBusy(true);setError('');
-    try{const updated=await getDraftJob(client,session,job.id);setJob(updated);
-      if(updated.status==='completed'&&updated.result_id){const opened=await getDraft(client,session,updated.result_id);
-        setDraft(opened);setSubject(opened.subject);setBody(opened.body);
-        setDraftLanguage(opened.language==='zh-HK'?'zh-HK':'en');replaceQuery({draft:opened.id});
-        await refreshList(0);}
-    }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
-    finally{setBusy(false);}
+    if(!job)return;
+    await performTransition(async identity=>{const updated=await getDraftJob(client,session,job.id);if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');setJob(updated);
+      if(updated.status==='completed'&&updated.result_id){const opened=await getDraft(client,session,updated.result_id);applyDraft(opened,identity);await refreshList(0);}});
   }
-  async function openDraft(id:string){
-    if(unsaved&&!window.confirm(t('Save changes before leaving this page?')))return;
-    setError('');try{const opened=await getDraft(client,session,id);setDraft(opened);setSubject(opened.subject);
-      setBody(opened.body);setDraftLanguage(opened.language==='zh-HK'?'zh-HK':'en');setApprovalConfirmed(false);setStaleDiff([]);replaceQuery({draft:id});}
-    catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
-  }
+  async function openDraft(id:string){await performTransition(async identity=>applyDraft(await getDraft(client,session,id),identity));}
   async function prepareFollowUp(){
     if(!draft||busy)return;setBusy(true);setError('');
     try{const loaded=await loadDraftContext(client,session,draft.buyer_id);setContext(loaded);setRecipient('');
@@ -163,23 +253,8 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
     finally{setBusy(false);}
   }
-  async function saveRevision(){
-    if(!draft||!unsaved||busy||!canGenerate)return;setBusy(true);setError('');setNotice('');
-    try{const updated=await editDraft(client,session,draft,{subject,body,language:draftLanguage},crypto.randomUUID());
-      setDraft(updated);setSubject(updated.subject);setBody(updated.body);setNotice(t('Human edits require a new grounding review before approval.'));
-      await refreshList(offset);
-    }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
-    finally{setBusy(false);}
-  }
-  async function refreshCurrentDraft(){
-    if(!draft||busy)return;
-    setBusy(true);setError('');
-    try{const latest=await getDraft(client,session,draft.id);setDraft(latest);
-      setSubject(latest.subject);setBody(latest.body);setDraftLanguage(latest.language==='zh-HK'?'zh-HK':'en');
-      setApprovalConfirmed(false);setStaleDiff([]);await refreshList(offset);
-    }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
-    finally{setBusy(false);}
-  }
+  async function saveRevision(){if(!draft||!unsaved||!canGenerate)return;await performTransition(async()=>{},true);}
+  async function refreshCurrentDraft(){if(!draft)return;await performTransition(async identity=>{applyDraft(await getDraft(client,session,draft.id),identity);await refreshList(offset);});}
   async function explainApprovalFailure(cause:unknown,previous:Draft){
     if(cause instanceof LiveCancelled)return;
     setError(describeLiveError(cause));
@@ -221,13 +296,14 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   const recipients=context?.buyer.contacts.filter(contact=>contact.access_state==='visible'&&contact.value
     &&contact.validity==='provider_marked_valid'&&contact.checked_at&&contact.retention_until)||[];
   return <section className="panel live-draft-editor" aria-label={t('Drafts')}>
+    {choosing&&<DraftDirtyDialog decide={decide} canSave={canGenerate} t={t}/>}
     <h2>{t('Drafts')}</h2><p>{t('Prepare a grounded draft; delivery is disabled.')}</p>
     {error&&<p ref={errorRef} tabIndex={-1} role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
     {!project&&<p role="status">Loading draft workspace...</p>}
     {project&&<section className="panel" aria-label={t('Sender identity')}><h3>{t('Sender identity')}</h3>
       {project.sender_identity?<p>{t('Reviewed sender')}: {project.sender_identity.display_name} · {project.sender_identity.organization} · {project.sender_identity.business_email} · {project.sender_identity.version_key}</p>
         :<p>{t('No reviewed sender. A reviewer must save one before drafting.')}</p>}
-      {canReviewSender&&<div className="live-draft-fields">
+      <details open={!project.sender_identity}><summary>{t('Sender details')}</summary>{canReviewSender&&<div className="live-draft-fields">
         <label>{t('Display name')} <input value={senderName} maxLength={160} onChange={e=>setSenderName(e.target.value)}/></label>
         <label>{t('Role title')} <input value={senderRole} maxLength={160} onChange={e=>setSenderRole(e.target.value)}/></label>
         <label>{t('Organization')} <input value={senderOrg} maxLength={200} onChange={e=>setSenderOrg(e.target.value)}/></label>
@@ -236,9 +312,12 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
         <label>{t('Reason for change')} <input value={senderReason} maxLength={400} onChange={e=>setSenderReason(e.target.value)}/></label>
         <label><input type="checkbox" checked={senderConfirmed} onChange={e=>setSenderConfirmed(e.target.checked)}/> {t('I confirm this sender identity')}</label>
         <button type="button" disabled={busy||!senderConfirmed||senderReason.trim().length<3} onClick={()=>void persistSender()}>{t('Save sender')}</button>
-      </div>}
+      </div>}</details>
     </section>}
     {context&&<section className="panel" aria-label={t('Prepare grounded draft')}><h3>{t('Prepare grounded draft')}</h3>
+      <p><strong>{t('Free fixed template')}</strong></p>
+      <p>{t('Template language changes only fixed headings, opening and closing; offer facts and source citations stay in their original language and are not automatically translated.')}</p>
+      <p>{t('Edit the draft manually after generation; changes need a new grounding review before approval.')}</p>
       <p>{context.buyer.name} · {context.buyer.version} · {t(context.buyer.review?.status||'review required')}</p>
       {!context.icp&&<p role="alert">{t('Current approved profile and accepted buyer are required.')}</p>}
       <fieldset><legend>{t('Approved offer facts')}</legend>{approvedFacts.map(f=><label key={f.id} className="live-draft-option"><input type="checkbox" checked={selectedFacts.includes(f.id)} onChange={e=>setSelectedFacts(v=>e.target.checked?[...v,f.id]:v.filter(id=>id!==f.id))}/>{f.value}</label>)}</fieldset>
@@ -248,26 +327,32 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
         <option value="">{t('No recipient — unaddressed draft')}</option>
         {recipients.map(contact=><option key={contact.id} value={contact.id}>{contact.value} · v{contact.version}</option>)}
       </select></label>
-      <div className="live-draft-fields"><label>{t('Objective')} <input value={objective} maxLength={1000} onChange={e=>setObjective(e.target.value)}/></label>
-        <label>{t('Tone')} <select value={tone} onChange={e=>setTone(e.target.value as typeof tone)}><option value="professional">professional</option><option value="concise">concise</option><option value="warm">warm</option></select></label>
-        <label>{t('Language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
+      <div className="live-draft-fields"><label>{t('Internal work objective — does not change the template body')} <input value={objective} maxLength={1000} onChange={e=>setObjective(e.target.value)}/></label>
+        <label>{t('Template language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)} disabled={busy||!canGenerate}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
       <button type="button" disabled={busy||!canGenerate||!project?.sender_identity||!context.icp||(recipient!==''&&!recipients.some(contact=>contact.id===recipient))||(draftKind==='follow_up'&&!parentDraftId)||selectedFacts.length===0||selectedEvidence.length===0||objective.trim().length<3} onClick={()=>void startDraft()}>{t(recipient?'Generate addressed draft':'Generate unaddressed draft')}</button>
     </section>}
     {job&&<section className="panel" role="status"><h3>{t('Job status')}</h3><p>{job.id} · {t(job.status)}</p><button type="button" disabled={busy} onClick={()=>void refreshJob()}>{t('Refresh job')}</button></section>}
-    {project&&<section className="panel" aria-label={t('Draft list')}><h3>{t('Draft list')}</h3><p>{offset+1}–{Math.min(offset+8,total)} / {total}</p>
-      {drafts.length===0&&<p>{t('No drafts yet.')}</p>}{drafts.map(item=><div className="inline" key={item.id}><span>{item.subject} · {t(item.status)} · v{item.version}</span><button type="button" onClick={()=>void openDraft(item.id)}>{t('Open draft')}</button></div>)}
-      <div className="inline"><button type="button" disabled={offset===0} onClick={()=>void refreshList(Math.max(0,offset-8))}>{t('Previous page')}</button><button type="button" disabled={offset+8>=total} onClick={()=>void refreshList(offset+8)}>{t('Next page')}</button></div>
+    {project&&<section className="panel" aria-label={t('Draft list')}><h3>{t('Draft list')}</h3>{approval&&<p>{t('Pending approvals')} · approval: pending</p>}{listError?<p role="alert">{listError}</p>:listLoading?<p role="status">{t('Loading drafts…')}</p>:<p>{total?offset+1:0}–{Math.min(offset+8,total)} / {total}</p>}<button type="button" disabled={listLoading} onClick={()=>void refreshList(offset)}>{t('Refresh draft list')}</button>
+      {!listLoading&&!listError&&drafts.length===0&&<p>{t('No drafts yet.')}</p>}{drafts.map(item=><div className="inline" key={item.id}><span>{item.subject} · {t(item.status)} · v{item.version}</span><button type="button" disabled={busy} onClick={()=>void openDraft(item.id)}>{t('Open draft')}</button></div>)}
+      <div className="inline"><button type="button" disabled={listLoading||Boolean(listError)||offset===0} onClick={()=>void refreshList(Math.max(0,offset-8))}>{t('Previous page')}</button><button type="button" disabled={listLoading||Boolean(listError)||offset+8>=total} onClick={()=>void refreshList(offset+8)}>{t('Next page')}</button></div>
     </section>}
-    {draft&&<section className="panel" aria-label={t('Open draft')} data-live-unsaved={unsaved?'true':undefined}>
+    {draft&&<section className="panel" aria-label={t('Open draft')} data-live-unsaved={unsaved?'true':undefined} data-baseline-revision={draft.revision_id} data-baseline-version={draft.version}>
       <h3>{draft.subject}</h3><p>{t('Revision')}: {draft.revision_number} · {t(draft.status)} · {draft.language}</p>
-      <p>{t('Delivery is disabled.')}</p>
-      <div className="live-draft-fields"><label>{t('Subject')} <input value={subject} maxLength={300} onChange={e=>setSubject(e.target.value)} disabled={!canGenerate}/></label>
-        <label>{t('Body')} <textarea value={body} maxLength={20000} rows={10} onChange={e=>setBody(e.target.value)} disabled={!canGenerate}/></label>
-        <label>{t('Language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)} disabled={!canGenerate}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
+      <nav aria-label={t('Draft workflow')}><ol><li>{t('1. Edit and save')}</li><li>{t('2. Review current sources')}</li><li>{t('3. Approve this exact revision')}</li><li>{t('4. Prepare approved export')}</li></ol></nav><p>{t('Delivery is disabled.')}</p>
+      <div className="live-draft-fields"><label>{t('Subject')} <input value={subject} maxLength={300} onChange={e=>setSubject(e.target.value)} disabled={busy||!canGenerate}/></label>
+        <label>{t('Body')} <textarea value={body} maxLength={20000} rows={10} onChange={e=>setBody(e.target.value)} disabled={busy||!canGenerate}/></label>
+        <label>{t('Language')} <select value={draftLanguage} onChange={e=>setDraftLanguage(e.target.value as typeof draftLanguage)} disabled={busy||!canGenerate}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label></div>
       <div className="inline"><button type="button" disabled={!unsaved||busy||!canGenerate} onClick={()=>void saveRevision()}>{t('Save revision')}</button>
       {canGenerate&&<button type="button" disabled={busy} onClick={()=>void prepareFollowUp()}>{t('Prepare follow-up')}</button>}</div>
+      {conflict&&<section className="panel" aria-label={t('Draft conflict comparison')}>
+        <h4>{t('Draft conflict comparison')}</h4><h5>{t('Local unsaved content')}</h5><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{subject+'\n'+body+'\n'+draftLanguage}</pre>
+        <button onClick={()=>void navigator.clipboard?.writeText(subject+'\n'+body+'\n'+draftLanguage)}>{t('Copy local content')}</button>
+        <h5>{t('Latest persisted content')}</h5><p>{t('Revision')}: {conflict.revision_number} · v{conflict.version}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{conflict.subject+'\n'+conflict.body+'\n'+conflict.language}</pre>
+      </section>}
       <h4>{t('Claims and sources')}</h4>{draft.claims.map((claim,index)=><p key={index}>{claim.text} · {claim.offer_fact_ids.join(', ')} {claim.evidence_ids.join(', ')}</p>)}
       {draft.claims.length===0&&<p>{t('Human edits require a new grounding review before approval.')}</p>}
+      {draft.claims.length===0&&<DraftGroundingReview key={`grounding:${draft.id}:${draft.revision_id}`} draft={draft} canReview={canApprove} busy={busy} dirty={unsaved} t={t} onBusy={setBusy} onReviewed={(updated,identity)=>{applyDraft(updated,identity);setNotice(t('Source review recorded; request a new exact review.'));void refreshList(offset);}}/>}
+      {draft.grounding_review&&<p>{t('Reviewed by')}: {draft.grounding_review.reviewed_by} · {draft.grounding_review.reviewed_at} · {draft.grounding_review.reason}</p>}
       <section className="panel" aria-label={t('Exact revision review')}>
         <h4>{t('Exact revision review')}</h4>
         <p>{t('Revision')}: {draft.revision_number} · {draft.content_hash}</p>

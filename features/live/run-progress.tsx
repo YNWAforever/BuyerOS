@@ -6,7 +6,7 @@ import type {components} from '@/services/generated/buyeros-api';
 import {useDataMode} from '@/features/providers/data-mode';
 import {useWorkspaceSession} from '@/features/providers/workspace-session';
 import {LiveCancelled,describeLiveError} from '@/services/live/client';
-import {cancelRun,getRun,listRuns,retryRun,startRun,subscribeRun,type Run,type RunContext,type RunPage} from '@/services/live/runs';
+import {cancelRun,getRun,listRuns,retryRun,startResearch,hasUncertainResearch,resetResearchIntent,uncertainResearchBody,subscribeRun,type Run,type RunContext,type RunPage} from '@/services/live/runs';
 
 type Project=components['schemas']['Project'];
 type Load={kind:'loading'}|{kind:'ready';page:RunPage}|{kind:'error';message:string};
@@ -28,11 +28,13 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
 }) {
   const {session,client}=useWorkspaceSession(),{apiBaseUrl}=useDataMode(),router=useRouter();
   const scope=session.current(),workspace=scope.workspace,project=scope.project;
+  const recovery=workspace&&project?uncertainResearchBody({client,session,apiBaseUrl,workspaceId:workspace,projectId:project}):null;
   const [list,setList]=useState<Load>({kind:'loading'}),[offset,setOffset]=useState(0);
   const [run,setRun]=useState<Run|null>(null),[detailError,setDetailError]=useState(''),[busy,setBusy]=useState(false);
-  const [profile,setProfile]=useState<string|null>(null),[target,setTarget]=useState('24');
-  const [maxCost,setMaxCost]=useState('2.000000'),[reason,setReason]=useState(''),[transport,setTransport]=useState('');
+  const [profile,setProfile]=useState<string|null>(null),[target,setTarget]=useState(()=>String(recovery?.target_companies??24));
+  const [maxCost,setMaxCost]=useState(()=>recovery?.max_cost.amount??'2.000000'),[reason,setReason]=useState(''),[transport,setTransport]=useState('');
   const busyRef=useRef(false);
+  const [uncertain,setUncertain]=useState(false);
   const ctx=useMemo<RunContext|null>(()=>workspace&&project?
     {client,session,apiBaseUrl,workspaceId:workspace,projectId:project}:null,
     [client,session,apiBaseUrl,workspace,project]);
@@ -88,13 +90,15 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
     if(!Number.isInteger(targetCount)||targetCount<1||targetCount>100||!/^(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/.test(amount)||!/[1-9]/.test(amount)){
       setDetailError(t('Enter a target from 1 to 100 and a positive USD cap.'));return;
     }
+    const identity=session.identity();
+    setMaxCost(`${amount.split('.')[0]}.${(amount.split('.')[1]??'').padEnd(6,'0')}`);
     busyRef.current=true;setBusy(true);setDetailError('');
     try{
-      const value=await startRun(ctx,{icp_version_id:profile,target_companies:targetCount,
-        max_cost:{amount:`${amount.split('.')[0]}.${(amount.split('.')[1]??'').padEnd(6,'0')}`,currency:'USD'},limits:{...LIMITS}},crypto.randomUUID());
-      if(current())router.push(`/app/discover/${encodeURIComponent(value.id)}?${new URLSearchParams({workspace:ctx.workspaceId,project:ctx.projectId})}`);
-    }catch(error){if(current()&&!(error instanceof LiveCancelled))setDetailError(describeLiveError(error));}
-    finally{busyRef.current=false;setBusy(false);}
+      const value=await startResearch(ctx,uncertainResearchBody(ctx)??{icp_version_id:profile,target_companies:targetCount,
+        max_cost:{amount:`${amount.split('.')[0]}.${(amount.split('.')[1]??'').padEnd(6,'0')}`,currency:'USD'},limits:{...LIMITS}});
+      if(session.isCurrent(identity))router.push(`/app/discover/${encodeURIComponent(value.id)}?${new URLSearchParams({workspace:ctx.workspaceId,project:ctx.projectId})}`);
+    }catch(error){if(session.isCurrent(identity)&&!(error instanceof LiveCancelled)){setUncertain(hasUncertainResearch(ctx));setDetailError(describeLiveError(error));}}
+    finally{busyRef.current=false;if(session.isCurrent(identity))setBusy(false);}
   }
   async function act(kind:'cancel'|'retry'){
     if(!ctx||!run||busyRef.current||reason.trim().length<3)return;
@@ -110,9 +114,12 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
     <div className="inline spread"><h2>{t('Research runs')}</h2>{runId&&<button type="button" onClick={()=>router.push(`/app/runs?${new URLSearchParams({workspace:ctx.workspaceId,project:ctx.projectId})}`)}>{t('All runs')}</button>}</div>
     {detailError&&<p role="alert">{t(detailError)}</p>}
     {!runId&&<>
-      <div className="run-grid"><label>{t('Target companies')} <input type="number" min="1" max="100" value={target} onChange={event=>setTarget(event.target.value)}/></label>
-        <label>{t('Maximum research cost (USD)')} <input inputMode="decimal" value={maxCost} onChange={event=>setMaxCost(event.target.value)}/></label>
-        <button type="button" disabled={!canStart||!profile||busy} onClick={()=>void start()}>{busy?t('Starting…'):t('Start research')}</button></div>
+      <p>{t('Check existing runs before starting new research.')}</p>
+      {(uncertain||hasUncertainResearch(ctx))&&<p role="status">{t('The result is unknown. Query existing runs or retry the same research; its key is retained.')}</p>}
+      {(uncertain||hasUncertainResearch(ctx))&&<button disabled={busy} onClick={()=>{if(window.confirm(t('The previous research may already exist. Start a new intent?'))){resetResearchIntent(ctx);setUncertain(false);setDetailError('');}}}>{t('Start new research intent')}</button>}
+      <div className="run-grid"><label>{t('Target companies')} <input disabled={busy||uncertain||hasUncertainResearch(ctx)} type="number" min="1" max="100" value={target} onChange={event=>setTarget(event.target.value)}/></label>
+        <label>{t('Maximum research cost (USD)')} <input disabled={busy||uncertain||hasUncertainResearch(ctx)} inputMode="decimal" value={maxCost} onChange={event=>setMaxCost(event.target.value)}/></label>
+        <button type="button" disabled={!canStart||!profile||busy} onClick={()=>void start()}>{busy?t('Starting…'):t(uncertain||hasUncertainResearch(ctx)?'Retry same research':'Start research')}</button></div>
       {!profile&&<p role="status">{t('Approve the current buyer profile before research.')}</p>}
       {list.kind==='loading'&&<p role="status">{t('Loading runs…')}</p>}
       {list.kind==='error'&&<p role="alert">{list.message}<button type="button" onClick={()=>{setList({kind:'loading'});void loadPage(offset);}}>{t('Retry loading')}</button></p>}
@@ -126,15 +133,15 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
           <button type="button" disabled={offset+list.page.items.length>=list.page.total} onClick={()=>{setList({kind:'loading'});setOffset(offset+10);}}>{t('Next')}</button></div></>}
     </>}
     {runId&&!run&&!detailError&&<p role="status">{t('Loading run…')}</p>}
-    {run&&<article className="run-detail" aria-live="polite">
-      <p><strong>{t('Status')}:</strong> {t(run.status)} · <strong>{t('Stage')}:</strong> {t(run.stage)}</p>
+    {run&&<article className="run-detail">
+      <p role="status" aria-atomic="true"><strong>{t('Status')}:</strong> {t(run.status)} · <strong>{t('Stage')}:</strong> {t(run.stage)}</p>
       <p>{t('Actual yield')}: {run.company_count} / {run.target_companies??'—'} · {t('Raw candidates')}: {run.raw_count} · {t('Assessed')}: {run.assessed_count}</p>
       <p>{t('Research spend')}: USD {run.spent.amount} · {t('Pending hold')}: USD {run.reserved.amount} · {t('Maximum')}: USD {run.max_cost.amount}</p>
-      <p>{t('Attempt')}: {run.attempt} · {t('Event')}: {run.last_event_sequence} · {t('Connection')}: {transport||t('Connecting')}</p>
-      <p role="status">{t('Next step')}: {t(nextStep(run.status))}</p>
-      {run.status==='cancel_requested'&&<p role="status">{t('New work is stopped. A submitted operation is awaiting reconciliation; its hold remains.')}</p>}
-      {run.status==='completed'&&run.target_companies!==undefined&&run.company_count<run.target_companies&&<p role="status">{t('Research completed with fewer companies than the requested target.')}</p>}
-      {['partial','paused_budget','failed'].includes(run.status)&&!['fit_review_required','fit'].includes(run.stage)&&<p role="status">{t('Discovery retry waits for authoritative reconciliation; committed results remain available.')}</p>}
+      <details><summary>{t('Technical details')}</summary><p>{t('Attempt')}: {run.attempt} · {t('Event')}: {run.last_event_sequence} · {t('Connection')}: {transport||t('Connecting')}</p></details>
+      <p>{t('Next step')}: {t(nextStep(run.status))}</p>
+      {run.status==='cancel_requested'&&<p>{t('New work is stopped. A submitted operation is awaiting reconciliation; its hold remains.')}</p>}
+      {run.status==='completed'&&run.target_companies!==undefined&&run.company_count<run.target_companies&&<p>{t('Research completed with fewer companies than the requested target.')}</p>}
+      {['partial','paused_budget','failed'].includes(run.status)&&!['fit_review_required','fit'].includes(run.stage)&&<p>{t('Discovery retry waits for authoritative reconciliation; committed results remain available.')}</p>}
       {run.failure_code&&<p role="alert">{t('Reason')}: {run.failure_code}</p>}
       <div className="run-grid">{canStart&&['queued','running','partial','paused_budget','failed'].includes(run.status)&&<label>{t('Reason for action')} <input value={reason} onChange={event=>setReason(event.target.value)} maxLength={2000}/></label>}
         {canStart&&['queued','running','partial','paused_budget','failed'].includes(run.status)&&<button type="button" disabled={busy||reason.trim().length<3} onClick={()=>void act('cancel')}>{t('Stop new work')}</button>}

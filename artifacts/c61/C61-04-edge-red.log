@@ -1,0 +1,94 @@
+..........FF.                                                            [100%]
+================================== FAILURES ===================================
+_ test_bad_pool_timing_cannot_break_error_envelope[10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000] _
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001E1F7E5DD60>
+wait = 100000000000000000...0000000000000000000
+
+    @pytest.mark.parametrize('wait', [True, float('nan'), float('inf'), -1, 10**400])
+    def test_bad_pool_timing_cannot_break_error_envelope(caplog, wait):
+        value = request()
+        value.state.database_diagnostics = {'pool_wait_ms': wait}
+        with caplog.at_level(logging.ERROR):
+>           response = asyncio.run(internal_error_handler(value, Exception('private')))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_error_diagnostics.py:90: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+buyeros_api\api\errors.py:106: in internal_error_handler
+    diagnostic = database_error_diagnostics(request, exc)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+request = <starlette.requests.Request object at 0x000001E1F7E5E300>
+exc = Exception('private')
+
+    def database_error_diagnostics(request: Request, exc: Exception) -> dict:
+        """Allowlisted metadata only: never stringify errors, DSNs, binds or traces.
+    
+        Timings/schema/role are null unless supplied by a trusted backend component.
+        They are observations, not inferred from a successful retry or an error name.
+        """
+        raw_id = getattr(request.state, "request_id", None)
+        try:
+            request_id = str(uuid.UUID(raw_id)) if isinstance(raw_id, str) else None
+        except ValueError:
+            request_id = None
+        original = exc.orig if isinstance(exc, DBAPIError) else None
+        raw_state = getattr(original, "sqlstate", None)
+        sqlstate = raw_state if isinstance(raw_state, str) and re.fullmatch(r"[0-9A-Z]{5}", raw_state) else None
+        classification = {
+            "42P01": "missing_relation", "42501": "insufficient_privilege",
+            "08001": "connection_failure", "08003": "connection_failure",
+            "08006": "connection_failure", "57P01": "connection_failure",
+        }.get(sqlstate, "unconfirmed")
+        if isinstance(exc, PoolTimeout):
+            classification = "pool_timeout"
+        names = {"OperationalError", "ProgrammingError", "InterfaceError", "DBAPIError", "TimeoutError", "IntegrityError"}
+        error_class = type(exc).__name__ if type(exc).__name__ in names else "UnexpectedError"
+        context = getattr(request.state, "database_diagnostics", None)
+        context = context if isinstance(context, dict) else {}
+        wait = context.get("pool_wait_ms")
+>       wait = wait if type(wait) in (int, float) and math.isfinite(wait) and wait >= 0 else None
+                                                      ^^^^^^^^^^^^^^^^^^^
+E       OverflowError: int too large to convert to float
+
+buyeros_api\api\errors.py:90: OverflowError
+__________ test_observed_connect_timeout_distinct_from_pool_timeout ___________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x000001E1F7E5F620>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E1F7E5F830>
+
+    def test_observed_connect_timeout_distinct_from_pool_timeout(caplog, monkeypatch):
+        value = request()
+        value.state.database_diagnostics = {
+            'connection_timeout': True, 'pool_wait_ms': 3.5,
+            'schema_head': '0037_bulk_manifests', 'runtime_role': 'buyeros_api',
+        }
+        monkeypatch.setenv('BUYEROS_SOURCE_SHA', 'a' * 40)
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(value, TimeoutError(SECRETS[0])))
+        fields = caplog.records[-1].diagnostic
+>       assert fields['classification'] == 'connection_timeout'
+E       AssertionError: assert 'unconfirmed' == 'connection_timeout'
+E         
+E         - connection_timeout
+E         + unconfirmed
+
+tests\test_error_diagnostics.py:105: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    buyeros_api.api.errors:errors.py:107 unexpected_api_error request_id=1d123054-2633-40b7-8e07-b6aed83dad98 type=TimeoutError diagnostics={"classification":"unconfirmed","connection_timeout":true,"error_class":"TimeoutError","pool_wait_ms":3.5,"request_id":"1d123054-2633-40b7-8e07-b6aed83dad98","runtime_role":"buyeros_api","schema_head":"0037_bulk_manifests","source_sha":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","sqlstate":null}
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-diag-edge-red.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_error_diagnostics.py::test_bad_pool_timing_cannot_break_error_envelope[10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000]
+FAILED tests/test_error_diagnostics.py::test_observed_connect_timeout_distinct_from_pool_timeout
+2 failed, 11 passed in 1.99s

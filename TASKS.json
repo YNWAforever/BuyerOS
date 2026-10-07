@@ -1,0 +1,4196 @@
+{
+  "scope": [
+    "Q11",
+    "Q01",
+    "Q03",
+    "Q04",
+    "Q15",
+    "Q02",
+    "Q05",
+    "Q06",
+    "Q07",
+    "Q12",
+    "Q08",
+    "Q14",
+    "Q09",
+    "Q10",
+    "N00"
+  ],
+  "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+  "audit_source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "tasks": [
+    {
+      "id": "N00",
+      "status": "local-spike-partial",
+      "code_status": "counted fixture APIRequestContext/private cookies and ownership lifecycle;Auth0/application unchanged",
+      "verification_status": "318reported root/317JUnit leaves,newAPIcontext10;Chromium6/strictcrypto8;0fail-error-skip;fullN00/realNeon/original302 OPEN",
+      "release_status": "not-deployed;full N00 open",
+      "base_sha": "ad1a54510f6a0fb2485392c878e7e867e9def6be",
+      "source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
+      "finding_ids": [
+        "F20"
+      ],
+      "cases": [
+        "NA01"
+      ],
+      "checks": {
+        "node": {
+          "leaf_cases": 317,
+          "fail": 0,
+          "error": 0,
+          "skip": 0,
+          "pass": 317,
+          "attributes": {},
+          "reported": {
+            "tests": "318",
+            "pass": "318",
+            "fail": "0",
+            "cancelled": "0",
+            "skipped": "0",
+            "todo": "0",
+            "duration_ms": "519306.7825"
+          },
+          "source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
+          "executed_this_followup": true
+        },
+        "built_ui": {
+          "portable": {
+            "target": "portable",
+            "run_nonce": "e94f786ad235",
+            "cases": 7,
+            "pass": 6,
+            "fail": 1,
+            "skip": 0,
+            "junit_errors": 0,
+            "global_errors": 0,
+            "time": "55.428903999999996",
+            "cli_exit": 1,
+            "fixture_only": true,
+            "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
+            "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
+            "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+            "executed_this_followup": false,
+            "new_real_runtime_overlay_exercised": false,
+            "historical_checkpoint_only": true
+          },
+          "vercel": {
+            "target": "vercel",
+            "run_nonce": "c07e49d328af",
+            "cases": 7,
+            "pass": 6,
+            "fail": 1,
+            "skip": 0,
+            "junit_errors": 0,
+            "global_errors": 0,
+            "time": "19.568469",
+            "cli_exit": 1,
+            "fixture_only": true,
+            "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
+            "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
+            "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+            "executed_this_followup": false,
+            "new_real_runtime_overlay_exercised": false,
+            "historical_checkpoint_only": true
+          }
+        },
+        "new_callback_cases": {
+          "per_target": 2,
+          "pass": 2,
+          "fail": 0,
+          "skip": 0,
+          "red_observed": true,
+          "historical_checkpoint_only": true,
+          "executed_this_followup": false
+        },
+        "api_carried": {
+          "executed_this_followup": false,
+          "prior_pass": 34,
+          "prior_fail": 0,
+          "prior_skip": 0,
+          "source_sha": "2f14645f34ba61ea032c1e826debff1c1defcec6",
+          "historical_checkpoint_only": true
+        },
+        "types_exit": 0,
+        "lint_exit": 0,
+        "real_preflight": {
+          "related_node": {
+            "tests": 68,
+            "pass": 68,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 10003.4381
+          },
+          "new_cases": 36,
+          "types_exit": 0,
+          "lint_exit": 0,
+          "external_requests": 0,
+          "built_runtime_verified": false,
+          "no_external_executor": true,
+          "historical_checkpoint_only": true,
+          "executed_this_followup": false
+        },
+        "counted_transport": {
+          "related_node": {
+            "tests": 80,
+            "pass": 80,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 9064.3264
+          },
+          "new_HTTP_cases": 11,
+          "new_discovery_cases": 1,
+          "fixture_budgets": {
+            "portable": {
+              "fixture_only": true,
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_requests": 0,
+              "run_nonce": "3c8f7aa30db0"
+            },
+            "vercel": {
+              "fixture_only": true,
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_requests": 0,
+              "run_nonce": "c5245a954fcb"
+            }
+          },
+          "types_exit": 0,
+          "lint_exit": 0,
+          "contracts_exit": 0,
+          "real_runtime_verified": false,
+          "no_external_executor": true,
+          "historical_checkpoint_only": true,
+          "executed_this_followup": false
+        },
+        "new_counted_SDK_cases": {
+          "per_target": 2,
+          "pass": 2,
+          "fail": 0,
+          "skip": 0,
+          "red_observed": true
+        },
+        "real_runtime_preparation": {
+          "related_node": {
+            "tests": 110,
+            "pass": 110,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 13491.6775
+          },
+          "new_unit_cases": 30,
+          "new_unit_green": {
+            "tests": 30,
+            "pass": 30,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 800.5488
+          },
+          "new_unit_red": {
+            "tests": 30,
+            "pass": 0,
+            "fail": 30,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 553.1382
+          },
+          "types_red_exit": 2,
+          "types_red_error": "TS2578: unused @ts-expect-error exposed any SDK inference",
+          "types_final_exit": 0,
+          "lint_final_exit": 0,
+          "contracts_exit": 0,
+          "built_fixture_ui": {
+            "portable": {
+              "target": "portable",
+              "run_nonce": "e94f786ad235",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "55.428903999999996",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            },
+            "vercel": {
+              "target": "vercel",
+              "run_nonce": "c07e49d328af",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "19.568469",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
+              "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            }
+          },
+          "all_ui_attempts": [
+            {
+              "target": "portable",
+              "run_nonce": "7f2d941e8c63",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 1,
+              "time": "76.717208",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            },
+            {
+              "target": "portable",
+              "run_nonce": "5bdaf49c6e02",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 1,
+              "time": "53.492132",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-5bdaf49c6e02-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui-attempt2.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            },
+            {
+              "target": "portable",
+              "run_nonce": "e94f786ad235",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "55.428903999999996",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\portable-e94f786ad235-ui.xml",
+              "log": "test-results\\neon-real-runtime\\portable-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            },
+            {
+              "target": "vercel",
+              "run_nonce": "c07e49d328af",
+              "cases": 7,
+              "pass": 6,
+              "fail": 1,
+              "skip": 0,
+              "junit_errors": 0,
+              "global_errors": 0,
+              "time": "19.568469",
+              "cli_exit": 1,
+              "fixture_only": true,
+              "report": "test-results\\neon-real-runtime\\vercel-c07e49d328af-ui.xml",
+              "log": "test-results\\neon-real-runtime\\vercel-ui-final.log",
+              "compiled_overlay_source_sha": "2fd84ef49d289ea313a5abb21ec6e30bc2659a9d",
+              "executed_this_followup": false,
+              "new_real_runtime_overlay_exercised": false,
+              "historical_checkpoint_only": true
+            }
+          ],
+          "fixture_budgets": {
+            "portable": {
+              "fixture_only": true,
+              "run_nonce": "e94f786ad235",
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_auth_requests": 0
+            },
+            "vercel": {
+              "fixture_only": true,
+              "run_nonce": "c07e49d328af",
+              "reserved": 44,
+              "forwarded": 44,
+              "accepted": 41,
+              "rejected": 3,
+              "pending": 0,
+              "unknown": 0,
+              "owned_children_absent": true,
+              "owned_journal_removed": true,
+              "real_configuration_verified": false,
+              "external_auth_requests": 0
+            }
+          },
+          "cleanup_error_gate": {
+            "red_attempts": 2,
+            "final_global_errors": 0,
+            "native_taskkill_timeout_ms": 15000,
+            "owned_stop_timeout_ms": 18000,
+            "global_teardown_timeout_ms": 20000,
+            "fixed_delay_replaced_with_bounded_OS_absence_poll": true
+          },
+          "null_target_exit": 1,
+          "null_target_error": "N00_REAL_TARGET_REQUIRED",
+          "alembic_heads_exit": 0,
+          "head": "0037_bulk_manifests",
+          "migrations": 0,
+          "DB_connections": 0,
+          "required_DB_suite_applicable": false,
+          "DB_skips": 0
+        },
+        "real_runtime_overlay": {
+          "SDK_version": "0.5.0-beta",
+          "strict_types_verified": true,
+          "request_lazy_constructor_boundary_unit_fixture_verified": true,
+          "constructor_in_unit_tests": "instrumented fixture; not official SDK runtime",
+          "built": true,
+          "actual_official_SDK_runtime_config_verified": true,
+          "node_crypto_in_new_workerd_bundle_verified": true,
+          "real_Neon_verified": false,
+          "human_Google_flow_verified": false,
+          "full_provider_browser_CLI_accounting_verified": false,
+          "real_HTTP_cleanup_executor_implemented": false,
+          "verification_scope": "fictional exact-context constructor/config/kernel only; not live trust or session/token",
+          "kernel_pass_per_output": 6
+        },
+        "runtime_built": {
+          "base": "1df7b4cb1b46a25b9019adf05bd4cd46cf2a7fa3",
+          "reviewed_source_sha": "e683a89225863387367bda204f84aa168f6abefb",
+          "deployed_sha": null,
+          "date_hk": "2026-10-05",
+          "scope": "N00/F20/NA01 SDK configuration/constructor kernel on actual built output; fixture only",
+          "source_files": 16,
+          "insertions": 305,
+          "deletions": 8,
+          "node": {
+            "cases": 126,
+            "pass": 126,
+            "fail": 0,
+            "skip": 0,
+            "duration_ms": 12046.3406
+          },
+          "unit_red": {
+            "cases": 10,
+            "pass": 1,
+            "fail": 9,
+            "skip": 0
+          },
+          "cleanup_unit_red": {
+            "cases": 6,
+            "pass": 0,
+            "fail": 6,
+            "skip": 0
+          },
+          "baseline_ui_red": {
+            "cases": 3,
+            "pass": 0,
+            "fail": 3,
+            "skip": 0,
+            "startup_error": false
+          },
+          "built_kernel_acceptance": {
+            "runs": [
+              {
+                "target": "portable",
+                "scenario": "valid",
+                "run_nonce": "7c2d4e6f8012",
+                "cases": 3,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 25.754606,
+                "report": "test-results\\neon-runtime-built\\portable-valid-7c2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 3,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "valid",
+                "run_nonce": "8c2d4e6f8012",
+                "cases": 3,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 58.192747000000004,
+                "report": "test-results\\neon-runtime-built\\vercel-valid-8c2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 3,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "portable",
+                "scenario": "missing",
+                "run_nonce": "9c2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 14.652927,
+                "report": "test-results\\neon-runtime-built\\portable-missing-9c2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "portable",
+                "scenario": "mismatch",
+                "run_nonce": "ac2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 5.165832999999999,
+                "report": "test-results\\neon-runtime-built\\portable-mismatch-ac2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "portable",
+                "scenario": "expired",
+                "run_nonce": "bc2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 5.485215,
+                "report": "test-results\\neon-runtime-built\\portable-expired-bc2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": [
+                      {
+                        "entry": "state",
+                        "code": "EBUSY"
+                      }
+                    ]
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 70,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "missing",
+                "run_nonce": "cc2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 3.4644040000000005,
+                "report": "test-results\\neon-runtime-built\\vercel-missing-cc2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "mismatch",
+                "run_nonce": "dc2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 2.5879090000000002,
+                "report": "test-results\\neon-runtime-built\\vercel-mismatch-dc2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              },
+              {
+                "target": "vercel",
+                "scenario": "expired",
+                "run_nonce": "ec2d4e6f8012",
+                "cases": 1,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "duration_s": 3.8016680000000003,
+                "report": "test-results\\neon-runtime-built\\vercel-expired-ec2d4e6f8012-ui.xml",
+                "fixture_only": true,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0
+                },
+                "runtime_value_leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2368,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                },
+                "pass": 1,
+                "cli_exit": 0,
+                "global_errors": 0
+              }
+            ],
+            "total_cases": 12,
+            "pass": 12,
+            "fail": 0,
+            "skip": 0,
+            "global_errors": 0,
+            "scope": "SDK constructor/config/kernel only; no session/token/provider verification"
+          },
+          "startup_failures_retained": 2,
+          "prior_portable_cleanup_global_failures_retained": 2,
+          "build_attempts": 3,
+          "actual_build_commands": 6,
+          "all_build_exits": 0,
+          "types_exit": 0,
+          "lint_exit": 0,
+          "contracts_exit": 0,
+          "schema_head": "0037_bulk_manifests",
+          "migrations": 0,
+          "DB_connections": 0,
+          "required_DB_suite_applicable": false,
+          "DB_skips": 0,
+          "sdk_constructor_official": true,
+          "new_runtime_node_crypto_in_workerd_verified": true,
+          "session_token_handler_or_middleware_exercised_by_kernel": false,
+          "real_Neon_verified": false,
+          "human_Google_verified": false,
+          "full_SDK_browser_CLI_provider_accounting_verified": false,
+          "external_auth_requests": 0,
+          "independent_review": "pending; author review only; no agents",
+          "full_N00_gate_passed": false,
+          "original_callback_case": "carried unchanged: portable500/vercel200 vs302; not rerun or relaxed in this follow-up",
+          "rollback_reverse_check_exit": 0
+        },
+        "runtime_flow": {
+          "task": "N00",
+          "finding": "F20",
+          "case": "NA01",
+          "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
+          "base_sha": "2eb4b388a4d669a80bd3f205804d97e3f3a81267",
+          "files": 27,
+          "insertions": 518,
+          "deletions": 1,
+          "node": {
+            "tests": 144,
+            "pass": 144,
+            "fail": 0,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 66617.2528,
+            "concurrency": 1,
+            "retained_parallel_attempt": {
+              "tests": 144,
+              "pass": 143,
+              "fail": 1,
+              "skip": 0,
+              "reason": "existing40ms500-response case received503; precise host cause unproven; assertions unchanged"
+            }
+          },
+          "crypto": {
+            "cases": 8,
+            "pass": 8,
+            "fail": 0,
+            "skip": 0,
+            "warnings": 1,
+            "duration_s": 1.51
+          },
+          "built_ui": {
+            "cases": 10,
+            "pass": 10,
+            "fail": 0,
+            "skip": 0,
+            "global_errors": 0,
+            "results": [
+              {
+                "target": "vercel",
+                "run_nonce": "5105aabbccdd",
+                "cases": 5,
+                "pass": 5,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "global_errors": 0,
+                "fixture_only": true,
+                "duration_s": 67.400413,
+                "auth_HTTP_requests": 30,
+                "forwarded": 30,
+                "accepted": 29,
+                "rejected": 1,
+                "pending": 0,
+                "unknown": 0,
+                "external_auth_requests": 0,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0,
+                  "owned_journal_removed": true
+                },
+                "leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 2391,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                }
+              },
+              {
+                "target": "portable",
+                "run_nonce": "6105aabbccdd",
+                "cases": 5,
+                "pass": 5,
+                "fail": 0,
+                "skip": 0,
+                "junit_errors": 0,
+                "global_errors": 0,
+                "fixture_only": true,
+                "duration_s": 26.082383999999998,
+                "auth_HTTP_requests": 30,
+                "forwarded": 30,
+                "accepted": 29,
+                "rejected": 1,
+                "pending": 0,
+                "unknown": 0,
+                "external_auth_requests": 0,
+                "cleanup": {
+                  "fixture_only": true,
+                  "private_root_removed": true,
+                  "runtime_configuration_removed": true,
+                  "owned_children_absent": true,
+                  "owned_root_removal": {
+                    "removed": true,
+                    "marker_retained_until_children_removed": true,
+                    "private_configuration_removed_first": true,
+                    "transient_errors": []
+                  },
+                  "external_resources": 0,
+                  "owned_journal_removed": true
+                },
+                "leak_check": {
+                  "fixture_only": true,
+                  "emitted_text_files": 91,
+                  "exact_runtime_value_matches": 0,
+                  "cookie_secret_checked": true
+                }
+              }
+            ],
+            "post_build_source_changes": [
+              "playwright.neon-runtime-flow.config.ts",
+              "scripts/serve-neon-runtime-flow.mjs"
+            ],
+            "changes_scope": "local launcher/Playwright startup only; no consumed app/SDK/output changes",
+            "full_N00_gate_passed": false
+          },
+          "types_exit": 0,
+          "lint_exit": 0,
+          "generated_types_exit": 0,
+          "generated_routes_exit": 0,
+          "actual_build_commands": 4,
+          "build_exits": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "schema_head": "0037_bulk_manifests",
+          "migrations": 0,
+          "DB_connections": 0,
+          "required_DB_suite_applicable": false,
+          "DB_skips": 0,
+          "external_auth_requests": 0,
+          "real_Neon_verified": false,
+          "human_Google_verified": false,
+          "full_SDK_browser_CLI_accounting_verified": false,
+          "external_cleanup_executor_verified": false,
+          "deployed_sha": null,
+          "independent_review": "pending; author review only/no agents",
+          "full_N00_gate_passed": false,
+          "original_callback": "strict302 portable500/Vercel200; historical/carried/not rerun or relaxed",
+          "retained_failures": [
+            "baselineUI1fail",
+            "initialbuiltVercel4pass1bodytimeout",
+            "finalVercelstartup0tests",
+            "finalportableAPIstartup0tests",
+            "parallelNode143pass1fail40ms500vs503",
+            "initialtypes2/lint9errors1warning"
+          ],
+          "captures": 238
+        },
+        "prior_node_checkpoint": {
+          "tests": 144,
+          "pass": 144,
+          "fail": 0,
+          "skip": 0,
+          "cancelled": 0,
+          "todo": 0,
+          "duration_ms": 66617.2528,
+          "concurrency": 1,
+          "retained_parallel_attempt": {
+            "tests": 144,
+            "pass": 143,
+            "fail": 1,
+            "skip": 0,
+            "reason": "existing40ms500-response case received503; precise host cause unproven; assertions unchanged"
+          },
+          "source_sha": "c756596406f41884f61a3b64c8549f569e34cfa4",
+          "executed_this_followup": false
+        },
+        "execution_boundary": {
+          "task": "N00",
+          "finding": "F20",
+          "case": "NA01",
+          "base_sha": "e0256f303502d4332400a837b99903926f74c842",
+          "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
+          "files": 10,
+          "insertions": 277,
+          "deletions": 0,
+          "related_node": {
+            "tests": 165,
+            "pass": 165,
+            "fail": 0,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 88448.9225
+          },
+          "new_boundary": {
+            "tests": 21,
+            "pass": 21,
+            "fail": 0,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 80465.3624
+          },
+          "attempted_full_node": {
+            "tests": 234,
+            "pass": 229,
+            "fail": 5,
+            "skip": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "duration_ms": 523519.4485
+          },
+          "full_suite_passed": false,
+          "full_suite_snapshot_note": "Full suite began before final reporter/receipt-only changes; related165 and actual Chromium3 freshly rerun after all functional boundary changes. Final reporter Chromium3 and frozen types/lint checked separately. No full green gate claimed.",
+          "crypto": {
+            "tests": 8,
+            "pass": 8,
+            "fail": 0,
+            "skip": 0,
+            "errors": 0,
+            "warnings": 1,
+            "junit_time_s": 3.068
+          },
+          "browser": {
+            "cases": 3,
+            "pass": 3,
+            "fail": 0,
+            "skip": 0,
+            "global_errors": 0,
+            "duration_ms": 37886.41,
+            "owned_cleanup_receipts": 3,
+            "first_case_HTTP": 4,
+            "fixture_only": true,
+            "external_verified": false
+          },
+          "checks": {
+            "types_exit": 0,
+            "scoped_lint_exit": 0,
+            "reporter_lint_exit": 0,
+            "generated_types_exit": 0,
+            "generated_routes_exit": 0,
+            "source_diff_check_exit": 0
+          },
+          "migrations": [],
+          "alembic_head": "0037_bulk_manifests",
+          "DB_connections": 0,
+          "DB_suites_applicable": false,
+          "DB_tests_skipped": 0,
+          "new_builds": 0,
+          "built_portable_vercel_evidence": "carried from c756596; not rerun here",
+          "external_requests": 0,
+          "deployment_sha": null,
+          "full_N00_gate_passed": false,
+          "independent_review": "pending; human no-agents instruction",
+          "next_eligible": "N00 full real-transport coverage and provider cleanup adapters; original302/real-Neon/human-Google/approval/review gates open"
+        },
+        "full_node_suite": {
+          "tests": 234,
+          "pass": 229,
+          "fail": 5,
+          "skip": 0,
+          "cancelled": 0,
+          "todo": 0,
+          "duration_ms": 523519.4485
+        },
+        "native_ipc_isolation": {
+          "status": "local-fixed-native-worker-verified;full-N00-open",
+          "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+          "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+          "branch": "codex/n00-native-ipc-isolation",
+          "checked_at": "2026-10-05T13:43:35.000910+00:00",
+          "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+          "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+          "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+          "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+          "checks": {
+            "red-ipc": {
+              "leaf_cases": 2,
+              "pass": 0,
+              "fail": 2,
+              "error": 0,
+              "skip": 0,
+              "attributes": {}
+            },
+            "red-isolation-behavior": {
+              "leaf_cases": 3,
+              "pass": 2,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "attributes": {}
+            },
+            "root-first": {
+              "leaf_cases": 307,
+              "pass": 306,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "attributes": {}
+            },
+            "root-green": {
+              "leaf_cases": 307,
+              "pass": 307,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "attributes": {},
+              "reported": {
+                "tests": "308",
+                "pass": "308",
+                "fail": "0",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "466803.7974"
+              }
+            },
+            "browser": {
+              "leaf_cases": 5,
+              "pass": 5,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "attributes": {
+                "id": "",
+                "name": "",
+                "tests": "5",
+                "failures": "0",
+                "skipped": "0",
+                "errors": "0",
+                "time": "13.736473000000002"
+              }
+            },
+            "crypto": {
+              "leaf_cases": 8,
+              "pass": 8,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "attributes": {
+                "name": "pytest tests"
+              }
+            }
+          },
+          "static_gates": {
+            "lint": 0,
+            "types": 0,
+            "contracts": 0,
+            "routes": 0,
+            "browser": 0,
+            "crypto": 0
+          },
+          "native_observation": {
+            "fixture_only": true,
+            "positive_control": {
+              "http_requests": 3,
+              "native_tcp_connected": true
+            },
+            "direct_http_requests": 0,
+            "probes": {
+              "http_connected": false,
+              "fetch_connected": false,
+              "tcp_connected": false,
+              "subprocess_connected": false
+            },
+            "worker_policy": {
+              "network": "none",
+              "read_only": true,
+              "user": "node",
+              "cap_drop": [
+                "ALL"
+              ],
+              "pids_limit": 64,
+              "memory": 134217728,
+              "nano_cpus": 1000000000,
+              "published_ports": 0,
+              "mounts": 0,
+              "environment_names": [
+                "BUYEROS_STRICT_INTEGRATION",
+                "PATH",
+                "NODE_VERSION",
+                "YARN_VERSION"
+              ]
+            },
+            "cleanup": {
+              "complete": true,
+              "containers_absent": [
+                "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
+                "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
+                "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
+              ],
+              "network_absent": true,
+              "fixture_only": true,
+              "inspect_retries": 0
+            }
+          },
+          "new_node_cases": 3,
+          "new_build": false,
+          "fixture_only": true,
+          "canonical_db_connection": false,
+          "real_Neon_verified": false,
+          "parent_os_contained": false,
+          "browser_os_contained": false,
+          "arbitrary_provider_cli_contained": false,
+          "external_requests": 0,
+          "full_N00_open": true,
+          "original302_rerun": false,
+          "schema_head": "0037_bulk_manifests",
+          "migrations": 0,
+          "operation_count": 84,
+          "original_operations": 70,
+          "extensions": 14,
+          "independent_review": "pending",
+          "deployed_sha": null,
+          "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+          "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+        },
+        "api_request_context": {
+          "status": "local-counted-APIRequestContext-verified;full-N00-open",
+          "source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
+          "base_sha": "ad1a54510f6a0fb2485392c878e7e867e9def6be",
+          "branch": "codex/n00-api-request-context",
+          "checked_at": "2026-10-05T17:21:02.560778+00:00",
+          "date_hk": "2026-10-06",
+          "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_API_REQUEST_CONTEXT/RESULTS.md",
+          "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+          "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+          "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+          "native_worker_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+          "checks": {
+            "red-node": {
+              "leaf_cases": 8,
+              "fail": 8,
+              "error": 0,
+              "skip": 0,
+              "pass": 0,
+              "attributes": {},
+              "reported": {
+                "tests": "8",
+                "pass": "0",
+                "fail": "8",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "1007.4626"
+              }
+            },
+            "red-browser": {
+              "leaf_cases": 6,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "pass": 5,
+              "attributes": {
+                "id": "",
+                "name": "",
+                "tests": "6",
+                "failures": "1",
+                "skipped": "0",
+                "errors": "0",
+                "time": "13.954609"
+              },
+              "reported": {}
+            },
+            "envelope-red": {
+              "leaf_cases": 8,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "pass": 7,
+              "attributes": {},
+              "reported": {
+                "tests": "8",
+                "pass": "7",
+                "fail": "1",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "6375.6904"
+              }
+            },
+            "root-first": {
+              "leaf_cases": 315,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "pass": 314,
+              "attributes": {},
+              "reported": {
+                "tests": "316",
+                "pass": "315",
+                "fail": "1",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "212366.4882"
+              }
+            },
+            "race-red": {
+              "leaf_cases": 9,
+              "fail": 1,
+              "error": 0,
+              "skip": 0,
+              "pass": 8,
+              "attributes": {},
+              "reported": {
+                "tests": "9",
+                "pass": "8",
+                "fail": "1",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "5499.6881"
+              }
+            },
+            "race-red-both": {
+              "leaf_cases": 10,
+              "fail": 2,
+              "error": 0,
+              "skip": 0,
+              "pass": 8,
+              "attributes": {},
+              "reported": {
+                "tests": "10",
+                "pass": "8",
+                "fail": "2",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "5400.9806"
+              }
+            },
+            "green-final": {
+              "leaf_cases": 18,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "pass": 18,
+              "attributes": {},
+              "reported": {
+                "tests": "18",
+                "pass": "18",
+                "fail": "0",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "17454.2441"
+              }
+            },
+            "root-final": {
+              "leaf_cases": 317,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "pass": 317,
+              "attributes": {},
+              "reported": {
+                "tests": "318",
+                "pass": "318",
+                "fail": "0",
+                "cancelled": "0",
+                "skipped": "0",
+                "todo": "0",
+                "duration_ms": "519306.7825"
+              }
+            },
+            "browser-final": {
+              "leaf_cases": 6,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "pass": 6,
+              "attributes": {
+                "id": "",
+                "name": "",
+                "tests": "6",
+                "failures": "0",
+                "skipped": "0",
+                "errors": "0",
+                "time": "47.728449"
+              },
+              "reported": {}
+            },
+            "crypto": {
+              "leaf_cases": 8,
+              "fail": 0,
+              "error": 0,
+              "skip": 0,
+              "pass": 8,
+              "attributes": {
+                "name": "pytest tests"
+              },
+              "reported": {}
+            }
+          },
+          "static_gates": {
+            "lint": 0,
+            "types": 0,
+            "routes": 0,
+            "contracts": 0,
+            "crypto": 0,
+            "browser": 0
+          },
+          "actual_context_observation": [
+            {
+              "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+              "name": "api-context-receipt",
+              "observation": {
+                "fixture_only": true,
+                "external_verified": false,
+                "http_requests": 2,
+                "reservations": 2,
+                "private_cookie_isolation": true,
+                "raw_context_os_contained": false
+              }
+            },
+            {
+              "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+              "name": "owned-api-context-cleanup",
+              "observation": {
+                "fixture_only": true,
+                "external_verified": false,
+                "owned_context_disposed": true
+              }
+            },
+            {
+              "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+              "name": "owned-cleanup",
+              "observation": {
+                "fixture_only": true,
+                "external_verified": false,
+                "owned_journal_removed": true,
+                "owned_servers_closed": true
+              }
+            }
+          ],
+          "new_node_cases": 10,
+          "new_browser_cases": 1,
+          "new_build": false,
+          "fixture_only": true,
+          "canonical_db_connection": false,
+          "required_DB_suite_for_new_protocol_cases": false,
+          "DB_skips": 0,
+          "real_Neon_verified": false,
+          "parent_os_contained": false,
+          "browser_os_contained": false,
+          "raw_APIRequestContext_os_contained": false,
+          "arbitrary_provider_cli_contained": false,
+          "external_auth_requests": 0,
+          "full_N00_open": true,
+          "original302_rerun": false,
+          "schema_head": "0037_bulk_manifests",
+          "migrations": 0,
+          "operation_count": 84,
+          "original_operations": 70,
+          "extensions": 14,
+          "independent_review": "pending",
+          "deployed_sha": null,
+          "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+          "rollback": "Revert following metadata commit then source4ba0a5d7757d5c9e4991593a13c0a2df217be511;reverse patch check0 only;retain admitted/unknown journal holds;no DB/data rollback."
+        }
+      },
+      "migrations": "none;0037 unchanged",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+      "rollback": "Revert following metadata commit then source4ba0a5d7757d5c9e4991593a13c0a2df217be511;reverse patch check0 only;retain admitted/unknown journal holds;no DB/data rollback.",
+      "limits": [
+        "No real Neon login/OAuth/email/CSRF/state/refresh/rotation/Safari/Firefox",
+        "No Vercel ingress/protection/binding/deployment verification",
+        "No canonical identity/membership workspace verification by diagnostic",
+        "No production or Cloudflare cutover",
+        "No live performance/SLA/UAT claim",
+        "OS containment covers fixed Linux child only; parent/broker/browser/APIRequestContext/arbitrary provider CLI remain OPEN",
+        "Cached local image only; no real SDK/browser/provider CLI provisioned into container",
+        "Independent review and true Neon/Google/managed cleanup/original302 remain OPEN"
+      ],
+      "full_gate_passed": false,
+      "next_action": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+      "cleanup_contract_followup": {
+        "source_sha": "370a558492ef2c6617379c8923f2ce17c81da66f",
+        "base_sha": "158e05f0b31e4c59776d39c6c2926f6ab8bf3fcd",
+        "status": "local-unarmed-contract-verified;N00open",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_CLEANUP_CONTRACTS/RESULTS.md",
+        "checks": {
+          "cases": 201,
+          "pass": 201,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "new_cases": 36,
+        "types_exit": 0,
+        "lint_exit": 0,
+        "contracts_exit": 0,
+        "provider_calls": 0,
+        "execution_enabled": false,
+        "identity_contract": "users_sync not assumed compatible;bound identity blocksdelete",
+        "migrations": [],
+        "limits": [
+          "ManagedBetterAuth exactidentitycleanup/absence unresolved",
+          "realtransport/original302/trueNeon/human/independentreviewopen",
+          "historicalwhole-root229pass5fail remainsRED;not rerun"
+        ]
+      },
+      "unknown_write_recovery": {
+        "source_sha": "2b69e7cf8c0b0c738bfc34b3de44b1877468a0ca",
+        "base_sha": "58b3cff65625c5abe55a0f8ab316b604989d8063",
+        "status": "local-unknown-auth-transport-recovery-verified;N00open",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_UNKNOWN_WRITE_RECOVERY/RESULTS.md",
+        "checks": {
+          "related_Node": {
+            "pass": 214,
+            "fail": 0,
+            "skip": 0
+          },
+          "crypto": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          },
+          "built_portable": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          },
+          "built_Vercel": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          },
+          "broad_root_MJS_attempt": {
+            "reported": 274,
+            "pass": 269,
+            "fail": 5,
+            "skip": 0,
+            "final_source_acceptance": false
+          }
+        },
+        "new_Node_cases": 13,
+        "new_UI_case_per_target": 1,
+        "types_exit": 0,
+        "lint_exit": 0,
+        "contracts_exit": 0,
+        "operations": 84,
+        "provider_calls": 0,
+        "migrations": [],
+        "deployed_sha": null,
+        "full_gate_passed": false,
+        "limits": [
+          "original302/trueNeon/Google/fullnativeaccounting/Managedidentitycleanup/independentreviewOPEN",
+          "broadsuiteRED;2intentfailuresnowrelatedGREEN;offerDocker30stimeout+parent+missingmainVercelentryremain",
+          "unresolvedrestartjournalsholdallstatechangespendingtrustedreconciliation"
+        ]
+      },
+      "managed_identity_sdk_cleanup": {
+        "source_sha": "050f0d03e49e867c9e5364865d3dc5f17bdc8fec",
+        "base_sha": "6c396a452fc48279ff093dc6984fdc0ad3a7e2a5",
+        "status": "local-native-SDK-managed-identity-cleanup-rehearsal-verified;N00open",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_MANAGED_CLEANUP_SDK/RESULTS.md",
+        "checks": {
+          "related_Node": {
+            "pass": 238,
+            "fail": 0,
+            "skip": 0
+          },
+          "focused_Node": {
+            "pass": 24,
+            "fail": 0,
+            "skip": 0
+          },
+          "crypto": {
+            "pass": 8,
+            "fail": 0,
+            "skip": 0
+          },
+          "owned_browser": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "types_exit": 0,
+        "lint_exit": 0,
+        "contracts_exit": 0,
+        "operations": 84,
+        "provider_calls": 0,
+        "migrations": [],
+        "builds": 0,
+        "deployed_sha": null,
+        "full_gate_passed": false,
+        "limits": [
+          "real-Neon/Google/Admincleanup/schema/absence require fresh isolated authority",
+          "original302/fullnativecontainment/independentreview/staffUAT OPEN",
+          "priorbroadrootRED;not rerun"
+        ],
+        "source_commits": [
+          "5ecaa23abf6e3148a6964a1886b70442c3615987",
+          "050f0d03e49e867c9e5364865d3dc5f17bdc8fec"
+        ],
+        "author_review_red": {
+          "pass": 23,
+          "fail": 1,
+          "skip": 0
+        },
+        "intent": "bound identity canonical JSON;headers do not change intent"
+      },
+      "proxy_dispatch_deadline_20261005": {
+        "checks": {
+          "red": {
+            "cases": 3,
+            "pass": 1,
+            "fail": 2,
+            "error": 0,
+            "skip": 0
+          },
+          "red-final": {
+            "cases": 4,
+            "pass": 1,
+            "fail": 3,
+            "error": 0,
+            "skip": 0
+          },
+          "focused-green": {
+            "cases": 28,
+            "pass": 28,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "root-green": {
+            "cases": 303,
+            "pass": 303,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "reported_pass": 304,
+            "duration_ms": 106071.156
+          },
+          "crypto": {
+            "cases": 8,
+            "pass": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          }
+        },
+        "built_reuse_ui": [
+          {
+            "target": "portable",
+            "nonce": "2314a4a2e7e8",
+            "pass": 6,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "time": "17.345563",
+            "fixture_only": true,
+            "fresh_host_proxy": true,
+            "new_build": false,
+            "metrics": {
+              "received": 38,
+              "forwarded": 37,
+              "locally_rejected": 2,
+              "unknown": 1
+            },
+            "requests": 38,
+            "outcomes": {
+              "accepted": 35,
+              "rejected": 2,
+              "unknown": 1,
+              "pending": 0
+            },
+            "cleanup": {
+              "fixture_only": true,
+              "private_root_removed": true,
+              "runtime_configuration_removed": true,
+              "owned_children_absent": true,
+              "owned_root_removal": {
+                "removed": true,
+                "marker_retained_until_children_removed": true,
+                "private_configuration_removed_first": true,
+                "transient_errors": []
+              },
+              "external_resources": 0,
+              "owned_journal_removed": true
+            }
+          },
+          {
+            "target": "vercel",
+            "nonce": "5d6402f65c01",
+            "pass": 6,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "time": "8.442167999999999",
+            "fixture_only": true,
+            "fresh_host_proxy": true,
+            "new_build": false,
+            "metrics": {
+              "received": 38,
+              "forwarded": 37,
+              "locally_rejected": 2,
+              "unknown": 1
+            },
+            "requests": 38,
+            "outcomes": {
+              "accepted": 35,
+              "rejected": 2,
+              "unknown": 1,
+              "pending": 0
+            },
+            "cleanup": {
+              "fixture_only": true,
+              "private_root_removed": true,
+              "runtime_configuration_removed": true,
+              "owned_children_absent": true,
+              "owned_root_removal": {
+                "removed": true,
+                "marker_retained_until_children_removed": true,
+                "private_configuration_removed_first": true,
+                "transient_errors": []
+              },
+              "external_resources": 0,
+              "owned_journal_removed": true
+            }
+          }
+        ],
+        "types_exit": 0,
+        "lint_exit": 0,
+        "contracts_exit": 0,
+        "routes_exit": 0,
+        "new_builds": 0,
+        "migrations": [],
+        "protocol_required_DB_suite_applicable": false,
+        "protocol_DB_connections": 0,
+        "root_suite_environment_has_separate_guarded_disposable_tests": true,
+        "external_auth_requests": 0,
+        "real_Neon_verified": false,
+        "original302_gate": "open;unchanged;not rerun this slice",
+        "independent_review": "pending;author only",
+        "full_N00_gate_passed": false,
+        "deployed_sha": null,
+        "status": "local-proxy-deadlines-verified;full-N00-open",
+        "source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+        "base_sha": "233848b263cfdefc49d6dc5f53df2d534afdba16",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "branch": "codex/n00-proxy-dispatch-deadline",
+        "checked_at": "2026-10-05T08:08:51.042633+00:00",
+        "owner_role": "Identity / QA",
+        "source_files": 3,
+        "insertions": 105,
+        "deletions": 8,
+        "protocol_code_changes": "absolute ingress body deadline, TTL recheck immediately before physical dispatch, remaining TTL clamps upstream timeout; unknown hold retained",
+        "new_operations": 0,
+        "operation_count": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "source_schema_head": "0037_bulk_manifests",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_PROXY_DISPATCH_DEADLINE/RESULTS.md",
+        "rollback": "Revert following metadata commit then9e1ef78 as one local harness/test unit;no DB/data undo;never erase admitted/unknown journal state.",
+        "next_eligible": "N00 local native browser/CLI containment gap audit; full real-Neon/Google/Admincleanup/original302 requires separate evidence and fresh exact authorization;N01/N02 prerequisite unchanged"
+      },
+      "prior_proxy_deadline_summary_20261005": {
+        "code_status": "local counted proxy absolute ingress and dispatch TTL repaired;Auth0 retained",
+        "verification_status": "304reportedroot(303leaves)/28focused/8crypto/6UIeach pass0fail/skip;retained compiled outputs;no new build/fullN00open",
+        "release_status": "not-deployed",
+        "source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92"
+      },
+      "browser_native_containment_20261005": {
+        "checks": {
+          "red": {
+            "cases": 5,
+            "pass": 4,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "green": {
+            "cases": 5,
+            "pass": 5,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "duration_ms": 3231.391,
+            "global_errors": 0
+          },
+          "crypto": {
+            "cases": 8,
+            "pass": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "root-green": {
+            "cases": 304,
+            "pass": 304,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "reported_pass": 305,
+            "duration_ms": 125948.7707
+          }
+        },
+        "static_gates": {
+          "lint": 0,
+          "routes": 0,
+          "types": 0,
+          "contracts": 0
+        },
+        "new_build": false,
+        "external_http_requests": 0,
+        "real_Neon_verified": false,
+        "full_N00_open": true,
+        "source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+        "base_sha": "ebe830e16f15d432ad326e7f298d629c8ca59a6f",
+        "branch": "codex/n00-browser-websocket-refusal",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+        "checked_at": "2026-10-05T12:01:07.670479+00:00",
+        "status": "local-browser-WebSocket-refusal-verified; full-N00-open",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_BROWSER_NATIVE_CONTAINMENT/RESULTS.md",
+        "schema_head": "0037_bulk_manifests",
+        "migrations": 0,
+        "operation_count": 84,
+        "independent_review": "pending",
+        "deployed_sha": null,
+        "next_eligible": "N00 prepare explicit counted transports and disposable OS egress isolation for Node native HTTP/APIRequestContext/provider CLI; no real execution until containment, cleanup and fresh exact authorization",
+        "rollback": "Revert following metadata commit then source362b60d; no DB/data rollback, retain admitted/unknown journal holds."
+      },
+      "prior_browser_native_summary_20261005": {
+        "code_status": "dedicated fixture Chromium WebSocket refusal; production runtime/Auth0 unchanged",
+        "verification_status": "5 actual Chromium /305 reported root(304 leaves)/8 strict crypto;0fail/error/skip;native HTTP/APIRequestContext gaps reproduced OPEN",
+        "release_status": "not-deployed; full N00 open",
+        "base_sha": "27f1412369edb6ea8581aa15d3d2a7a0e84882d3",
+        "source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_EXECUTION_BOUNDARY/RESULTS.md",
+        "rollback": "revert following metadata then b8a10848b62090ff19544918961e54df3ebfa921;reverse applicability0 only;no DB/resource undo",
+        "next_action": "N00 specifically authorized isolated real-Neon/Google roundtrip, exact admin cleanup/absence and counted native transport; full gate open"
+      },
+      "native_ipc_isolation_20261005": {
+        "status": "local-fixed-native-worker-verified;full-N00-open",
+        "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+        "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+        "branch": "codex/n00-native-ipc-isolation",
+        "checked_at": "2026-10-05T13:43:35.000910+00:00",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_NATIVE_IPC_ISOLATION/RESULTS.md",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+        "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+        "checks": {
+          "red-ipc": {
+            "leaf_cases": 2,
+            "pass": 0,
+            "fail": 2,
+            "error": 0,
+            "skip": 0,
+            "attributes": {}
+          },
+          "red-isolation-behavior": {
+            "leaf_cases": 3,
+            "pass": 2,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "attributes": {}
+          },
+          "root-first": {
+            "leaf_cases": 307,
+            "pass": 306,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "attributes": {}
+          },
+          "root-green": {
+            "leaf_cases": 307,
+            "pass": 307,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "attributes": {},
+            "reported": {
+              "tests": "308",
+              "pass": "308",
+              "fail": "0",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "466803.7974"
+            }
+          },
+          "browser": {
+            "leaf_cases": 5,
+            "pass": 5,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "attributes": {
+              "id": "",
+              "name": "",
+              "tests": "5",
+              "failures": "0",
+              "skipped": "0",
+              "errors": "0",
+              "time": "13.736473000000002"
+            }
+          },
+          "crypto": {
+            "leaf_cases": 8,
+            "pass": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "attributes": {
+              "name": "pytest tests"
+            }
+          }
+        },
+        "static_gates": {
+          "lint": 0,
+          "types": 0,
+          "contracts": 0,
+          "routes": 0,
+          "browser": 0,
+          "crypto": 0
+        },
+        "native_observation": {
+          "fixture_only": true,
+          "positive_control": {
+            "http_requests": 3,
+            "native_tcp_connected": true
+          },
+          "direct_http_requests": 0,
+          "probes": {
+            "http_connected": false,
+            "fetch_connected": false,
+            "tcp_connected": false,
+            "subprocess_connected": false
+          },
+          "worker_policy": {
+            "network": "none",
+            "read_only": true,
+            "user": "node",
+            "cap_drop": [
+              "ALL"
+            ],
+            "pids_limit": 64,
+            "memory": 134217728,
+            "nano_cpus": 1000000000,
+            "published_ports": 0,
+            "mounts": 0,
+            "environment_names": [
+              "BUYEROS_STRICT_INTEGRATION",
+              "PATH",
+              "NODE_VERSION",
+              "YARN_VERSION"
+            ]
+          },
+          "cleanup": {
+            "complete": true,
+            "containers_absent": [
+              "3a107652e428e6355425507dc2e28aaddee156395aaa450649ee00169c49ec8f",
+              "52db7e987388afe3336c9648e816dfddc63dd5d621e89c4c11a50c28863f7cdd",
+              "90f1baafd2dfe0c3048f8dfd6c5090a56c63727f8a47ed8ed8db92911a2e9462"
+            ],
+            "network_absent": true,
+            "fixture_only": true,
+            "inspect_retries": 0
+          }
+        },
+        "new_node_cases": 3,
+        "new_build": false,
+        "fixture_only": true,
+        "canonical_db_connection": false,
+        "real_Neon_verified": false,
+        "parent_os_contained": false,
+        "browser_os_contained": false,
+        "arbitrary_provider_cli_contained": false,
+        "external_requests": 0,
+        "full_N00_open": true,
+        "original302_rerun": false,
+        "schema_head": "0037_bulk_manifests",
+        "migrations": 0,
+        "operation_count": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "independent_review": "pending",
+        "deployed_sha": null,
+        "next_eligible": "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+        "rollback": "Revert following metadata commit then source779138a; no DB/data rollback, retain admitted/unknown journal holds."
+      },
+      "prior_native_ipc_summary_20261006": {
+        "code_status": "fixed fictional native worker counted IPC and network-none isolation; Auth0/application unchanged",
+        "verification_status": "308 reported root/307 JUnit leaves, native3 included; Chromium5/strict crypto8;0fail-error-skip; full containment/Neon/original302 OPEN",
+        "release_status": "not-deployed; full N00 open",
+        "base_sha": "a06e134d807850c6fe8f4324a877d187e1ed5387",
+        "source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a"
+      },
+      "prior_latest_checks_fields_20261006": {
+        "node": {
+          "tests": 165,
+          "pass": 165,
+          "fail": 0,
+          "skip": 0,
+          "cancelled": 0,
+          "todo": 0,
+          "duration_ms": 88448.9225,
+          "source_sha": "b8a10848b62090ff19544918961e54df3ebfa921",
+          "executed_this_followup": true
+        },
+        "types_exit": 0,
+        "lint_exit": 0
+      },
+      "api_request_context_20261006": {
+        "status": "local-counted-APIRequestContext-verified;full-N00-open",
+        "source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
+        "base_sha": "ad1a54510f6a0fb2485392c878e7e867e9def6be",
+        "branch": "codex/n00-api-request-context",
+        "checked_at": "2026-10-05T17:21:02.560778+00:00",
+        "date_hk": "2026-10-06",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/N00_API_REQUEST_CONTEXT/RESULTS.md",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "runtime_proxy_source_sha": "9e1ef78d4ae61429dee0d4b6fd62de9cbfdd7c92",
+        "dedicated_browser_source_sha": "362b60dd42d034e229b9fa5f51a47d6ffcd4ec04",
+        "native_worker_source_sha": "779138aa5335eb829a97a80bbc80430a32201c1a",
+        "checks": {
+          "red-node": {
+            "leaf_cases": 8,
+            "fail": 8,
+            "error": 0,
+            "skip": 0,
+            "pass": 0,
+            "attributes": {},
+            "reported": {
+              "tests": "8",
+              "pass": "0",
+              "fail": "8",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "1007.4626"
+            }
+          },
+          "red-browser": {
+            "leaf_cases": 6,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "pass": 5,
+            "attributes": {
+              "id": "",
+              "name": "",
+              "tests": "6",
+              "failures": "1",
+              "skipped": "0",
+              "errors": "0",
+              "time": "13.954609"
+            },
+            "reported": {}
+          },
+          "envelope-red": {
+            "leaf_cases": 8,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "pass": 7,
+            "attributes": {},
+            "reported": {
+              "tests": "8",
+              "pass": "7",
+              "fail": "1",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "6375.6904"
+            }
+          },
+          "root-first": {
+            "leaf_cases": 315,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "pass": 314,
+            "attributes": {},
+            "reported": {
+              "tests": "316",
+              "pass": "315",
+              "fail": "1",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "212366.4882"
+            }
+          },
+          "race-red": {
+            "leaf_cases": 9,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "pass": 8,
+            "attributes": {},
+            "reported": {
+              "tests": "9",
+              "pass": "8",
+              "fail": "1",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "5499.6881"
+            }
+          },
+          "race-red-both": {
+            "leaf_cases": 10,
+            "fail": 2,
+            "error": 0,
+            "skip": 0,
+            "pass": 8,
+            "attributes": {},
+            "reported": {
+              "tests": "10",
+              "pass": "8",
+              "fail": "2",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "5400.9806"
+            }
+          },
+          "green-final": {
+            "leaf_cases": 18,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 18,
+            "attributes": {},
+            "reported": {
+              "tests": "18",
+              "pass": "18",
+              "fail": "0",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "17454.2441"
+            }
+          },
+          "root-final": {
+            "leaf_cases": 317,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 317,
+            "attributes": {},
+            "reported": {
+              "tests": "318",
+              "pass": "318",
+              "fail": "0",
+              "cancelled": "0",
+              "skipped": "0",
+              "todo": "0",
+              "duration_ms": "519306.7825"
+            }
+          },
+          "browser-final": {
+            "leaf_cases": 6,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 6,
+            "attributes": {
+              "id": "",
+              "name": "",
+              "tests": "6",
+              "failures": "0",
+              "skipped": "0",
+              "errors": "0",
+              "time": "47.728449"
+            },
+            "reported": {}
+          },
+          "crypto": {
+            "leaf_cases": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 8,
+            "attributes": {
+              "name": "pytest tests"
+            },
+            "reported": {}
+          }
+        },
+        "static_gates": {
+          "lint": 0,
+          "types": 0,
+          "routes": 0,
+          "contracts": 0,
+          "crypto": 0,
+          "browser": 0
+        },
+        "actual_context_observation": [
+          {
+            "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+            "name": "api-context-receipt",
+            "observation": {
+              "fixture_only": true,
+              "external_verified": false,
+              "http_requests": 2,
+              "reservations": 2,
+              "private_cookie_isolation": true,
+              "raw_context_os_contained": false
+            }
+          },
+          {
+            "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+            "name": "owned-api-context-cleanup",
+            "observation": {
+              "fixture_only": true,
+              "external_verified": false,
+              "owned_context_disposed": true
+            }
+          },
+          {
+            "case": "NA01 counted APIRequestContext: private cookies and two manual hops through the original journal",
+            "name": "owned-cleanup",
+            "observation": {
+              "fixture_only": true,
+              "external_verified": false,
+              "owned_journal_removed": true,
+              "owned_servers_closed": true
+            }
+          }
+        ],
+        "new_node_cases": 10,
+        "new_browser_cases": 1,
+        "new_build": false,
+        "fixture_only": true,
+        "canonical_db_connection": false,
+        "required_DB_suite_for_new_protocol_cases": false,
+        "DB_skips": 0,
+        "real_Neon_verified": false,
+        "parent_os_contained": false,
+        "browser_os_contained": false,
+        "raw_APIRequestContext_os_contained": false,
+        "arbitrary_provider_cli_contained": false,
+        "external_auth_requests": 0,
+        "full_N00_open": true,
+        "original302_rerun": false,
+        "schema_head": "0037_bulk_manifests",
+        "migrations": 0,
+        "operation_count": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "independent_review": "pending",
+        "deployed_sha": null,
+        "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+        "rollback": "Revert following metadata commit then source4ba0a5d7757d5c9e4991593a13c0a2df217be511;reverse patch check0 only;retain admitted/unknown journal holds;no DB/data rollback."
+      }
+    },
+    {
+      "id": "N01",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N02",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N03",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N04",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N05",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N06",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "N07",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q01",
+      "status": "fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "source_sha": "8251027ddcf781e5cae713da4190d32a77a81dbd",
+      "cases": [
+        "U02",
+        "U03",
+        "U13"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q01-ui.xml"
+    },
+    {
+      "id": "Q02",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "72 API + 29 combined UI + 13 unit pass; 0 fail/skip",
+      "release_status": "not-deployed",
+      "base_sha": "338ee8e623b0f9b117c5cd6d3f84dc63a0a05b9d",
+      "cases": [
+        "U06",
+        "U07",
+        "U08",
+        "S06"
+      ],
+      "migrations": "none; source head 0036_checkpoint_schema_grants",
+      "source_sha": "fb184819d038dc2ad56b7f1746362fe9b7a6089a",
+      "depends_on": [
+        "Q01"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q02/RESULTS.md",
+      "next_eligible": "Q05",
+      "u05_followup": {
+        "case_id": "U05",
+        "status": "integration-fixture-verified",
+        "code_status": "implemented",
+        "verification_status": "36 UI/38 strict API/17 related Node pass; 0 fail/error/skip; whole-root Node2 inherited/environment failures remain",
+        "release_status": "not-deployed",
+        "base_sha": "e8e478c9e5a5812d43169759d39ddea1d5529098",
+        "source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/U05/RESULTS.md",
+        "migrations": "none; head0037_bulk_manifests",
+        "next_eligible": null
+      }
+    },
+    {
+      "id": "Q03",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "source_sha": "f5936cef6b363e3662c9b84c6153ea2c43f8117b",
+      "cases": [
+        "B10",
+        "B11"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q03-ui.xml"
+    },
+    {
+      "id": "Q04",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "source_sha": "fc8fae75dfd743feaf590e73a099443d23e34788",
+      "cases": [
+        "B05",
+        "B06"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q04-ui.xml"
+    },
+    {
+      "id": "Q05",
+      "status": "integration-fixture-verified",
+      "base_sha": "6e7a78c6994664cb47c5325d8c0eecd8cfdde573",
+      "depends_on": [
+        "Q02"
+      ],
+      "verification_status": "13 strict DB + 37 combined UI + 18 unit pass; 0 fail/error/skip",
+      "release_status": "not-deployed",
+      "code_status": "implemented",
+      "source_sha": "4cd0f484814be7d4333ca265c9637de940d398fa",
+      "cases": [
+        "B02",
+        "B03",
+        "B04",
+        "B07",
+        "B16"
+      ],
+      "migrations": "none; source head 0036_checkpoint_schema_grants",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q05/RESULTS.md",
+      "next_eligible": "Q06"
+    },
+    {
+      "id": "Q06",
+      "status": "fixture-verified",
+      "base_sha": "b083ea43988ed73e9d8e9ab112ba3d6305f2c941",
+      "depends_on": [
+        "Q03"
+      ],
+      "release_status": "not-deployed",
+      "verification_status": "local-fixture-and-integration-pass",
+      "code_status": "implemented",
+      "source_sha": "b3477e341c35807bcdcbb400edfed7cceaa46de4",
+      "cases": [
+        "B12",
+        "B13",
+        "P04",
+        "B16"
+      ],
+      "commands": "docs/buyeros/evidence/audit-fixes-20261003/Q06/q06-commands.json",
+      "checks": {
+        "strict_api_db_contract": {
+          "pass": 24,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "audit_ui": {
+          "pass": 44,
+          "fail": 0,
+          "skip": 0
+        },
+        "related_unit": {
+          "pass": 29,
+          "fail": 0,
+          "skip": 0
+        },
+        "adapter_auth": {
+          "node_file_tests": 2,
+          "adapter_checks": 74,
+          "auth_checks": 8
+        },
+        "rollback_unit": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "migrations": "none; source head0036_checkpoint_schema_grants",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q06/RESULTS.md",
+      "next_eligible": "Q07"
+    },
+    {
+      "id": "Q07",
+      "status": "fixture-verified",
+      "base_sha": "c09eec2872b1fa73719c0894c14d01c23a13bbdc",
+      "depends_on": [
+        "Q15"
+      ],
+      "release_status": "not-deployed",
+      "verification_status": "local-fixture-and-integration-pass",
+      "code_status": "implemented",
+      "source_sha": "a2696e1a317342a64c9b9b29b0585ae8ddff54bf",
+      "cases": [
+        "A02",
+        "A07"
+      ],
+      "finding_ids": [
+        "F09"
+      ],
+      "commands": "docs/buyeros/evidence/audit-fixes-20261003/Q07/q07-commands.json",
+      "checks": {
+        "strict_api_db_contract": {
+          "pass": 47,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "strict_worker_db": {
+          "pass": 11,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "q07_q15_ui": {
+          "pass": 12,
+          "fail": 0,
+          "skip": 0
+        },
+        "related_node": {
+          "pass": 12,
+          "fail": 0,
+          "skip": 0,
+          "adapter_checks": 74,
+          "auth_checks": 8
+        }
+      },
+      "migrations": "none; source head0036_checkpoint_schema_grants",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q07/RESULTS.md",
+      "rollback": "generation-pause-rollback.patch; retains truthful fixed-template copy, existing drafts/edits and API guards; applicability checked, browser/deployment rehearsal not run",
+      "limits": "fictional identity/contact/purposes and fixture-staged dispatch; no live provider/auth/worker/production validation; Q12 manual grounding still pending",
+      "next_eligible": "Q12"
+    },
+    {
+      "id": "Q08",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "required-local-HTTP-DB-UI-pass; original-case-variant/live limitations recorded",
+      "release_status": "not-deployed",
+      "base_sha": "80ecfc762a6b1aeb5ce6c205d0a641539aff54c1",
+      "source_sha": "c98fb6860ce2d4f9ba1797abe919454edcb13204",
+      "depends_on": [
+        "Q05",
+        "Q06"
+      ],
+      "cases": [
+        "B01",
+        "B08",
+        "B09",
+        "B14",
+        "B15",
+        "B16"
+      ],
+      "finding_ids": [
+        "F11"
+      ],
+      "checks": {
+        "api": {
+          "pass": 90,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "ui": {
+          "pass": 17,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "migrations": {
+          "pass": 39,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        }
+      },
+      "node_checks": {
+        "pass": 22,
+        "fail": 0,
+        "skip": 0
+      },
+      "migrations": "0037_bulk_manifests allocated after sole0036head; disposable upgrade/empty roundtrip/populated refusal; production unapplied",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q08/RESULTS.md",
+      "rollback": "pause new admissions; preserve durable manifests/jobs/results; populated downgrade refused; patch applicability only",
+      "limits": "fake OIDC/fit; manual shared worker chunks; no live provider/continuous worker/production/whole staff journey",
+      "next_eligible": "Q14"
+    },
+    {
+      "id": "Q09",
+      "status": "local-candidate-human-gates-open",
+      "base_sha": "38e88735b003fa8fdc0e8d034e5a883d9df5d204",
+      "depends_on": [
+        "Q01",
+        "Q02",
+        "Q05",
+        "Q14",
+        "Q15"
+      ],
+      "cases": [
+        "U09",
+        "U10",
+        "U11",
+        "U12",
+        "WF01",
+        "WF02"
+      ],
+      "release_status": "not-deployed",
+      "checkpoint": "2026-10-04 HKT: five-task selected keyboard fixture matrix verified; final12pass/0fail/error/skip+14rawproofs. Application unchanged; human screen-reader/staff/independent review open; earlier failures retained; no external action.",
+      "tests": {
+        "api": {
+          "report": "q09-api-third.xml",
+          "executed": 21,
+          "passed": 21,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 183.647,
+          "zero_cases_is_pass": null
+        },
+        "node": {
+          "passed": 34,
+          "failed": 0,
+          "skipped": 0,
+          "evidence": "Q09/q09-node-handoff.log"
+        },
+        "ui_full_second": {
+          "report": "q09-built-second-full.xml",
+          "executed": 50,
+          "passed": 48,
+          "failures": 0,
+          "errors": 2,
+          "skipped": 0,
+          "wall_seconds": 1318.325699,
+          "zero_cases_is_pass": null
+        },
+        "ui_affected_final": {
+          "report": "q09-owner-final.xml",
+          "executed": 17,
+          "passed": 17,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 396.127954,
+          "zero_cases_is_pass": null
+        },
+        "demo_parity": {
+          "report": "q09-responsive.xml",
+          "executed": 21,
+          "passed": 21,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 308.66396599999996,
+          "zero_cases_is_pass": null
+        },
+        "keyboard_final": {
+          "report": "q09-keyboard-proof-full.xml",
+          "executed": 12,
+          "passed": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 568.761243,
+          "zero_case_is_pass": null
+        }
+      },
+      "migrations": [],
+      "human_gates": {
+        "screen_reader": "blocked-not-observed",
+        "staff_uat": "blocked-not-observed"
+      },
+      "module_commits": {
+        "canonical_actor_projection": "85686a6608cca04a669dbf21156fdfd2d2af33e7",
+        "offer_profile_reads": "3843623c934fba75a8a5bffe1db4175960444361",
+        "buyer_member_results": "35e859161536bc2f6726c8b713c8006ec01cc43a",
+        "scope_jobs": "6e7335b2d341167ddbc6fdfbad08d789e5c8972e",
+        "fixture_journeys": "1953d615dc00e6920380dbb71be6a99b96e36488",
+        "keyboard_fixtures": "f70501a174c641db65d06929ebd3b7e8b52ee3bb"
+      },
+      "source_sha": "1953d615dc00e6920380dbb71be6a99b96e36488",
+      "code_status": "implemented",
+      "verification_status": "strict API21/Node34/current affected UI17/demo21 pass; full50 report48pass+2setup errors resolved by affected-suite reruns; human gates open; keyboard final12 with14rawproofs pass0fail/error/skip; human gates open",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q09/FINAL/RESULTS.md",
+      "rollback": "Q09.patch reverse applicability verified; no runtime/production rollback rehearsal",
+      "keyboard_followup": {
+        "status": "local-fixture-integration-verified",
+        "base_sha": "86014b03f2a7db48c90ecd1c52800b528679a220",
+        "source_sha": "f70501a174c641db65d06929ebd3b7e8b52ee3bb",
+        "application_source_sha": "1953d615dc00e6920380dbb71be6a99b96e36488",
+        "tests": {
+          "report": "q09-keyboard-proof-full.xml",
+          "executed": 12,
+          "passed": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "wall_seconds": 568.761243,
+          "zero_case_is_pass": null
+        },
+        "keyboard_cases": 8,
+        "pointer_continuity_cases": 4,
+        "proof_bodies": 14,
+        "native_actions": 460,
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q09/KEYBOARD/RESULTS.md",
+        "human_uat": "unobserved",
+        "screen_reader": "unobserved",
+        "release_status": "not-deployed",
+        "migrations": [],
+        "rollback": "six-file test-source revert; reverse applicability0; no production rehearsal"
+      }
+    },
+    {
+      "id": "Q10",
+      "status": "partial-local-tools-and-baseline-verified",
+      "code_status": "offline-evaluator-and-owned-directory-capture-implemented",
+      "verification_status": "62 related API/tool tests and69 Node pass; capture1pass but frozen SQL gateFAIL; actual provider/goldset/full-load/UAT not run",
+      "release_status": "not-deployed",
+      "source_sha": "ad4f4394819664484eb4b928bdd56c43e055fd3d",
+      "base_sha": "6232e4e1f4127833b93c1343207894c79b638852",
+      "cases": [
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A08",
+        "P09",
+        "P10"
+      ],
+      "finding_ids": [
+        "F12",
+        "F18"
+      ],
+      "checks": {
+        "api_and_tools": {
+          "passed": 62,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0
+        },
+        "directory_capture": {
+          "passed": 1,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "cli_exit": 1,
+          "sql_gate_passed": false
+        },
+        "node": {
+          "passed": 69,
+          "failed": 0,
+          "skipped": 0,
+          "xml_leaf_cases": 68
+        }
+      },
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q10_LOCAL/RESULTS.md",
+      "migrations": "none added; existing0037 applied only to disposable fixtures",
+      "rollback": "reviewed source reverse applicability exit0; no production rollback/migration/auth mutation",
+      "limits": [
+        "Q13/N02 directory remediation dependency unresolved; no RLS policy/identity adapter changes",
+        "real>=200-company independently labelled goldset and approved provider evidence unavailable",
+        "10/25actor stairs, full API/UI/RUM/worker load and human UAT not run",
+        "contact validity/real company relationship/adversarial source factuality not verified",
+        "independent source review pending; author only per no-agents instruction"
+      ],
+      "next_eligible": null
+    },
+    {
+      "id": "Q11",
+      "status": "partial-local-guidance;release-gates-open",
+      "code_status": "bounded capability responsibility/action contract and API; generated typed, scope-current en/zh-HK UI; archive-only compiler exclusions",
+      "verification_status": "19strictAPI/5finalguidanceUI/300reportedroot/3LinuxSSR/3WindowsSSR pass0fail/skip;intermediate15UIseparate",
+      "release_status": "not-deployed",
+      "source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+      "cases": [
+        "R05"
+      ],
+      "evidence": "docs/buyeros/CURRENT_STATUS.md",
+      "local_verification_gates_followup": {
+        "status": "local-test-gates-verified",
+        "base_sha": "cbb67ddbb907b8b989b175588ba73ed205e2c2d8",
+        "source_sha": "d7ab5b6323402adf139d9b94e4e499f1631006b4",
+        "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+        "code_changes": "one test + focused plan; application/API/schema unchanged",
+        "checks": {
+          "root_node": {
+            "pass": 69,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "junit_leaf_cases": 68,
+            "duration_ms": 96210.0865
+          },
+          "cleanup_included": {
+            "pass": 24,
+            "fail": 0,
+            "skip": 0
+          },
+          "linux_emitted_ssr": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          "windows_emitted_ssr": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "contracts": "types/lint/generated84 pass;0 new operations",
+        "migrations": [],
+        "head": "0037_bulk_manifests",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/LOCAL_GATES/RESULTS.md",
+        "rollback": "one-test reverse patch applicability passed; no runtime/production rehearsal",
+        "review": "author only; independent review pending",
+        "release_status": "not-deployed",
+        "limits": "Docker/image/build prerequisite; no fresh UI/DB/live/performance/human UAT; prior failures retained"
+      },
+      "current_source_verification_20261005": {
+        "status": "current-source-local-gates-verified;full-Q11-open",
+        "source_sha": "bb7a1ede078085dede0433cafd47078ea63a4e11",
+        "application_source_sha": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+        "branch": "codex/q11-current-source-gates",
+        "checked_at": "2026-10-05T05:50:55.784291+00:00",
+        "owner_role": "Release owner / QA",
+        "runtime_code_changes": 0,
+        "tests_changed": 0,
+        "checks": {
+          "root-node": {
+            "pass": 299,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "reported_pass": 300,
+            "junit_leaf_cases": 299,
+            "duration_ms": 100374.5609
+          },
+          "api": {
+            "pass": 18,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "vercel-render-linux": {
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "vercel-render-windows": {
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "ui": {
+            "pass": 11,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          }
+        },
+        "contract_operations": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "generated_types_exit": 0,
+        "routes_exit": 0,
+        "typescript_exit": 0,
+        "source_lint_exit": 0,
+        "build_exit": 0,
+        "migrations": [],
+        "source_schema_head": "0037_bulk_manifests",
+        "deployed_sha": null,
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_CURRENT_SOURCE_GATES/RESULTS.md",
+        "limits": "Fixture identities/SQL rows; API/DB and 11 actual Operations browser cases. No real auth/provider/full staff/recovery/performance/production evidence. Original302 and fullN00 open. No deployment.",
+        "next_eligible": "Q11 local capability/readiness responsible role and concrete next action; N00 real compatibility separately blocked",
+        "rollback": "Revert this metadata/evidence commit only; no runtime/data/DB rollback."
+      },
+      "capability_guidance_20261005": {
+        "checked_at": "2026-10-05T06:46:36.763406+00:00",
+        "checks": {
+          "api-red": {
+            "cases": 1,
+            "pass": 0,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "ui-red": {
+            "cases": 1,
+            "pass": 0,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "review-red": {
+            "cases": 1,
+            "pass": 0,
+            "fail": 1,
+            "error": 0,
+            "skip": 0
+          },
+          "api-green": {
+            "cases": 19,
+            "pass": 19,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "ui-green-first": {
+            "cases": 15,
+            "pass": 15,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "ui-final": {
+            "cases": 5,
+            "pass": 5,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "root-node": {
+            "cases": 299,
+            "pass": 299,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "reported_pass": 300,
+            "duration_ms": 67414.0489
+          },
+          "vercel-render-linux": {
+            "cases": 3,
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          },
+          "vercel-render-windows": {
+            "cases": 3,
+            "pass": 3,
+            "fail": 0,
+            "error": 0,
+            "skip": 0
+          }
+        },
+        "typescript_exit": 0,
+        "source_lint_exit": 0,
+        "generated_contracts_exit": 0,
+        "operation_routes_exit": 0,
+        "build_exit": 0,
+        "original_artifacts_unchanged": 3200,
+        "all_prior_artifacts_unchanged": 3370,
+        "foreign_worktrees_unchanged": 3,
+        "review": "author only; independent review pending",
+        "live_verification": false,
+        "status": "local-guidance-and-regression-verified;full-Q11-open",
+        "source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "base_sha": "f53ebec2a02a354edf6a8a858c4ca2e10f7f5fca",
+        "branch": "codex/q11-capability-guidance",
+        "owner_role": "Release owner / SRE",
+        "code_changes": "bounded capability responsibility/action contract and API; generated typed, scope-current en/zh-HK UI; archive-only compiler exclusions",
+        "contract_operations": 84,
+        "original_operations": 70,
+        "extensions": 14,
+        "new_operations": 0,
+        "migrations": [],
+        "source_schema_head": "0037_bulk_manifests",
+        "deployed_sha": null,
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_CAPABILITY_GUIDANCE/RESULTS.md",
+        "limits": "API/PostgreSQL/RLS and actual browser use fictional identities. Final5 new UI; intermediate15=11 Operations+4 guidance before final contradiction guard. No real auth/provider/full staff/UAT/recovery/performance/production proof. FullQ11/N00 and F10/F13 external gates OPEN.",
+        "next_eligible": "N00 remaining local original-redirect/native containment/accounting gap audit; actual Neon/provider/production work still needs its own concrete evidence and authorization",
+        "rollback": "Revert the following metadata commit, then source 5aaf6492ec10078e4f1a4fa5b17efd41c5673eba as one contract/API/UI/test unit. No DB/data rollback."
+      },
+      "ci_repair_20261006": {
+        "task": "Q11 PR11 CI follow-up",
+        "date_hk": "2026-10-06",
+        "base_sha": "38c55228489a12bfc493f27d2ed27e177117366e",
+        "source_sha": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
+        "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+        "status": "local-required-gates-verified;full-Q11-and-N00-open",
+        "code_scope": "one workflow,one Playwright config,two test files,one plan;application/auth/schema unchanged",
+        "checks": {
+          "api": {
+            "cases": 812,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 812,
+            "duration_seconds": 1974.703,
+            "producer_total_seconds": 1990.119
+          },
+          "workbench": {
+            "cases": 8,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 8,
+            "duration_seconds": 63.097,
+            "producer_total_seconds": 85.567841
+          },
+          "auth_entry": {
+            "cases": 7,
+            "fail": 0,
+            "error": 0,
+            "skip": 0,
+            "pass": 7,
+            "duration_seconds": 35.219,
+            "producer_total_seconds": 127.74405
+          },
+          "workbench_red": {
+            "cases": 1,
+            "fail": 1,
+            "error": 0,
+            "skip": 0,
+            "pass": 0,
+            "duration_seconds": 14.739,
+            "producer_total_seconds": 67.732543
+          },
+          "workbench_first_full": {
+            "cases": 8,
+            "fail": 0,
+            "error": 3,
+            "skip": 0,
+            "pass": 5,
+            "duration_seconds": 226.135,
+            "producer_total_seconds": 297.457946
+          },
+          "types": {
+            "exit_code": 0,
+            "report": "types.log"
+          },
+          "lint": {
+            "exit_code": 0,
+            "report": "lint.log"
+          },
+          "generated_contract": {
+            "exit_code": 0,
+            "operations": 84,
+            "report": "contracts.log"
+          },
+          "operation_routes": {
+            "exit_code": 0,
+            "operations": 84,
+            "report": "routes.log"
+          }
+        },
+        "contracts": {
+          "original": 70,
+          "extensions": 14,
+          "total": 84,
+          "changes": 0
+        },
+        "alembic_heads": [
+          "0037_bulk_manifests"
+        ],
+        "new_migrations": [],
+        "live_verification": false,
+        "deployed_sha": null,
+        "review": "author only;independent pending;no agents",
+        "remaining": [
+          "full Q11 external release comparison",
+          "full N00/F20/NA01 OS boundary",
+          "real Neon/Google/Admin cleanup",
+          "original strict302 acceptance",
+          "independent review",
+          "eight-module live staff acceptance"
+        ],
+        "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+        "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_CI/RESULTS.md",
+        "rollback": "revert following evidence/status commit then 546a03770b32430f9ff90b7ac21c00fa74dd2166;no schema/data rollback;preserve admitted/unknown N00 holds",
+        "ci": {
+          "prior_run": 37360072047,
+          "prior_head": "38c55228489a12bfc493f27d2ed27e177117366e",
+          "prior_results": "six jobs pass;API810pass2fail0skip;continuity workbench7pass1fail0skip",
+          "updated_run": 37368187565,
+          "hosted_readback_20261006": {
+            "task": "Q11 PR11 hosted CI readback",
+            "date_hk": "2026-10-06",
+            "reviewed_test_config_source_sha": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
+            "reviewed_application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+            "ci_head_sha": "0e100d986c6a6636812abf97f6b20d36c8c65263",
+            "tested_merge_sha": "5c97cc797acb3288a18a76802e5b4a49e10e7237",
+            "tested_tree_sha": "974f6ef6ee93301f3e168da041e5ed430ccc67c3",
+            "merge_tree_matches_reviewed_branch": true,
+            "run_id": 37368187565,
+            "run_url": "https://github.com/YNWAforever/BuyerOS/actions/runs/37368187565/attempts/2",
+            "final_attempt": 2,
+            "required_jobs_success": 8,
+            "first_attempt_continuity": "cancelled before steps: hosted runner not acquired; no tests counted",
+            "retry": "only continuity; seven successful job timestamps retained",
+            "checks": {
+              "research": {
+                "pass": 4,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "producer_seconds": 123.106,
+                "report": "reports/t30-browser.xml",
+                "testcases": [
+                  {
+                    "name": "T30 en desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+                    "classname": "mvp-a-research.spec.ts",
+                    "time": "35.982"
+                  },
+                  {
+                    "name": "T30 en mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+                    "classname": "mvp-a-research.spec.ts",
+                    "time": "29.048"
+                  },
+                  {
+                    "name": "T30 zh-HK desktop UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+                    "classname": "mvp-a-research.spec.ts",
+                    "time": "29.224"
+                  },
+                  {
+                    "name": "T30 zh-HK mobile UI-created offer through research, grounded addressed approval, export and outcome on one dataset",
+                    "classname": "mvp-a-research.spec.ts",
+                    "time": "28.852"
+                  }
+                ],
+                "local_report_checker_exit": 0
+              },
+              "workbench": {
+                "pass": 8,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "producer_seconds": 46.502,
+                "report": "reports/workbench.xml",
+                "testcases": [
+                  {
+                    "name": "T27 usage, queue filters and manual outcome history survive refresh in both locales",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "7.729"
+                  },
+                  {
+                    "name": "T29 API-backed workbench reflows across routes and widths in en",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "4.827"
+                  },
+                  {
+                    "name": "T29 API-backed workbench reflows across routes and widths in zh-HK",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "4.644"
+                  },
+                  {
+                    "name": "T29 manual locale remains usable while preference loads and saves with its current version",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "5.16"
+                  },
+                  {
+                    "name": "T29 operations resolves a failed profile lookup without a permanent spinner",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "3.128"
+                  },
+                  {
+                    "name": "T29 live operations and results text meets measured AA contrast in both locales",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "3.929"
+                  },
+                  {
+                    "name": "T29 scope list timeout offers a bounded retry with current identity",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "12.948"
+                  },
+                  {
+                    "name": "T29 live form controls have a visible three-to-one boundary in both locales",
+                    "classname": "daily-workbench.spec.ts",
+                    "time": "4.137"
+                  }
+                ],
+                "local_report_checker_exit": 0
+              },
+              "buyers": {
+                "pass": 1,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "producer_seconds": 7.358,
+                "report": "reports/buyers.xml",
+                "testcases": [
+                  {
+                    "name": "T08 real snapshot pages, selection scope, URL filters and dossier",
+                    "classname": "buyer-results.spec.ts",
+                    "time": "7.358"
+                  }
+                ],
+                "local_report_checker_exit": 0
+              },
+              "buyer_management": {
+                "pass": 3,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "producer_seconds": 10.203,
+                "report": "reports/buyer-management.xml",
+                "testcases": [
+                  {
+                    "name": "T09 durable list, preset, note, owner and individual review journey",
+                    "classname": "buyer-management.spec.ts",
+                    "time": "5.531"
+                  },
+                  {
+                    "name": "T09 viewer cannot mutate buyers or lists",
+                    "classname": "buyer-management.spec.ts",
+                    "time": "2.087"
+                  },
+                  {
+                    "name": "T29 zh-HK list and saved filter actions use localized accessible names and feedback",
+                    "classname": "buyer-management.spec.ts",
+                    "time": "2.585"
+                  }
+                ],
+                "local_report_checker_exit": 0
+              },
+              "mvp_partial_journey": {
+                "pass": 1,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "producer_seconds": 8.499,
+                "report": "reports/mvp-acceptance.xml",
+                "testcases": [
+                  {
+                    "name": "T30 partial fixture walkthrough: review, list, assign, exact approval, export and manual outcome",
+                    "classname": "mvp-a-journey.spec.ts",
+                    "time": "8.499"
+                  }
+                ],
+                "local_report_checker_exit": 0
+              },
+              "api": {
+                "pass": 812,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "warnings": 101,
+                "producer_seconds": 376.53,
+                "scope": "attempt1 retained successful hosted job",
+                "source": "api-ci-green.log; required producer checker0; API XML not uploaded by current workflow"
+              }
+            },
+            "production_verification": false,
+            "deployed_sha": null,
+            "new_migrations": [],
+            "independent_review": "pending; author readback only; no agents",
+            "full_q11_n00_na01": "OPEN",
+            "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q11_PR11_HOSTED/RESULTS.md",
+            "next_eligible": "N00 trusted parent/broker/browser/control-plane OS egress isolation feasibility/composition,including raw APIRequestContext/arbitrary provider CLI;no real run until full boundary,cleanup and fresh exact authorization",
+            "rollback": "revert this evidence/status checkpoint only; no application/schema changes or DB undo; retain prior source and all admitted/unknown holds"
+          }
+        },
+        "failure_history": [
+          "wrong-cwd registry setup FileNotFound;correct-cwd six-extension RED",
+          "old T29 enabled-language expectation RED1fail",
+          "unscoped old Playwright output cleanup deleted ignored sibling reports/clone;interrupted startup counted no tests",
+          "first corrected full workbench5pass3beforeEach errors0skip;final serialized8pass;unchanged30s caps",
+          "CP950 console evidence read failure;corrected PYTHONUTF8;not a test failure",
+          "source-plan EOF whitespace REDexit2 then GREEN0"
+        ]
+      }
+    },
+    {
+      "id": "Q12",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "required-task-local-fixture-and-integration-pass; broader-dev-transport-flakiness-open",
+      "release_status": "not-deployed",
+      "base_sha": "c7136fbceb1567bca87215b57d142e8137b8968d",
+      "source_sha": "70d2e54ef613910ce5a684d90c4afce32f504e66",
+      "domain_commit": "63d140b4b5d4636b1fe9125ec3885d1e69bbecb4",
+      "ui_commit": "70d2e54ef613910ce5a684d90c4afce32f504e66",
+      "cases": [
+        "D01",
+        "D03",
+        "U09 (draft slice only; whole journey partial)"
+      ],
+      "test_counts": {
+        "strict_api_db": {
+          "pass": 85,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "named_q12_ui": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        },
+        "related_node": {
+          "pass": 14,
+          "fail": 0,
+          "skip": 0,
+          "adapter_checks": 74,
+          "auth_checks": 8
+        },
+        "broader_ui_transport_preserved": {
+          "pass": 14,
+          "fail": 2,
+          "skip": 0
+        }
+      },
+      "migrations": "none; source head0036_checkpoint_schema_grants",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q12/RESULTS.md",
+      "rollback": "q12-grounding-pause-rollback.patch; keep shared proof/context guards and all immutable history; applicability checked only",
+      "limits": "fake OIDC/contact/source/purpose; fixture-staged zero-cost handler; no live auth/provider/continuous transport/build/production proof; U09 full staff journey partial; broader UI dev transport failure unresolved; independent review pending",
+      "next_eligible": "Q08"
+    },
+    {
+      "id": "Q13",
+      "status": "outside-current-scope"
+    },
+    {
+      "id": "Q14",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-HTTP-DB-UI-pass",
+      "release_status": "not-deployed",
+      "base_sha": "092e8f555d7e98f0f2603ff86a7afecf8c65492e",
+      "source_sha": "1aab3ddc0519bb6da8d1483efaf173eb5a87037e",
+      "depends_on": [
+        "Q03"
+      ],
+      "cases": [
+        "U15"
+      ],
+      "finding_ids": [
+        "F17"
+      ],
+      "checks": {
+        "api": {
+          "pass": 18,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "ui": {
+          "pass": 10,
+          "fail": 0,
+          "error": 0,
+          "skip": 0
+        }
+      },
+      "node_checks": {
+        "pass": 16,
+        "fail": 0,
+        "skip": 0
+      },
+      "migrations": "none; existing source head0037 unchanged",
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q14/RESULTS.md",
+      "rollback": "revert8file source commit; reverse patch applicability exit0; no DB/role/actor change; browser/production rehearsal not run",
+      "limits": "fictional OIDC/jobs; local dev only; no production/auth/provider/full UAT",
+      "next_eligible": "Q09"
+    },
+    {
+      "id": "Q15",
+      "status": "integration-fixture-verified",
+      "code_status": "implemented",
+      "verification_status": "local-fixture-and-integration-pass",
+      "release_status": "not-deployed",
+      "cases": [
+        "D02"
+      ],
+      "evidence": "docs/buyeros/evidence/audit-fixes-20261003/Q15-ui.xml",
+      "migration": "none; schema source head 0036_checkpoint_schema_grants",
+      "source_sha": "3efd1f3f97036e1988751d1dfb54d37d48d0929a"
+    },
+    {
+      "id": "Q16",
+      "status": "blocked-root-cause-evidence",
+      "code_status": "read-only-investigation-recorded",
+      "verification_status": "runtime-log-inspected; cause-not-confirmed",
+      "release_status": "not-deployed",
+      "evidence": "docs/buyeros/incidents/2026-10-03-workspace-500.md"
+    },
+    {
+      "id": "Q17",
+      "status": "outside-current-scope"
+    }
+  ],
+  "future_eligible": [
+    "Q09 human screen-reader/staff UAT",
+    "Independent source review",
+    "Q16 underlying evidence when available",
+    "N00 explicit counted APIRequestContext adapter and parent/browser/control-plane OS isolation composition; no real execution until full containment, cleanup and fresh exact authorization",
+    "Full Q10 after Q13/N02 and real goldset/provider/load/UAT gates"
+  ],
+  "reviewed_source_sha": "4ba0a5d7757d5c9e4991593a13c0a2df217be511",
+  "deployed_sha": null,
+  "selected_followups": [
+    "U05",
+    "Q11 local verification gates",
+    "Q10 independent local tools and current directory baseline",
+    "N00 local built compatibility spike",
+    "N00 managed callback contract fixture follow-up",
+    "Q11 local capability responsibility and next action",
+    "N00 local ingress and physical dispatch deadline",
+    "N00 dedicated browser WebSocket refusal and native transport gap evidence (local-only)",
+    "N00 counted native IPC and disposable fixed worker OS isolation (local-only)"
+  ],
+  "application_source_sha": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+  "peer_q13_checkpoint": {
+    "branch": "codex/q13-workspace-discovery",
+    "source_sha": "fa198ae533be3dc93eda73bc45331c2d80eb9540",
+    "evidence_commit": "55f81338e5d12948279b6f095787aa03e6038242",
+    "status": "current-auth-local-verified;N02/fullQ13open",
+    "proposed_schema_head": "0038_workspace_discovery",
+    "merged_here": false
+  },
+  "latest_local_verification_source_sha": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
+  "latest_local_verification_scope": "Q11 PR11 test/CI repair;N00/application checkpoint unchanged",
+  "latest_hosted_verification_source": "0e100d986c6a6636812abf97f6b20d36c8c65263",
+  "latest_hosted_verification_scope": "Q11 PR11 all8 hosted jobs success at tested merge tree; fixture/Postgres only; N00 and release gates open",
+  "c61_execution": {
+    "plan": "docs/superpowers/plans/2026-10-06-buyeros-gpt61-fixes.md",
+    "baseline_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+    "original_registry_preserved": true,
+    "tasks": [
+      {
+        "task_id": "C61-01",
+        "title": "鎖定證據、分支差異及交付基準",
+        "parent_tasks": "A26-01;Q11",
+        "finding_ids": "F13;F22",
+        "priority": "P1",
+        "dependencies": "",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Release / Codex",
+        "effort": "0.5–1 人日",
+        "status": "待開始",
+        "case_ids": "R01;R05;O26-15",
+        "new_case_ids": "",
+        "existing_files": "TASKS.json;docs/buyeros/CURRENT_STATUS.md;.github/workflows/buyeros-ci.yml",
+        "proposed_new_files": "docs/buyeros/decisions/2026-10-06-fix-integration.md;docs/buyeros/release-candidate.json",
+        "acceptance": "每個既有修復有實際 commit/path 與採用決定；八模組 live 驗收仍標未完成。原 ZIP 不更改。命令是本地核對，不代表發布。",
+        "rollback": "刪除未採用的隔離 worktree；不 reset 使用者分支，不改原 audit。",
+        "execution_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+        "execution_evidence": "docs/buyeros/evidence/c61/baseline-integrity.json",
+        "code_status": "complete",
+        "verification_status": "verified-documentary-local",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": [
+          "docs/buyeros/evidence/c61/baseline-integrity.json",
+          "docs/buyeros/evidence/c61/integration-selection.json"
+        ]
+      },
+      {
+        "task_id": "C61-02",
+        "title": "整合並驗收已存在的 Q 修復",
+        "parent_tasks": "A26-03;Q01;Q02;Q03;Q04;Q05;Q06;Q07;Q08;Q12;Q14;Q15",
+        "finding_ids": "F01;F02;F03;F04;F05;F06;F07;F08;F09;F11;F15;F16;F17;F19",
+        "priority": "P1",
+        "dependencies": "C61-01",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Full stack / QA",
+        "effort": "3–5 人日",
+        "status": "待驗收",
+        "case_ids": "U02;U03;U05;U06;U07;U08;B01;B02;B03;B04;B05;B06;B07;B08;B09;B10;B11;B12;B13;B14;B15;B16;A02;A07;P04;S06;U13;U15;D01;D02;D03;WF01;WF02;O26-04;O26-05;O26-06;O26-09",
+        "new_case_ids": "",
+        "existing_files": "features/live/workspace-picker.tsx;features/live/settings.tsx;features/live/operations.tsx;features/live/bulk-actions.tsx;features/live/bulk-manifest.tsx;features/live/drafts.tsx;features/live/draft-grounding-review.tsx;features/live/draft-dirty-guard.tsx;services/live/job-poller.ts;services/live/job-query.ts;services/api/buyeros_api/services/bulk_manifest.py;services/api/buyeros_api/services/draft_grounding.py;services/api/tests/test_membership_directory_db.py;services/api/tests/test_bulk_manifest_db.py;services/api/tests/test_manual_grounding_db.py",
+        "proposed_new_files": "docs/buyeros/evidence/c61/integration-results.md",
+        "acceptance": "隔離 PG16 strict tests：0 fail/error/skip；fixture UI 與 API/DB 對照一致。既有 44 units / 812 API 是歷史參照，不能硬編碼未來總數或把它們相加。",
+        "rollback": "按修復組 revert；保留 append-only、manifest、accepted/unknown operation 記錄；禁止破壞式降 schema。",
+        "execution_sha": "53bb6cfb65e83a39e2f489d35f62c5ffc34035bd",
+        "execution_evidence": "artifacts/c61/C61-02-current-full-built.json;artifacts/c61/c61-current-full-built.xml;artifacts/c61/C61-02-cold-jwks-green.json;artifacts/c61/C61-02-preference-tested-source.json;artifacts/c61/C61-02-db.json;artifacts/c61/C61-02-source-bridge.json",
+        "code_status": "selected Q integration and focused CI defects repaired",
+        "verification_status": "complete fresh built suite 96 pass, zero fail/error/skip at 53bb6cf; auth/cold-JWKS 51; required PG16 Q 64 at earlier unchanged-Q subtree source; fresh full API/CI pending",
+        "release_status": "not-deployed",
+        "blockers": [
+          "latest CI and full API follow-up suite",
+          "production same-version readback",
+          "real provider and human UAT"
+        ],
+        "evidence_paths": [
+          "artifacts/c61/C61-02-current-full-built.json",
+          "artifacts/c61/c61-current-full-built.xml",
+          "artifacts/c61/C61-02-cold-jwks-green.json",
+          "artifacts/c61/C61-02-preference-tested-source.json",
+          "artifacts/c61/C61-02-db.json",
+          "artifacts/c61/C61-02-source-bridge.json"
+        ]
+      },
+      {
+        "task_id": "C61-03",
+        "title": "打通授權員工的工作區入職及恢復",
+        "parent_tasks": "A26-02;Q01;Q02",
+        "finding_ids": "F01;F03;F04",
+        "priority": "P1",
+        "dependencies": "C61-02",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Backend / Admin / QA",
+        "effort": "1–2 人日",
+        "status": "待開始",
+        "case_ids": "U01;U02;U03;U05;U06;U07;U08;S06;U13;NA06;NA07;NA08;NA09;NA10;O26-01;O26-09",
+        "new_case_ids": "",
+        "existing_files": "features/live/workspace-picker.tsx;features/live/settings.tsx;services/api/buyeros_api/api/deps.py;services/api/tests/test_membership_directory_db.py;tests/e2e/audit-access-revocation.spec.ts",
+        "proposed_new_files": "docs/buyeros/runbooks/staff-onboarding.md;services/api/tools/reconcile_staff_membership.py;services/api/tests/test_staff_onboarding_db.py",
+        "acceptance": "有正確帳戶與 membership 的 UI/API 讀回證據；0-membership 仍不能進 workspace，提供雙語重試和聯絡路徑。沒有有效帳戶時只標受阻，不改密碼或提升自己權限。",
+        "rollback": "撤回本批新增 membership 須依正常管理流程並保留 audit；不刪 canonical users 或歷史 actor。",
+        "execution_sha": "8b631ab8a911e63c856a674d78b42cddfab29049",
+        "execution_evidence": "artifacts/c61/C61-03-focused-red.json;artifacts/c61/C61-03-required-first-green.json;artifacts/c61/C61-03-required-final-green.json;artifacts/c61/c61-onboarding-final-green.xml;artifacts/c61/C61-03-tested-source.json;docs/buyeros/runbooks/staff-onboarding.md;artifacts/c61/C61-03-04-06-full-api-regression.json;artifacts/c61/c61-api-followup-regression.xml;artifacts/c61/C61-integrated-current-api-bridge.json",
+        "code_status": "controlled default-readonly canonical staff membership CLI and shared admin mutation boundary implemented",
+        "verification_status": "4 focused RED then 36 required GREEN, zero fail/error/skip; signed local JWT, runtime role, current authority, exact restore/replay, real same-lock revoke and last-admin competition verified; complete current API 863/863 fresh cases, zero fail/error/skip; unchanged committed API/migration trees connected to integrated source",
+        "release_status": "not-deployed",
+        "blockers": [
+          "real authorized operator/reviewer/admin accounts in declared target scope",
+          "same-version production/UI account readback",
+          "full API and C61-02 full built/CI gates"
+        ],
+        "evidence_paths": [
+          "artifacts/c61/C61-03-focused-red.json",
+          "artifacts/c61/C61-03-required-first-green.json",
+          "artifacts/c61/C61-03-required-final-green.json",
+          "artifacts/c61/c61-onboarding-final-green.xml",
+          "artifacts/c61/C61-03-tested-source.json",
+          "docs/buyeros/runbooks/staff-onboarding.md",
+          "artifacts/c61/C61-03-04-06-full-api-regression.json",
+          "artifacts/c61/c61-api-followup-regression.xml",
+          "artifacts/c61/C61-integrated-current-api-bridge.json"
+        ]
+      },
+      {
+        "task_id": "C61-04",
+        "title": "取得 workspace 500 根因證據",
+        "parent_tasks": "A26-07;Q16",
+        "finding_ids": "F21",
+        "priority": "P1",
+        "dependencies": "C61-01",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "SRE / Backend",
+        "effort": "1–2 人日",
+        "status": "受阻",
+        "case_ids": "U16",
+        "new_case_ids": "C61T-15",
+        "existing_files": "docs/buyeros/incidents/2026-10-03-workspace-500.md;services/api/buyeros_api/api/errors.py;services/api/buyeros_api/api/deps.py;services/api/buyeros_api/db/session.py",
+        "proposed_new_files": "services/api/tests/test_error_diagnostics.py",
+        "acceptance": "只有能連接 request → driver/SQLSTATE → 實際故障位置的證據才解除 C61-05 的阻塞；僅加 logging 不算 F21 已修。",
+        "rollback": "關閉新增診斷或 revert logging；保留事故報告。",
+        "execution_sha": "8b631ab8a911e63c856a674d78b42cddfab29049",
+        "execution_evidence": "artifacts/c61/C61-04-logging-compatibility-red.json;artifacts/c61/C61-04-migration-logging-red.json;artifacts/c61/C61-04-logging-compatibility-green.json;artifacts/c61/C61-04-logging-tested-source.json;artifacts/c61/C61-06-api-regression.json;artifacts/c61/C61-03-04-06-full-api-regression.json;artifacts/c61/c61-api-followup-regression.xml;artifacts/c61/C61-integrated-current-api-bridge.json",
+        "code_status": "sanitized diagnostics and same-process migration logger preservation implemented",
+        "verification_status": "focused RED ValueError and offline migration logger reproduced; 22 GREEN, zero fail/error/skip; historical root unconfirmed; complete current API 863/863 fresh cases, zero fail/error/skip; unchanged committed API/migration trees connected to integrated source",
+        "release_status": "not-deployed",
+        "blockers": [
+          "historical request SQLSTATE/runtime/schema/pool metadata unavailable",
+          "same-version production incident readback",
+          "full API regression rerun"
+        ],
+        "evidence_paths": [
+          "artifacts/c61/C61-04-logging-compatibility-red.json",
+          "artifacts/c61/C61-04-migration-logging-red.json",
+          "artifacts/c61/C61-04-logging-compatibility-green.json",
+          "artifacts/c61/C61-04-logging-tested-source.json",
+          "artifacts/c61/C61-06-api-regression.json",
+          "artifacts/c61/C61-03-04-06-full-api-regression.json",
+          "artifacts/c61/c61-api-followup-regression.xml",
+          "artifacts/c61/C61-integrated-current-api-bridge.json"
+        ]
+      },
+      {
+        "task_id": "C61-05",
+        "title": "修正已證實的 500 原因",
+        "parent_tasks": "A26-08;Q17",
+        "finding_ids": "F21",
+        "priority": "P1",
+        "dependencies": "C61-04",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Backend / SRE",
+        "effort": "根因確認後估算",
+        "status": "受阻",
+        "case_ids": "U16",
+        "new_case_ids": "",
+        "existing_files": "docs/buyeros/incidents/2026-10-03-workspace-500.md",
+        "proposed_new_files": "services/api/tests/test_workspace_500_regression.py",
+        "acceptance": "根因、失敗重現、修後結果與相同 SHA 清楚連結；歷史無法重現則仍 open，不為關單而捏造原因。",
+        "rollback": "revert 單一修復/相容設定；保留診斷和事件時間線。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-06",
+        "title": "把 workspace discovery 改為有界查詢",
+        "parent_tasks": "A26-04;Q13;N02 dependency",
+        "finding_ids": "F18",
+        "priority": "P1",
+        "dependencies": "C61-01;C61-02",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Backend / DB",
+        "effort": "2–4 人日",
+        "status": "待開始",
+        "case_ids": "P09;P10;O26-12",
+        "new_case_ids": "C61T-01",
+        "existing_files": "services/api/buyeros_api/api/routes/workspaces.py;services/api/buyeros_api/api/deps.py;services/api/buyeros_api/db/models.py;services/api/tests/test_workspace_listing_db.py;services/api/tests/benchmark_workspace_directory_case.py;scripts/benchmark-workspace-directory.py",
+        "proposed_new_files": "services/api/buyeros_api/services/identity_resolver.py;services/api/buyeros_api/services/workspace_directory.py;docs/buyeros/decisions/2026-10-06-workspace-discovery.md;services/api/tests/test_identity_resolver_db.py",
+        "acceptance": "owned PG16 benchmark CLI exit 0 且 SQL gate=true；舊 4/22/202/2002 查詢數只作 baseline。EXPLAIN/query 計數/role/RLS 證據齊備；n=30 p99 只標不穩定。",
+        "rollback": "先停新查詢入口並切回相容 route；保留新增 schema。若舊路徑恢復 O(W)，記效能退化，不放鬆授權。",
+        "execution_sha": "8b631ab8a911e63c856a674d78b42cddfab29049",
+        "execution_evidence": "artifacts/c61/C61-06-directory-required-green.json;artifacts/c61/c61-directory-required-green.xml;artifacts/c61/C61-06-directory-benchmark-green.json;artifacts/c61/c61-directory-measured.json;artifacts/c61/C61-06-tested-source.json;artifacts/c61/C61-06-commit-source.json;artifacts/c61/C61-06-api-regression.json;artifacts/c61/c61-workspace-directory-upgrade.sql;artifacts/c61/c61-workspace-directory-rollback.sql;artifacts/c61/C61-03-04-06-full-api-regression.json;artifacts/c61/c61-api-followup-regression.xml;artifacts/c61/C61-integrated-current-api-bridge.json",
+        "code_status": "bounded readonly canonical-actor workspace directory and additive 0038 payload implemented",
+        "verification_status": "required 39 pass zero fail/error/skip; owned 4-stage 120-sample benchmark SQL 4 each; full API diagnostic follow-up pending; complete current API 863/863 fresh cases, zero fail/error/skip; unchanged committed API/migration trees connected to integrated source",
+        "release_status": "not-deployed",
+        "blockers": [
+          "full API regression rerun after C61-04 correction",
+          "real Neon migration-owner eligibility and index lock-window review",
+          "C61-02 full built acceptance",
+          "same-version production performance/readback"
+        ],
+        "evidence_paths": [
+          "artifacts/c61/C61-06-directory-required-green.json",
+          "artifacts/c61/c61-directory-required-green.xml",
+          "artifacts/c61/C61-06-directory-benchmark-green.json",
+          "artifacts/c61/c61-directory-measured.json",
+          "artifacts/c61/C61-06-tested-source.json",
+          "artifacts/c61/C61-06-commit-source.json",
+          "artifacts/c61/C61-06-api-regression.json",
+          "artifacts/c61/c61-workspace-directory-upgrade.sql",
+          "artifacts/c61/c61-workspace-directory-rollback.sql",
+          "artifacts/c61/C61-03-04-06-full-api-regression.json",
+          "artifacts/c61/c61-api-followup-regression.xml",
+          "artifacts/c61/C61-integrated-current-api-bridge.json"
+        ]
+      },
+      {
+        "task_id": "C61-07",
+        "title": "完成 N00：Neon 的真實產品登入契約",
+        "parent_tasks": "A26-06;N00",
+        "finding_ids": "F20",
+        "priority": "P1",
+        "dependencies": "C61-01",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Auth / Frontend",
+        "effort": "2–4 人日",
+        "status": "待驗收",
+        "case_ids": "NA01;NA04;NA05;O26-11",
+        "new_case_ids": "",
+        "existing_files": "docs/buyeros/decisions/2026-10-03-neon-auth-contract.md;package.json;pnpm-lock.yaml;scripts/neon-real-preflight.mjs;scripts/neon-real-runtime.mjs;tests/e2e/audit-neon-runtime-built.spec.ts;playwright.neon-runtime-built.config.ts",
+        "proposed_new_files": "docs/buyeros/decisions/2026-10-06-neon-production-contract.md",
+        "acceptance": "fixture 與真實 Neon 分開記錄；真實隔離 branch、built portable 及 Vercel preview 都過產品流程才 N00 完成。--help 只確認 runner 用法，實際 run 用 ADR 中已核對的 flags，不能以 help 成功關單。",
+        "rollback": "維持 Auth0 現有路徑；移除未採用 spike overlay。真實 Neon 測試帳戶只依 owner/nonce 精確清理。",
+        "execution_sha": "08e086eed98881b35dd6ac46e4d89155a8ad153c",
+        "execution_evidence": "docs/buyeros/decisions/2026-10-06-neon-production-contract.md;docs/buyeros/evidence/c61/neon-contract-review.json;artifacts/c61/C61-07-existing-sdk.log;artifacts/c61/C61-07-existing-sdk.json;artifacts/c61/C61-07-preflight-help.log",
+        "code_status": "contract-decision-prepared",
+        "verification_status": "6-sdk-units-passed; candidate-runtime-and-real-gates-open",
+        "release_status": "not-deployed",
+        "blockers": [
+          "Same-candidate normal portable/Vercel auth flow not verified",
+          "Authorized real Neon target/account/method absent",
+          "Google configuration and human UAT absent"
+        ],
+        "evidence_paths": [
+          "docs/buyeros/decisions/2026-10-06-neon-production-contract.md",
+          "docs/buyeros/evidence/c61/neon-contract-review.json",
+          "artifacts/c61/C61-07-existing-sdk.log",
+          "artifacts/c61/C61-07-existing-sdk.json",
+          "artifacts/c61/C61-07-preflight-help.log"
+        ]
+      },
+      {
+        "task_id": "C61-08",
+        "title": "完成 N01：環境與 auth server 邊界",
+        "parent_tasks": "A26-06;N01",
+        "finding_ids": "F20",
+        "priority": "P1",
+        "dependencies": "C61-07",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Auth / Platform",
+        "effort": "1–2 人日",
+        "status": "待開始",
+        "case_ids": "S04;S05;NA01;NA02;NA03;O26-11",
+        "new_case_ids": "",
+        "existing_files": "package.json;pnpm-lock.yaml;services/api/buyeros_api/settings.py;services/live/auth.ts;tests/e2e/audit-neon-compat.spec.ts",
+        "proposed_new_files": "lib/auth/neon-server.ts;lib/auth/neon-config.ts;app/api/auth/[...path]/route.ts;tests/neon-production-config.test.mjs",
+        "acceptance": "兩類 build 可用且 secret scan 無漏出；環境矩陣無默認 fallback 到 production；新增設定文件不含值。",
+        "rollback": "auth provider gate 回 Auth0；保留 Neon branch，勿使既有使用者無法登入。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-09",
+        "title": "完成 N02：不可變 canonical identity 映射",
+        "parent_tasks": "A26-06;N02",
+        "finding_ids": "F20",
+        "priority": "P1",
+        "dependencies": "C61-06;C61-07",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Backend / DB",
+        "effort": "2–4 人日",
+        "status": "待開始",
+        "case_ids": "U04;U05;U06;U07;U08;S06;NA06;NA07;NA08;NA09;NA24;NA25;NA26;O26-09;O26-10",
+        "new_case_ids": "C61T-02",
+        "existing_files": "services/api/buyeros_api/db/models.py;services/api/buyeros_api/api/deps.py;services/api/buyeros_api/api/routes/workspaces.py;services/api/tests/test_auth_routes_db.py",
+        "proposed_new_files": "services/api/buyeros_api/services/identity_linking.py;services/api/tools/link_user_identities.py;services/api/tests/test_identity_linking_db.py",
+        "acceptance": "映射前後 UUID/FK hash 對照一致；新舊 auth 同人得到同一 canonical id；不同身份不越權；tenant/session pool 重用不殘留上一 actor。",
+        "rollback": "保留 additive mapping；回舊 verifier 仍用原 User 欄位；不能回退成刪 Neon-only users 或清空其 ownership。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-10",
+        "title": "完成 N03：隔離信任設定的 API JWT verifier",
+        "parent_tasks": "A26-06;N03",
+        "finding_ids": "F20",
+        "priority": "P1",
+        "dependencies": "C61-07;C61-08;C61-09",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Backend / Security",
+        "effort": "2–3 人日",
+        "status": "待開始",
+        "case_ids": "S01;NA11;NA12;NA13;NA14;NA15;NA16;NA24;NA25;NA26;O26-11",
+        "new_case_ids": "",
+        "existing_files": "services/api/buyeros_api/api/auth.py;services/api/buyeros_api/api/verifier.py;services/api/buyeros_api/api/jwks.py;services/api/buyeros_api/settings.py;services/api/tests/test_auth_cache_lifecycle.py;services/api/tests/test_auth_tenant.py;services/api/tests/test_api_auth.py",
+        "proposed_new_files": "services/api/buyeros_api/api/auth_trust.py;services/api/tests/test_neon_verifier.py",
+        "acceptance": "雙信任只在具到期時間的遷移設定開啟；驗證錯誤為可預期 401 而非 500；JWT role claim 不授予 workspace role。",
+        "rollback": "回到已驗證 Auth0 trust 設定；不放寬 issuer/algorithm 以救登入。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-11",
+        "title": "完成 N04：Neon session、刷新與跨 tab 登出",
+        "parent_tasks": "A26-06;N04",
+        "finding_ids": "F20;F01;F08",
+        "priority": "P1",
+        "dependencies": "C61-08;C61-09;C61-10",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Frontend / Auth",
+        "effort": "2–4 人日",
+        "status": "待開始",
+        "case_ids": "U01;U02;U03;B05;B06;U13;U14;NA04;NA05;NA10;NA17;NA18;NA19;NA20;NA21;NA22;NA23;O26-01;O26-04;O26-11",
+        "new_case_ids": "C61T-03;C61T-04",
+        "existing_files": "services/live/auth.ts;services/live/session.ts;features/providers/workspace-session.tsx;features/live/workspace-picker.tsx;tests/e2e/audit-auth-entry.spec.ts",
+        "proposed_new_files": "services/live/neon-auth.ts;tests/neon-session.test.mjs;tests/e2e/neon-session-production.spec.ts",
+        "acceptance": "修改該 config 的 testMatch 使新 spec 被 discovery 收錄，並確認 case count>0；built UI email/token/API/reload/logout 完成；Safari 實機與 runner 分开記錄。登出後已發 JWT 剩餘壽命要實測記錄，不能聲稱瞬時全域撤銷。",
+        "rollback": "provider gate 回相容 adapter；清理 client session/暫存，不刪後端 identity mapping。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-12",
+        "title": "完成 N05：身份與租戶負向驗收",
+        "parent_tasks": "A26-06;N05",
+        "finding_ids": "F20;F01;F04",
+        "priority": "P1",
+        "dependencies": "C61-03;C61-10;C61-11",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "QA / Security",
+        "effort": "1–2 人日",
+        "status": "待開始",
+        "case_ids": "U04;U05;U06;U07;U08;S01;S04;S05;S06;U14;NA02;NA03;NA10;NA11;NA12;NA13;NA14;NA15;NA16;NA17;NA18;NA19;NA20;NA21;NA22;NA23;NA24;NA25;NA26;NA27;O26-09;O26-11",
+        "new_case_ids": "",
+        "existing_files": "services/api/tests/test_auth_tenant.py;services/api/tests/test_auth_routes_db.py;tests/e2e/audit-access-revocation.spec.ts;tests/e2e/audit-memberships.spec.ts",
+        "proposed_new_files": "services/api/tests/test_neon_security_db.py;tests/e2e/neon-security-production.spec.ts",
+        "acceptance": "API DB 負向零資料外洩；real session 測試可定位 cookie/CSRF 邊界；不以 decoded JWT 或 UI hide 作授權證據。",
+        "rollback": "關閉新增 provider admission；保留負向測試與 evidence。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-13",
+        "title": "完成 N06：身份遷移及回退演練",
+        "parent_tasks": "A26-06;N06",
+        "finding_ids": "F20",
+        "priority": "P1",
+        "dependencies": "C61-09;C61-12",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Release / DB / QA",
+        "effort": "1–2 人日",
+        "status": "待開始",
+        "case_ids": "R02;R03;R04;R06;NA06;NA07;NA08;NA09;NA29;NA30;O26-10",
+        "new_case_ids": "C61T-05",
+        "existing_files": "docs/buyeros/decisions/2026-10-03-neon-auth-contract.md;services/api/tests/test_backup_restore_t28.py",
+        "proposed_new_files": "docs/buyeros/runbooks/neon-cutover.md;services/api/tests/test_neon_cutover_db.py",
+        "acceptance": "演練有時間線、row count/hash、可登入驗證及 rollback artifact；「改回 Auth0」不算 Neon-only 新戶回退方案。 restore/retention rehearsal須用隔離資料驗證，未重放刪除及對帳前不開放readiness。",
+        "rollback": "停止切換，保留支援現有用戶的 auth artifact，按 runbook 回復相容配置。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-14",
+        "title": "完成 N07：有限期雙信任後退役 Auth0",
+        "parent_tasks": "A26-06;N07",
+        "finding_ids": "F20",
+        "priority": "P1",
+        "dependencies": "C61-13;C61-29",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Release / Auth",
+        "effort": "1–2 人日及觀察窗",
+        "status": "待開始",
+        "case_ids": "NA28;NA29;NA30",
+        "new_case_ids": "",
+        "existing_files": "services/api/buyeros_api/settings.py;services/api/buyeros_api/api/auth_trust.py;services/live/auth.ts;docs/buyeros/CURRENT_STATUS.md",
+        "proposed_new_files": "docs/buyeros/evidence/c61/neon-retirement.md",
+        "acceptance": "Neon 真正成為唯一用戶 auth；production readback 與 source/config 對上。此項在 C61-29 後做，不是前端換 logo 即完成。",
+        "rollback": "只在已授權 rollback 窗恢復審核過的有限期 trust；canonical mapping 與歷史資料不刪。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-15",
+        "title": "定義並核實真實供應商接駁契約",
+        "parent_tasks": "A26-05;Q11",
+        "finding_ids": "F10",
+        "priority": "P1",
+        "dependencies": "C61-01",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Integrations / Product",
+        "effort": "1–2 人日",
+        "status": "待開始",
+        "case_ids": "P08;S04;S05",
+        "new_case_ids": "",
+        "existing_files": "services/api/buyeros_api/providers/base.py;services/api/buyeros_api/providers/search.py;services/api/buyeros_api/providers/model.py;services/api/buyeros_api/providers/contact.py;services/api/tests/test_provider_contracts.py",
+        "proposed_new_files": "docs/buyeros/decisions/2026-10-06-provider-selection.md;services/api/buyeros_api/providers/registry.py;services/api/tests/test_provider_registry.py",
+        "acceptance": "每類供應商有可驗證 contract；選型/credential/額度缺失只阻塞相應 live gate，離線 contract/fixture 開發可繼續。禁止以解除 503 當功能完成。",
+        "rollback": "清空本次未核實 provider activation，維持 capability_blocked。",
+        "execution_sha": "22d6fd9cefe1ac3ea8cbc98bc34dac87072feb86",
+        "execution_evidence": "docs/buyeros/decisions/2026-10-06-provider-selection.md;docs/buyeros/evidence/c61/provider-contract-results.json;artifacts/c61/C61-15-core-gate-red.json;artifacts/c61/C61-15-core-gate-red.log;artifacts/c61/C61-15-core-gate-green.json;artifacts/c61/C61-15-core-gate-green.log;artifacts/c61/C61-15-worker-gate.json;artifacts/c61/C61-15-worker-gate.log;artifacts/c61/c61-core-gate-red.xml;artifacts/c61/c61-core-gate-green.xml;artifacts/c61/c61-provider-worker-gate.xml",
+        "code_status": "complete-local-contract",
+        "verification_status": "40-api-and-5-worker-passed-zero-skip; live-selection-blocked",
+        "release_status": "not-deployed",
+        "blockers": [
+          "Vendor selection/account tariff/credential/isolated sandbox allowance pending"
+        ],
+        "evidence_paths": [
+          "docs/buyeros/decisions/2026-10-06-provider-selection.md",
+          "docs/buyeros/evidence/c61/provider-contract-results.json",
+          "artifacts/c61/C61-15-core-gate-red.json",
+          "artifacts/c61/C61-15-core-gate-red.log",
+          "artifacts/c61/C61-15-core-gate-green.json",
+          "artifacts/c61/C61-15-core-gate-green.log",
+          "artifacts/c61/C61-15-worker-gate.json",
+          "artifacts/c61/C61-15-worker-gate.log",
+          "artifacts/c61/c61-core-gate-red.xml",
+          "artifacts/c61/c61-core-gate-green.xml",
+          "artifacts/c61/c61-provider-worker-gate.xml"
+        ]
+      },
+      {
+        "task_id": "C61-16",
+        "title": "實作真實搜尋、來源抓取及公司對應",
+        "parent_tasks": "A26-05",
+        "finding_ids": "F10;F12",
+        "priority": "P1",
+        "dependencies": "C61-15",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Integrations / Backend",
+        "effort": "3–5 人日",
+        "status": "待開始",
+        "case_ids": "A01;A03;A04;A05;A06;A08;S02;O26-02;O26-03",
+        "new_case_ids": "C61T-06",
+        "existing_files": "services/api/buyeros_api/providers/search.py;services/api/buyeros_api/execution/provider_dispatch.py;services/api/buyeros_api/execution/external_runner.py;services/api/buyeros_api/execution/handlers/capability_blocked.py;services/api/tests/test_provider_contracts.py",
+        "proposed_new_files": "services/api/buyeros_api/providers/live_search.py;services/api/tests/test_live_search_adapter.py;services/api/tests/test_live_search_db.py",
+        "acceptance": "真實公司和來源持久化且可重開讀回；provider receipt/帳本/觀測成本對得上；無成功 receipt 不假稱研究完成。",
+        "rollback": "關 search capability admission；保留已接受任務及 sources，未知項走 status reconciliation。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-17",
+        "title": "實作真實 model fit、證據驗證及人工審核銜接",
+        "parent_tasks": "A26-05;Q10",
+        "finding_ids": "F10;F12",
+        "priority": "P1",
+        "dependencies": "C61-15;C61-16",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Backend / AI integrations",
+        "effort": "3–5 人日",
+        "status": "待開始",
+        "case_ids": "A01;A03;A04;A05;A06;A08;O26-02;O26-03",
+        "new_case_ids": "C61T-07",
+        "existing_files": "services/api/buyeros_api/providers/model.py;services/api/buyeros_api/execution/fit_runner.py;services/api/buyeros_api/execution/fit_execution.py;services/api/buyeros_api/execution/research_graph.py;services/worker/buyeros_worker/fit_runner.py;services/worker/tests/test_research_graph.py",
+        "proposed_new_files": "services/api/buyeros_api/providers/live_model.py;services/api/tests/test_live_model_adapter.py;services/worker/tests/test_live_fit_db.py",
+        "acceptance": "真實 result→evidence→fit/review 可持久化；三次 provider run 尚須 C61-24 準確度 gate，單元通過不宣稱 factual accuracy。",
+        "rollback": "停 model admission；既有 proposal/assessment 保留，不自動將未驗證結果升級為 Match。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-18",
+        "title": "實作 Contact quote、確認及真實結果",
+        "parent_tasks": "A26-05",
+        "finding_ids": "F10;F12",
+        "priority": "P1",
+        "dependencies": "C61-15;C61-16",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Integrations / Backend",
+        "effort": "2–4 人日",
+        "status": "待開始",
+        "case_ids": "A01;A03;A04;A05;A06;A08;S03;O26-02;O26-03",
+        "new_case_ids": "",
+        "existing_files": "services/api/buyeros_api/providers/contact.py;services/api/buyeros_api/execution/handlers/contact_submit.py;services/api/buyeros_api/services/contact_result_service.py;features/live/contact-quote.tsx;services/api/tests/test_contact_confirm_atomicity_db.py;services/worker/tests/test_contact_uncertainty_db.py",
+        "proposed_new_files": "services/api/buyeros_api/providers/live_contact.py;services/api/tests/test_live_contact_adapter.py",
+        "acceptance": "quote→explicit confirm→single operation→可驗證 contact result；錯公司/禁用 contact 輸出=0（樣本內），未驗證項清楚標示。",
+        "rollback": "關 contact admission；不得釋放 unknown 費用或重複購買。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-19",
+        "title": "接通真正可恢复的 research run",
+        "parent_tasks": "A26-05;Q04;Q11",
+        "finding_ids": "F10;F08",
+        "priority": "P1",
+        "dependencies": "C61-02;C61-16;C61-17;C61-18",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Backend / Worker / Platform",
+        "effort": "3–5 人日",
+        "status": "待開始",
+        "case_ids": "B05;B06;P08;S03;S04;S05;R02;R03;R04;R06;O26-02;O26-04",
+        "new_case_ids": "C61T-08",
+        "existing_files": "services/api/buyeros_api/api/routes/runs.py;services/api/buyeros_api/services/run_admission.py;services/api/buyeros_api/execution/provider_dispatch.py;services/api/buyeros_api/execution/external_runner.py;services/api/buyeros_api/execution/handlers/capability_blocked.py;services/worker/tests/test_research_restart_db.py;services/worker/tests/test_t30_broker_research.py",
+        "proposed_new_files": "services/worker/tests/test_live_research_journey_db.py",
+        "acceptance": "實際 preview 同一 project 完成 Offer/ICP→run→buyers/evidence/fit→contact→人工 review；provider費用/帳本一致，accepted/unknown無盲目重送。",
+        "rollback": "停新 admission、保留 reconciliation；停止舊 epoch，不能以回退應用清除 outbox/holds。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-20",
+        "title": "新增可追蹤站內寄送連接器",
+        "parent_tasks": "A26-12",
+        "finding_ids": "F10",
+        "priority": "P1",
+        "dependencies": "C61-13;C61-15;C61-18;C61-19",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Integrations / Backend / QA",
+        "effort": "5–10+ 人日",
+        "status": "待開始",
+        "case_ids": "P08;S03;S04;S05;R02;R03;R04;R06;O26-07;O26-16",
+        "new_case_ids": "C61T-12;C61T-13",
+        "existing_files": "services/api/buyeros_api/api/routes/drafts.py;services/api/buyeros_api/services/draft_service.py;services/api/buyeros_api/api/routes/provider_callbacks.py;services/api/tests/test_provider_callbacks_db.py",
+        "proposed_new_files": "services/api/buyeros_api/providers/delivery.py;services/api/buyeros_api/services/delivery_service.py;services/api/buyeros_api/api/routes/delivery_callbacks.py;services/api/tests/test_delivery_db.py;tests/e2e/delivery-sandbox.spec.ts",
+        "acceptance": "只向已核准隔離收件人做 sandbox 測試；O26-16 有 receipt/event/readback 證據後才能進 C61-30。C61-20 未交付時 UI 明示「核准匯出／手動結果」，保留 403，不宣稱站內 outreach send 已完成。",
+        "rollback": "关 delivery gate/停止新 admission；已送 email 無法撤回，保留帳本與 webhook reconciliation。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-21",
+        "title": "讓 Overview 今日待辦直接到正確資料",
+        "parent_tasks": "A26-09;Q09;Q14",
+        "finding_ids": "F14;F17",
+        "priority": "P2",
+        "dependencies": "C61-02;C61-06",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Frontend / Backend",
+        "effort": "2–3 人日",
+        "status": "待開始",
+        "case_ids": "U15",
+        "new_case_ids": "C61T-09",
+        "existing_files": "features/live/overview.tsx;features/live/operations.tsx;services/live/job-query.ts;services/api/buyeros_api/api/routes/jobs.py;services/api/tests/test_daily_ux_db.py;services/api/tests/test_job_scope_db.py;services/api/buyeros_api/api/routes/drafts.py;services/api/buyeros_api/api/routes/buyers.py",
+        "proposed_new_files": "services/api/buyeros_api/services/work_queue.py;services/api/buyeros_api/api/routes/work_queue.py;services/live/work-queue.ts;tests/e2e/work-queue-counts.spec.ts",
+        "acceptance": "將新 spec 收入該 config 的 discovery，0 tests 不算通過；6 張卡片在角色/scope/空/錯誤狀態皆準確；新增 operation 類型生成無 drift。",
+        "rollback": "UI gate 回舊導覽但文案要誠實；保留新 API 相容 response，不動業務資料。",
+        "execution_sha": "97adf4480cb6cd82a5122ed0934491a8c1c741a9",
+        "execution_evidence": "artifacts/c61/C61-21-queue-api-contract-final-green.json;artifacts/c61/C61-21-integrated-built-final.json;artifacts/c61/c61-queue-integrated-final.xml;artifacts/c61/C61-21-integrated-tested-source.json;artifacts/c61/C61-21-0-counts.json;artifacts/c61/C61-21-1-counts.json;artifacts/c61/C61-21-scope-race.json",
+        "code_status": "typed six project work counts and filtered draft/receipt lists integrated",
+        "verification_status": "54 required API/DB/contract + 5 frontend units + 24 fresh built regression cases pass, zero fail/error/skip; 24 positive focused discovery; tsc and 86 generated routes/types match; A/B en/zh-HK six actual list totals equal cards; delayed read/cancelled scope and synthetic 503 recover honestly",
+        "release_status": "not-deployed",
+        "blockers": [
+          "real account/provider source acceptance",
+          "same-version production readback",
+          "human UAT"
+        ],
+        "evidence_paths": [
+          "artifacts/c61/C61-21-queue-api-contract-final-green.json",
+          "artifacts/c61/C61-21-integrated-built-final.json",
+          "artifacts/c61/c61-queue-integrated-final.xml",
+          "artifacts/c61/C61-21-integrated-tested-source.json",
+          "artifacts/c61/C61-21-0-counts.json",
+          "artifacts/c61/C61-21-1-counts.json",
+          "artifacts/c61/C61-21-scope-race.json"
+        ]
+      },
+      {
+        "task_id": "C61-22",
+        "title": "把改稿與來源覆核變成可完成的日常流程",
+        "parent_tasks": "A26-09;Q07;Q12;Q15",
+        "finding_ids": "F09;F14;F16;F19",
+        "priority": "P2",
+        "dependencies": "C61-02",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Frontend / UX / QA",
+        "effort": "2–3 人日",
+        "status": "待開始",
+        "case_ids": "A02;A07;D01;D02;D03;O26-06",
+        "new_case_ids": "C61T-10",
+        "existing_files": "features/live/drafts.tsx;features/live/draft-grounding-review.tsx;features/live/draft-dirty-guard.tsx;services/live/draft-grounding.ts;tests/e2e/audit-draft-dirty.spec.ts;tests/e2e/audit-draft-reground.spec.ts",
+        "proposed_new_files": "services/live/text-selection-offsets.ts;tests/text-selection-offsets.test.mjs",
+        "acceptance": "中英混合/emoji/換行/長稿可完成改稿至下載；grounding 完整覆蓋不等於語義真實，真人覆核仍保留。",
+        "rollback": "revert UI helper，不改 immutable revision/approval/grounding history；不能回退成丟棄未儲存內容。",
+        "execution_sha": "f7cb47798017a3646d1339830495a20ff9792d15",
+        "execution_evidence": "artifacts/c61/C61-22-readonly-core-green.json;artifacts/c61/C61-22-readonly-built-green.json;artifacts/c61/c61-grounding-readonly-built.xml;artifacts/c61/C61-22-native-keyboard-probe.json;artifacts/c61/C61-22-unicode-selection-result.json;artifacts/c61/C61-22-readonly-tested-source.json",
+        "code_status": "source context, workflow and exact read-only grapheme keyboard selection implemented",
+        "verification_status": "RED/native probe then 22 core and 15 fresh built-browser cases pass, zero fail/error/skip; tsc exit 0; real UTF16 [1,3] -> server [1,2] exact emoji plus combining mark ranges verified",
+        "release_status": "not-deployed",
+        "blockers": [
+          "actual human screen-reader/zoom UAT",
+          "real-provider retained source semantic review",
+          "same-version production approved-export readback"
+        ],
+        "evidence_paths": [
+          "artifacts/c61/C61-22-readonly-core-green.json",
+          "artifacts/c61/C61-22-readonly-built-green.json",
+          "artifacts/c61/c61-grounding-readonly-built.xml",
+          "artifacts/c61/C61-22-native-keyboard-probe.json",
+          "artifacts/c61/C61-22-unicode-selection-result.json",
+          "artifacts/c61/C61-22-readonly-tested-source.json"
+        ]
+      },
+      {
+        "task_id": "C61-23",
+        "title": "改善大批維護、Settings 及可達性",
+        "parent_tasks": "A26-09;Q02;Q05;Q08;Q09",
+        "finding_ids": "F03;F04;F06;F11;F14",
+        "priority": "P2",
+        "dependencies": "C61-02;C61-03;C61-21;C61-22",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Frontend / UX / QA",
+        "effort": "2–3 人日",
+        "status": "待開始",
+        "case_ids": "U05;U06;U07;U08;U10;U11;U12;B01;B02;B03;B04;B07;B08;B09;B10;B11;B14;B15;B16;S06;O26-05;O26-09;O26-13",
+        "new_case_ids": "C61T-11",
+        "existing_files": "features/live/bulk-manifest.tsx;features/live/bulk-actions.tsx;features/live/settings.tsx;features/live/operations.tsx;tests/e2e/audit-bulk-manifest.spec.ts;tests/e2e/audit-keyboard-workbench.spec.ts;tests/e2e/audit-daily-journey.spec.ts",
+        "proposed_new_files": "docs/buyeros/runbooks/bulk-maintenance.md",
+        "acceptance": "五項員工任務均可鍵盤完成且 scope 清楚；實際 screen reader/人員完成率留 C61-27，不能用 axe 或截圖替代。",
+        "rollback": "UI revert 不改 frozen manifest 和審計；保留失敗重試及 server checks。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-24",
+        "title": "驗收真實研究準確度與成本",
+        "parent_tasks": "A26-10;Q10",
+        "finding_ids": "F12;F10",
+        "priority": "P1",
+        "dependencies": "C61-17;C61-18;C61-19",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "QA / Product / Domain reviewers",
+        "effort": "3–5 人日，標註另計",
+        "status": "待開始",
+        "case_ids": "A01;A03;A04;A05;A06;A08;S02;O26-03",
+        "new_case_ids": "",
+        "existing_files": "services/api/tools/evaluate_research_goldset.py;services/api/tools/quality_metrics.py;services/api/tests/test_quality_tools.py",
+        "proposed_new_files": "docs/buyeros/quality/research-gate.md;services/api/tools/capture_research_predictions.py;services/api/tests/test_research_capture.py",
+        "acceptance": "offline evaluator 仍 live_verified=false，另以 provider receipt/source review/標註獨立性證據作實際驗收；0 wrong-company/unsupported citation/禁用 contact，三次門檻及成本均符合已記錄值。沒有真人標註時不能宣稱達標。",
+        "rollback": "停測及 admission；保留原報告、holdout、失敗案例，按精確 dataset marker 清理隔離資料。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-25",
+        "title": "驗收效能、輪詢、worker 公平性及容量",
+        "parent_tasks": "A26-10;Q06;Q10;Q13",
+        "finding_ids": "F07;F12;F18",
+        "priority": "P1",
+        "dependencies": "C61-06;C61-19;C61-21;C61-23",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "QA / Backend / SRE",
+        "effort": "2–4 人日",
+        "status": "待開始",
+        "case_ids": "B12;B13;P01;P02;P03;P04;P05;P06;P07;P08;P09;P10;O26-12",
+        "new_case_ids": "",
+        "existing_files": "scripts/benchmark-workspace-directory.py;scripts/benchmark-buyeros.py;scripts/benchmark-buyer-mutations.py;services/api/tools/quality_metrics.py;services/worker/tests/benchmark_dispatcher_case.py;tests/job-poller-checks.mjs",
+        "proposed_new_files": "docs/buyeros/performance/c61-budget.md;scripts/c61-performance-harness.py",
+        "acceptance": "每項 gate 有 raw samples/樣本數/環境/SQL/成本/錯誤分母；不把 local API benchmark 說成 HK production 使用體驗。超標指出具體改善與重測，不用增加 timeout 隱藏。",
+        "rollback": "停止隔離負載；回退造成退化的 query/index/config 變更（schema保留相容）；不提高正式配額。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-26",
+        "title": "八模組同一資料鏈端到端驗收",
+        "parent_tasks": "A26-11;Q11",
+        "finding_ids": "F01;F10;F12;F14;F20;F22",
+        "priority": "P1",
+        "dependencies": "C61-03;C61-12;C61-19;C61-21;C61-22;C61-23;C61-24;C61-25",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "QA / Staff owner",
+        "effort": "2–3 人日",
+        "status": "待開始",
+        "case_ids": "U01;U09;B01;B02;B03;B04;B07;B08;B09;B16;D01;D02;D03;WF01;WF02;WF03;NA04;NA05;NA27;O26-01;O26-02;O26-06;O26-07;O26-08;O26-14",
+        "new_case_ids": "",
+        "existing_files": "tests/e2e/fixtures/staff-journey.ts;tests/e2e/audit-daily-journey.spec.ts;tests/e2e/audit-research-intent.spec.ts;tests/e2e/audit-draft-reground.spec.ts",
+        "proposed_new_files": "playwright.c61-acceptance.config.ts;tests/e2e/c61-eight-module.spec.ts;docs/buyeros/evidence/c61/journey-ledger.json",
+        "acceptance": "八模組至少各一段可追查證據且整鏈成功；required cases count>0、零 fail/error/skip，環境缺失標 blocked。live唯讀smoke不等於此驗收。",
+        "rollback": "停止新測試任務；保留已受理/unknown任務與審計，cleanup 僅本次 marker，禁止粗略刪整個 workspace。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-27",
+        "title": "用真實員工驗收可用性與輔助工具",
+        "parent_tasks": "A26-09;A26-11;Q09",
+        "finding_ids": "F14",
+        "priority": "P2",
+        "dependencies": "C61-26",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Product / UX / 3–5 staff",
+        "effort": "1–2 人日及排期",
+        "status": "待開始",
+        "case_ids": "U10;U11;U12;O26-13",
+        "new_case_ids": "",
+        "existing_files": "docs/buyeros/CURRENT_STATUS.md",
+        "proposed_new_files": "docs/buyeros/uat/c61-staff-protocol.md;docs/buyeros/uat/c61-staff-results.csv",
+        "acceptance": "真人簽核不由 Codex 模擬；缺人或screen reader未測保持 blocked，不能套用 fixture結果填pass。",
+        "rollback": "UI revert 限于造成阻礙的變更；保留觀察紀錄。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-28",
+        "title": "把同版本驗收變成 CI 和維護門檻",
+        "parent_tasks": "A26-13;Q11",
+        "finding_ids": "F13;F22",
+        "priority": "P1",
+        "dependencies": "C61-02;C61-05;C61-06;C61-13;C61-24;C61-25;C61-26;C61-27",
+        "dependency_conditions": "C61-05: 已驗證根因修復；或release owner明確記錄未解風險接受，F21與C61-05仍open；其餘依賴不可豁免",
+        "owner_role": "Release / QA / SRE",
+        "effort": "1–2 人日",
+        "status": "待開始",
+        "case_ids": "R01;R02;R03;R04;R05;R06;O26-15",
+        "new_case_ids": "C61T-14",
+        "existing_files": ".github/workflows/buyeros-ci.yml;scripts/check-required-tests.py;scripts/generate-api-types.mjs;scripts/generate-operation-routes.py;TASKS.json;docs/buyeros/CURRENT_STATUS.md",
+        "proposed_new_files": "docs/buyeros/release/c61-go-no-go.md;scripts/check-c61-evidence.py;tests/test_c61_evidence.py",
+        "acceptance": "全量 API/worker strict PG16及CI原有job依原工作流程成功，新tests被收錄；812歷史數字不是最低/固定值，但測試減少須解釋。每個open finding 明確列出，無修復完成=上線的混淆。",
+        "rollback": "保留PR/CI evidence；不以停用tests或改門檻解除block。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-29",
+        "title": "發布研究與核准匯出版本並讀回驗證",
+        "parent_tasks": "A26-13;Q11",
+        "finding_ids": "F13;F20;F22",
+        "priority": "P1",
+        "dependencies": "C61-28",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Release / SRE",
+        "effort": "1–2 人日及觀察窗",
+        "status": "待開始",
+        "case_ids": "U01;R01;R02;R03;R04;R05;R06;NA30;O26-01;O26-15",
+        "new_case_ids": "",
+        "existing_files": "docs/buyeros/CURRENT_STATUS.md;TASKS.json;docs/buyeros/runbooks/worker-runtime.md",
+        "proposed_new_files": "docs/buyeros/release/c61-production-readback.json",
+        "acceptance": "合併到 main 及 production alias 的實際SHA一致性可查，不能用PRmerge代替；登入/八模組readback/告警可用。真實付費/外寄驗收不由唯讀smoke自動執行。",
+        "rollback": "關新admission，切回已演練相容artifact與selector；fence舊epoch，保持accepted/unknown對帳；不downgrade刪migration資料。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      },
+      {
+        "task_id": "C61-30",
+        "title": "獨立啟用站內寄送並完成全外展驗收",
+        "parent_tasks": "A26-12;A26-13",
+        "finding_ids": "F10;F22",
+        "priority": "P1",
+        "dependencies": "C61-14;C61-20;C61-29",
+        "dependency_conditions": "全部列出的依賴已完成相應交付",
+        "owner_role": "Release / Integrations / QA",
+        "effort": "1–2 人日及觀察窗",
+        "status": "待開始",
+        "case_ids": "WF03;O26-07;O26-14;O26-16",
+        "new_case_ids": "C61T-16",
+        "existing_files": "features/live/drafts.tsx;features/live/operations.tsx;docs/buyeros/CURRENT_STATUS.md;tests/e2e/delivery-sandbox.spec.ts",
+        "proposed_new_files": "docs/buyeros/release/c61-delivery-go-no-go.md",
+        "acceptance": "新send spec 明確加入discovery；完整「站內寄送」完成只在此gate通過後宣稱。未做此階段，狀態永遠是research+export可用／native send未交付。",
+        "rollback": "關send admission，繼續callback/status reconciliation；已寄不可撤回，也不可rollback成重新寄送。",
+        "execution_sha": "",
+        "execution_evidence": "",
+        "code_status": "not-started",
+        "verification_status": "not-run",
+        "release_status": "not-deployed",
+        "blockers": [],
+        "evidence_paths": []
+      }
+    ]
+  }
+}

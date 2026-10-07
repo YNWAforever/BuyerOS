@@ -10,7 +10,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0036_checkpoint_schema_grants"
+HEAD = "0038_c61_workspace_directory"
 
 
 def _config():

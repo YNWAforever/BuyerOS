@@ -1,0 +1,26 @@
+{
+  "source_sha": "22f11abfbde4f3c422b866d0a7eec2a9c9742951",
+  "source_sha_after": "22f11abfbde4f3c422b866d0a7eec2a9c9742951",
+  "started_at_utc": "2026-10-06T20:01:45.220882+00:00",
+  "seconds": 9.075,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_jwks_cold_concurrency.py",
+    "--junitxml=../../artifacts/c61/c61-cold-jwks-red.xml"
+  ],
+  "cwd": "services/api",
+  "exit_code": 1,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-02-cold-jwks-red.log",
+  "fresh_junit": true,
+  "tests": 2,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-cold-jwks-red.xml",
+  "required_gate_exit_code": 1
+}

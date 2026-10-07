@@ -213,8 +213,9 @@ def set_execution_runtime(dsn: str, *, expected_epoch: int, backend: str, enable
         raise ValueError('invalid runtime change')
     with psycopg.connect(dsn) as db:
         if db.execute('SELECT version_num FROM alembic_version').fetchone()[0] not in {
-                '0035_worker_recovery_probe', '0036_checkpoint_schema_grants'}:
-            raise ValueError('compatible 0035/0036 build and migration required')
+                '0035_worker_recovery_probe', '0036_checkpoint_schema_grants', '0037_bulk_manifests',
+                '0038_c61_workspace_directory'}:
+            raise ValueError('compatible 0035/0036/0037/0038 build and migration required')
         current = db.execute('SELECT backend,enabled,epoch,active_until FROM worker_runtime_control WHERE singleton=1 FOR UPDATE').fetchone()
         if current[2] != expected_epoch:
             raise ValueError('runtime epoch changed; inspect current state')

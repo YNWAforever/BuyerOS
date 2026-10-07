@@ -1,0 +1,18 @@
+{
+  "source_sha": "d90431dd4a5a448b54fcb29b4920f6d07982e4d9",
+  "status": "blocked_environment_enospc",
+  "exit_code": 1,
+  "disk": {
+    "total": 1021281562624,
+    "used": 1017066651648,
+    "free": 4214910976
+  },
+  "fresh_completed_report": false,
+  "junit_mtime": 1791311946.2886982,
+  "run_started": 1791311981.099405,
+  "rejected_previous_junit": "test-results\\audit-fixes.xml",
+  "previous_junit_sha256": "99fb5ca3448e68acb7ae17255f7dfb8e54d9d27715ca2fac796109a79a50cf07",
+  "observed_log_pass_lines": 25,
+  "whole_suite_pass": false,
+  "production_readback": false
+}

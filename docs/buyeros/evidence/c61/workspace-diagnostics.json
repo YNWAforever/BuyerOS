@@ -1,0 +1,49 @@
+{
+  "source_sha_base": "35226658ebc15367fd643b207184464e6108d6f6",
+  "tested_tree": "c968c328df2e736e9f7571d5dc752b733fed793e",
+  "historical_request_id": "1d123054-2633-40b7-8e07-b6aed83dad98",
+  "root_cause_confirmed": false,
+  "sqlstate": null,
+  "pool_wait_ms": null,
+  "connection_timeout": null,
+  "schema_head": null,
+  "runtime_role": null,
+  "historical_source_sha": null,
+  "historical_error_class": "OperationalError",
+  "log_query_result": "No logs found in the reviewed UTC 19:35-19:45 window on 2026-10-06; absence does not disprove the archived event.",
+  "test_result": {
+    "source_sha": "35226658ebc15367fd643b207184464e6108d6f6",
+    "source_sha_after": "35226658ebc15367fd643b207184464e6108d6f6",
+    "started_at_utc": "2026-10-06T17:27:01.315283+00:00",
+    "seconds": 14.936,
+    "command": [
+      "uv",
+      "run",
+      "--frozen",
+      "pytest",
+      "-q",
+      "tests/test_error_diagnostics.py",
+      "tests/test_api_routes_contract.py",
+      "tests/test_contract_required_fields.py",
+      "--junitxml=../../artifacts/c61/c61-diag.xml"
+    ],
+    "cwd": "services/api",
+    "exit_code": 0,
+    "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+    "log": "artifacts\\c61\\C61-04-verified.log",
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junit": "artifacts/c61/c61-diag.xml",
+    "required_gate_exit_code": 0
+  },
+  "acceptance_levels": {
+    "L0": "20 passed, zero fail/error/skip; diagnostic injection and API contracts",
+    "L1": "not required for pure handler change",
+    "L2": "not run",
+    "L3": "blocked: historical driver/SQLSTATE/timing/schema-role evidence unavailable",
+    "L4": "not run"
+  },
+  "rollback": "Revert diagnostic logging only; retain incident evidence; no schema/config/provider changes."
+}

@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="7" failures="0" skipped="0" tests="7" time="12.069" timestamp="2026-10-07T05:00:41.762790+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_work_queue_db" name="test_work_queue_count_equals_filtered_list[a0000000-0000-4000-8000-000000000001-expected0]" time="7.084"><error message="failed on setup with &quot;psycopg.errors.UniqueViolation: duplicate key value violates unique constraint &quot;uq_budget_accounts_scope_identity_period&quot;&#10;DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:51.068016+00) already exists.&quot;">buyer_api = &lt;starlette.testclient.TestClient object at 0x000001F044C7DCD0&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:59222/buyeros_test_api'
+
+    @pytest.fixture
+    def queue_case(buyer_api,seeded):
+     with buyer_api as api:
+      with psycopg.connect(seeded) as db:
+       db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,language_preferences,version) VALUES (%s,%s,'Queue B','Fixture','Offer','{US}','{en}',1) ON CONFLICT DO NOTHING",(PROJECT_A2,WORKSPACE_A))
+       for project,n,pending,failed,uncertain in [(PROJECT_A,5,2,2,1),(PROJECT_A2,7,3,3,2)]:
+        buyers=[];icp=uuid.uuid4()
+        db.execute("INSERT INTO icp_versions(id,workspace_id,project_id,number,content,content_hash) VALUES (%s,%s,%s,1,'{}','fixture-queue')",(icp,WORKSPACE_A,project))
+        for i in range(n):
+         company,buyer=uuid.uuid4(),uuid.uuid4();buyers.append(buyer)
+         db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES (%s,%s,'Fixture',%s)",(company,WORKSPACE_A,f'Queue {i}'))
+         db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id,owner_user_id) VALUES (%s,%s,%s,%s,%s)",(buyer,WORKSPACE_A,project,company,uid(OPERATOR) if i&lt;2 else None))
+         if i&lt;2:
+          db.execute("INSERT INTO fit_assessments(id,workspace_id,project_id,project_buyer_id,icp_version_id,evidence_set_hash,verdict,rationale,evidence_ids) VALUES (%s,%s,%s,%s,%s,'fixture','match','Fixture','[]')",(uuid.uuid4(),WORKSPACE_A,project,buyer,icp))
+         if i==0:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id) VALUES (%s,%s,%s,'accepted',%s)",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+         if i==1:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id,created_at) VALUES (%s,%s,%s,'rejected',%s,now()-interval '1 day'),(%s,%s,%s,'awaiting_review',%s,now())",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER),uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+        for i in range(pending+1):
+         draft,revision=uuid.uuid4(),uuid.uuid4()
+         content={'subject':f'Queue draft {i}','body':'Fixture body','language':'en','kind':'initial','icp_version_id':str(icp),'evidence_set_hash':'a'*64,'value_proposition_fact_ids':[]}
+         db.execute("INSERT INTO outreach_drafts(id,workspace_id,project_id,buyer_id,current_revision,state) VALUES (%s,%s,%s,%s,1,%s)",(draft,WORKSPACE_A,project,buyers[0],'review_requested' if i&lt;pending else 'draft'))
+         db.execute("INSERT INTO draft_revisions(id,workspace_id,draft_id,revision_number,content,content_hash) VALUES (%s,%s,%s,1,%s::jsonb,%s)",(revision,WORKSPACE_A,draft,json.dumps(content),'b'*64))
+        for subject,count in [(OPERATOR,failed),(REVIEWER,5 if project==PROJECT_A else 7)]:
+         for _ in range(count):
+          db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,blocked) VALUES (%s,%s,%s,%s,'bulk_mutation','reviewBuyers','{}','failed',1,1,1)",(uuid.uuid4(),WORKSPACE_A,project,uid(subject)))
+        for subject,count in [(OPERATOR,uncertain),(REVIEWER,4 if project==PROJECT_A else 6)]:
+         quote,job=uuid.uuid4(),uuid.uuid4()
+         db.execute("INSERT INTO enrichment_quotes(id,workspace_id,project_id,actor_id,purpose,selection,request_hash,quote_hash,price_version,max_cost,status) VALUES (%s,%s,%s,%s,'contact_research','{}','fixture','fixture','fixture',1,'consumed')",(quote,WORKSPACE_A,project,uid(subject)))
+         db.execute("INSERT INTO enrichment_jobs(id,workspace_id,quote_id,state) VALUES (%s,%s,%s,'unknown')",(job,WORKSPACE_A,quote))
+         for i in range(count+1):
+          db.execute("INSERT INTO provider_operations(id,workspace_id,job_id,intent_key,capability,input_hash,status,provider_ref,account_reference) VALUES (%s,%s,%s,%s,'contact_lookup','fixture',%s,'PRIVATE-RECEIPT','PRIVATE-ACCOUNT')",(uuid.uuid4(),WORKSPACE_A,job,str(uuid.uuid4()),'unknown' if i&lt;count else 'accepted'))
+        # A real durable research hold proves run/project/actor; no intent-key parsing.
+        for subject in [OPERATOR,REVIEWER]:
+         run,op,reservation,run_account,project_account=(uuid.uuid4() for _ in range(5))
+         db.execute("INSERT INTO search_runs(id,workspace_id,project_id,icp_version_id,status,limits,execution_snapshot) VALUES (%s,%s,%s,%s,'running','{}',%s::jsonb)",(run,WORKSPACE_A,project,icp,json.dumps({'actor_id':str(uid(subject))})))
+         for account,scope,scope_id in [(run_account,'run',run),(project_account,'project',project)]:
+&gt;         db.execute("INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)",(account,WORKSPACE_A,scope,scope_id))
+
+tests\test_work_queue_db.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1f044c7f050&gt;
+query = "INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)"
+params = (UUID('6c172873-b631-48d4-b602-69d7cb370838'), '11111111-1111-4111-8111-111111111111', 'project', 'a0000000-0000-4000-8000-000000000001')
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "uq_budget_accounts_scope_identity_period"
+E           DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:51.068016+00) already exists.
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UniqueViolation</error></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_count_equals_filtered_list[a0000000-0000-4000-8000-00000000000a-expected1]" time="0.221"><error message="failed on setup with &quot;psycopg.errors.UniqueViolation: duplicate key value violates unique constraint &quot;uq_budget_accounts_scope_identity_period&quot;&#10;DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:51.914167+00) already exists.&quot;">buyer_api = &lt;starlette.testclient.TestClient object at 0x000001F044AC7FE0&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:59222/buyeros_test_api'
+
+    @pytest.fixture
+    def queue_case(buyer_api,seeded):
+     with buyer_api as api:
+      with psycopg.connect(seeded) as db:
+       db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,language_preferences,version) VALUES (%s,%s,'Queue B','Fixture','Offer','{US}','{en}',1) ON CONFLICT DO NOTHING",(PROJECT_A2,WORKSPACE_A))
+       for project,n,pending,failed,uncertain in [(PROJECT_A,5,2,2,1),(PROJECT_A2,7,3,3,2)]:
+        buyers=[];icp=uuid.uuid4()
+        db.execute("INSERT INTO icp_versions(id,workspace_id,project_id,number,content,content_hash) VALUES (%s,%s,%s,1,'{}','fixture-queue')",(icp,WORKSPACE_A,project))
+        for i in range(n):
+         company,buyer=uuid.uuid4(),uuid.uuid4();buyers.append(buyer)
+         db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES (%s,%s,'Fixture',%s)",(company,WORKSPACE_A,f'Queue {i}'))
+         db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id,owner_user_id) VALUES (%s,%s,%s,%s,%s)",(buyer,WORKSPACE_A,project,company,uid(OPERATOR) if i&lt;2 else None))
+         if i&lt;2:
+          db.execute("INSERT INTO fit_assessments(id,workspace_id,project_id,project_buyer_id,icp_version_id,evidence_set_hash,verdict,rationale,evidence_ids) VALUES (%s,%s,%s,%s,%s,'fixture','match','Fixture','[]')",(uuid.uuid4(),WORKSPACE_A,project,buyer,icp))
+         if i==0:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id) VALUES (%s,%s,%s,'accepted',%s)",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+         if i==1:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id,created_at) VALUES (%s,%s,%s,'rejected',%s,now()-interval '1 day'),(%s,%s,%s,'awaiting_review',%s,now())",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER),uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+        for i in range(pending+1):
+         draft,revision=uuid.uuid4(),uuid.uuid4()
+         content={'subject':f'Queue draft {i}','body':'Fixture body','language':'en','kind':'initial','icp_version_id':str(icp),'evidence_set_hash':'a'*64,'value_proposition_fact_ids':[]}
+         db.execute("INSERT INTO outreach_drafts(id,workspace_id,project_id,buyer_id,current_revision,state) VALUES (%s,%s,%s,%s,1,%s)",(draft,WORKSPACE_A,project,buyers[0],'review_requested' if i&lt;pending else 'draft'))
+         db.execute("INSERT INTO draft_revisions(id,workspace_id,draft_id,revision_number,content,content_hash) VALUES (%s,%s,%s,1,%s::jsonb,%s)",(revision,WORKSPACE_A,draft,json.dumps(content),'b'*64))
+        for subject,count in [(OPERATOR,failed),(REVIEWER,5 if project==PROJECT_A else 7)]:
+         for _ in range(count):
+          db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,blocked) VALUES (%s,%s,%s,%s,'bulk_mutation','reviewBuyers','{}','failed',1,1,1)",(uuid.uuid4(),WORKSPACE_A,project,uid(subject)))
+        for subject,count in [(OPERATOR,uncertain),(REVIEWER,4 if project==PROJECT_A else 6)]:
+         quote,job=uuid.uuid4(),uuid.uuid4()
+         db.execute("INSERT INTO enrichment_quotes(id,workspace_id,project_id,actor_id,purpose,selection,request_hash,quote_hash,price_version,max_cost,status) VALUES (%s,%s,%s,%s,'contact_research','{}','fixture','fixture','fixture',1,'consumed')",(quote,WORKSPACE_A,project,uid(subject)))
+         db.execute("INSERT INTO enrichment_jobs(id,workspace_id,quote_id,state) VALUES (%s,%s,%s,'unknown')",(job,WORKSPACE_A,quote))
+         for i in range(count+1):
+          db.execute("INSERT INTO provider_operations(id,workspace_id,job_id,intent_key,capability,input_hash,status,provider_ref,account_reference) VALUES (%s,%s,%s,%s,'contact_lookup','fixture',%s,'PRIVATE-RECEIPT','PRIVATE-ACCOUNT')",(uuid.uuid4(),WORKSPACE_A,job,str(uuid.uuid4()),'unknown' if i&lt;count else 'accepted'))
+        # A real durable research hold proves run/project/actor; no intent-key parsing.
+        for subject in [OPERATOR,REVIEWER]:
+         run,op,reservation,run_account,project_account=(uuid.uuid4() for _ in range(5))
+         db.execute("INSERT INTO search_runs(id,workspace_id,project_id,icp_version_id,status,limits,execution_snapshot) VALUES (%s,%s,%s,%s,'running','{}',%s::jsonb)",(run,WORKSPACE_A,project,icp,json.dumps({'actor_id':str(uid(subject))})))
+         for account,scope,scope_id in [(run_account,'run',run),(project_account,'project',project)]:
+&gt;         db.execute("INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)",(account,WORKSPACE_A,scope,scope_id))
+
+tests\test_work_queue_db.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1f044c7d040&gt;
+query = "INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)"
+params = (UUID('6adef67e-27ae-4e91-a466-3d115a2be993'), '11111111-1111-4111-8111-111111111111', 'project', 'a0000000-0000-4000-8000-000000000001')
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "uq_budget_accounts_scope_identity_period"
+E           DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:51.914167+00) already exists.
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UniqueViolation</error></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_actor_roles_project_and_no_side_effects[auth0|operator-a-2-2]" time="0.187"><error message="failed on setup with &quot;psycopg.errors.UniqueViolation: duplicate key value violates unique constraint &quot;uq_budget_accounts_scope_identity_period&quot;&#10;DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:52.188733+00) already exists.&quot;">buyer_api = &lt;starlette.testclient.TestClient object at 0x000001F0449E3E60&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:59222/buyeros_test_api'
+
+    @pytest.fixture
+    def queue_case(buyer_api,seeded):
+     with buyer_api as api:
+      with psycopg.connect(seeded) as db:
+       db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,language_preferences,version) VALUES (%s,%s,'Queue B','Fixture','Offer','{US}','{en}',1) ON CONFLICT DO NOTHING",(PROJECT_A2,WORKSPACE_A))
+       for project,n,pending,failed,uncertain in [(PROJECT_A,5,2,2,1),(PROJECT_A2,7,3,3,2)]:
+        buyers=[];icp=uuid.uuid4()
+        db.execute("INSERT INTO icp_versions(id,workspace_id,project_id,number,content,content_hash) VALUES (%s,%s,%s,1,'{}','fixture-queue')",(icp,WORKSPACE_A,project))
+        for i in range(n):
+         company,buyer=uuid.uuid4(),uuid.uuid4();buyers.append(buyer)
+         db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES (%s,%s,'Fixture',%s)",(company,WORKSPACE_A,f'Queue {i}'))
+         db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id,owner_user_id) VALUES (%s,%s,%s,%s,%s)",(buyer,WORKSPACE_A,project,company,uid(OPERATOR) if i&lt;2 else None))
+         if i&lt;2:
+          db.execute("INSERT INTO fit_assessments(id,workspace_id,project_id,project_buyer_id,icp_version_id,evidence_set_hash,verdict,rationale,evidence_ids) VALUES (%s,%s,%s,%s,%s,'fixture','match','Fixture','[]')",(uuid.uuid4(),WORKSPACE_A,project,buyer,icp))
+         if i==0:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id) VALUES (%s,%s,%s,'accepted',%s)",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+         if i==1:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id,created_at) VALUES (%s,%s,%s,'rejected',%s,now()-interval '1 day'),(%s,%s,%s,'awaiting_review',%s,now())",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER),uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+        for i in range(pending+1):
+         draft,revision=uuid.uuid4(),uuid.uuid4()
+         content={'subject':f'Queue draft {i}','body':'Fixture body','language':'en','kind':'initial','icp_version_id':str(icp),'evidence_set_hash':'a'*64,'value_proposition_fact_ids':[]}
+         db.execute("INSERT INTO outreach_drafts(id,workspace_id,project_id,buyer_id,current_revision,state) VALUES (%s,%s,%s,%s,1,%s)",(draft,WORKSPACE_A,project,buyers[0],'review_requested' if i&lt;pending else 'draft'))
+         db.execute("INSERT INTO draft_revisions(id,workspace_id,draft_id,revision_number,content,content_hash) VALUES (%s,%s,%s,1,%s::jsonb,%s)",(revision,WORKSPACE_A,draft,json.dumps(content),'b'*64))
+        for subject,count in [(OPERATOR,failed),(REVIEWER,5 if project==PROJECT_A else 7)]:
+         for _ in range(count):
+          db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,blocked) VALUES (%s,%s,%s,%s,'bulk_mutation','reviewBuyers','{}','failed',1,1,1)",(uuid.uuid4(),WORKSPACE_A,project,uid(subject)))
+        for subject,count in [(OPERATOR,uncertain),(REVIEWER,4 if project==PROJECT_A else 6)]:
+         quote,job=uuid.uuid4(),uuid.uuid4()
+         db.execute("INSERT INTO enrichment_quotes(id,workspace_id,project_id,actor_id,purpose,selection,request_hash,quote_hash,price_version,max_cost,status) VALUES (%s,%s,%s,%s,'contact_research','{}','fixture','fixture','fixture',1,'consumed')",(quote,WORKSPACE_A,project,uid(subject)))
+         db.execute("INSERT INTO enrichment_jobs(id,workspace_id,quote_id,state) VALUES (%s,%s,%s,'unknown')",(job,WORKSPACE_A,quote))
+         for i in range(count+1):
+          db.execute("INSERT INTO provider_operations(id,workspace_id,job_id,intent_key,capability,input_hash,status,provider_ref,account_reference) VALUES (%s,%s,%s,%s,'contact_lookup','fixture',%s,'PRIVATE-RECEIPT','PRIVATE-ACCOUNT')",(uuid.uuid4(),WORKSPACE_A,job,str(uuid.uuid4()),'unknown' if i&lt;count else 'accepted'))
+        # A real durable research hold proves run/project/actor; no intent-key parsing.
+        for subject in [OPERATOR,REVIEWER]:
+         run,op,reservation,run_account,project_account=(uuid.uuid4() for _ in range(5))
+         db.execute("INSERT INTO search_runs(id,workspace_id,project_id,icp_version_id,status,limits,execution_snapshot) VALUES (%s,%s,%s,%s,'running','{}',%s::jsonb)",(run,WORKSPACE_A,project,icp,json.dumps({'actor_id':str(uid(subject))})))
+         for account,scope,scope_id in [(run_account,'run',run),(project_account,'project',project)]:
+&gt;         db.execute("INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)",(account,WORKSPACE_A,scope,scope_id))
+
+tests\test_work_queue_db.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1f040d98f50&gt;
+query = "INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)"
+params = (UUID('51a59bac-60ac-4798-b2d0-64a036541c8b'), '11111111-1111-4111-8111-111111111111', 'project', 'a0000000-0000-4000-8000-000000000001')
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "uq_budget_accounts_scope_identity_period"
+E           DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:52.188733+00) already exists.
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UniqueViolation</error></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_actor_roles_project_and_no_side_effects[auth0|reviewer-a-5-5]" time="0.184"><error message="failed on setup with &quot;psycopg.errors.UniqueViolation: duplicate key value violates unique constraint &quot;uq_budget_accounts_scope_identity_period&quot;&#10;DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:52.391386+00) already exists.&quot;">buyer_api = &lt;starlette.testclient.TestClient object at 0x000001F040E09EB0&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:59222/buyeros_test_api'
+
+    @pytest.fixture
+    def queue_case(buyer_api,seeded):
+     with buyer_api as api:
+      with psycopg.connect(seeded) as db:
+       db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,language_preferences,version) VALUES (%s,%s,'Queue B','Fixture','Offer','{US}','{en}',1) ON CONFLICT DO NOTHING",(PROJECT_A2,WORKSPACE_A))
+       for project,n,pending,failed,uncertain in [(PROJECT_A,5,2,2,1),(PROJECT_A2,7,3,3,2)]:
+        buyers=[];icp=uuid.uuid4()
+        db.execute("INSERT INTO icp_versions(id,workspace_id,project_id,number,content,content_hash) VALUES (%s,%s,%s,1,'{}','fixture-queue')",(icp,WORKSPACE_A,project))
+        for i in range(n):
+         company,buyer=uuid.uuid4(),uuid.uuid4();buyers.append(buyer)
+         db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES (%s,%s,'Fixture',%s)",(company,WORKSPACE_A,f'Queue {i}'))
+         db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id,owner_user_id) VALUES (%s,%s,%s,%s,%s)",(buyer,WORKSPACE_A,project,company,uid(OPERATOR) if i&lt;2 else None))
+         if i&lt;2:
+          db.execute("INSERT INTO fit_assessments(id,workspace_id,project_id,project_buyer_id,icp_version_id,evidence_set_hash,verdict,rationale,evidence_ids) VALUES (%s,%s,%s,%s,%s,'fixture','match','Fixture','[]')",(uuid.uuid4(),WORKSPACE_A,project,buyer,icp))
+         if i==0:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id) VALUES (%s,%s,%s,'accepted',%s)",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+         if i==1:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id,created_at) VALUES (%s,%s,%s,'rejected',%s,now()-interval '1 day'),(%s,%s,%s,'awaiting_review',%s,now())",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER),uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+        for i in range(pending+1):
+         draft,revision=uuid.uuid4(),uuid.uuid4()
+         content={'subject':f'Queue draft {i}','body':'Fixture body','language':'en','kind':'initial','icp_version_id':str(icp),'evidence_set_hash':'a'*64,'value_proposition_fact_ids':[]}
+         db.execute("INSERT INTO outreach_drafts(id,workspace_id,project_id,buyer_id,current_revision,state) VALUES (%s,%s,%s,%s,1,%s)",(draft,WORKSPACE_A,project,buyers[0],'review_requested' if i&lt;pending else 'draft'))
+         db.execute("INSERT INTO draft_revisions(id,workspace_id,draft_id,revision_number,content,content_hash) VALUES (%s,%s,%s,1,%s::jsonb,%s)",(revision,WORKSPACE_A,draft,json.dumps(content),'b'*64))
+        for subject,count in [(OPERATOR,failed),(REVIEWER,5 if project==PROJECT_A else 7)]:
+         for _ in range(count):
+          db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,blocked) VALUES (%s,%s,%s,%s,'bulk_mutation','reviewBuyers','{}','failed',1,1,1)",(uuid.uuid4(),WORKSPACE_A,project,uid(subject)))
+        for subject,count in [(OPERATOR,uncertain),(REVIEWER,4 if project==PROJECT_A else 6)]:
+         quote,job=uuid.uuid4(),uuid.uuid4()
+         db.execute("INSERT INTO enrichment_quotes(id,workspace_id,project_id,actor_id,purpose,selection,request_hash,quote_hash,price_version,max_cost,status) VALUES (%s,%s,%s,%s,'contact_research','{}','fixture','fixture','fixture',1,'consumed')",(quote,WORKSPACE_A,project,uid(subject)))
+         db.execute("INSERT INTO enrichment_jobs(id,workspace_id,quote_id,state) VALUES (%s,%s,%s,'unknown')",(job,WORKSPACE_A,quote))
+         for i in range(count+1):
+          db.execute("INSERT INTO provider_operations(id,workspace_id,job_id,intent_key,capability,input_hash,status,provider_ref,account_reference) VALUES (%s,%s,%s,%s,'contact_lookup','fixture',%s,'PRIVATE-RECEIPT','PRIVATE-ACCOUNT')",(uuid.uuid4(),WORKSPACE_A,job,str(uuid.uuid4()),'unknown' if i&lt;count else 'accepted'))
+        # A real durable research hold proves run/project/actor; no intent-key parsing.
+        for subject in [OPERATOR,REVIEWER]:
+         run,op,reservation,run_account,project_account=(uuid.uuid4() for _ in range(5))
+         db.execute("INSERT INTO search_runs(id,workspace_id,project_id,icp_version_id,status,limits,execution_snapshot) VALUES (%s,%s,%s,%s,'running','{}',%s::jsonb)",(run,WORKSPACE_A,project,icp,json.dumps({'actor_id':str(uid(subject))})))
+         for account,scope,scope_id in [(run_account,'run',run),(project_account,'project',project)]:
+&gt;         db.execute("INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)",(account,WORKSPACE_A,scope,scope_id))
+
+tests\test_work_queue_db.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1f044c7cc50&gt;
+query = "INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)"
+params = (UUID('c6edd023-9dc8-4857-93aa-88bb0cb8756b'), '11111111-1111-4111-8111-111111111111', 'project', 'a0000000-0000-4000-8000-000000000001')
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "uq_budget_accounts_scope_identity_period"
+E           DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:52.391386+00) already exists.
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UniqueViolation</error></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_actor_roles_project_and_no_side_effects[auth0|admin-a-7-7]" time="0.244"><error message="failed on setup with &quot;psycopg.errors.UniqueViolation: duplicate key value violates unique constraint &quot;uq_budget_accounts_scope_identity_period&quot;&#10;DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:52.628072+00) already exists.&quot;">buyer_api = &lt;starlette.testclient.TestClient object at 0x000001F044C7C350&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:59222/buyeros_test_api'
+
+    @pytest.fixture
+    def queue_case(buyer_api,seeded):
+     with buyer_api as api:
+      with psycopg.connect(seeded) as db:
+       db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,language_preferences,version) VALUES (%s,%s,'Queue B','Fixture','Offer','{US}','{en}',1) ON CONFLICT DO NOTHING",(PROJECT_A2,WORKSPACE_A))
+       for project,n,pending,failed,uncertain in [(PROJECT_A,5,2,2,1),(PROJECT_A2,7,3,3,2)]:
+        buyers=[];icp=uuid.uuid4()
+        db.execute("INSERT INTO icp_versions(id,workspace_id,project_id,number,content,content_hash) VALUES (%s,%s,%s,1,'{}','fixture-queue')",(icp,WORKSPACE_A,project))
+        for i in range(n):
+         company,buyer=uuid.uuid4(),uuid.uuid4();buyers.append(buyer)
+         db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES (%s,%s,'Fixture',%s)",(company,WORKSPACE_A,f'Queue {i}'))
+         db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id,owner_user_id) VALUES (%s,%s,%s,%s,%s)",(buyer,WORKSPACE_A,project,company,uid(OPERATOR) if i&lt;2 else None))
+         if i&lt;2:
+          db.execute("INSERT INTO fit_assessments(id,workspace_id,project_id,project_buyer_id,icp_version_id,evidence_set_hash,verdict,rationale,evidence_ids) VALUES (%s,%s,%s,%s,%s,'fixture','match','Fixture','[]')",(uuid.uuid4(),WORKSPACE_A,project,buyer,icp))
+         if i==0:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id) VALUES (%s,%s,%s,'accepted',%s)",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+         if i==1:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id,created_at) VALUES (%s,%s,%s,'rejected',%s,now()-interval '1 day'),(%s,%s,%s,'awaiting_review',%s,now())",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER),uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+        for i in range(pending+1):
+         draft,revision=uuid.uuid4(),uuid.uuid4()
+         content={'subject':f'Queue draft {i}','body':'Fixture body','language':'en','kind':'initial','icp_version_id':str(icp),'evidence_set_hash':'a'*64,'value_proposition_fact_ids':[]}
+         db.execute("INSERT INTO outreach_drafts(id,workspace_id,project_id,buyer_id,current_revision,state) VALUES (%s,%s,%s,%s,1,%s)",(draft,WORKSPACE_A,project,buyers[0],'review_requested' if i&lt;pending else 'draft'))
+         db.execute("INSERT INTO draft_revisions(id,workspace_id,draft_id,revision_number,content,content_hash) VALUES (%s,%s,%s,1,%s::jsonb,%s)",(revision,WORKSPACE_A,draft,json.dumps(content),'b'*64))
+        for subject,count in [(OPERATOR,failed),(REVIEWER,5 if project==PROJECT_A else 7)]:
+         for _ in range(count):
+          db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,blocked) VALUES (%s,%s,%s,%s,'bulk_mutation','reviewBuyers','{}','failed',1,1,1)",(uuid.uuid4(),WORKSPACE_A,project,uid(subject)))
+        for subject,count in [(OPERATOR,uncertain),(REVIEWER,4 if project==PROJECT_A else 6)]:
+         quote,job=uuid.uuid4(),uuid.uuid4()
+         db.execute("INSERT INTO enrichment_quotes(id,workspace_id,project_id,actor_id,purpose,selection,request_hash,quote_hash,price_version,max_cost,status) VALUES (%s,%s,%s,%s,'contact_research','{}','fixture','fixture','fixture',1,'consumed')",(quote,WORKSPACE_A,project,uid(subject)))
+         db.execute("INSERT INTO enrichment_jobs(id,workspace_id,quote_id,state) VALUES (%s,%s,%s,'unknown')",(job,WORKSPACE_A,quote))
+         for i in range(count+1):
+          db.execute("INSERT INTO provider_operations(id,workspace_id,job_id,intent_key,capability,input_hash,status,provider_ref,account_reference) VALUES (%s,%s,%s,%s,'contact_lookup','fixture',%s,'PRIVATE-RECEIPT','PRIVATE-ACCOUNT')",(uuid.uuid4(),WORKSPACE_A,job,str(uuid.uuid4()),'unknown' if i&lt;count else 'accepted'))
+        # A real durable research hold proves run/project/actor; no intent-key parsing.
+        for subject in [OPERATOR,REVIEWER]:
+         run,op,reservation,run_account,project_account=(uuid.uuid4() for _ in range(5))
+         db.execute("INSERT INTO search_runs(id,workspace_id,project_id,icp_version_id,status,limits,execution_snapshot) VALUES (%s,%s,%s,%s,'running','{}',%s::jsonb)",(run,WORKSPACE_A,project,icp,json.dumps({'actor_id':str(uid(subject))})))
+         for account,scope,scope_id in [(run_account,'run',run),(project_account,'project',project)]:
+&gt;         db.execute("INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)",(account,WORKSPACE_A,scope,scope_id))
+
+tests\test_work_queue_db.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1f044c466c0&gt;
+query = "INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)"
+params = (UUID('885436ac-db87-4c3f-a16c-718cd2c8255c'), '11111111-1111-4111-8111-111111111111', 'project', 'a0000000-0000-4000-8000-000000000001')
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "uq_budget_accounts_scope_identity_period"
+E           DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:52.628072+00) already exists.
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UniqueViolation</error></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_actor_roles_project_and_no_side_effects[auth0|viewer-a-0-0]" time="0.246"><error message="failed on setup with &quot;psycopg.errors.UniqueViolation: duplicate key value violates unique constraint &quot;uq_budget_accounts_scope_identity_period&quot;&#10;DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:52.877324+00) already exists.&quot;">buyer_api = &lt;starlette.testclient.TestClient object at 0x000001F044A24B90&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:59222/buyeros_test_api'
+
+    @pytest.fixture
+    def queue_case(buyer_api,seeded):
+     with buyer_api as api:
+      with psycopg.connect(seeded) as db:
+       db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,language_preferences,version) VALUES (%s,%s,'Queue B','Fixture','Offer','{US}','{en}',1) ON CONFLICT DO NOTHING",(PROJECT_A2,WORKSPACE_A))
+       for project,n,pending,failed,uncertain in [(PROJECT_A,5,2,2,1),(PROJECT_A2,7,3,3,2)]:
+        buyers=[];icp=uuid.uuid4()
+        db.execute("INSERT INTO icp_versions(id,workspace_id,project_id,number,content,content_hash) VALUES (%s,%s,%s,1,'{}','fixture-queue')",(icp,WORKSPACE_A,project))
+        for i in range(n):
+         company,buyer=uuid.uuid4(),uuid.uuid4();buyers.append(buyer)
+         db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES (%s,%s,'Fixture',%s)",(company,WORKSPACE_A,f'Queue {i}'))
+         db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id,owner_user_id) VALUES (%s,%s,%s,%s,%s)",(buyer,WORKSPACE_A,project,company,uid(OPERATOR) if i&lt;2 else None))
+         if i&lt;2:
+          db.execute("INSERT INTO fit_assessments(id,workspace_id,project_id,project_buyer_id,icp_version_id,evidence_set_hash,verdict,rationale,evidence_ids) VALUES (%s,%s,%s,%s,%s,'fixture','match','Fixture','[]')",(uuid.uuid4(),WORKSPACE_A,project,buyer,icp))
+         if i==0:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id) VALUES (%s,%s,%s,'accepted',%s)",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+         if i==1:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id,created_at) VALUES (%s,%s,%s,'rejected',%s,now()-interval '1 day'),(%s,%s,%s,'awaiting_review',%s,now())",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER),uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+        for i in range(pending+1):
+         draft,revision=uuid.uuid4(),uuid.uuid4()
+         content={'subject':f'Queue draft {i}','body':'Fixture body','language':'en','kind':'initial','icp_version_id':str(icp),'evidence_set_hash':'a'*64,'value_proposition_fact_ids':[]}
+         db.execute("INSERT INTO outreach_drafts(id,workspace_id,project_id,buyer_id,current_revision,state) VALUES (%s,%s,%s,%s,1,%s)",(draft,WORKSPACE_A,project,buyers[0],'review_requested' if i&lt;pending else 'draft'))
+         db.execute("INSERT INTO draft_revisions(id,workspace_id,draft_id,revision_number,content,content_hash) VALUES (%s,%s,%s,1,%s::jsonb,%s)",(revision,WORKSPACE_A,draft,json.dumps(content),'b'*64))
+        for subject,count in [(OPERATOR,failed),(REVIEWER,5 if project==PROJECT_A else 7)]:
+         for _ in range(count):
+          db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,blocked) VALUES (%s,%s,%s,%s,'bulk_mutation','reviewBuyers','{}','failed',1,1,1)",(uuid.uuid4(),WORKSPACE_A,project,uid(subject)))
+        for subject,count in [(OPERATOR,uncertain),(REVIEWER,4 if project==PROJECT_A else 6)]:
+         quote,job=uuid.uuid4(),uuid.uuid4()
+         db.execute("INSERT INTO enrichment_quotes(id,workspace_id,project_id,actor_id,purpose,selection,request_hash,quote_hash,price_version,max_cost,status) VALUES (%s,%s,%s,%s,'contact_research','{}','fixture','fixture','fixture',1,'consumed')",(quote,WORKSPACE_A,project,uid(subject)))
+         db.execute("INSERT INTO enrichment_jobs(id,workspace_id,quote_id,state) VALUES (%s,%s,%s,'unknown')",(job,WORKSPACE_A,quote))
+         for i in range(count+1):
+          db.execute("INSERT INTO provider_operations(id,workspace_id,job_id,intent_key,capability,input_hash,status,provider_ref,account_reference) VALUES (%s,%s,%s,%s,'contact_lookup','fixture',%s,'PRIVATE-RECEIPT','PRIVATE-ACCOUNT')",(uuid.uuid4(),WORKSPACE_A,job,str(uuid.uuid4()),'unknown' if i&lt;count else 'accepted'))
+        # A real durable research hold proves run/project/actor; no intent-key parsing.
+        for subject in [OPERATOR,REVIEWER]:
+         run,op,reservation,run_account,project_account=(uuid.uuid4() for _ in range(5))
+         db.execute("INSERT INTO search_runs(id,workspace_id,project_id,icp_version_id,status,limits,execution_snapshot) VALUES (%s,%s,%s,%s,'running','{}',%s::jsonb)",(run,WORKSPACE_A,project,icp,json.dumps({'actor_id':str(uid(subject))})))
+         for account,scope,scope_id in [(run_account,'run',run),(project_account,'project',project)]:
+&gt;         db.execute("INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)",(account,WORKSPACE_A,scope,scope_id))
+
+tests\test_work_queue_db.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1f04455f590&gt;
+query = "INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)"
+params = (UUID('74de9a0c-03a8-4d70-92c4-328843036a67'), '11111111-1111-4111-8111-111111111111', 'project', 'a0000000-0000-4000-8000-000000000001')
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "uq_budget_accounts_scope_identity_period"
+E           DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:52.877324+00) already exists.
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UniqueViolation</error></testcase><testcase classname="tests.test_work_queue_db" name="test_work_queue_filters_are_typed_and_receipts_bounded" time="0.765"><error message="failed on setup with &quot;psycopg.errors.UniqueViolation: duplicate key value violates unique constraint &quot;uq_budget_accounts_scope_identity_period&quot;&#10;DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:53.167698+00) already exists.&quot;">buyer_api = &lt;starlette.testclient.TestClient object at 0x000001F040E08BF0&gt;
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:59222/buyeros_test_api'
+
+    @pytest.fixture
+    def queue_case(buyer_api,seeded):
+     with buyer_api as api:
+      with psycopg.connect(seeded) as db:
+       db.execute("INSERT INTO projects(id,workspace_id,name,company_name,offer,markets,language_preferences,version) VALUES (%s,%s,'Queue B','Fixture','Offer','{US}','{en}',1) ON CONFLICT DO NOTHING",(PROJECT_A2,WORKSPACE_A))
+       for project,n,pending,failed,uncertain in [(PROJECT_A,5,2,2,1),(PROJECT_A2,7,3,3,2)]:
+        buyers=[];icp=uuid.uuid4()
+        db.execute("INSERT INTO icp_versions(id,workspace_id,project_id,number,content,content_hash) VALUES (%s,%s,%s,1,'{}','fixture-queue')",(icp,WORKSPACE_A,project))
+        for i in range(n):
+         company,buyer=uuid.uuid4(),uuid.uuid4();buyers.append(buyer)
+         db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES (%s,%s,'Fixture',%s)",(company,WORKSPACE_A,f'Queue {i}'))
+         db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id,owner_user_id) VALUES (%s,%s,%s,%s,%s)",(buyer,WORKSPACE_A,project,company,uid(OPERATOR) if i&lt;2 else None))
+         if i&lt;2:
+          db.execute("INSERT INTO fit_assessments(id,workspace_id,project_id,project_buyer_id,icp_version_id,evidence_set_hash,verdict,rationale,evidence_ids) VALUES (%s,%s,%s,%s,%s,'fixture','match','Fixture','[]')",(uuid.uuid4(),WORKSPACE_A,project,buyer,icp))
+         if i==0:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id) VALUES (%s,%s,%s,'accepted',%s)",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+         if i==1:
+          db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id,created_at) VALUES (%s,%s,%s,'rejected',%s,now()-interval '1 day'),(%s,%s,%s,'awaiting_review',%s,now())",(uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER),uuid.uuid4(),WORKSPACE_A,buyer,uid(REVIEWER)))
+        for i in range(pending+1):
+         draft,revision=uuid.uuid4(),uuid.uuid4()
+         content={'subject':f'Queue draft {i}','body':'Fixture body','language':'en','kind':'initial','icp_version_id':str(icp),'evidence_set_hash':'a'*64,'value_proposition_fact_ids':[]}
+         db.execute("INSERT INTO outreach_drafts(id,workspace_id,project_id,buyer_id,current_revision,state) VALUES (%s,%s,%s,%s,1,%s)",(draft,WORKSPACE_A,project,buyers[0],'review_requested' if i&lt;pending else 'draft'))
+         db.execute("INSERT INTO draft_revisions(id,workspace_id,draft_id,revision_number,content,content_hash) VALUES (%s,%s,%s,1,%s::jsonb,%s)",(revision,WORKSPACE_A,draft,json.dumps(content),'b'*64))
+        for subject,count in [(OPERATOR,failed),(REVIEWER,5 if project==PROJECT_A else 7)]:
+         for _ in range(count):
+          db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,command,status,requested,processed,blocked) VALUES (%s,%s,%s,%s,'bulk_mutation','reviewBuyers','{}','failed',1,1,1)",(uuid.uuid4(),WORKSPACE_A,project,uid(subject)))
+        for subject,count in [(OPERATOR,uncertain),(REVIEWER,4 if project==PROJECT_A else 6)]:
+         quote,job=uuid.uuid4(),uuid.uuid4()
+         db.execute("INSERT INTO enrichment_quotes(id,workspace_id,project_id,actor_id,purpose,selection,request_hash,quote_hash,price_version,max_cost,status) VALUES (%s,%s,%s,%s,'contact_research','{}','fixture','fixture','fixture',1,'consumed')",(quote,WORKSPACE_A,project,uid(subject)))
+         db.execute("INSERT INTO enrichment_jobs(id,workspace_id,quote_id,state) VALUES (%s,%s,%s,'unknown')",(job,WORKSPACE_A,quote))
+         for i in range(count+1):
+          db.execute("INSERT INTO provider_operations(id,workspace_id,job_id,intent_key,capability,input_hash,status,provider_ref,account_reference) VALUES (%s,%s,%s,%s,'contact_lookup','fixture',%s,'PRIVATE-RECEIPT','PRIVATE-ACCOUNT')",(uuid.uuid4(),WORKSPACE_A,job,str(uuid.uuid4()),'unknown' if i&lt;count else 'accepted'))
+        # A real durable research hold proves run/project/actor; no intent-key parsing.
+        for subject in [OPERATOR,REVIEWER]:
+         run,op,reservation,run_account,project_account=(uuid.uuid4() for _ in range(5))
+         db.execute("INSERT INTO search_runs(id,workspace_id,project_id,icp_version_id,status,limits,execution_snapshot) VALUES (%s,%s,%s,%s,'running','{}',%s::jsonb)",(run,WORKSPACE_A,project,icp,json.dumps({'actor_id':str(uid(subject))})))
+         for account,scope,scope_id in [(run_account,'run',run),(project_account,'project',project)]:
+&gt;         db.execute("INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)",(account,WORKSPACE_A,scope,scope_id))
+
+tests\test_work_queue_db.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;psycopg.Connection [BAD] at 0x1f044c45550&gt;
+query = "INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES (%s,%s,%s,%s,'all','USD','fixture',now(),now()+interval '1 day',10,0)"
+params = (UUID('9f2989c8-d795-4ae2-83b7-c25f4cd95aae'), '11111111-1111-4111-8111-111111111111', 'project', 'a0000000-0000-4000-8000-000000000001')
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool = False,
+    ) -&gt; Cursor[Row]:
+        """Execute a query and return a cursor to read its results."""
+        try:
+            cur = self.cursor()
+            if binary:
+                cur.format = BINARY
+    
+            if isinstance(query, Template):
+                if params is not None:
+                    raise TypeError(
+                        "'execute()' with string template query doesn't support parameters"
+                    )
+                return cur.execute(query, prepare=prepare)
+            else:
+                return cur.execute(query, params, prepare=prepare)
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "uq_budget_accounts_scope_identity_period"
+E           DETAIL:  Key (workspace_id, scope, scope_id, category, currency, period_start)=(11111111-1111-4111-8111-111111111111, project, a0000000-0000-4000-8000-000000000001, all, USD, 2026-10-06 21:00:53.167698+00) already exists.
+
+.venv\Lib\site-packages\psycopg\connection.py:300: UniqueViolation</error></testcase></testsuite></testsuites>

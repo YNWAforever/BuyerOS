@@ -1,0 +1,138 @@
+<testsuites id="" name="" tests="24" failures="1" skipped="0" errors="1" time="359.530328">
+<testsuite name="audit-draft-dirty.spec.ts" timestamp="2026-10-06T21:30:30.696Z" hostname="" tests="10" failures="0" skipped="0" time="56.05" errors="0">
+<testcase name="D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="5.983">
+</testcase>
+<testcase name="D02 Open draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="5.068">
+</testcase>
+<testcase name="D02 Refresh job Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="6.314">
+</testcase>
+<testcase name="D02 Save is awaited before opening another draft and persists one revision" classname="audit-draft-dirty.spec.ts" time="5.27">
+</testcase>
+<testcase name="D02 failed Save 401 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="4.79">
+</testcase>
+<testcase name="D02 failed Save 412 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.745">
+</testcase>
+<testcase name="D02 failed Save 503 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="4.462">
+</testcase>
+<testcase name="D02 Refresh does not overwrite the unsaved buffer before a decision" classname="audit-draft-dirty.spec.ts" time="7.255">
+</testcase>
+<testcase name="D02 delayed refresh cannot materialize a draft into a new project scope" classname="audit-draft-dirty.spec.ts" time="5.977">
+</testcase>
+<testcase name="D02 zh-HK mobile dialog preserves content and keeps all choices visible" classname="audit-draft-dirty.spec.ts" time="5.186">
+</testcase>
+</testsuite>
+<testsuite name="audit-draft-reground.spec.ts" timestamp="2026-10-06T21:30:30.696Z" hostname="" tests="5" failures="0" skipped="0" time="64.686" errors="0">
+<testcase name="D01/D03 manual Unicode draft exposes a source review and operator cannot attest" classname="audit-draft-reground.spec.ts" time="10.094">
+</testcase>
+<testcase name="D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export" classname="audit-draft-reground.spec.ts" time="14.432">
+</testcase>
+<testcase name="D03 zh-HK mobile code-point split reads every source and exports exact Unicode message" classname="audit-draft-reground.spec.ts" time="11.665">
+</testcase>
+<testcase name="U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result" classname="audit-draft-reground.spec.ts" time="14.501">
+</testcase>
+<testcase name="C61T-10 keyboard text selection binds emoji and combining marks to exact server code-point ranges" classname="audit-draft-reground.spec.ts" time="13.994">
+</testcase>
+</testsuite>
+<testsuite name="audit-job-scope.spec.ts" timestamp="2026-10-06T21:30:30.696Z" hostname="" tests="6" failures="1" skipped="0" time="41.794" errors="0">
+<testcase name="U15 project A0 B5; card and failed list share scope; explicit workspace5" classname="audit-job-scope.spec.ts" time="7.118">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toHaveText(expected) failed" type="expect.toHaveText">
+<![CDATA[  audit-job-scope.spec.ts:15:1 › U15 project A0 B5; card and failed list share scope; explicit workspace5 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('region', { name: 'Daily work queue' }).locator('.activity').filter({ has: getByText('Failed jobs', { exact: true }) }).locator('p')
+    Expected: "0"
+    Error: strict mode violation: getByRole('region', { name: 'Daily work queue' }).locator('.activity').filter({ has: getByText('Failed jobs', { exact: true }) }).locator('p') resolved to 2 elements:
+        1) <p>…</p> aka getByRole('paragraph').filter({ hasText: '0' }).nth(2)
+        2) <p>status: failed</p> aka getByText('status: failed')
+
+    Call log:
+      - Expect "toHaveText" getByRole('region', { name: 'Daily work queue' }).locator('.activity').filter({ has: getByText('Failed jobs', { exact: true }) }).locator('p') with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Daily work queue' }).locator('.activity').filter({ has: getByText('Failed jobs', { exact: true }) }).locator('p')
+
+
+      14 | test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
+      15 | test('U15 project A0 B5; card and failed list share scope; explicit workspace5',async({page})=>{
+    > 16 |  const seeded=await seed();await login(page);const card=failedCard(page);await expect(card.locator('p')).toHaveText('0');
+         |                                                                                                          ^
+      17 |  await card.getByRole('button',{name:'Open',exact:true}).click();
+      18 |  const jobs=page.getByRole('region',{name:'Bulk jobs'});await expect(jobs).toContainText('0 jobs in scope');await expect(page).toHaveURL(/job_scope=project/);await expect(page).toHaveURL(/job_status=failed/);
+      19 |  await page.getByRole('combobox',{name:'Project',exact:true}).selectOption(projectB);await expect(jobs).toContainText('5 jobs in scope');
+        at C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-job-scope.spec.ts:16:106
+
+    Error Context: ..\..\test-results\audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\audit-job-scope-U15-projec-9c2a5-e-scope-explicit-workspace5\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="U15 workspace view remains actor-bound, other actor detail denied; admin read sees all" classname="audit-job-scope.spec.ts" time="5.123">
+</testcase>
+<testcase name="U15 actual 21 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="8.321">
+</testcase>
+<testcase name="U15 actual 101 job list fully pages20; scope resets offset and old rows" classname="audit-job-scope.spec.ts" time="6.299">
+</testcase>
+<testcase name="U15 held B list and count cannot overwrite newer A-B-A generation" classname="audit-job-scope.spec.ts" time="7.44">
+</testcase>
+<testcase name="U15 zh-HK390 workspace label, filter URL/reload reauth and read failure recovery" classname="audit-job-scope.spec.ts" time="7.493">
+</testcase>
+</testsuite>
+<testsuite name="work-queue-counts.spec.ts" timestamp="2026-10-06T21:30:30.696Z" hostname="" tests="3" failures="0" skipped="0" time="137.297" errors="1">
+<testcase name="U15/C61T-09 project A en desktop cards equal each real filtered list" classname="work-queue-counts.spec.ts" time="8.448">
+</testcase>
+<testcase name="U15/C61T-09 project B zh-HK mobile cards equal each real filtered list" classname="work-queue-counts.spec.ts" time="120.125">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\work-queue-counts-U15-C61T-07f3d-ual-each-real-filtered-list\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\work-queue-counts-U15-C61T-07f3d-ual-each-real-filtered-list\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 120000ms exceeded." type="Error">
+<![CDATA[  work-queue-counts.spec.ts:12:26 › U15/C61T-09 project B zh-HK mobile cards equal each real filtered list 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: locator.click: Test timeout of 120000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: /^(Overview|概覽)$/ })
+
+
+      25 |   if(kind==='unknown_acceptance'){expect(url.searchParams.get('acceptance')).toBe('unknown');expect(data.items.every((row:{status:string})=>row.status==='unknown')).toBe(true);await expect(page.getByRole('region',{name:/^(Bulk jobs|批量工作)$/,exact:true})).toHaveCount(0);}
+      26 |   observations.push({kind,total,response_total:data.total,query:url.search});
+    > 27 |   await page.getByRole('button',{name:/^(Overview|概覽)$/,exact:true}).click();await counts(page,selected);
+         |                                                                      ^
+      28 |  }
+      29 |  await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+      30 |  await writeFile(`test-results/c61-queue-${index}-counts.json`,JSON.stringify({fixture_only:true,selected,observations},null,2));
+        at C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\work-queue-counts.spec.ts:27:70
+
+    Error Context: ..\..\test-results\audit-fixes\work-queue-counts-U15-C61T-07f3d-ual-each-real-filtered-list\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\work-queue-counts-U15-C61T-07f3d-ual-each-real-filtered-list\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\test-results\audit-fixes\work-queue-counts-U15-C61T-07f3d-ual-each-real-filtered-list\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="C61T-09 held project summary cannot overwrite newer scope; failed refresh stays unavailable" classname="work-queue-counts.spec.ts" time="8.724">
+</testcase>
+</testsuite>
+</testsuites>

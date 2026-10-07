@@ -1,0 +1,11 @@
+✔ B05 token renewal and route remount retain lost-response key; double start shares work (25.7966ms)
+✔ B06 full normalized payload and actor/scope define intent; generation and key order do not (1.5266ms)
+✔ B05 A-B-A rejects late result but reuses durable key; explicit reset creates new intent (5.1284ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1017.9812

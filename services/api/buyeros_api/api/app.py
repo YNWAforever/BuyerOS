@@ -12,6 +12,7 @@ from .routes.audit import router as audit_router
 from .routes.buyers import router as buyers_router
 from .routes.budgets import router as budgets_router
 from .routes.buyer_management import router as buyer_management_router
+from .routes.bulk_manifests import router as bulk_manifests_router
 from .routes.documents import router as documents_router
 from .routes.drafts import router as drafts_router
 from .routes.exports import router as exports_router
@@ -19,6 +20,7 @@ from .routes.enrichment import router as enrichment_router
 from .routes.health import router as health_router
 from .routes.icp import router as icp_router
 from .routes.jobs import router as jobs_router
+from .routes.work_queue import router as work_queue_router
 from .routes.memberships import router as memberships_router
 from .routes.outcomes import router as outcomes_router
 from .routes.projects import router as projects_router
@@ -61,6 +63,7 @@ def create_app() -> FastAPI:
     app.include_router(icp_router)
     app.include_router(buyers_router)
     app.include_router(buyer_management_router)
+    app.include_router(bulk_manifests_router)
     app.include_router(documents_router)
     app.include_router(drafts_router)
     app.include_router(exports_router)
@@ -70,6 +73,7 @@ def create_app() -> FastAPI:
     app.include_router(policy_router)
     app.include_router(provider_callbacks_router)
     app.include_router(jobs_router)
+    app.include_router(work_queue_router)
     app.include_router(reviews_router)
     app.include_router(runs_router)
     app.include_router(run_detail_router)

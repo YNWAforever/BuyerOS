@@ -1,5 +1,6 @@
 'use client';
 import {useEffect,useState} from 'react';
+import {loadWorkQueue,workQueueLink,type WorkQueue,type WorkQueueItem} from '@/services/live/work-queue';
 import type {Availability} from '@/services/live/mode';
 import {loadLive} from '@/services/live/read';
 import {toWorkspaces,MapError,type LiveWorkspace} from '@/services/live/mapping';
@@ -62,30 +63,28 @@ export function LiveOverview({t=(value:string)=>value}:{t?:(value:string)=>strin
 
 /** Navigation cards use exactly the same server filters as Results and Operations. */
 export function LiveWorkQueue({t,onNavigate}:{t:(value:string)=>string;onNavigate:(path:string)=>void}){
-  const {client,session}=useWorkspaceSession(),scope=useSessionSnapshot().scope;
-  const [failed,setFailed]=useState<number|null>(null),[error,setError]=useState('');
-  const [asOf]=useState(()=>new Date().toISOString());
+  const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot(),scope=snapshot.scope;
+  const [result,setResult]=useState<{identity:string;value?:WorkQueue;error?:string}>(),[reload,setReload]=useState(0);
+  const current=result?.identity===snapshot.identity?result:undefined;
   useEffect(()=>{
-    if(!scope.workspace||!scope.project)return;
-    const own=new AbortController(),identity=session.identity(),token=session.token();if(!token)return;
-    void client.request<{total:number}>({path:`/v1/workspaces/${encodeURIComponent(scope.workspace)}/jobs?status=failed&offset=0&limit=1`,
-      token,scope:identity,signal:AbortSignal.any([own.signal,session.controller().signal])})
-      .then(value=>{if(!own.signal.aborted&&session.isCurrent(identity))setFailed(value.total);})
-      .catch(cause=>{if(!own.signal.aborted&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));});
+    if(!scope.workspace||!scope.project||!session.token())return;
+    const own=new AbortController(),identity=session.identity();setResult({identity});
+    void loadWorkQueue(client,session,own.signal)
+      .then(value=>{if(!own.signal.aborted&&session.isCurrent(identity))setResult({identity,value});})
+      .catch(cause=>{if(!own.signal.aborted&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled))setResult({identity,error:describeLiveError(cause)});});
     return()=>own.abort();
-  },[client,session,scope.workspace,scope.project]);
-  const cards:[string,string,string][]=[
-    ['Awaiting review','/app/results?review=awaiting_review',''],
-    ['Pending approvals','/app/operations',''],
-    ['Unassigned buyers','/app/results?queue=unassigned',''],
-    ['Failed jobs','/app/operations?job_status=failed',failed===null?'—':String(failed)],
-    ['Unknown fit','/app/results?queue=unknown',''],
-    ['Unknown provider acceptance','/app/operations',''],
-  ];
-  return <section className="panel" aria-label={t('Daily work queue')}><h2>{t('Daily work queue')}</h2>
-    <p>{t('Project')}: <code>{scope.project}</code> · {t('As of')}: {asOf?new Date(asOf).toLocaleString(): '—'}</p>
-    <div className="grid two-col">{cards.map(([label,path,count])=><div className="activity" key={label}>
-      <div><b>{t(label)}</b>{count&&<p>{count}</p>}</div><button type="button" onClick={()=>onNavigate(path)}>{t('Open')}</button></div>)}</div>
-    {error&&<p role="alert">{error}</p>}
+  },[client,session,scope.workspace,scope.project,snapshot.identity,reload]);
+  const cards:[WorkQueueItem['kind'],string][]=[['awaiting_review','Awaiting review'],['pending_approval','Pending approvals'],['unassigned','Unassigned buyers'],['failed_job','Failed jobs'],['unknown_fit','Unknown fit'],['unknown_acceptance','Unknown provider acceptance']];
+  return <section className="panel" aria-label={t('Daily work queue')} aria-busy={Boolean(scope.project&&!current?.value&&!current?.error)}><h2>{t('Daily work queue')}</h2>
+    <p>{t('As of')}: {current?.value?<time dateTime={current.value.as_of}>{new Date(current.value.as_of).toLocaleString()}</time>:'—'}</p>
+    <details><summary>{t('Technical details')}</summary><p>{t('Project')}: <code>{scope.project}</code></p></details>
+    <div className="grid two-col">{cards.map(([kind,label])=>{
+      const item=current?.value?.items.find(row=>row.kind===kind);
+      return <div className="activity" key={kind} data-work-queue-kind={kind}><div><b>{t(label)}</b><p><output aria-label={t('Count')}>{item?.count??'—'}</output></p>
+      {item&&<p>{Object.entries(item.filters).map(([filter,value])=>`${t(filter)}: ${t(value)}`).join(' · ')}</p>}</div>
+      <button type="button" disabled={!item||!scope.workspace||!scope.project} onClick={()=>{if(item&&scope.workspace&&scope.project)onNavigate(workQueueLink(item,{workspaceId:scope.workspace,projectId:scope.project}));}}>{t('Open')}</button></div>;
+    })}</div>
+    {current?.error&&<p role="alert">{current.error}</p>}
+    <button type="button" disabled={!scope.workspace||!scope.project} onClick={()=>setReload(value=>value+1)}>{t('Refresh work queue')}</button>
   </section>;
 }
