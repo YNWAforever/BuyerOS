@@ -1,6 +1,7 @@
 """C61-31 bounded read-only runtime inspection. No migration or identity writes."""
 from datetime import datetime, timezone
 import hashlib
+import json
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
@@ -73,6 +74,7 @@ class SchemaCheck(ClosedModel):
 class SchemaReadiness(ClosedModel):
     schema_name: Literal['buyeros.schema-readiness.v1'] = Field(default='buyeros.schema-readiness.v1', alias='schema')
     source_sha: str
+    contract_sha256: str = Field(pattern=r'^[0-9a-f]{64}$')
     checked_at: datetime
     target_match: StrictBool
     observed_heads: list[str]
@@ -91,6 +93,10 @@ async def inspect_schema(connection: AsyncConnection, expected: SchemaContract) 
     """
     if connection.in_transaction():
         raise ValueError('schema probe requires an idle connection')
+    # Snapshot nested lists/maps too: frozen BaseModel alone is shallow.
+    expected=SchemaContract.model_validate(expected.model_dump(mode='json'))
+    contract_sha256=hashlib.sha256(json.dumps(expected.model_dump(mode='json',by_alias=True),
+        sort_keys=True,separators=(',',':')).encode()).hexdigest()
     checks: list[SchemaCheck] = []
     heads: list[str] = []
     target_match = False
@@ -114,6 +120,7 @@ async def inspect_schema(connection: AsyncConnection, expected: SchemaContract) 
         check('runtime_role_privileged', not privileged)
         version_oid=await scalar("SELECT to_regclass('public.alembic_version')::oid")
         readable=version_oid and await scalar("SELECT has_column_privilege(current_user,:oid,'version_num','SELECT')",{'oid':version_oid})
+        check('version_metadata_unreadable',bool(readable))
         if readable:
             heads=sorted((await connection.execute(text('SELECT version_num FROM public.alembic_version LIMIT 101'))).scalars().all())
         check('schema_head_unknown', bool(heads) and len(heads)==1 and heads[0] in expected.compatible_heads)
@@ -159,6 +166,6 @@ async def inspect_schema(connection: AsyncConnection, expected: SchemaContract) 
     finally:
         await transaction.rollback()
     blockers=[c.code for c in checks if not c.passed]
-    return SchemaReadiness(source_sha=expected.source_sha,checked_at=datetime.now(timezone.utc),
+    return SchemaReadiness(source_sha=expected.source_sha,contract_sha256=contract_sha256,checked_at=datetime.now(timezone.utc),
         target_match=target_match,observed_heads=heads,compatible=not blockers,
         checks=checks,blockers=blockers,evidence_mode=expected.evidence_mode)

@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import re
 
-MANIFEST_KEYS={'schema','source_sha','tree_sha','configuration_sha256','db_target_sha256',
+MANIFEST_KEYS={'schema','source_sha','tree_sha','configuration_sha256','db_target_sha256','schema_contract_sha256',
     'frontend_artifact','api_artifact','worker_artifact','required_heads','ci_run_id',
     'required_ci_jobs','candidate_deployment_id','receipt_max_age_seconds','rollback_artifacts','activation'}
 COMMON_KEYS={'source_sha','tree_sha','configuration_sha256','db_target_sha256','deployment_id','checked_at','evidence_mode','data'}
@@ -27,7 +27,7 @@ def _time(value):
 
 def _manifest_valid(manifest):
     if type(manifest) is not dict or set(manifest)!=MANIFEST_KEYS or manifest['schema']!='buyeros.release-manifest.v1':return False
-    for key,length in [('source_sha',40),('tree_sha',40),('configuration_sha256',64),('db_target_sha256',64)]:
+    for key,length in [('source_sha',40),('tree_sha',40),('configuration_sha256',64),('db_target_sha256',64),('schema_contract_sha256',64)]:
         if type(manifest[key]) is not str or not re.fullmatch('[0-9a-f]{'+str(length)+'}',manifest[key]):return False
     if type(manifest['ci_run_id']) is not int or manifest['ci_run_id']<=0:return False
     if type(manifest['receipt_max_age_seconds']) is not int or not 1<=manifest['receipt_max_age_seconds']<=900:return False
@@ -37,6 +37,8 @@ def _manifest_valid(manifest):
     if type(manifest['candidate_deployment_id']) is not str or not re.fullmatch(r'dpl_[A-Za-z0-9_-]+',manifest['candidate_deployment_id']):return False
     if type(manifest['rollback_artifacts']) is not dict or set(manifest['rollback_artifacts'])!={'frontend','api'}:return False
     if type(manifest['activation']) is not dict or set(manifest['activation'])!={'auth','providers','worker','delivery'}:return False
+    if manifest['activation']['auth'] not in ('auth0','dual','neon'):return False
+    if any(manifest['activation'][key] not in ('disabled','active') for key in ('providers','worker','delivery')):return False
     if set(manifest['required_ci_jobs'])!=REQUIRED_CI_JOBS:return False
     return True
 
@@ -52,7 +54,9 @@ def evaluate_release(manifest: dict, receipts: dict, gate: str) -> dict:
     blockers=result['blockers'];now=datetime.now(timezone.utc);items=receipts['items']
     def require(passed,code):
         if passed is not True:blockers.append(code)
-    for name in GATES[gate]:
+    required_names=set(GATES[gate])
+    if manifest['activation']['auth'] in ('dual','neon'):required_names.add('neon')
+    for name in required_names|set(items):
         if name not in items:
             blockers.append('receipt_missing:'+name);continue
         receipt=items[name]
@@ -82,12 +86,18 @@ def evaluate_release(manifest: dict, receipts: dict, gate: str) -> dict:
         require(type(required) is str and bool(required) and artifacts.get(key)==required,'artifact_missing_or_mismatched:'+key)
     schema=data('schema')
     require(schema.get('schema')=='buyeros.schema-readiness.v1' and schema.get('source_sha')==manifest['source_sha'],'schema_receipt_source_mismatch')
+    require(schema.get('contract_sha256')==manifest['schema_contract_sha256'],'schema_contract_mismatch')
     require(schema.get('compatible') is True and schema.get('target_match') is True and schema.get('blockers')==[],'schema_incompatible_or_target_unknown')
     require(schema.get('evidence_mode') in ('candidate_runtime','production_readback'),'schema_not_live')
     require(schema.get('observed_heads')==manifest['required_heads'],'schema_head_mismatch')
     checks=schema.get('checks')
     required_checks={'target_unproven_or_mismatched','runtime_role_mismatch','runtime_role_privileged','schema_head_unknown','required_revision_unproven',
         'relation_missing:public.user_identities','function_missing_or_denied:public.buyeros_workspace_directory(uuid,bigint,integer)'}
+    required_checks|={'version_metadata_unreadable','schema_usage_missing:public','relation_missing:public.memberships',
+        'relation_not_visible:public.user_identities','relation_not_visible:public.memberships',
+        'relation_columns_missing:public.user_identities','relation_columns_missing:public.memberships',
+        'privilege_missing:public.user_identities:SELECT','rls_not_forced:public.memberships',
+        'function_contract_mismatch:public.buyeros_workspace_directory(uuid,bigint,integer)'}
     valid_checks=type(checks) is list and bool(checks) and all(type(c) is dict and set(c)=={'code','passed'} and type(c['code']) is str and c['passed'] is True for c in checks)
     codes=[c['code'] for c in checks] if valid_checks else []
     require(valid_checks and len(codes)==len(set(codes)) and required_checks<=set(codes),'schema_required_checks_missing_or_failed')
@@ -102,6 +112,14 @@ def evaluate_release(manifest: dict, receipts: dict, gate: str) -> dict:
         artifact=manifest['rollback_artifacts'][key]
         require(type(artifact) is str and bool(artifact) and rollback.get(key)==artifact,'rollback_artifact_missing_or_mismatched:'+key)
     require(rollback.get('compatible') is True,'rollback_not_verified')
+    if manifest['activation']['auth'] in ('dual','neon'):
+        require(data('neon').get('accepted') is True,'neon_activation_acceptance_missing')
+        require(data('neon').get('neon_only_rollback_verified') is True,'neon_only_rollback_missing')
+    if gate=='workspace':
+        for capability in ('providers','worker','delivery'):
+            require(manifest['activation'][capability]=='disabled','activation_exceeds_workspace_gate:'+capability)
+    if gate=='research_export':
+        require(manifest['activation']['delivery']=='disabled','delivery_requires_native_send_gate')
     if gate!='workspace':
         require(manifest['activation']['auth']=='neon','neon_not_active')
         require(manifest['activation']['providers']=='active','providers_not_active')

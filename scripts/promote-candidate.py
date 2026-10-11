@@ -20,7 +20,7 @@ def promote(manifest,receipts,gate,*,attestation_verified,metadata,execute,promo
     evaluation=gate_module().evaluate_release(manifest,receipts,gate)
     blockers=list(evaluation['blockers'])
     if attestation_verified is not True:blockers.append('trusted_runtime_attestation_missing')
-    for key in ['auto_main_disabled','protected_main','protected_environment','ci_completed']:
+    for key in ['auto_main_disabled','protected_main','protected_environment','ci_completed','project_match','team_match','repository_match']:
         if metadata.get(key) is not True:blockers.append('remote_control_unverified:'+key)
     if metadata.get('source_sha')!=manifest.get('source_sha'):blockers.append('remote_source_mismatch')
     if metadata.get('deployment_id')!=manifest.get('candidate_deployment_id'):blockers.append('remote_deployment_mismatch')
@@ -51,8 +51,16 @@ def remote_metadata(manifest):
     environment=github('environments/'+ENVIRONMENT)
     run=github('actions/runs/'+str(manifest['ci_run_id']))
     jobs=github('actions/runs/'+str(manifest['ci_run_id'])+'/jobs?per_page=100')
-    deployment=vercel('/v13/deployments/'+manifest['candidate_deployment_id'])
-    project=vercel('/v9/projects/buyer-os')
+    project_id=os.environ.get('VERCEL_PROJECT_ID','');team_id=os.environ.get('VERCEL_ORG_ID','')
+    if not project_id.startswith('prj_') or not team_id.startswith('team_'):raise ValueError('exact project/team configuration absent')
+    deployment=vercel('/v13/deployments/'+manifest['candidate_deployment_id']+'?teamId='+team_id)
+    project=vercel('/v9/projects/'+project_id+'?teamId='+team_id)
+    project_match=project.get('id')==project_id==deployment.get('projectId')
+    team_match=project.get('accountId')==team_id==deployment.get('ownerId')
+    link=project.get('link',{});meta=deployment.get('meta',{})
+    repository_match=(link.get('type')=='github' and link.get('org')+'/'+link.get('repo')==REPOSITORY
+        and meta.get('githubCommitOrg')==link.get('org') and meta.get('githubCommitRepo')==link.get('repo')
+        and bool(link.get('repoId')) and str(meta.get('githubCommitRepoId'))==str(link['repoId']))
     rules=environment.get('protection_rules',[])
     reviewed=any(rule.get('type')=='required_reviewers' and rule.get('reviewers') and rule.get('prevent_self_review') is True for rule in rules)
     status_checks=protection.get('required_status_checks',{})
@@ -64,6 +72,7 @@ def remote_metadata(manifest):
     job_rows=jobs.get('jobs',[])
     complete_inventory=jobs.get('total_count')==len(job_rows) and len({row['name'] for row in job_rows})==len(job_rows)
     return {'source_sha':deployment.get('meta',{}).get('githubCommitSha'),'deployment_id':deployment.get('id'),
+        'project_match':project_match,'team_match':team_match,'repository_match':repository_match,
         'target':deployment.get('target'),'ready_state':deployment.get('readyState'),
         'auto_main_disabled':main_disabled,'protected_main':protected_main,
         'protected_environment':reviewed and environment.get('deployment_branch_policy',{}).get('protected_branches') is True,

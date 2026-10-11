@@ -19,7 +19,7 @@ def evaluate(manifest,receipts,gate='workspace'):
 
 def candidate():
     manifest={'schema':'buyeros.release-manifest.v1','source_sha':'a'*40,'tree_sha':'b'*40,
-        'configuration_sha256':'c'*64,'db_target_sha256':'d'*64,
+        'configuration_sha256':'c'*64,'db_target_sha256':'d'*64,'schema_contract_sha256':'e'*64,
         'frontend_artifact':'frontend-a','api_artifact':'api-a','worker_artifact':None,
         'required_heads':['0050_c61_delivery_authorizations'],'ci_run_id':123,
         'required_ci_jobs':['frontend','api','worker','browser-smoke','browser-continuity','browser-zoom',
@@ -37,7 +37,7 @@ def candidate():
         'ci':receipt({'run_id':123,'head_sha':'a'*40,'status':'completed','conclusion':'success',
                       'jobs':{name:'success' for name in manifest['required_ci_jobs']}}),
         'artifacts':receipt({'frontend':'frontend-a','api':'api-a','worker':None}),
-        'schema':receipt({'schema':'buyeros.schema-readiness.v1','source_sha':'a'*40,'checked_at':common['checked_at'],
+        'schema':receipt({'schema':'buyeros.schema-readiness.v1','source_sha':'a'*40,'contract_sha256':'e'*64,'checked_at':common['checked_at'],
              'target_match':True,'compatible':True,'observed_heads':['0050_c61_delivery_authorizations'],
              'checks':[{'code':'target_unproven_or_mismatched','passed':True},{'code':'runtime_role_mismatch','passed':True},
                        {'code':'runtime_role_privileged','passed':True},{'code':'schema_head_unknown','passed':True},
@@ -48,6 +48,12 @@ def candidate():
         'workspace_canary':receipt({'workspace_status':200,'correct_roles':True,'correct_project':True,
               'empty_membership_verified':True,'revoked_denied':True,'foreign_tenant_denied':True,'reload_retry_verified':True}),
         'rollback':receipt({'frontend':'frontend-compatible','api':'api-compatible','compatible':True})}}
+    additional=['version_metadata_unreadable','schema_usage_missing:public','relation_missing:public.memberships',
+        'relation_not_visible:public.user_identities','relation_not_visible:public.memberships',
+        'relation_columns_missing:public.user_identities','relation_columns_missing:public.memberships',
+        'privilege_missing:public.user_identities:SELECT','rls_not_forced:public.memberships',
+        'function_contract_mismatch:public.buyeros_workspace_directory(uuid,bigint,integer)']
+    receipts['items']['schema']['data']['checks'] += [{'code':code,'passed':True} for code in additional]
     return manifest,receipts
 
 
@@ -107,6 +113,20 @@ class ReleaseReadinessTests(unittest.TestCase):
         result=evaluate(self.manifest,self.receipts,'native_send')
         self.assertFalse(result['promotable'])
         self.assertIn('receipt_missing:delivery',result['blockers'])
+    def test_workspace_cannot_enable_delivery_without_GS(self):
+        self.manifest['activation']['delivery']='active';self.check_blocked()
+    def test_workspace_cannot_enable_paid_research_without_GA(self):
+        self.manifest['activation'].update(providers='active',worker='active');self.check_blocked()
+    def test_unknown_activation_value_is_malformed(self):
+        self.manifest['activation']['delivery']='unknown-invalid-value'
+        self.assertEqual(evaluate(self.manifest,self.receipts)['status'],'malformed')
+    def test_workspace_neon_activation_requires_bound_GN_acceptance(self):
+        self.manifest['activation']['auth']='neon';self.check_blocked()
+    def test_wrong_reviewed_schema_contract_is_blocked(self):
+        self.receipts['items']['schema']['data']['contract_sha256']='f'*64;self.check_blocked()
+    def test_minimal_booleans_cannot_replace_privilege_RLS_and_function_checks(self):
+        self.receipts['items']['schema']['data']['checks']=self.receipts['items']['schema']['data']['checks'][:7]
+        self.check_blocked()
 
 
 if __name__=='__main__': unittest.main()

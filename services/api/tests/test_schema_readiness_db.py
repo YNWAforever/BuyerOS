@@ -73,6 +73,30 @@ def test_runtime_receipt_has_unambiguous_checks_for_promotion(readiness_db):
     codes=[item.code for item in result.checks]
     assert len(codes)==len(set(codes)), 'a valid runtime receipt cannot be rejected for repeated schema checks'
 
+def test_runtime_receipt_binds_reviewed_schema_contract(readiness_db):
+    result=inspect(readiness_db)
+    assert hasattr(result,'contract_sha256'), 'release join needs the exact reviewed schema contract digest'
+    changed=contract(readiness_db,statement_timeout_ms=4000)
+    assert inspect(readiness_db,changed).contract_sha256!=result.contract_sha256
+
+def test_real_probe_check_set_joins_gate_but_fixture_cannot_promote(readiness_db):
+    import importlib.util
+    from pathlib import Path
+    root=Path(__file__).resolve().parents[3]
+    def load(name,path):
+        spec=importlib.util.spec_from_file_location(name,path)
+        module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module);return module
+    fixtures=load('release_fixture_contract',root/'tests/test_release_readiness.py')
+    gate=load('release_gate_contract',root/'scripts/check-release-readiness.py')
+    manifest,receipts=fixtures.candidate()
+    probe=inspect(readiness_db)
+    manifest['schema_contract_sha256']=probe.contract_sha256
+    receipts['items']['schema']['data']=probe.model_dump(mode='json',by_alias=True)
+    result=gate.evaluate_release(manifest,receipts,'workspace')
+    assert not result['promotable'] and 'schema_not_live' in result['blockers']
+    assert 'schema_required_checks_missing_or_failed' not in result['blockers']
+    assert 'schema_contract_mismatch' not in result['blockers']
+
 def test_createdb_runtime_role_is_not_a_compatible_api_role(readiness_db):
     with psycopg.connect(readiness_db) as owner:owner.execute('ALTER ROLE buyeros_api CREATEDB')
     try:

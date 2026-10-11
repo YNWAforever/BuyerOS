@@ -32,13 +32,17 @@ jobs:
       - run: npm install --global vercel@50.28.0
       - name: Fetch attested runtime bundle and join fresh gates before alias change
         env:
-          GH_TOKEN: ${{ github.token }}
+          # Branch protection readback requires Administration(read), which the
+          # workflow GITHUB_TOKEN cannot receive. Use a repo-scoped read-only app
+          # installation token provisioned only in this protected environment.
+          GH_TOKEN: ${{ secrets.BUYEROS_PROMOTION_METADATA_TOKEN }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
           RUNTIME_RUN_ID: ${{ inputs.runtime_run_id }}
           RELEASE_GATE: ${{ inputs.gate }}
         run: |
+          test -n "$GH_TOKEN"
           [[ "$RUNTIME_RUN_ID" =~ ^[0-9]+$ ]]
           gh run download "$RUNTIME_RUN_ID" --repo YNWAforever/BuyerOS --name buyeros-attested-runtime --dir runtime
           python scripts/promote-candidate.py --bundle runtime/runtime-bundle.json --gate "$RELEASE_GATE" --output artifacts/promotion.json --execute

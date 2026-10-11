@@ -10,6 +10,8 @@ The operator first stages a production build without alias assignment. Live runt
 
 Pending adoption packet: disable remote auto assignment, protect main with the required checks, configure `buyeros-production-promote` reviewers/branch policy and server-only credentials, implement/review the real runtime collector, fix exact deployed DB binding, produce a real canary and compatible rollback artifacts, then seek scoped promotion authorization. No setting, secret, deployment, schema, provider or alias was mutated in this batch.
 
+The protected environment's `BUYEROS_PROMOTION_METADATA_TOKEN` must be a short-lived repository-scoped GitHub App installation token with Actions/Contents/Attestations and Administration **read only**. The workflow's default token cannot read branch protection. Provisioning/minting this token remains an owner prerequisite; missing credentials fail closed. Vercel credentials remain server-only in the same environment.
+
 Promotion invokes the alias command once. A timeout/unknown outcome is recorded as `promotion_unknown` and must be reconciled read-only; no automatic retry. A successful submission still requires alias/source/config/schema/workspace readback before acceptance. Check remote auto assignment again after promotion and stop rollout on unexpected control drift.
 
 Local transport tests prove a missing identity relation, unattested JSON, preview build, wrong source, failed CI or unprotected controls never call the alias function. Their normal fixture calls it once. These are isolated control tests, not live Vercel promotion receipts.

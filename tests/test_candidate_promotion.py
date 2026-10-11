@@ -17,6 +17,7 @@ class CandidatePromotionTests(unittest.TestCase):
     def setUp(self):
         self.manifest,self.receipts=candidate();self.calls=[]
         self.metadata={'source_sha':self.manifest['source_sha'],'deployment_id':'dpl_candidate',
+            'project_match':True,'team_match':True,'repository_match':True,
             'target':'production','ready_state':'READY','auto_main_disabled':True,'protected_main':True,
             'protected_environment':True,'ci_completed':True,'ci_head':self.manifest['source_sha'],
             'ci_run_id':123,'jobs':{key:'success' for key in self.manifest['required_ci_jobs']}}
@@ -45,5 +46,11 @@ class CandidatePromotionTests(unittest.TestCase):
         self.metadata['protected_environment']=False;self.assertFalse(self.promote()['promoted']);self.assertEqual(self.calls,[])
     def test_fresh_failed_CI_never_changes_alias(self):
         self.metadata['jobs']['api']='failure';self.assertFalse(self.promote()['promoted']);self.assertEqual(self.calls,[])
+    def test_foreign_project_never_changes_alias(self):
+        self.metadata['project_match']=False;self.assertFalse(self.promote()['promoted']);self.assertEqual(self.calls,[])
+    def test_foreign_team_never_changes_alias(self):
+        self.metadata['team_match']=False;self.assertFalse(self.promote()['promoted']);self.assertEqual(self.calls,[])
+    def test_foreign_repository_never_changes_alias(self):
+        self.metadata['repository_match']=False;self.assertFalse(self.promote()['promoted']);self.assertEqual(self.calls,[])
 
 if __name__=='__main__':unittest.main()
