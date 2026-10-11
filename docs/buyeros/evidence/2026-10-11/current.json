@@ -40,11 +40,21 @@
         "services/api/tests/test_bulk_manifest_db.py",
         "services/api/tests/test_manual_grounding_db.py"
       ],
-      "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "implemented_at_sha": "6532d5916a3941d38d33855a15247543a9d57054",
       "tested_at_sha": null,
       "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
       "activated": null,
-      "live_accepted_at": null
+      "live_accepted_at": null,
+      "local_verification": {
+        "native_source_commit": "6532d591",
+        "junit_sha256": "851e148c96173cedbfb6594e63e002c136e85f303ff5b368726ed278312c57b9",
+        "passed": 21,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "scope": "focused owned fixture/transport; executed before source commit"
+      },
+      "current_note": "partial built fixture auth/workspace UX; independent employee UAT blocked"
     },
     {
       "task_id": "C61-03",
@@ -58,11 +68,21 @@
         "services/api/tests/test_membership_directory_db.py",
         "tests/e2e/audit-access-revocation.spec.ts"
       ],
-      "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "implemented_at_sha": "6532d5916a3941d38d33855a15247543a9d57054",
       "tested_at_sha": null,
       "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
       "activated": null,
-      "live_accepted_at": null
+      "live_accepted_at": null,
+      "local_verification": {
+        "native_source_commit": "6532d591",
+        "junit_sha256": "851e148c96173cedbfb6594e63e002c136e85f303ff5b368726ed278312c57b9",
+        "passed": 21,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "scope": "focused owned fixture/transport; executed before source commit"
+      },
+      "current_note": "recovery UX source only; real canonical staff/role readback blocked"
     },
     {
       "task_id": "C61-04",
@@ -108,11 +128,21 @@
         "services/api/tests/benchmark_workspace_directory_case.py",
         "scripts/benchmark-workspace-directory.py"
       ],
-      "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "implemented_at_sha": "6532d5916a3941d38d33855a15247543a9d57054",
       "tested_at_sha": null,
       "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
       "activated": null,
-      "live_accepted_at": null
+      "live_accepted_at": null,
+      "local_verification": {
+        "native_source_commit": "6532d591",
+        "junit_sha256": "851e148c96173cedbfb6594e63e002c136e85f303ff5b368726ed278312c57b9",
+        "passed": 21,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "scope": "focused owned fixture/transport; executed before source commit"
+      },
+      "current_note": "UX + existing directory reuse; production mapping/performance target blocked"
     },
     {
       "task_id": "C61-07",
@@ -124,11 +154,12 @@
         "pnpm-lock.yaml",
         "playwright.neon-runtime-built.config.ts"
       ],
-      "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "implemented_at_sha": "ac5a2614005a0b312079996f4c8c51c64b27db3d",
       "tested_at_sha": null,
       "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
       "activated": null,
-      "live_accepted_at": null
+      "live_accepted_at": null,
+      "current_note": "real spec discovery 2 + lint/types only; no real account/compatible deployment execution"
     },
     {
       "task_id": "C61-08",
@@ -196,11 +227,12 @@
         "features/live/workspace-picker.tsx",
         "tests/e2e/audit-auth-entry.spec.ts"
       ],
-      "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "implemented_at_sha": "ac5a2614005a0b312079996f4c8c51c64b27db3d",
       "tested_at_sha": null,
       "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
       "activated": null,
-      "live_accepted_at": null
+      "live_accepted_at": null,
+      "current_note": "real spec discovery 2 + lint/types only; no real account/compatible deployment execution"
     },
     {
       "task_id": "C61-12",
@@ -227,11 +259,12 @@
       "reuse_paths": [
         "services/api/tests/test_backup_restore_t28.py"
       ],
-      "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "implemented_at_sha": "ac5a2614005a0b312079996f4c8c51c64b27db3d",
       "tested_at_sha": null,
       "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
       "activated": null,
-      "live_accepted_at": null
+      "live_accepted_at": null,
+      "current_note": "real spec discovery 2 + lint/types only; no real account/compatible deployment execution"
     },
     {
       "task_id": "C61-14",
@@ -262,11 +295,21 @@
         "services/api/buyeros_api/providers/contact.py",
         "services/api/tests/test_provider_contracts.py"
       ],
-      "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "implemented_at_sha": "b358ce2fa5bf81f4b3a4b1cde355d122411de267",
       "tested_at_sha": null,
       "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
       "activated": null,
-      "live_accepted_at": null
+      "live_accepted_at": null,
+      "local_verification": {
+        "native_source_commit": "b358ce2f",
+        "junit_sha256": "905657332cb094b50d9e266b8844854c224b2297f3ff089cbbc26c3394f06134",
+        "passed": 42,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "scope": "focused owned fixture/transport; executed before source commit"
+      },
+      "current_note": "registry source readiness corrected; live accounts/tariffs/activation blocked"
     },
     {
       "task_id": "C61-16",
@@ -500,11 +543,21 @@
         "TASKS.json",
         "docs/buyeros/CURRENT_STATUS.md"
       ],
-      "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "implemented_at_sha": "ac5a2614005a0b312079996f4c8c51c64b27db3d",
       "tested_at_sha": null,
       "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
       "activated": null,
-      "live_accepted_at": null
+      "live_accepted_at": null,
+      "local_verification": {
+        "native_source_commit": "ac5a2614",
+        "junit_sha256": "e5c4a7a437b410d1d37d5b4b1d5d7f2f21210bb2a345bb444c9648be57341a65",
+        "passed": 40,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "scope": "focused owned fixture/transport; executed before source commit"
+      },
+      "current_note": "28a CI job wired; final candidate CI pending; 28b live acceptance blocked"
     },
     {
       "task_id": "C61-29",
@@ -544,7 +597,7 @@
       "retained_current_status": "NOT_STARTED",
       "retained_current_note": "只讀查 actual database/branch/search_path、alembic_version、to_regclass、0038 function、0039 grants、legacy exact mapping counts；保留已遮蔽證據。",
       "reuse_paths": [],
-      "implemented_at_sha": null,
+      "implemented_at_sha": "ac5a2614005a0b312079996f4c8c51c64b27db3d",
       "tested_at_sha": null,
       "deployed_at_sha": null,
       "activated": null,
@@ -558,7 +611,17 @@
       "evidence": [
         "C61-31-local.json",
         "db-readback.redacted.json"
-      ]
+      ],
+      "local_verification": {
+        "native_source_commit": "ac5a2614",
+        "junit_sha256": "0e25033dbec58d26a55cd43bfae72477e910908fa9b148ceec250b2fde9bcdf2",
+        "passed": 16,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "scope": "focused owned fixture/transport; executed before source commit"
+      },
+      "current_note": "runtime target/canary blocked"
     },
     {
       "task_id": "C61-32",
@@ -566,7 +629,7 @@
       "retained_current_status": "NOT_STARTED",
       "retained_current_note": "依 C61-31 結果選擇已證明相容 rollback 或 additive migration；先隔離副本排練；0039包含原 UUID backfill、trigger、grants，不只建空表。",
       "reuse_paths": [],
-      "implemented_at_sha": null,
+      "implemented_at_sha": "3b9973749b2c803388b651dd160f52cdc1297a9b",
       "tested_at_sha": null,
       "deployed_at_sha": null,
       "activated": null,
@@ -580,7 +643,17 @@
       "evidence": [
         "C61-32-local.json",
         "../../release/schema-change-set.json"
-      ]
+      ],
+      "local_verification": {
+        "native_source_commit": "3b997374",
+        "junit_sha256": "0cd1e44a79d8673a05ac09fed50e30d8a0e8cf06558c4fd6f0762bff16804344",
+        "passed": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "scope": "focused owned fixture/transport; executed before source commit"
+      },
+      "current_note": "exact deployment target/PG18 copy/restorepoint/authorization blocked"
     },
     {
       "task_id": "C61-33",
@@ -588,11 +661,21 @@
       "retained_current_status": "NOT_STARTED",
       "retained_current_note": "更新release manifest；以固定 source/API/worker/schema tuples 驗證；CI成功後在candidate以runtime role測requiredrelations/grants/mapping及known-account workspace；失敗禁止promote。",
       "reuse_paths": [],
-      "implemented_at_sha": null,
+      "implemented_at_sha": "ac5a2614005a0b312079996f4c8c51c64b27db3d",
       "tested_at_sha": null,
       "deployed_at_sha": null,
       "activated": null,
-      "live_accepted_at": null
+      "live_accepted_at": null,
+      "local_verification": {
+        "native_source_commit": "ac5a2614",
+        "junit_sha256": "e5c4a7a437b410d1d37d5b4b1d5d7f2f21210bb2a345bb444c9648be57341a65",
+        "passed": 40,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "scope": "focused owned fixture/transport; executed before source commit"
+      },
+      "current_note": "33a source exists; remote protection/attested producer/live canary blocked; 33b GN/GA/GS blocked"
     }
   ],
   "cases": [
@@ -1489,25 +1572,61 @@
     "G0": {
       "accepted": false,
       "blockers": [
-        "same-deployment DB target binding",
-        "exact canonical account mapping readback",
-        "reviewed schema change authorization",
-        "compatible frontend+API rollback artifact IDs",
+        "screenshot not supplied",
+        "exact deployed sensitive DB target binding",
+        "owner/runtime schema + mapping readback",
         "known-account workspace canary",
-        "remote promotion protection"
+        "compatible frontend/API artifacts",
+        "remote promotion controls + trusted runtime producer",
+        "production change scope authorization"
       ]
     },
     "GN": {
       "accepted": false,
-      "blockers": []
+      "blockers": [
+        "real email/Google session/enrollment/reset account and authorized mail scope",
+        "canonical UUID/FK two-tenant four-role controls",
+        "Neon-only compatible frontend/API rollback IDs",
+        "cold restore/tombstone/hold reconciliation receipt"
+      ]
     },
     "GA": {
       "accepted": false,
-      "blockers": []
+      "blockers": [
+        "G0/GN receipts",
+        "reviewed provider account/model/filter/tariff/liability/budget authorization",
+        "same-chain eight-module real worker/provider receipt",
+        "goldset 60 companies/100 claims human labels",
+        "same-environment performance dataset receipt",
+        "operator/reviewer real staff UAT",
+        "F21 historical incident evidence or explicit exception"
+      ]
     },
     "GS": {
       "accepted": false,
-      "blockers": []
+      "blockers": [
+        "GA + C61-29 acceptance",
+        "C61-14 scoped Auth0 retirement after C61-29",
+        "server-owned delivery authority/account/sender/recipient/cost cap",
+        "one-submit callback/suppression delivered receipt with unknown holds retained"
+      ]
     }
+  },
+  "source_candidate_code_sha": "ac5a2614005a0b312079996f4c8c51c64b27db3d",
+  "final_candidate_ci": {
+    "status": "PENDING",
+    "candidate_sha": null,
+    "run_id": null
+  },
+  "worker_readback": {
+    "outcome": "BLOCKED_CONFIGURED_ACCOUNT_WORKER_NOT_FOUND",
+    "cloudflare_error_code": 10007,
+    "source_sha": null,
+    "scope": "read-only deployments list, configured buyeros-jobs; account binding not independently proven"
+  },
+  "promotion_readback": {
+    "auto_assign_custom_domains": true,
+    "main_protected": false,
+    "remote_mutation_count": 0
   }
 }

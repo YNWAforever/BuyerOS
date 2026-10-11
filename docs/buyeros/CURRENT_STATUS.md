@@ -1,3 +1,10 @@
+# BuyerOS current repair status — 2026-10-11
+
+Current implementation/evidence: [execution report](evidence/2026-10-11/execution-report.zh-HK.md), [source/test/deploy/activation/live fields](evidence/2026-10-11/current.json), and [task selection](evidence/2026-10-11/task-selection.json). G0/GN/GA/GS remain NOT ACCEPTED. PR #12 is merged; current main and production source were rechecked as cbbe0e93b0132ae07ff0d87f6cc57f871f13200e. The new candidate is not deployed. F21 is historical unknown; F23 is the separate 42P01 incident. No production mutation was executed.
+
+The following October 6–9 entries are preserved historical evidence; references to a draft PR or tasks that can start describe that earlier snapshot.
+
+---
 # BuyerOS C61 execution status
 
 Execution date: 2026-10-07 Asia/Hong_Kong. Original audit date: 2026-10-06.

@@ -4192,5 +4192,20 @@
         "evidence_paths": []
       }
     ]
+  },
+  "repair_current_20261011": {
+    "source_candidate_code_sha": "ac5a2614005a0b312079996f4c8c51c64b27db3d",
+    "tasks_current": "docs/buyeros/evidence/2026-10-11/current-tasks.csv",
+    "cases_current": "docs/buyeros/evidence/2026-10-11/current-cases.csv",
+    "evidence": "docs/buyeros/evidence/2026-10-11/current.json",
+    "baseline_retained": true,
+    "task_ids_retained": 33,
+    "case_ids_retained": 148,
+    "gates_accepted": {
+      "G0": false,
+      "GN": false,
+      "GA": false,
+      "GS": false
+    }
   }
 }
