@@ -1,0 +1,50 @@
+name: BuyerOS guarded promotion
+on:
+  workflow_dispatch:
+    inputs:
+      runtime_run_id:
+        description: Reviewed protected runtime acceptance run containing an attested bundle
+        required: true
+      gate:
+        type: choice
+        options: [workspace, research_export, native_send]
+        default: workspace
+permissions:
+  contents: read
+  actions: read
+  attestations: read
+concurrency:
+  group: buyeros-production-promote
+  cancel-in-progress: false
+jobs:
+  promote:
+    if: github.ref == 'refs/heads/main'
+    environment: buyeros-production-promote
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --global vercel@50.28.0
+      - name: Fetch attested runtime bundle and join fresh gates before alias change
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+          RUNTIME_RUN_ID: ${{ inputs.runtime_run_id }}
+          RELEASE_GATE: ${{ inputs.gate }}
+        run: |
+          [[ "$RUNTIME_RUN_ID" =~ ^[0-9]+$ ]]
+          gh run download "$RUNTIME_RUN_ID" --repo YNWAforever/BuyerOS --name buyeros-attested-runtime --dir runtime
+          python scripts/promote-candidate.py --bundle runtime/runtime-bundle.json --gate "$RELEASE_GATE" --output artifacts/promotion.json --execute
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-promotion-readback-required
+          path: artifacts/promotion.json
+          if-no-files-found: error
