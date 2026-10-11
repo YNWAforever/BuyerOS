@@ -570,7 +570,17 @@
       "tested_at_sha": null,
       "deployed_at_sha": null,
       "activated": null,
-      "live_accepted_at": null
+      "live_accepted_at": null,
+      "current_status": "OPEN_EXACT_TARGET_REPAIR_AND_G0",
+      "current_source": "reuse existing explicit 0034–0050 additive migrations; no new revision or production change",
+      "current_test": "owned 0033/42P01→0050 canonical/FK/revoked rehearsal passes; focused cold rollback/holds pass",
+      "current_deploy": "unchanged cbbe0e93",
+      "current_activation": "none",
+      "current_live_acceptance": "blocked exact target, PG18 rehearsal, restore point, artifacts, canary, authority",
+      "evidence": [
+        "C61-32-local.json",
+        "../../release/schema-change-set.json"
+      ]
     },
     {
       "task_id": "C61-33",

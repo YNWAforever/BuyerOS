@@ -1,0 +1,132 @@
+{
+  "schema": "buyeros.schema-change-set.v1",
+  "status": "BLOCKED_NOT_AUTHORIZED_NOT_TARGET_BOUND",
+  "task_ids": [
+    "C61-31",
+    "C61-32"
+  ],
+  "review_source_sha": "5c79f60cd608f2ad9144f577609242ec7200c18f",
+  "target_receipt_sha256": "39ab75fbb915314dd55e45feaea687feab7e2016a437a4a34a1b415f97f1ff47",
+  "same_deployment_target_match": null,
+  "named_branch_observed_head": "0033_api_rate_windows",
+  "proposed_target_head": "0050_c61_delivery_authorizations",
+  "revisions": [
+    {
+      "revision": "0034_worker_execution",
+      "path": "services/api/alembic/versions/0034_worker_execution.py",
+      "sha256": "c86a932642e1874cfb801a7a047dfe9a965a34fbd21c29612862cfc278b1141e"
+    },
+    {
+      "revision": "0035_worker_recovery_probe",
+      "path": "services/api/alembic/versions/0035_worker_recovery_probe.py",
+      "sha256": "997fbd70969d8288cd2f7958da1d275aeaa6740d04c7c6d565fa491e64f65d04"
+    },
+    {
+      "revision": "0036_checkpoint_schema_grants",
+      "path": "services/api/alembic/versions/0036_checkpoint_schema_grants.py",
+      "sha256": "7482af77e757c60fb50e9cfbdbc30a840a4e9df23dce99fd5b32ee733a76f261"
+    },
+    {
+      "revision": "0037_bulk_manifests",
+      "path": "services/api/alembic/versions/0037_bulk_manifests.py",
+      "sha256": "3dd82a7d95beada50b97e7f185741e956a87b70d3c5bc8626d7aeb878c074d08"
+    },
+    {
+      "revision": "0038_c61_workspace_directory",
+      "path": "services/api/alembic/versions/0038_c61_workspace_directory.py",
+      "sha256": "8970021770a72946cea409a446ebeb55ced9ce16e397ac18d4b9e77bda39d7ee"
+    },
+    {
+      "revision": "0039_c61_user_identities",
+      "path": "services/api/alembic/versions/0039_c61_user_identities.py",
+      "sha256": "8621fe6a5eefcbbf7b1d68d2938c979ddb2592dec7fa857bcef70d7ae5c1a79e"
+    },
+    {
+      "revision": "0040_c61_search_receipts",
+      "path": "services/api/alembic/versions/0040_c61_search_receipts.py",
+      "sha256": "d181d9ed9158d4dd407ad1aba3014c0b68b922372555b4a0db35597b6002fdc7"
+    },
+    {
+      "revision": "0041_c61_model_receipts",
+      "path": "services/api/alembic/versions/0041_c61_model_receipts.py",
+      "sha256": "79441c050058e2e35f00bed115738f0b0c96ff6c43d5c70d23ca72ce7054226f"
+    },
+    {
+      "revision": "0042_c61_contact_receipts",
+      "path": "services/api/alembic/versions/0042_c61_contact_receipts.py",
+      "sha256": "5b4abbd66694b436d9cb008882b3586f463aa3b3c272f17ceb8525a8ba85a033"
+    },
+    {
+      "revision": "0043_c61_receipt_retention",
+      "path": "services/api/alembic/versions/0043_c61_receipt_retention.py",
+      "sha256": "afbb5e3a6bf953012035e98a44883534b1cedf9da1586453f5e6e297b6e778ed"
+    },
+    {
+      "revision": "0044_c61_search_intake",
+      "path": "services/api/alembic/versions/0044_c61_search_intake.py",
+      "sha256": "9581be01cd2217c9986c20caa2773e7f20eeec9753c3fff2a641d45b68f26dc1"
+    },
+    {
+      "revision": "0045_c61_research_page_privacy",
+      "path": "services/api/alembic/versions/0045_c61_research_page_privacy.py",
+      "sha256": "7949f817ff98ed733c6fad833f506736fce5c322c57ef507b0a5101703292fb9"
+    },
+    {
+      "revision": "0046_c61_derived_privacy",
+      "path": "services/api/alembic/versions/0046_c61_research_derived_privacy.py",
+      "sha256": "5d47c835f06f109d3ac754ff48f2600c2e6e02b31d73473e5e5364458a831e2b"
+    },
+    {
+      "revision": "0047_c61_legacy_source_privacy",
+      "path": "services/api/alembic/versions/0047_c61_legacy_source_privacy.py",
+      "sha256": "8d6fe1bf0f4ca4069e5073734646ec56d2e9d45b9d9741f9b1825a92852ce019"
+    },
+    {
+      "revision": "0048_c61_delivery_ledger",
+      "path": "services/api/alembic/versions/0048_c61_delivery_ledger.py",
+      "sha256": "290ee52887ecc4df38ed4673531d89a171cb11743a4babfc058a7bfddbc4a902"
+    },
+    {
+      "revision": "0049_c61_delivery_money",
+      "path": "services/api/alembic/versions/0049_c61_delivery_money.py",
+      "sha256": "aa94ea5e553effa051882127f121639861828ebda2f54c012631d80bbbbea20d"
+    },
+    {
+      "revision": "0050_c61_delivery_authorizations",
+      "path": "services/api/alembic/versions/0050_c61_delivery_authorizations.py",
+      "sha256": "724bb50eb088fca5e0a5d84d7e36d91441975c1fd7d893d711abcf71b6930ddc"
+    }
+  ],
+  "offline_sql_path": "docs/buyeros/release/schema-recovery-0033-to-0050.sql",
+  "offline_sql_sha256": "d4957f94cc6d83f07cb7fca85a8c0f937eef3874b0ccdfe97b43a02596deb717",
+  "proposed_probe_metadata_grant": "GRANT SELECT(version_num) ON public.alembic_version TO buyeros_api",
+  "metadata_grant_applied": false,
+  "migration_owner_existing_bypassrls_observed": true,
+  "lock_timeout_ms": 1000,
+  "statement_timeout_ms": 10000,
+  "lock_budget_adopted": false,
+  "restore_point": null,
+  "known_account_canary": null,
+  "compatible_frontend_artifact": null,
+  "compatible_api_artifact": null,
+  "observation_owner": null,
+  "observation_window": null,
+  "production_authorization": null,
+  "stop_conditions": [
+    "wrong target",
+    "canonical UUID/FK/revocation/hold change",
+    "privilege or RLS regression",
+    "unexplained data difference",
+    "lock budget exceeded"
+  ],
+  "rollback": "pause new writes; preserve additive schema, immutable histories and unknown holds; select only verified compatible frontend+API artifacts",
+  "blocked": [
+    "deployed sensitive DSN provenance",
+    "PG18 exact-target rehearsal",
+    "fresh restore point",
+    "adopted lock/observation budget and owner",
+    "real artifact IDs",
+    "known-account mapping and session",
+    "specific production change authorization"
+  ]
+}
