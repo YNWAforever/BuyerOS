@@ -1,5 +1,5 @@
 """Finite owned backlog/worker restart capture; never uses a shared DSN."""
-import argparse,json,math,os,subprocess,sys,time,uuid
+import argparse,importlib.util,json,math,os,subprocess,sys,time,uuid
 from pathlib import Path
 import xml.etree.ElementTree as ET
 ROOT=Path(__file__).resolve().parents[1];API=ROOT/'services/api';WORKER=ROOT/'services/worker'
@@ -38,6 +38,9 @@ def main():
                or not math.isfinite(row['done_observed_seconds']) or row['done_observed_seconds']<0
                for row in rows)
         or len({row['intent'] for row in rows})!=29):return 1
+    spec=importlib.util.spec_from_file_location('owned_capacity_driver',WORKER/'tests/worker_capacity_driver.py')
+    driver=importlib.util.module_from_spec(spec);spec.loader.exec_module(driver)
+    if not driver.resource_measurements_complete(report):return 1
     report['provenance']=provenance(ROOT,[Path(__file__).resolve(),case,WORKER/'tests/worker_capacity_driver.py',WORKER/'tests/conftest.py',WORKER/'buyeros_worker/tasks.py',WORKER/'buyeros_worker/app.py',API/'buyeros_api/execution/dispatcher.py',API/'buyeros_api/execution/handlers/retention.py'])
     output.write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
     return 0

@@ -9,7 +9,7 @@ from buyeros_worker.engine import create_engine
 from buyeros_worker.tasks import publish_message
 from tests.conftest import WS_A,WS_B,PROJECT_A,API_ROLE,seed_outbox
 from tests.test_valkey_integration import _valkey_container
-from tests.worker_capacity_driver import collect_bounded_backlog
+from tests.worker_capacity_driver import collect_bounded_backlog,sample_worker_resources
 
 def test_owned_backlog_rotation_and_worker_restart(worker_database_url,pg_dsn,monkeypatch):
     output=Path(os.environ['BUYEROS_WORKER_CAPACITY_OUTPUT']);assert not output.exists()
@@ -19,7 +19,7 @@ def test_owned_backlog_rotation_and_worker_restart(worker_database_url,pg_dsn,mo
     get_settings.cache_clear()
     third=str(uuid.uuid4());workspaces=[WS_A,WS_B,third];backlogs=[25,3,1]
     projects=[PROJECT_A,str(uuid.uuid4()),str(uuid.uuid4())]
-    sources=[];intents={};published={};observed_done={};cycles=[];snapshots=[];workers=[];logs=[]
+    sources=[];intents={};published={};observed_done={};cycles=[];snapshots=[];workers=[];logs=[];resource_samples=[]
     original=celery_app.conf.broker_url;name=None;started=time.monotonic();ready=None;error=None
     def snapshot():
         with psycopg.connect(pg_dsn) as db:
@@ -30,7 +30,9 @@ def test_owned_backlog_rotation_and_worker_restart(worker_database_url,pg_dsn,mo
         path=output.with_name(output.stem+f'-worker-{len(workers)+1}.log');assert not path.exists()
         with path.open('xb') as log:
             process=subprocess.Popen([sys.executable,'-m','celery','-A','buyeros_worker.tasks','worker','--pool=solo','--concurrency=1','--loglevel=WARNING','--without-gossip','--without-mingle','--without-heartbeat'],cwd=Path(__file__).resolve().parents[1],env=env,stdout=log,stderr=subprocess.STDOUT)
-        workers.append(process);logs.append(path);return process
+        workers.append(process);logs.append(path)
+        sample_worker_resources(workers,time.monotonic()-started,resource_samples)
+        return process
     def stop_worker(process):
         if process.poll() is None:
             process.terminate()
@@ -39,6 +41,8 @@ def test_owned_backlog_rotation_and_worker_restart(worker_database_url,pg_dsn,mo
     def wait_done(keys,process):
         deadline=time.monotonic()+90
         while time.monotonic()<deadline:
+            sample_worker_resources(workers,time.monotonic()-started,resource_samples)
+            snapshots.append(snapshot())
             with psycopg.connect(pg_dsn) as db:
                 rows=db.execute('SELECT intent_key,state FROM outbox_events WHERE intent_key LIKE %s',(prefix+'%',)).fetchall()
             now=time.monotonic()
@@ -98,7 +102,8 @@ def test_owned_backlog_rotation_and_worker_restart(worker_database_url,pg_dsn,mo
         if ready is not None:
             report=dict(schema='buyeros.worker-capacity.v1',source_sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),evidence_mode='owned_disposable_fixture',live_verified=False,release_accepted=False,complete=error is None and len(observed_done)==29,error=error,
                 environment=dict(os=platform.platform(),python=platform.python_version(),region='local loopback;notHK',database='owned PG16',broker='owned Valkey8',worker='actual separate Celery solo processes',restart='between committed first3 and remaining broker backlog;not inflight kill/redelivery',provider_calls=0,private_object_io=0,paid_dispatch_enabled=False,dispatch_time_budget_seconds=5,max_total_per_cycle=3,max_remaining_cycles=2*len(intents)),
-                initial_backlogs=[dict(workspace=w,count=n) for w,n in zip(workspaces,backlogs)],schema_head=schema_head,role=dict(name=role[0],superuser=role[1],bypass_rls=role[2],outbox_owner=role[3],outbox_rls=role[4]),worker_pids=[p.pid for p in workers],dispatcher_cycles=cycles,backlog_snapshots=snapshots,
+                initial_backlogs=[dict(workspace=w,count=n) for w,n in zip(workspaces,backlogs)],schema_head=schema_head,role=dict(name=role[0],superuser=role[1],bypass_rls=role[2],outbox_owner=role[3],outbox_rls=role[4]),worker_pids=[p.pid for p in workers],dispatcher_cycles=cycles,backlog_snapshots=snapshots,worker_resource_samples=resource_samples,
+                resource_method='RSS of owned Celery Popen tree at startup and each200ms readback;Windows launcher plus descendants(max16/depth4),Linux solo PID;per-PID samples/tree sums may double-count shared pages;sample maximum not all-time peak/PSS/cgroup;SQL oldest created-at age by workspace/state,not actual dequeue latency;extra readback query included in duration;no adopted memory or queue SLO',
                 observations=[dict(intent=key,workspace=w,published=published.get(key),done_observed_seconds=observed_done[key]-ready if key in observed_done else None,timeout_or_incomplete=key not in observed_done) for key,w in intents.items()],
                 observation_method='ready-to-publish actual wall clock;ready-to-done sampled upper bound at200ms polling,includes startup/restart;no actual dequeue timestamp or oldest wait distribution inferred',seconds=time.monotonic()-started)
             output.parent.mkdir(parents=True,exist_ok=True)

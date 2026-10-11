@@ -614,7 +614,7 @@ jobs:
         working-directory: services/worker
         run: |
           uv run --frozen pytest tests/test_claim_limit_db.py tests/test_worker_capacity_tools.py --collect-only -q > artifacts/c61-claim-capacity-discovery.txt
-          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-claim-capacity-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==19 and all(name in text for name in ('test_actual_single_tenant_claim_respects_locked_limit[1]', 'test_actual_single_tenant_claim_respects_locked_limit[3]', 'test_worker_capacity_requires_named_positive_zero_skip_junit', 'test_worker_capacity_continues_returned_cursor_after_empty_budget_cycle', 'test_worker_capacity_stalled_backlog_stops_with_all_empty_cycles_retained', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[incomplete]', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[empty]', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[same-worker]')), 'empty or missing bounded claim/capacity discovery'"
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-claim-capacity-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==29 and all(name in text for name in ('test_actual_single_tenant_claim_respects_locked_limit[1]', 'test_actual_single_tenant_claim_respects_locked_limit[3]', 'test_worker_capacity_requires_named_positive_zero_skip_junit', 'test_worker_capacity_continues_returned_cursor_after_empty_budget_cycle', 'test_worker_capacity_stalled_backlog_stops_with_all_empty_cycles_retained', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[incomplete]', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[empty]', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[same-worker]', 'test_worker_resource_sampler_reads_the_owned_live_process')) and all('test_worker_capacity_rejects_missing_or_invalid_resource_measurement['+name+']' in text for name in ('missing-memory','missing-second-worker','unowned-pid','zero-rss','missing-queue','nonfinite-age','negative-age','missing-tenant','launcher-only')), 'empty or missing bounded claim/capacity discovery'"
       - name: Verify required C61 worker research guard discovery
         working-directory: services/worker
         run: |
@@ -630,10 +630,10 @@ jobs:
         working-directory: services/worker
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 246 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 256 --discovery-only
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/worker
-      - run: python scripts/check-required-tests.py --pytest-discovery services/worker/artifacts/c61-full-discovery.txt --expected-count 246 --junit services/worker/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/worker/artifacts/c61-full-discovery.txt --expected-count 256 --junit services/worker/artifacts/tests.xml
       - run: python -m pip install uv==0.11.27 && uv sync --project services/worker --frozen --no-dev --python 3.12
       - run: services/worker/.venv/bin/python scripts/run-render-worker.py worker --check
       - run: services/worker/.venv/bin/python scripts/run-render-worker.py dispatcher --check
