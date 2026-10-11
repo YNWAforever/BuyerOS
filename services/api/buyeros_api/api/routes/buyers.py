@@ -287,7 +287,7 @@ async def list_buyer_evidence(
 
     from ...db.buyers import Evidence, ProjectBuyer, SourceDocument
     from ...db.runs import RawCandidate
-    from ...services.buyer_view import evidence_data
+    from ...services.buyer_view import current_evidence_data
     from ..deps import load_membership, permission_for_roles, tenant_scoped
 
     limit = max(1, min(limit, 100))
@@ -336,7 +336,8 @@ async def list_buyer_evidence(
                 .limit(limit)
             )
         ).all()
-        items = [evidence_data(evidence, source, mapped_company_id=company_id)
+        items = [await current_evidence_data(session, workspace_id=workspace_id,
+                    evidence=evidence, source=source, mapped_company_id=company_id, buyer_id=buyer.id)
                  for evidence, source, company_id in rows]
     return envelope({"items": items, "offset": offset, "limit": limit, "total": total}, request.state.request_id)
 
@@ -352,7 +353,7 @@ async def get_evidence(
 
     from ...db.buyers import Evidence, SourceDocument
     from ...db.runs import RawCandidate
-    from ...services.buyer_view import evidence_data
+    from ...services.buyer_view import current_evidence_data
     from ..deps import load_membership, permission_for_roles, tenant_scoped
 
     async with tenant_scoped(workspace_id) as session:
@@ -378,5 +379,6 @@ async def get_evidence(
         if row is None:
             raise ApiError(404, "NOT_FOUND", "evidence not found")
         evidence, source, company_id = row
-        data = evidence_data(evidence, source, mapped_company_id=company_id)
+        data = await current_evidence_data(session, workspace_id=workspace_id,
+            evidence=evidence, source=source, mapped_company_id=company_id)
     return envelope(data, request.state.request_id)

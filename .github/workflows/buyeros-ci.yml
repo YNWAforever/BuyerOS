@@ -20,14 +20,46 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: node tests/domain-checks.mjs
       - run: node tests/live-adapter-checks.mjs
+      - name: Verify C61 candidate client intent and source privacy
+        run: |
+          mkdir -p artifacts/c61
+          node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-candidate-client.xml tests/research-candidate-client.test.mjs
+          python scripts/check-required-tests.py --junit artifacts/c61/ci-candidate-client.xml
       - run: node tests/live-auth-checks.mjs
       - run: node --test tests/audit-*.test.mjs tests/job-poller-checks.mjs
       - run: node --test tests/api-types-generation.test.mjs
       - run: node --test tests/vercel-services.test.mjs tests/deployment/cloudflare-python-runtime.test.mjs tests/deployment/cloudflare-acceptance.test.mjs tests/deployment/built-ui-fixture.test.mjs
+      - run: node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-neon-session.xml tests/neon-session.test.mjs tests/audit-auth-render.test.mjs tests/job-poller-checks.mjs tests/neon-security-proxy.test.mjs
+      - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-neon-session.xml
+      - run: node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-neon-config.xml tests/neon-production-config.test.mjs tests/neon-auth-boundary.test.mjs
+      - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-neon-config.xml
+      - run: node --conditions=react-server --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-neon-sdk.xml tests/neon-auth-server-production.test.mjs
+      - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-neon-sdk.xml
       - run: pnpm exec tsc --noEmit
       - run: pnpm lint
       - run: pnpm build
       - run: node scripts/run-vercel.mjs build
+      - run: node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-neon-built.xml tests/neon-auth-built.test.mjs
+      - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-neon-built.xml
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: |
+          pnpm exec playwright test --config playwright.neon-runtime-built.config.ts --list > artifacts/c61/ci-neon-session-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61/ci-neon-session-discovery.txt').read_text(); match=re.search(r'Total: (\d+) tests?',text); assert match and int(match[1])>0 and 'neon-session-production.spec.ts' in text and 'neon-security-production.spec.ts' in text, 'empty or wrong Neon discovery'"
+          pnpm exec playwright test --config playwright.neon-runtime-built.config.ts --list --reporter=json > artifacts/c61/ci-neon-session-native-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 8 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --discovery-only
+      - run: pnpm exec playwright test --config playwright.neon-runtime-built.config.ts
+      - run: python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 8 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --junit test-results/neon-session.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-neon-local-boundary
+          path: |
+            artifacts/c61/ci-neon-*.xml
+            artifacts/c61/ci-neon-session-discovery.txt
+            artifacts/c61/ci-neon-session-native-discovery.json
+            test-results/neon-session.xml
+            test-results/neon-session/
+          if-no-files-found: error
       - run: node --test tests/vercel-render.test.mjs tests/deployment/cloudflare-release-config.test.mjs
 
   cloudflare-controller:
@@ -46,7 +78,16 @@ jobs:
       - run: pnpm cloudflare:types
       - run: pnpm cloudflare:lint
       - run: pnpm cloudflare:bindings
-      - run: pnpm cloudflare:test --reporter=default --reporter=junit --outputFile.junit=artifacts/cloudflare/ci-controller.xml
+      - name: Discover full C61 controller inventory before execution
+        run: |
+          mkdir -p artifacts/cloudflare
+          pnpm exec vitest list --config services/cloudflare-jobs/vitest.config.ts --json artifacts/cloudflare/ci-controller-discovery.json
+          python -c "import json,pathlib; root=pathlib.Path.cwd().resolve(); rows=json.loads(pathlib.Path('artifacts/cloudflare/ci-controller-discovery.json').read_text()); names=[pathlib.Path(row['file']).resolve().relative_to(root).as_posix()+'::'+row['name'] for row in rows]; files={name.split('::',1)[0] for name in names}; assert len(names)==len(set(names))==27 and files==set(['services/cloudflare-jobs/tests/api-client.test.ts', 'services/cloudflare-jobs/tests/dispatcher.test.ts', 'services/cloudflare-jobs/tests/handler.test.ts', 'services/cloudflare-jobs/tests/platform.test.ts', 'services/cloudflare-jobs/tests/protocol.test.ts', 'services/cloudflare-jobs/tests/queue.test.ts', 'services/cloudflare-jobs/tests/workflow.test.ts', 'tests/integration/cloudflare-recovery.test.ts']), 'empty, duplicate or missing full controller discovery'"
+      - name: Verify exact full C61 controller execution
+        run: |
+          pnpm cloudflare:test --reporter=default --reporter=junit --outputFile.junit=artifacts/cloudflare/ci-controller.xml
+          python scripts/check-required-tests.py --junit artifacts/cloudflare/ci-controller.xml
+          python -c "import json,pathlib,xml.etree.ElementTree as E; root=pathlib.Path.cwd().resolve(); rows=json.loads(pathlib.Path('artifacts/cloudflare/ci-controller-discovery.json').read_text()); discovered=[pathlib.Path(row['file']).resolve().relative_to(root).as_posix()+'::'+row['name'] for row in rows]; cases=list(E.parse('artifacts/cloudflare/ci-controller.xml').getroot().iter('testcase')); names=[c.get('classname').replace(chr(92),'/')+'::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==27 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing full controller execution'"
       - run: pnpm exec wrangler deploy --dry-run --config services/cloudflare-jobs/wrangler.jsonc --outdir .sites-runtime/cloudflare-dry-run
         env:
           WRANGLER_SEND_METRICS: 'false'
@@ -99,9 +140,394 @@ jobs:
         working-directory: services/api
       - run: mkdir -p artifacts
         working-directory: services/api
-      - run: uv run --frozen pytest -q --junitxml=artifacts/tests.xml
+      - name: Verify supported C61 migration to current head
         working-directory: services/api
-      - run: python scripts/check-required-tests.py --junit services/api/artifacts/tests.xml
+        run: |
+          uv run --frozen pytest tests/test_identity_migration_db.py --collect-only -q > artifacts/c61-supported-migration-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-supported-migration-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_identity_migration_db.py::test_')]; required={'tests/test_identity_migration_db.py::test_fresh_0038_backfill_and_retained_rollback_preserve_canonical_history','tests/test_identity_migration_db.py::test_identity_revision_preserves_runtime_off_and_rejects_unknown_future_head','tests/test_identity_migration_db.py::test_supported_0038_upgrade_to_current_head_preserves_history_and_restricted_runtime'}; assert m and int(m[1])==len(names)==len(set(names))==3 and set(names)==required, 'empty, duplicate or missing supported migration discovery'"
+          uv run --frozen pytest tests/test_identity_migration_db.py --junitxml=artifacts/c61-supported-migration.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-supported-migration.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; collected=[line for line in pathlib.Path('artifacts/c61-supported-migration-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith('tests/test_identity_migration_db.py::test_')]; cases=list(E.parse('artifacts/c61-supported-migration.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(names)==len(set(names))==len(collected)==3 and set(names)==set(collected), 'missing or mismatched supported migration execution'"
+      - name: Verify required Neon security discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_neon_security_db.py tests/test_auth_tenant.py tests/test_membership_directory_db.py --collect-only -q > artifacts/neon-security-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/neon-security-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>0 and 'test_neon_security_db.py::test_signed_neon_DB_roles_and_foreign_workspace_existence' in text, 'empty or missing Neon security discovery'"
+      - name: Verify required C61 search discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_live_search_adapter.py tests/test_live_search_db.py tests/test_live_search_guards.py --collect-only -q > artifacts/c61-search-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-search-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>0 and all(name in text for name in ['test_search_wrong_entity_not_attached','test_search_timeout_unknown_not_resubmitted','test_fetch_redirect_private_blocked','test_runtime_epoch_change_during_response_cannot_claim_accepted']), 'empty or missing required search discovery'"
+      - name: Verify required C61 model discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_live_model_adapter.py tests/test_model_migration_payload.py --collect-only -q > artifacts/c61-model-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-model-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>0 and all(name in text for name in ['test_model_citation_must_resolve_to_current_company','test_source_instruction_cannot_change_tools_or_request_scope','test_model_durable_claim_never_replays_unknown_or_received','test_unselected_live_fit_does_not_invent_a_model_proposal']), 'empty or missing required model discovery'"
+      - name: Verify required C61 contact discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_live_contact_adapter.py tests/test_live_contact_db.py tests/test_contact_migration_payload.py --collect-only -q > artifacts/c61-contact-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-contact-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>0 and all(name in text for name in ['test_contact_quote_stale_price_blocks','test_contact_wrong_company_quarantined','test_actual_confirm_single_contact_operation_and_encrypted_reopen_without_billing','test_contact_runtime_rls_immutable_private_result_and_populated_rollback']), 'empty or missing required contact discovery'"
+      - name: Verify required C61 reviewed contact configuration discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_selected_contact_configuration.py --collect-only -q > artifacts/c61-contact-configuration-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-contact-configuration-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==50 and all(name in text for name in ('test_contact_planning_requires_current_bounded_reviewed_account_and_status_without_factory[verified-US]', 'test_contact_planning_requires_current_bounded_reviewed_account_and_status_without_factory[unsupported-pair]', 'test_contact_planning_requires_current_bounded_reviewed_account_and_status_without_factory[missing-nonbillable-evidence]', 'test_contact_scope_rejects_mutable_unbounded_or_nonopaque_account_and_lookup_basis[email-account]', 'test_contact_scope_rejects_mutable_unbounded_or_nonopaque_account_and_lookup_basis[boolean-limit]', 'test_contact_registration_rejects_scope_not_owned_by_its_exact_hunter_capability[mutable-capability-roles]', 'test_contact_full_registry_hash_binds_account_pair_count_and_nonbillable_proof_preserving_old_receipt_hash', 'test_default_contact_planning_and_both_public_selectors_remain_closed')), 'empty or missing reviewed contact configuration discovery'"
+      - name: Verify required C61 current contact quote and claim discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_contact_registry_scope_db.py --collect-only -q > artifacts/c61-contact-current-scope-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-contact-current-scope-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==32 and all(name in text for name in ('test_production_quote_freezes_full_current_contact_scope_without_factory_budget_or_operation', 'test_changed_contact_registry_requires_fresh_explicit_quote_before_confirm_admission[account]', 'test_production_quote_rejects_typed_capability_without_exact_current_reviewed_registry[unselected]', 'test_new_private_contact_prepare_rechecks_full_confirmed_quote_before_receipt_write[request-count]', 'test_prepared_contact_claim_rechecks_full_current_registry_before_supplier_io[unbound-quote]', 'test_original_contact_received_or_unknown_reopens_after_current_scope_revocation_without_resubmit[received]', 'test_original_contact_received_or_unknown_reopens_after_current_scope_revocation_without_resubmit[unknown]')), 'empty or missing current contact quote/claim discovery'"
+      - name: Discover independent C61 delivery core and current approval preparation
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_protocol.py tests/test_delivery_preparation_db.py --collect-only -q > artifacts/c61-delivery-core-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-core-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith(('tests/test_delivery_protocol.py::test_', 'tests/test_delivery_preparation_db.py::test_'))]; required=['test_delivery_intent_is_immutable_and_independent_of_contact_service', 'test_delivery_webhook_verifies_official_svix_example_raw_bytes', 'test_delivery_preparation_resolves_exact_server_revision_and_retains_disabled_route', 'test_delivery_preparation_foreign_workspace_is_denied_with_owned_positive_control', 'test_delivery_status_result_keeps_observed_reference_and_cannot_authorize_resubmit', 'test_delivery_status_result_rejects_invalid_or_local_only_state_before_any_IO', 'test_delivery_status_result_validator_preserves_exact_original_reference', 'test_delivery_status_result_validator_refuses_rebinding_to_another_reference', 'test_delivery_status_result_validator_rejects_untyped_or_ambiguous_result', 'test_delivery_status_result_validator_rejects_missing_original_query_reference', 'test_delivery_status_result_validator_rechecks_even_frozen_result_data', 'test_delivery_accepted_unknown_or_submitting_never_authorizes_resubmit[unknown]', 'test_delivery_status_never_regresses_or_confuses_acceptance_and_delivery[delivered-accepted-delivered]', 'test_delivery_preparation_rechecks_current_policy_recipient_sender_and_revision[policy]', 'test_delivery_preparation_rechecks_current_policy_recipient_sender_and_revision[suppression]']; assert m and int(m[1])==len(names)==len(set(names))==87 and all(any(item.split('::')[-1]==name or item.split('::')[-1].startswith(name+'[') for item in names) for name in required), 'empty, duplicate or missing independent delivery core discovery'"
+          uv run --frozen pytest tests/test_delivery_protocol.py tests/test_delivery_preparation_db.py --junitxml=artifacts/c61-delivery-core.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-core.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-delivery-core-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith(('tests/test_delivery_protocol.py::test_', 'tests/test_delivery_preparation_db.py::test_'))]; cases=list(E.parse('artifacts/c61-delivery-core.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==87 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing independent delivery execution'"
+      - name: Discover retained C61 delivery status and original unknown liability
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_status_db.py --collect-only -q > artifacts/c61-delivery-status-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-status-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_status_db.py::test_')]; required=['test_status_default_refuses_before_database_or_provider_IO', 'test_status_original_unknown_once_acceptance_is_distinct_from_delivery_and_never_resends', 'test_status_wrong_original_scope_has_exact_denial_and_no_state_or_hold_change', 'test_status_foreign_tenant_denial_has_matching_owned_positive_control', 'test_status_adverse_observation_deduplicates_suppression_and_retains_original_full_hold', 'test_status_caller_abort_rolls_back_observation_suppression_and_approval', 'test_status_expiry_after_writes_rolls_back_even_when_outer_caller_commits', 'test_status_twelve_parallel_observations_commit_one_event_without_extra_cost', 'test_status_reconciliation_survives_new_admission_role_and_approval_revocation', 'test_status_missing_or_changed_original_liability_never_invents_receipts_or_releases_hold']; assert m and int(m[1])==len(names)==len(set(names))==27 and all(any(item.split('::')[-1]==name or item.split('::')[-1].startswith(name+'[') for item in names) for name in required), 'empty, duplicate or missing retained delivery status discovery'"
+          uv run --frozen pytest tests/test_delivery_status_db.py --junitxml=artifacts/c61-delivery-status.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-status.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-delivery-status-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith('tests/test_delivery_status_db.py::test_')]; cases=list(E.parse('artifacts/c61-delivery-status.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==27 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing retained delivery status execution'"
+      - name: Discover fenced C61 delivery submit claim and immutable original scope
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_submission_db.py --collect-only -q > artifacts/c61-delivery-claim-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-claim-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_submission_db.py::test_')]; required=['test_delivery_submit_default_refuses_before_any_IO', 'test_delivery_submit_requires_both_closed_dispatch_flags_before_IO', 'test_delivery_submit_real_worker_claim_persists_once_before_IO_and_keeps_exact_payload_and_hold', 'test_delivery_submit_crash_or_known_acceptance_never_resubmits_original_intent', 'test_delivery_submit_rechecks_current_role_approval_policy_and_recipient_before_claim', 'test_delivery_submit_cannot_replace_the_original_reviewed_authority', 'test_delivery_submit_current_native_worker_fence_denies_stale_claim_without_mutation', 'test_delivery_submit_caller_abort_preserves_prepared_original_and_full_hold', 'test_delivery_submit_expiry_after_write_rolls_back_even_when_outer_caller_commits', 'test_delivery_submit_twelve_parallel_current_worker_calls_claim_original_only_once', 'test_delivery_submit_rechecks_locked_current_values_after_unlocked_original_read', 'test_delivery_submit_late_worker_fence_refusal_rolls_back_claim_even_if_outer_commits']; assert m and int(m[1])==len(names)==len(set(names))==30 and all(any(item.split('::')[-1]==name or item.split('::')[-1].startswith(name+'[') for item in names) for name in required), 'empty, duplicate or missing fenced delivery claim discovery'"
+          uv run --frozen pytest tests/test_delivery_submission_db.py --junitxml=artifacts/c61-delivery-claim.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-claim.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-delivery-claim-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith('tests/test_delivery_submission_db.py::test_')]; cases=list(E.parse('artifacts/c61-delivery-claim.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==30 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing fenced delivery claim execution'"
+      - name: Discover one-time C61 delivery POST permit and current post-commit checks
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_post_db.py --collect-only -q > artifacts/c61-delivery-post-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-post-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_post_db.py::test_')]; required=['test_delivery_post_default_refuses_before_any_database_or_provider_IO', 'test_delivery_post_one_committed_permit_keeps_original_scope_payload_and_permanent_unknown_hold', 'test_delivery_post_permission_revoked_after_initial_claim_blocks_before_IO_without_losing_hold', 'test_delivery_post_cannot_rebind_an_original_claim_or_replace_its_payload', 'test_delivery_post_current_fence_and_full_liability_are_rechecked_after_initial_commit', 'test_delivery_post_caller_abort_keeps_committed_initial_claim_and_full_hold', 'test_delivery_post_authority_expiry_after_actual_writes_rolls_back_even_outer_commit', 'test_delivery_post_twelve_parallel_original_claims_issue_one_permanent_permit', 'test_delivery_post_rechecks_locked_current_values_after_unlocked_original_read', 'test_delivery_post_late_worker_fence_refusal_rolls_back_permit_even_if_outer_commits', 'test_delivery_post_closed_dispatch_after_initial_commit_preserves_original_claim', 'test_delivery_post_new_authority_cannot_renew_a_committed_unknown_permit']; assert m and int(m[1])==len(names)==len(set(names))==36 and all(any(item.split('::')[-1]==name or item.split('::')[-1].startswith(name+'[') for item in names) for name in required), 'empty, duplicate or missing one-time delivery POST permit discovery'"
+          uv run --frozen pytest tests/test_delivery_post_db.py --junitxml=artifacts/c61-delivery-post.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-post.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-delivery-post-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith('tests/test_delivery_post_db.py::test_')]; cases=list(E.parse('artifacts/c61-delivery-post.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==36 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing one-time delivery POST permit execution'"
+      - name: Discover original C61 delivery submit responses and immutable references
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_response_db.py tests/test_delivery_response_protocol.py --collect-only -q > artifacts/c61-delivery-response-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-response-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_response_')]; required=['test_delivery_response_default_refuses_before_database_or_provider_IO', 'test_delivery_response_accepted_once_binds_original_ref_receipt_and_full_hold_without_delivery', 'test_delivery_response_unknown_and_rejection_keep_uncertainty_and_full_hold', 'test_delivery_response_cannot_replace_original_retained_authority', 'test_delivery_response_foreign_tenant_denial_has_matching_owned_positive_control', 'test_delivery_response_initial_claim_without_committed_post_permit_cannot_bind_acceptance', 'test_delivery_response_malformed_observation_refuses_before_database_IO', 'test_delivery_response_requires_exact_original_money_and_metadata', 'test_delivery_response_caller_abort_rolls_back_reference_and_local_receipt', 'test_delivery_response_authority_expiry_after_writes_rolls_back_even_outer_commit', 'test_delivery_response_twelve_parallel_original_results_persist_one_local_acceptance_receipt', 'test_delivery_response_retained_authority_persists_after_role_flags_and_worker_lease_revoked', 'test_delivery_response_cannot_replace_a_known_original_reference', 'test_delivery_response_late_unknown_rejection_and_acceptance_never_regress_delivered_or_drop_ref', 'test_delivery_response_cannot_rebind_original_permit_or_payload_digest', 'test_delivery_response_original_reference_joins_signed_callback_and_status_without_releasing_hold', 'test_delivery_submission_result_preserves_exact_typed_acceptance_and_reference', 'test_delivery_submission_result_rejects_malformed_unbounded_or_ambiguous_response', 'test_delivery_submission_result_refuses_untyped_and_status_response', 'test_delivery_submission_result_rechecks_frozen_values_before_durable_application']; assert m and int(m[1])==len(names)==len(set(names))==66 and all(any(item.split('::')[-1]==name or item.split('::')[-1].startswith(name+'[') for item in names) for name in required), 'empty, duplicate or missing original delivery submit response discovery'"
+          uv run --frozen pytest tests/test_delivery_response_db.py tests/test_delivery_response_protocol.py --junitxml=artifacts/c61-delivery-response.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-response.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-delivery-response-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith('tests/test_delivery_response_')]; cases=list(E.parse('artifacts/c61-delivery-response.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==66 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing original delivery submit response execution'"
+      - name: Discover transaction-separated native delivery runner and reconciliation receipts
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_runner_db.py --collect-only -q > artifacts/c61-delivery-runner-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-runner-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_runner_db.py::test_')]; required=['test_delivery_runner_unselected_refuses_before_all_IO', 'test_delivery_runner_both_dispatch_flags_required_before_IO', 'test_delivery_runner_selection_and_retained_authority_bound_before_IO', 'test_delivery_runner_same_intent_once_committed_unknown_before_POST_then_accepted_receipt', 'test_delivery_runner_revocation_after_claim_before_POST_has_zero_provider_calls', 'test_delivery_runner_invalid_or_over_limit_estimate_never_obtains_POST_permit', 'test_delivery_runner_unknown_error_rejection_or_invalid_response_never_resends_or_releases', 'test_delivery_runner_cancellation_after_POST_keeps_permanent_unknown_and_full_hold', 'test_delivery_runner_twelve_parallel_native_calls_send_original_once', 'test_delivery_runner_permit_transaction_commit_failure_cannot_start_POST', 'test_delivery_runner_response_write_failure_retains_unknown_without_second_POST', 'test_delivery_runner_accepted_response_survives_permission_and_worker_lease_revocation', 'test_native_delivery_selected_attempt_is_reconcile_not_delivered_and_finishes_fresh_receipt', 'test_native_delivery_unselected_keeps_closed_behavior_and_never_uses_common_adapter', 'test_native_delivery_selected_invalid_scope_refuses_before_factory_and_keeps_full_hold', 'test_native_delivery_received_acceptance_retained_when_late_worker_lease_cannot_finish', 'test_native_delivery_fresh_real_worker_entrypoint_uses_independent_delivery_and_never_contact', 'test_native_delivery_disabled_dispatch_never_resolves_factory']; assert m and int(m[1])==len(names)==len(set(names))==45 and all(any(item.split('::')[-1]==name or item.split('::')[-1].startswith(name+'[') for item in names) for name in required), 'empty, duplicate or missing native delivery runner discovery'"
+          uv run --frozen pytest tests/test_delivery_runner_db.py --junitxml=artifacts/c61-delivery-runner.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-runner.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-delivery-runner-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith('tests/test_delivery_runner_db.py::test_')]; cases=list(E.parse('artifacts/c61-delivery-runner.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==45 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing native delivery runner execution'"
+      - name: Discover exact-revision public delivery admission and retained original403
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_public_admission_db.py --collect-only -q > artifacts/c61-delivery-public-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-public-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_public_admission_db.py::test_')]; required=['test_new_delivery_admission_default_closed403_and_original_deliver403_have_zero_side_effects', 'test_delivery_admission_unselected503_does_not_create_any_message_operation_hold_or_outbox', 'test_delivery_admission_selected_precise_revision_once_replay_same_original_and_still_no_provider_IO', 'test_delivery_admission_rejects_arbitrary_content_or_client_authority_fields_before_write', 'test_delivery_admission_stale_or_rebound_revision_context_has_exact412_and_no_money', 'test_delivery_admission_operator_role_denied_and_matching_reviewer_positive_control', 'test_delivery_admission_foreign_draft_404_has_matching_owned202_and_same_original_scope', 'test_delivery_admission_unreviewed_or_expired_server_scope_cannot_create_hold', 'test_delivery_admission_paid_flag_disabled_requires503_even_if_delivery_flag_and_selection_present', 'test_delivery_admission_requires_key_before_any_delivery_write', 'test_delivery_admission_current_revocation_before_request_denies_and_keeps_zero_side_effects', 'test_delivery_admission_key_contract_rejects_before_money_and_never_surfaces500', 'test_delivery_admission_zero_UUID_is_invalid_request_without_write', 'test_delivery_admission_same_key_different_body_conflicts_without_rebind_or_extra_hold', 'test_delivery_admission_original_unknown_or_accepted_replay_never_resends_under_new_key', 'test_delivery_admission_replay_rechecks_current_permission_instead_of_returning_cached202', 'test_delivery_admission_foreign_workspace_is_non_enumerating404_with_owned202_control']; assert m and int(m[1])==len(names)==len(set(names))==46 and all(any(item.split('::')[-1]==name or item.split('::')[-1].startswith(name+'[') for item in names) for name in required), 'empty, duplicate or missing exact-revision admission discovery'"
+          uv run --frozen pytest tests/test_delivery_public_admission_db.py --junitxml=artifacts/c61-delivery-public.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-public.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-delivery-public-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith('tests/test_delivery_public_admission_db.py::test_')]; cases=list(E.parse('artifacts/c61-delivery-public.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==46 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing exact-revision admission execution'"
+      - name: Discover retained original-reference GET orchestration and full original unresolved hold
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_reconciliation_db.py --collect-only -q > artifacts/c61-delivery-reconciliation-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-reconciliation-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_reconciliation_db.py::test_')]; required=['test_retained_reconciliation_default_selector_refuses_before_database_or_provider_IO', 'test_retained_reconciliation_invalid_selection_refuses_before_database_or_provider_IO', 'test_retained_reconciliation_original_GET_closes_all_transactions_and_records_once_without_money', 'test_retained_reconciliation_survives_revoked_role_policy_flags_and_disabled_runtime', 'test_retained_reconciliation_original_binding_refuses_before_factory_and_has_owned_control', 'test_retained_reconciliation_foreign_tenant_is404_with_matching_owned_control', 'test_retained_reconciliation_lost_original_reference_never_looks_up_key_or_constructs_reader', 'test_retained_reconciliation_rejects_common_or_submit_capable_reader_without_GET', 'test_retained_reconciliation_malformed_observation_never_changes_state_hold_or_cost', 'test_retained_reconciliation_network_exception_retains_original_unknown_and_no_new_event', 'test_retained_reconciliation_cancellation_retains_original_hold_without_observation', 'test_retained_reconciliation_expiry_at_actual_boundary_refuses_without_local_event', 'test_retained_reconciliation_failed_transaction_commit_never_creates_partial_event_or_money', 'test_retained_reconciliation_parallel_GET_deduplicates_status_event_without_extra_operation_or_hold', 'test_retained_reconciliation_terminal_and_adverse_status_does_not_regress_or_release_full_hold', 'test_actual_bound_cold_Resend_reader_records_original_GET_without_new_send_authority_or_lock']; assert m and int(m[1])==len(names)==len(set(names))==34 and all(any(item.split('::')[-1]==name or item.split('::')[-1].startswith(name+'[') for item in names) for name in required), 'empty, duplicate or missing retained original-reference GET discovery'"
+          uv run --frozen pytest tests/test_delivery_reconciliation_db.py --junitxml=artifacts/c61-delivery-reconciliation.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-reconciliation.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-delivery-reconciliation-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith('tests/test_delivery_reconciliation_db.py::test_')]; cases=list(E.parse('artifacts/c61-delivery-reconciliation.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==34 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing retained original-reference GET execution'"
+      - name: Discover scoped admin original-message reconciliation and current response authority
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_reconcile_public_db.py --collect-only -q > artifacts/c61-delivery-reconcile-public-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-reconcile-public-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_reconcile_public_db.py::test_')]; required=['test_public_retained_reconciliation_unselected503_and_original_deliver403_have_no_provider_or_ledger_write', 'test_public_retained_reconciliation_gate_off503_before_any_factory_or_GET', 'test_public_retained_reconciliation_selected_admin_reads_only_original_metadata_and_deduplicates_event', 'test_public_retained_reconciliation_current_nonadmin_role_denied_before_GET_with_admin_positive_control', 'test_public_retained_reconciliation_foreign_workspace404_has_matching_owned_admin_control', 'test_public_retained_reconciliation_real_foreign_message404_with_current_foreign_workspace_membership_and_owned200', 'test_public_retained_reconciliation_forbids_client_ref_key_scope_body_and_economics_fields', 'test_public_retained_reconciliation_rejects_invalid_server_review_without_factory_or_GET', 'test_public_retained_reconciliation_original_without_saved_ref_is409_without_key_lookup_or_GET', 'test_public_retained_reconciliation_new_delivery_admission_off_does_not_block_retained_scope', 'test_public_retained_reconciliation_inactive_admin_is404_before_GET', 'test_public_retained_reconciliation_revoked_admin_after_GET_keeps_observation_but_denies_response', 'test_public_retained_reconciliation_malformed_foreign_ref_never_rebinds_original_or_records_event', 'test_public_retained_reconciliation_network_loss_returns_original_unknown_with_no_event_money_or_resend', 'test_retained_public_reconciliation_classifies_as_expensive_write', 'test_retained_public_reconciliation_rate_limit_admission_occurs_once_before_GET_and_never_after_receipt']; assert m and int(m[1])==len(names)==len(set(names))==28 and all(any(item.split('::')[-1]==name or item.split('::')[-1].startswith(name+'[') for item in names) for name in required), 'empty, duplicate or missing scoped admin original-message reconciliation discovery'"
+          uv run --frozen pytest tests/test_delivery_reconcile_public_db.py --junitxml=artifacts/c61-delivery-reconcile-public.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-reconcile-public.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-delivery-reconcile-public-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith('tests/test_delivery_reconcile_public_db.py::test_')]; cases=list(E.parse('artifacts/c61-delivery-reconcile-public.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==28 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing scoped admin original-message reconciliation execution'"
+      - name: Discover owned C61 delivery HTTP pool and lifecycle closure
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_resend_delivery_pool.py --collect-only -q > artifacts/c61-resend-pool-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-resend-pool-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_resend_delivery_pool.py::test_')]; required=['test_resend_pool_no_HTTP_during_constructor_entry_binding_and_estimate', 'test_resend_pool_binding_before_enter_after_close_or_second_enter_refuses', 'test_resend_pool_closes_after_owner_exception', 'test_resend_pool_cancellation_during_cleanup_waits_for_owned_close', 'test_resend_pool_foreign_or_inactive_send_binding_refuses_without_HTTP', 'test_resend_pool_cold_GET_only_factory_needs_no_new_send_authority', 'test_resend_pool_invalid_or_unbounded_limits_refuse_before_client_creation', 'test_resend_pool_invalid_retained_scope_or_key_refuses_before_client_creation', 'test_resend_pool_one_original_POST_and_unknown_not_retried']; assert m and int(m[1])==len(names)==len(set(names))==25 and all(any(n.split('::')[-1]==item or n.split('::')[-1].startswith(item+'[') for n in names) for item in required), 'empty, duplicate or missing owned HTTP pool discovery'"
+          uv run --frozen pytest tests/test_resend_delivery_pool.py --junitxml=artifacts/c61-resend-pool.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-resend-pool.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-resend-pool-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith('tests/test_resend_delivery_pool.py::test_')]; cases=list(E.parse('artifacts/c61-resend-pool.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(names)==len(set(names))==25 and set(names)==set(discovered) and not any(c.find('failure') is not None or c.find('error') is not None or c.find('skipped') is not None for c in cases), 'empty, duplicate, missing or nonpassing owned HTTP pool execution'"
+      - name: Discover bounded Resend delivery candidate and retained GET-only reconciliation
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_resend_delivery_transport.py tests/test_resend_delivery_native_db.py --collect-only -q > artifacts/c61-resend-wire-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-resend-wire-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith(('tests/test_resend_delivery_transport.py::test_', 'tests/test_resend_delivery_native_db.py::test_'))]; required=['test_resend_wire_fixed_POST_only_original_key_and_server_plaintext_payload', 'test_resend_wire_non200_no_redirect_retry_or_no_charge_claim', 'test_resend_wire_malformed_ambiguous_credential_echo_or_unbounded_response_stays_unknown', 'test_resend_wire_network_error_or_cancellation_cannot_retry_original', 'test_resend_wire_twelve_concurrent_calls_one_POST_remaining_unknown_until_original_finishes', 'test_resend_wire_wrong_unreviewed_expired_or_rebound_input_refuses_before_HTTP', 'test_resend_wire_rebound_intent_cannot_estimate_or_submit', 'test_resend_wire_status_GET_only_exact_original_id_and_conservative_event', 'test_resend_wire_unknown_status_never_rebinds_ref_or_submits', 'test_resend_wire_status_requires_existing_canonical_ref_no_key_lookup', 'test_cold_retained_delivery_status_reader_needs_no_new_send_authority_or_payload', 'test_cold_retained_status_invalid_authority_refuses_before_HTTP', 'test_cold_retained_status_expiry_after_construction_cannot_query_HTTP', 'test_actual_native_delivery_http_candidate_uses_committed_permit_once_and_keeps_full_hold']; assert m and int(m[1])==len(names)==len(set(names))==73 and all(any(item.split('::')[-1]==name or item.split('::')[-1].startswith(name+'[') for item in names) for name in required), 'empty, duplicate or missing bounded delivery wire discovery'"
+          uv run --frozen pytest tests/test_resend_delivery_transport.py tests/test_resend_delivery_native_db.py --junitxml=artifacts/c61-resend-wire.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-resend-wire.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-resend-wire-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith(('tests/test_resend_delivery_transport.py::test_', 'tests/test_resend_delivery_native_db.py::test_'))]; cases=list(E.parse('artifacts/c61-resend-wire.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==73 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing bounded delivery wire execution'"
+      - name: Discover C61 shared JWKS cross-loop and cancellation boundaries
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_jwks_cross_loop.py tests/test_jwks_cold_concurrency.py --collect-only -q > artifacts/c61-jwks-cross-loop-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-jwks-cross-loop-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith(('tests/test_jwks_cross_loop.py::test_', 'tests/test_jwks_cold_concurrency.py::test_'))]; required=['test_signed_cold_requests_on_two_event_loops_finish_without_foreign_loop_wakeup', 'test_two_warm_signed_requests_keep_independent_subjects_without_refetch', 'test_cancelling_one_waiter_does_not_cancel_original_fetch_or_other_signed_request', 'test_cancelling_fetch_owner_finishes_other_signed_request_fail_closed_without_refetch', 'test_valid_parallel_signed_tokens_wait_for_same_cold_jwks_fetch', 'test_cold_fetch_outage_rejects_all_waiters_without_refetch_or_trust_fallback']; assert m and int(m[1])==len(names)==len(set(names))==8 and all(any(item.split('::')[-1]==name or item.split('::')[-1].startswith(name+'[') for item in names) for name in required), 'empty, duplicate or missing shared cross-loop JWKS completion discovery'"
+          uv run --frozen pytest tests/test_jwks_cross_loop.py tests/test_jwks_cold_concurrency.py --junitxml=artifacts/c61-jwks-cross-loop.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-jwks-cross-loop.xml
+          python -c "import pathlib,xml.etree.ElementTree as E; discovered=[line for line in pathlib.Path('artifacts/c61-jwks-cross-loop-discovery.txt').read_text(encoding='utf-8').splitlines() if line.startswith(('tests/test_jwks_cross_loop.py::test_', 'tests/test_jwks_cold_concurrency.py::test_'))]; cases=list(E.parse('artifacts/c61-jwks-cross-loop.xml').getroot().iter('testcase')); names=[c.get('classname').replace('.','/')+'.py::'+c.get('name') for c in cases]; assert len(cases)==len(set(names))==8 and set(names)==set(discovered) and not any(list(c.iter('failure')) or list(c.iter('error')) or list(c.iter('skipped')) for c in cases), 'empty, duplicate, missing or nonpassing shared cross-loop JWKS completion execution'"
+      - name: Discover atomic C61 delivery admission and retained authority
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_admission_db.py --collect-only -q > artifacts/c61-delivery-admission-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-admission-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_admission_db.py::test_')]; assert m and int(m[1])==len(names)==len(set(names))==67 and all(name in text for name in ('test_unselected_delivery_admission_refuses_before_any_database_or_provider_io', 'test_atomic_delivery_reserves_persists_reviewed_scope_and_one_registered_paid_outbox', 'test_postwrite_authority_expiry_refusal_rolls_back_even_if_outer_caller_commits', 'test_twelve_parallel_same_intent_admissions_commit_one_original_liability', 'test_twelve_parallel_different_keys_cannot_resend_same_original_revision', 'test_original_unknown_replay_refusal_keeps_exact_refs_authority_and_full_hold', 'test_paid_dispatcher_requires_both_independent_flags_and_retains_original_hold', 'test_native_delivery_step_never_routes_to_common_contact_and_keeps_full_hold', 'test_SQL_authority_requires_exact_original_message_liability_scope_and_paid_outbox', 'test_SQL_authority_refuses_incomplete_ambiguous_expired_or_unhashed_metadata', 'test_SQL_original_message_and_outbox_cannot_acquire_a_second_authority', 'test_delivery_authority_force_RLS_owned_positive_foreign_denial_and_immutable_runtime_grants', 'test_empty0050_downgrade_and_reupgrade_restore_exact_head_receipt_guards', 'test_populated_authority_downgrade_refuses_and_retains_original_refs_and_full_hold', 'test_new_approved_revision_and_new_key_cannot_hide_original_unknown_delivery')), 'empty or missing required delivery discovery'"
+          uv run --frozen pytest tests/test_delivery_admission_db.py --junitxml=artifacts/c61-delivery-admission.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-admission.xml
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('artifacts/c61-delivery-admission.xml').getroot().iter('testcase')); names=[c.get('name') for c in cases]; assert len(cases)==len(set(names))==67 and all(any(item==name or item.startswith(name+'[') for item in names) for name in ('test_unselected_delivery_admission_refuses_before_any_database_or_provider_io', 'test_atomic_delivery_reserves_persists_reviewed_scope_and_one_registered_paid_outbox', 'test_postwrite_authority_expiry_refusal_rolls_back_even_if_outer_caller_commits', 'test_twelve_parallel_same_intent_admissions_commit_one_original_liability', 'test_twelve_parallel_different_keys_cannot_resend_same_original_revision', 'test_original_unknown_replay_refusal_keeps_exact_refs_authority_and_full_hold', 'test_paid_dispatcher_requires_both_independent_flags_and_retains_original_hold', 'test_native_delivery_step_never_routes_to_common_contact_and_keeps_full_hold', 'test_SQL_authority_requires_exact_original_message_liability_scope_and_paid_outbox', 'test_SQL_authority_refuses_incomplete_ambiguous_expired_or_unhashed_metadata', 'test_SQL_original_message_and_outbox_cannot_acquire_a_second_authority', 'test_delivery_authority_force_RLS_owned_positive_foreign_denial_and_immutable_runtime_grants', 'test_empty0050_downgrade_and_reupgrade_restore_exact_head_receipt_guards', 'test_populated_authority_downgrade_refuses_and_retains_original_refs_and_full_hold', 'test_new_approved_revision_and_new_key_cannot_hide_original_unknown_delivery')), 'missing or duplicate delivery execution'"
+
+      - name: Discover signed C61 delivery callback transaction and retained liability
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_callbacks_db.py --collect-only -q > artifacts/c61-delivery-callback-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-callback-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_callbacks_db.py::test_')]; assert m and int(m[1])==len(names)==len(set(names))==36 and all(name in text for name in ('test_delivery_callback_same_signed_intent_once_preserves_original_unknown_hold', 'test_delivery_callback_bounce_duplicate_and_late_acceptance_keep_independent_suppression', 'test_delivery_callback_twelve_parallel_duplicates_commit_one_event_and_overlay', 'test_delivery_callback_caller_abort_rolls_back_event_state_suppression_and_approval_invalidation', 'test_delivery_callback_foreign_tenant_denial_has_matching_owned_positive_control', 'test_delivery_callback_expired_after_actual_writes_rolls_back_when_outer_caller_catches', 'test_delivery_callback_external_event_cannot_move_to_another_original_message')), 'empty or missing signed delivery callback discovery'"
+          uv run --frozen pytest tests/test_delivery_callbacks_db.py --junitxml=artifacts/c61-delivery-callback.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-callback.xml
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('artifacts/c61-delivery-callback.xml').getroot().iter('testcase')); names=[c.get('name') for c in cases]; assert len(cases)==len(set(names))==36 and all(any(item==name or item.startswith(name+'[') for item in names) for name in ('test_delivery_callback_same_signed_intent_once_preserves_original_unknown_hold', 'test_delivery_callback_bounce_duplicate_and_late_acceptance_keep_independent_suppression', 'test_delivery_callback_twelve_parallel_duplicates_commit_one_event_and_overlay', 'test_delivery_callback_caller_abort_rolls_back_event_state_suppression_and_approval_invalidation', 'test_delivery_callback_foreign_tenant_denial_has_matching_owned_positive_control', 'test_delivery_callback_expired_after_actual_writes_rolls_back_when_outer_caller_catches', 'test_delivery_callback_external_event_cannot_move_to_another_original_message')), 'missing or duplicate signed delivery callback execution'"
+
+      - name: Discover independent C61 delivery budget and retained holds
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_budget_db.py --collect-only -q > artifacts/c61-delivery-budget-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-budget-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_budget_db.py::test_')]; assert m and int(m[1])==len(names)==len(set(names))==41 and all(name in text for name in ('test_delivery_budget_reserves_original_operation_in_three_exact_scopes_and_keeps_public403', 'test_delivery_budget_missing_selected_authority_never_creates_a_hold', 'test_delivery_budget_expiry_after_reserve_rolls_back_even_when_caller_catches', 'test_delivery_budget_twelve_parallel_replays_create_one_three_scope_hold', 'test_delivery_budget_foreign_workspace_is_denied_after_owned_positive_control', 'test_delivery_budget_foreign_operation_is_not_found_with_matching_owned_control', 'test_delivery_budget_caller_abort_rolls_back_original_operation_and_all_allocations')), 'empty or missing independent delivery budget discovery'"
+          uv run --frozen pytest tests/test_delivery_budget_db.py --junitxml=artifacts/c61-delivery-budget.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-delivery-budget.xml
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('artifacts/c61-delivery-budget.xml').getroot().iter('testcase')); names=[c.get('name') for c in cases]; assert len(cases)==len(set(names))==41 and all(any(item==name or item.startswith(name+'[') for item in names) for name in ('test_delivery_budget_reserves_original_operation_in_three_exact_scopes_and_keeps_public403', 'test_delivery_budget_missing_selected_authority_never_creates_a_hold', 'test_delivery_budget_expiry_after_reserve_rolls_back_even_when_caller_catches', 'test_delivery_budget_twelve_parallel_replays_create_one_three_scope_hold', 'test_delivery_budget_foreign_workspace_is_denied_after_owned_positive_control', 'test_delivery_budget_foreign_operation_is_not_found_with_matching_owned_control', 'test_delivery_budget_caller_abort_rolls_back_original_operation_and_all_allocations')), 'missing or duplicate delivery budget execution'"
+
+      - name: Discover delivery money expand and retained history
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_numeric_contract_db.py --collect-only -q > artifacts/c61-delivery-money-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-money-discovery.txt').read_text(); m=re.search(r'(\d+) tests? collected',text); assert m and int(m[1])==2 and all(name in text for name in ('test_delivery_liability_uses_exact_original_reservation_money_precision','test_populated0048_money_expand_retains_original_unknown_hold_and_refuses_shrinking')), 'empty or missing delivery money expand discovery'"
+
+      - name: Discover independent C61 delivery ledger and retained rollback
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_delivery_ledger_db.py --collect-only -q > artifacts/c61-delivery-ledger-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-delivery-ledger-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==18 and all(name in text for name in ('test_delivery_tables_force_tenant_rls_and_deny_mutating_immutable_bindings', 'test_delivery_owned_control_foreign_rls_and_cross_workspace_fk', 'test_delivery_event_identity_and_message_status_cannot_regress', 'test_delivery_populated_rollback_refuses_and_retains_unknown_hold_and_canonical_refs', 'test_delivery_no_tenant_context_fails_closed_and_owned_receipt_guards_remain_writable', 'test_delivery_original_reference_and_event_account_cannot_be_rebound', 'test_delivery_liability_cannot_borrow_another_operation_hold', 'test_delivery_models_register_exact_migrated_columns', 'test_delivery_durable_states_refuse_unknown_resend_and_terminal_regression[unknown-submitting-False]')), 'empty or missing delivery ledger boundary discovery'"
+      - name: Verify required C61 HTTP retry boundary discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_run_events_http.py --collect-only -q > artifacts/c61-http-retry-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-http-retry-discovery.txt').read_text(); m=re.search(r'(\d+) tests? collected',text); assert m and int(m[1])==4 and all(name in text for name in ('test_retry_only_safe_fit_checkpoint_preserves_usage_and_checks_current_profile','test_cancel_unknown_operation_retains_hold','test_cancel_before_dispatch_is_terminal_and_retry_does_not_reset','test_run_page_replay_and_tenant_safe_missing')), 'empty or missing HTTP retry boundary discovery'"
+
+      - name: Discover settled step terminal outcome with whole-run queued fence
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_native_terminal_outcome_db.py --collect-only -q > artifacts/c61-native-terminal-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-native-terminal-discovery.txt').read_text(); m=re.search(r'(\d+) tests? collected',text); assert m and int(m[1])==1 and 'tests/test_native_terminal_outcome_db.py::test_settled_discovery_step_does_not_reconcile_only_because_next_query_is_queued' in text, 'empty or missing settled step terminal discovery'"
+      - name: Verify required C61 actual native contact discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_native_contact_dispatch_db.py --collect-only -q > artifacts/c61-native-contact-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-native-contact-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==13 and all(name in text for name in ('test_current_contact_factory_can_resolve_exact_reviewed_account_without_company_role_fallback', 'test_contact_factory_cannot_swap_reviewed_account_or_nonbillable_status[account]', 'test_contact_factory_cannot_swap_reviewed_account_or_nonbillable_status[status]', 'test_actual_public_contact_confirm_native_registry_factory_prepares_once_and_preserves_unknown_money[received]', 'test_actual_public_contact_confirm_native_registry_factory_prepares_once_and_preserves_unknown_money[unknown]', 'test_actual_native_contact_denies_unready_current_basis_before_private_prepare_or_network[key-owner]', 'test_actual_native_contact_denies_unready_current_basis_before_private_prepare_or_network[full-contract]', 'test_actual_native_contact_denies_unready_current_basis_before_private_prepare_or_network[epoch]')), 'empty or missing actual native contact discovery'"
+      - name: Verify required C61 owned HTTP capture discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_owned_request_capture.py --collect-only -q > artifacts/c61-owned-http-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-owned-http-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==10 and all(name in text for name in ('test_owned_capture_separates_concurrent_actor_sql_and_restores_outer_context', 'test_owned_capture_keeps_non2xx_timeout_and_scope_failures[timeout]', 'test_owned_capture_keeps_non2xx_timeout_and_scope_failures[wrong_scope]', 'test_owned_capture_keeps_non2xx_timeout_and_scope_failures[malformed]', 'test_owned_capture_preserves_measured_queue_and_unexpected_exception_restoration')), 'empty or missing owned HTTP capture discovery'"
+      - name: Verify required C61 Q10 quality tool discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_quality_tools.py tests/test_workspace_benchmark_tools.py --collect-only -q > artifacts/c61-quality-tool-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-quality-tool-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==50 and all(name in text for name in ('test_buyer_capture_accepts_capacity_actors_but_refuses_empty_observations[1]', 'test_buyer_capture_accepts_capacity_actors_but_refuses_empty_observations[10]', 'test_buyer_capture_accepts_capacity_actors_but_refuses_empty_observations[25]', 'test_buyer_benchmark_completes_with_actual_scoped_source_hashes', 'test_three_fixture_runs_have_hand_derived_precision_recall_and_abstention', 'test_incomplete_or_leaky_goldset_comparisons_are_rejected', 'test_legacy_benchmark_rejects_collection_without_observations', 'test_legacy_benchmark_preserves_existing_dispatcher_evidence', 'test_directory_capture_rejects_empty_or_nonpassing_required_junit', 'test_directory_capture_supports_scoped_actor_stairs[10]', 'test_directory_capture_supports_scoped_actor_stairs[25]')), 'empty or missing C61 Q10 tool discovery'"
+      - name: Verify required C61 read-only research capture discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_research_capture.py tests/test_research_capture_receipt_db.py --collect-only -q > artifacts/c61-capture-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-capture-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==34 and all(name in text for name in ('test_capture_excludes_wrong_company_and_preserves_abstention', 'test_capture_keeps_failed_and_needs_review_in_each_run_denominator', 'test_actual_runtime_readonly_capture_keeps_all_rows_and_denies_current_scope[none]', 'test_actual_runtime_readonly_capture_keeps_all_rows_and_denies_current_scope[owner-role]', 'test_actual_capture_cli_preserves_frozen_inputs_and_exclusive_outputs[none]', 'test_readonly_capture_reads_original_native_receipt_metadata_without_submit_or_settlement[native]', 'test_capture_missing_both_receipt_hashes_cannot_be_equal_authority', 'test_capture_preserves_valid_not_match_with_qualified_contradictory_evidence')), 'empty or missing C61 read-only capture discovery'"
+      - name: Verify required C61 pool wait discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_pool_wait_tools.py --collect-only -q > artifacts/c61-pool-wait-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-pool-wait-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==8 and all(name in text for name in ('test_owned_queue_wait_records_actual_queue_call_and_restores','test_owned_queue_wait_keeps_exception_and_failed_wait_in_denominator','test_owned_queue_restore_cannot_overwrite_another_patch','test_pool_wait_summary_keeps_partial_and_unmeasured_denominators')), 'empty or missing C61 pool wait discovery'"
+      - name: Verify required C61 performance manifest discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_c61_performance_harness.py --collect-only -q > artifacts/c61-performance-manifest-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-performance-manifest-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==39 and all(name in text for name in ('test_frozen_pool_wait_coverage_is_measured_without_filling_unknowns[True]', 'test_frozen_pool_wait_coverage_is_measured_without_filling_unknowns[False]', 'test_frozen_matrix_recomputes_raw_denominators_and_never_claims_release', 'test_frozen_matrix_never_hides_actual_failures_or_incomplete_coverage[timeout]', 'test_frozen_performance_actual_cli_binds_inputs_and_refuses_empty_required_evidence[empty-junit]', 'test_frozen_cli_rejects_unrelated_positive_suite_and_mixed_runtime_overlay[wrong-required-case]', 'test_frozen_cli_rejects_unrelated_positive_suite_and_mixed_runtime_overlay[mixed-runtime-file]')), 'empty or missing C61 performance manifest discovery'"
+      - name: Verify required C61 frozen quality discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_research_gate_tools.py --collect-only -q > artifacts/c61-frozen-quality-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-frozen-quality-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==29 and all(name in text for name in ('test_frozen_reports_separate_three_runs_and_strata_without_3n_pooling', 'test_frozen_small_strata_are_insufficient_with_their_own_intervals', 'test_frozen_quality_and_cost_gates_never_hide_unknowns_or_unsafe_rows[unknown-hold]', 'test_frozen_quality_and_cost_gates_never_hide_unknowns_or_unsafe_rows[not-adopted]', 'test_frozen_rejects_changed_or_incomplete_original_bindings[bool-safety]', 'test_frozen_rejects_changed_or_incomplete_original_bindings[empty-owner]', 'test_frozen_cli_writes_new_report_and_preserves_all_input_and_output_evidence[canonical]', 'test_frozen_cli_writes_new_report_and_preserves_all_input_and_output_evidence[pretty]')), 'empty or missing C61 frozen quality discovery'"
+      - name: Verify required C61 receipt privacy discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_provider_receipt_retention_db.py tests/test_receipt_source_erasure_db.py tests/test_receipt_read_current_scope_db.py tests/test_receipt_retention_payload.py tests/test_receipt_retention_rollback_db.py --collect-only -q > artifacts/c61-receipt-privacy-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-receipt-privacy-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>0 and all(name in text for name in ['test_receipt_read_does_not_wait_on_its_own_parent_policy_transaction', 'test_private_contact_read_does_not_wait_on_parent_policy_transaction', 'test_unknown_redacted_payload_and_hash_survive_downgrade_and_reupgrade']), 'empty or missing required receipt privacy discovery'"
+      - name: Verify required C61 api research guard discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_live_research_admission_db.py --collect-only -q > artifacts/c61-research-guard-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-research-guard-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>0 and all(name in text for name in ['test_lost202_single_run_outbox_uses_current_selector_epoch', 'test_role_revoked_before_admission_blocks', 'test_safe_fit_retry_reads_current_runtime_without_replaying_prior_intent']), 'empty or missing required research guard discovery'"
+      - name: Verify required C61 received search intake discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_received_search_intake_db.py --collect-only -q > artifacts/c61-search-intake-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-search-intake-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>0 and all(name in text for name in ['test_received_metadata_ingests_once_without_guessing_entities_or_cost','test_receipt_erasure_clears_all_intake_source_copies_atomically','test_intake_read_lock_prevents_concurrent_erase_then_no_resurrection','test_intake_migration_rollback_retains_tombstones_and_closes_writes','test_worker_cannot_use_api_intake_lock_or_prepare_receipts','test_intake_receipt_lock_fences_runtime_flip_until_transaction_finishes']), 'empty or missing required received search intake discovery'"
+      - name: Verify required C61 frozen research preparation discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_run_search_preparation_db.py --collect-only -q > artifacts/c61-run-search-preparation-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-run-search-preparation-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>=28 and all(name in text for name in ['test_run_request_prepared_atomically_on_original_intent_once', 'test_live_admission_freezes_complete_receipt_contract', 'test_live_admission_missing_contract_stays_unavailable', 'test_native_run_discover_prepares_submits_intakes_or_reconciles_once', 'epoch-during-http-native', 'no-api-port-native', 'test_received_receipt_crash_recovers_status_reference_without_resubmit', 'test_native_status_recovery_intakes_received_search_without_another_http', 'test_signed_api_host_step_uses_api_prepare_and_worker_submit_once']), 'empty or missing required frozen research preparation discovery'"
+      - name: Verify required C61 source provenance discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_evidence_persistence_db.py::test_search_metadata_cannot_be_promoted_to_retrieved_evidence tests/test_safe_fetch.py::test_retrieved_excerpt_has_complete_utf8_codepoints tests/test_research_page_scope_db.py --collect-only -q > artifacts/c61-source-provenance-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-source-provenance-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>=20 and all(name in text for name in ['test_search_metadata_cannot_be_promoted_to_retrieved_evidence','search_result_metadata','private_object_missing_key','future_retrieval','test_retrieved_excerpt_has_complete_utf8_codepoints','test_exact_source_scope_is_immutable_current_and_does_not_retrieve_or_promote','test_page_scope_rejects_current_permission_provenance_and_fence_changes','generic-policy','wrong-purpose','foreign-raw','future-metadata']), 'empty or missing required source provenance discovery'"
+      - name: Verify required C61 research page discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_research_page_retrieval_db.py --collect-only -q > artifacts/c61-research-page-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-research-page-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>=14 and all(name in text for name in ['test_permitted_page_retrieves_persists_once_with_current_scope_and_no_entity_guess','test_page_process_loss_keeps_original_claim_and_does_not_get_again','test_page_receipt_expiry_erases_all_page_and_metadata_copies_atomically','test_page_get_obeys_the_actual_run_byte_limit_before_retaining_content','test_signed_native_search_continues_to_only_an_explicitly_permitted_page','test_page_migration_rollback_keeps_rows_hashes_holds_and_closes_writes','test_concurrent_page_attempts_have_only_one_get_and_one_source','test_receipt_erased_during_page_get_cannot_resurrect_a_page']), 'empty or missing required research page discovery'"
+      - name: Verify required C61 page status recovery discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_research_page_recovery_db.py --collect-only -q > artifacts/c61-page-recovery-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-page-recovery-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>=6 and all(name in text for name in ['unattempted-native','pending-native','retrieved-native','missing-transport-native','policy-changed-native','epoch-during-page-native']), 'empty or missing required research recovery discovery'"
+      - name: Verify required C61 receipt-derived privacy discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_research_receipt_derived_privacy_db.py --collect-only -q > artifacts/c61-derived-privacy-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-derived-privacy-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>=14 and all(name in text for name in ['test_search_receipt_erasure_clears_future_evidence_fit_draft_approval_export_copies_atomically','test_derived_erasure_rejects_not_due_foreign_workspace_and_direct_helper','test_derived_row_lock_failure_rolls_back_receipt_source_and_all_copies','test_concurrent_derived_receipt_erasure_has_one_audit_and_no_replay','test_model_basis_payload_is_erased_only_when_dependent_on_search_source','test_populated_derived_privacy_rollback_retains_eraser_and_closes_all_receipt_writes','test_retained_pre0046_tombstone_repairs_derived_copies_without_new_receipt_audit','test_source_specific_compatible_sweep_repairs_retained_derived_copies','test_atomic_eraser_does_not_relax_draft_or_approval_immutability','test_retained_old_receipt_must_clear_metadata_raw_and_older_live_source','tombstoned','still_live']), 'empty or missing required receipt-derived privacy discovery'"
+      - name: Verify required C61 native candidate review discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_research_candidate_review_db.py --collect-only -q > artifacts/c61-candidate-review-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-candidate-review-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>=20 and all(name in text for name in ['test_explicit_page_review_maps_only_selected_existing_company_and_creates_cited_inference_once','test_page_review_rechecks_member_scope_source_identity_and_original_fence','altered-page','missing-page-proof','test_reviewed_page_evidence_expiry_clears_copy_but_keeps_independent_entity_uuid','test_reviewed_raw_cannot_be_silently_relinked_by_a_different_replay','test_concurrent_same_review_keeps_one_alias_evidence_and_buyer','test_worker_cannot_perform_human_page_review','test_review_replay_rejects_changed_stored_alias_citation_or_buyer_material']), 'empty or missing required native candidate review discovery'"
+      - name: Verify required C61 native candidate API discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_research_candidate_api_db.py --collect-only -q > artifacts/c61-candidate-api-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-candidate-api-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==21 and all(name in text for name in ('test_review_API_derives_canonical_actor_replays_once_and_matches_contract','test_review_context_rejects_changed_accepted_mapping_material','test_review_API_revoked_reviewer_cannot_replay_cached_result','test_review_API_stale_source_cannot_replay_cached_result','test_review_error_matches_declared_recovery_contract','test_review_context_requires_frozen_original_quote_proof')), 'empty or missing C61 candidate API discovery'"
+
+      - name: Verify required C61 native evidence basis discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_research_native_basis_db.py --collect-only -q > artifacts/c61-native-basis-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-native-basis-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==12 and all(name in text for name in ('test_native_page_current_proof_distinguishes_excerpt_and_full_digest_under_restricted_roles','test_live_model_basis_never_transfers_expired_native_page_prose','test_native_current_proof_rejects_changed_or_expired_authoritative_basis')), 'empty or missing C61 native model basis discovery'"
+
+      - name: Verify required C61 candidate list discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_research_candidate_list_db.py --collect-only -q > artifacts/c61-candidate-list-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-candidate-list-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==8 and all(name in text for name in ('test_candidate_list_query_count_does_not_grow_from1_to101','test_candidate_list_incomplete_original_page_claim_is_awaiting_reconciliation_without_GET','test_candidate_list_redacts_expired_or_unlicensed_source_details')), 'empty or missing C61 candidate list discovery'"
+
+      - name: Verify required C61 native evidence read discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_research_native_read_db.py --collect-only -q > artifacts/c61-native-read-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-native-read-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==20 and all(name in text for name in ('test_current_native_evidence_is_available_as_inference_without_more_GET','test_native_evidence_read_masks_changed_or_unlicensed_prose_and_URL[license-list]','test_native_evidence_read_masks_changed_or_unlicensed_prose_and_URL[finish-single]')), 'empty or missing C61 native read discovery'"
+
+      - name: Verify required C61 native model preparation discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_run_model_admission_db.py tests/test_native_model_context.py --collect-only -q > artifacts/c61-run-model-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-run-model-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==28 and all(name in text for name in ('test_queue_then_atomic_prepare_freezes_one_basis_operation_receipt_hold_and_token_ceiling','test_caller_rollback_leaves_no_partial_model_receipt_hold_operation_or_usage','test_model_accepted_unknown_prepare_requires_reconciliation_without_new_hold_or_tokens[unknown]','test_native_entity_context_can_prepare_but_cannot_prove_a_requirement','test_native_entity_context_remains_ineligible_for_factual_model_citation')), 'empty or missing native model preparation discovery'"
+
+      - name: Verify required C61 native model dispatch discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_run_model_dispatch_db.py --collect-only -q > artifacts/c61-run-model-dispatch-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-run-model-dispatch-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==23 and all(name in text for name in ('test_native_model_dispatch_prepares_before_IO_and_keeps_single_intent_and_liability[received-native]','test_native_received_model_status_recovers_current_fit_without_a_second_submit[status-envelope-native]','test_native_received_model_status_recovers_current_fit_without_a_second_submit[epoch-before-persist-native]','test_native_model_process_loss_preserves_original_receipt_and_recovers_fit_once[submit-ack-native]','test_native_model_process_loss_preserves_original_receipt_and_recovers_fit_once[status-read-native]','test_native_received_model_status_recovers_current_fit_without_a_second_submit[legacy-scope-revoked-native]','test_native_received_model_status_recovers_current_fit_without_a_second_submit[new-scope-revoked-native]','test_native_received_model_status_recovers_current_fit_without_a_second_submit[invalid-registry-hash-native]','test_native_received_model_status_recovers_current_fit_without_a_second_submit[extra-registry-authority-native]')), 'empty or missing native model dispatch discovery'"
+
+      - name: Verify required C61 native fit context discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_native_fit_context_db.py --collect-only -q > artifacts/c61-native-fit-context-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-native-fit-context-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==8 and all(name in text for name in ('test_native_fit_callbacks_keep_current_entity_context_as_needs_review_without_factual_coverage','test_native_fit_context_exception_requires_current_original_server_proof[claim-factual-native]','test_native_entity_context_expired_after_verify_cannot_persist_a_fit')), 'empty or missing native fit context discovery'"
+
+      - name: Verify required C61 first review model handoff discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_review_model_handoff_db.py --collect-only -q > artifacts/c61-review-model-handoff-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-review-model-handoff-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==8 and all(name in text for name in ('test_first_actual_review_queues_one_frozen_model_without_factory_hold_or_token_admission[native]','test_unavailable_model_keeps_accepted_review_and_later_activation_never_creates_work_on_replay[paid-disabled-native]','test_model_queue_failure_rolls_back_only_new_wakeup_without_dropping_accepted_review[native]','test_review_queued_model_uses_real_registry_native_factory_once_and_retains_original_unknown_hold[received-native]','test_review_queued_model_uses_real_registry_native_factory_once_and_retains_original_unknown_hold[unknown-native]','test_next_frozen_discovery_claim_keeps_reviewed_model_fit_stage[native]')), 'empty or missing first review model handoff discovery'"
+
+      - name: Verify required C61 selected public review discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_research_review_registry_db.py --collect-only -q > artifacts/c61-public-review-registry-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-public-review-registry-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==8 and all(name in text for name in ('test_actual_selected_review_uses_current_typed_registration_without_provider_factory[context]','test_actual_selected_review_uses_current_typed_registration_without_provider_factory[review]','test_public_review_blocks_unbound_or_changed_registry_scope_without_writes[stale-planning]','test_public_review_blocks_unbound_or_changed_registry_scope_without_writes[direct-production-capability]')), 'empty or missing selected public review discovery'"
+
+      - name: Verify required C61 model registry scope discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_run_model_registry_scope_db.py --collect-only -q > artifacts/c61-model-current-scope-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-model-current-scope-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==15 and all(name in text for name in ('test_model_queue_freezes_full_reviewed_route_hash_separately_from_receipt_hash[native]','test_model_new_queue_requires_current_typed_registry_before_any_outbox[unscoped-native]','test_model_prepare_rechecks_full_frozen_registry_before_hold_tokens_or_receipt[missing-hash-native]','test_prepared_model_claim_blocks_current_scope_change_before_worker_submit[registry-empty-native]','test_original_model_receipt_reconciles_after_scope_revocation_without_new_submit[received-native]','test_original_model_receipt_reconciles_after_scope_revocation_without_new_submit[unknown-native]')), 'empty or missing model registry scope discovery'"
+
+      - name: Verify required C61 model configuration discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_selected_run_model.py --collect-only -q > artifacts/c61-model-configuration-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-model-configuration-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==18 and all(name in text for name in ('test_selected_model_configuration_requires_complete_current_reviewed_route_without_factory[verified]','test_selected_model_configuration_requires_complete_current_reviewed_route_without_factory[unscoped]','test_model_registration_rejects_partial_mutable_or_unbounded_native_configuration[boolean-token-bound]','test_model_full_registry_hash_binds_route_model_and_review_without_changing_historical_receipt_hash','test_default_production_model_configuration_stays_unselected')), 'empty or missing model configuration discovery'"
+
+      - name: Verify required C61 bounded query continuation discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_native_query_continuation_db.py --collect-only -q > artifacts/c61-query-continuation-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-query-continuation-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==13 and all(name in text for name in ('test_received_intake_atomically_queues_one_independent_next_query_without_replaying_original','test_native_fit_cannot_complete_before_unreserved_discovery[ready]','test_native_fit_cannot_complete_before_unreserved_discovery[dispatched]','test_receipt_still_intakes_when_new_query_gate_blocks_without_hold_or_child[None-registry-revoked]','test_actual_native_factory_walks_frozen_queries_individually_and_never_repeats_unknown[received]','test_actual_native_factory_walks_frozen_queries_individually_and_never_repeats_unknown[unknown]')), 'empty or missing bounded query continuation discovery'"
+
+      - name: Verify required C61 selected native producer discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_native_selected_run_producer_db.py --collect-only -q > artifacts/c61-native-selected-producer-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-native-selected-producer-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==2 and all('test_real_selected_producer_and_native_registry_factory_share_original_scope_and_one_submit['+mode+']' in text for mode in ('received','unknown')), 'empty or missing selected native producer discovery'"
+
+      - name: Verify required C61 current registry scope discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_run_registry_scope_db.py --collect-only -q > artifacts/c61-registry-current-scope-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-registry-current-scope-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==16 and all(name in text for name in ('test_real_admission_freezes_registry_hash_and_explicit_pairs','test_new_prepare_requires_current_full_scope_before_hold_or_counters[missing-hash]','test_prepared_claim_rechecks_scope_before_worker_http[registry-empty]','test_original_uncertain_receipt_reconciles_after_registry_revocation_without_post[unknown]','test_original_uncertain_receipt_reconciles_after_registry_revocation_without_post[received-after-crash]','test_real_admission_without_full_registry_hash_stays_unavailable[malformed]')), 'empty or missing current registry scope discovery'"
+
+      - name: Verify required C61 registry admission discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_selected_run_provider.py --collect-only -q > artifacts/c61-registry-admission-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-registry-admission-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==27 and all(name in text for name in ('test_selected_run_capability_uses_only_verified_code_owned_search_scope[valid]','test_registration_search_scope_constructor_is_frozen_bounded_and_hash_bound[valid]','test_registry_selected_scope_reaches_real_atomic_admission_without_route_override[verified]','test_registry_selected_scope_reaches_real_atomic_admission_without_route_override[lost-replay]','test_registry_selected_scope_reaches_real_atomic_admission_without_route_override[paid-off]')), 'empty or missing registry admission discovery'"
+
+      - name: Verify required C61 native progress discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_native_run_progress_db.py --collect-only -q > artifacts/c61-native-progress-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-native-progress-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==12 and all('test_native_run_api_exposes_current_reconciliation_and_rejects_unsafe_retry['+name+'-native]' in text for name in ('ready','reserved','accepted','unknown','succeeded','retry-ready','retry-reserved','retry-accepted','retry-unknown','cancel-accepted','cancel-unknown')) and 'test_native_confirmed_original_work_allows_one_safe_checkpoint_retry[native]' in text, 'empty or missing native progress discovery'"
+
+      - name: Verify required C61 native completion discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_native_model_completion_db.py --collect-only -q > artifacts/c61-native-completion-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-native-completion-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==11 and all('test_native_fit_completion_waits_for_original_model_work_and_current_basis['+name+'-native]' in text for name in ('ready','reserved','accepted','unknown','succeeded','project-only','stale-actor','stale-source','stale-offer','resume','late-ready')), 'empty or missing native completion discovery'"
+
+      - name: Verify required Neon cutover discovery
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_neon_cutover_db.py tests/test_backup_restore_t28.py --collect-only -q > artifacts/neon-cutover-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/neon-cutover-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>0 and 'test_neon_cutover_rollback_preserves_new_users' in text and 'test_restore_replays_deletion_before_reopen' in text and 'test_disposable_restore_replays_older_backup_deletion_journal' in text, 'empty or missing required cutover discovery'"
+      - name: Discover full native C61 api inventory before execution
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 2525 --discovery-only
+      - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
+        working-directory: services/api
+      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 2525 --junit services/api/artifacts/tests.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-neon-cutover-local-rehearsal
+          path: |
+            artifacts/c61/C61-13-cold-*-rehearsal.json
+            services/api/artifacts/neon-cutover-discovery.txt
+            services/api/artifacts/tests.xml
+            services/api/artifacts/c61-full-discovery.txt
+          if-no-files-found: error
 
   worker:
     runs-on: ubuntu-latest
@@ -136,14 +562,83 @@ jobs:
         working-directory: services/worker
       - run: mkdir -p artifacts
         working-directory: services/worker
-      - run: uv run --frozen pytest -q --junitxml=artifacts/tests.xml
+      - name: Discover independent C61 legacy delivery routing and retained holds
         working-directory: services/worker
-      - run: python scripts/check-required-tests.py --junit services/worker/artifacts/tests.xml
+        run: |
+          uv run --frozen pytest tests/test_delivery_routing_db.py --collect-only -q > artifacts/c61-legacy-delivery-routing-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-legacy-delivery-routing-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_routing_db.py::test_')]; assert m and int(m[1])==len(names)==len(set(names))==4 and all(name in text for name in ('test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[False-False]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[True-False]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[False-True]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[True-True]')), 'empty or missing required delivery discovery'"
+          uv run --frozen pytest tests/test_delivery_routing_db.py --junitxml=artifacts/c61-legacy-delivery-routing.xml
+          python ../../scripts/check-required-tests.py --junit artifacts/c61-legacy-delivery-routing.xml
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('artifacts/c61-legacy-delivery-routing.xml').getroot().iter('testcase')); names=[c.get('name') for c in cases]; assert len(cases)==len(set(names))==4 and all(any(item==name or item.startswith(name+'[') for item in names) for name in ('test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[False-False]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[True-False]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[False-True]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[True-True]')), 'missing or duplicate delivery execution'"
+
+      - name: Verify bounded C61 worker claim and capacity gate discovery
+        working-directory: services/worker
+        run: |
+          uv run --frozen pytest tests/test_claim_limit_db.py tests/test_worker_capacity_tools.py --collect-only -q > artifacts/c61-claim-capacity-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-claim-capacity-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==18 and all(name in text for name in ('test_actual_single_tenant_claim_respects_locked_limit[1]', 'test_actual_single_tenant_claim_respects_locked_limit[3]', 'test_worker_capacity_requires_named_positive_zero_skip_junit', 'test_worker_capacity_continues_returned_cursor_after_empty_budget_cycle', 'test_worker_capacity_stalled_backlog_stops_with_all_empty_cycles_retained', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[incomplete]', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[empty]', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[same-worker]')), 'empty or missing bounded claim/capacity discovery'"
+      - name: Verify required C61 worker research guard discovery
+        working-directory: services/worker
+        run: |
+          uv run --frozen pytest tests/test_live_research_journey_db.py --collect-only -q > artifacts/c61-research-guard-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-research-guard-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>0 and all(name in text for name in ['test_crash_after_provider_acceptance_reconciles', 'test_unknown_intent_uses_status_only_at_original_epoch', 'test_old_epoch_cannot_commit', 'test_research_continuations_keep_original_selector_epoch']), 'empty or missing required research guard discovery'"
+      - name: Verify required C61 fit discovery
+        working-directory: services/worker
+        run: |
+          mkdir -p artifacts
+          uv run --frozen pytest tests/test_live_fit_db.py tests/test_research_graph.py --collect-only -q > artifacts/c61-fit-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-fit-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>0 and all(name in text for name in ['test_stale_basis_cannot_persist_match','test_live_model_pg_receipt_survives_restart_without_new_submission']), 'empty or missing required fit discovery'"
+      - name: Discover full native C61 worker inventory before execution
+        working-directory: services/worker
+        run: |
+          uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 246 --discovery-only
+      - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
+        working-directory: services/worker
+      - run: python scripts/check-required-tests.py --pytest-discovery services/worker/artifacts/c61-full-discovery.txt --expected-count 246 --junit services/worker/artifacts/tests.xml
       - run: python -m pip install uv==0.11.27 && uv sync --project services/worker --frozen --no-dev --python 3.12
       - run: services/worker/.venv/bin/python scripts/run-render-worker.py worker --check
       - run: services/worker/.venv/bin/python scripts/run-render-worker.py dispatcher --check
       - run: services/worker/.venv/bin/python -m celery -A buyeros_worker.app:celery_app worker --help
       - run: services/worker/.venv/bin/python -m buyeros_worker.cli dispatch --help
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-full-worker-native
+          path: |
+            services/worker/artifacts/c61-full-discovery.txt
+            services/worker/artifacts/tests.xml
+          if-no-files-found: error
+
+  owned-worker-capacity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BUYEROS_STRICT_INTEGRATION: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install uv==0.11.27
+      - run: uv sync --frozen
+        working-directory: services/api
+      - run: uv sync --frozen
+        working-directory: services/worker
+      - run: mkdir -p artifacts/c61
+      - name: Discover the opt-in real worker fixture explicitly
+        run: |
+          services/worker/.venv/bin/python -m pytest services/worker/tests/benchmark_worker_capacity_case.py --collect-only -q > artifacts/c61/ci-worker-capacity-discovery.txt
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61/ci-worker-capacity-discovery.txt').read_text(); m=re.search(r'(\d+) tests? collected',text); assert m and int(m[1])==1 and 'benchmark_worker_capacity_case.py::test_owned_backlog_rotation_and_worker_restart' in text, 'empty or wrong actual worker capacity discovery'"
+      - name: Capture owned backlog rotation and worker restart
+        run: services/worker/.venv/bin/python scripts/benchmark-worker-capacity.py --output artifacts/c61/ci-worker-capacity-observations.json --junit artifacts/c61/ci-worker-capacity.xml
+      - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-worker-capacity.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-owned-worker-capacity
+          path: artifacts/c61/ci-worker-capacity*
+          if-no-files-found: error
 
   browser-smoke:
     runs-on: ubuntu-latest
@@ -178,7 +673,21 @@ jobs:
       - run: uv sync --frozen
         working-directory: services/api
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm exec playwright test tests/e2e/harness.spec.ts
+      - name: Verify native smoke discovery before execution
+        run: |
+          mkdir -p test-results
+          pnpm exec playwright test tests/e2e/harness.spec.ts --list --reporter=json > test-results/smoke-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery test-results/smoke-discovery.json --expected-count 1 --expected-file harness.spec.ts --discovery-only
+          pnpm exec playwright test tests/e2e/harness.spec.ts --reporter=line,junit
+          python scripts/check-required-tests.py --playwright-discovery test-results/smoke-discovery.json --expected-count 1 --expected-file harness.spec.ts --junit test-results/smoke.xml
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/smoke.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-browser-smoke
+          path: test-results/
+          if-no-files-found: error
 
   browser-zoom:
     runs-on: ubuntu-latest
@@ -213,10 +722,15 @@ jobs:
       - run: uv sync --frozen
         working-directory: services/api
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Verify native zoom discovery before execution
+        run: |
+          mkdir -p test-results
+          pnpm exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --list --reporter=json > test-results/zoom-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery test-results/zoom-discovery.json --expected-count 2 --expected-file api-browser-zoom.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.live-zoom.config.ts tests/e2e/api-browser-zoom.spec.ts --reporter=line,junit
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/zoom.xml
-      - run: python scripts/check-required-tests.py --junit test-results/zoom.xml
+      - run: python scripts/check-required-tests.py --playwright-discovery test-results/zoom-discovery.json --expected-count 2 --expected-file api-browser-zoom.spec.ts --junit test-results/zoom.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -255,7 +769,10 @@ jobs:
       - run: uv run --frozen pytest -q tests/benchmark_cloudflare_case.py --junitxml=../../artifacts/cloudflare/ci-operating.xml
         working-directory: services/api
       - run: python scripts/check-required-tests.py --junit artifacts/cloudflare/ci-operating.xml
+      - run: pnpm exec playwright test --config playwright.cloudflare.config.ts --list --reporter=json > artifacts/cloudflare/ci-staff-discovery.json
+      - run: python scripts/check-required-tests.py --playwright-discovery artifacts/cloudflare/ci-staff-discovery.json --expected-count 7 --expected-file cloudflare-journey.spec.ts --discovery-only
       - run: node scripts/run-cloudflare-acceptance.mjs
+      - run: python scripts/check-required-tests.py --playwright-discovery artifacts/cloudflare/ci-staff-discovery.json --expected-count 7 --expected-file cloudflare-journey.spec.ts --junit artifacts/cloudflare/acceptance/journey.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -293,37 +810,62 @@ jobs:
       - run: uv sync --frozen
         working-directory: services/worker
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Verify native research discovery before execution
+        run: |
+          mkdir -p test-results
+          pnpm exec playwright test --config playwright.mvp-research.config.ts tests/e2e/mvp-a-research.spec.ts --list --reporter=json > test-results/research-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery test-results/research-discovery.json --expected-count 4 --expected-file mvp-a-research.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.mvp-research.config.ts tests/e2e/mvp-a-research.spec.ts --reporter=line,junit
-      - run: python scripts/check-required-tests.py --junit test-results/t30-browser.xml
+      - run: python scripts/check-required-tests.py --playwright-discovery test-results/research-discovery.json --expected-count 4 --expected-file mvp-a-research.spec.ts --junit test-results/t30-browser.xml
       - run: |
           mkdir -p artifacts/ci-t30/continuity
           cp -r test-results/. artifacts/ci-t30/continuity/
+      - name: Verify native workbench discovery before execution
+        run: |
+          mkdir -p test-results
+          pnpm exec playwright test --config playwright.workbench.config.ts tests/e2e/daily-workbench.spec.ts --list --reporter=json > test-results/workbench-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery test-results/workbench-discovery.json --expected-count 8 --expected-file daily-workbench.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.workbench.config.ts tests/e2e/daily-workbench.spec.ts --reporter=line,junit
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/workbench.xml
       - run: |
-          python scripts/check-required-tests.py --junit test-results/workbench.xml
+          python scripts/check-required-tests.py --playwright-discovery test-results/workbench-discovery.json --expected-count 8 --expected-file daily-workbench.spec.ts --junit test-results/workbench.xml
           mkdir -p artifacts/ci-t30/workbench
           cp -r test-results/. artifacts/ci-t30/workbench/
+      - name: Verify native buyers discovery before execution
+        run: |
+          mkdir -p test-results
+          pnpm exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --workers=1 --list --reporter=json > test-results/buyers-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery test-results/buyers-discovery.json --expected-count 1 --expected-file buyer-results.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --workers=1 --reporter=line,junit
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/buyers.xml
       - run: |
-          python scripts/check-required-tests.py --junit test-results/buyers.xml
+          python scripts/check-required-tests.py --playwright-discovery test-results/buyers-discovery.json --expected-count 1 --expected-file buyer-results.spec.ts --junit test-results/buyers.xml
           mkdir -p artifacts/ci-t30/buyers
           cp -r test-results/. artifacts/ci-t30/buyers/
+      - name: Verify native buyer-management discovery before execution
+        run: |
+          mkdir -p test-results
+          pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --list --reporter=json > test-results/buyer-management-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery test-results/buyer-management-discovery.json --expected-count 3 --expected-file buyer-management.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --reporter=line,junit
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/buyer-management.xml
       - run: |
-          python scripts/check-required-tests.py --junit test-results/buyer-management.xml
+          python scripts/check-required-tests.py --playwright-discovery test-results/buyer-management-discovery.json --expected-count 3 --expected-file buyer-management.spec.ts --junit test-results/buyer-management.xml
           mkdir -p artifacts/ci-t30/buyer-management
           cp -r test-results/. artifacts/ci-t30/buyer-management/
+      - name: Verify native journey discovery before execution
+        run: |
+          mkdir -p test-results
+          pnpm exec playwright test --config playwright.mvp.config.ts tests/e2e/mvp-a-journey.spec.ts --list --reporter=json > test-results/journey-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery test-results/journey-discovery.json --expected-count 1 --expected-file mvp-a-journey.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.mvp.config.ts tests/e2e/mvp-a-journey.spec.ts --reporter=line,junit
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/mvp-acceptance.xml
       - run: |
-          python scripts/check-required-tests.py --junit test-results/mvp-acceptance.xml
+          python scripts/check-required-tests.py --playwright-discovery test-results/journey-discovery.json --expected-count 1 --expected-file mvp-a-journey.spec.ts --junit test-results/mvp-acceptance.xml
           mkdir -p artifacts/ci-t30/mvp-acceptance
           cp -r test-results/. artifacts/ci-t30/mvp-acceptance/
       - uses: actions/upload-artifact@v4
@@ -341,6 +883,7 @@ jobs:
     # Owned PG16 and built fixture only; no provider/production credentials.
     env:
       BUYEROS_STRICT_INTEGRATION: '1'
+      C61_SOURCE_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -362,16 +905,126 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: |
           mkdir -p artifacts/c61
-          pnpm exec playwright test --config playwright.audit-fixes.config.ts --list > artifacts/c61/playwright-discovery.txt
-          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61/playwright-discovery.txt').read_text(); match=re.search(r'Total: (\d+) tests',text); assert match and int(match[1])>0, 'empty Playwright discovery'"
+          pnpm exec playwright test --config playwright.audit-fixes.config.ts --list --reporter=json > artifacts/c61/playwright-discovery.json
+          python -c "import importlib.util,pathlib; s=importlib.util.spec_from_file_location('c61_gate',pathlib.Path('scripts/check-c61-evidence.py')); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); names=m._built_playwright_names(pathlib.Path('artifacts/c61/playwright-discovery.json').read_bytes(),'audit'); print('native unique '+str(len(names)))"
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 124 --expected-file audit-delivery-history.spec.ts --expected-file audit-access-revocation.spec.ts --expected-file audit-auth-entry.spec.ts --expected-file audit-bulk-confirmation.spec.ts --expected-file audit-bulk-manifest.spec.ts --expected-file audit-candidate-review.spec.ts --expected-file audit-daily-journey.spec.ts --expected-file audit-daily-ux.spec.ts --expected-file audit-draft-dirty.spec.ts --expected-file audit-draft-reground.spec.ts --expected-file audit-job-scope.spec.ts --expected-file audit-keyboard-workbench.spec.ts --expected-file audit-keyboard.spec.ts --expected-file audit-maintenance-settings.spec.ts --expected-file audit-memberships.spec.ts --expected-file audit-native-run-progress.spec.ts --expected-file audit-operations.spec.ts --expected-file audit-research-intent.spec.ts --expected-file audit-reviewed-list-order.spec.ts --expected-file audit-template-copy.spec.ts --expected-file work-queue-counts.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.audit-fixes.config.ts
-      - run: python scripts/check-required-tests.py --junit test-results/audit-fixes.xml
+      - run: python scripts/check-required-tests.py --playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 124 --expected-file audit-delivery-history.spec.ts --expected-file audit-access-revocation.spec.ts --expected-file audit-auth-entry.spec.ts --expected-file audit-bulk-confirmation.spec.ts --expected-file audit-bulk-manifest.spec.ts --expected-file audit-candidate-review.spec.ts --expected-file audit-daily-journey.spec.ts --expected-file audit-daily-ux.spec.ts --expected-file audit-draft-dirty.spec.ts --expected-file audit-draft-reground.spec.ts --expected-file audit-job-scope.spec.ts --expected-file audit-keyboard-workbench.spec.ts --expected-file audit-keyboard.spec.ts --expected-file audit-maintenance-settings.spec.ts --expected-file audit-memberships.spec.ts --expected-file audit-native-run-progress.spec.ts --expected-file audit-operations.spec.ts --expected-file audit-research-intent.spec.ts --expected-file audit-reviewed-list-order.spec.ts --expected-file audit-template-copy.spec.ts --expected-file work-queue-counts.spec.ts --junit test-results/audit-fixes.xml
+      - run: python -c "import importlib.util,pathlib; s=importlib.util.spec_from_file_location('c61_gate',pathlib.Path('scripts/check-c61-evidence.py')); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); discovered=m._built_playwright_names(pathlib.Path('artifacts/c61/playwright-discovery.json').read_bytes(),'audit'); executed=m._junit(pathlib.Path('test-results/audit-fixes.xml').read_bytes()); assert discovered==executed, 'native JSON discovery/JUnit mismatch'"
+      - name: Discover and verify strict C61 built process ownership
+        run: |
+          uv run --frozen --project services/api python - <<'PY'
+          import json,pathlib,unittest
+          pending=[unittest.defaultTestLoader.discover('tests',pattern='test_c61_built_owner.py')]
+          names=[]
+          while pending:
+              item=pending.pop()
+              if isinstance(item,unittest.TestCase): names.append(item.id())
+              else: pending.extend(item)
+          assert len(names)==len(set(names))==7 and all('BuiltOwnerTests.test_' in name for name in names), 'empty or wrong built owner discovery'
+          pathlib.Path('artifacts/c61/ci-built-owner-discovery.json').write_text(json.dumps(sorted(names),indent=2)+'\n')
+          PY
+          uv run --frozen --project services/api python -m unittest discover -s tests -p test_c61_built_owner.py -v > artifacts/c61/ci-built-owner.log 2>&1
+          python -c "import json,pathlib,re; discovered=json.loads(pathlib.Path('artifacts/c61/ci-built-owner-discovery.json').read_text()); text=pathlib.Path('artifacts/c61/ci-built-owner.log').read_text(); names=re.findall(r'^test_\\w+ \\((test_c61_built_owner\\.BuiltOwnerTests\\.test_\\w+)\\) \\.\\.\\. ok$',text,re.M); assert len(names)==len(set(names))==7 and set(names)==set(discovered) and re.search(r'^Ran 7 tests in ',text,re.M) and text.rstrip().endswith('OK'), 'empty, skipped or mismatched native owner execution'"
+      - name: Discover C61 joined built fixture and state regression
+        run: |
+          pnpm exec playwright test --config playwright.c61-react-regression.config.ts --list --reporter=json > artifacts/c61/ci-c61-react-built-discovery.json
+          python -c "import importlib.util,pathlib; s=importlib.util.spec_from_file_location('c61_gate',pathlib.Path('scripts/check-c61-evidence.py')); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); names=m._built_playwright_names(pathlib.Path('artifacts/c61/ci-c61-react-built-discovery.json').read_bytes(),'react'); print('native unique '+str(len(names)))"
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-c61-react-built-discovery.json --expected-count 17 --expected-file audit-bulk-manifest.spec.ts --expected-file audit-candidate-review.spec.ts --expected-file c61-eight-module-fixture.spec.ts --expected-file c61-joined-authority-fixture.spec.ts --expected-file c61-joined-bulk-fixture.spec.ts --discovery-only
+      - name: Verify C61 joined built fixture and state regression
+        run: |
+          pnpm exec playwright test --config playwright.c61-react-regression.config.ts
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-c61-react-built-discovery.json --expected-count 17 --expected-file audit-bulk-manifest.spec.ts --expected-file audit-candidate-review.spec.ts --expected-file c61-eight-module-fixture.spec.ts --expected-file c61-joined-authority-fixture.spec.ts --expected-file c61-joined-bulk-fixture.spec.ts --junit test-results/c61-react-regression.xml
+          python -c "import importlib.util,pathlib; s=importlib.util.spec_from_file_location('c61_gate',pathlib.Path('scripts/check-c61-evidence.py')); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); discovered=m._built_playwright_names(pathlib.Path('artifacts/c61/ci-c61-react-built-discovery.json').read_bytes(),'react'); executed=m._junit(pathlib.Path('test-results/c61-react-regression.xml').read_bytes()); assert discovered==executed, 'native JSON discovery/JUnit mismatch'"
+      - name: Discover C61 same-chain Unicode grounding and exact approved export
+        run: |
+          pnpm exec playwright test --config playwright.c61-unicode-joined.config.ts --list --reporter=json > artifacts/c61/ci-c61-unicode-built-discovery.json
+          python -c "import importlib.util,pathlib; s=importlib.util.spec_from_file_location('c61_gate',pathlib.Path('scripts/check-c61-evidence.py')); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); names=m._built_playwright_names(pathlib.Path('artifacts/c61/ci-c61-unicode-built-discovery.json').read_bytes(),'unicode'); print('native unique '+str(len(names)))"
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-c61-unicode-built-discovery.json --expected-count 4 --expected-file c61-unicode-joined-fixture.spec.ts --discovery-only
+      - name: Verify C61 same-chain Unicode grounding and exact approved export
+        run: |
+          pnpm exec playwright test --config playwright.c61-unicode-joined.config.ts
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-c61-unicode-built-discovery.json --expected-count 4 --expected-file c61-unicode-joined-fixture.spec.ts --junit test-results/c61-unicode-joined.xml
+          python -c "import importlib.util,pathlib; s=importlib.util.spec_from_file_location('c61_gate',pathlib.Path('scripts/check-c61-evidence.py')); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); discovered=m._built_playwright_names(pathlib.Path('artifacts/c61/ci-c61-unicode-built-discovery.json').read_bytes(),'unicode'); executed=m._junit(pathlib.Path('test-results/c61-unicode-joined.xml').read_bytes()); assert discovered==executed, 'native JSON discovery/JUnit mismatch'"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: buyeros-c61-audit-built-fixture
           path: |
-            artifacts/c61/playwright-discovery.txt
+            artifacts/c61/playwright-discovery.json
             test-results/audit-fixes.xml
             test-results/audit-fixes/
+            artifacts/c61/ci-built-owner-discovery.json
+            artifacts/c61/ci-built-owner.log
+            artifacts/c61/ci-c61-react-built-discovery.json
+            test-results/c61-react-regression.xml
+            test-results/c61-react-regression/
+            artifacts/c61/ci-c61-unicode-built-discovery.json
+            test-results/c61-unicode-joined.xml
+            test-results/c61-unicode-joined/
+            test-results/c61-26-*-journey-ledger.json
+          if-no-files-found: error
+
+  c61-evidence-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify required Playwright discovery guards
+        run: |
+          python - <<'PY'
+          import unittest
+          suite=unittest.defaultTestLoader.discover('tests',pattern='test_playwright_required_discovery.py')
+          pending=[suite]; names=[]
+          while pending:
+              item=pending.pop()
+              if isinstance(item,unittest.TestCase): names.append(item.id())
+              else: pending.extend(item)
+          assert len(names)==len(set(names))==16, 'empty, duplicate or missing discovery guard controls'
+          result=unittest.TextTestRunner(verbosity=2).run(suite)
+          assert result.testsRun==16 and result.wasSuccessful() and not result.skipped, 'required discovery guards failed or skipped'
+          PY
+      - name: Verify required full pytest discovery guards
+        run: |
+          python - <<'PY'
+          import unittest
+          suite=unittest.defaultTestLoader.discover('tests',pattern='test_pytest_required_discovery.py')
+          pending=[suite]; names=[]
+          while pending:
+              item=pending.pop()
+              if isinstance(item,unittest.TestCase): names.append(item.id())
+              else: pending.extend(item)
+          assert len(names)==len(set(names))==21, 'empty, duplicate or missing full pytest guard controls'
+          result=unittest.TextTestRunner(verbosity=2).run(suite)
+          assert result.testsRun==21 and result.wasSuccessful() and not result.skipped, 'required full pytest guards failed or skipped'
+          PY
+      - name: Discover C61 evidence checker assertions before running
+        run: |
+          mkdir -p artifacts/c61
+          python - <<'PY'
+          import json,pathlib,unittest
+          pending=[unittest.defaultTestLoader.discover('tests',pattern='test_c61*evidence.py')];names=[]
+          while pending:
+              item=pending.pop()
+              if isinstance(item,unittest.TestCase): names.append(item.id())
+              else: pending.extend(item)
+          required=('test_windows_CRLF_native_owner_log_keeps_names_and_release_no_go', 'test_CRLF_skipped_owner_row_cannot_be_hidden_by_OK_summary', 'test_complete_native_JSON_registration_alias_and_owner_metadata_remain_release_no_go', 'test_windows_native_commands_are_valid', 'test_missing_full_provenance_rejected', 'test_empty_native_discovery_rejected', 'test_collection_error_rejected', 'test_duplicate_native_id_rejected', 'test_results_in_list_rejected', 'test_multiple_projects_for_one_spec_rejected', 'test_missing_audit_family_rejected', 'test_candidate_family_subset_rejected', 'test_definition_file_cannot_replace_registration_identity', 'test_foreign_file_path_rejected', 'test_empty_group_JUnit_rejected', 'test_failed_group_JUnit_rejected', 'test_skipped_group_JUnit_rejected', 'test_missing_step_rejected', 'test_keyword_filtered_execution_rejected', 'test_old_text_discovery_rejected', 'test_wrong_original_config_rejected', 'test_nonzero_native_exit_rejected', 'test_boolean_native_exit_rejected', 'test_source_change_rejected', 'test_shared_dependency_scope_rejected', 'test_frozen_dependency_change_rejected', 'test_browser_fixture_cannot_claim_real_auth', 'test_owner_metadata_cannot_claim_Linux_process_proof', 'test_owner_empty_discovery_rejected', 'test_owner_discovery_execution_mismatch_rejected', 'test_owner_fake_success_log_rejected', 'test_time_outside_receipt_rejected', 'test_discovery_after_its_execution_rejected', 'test_duplicate_required_inventory_rejected', 'test_full_frontend_all_original_steps_and_positive_reports_remain_release_no_go', 'test_full_frontend_windows_native_pnpm_is_valid', 'test_frontend_unscoped_subset_cannot_satisfy_full_job', 'test_frontend_missing_bare_script_cannot_pass', 'test_frontend_wrong_original_step_order_cannot_pass', 'test_frontend_node_keyword_filter_cannot_pass', 'test_frontend_omitted_audit_source_file_cannot_pass', 'test_frontend_empty_group_junit_cannot_pass', 'test_frontend_skipped_group_cannot_pass', 'test_frontend_duplicate_group_report_cannot_count_twice', 'test_frontend_empty_native_Playwright_discovery_cannot_pass', 'test_frontend_native_Playwright_name_mismatch_cannot_pass', 'test_frontend_wrong_Playwright_config_cannot_pass', 'test_frontend_shared_node_modules_cannot_pass', 'test_frontend_changed_frozen_lockfile_cannot_pass', 'test_frontend_boolean_native_exit_cannot_pass', 'test_frontend_build_echo_cannot_pass', 'test_frontend_empty_build_output_cannot_pass', 'test_frontend_build_other_source_cannot_pass', 'test_frontend_tampered_native_log_cannot_pass', 'test_frontend_step_time_outside_candidate_cannot_pass', 'test_frontend_source_change_cannot_pass', 'test_frontend_invented_Node_collect_only_claim_cannot_pass', 'test_frontend_synthetic_browser_cannot_be_called_real_Neon', 'test_frontend_duplicate_full_inventory_cannot_pass', 'test_controller_complete_named_original_job_is_valid_and_stays_release_no_go', 'test_controller_windows_exact_pnpm_argv_is_valid_without_shell_text', 'test_controller_missing_frozen_install_cannot_pass_with_unit_junit', 'test_controller_ignore_scripts_or_unfrozen_install_is_not_original_job', 'test_controller_module_keyword_filter_is_not_full_execution', 'test_controller_missing_bindings_check_does_not_pass', 'test_controller_wrangler_publish_is_not_dry_run', 'test_controller_different_vitest_config_is_not_required_inventory', 'test_controller_shared_dependency_junction_is_not_fresh_install', 'test_controller_changed_lockfile_does_not_pass', 'test_controller_boolean_step_exit_is_not_native_zero', 'test_controller_nonzero_original_step_cannot_pass', 'test_controller_step_outside_proof_window_is_not_current', 'test_controller_duplicate_step_cannot_hide_missing_original_check', 'test_controller_source_drift_does_not_pass', 'test_controller_unscoped_subset_junit_remains_refused', 'test_controller_other_service_or_fixture_scope_is_refused', 'test_controller_tampered_original_step_log_does_not_pass', 'test_full_execution_requires_explicit_tests_root', 'test_full_discovery_requires_explicit_tests_root', 'test_full_execution_empty_args_is_not_full_inventory', 'test_explicit_full_roots_keep_python_and_frozen_uv_controls', 'test_module_substitution_cannot_become_the_full_root', 'test_zero_discovery_is_rejected', 'test_missing_case_cannot_shrink_denominator', 'test_duplicate_report_bytes_under_second_filename_are_rejected', 'test_utf16_entities_cannot_bypass_declaration_guard', 'test_rewriting_both_original_and_trace_cannot_redefine_history', 'test_optimized_interpreter_cannot_disable_phase_guard', 'test_case_pass_must_name_its_actual_assertions', 'test_human_case_cannot_use_junit_or_fixture', 'test_full_gate_rejects_unscoped_valid_subset', 'test_full_gate_rejects_module_only_execution', 'test_full_gate_rejects_execution_keyword_filter', 'test_full_worker_positive_control_is_independent', 'test_full_gate_rejects_missing_executed_inventory_case', 'test_pytest_ipv6_parameter_is_preserved_as_one_test_name', 'test_complete_owned_migration_proof_is_scoped_and_release_stays_no_go', 'test_bare_full_API_JUnit_cannot_replace_retained_migration_report', 'test_missing_current_supported_upgrade_assertion_is_not_migration_acceptance', 'test_changed_UUID_FK_or_unknown_hold_cannot_pass', 'test_false_tombstone_hold_or_epoch_fence_is_not_a_rollback', 'test_historical_or_reordered_timeline_cannot_be_current', 'test_reopened_runtime_readiness_and_revoked_identity_stay_refused', 'test_fake_empty_history_or_zero_unknown_hold_cannot_pass', 'test_owned_migration_proof_cannot_claim_real_Neon_or_production', 'test_numeric_digest_or_boolean_count_cannot_fake_native_readback', 'test_explicit_frozen_built_python312_pin_preserves_all_release_refusals', 'test_wrong_or_mutable_built_python_selectors_remain_refused', 'test_exact_package_native_Node_Playwright_entry_preserves_release_refusals', 'test_native_Node_browser_entry_refuses_external_scripts_filters_and_wrappers','test_complete_react17_includes_original9_authority4_and_joined_bulk4','test_legacy_react9_cannot_omit_required_authority_cases','test_seventeen_other_cases_cannot_replace_joined_bulk_family','test_legacy_react13_cannot_omit_required_joined_bulk_cases')
+          assert len(names)==len(set(names))==158 and all(any(n.endswith('.'+r) for n in names) for r in required),'empty or missing C61 evidence checker discovery'
+          pathlib.Path('artifacts/c61/ci-evidence-checker-discovery.json').write_text(json.dumps({'count':len(names),'unique_names':sorted(names)},indent=2)+'\n')
+          PY
+      - name: Verify C61 automated evidence foundation (not release acceptance)
+        run: |
+          python - <<'PY'
+          import unittest
+          suite=unittest.defaultTestLoader.discover('tests',pattern='test_c61*evidence.py')
+          result=unittest.TextTestRunner(verbosity=2).run(suite)
+          assert result.testsRun==159 and result.wasSuccessful() and not result.skipped, 'empty, incomplete, failed or skipped C61 evidence checker execution'
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-c61-evidence-checker-discovery
+          path: artifacts/c61/ci-evidence-checker-discovery.json
           if-no-files-found: error

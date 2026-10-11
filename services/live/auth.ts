@@ -7,6 +7,14 @@ export interface AuthAdapter {
   subject(): string;
   returnPath(): string;
   expiresAt(): number;
+  provider?: 'auth0' | 'neon';
+  initialize?(): Promise<void>;
+  refreshAccessToken?(rejectedToken?: string): Promise<string>;
+  subscribeInvalidated?(listener: () => void): () => void;
+  invalidate?(): void;
+  dispose?(): void;
+  signInEmail?(email: string, password: string): Promise<void>;
+  signInGoogle?(): Promise<void>;
 }
 export interface AuthConfig {issuer: string; clientId: string; audience: string; clientSecret?: never;}
 interface AuthEnvironment {
@@ -31,8 +39,14 @@ function decodePart(value: string): Record<string, unknown> {
   return parsed as Record<string, unknown>;
 }
 export function normalizeReturnPath(value: string): string {
-  if (!value.startsWith('/app') || (value.length > 4 && !['/', '?', '#'].includes(value[4])) || value.startsWith('//') || value.includes('\\') || /[\r\n]/.test(value)) return '/app';
-  return value;
+  if (value.length > 2048 || /[\u0000-\u001f\u007f\\]/.test(value) || !/^\/app(?:[/?#]|$)/.test(value)) return '/app';
+  try {
+    const url = new URL(value, 'https://return.buyeros.invalid');
+    const path = decodeURIComponent(url.pathname);
+    if (url.origin !== 'https://return.buyeros.invalid' || !/^\/app(?:\/|$)/.test(path)
+      || /[\u0000-\u001f\u007f\\%]/.test(path) || path.split('/').some(part => part === '.' || part === '..')) return '/app';
+    return url.pathname + url.search + url.hash;
+  } catch {return '/app';}
 }
 function random(env: AuthEnvironment): string {
   const bytes = new Uint8Array(32);

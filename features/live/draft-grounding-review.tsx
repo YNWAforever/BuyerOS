@@ -33,7 +33,7 @@ export function DraftGroundingReview({draft,canReview,busy,dirty,t,onBusy,onRevi
  const evidence=(sources?.evidence||[]).filter(e=>draft.evidence_refs.some(r=>r.id===e.id&&r.version===e.version)&&e.status==='available'&&e.relationship==='supports'&&e.kind==='observation'&&e.retention_until&&Date.parse(e.retention_until)>(sources?.asOf??0));
  const icp=sources?.icp;const facts=icp?.offer_facts.filter(f=>f.approved&&draft.value_proposition_fact_ids.includes(f.id))||[];
  function update(index:number,change:Partial<SegmentPreparation>){setConfirmed(false);setSegments(rows=>rows.map((row,i)=>i===index?{...row,...change}:row));}
- function useSelection(index:number){
+ function applySourceSelection(index:number){
   const segment=segments[index],selection=selections[index];if(!selection||busy||dirty)return;
   const boundaries=[...new Set([selection.start,selection.end])].filter(v=>v>0&&v<Array.from(segment.exact_text).length).sort((a,b)=>a-b);
   if(!boundaries.length||segments.length+boundaries.length>200)return;
@@ -75,7 +75,7 @@ export function DraftGroundingReview({draft,canReview,busy,dirty,t,onBusy,onRevi
      target.setSelectionRange(next.start,next.end,next.direction);setSelections(value=>({...value,[index]:selectionToCodePoints(s.exact_text,next.start,next.end)}));setError('');
     }catch(cause){setError(describeLiveError(cause));}
    }} onSelect={event=>{try{const target=event.currentTarget;const range=selectionToCodePoints(s.exact_text,target.selectionStart,target.selectionEnd);setSelections(value=>({...value,[index]:range}));setError('');}catch(cause){setSelections(value=>{const next={...value};delete next[index];return next;});setError(describeLiveError(cause));}}}/>
-   <button type="button" disabled={!selections[index]||![selections[index]?.start,selections[index]?.end].some(v=>v>0&&v<Array.from(s.exact_text).length)||segments.length+new Set([selections[index]?.start,selections[index]?.end].filter(v=>v>0&&v<Array.from(s.exact_text).length)).size>200} onClick={()=>useSelection(index)}>{t('Use selected text')}</button>
+   <button type="button" disabled={!selections[index]||![selections[index]?.start,selections[index]?.end].some(v=>v>0&&v<Array.from(s.exact_text).length)||segments.length+new Set([selections[index]?.start,selections[index]?.end].filter(v=>v>0&&v<Array.from(s.exact_text).length)).size>200} onClick={()=>applySourceSelection(index)}>{t('Use selected text')}</button>
    <label>{t('Classification')} <select value={s.classification} onChange={e=>update(index,{classification:e.target.value as SegmentPreparation['classification'],evidence_refs:[],offer_fact_refs:[]})}>
     <option value="">{t('Choose classification')}</option><option value="factual">{t('Factual — cite a source')}</option><option value="non_factual">{t('Non-factual — explain why')}</option>
    </select></label>

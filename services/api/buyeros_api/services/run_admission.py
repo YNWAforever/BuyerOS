@@ -11,10 +11,13 @@ import uuid
 from sqlalchemy import select
 
 from ..api.errors import ApiError
+from ..api.deps import permission_for_roles
 from ..api.schemas import RunCreate
 from ..settings import get_settings
 from ..db.icp import IcpVersion, Project, canonical_hash
 from ..db.outbox import OutboxEvent
+from ..db.models import Membership
+from ..db.worker_execution import WorkerRuntimeControl
 from ..db.runs import RunEvent, SearchRun
 from .budget_service import ZERO, account_snapshot, ensure_period_accounts
 from .outbox_service import build_intent
@@ -52,6 +55,27 @@ async def admit_run(session, actor_id: uuid.UUID, project_id: uuid.UUID, request
         raise ApiError(503, "PROVIDER_UNAVAILABLE", "fixture capability is test-only")
     if not capabilities.get("verified") or not capabilities.get("price_version"):
         raise ApiError(503, "PROVIDER_UNAVAILABLE", "verified bounded pricing and filters are required")
+    # Live research must freeze the entire receipt contract, not just a price label.
+    receipt_contract_hash=capabilities.get('receipt_contract_hash')
+    if capabilities.get('provider')!='fixture':
+        import re
+        if not isinstance(receipt_contract_hash,str) or re.fullmatch(r'[0-9a-f]{64}',receipt_contract_hash) is None:
+            raise ApiError(503,'PROVIDER_UNAVAILABLE','complete verified search receipt contract is required')
+        registry_contract_hash=capabilities.get('registry_contract_hash')
+        if not isinstance(registry_contract_hash,str) or re.fullmatch(r'[0-9a-f]{64}',registry_contract_hash) is None:
+            raise ApiError(503,'PROVIDER_UNAVAILABLE','complete reviewed search registry scope is required')
+    # Admission records the observed selector; executor fences recheck it before
+    # every commit/call. API uses only the existing SELECT column grant.
+    runtime = (await session.execute(select(WorkerRuntimeControl.backend, WorkerRuntimeControl.epoch))).one_or_none()
+    if (runtime is None or runtime.backend not in {'celery', 'cloudflare'} or
+            type(runtime.epoch) is not int or not 1 <= runtime.epoch <= 9007199254740991):
+        raise ApiError(503, "CAPABILITY_DISABLED", "current worker selector is unavailable")
+    member = (await session.execute(select(Membership).where(
+        Membership.workspace_id == workspace_id, Membership.user_id == actor_id,
+        Membership.active.is_(True),
+    ).with_for_update(read=True))).scalar_one_or_none()
+    if member is None or not permission_for_roles(member.roles, "startRun"):
+        raise ApiError(403, "PERMISSION_DENIED", "current research actor permission is required")
     project = (await session.execute(select(Project).where(
         Project.workspace_id == workspace_id, Project.id == project_id,
     ).with_for_update())).scalar_one_or_none()
@@ -104,7 +128,11 @@ async def admit_run(session, actor_id: uuid.UUID, project_id: uuid.UUID, request
         },
         "query_plan": plan,
         "actor_id": str(actor_id),
+        "runtime_selector": {"backend": runtime.backend, "epoch": runtime.epoch},
     }
+    if capabilities.get('provider')!='fixture':
+        snapshot['capability'].update(receipt_contract_hash=receipt_contract_hash,registry_contract_hash=registry_contract_hash,
+            market_languages={market:list(languages) for market,languages in sorted(capabilities['market_languages'].items())})
     counters = {name: 0 for name in
                 ("rounds", "queries", "raw_results", "pages", "model_tokens", "in_flight")}
     run = SearchRun(workspace_id=workspace_id, project_id=project_id,
@@ -121,7 +149,8 @@ async def admit_run(session, actor_id: uuid.UUID, project_id: uuid.UUID, request
                          event_type="run.queued", payload={"stage": "queued", "version": 1}))
     intent_key = build_intent("run.discover", {"run_id": str(run.id)}, 0)
     session.add(OutboxEvent(workspace_id=workspace_id, intent_key=intent_key,
-                            event_type="run.discover", payload={"run_id": str(run.id)}))
+                            event_type="run.discover", payload={"run_id": str(run.id)},
+                            runtime_backend=runtime.backend, runtime_epoch=runtime.epoch))
     await session.flush()
     await session.refresh(run)
     return run_data(run)

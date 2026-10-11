@@ -10,7 +10,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0038_c61_workspace_directory"
+HEAD = "0050_c61_delivery_authorizations"
 
 
 def _config():
@@ -24,7 +24,8 @@ def _head(dsn):
         return db.execute("SELECT version_num FROM alembic_version").fetchone()[0]
 
 
-def test_0024_0025_empty_roundtrip_preserves_one_head(migrated):
+def test_0024_0025_empty_roundtrip_preserves_one_head(isolated_migrated):
+    migrated = isolated_migrated
     assert _head(migrated) == HEAD
     try:
         command.downgrade(_config(), "0023_contact_quote_basis")
@@ -40,7 +41,8 @@ def test_0024_0025_empty_roundtrip_preserves_one_head(migrated):
     assert _head(migrated) == HEAD
 
 
-def test_0025_refuses_to_drop_a_retained_callback_route(seeded):
+def test_0025_refuses_to_drop_a_retained_callback_route(isolated_seeded):
+    seeded = isolated_seeded
     operation_id = uuid.uuid4()
     with psycopg.connect(seeded, autocommit=True) as db:
         db.execute("INSERT INTO provider_operations(id,workspace_id,intent_key,capability,input_hash,status) "
@@ -62,7 +64,8 @@ def test_0025_refuses_to_drop_a_retained_callback_route(seeded):
             db.execute("DELETE FROM provider_operations WHERE id=%s", (operation_id,))
 
 
-def test_0024_refuses_to_drop_a_retained_provider_reference(seeded):
+def test_0024_refuses_to_drop_a_retained_provider_reference(isolated_seeded):
+    seeded = isolated_seeded
     operation_id = uuid.uuid4()
     with psycopg.connect(seeded, autocommit=True) as db:
         db.execute("INSERT INTO provider_operations(id,workspace_id,intent_key,capability,input_hash,"

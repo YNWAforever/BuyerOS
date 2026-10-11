@@ -74,7 +74,12 @@ export default defineConfig(async () => {
       ...(isCodexSeatbeltSandbox ? { watch: { useFsEvents: false, usePolling: true } } : {}),
     },
     plugins: vercelTarget
-      ? [vinext(), (await import("nitro/vite")).nitro({ vercel: { functions: { maxDuration: 90 } } })]
+      ? [vinext(), (await import("nitro/vite")).nitro({
+          // Traced transitive imports also use tslib through its Node exports.
+          // Retain both ESM and Node entry files in the deployment payload.
+          traceDeps: ["tslib*"],
+          vercel: { functions: { maxDuration: 90 } },
+        })]
       : [
           vinext(),
           sites({ mockAuth: !managedLinux }),

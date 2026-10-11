@@ -93,6 +93,7 @@ def test_directory_function_enforces_pagination_at_database_boundary(directory_c
 def test_directory_optional_expansion_round_trip_preserves_canonical_rows(directory_case,monkeypatch):
     from alembic import command
     from alembic.config import Config
+    from alembic.script import ScriptDirectory
     from buyeros_api.settings import get_settings
     from tests.conftest import ALEMBIC_INI,SERVICE_ROOT
     case=directory_case;case['add'](0);case['add'](1)
@@ -118,6 +119,6 @@ def test_directory_optional_expansion_round_trip_preserves_canonical_rows(direct
             command.upgrade(config,'head');get_settings.cache_clear()
     assert snapshot()==before
     with psycopg.connect(case['dsn']) as owner:
-        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()==('0038_c61_workspace_directory',)
+        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()==(ScriptDirectory.from_config(config).get_current_head(),)
         assert owner.execute("SELECT has_function_privilege('buyeros_api',%s,'EXECUTE'),has_function_privilege('buyeros_worker',%s,'EXECUTE')",(FUNCTION,FUNCTION)).fetchone()==(True,False)
         assert owner.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE oid='public.memberships'::regclass").fetchone()==(True,True)

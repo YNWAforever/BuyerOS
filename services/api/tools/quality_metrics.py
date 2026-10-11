@@ -3,6 +3,7 @@ import hashlib
 import json
 import math
 import subprocess
+import time
 from pathlib import Path
 
 DATABASE_VARIABLES = ("BUYEROS_TEST_DATABASE_URL", "BUYEROS_DATABASE_URL", "DATABASE_URL", "BUYEROS_WORKER_DATABASE_URL")
@@ -44,6 +45,18 @@ def summarize_requests(samples: list[dict]) -> dict:
             raise ValueError("invalid status")
         if type(row["invalid_context"]) is not bool:
             raise ValueError("invalid context flag")
+    waits = []
+    queue_gets = 0
+    for row in samples:
+        wait = row.get("pool_wait_ms")
+        if wait is not None:
+            if type(wait) not in (int, float) or not math.isfinite(wait) or wait < 0:
+                raise ValueError("invalid measured pool wait")
+            waits.append(wait)
+            attempts = row.get("pool_queue_gets", 0)
+            if type(attempts) is not int or attempts < 0:
+                raise ValueError("invalid queue observation count")
+            queue_gets += attempts
     n = len(samples)
     latency = [r["latency_ms"] for r in samples]
     queries, sizes = [r["queries"] for r in samples], [r["bytes"] for r in samples]
@@ -51,6 +64,7 @@ def summarize_requests(samples: list[dict]) -> dict:
     failed = sum(r["status"] is None or not 200 <= r["status"] < 300 or r["invalid_context"] for r in samples)
     return {
         "requests": n,
+        "pool_wait_ms": {"observed": len(waits), "denominator": n, "complete": len(waits) == n, "total": sum(waits) if waits else None, "p95": _percentile(waits, .95) if waits else None, "max": max(waits) if waits else None, "queue_gets": queue_gets, "method": "elapsed inside opt-in SQLAlchemy queue.get; excludes new connection/reconnect and is not latency minus SQL"},
         "method": {"percentiles": "linear interpolation of all requests", "p99_sample_flag": "heuristic n>=1000 (at least10 expected tail observations); no stability guarantee"},
         "latency_ms": {"p50": _percentile(latency, .5), "p95": _percentile(latency, .95), "p99": _percentile(latency, .99), "max": max(latency), "p99_stable": n >= 1000},
         "errors": {"denominator": n, "http_5xx": sum(r["status"] is not None and r["status"] >= 500 for r in samples), "http_non_2xx": non_2xx, "transport": sum(r["status"] is None for r in samples), "invalid_context": sum(r["invalid_context"] for r in samples), "failed_requests": failed, "rate": failed/n},
@@ -75,3 +89,31 @@ def write_new_report(path: Path, report: dict, protected: tuple[Path, ...] = ())
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("x", encoding="utf-8") as output:
         output.write(payload)
+
+
+def install_queue_wait_probe(queue, current_observation, clock=time.perf_counter):
+    """Opt-in owned fixture queue timer; restore refuses an unrelated replacement.
+
+    The caller owns this pool and provides request-local context. Instrument only
+    queue.get, keeping all success/exception waits; do not tune its limits.
+    """
+    original = queue.get
+    def observed_get(*args, **kwargs):
+        observation = current_observation()
+        if observation is None:
+            return original(*args, **kwargs)
+        started = clock()
+        try:
+            return original(*args, **kwargs)
+        finally:
+            elapsed = (clock() - started) * 1000
+            if not math.isfinite(elapsed) or elapsed < 0:
+                raise ValueError("invalid monotonic queue timer")
+            observation["pool_wait_ms"] = observation.get("pool_wait_ms", 0.0) + elapsed
+            observation["pool_queue_gets"] = observation.get("pool_queue_gets", 0) + 1
+    queue.get = observed_get
+    def restore():
+        if queue.get is not observed_get:
+            raise ValueError("refusing to overwrite a replacement queue probe")
+        queue.get = original
+    return restore

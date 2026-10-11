@@ -1,27 +1,25 @@
 'use client';
 import {useEffect, useRef, useState} from 'react';
 import {useRouter} from 'next/navigation';
+import type {AuthAdapter} from '@/services/live/auth';
+import {completeSessionCallback} from '@/services/live/auth-session';
 import {useWorkspaceSession} from '@/features/providers/workspace-session';
 
 export default function AuthCallbackPage() {
   const {auth, session, authBootstrap} = useWorkspaceSession();
   const router = useRouter();
   const [error, setError] = useState('');
-  const completion = useRef<Promise<void> | null>(null);
+  const completion=useRef<{auth:AuthAdapter;promise:Promise<string>}|null>(null),activeAuth=useRef<AuthAdapter|null>(null);
   useEffect(() => {
     let active = true;
     if (!auth) return;
     // React may replay effects in development; one callback code can only be exchanged once.
-    completion.current ??= auth.completeCallback();
-    void completion.current.then(async () => {
-      if (!active) return;
-      const token = await auth.getAccessToken();
-      if (!active) return;
-      session.setToken(token);
-      session.next({actor: auth.subject(), workspace: null, project: null});
-      router.replace(auth.returnPath());
-    }).catch(() => { if (active) { session.setToken(undefined); setError('Sign-in failed. Please start again.'); } });
-    return () => { active = false; };
+    const identity=session.identity();activeAuth.current=auth;
+    if(completion.current?.auth!==auth)completion.current={auth,promise:completeSessionCallback(auth,session,()=>activeAuth.current===auth)};
+    void completion.current.promise.then(path => {
+      if (active) router.replace(path);
+    }).catch(() => { if (active&&session.isCurrent(identity)) { session.setToken(undefined); setError('Sign-in failed. Please start again.'); } });
+    return () => {active=false;if(activeAuth.current===auth)activeAuth.current=null;};
   }, [auth, router, session]);
   const configurationError=authBootstrap.kind==='configuration_error';
   const message = error || (configurationError ? authBootstrap.message : authBootstrap.kind==='disabled' ? 'Live sign-in is disabled' : 'Completing sign-in…');

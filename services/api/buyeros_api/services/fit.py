@@ -21,6 +21,21 @@ def needs_review_if_uncited(assessment: dict) -> bool:
 
 
 
+def requirement_claims(items):
+    # Server-proven entity context is still inference and has no assigned ICP
+    # requirement. Keep it in model input but never in factual fit coverage.
+    # All other unassigned/foreign claims retain the strict domain rejection.
+    result=[]
+    for item in items:
+        if (isinstance(item,dict) and item.get('source_kind')=='research_page_excerpt' and
+            item.get('requirement_id') is None and item.get('stance')=='qualifies' and
+            item.get('is_inference') is True and item.get('current') is True):
+            if type(item.get('version')) is not int or item['version']<1:raise ValueError('versioned native entity context required')
+            continue
+        result.append(item)
+    return result
+
+
 def evaluate_evidence_fit(requirements: list[dict], evidence: list[dict]) -> dict:
     """Classify a scoped evidence set without consuming untrusted source prose.
 

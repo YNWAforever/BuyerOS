@@ -64,3 +64,17 @@ def test_directory_capture_rejects_inherited_database_before_subprocess(monkeypa
     monkeypatch.setattr(module.subprocess,'run',lambda *args,**kwargs:pytest.fail('must not run outside owned fixture'))
     with pytest.raises(SystemExit) as denied:module.main()
     assert denied.value.code==2
+
+
+@pytest.mark.parametrize('actors',[10,25])
+def test_directory_capture_supports_scoped_actor_stairs(monkeypatch,tmp_path,actors):
+    module=fake_capture(monkeypatch,tmp_path,'<testsuite><testcase name="observed"/></testsuite>')
+    output=tmp_path/'directory.json'
+    monkeypatch.setattr(module.sys,'argv',['benchmark-workspace-directory.py','--actors',str(actors),'--output',str(output)])
+    original=module.subprocess.run
+    def capture(command,**kwargs):
+        assert kwargs['env']['BUYEROS_DIRECTORY_ACTORS']==str(actors)
+        assert kwargs['env']['BUYEROS_DIRECTORY_SAMPLES']=='30'
+        return original(command,**kwargs)
+    monkeypatch.setattr(module.subprocess,'run',capture)
+    assert module.main()==0

@@ -220,3 +220,83 @@ def _dispose_api_engines(request):
 def runtime_role_dsn(dsn: str) -> str:
     """DSN for the non-owner, NOBYPASSRLS runtime role."""
     return dsn.replace(f"{DB_USER}:{DB_PASSWORD}", f"{API_ROLE}:{API_ROLE_PASSWORD}", 1)
+
+
+@pytest.fixture(scope="session")
+def isolated_migration_cluster():
+    """Owned clean migration template; cluster roles are never shared or reset.
+
+    PostgreSQL roles belong to the cluster. Cloning an empty HEAD template
+    avoids rerunning CREATE ROLE against a cluster holding another test's roles.
+    Each destructive case mutates only its own cloned database.
+    """
+    from alembic import command
+    from alembic.config import Config
+    from buyeros_api.settings import get_settings
+    name,dsn=_start_container()
+    prior={k:os.environ.get(k) for k in ['BUYEROS_DATABASE_URL','BUYEROS_DATABASE_MIGRATION_URL']}
+    try:
+        os.environ['BUYEROS_DATABASE_URL']=dsn;os.environ['BUYEROS_DATABASE_MIGRATION_URL']=dsn;get_settings.cache_clear()
+        config=Config(str(ALEMBIC_INI));config.set_main_option('script_location',str(SERVICE_ROOT/'alembic'))
+        command.upgrade(config,'head')
+        for k,v in prior.items():
+            if v is None:os.environ.pop(k,None)
+            else:os.environ[k]=v
+        get_settings.cache_clear()
+        yield dsn
+    finally:
+        for k,v in prior.items():
+            if v is None:os.environ.pop(k,None)
+            else:os.environ[k]=v
+        get_settings.cache_clear();_docker('rm','-f',name)
+
+
+@pytest.fixture
+def isolated_migrated(isolated_migration_cluster,monkeypatch):
+    """Each destructive migration case owns a fresh child DB, never shared state.
+
+    A prior runtime test may advance the monotonic epoch. Empty rollback cases
+    must not erase that state or weaken the migration's data-preserving refusal.
+    """
+    import asyncio,psycopg
+    from psycopg import sql
+    from alembic import command
+    from alembic.config import Config
+    from buyeros_api.settings import get_settings
+    from buyeros_api.api.deps import dispose_engines
+    pg_dsn=isolated_migration_cluster
+    _require_disposable_test_dsn(pg_dsn)
+    from urllib.parse import urlsplit,urlunsplit
+    parsed=urlsplit(pg_dsn);catalog_dsn=urlunsplit(parsed._replace(path='/postgres'))
+    owned_database='buyeros_test_migration_'+uuid.uuid4().hex
+    with psycopg.connect(catalog_dsn,autocommit=True,connect_timeout=5) as owner:
+        owner.execute(sql.SQL('CREATE DATABASE {} TEMPLATE {}').format(sql.Identifier(owned_database),sql.Identifier(parsed.path.lstrip('/'))))
+    # URI keeps the existing runtime role fixture credential substitution usable.
+    from urllib.parse import urlsplit,urlunsplit
+    parsed=urlsplit(pg_dsn);dsn=urlunsplit(parsed._replace(path='/'+owned_database))
+    _require_disposable_test_dsn(dsn)
+    monkeypatch.setenv('BUYEROS_DATABASE_URL',dsn);monkeypatch.setenv('BUYEROS_DATABASE_MIGRATION_URL',dsn);get_settings.cache_clear()
+    config=Config(str(ALEMBIC_INI));config.set_main_option('script_location',str(SERVICE_ROOT/'alembic'))
+    try:
+        command.upgrade(config,'head')
+        yield dsn
+    finally:
+        asyncio.run(dispose_engines());get_settings.cache_clear()
+        assert urlsplit(dsn).path=='/'+owned_database and owned_database.startswith('buyeros_test_migration_')
+        with psycopg.connect(catalog_dsn,autocommit=True,connect_timeout=5) as owner:
+            owner.execute(sql.SQL('DROP DATABASE {} WITH (FORCE)').format(sql.Identifier(owned_database)))
+
+@pytest.fixture
+def isolated_seeded(isolated_migrated):
+    # Reuse the authoritative workspace seed without maintaining a second copy.
+    return seeded.__wrapped__(isolated_migrated)
+
+@pytest.fixture
+def isolated_api(isolated_seeded,monkeypatch):
+    from tests.test_buyer_review_db import api
+    yield from api.__wrapped__(isolated_seeded,monkeypatch)
+
+@pytest.fixture
+def isolated_quote_case(isolated_api,isolated_seeded):
+    from tests.test_lookup_quotes_db import quote_case
+    yield from quote_case.__wrapped__(isolated_api,isolated_seeded)

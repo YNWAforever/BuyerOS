@@ -20,8 +20,9 @@ detail_router = APIRouter(prefix="/v1/workspaces/{workspace_id}/enrichment-quote
 
 
 def selected_contact_quote_capability():
-    """No live provider or tariff is selected; tests inject a verified fixture."""
-    return None, "production"
+    """Use only pure current reviewed metadata; never construct an adapter for a quote."""
+    from ...providers import registry
+    return registry.DEFAULT_REGISTRY.contact_quote_capability(environment="production"), "production"
 
 
 @router.post("", status_code=201, name="quoteLookup")

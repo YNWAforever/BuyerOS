@@ -48,7 +48,8 @@ def test_unknown_async_job_is_not_a_fake_success(api):
 
 
 
-def test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback(migrated, monkeypatch):
+def test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback(isolated_migrated, monkeypatch):
+    migrated = isolated_migrated
     from alembic import command
     from alembic.config import Config
     from tests.test_buyer_review_db import ALEMBIC_INI, SERVICE_ROOT
@@ -57,7 +58,7 @@ def test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback(migrated
     config = Config(str(ALEMBIC_INI))
     config.set_main_option("script_location", str(SERVICE_ROOT / "alembic"))
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0038_c61_workspace_directory"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0050_c61_delivery_authorizations"
         for table in ("async_jobs", "async_job_items"):
             assert conn.execute("SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname=%s",
                                 (table,)).fetchone() == (True, True)

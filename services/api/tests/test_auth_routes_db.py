@@ -147,3 +147,19 @@ def test_capabilities_and_errors_disclose_no_secrets(auth_env):
 
     denied = client.get(f"/v1/workspaces/{WORKSPACE_A}/projects", headers={"Authorization": "Bearer bogus"})
     assert denied.json()["message"] == "token rejected"
+
+
+def test_c61_mapped_principal_reuses_canonical_membership_and_revocation_denies_warm_jwt(auth_env,seeded):
+    from buyeros_api.services.identity_linking import link_identity
+    from tests.test_identity_linking_db import run
+    user_id=uuid.uuid5(uuid.NAMESPACE_URL,MEMBER);subject='c61-mapped-'+uuid.uuid4().hex
+    async def link(session):return await link_identity(session,user_id=user_id,issuer=fx.ISSUER,subject=subject,proof_ref='verified-admin:'+subject)
+    assert run(seeded,link)==user_id
+    client=_client();path=f'/v1/workspaces/{WORKSPACE_A}/projects';headers=_headers(subject)
+    first=client.get(path,headers=headers);assert first.status_code==200,first.text
+    assert {item['name'] for item in first.json()['data']['items']}=={'ProjectA'}
+    with psycopg.connect(seeded,autocommit=True) as owner:
+        owner.execute("UPDATE user_identities SET status='revoked',version=version+1 WHERE issuer=%s AND subject=%s",(fx.ISSUER,subject))
+    denied=client.get(path,headers=headers);assert denied.status_code==404,denied.text
+    assert 'ProjectA' not in denied.text
+    assert client.get(path,headers=_headers(MEMBER)).status_code==200

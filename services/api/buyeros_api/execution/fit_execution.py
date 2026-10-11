@@ -7,7 +7,7 @@ from sqlalchemy import select
 from buyeros_api.db.buyers import FitAssessment, ProjectBuyer
 from buyeros_api.db.outbox import OutboxEvent
 from buyeros_api.db.runs import RawCandidate, SearchRun
-from .provider_context import execution_session as tenant_session
+from .provider_context import execution_session as tenant_session, pending_run_work
 
 from .checkpoints import open_checkpoint_saver
 from .fit_runner import FitDomainRunner
@@ -33,14 +33,18 @@ async def _partial(engine, workspace_id, intent_key, generation, reason: str) ->
             event.lease_owner = None
             event.lease_expires_at = None
             return "cancel_requested"
-        run.status = "partial"
-        run.stage = "fit_review_required"
-        run.terminal_reason = reason
-        run.version += 1
-        await emit_run_event(session, run.id, "run.partial", payload={"reason": reason})
-        event.state = "done"
-        event.lease_owner = None
-        event.lease_expires_at = None
+        return await _partial_in_session(session, event, run, reason)
+
+
+async def _partial_in_session(session, event, run, reason):
+    run.status = "partial"
+    run.stage = "fit_review_required"
+    run.terminal_reason = reason
+    run.version += 1
+    await emit_run_event(session, run.id, "run.partial", payload={"reason": reason})
+    event.state = "done"
+    event.lease_owner = None
+    event.lease_expires_at = None
     return "partial"
 
 
@@ -68,9 +72,11 @@ async def execute_fit(engine, workspace_id: uuid.UUID, intent_key: str, generati
             return "invalid_intent"
         run = (await session.execute(select(SearchRun).where(
             SearchRun.workspace_id == workspace_id, SearchRun.id == run_id,
-        ))).scalar_one_or_none()
+        ).with_for_update())).scalar_one_or_none()
         if run is None or run.status not in {"queued", "running"} or run.stage != "fit":
             return "invalid_run"
+        if await pending_run_work(session, workspace_id, run_id):
+            return "pending"
         buyer_ids = (await session.execute(select(ProjectBuyer.id).join(
             RawCandidate,
             (RawCandidate.workspace_id == ProjectBuyer.workspace_id) &
@@ -119,6 +125,17 @@ async def execute_fit(engine, workspace_id: uuid.UUID, intent_key: str, generati
         ).with_for_update())).scalar_one()
         if run.status != "running" or run.stage != "fit":
             return "invalid_run"
+        if await pending_run_work(session, workspace_id, run_id):
+            return "pending"
+        current_buyers = (await session.execute(select(ProjectBuyer.id).join(
+            RawCandidate,
+            (RawCandidate.workspace_id == ProjectBuyer.workspace_id) &
+            (RawCandidate.canonical_company_id == ProjectBuyer.company_id) &
+            (RawCandidate.run_id == run.id),
+        ).where(ProjectBuyer.workspace_id == workspace_id,
+                ProjectBuyer.project_id == run.project_id).distinct().order_by(ProjectBuyer.id).limit(101))).scalars().all()
+        if list(current_buyers) != all_buyer_ids:
+            return await _partial_in_session(session, event, run, "fit basis buyer set changed")
         if assessment_ids:
             persisted = (await session.execute(select(FitAssessment.id).where(
                 FitAssessment.workspace_id == workspace_id,
@@ -127,13 +144,29 @@ async def execute_fit(engine, workspace_id: uuid.UUID, intent_key: str, generati
             ))).scalars().all()
             if len(persisted) != len(assessment_ids):
                 raise ValueError("fit graph output is not durable")
-        if max_buyers == 1:
-            completed = set((await session.execute(select(FitAssessment.project_buyer_id).where(
-                FitAssessment.run_id == run_id))).scalars())
-            if any(buyer not in completed for buyer in all_buyer_ids):
+        assessments = (await session.execute(select(FitAssessment).where(
+            FitAssessment.workspace_id == workspace_id, FitAssessment.run_id == run_id,
+        ))).scalars().all()
+        completed = set()
+        try:
+            for buyer_id in all_buyer_ids:
+                candidates = [item for item in assessments if item.project_buyer_id == buyer_id]
+                if not candidates:
+                    continue
+                runner = FitDomainRunner(engine, workspace_id, run_id, buyer_id)
+                basis, _, _, _ = await runner._basis(session, lock_buyer=True)
+                if not any(item.evidence_set_hash == basis and item.icp_version_id == run.icp_version_id
+                           and item.project_id == run.project_id for item in candidates):
+                    raise ValueError("fit basis changed before run completion")
+                completed.add(buyer_id)
+        except ValueError as exc:
+            return await _partial_in_session(session, event, run, str(exc)[:200])
+        if any(buyer not in completed for buyer in all_buyer_ids):
+            if max_buyers == 1:
                 from .provider_context import finish_continuation
                 await finish_continuation(session)
                 return "continue"
+            return await _partial_in_session(session, event, run, "fit basis assessment is absent")
         await emit_run_event(session, run.id, "run.completed", transition="complete",
                              payload={"fit_assessments": len(all_buyer_ids) if max_buyers == 1 else len(assessment_ids),
                                       "next_action": "human_review"})

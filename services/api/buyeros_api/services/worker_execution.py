@@ -162,7 +162,7 @@ def json_bytes(value) -> bytes:
 
 
 async def execute_step(engine, envelope: JobEnvelope, step_key: str, *, timeout_seconds: float = 60,
-                       adapter=None, checkpoint_dsn=None, environment="production") -> StepOutcome:
+                       adapter=None, checkpoint_dsn=None, environment="production", research_engine=None) -> StepOutcome:
     # Cloudflare selects only a key supplied by the server. One local outbox is
     # one unit; bulk creates its next 50-row outbox in the same transaction.
     now = datetime.now(timezone.utc)
@@ -174,7 +174,7 @@ async def execute_step(engine, envelope: JobEnvelope, step_key: str, *, timeout_
     try:
         from buyeros_api.execution.step_runner import execute_claimed
         return await asyncio.wait_for(execute_claimed(engine, envelope, step_key, claim.owner,
-            adapter=adapter, checkpoint_dsn=checkpoint_dsn, environment=environment), timeout=min(60, timeout_seconds))
+            adapter=adapter, checkpoint_dsn=checkpoint_dsn, environment=environment, research_engine=research_engine), timeout=min(60, timeout_seconds))
     except Exception:
         # Do not swallow failure as success or release any financial hold. DB-only
         # work rolled back; this inspectable receipt must be explicitly recovered.

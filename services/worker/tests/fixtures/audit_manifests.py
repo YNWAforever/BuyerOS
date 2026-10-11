@@ -53,10 +53,34 @@ def main():
    buyers=db.execute('SELECT b.id FROM project_buyers b JOIN companies c ON c.id=b.company_id AND c.workspace_id=b.workspace_id WHERE b.workspace_id=%s AND b.project_id=%s AND c.display_name LIKE %s',(WORKSPACE,PROJECT,PREFIX+'%')).fetchall()
    db.cursor().executemany("INSERT INTO fit_assessments(id,workspace_id,project_id,project_buyer_id,icp_version_id,evidence_set_hash,verdict,rationale,evidence_ids) VALUES (%s,%s,%s,%s,%s,%s,'match','Fictional assessment, not live validation','[]')",[(uuid.uuid4(),WORKSPACE,PROJECT,b,icp,'a'*64) for b, in buyers])
    print(json.dumps({'fixture_only':True,'assessed':len(buyers)}));return
+  if command=='stale-many':
+   buyers=[uuid.UUID(value) for value in sys.argv[2:]]
+   if not 1<=len(buyers)<=101 or len(set(buyers))!=len(buyers):raise ValueError('bounded unique Q08 buyers required')
+   owned=db.execute('SELECT b.id FROM project_buyers b JOIN companies c ON c.id=b.company_id AND c.workspace_id=b.workspace_id WHERE b.id=ANY(%s) AND b.workspace_id=%s AND b.project_id=%s AND c.display_name LIKE %s',(buyers,WORKSPACE,PROJECT,PREFIX+'%')).fetchall()
+   if {value for value, in owned}!=set(buyers):raise RuntimeError('unknown Q08 buyer')
+   db.execute('UPDATE project_buyers SET version=version+1 WHERE id=ANY(%s) AND workspace_id=%s AND project_id=%s',(buyers,WORKSPACE,PROJECT))
+   print(json.dumps({'fixture_only':True,'stale_ids':[str(value) for value in buyers]}));return
   if command=='stale':
    buyer=uuid.UUID(sys.argv[2]);proof=db.execute('SELECT c.display_name FROM project_buyers b JOIN companies c ON c.id=b.company_id AND c.workspace_id=b.workspace_id WHERE b.id=%s AND b.workspace_id=%s AND b.project_id=%s',(buyer,WORKSPACE,PROJECT)).fetchone()
    if not proof or not proof[0].startswith(PREFIX):raise RuntimeError('unknown Q08 buyer')
    db.execute('UPDATE project_buyers SET version=version+1 WHERE id=%s AND workspace_id=%s',(buyer,WORKSPACE));print(json.dumps({'fixture_only':True,'stale':str(buyer)}));return
+  if command=='expired-copy':
+   source=uuid.UUID(sys.argv[2]);manifest=uuid.uuid4()
+   row=db.execute("SELECT status,specification->'filters'->>'q' FROM bulk_manifests WHERE id=%s AND workspace_id=%s AND project_id=%s",(source,WORKSPACE,PROJECT)).fetchone()
+   if row!=('ready',PREFIX):
+    source_job=db.execute("SELECT specification->>'source_job_id' FROM bulk_manifests WHERE id=%s AND workspace_id=%s AND project_id=%s AND status='ready'",(source,WORKSPACE,PROJECT)).fetchone()
+    original=db.execute("SELECT m.specification->'filters'->>'q' FROM async_jobs j JOIN bulk_manifests m ON m.id=j.manifest_id AND m.workspace_id=j.workspace_id WHERE j.id=%s AND j.workspace_id=%s AND j.project_id=%s",(uuid.UUID(source_job[0]),WORKSPACE,PROJECT)).fetchone() if source_job and source_job[0] else None
+    if original!=(PREFIX,):raise RuntimeError('unknown owned ready Q08 manifest')
+   # Create a separate historical-time fixture through the normal preparing ->
+   # ready lifecycle. No frozen basis UPDATE and no trigger/grant bypass.
+   db.execute("""INSERT INTO bulk_manifests(id,workspace_id,project_id,actor_user_id,specification,operation,command,digest,count,version,status,created_at,expires_at)
+    SELECT %s,workspace_id,project_id,actor_user_id,specification,operation,command,digest,count,1,'preparing',clock_timestamp()-interval '15 minutes 1 second',clock_timestamp()-interval '1 second'
+    FROM bulk_manifests WHERE id=%s AND workspace_id=%s AND project_id=%s""",(manifest,source,WORKSPACE,PROJECT))
+   db.execute("""INSERT INTO bulk_manifest_items(id,workspace_id,manifest_id,buyer_id,ordinal,expected_version)
+    SELECT gen_random_uuid(),workspace_id,%s,buyer_id,ordinal,expected_version FROM bulk_manifest_items WHERE manifest_id=%s AND workspace_id=%s""",(manifest,source,WORKSPACE))
+   db.execute("UPDATE bulk_manifests SET status='ready' WHERE id=%s AND workspace_id=%s",(manifest,WORKSPACE))
+   expiry=db.execute('SELECT expires_at FROM bulk_manifests WHERE id=%s',(manifest,)).fetchone()[0]
+   print(json.dumps({'fixture_only':True,'expired_manifest':str(manifest),'copied_from':str(source),'expires_at':expiry.isoformat()}));return
   if command=='inspect':
    buyers=db.execute('SELECT b.id,b.version,b.owner_user_id FROM project_buyers b JOIN companies c ON c.id=b.company_id AND c.workspace_id=b.workspace_id WHERE b.workspace_id=%s AND b.project_id=%s AND c.display_name LIKE %s ORDER BY c.display_name',(WORKSPACE,PROJECT,PREFIX+'%')).fetchall()
    manifests=db.execute('SELECT id,count,status,job_id FROM bulk_manifests WHERE workspace_id=%s AND project_id=%s ORDER BY created_at',(WORKSPACE,PROJECT)).fetchall()

@@ -40,10 +40,15 @@ export function LiveProfilePanel({canApprove=false,t=(text:string)=>text}: {canA
     void (async()=>{
       try{
         const token=session.token();
-        const project=await client.request<Project>({path,token,scope:identity,signal});
+        // Both reads are independently authorized for this same captured scope.
+        const [project,firstPage]=await Promise.all([
+          client.request<Project>({path,token,scope:identity,signal}),
+          client.request<{items:ICP[];offset:number;limit:number;total:number}>({
+            path:`${path}/icp-versions?offset=0&limit=100`,token,scope:identity,signal}),
+        ]);
         const versions:ICP[]=[];
         for(let offset=0;;){
-          const page=await client.request<{items:ICP[];offset:number;limit:number;total:number}>({
+          const page=offset===0?firstPage:await client.request<{items:ICP[];offset:number;limit:number;total:number}>({
             path:`${path}/icp-versions?offset=${offset}&limit=100`,token,scope:identity,signal});
           if(page.offset!==offset||page.limit<1||!Array.isArray(page.items))throw new Error('Invalid profile history page');
           versions.push(...page.items);

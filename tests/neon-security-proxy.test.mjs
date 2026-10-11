@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {loadModule} from './ts-loader.mjs';
+const proxy=await loadModule('app/v1/[...path]/route.ts');
+const worker={'x-buyeros-worker-key-id':'synthetic-key','x-buyeros-worker-timestamp':'1','x-buyeros-worker-nonce':'synthetic-nonce','x-buyeros-worker-signature':'synthetic-signature'};
+for(const [method,path,forward]of [['GET','/v1/workspaces/A/projects',false],['POST','/v1/workspaces/A/projects',false],['GET','/v1/internal/worker/claim',false],['POST','/v1/internal/worker/claim',true],['POST','/v1/internal/worker/claim/other',false]])test('C12 proxy exact service header boundary '+method+' '+path,async()=>{
+ const before=globalThis.fetch,binding=process.env.BUYEROS_INTERNAL_API_URL;process.env.BUYEROS_INTERNAL_API_URL='https://owned-internal.example.test/';let calls=0;
+ globalThis.fetch=async(url,init)=>{calls++;assert.equal(new URL(url).origin,'https://owned-internal.example.test');assert.equal(init.redirect,'manual');const headers=new Headers(init.headers);assert.equal(headers.get('authorization'),'Bearer synthetic-JWT');for(const name of ['cookie','x-service-secret','x-vercel-protection-bypass','x-buyeros-worker-extra'])assert.equal(headers.get(name),null,name);for(const [name,value]of Object.entries(worker))assert.equal(headers.get(name),forward?value:null,name);return new Response(null,{status:307,headers:{location:'https://foreign.example.test/', 'set-cookie':'upstream-secret=must-not-forward','x-service-secret':'must-not-forward'}});};
+ try{const response=await proxy[method](new Request('https://app.example.test'+path,{method,headers:{authorization:'Bearer synthetic-JWT',cookie:'__Secure-neon-auth.session_token=must-not-forward','x-service-secret':'private','x-vercel-protection-bypass':'private','x-buyeros-worker-extra':'private',...worker},...(method==='POST'?{body:'{}'}:{})}));assert.equal(response.status,307);assert.equal(calls,1);assert.equal(response.headers.get('set-cookie'),null);assert.equal(response.headers.get('x-service-secret'),null);assert.equal(response.headers.get('cache-control'),'private, no-store');}
+ finally{globalThis.fetch=before;if(binding===undefined)delete process.env.BUYEROS_INTERNAL_API_URL;else process.env.BUYEROS_INTERNAL_API_URL=binding;}
+});

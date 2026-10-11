@@ -72,9 +72,26 @@ async def claim_outbox_rows(
         return []
     epoch = control.epoch
     predicate = _EXPIRED_PREDICATE if expired_only else _CLAIMABLE_PREDICATE
+    # Freeze the locked candidate set once. Under the runtime RLS plan, an
+    # UPDATE/IN locking subquery can be rescanned per target row and exceed LIMIT.
     result = await session.execute(
         text(
             f"""
+            WITH claim_candidates AS MATERIALIZED (
+                   SELECT id FROM outbox_events
+                    WHERE ({predicate})
+                      AND (state='ready' OR (runtime_backend=:backend AND runtime_epoch=:epoch))
+                      AND NOT EXISTS (SELECT 1 FROM worker_steps s WHERE s.outbox_id=outbox_events.id
+                                      AND s.state IN ('running','reconcile'))
+                      AND (:paid_dispatch_enabled OR event_type NOT IN
+                           ('provider.external', 'run.discover', 'contact.lookup', 'delivery.submit'))
+                      AND (:delivery_dispatch_enabled OR event_type<>'delivery.submit')
+                      AND (:reconciliation_enabled OR event_type NOT IN
+                           ('provider.reconcile', 'research.reconcile', 'contact.reconcile'))
+                    ORDER BY created_at, id
+                    LIMIT :limit
+                    FOR UPDATE SKIP LOCKED
+            )
             UPDATE outbox_events
                SET lease_owner = :owner,
                    lease_expires_at = :expires,
@@ -84,25 +101,13 @@ async def claim_outbox_rows(
                    runtime_backend = :backend,
                    runtime_epoch = :epoch,
                    state = 'dispatched'
-             WHERE id IN (
-                   SELECT id FROM outbox_events
-                    WHERE ({predicate})
-                      AND (state='ready' OR (runtime_backend=:backend AND runtime_epoch=:epoch))
-                      AND NOT EXISTS (SELECT 1 FROM worker_steps s WHERE s.outbox_id=outbox_events.id
-                                      AND s.state IN ('running','reconcile'))
-                      AND (:paid_dispatch_enabled OR event_type NOT IN
-                           ('provider.external', 'run.discover', 'contact.lookup'))
-                      AND (:reconciliation_enabled OR event_type NOT IN
-                           ('provider.reconcile', 'research.reconcile', 'contact.reconcile'))
-                    ORDER BY created_at
-                    LIMIT :limit
-                    FOR UPDATE SKIP LOCKED
-             )
+             WHERE id IN (SELECT id FROM claim_candidates)
          RETURNING {_CLAIM_COLUMNS}
             """
         ),
         {"owner": owner, "expires": lease_expiry(now, lease_seconds), "now": now,
          "limit": limit, "paid_dispatch_enabled": get_settings().paid_dispatch_enabled,
+         "delivery_dispatch_enabled": get_settings().delivery_dispatch_enabled,
          "reconciliation_enabled": get_settings().reconciliation_enabled, "backend": backend, "epoch": epoch},
     )
     return [dict(r._mapping) for r in result]

@@ -2,6 +2,7 @@
 
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {useRouter} from 'next/navigation';
+import {ResearchCandidateObservations} from './research-candidates';
 import type {components} from '@/services/generated/buyeros-api';
 import {useDataMode} from '@/features/providers/data-mode';
 import {useWorkspaceSession} from '@/features/providers/workspace-session';
@@ -16,15 +17,15 @@ const LIMITS={query_rounds:3,max_queries_per_run:12,max_results:300,max_pages:20
 function nextStep(status:Run['status']):string {
   if(status==='queued')return 'Waiting for the worker to start.';
   if(status==='running')return 'Research is in progress. Review committed buyers at any time.';
-  if(status==='cancel_requested')return 'Wait for provider reconciliation; the hold remains.';
+  if(status==='cancel_requested'||status==='awaiting_reconciliation')return 'Wait for provider reconciliation; the hold remains.';
   if(status==='partial'||status==='failed')return 'Review committed buyers and resolve the reported issue before retrying.';
   if(status==='paused_budget')return 'Review the approved budget before retrying.';
   if(status==='completed')return 'Review committed buyers and decide the next manual step.';
   return 'No new research work will start.';
 }
 
-export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
-  runId?:string;canStart:boolean;t:(text:string)=>string;onOpenBuyers:()=>void;
+export function LiveRunProgress({runId,canStart,canReview=false,t,onOpenBuyers}: {
+  runId?:string;canStart:boolean;canReview?:boolean;t:(text:string)=>string;onOpenBuyers:()=>void;
 }) {
   const {session,client}=useWorkspaceSession(),{apiBaseUrl}=useDataMode(),router=useRouter();
   const scope=session.current(),workspace=scope.workspace,project=scope.project;
@@ -101,7 +102,7 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
     finally{busyRef.current=false;if(session.isCurrent(identity))setBusy(false);}
   }
   async function act(kind:'cancel'|'retry'){
-    if(!ctx||!run||busyRef.current||reason.trim().length<3)return;
+    if(!ctx||!run||busyRef.current||reason.trim().length<3||kind==='retry'&&run.retryable!==true)return;
     busyRef.current=true;setBusy(true);setDetailError('');
     try{const value=kind==='cancel'?await cancelRun(ctx,run,reason.trim(),crypto.randomUUID())
       :await retryRun(ctx,run,reason.trim(),crypto.randomUUID());
@@ -125,7 +126,7 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
       {list.kind==='error'&&<p role="alert">{list.message}<button type="button" onClick={()=>{setList({kind:'loading'});void loadPage(offset);}}>{t('Retry loading')}</button></p>}
       {list.kind==='ready'&&<><p>{t('Actual runs')}: {list.page.total}</p>
         {list.page.items.length===0?<p role="status">{t('No research runs yet.')}</p>:<ul className="run-list">{list.page.items.map(item=><li key={item.id}>
-          <button type="button" onClick={()=>router.push(`/app/discover/${encodeURIComponent(item.id)}?${new URLSearchParams({workspace:ctx.workspaceId,project:ctx.projectId})}`)}>
+          <button type="button" data-run-id={item.id} onClick={()=>router.push(`/app/discover/${encodeURIComponent(item.id)}?${new URLSearchParams({workspace:ctx.workspaceId,project:ctx.projectId})}`)}>
             {t(item.status)} · {item.company_count}/{item.target_companies??'—'} {t('companies')} · {item.created_at}
           </button></li>)}</ul>}
         <div className="inline"><button type="button" disabled={offset===0} onClick={()=>{setList({kind:'loading'});setOffset(Math.max(0,offset-10));}}>{t('Previous')}</button>
@@ -139,14 +140,16 @@ export function LiveRunProgress({runId,canStart,t,onOpenBuyers}: {
       <p>{t('Research spend')}: USD {run.spent.amount} · {t('Pending hold')}: USD {run.reserved.amount} · {t('Maximum')}: USD {run.max_cost.amount}</p>
       <details><summary>{t('Technical details')}</summary><p>{t('Attempt')}: {run.attempt} · {t('Event')}: {run.last_event_sequence} · {t('Connection')}: {transport||t('Connecting')}</p></details>
       <p>{t('Next step')}: {t(nextStep(run.status))}</p>
+      {run.reconciliation_pending&&<p role="status">{t('Original provider work is awaiting reconciliation. Its hold and committed results remain.')}</p>}
       {run.status==='cancel_requested'&&<p>{t('New work is stopped. A submitted operation is awaiting reconciliation; its hold remains.')}</p>}
       {run.status==='completed'&&run.target_companies!==undefined&&run.company_count<run.target_companies&&<p>{t('Research completed with fewer companies than the requested target.')}</p>}
       {['partial','paused_budget','failed'].includes(run.status)&&!['fit_review_required','fit'].includes(run.stage)&&<p>{t('Discovery retry waits for authoritative reconciliation; committed results remain available.')}</p>}
       {run.failure_code&&<p role="alert">{t('Reason')}: {run.failure_code}</p>}
-      <div className="run-grid">{canStart&&['queued','running','partial','paused_budget','failed'].includes(run.status)&&<label>{t('Reason for action')} <input value={reason} onChange={event=>setReason(event.target.value)} maxLength={2000}/></label>}
-        {canStart&&['queued','running','partial','paused_budget','failed'].includes(run.status)&&<button type="button" disabled={busy||reason.trim().length<3} onClick={()=>void act('cancel')}>{t('Stop new work')}</button>}
-        {canStart&&['partial','paused_budget','failed'].includes(run.status)&&['fit_review_required','fit'].includes(run.stage)&&<button type="button" disabled={busy||reason.trim().length<3} onClick={()=>void act('retry')}>{t('Retry safe work')}</button>}
+      <div className="run-grid">{canStart&&['queued','running','awaiting_reconciliation','partial','paused_budget','failed'].includes(run.status)&&<label>{t('Reason for action')} <input value={reason} onChange={event=>setReason(event.target.value)} maxLength={2000}/></label>}
+        {canStart&&['queued','running','awaiting_reconciliation','partial','paused_budget','failed'].includes(run.status)&&<button type="button" disabled={busy||reason.trim().length<3} onClick={()=>void act('cancel')}>{t('Stop new work')}</button>}
+        {canStart&&run.retryable===true&&['partial','paused_budget','failed'].includes(run.status)&&['fit_review_required','fit'].includes(run.stage)&&<button type="button" disabled={busy||reason.trim().length<3} onClick={()=>void act('retry')}>{t('Retry safe work')}</button>}
         <button type="button" onClick={onOpenBuyers}>{t('Review committed buyers')}</button></div>
+      <ResearchCandidateObservations key={run.id} ctx={ctx} runId={run.id} canReview={canReview} t={t}/>
     </article>}
   </section>;
 }

@@ -140,7 +140,7 @@ def test_existing_current_admin_authority_required(staff, subject, workspace):
     assert counts(dsn) == before
 
 
-@pytest.mark.parametrize('token', ['malformed-token', fx.make_token(sub=ADMIN, aud='wrong-audience'), fx.make_token(sub=ADMIN, exp=1)])
+@pytest.mark.parametrize('token', ['malformed-token', fx.make_token(sub=ADMIN, aud='wrong-audience'), fx.make_token(sub=ADMIN, exp=1)], ids=['malformed','wrong-audience','expired'])
 def test_cli_uses_gateway_jwt_verification_before_writes(staff, token):
     dsn, user = staff
     before = counts(dsn)

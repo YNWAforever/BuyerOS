@@ -6,7 +6,7 @@ from buyeros_api.api.worker_schemas import JobEnvelope, StepOutcome
 from buyeros_api.db.session import tenant_session
 
 LOCAL_EVENTS = frozenset({'bulk.mutate', 'draft.generate', 'fetch.evidence',
-                         'offer.parse', 'offer.delete', 'offer.fetch', 'source.delete'})
+                         'offer.parse', 'offer.delete', 'offer.fetch', 'source.delete', 'delivery.submit'})
 
 
 @dataclass
@@ -44,7 +44,7 @@ async def execute_local_step(engine, envelope: JobEnvelope, step_key: str,
     return await execute_step(engine, envelope, step_key, timeout_seconds=min(60, remaining))
 
 
-async def execute_claimed(engine, envelope, step_key, owner, *, adapter=None, checkpoint_dsn=None, environment='production'):
+async def execute_claimed(engine, envelope, step_key, owner, *, adapter=None, checkpoint_dsn=None, environment='production', research_engine=None):
     from buyeros_api.services.worker_execution import outcome
     from .domain_executor import run_intent
     execution = LocalExecution(envelope, step_key, owner)
@@ -57,6 +57,15 @@ async def execute_claimed(engine, envelope, step_key, owner, *, adapter=None, ch
             provider_event = True
         else:
             provider_event = False
+        if event_type == 'delivery.submit':
+            from .config import get_settings as worker_settings
+            settings=worker_settings()
+            if not settings.paid_dispatch_enabled or not settings.delivery_dispatch_enabled:
+                result=outcome('blocked','EXECUTION_DISABLED')
+                execution.finish(result)
+                return result
+            # The delivery runner owns fresh policy/claim/permit transactions.
+            # Never hold this runtime/control guard over its provider await.
         if event_type in {'bulk.mutate', 'draft.generate', 'fetch.evidence'}:
             state = await run_intent(session, {'workspace_id': str(envelope.workspace_id)},
                                      intent_key, envelope.generation)
@@ -64,10 +73,14 @@ async def execute_claimed(engine, envelope, step_key, owner, *, adapter=None, ch
             execution.finish(result)
             return result
 
+    if event_type == 'delivery.submit':
+        from .delivery_runner import execute_delivery_claimed
+        return await execute_delivery_claimed(engine,execution)
+
     if provider_event:
         from .provider_dispatch import execute_provider_claimed
         return await execute_provider_claimed(engine, execution, adapter=adapter,
-            checkpoint_dsn=checkpoint_dsn, environment=environment)
+            checkpoint_dsn=checkpoint_dsn, environment=environment, research_engine=research_engine)
 
     # Each native runner checks the same owner/epoch before prepare/finalize.
     # No transaction, permit row lock or customer lock spans object/network IO.

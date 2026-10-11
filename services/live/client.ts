@@ -48,15 +48,38 @@ async function bodyOf(response: {json: () => Promise<unknown>}): Promise<Record<
  * a live read would be sent to the app's own origin (`fetch(path)`) instead of the API. The default
  * `''` keeps the path used as-is for callers that pass no base URL.
  */
-export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '') {
+export interface AuthRecovery {
+  refresh(token: string, scope: string): Promise<string>;
+  isCurrent(scope: string): boolean;
+  onUnauthorized?(): void;
+}
+export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '', recovery?: AuthRecovery) {
   const root = baseUrl.replace(/\/$/, '');
   const accessListeners = new Set<(event: AccessDenied) => void>();
+  let authRecovery = recovery;
+  async function send(path: string, init: RequestInit, token: string | undefined, scope: string, mayRetry: boolean, retryBody?: FormData) {
+    const first = await fetchImpl(`${root}${path}`, init);
+    const current = authRecovery;
+    if (first.status !== 401 || !token || !current) return first;
+    const guard = () => {if (init.signal?.aborted || !current.isCurrent(scope)) throw new LiveCancelled('scope changed');};
+    guard();
+    if (!mayRetry) {current.onUnauthorized?.(); return first;}
+    let renewed: string;
+    try {renewed = await current.refresh(token, scope);}
+    catch {guard(); current.onUnauthorized?.(); return first;}
+    guard();
+    const retry = await fetchImpl(`${root}${path}`, {...init,body:retryBody??init.body, headers: {...init.headers, Authorization: `Bearer ${renewed}`}});
+    guard();
+    if (retry.status === 401) current.onUnauthorized?.();
+    return retry;
+  }
   function notifyAccessDenied(path: string, scope: string, status: number, signal?: AbortSignal) {
     const workspace = path.match(/^\/v1\/workspaces\/([^/?]+)(?:[/?]|$)/)?.[1];
     if (!workspace || signal?.aborted || ![403, 404].includes(status)) return;
     for (const listener of accessListeners) listener({workspace, scope});
   }
   return {
+    setAuthRecovery(value: AuthRecovery | undefined) {authRecovery = value;},
     subscribeAccessDenied(listener: (event: AccessDenied) => void): () => void {
       accessListeners.add(listener);
       return () => {accessListeners.delete(listener);};
@@ -64,9 +87,10 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '') 
     async requestContent({path, token, scope, signal}: Pick<LiveRequest,'path'|'token'|'scope'|'signal'>): Promise<{text:string;contentType:string}> {
       let response: Awaited<ReturnType<typeof fetch>>;
       try {
-        response = await fetchImpl(`${root}${path}`, {method:'GET',
-          headers:{Accept:'text/csv, text/plain',...(token?{Authorization:`Bearer ${token}`}:{})}, signal});
+        response = await send(path, {method:'GET',
+          headers:{Accept:'text/csv, text/plain',...(token?{Authorization:`Bearer ${token}`}:{})}, signal}, token, scope, true);
       } catch (err) {
+        if (err instanceof LiveCancelled) throw err;
         if (err instanceof Error && err.name === 'AbortError') throw new LiveCancelled('cancelled');
         throw new LiveError('request failed','NETWORK_ERROR',0,'',true);
       }
@@ -94,15 +118,18 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '') 
       if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
       if (ifMatch) headers['If-Match'] = ifMatch;
       if (body !== undefined && formData !== undefined) throw new LiveError('ambiguous request body', 'INVALID_REQUEST', 0, '', false);
-      let payload: string | FormData | undefined = formData;
+      let payload: string | FormData | undefined=formData;
+      let retryBody:FormData|undefined;
+      if (formData) {const frozen = new FormData(); for (const [key, value] of formData.entries()) frozen.append(key, value); retryBody = frozen;}
       if (body !== undefined) {
         headers['Content-Type'] = 'application/json';
         payload = JSON.stringify(body);
       }
       let response: Awaited<ReturnType<typeof fetch>>;
       try {
-        response = await fetchImpl(`${root}${path}`, {method, headers, signal, body: payload});
+        response = await send(path, {method, headers, signal, body: payload}, token, scope, ['GET','HEAD','OPTIONS'].includes(method.toUpperCase()) || !!idempotencyKey, retryBody);
       } catch (err) {
+        if (err instanceof LiveCancelled) throw err;
         if (err instanceof Error && err.name === 'AbortError') throw new LiveCancelled('cancelled');
         throw new LiveError('request failed', 'NETWORK_ERROR', 0, '', true);
       }

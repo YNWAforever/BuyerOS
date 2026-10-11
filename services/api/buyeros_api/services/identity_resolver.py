@@ -3,10 +3,10 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..api.auth import Principal
-from ..db.models import User
+from ..db.models import UserIdentity
 
 
 async def resolve_user_id(session: AsyncSession, principal: Principal) -> uuid.UUID | None:
-    return (await session.execute(select(User.id).where(
-        User.issuer == principal.issuer, User.subject == principal.subject
+    return (await session.execute(select(UserIdentity.user_id).where(
+        UserIdentity.issuer == principal.issuer, UserIdentity.subject == principal.subject, UserIdentity.status == "active"
     ))).scalar_one_or_none()

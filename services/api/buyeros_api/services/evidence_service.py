@@ -127,6 +127,11 @@ async def persist_candidate_evidence(
             SourceDocument.workspace_id == workspace_id,
             SourceDocument.id == source_id,
         ))).scalar_one_or_none()
+        if (source is not None and (
+                source.storage_mode not in {"excerpt_only", "private_object"}
+                or (source.storage_mode == "private_object" and not source.object_key)
+                or source.retrieved_at is None or source.retrieved_at > now)):
+            raise ValueError("current retrieved source required; search metadata is not page evidence")
         if (source is None or source.project_id != project_id or source.run_id != run_id
                 or source.permission_purpose != "account_research"
                 or source.retention_until is None or source.retention_until <= now

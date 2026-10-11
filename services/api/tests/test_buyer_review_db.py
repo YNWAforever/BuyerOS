@@ -805,7 +805,8 @@ def test_expired_or_deleted_source_is_not_current_evidence(api, seeded):
     assert "source_url" not in deleted.json()["data"]
 
 
-def test_0011_downgrade_truncates_a_long_review_reason(migrated):
+def test_0011_downgrade_truncates_a_long_review_reason(isolated_migrated):
+    migrated = isolated_migrated
     """0011's downgrade narrows `reason` without failing on a stored >400-char value."""
     import os
 

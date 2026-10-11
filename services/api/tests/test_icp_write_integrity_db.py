@@ -139,7 +139,9 @@ def test_approval_requires_current_project_version_and_known_basis(api, seeded):
     assert approved is None
 
 
-def test_0012_downgrade_upgrade_preserves_legacy_as_unapprovable(api, seeded, monkeypatch):
+def test_0012_downgrade_upgrade_preserves_legacy_as_unapprovable(isolated_api, isolated_seeded, monkeypatch):
+    seeded = isolated_seeded
+    api = isolated_api
     """Only the disposable test database is migrated; historical ICP basis stays NULL."""
     from alembic import command
     from alembic.config import Config

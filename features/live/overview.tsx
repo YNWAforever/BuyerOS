@@ -64,14 +64,14 @@ export function LiveOverview({t=(value:string)=>value}:{t?:(value:string)=>strin
 /** Navigation cards use exactly the same server filters as Results and Operations. */
 export function LiveWorkQueue({t,onNavigate}:{t:(value:string)=>string;onNavigate:(path:string)=>void}){
   const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot(),scope=snapshot.scope;
-  const [result,setResult]=useState<{identity:string;value?:WorkQueue;error?:string}>(),[reload,setReload]=useState(0);
-  const current=result?.identity===snapshot.identity?result:undefined;
+  const [result,setResult]=useState<{identity:string;reload:number;value?:WorkQueue;error?:string}>(),[reload,setReload]=useState(0);
+  const current=result?.identity===snapshot.identity&&result.reload===reload?result:undefined;
   useEffect(()=>{
     if(!scope.workspace||!scope.project||!session.token())return;
-    const own=new AbortController(),identity=session.identity();setResult({identity});
+    const own=new AbortController(),identity=session.identity();
     void loadWorkQueue(client,session,own.signal)
-      .then(value=>{if(!own.signal.aborted&&session.isCurrent(identity))setResult({identity,value});})
-      .catch(cause=>{if(!own.signal.aborted&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled))setResult({identity,error:describeLiveError(cause)});});
+      .then(value=>{if(!own.signal.aborted&&session.isCurrent(identity))setResult({identity,reload,value});})
+      .catch(cause=>{if(!own.signal.aborted&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled))setResult({identity,reload,error:describeLiveError(cause)});});
     return()=>own.abort();
   },[client,session,scope.workspace,scope.project,snapshot.identity,reload]);
   const cards:[WorkQueueItem['kind'],string][]=[['awaiting_review','Awaiting review'],['pending_approval','Pending approvals'],['unassigned','Unassigned buyers'],['failed_job','Failed jobs'],['unknown_fit','Unknown fit'],['unknown_acceptance','Unknown provider acceptance']];

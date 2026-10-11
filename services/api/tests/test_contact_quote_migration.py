@@ -9,7 +9,7 @@ from alembic.config import Config
 
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 
-HEAD = "0038_c61_workspace_directory"
+HEAD = "0050_c61_delivery_authorizations"
 PREVIOUS = "0022_research_checkpoints"
 WORKSPACE = "11111111-1111-4111-8111-111111111111"
 PROJECT = "a0000000-0000-4000-8000-000000000001"
@@ -26,7 +26,8 @@ def _head(dsn):
         return db.execute("SELECT version_num FROM alembic_version").fetchone()[0]
 
 
-def test_0023_empty_quote_basis_roundtrip(migrated):
+def test_0023_empty_quote_basis_roundtrip(isolated_migrated):
+    migrated = isolated_migrated
     config = _config()
     assert _head(migrated) == HEAD
     try:
@@ -41,7 +42,8 @@ def test_0023_empty_quote_basis_roundtrip(migrated):
     assert _head(migrated) == HEAD
 
 
-def test_0023_refuses_downgrade_with_actor_bound_quote(seeded):
+def test_0023_refuses_downgrade_with_actor_bound_quote(isolated_seeded):
+    seeded = isolated_seeded
     quote_id = str(uuid.uuid4())
     with psycopg.connect(seeded, autocommit=True) as db:
         db.execute(

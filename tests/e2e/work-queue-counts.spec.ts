@@ -38,6 +38,13 @@ test('C61T-09 held project summary cannot overwrite newer scope; failed refresh 
  await page.getByRole('combobox',{name:/^(Project|專案)$/}).selectOption(a.id);await begun;
  await page.getByRole('combobox',{name:/^(Project|專案)$/}).selectOption(b.id);await counts(page,b);const asOf=await panel(page).locator('time').getAttribute('datetime');release();await completed;await counts(page,b);expect(await panel(page).locator('time').getAttribute('datetime')).toBe(asOf);await page.unroute(aPath);
  const path=`**/v1/workspaces/${workspace}/projects/${b.id}/work-queue`;
+ let refreshStarted:()=>void=()=>{},refreshRelease:()=>void=()=>{};
+ const refreshing=new Promise<void>(r=>refreshStarted=r),refreshHeld=new Promise<void>(r=>refreshRelease=r);
+ await page.route(path,async route=>{const response=await route.fetch();expect(response.status()).toBe(200);refreshStarted();await refreshHeld;await route.fulfill({response});});
+ await panel(page).getByRole('button',{name:/^(Refresh work queue|重新整理今日待辦)$/,exact:true}).click();await refreshing;
+ await expect(panel(page)).toHaveAttribute('aria-busy','true');
+ for(const kind of Object.keys(b.counts))await expect(panel(page).locator(`[data-work-queue-kind="${kind}"] output`)).toHaveText('—');
+ await expect(panel(page).locator('time')).toHaveCount(0);refreshRelease();await counts(page,b);await page.unroute(path);
  await page.route(path,route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({code:'PROVIDER_UNAVAILABLE',message:'Isolated C61 summary read failure',request_id:'00000000-0000-4000-8000-000000000021',retryable:true})}));
  await panel(page).getByRole('button',{name:/^(Refresh work queue|重新整理今日待辦)$/,exact:true}).click();await expect(panel(page).getByRole('alert')).toBeVisible();
  for(const kind of Object.keys(b.counts))await expect(panel(page).locator(`[data-work-queue-kind="${kind}"] output`)).toHaveText('—');await expect(panel(page).locator('time')).toHaveCount(0);

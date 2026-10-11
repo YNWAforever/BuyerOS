@@ -11,7 +11,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import api
 from tests.test_lookup_quotes_db import OPERATOR, WORKSPACE_A, PROJECT, quote_case
 
-HEAD = "0038_c61_workspace_directory"
+HEAD = "0050_c61_delivery_authorizations"
 
 
 def _config():
@@ -25,7 +25,8 @@ def _head(dsn):
         return db.execute("SELECT version_num FROM alembic_version").fetchone()[0]
 
 
-def test_0030_empty_downgrade_reupgrade_and_runtime_grants(migrated, monkeypatch):
+def test_0030_empty_downgrade_reupgrade_and_runtime_grants(isolated_migrated, monkeypatch):
+    migrated = isolated_migrated
     assert _head(migrated) == HEAD
     with psycopg.connect(migrated) as db:
         assert db.execute("SELECT has_table_privilege('buyeros_api','outcome_events','UPDATE')").fetchone()[0] is False
@@ -43,7 +44,8 @@ def test_0030_empty_downgrade_reupgrade_and_runtime_grants(migrated, monkeypatch
     assert _head(migrated) == HEAD
 
 
-def test_0030_retained_outcome_refuses_downgrade(quote_case, monkeypatch):
+def test_0030_retained_outcome_refuses_downgrade(isolated_quote_case, monkeypatch):
+    quote_case = isolated_quote_case
     _client, dsn, buyers = quote_case
     event_id = uuid.uuid4()
     with psycopg.connect(dsn, autocommit=True) as db:

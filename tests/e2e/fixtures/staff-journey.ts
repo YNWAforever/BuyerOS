@@ -1,13 +1,12 @@
-import {expect,test,type Page} from '@playwright/test';
+import {expect,test,type Page,type Browser,type APIRequestContext} from '@playwright/test';
+import type {components} from '@/services/generated/buyeros-api';
 import {webcrypto} from 'node:crypto';
-import {execFile} from 'node:child_process';
-import {promisify} from 'node:util';
+import {runOwnedFixtureProcess} from './owned-fixture-process';
 import {resolve} from 'node:path';
 import {readFile} from 'node:fs/promises';
 import {awaitCloudflareIntent} from './cloudflare-stack';
 import {createJourneyInput,observeWorkspaceLocale,type JourneyInputMode} from './journey-input';
 
-const execFileAsync=promisify(execFile);
 const workspace='e0000000-0000-4000-8000-000000000001';
 const project='e9100000-0000-4000-8000-000000000001';
 
@@ -27,6 +26,12 @@ export async function signIn(page:Page,accessToken='fixture-access',initialPath=
       body:JSON.stringify({access_token:accessToken,id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:900})});});
   await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,
     contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[publicKey]})}));
+  await page.route('https://oidc.buyeros.test/v2/logout**',async route=>{
+    const q=new URL(route.request().url()).searchParams;
+    expect(q.get('client_id')).toBe('fixture-public-client');
+    expect(q.get('returnTo')).toBe('http://localhost:5173/app');
+    await route.fulfill({status:302,headers:{location:q.get('returnTo')!},body:''});
+  });
   const localeRead=inputMode==='keyboard'?observeWorkspaceLocale(page,workspace):null;
   try{
     await page.goto(initialPath);
@@ -103,7 +108,10 @@ const journeyZh:Record<string,string>={
   "Value proposition": "價值主張"
 };
 
-export function registerStaffJourney(transport:'celery'|'cloudflare'='celery',inputMode:JourneyInputMode='pointer'){
+type GroundingRequest=components['schemas']['DraftGroundingReviewRequest'];
+export type GroundingReceipt={requests:{key:string;body:GroundingRequest}[];committed_status:number};
+export type StaffJourneyReadback={page:Page;reviewer:Page;browser:Browser;request:APIRequestContext;workspace:string;project:string;runId:string;draftJobId:string;draftId:string;exportId:string;buyerId:string;contactId:string;locale:'en'|'zh-HK';layout:'desktop'|'mobile';approvedCopy:string;groundingReceipt?:GroundingReceipt};
+export function registerStaffJourney(transport:'celery'|'cloudflare'='celery',inputMode:JourneyInputMode='pointer',afterJourney?:(context:StaffJourneyReadback)=>Promise<void>,options:{unicode?:boolean;loseGroundingAck?:boolean;delayedReviewAck?:boolean;acceptedUnknownSearch?:boolean}={}){
 for(const locale of ['en','zh-HK'] as const){
 for(const layout of ['desktop','mobile'] as const){
 test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboard ':''}${locale} ${layout} UI-created offer through research, grounded addressed approval, export and outcome on one dataset`,async({page,browser,request})=>{
@@ -144,7 +152,7 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboar
   expect(project).not.toBe('e9100000-0000-4000-8000-000000000001');
   const workerRoot=resolve('services/worker');
   const python=resolve(workerRoot,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
-  const prerequisites=await execFileAsync(python,['tests/fixtures/prepare_browser_project.py','prepare',project],
+  const prerequisites=await runOwnedFixtureProcess(python,['tests/fixtures/prepare_browser_project.py','prepare',project],
     {cwd:workerRoot,timeout:30_000});
   const prepared=JSON.parse(prerequisites.stdout);
   expect(prepared.fixture_prerequisites).toBe(true);
@@ -197,14 +205,32 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboar
     :(locale==='en'?/Status:\s*queued\s*·/:/狀態:\s*排隊中\s*·/);
   await expect(page.getByText(visibleStatus)).toBeVisible();
   await fits(page);
-  const {stdout}=transport==='cloudflare'?await awaitCloudflareIntent(runId,project):await execFileAsync(python,['tests/fixtures/run_browser_research.py',runId,project],
-    {cwd:workerRoot,timeout:180_000,maxBuffer:1024*1024});
+  let stdout:string;
+  if(options.acceptedUnknownSearch){
+    expect(transport).toBe('celery');
+    const first=await runOwnedFixtureProcess(python,['tests/fixtures/c61_joined_unknown_research.py',runId,project,'unknown'],{cwd:workerRoot,timeout:180_000,maxBuffer:1024*1024});
+    const unknown=JSON.parse(first.stdout.trim().split(/\r?\n/).at(-1)!);
+    expect(unknown.fixture_only).toBe(true);expect(unknown.run_id).toBe(runId);expect(unknown.project_id).toBe(project);expect(unknown.original_hold_preserved).toBe(true);expect(unknown.submit_count).toBe(1);expect(unknown.status_count).toBe(0);
+    const panel=page.getByRole('region',{name:ui('Research runs'),exact:true});
+    await expect(panel.getByText(locale==='en'?'Original provider work is awaiting reconciliation. Its hold and committed results remain.':'原供應商操作仍待核對；預留金額及已儲存結果會保留。',{exact:true})).toBeVisible({timeout:15_000});
+    await expect(panel.getByRole('button',{name:locale==='en'?'Retry safe work':'重試安全工作',exact:true})).toHaveCount(0);
+    let unsafeRetries=0;
+    const retryListener=(r:import('@playwright/test').Request)=>{if(r.method()==='POST'&&new URL(r.url()).pathname===`/v1/workspaces/${workspace}/runs/${runId}/retry`)unsafeRetries++;};page.on('request',retryListener);
+    const second=await runOwnedFixtureProcess(python,['tests/fixtures/c61_joined_unknown_research.py',runId,project,'accepted'],{cwd:workerRoot,timeout:180_000,maxBuffer:1024*1024});
+    stdout=second.stdout;const accepted=JSON.parse(stdout.trim().split(/\r?\n/).at(-1)!);
+    expect(accepted.submit_count).toBe(1);expect(accepted.status_count).toBe(1);expect(accepted.billing_events).toBe(1);expect(accepted.blind_resubmits).toBe(0);expect(accepted.native_status_worker_pid).not.toBe(unknown.native_submit_worker_pid);
+    for(const index of [0,1,3,4])expect(accepted.original_resolved[index]).toBe(unknown.original_unknown[index]);
+    expect(unsafeRetries).toBe(0);page.off('request',retryListener);
+    await test.info().attach('same-project accepted unknown and original reconciliation',{body:JSON.stringify({fixture_only:true,workspace,project,runId,unknown,accepted,unsafe_browser_retries:unsafeRetries,real_provider:false,human_UAT:false,production:false}),contentType:'application/json'});
+  }else{
+    ({stdout}=transport==='cloudflare'?await awaitCloudflareIntent(runId,project):await runOwnedFixtureProcess(python,['tests/fixtures/run_browser_research.py',runId,project],{cwd:workerRoot,timeout:180_000,maxBuffer:1024*1024}));
+  }
   const report=JSON.parse(stdout.trim().split(/\r?\n/).at(-1)!) as {run_id:string;status:string;evidence:number;buyers:number;fit_verdicts:string[];published:string[]};
   expect(report.run_id).toBe(runId);
   expect(report.evidence).toBeGreaterThanOrEqual(1);
   expect(report.buyers).toBeGreaterThanOrEqual(1);
   expect(report.published.length).toBeGreaterThanOrEqual(1);
-  const contactInput=await execFileAsync(python,['tests/fixtures/prepare_browser_project.py','contact',project,runId],
+  const contactInput=await runOwnedFixtureProcess(python,['tests/fixtures/prepare_browser_project.py','contact',project,runId],
     {cwd:workerRoot,timeout:30_000});
   const existingContact=JSON.parse(contactInput.stdout) as {buyer_id:string;contact_id:string;fixture_existing_contact:boolean};
   expect(existingContact.fixture_existing_contact).toBe(true);
@@ -221,7 +247,30 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboar
   const reviewDossier=reviewer.getByRole('dialog',{name:ui('Buyer details: T30 Fictional Industrial Buyer')});
   await expect(reviewDossier).toContainText(locale==='en'?'Fit: match':'配對: 符合');
   await input.fill(reviewDossier.getByRole('textbox',{name:ui('Individual review reason')}),'Verified cited industrial buyer');
+  if(options.delayedReviewAck){
+    // Fixture fault injection: one actual committed reply is held. No retry,
+    // request-body substitution or provider side effect is introduced.
+    await reviewer.route('**/buyer-reviews',async route=>{
+      expect(route.request().method()).toBe('POST');
+      const original=await route.fetch();expect(original.status()).toBe(200);
+      const committed=await original.json();expect(committed.data.updated).toBe(1);
+      await test.info().attach('held-committed-review-ack',{body:JSON.stringify({
+        fixture_only:true,actual_original_status:original.status(),updated:committed.data.updated,
+        held_ms:5000,original_request_count:1,retry:false}),contentType:'application/json'});
+      await new Promise(resolve=>setTimeout(resolve,5000));
+      await route.fulfill({response:original});
+    },{times:1});
+  }
+  // Do not select the pre-review version while its committed ack is held.
+  // Closing the dossier creates a new snapshot and intentionally clears old
+  // selections; await the real current read before choosing an exact row.
+  const currentBuyers=reviewer.waitForResponse(response=>response.request().method()==='GET'
+    &&new URL(response.url()).pathname===`/v1/workspaces/${workspace}/projects/${project}/buyers`
+    &&response.status()===200,{timeout:30_000});
   await input.activate(reviewDossier.getByRole('button',{name:locale==='en'?/^Save review/:/^儲存審閱/}));
+  expect(await (await currentBuyers).finished()).toBeNull();
+  await expect(reviewer.getByRole('checkbox',{name:ui('Select T30 Fictional Industrial Buyer')}).locator('..'))
+    .toContainText(locale==='en'?'accepted':'已接納');
   await input.check(reviewer.getByRole('checkbox',{name:ui('Select T30 Fictional Industrial Buyer')}));
   await input.fill(reviewer.getByRole('textbox',{name:ui('List name')}),'T30 generated buyer');
   await input.activate(reviewer.getByRole('button',{name:ui('Create list')}));
@@ -252,7 +301,7 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboar
   await input.activate(page.getByRole('button',{name:ui('Generate addressed draft')}));
   await expect.poll(()=>new URL(page.url()).searchParams.get('draft_job'),{timeout:30_000}).toMatch(/^[0-9a-f-]{36}$/);
   const draftJobId=new URL(page.url()).searchParams.get('draft_job')!;
-  const draftRun=transport==='cloudflare'?await awaitCloudflareIntent(runId,project,draftJobId):await execFileAsync(python,['tests/fixtures/run_browser_research.py',runId,project,draftJobId!],
+  const draftRun=transport==='cloudflare'?await awaitCloudflareIntent(runId,project,draftJobId):await runOwnedFixtureProcess(python,['tests/fixtures/run_browser_research.py',runId,project,draftJobId!],
     {cwd:workerRoot,timeout:180_000,maxBuffer:1024*1024});
   const draftReport=JSON.parse(draftRun.stdout.trim().split(/\r?\n/).at(-1)!) as {job_id:string;status:string;draft_id:string;grounding_status:string};
   expect(draftReport.job_id).toBe(draftJobId);
@@ -266,10 +315,13 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboar
   await fits(page);
   const generatedDraft=new URL(page.url()).searchParams.get('draft')!;
   expect(generatedDraft).toBe(draftReport.draft_id);
+  const manualSubject=options.unicode?'😀 Keyboard invitation é':'Keyboard invitation😀';
+  const greeting=options.unicode?(locale==='en'?'Hello👩‍💻 é,':'你好👩‍💻 é，'):(locale==='en'?'Hello,':'你好，');
+  const manualBody=[greeting,'Industrial sensor platform','Fictional distributor lists industrial sensors',locale==='en'?'Thank you.':'謝謝！'].join('\n');
+  let groundingReceipt:GroundingReceipt|undefined;
   if(inputMode==='keyboard'){
     const editor=page.getByRole('region',{name:ui('Open draft'),exact:true});
-    const manualBody=[locale==='en'?'Hello,':'你好，','Industrial sensor platform','Fictional distributor lists industrial sensors',locale==='en'?'Thank you.':'謝謝！'].join('\n');
-    await input.fill(editor.getByRole('textbox',{name:locale==='en'?'Subject':'主旨',exact:true}),'Keyboard invitation😀');
+    await input.fill(editor.getByRole('textbox',{name:locale==='en'?'Subject':'主旨',exact:true}),manualSubject);
     await input.fill(editor.getByRole('textbox',{name:ui('Body'),exact:true}),manualBody);
     await expect(editor).toHaveAttribute('data-live-unsaved','true');
     await input.activate(editor.getByRole('button',{name:locale==='en'?'Save revision':'儲存修訂',exact:true}));
@@ -285,20 +337,45 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboar
   await signIn(reviewer,'fixture-reviewer',`/app/outreach?workspace=${workspace}&project=${project}&draft=${generatedDraft}`,locale,inputMode,input);
   if(inputMode==='keyboard'){
     const grounding=reviewer.getByRole('region',{name:locale==='en'?'Manual source review':'人工來源覆核',exact:true});
-    const groups=grounding.getByRole('group');await expect(groups).toHaveCount(5);
-    for(let i=0;i<5;i++){
+    const groups=grounding.getByRole('group',{name:/^(Segment|段落) \d+$/,exact:true});await expect(groups).toHaveCount(5);
+    if(options.unicode){
+      const first=groups.first(),selection=first.getByRole('textbox',{name:locale==='en'?'Select segment text':'選取段落文字',exact:true});
+      await expect(selection).toHaveValue(manualSubject);await expect(selection).toHaveAttribute('readonly','');
+      await input.focus(selection);await selection.press('Home');await selection.press('Shift+ArrowRight');
+      expect(await selection.evaluate((element:HTMLTextAreaElement)=>[element.selectionStart,element.selectionEnd])).toEqual([0,2]);
+      await input.activate(first.getByRole('button',{name:locale==='en'?'Use selected text':'使用選取文字',exact:true}));
+      await expect(groups).toHaveCount(6);expect(await groups.locator('pre').allTextContents()).toEqual(['😀',manualSubject.slice(2),...manualBody.split('\n')]);
+    }
+    const segmentCount=options.unicode?6:5;
+    for(let i=0;i<segmentCount;i++){
       const group=groups.nth(i),text=await group.locator('pre').innerText();
       const offer=text==='Industrial sensor platform',evidence=text==='Fictional distributor lists industrial sensors';
       await input.choose(group.getByRole('combobox'),offer||evidence?'factual':'non_factual');
-      await input.fill(group.getByRole('textbox'),offer||evidence?'Read exact retained versioned source':'Greeting, invitation or closing without a factual claim');
+      await input.fill(group.getByRole('textbox',{name:locale==='en'?'Segment reason':'段落理由',exact:true}),offer||evidence?'Read exact retained versioned source':'Greeting, invitation or closing without a factual claim');
       if(offer)await input.check(group.getByRole('checkbox',{name:locale==='en'?/^Offer fact: Industrial sensor platform/:/^產品事實: Industrial sensor platform/}));
       if(evidence)await input.check(group.getByRole('checkbox',{name:locale==='en'?/^Evidence.*Fictional distributor lists industrial sensors/:/^證據.*Fictional distributor lists industrial sensors/}));
     }
     await input.fill(grounding.getByRole('textbox',{name:locale==='en'?'Overall review reason':'整體覆核理由',exact:true}),'Reviewed the full keyboard-edited message and exact retained sources');
     await input.check(grounding.getByRole('checkbox',{name:locale==='en'?/^I read the entire exact message/:/^我已閱讀整篇精確訊息/}));
+    const submit=grounding.getByRole('button',{name:locale==='en'?'Submit source review':'提交來源覆核',exact:true});
+    const reviewPath=`**/v1/workspaces/${workspace}/drafts/${generatedDraft}/grounding-reviews`;
+    if(options.loseGroundingAck){
+      groundingReceipt={requests:[],committed_status:0};let first=true;
+      await reviewer.route(reviewPath,async route=>{
+        groundingReceipt!.requests.push({key:route.request().headers()['idempotency-key'],body:route.request().postDataJSON() as GroundingRequest});
+        if(!first)return route.continue();first=false;
+        const committed=await route.fetch();groundingReceipt!.committed_status=committed.status();expect(committed.status(),await committed.text()).toBe(200);
+        await route.abort('failed');
+      });
+      await input.activate(submit);await expect(grounding.getByRole('alert')).toBeVisible();await expect(submit).toBeEnabled();
+      await expect(grounding.getByRole('checkbox',{name:locale==='en'?/^I read the entire exact message/:/^我已閱讀整篇精確訊息/})).toBeChecked();
+      await expect(groups).toHaveCount(segmentCount);
+      await expect(reviewer.getByRole('textbox',{name:ui('Body'),exact:true})).toHaveValue(manualBody);
+    }
     const reviewed=reviewer.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith('/grounding-reviews'));
-    await input.activate(grounding.getByRole('button',{name:locale==='en'?'Submit source review':'提交來源覆核',exact:true}));expect((await reviewed).status()).toBe(200);
-    await expect(reviewer.getByRole('textbox',{name:ui('Body'),exact:true})).toHaveValue([locale==='en'?'Hello,':'你好，','Industrial sensor platform','Fictional distributor lists industrial sensors',locale==='en'?'Thank you.':'謝謝！'].join('\n'));
+    await input.activate(submit);expect((await reviewed).status()).toBe(200);
+    if(groundingReceipt){expect(groundingReceipt.requests).toHaveLength(2);expect(groundingReceipt.requests[0].key).toBeTruthy();expect(groundingReceipt.requests[1]).toEqual(groundingReceipt.requests[0]);await reviewer.unroute(reviewPath);}
+    await expect(reviewer.getByRole('textbox',{name:ui('Body'),exact:true})).toHaveValue(manualBody);
     await input.activate(reviewer.getByRole('button',{name:ui('Request exact review'),exact:true}));
   }
   await expect(reviewer.getByRole('checkbox',{name:locale==='en'?/I confirm the exact recipient/:/我確認以上精確收件人/})).toBeVisible();
@@ -318,7 +395,7 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboar
   const copy=await readFile((await downloaded.path())!,'utf8');
   expect(copy).toContain('recipient@fixture.example.test');
   expect(copy).toContain('Industrial sensor platform');
-  expect(copy).toContain(locale==='en'?'Hello,':'你好，');
+  expect(copy).toContain(greeting);if(options.unicode){expect(copy).toContain(manualSubject);expect(copy).toContain(manualBody);}
   const viewer=await request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/exports/${exportId}/content`,
     {headers:{Authorization:'Bearer fixture-viewer'}});
   expect(viewer.status()).toBe(403);
@@ -340,6 +417,7 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboar
     await test.info().attach('operator-keyboard-input',{body:JSON.stringify(await input.verify(page),null,2),contentType:'application/json'});
     await test.info().attach('reviewer-keyboard-input',{body:JSON.stringify(await input.verify(reviewer),null,2),contentType:'application/json'});
   }
+  if(afterJourney)await afterJourney({page,reviewer,browser,request,workspace,project,runId,draftJobId,draftId:generatedDraft,exportId,buyerId:existingContact.buyer_id,contactId:existingContact.contact_id,locale,layout,approvedCopy:copy,groundingReceipt});
   await reviewerContext.close();
   await page.setViewportSize({width:390,height:844});
   await expect(page.locator('html')).toHaveAttribute('lang',locale);

@@ -1,7 +1,9 @@
 """Bounded frozen maintenance, distinct from 1000-row browser snapshots."""
 import hashlib,json,uuid
 from datetime import datetime,timedelta,timezone
-from sqlalchemy import select,insert,func,literal
+from sqlalchemy import select,insert,func,literal,cast,String,column,true
+from sqlalchemy.orm import aliased
+from sqlalchemy.dialects.postgresql import JSONB
 from ..api.errors import ApiError
 from ..api.deps import permission_for_roles
 from ..db.icp import Project
@@ -60,6 +62,31 @@ async def get(session,*,workspace_id,project_id,actor_id,manifest_id,lock=False)
     return row
 
 
+def _retry_receipt_queries(*,workspace_id,project_id,actor_id,source,target):
+    # Original conflict receipts are immutable history. Successful retry
+    # receipts exclude rows without rewriting that source job or its totals.
+    retry_manifest=aliased(BulkManifest)
+    retry_job=aliased(AsyncJob)
+    retry_item=aliased(AsyncJobItem)
+    retry_scope=(retry_manifest.workspace_id==workspace_id,
+        retry_manifest.project_id==project_id,retry_manifest.actor_user_id==actor_id,
+        retry_manifest.status=="executed",retry_manifest.operation==source.operation,
+        retry_manifest.specification["source_job_id"].astext==str(source.id),
+        retry_manifest.specification["target"]==target)
+    retry_jobs=select(retry_job.id).join(retry_manifest,
+        (retry_manifest.id==retry_job.manifest_id)&(retry_manifest.workspace_id==retry_job.workspace_id)).where(
+            *retry_scope,retry_job.workspace_id==workspace_id,
+            retry_job.project_id==project_id,retry_job.actor_user_id==actor_id)
+    receipts=func.jsonb_array_elements(retry_manifest.result["results"]).table_valued(column("value",JSONB)).lateral()
+    successful_sync=select(receipts.c.value["id"].astext).select_from(retry_manifest).join(receipts,true()).where(
+        *retry_scope,receipts.c.value["status"].astext.in_(["updated","unchanged"]),
+        receipts.c.value["id"].astext.is_not(None))
+    successful_async=select(cast(retry_item.buyer_id,String)).where(
+        retry_item.workspace_id==workspace_id,retry_item.job_id.in_(retry_jobs),
+        retry_item.status.in_(["updated","unchanged"]))
+    return retry_jobs,successful_sync.union(successful_async),retry_job
+
+
 async def preview(session,*,workspace_id,project_id,actor_id,payload):
     specification=payload.model_dump(mode="json",exclude_none=True)
     # Explicit clear-owner null is material, even though optional unused target fields are absent.
@@ -77,7 +104,13 @@ async def preview(session,*,workspace_id,project_id,actor_id,payload):
         if source.status not in {"completed","failed","cancelled"}:raise ApiError(409,"JOB_IN_PROGRESS","wait until the job has finished")
         if filters or source.operation!=payload.operation or any(source.command.get(k)!=v for k,v in specification["target"].items()):
             raise ApiError(422,"INVALID_REQUEST","retry preview must preserve the source operation/target and use only failed rows")
-        query=select(AsyncJobItem.buyer_id,func.coalesce(ProjectBuyer.version,AsyncJobItem.expected_version)).outerjoin(ProjectBuyer,(ProjectBuyer.workspace_id==AsyncJobItem.workspace_id)&(ProjectBuyer.project_id==project_id)&(ProjectBuyer.id==AsyncJobItem.buyer_id)).where(AsyncJobItem.workspace_id==workspace_id,AsyncJobItem.job_id==source.id,AsyncJobItem.status.in_(["blocked","conflict"])).order_by(AsyncJobItem.ordinal)
+        retry_jobs,successful_retries,retry_job=_retry_receipt_queries(workspace_id=workspace_id,
+            project_id=project_id,actor_id=actor_id,source=source,target=specification["target"])
+        active_retry=(await session.execute(retry_jobs.where(
+            retry_job.status.not_in(["completed","failed","cancelled"])).limit(1))).scalar_one_or_none()
+        if active_retry is not None:
+            raise ApiError(409,"JOB_IN_PROGRESS","wait until the accepted retry job has finished")
+        query=select(AsyncJobItem.buyer_id,func.coalesce(ProjectBuyer.version,AsyncJobItem.expected_version)).outerjoin(ProjectBuyer,(ProjectBuyer.workspace_id==AsyncJobItem.workspace_id)&(ProjectBuyer.project_id==project_id)&(ProjectBuyer.id==AsyncJobItem.buyer_id)).where(AsyncJobItem.workspace_id==workspace_id,AsyncJobItem.job_id==source.id,AsyncJobItem.status.in_(["blocked","conflict"]),cast(AsyncJobItem.buyer_id,String).not_in(successful_retries)).order_by(AsyncJobItem.ordinal)
     else:
         query=await selection_query(session,workspace_id=workspace_id,project_id=project_id,filters=filters,sort="name_asc")
     if payload.excluded_ids:query=query.where((AsyncJobItem.buyer_id if payload.source_job_id else ProjectBuyer.id).not_in(payload.excluded_ids))
@@ -106,6 +139,29 @@ async def execute(session,*,row,actor_id,version,payload):
     if row.status!="ready":raise ApiError(409,"INVALID_STATE","manifest is not ready for a new execution")
     if row.expires_at<=datetime.now(timezone.utc):raise ApiError(412,"STALE_REVISION","manifest expired; preview current versions")
     if row.version!=version or row.digest!=payload.digest:raise ApiError(412,"STALE_REVISION","exact manifest digest/version changed")
+    source_id=row.specification.get("source_job_id")
+    if source_id:
+        # Serialize sibling admissions on the original source, alongside preview.
+        # A refusal leaves the previously frozen sibling ready and unchanged.
+        source=(await session.execute(select(AsyncJob).where(
+            AsyncJob.workspace_id==row.workspace_id,AsyncJob.project_id==row.project_id,
+            AsyncJob.actor_user_id==actor_id,AsyncJob.id==uuid.UUID(source_id)).with_for_update())).scalar_one_or_none()
+        if source is None:raise ApiError(404,"NOT_FOUND","retry source job not found")
+        if source.status not in {"completed","failed","cancelled"}:
+            raise ApiError(409,"JOB_IN_PROGRESS","wait until the source job has finished")
+        if source.operation!=row.operation or any(source.command.get(k)!=v for k,v in row.specification["target"].items()):
+            raise ApiError(412,"STALE_REVISION","retry source basis changed; preview current failed rows")
+        retry_jobs,successful_retries,retry_job=_retry_receipt_queries(workspace_id=row.workspace_id,
+            project_id=row.project_id,actor_id=actor_id,source=source,target=row.specification["target"])
+        active_retry=(await session.execute(retry_jobs.where(
+            retry_job.status.not_in(["completed","failed","cancelled"])).limit(1))).scalar_one_or_none()
+        if active_retry is not None:
+            raise ApiError(409,"JOB_IN_PROGRESS","wait until the accepted retry job has finished")
+        handled=(await session.execute(select(BulkManifestItem.buyer_id).where(
+            BulkManifestItem.workspace_id==row.workspace_id,BulkManifestItem.manifest_id==row.id,
+            cast(BulkManifestItem.buyer_id,String).in_(successful_retries)).limit(1))).scalar_one_or_none()
+        if handled is not None:
+            raise ApiError(412,"STALE_REVISION","earlier retry already handled rows; preview remaining failed rows")
     digest=basis(row);count=0;pairs=[]
     cursor=await session.stream(select(BulkManifestItem).where(BulkManifestItem.workspace_id==row.workspace_id,BulkManifestItem.manifest_id==row.id).order_by(BulkManifestItem.ordinal).execution_options(yield_per=PAGE))
     try:

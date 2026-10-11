@@ -17,6 +17,11 @@ def build_app() -> Celery:
         broker_connection_retry_on_startup=True,
         broker_connection_timeout=5,
         beat_schedule={
+            "buyeros-retained-delivery-status": {
+                "task": "buyeros.reconcile_retained_deliveries",
+                "schedule": max(30.0, float(settings.sweep_seconds)),
+            },
+
             "buyeros-sweep-expired": {
                 "task": "buyeros.sweep",
                 "schedule": float(settings.sweep_seconds),

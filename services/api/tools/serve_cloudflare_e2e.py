@@ -80,7 +80,7 @@ def main():
         from buyeros_api.execution.config import get_settings
         get_settings.cache_clear()
 
-    async def execute(engine, envelope, step_key):
+    async def execute(engine, envelope, step_key, *, research_engine=None):
         with psycopg.connect(connection['owner']) as db:
             event = db.execute('SELECT event_type,payload FROM outbox_events WHERE id=%s AND workspace_id=%s', (envelope.outbox_id, envelope.workspace_id)).fetchone()
             progress = db.execute('SELECT processed FROM async_jobs WHERE id=%s', (event[1].get('job_id'),)).fetchone() if event and event[0]=='bulk.mutate' else None
@@ -89,7 +89,7 @@ def main():
             await released.wait()
         selected = contact if event and event[0].startswith('contact.') else adapter
         return await original_execute(engine, envelope, step_key, adapter=selected,
-            checkpoint_dsn=connection['worker'], environment='test')
+            checkpoint_dsn=connection['worker'], environment='test', research_engine=research_engine)
 
     def app_factory():
         app = create_app()

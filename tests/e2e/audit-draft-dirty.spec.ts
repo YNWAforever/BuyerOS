@@ -8,7 +8,7 @@ async function fixture(...args:string[]){const cwd=resolve('services/worker');re
 async function enter(page:Page){await resetWorkbenchFixtureRateWindows();const seeded=await fixture('create');await signInWorkbench(page,true,'access',`/app/outreach?workspace=${workspace}&project=${project}&draft=${seeded.draft}&draft_job=${seeded.job}`);const editor=page.getByRole('region',{name:'Open draft',exact:true});await expect(editor.getByRole('textbox',{name:'Subject',exact:true})).toHaveValue(seeded.subject);return {seeded,editor};}
 async function otherDraftButton(page:Page,subject:string){
   const list=page.getByRole('region',{name:'Draft list'}),button=list.locator('div.inline').filter({hasText:subject}).getByRole('button',{name:'Open draft'});
-  for(let i=0;i<100;i++){if(await button.count()){await expect(button).toBeVisible();return button;}const range=list.locator('p').first(),before=await range.innerText();await expect(list.getByRole('button',{name:'Next page',exact:true})).toBeEnabled();await list.getByRole('button',{name:'Next page',exact:true}).click();await expect(range).not.toHaveText(before);}
+  for(let i=0;i<100;i++){if(await button.count()){await expect(button).toBeVisible();return button;}const range=list.locator('p').first(),before=await range.innerText();await expect(list.getByRole('button',{name:'Next page',exact:true})).toBeEnabled();await list.getByRole('button',{name:'Next page',exact:true}).click();await expect(range).not.toHaveText(before);await expect(range).toHaveText(/^\d+–\d+ \/ \d+$/);}
   throw new Error('Fictional target draft was not found through actual list pagination');
 }
 async function dirty(page:Page){const editor=page.getByRole('region',{name:'Open draft',exact:true});await editor.getByRole('textbox',{name:'Subject',exact:true}).fill('Local unsaved subject');await editor.getByRole('textbox',{name:'Body',exact:true}).fill('Local unsaved body');await editor.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');}
@@ -61,4 +61,35 @@ test('D02 zh-HK mobile dialog preserves content and keeps all choices visible',a
   const box=await dialog.boundingBox();expect(box).not.toBeNull();expect(box!.x).toBeGreaterThanOrEqual(0);expect(box!.x+box!.width).toBeLessThanOrEqual(390);
   await page.screenshot({path:'test-results/audit-draft-dialog-zh-mobile.png',fullPage:true});await dialog.getByRole('button',{name:'取消',exact:true}).click();
   const editor=page.getByRole('region',{name:'開啟草稿',exact:true});await expect(editor.getByRole('textbox',{name:'內容',exact:true})).toHaveValue('Local unsaved body');await expect(editor).toHaveAttribute('data-live-unsaved','true');
+});
+
+test('D02 clean project switch clears draft query and loads the selected project',async({page})=>{
+  await enter(page);const selected=page.getByRole('combobox',{name:'Project',exact:true});
+  const target='e9100000-0000-4000-8000-000000000001';await selected.selectOption(target);
+  await expect(selected).toHaveValue(target);
+  await expect.poll(()=>new URL(page.url()).searchParams.get('draft')).toBeNull();
+  await expect.poll(()=>new URL(page.url()).searchParams.get('draft_job')).toBeNull();
+  await expect(page.getByRole('region',{name:'Open draft',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('region',{name:'Sender identity',exact:true})).toBeVisible();
+});
+
+test('D02 busy Save keeps its dirty buffer and refuses project switching until acknowledgement',async({page})=>{
+  const {seeded,editor}=await enter(page);await dirty(page);
+  let release:()=>void=()=>{},received:()=>void=()=>{};
+  const held=new Promise<void>(r=>release=r),started=new Promise<void>(r=>received=r);
+  await page.route(`**/v1/workspaces/${workspace}/drafts/${seeded.draft}`,async route=>{
+    if(route.request().method()!=='PATCH')return route.continue();
+    const response=await route.fetch();expect(response.status()).toBe(200);received();await held;await route.fulfill({response});
+  });
+  await editor.getByRole('button',{name:'Save revision',exact:true}).click();await started;
+  const selected=page.getByRole('combobox',{name:'Project',exact:true});
+  await selected.selectOption('e9100000-0000-4000-8000-000000000001');
+  await expect(selected).toHaveValue(project);
+  await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue('Local unsaved body');
+  await expect(editor).toHaveAttribute('data-live-unsaved','true');release();
+  await expect(editor).not.toHaveAttribute('data-live-unsaved','true');
+  await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toBeEnabled();
+  const saved=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${seeded.draft}`,{headers:{Authorization:'Bearer fixture-access'}});
+  expect(saved.status()).toBe(200);const data=(await saved.json()).data;
+  expect(data.revision_number).toBe(2);expect(data.body).toBe('Local unsaved body');expect(data.language).toBe('zh-HK');
 });

@@ -269,7 +269,7 @@ def test_0037_empty_roundtrip_and_data_preserving_downgrade_refusal(api,seeded,m
     _seed_many(seeded,2);manifest=_preview(api,_admin_membership(seeded));monkeypatch.setenv('BUYEROS_DATABASE_URL',seeded);get_settings.cache_clear()
     with pytest.raises(RuntimeError,match='durable manifests'):command.downgrade(config,'0036_checkpoint_schema_grants')
     with psycopg.connect(seeded) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0038_c61_workspace_directory'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0050_c61_delivery_authorizations'
         assert db.execute('SELECT count(*) FROM bulk_manifest_items WHERE manifest_id=%s',(manifest['id'],)).fetchone()[0]==2
     monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(seeded));get_settings.cache_clear()
 
@@ -293,3 +293,78 @@ def test_manifest_other_operations_use_current_canonical_review_and_lists(api,se
     with psycopg.connect(seeded) as db:
         if operation=='reviewBuyers':assert db.execute('SELECT count(*) FROM human_reviews WHERE project_buyer_id=ANY(%s::uuid[]) AND state=%s',(buyers,'accepted')).fetchone()[0]==2
         else:assert db.execute('SELECT count(*) FROM list_memberships WHERE list_id=%s AND buyer_id=ANY(%s::uuid[])',(target['list_id'],buyers)).fetchone()[0]==2
+
+
+@pytest.mark.parametrize("failed_count", [20, 121])
+def test_c61_partial_retry_keeps_80_successes_and_only_20_failed_rows(api, seeded, failed_count):
+    from buyeros_api.api.deps import tenant_scoped
+    from buyeros_api.services.bulk_service import apply_bulk_chunk
+
+    # Async starts at 101. One already-owned row is unchanged, alongside the
+    # required 80 successful updates and actual version conflicts.
+    _seed_many(seeded, 81 + failed_count)
+    owner = _admin_membership(seeded)
+    with psycopg.connect(seeded) as db:
+        target_user = db.execute("SELECT user_id FROM memberships WHERE id=%s", (owner,)).fetchone()[0]
+        ids = [row[0] for row in db.execute("SELECT id FROM project_buyers WHERE workspace_id=%s ORDER BY id", (WORKSPACE_A,)).fetchall()]
+        assert len(ids) == 81 + failed_count
+        db.execute("UPDATE project_buyers SET owner_user_id=%s WHERE id=%s", (target_user, ids[-1]))
+    original = _preview(api, owner)
+    with psycopg.connect(seeded) as db:
+        db.cursor().executemany("UPDATE project_buyers SET version=version+1 WHERE id=%s", [(item,) for item in ids[:failed_count]])
+    response = _execute(api, original)
+    assert response.status_code == 202, response.text
+    job_id = uuid.UUID(response.json()["data"]["id"])
+
+    async def drain(target_job, count):
+        for _ in range((count + 49) // 50 + 1):
+            async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
+                await apply_bulk_chunk(session, target_job)
+    asyncio.run(drain(job_id, 81 + failed_count))
+    with psycopg.connect(seeded) as db:
+        assert db.execute("SELECT processed,updated,unchanged,conflicts FROM async_jobs WHERE id=%s", (job_id,)).fetchone() == (81 + failed_count, 80, 1, failed_count)
+        successes = db.execute("SELECT buyer_id FROM async_job_items WHERE job_id=%s AND status='updated'", (job_id,)).fetchall()
+        assert len(successes) == 80
+        success_state = db.execute("SELECT id,version,owner_user_id FROM project_buyers WHERE id=ANY(%s) ORDER BY id", ([row[0] for row in successes],)).fetchall()
+    child = _preview(api, owner, filters={}, source_job_id=str(job_id))
+    assert child["count"] == failed_count and child["digest"] != original["digest"]
+    with psycopg.connect(seeded) as db:
+        rows = db.execute("SELECT buyer_id,expected_version FROM bulk_manifest_items WHERE manifest_id=%s", (child["id"],)).fetchall()
+        assert {row[0] for row in rows} == set(ids[:failed_count])
+        assert all(row[1] == 2 for row in rows)
+    sibling = _preview(api, owner, filters={}, source_job_id=str(job_id),
+        reason="Earlier frozen sibling of the same failed-only source")
+    assert sibling["count"] == failed_count
+    retried = _execute(api, child)
+    assert retried.status_code == (200 if failed_count == 20 else 202), retried.text
+    if failed_count == 20:
+        assert retried.json()["data"]["updated"] == failed_count
+        denied_sibling = _execute(api, sibling)
+        assert denied_sibling.status_code == 412, denied_sibling.text
+    else:
+        # An already-accepted retry job must settle before a second intent.
+        accepted_repreview = api.post(ROOT, json={
+            "filters": {}, "excluded_ids": [], "operation": "assignBuyerOwners",
+            "target": {"owner_membership_id": owner}, "reason": "Wait for accepted retry before new intent",
+            "source_job_id": str(job_id),
+        }, headers=_h(key=str(uuid.uuid4())))
+        assert accepted_repreview.status_code == 409, accepted_repreview.text
+        denied_sibling = _execute(api, sibling)
+        assert denied_sibling.status_code == 409, denied_sibling.text
+        asyncio.run(drain(uuid.UUID(retried.json()["data"]["id"]), failed_count))
+    with psycopg.connect(seeded) as db:
+        assert db.execute("SELECT id,version,owner_user_id FROM project_buyers WHERE id=ANY(%s) ORDER BY id", ([row[0] for row in successes],)).fetchall() == success_state
+        assert db.execute("SELECT count(*) FROM project_buyers WHERE id=ANY(%s) AND version=3", (ids[:failed_count],)).fetchone()[0] == failed_count
+    # C61T-11: a successful failed-only child is a durable receipt. Reopening
+    # the historical parent must not admit those successful rows a second time.
+    reopened = api.post(ROOT, json={
+        "filters": {}, "excluded_ids": [], "operation": "assignBuyerOwners",
+        "target": {"owner_membership_id": owner}, "reason": "Reopen failed-only source after committed retry",
+        "source_job_id": str(job_id),
+    }, headers=_h(key=str(uuid.uuid4())))
+    assert reopened.status_code == 422, reopened.text
+    with psycopg.connect(seeded) as db:
+        assert db.execute("SELECT count(*) FROM bulk_manifests WHERE workspace_id=%s AND specification->>'source_job_id'=%s", (WORKSPACE_A, str(job_id))).fetchone()[0] == 2
+        assert db.execute("SELECT count(*) FROM async_job_items WHERE job_id=%s AND status='conflict'", (job_id,)).fetchone()[0] == failed_count
+        assert db.execute("SELECT count(*) FROM project_buyers WHERE id=ANY(%s) AND version=3", (ids[:failed_count],)).fetchone()[0] == failed_count
+        assert db.execute("SELECT status,version,job_id FROM bulk_manifests WHERE id=%s", (sibling["id"],)).fetchone() == ("ready", 1, None)

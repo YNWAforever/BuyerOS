@@ -60,8 +60,10 @@ async def cancel_enrichment_job(workspace_id: uuid.UUID, job_id: uuid.UUID,
 
 
 def selected_contact_status_capability():
-    """No live provider has verified nonbillable status semantics."""
-    return None, "production", False
+    """Require the current reviewed contact/status scope without factory or supplier IO."""
+    from ...providers import registry
+    cap=registry.DEFAULT_REGISTRY.contact_quote_capability(environment="production")
+    return cap, "production", cap is not None
 
 
 @router.post("/{job_id}/reconcile", status_code=202, name="reconcileEnrichmentJob")

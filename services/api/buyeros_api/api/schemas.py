@@ -624,3 +624,32 @@ class BulkManifestExecute(_Strict):
     def _confirmed(cls,value):
         if not value:raise ValueError("exact manifest confirmation required")
         return value
+
+
+class ResearchCandidateReviewRequest(_Strict):
+    company_id: uuid.UUID
+    page_source_id: uuid.UUID
+    expected_page_digest: StrictStr = Field(pattern=r"^[0-9a-f]{64}$")
+    expected_company_hash: StrictStr = Field(pattern=r"^[0-9a-f]{64}$")
+    excerpt: StrictStr = Field(min_length=5, max_length=4000)
+    reason: StrictStr = Field(min_length=10, max_length=400)
+
+
+class DeliveryAdmissionRequest(_Strict):
+    """Only immutable approval/context references; content and money stay server-owned."""
+
+    draft_revision_id: uuid.UUID
+    recipient_ref: uuid.UUID
+    sender_identity_id: uuid.UUID
+    approval_id: uuid.UUID
+
+    @field_validator("draft_revision_id", "recipient_ref", "sender_identity_id", "approval_id")
+    @classmethod
+    def _nonzero_delivery_reference(cls, value: uuid.UUID) -> uuid.UUID:
+        if value.int == 0:
+            raise ValueError("nonzero delivery reference required")
+        return value
+
+
+class DeliveryReconciliationRequest(_Strict):
+    """Empty body only; ref/account/scope and economic authority are server-owned."""

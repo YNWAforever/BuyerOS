@@ -10,7 +10,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import api
 from tests.test_lookup_quotes_db import PROJECT, WORKSPACE_A, quote_case
 
-HEAD = "0038_c61_workspace_directory"
+HEAD = "0050_c61_delivery_authorizations"
 
 
 def _config():
@@ -24,7 +24,8 @@ def _head(dsn):
         return db.execute("SELECT version_num FROM alembic_version").fetchone()[0]
 
 
-def test_0027_empty_downgrade_and_reupgrade(migrated):
+def test_0027_empty_downgrade_and_reupgrade(isolated_migrated):
+    migrated = isolated_migrated
     assert _head(migrated) == HEAD
     try:
         command.downgrade(_config(), "0026_sender_identity_versions")
@@ -36,7 +37,8 @@ def test_0027_empty_downgrade_and_reupgrade(migrated):
     assert _head(migrated) == HEAD
 
 
-def test_0027_refuses_populated_downgrade(quote_case, monkeypatch):
+def test_0027_refuses_populated_downgrade(isolated_quote_case, monkeypatch):
+    quote_case = isolated_quote_case
     _, dsn, buyers = quote_case
     draft_id = uuid.uuid4()
     with psycopg.connect(dsn, autocommit=True) as db:

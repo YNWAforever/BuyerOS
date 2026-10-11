@@ -114,7 +114,12 @@ async def _expire_retention(session, *, now, limit):
         .with_for_update(skip_locked=True))).scalars().all()
     for contact in contacts:
         await expire_subject_data(session, contact, policy, now, subject_type='contact_point')
-    return len(sources) + len(contacts)
+    remaining=limit-len(sources)-len(contacts)
+    if remaining>0:
+        from .receipt_retention import expire_provider_receipts
+        receipts=await expire_provider_receipts(session,now=now,policy_version=policy,limit=min(100,remaining))
+    else:receipts=[]
+    return len(sources)+len(contacts)+len(receipts)
 
 
 async def recover_execution(engine, *, now: datetime, limit: int = 10, runtime_epoch: int | None = None) -> RecoveryReport:
@@ -214,8 +219,8 @@ def set_execution_runtime(dsn: str, *, expected_epoch: int, backend: str, enable
     with psycopg.connect(dsn) as db:
         if db.execute('SELECT version_num FROM alembic_version').fetchone()[0] not in {
                 '0035_worker_recovery_probe', '0036_checkpoint_schema_grants', '0037_bulk_manifests',
-                '0038_c61_workspace_directory'}:
-            raise ValueError('compatible 0035/0036/0037/0038 build and migration required')
+                '0038_c61_workspace_directory', '0039_c61_user_identities', '0040_c61_search_receipts', '0041_c61_model_receipts', '0042_c61_contact_receipts', '0043_c61_receipt_retention', '0044_c61_search_intake', '0045_c61_research_page_privacy', '0046_c61_derived_privacy', '0047_c61_legacy_source_privacy', '0048_c61_delivery_ledger', '0049_c61_delivery_money', '0050_c61_delivery_authorizations'}:
+            raise ValueError('compatible reviewed 0035–0050 build and migration required')
         current = db.execute('SELECT backend,enabled,epoch,active_until FROM worker_runtime_control WHERE singleton=1 FOR UPDATE').fetchone()
         if current[2] != expected_epoch:
             raise ValueError('runtime epoch changed; inspect current state')

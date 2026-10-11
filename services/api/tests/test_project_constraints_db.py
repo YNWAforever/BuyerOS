@@ -148,7 +148,8 @@ def test_runtime_role_pool_reuse_isolated(seeded):
         assert names == {"ProjectB"}
 
 
-def test_0013_preflight_reports_legacy_conflict_without_deleting_it(seeded, monkeypatch):
+def test_0013_preflight_reports_legacy_conflict_without_deleting_it(isolated_seeded, monkeypatch):
+    seeded = isolated_seeded
     from alembic import command
     from alembic.config import Config
     from buyeros_api.settings import get_settings
@@ -192,7 +193,7 @@ def test_0013_preflight_reports_legacy_conflict_without_deleting_it(seeded, monk
             assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0014_buyer_management"
         command.upgrade(config, "head")
         with psycopg.connect(seeded) as owner:
-            assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0038_c61_workspace_directory"
+            assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0050_c61_delivery_authorizations"
     finally:
         with psycopg.connect(seeded, autocommit=True) as owner:
             owner.execute("UPDATE projects SET active_icp_version_id=NULL WHERE id=%s", (PROJECT_A,))

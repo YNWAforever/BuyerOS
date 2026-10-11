@@ -54,6 +54,13 @@ def _redacted_draft_content(content: dict, *, subject: str = "source") -> dict:
 
 
 async def _redact_derived_source_content(session, row: SourceDocument) -> None:
+    from ..db.runs import RawCandidate
+    await session.execute(update(RawCandidate).where(
+        RawCandidate.workspace_id==row.workspace_id,
+        RawCandidate.raw_payload['source_document_id'].astext==str(row.id),
+        RawCandidate.raw_payload['content_kind'].astext=='search_result_metadata',
+    ).values(source_url=row.canonical_url,normalized_url=row.canonical_url,
+             raw_payload={'source_document_id':str(row.id),'content_kind':'search_result_metadata','redacted':True}))
     evidence_ids = list((await session.execute(select(Evidence.id).where(
         Evidence.workspace_id == row.workspace_id,
         Evidence.source_document_id == row.id,
@@ -184,12 +191,16 @@ async def expire_subject_data(
     if row.retention_until is None or row.retention_until > now:
         raise ApiError(409, "POLICY_BLOCKED", "source retention has not expired")
     if row.excerpt is None and row.canonical_url.startswith("https://redacted.invalid/"):
+        from .receipt_retention import expire_provider_receipts
+        await expire_provider_receipts(session,now=now,policy_version=policy_version,limit=100,source_id=row.id)
         if row.object_key or row.run_id:
             await _ensure_source_delete_intent(session, row)
         return {"expired": False, "subject_id": str(row.id)}
     row.excerpt = None
     row.canonical_url = f"https://redacted.invalid/{row.id}"
     await session.flush()
+    from .receipt_retention import expire_provider_receipts
+    await expire_provider_receipts(session,now=now,policy_version=policy_version,limit=100,source_id=row.id)
     await _redact_derived_source_content(session, row)
     await session.execute(update(Evidence).where(
         Evidence.workspace_id == row.workspace_id,

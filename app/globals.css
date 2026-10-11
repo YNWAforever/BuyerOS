@@ -212,3 +212,14 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
 .live-scope-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
 .live-scope-grid > .panel {min-width:0;margin-bottom:0;}
 @media (max-width:720px) {.live-scope-grid {grid-template-columns:minmax(0,1fr);}}
+
+.candidate-observations,.candidate-review{min-width:0;overflow-wrap:anywhere;margin-block-start:1rem}
+.candidate-list{list-style:none;padding:0}.candidate-list li{border-block-end:1px solid var(--border,#ddd);padding-block:.8rem}
+.candidate-review{border:1px solid var(--border,#ddd);padding:1rem;border-radius:.5rem}
+.candidate-review label{display:block;min-width:0;margin-block:.6rem}.candidate-review textarea,.candidate-review select{width:100%;min-width:0;max-width:100%}
+.candidate-review textarea{min-height:6rem}.candidate-review blockquote{margin-inline:0;padding:.8rem;background:var(--surface-muted,#f5f5f5);white-space:pre-wrap}
+.candidate-review label.inline{display:flex;align-items:start}.candidate-review input[type=checkbox]{width:auto;flex-shrink:0;margin-top:.3rem}
+
+/* Bound the scope dropdown to its panel at narrow widths and 200% zoom. */
+.live-scope-select{display:block;min-width:0}
+.live-scope-select select{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box}

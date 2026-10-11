@@ -15,6 +15,8 @@ from .routes.buyer_management import router as buyer_management_router
 from .routes.bulk_manifests import router as bulk_manifests_router
 from .routes.documents import router as documents_router
 from .routes.drafts import router as drafts_router
+from .routes.delivery import router as delivery_router
+from .routes.delivery_history import router as delivery_history_router
 from .routes.exports import router as exports_router
 from .routes.enrichment import router as enrichment_router
 from .routes.health import router as health_router
@@ -26,6 +28,7 @@ from .routes.outcomes import router as outcomes_router
 from .routes.projects import router as projects_router
 from .routes.policy import router as policy_router
 from .routes.provider_callbacks import router as provider_callbacks_router
+from .routes.delivery_callbacks import router as delivery_callbacks_router
 from .routes.reviews import router as reviews_router
 from .routes.quotes import detail_router as quote_detail_router, router as quotes_router
 from .routes.runs import detail_router as run_detail_router, router as runs_router
@@ -66,12 +69,15 @@ def create_app() -> FastAPI:
     app.include_router(bulk_manifests_router)
     app.include_router(documents_router)
     app.include_router(drafts_router)
+    app.include_router(delivery_router)
+    app.include_router(delivery_history_router)
     app.include_router(exports_router)
     app.include_router(outcomes_router)
     app.include_router(usage_router)
     app.include_router(enrichment_router)
     app.include_router(policy_router)
     app.include_router(provider_callbacks_router)
+    app.include_router(delivery_callbacks_router)
     app.include_router(jobs_router)
     app.include_router(work_queue_router)
     app.include_router(reviews_router)

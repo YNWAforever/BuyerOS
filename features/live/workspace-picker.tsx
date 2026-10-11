@@ -123,7 +123,7 @@ export function LiveWorkspace() {
     const requestId=message.match(/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/i)?.[0]??null;
     // Allow-listed support fields only: no token, OAuth code, email or user claims.
     void navigator.clipboard?.writeText(JSON.stringify({request_id:requestId,time:new Date().toISOString(),
-      workspace_id:workspace,project_id:project,login_method:'auth0'},null,2));
+      workspace_id:workspace,project_id:project,login_method:auth?.provider??'auth0'},null,2));
   }
   useEffect(() => {
     if (!snapshot.authenticated) return;
@@ -193,17 +193,14 @@ export function LiveWorkspace() {
       .catch(error => {if (!own.signal.aborted && !(error instanceof LiveCancelled)) setSelectionError('Could not verify profile');});
     return () => own.abort();
   }, [client,session,workspace,project,projectKnown]);
-  function mayLeaveOffer(){return !document.querySelector('[data-live-unsaved="true"]') || window.confirm(t('Discard unsaved changes?'));}
+  function mayLeaveOffer(){return !document.querySelector('[data-live-unsaved="true"]:not([data-baseline-revision])') || window.confirm(t('Discard unsaved changes?'));}
   function chooseWorkspace(id:string) {
-    if(!mayLeaveOffer())return;
     if (workspaces.kind !== 'ready' || !workspaces.items.some(item => item.id === id)) return;
-    allowAutoSelection.current=true;setAccessError('');setSelectionError(''); setProjects({kind:'loading'});
-    session.next({workspace:id,project:null}); updateUrl(router,{workspace:id,project:null,profile:null});
+    void session.transition(async()=>{if(!mayLeaveOffer())return;allowAutoSelection.current=true;setAccessError('');setSelectionError('');setProjects({kind:'loading'});session.next({workspace:id,project:null});updateUrl(router,{workspace:id,project:null,profile:null,buyer:null,draft:null,draft_job:null,approval:null,bulk_job:null,bulk_manifest:null});}).catch(()=>{});
   }
   function chooseProject(id:string) {
-    if(!mayLeaveOffer())return;
     if (projects.kind !== 'ready' || !projects.items.some(item => item.id === id)) return;
-    setSelectionError(''); session.next({project:id}); updateUrl(router,{project:id,profile:null});
+    void session.transition(async()=>{if(!mayLeaveOffer())return;setSelectionError('');session.next({project:id});updateUrl(router,{project:id,profile:null,buyer:null,draft:null,draft_job:null,approval:null,bulk_job:null,bulk_manifest:null});}).catch(()=>{});
   }
   function saved(info:{projectId:string;icpVersionId:string}) {
     updateUrl(router,{workspace,project:info.projectId,profile:info.icpVersionId});
@@ -213,20 +210,19 @@ export function LiveWorkspace() {
     router.push(`/app?${new URLSearchParams({workspace:workspace!,project:info.projectId,profile:info.icpVersionId})}`);
   }
   function navigate(path:string) {
-    if(!mayLeaveOffer())return;
     const params = new URLSearchParams(); if (workspace) params.set('workspace',workspace); if (project) params.set('project',project); if (project && requested('profile')) params.set('profile',requested('profile')!);
     const target=new URL(path,window.location.origin);for(const [key,value] of params)target.searchParams.set(key,value);
-    router.push(target.pathname+target.search);
+    void session.transition(async()=>{if(mayLeaveOffer())router.push(target.pathname+target.search);}).catch(()=>{});
   }
-  if (!auth) return <main className="main-shell">{languagePicker}<section className="panel" role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&<p>{authError}</p>}</section></main>;
-  if (!snapshot.authenticated) return <main className="main-shell">{languagePicker}<section className="panel"><h1>FIMMICK BuyerOS</h1><p>{t('Sign in to access your workspaces.')}</p><button onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></section></main>;
+  if (!auth || authBootstrap.kind==='initializing') return <main className="main-shell">{languagePicker}<section className="panel" role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&<p>{authError}</p>}</section></main>;
+  if (!snapshot.authenticated) return <main className="main-shell">{languagePicker}<section className="panel"><h1>FIMMICK BuyerOS</h1><p>{t('Sign in to access your workspaces.')}</p>{authError&&<p role="alert">{authError}</p>}<button onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></section></main>;
   return <main className="main-shell live-workspace"><div className="content">
-    <header className="topbar live-topbar"><b>FIMMICK BuyerOS</b><span>{t('Live workspace')}</span>{languagePicker}<button onClick={() => {session.setToken(undefined); void auth.signOut();}}>{t('Sign out')}</button></header>
+    <header className="topbar live-topbar"><b>FIMMICK BuyerOS</b><span>{t('Live workspace')}</span>{languagePicker}<button onClick={()=>void session.transition(async()=>{if(!mayLeaveOffer())return;session.setToken(undefined);await auth.signOut();}).catch(()=>{})}>{t('Sign out')}</button></header>
     <LiveNavigation t={t} navigate={navigate} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>
     <div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
       {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
       {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
-      {workspaces.kind === 'ready' && (workspaces.items.length ? <label>{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p></>)}
+      {workspaces.kind === 'ready' && (workspaces.items.length ? <label className="live-scope-select">{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p></>)}
       {workspaces.kind==='ready'&&<><button onClick={retryAccess}>{t('Check access again')}</button>{accessError&&<p role="alert">{localizeError(accessError)}</p>}</>}
       {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={copyDiagnostics}>{t('Copy diagnostics')}</button></>}
       {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
@@ -234,7 +230,7 @@ export function LiveWorkspace() {
     {authorized && <section className="panel" aria-label={t('Project selection')}><h2>{t('Projects')}</h2>
       {projects.kind === 'loading' && <p role="status">{t('Loading projects…')}</p>}
       {projects.kind === 'error' && <><p role="alert">{localizeError(projects.message)}</p><button onClick={()=>{setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}>{t('Retry loading projects')}</button></>}
-      {projects.kind === 'ready' && (projects.items.length ? <label>{t('Project')} <select aria-label={t('Project')} value={project || ''} onChange={event=>chooseProject(event.target.value)}><option value="">{t('Choose project')}</option>{projects.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>{t('No projects yet.')}</p>)}
+      {projects.kind === 'ready' && (projects.items.length ? <label className="live-scope-select">{t('Project')} <select aria-label={t('Project')} value={project || ''} onChange={event=>chooseProject(event.target.value)}><option value="">{t('Choose project')}</option>{projects.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>{t('No projects yet.')}</p>)}
       {(canCreate||canEdit&&projectKnown&&projectActive) && <div className="inline">{canCreate&&<button onClick={()=>navigate('/app/discover/new')}>{t('New project')}</button>}{canEdit&&projectKnown&&projectActive&&<button onClick={()=>navigate('/app/discover/edit')}>{t('Edit offer')}</button>}</div>}
     </section>}
     </div>
@@ -245,9 +241,9 @@ export function LiveWorkspace() {
     {authorized && projectKnown && pathname === '/app' && <><LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/><LiveUsage key={`usage-${workspace}-${project}`} locale={locale} t={t}/><LiveProfilePanel key={`${workspace}-${project}`} canApprove={canApprove&&projectActive} t={t}/>{canArchive&&<LiveProjectManager key={`manager-${workspace}-${project}`} projectId={project!} t={t} onArchived={()=>{session.next({project:null});updateUrl(router,{project:null,profile:null});setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}/>}</>}
     {authorized && projectKnown && pathname === '/app/results' && <LiveResults key={`results-${workspace}-${project}`} locale={locale} canReview={canApprove} canEdit={canEdit} canQuote={canEdit} canAssign={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId??null:null} t={t}/>}
     {authorized && projectKnown && pathname === '/app/discover' && <LiveBuyers locale={locale} canReview={canApprove} canEdit={canBuyerEdit} canQuote={canEdit} canAssign={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId:null}/>}
-    {authorized && projectKnown && (pathname === '/app/runs' || /^\/app\/discover\/[^/]+$/.test(pathname) && !['new','edit'].includes(pathname.split('/')[3])) && <LiveRunProgress key={`runs-${workspace}-${project}-${pathname}`} runId={pathname.startsWith('/app/discover/')?pathname.split('/')[3]:undefined} canStart={canEdit&&projectActive} t={t} onOpenBuyers={()=>navigate('/app/discover')}/>}
+    {authorized && projectKnown && (pathname === '/app/runs' || /^\/app\/discover\/[^/]+$/.test(pathname) && !['new','edit'].includes(pathname.split('/')[3])) && <LiveRunProgress key={`runs-${workspace}-${project}-${pathname}`} runId={pathname.startsWith('/app/discover/')?pathname.split('/')[3]:undefined} canStart={canEdit&&projectActive} canReview={canApprove&&projectActive} t={t} onOpenBuyers={()=>navigate('/app/discover')}/>}
     {authorized && projectKnown && pathname === '/app/outreach' && <LiveDraftEditor key={`drafts-${workspace}-${project}`} locale={locale} canGenerate={canEdit&&projectActive} canReviewSender={canApprove&&projectActive} canRequestReview={canBuyerEdit&&projectActive} canApprove={canApprove&&projectActive} canExport={canBuyerEdit&&projectActive}/>}
-    {authorized && pathname === '/app/settings' && <><LiveSettings key={`settings-${workspace}`} workspace={workspace!} locale={locale} isAdmin={canArchive} canViewBudget={roles.some(role=>['operator','reviewer','workspace_admin'].includes(role))} onLocale={setLocale} onVersion={setPrefVersion} currentVersion={prefVersion} t={t}/><LivePolicySettings key={`policy-${workspace}`} roles={roles} t={t}/></>}
+    {authorized && pathname === '/app/settings' && <><LiveSettings key={`settings-${workspace}`} workspace={workspace!} locale={locale} isAdmin={canArchive} roles={roles} canViewBudget={roles.some(role=>['operator','reviewer','workspace_admin'].includes(role))} onLocale={setLocale} onVersion={setPrefVersion} currentVersion={prefVersion} t={t}/><LivePolicySettings key={`policy-${workspace}`} roles={roles} t={t}/></>}
     {authorized && pathname === '/app/operations' && <LiveOperations key={`operations-${workspace}-${project}`} workspace={workspace!} project={projectKnown?project:null} isAdmin={canArchive} onOpenBuyers={()=>navigate('/app/discover')} t={t}/>}
     {authorized && !['/app','/app/discover','/app/discover/new','/app/discover/edit','/app/results','/app/runs','/app/outreach','/app/settings','/app/operations'].includes(pathname) && !/^\/app\/discover\/[^/]+$/.test(pathname) && <LiveUnavailable state="unavailable"/>}
   </div></main>;

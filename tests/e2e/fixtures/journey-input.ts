@@ -18,8 +18,10 @@ export function createJourneyInput(mode:JourneyInputMode='pointer'){
   }
   async function reach(target:Locator,kind:string){
     const page=target.page();await expect(target).toBeVisible();await expect(target).toBeEnabled();
-    const visited:string[]=[];const end=Date.now()+10_000;let tabs=0;
-    while(tabs<=250&&Date.now()<end){
+    const visited:string[]=[];let tabs=0;
+    // Probe latency must not misclassify a partial tab cycle as unreachable.
+    // The native Tab count and the owning test timeout still bound traversal.
+    while(tabs<=250){
       if(await target.evaluate(element=>element===document.activeElement)){
         const focus=await target.evaluate(element=>{const style=getComputedStyle(element);return {
           name:element.getAttribute('aria-label')??element.textContent?.trim().slice(0,120)??element.tagName,
@@ -28,12 +30,14 @@ export function createJourneyInput(mode:JourneyInputMode='pointer'){
         expect(focus.outline!=='none'&&focus.outlineWidth>=2,`Visible outline on ${focus.name}`).toBe(true);
         actions.get(page)!.push({kind,name:focus.name,tabs,focusVisible:focus.focusVisible,outline:`${focus.outlineWidth}px ${focus.outline}`});return;
       }
+      if(tabs===250)break;
       visited.push(await page.evaluate(()=>{const element=document.activeElement;return `${element?.tagName}:${element?.getAttribute('aria-label')??element?.textContent?.trim().slice(0,80)??''}`;}));
       await page.keyboard.press('Tab');tabs++;
     }
     throw new Error(`Control unreachable by Tab after ${tabs} steps: ${target}; last focus: ${visited.slice(-8).join(' | ')}`);
   }
   return {mode,install,
+    async focus(target:Locator){if(mode==='pointer')return target.focus();await reach(target,'text-selection');},
     async activate(target:Locator){if(mode==='pointer')return target.click();await reach(target,'activate');await target.page().keyboard.press('Enter');},
     async fill(target:Locator,value:string){if(mode==='pointer')return target.fill(value);await reach(target,'type');await target.page().keyboard.press('ControlOrMeta+A');await target.page().keyboard.insertText(value);await expect(target).toHaveValue(value);},
     async check(target:Locator,checked=true){if(mode==='pointer')return checked?target.check():target.uncheck();await reach(target,'checkbox');if(await target.isChecked()!==checked)await target.page().keyboard.press('Space');if(checked)await expect(target).toBeChecked();else await expect(target).not.toBeChecked();},
@@ -62,17 +66,29 @@ export function createJourneyInput(mode:JourneyInputMode='pointer'){
 export function createDocumentReads<T>(){
  let generation=0;const requests=new WeakMap<object,number>();
  type Read={generation:number;body:T}|{generation:number;error:unknown};
- let reads:Promise<Read>[]=[];
+ let reads:{request:object;result:Promise<Read>}[]=[];
+ let notify!:()=>void;
+ let changed=new Promise<void>(resolve=>{notify=resolve;});
+ // A pending old body must not hold a newer response or document hostage.
+ const supersede=()=>{notify();changed=new Promise<void>(resolve=>{notify=resolve;});};
  return {
-  advance(){generation++;reads=[];},
+  advance(){generation++;reads=[];supersede();},
   start(request:object){requests.set(request,generation);},
+  cancel(request:object){
+   if(requests.get(request)===generation){
+    const count=reads.length;reads=reads.filter(read=>read.request!==request);
+    if(reads.length!==count)supersede();
+   }
+  },
   record(request:object,read:()=>Promise<T>){
    const document=requests.get(request);if(document===undefined||document!==generation)return;
-   reads.push(read().then(body=>({generation:document,body}),error=>({generation:document,error})));
+   reads.push({request,result:read().then(body=>({generation:document,body}),error=>({generation:document,error}))});
+   supersede();
   },
   async latest():Promise<T|undefined>{
    const candidate=reads.at(-1);if(!candidate)return;
-   const result=await candidate;if(result.generation!==generation||candidate!==reads.at(-1))return;
+   const result=await Promise.race([candidate.result,changed.then(()=>undefined)]);
+   if(result===undefined||result.generation!==generation||candidate!==reads.at(-1))return;
    if('error' in result)throw result.error;return result.body;
   },
  };
@@ -81,9 +97,23 @@ export function createDocumentReads<T>(){
 export function observeWorkspaceLocale(page:Page,workspace:string){
  const reads=createDocumentReads<{data:{locale:string}}>();
  const matches=(request:import('@playwright/test').Request)=>request.method()==='GET'&&new URL(request.url()).pathname===`/v1/workspaces/${workspace}/preferences`;
- const start=(request:import('@playwright/test').Request)=>{if(matches(request))reads.start(request);};
- const navigation=(frame:import('@playwright/test').Frame)=>{if(frame===page.mainFrame())reads.advance();};
- const record=(response:Response)=>{if(response.status()===200&&matches(response.request()))reads.record(response.request(),()=>response.json());};
+ let navigationPending=false;
+ // Chromium may evict the previous body before framenavigated is delivered.
+ // Attribute no preference reads to the gap between navigation admission and commit.
+ const start=(request:import('@playwright/test').Request)=>{
+  if(request.isNavigationRequest()&&request.frame()===page.mainFrame()){navigationPending=true;reads.advance();}
+  else if(!navigationPending&&matches(request))reads.start(request);
+ };
+ // A same-document route event keeps current requests; admission already fences replaced documents.
+ const navigation=(frame:import('@playwright/test').Frame)=>{if(frame===page.mainFrame()&&navigationPending)navigationPending=false;};
+ const record=(response:Response)=>{if(!navigationPending&&response.status()===200&&matches(response.request()))reads.record(response.request(),async()=>{
+  // Headers may arrive before React cancels a superseded request in this document.
+  // Observe native completion before reading the body; require another real read.
+  const failure=await response.finished();
+  if(response.request().failure()?.errorText==='net::ERR_ABORTED')reads.cancel(response.request());
+  if(failure)throw failure;
+  return response.json();
+ });};
  page.on('request',start);page.on('framenavigated',navigation);page.on('response',record);
  return {
   async settle(){

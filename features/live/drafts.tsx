@@ -7,6 +7,7 @@ import {LiveCancelled,LiveError,describeLiveError} from '@/services/live/client'
 import {ActionIntent} from '@/services/live/action-intent';
 import {DraftDirtyDialog,guardDraftTransition,type DirtyDecision} from './draft-dirty-guard';
 import {ExportDialog} from './export-dialog';
+import {DraftDeliveryHistory} from './delivery-history';
 import {DraftGroundingReview} from './draft-grounding-review';
 import {approveExactDraft,editDraft,generateDraft,getDraft,getDraftJob,getProject,listDrafts,loadDraftContext,requestDraftReview,saveSender,
   type Draft,type DraftJob,type Evidence,type Icp,type Project,type Buyer} from '@/services/live/drafts';
@@ -113,7 +114,7 @@ function eligibleEvidence(row:Evidence){
     &&Boolean(row.retention_until)&&Date.parse(row.retention_until!)>Date.now();
 }
 export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestReview,canApprove,canExport}:{locale:'en'|'zh-HK';canGenerate:boolean;canReviewSender:boolean;canRequestReview:boolean;canApprove:boolean;canExport:boolean}){
-  const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot();
+  const {client,session,draftRecovery}=useWorkspaceSession(),snapshot=useSessionSnapshot();
   const t=(value:string)=>locale==='zh-HK'?(words[value]||value):value;
   const searchParams=useSearchParams(),approval=readDraftApproval(searchParams.get('approval'));
   const listSequence=useRef(0),[listLoading,setListLoading]=useState(true),[listError,setListError]=useState('');
@@ -136,12 +137,36 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   const errorRef=useRef<HTMLParagraphElement>(null),generateIntent=useRef(new ActionIntent<DraftJob>());
   const scope=snapshot.scope,scopeKey=snapshot.identity;
   const unsaved=Boolean(draft&&(subject!==draft.subject||body!==draft.body||draftLanguage!==draft.language));
+  const suppressRecovery=useRef(false),retainBuffer=useRef(()=>{}),transitionHandler=useRef<(proceed:()=>Promise<void>)=>Promise<boolean>>(async()=>false);
+  retainBuffer.current=()=>{
+    if(suppressRecovery.current||!unsaved||!draft||!scope.actor||!scope.workspace||!scope.project)return;
+    draftRecovery.retain({actor:scope.actor,workspace:scope.workspace,project:scope.project,draftId:draft.id,
+      revisionId:draft.revision_id,version:draft.version,subject,body,language:draftLanguage});
+  };
+  transitionHandler.current=async proceed=>{
+    if(busy||transition.current){
+      // A clean or explicitly discarded buffer may leave while an old read is pending.
+      // A pending save still owns dirty content and must finish before navigation.
+      if(unsaved&&!suppressRecovery.current)return false;
+      await proceed();return true;
+    }
+    let proceeded=false;await performTransition(async()=>{await proceed();proceeded=true;});return proceeded;
+  };
+  useEffect(()=>session.subscribeBeforeClear(()=>retainBuffer.current()),[session]);
+  useEffect(()=>session.registerTransitionGuard(proceed=>transitionHandler.current(proceed)),[session]);
+  function restoreBuffer(opened:Draft){
+    const current=session.current();if(!current.actor||!current.workspace||!current.project)return;
+    const buffer=draftRecovery.find({actor:current.actor,workspace:current.workspace,project:current.project,draftId:opened.id});if(!buffer)return;
+    setSubject(buffer.subject);setBody(buffer.body);setDraftLanguage(buffer.language);setApprovalConfirmed(false);
+    if(buffer.version!==opened.version||buffer.revisionId!==opened.revision_id)setConflict(opened);
+    setNotice(t('Unsaved draft recovered. Compare the current revision before saving.'));
+  }
   useEffect(()=>()=>{choice.current?.('cancel');choice.current=null;},[snapshot.identity]);
   useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
   useEffect(()=>{if(!busy&&returnFocus.current){const target=returnFocus.current;returnFocus.current=null;if(target.isConnected)target.focus();}},[busy]);
   useEffect(()=>{
     if(!unsaved)return;
-    const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};
+    const warn=(event:BeforeUnloadEvent)=>{retainBuffer.current();event.preventDefault();event.returnValue='';};
     window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);
   },[unsaved]);
   useEffect(()=>{
@@ -161,7 +186,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
         setProject(p);setContext(c);setRecipient('');setJob(j);setDraft(d);setApprovalConfirmed(false);setStaleDiff([]);
         if(c){setSelectedFacts((c.icp?.offer_facts||[]).filter(f=>f.approved).map(f=>f.id));
           setSelectedEvidence(c.evidence.filter(eligibleEvidence).map(e=>e.id));}
-        if(d){setSubject(d.subject);setBody(d.body);setDraftLanguage(d.language==='zh-HK'?'zh-HK':'en');}
+        if(d){setSubject(d.subject);setBody(d.body);setDraftLanguage(d.language==='zh-HK'?'zh-HK':'en');restoreBuffer(d);}
         if(p.sender_identity){setSenderName(p.sender_identity.display_name);setSenderRole(p.sender_identity.role_title||'');
           setSenderOrg(p.sender_identity.organization);setSenderEmail(p.sender_identity.business_email);
           setSenderCountry(p.sender_identity.country);}
@@ -211,14 +236,15 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     setDraft(opened);setSubject(opened.subject);setBody(opened.body);setDraftLanguage(opened.language==='zh-HK'?'zh-HK':'en');
     setApprovalConfirmed(false);setStaleDiff([]);setConflict(null);replaceQuery({draft:opened.id});
   }
-  function decide(value:DirtyDecision){const resolve=choice.current;choice.current=null;setChoosing(false);resolve?.(value);}
+  function decide(value:DirtyDecision){if(value==='discard'){suppressRecovery.current=true;forgetBuffer();}const resolve=choice.current;choice.current=null;setChoosing(false);resolve?.(value);}
   function choose():Promise<DirtyDecision>{setChoosing(true);return new Promise(resolve=>{choice.current=resolve;});}
+  function forgetBuffer(){if(draft&&scope.actor&&scope.workspace&&scope.project)draftRecovery.forget({actor:scope.actor,workspace:scope.workspace,project:scope.project,draftId:draft.id});}
   async function persistRevision(identity:string){
     if(!draft||!canGenerate)throw new Error('Draft edit permission required');
     if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');
     const updated=await editDraft(client,session,draft,{subject,body,language:draftLanguage},crypto.randomUUID());
     if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');
-    applyDraft(updated,identity);setNotice(t('Human edits require a new grounding review before approval.'));
+    forgetBuffer();suppressRecovery.current=true;applyDraft(updated,identity);setNotice(t('Human edits require a new grounding review before approval.'));
     await refreshList(offset);
   }
   async function performTransition(proceed:(identity:string)=>Promise<void>,saveOnly=false){
@@ -236,7 +262,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
           try{const latest=await getDraft(client,session,draft.id);guard();setConflict(latest);}catch {/* Preserve local buffer if comparison is unavailable. */}
         }
       }
-    }finally{transition.current=false;if(session.isCurrent(identity))setBusy(false);}
+    }finally{suppressRecovery.current=false;transition.current=false;if(session.isCurrent(identity))setBusy(false);}
   }
   async function refreshJob(){
     if(!job)return;
@@ -376,6 +402,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
           <button type="button" onClick={()=>void approve()} disabled={busy||unsaved||!approvalConfirmed}>{t('Approve exact revision')}</button>
         </>}
       </section>
+      <DraftDeliveryHistory key={`delivery-history:${draft.id}`} draft={draft} locale={locale}/>
       {draft.status==='approved'&&draft.approval_id&&<ExportDialog key={`draft-export:${draft.id}:${draft.version}`} locale={locale} draft={draft} canExport={canExport}/>}
     </section>}
   </section>;

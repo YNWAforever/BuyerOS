@@ -11,7 +11,7 @@ from pathlib import Path
 import httpx
 import psycopg
 import pytest
-from sqlalchemy import event, text
+from sqlalchemy import event, text, __version__ as sqlalchemy_version
 from sqlalchemy.engine import Engine
 
 from buyeros_api.api import auth, deps
@@ -21,7 +21,7 @@ from buyeros_api.api.verifier import TokenVerifier
 from buyeros_api.settings import get_settings
 from tests import auth_fixtures as fx
 from tests.conftest import _docker, _require_disposable_test_dsn, _start_container, runtime_role_dsn
-from tools.quality_metrics import DATABASE_VARIABLES, provenance, summarize_requests, write_new_report
+from tools.quality_metrics import DATABASE_VARIABLES, install_queue_wait_probe, provenance, summarize_requests, write_new_report
 
 ROOT = Path(__file__).resolve().parents[3]
 CURRENT = contextvars.ContextVar("directory_observation", default=None)
@@ -47,7 +47,7 @@ def pg_dsn():
 
 def test_workspace_directory_current_baseline(migrated, monkeypatch):
     samples, actors = int(os.environ["BUYEROS_DIRECTORY_SAMPLES"]), int(os.environ["BUYEROS_DIRECTORY_ACTORS"])
-    assert 30 <= samples <= 100 and actors == 1
+    assert 30 <= samples <= 100 and actors in (1, 10, 25)
     output = Path(os.environ["BUYEROS_DIRECTORY_OUTPUT"])
     subjects = [f"directory-fixture-{uuid.uuid4().hex}" for _ in range(actors+1)]
     users = [uuid.uuid4() for _ in subjects]
@@ -55,6 +55,7 @@ def test_workspace_directory_current_baseline(migrated, monkeypatch):
     membership_ids = [uuid.uuid4() for _ in range(actors)]
     with psycopg.connect(migrated, autocommit=True) as owner:
         assert owner.execute("SELECT count(*) FROM workspaces").fetchone()[0] == 0, "fixture must be freshly owned/empty"
+        schema_head = owner.execute("SELECT version_num FROM alembic_version").fetchone()[0]
         owner.execute("ALTER ROLE buyeros_api LOGIN PASSWORD 'test-only'")
         owner.execute("GRANT USAGE ON SCHEMA public TO buyeros_api")
         for user, subject in zip(users, subjects):
@@ -81,18 +82,23 @@ def test_workspace_directory_current_baseline(migrated, monkeypatch):
     event.listen(Engine, "before_cursor_execute", before)
     event.listen(Engine, "after_cursor_execute", after)
     matrix = []
+    queue_restore = None
     try:
         async def capture():
+            nonlocal queue_restore
             app = create_app()
             async with app.router.lifespan_context(app), httpx.AsyncClient(transport=httpx.ASGITransport(app=app, raise_app_exceptions=False), base_url="http://fixture.test") as client:
                 engine = deps.get_engine()
+                queue_restore = install_queue_wait_probe(engine.pool._pool, CURRENT.get)
                 async with engine.connect() as conn:
                     role = (await conn.execute(text("SELECT current_user, r.rolsuper, r.rolbypassrls, pg_get_userbyid(c.relowner), c.relrowsecurity FROM pg_roles r CROSS JOIN pg_class c WHERE r.rolname=current_user AND c.oid='memberships'::regclass"))).one()
+                async with engine.connect() as conn:
+                    postgres_version = (await conn.execute(text("SHOW server_version"))).scalar_one()
                 assert role[0] == "buyeros_api" and role[1] is role[2] is False and role[3] != role[0] and role[4] is True
                 report_role = dict(name=role[0], superuser=role[1], bypass_rls=role[2], membership_owner=role[3], membership_rls=role[4])
 
-                async def request(actor=0, visible=True):
-                    observation = dict(latency_ms=0.0, status=None, bytes=0, queries=0, sql_ms=0.0, invalid_context=False)
+                async def request(actor=0, visible=True, repetition=None):
+                    observation = dict(latency_ms=0.0, status=None, bytes=0, queries=0, sql_ms=0.0, invalid_context=False, actor_index=actor, repetition=repetition, pool_wait_ms=0.0, pool_queue_gets=0)
                     token = CURRENT.set(observation)
                     started = time.perf_counter()
                     try:
@@ -120,8 +126,8 @@ def test_workspace_directory_current_baseline(migrated, monkeypatch):
                     first = await request()
                     warmups = [await request() for _ in range(3)]
                     observed = []
-                    for _ in range(samples):
-                        observed.extend(await asyncio.gather(*(request(i) for i in range(actors))))
+                    for repetition in range(samples):
+                        observed.extend(await asyncio.gather(*(request(i,repetition=repetition) for i in range(actors))))
                     summary = summarize_requests(observed)
                     with psycopg.connect(runtime_role_dsn(migrated)) as runtime:
                         runtime.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
@@ -157,22 +163,38 @@ def test_workspace_directory_current_baseline(migrated, monkeypatch):
                 with psycopg.connect(migrated,autocommit=True) as owner:
                     owner.execute("UPDATE memberships SET active=true WHERE id=%s",(membership_ids[0],))
                 probes.append(await request(0,True))
-                assert len(set(pids)) == 1 and all(s in (None,"") for s in settings+actor_settings)
-                assert summarize_requests(probes)["errors"]["failed_requests"] == 0
-                return report_role, dict(backend_pids=pids, workspace_setting_after_return=settings, actor_setting_after_return=actor_settings, same_connection_reused=True, revocation_seen=True, probes=probes)
+                # Concurrent requests expand the pool. Its FIFO checkout may
+                # rotate the later sequential probes across several backends.
+                # Inspect every retained connection without changing pool limits.
+                leases, retained = [], []
+                try:
+                    for _ in range(engine.pool.checkedin()):
+                        conn = await engine.connect()
+                        leases.append(conn)
+                        pid, workspace, actor_setting = (await conn.execute(text("SELECT pg_backend_pid(), current_setting('app.workspace_id',true), current_setting('app.user_id',true)"))).one()
+                        retained.append(dict(pid=pid,workspace_setting=workspace,actor_setting=actor_setting))
+                finally:
+                    for conn in leases:
+                        await conn.close()
+                clean = all(s in (None,"") for s in settings+actor_settings) and all(row[key] in (None,"") for row in retained for key in ("workspace_setting","actor_setting"))
+                same = len(set(pids)) == 1
+                verified = clean and (actors != 1 or same) and summarize_requests(probes)["errors"]["failed_requests"] == 0
+                return dict(**report_role,schema_head=schema_head,schema_head_read_by="owned fixture migration owner; runtime grants unchanged",postgres_version=postgres_version), dict(backend_pids=pids, workspace_setting_after_return=settings, actor_setting_after_return=actor_settings, same_connection_reused=same, retained_pool_connections=retained, all_inspected_connections_cleared=clean, revocation_seen=not probes[3]["invalid_context"] and probes[3]["status"]==200, verified=verified, probes=probes)
 
         role, pool = asyncio.run(capture())
         query_maxima = [r["warm"]["queries"]["max"] for r in matrix]
-        valid = all(summarize_requests([r["first_after_seed"], *r["warmups"], *r["observations"]])["errors"]["failed_requests"] == 0 for r in matrix)
+        valid = pool["verified"] and all(summarize_requests([r["first_after_seed"], *r["warmups"], *r["observations"]])["errors"]["failed_requests"] == 0 for r in matrix)
         gate = dict(max_sql_per_request=6, independent_of_unrelated_workspaces=len(set(query_maxima)) == 1, within_budget=max(query_maxima)<=6, passed=valid and max(query_maxima)<=6 and len(set(query_maxima))==1)
         report = dict(schema="buyeros.workspace-directory-benchmark.v1", run_id=os.environ["BUYEROS_DIRECTORY_NONCE"], evidence_mode="owned_disposable_fixture", live_verified=False,
-                      environment=dict(os=platform.platform(), python=platform.python_version(), database="owned Docker PostgreSQL16", region="local loopback; no geographic network measurement", transport="in-process HTTPX ASGI + real loopback PostgreSQL", cold_warm="first-after-seed is not process-cold; warm after3primers", concurrency=actors, warm_samples_per_actor=samples, duration_model="fixed request batches; not 10-minute stairs"),
+                      environment=dict(os=platform.platform(), python=platform.python_version(), database="owned Docker PostgreSQL16", region="local loopback; no geographic network measurement", transport="in-process HTTPX ASGI + real loopback PostgreSQL", cold_warm="first-after-seed is not process-cold; warm after3primers", concurrency=actors, warm_samples_per_actor=samples, duration_model="fixed request batches; not 10-minute stairs", device="local Windows host; not browser", network="ASGI in-process/PG loopback; not HK or WAN", pool_wait="elapsed inside SQLAlchemy pool queue.get incl exceptions; excludes new connections/reconnect, not latency minus SQL", sqlalchemy=sqlalchemy_version),
                       dataset="fictional users/workspaces only; fixed one visible membership", role=role, pool_reuse=pool, matrix=matrix, directory_gate=gate,
                       cost=dict(provider_calls=0, paid_resources_created=False, local_infrastructure_usd=None), release_accepted=False)
         report.update(provenance(ROOT,[Path(__file__).resolve(), ROOT/'scripts/benchmark-workspace-directory.py', ROOT/'services/api/tools/quality_metrics.py', ROOT/'services/api/buyeros_api/api/routes/workspaces.py', ROOT/'services/api/buyeros_api/api/deps.py', ROOT/'services/api/buyeros_api/services/workspace_directory.py', ROOT/'services/api/buyeros_api/db/session.py', ROOT/'services/api/alembic/versions/0038_c61_workspace_directory.py', ROOT/'services/api/buyeros_api/services/identity_resolver.py']))
         write_new_report(output, report)
         assert valid, "captured response/scope failure; report retained"
     finally:
+        if queue_restore is not None:
+            queue_restore()
         event.remove(Engine,"before_cursor_execute",before)
         event.remove(Engine,"after_cursor_execute",after)
         get_settings.cache_clear()

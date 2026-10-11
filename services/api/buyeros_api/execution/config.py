@@ -14,6 +14,7 @@ class WorkerSettings(BaseSettings):
     batch_size: int = 10
     sweep_seconds: int = 60
     paid_dispatch_enabled: bool = False
+    delivery_dispatch_enabled: bool = False
     reconciliation_enabled: bool = True
     retention_policy_version: str | None = None
     cloudflare_execution_enabled: bool = False

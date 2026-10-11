@@ -84,11 +84,13 @@ def test_registry_covers_every_unimplemented_contract_operation():
         "uploadOfferDocument", "ingestOfferUrl", "getOfferDocument", "listOfferDocuments", "deleteOfferDocument",
         "listDrafts", "generateDraft", "getDraft", "editDraft",
         "requestDraftReview", "approveDraft", "disabledDeliveryBoundary",
+        "admitDraftDelivery", "reconcileDeliveryMessage", "receiveDeliveryCallback", "listDraftDeliveryMessages",
         "exportBuyers", "exportDraft", "getExport", "downloadExport", "exportBulkFailures",
         "getUsage", "listOutcomes", "recordOutcome", "correctOutcome",
         "listEligibleAssignees", "getAsyncJobSummary", "reviewDraftGrounding",
         "previewBulkManifest", "getBulkManifest", "executeBulkManifest",
         "getWorkQueue", "listProviderOperations",
+        "listResearchCandidates", "getResearchCandidateReviewContext", "reviewResearchCandidate",
     }
     contract = _contract_operations()
     out_of_slice = set(contract) - implemented

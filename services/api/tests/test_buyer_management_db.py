@@ -228,7 +228,8 @@ def test_note_does_not_revise_draft_and_material_review_invalidates_approval(api
         conn.execute("DELETE FROM outreach_drafts WHERE id=%s", (draft_id,))
 
 
-def test_0014_migration_owns_preset_rls_and_disposable_rollback(migrated, monkeypatch):
+def test_0014_migration_owns_preset_rls_and_disposable_rollback(isolated_migrated, monkeypatch):
+    migrated = isolated_migrated
     from alembic import command
     from alembic.config import Config
     from tests.test_buyer_review_db import ALEMBIC_INI, SERVICE_ROOT
@@ -260,7 +261,7 @@ def test_0014_migration_owns_preset_rls_and_disposable_rollback(migrated, monkey
         ).fetchone()[0] == "0014_buyer_management"
     command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0038_c61_workspace_directory"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0050_c61_delivery_authorizations"
 
 
 def test_list_filter_freezes_membership_and_refreezes_after_remove(api, seeded):

@@ -12,6 +12,7 @@ from ..db.icp import IcpVersion, Project, canonical_hash
 from ..db.models import Membership
 from .policy_service import evaluate_current_policy
 from ..db.outbox import OutboxEvent
+from ..db.worker_execution import WorkerRuntimeControl
 from ..db.runs import SearchRun
 from .outbox_service import build_intent
 from .run_events import append_event, require_run
@@ -68,6 +69,28 @@ async def retry_run(session, workspace_id: uuid.UUID, run_id: uuid.UUID, reason:
         raise ApiError(409, "INVALID_STATE", "run is not retryable")
     if run.stage not in {"fit_review_required", "fit"}:
         raise ApiError(409, "RETRY_UNSAFE", "discovery resume needs authoritative reconciliation")
+    runtime = await _retry_preconditions(session, run)
+    run.attempt += 1
+    run.version += 1
+    run.status = "queued"
+    run.stage = "fit"
+    run.terminal_reason = None
+    payload = {"run_id": str(run.id)}
+    session.add(OutboxEvent(workspace_id=workspace_id,
+                            intent_key=build_intent("run.fit", payload, run.attempt),
+                            event_type="run.fit", payload=payload,
+                            runtime_backend=runtime.backend, runtime_epoch=runtime.epoch))
+    await append_event(session, run, "run.queued", payload={
+        "reason": reason, "version": run.version, "stage": run.stage,
+        "company_count": (run.usage_counters or {}).get("companies", 0),
+        "raw_count": run.raw_result_count,
+    })
+    return run
+
+
+async def _retry_preconditions(session, run):
+    """Shared read-only basis; retry_run holds the existing run lock."""
+    workspace_id, run_id = run.workspace_id, run.id
     project = (await session.execute(select(Project).where(
         Project.workspace_id == workspace_id, Project.id == run.project_id,
     ))).scalar_one_or_none()
@@ -97,25 +120,21 @@ async def retry_run(session, workspace_id: uuid.UUID, run_id: uuid.UUID, reason:
     }, "account_research", datetime.now(timezone.utc))
     if not policy["allowed"]:
         raise ApiError(409, "POLICY_BLOCKED", "current account research policy is required")
-    unresolved = (await session.execute(select(ProviderOperation.id).where(
-        ProviderOperation.workspace_id == workspace_id,
-        ProviderOperation.intent_key.like(f"research:{run_id}:%"),
-        ProviderOperation.status.in_(["submitting", "unknown", "accepted"]),
-    ).limit(1))).scalar_one_or_none()
-    if unresolved is not None:
-        raise ApiError(409, "RETRY_UNSAFE", "provider operation has unresolved acceptance")
-    run.attempt += 1
-    run.version += 1
-    run.status = "queued"
-    run.stage = "fit"
-    run.terminal_reason = None
-    payload = {"run_id": str(run.id)}
-    session.add(OutboxEvent(workspace_id=workspace_id,
-                            intent_key=build_intent("run.fit", payload, run.attempt),
-                            event_type="run.fit", payload=payload))
-    await append_event(session, run, "run.queued", payload={
-        "reason": reason, "version": run.version, "stage": run.stage,
-        "company_count": (run.usage_counters or {}).get("companies", 0),
-        "raw_count": run.raw_result_count,
-    })
-    return run
+    from buyeros_api.execution.provider_context import pending_run_work
+    if await pending_run_work(session, workspace_id, run_id):
+        raise ApiError(409, "RETRY_UNSAFE", "original run provider work requires reconciliation before checkpoint retry")
+    runtime = (await session.execute(select(WorkerRuntimeControl.backend, WorkerRuntimeControl.epoch))).one_or_none()
+    if (runtime is None or runtime.backend not in {'celery', 'cloudflare'} or
+            type(runtime.epoch) is not int or not 1 <= runtime.epoch <= 9007199254740991):
+        raise ApiError(503, "CAPABILITY_DISABLED", "current worker selector is unavailable")
+    return runtime
+
+
+async def run_retryable(session, run):
+    if run.status not in {"failed", "partial", "paused_budget"} or run.stage not in {"fit_review_required", "fit"}:
+        return False
+    try:
+        await _retry_preconditions(session, run)
+    except ApiError:
+        return False
+    return True

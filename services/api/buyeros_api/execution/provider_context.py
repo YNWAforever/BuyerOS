@@ -7,7 +7,7 @@ import uuid
 from contextlib import asynccontextmanager, contextmanager
 from contextvars import ContextVar
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, or_
 from buyeros_api.db.contact import ProviderOperation, EnrichmentJob
 from buyeros_api.db.outbox import OutboxEvent
 from buyeros_api.db.runs import SearchRun
@@ -50,6 +50,39 @@ async def execution_session(engine, workspace_id):
                 execution.finish(result)
 
 
+async def pending_run_work(session, workspace_id, run_id, *, uncertain_only=False):
+    """Current run ownership, including queued discovery/model work before reservation."""
+    from buyeros_api.db.budget import BudgetAccount, BudgetReservation, BudgetReservationAllocation
+    run_allocation = select(BudgetReservation.id).join(
+        BudgetReservationAllocation, BudgetReservationAllocation.reservation_id == BudgetReservation.id,
+    ).join(BudgetAccount, BudgetAccount.id == BudgetReservationAllocation.account_id).where(
+        BudgetReservation.operation_id == ProviderOperation.id,
+        BudgetAccount.workspace_id == workspace_id,
+        BudgetAccount.scope == 'run', BudgetAccount.scope_id == run_id,
+    ).exists()
+    operation = (await session.execute(select(ProviderOperation.id).where(
+        ProviderOperation.workspace_id == workspace_id,
+        or_(ProviderOperation.intent_key.like(f'research:{run_id}:%'), run_allocation),
+        ProviderOperation.status.in_({'submitting', 'unknown', 'accepted', 'pending'} if uncertain_only else
+                                     {'reserved', 'submitting', 'unknown', 'accepted', 'pending'}),
+    ).limit(1))).first()
+    if operation is not None:
+        return True
+    if uncertain_only:
+        return False
+    # Discovery/model wakeups precede atomic budget/receipt preparation. Their
+    # original run-owned events prevent completion before a provider reservation.
+    queued = (await session.execute(select(OutboxEvent.id).where(
+        OutboxEvent.workspace_id == workspace_id,
+        or_(OutboxEvent.event_type == 'run.discover',
+            (OutboxEvent.event_type == 'provider.external') &
+            OutboxEvent.intent_key.like('run-model:%')),
+        OutboxEvent.payload['run_id'].astext == str(run_id),
+        OutboxEvent.state.notin_({'done', 'failed'}),
+    ).limit(1))).first()
+    return queued is not None
+
+
 async def terminal_business_outcome(session, row, *, include_running=False):
     from buyeros_api.services.worker_execution import outcome
     terminal = row.state in {'done', 'failed', 'ready'}
@@ -60,9 +93,9 @@ async def terminal_business_outcome(session, row, *, include_running=False):
     if row.event_type in {'run.discover', 'research.reconcile', 'run.fit'}:
         run_id = uuid.UUID(payload['run_id'])
         run = (await session.execute(select(SearchRun).where(SearchRun.id == run_id))).scalar_one_or_none()
-        unknown = (await session.execute(select(ProviderOperation.id).where(
-            ProviderOperation.intent_key.like(f'research:{run_id}:%'),
-            ProviderOperation.status.in_({'submitting', 'unknown', 'accepted', 'pending'})).limit(1))).first()
+        # A queued successor blocks whole-run completion, but is not an
+        # uncertain side effect of this already settled individual wakeup.
+        unknown = True if await pending_run_work(session, row.workspace_id, run_id, uncertain_only=True) else None
         if unknown is None and run is not None and run.terminal_reason:
             reason = run.terminal_reason
             if reason in {'run_limit_reached', 'provider_result_exceeded_limits', 'decoded_page_bytes_exceeded_limit'}:

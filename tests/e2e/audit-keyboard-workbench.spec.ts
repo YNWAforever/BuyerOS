@@ -104,7 +104,7 @@ for(const [locale,layout] of [['en','desktop'],['zh-HK','mobile']] as const){
   const member=(await changed.json()).data;expect(member.user_id).toBe('71000001-0000-4000-8000-000000c011de');expect(member.version).toBe(2);
   const read=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/memberships?q=Alex`,{headers:{Authorization:'Bearer fixture-admin'}});expect(read.status()).toBe(200);expect((await read.json()).data.items.map((m:{version:number})=>m.version)).toEqual([2,1]);
   await input.choose(page.getByRole('combobox',{name:t('Project'),exact:true}),projectB);await input.activate(page.getByRole('button',{name:t('Overview'),exact:true}));
-  const card=page.locator('.activity').filter({has:page.getByText(t('Failed jobs'),{exact:true})});await expect(card.locator('p')).toHaveText('24');await input.activate(card.getByRole('button',{name:t('Open'),exact:true}));
+  const card=page.locator('.activity').filter({has:page.getByText(t('Failed jobs'),{exact:true})});await expect(card.locator('output')).toHaveText('24');await input.activate(card.getByRole('button',{name:t('Open'),exact:true}));
   const list=page.getByRole('region',{name:t('Bulk jobs'),exact:true});await expect(list).toContainText(locale==='en'?'24 jobs in scope':'24 項範圍內工作');
   const seen=await list.getByRole('button').filter({hasText:/^[0-9a-f-]{36}$/}).allTextContents();expect(seen).toHaveLength(20);
   await input.activate(list.getByRole('button',{name:t('Next'),exact:true}));await expect(list.getByText('21–24 / 24',{exact:true})).toBeVisible();seen.push(...await list.getByRole('button').filter({hasText:/^[0-9a-f-]{36}$/}).allTextContents());
@@ -122,3 +122,34 @@ for(const [locale,layout] of [['en','desktop'],['zh-HK','mobile']] as const){
   await test.info().attach('keyboard-task5-proof',{body:JSON.stringify({fixture_only:true,member,jobs:seen,input:await input.verify(page)},null,2),contentType:'application/json'});
  });
 }
+
+
+test('C61T-14 Tab traversal completes its bounded native cycle under slow fixture probes',async({page})=>{
+ test.setTimeout(60_000);
+ const input=createJourneyInput('keyboard');await input.install(page);
+ const controls=Array.from({length:39},(_,i)=>`<button>Control ${i}</button>`).join('');
+ await page.goto('data:text/html,'+encodeURIComponent('<style>button:focus-visible{outline:2px solid blue}</style>'+controls+'<button>Last control</button>'));
+ const target=page.getByRole('button',{name:'Last control',exact:true});
+ // Model the 300-400ms probe latency observed in the retained failing trace.
+ // Actual focus, Tab, Enter and :focus-visible are still Chromium-native.
+ const delayed=new Proxy(target,{get(object,key,receiver){
+  if(key!=='evaluate')return Reflect.get(object,key,receiver);
+  return async(pageFunction:Parameters<typeof target.evaluate>[0],arg:unknown)=>{
+   await new Promise(resolve=>setTimeout(resolve,350));return object.evaluate(pageFunction,arg);
+  };
+ }});
+ await input.activate(delayed);
+ await expect(target).toBeFocused();
+ const proof=await input.verify(page);expect(proof?.trustedPointerEvents).toEqual([]);
+ expect(proof?.actions.at(-1)?.tabs).toBe(40);
+});
+
+
+test('C61T-14 Tab traversal rejects a natively unreachable control within250 steps',async({page})=>{
+ test.setTimeout(60_000);
+ const input=createJourneyInput('keyboard');await input.install(page);
+ await page.goto('data:text/html,'+encodeURIComponent('<style>button:focus-visible{outline:2px solid blue}</style><button>Reachable control</button><button tabindex="-1">Unreachable control</button>'));
+ const target=page.getByRole('button',{name:'Unreachable control',exact:true});
+ await expect(input.activate(target)).rejects.toThrow(/Control unreachable by Tab after 250 steps:/);
+ await expect(target).not.toBeFocused();
+});

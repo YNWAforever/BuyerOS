@@ -55,7 +55,8 @@ async def _queue_reconciliation(session, outbox: OutboxEvent,
             payload={"operation_id": str(operation_id), "service": intent.service,
                      "market": intent.market, "language": intent.language,
                      "role": intent.role, "original_intent_key": intent.key},
-            state="ready",
+            state="ready", runtime_backend=outbox.runtime_backend,
+            runtime_epoch=outbox.runtime_epoch,
         ))
     outbox.state = "done"
     outbox.lease_owner = None

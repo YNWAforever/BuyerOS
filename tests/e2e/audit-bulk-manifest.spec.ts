@@ -1,6 +1,5 @@
 import {expect,test,type Page} from '@playwright/test';
-import {execFile} from 'node:child_process';
-import {promisify} from 'node:util';
+import {runOwnedFixtureProcess} from './fixtures/owned-fixture-process';
 import {resolve} from 'node:path';
 import {writeFileSync} from 'node:fs';
 import {signInWorkbench,workspace,project,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
@@ -8,9 +7,9 @@ const root=`/v1/workspaces/${workspace}/projects/${project}/bulk-manifests`;
 const prefix='Q08 Manifest Fixture';
 async function fixture(command:string,...args:string[]):Promise<{fixture_only:boolean;count:number;ids:string[];buyers:{id:string;version:number;owner:string|null}[];manifests:{id:string;count:number;status:string;job_id:string|null}[];total:number}>{
  const cwd=resolve('services/worker'),python=resolve(cwd,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
- const value=JSON.parse((await promisify(execFile)(python,['tests/fixtures/audit_manifests.py',command,...args],{cwd,timeout:45_000})).stdout);expect(value.fixture_only).toBe(true);return value;
+ const value=JSON.parse((await runOwnedFixtureProcess(python,['tests/fixtures/audit_manifests.py',command,...args],{cwd,timeout:45_000})).stdout);expect(value.fixture_only).toBe(true);return value;
 }
-async function open(page:Page,actor:'access'|'reviewer'|'viewer'='access',entry?:string){
+async function open(page:Page,actor:'access'|'reviewer'|'viewer'|'admin'='access',entry?:string){
  await signInWorkbench(page,true,actor,entry);await page.getByRole('combobox',{name:/^(Language|語言)$/}).selectOption('en');await page.getByRole('button',{name:'Buyers',exact:true}).click();
  const buyers=page.getByRole('region',{name:'Buyer results',exact:true});
  await buyers.getByRole('textbox',{name:'Search buyers',exact:true}).fill(prefix);await buyers.getByRole('textbox',{name:'Search buyers',exact:true}).press('Enter');
@@ -85,4 +84,92 @@ test('B09 UI cancel preserves the committed first50 and cancels only pending51',
  expect((await fixture('chunk',jobId)).total).toBe(50);const progress=page.getByRole('region',{name:'Bulk job progress'});await progress.getByRole('button',{name:'Refresh job'}).click();await expect(progress).toContainText('50 of 101');
  const cancelled=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname.endsWith(`/jobs/${jobId}/cancel`));await progress.getByRole('button',{name:'Cancel pending rows'}).click();expect((await cancelled).status()).toBe(200);expect((await fixture('drain',jobId)).total).toBe(51);await progress.getByRole('button',{name:'Refresh job'}).click();await expect(progress).toContainText('cancelled:');await expect(progress).toContainText('51 cancelled');const proof=await fixture('inspect');expect(proof.buyers.filter(b=>b.version===2&&b.owner!==null)).toHaveLength(50);expect(proof.buyers.filter(b=>b.version===1&&b.owner===null)).toHaveLength(51);
  writeFileSync('test-results/q08-ui-cancel.json',JSON.stringify({fixture_only:true,manifest,jobId,proof},null,2));await page.screenshot({path:'test-results/q08-cancel-en.png',fullPage:true});
+});
+
+
+for(const locale of ['en','zh-HK'] as const)test(`C61T-11 expired manifest ${locale} disables old confirmation and requires a fresh preview`,async({page})=>{
+ await fixture('seed','100');const panel=await open(page),original=await preview(page,panel);
+ await panel.getByRole('checkbox',{name:'Confirm exact manifest'}).check();
+ const expired=await fixture('expired-copy',original.id) as unknown as {fixture_only:true;expired_manifest:string;expires_at:string};
+ // Prove the actual server rejects the exact old digest/version and changes no row.
+ const refused=await page.request.post(`http://127.0.0.1:8000${root}/${expired.expired_manifest}/execute`,{
+  headers:{Authorization:'Bearer fixture-access','Idempotency-Key':`c61-expired-${original.id}`,'If-Match':`"${original.version}"`},data:{digest:original.digest,confirmation:true}});
+ expect(refused.status()).toBe(412);const before=await fixture('inspect');expect(before.buyers.every(row=>row.version===1&&row.owner===null)).toBe(true);
+ const entry=new URL(page.url());entry.searchParams.set('bulk_manifest',expired.expired_manifest);
+ await signInWorkbench(page,true,'access',entry.pathname+entry.search);
+ await expect(page.getByRole('region',{name:'Frozen manifest',exact:true})).toContainText(expired.expired_manifest);
+ if(locale==='zh-HK'){await page.setViewportSize({width:390,height:844});await page.getByRole('combobox',{name:'Language',exact:true}).selectOption(locale);}
+ const current=page.getByRole('region',{name:locale==='en'?'Segmented maintenance':'分段批量維護',exact:true});
+ await expect(current.getByRole('checkbox',{name:locale==='en'?'Confirm exact manifest':'確認精確維護清單'})).toBeDisabled();
+ await expect(current.getByRole('button',{name:locale==='en'?'Execute confirmed manifest':'執行已確認維護清單'})).toBeDisabled();
+ await expect(current).toContainText(locale==='en'?'This preview has expired. Start a new preview of current versions.':'此預覽已到期。請按目前版本開始新的預覽。');
+ const next=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===root);
+ await current.getByRole('button',{name:locale==='en'?'Start a new preview':'開始新的預覽'}).click();await expect(current.getByRole('button',{name:locale==='en'?'Preview segmented maintenance':'預覽分段批量維護'})).toBeFocused();
+ await current.getByRole('button',{name:locale==='en'?'Preview segmented maintenance':'預覽分段批量維護'}).click();
+ const response=await next;expect(response.status()).toBe(201);const fresh=(await response.json()).data;
+ expect(fresh.id).not.toBe(original.id);expect(fresh.count).toBe(100);
+ await expect(current.getByRole('checkbox',{name:locale==='en'?'Confirm exact manifest':'確認精確維護清單'})).not.toBeChecked();
+ await expect(current.getByRole('button',{name:locale==='en'?'Execute confirmed manifest':'執行已確認維護清單'})).toBeDisabled();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ writeFileSync(`test-results/c61-bulk-expiry-${locale}.json`,JSON.stringify({fixture_only:true,original,expired,refused_status:refused.status(),fresh,unchanged_before_new_execution:before.buyers},null,2));
+});
+
+
+// Same owned dataset: 80 successes, 21 conflicts, one explicitly excluded
+// conflict. A new preview after recovery must contain only the other 20.
+for(const locale of ['en','zh-HK'] as const)test.describe(`C61T-11 owned historical failed-only setup ${locale}`,()=>{
+ let sourcePage:Page,sourcePanel:ReturnType<Page['getByRole']>,seed:Awaited<ReturnType<typeof fixture>>,original:Awaited<ReturnType<typeof preview>>,jobId:string,child:Awaited<ReturnType<typeof preview>>,expired:{fixture_only:true;expired_manifest:string;expires_at:string},before:Awaited<ReturnType<typeof fixture>>,restoreEntry:string;
+ // Historical fixture preparation uses independently bounded native hooks.
+ // Keep the original 60s config for every hook and the recovery assertion.
+ test.beforeAll(async({browser,baseURL})=>{
+  await resetWorkbenchFixtureRateWindows();sourcePage=await browser.newPage({baseURL});const page=sourcePage;
+ seed=await fixture('seed','101');
+ if(locale==='zh-HK')await fixture('assess');
+ sourcePanel=await open(page,locale==='en'?'access':'admin');
+ if(locale==='zh-HK')await sourcePanel.getByRole('combobox',{name:'Operation',exact:true}).selectOption('reviewBuyers');
+ });
+ test.beforeAll(async()=>{
+ original=await preview(sourcePage,sourcePanel);await fixture('stale-many',...seed.ids.slice(0,21));
+ const response=await execute(sourcePage,sourcePanel,original.id);expect(response.status()).toBe(202);
+ jobId=(await response.json()).data.id;expect((await fixture('drain',jobId)).total).toBe(101);
+ });
+ test.beforeAll(async()=>{
+ const progress=sourcePage.getByRole('region',{name:'Bulk job progress'});await progress.getByRole('button',{name:'Refresh job'}).click();await expect(progress).toContainText('21 conflicts');
+ await progress.getByRole('button',{name:'Preview failed rows with current versions'}).click();
+ const childPanel=sourcePage.getByRole('region',{name:'Segmented maintenance'});
+ await expect(childPanel).toContainText('Failed rows only');
+ await childPanel.getByRole('textbox',{name:'Excluded buyer IDs (one per line)'}).fill(seed.ids[20]);
+ child=await preview(sourcePage,childPanel);expect(child.count).toBe(20);
+ expired=await fixture('expired-copy',child.id) as unknown as {fixture_only:true;expired_manifest:string;expires_at:string};
+ before=await fixture('inspect');
+ const entry=new URL(sourcePage.url());entry.searchParams.set('bulk_manifest',expired.expired_manifest);entry.searchParams.delete('bulk_job');
+ restoreEntry=entry.pathname+entry.search;await sourcePage.close();
+ });
+ test(`C61T-11 restored failed-only ${locale} preserves source operation and never replays80 successes`,async({page})=>{
+ await signInWorkbench(page,true,locale==='en'?'access':'admin',restoreEntry);
+ await expect(page.getByRole('region',{name:'Frozen manifest',exact:true})).toContainText(expired.expired_manifest);
+ if(locale==='zh-HK'){await page.setViewportSize({width:390,height:844});await page.getByRole('combobox',{name:'Language',exact:true}).selectOption(locale);}
+ const current=page.getByRole('region',{name:locale==='en'?'Segmented maintenance':'分段批量維護',exact:true});
+ const operation=locale==='en'?'assignBuyerOwners':'reviewBuyers';
+ await expect(current.getByRole('combobox',{name:locale==='en'?'Operation':'操作',exact:true})).toHaveValue(operation);
+ await expect(current.getByRole('checkbox',{name:locale==='en'?'Confirm exact manifest':'確認精確維護清單'})).toBeDisabled();
+ const next=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===root);
+ await current.getByRole('button',{name:locale==='en'?'Start a new preview':'開始新的預覽'}).click();
+ await current.getByRole('button',{name:locale==='en'?'Preview segmented maintenance':'預覽分段批量維護'}).click();
+ const freshResponse=await next;expect(freshResponse.status()).toBe(201);
+ const fresh=(await freshResponse.json()).data;const request=freshResponse.request().postDataJSON();
+ expect(request.source_job_id).toBe(jobId);await expect(current.getByRole('combobox',{name:locale==='en'?'Operation':'操作',exact:true})).toBeDisabled();expect(request.filters).toEqual({});expect(request.operation).toBe(operation);
+ expect(request.excluded_ids).toEqual([seed.ids[20]]);expect(fresh.count).toBe(20);expect(fresh.source_job_id).toBe(jobId);expect(fresh.id).not.toBe(child.id);
+ await expect(current.getByRole('checkbox',{name:locale==='en'?'Confirm exact manifest':'確認精確維護清單'})).not.toBeChecked();
+ await current.getByRole('checkbox',{name:locale==='en'?'Confirm exact manifest':'確認精確維護清單'}).check();
+ const committed=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===root+`/${fresh.id}/execute`);
+ await current.getByRole('button',{name:locale==='en'?'Execute confirmed manifest':'執行已確認維護清單'}).click();
+ const result=await committed;expect(result.status()).toBe(200);expect((await result.json()).data.updated).toBe(20);
+ const after=await fixture('inspect');
+ const successes=seed.ids.slice(21),unchanged=seed.ids[20];
+ for(const id of [...successes,unchanged])expect(after.buyers.find(row=>row.id===id)).toEqual(before.buyers.find(row=>row.id===id));
+ for(const id of seed.ids.slice(0,20))expect(after.buyers.find(row=>row.id===id)?.version).toBe((before.buyers.find(row=>row.id===id)?.version??0)+1);
+ await test.info().attach('C61T-11 restored failed-only joined proof',{body:JSON.stringify({fixture_only:true,locale,workspace,project,operation,original,jobId,child,expired,fresh,request,success_ids:successes,excluded_id:unchanged,before,after,real_neon:false,real_provider:false,human_uat:false},null,2),contentType:'application/json'});
+});
+ test.afterAll(async()=>{if(sourcePage&&!sourcePage.isClosed())await sourcePage.close();});
 });

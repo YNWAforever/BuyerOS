@@ -58,7 +58,8 @@ def test_0009_drops_the_backfill_server_defaults(migrated):
     assert all(default is None for default in defaults.values()), defaults
 
 
-def test_0009_downgrade_then_upgrade_backfills_existing_rows(migrated):
+def test_0009_downgrade_then_upgrade_backfills_existing_rows(isolated_migrated):
+    migrated = isolated_migrated
     """0009 is reversible, and rows written before it are backfilled on re-upgrade."""
     from alembic import command
     from alembic.config import Config

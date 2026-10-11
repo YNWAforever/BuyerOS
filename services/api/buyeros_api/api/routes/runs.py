@@ -20,15 +20,16 @@ from ..auth import Principal, get_principal
 from ..deps import load_membership, permission_for_roles, tenant_scoped
 from ..errors import ApiError, envelope
 from ..idempotency import begin_idempotency, complete_idempotency
-from ..schemas import RunCreate
+from ..schemas import RunCreate, ResearchCandidateReviewRequest
 from ...services.run_admission import admit_run
 
 router = APIRouter(prefix="/v1/workspaces/{workspace_id}/projects/{project_id}/runs", tags=["runs"])
 
 
 def selected_run_capability() -> tuple[dict | None, str]:
-    """No production provider is selected; tests override this dependency explicitly."""
-    return None, "production"
+    """Only the current code-owned verified registry can supply production scope."""
+    from ...providers import registry
+    return registry.DEFAULT_REGISTRY.search_run_capability(environment="production"), "production"
 
 
 @router.post("", status_code=202, name="startRun")
@@ -191,3 +192,79 @@ async def retry_run_http(
         data = await run_snapshot(session, run)
         complete_idempotency(outcome, str(run_id), response={"http_status": 202, "data": data})
     return envelope(data, request.state.request_id)
+
+
+async def _review_access(session,workspace_id,run_id,raw_candidate_id,principal,operation):
+    from ...db.runs import RawCandidate
+    member=await load_membership(session,principal=principal,workspace_id=workspace_id)
+    if not permission_for_roles(member['roles'],operation):raise ApiError(403,'PERMISSION_DENIED','current reviewer role required')
+    await require_run(session,workspace_id,run_id)
+    raw=(await session.execute(select(RawCandidate.id).where(RawCandidate.workspace_id==workspace_id,
+        RawCandidate.run_id==run_id,RawCandidate.id==raw_candidate_id))).scalar_one_or_none()
+    if raw is None:raise ApiError(404,'NOT_FOUND','candidate not found')
+    return member
+
+def _review_capability(selection):
+    from ...providers.base import ProviderCapability
+    from ...providers import registry
+    planning,environment=selection
+    if environment=='test' and isinstance(planning,ProviderCapability):
+        return planning
+    if environment=='production' and isinstance(planning,dict):
+        current=registry.DEFAULT_REGISTRY.search_run_capability(environment='production')
+        item=registry.DEFAULT_REGISTRY.registration('search')
+        if current is not None and planning==current and item is not None:
+            return item.capability
+    raise ApiError(503,'PROVIDER_CAPABILITY_BLOCKED','Review requires the current verified search contract. Ask the workspace administrator to complete provider readiness.')
+
+@detail_router.get('/{run_id}/candidates/{raw_candidate_id}/review-context',name='getResearchCandidateReviewContext')
+async def get_research_candidate_review_context(workspace_id:uuid.UUID,run_id:uuid.UUID,raw_candidate_id:uuid.UUID,
+        request:Request,company_id:uuid.UUID=Query(),principal:Principal=Depends(get_principal),
+        selection=Depends(selected_run_capability)):
+    from ...services.research_candidate_review import research_candidate_review_context
+    async with tenant_scoped(workspace_id) as session:
+        member=await _review_access(session,workspace_id,run_id,raw_candidate_id,principal,'getResearchCandidateReviewContext')
+        capability=_review_capability(selection)
+        try:
+            data=await research_candidate_review_context(session,workspace_id=workspace_id,run_id=run_id,
+                raw_candidate_id=raw_candidate_id,company_id=company_id,actor_id=member['user_id'],capability=capability)
+        except ValueError as exc:raise ApiError(409,'STALE_REVISION','Current source, entity or research permission changed; refresh and review the current basis.') from exc
+    return envelope(data,request.state.request_id)
+
+
+@detail_router.post('/{run_id}/candidates/{raw_candidate_id}/review',name='reviewResearchCandidate')
+async def review_research_candidate_http(workspace_id:uuid.UUID,run_id:uuid.UUID,raw_candidate_id:uuid.UUID,
+        payload:ResearchCandidateReviewRequest,request:Request,principal:Principal=Depends(get_principal),
+        idempotency_key:str|None=Header(default=None,alias='Idempotency-Key'),selection=Depends(selected_run_capability)):
+    from ...services.research_candidate_review import review_research_candidate
+    if not idempotency_key:raise ApiError(400,'INVALID_REQUEST','Idempotency-Key header is required')
+    async with tenant_scoped(workspace_id) as session:
+        member=await _review_access(session,workspace_id,run_id,raw_candidate_id,principal,'reviewResearchCandidate')
+        capability=_review_capability(selection)
+        outcome=await begin_idempotency(session,workspace_id=workspace_id,actor_id=member['user_id'],
+            operation_id='reviewResearchCandidate',key=idempotency_key,body=payload.model_dump(mode='json'),
+            target={'workspace_id':str(workspace_id),'run_id':str(run_id),'raw_candidate_id':str(raw_candidate_id)})
+        # Revalidate accepted material even on an idempotency replay. Never return
+        # a cached acknowledgment after role, epoch, license or source revocation.
+        try:
+            data=await review_research_candidate(session,workspace_id=workspace_id,run_id=run_id,
+                raw_candidate_id=raw_candidate_id,actor_id=member['user_id'],capability=capability,
+                model_environment='production' if selection[1]=='production' else None,**payload.model_dump())
+        except ValueError as exc:raise ApiError(409,'STALE_REVISION','Current source, entity or research permission changed; refresh and review the current basis.') from exc
+        if outcome.replay:
+            if outcome.response is None or outcome.response.get('data')!=data:raise ApiError(409,'IDEMPOTENCY_CONFLICT','Accepted review material changed')
+        else:complete_idempotency(outcome,data['buyer_id'],response={'http_status':200,'data':data})
+    return envelope(data,request.state.request_id)
+
+
+@detail_router.get('/{run_id}/candidates',name='listResearchCandidates')
+async def list_research_candidates_http(workspace_id:uuid.UUID,run_id:uuid.UUID,request:Request,
+        offset:int=Query(default=0,ge=0,le=10000),limit:int=Query(default=20,ge=1,le=100),
+        principal:Principal=Depends(get_principal)):
+    from ...services.research_candidate_list import list_research_candidates
+    async with tenant_scoped(workspace_id) as session:
+        member=await load_membership(session,principal=principal,workspace_id=workspace_id)
+        if not permission_for_roles(member['roles'],'listResearchCandidates'):raise ApiError(403,'PERMISSION_DENIED','insufficient role')
+        run=await require_run(session,workspace_id,run_id)
+        data=await list_research_candidates(session,workspace_id=workspace_id,run_id=run_id,project_id=run.project_id,offset=offset,limit=limit)
+    return envelope(data,request.state.request_id)

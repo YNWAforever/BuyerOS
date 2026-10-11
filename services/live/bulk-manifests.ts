@@ -34,3 +34,13 @@ export async function executeManifest(client:LiveClient,session:SessionScope,man
   path:{workspace_id:ctx.workspace,project_id:ctx.project!,manifest_id:manifest.id},header:{'Idempotency-Key':key,'If-Match':`"${manifest.version}"`},body},ctx));
 }
 export function startNewManifest(session:SessionScope){const records=recoveries.get(session);records?.delete(scopeKey(session.current()));}
+
+
+/** Advisory UI deadline for a new confirmation. The server remains authoritative;
+ * do not apply this to recovery of an already submitted exact intent. */
+export function manifestConfirmationAvailable(manifest:Pick<Manifest,'status'|'expires_at'>|null|undefined,nowMs=Date.now()):boolean{
+ const expiry=manifest?.expires_at;
+ if(manifest?.status!=='ready'||typeof expiry!=='string'||!/(Z|[+-]\d{2}:\d{2})$/.test(expiry)||!Number.isFinite(nowMs))return false;
+ const deadline=Date.parse(expiry);
+ return Number.isFinite(deadline)&&nowMs<deadline;
+}

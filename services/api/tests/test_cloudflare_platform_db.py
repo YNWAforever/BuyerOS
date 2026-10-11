@@ -22,6 +22,8 @@ from tests.test_cloudflare_local_steps_db import seed_project
 from tests.test_cloudflare_runtime_control_db import seed_envelope, worker_runtime
 
 
+from tests.fixture_reports import fresh_report_path
+
 def test_actual_local_queue_workflow_api_postgres(migrated, worker_runtime, monkeypatch, tmp_path):
     from buyeros_api.api.app import create_app
     from buyeros_api.settings import get_settings
@@ -62,10 +64,11 @@ def test_actual_local_queue_workflow_api_postgres(migrated, worker_runtime, monk
         root = Path(__file__).resolve().parents[3]
         env = {key: value for key, value in os.environ.items() if not key.startswith(('BUYEROS_', 'AUTH0_', 'R2_', 'VERCEL_', 'CLOUDFLARE_'))}
         env['BUYEROS_CF_TEST_CONTEXT'] = str(context)
+        report = fresh_report_path(root / 'artifacts/cloudflare/CF-platform-pg.xml')
         result = subprocess.run(['node', 'node_modules/vitest/vitest.mjs', 'run', '--config', 'services/cloudflare-jobs/vitest.pg.config.ts',
-                                 '--reporter=default', '--reporter=junit', '--outputFile.junit=artifacts/cloudflare/CF-platform-pg.xml'],
+                                 '--reporter=default', '--reporter=junit', '--outputFile.junit='+report.relative_to(root).as_posix()],
                                 cwd=root, env=env, capture_output=True, text=True, encoding='utf8', timeout=120)
-        (root / 'artifacts/cloudflare/CF-platform-pg.txt').write_text(result.stdout + result.stderr, encoding='utf8')
+        report.with_suffix('.txt').write_text(result.stdout + result.stderr, encoding='utf8')
         assert result.returncode == 0, result.stdout + result.stderr
         with psycopg.connect(migrated) as db:
             assert db.execute('SELECT status,processed,updated,conflicts FROM async_jobs WHERE id=%s', (job,)).fetchone() == ('completed', 1, 1, 0)

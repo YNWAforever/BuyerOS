@@ -250,6 +250,7 @@ async def _mark_unknown(engine, workspace_id, prepared, outbox_intent, generatio
                     event_type="research.reconcile",
                     payload={"run_id": str(run.id), "operation_id": str(operation.id),
                              "query_id": prepared.query["id"]},
+                    runtime_backend=event.runtime_backend, runtime_epoch=event.runtime_epoch,
                 ))
         event.state = "done"
         event.lease_owner = None
@@ -407,14 +408,16 @@ async def _finalize(engine, workspace_id, prepared, outbox_intent, generation,
             payload = {"run_id": str(run.id), "query_index": next_index}
             session.add(OutboxEvent(workspace_id=workspace_id,
                 intent_key=build_intent("run.discover", payload, next_index),
-                event_type="run.discover", payload=payload))
+                event_type="run.discover", payload=payload,
+                runtime_backend=event.runtime_backend, runtime_epoch=event.runtime_epoch))
             await emit_run_event(session, run.id, "node.committed",
                 payload={"query_id": prepared.query["id"], "next_query_index": next_index})
         else:
             payload = {"run_id": str(run.id)}
             session.add(OutboxEvent(workspace_id=workspace_id,
                 intent_key=build_intent("run.fit", payload, run.attempt),
-                event_type="run.fit", payload=payload))
+                event_type="run.fit", payload=payload,
+                runtime_backend=event.runtime_backend, runtime_epoch=event.runtime_epoch))
             await emit_run_event(session, run.id, "node.committed",
                 payload={"query_id": prepared.query["id"], "next_stage": "fit"})
             run.stage = "fit"

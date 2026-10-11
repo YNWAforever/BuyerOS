@@ -4,7 +4,7 @@ import uuid
 from hashlib import sha256
 from datetime import datetime, timezone
 
-from sqlalchemy import and_, func, or_, select, update
+from sqlalchemy import and_, func, or_, select, text, update
 
 from ..api.errors import ApiError
 from ..db.buyers import Company
@@ -107,6 +107,24 @@ def suppression_data(item: Suppression) -> dict:
 
 
 async def evaluate_current_policy(session, subject: dict, purpose: str, now: datetime) -> dict:
+    """Mutation authorization retains its existing workspace lock."""
+    return await _evaluate_current_policy(session,subject,purpose,now,lock_workspace=True)
+
+
+async def evaluate_current_policy_readonly(session, subject: dict, purpose: str, now: datetime) -> dict:
+    """Current DB read snapshot; never usable to authorize an unlocked mutation.
+
+    A receipt read can be nested in a parent fit/policy mutation transaction.
+    Acquiring the same advisory lock on its independent connection would wait
+    on its own parent forever. Only an actual read-only transaction may use
+    this snapshot; persistence/admission still recheck through the locked gate.
+    """
+    if (await session.execute(text("SELECT current_setting('transaction_read_only')"))).scalar_one()!='on':
+        raise ValueError('read-only current policy transaction required')
+    return await _evaluate_current_policy(session,subject,purpose,now,lock_workspace=False)
+
+
+async def _evaluate_current_policy(session, subject: dict, purpose: str, now: datetime, *, lock_workspace: bool) -> dict:
     """Synchronous current gate. Caller supplies server-resolved IDs in a tenant-scoped transaction."""
     if purpose not in PURPOSES or now.tzinfo is None:
         raise ValueError("purpose and timezone-aware now are required")
@@ -114,7 +132,7 @@ async def evaluate_current_policy(session, subject: dict, purpose: str, now: dat
     controller_id = uuid.UUID(str(subject.get("controller_scope_id") or workspace_id))
     if controller_id != workspace_id:
         return {"status": "unknown", "allowed": False, "reason_codes": ["controller_scope_unverified"]}
-    await policy_workspace_lock(session, workspace_id)
+    if lock_workspace:await policy_workspace_lock(session, workspace_id)
     domain = None
     if subject.get("company_id"):
         company = (await session.execute(select(Company).where(

@@ -7,6 +7,8 @@ skips verification, so a JWKS outage can never become a signature bypass.
 
 import asyncio
 import time
+from concurrent.futures import Future
+from threading import Lock
 from collections.abc import Awaitable, Callable
 
 import jwt
@@ -25,9 +27,11 @@ def _public_key(entry: dict):
     """
     if not isinstance(entry, dict):
         return None
-    if entry.get("kty") != "RSA":
+    if entry.get("kty") != "RSA" or entry.get("alg") not in (None,"RS256") or "d" in entry:
         return None
     if entry.get("use") not in (None, "sig"):
+        return None
+    if entry.get("key_ops") is not None and entry["key_ops"] != ["verify"]:
         return None
     try:
         return jwt.algorithms.RSAAlgorithm.from_jwk(entry)
@@ -46,8 +50,10 @@ class JwksKeyCache:
         max_stale_seconds: int = 3600,
         min_refetch_seconds: int = 10,
         now: Callable[[], float] = time.monotonic,
+        key_parser: Callable[[dict], object | None] = _public_key,
     ) -> None:
         self._fetch_jwks = fetch_jwks
+        self._key_parser = key_parser
         if cache_seconds <= 0 or max_stale_seconds <= 0 or min_refetch_seconds <= 0:
             raise ValueError("JWKS cache intervals must be positive")
         self._cache_seconds = cache_seconds
@@ -57,7 +63,8 @@ class JwksKeyCache:
         self._keys: dict[str, object] = {}
         self._fetched_at: float | None = None
         self._last_attempt_at: float | None = None
-        self._lock = asyncio.Lock()
+        self._lock = Lock()
+        self._inflight: Future | None = None
 
     def _age(self) -> float | None:
         return None if self._fetched_at is None else self._now() - self._fetched_at
@@ -77,36 +84,67 @@ class JwksKeyCache:
         self._fetched_at = None
 
     async def _refetch(self, seen_attempt: float | None) -> None:
-        async with self._lock:
-            # Another caller already refetched (or tried) while we waited for the lock.
-            if self._last_attempt_at != seen_attempt or not self._cooldown_elapsed():
-                return
-            self._last_attempt_at = self._now()
+        # A cache can be shared by ASGI requests on different event loops. Keep
+        # only short synchronous state changes under a thread lock; marshal a
+        # single fetch result to each waiter's own loop through wrap_future.
+        with self._lock:
+            future = self._inflight
+            owner = future is None
+            if owner:
+                if self._last_attempt_at != seen_attempt or not self._cooldown_elapsed():
+                    return
+                future = Future()
+                self._inflight = future
+                self._last_attempt_at = self._now()
+        if not owner:
+            # Cancelling one request must not cancel the shared completion or
+            # strand another signed request waiting for the same key set.
+            await asyncio.shield(asyncio.wrap_future(future))
+            return
+        try:
             document = await self._fetch_jwks()
+            if not isinstance(document,dict) or not isinstance(document.get("keys"),list):
+                raise JwksError("invalid key set")
             keys: dict[str, object] = {}
             for entry in document.get("keys", []):
                 if not isinstance(entry, dict):
                     continue
                 kid = entry.get("kid")
-                if not kid:
+                if not isinstance(kid,str) or not 0<len(kid)<=255:
                     continue
-                key = _public_key(entry)
+                key = self._key_parser(entry)
                 if key is not None:
+                    if kid in keys:raise JwksError("ambiguous key id")
                     keys[kid] = key
-            # An empty-but-valid response is not a successful rotation: keep the keys we hold
-            # rather than letting a provider misconfiguration wipe every published key.
-            if keys or not self._keys:
-                self._keys = keys
-                self._fetched_at = self._now()
+            with self._lock:
+                # Empty rotation retains existing keys under their old hard
+                # ceiling, exactly as before; it never extends stale trust.
+                if keys or not self._keys:
+                    self._keys = keys
+                    self._fetched_at = self._now()
+        except BaseException as exc:
+            # Owner cancellation remains cancellation for that request, while
+            # other requests receive a fail-closed fetch error and can finish.
+            future.set_exception(exc if isinstance(exc, Exception) else JwksError("key fetch interrupted"))
+            raise
+        else:
+            future.set_result(None)
+        finally:
+            with self._lock:
+                if self._inflight is future:
+                    self._inflight = None
 
     async def get_key(self, kid: str):
+        if not isinstance(kid,str) or not 0<len(kid)<=255:raise JwksError("invalid key id")
         if kid in self._keys and self._fresh():
             return self._keys[kid]
         # Every refetch is rate limited, not just the unknown-kid one: an outage keeps the
         # cache permanently stale, so without this a bogus kid would drive one fetch per request.
-        # A concurrent cold miss must join the fetch already holding this lock.
-        # Recheck cooldown under the lock, so joining never performs another fetch.
-        if self._cooldown_elapsed() or self._lock.locked():
+        # A concurrent cold miss must join the existing shared fetch completion.
+        # Recheck cooldown while claiming ownership; joining never starts another fetch.
+        with self._lock:
+            fetching = self._inflight is not None
+        if self._cooldown_elapsed() or fetching:
             seen_attempt = self._last_attempt_at
             try:
                 await self._refetch(seen_attempt)

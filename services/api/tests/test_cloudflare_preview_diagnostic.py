@@ -1,4 +1,5 @@
 """A separately prepared preview overlay cannot turn into a production executor."""
+from tests.fixture_reports import fresh_report_path
 import hashlib
 import hmac
 import importlib.util
@@ -267,7 +268,7 @@ async def test_preview_actual_sixty_one_second_sleep_and_durable_replay(local_pr
         assert result.json()["slept_seconds"] == 61
         assert result.json()["wall_seconds"] >= 61
         assert result.json()["hosted_feasible"] is False
-        output = ROOT / "artifacts/cloudflare/CF00-preview-duration-local.json"
+        output = fresh_report_path(ROOT / "artifacts/cloudflare/CF00-preview-duration-local.json")
         output.write_text(json.dumps({"environment": "local_owned_fixture", "two_hop_hosted": False,
                                       "result": result.json()}, indent=2) + "\n", encoding="utf-8")
     # A fresh application process must still reject the consumed nonce.
@@ -286,7 +287,7 @@ def test_preview_native_pdf_interruption_and_cross_tenant_checkpoint(local_probe
     assert rows["postgres_checkpoint"]["details"]["committed_node_replayed"] is False
     assert report["hosted_feasible"] is False
     assert "test-only" not in json.dumps(report)
-    output = ROOT / "artifacts/cloudflare/CF00-preview-native-local.json"
+    output = fresh_report_path(ROOT / "artifacts/cloudflare/CF00-preview-native-local.json")
     output.write_text(json.dumps({"environment": "local_owned_fixture", "guard_override": "loopback fixture only",
                                   "child_wrapper_hosted": False, "result": report}, indent=2) + "\n", encoding="utf-8")
 

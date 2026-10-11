@@ -376,3 +376,25 @@ def test_per_query_intent_must_belong_to_immutable_run_plan(t17_scope):
         asyncio.run(persist(bad_operation))
     buyer_id = asyncio.run(persist(good_operation))
     assert buyer_id is not None
+
+
+@pytest.mark.parametrize("mode", ["search_result_metadata", "unverified_page", "private_object_missing_key", "future_retrieval"])
+def test_search_metadata_cannot_be_promoted_to_retrieved_evidence(t17_scope, mode):
+    seeded, run_id, operation_id, source_id, *_ = t17_scope
+    with psycopg.connect(seeded) as db:
+        if mode == "future_retrieval":
+            db.execute("UPDATE source_documents SET retrieved_at=now()+interval '1 day' WHERE id=%s", (source_id,))
+        else:
+            db.execute("UPDATE source_documents SET storage_mode=%s,object_key=NULL WHERE id=%s", ("private_object" if mode == "private_object_missing_key" else mode, source_id))
+    async def exercise():
+        engine = create_async_engine(async_database_url(runtime_role_dsn(seeded)))
+        try:
+            async with tenant_session(engine, WS_A) as session:
+                await persist_candidate_evidence(session, run_id, operation_id, _candidate(), _source(source_id))
+        finally:
+            await engine.dispose()
+    with pytest.raises(ValueError, match="retrieved source"):
+        asyncio.run(exercise())
+    with psycopg.connect(seeded) as db:
+        for table in ("companies", "project_buyers", "evidence", "fit_assessments", "raw_candidates"):
+            assert db.execute(f"SELECT count(*) FROM {table} WHERE workspace_id=%s", (WS_A,)).fetchone() == (0,)
