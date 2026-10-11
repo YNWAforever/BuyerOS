@@ -4,6 +4,7 @@ import {promisify} from 'node:util';
 import {resolve} from 'node:path';
 import {writeFile} from 'node:fs/promises';
 import {signIn,type StaffJourneyReadback} from './staff-journey';
+import {responseReceipt} from './c61-response-receipt.mjs';
 type Receipt={path:string;method:string;status:number;request_id:string|null};
 const paths=new WeakMap<Page,Set<string>>(),receipts=new WeakMap<Page,Receipt[]>(),pending=new WeakMap<Page,Promise<void>[]>();
 export async function observeJoinedPages({page,browser}:{page:Page;browser:import('@playwright/test').Browser}){
@@ -11,8 +12,7 @@ export async function observeJoinedPages({page,browser}:{page:Page;browser:impor
  const watch=(target:Page)=>{
   target.on('framenavigated',frame=>{if(frame===target.mainFrame())observed.add(new URL(frame.url()).pathname);});
   target.on('response',response=>{const path=new URL(response.url()).pathname;if(!path.startsWith('/v1/'))return;
-   promises.push((async()=>{const body=response.headers()['content-type']?.includes('json')?await response.json().catch(()=>({})):{};
-    reads.push({path,method:response.request().method(),status:response.status(),request_id:response.headers()['x-request-id']??body.request_id??null});})());});
+   promises.push((async()=>{reads.push(await responseReceipt(response));})());});
  };watch(page);browser.on('context',context=>context.on('page',watch));
 }
 export async function joinedReadback(c:StaffJourneyReadback,unicodeGrounding?:Record<string,unknown>){
