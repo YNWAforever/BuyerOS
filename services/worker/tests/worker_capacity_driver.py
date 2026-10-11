@@ -27,7 +27,12 @@ def _process_rss(pid):
             return counters.WorkingSetSize,'windows_GetProcessMemoryInfo_WorkingSetSize'
         finally:kernel.CloseHandle(handle)
     if sys.platform.startswith('linux'):
-        for line in Path(f'/proc/{pid}/status').read_text().splitlines():
+        status=Path(f'/proc/{pid}/status').read_text().splitlines()
+        if any(line.startswith('State:') and line.split()[1] in {'Z','X'} for line in status):
+            # Kernel-confirmed exit is compatible with the caller's poll/OSError
+            # race check; a live process without VmRSS still fails closed below.
+            raise ProcessLookupError('owned process exited during RSS sampling')
+        for line in status:
             if line.startswith('VmRSS:'):
                 value,unit=line.split()[1:]
                 if unit!='kB':raise ValueError('unexpected proc RSS unit')
