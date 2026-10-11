@@ -1,0 +1,114 @@
+{
+  "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+  "declared_operations": 93,
+  "previous_operations": 84,
+  "new_operations": [
+    {
+      "operation_id": "receiveDeliveryCallback",
+      "method": "POST",
+      "path": "/v1/delivery-callbacks/resend/{endpoint_id}",
+      "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "inventory_kind": "declared OpenAPI operation; not execution coverage",
+      "change_since_oct06": "new",
+      "production_execution": "NOT_EXERCISED_IN_THIS_AUDIT",
+      "evidence": "E06",
+      "baseline_operation_id": ""
+    },
+    {
+      "operation_id": "reconcileDeliveryMessage",
+      "method": "POST",
+      "path": "/v1/workspaces/{workspace_id}/delivery-messages/{message_id}/reconciliation",
+      "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "inventory_kind": "declared OpenAPI operation; not execution coverage",
+      "change_since_oct06": "new",
+      "production_execution": "NOT_EXERCISED_IN_THIS_AUDIT",
+      "evidence": "E06",
+      "baseline_operation_id": ""
+    },
+    {
+      "operation_id": "admitDraftDelivery",
+      "method": "POST",
+      "path": "/v1/workspaces/{workspace_id}/drafts/{draft_id}/delivery-intents",
+      "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "inventory_kind": "declared OpenAPI operation; not execution coverage",
+      "change_since_oct06": "new",
+      "production_execution": "NOT_EXERCISED_IN_THIS_AUDIT",
+      "evidence": "E06",
+      "baseline_operation_id": ""
+    },
+    {
+      "operation_id": "getWorkQueue",
+      "method": "GET",
+      "path": "/v1/workspaces/{workspace_id}/projects/{project_id}/work-queue",
+      "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "inventory_kind": "declared OpenAPI operation; not execution coverage",
+      "change_since_oct06": "new",
+      "production_execution": "NOT_EXERCISED_IN_THIS_AUDIT",
+      "evidence": "E06",
+      "baseline_operation_id": ""
+    },
+    {
+      "operation_id": "listProviderOperations",
+      "method": "GET",
+      "path": "/v1/workspaces/{workspace_id}/projects/{project_id}/provider-operations",
+      "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "inventory_kind": "declared OpenAPI operation; not execution coverage",
+      "change_since_oct06": "new",
+      "production_execution": "NOT_EXERCISED_IN_THIS_AUDIT",
+      "evidence": "E06",
+      "baseline_operation_id": ""
+    },
+    {
+      "operation_id": "getResearchCandidateReviewContext",
+      "method": "GET",
+      "path": "/v1/workspaces/{workspace_id}/runs/{run_id}/candidates/{raw_candidate_id}/review-context",
+      "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "inventory_kind": "declared OpenAPI operation; not execution coverage",
+      "change_since_oct06": "new",
+      "production_execution": "NOT_EXERCISED_IN_THIS_AUDIT",
+      "evidence": "E06",
+      "baseline_operation_id": ""
+    },
+    {
+      "operation_id": "reviewResearchCandidate",
+      "method": "POST",
+      "path": "/v1/workspaces/{workspace_id}/runs/{run_id}/candidates/{raw_candidate_id}/review",
+      "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "inventory_kind": "declared OpenAPI operation; not execution coverage",
+      "change_since_oct06": "new",
+      "production_execution": "NOT_EXERCISED_IN_THIS_AUDIT",
+      "evidence": "E06",
+      "baseline_operation_id": ""
+    },
+    {
+      "operation_id": "listResearchCandidates",
+      "method": "GET",
+      "path": "/v1/workspaces/{workspace_id}/runs/{run_id}/candidates",
+      "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "inventory_kind": "declared OpenAPI operation; not execution coverage",
+      "change_since_oct06": "new",
+      "production_execution": "NOT_EXERCISED_IN_THIS_AUDIT",
+      "evidence": "E06",
+      "baseline_operation_id": ""
+    },
+    {
+      "operation_id": "listDraftDeliveryMessages",
+      "method": "GET",
+      "path": "/v1/workspaces/{workspace_id}/projects/{project_id}/drafts/{draft_id}/delivery-messages",
+      "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+      "inventory_kind": "declared OpenAPI operation; not execution coverage",
+      "change_since_oct06": "new",
+      "production_execution": "NOT_EXERCISED_IN_THIS_AUDIT",
+      "evidence": "E06",
+      "baseline_operation_id": ""
+    }
+  ],
+  "prior_cases": 130,
+  "new_cases": 18,
+  "case_total": 148,
+  "findings": 24,
+  "tasks": 33,
+  "ui_actions": 48,
+  "operation_route_check": "uv run --frozen python ../../scripts/generate-operation-routes.py --check -> exit0, 93 operations",
+  "coverage_limit": "OpenAPI and representative UI inventory are static coverage denominators, not claims that every action was clicked or operation called."
+}

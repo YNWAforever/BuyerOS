@@ -1,0 +1,4031 @@
+{
+  "schema": "buyeros.implementation-plan-traceability.v1",
+  "plan_date": "2026-10-11",
+  "audited_source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+  "note": "Audit statuses are inherited historical input; all execution fields here are not run. Original dependencies are preserved; plan sections describe 28a/b and 33a/b staging.",
+  "release_gate_conditions": {
+    "F21": "historical_fix accepted OR explicit recorded release exception; never automatically closed",
+    "C61-14": "after C61-29; GN canary precedes retirement",
+    "C61-33": "core staging complete does not close parent; full release gate acceptance still required"
+  },
+  "execution_dependencies": {
+    "baseline": [],
+    "db_readback": [
+      "baseline"
+    ],
+    "schema_repair": [
+      "db_readback"
+    ],
+    "promotion_core": [
+      "db_readback",
+      "schema_repair"
+    ],
+    "workspace": [
+      "schema_repair"
+    ],
+    "historical_root": [
+      "baseline"
+    ],
+    "historical_fix": [
+      "historical_root"
+    ],
+    "neon_contract": [
+      "baseline"
+    ],
+    "neon_identity": [
+      "schema_repair",
+      "neon_contract"
+    ],
+    "neon_session": [
+      "neon_identity"
+    ],
+    "neon_negative": [
+      "neon_session",
+      "workspace"
+    ],
+    "neon_rollback": [
+      "neon_negative"
+    ],
+    "provider_contract": [
+      "baseline"
+    ],
+    "search_model": [
+      "provider_contract"
+    ],
+    "contact_run": [
+      "search_model"
+    ],
+    "daily_ux": [
+      "workspace"
+    ],
+    "bulk": [
+      "workspace",
+      "daily_ux"
+    ],
+    "quality": [
+      "contact_run"
+    ],
+    "performance": [
+      "workspace",
+      "contact_run",
+      "daily_ux",
+      "bulk"
+    ],
+    "journey": [
+      "workspace",
+      "neon_negative",
+      "contact_run",
+      "daily_ux",
+      "bulk",
+      "quality",
+      "performance"
+    ],
+    "uat": [
+      "journey"
+    ],
+    "release_gate": [
+      "promotion_core",
+      "neon_rollback",
+      "quality",
+      "performance",
+      "journey",
+      "uat"
+    ],
+    "research_release": [
+      "release_gate"
+    ],
+    "auth0_retirement": [
+      "research_release",
+      "neon_rollback"
+    ],
+    "delivery_candidate": [
+      "neon_rollback",
+      "provider_contract",
+      "contact_run"
+    ],
+    "native_release": [
+      "auth0_retirement",
+      "delivery_candidate",
+      "research_release"
+    ]
+  },
+  "topological_order": [
+    "baseline",
+    "db_readback",
+    "historical_root",
+    "neon_contract",
+    "provider_contract",
+    "schema_repair",
+    "historical_fix",
+    "search_model",
+    "promotion_core",
+    "workspace",
+    "neon_identity",
+    "contact_run",
+    "neon_session",
+    "daily_ux",
+    "quality",
+    "neon_negative",
+    "bulk",
+    "neon_rollback",
+    "performance",
+    "journey",
+    "delivery_candidate",
+    "uat",
+    "release_gate",
+    "research_release",
+    "auth0_retirement",
+    "native_release"
+  ],
+  "findings": [
+    {
+      "finding_id": "F01",
+      "priority": "P1",
+      "problem": "登入成功後工作區載入失敗，不能進入業務流程",
+      "audit_current_status": "FAIL_LIVE",
+      "audit_current_note": "恢復與診斷 UI 已存在；本次根因見 F23。未讀到會員資料，不能判定無 membership。",
+      "planned_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-11",
+        "C61-12",
+        "C61-26",
+        "C61-32"
+      ]
+    },
+    {
+      "finding_id": "F02",
+      "priority": "P2",
+      "problem": "無可用工作區時的語言切換",
+      "audit_current_status": "PASS_OBSERVED_ERROR_STATE",
+      "audit_current_note": "在本次工作區錯誤畫面切換繁中成功；零會員／跨裝置偏好另未重測。",
+      "planned_tasks": [
+        "C61-02"
+      ]
+    },
+    {
+      "finding_id": "F03",
+      "priority": "P2",
+      "problem": "成員目錄分頁",
+      "audit_current_status": "IMPLEMENTED_NOT_LIVE_ACCEPTED",
+      "audit_current_note": "新版來源及 hosted fixture 有對應覆蓋；正式 Settings 受 F23 阻擋。",
+      "planned_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-23"
+      ]
+    },
+    {
+      "finding_id": "F04",
+      "priority": "P1",
+      "problem": "員工身份與工作區入職",
+      "audit_current_status": "NOT_LIVE_VERIFIED",
+      "audit_current_note": "identity reconciliation 工具已存在；實際員工 canonical UUID／角色尚未讀回。",
+      "planned_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-12",
+        "C61-23"
+      ]
+    },
+    {
+      "finding_id": "F05",
+      "priority": "P2",
+      "problem": "Operations 分頁及工作辨識",
+      "audit_current_status": "IMPLEMENTED_NOT_LIVE_ACCEPTED",
+      "audit_current_note": "目前有 scope/filter/receipt/result paging；正式工作台無法進入。",
+      "planned_tasks": [
+        "C61-02"
+      ]
+    },
+    {
+      "finding_id": "F06",
+      "priority": "P1",
+      "problem": "批量選取、責任人與確認",
+      "audit_current_status": "IMPLEMENTED_NOT_LIVE_ACCEPTED",
+      "audit_current_note": "新版 manifest／confirmation 已有測試，未驗收正式跨頁批量。",
+      "planned_tasks": [
+        "C61-02",
+        "C61-23"
+      ]
+    },
+    {
+      "finding_id": "F07",
+      "priority": "P2",
+      "problem": "輪詢與頁面背景負載",
+      "audit_current_status": "NOT_LIVE_VERIFIED",
+      "audit_current_note": "session scope 與取消機制有程式測試；正式流量、SSE／polling fallback 未量測。",
+      "planned_tasks": [
+        "C61-02",
+        "C61-25"
+      ]
+    },
+    {
+      "finding_id": "F08",
+      "priority": "P1",
+      "problem": "Research 接受後回應遺失可能重複提交",
+      "audit_current_status": "IMPLEMENTED_NOT_LIVE_ACCEPTED",
+      "audit_current_note": "intent/idempotency 有本次 focused 測試；真實供應商 unknown receipt 未驗收。",
+      "planned_tasks": [
+        "C61-02",
+        "C61-11",
+        "C61-19"
+      ]
+    },
+    {
+      "finding_id": "F09",
+      "priority": "P2",
+      "problem": "語氣／目的與實際產出一致性",
+      "audit_current_status": "NOT_LIVE_VERIFIED",
+      "audit_current_note": "不能以 fixture 取代真實 model output 的人工品質評核。",
+      "planned_tasks": [
+        "C61-02",
+        "C61-22"
+      ]
+    },
+    {
+      "finding_id": "F10",
+      "priority": "P1",
+      "problem": "研究、聯絡人及完整站內外展仍未啟用",
+      "audit_current_status": "FEATURE_NOT_ACTIVATED",
+      "audit_current_note": "live_search/model/contact 與 Resend candidate 已實作；DEFAULT_REGISTRY 空，selected_delivery_authorization 回 None。",
+      "planned_tasks": [
+        "C61-15",
+        "C61-16",
+        "C61-17",
+        "C61-18",
+        "C61-19",
+        "C61-20",
+        "C61-24",
+        "C61-26",
+        "C61-30"
+      ]
+    },
+    {
+      "finding_id": "F11",
+      "priority": "P1",
+      "problem": "大量維護與結果可重試性",
+      "audit_current_status": "IMPLEMENTED_NOT_LIVE_ACCEPTED",
+      "audit_current_note": "現有 10,000 筆 crash recovery 測試在 hosted API suite 內；不是正式容量或操作驗收。",
+      "planned_tasks": [
+        "C61-02",
+        "C61-23"
+      ]
+    },
+    {
+      "finding_id": "F12",
+      "priority": "P1",
+      "problem": "真實效能、準確度與成本證據不足",
+      "audit_current_status": "NOT_MEASURED_LIVE",
+      "audit_current_note": "正式 workspace fail；沒有成功請求 p95/p99、真實搜尋 precision 或真實單位成本。",
+      "planned_tasks": [
+        "C61-16",
+        "C61-17",
+        "C61-18",
+        "C61-24",
+        "C61-25",
+        "C61-26"
+      ]
+    },
+    {
+      "finding_id": "F13",
+      "priority": "P1",
+      "problem": "開發與發布文件過時",
+      "audit_current_status": "CONFIRMED_SOURCE",
+      "audit_current_note": "CURRENT_STATUS 仍稱 PR12 draft / Neon 可開始；release-candidate 仍 a788、predeploy_ready=false。",
+      "planned_tasks": [
+        "C61-01",
+        "C61-28",
+        "C61-29",
+        "C61-33"
+      ]
+    },
+    {
+      "finding_id": "F14",
+      "priority": "P2",
+      "problem": "每日工作 UI、mobile 與可達性",
+      "audit_current_status": "PARTIAL_FIXTURE_ONLY",
+      "audit_current_note": "hosted keyboard／zh-HK mobile case 通過；本次正式 UI 只驗登入／工作區错误。",
+      "planned_tasks": [
+        "C61-21",
+        "C61-22",
+        "C61-23",
+        "C61-26",
+        "C61-27"
+      ]
+    },
+    {
+      "finding_id": "F15",
+      "priority": "P1",
+      "problem": "登入初始化與設定錯誤呈現",
+      "audit_current_status": "PARTIAL",
+      "audit_current_note": "新 Neon bootstrap 有測試；本次 Auth0 callback 成功，reload 仍回 Sign in。",
+      "planned_tasks": [
+        "C61-02"
+      ]
+    },
+    {
+      "finding_id": "F16",
+      "priority": "P1",
+      "problem": "編輯後重新核對來源及核准",
+      "audit_current_status": "IMPLEMENTED_NOT_LIVE_ACCEPTED",
+      "audit_current_note": "grounding 與 Unicode／dirty draft fixture 增加；真實来源至匯出的資料鏈未驗收。",
+      "planned_tasks": [
+        "C61-02",
+        "C61-22"
+      ]
+    },
+    {
+      "finding_id": "F17",
+      "priority": "P1",
+      "problem": "Overview／列表篩選範圍及數量",
+      "audit_current_status": "IMPLEMENTED_NOT_LIVE_ACCEPTED",
+      "audit_current_note": "六卡與 scope 查詢已有 hosted fixture；正式 workspace 受阻。",
+      "planned_tasks": [
+        "C61-02",
+        "C61-21"
+      ]
+    },
+    {
+      "finding_id": "F18",
+      "priority": "P1",
+      "problem": "workspace discovery 查詢規模",
+      "audit_current_status": "IMPLEMENTED_BLOCKED_LIVE",
+      "audit_current_note": "0038 restricted function 與有界查詢已存在；本次首先於 0039 identity relation 缺失失敗。",
+      "planned_tasks": [
+        "C61-06",
+        "C61-25",
+        "C61-32"
+      ]
+    },
+    {
+      "finding_id": "F19",
+      "priority": "P1",
+      "problem": "草稿未儲存內容保護",
+      "audit_current_status": "IMPLEMENTED_NOT_LIVE_ACCEPTED",
+      "audit_current_note": "跨 tab／dirty buffer／navigation 測試存在；本次未開啟正式草稿。",
+      "planned_tasks": [
+        "C61-02",
+        "C61-22"
+      ]
+    },
+    {
+      "finding_id": "F20",
+      "priority": "P1",
+      "problem": "Auth0 轉 Neon 仍未完成正式切換",
+      "audit_current_status": "CONFIRMED_NOT_CUT_OVER",
+      "audit_current_note": "目前 live 仍導向 Auth0；Neon SDK、server、JWT verifier、session、identity migration 已有實作與離線測試。reload 需再按 Sign in。",
+      "planned_tasks": [
+        "C61-07",
+        "C61-08",
+        "C61-09",
+        "C61-10",
+        "C61-11",
+        "C61-12",
+        "C61-13",
+        "C61-14",
+        "C61-26",
+        "C61-29",
+        "C61-32"
+      ]
+    },
+    {
+      "finding_id": "F21",
+      "priority": "P1",
+      "problem": "2026-10-02 舊 workspace OperationalError",
+      "audit_current_status": "HISTORICAL_CAUSE_UNKNOWN",
+      "audit_current_note": "保留舊案；不能用本次 42P01 代替舊錯誤根因或將它標為已修復。",
+      "planned_tasks": [
+        "C61-04",
+        "C61-05"
+      ]
+    },
+    {
+      "finding_id": "F22",
+      "priority": "P1",
+      "problem": "舊修復未在 main／正式別名部署",
+      "audit_current_status": "CLOSED_FOR_SOURCE_DEPLOYMENT_GAP",
+      "audit_current_note": "PR12 已 merge，main／正式 alias／錯誤 API source_sha 同為 cbbe0e93；不代表八模組已驗收。",
+      "planned_tasks": [
+        "C61-01",
+        "C61-26",
+        "C61-28",
+        "C61-29",
+        "C61-30",
+        "C61-33"
+      ]
+    },
+    {
+      "finding_id": "F23",
+      "priority": "P0",
+      "problem": "正式 API 必需的 user_identities relation 不存在",
+      "audit_current_status": "CONFIRMED_LIVE_BLOCKER",
+      "audit_current_note": "兩個本次 request ID 均為 missing_relation / 42P01；工作區 route 無條件查 identity。0039 含 backfill、trigger 及 restricted grants。尚未取得實際 DB target/schema head/search_path，不能斷言只是漏跑某一 migration。",
+      "planned_tasks": [
+        "C61-31",
+        "C61-32"
+      ]
+    },
+    {
+      "finding_id": "F24",
+      "priority": "P1",
+      "problem": "正式推廣沒有攔截已知未就緒的資料庫／發布狀態",
+      "audit_current_status": "CONFIRMED_OUTCOME_CONTROL_GAP",
+      "audit_current_note": "Vercel READY 約 06:11 UTC，完整 main CI 約 06:46 才完成；release-candidate 仍 predeploy_ready=false。source build 只執行 Vite，/health/live 只回 ok。確定此次未攔截不相容發布；未讀取全部遠端 deployment protection 設定，不能宣稱一概沒有門檻。",
+      "planned_tasks": [
+        "C61-33"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "C61-01",
+      "title": "鎖定證據、分支差異及交付基準",
+      "finding_ids": [
+        "F13",
+        "F22"
+      ],
+      "plan_sections": [
+        3
+      ],
+      "original_dependencies": [],
+      "original_acceptance_criteria": "每個既有修復有實際 commit/path 與採用決定；八模組 live 驗收仍標未完成。原 ZIP 不更改。命令是本地核對，不代表發布。",
+      "original_rollback": "刪除未採用的隔離 worktree；不 reset 使用者分支，不改原 audit。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "本次 SHA／PR／alias 已核對；需把版本資料寫回 authoritative release 文件。",
+      "planned_case_ids": [
+        "N11-18",
+        "O26-15",
+        "R01",
+        "R05"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-02",
+      "title": "整合並驗收已存在的 Q 修復",
+      "finding_ids": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09",
+        "F11",
+        "F15",
+        "F16",
+        "F17",
+        "F19"
+      ],
+      "plan_sections": [
+        7
+      ],
+      "original_dependencies": [
+        "C61-01"
+      ],
+      "original_acceptance_criteria": "隔離 PG16 strict tests：0 fail/error/skip；fixture UI 與 API/DB 對照一致。既有 44 units / 812 API 是歷史參照，不能硬編碼未來總數或把它們相加。",
+      "original_rollback": "按修復組 revert；保留 append-only、manifest、accepted/unknown operation 記錄；禁止破壞式降 schema。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "PR12 已合併並部署，hosted main CI 通過；正式 user acceptance 仍受阻。",
+      "planned_case_ids": [
+        "A02",
+        "A07",
+        "B01",
+        "B02",
+        "B03",
+        "B04",
+        "B05",
+        "B06",
+        "B07",
+        "B08",
+        "B09",
+        "B10",
+        "B11",
+        "B12",
+        "B13",
+        "B14",
+        "B15",
+        "B16",
+        "D01",
+        "D02",
+        "D03",
+        "N11-04",
+        "N11-07",
+        "N11-09",
+        "O26-04",
+        "O26-05",
+        "O26-06",
+        "O26-09",
+        "P04",
+        "S06",
+        "U02",
+        "U03",
+        "U05",
+        "U06",
+        "U07",
+        "U08",
+        "U13",
+        "U15",
+        "WF01",
+        "WF02"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-03",
+      "title": "打通授權員工的工作區入職及恢復",
+      "finding_ids": [
+        "F01",
+        "F03",
+        "F04"
+      ],
+      "plan_sections": [
+        7
+      ],
+      "original_dependencies": [
+        "C61-02"
+      ],
+      "original_acceptance_criteria": "有正確帳戶與 membership 的 UI/API 讀回證據；0-membership 仍不能進 workspace，提供雙語重試和聯絡路徑。沒有有效帳戶時只標受阻，不改密碼或提升自己權限。",
+      "original_rollback": "撤回本批新增 membership 須依正常管理流程並保留 audit；不刪 canonical users 或歷史 actor。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "員工 reconciliation source 已存在；F23 解決後讀回真實 canonical UUID／membership。",
+      "planned_case_ids": [
+        "N11-01",
+        "N11-14",
+        "NA06",
+        "NA07",
+        "NA08",
+        "NA09",
+        "NA10",
+        "O26-01",
+        "O26-09",
+        "S06",
+        "U01",
+        "U02",
+        "U03",
+        "U05",
+        "U06",
+        "U07",
+        "U08",
+        "U13"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-04",
+      "title": "取得 workspace 500 根因證據",
+      "finding_ids": [
+        "F21"
+      ],
+      "plan_sections": [
+        8
+      ],
+      "original_dependencies": [
+        "C61-01"
+      ],
+      "original_acceptance_criteria": "只有能連接 request → driver/SQLSTATE → 實際故障位置的證據才解除 C61-05 的阻塞；僅加 logging 不算 F21 已修。",
+      "original_rollback": "關閉新增診斷或 revert logging；保留事故報告。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "本次新 42P01 已取得 request-correlated 證據；Oct2 舊根因仍未知。",
+      "planned_case_ids": [
+        "C61T-15",
+        "U16"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-05",
+      "title": "修正已證實的 500 原因",
+      "finding_ids": [
+        "F21"
+      ],
+      "plan_sections": [
+        8
+      ],
+      "original_dependencies": [
+        "C61-04"
+      ],
+      "original_acceptance_criteria": "根因、失敗重現、修後結果與相同 SHA 清楚連結；歷史無法重現則仍 open，不為關單而捏造原因。",
+      "original_rollback": "revert 單一修復/相容設定；保留診斷和事件時間線。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "保留針對舊 F21 的根因調查；新 F23 用 C61-31/32 處理。",
+      "planned_case_ids": [
+        "U16"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-06",
+      "title": "把 workspace discovery 改為有界查詢",
+      "finding_ids": [
+        "F18"
+      ],
+      "plan_sections": [
+        7,
+        18
+      ],
+      "original_dependencies": [
+        "C61-01",
+        "C61-02"
+      ],
+      "original_acceptance_criteria": "owned PG16 benchmark CLI exit 0 且 SQL gate=true；舊 4/22/202/2002 查詢數只作 baseline。EXPLAIN/query 計數/role/RLS 證據齊備；n=30 p99 只標不穩定。",
+      "original_rollback": "先停新查詢入口並切回相容 route；保留新增 schema。若舊路徑恢復 O(W)，記效能退化，不放鬆授權。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "0038 有界 directory 已實作；production schema／成功查詢驗收受阻。",
+      "planned_case_ids": [
+        "C61T-01",
+        "N11-15",
+        "O26-12",
+        "P09",
+        "P10"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-07",
+      "title": "完成 N00：Neon 的真實產品登入契約",
+      "finding_ids": [
+        "F20"
+      ],
+      "plan_sections": [
+        9
+      ],
+      "original_dependencies": [
+        "C61-01"
+      ],
+      "original_acceptance_criteria": "fixture 與真實 Neon 分開記錄；真實隔離 branch、built portable 及 Vercel preview 都過產品流程才 N00 完成。--help 只確認 runner 用法，實際 run 用 ADR 中已核對的 flags，不能以 help 成功關單。",
+      "original_rollback": "維持 Auth0 現有路徑；移除未採用 spike overlay。真實 Neon 測試帳戶只依 owner/nonce 精確清理。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "ADR及 pinned Neon SDK 已存在；真實 target branch/session/provider acceptance 未完成。",
+      "planned_case_ids": [
+        "N11-10",
+        "NA01",
+        "NA04",
+        "NA05",
+        "O26-11"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-08",
+      "title": "完成 N01：環境與 auth server 邊界",
+      "finding_ids": [
+        "F20"
+      ],
+      "plan_sections": [
+        9
+      ],
+      "original_dependencies": [
+        "C61-07"
+      ],
+      "original_acceptance_criteria": "兩類 build 可用且 secret scan 無漏出；環境矩陣無默認 fallback 到 production；新增設定文件不含值。",
+      "original_rollback": "auth provider gate 回 Auth0；保留 Neon branch，勿使既有使用者無法登入。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "server/config/route boundary 已實作，本次 Node tests 覆蓋；尚未 live activation。",
+      "planned_case_ids": [
+        "N11-10",
+        "NA01",
+        "NA02",
+        "NA03",
+        "O26-11",
+        "S04",
+        "S05"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-09",
+      "title": "完成 N02：不可變 canonical identity 映射",
+      "finding_ids": [
+        "F20"
+      ],
+      "plan_sections": [
+        10
+      ],
+      "original_dependencies": [
+        "C61-06",
+        "C61-07"
+      ],
+      "original_acceptance_criteria": "映射前後 UUID/FK hash 對照一致；新舊 auth 同人得到同一 canonical id；不同身份不越權；tenant/session pool 重用不殘留上一 actor。",
+      "original_rollback": "保留 additive mapping；回舊 verifier 仍用原 User 欄位；不能回退成刪 Neon-only users 或清空其 ownership。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "0039 identity mapping 已實作，但 production resolver 所需 relation 缺失。",
+      "planned_case_ids": [
+        "C61T-02",
+        "N11-14",
+        "NA06",
+        "NA07",
+        "NA08",
+        "NA09",
+        "NA24",
+        "NA25",
+        "NA26",
+        "O26-09",
+        "O26-10",
+        "S06",
+        "U04",
+        "U05",
+        "U06",
+        "U07",
+        "U08"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-10",
+      "title": "完成 N03：隔離信任設定的 API JWT verifier",
+      "finding_ids": [
+        "F20"
+      ],
+      "plan_sections": [
+        10
+      ],
+      "original_dependencies": [
+        "C61-07",
+        "C61-08",
+        "C61-09"
+      ],
+      "original_acceptance_criteria": "雙信任只在具到期時間的遷移設定開啟；驗證錯誤為可預期 401 而非 500；JWT role claim 不授予 workspace role。",
+      "original_rollback": "回到已驗證 Auth0 trust 設定；不放寬 issuer/algorithm 以救登入。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "Neon verifier 已實作，本次離線 verifier tests 通過；實際 Neon JWT trust 未驗收。",
+      "planned_case_ids": [
+        "N11-10",
+        "NA11",
+        "NA12",
+        "NA13",
+        "NA14",
+        "NA15",
+        "NA16",
+        "NA24",
+        "NA25",
+        "NA26",
+        "O26-11",
+        "S01"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-11",
+      "title": "完成 N04：Neon session、刷新與跨 tab 登出",
+      "finding_ids": [
+        "F20",
+        "F01",
+        "F08"
+      ],
+      "plan_sections": [
+        11
+      ],
+      "original_dependencies": [
+        "C61-08",
+        "C61-09",
+        "C61-10"
+      ],
+      "original_acceptance_criteria": "修改該 config 的 testMatch 使新 spec 被 discovery 收錄，並確認 case count>0；built UI email/token/API/reload/logout 完成；Safari 實機與 runner 分开記錄。登出後已發 JWT 剩餘壽命要實測記錄，不能聲稱瞬時全域撤銷。",
+      "original_rollback": "provider gate 回相容 adapter；清理 client session/暫存，不刪後端 identity mapping。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "Neon session/cross-tab/renewal 已實作，本次本地測試通過；live Auth0 reload 仍重新要求 Sign in。",
+      "planned_case_ids": [
+        "B05",
+        "B06",
+        "C61T-03",
+        "C61T-04",
+        "N11-05",
+        "N11-06",
+        "N11-08",
+        "N11-10",
+        "NA04",
+        "NA05",
+        "NA10",
+        "NA17",
+        "NA18",
+        "NA19",
+        "NA20",
+        "NA21",
+        "NA22",
+        "NA23",
+        "O26-01",
+        "O26-04",
+        "O26-11",
+        "U01",
+        "U02",
+        "U03",
+        "U13",
+        "U14"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-12",
+      "title": "完成 N05：身份與租戶負向驗收",
+      "finding_ids": [
+        "F20",
+        "F01",
+        "F04"
+      ],
+      "plan_sections": [
+        10,
+        11
+      ],
+      "original_dependencies": [
+        "C61-03",
+        "C61-10",
+        "C61-11"
+      ],
+      "original_acceptance_criteria": "API DB 負向零資料外洩；real session 測試可定位 cookie/CSRF 邊界；不以 decoded JWT 或 UI hide 作授權證據。",
+      "original_rollback": "關閉新增 provider admission；保留負向測試與 evidence。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "負向測試在 hosted/local；真實 tenant／角色登入 readback 仍待做。",
+      "planned_case_ids": [
+        "N11-10",
+        "N11-14",
+        "NA02",
+        "NA03",
+        "NA10",
+        "NA11",
+        "NA12",
+        "NA13",
+        "NA14",
+        "NA15",
+        "NA16",
+        "NA17",
+        "NA18",
+        "NA19",
+        "NA20",
+        "NA21",
+        "NA22",
+        "NA23",
+        "NA24",
+        "NA25",
+        "NA26",
+        "NA27",
+        "O26-09",
+        "O26-11",
+        "S01",
+        "S04",
+        "S05",
+        "S06",
+        "U04",
+        "U05",
+        "U06",
+        "U07",
+        "U08",
+        "U14"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-13",
+      "title": "完成 N06：身份遷移及回退演練",
+      "finding_ids": [
+        "F20"
+      ],
+      "plan_sections": [
+        11
+      ],
+      "original_dependencies": [
+        "C61-09",
+        "C61-12"
+      ],
+      "original_acceptance_criteria": "演練有時間線、row count/hash、可登入驗證及 rollback artifact；「改回 Auth0」不算 Neon-only 新戶回退方案。 restore/retention rehearsal須用隔離資料驗證，未重放刪除及對帳前不開放readiness。",
+      "original_rollback": "停止切換，保留支援現有用戶的 auth artifact，按 runbook 回復相容配置。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "owned DB migration/cutover suites 在 hosted CI；production target 與rollback兼容需先 C61-31/32。",
+      "planned_case_ids": [
+        "C61T-05",
+        "N11-02",
+        "N11-06",
+        "N11-10",
+        "NA06",
+        "NA07",
+        "NA08",
+        "NA09",
+        "NA29",
+        "NA30",
+        "O26-10",
+        "R02",
+        "R03",
+        "R04",
+        "R06"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-14",
+      "title": "完成 N07：有限期雙信任後退役 Auth0",
+      "finding_ids": [
+        "F20"
+      ],
+      "plan_sections": [
+        21
+      ],
+      "original_dependencies": [
+        "C61-13",
+        "C61-29"
+      ],
+      "original_acceptance_criteria": "Neon 真正成為唯一用戶 auth；production readback 與 source/config 對上。此項在 C61-29 後做，不是前端換 logo 即完成。",
+      "original_rollback": "只在已授權 rollback 窗恢復審核過的有限期 trust；canonical mapping 與歷史資料不刪。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "未切 Neon-only，live Auth0 仍 active；不能直接刪 Auth0 或以 email 自動連結。",
+      "planned_case_ids": [
+        "N11-10",
+        "NA28",
+        "NA29",
+        "NA30"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-15",
+      "title": "定義並核實真實供應商接駁契約",
+      "finding_ids": [
+        "F10"
+      ],
+      "plan_sections": [
+        12
+      ],
+      "original_dependencies": [
+        "C61-01"
+      ],
+      "original_acceptance_criteria": "每類供應商有可驗證 contract；選型/credential/額度缺失只阻塞相應 live gate，離線 contract/fixture 開發可繼續。禁止以解除 503 當功能完成。",
+      "original_rollback": "清空本次未核實 provider activation，維持 capability_blocked。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "DEFAULT_REGISTRY 空；需選定驗證的 immutable account/contract/cost scope。",
+      "planned_case_ids": [
+        "P08",
+        "S04",
+        "S05"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-16",
+      "title": "實作真實搜尋、來源抓取及公司對應",
+      "finding_ids": [
+        "F10",
+        "F12"
+      ],
+      "plan_sections": [
+        13
+      ],
+      "original_dependencies": [
+        "C61-15"
+      ],
+      "original_acceptance_criteria": "真實公司和來源持久化且可重開讀回；provider receipt/帳本/觀測成本對得上；無成功 receipt 不假稱研究完成。",
+      "original_rollback": "關 search capability admission；保留已接受任務及 sources，未知項走 status reconciliation。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "live_search adapter 已實作；本次 mock transport tests 通過；real sandbox 未驗收。",
+      "planned_case_ids": [
+        "A01",
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A08",
+        "C61T-06",
+        "O26-02",
+        "O26-03",
+        "S02"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-17",
+      "title": "實作真實 model fit、證據驗證及人工審核銜接",
+      "finding_ids": [
+        "F10",
+        "F12"
+      ],
+      "plan_sections": [
+        13
+      ],
+      "original_dependencies": [
+        "C61-15",
+        "C61-16"
+      ],
+      "original_acceptance_criteria": "真實 result→evidence→fit/review 可持久化；三次 provider run 尚須 C61-24 準確度 gate，單元通過不宣稱 factual accuracy。",
+      "original_rollback": "停 model admission；既有 proposal/assessment 保留，不自動將未驗證結果升級為 Match。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "live_model 與 research handoff source 已實作；real grounded output 品質未驗收。",
+      "planned_case_ids": [
+        "A01",
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A08",
+        "C61T-07",
+        "O26-02",
+        "O26-03"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-18",
+      "title": "實作 Contact quote、確認及真實結果",
+      "finding_ids": [
+        "F10",
+        "F12"
+      ],
+      "plan_sections": [
+        14
+      ],
+      "original_dependencies": [
+        "C61-15",
+        "C61-16"
+      ],
+      "original_acceptance_criteria": "quote→explicit confirm→single operation→可驗證 contact result；錯公司/禁用 contact 輸出=0（樣本內），未驗證項清楚標示。",
+      "original_rollback": "關 contact admission；不得釋放 unknown 費用或重複購買。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "live_contact quote/receipt/adapter 已實作；real account/cost/contact acceptance 未驗收。",
+      "planned_case_ids": [
+        "A01",
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A08",
+        "O26-02",
+        "O26-03",
+        "S03"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-19",
+      "title": "接通真正可恢复的 research run",
+      "finding_ids": [
+        "F10",
+        "F08"
+      ],
+      "plan_sections": [
+        14
+      ],
+      "original_dependencies": [
+        "C61-02",
+        "C61-16",
+        "C61-17",
+        "C61-18"
+      ],
+      "original_acceptance_criteria": "實際 preview 同一 project 完成 Offer/ICP→run→buyers/evidence/fit→contact→人工 review；provider費用/帳本一致，accepted/unknown無盲目重送。",
+      "original_rollback": "停新 admission、保留 reconciliation；停止舊 epoch，不能以回退應用清除 outbox/holds。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "durable research orchestration 與unknown回復有 hosted coverage；正式 provider未選定。",
+      "planned_case_ids": [
+        "B05",
+        "B06",
+        "C61T-08",
+        "N11-12",
+        "O26-02",
+        "O26-04",
+        "P08",
+        "R02",
+        "R03",
+        "R04",
+        "R06",
+        "S03",
+        "S04",
+        "S05"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-20",
+      "title": "新增可追蹤站內寄送連接器",
+      "finding_ids": [
+        "F10"
+      ],
+      "plan_sections": [
+        21
+      ],
+      "original_dependencies": [
+        "C61-13",
+        "C61-15",
+        "C61-18",
+        "C61-19"
+      ],
+      "original_acceptance_criteria": "只向已核准隔離收件人做 sandbox 測試；O26-16 有 receipt/event/readback 證據後才能進 C61-30。C61-20 未交付時 UI 明示「核准匯出／手動結果」，保留 403，不宣稱站內 outreach send 已完成。",
+      "original_rollback": "关 delivery gate/停止新 admission；已送 email 無法撤回，保留帳本與 webhook reconciliation。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "delivery ledger/admission/status/native/Resend候選已實作；authorization=None，無啟用。",
+      "planned_case_ids": [
+        "C61T-12",
+        "C61T-13",
+        "N11-13",
+        "O26-07",
+        "O26-16",
+        "P08",
+        "R02",
+        "R03",
+        "R04",
+        "R06",
+        "S03",
+        "S04",
+        "S05"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-21",
+      "title": "讓 Overview 今日待辦直接到正確資料",
+      "finding_ids": [
+        "F14",
+        "F17"
+      ],
+      "plan_sections": [
+        15
+      ],
+      "original_dependencies": [
+        "C61-02",
+        "C61-06"
+      ],
+      "original_acceptance_criteria": "將新 spec 收入該 config 的 discovery，0 tests 不算通過；6 張卡片在角色/scope/空/錯誤狀態皆準確；新增 operation 類型生成無 drift。",
+      "original_rollback": "UI gate 回舊導覽但文案要誠實；保留新 API 相容 response，不動業務資料。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "六卡範圍與列表 fixture 通過；正式資料量一致性未驗收。",
+      "planned_case_ids": [
+        "C61T-09",
+        "U15"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-22",
+      "title": "把改稿與來源覆核變成可完成的日常流程",
+      "finding_ids": [
+        "F09",
+        "F14",
+        "F16",
+        "F19"
+      ],
+      "plan_sections": [
+        15
+      ],
+      "original_dependencies": [
+        "C61-02"
+      ],
+      "original_acceptance_criteria": "中英混合/emoji/換行/長稿可完成改稿至下載；grounding 完整覆蓋不等於語義真實，真人覆核仍保留。",
+      "original_rollback": "revert UI helper，不改 immutable revision/approval/grounding history；不能回退成丟棄未儲存內容。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "grounding/dirty/Unicode source已實作；需真實同revision核准／匯出驗收。",
+      "planned_case_ids": [
+        "A02",
+        "A07",
+        "C61T-10",
+        "D01",
+        "D02",
+        "D03",
+        "O26-06"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-23",
+      "title": "改善大批維護、Settings 及可達性",
+      "finding_ids": [
+        "F03",
+        "F04",
+        "F06",
+        "F11",
+        "F14"
+      ],
+      "plan_sections": [
+        16
+      ],
+      "original_dependencies": [
+        "C61-02",
+        "C61-03",
+        "C61-21",
+        "C61-22"
+      ],
+      "original_acceptance_criteria": "五項員工任務均可鍵盤完成且 scope 清楚；實際 screen reader/人員完成率留 C61-27，不能用 axe 或截圖替代。",
+      "original_rollback": "UI revert 不改 frozen manifest 和審計；保留失敗重試及 server checks。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "bulk manifest、expiry、Settings與keyboard已加測；正式站受阻。",
+      "planned_case_ids": [
+        "B01",
+        "B02",
+        "B03",
+        "B04",
+        "B07",
+        "B08",
+        "B09",
+        "B10",
+        "B11",
+        "B14",
+        "B15",
+        "B16",
+        "C61T-11",
+        "O26-05",
+        "O26-09",
+        "O26-13",
+        "S06",
+        "U05",
+        "U06",
+        "U07",
+        "U08",
+        "U10",
+        "U11",
+        "U12"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-24",
+      "title": "驗收真實研究準確度與成本",
+      "finding_ids": [
+        "F12",
+        "F10"
+      ],
+      "plan_sections": [
+        17
+      ],
+      "original_dependencies": [
+        "C61-17",
+        "C61-18",
+        "C61-19"
+      ],
+      "original_acceptance_criteria": "offline evaluator 仍 live_verified=false，另以 provider receipt/source review/標註獨立性證據作實際驗收；0 wrong-company/unsupported citation/禁用 contact，三次門檻及成本均符合已記錄值。沒有真人標註時不能宣稱達標。",
+      "original_rollback": "停測及 admission；保留原報告、holdout、失敗案例，按精確 dataset marker 清理隔離資料。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "real gold set、成本及誤判指標仍無本次結果。",
+      "planned_case_ids": [
+        "A01",
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A08",
+        "N11-16",
+        "O26-03",
+        "S02"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-25",
+      "title": "驗收效能、輪詢、worker 公平性及容量",
+      "finding_ids": [
+        "F07",
+        "F12",
+        "F18"
+      ],
+      "plan_sections": [
+        18
+      ],
+      "original_dependencies": [
+        "C61-06",
+        "C61-19",
+        "C61-21",
+        "C61-23"
+      ],
+      "original_acceptance_criteria": "每項 gate 有 raw samples/樣本數/環境/SQL/成本/錯誤分母；不把 local API benchmark 說成 HK production 使用體驗。超標指出具體改善與重測，不用增加 timeout 隱藏。",
+      "original_rollback": "停止隔離負載；回退造成退化的 query/index/config 變更（schema保留相容）；不提高正式配額。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "harness與hosted容量測試存在；本次沒有真實成功請求performance baseline。",
+      "planned_case_ids": [
+        "B12",
+        "B13",
+        "N11-15",
+        "O26-12",
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-26",
+      "title": "八模組同一資料鏈端到端驗收",
+      "finding_ids": [
+        "F01",
+        "F10",
+        "F12",
+        "F14",
+        "F20",
+        "F22"
+      ],
+      "plan_sections": [
+        19
+      ],
+      "original_dependencies": [
+        "C61-03",
+        "C61-12",
+        "C61-19",
+        "C61-21",
+        "C61-22",
+        "C61-23",
+        "C61-24",
+        "C61-25"
+      ],
+      "original_acceptance_criteria": "八模組至少各一段可追查證據且整鏈成功；required cases count>0、零 fail/error/skip，環境缺失標 blocked。live唯讀smoke不等於此驗收。",
+      "original_rollback": "停止新測試任務；保留已受理/unknown任務與審計，cleanup 僅本次 marker，禁止粗略刪整個 workspace。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "完整八模組流程 BLOCKED_AT_WORKSPACE。",
+      "planned_case_ids": [
+        "B01",
+        "B02",
+        "B03",
+        "B04",
+        "B07",
+        "B08",
+        "B09",
+        "B16",
+        "D01",
+        "D02",
+        "D03",
+        "N11-12",
+        "NA04",
+        "NA05",
+        "NA27",
+        "O26-01",
+        "O26-02",
+        "O26-06",
+        "O26-07",
+        "O26-08",
+        "O26-14",
+        "U01",
+        "U09",
+        "WF01",
+        "WF02",
+        "WF03"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-27",
+      "title": "用真實員工驗收可用性與輔助工具",
+      "finding_ids": [
+        "F14"
+      ],
+      "plan_sections": [
+        19
+      ],
+      "original_dependencies": [
+        "C61-26"
+      ],
+      "original_acceptance_criteria": "真人簽核不由 Codex 模擬；缺人或screen reader未測保持 blocked，不能套用 fixture結果填pass。",
+      "original_rollback": "UI revert 限于造成阻礙的變更；保留觀察紀錄。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "真實員工 mobile／screen reader UAT 尚未完成。",
+      "planned_case_ids": [
+        "O26-13",
+        "U10",
+        "U11",
+        "U12"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-28",
+      "title": "把同版本驗收變成 CI 和維護門檻",
+      "finding_ids": [
+        "F13",
+        "F22"
+      ],
+      "plan_sections": [
+        6,
+        20
+      ],
+      "original_dependencies": [
+        "C61-02",
+        "C61-05",
+        "C61-06",
+        "C61-13",
+        "C61-24",
+        "C61-25",
+        "C61-26",
+        "C61-27"
+      ],
+      "original_acceptance_criteria": "全量 API/worker strict PG16及CI原有job依原工作流程成功，新tests被收錄；812歷史數字不是最低/固定值，但測試減少須解釋。每個open finding 明確列出，無修復完成=上線的混淆。",
+      "original_rollback": "保留PR/CI evidence；不以停用tests或改門檻解除block。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "證據 checker存在，但今回未阻止schema不相容程式到正式 alias；加入 C61-33。",
+      "planned_case_ids": [
+        "C61T-14",
+        "N11-17",
+        "N11-18",
+        "O26-15",
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-29",
+      "title": "發布研究與核准匯出版本並讀回驗證",
+      "finding_ids": [
+        "F13",
+        "F20",
+        "F22"
+      ],
+      "plan_sections": [
+        20
+      ],
+      "original_dependencies": [
+        "C61-28"
+      ],
+      "original_acceptance_criteria": "合併到 main 及 production alias 的實際SHA一致性可查，不能用PRmerge代替；登入/八模組readback/告警可用。真實付費/外寄驗收不由唯讀smoke自動執行。",
+      "original_rollback": "關新admission，切回已演練相容artifact與selector；fence舊epoch，保持accepted/unknown對帳；不downgrade刪migration資料。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "程式已部署，Release A acceptance仍 NOT_ACCEPTED；需修復後實際readback。",
+      "planned_case_ids": [
+        "N11-01",
+        "N11-12",
+        "NA30",
+        "O26-01",
+        "O26-15",
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "U01"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-30",
+      "title": "獨立啟用站內寄送並完成全外展驗收",
+      "finding_ids": [
+        "F10",
+        "F22"
+      ],
+      "plan_sections": [
+        21
+      ],
+      "original_dependencies": [
+        "C61-14",
+        "C61-20",
+        "C61-29"
+      ],
+      "original_acceptance_criteria": "新send spec 明確加入discovery；完整「站內寄送」完成只在此gate通過後宣稱。未做此階段，狀態永遠是research+export可用／native send未交付。",
+      "original_rollback": "關send admission，繼續callback/status reconciliation；已寄不可撤回，也不可rollback成重新寄送。",
+      "audit_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+      "audit_current_note": "native send尚未啟用，無真實寄送receipt。",
+      "planned_case_ids": [
+        "C61T-16",
+        "N11-13",
+        "O26-07",
+        "O26-14",
+        "O26-16",
+        "WF03"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-31",
+      "title": "確認正式 DB target、schema head及 runtime role",
+      "finding_ids": [
+        "F23"
+      ],
+      "plan_sections": [
+        4
+      ],
+      "original_dependencies": [],
+      "original_acceptance_criteria": "能用正式 runtime角色重現／定位缺少relation；確認該部署連到預期 DB；不以 NULL diagnostics 猜 schema head。",
+      "original_rollback": "不改資料；撤回臨时只讀診斷。",
+      "audit_current_status": "NOT_STARTED",
+      "audit_current_note": "只讀查 actual database/branch/search_path、alembic_version、to_regclass、0038 function、0039 grants、legacy exact mapping counts；保留已遮蔽證據。",
+      "planned_case_ids": [
+        "N11-03",
+        "N11-11"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-32",
+      "title": "修復已證實的 schema／應用相容性",
+      "finding_ids": [
+        "F23",
+        "F01",
+        "F18",
+        "F20"
+      ],
+      "plan_sections": [
+        5
+      ],
+      "original_dependencies": [
+        "C61-31"
+      ],
+      "original_acceptance_criteria": "同 SHA 用合法帳戶登入→工作區200→正確roles；0會員帳戶真empty；跨tenant拒絕；canonical UUID/FK/revoke不變；所需0050等head按實際artifact相容性核對。",
+      "original_rollback": "保留expanded schema／identity／unknownholds；回到已證明兼容API/worker，不做破壞性downgrade。",
+      "audit_current_status": "NOT_STARTED",
+      "audit_current_note": "依 C61-31 結果選擇已證明相容 rollback 或 additive migration；先隔離副本排練；0039包含原 UUID backfill、trigger、grants，不只建空表。",
+      "planned_case_ids": [
+        "N11-02",
+        "N11-03",
+        "N11-04",
+        "N11-11",
+        "N11-12",
+        "N11-14"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "task_id": "C61-33",
+      "title": "把 schema readiness 與同版本驗收接到正式推廣",
+      "finding_ids": [
+        "F24",
+        "F13",
+        "F22"
+      ],
+      "plan_sections": [
+        6,
+        20
+      ],
+      "original_dependencies": [
+        "C61-31",
+        "C61-32",
+        "C61-28"
+      ],
+      "original_acceptance_criteria": "缺少user_identities／錯DB／錯role／stale manifest／CI未完成皆阻止正式alias；成功candidate才可promote，部署後canary失敗有兼容rollback。",
+      "original_rollback": "維持目前相容production版本；保留審計與migrationhistory，不將build hook設為無人監督DBowner mutation。",
+      "audit_current_status": "NOT_STARTED",
+      "audit_current_note": "更新release manifest；以固定 source/API/worker/schema tuples 驗證；CI成功後在candidate以runtime role測requiredrelations/grants/mapping及known-account workspace；失敗禁止promote。",
+      "planned_case_ids": [
+        "N11-11",
+        "N11-17",
+        "N11-18"
+      ],
+      "implementation_status": "not_executed_by_this_plan",
+      "execution_evidence": []
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "U01",
+      "scenario": "正式登入與工作區",
+      "audit_current_result": "FAIL_LIVE_WORKSPACE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "本次 Auth0 成功，workspace 500；詳見 N11-02 至 N11-04。",
+      "finding_ids": [
+        "F01"
+      ],
+      "implementation_tasks": [
+        "C61-03",
+        "C61-11",
+        "C61-26",
+        "C61-29"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U02",
+      "scenario": "無會員恢復",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F01"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-11"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U03",
+      "scenario": "無會員繁中",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F02"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-11"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U04",
+      "scenario": "不同身份提供者",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F01"
+      ],
+      "implementation_tasks": [
+        "C61-09",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U05",
+      "scenario": "角色撤回",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F04"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-09",
+        "C61-12",
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U06",
+      "scenario": "成員分頁",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F03"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-09",
+        "C61-12",
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U07",
+      "scenario": "辨識成員",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F04"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-09",
+        "C61-12",
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U08",
+      "scenario": "最後管理員競態",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F04"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-09",
+        "C61-12",
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U09",
+      "scenario": "完整員工任務",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F14"
+      ],
+      "implementation_tasks": [
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U10",
+      "scenario": "手機及縮放",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F14"
+      ],
+      "implementation_tasks": [
+        "C61-23",
+        "C61-27"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U11",
+      "scenario": "輔助工具",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F14"
+      ],
+      "implementation_tasks": [
+        "C61-23",
+        "C61-27"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U12",
+      "scenario": "人員可用性",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F14"
+      ],
+      "implementation_tasks": [
+        "C61-23",
+        "C61-27"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B01",
+      "scenario": "批量100/101邊界",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F06"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B02",
+      "scenario": "確認後改集合",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F06"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B03",
+      "scenario": "分派給同事",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F06"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B04",
+      "scenario": "owner失效",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F06"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B05",
+      "scenario": "建立研究回應遺失",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F08"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-11",
+        "C61-19"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B06",
+      "scenario": "研究雙擊",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F08"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-11",
+        "C61-19"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B07",
+      "scenario": "混合逐列結果",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F06"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B08",
+      "scenario": "只重試失敗",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F06"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B09",
+      "scenario": "取消及中途崩潰",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F06"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B10",
+      "scenario": "Operations結果ID",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F05"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B11",
+      "scenario": "Operations結果第二頁",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F05"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B12",
+      "scenario": "慢網路輪詢",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F07"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B13",
+      "scenario": "隱藏頁及429",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F07"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B14",
+      "scenario": "1000/1001上限",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F11"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B15",
+      "scenario": "10k維護manifest",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F11"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "B16",
+      "scenario": "selection與scope切換",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F06"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "A01",
+      "scenario": "規則fit六案例",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-16",
+        "C61-17",
+        "C61-18",
+        "C61-24"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "A02",
+      "scenario": "tone及目的是否有效",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F09"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-22"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "A03",
+      "scenario": "真實gold set",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-16",
+        "C61-17",
+        "C61-18",
+        "C61-24"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "A04",
+      "scenario": "同名公司與子公司",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-16",
+        "C61-17",
+        "C61-18",
+        "C61-24"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "A05",
+      "scenario": "過期/矛盾來源",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-16",
+        "C61-17",
+        "C61-18",
+        "C61-24"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "A06",
+      "scenario": "引用及prompt injection",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-16",
+        "C61-17",
+        "C61-18",
+        "C61-24"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "A07",
+      "scenario": "雙語草稿與引用",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F09"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-22"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "A08",
+      "scenario": "Contact實際正確性",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-16",
+        "C61-17",
+        "C61-18",
+        "C61-24"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "P01",
+      "scenario": "HK冷暖端到端",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "P02",
+      "scenario": "API多actor負載",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "P03",
+      "scenario": "SQL及連線",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "P04",
+      "scenario": "Bulk流量前後比較",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F07"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "P05",
+      "scenario": "Worker公平性",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "P06",
+      "scenario": "UI核心指標",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "P07",
+      "scenario": "大量scope及名單",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "P08",
+      "scenario": "運行成本與idle",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-15",
+        "C61-19",
+        "C61-20",
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "S01",
+      "scenario": "JWT/JWKS行為",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F01"
+      ],
+      "implementation_tasks": [
+        "C61-10",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "S02",
+      "scenario": "fetch邊界",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-16",
+        "C61-24"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "S03",
+      "scenario": "provider未明結果帳本",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F08"
+      ],
+      "implementation_tasks": [
+        "C61-18",
+        "C61-19",
+        "C61-20"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "S04",
+      "scenario": "fixture不得正式啟用",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-08",
+        "C61-12",
+        "C61-15",
+        "C61-19",
+        "C61-20"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "S05",
+      "scenario": "跨服務gateway",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-08",
+        "C61-12",
+        "C61-15",
+        "C61-19",
+        "C61-20"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "S06",
+      "scenario": "租戶隔離與last-admin DB",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F04"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-09",
+        "C61-12",
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "R01",
+      "scenario": "部署對照",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F13"
+      ],
+      "implementation_tasks": [
+        "C61-01",
+        "C61-28",
+        "C61-29"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "R02",
+      "scenario": "runtime權限0036",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-13",
+        "C61-19",
+        "C61-20",
+        "C61-28",
+        "C61-29"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "R03",
+      "scenario": "outbox恢復與lease",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-13",
+        "C61-19",
+        "C61-20",
+        "C61-28",
+        "C61-29"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "R04",
+      "scenario": "restore及retention",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-13",
+        "C61-19",
+        "C61-20",
+        "C61-28",
+        "C61-29"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "R05",
+      "scenario": "單一現況文件",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F13"
+      ],
+      "implementation_tasks": [
+        "C61-01",
+        "C61-28",
+        "C61-29"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "R06",
+      "scenario": "告警及rollback",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-13",
+        "C61-19",
+        "C61-20",
+        "C61-28",
+        "C61-29"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U13",
+      "scenario": "Callback初始化不誤報",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F15"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-11"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U14",
+      "scenario": "Neon刷新／新分頁與deep link",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-11",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U15",
+      "scenario": "專案統計與列表同範圍",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F17"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-21"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "U16",
+      "scenario": "正式workspace讀取錯誤恢復",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F21"
+      ],
+      "implementation_tasks": [
+        "C61-04",
+        "C61-05"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "D01",
+      "scenario": "人工改稿至重新審批",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F16"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-22",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "D02",
+      "scenario": "Dirty稿件refresh不丟失",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F19"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-22",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "D03",
+      "scenario": "未覆核人工稿不得直接批准",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F16"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-22",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "P09",
+      "scenario": "Workspace查詢量基線",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F18"
+      ],
+      "implementation_tasks": [
+        "C61-06",
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "P10",
+      "scenario": "Workspace SQL分頁與租戶保護",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F18"
+      ],
+      "implementation_tasks": [
+        "C61-06",
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "WF01",
+      "scenario": "Offer部分保存與lost response",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F14"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "WF02",
+      "scenario": "過期Offer不得沿用舊ICP批准",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F14"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "WF03",
+      "scenario": "同一專案跨角色handoff",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F14",
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-26",
+        "C61-30"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA01",
+      "scenario": "SDK與輸出相容",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-07",
+        "C61-08"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA02",
+      "scenario": "環境設定不完整",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-08",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA03",
+      "scenario": "秘密不得進前端",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-08",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA04",
+      "scenario": "Email登入",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-07",
+        "C61-11",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA05",
+      "scenario": "Google登入",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-07",
+        "C61-11",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA06",
+      "scenario": "舊密碼帳戶onboarding",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-03",
+        "C61-09",
+        "C61-13"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA07",
+      "scenario": "保留使用者UUID",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-03",
+        "C61-09",
+        "C61-13"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA08",
+      "scenario": "同email不同身份",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-03",
+        "C61-09",
+        "C61-13"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA09",
+      "scenario": "映射冲突與重跑",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-03",
+        "C61-09",
+        "C61-13"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA10",
+      "scenario": "沒有membership",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-03",
+        "C61-11",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA11",
+      "scenario": "EdDSA成功",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-10",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA12",
+      "scenario": "issuer/audience/branch",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-10",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA13",
+      "scenario": "演算法混淆",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-10",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA14",
+      "scenario": "過期及claim型別",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-10",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA15",
+      "scenario": "key rotation與outage",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-10",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA16",
+      "scenario": "跨issuer相同kid",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-10",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA17",
+      "scenario": "reload恢復session",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-11",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA18",
+      "scenario": "token更新single-flight",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-11",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA19",
+      "scenario": "refresh與mutation重試",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-11",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA20",
+      "scenario": "跨tab登出",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-11",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA21",
+      "scenario": "cookie/Safari類路徑",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-11",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA22",
+      "scenario": "CSRF與callback",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-11",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA23",
+      "scenario": "returnTo open redirect",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-11",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA24",
+      "scenario": "撤回權限及identity",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-09",
+        "C61-10",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA25",
+      "scenario": "workspace roles真實來源",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-09",
+        "C61-10",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA26",
+      "scenario": "業務gateway及serviceauth",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-09",
+        "C61-10",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA27",
+      "scenario": "完整角色journey",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-12",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA28",
+      "scenario": "Neon-only退役",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-14"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA29",
+      "scenario": "rollback及Neon-only新戶",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-13",
+        "C61-14"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "NA30",
+      "scenario": "production前置readback",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-13",
+        "C61-14",
+        "C61-29"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-01",
+      "scenario": "登入及指定工作區",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F01"
+      ],
+      "implementation_tasks": [
+        "C61-03",
+        "C61-11",
+        "C61-26",
+        "C61-29"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-02",
+      "scenario": "Offer→ICP→真實research→buyers/evidence",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-16",
+        "C61-17",
+        "C61-18",
+        "C61-19",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-03",
+      "scenario": "真實goldset準確度",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F12"
+      ],
+      "implementation_tasks": [
+        "C61-16",
+        "C61-17",
+        "C61-18",
+        "C61-24"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-04",
+      "scenario": "研究POST已提交但回應遺失",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F08"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-11",
+        "C61-19"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-05",
+      "scenario": "10001／10000批量邊界與失敗重試",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F11"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-06",
+      "scenario": "改稿→來源重核→精確審批→下載",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F16",
+        "F19"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-22",
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-07",
+      "scenario": "目前寄送停用邊界",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-20",
+        "C61-26",
+        "C61-30"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-08",
+      "scenario": "外展後手動結果／修正歷史",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F14"
+      ],
+      "implementation_tasks": [
+        "C61-26"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-09",
+      "scenario": "角色／租戶／撤權負向測試",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F01",
+        "F04"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-03",
+        "C61-09",
+        "C61-12",
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-10",
+      "scenario": "Neon canonical身份映射不改歷史actor",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-09",
+        "C61-13"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-11",
+      "scenario": "Neon真實callback/session/token/API",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-07",
+        "C61-08",
+        "C61-10",
+        "C61-11",
+        "C61-12"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-12",
+      "scenario": "workspace discovery scaling",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F18"
+      ],
+      "implementation_tasks": [
+        "C61-06",
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-13",
+      "scenario": "員工日常五任務可用性",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F14"
+      ],
+      "implementation_tasks": [
+        "C61-23",
+        "C61-27"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-14",
+      "scenario": "八模組完整同一dataset驗收",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F01",
+        "F10",
+        "F14",
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-26",
+        "C61-30"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-15",
+      "scenario": "release SHA／CI／schema／production一致",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F13",
+        "F22"
+      ],
+      "implementation_tasks": [
+        "C61-01",
+        "C61-28",
+        "C61-29"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "O26-16",
+      "scenario": "將來站內寄送及狀態回傳",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-20",
+        "C61-30"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-01",
+      "scenario": "Pool 重用不可殘留 directory actor",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-06"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-02",
+      "scenario": "Identity 撤銷與 cache",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-09"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-03",
+      "scenario": "Refresh 與 mutation lost response 同時發生",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-11"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-04",
+      "scenario": "登出與晚到 callback／讀取競態",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-11"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-05",
+      "scenario": "Neon-only 新戶在rollback後仍可用",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-13"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-06",
+      "scenario": "抓取redirect與DNS重解析邊界",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-16"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-07",
+      "scenario": "研究完成前 Offer/ICP 變更",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-17"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-08",
+      "scenario": "Provider受理後worker崩潰",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-19"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-09",
+      "scenario": "Overview數量、列表與刷新時間一致",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-21"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-10",
+      "scenario": "Emoji/combining mark 文字分段",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-22"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-11",
+      "scenario": "TTL到期加部分成功重試",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-23"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-12",
+      "scenario": "Send timeout/政策撤銷防雙寄",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-20"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-13",
+      "scenario": "Webhook亂序／重複／偽造",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-20"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-14",
+      "scenario": "CI evidence不能混SHA或空跑",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-28"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-15",
+      "scenario": "錯誤診斷不漏機密",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-04"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "C61T-16",
+      "scenario": "完整站內寄送資料链及關閉gate",
+      "audit_current_result": "NOT_REEXECUTED_AS_INDIVIDUAL_ACCEPTANCE_CASE",
+      "audit_current_evidence": "E02;E03;E04",
+      "audit_current_note": "保留原 case；本次 CI suite／focused tests 不是此完整 user case 的逐項正式驗收。正式業務流程受 F23 阻擋。",
+      "finding_ids": [],
+      "implementation_tasks": [
+        "C61-30"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-01",
+      "scenario": "公開入口",
+      "audit_current_result": "PASS_LIVE",
+      "audit_current_evidence": "E02",
+      "audit_current_note": "Sign in 與 Language 可見",
+      "finding_ids": [
+        "F01"
+      ],
+      "implementation_tasks": [
+        "C61-03",
+        "C61-29"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-02",
+      "scenario": "既有帳戶 Auth0 登入",
+      "audit_current_result": "PASS_LIVE_AUTH_ONLY",
+      "audit_current_evidence": "E02",
+      "audit_current_note": "Sign out 與 Live workspace 可見；工作區另失敗",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-13",
+        "C61-32"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-03",
+      "scenario": "登入後工作區",
+      "audit_current_result": "FAIL_LIVE",
+      "audit_current_evidence": "E02;E03",
+      "audit_current_note": "500，request 0c64e2f6；42P01",
+      "finding_ids": [
+        "F23",
+        "F01"
+      ],
+      "implementation_tasks": [
+        "C61-31",
+        "C61-32"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-04",
+      "scenario": "工作區重試",
+      "audit_current_result": "FAIL_LIVE",
+      "audit_current_evidence": "E02;E03",
+      "audit_current_note": "相同錯誤，request b7aea690；42P01",
+      "finding_ids": [
+        "F23"
+      ],
+      "implementation_tasks": [
+        "C61-02",
+        "C61-32"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-05",
+      "scenario": "頁面重新整理 session 連續性",
+      "audit_current_result": "FAIL_LIVE_USABILITY",
+      "audit_current_evidence": "E02;E05",
+      "audit_current_note": "回到 Sign in，需再次按鈕",
+      "finding_ids": [
+        "F20",
+        "F15"
+      ],
+      "implementation_tasks": [
+        "C61-11"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-06",
+      "scenario": "既有 SSO 恢復",
+      "audit_current_result": "PASS_LIVE_AUTH_ONLY",
+      "audit_current_evidence": "E02",
+      "audit_current_note": "callback 成功；workspace 再失敗，request 6c8f86f0",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-11",
+        "C61-13"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-07",
+      "scenario": "工作區錯誤時繁中切換",
+      "audit_current_result": "PASS_LIVE",
+      "audit_current_evidence": "E02",
+      "audit_current_note": "翻譯成功；已恢復 English",
+      "finding_ids": [
+        "F02"
+      ],
+      "implementation_tasks": [
+        "C61-02"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-08",
+      "scenario": "登出",
+      "audit_current_result": "PASS_LIVE_VISIBLE_STATE",
+      "audit_current_evidence": "E02",
+      "audit_current_note": "Sign in 畫面；未另測跨 tab revocation",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-11"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-09",
+      "scenario": "複製診斷資料",
+      "audit_current_result": "INCONCLUSIVE",
+      "audit_current_evidence": "E02;E05",
+      "audit_current_note": "沒有回饋，cloud clipboard 為空；不能確定網站寫入失敗",
+      "finding_ids": [
+        "F01"
+      ],
+      "implementation_tasks": [
+        "C61-02"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-10",
+      "scenario": "正式 Neon 登入、refresh、logout",
+      "audit_current_result": "BLOCKED_NOT_ACTIVATED",
+      "audit_current_evidence": "E02;E07;E09",
+      "audit_current_note": "live 仍 Auth0；local 測試不可代替真實 Neon",
+      "finding_ids": [
+        "F20"
+      ],
+      "implementation_tasks": [
+        "C61-07",
+        "C61-08",
+        "C61-10",
+        "C61-11",
+        "C61-12",
+        "C61-13",
+        "C61-14"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-11",
+      "scenario": "正式 schema／role 身份 backfill",
+      "audit_current_result": "NOT_RUN_DB_READBACK",
+      "audit_current_evidence": "E03;E05",
+      "audit_current_note": "未連線讀取 DB；runtime relation 不存在",
+      "finding_ids": [
+        "F23"
+      ],
+      "implementation_tasks": [
+        "C61-31",
+        "C61-32",
+        "C61-33"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-12",
+      "scenario": "同一資料鏈研究至核准匯出",
+      "audit_current_result": "BLOCKED_AT_WORKSPACE",
+      "audit_current_evidence": "E02;E03;E05",
+      "audit_current_note": "未開始業務寫入；workspace 500",
+      "finding_ids": [
+        "F10",
+        "F23"
+      ],
+      "implementation_tasks": [
+        "C61-19",
+        "C61-26",
+        "C61-29",
+        "C61-32"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-13",
+      "scenario": "同一資料鏈站內寄送與 receipt",
+      "audit_current_result": "BLOCKED_NOT_ACTIVATED",
+      "audit_current_evidence": "E05",
+      "audit_current_note": "selected_delivery_authorization=None；沒寄信",
+      "finding_ids": [
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-20",
+        "C61-30"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-14",
+      "scenario": "跨租戶與降權負向驗收",
+      "audit_current_result": "NOT_RUN_LIVE",
+      "audit_current_evidence": "E04;E09",
+      "audit_current_note": "hosted／local evidence only，沒有正式多帳戶演練",
+      "finding_ids": [
+        "F20",
+        "F04"
+      ],
+      "implementation_tasks": [
+        "C61-03",
+        "C61-09",
+        "C61-12",
+        "C61-32"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-15",
+      "scenario": "正式成功請求效能與大批容量",
+      "audit_current_result": "NOT_MEASURED_LIVE",
+      "audit_current_evidence": "E04;E05",
+      "audit_current_note": "本次未做生產壓測；不能給正式 p95",
+      "finding_ids": [
+        "F12",
+        "F18"
+      ],
+      "implementation_tasks": [
+        "C61-06",
+        "C61-25"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-16",
+      "scenario": "真實搜尋及草稿準確度",
+      "audit_current_result": "NOT_MEASURED_LIVE",
+      "audit_current_evidence": "E09",
+      "audit_current_note": "沒有 real provider output；品質未知",
+      "finding_ids": [
+        "F12",
+        "F10"
+      ],
+      "implementation_tasks": [
+        "C61-24"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-17",
+      "scenario": "部署推廣相容性門檻",
+      "audit_current_result": "FAIL_OBSERVED_RELEASE_OUTCOME",
+      "audit_current_evidence": "E01;E03;E05",
+      "audit_current_note": "READY 早於完整CI，manifest false，正式 workspace42P01",
+      "finding_ids": [
+        "F24",
+        "F13"
+      ],
+      "implementation_tasks": [
+        "C61-28",
+        "C61-33"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    },
+    {
+      "case_id": "N11-18",
+      "scenario": "同版本 CI 證據",
+      "audit_current_result": "PASS_METADATA_SCOPE_ONLY",
+      "audit_current_evidence": "E01;E04",
+      "audit_current_note": "11 jobs success；API2525、worker246；built124/17/4，非live",
+      "finding_ids": [
+        "F22"
+      ],
+      "implementation_tasks": [
+        "C61-01",
+        "C61-28",
+        "C61-33"
+      ],
+      "execution_result": "not_run_by_this_plan",
+      "execution_evidence": []
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-11",
+  "origin": "https://buyer-os-nu.vercel.app",
+  "observations": [
+    "Anonymous / and /app show Sign in and a Language selector.",
+    "Sign in reaches Auth0 hosted login at dev-oaug20cdxqqgn1s8.us.auth0.com. User securely selected email login. Credentials were not read or retained.",
+    "Callback returns to /app. Sign out and Live workspace are visible, proving successful authentication only.",
+    "Workspace loading fails with request 0c64e2f6-0da5-4309-a34a-224c1c9dcf52. One Retry loading workspaces yields b7aea690-a1a4-4c58-b85e-27dc02a7e7c8 and same error.",
+    "Overview is available but no workspace data loads. Offer, Buyers, Results, Research runs, Drafts, Settings, Operations are disabled.",
+    "Reload returns to Sign in. Clicking it completes existing Auth0 SSO without another credential prompt and returns to the same workspace error; request 6c8f86f0-9e64-4d43-b02a-4f38bc3a0361. Only first two IDs were correlated with retained runtime diagnostics.",
+    "Copy diagnostics was clicked; UI provided no success/failure feedback and browser clipboard read was empty. Transfer success is inconclusive, not proven product clipboard failure.",
+    "Language changed to 繁體中文 while workspace loading failed. Navigation, error and request-ID label translated. Restored English.",
+    "Sign out returned to Sign in screen. This verifies visible logout only, not complete cross-tab token revocation.",
+    "No research, enrichment, export, approval, send, membership changes, production migration or external message was performed."
+  ],
+  "limitations": [
+    "No workspace membership data became available; this is not evidence of absent membership.",
+    "No real Neon session, Google login, registration, password reset, cross-tenant or mobile production workflow was exercised.",
+    "Browser screenshots inspected internally; not included in persisted evidence because screenshots were not explicitly requested as deliverables."
+  ]
+}
