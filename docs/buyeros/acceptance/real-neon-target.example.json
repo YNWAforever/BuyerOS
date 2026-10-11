@@ -1,0 +1,11 @@
+{
+  "schema": "buyeros.real-neon-target.v1",
+  "origin": null,
+  "rollback_origin": null,
+  "source_sha": null,
+  "rollback_source_sha": null,
+  "account_sha256": null,
+  "workspace_id": null,
+  "project_id": null,
+  "authorization_reference": null
+}
