@@ -44,7 +44,7 @@ def positive():
         admitted = [r for r in rows if r['created_ns'] <= start+second*1_000_000_000]
         samples.append(dict(at_ns=start+second*1_000_000_000,
                             spaces=[dict(workspace=s, ready=0, dispatched=0, done=sum(r['workspace']==s for r in admitted), failed=0, blocked=0, oldest_ready_seconds=None, oldest_dispatched_seconds=None) for s in spaces],
-                            broker=dict(queued=0, unacked=0), holds=copy.deepcopy(holds),
+                            broker=dict(queued=0, unacked=0, queued_task_ids=[], unacked_task_ids=[]), holds=copy.deepcopy(holds),
                             resources=[dict(owner_pid=p, pid=p, parent_pid=None, depth=0, rss_bytes=1_000_000, method='linux_proc_status_VmRSS') for p in (101, 102)]))
     publications = [dict(intent=r['intent'], workspace=r['workspace'], generation=1, task_id=r['task_id'], at_ns=r['publish_ns']) for r in rows]
     events = [dict(stage=stage, intent=r['intent'], workspace=r['workspace'], generation=1, task_id=r['task_id'], pid=101, at_ns=r[at], outcome='done') for r in rows for stage, at in [('started', 'start_ns'), ('return', 'return_ns')]]
@@ -138,3 +138,55 @@ def test_summarized_pass_requires_matching_raw_execution_and_durable_receipts(br
     elif breakage == 'bulk_owner_changed': next(x for x in r['durable'] if x['kind']=='bulk.mutate')['owner'] = 'foreign-user'
     elif breakage == 'source_object_retained': r['durable'][0]['object_key'] = 'still-retained'
     assert not validator(r)
+
+
+@pytest.mark.parametrize('breakage', ['broker_count_without_ids', 'foreign_broker_id',
+    'duplicate_broker_id', 'unreported_provider_call'])
+def test_broker_and_provider_counters_require_raw_denominators(breakage):
+    r=positive(); broker=r['samples'][50]['broker']
+    if breakage=='broker_count_without_ids': broker['queued']=1
+    elif breakage=='foreign_broker_id': broker.update(queued=1,queued_task_ids=['foreign-task'])
+    elif breakage=='duplicate_broker_id':
+        broker.update(queued=2,queued_task_ids=[r['observations'][0]['task_id']]*2)
+    elif breakage=='unreported_provider_call': r['events'].append(dict(stage='forbidden_provider_call',method='submit'))
+    assert not validator(r)
+
+
+def tool():
+    spec=importlib.util.spec_from_file_location('mixed_tool',ROOT/'scripts/benchmark-mixed-workload.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize('variable', ['BUYEROS_DATABASE_URL', 'BUYEROS_TEST_DATABASE_URL',
+    'DATABASE_URL', 'BUYEROS_WORKER_DATABASE_URL'])
+def test_mixed_runner_refuses_inherited_database_without_starting_child(monkeypatch,tmp_path,variable):
+    module=tool()
+    for key in module.DATABASE_VARIABLES: monkeypatch.delenv(key,raising=False)
+    monkeypatch.setenv(variable,'postgresql://private-target.invalid/unowned')
+    monkeypatch.setattr('sys.argv',['mixed','--output-dir',str(tmp_path/'never-created')])
+    monkeypatch.setattr(module.subprocess,'run',lambda *a,**k: pytest.fail('child must not start'))
+    with pytest.raises(SystemExit) as refused: module.main()
+    assert refused.value.code==2 and not (tmp_path/'never-created').exists()
+
+
+def test_mixed_runner_preserves_existing_evidence_before_starting_child(monkeypatch,tmp_path):
+    module=tool()
+    for key in module.DATABASE_VARIABLES: monkeypatch.delenv(key,raising=False)
+    (tmp_path/'receipt').write_bytes(b'original-evidence')
+    monkeypatch.setattr('sys.argv',['mixed','--output-dir',str(tmp_path)])
+    monkeypatch.setattr(module.subprocess,'run',lambda *a,**k: pytest.fail('child must not start'))
+    with pytest.raises(SystemExit) as refused: module.main()
+    assert refused.value.code==2 and (tmp_path/'receipt').read_bytes()==b'original-evidence'
+
+
+@pytest.mark.parametrize('change', ['none', 'head_changed', 'runtime_changed', 'missing_runtime'])
+def test_thirty_minute_capture_requires_unchanged_source_and_loaded_runtime_bytes(change):
+    module=tool()
+    before=dict(source_sha='original-head',source_dirty=True,tool_hashes={'worker.py':'original-bytes'})
+    after=copy.deepcopy(before)
+    if change=='head_changed': after['source_sha']='different-head'
+    elif change=='runtime_changed': after['tool_hashes']['worker.py']='different-bytes'
+    elif change=='missing_runtime': after['tool_hashes']={}
+    check=getattr(module,'source_capture_unchanged',lambda before,after: True)
+    assert check(before,after) is (change=='none')

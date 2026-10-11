@@ -57,6 +57,7 @@ def workload_complete(r):
         if any(len(items) != 1320 or len({x['intent'] for x in items}) != 1320 for items in (publications, terminal, durable)): return False
         pubs, final, results = ({x['intent']: x for x in items} for items in (publications, terminal, durable))
         task_events = [e for e in r['events'] if e['stage'] in ('started', 'return')]
+        if any(e['stage'] == 'forbidden_provider_call' for e in r['events']): return False
         if len(task_events) != 2640: return False
         event_index = {(e['stage'], e['task_id']): e for e in task_events}
         if len(event_index) != 2640: return False
@@ -85,6 +86,13 @@ def workload_complete(r):
         for sample in samples:
             if sample['holds'] != baseline: return False
             if any(not integer(sample['broker'][k]) for k in ('queued', 'unacked')): return False
+            ids=[]
+            for kind in ('queued', 'unacked'):
+                task_ids=sample['broker'][kind+'_task_ids']
+                if not isinstance(task_ids,list) or len(task_ids)!=sample['broker'][kind]: return False
+                ids.extend(task_ids)
+            published_ids={p['task_id'] for p in publications if p['at_ns']<=sample['at_ns']}
+            if len(ids)!=len(set(ids)) or not set(ids)<=published_ids: return False
             resource = sample['resources']
             if {s['owner_pid'] for s in resource} != owners: return False
             for owner in owners:

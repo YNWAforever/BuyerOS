@@ -1,0 +1,17 @@
+# C61-25 — owned10 workspace /30 minute nonpaid mixed capacity capture
+
+Run from repository root with frozen API/worker environments and Docker:
+
+```sh
+services/worker/.venv/bin/python scripts/benchmark-mixed-workload.py --output-dir artifacts/c61/new-mixed-run
+```
+
+The runner refuses every inherited database variable and any existing output directory. It discovers exactly one opt-in native test and requires the exact same positive, zero-failure/error/skip JUnit identities. There is no duration, wave or workspace override. The CI job budget covers setup, the actual1800s run, retained existing worker/broker/bulk cases and cleanup; production timeouts and quotas are unchanged.
+
+Two actual separate Celery solo workers execute the unchanged registered task, dispatcher, tenant transactions, retention and bulk handlers against owned disposable PG16/Valkey8.60 waves begin30s apart across10 workspaces. Each wave assigns one new buyer owner and tombstones one source in every workspace; tenant0 has three retention items. The frozen denominator is1320 unique generation1 intents:720 retention and600 bulk assignments. Half the retention sources include a test-only private-object delete; no object store/network/provider call occurs. Actor/membership records and bulk jobs are owned seeds, so this does not prove API admission, real identity sessions or the research chain.
+
+Every10s sample records all10 workspace SQL state counts including zero controls, oldest ready/dispatched created-at age, broker queued/unacked counts and RSS for both owned Popen trees. Per-intent publisher send-begin, worker task-entry and committed return timestamps are separately bound to the same task id, intent, workspace, generation and PID, then to original outbox ids/epoch1 and durable source/buyer/job results. Send-begin to task-entry includes producer enqueue overhead; it is not a transport-only dequeue measurement. SQL created-at age is not that wait distribution. RSS sampled maximum is not the all-time peak, PSS or cgroup limit; tree sums may double-count shared pages. Sampling readback cost is included in the workload window.
+
+One synthetic unknown and one synthetic accepted operation are seeded with original ids/keys/input hashes/ref and a shared active0.60USD hold. Every sample requires exact unchanged operations, reservation and zero cost events. They are never enqueued, resubmitted, status queried, settled or released by this workload or its cleanup. Paid/delivery dispatch remain disabled; no actual credentials, spending or sending is involved. The disposable DB fixture finally removes its whole owned container, rather than mutating liability state.
+
+The strict validator refuses omitted tenants/waves/samples/resources, rebound tasks, mismatched raw receipts, duplicate results, invalid units, queue denominators and any liability change. A valid capture is owned source evidence only: no adopted queue/memory/fleet SLO, no HK field latency, no actual provider acceptance, no human UAT and no G0/GN/GA/GS acceptance. Preserve baseline and all raw failed attempts; do not substitute prior325 tests,148-case inventory or93-operation definitions for new live evidence.
