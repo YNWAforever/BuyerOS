@@ -21,7 +21,7 @@ jobs:
           mkdir -p artifacts/repair
           services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_workspace_runtime_observations.py --collect-only -q > artifacts/repair/promotion-discovery.txt
           services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_workspace_runtime_observations.py -q --junitxml=artifacts/repair/promotion.xml
-          python scripts/check-required-tests.py --pytest-discovery artifacts/repair/promotion-discovery.txt --expected-count 74 --junit artifacts/repair/promotion.xml
+          python scripts/check-required-tests.py --pytest-discovery artifacts/repair/promotion-discovery.txt --expected-count 76 --junit artifacts/repair/promotion.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:

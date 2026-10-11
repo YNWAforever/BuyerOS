@@ -9,6 +9,8 @@ from unittest.mock import patch
 import tempfile
 from email.message import Message
 import urllib.error
+import sys
+import urllib.parse
 
 ROOT = Path(__file__).resolve().parents[1]
 TOKENS = {key: 'owned-fixture-token-' + key for key in ('owned', 'foreign', 'empty', 'revoked')}
@@ -27,7 +29,7 @@ def load():
 
 def packet():
     return {'schema': 'buyeros.workspace-api-target.v1', 'source_sha': 'a'*40,
-            'origin': 'https://owned-candidate.example.test', 'api_prefix': '/api/v1',
+            'origin': 'https://owned-candidate.example.test', 'api_prefix': '/v1',
             'authorization_reference_sha256': 'b'*64,
             'accounts': {key: {'workspace_id': workspace, 'project_id': project, 'roles': ['viewer']}
                          for key, workspace, project in [('owned', W1, P1), ('foreign', W2, P2)]},
@@ -46,9 +48,9 @@ class WorkspaceRuntimeObservationsTests(unittest.TestCase):
             (200, envelope({'items': [{'id': W1, 'roles': ['viewer']}], 'total': 1, 'offset': 0, 'limit': 100})),
             (200, envelope({'id': P1, 'workspace_id': W1, 'data_mode': 'live'})),
             (200, envelope({'items': [], 'total': 0, 'offset': 0, 'limit': 100})),
-            (404, {'error': {'code': 'NOT_FOUND'}, 'request_id': W1}),
-            (404, {'error': {'code': 'NOT_FOUND'}, 'request_id': W1}),
-            (404, {'error': {'code': 'NOT_FOUND'}, 'request_id': W1}),
+            (404, {'code': 'NOT_FOUND', 'message': 'workspace not found', 'request_id': W1, 'retryable': False}),
+            (404, {'code': 'NOT_FOUND', 'message': 'workspace not found', 'request_id': W1, 'retryable': False}),
+            (404, {'code': 'NOT_FOUND', 'message': 'workspace not found', 'request_id': W1, 'retryable': False}),
             (200, envelope({'id': P2, 'workspace_id': W2, 'data_mode': 'live'})),
         ]
 
@@ -166,6 +168,22 @@ class WorkspaceRuntimeObservationsTests(unittest.TestCase):
     def test_same_tenant_cannot_stand_for_foreign_control(self):
         self.packet['accounts']['foreign']['workspace_id'] = W1
         self.assert_blocked_before_http()
+
+    def test_reads_use_current_native_workspace_router_prefix(self):
+        sys.path.insert(0, str(ROOT/'services/api'))
+        from buyeros_api.api.routes.workspaces import router
+        self.collect()
+        self.assertEqual(urllib.parse.urlsplit(self.calls[0][0]).path, router.prefix)
+
+    def test_denials_use_current_native_error_body(self):
+        sys.path.insert(0, str(ROOT/'services/api'))
+        from starlette.requests import Request
+        from buyeros_api.api.errors import error_body
+        request = Request({'type': 'http', 'headers': []})
+        request.state.request_id = W1
+        for index in (3, 4, 5):
+            self.responses[index] = (404, error_body(request, code='NOT_FOUND', message='workspace not found'))
+        self.assertTrue(self.collect()['all_checks_passed'])
 
     def test_foreign_workspace_in_owned_directory_is_rejected(self):
         self.responses[0][1]['data']['items'].append({'id': W2, 'roles': ['viewer']})

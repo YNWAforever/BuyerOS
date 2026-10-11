@@ -38,7 +38,7 @@ def validate(packet, tokens, allowed_origin):
         if type(packet[key]) is not str or not re.fullmatch('[0-9a-f]{'+str(length)+'}', packet[key]):
             raise ValueError('missing reviewed source or authorization reference')
     origin = packet['origin']
-    if type(origin) is not str or origin != allowed_origin or packet['api_prefix'] != '/api/v1':
+    if type(origin) is not str or origin != allowed_origin or packet['api_prefix'] != '/v1':
         raise ValueError('origin or fixed read-only route scope mismatch')
     parsed = urllib.parse.urlsplit(origin)
     if (parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password
@@ -142,8 +142,10 @@ def collect(packet, tokens, allowed_origin, *, get=get_json):
         return (live(body) and body['data'].get('items') == [] and type(body['data'].get('total')) is int
                 and body['data']['total'] == 0 and body['data'].get('offset') == 0 and body['data'].get('limit') == 100)
     def denied(body):
-        return (type(body) is dict and type(body.get('error')) is dict
-                and body['error'].get('code') == 'NOT_FOUND' and 'data' not in body)
+        return (type(body) is dict and set(body) == {'code', 'message', 'request_id', 'retryable'}
+                and body['code'] == 'NOT_FOUND' and type(body['message']) is str
+                and type(body['request_id']) is str and re.fullmatch(r'[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}', body['request_id']) is not None
+                and body['retryable'] is False)
     observations = [
         ('owned_workspace_roles_response', 'owned', '/workspaces?offset=0&limit=100', 200, directory),
         ('owned_project_response', 'owned', project(owned), 200, lambda body: known_project(body, owned)),
