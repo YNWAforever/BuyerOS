@@ -17,10 +17,14 @@ from buyeros_worker.dispatcher import dispatch_cycle
 from buyeros_worker.engine import create_engine
 from tests.conftest import WS_A, WS_B, PROJECT_A, seed_outbox
 from tests.test_contact_uncertainty_db import _setup
-from tests.test_valkey_integration import _valkey_container
 from tests.worker_capacity_driver import sample_worker_resources, _owned_process_tree
 from tests.mixed_workload_driver import DURATION_NS, INTERVAL_NS, WAVES, workload_complete
 from tests.mixed_workload_cleanup import capture_then_cleanup
+from tests.mixed_timeout_probe import check_owned_timeout
+
+
+def test_owned_timeout_cleans_cooperative_and_stubborn_processes():
+    check_owned_timeout()
 
 
 def test_owned_ten_workspaces_thirty_minute_mixed_nonpaid(worker_database_url, pg_dsn, monkeypatch):
@@ -131,9 +135,8 @@ def test_owned_ten_workspaces_thirty_minute_mixed_nonpaid(worker_database_url, p
                 db.execute("INSERT INTO users(id,issuer,subject) VALUES(%s,'https://fixture.invalid/',%s)",(m['user'],'mixed|'+m['user']))
                 db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES(%s,%s,%s,'{workspace_admin}',true)",(m['id'],m['workspace'],m['user']))
             baseline=holds(db)
-        container=_valkey_container()
-        mapping=subprocess.check_output(['docker','port',container,'6379'],text=True).strip().splitlines()[0]
-        broker='redis://127.0.0.1:'+mapping.rsplit(':',1)[1]+'/0'
+        # Parent owns exact PG/Valkey container ids, including forced-timeout cleanup.
+        broker=os.environ['BUYEROS_MIXED_BROKER_URL']
         publisher=Celery('owned-mixed-publisher',broker=broker);client=redis.Redis.from_url(broker,socket_timeout=3)
         deadline=time.monotonic()+15
         while time.monotonic()<deadline:

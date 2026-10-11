@@ -190,3 +190,14 @@ def test_thirty_minute_capture_requires_unchanged_source_and_loaded_runtime_byte
     elif change=='missing_runtime': after['tool_hashes']={}
     check=getattr(module,'source_capture_unchanged',lambda before,after: True)
     assert check(before,after) is (change=='none')
+
+
+def test_runner_refuses_unsupported_native_platform_before_creating_targets(monkeypatch,tmp_path):
+    module=tool()
+    for key in module.DATABASE_VARIABLES:monkeypatch.delenv(key,raising=False)
+    monkeypatch.setattr(module,'native_linux_supported',lambda:False,raising=False)
+    folder=tmp_path/'never-created'
+    monkeypatch.setattr('sys.argv',['mixed','--output-dir',str(folder)])
+    monkeypatch.setattr(module.subprocess,'run',lambda *a,**k:pytest.fail('unsupported native runner started a child'))
+    with pytest.raises(SystemExit) as refused:module.main()
+    assert refused.value.code==2 and not folder.exists()
