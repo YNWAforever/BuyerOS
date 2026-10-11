@@ -109,15 +109,14 @@ async def inspect_schema(connection: AsyncConnection, expected: SchemaContract) 
                       and expected.target.database==metadata['database']
                       and expected.target.endpoint_sha256==endpoint)
         check('target_unproven_or_mismatched', target_match)
-        flags=(await connection.execute(text('SELECT rolsuper,rolbypassrls FROM pg_catalog.pg_roles WHERE rolname=current_user'))).one()
+        privileged=await scalar("SELECT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE pg_has_role(current_user,oid,'MEMBER') AND (rolsuper OR rolbypassrls OR rolcreatedb OR rolcreaterole OR rolreplication))")
         check('runtime_role_mismatch', metadata['role']==metadata['login']==expected.runtime_role_policy.role)
-        check('runtime_role_privileged', not flags[0] and not flags[1])
+        check('runtime_role_privileged', not privileged)
         version_oid=await scalar("SELECT to_regclass('public.alembic_version')::oid")
         readable=version_oid and await scalar("SELECT has_column_privilege(current_user,:oid,'version_num','SELECT')",{'oid':version_oid})
         if readable:
             heads=sorted((await connection.execute(text('SELECT version_num FROM public.alembic_version LIMIT 101'))).scalars().all())
         check('schema_head_unknown', bool(heads) and len(heads)==1 and heads[0] in expected.compatible_heads)
-        from alembic.config import Config
         from alembic.script import ScriptDirectory
         from pathlib import Path
         migrations=ScriptDirectory(str(Path(__file__).resolve().parents[2]/'alembic'))
@@ -126,6 +125,8 @@ async def inspect_schema(connection: AsyncConnection, expected: SchemaContract) 
         except Exception:
             ancestors=set()
         check('required_revision_unproven',set(expected.required_revisions)<=ancestors)
+        for schema in sorted({name.split('.')[0] for name in expected.required_relations}):
+            check('schema_usage_missing:'+schema,await scalar("SELECT has_schema_privilege(current_user,:schema,'USAGE')",{'schema':schema}))
         for name,columns in expected.required_relations.items():
             oid=await scalar('SELECT to_regclass(:name)::oid',{'name':name})
             check('relation_missing:'+name,oid is not None)
@@ -133,7 +134,6 @@ async def inspect_schema(connection: AsyncConnection, expected: SchemaContract) 
             check('relation_not_visible:'+name, await scalar('SELECT to_regclass(:short)::oid = :oid',{'short':name.split('.')[1],'oid':oid}) is True)
             actual=set((await connection.execute(text('SELECT attname FROM pg_catalog.pg_attribute WHERE attrelid=:oid AND attnum>0 AND NOT attisdropped'),{'oid':oid})).scalars().all())
             check('relation_columns_missing:'+name,set(columns)<=actual)
-            check('schema_usage_missing:'+name.split('.')[0],await scalar("SELECT has_schema_privilege(current_user,:schema,'USAGE')",{'schema':name.split('.')[0]}))
         for requirement in expected.required_privileges:
             oid=await scalar('SELECT to_regclass(:name)::oid',{'name':requirement.relation})
             allowed=bool(oid)

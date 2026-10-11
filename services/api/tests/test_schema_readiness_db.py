@@ -68,6 +68,19 @@ def test_expanded_compatible_schema_is_allowed(readiness_db):
     assert result.observed_heads == ['0050_c61_delivery_authorizations']
     assert result.blockers == []
 
+def test_runtime_receipt_has_unambiguous_checks_for_promotion(readiness_db):
+    result=inspect(readiness_db)
+    codes=[item.code for item in result.checks]
+    assert len(codes)==len(set(codes)), 'a valid runtime receipt cannot be rejected for repeated schema checks'
+
+def test_createdb_runtime_role_is_not_a_compatible_api_role(readiness_db):
+    with psycopg.connect(readiness_db) as owner:owner.execute('ALTER ROLE buyeros_api CREATEDB')
+    try:
+        result=inspect(readiness_db)
+        assert not result.compatible and 'runtime_role_privileged' in result.blockers
+    finally:
+        with psycopg.connect(readiness_db) as owner:owner.execute('ALTER ROLE buyeros_api NOCREATEDB')
+
 
 def test_missing_identity_relation_blocks_readiness(readiness_db):
     with psycopg.connect(readiness_db) as owner:
