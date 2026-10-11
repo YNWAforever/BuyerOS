@@ -11,8 +11,11 @@ from tests.test_external_runner_db import _setup,_capability
 from tests.test_discovery_runner_db import discovery_case,SearchFixture,INTENT,RUN_ID,WS_A as DISCOVERY_WS
 
 @pytest.fixture
-def pg_dsn():
+def pg_dsn(monkeypatch):
     # Each case owns an entire native cluster: no shared epoch/schema/reset.
+    # CI may supply a job database for the session-scoped worker suite.
+    # This function-scoped recovery fixture must still own a fresh cluster.
+    monkeypatch.delenv("BUYEROS_TEST_DATABASE_URL", raising=False)
     yield from base.pg_dsn.__wrapped__()
 
 @pytest.fixture

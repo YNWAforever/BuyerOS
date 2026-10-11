@@ -567,7 +567,7 @@ jobs:
         run: |
           uv run --frozen pytest tests/test_delivery_routing_db.py --collect-only -q > artifacts/c61-legacy-delivery-routing-discovery.txt
           python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-legacy-delivery-routing-discovery.txt').read_text(encoding='utf-8'); m=re.search(r'(\d+) tests? collected',text); names=[line for line in text.splitlines() if line.startswith('tests/test_delivery_routing_db.py::test_')]; assert m and int(m[1])==len(names)==len(set(names))==4 and all(name in text for name in ('test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[False-False]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[True-False]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[False-True]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[True-True]')), 'empty or missing required delivery discovery'"
-          uv run --frozen pytest tests/test_delivery_routing_db.py --junitxml=artifacts/c61-legacy-delivery-routing.xml
+          env -u BUYEROS_TEST_DATABASE_URL uv run --frozen pytest tests/test_delivery_routing_db.py --junitxml=artifacts/c61-legacy-delivery-routing.xml
           python ../../scripts/check-required-tests.py --junit artifacts/c61-legacy-delivery-routing.xml
           python -c "import xml.etree.ElementTree as E; cases=list(E.parse('artifacts/c61-legacy-delivery-routing.xml').getroot().iter('testcase')); names=[c.get('name') for c in cases]; assert len(cases)==len(set(names))==4 and all(any(item==name or item.startswith(name+'[') for item in names) for name in ('test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[False-False]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[True-False]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[False-True]', 'test_legacy_delivery_intent_never_resolves_contact_or_releases_original_hold[True-True]')), 'missing or duplicate delivery execution'"
 
@@ -837,27 +837,29 @@ jobs:
           cp -r test-results/. artifacts/ci-t30/workbench/
       - name: Verify native buyers discovery before execution
         run: |
-          mkdir -p test-results
-          pnpm exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --workers=1 --list --reporter=json > test-results/buyers-discovery.json
-          python scripts/check-required-tests.py --playwright-discovery test-results/buyers-discovery.json --expected-count 1 --expected-file buyer-results.spec.ts --discovery-only
+          mkdir -p test-results artifacts/c61
+          pnpm exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --workers=1 --list --reporter=json > artifacts/c61/buyers-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/buyers-discovery.json --expected-count 1 --expected-file buyer-results.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-results.spec.ts --workers=1 --reporter=line,junit
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/buyers.xml
       - run: |
-          python scripts/check-required-tests.py --playwright-discovery test-results/buyers-discovery.json --expected-count 1 --expected-file buyer-results.spec.ts --junit test-results/buyers.xml
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/buyers-discovery.json --expected-count 1 --expected-file buyer-results.spec.ts --junit test-results/buyers.xml
           mkdir -p artifacts/ci-t30/buyers
+          cp artifacts/c61/buyers-discovery.json artifacts/ci-t30/buyers/discovery.json
           cp -r test-results/. artifacts/ci-t30/buyers/
       - name: Verify native buyer-management discovery before execution
         run: |
-          mkdir -p test-results
-          pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --list --reporter=json > test-results/buyer-management-discovery.json
-          python scripts/check-required-tests.py --playwright-discovery test-results/buyer-management-discovery.json --expected-count 3 --expected-file buyer-management.spec.ts --discovery-only
+          mkdir -p test-results artifacts/c61
+          pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --list --reporter=json > artifacts/c61/buyer-management-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/buyer-management-discovery.json --expected-count 3 --expected-file buyer-management.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --reporter=line,junit
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/buyer-management.xml
       - run: |
-          python scripts/check-required-tests.py --playwright-discovery test-results/buyer-management-discovery.json --expected-count 3 --expected-file buyer-management.spec.ts --junit test-results/buyer-management.xml
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/buyer-management-discovery.json --expected-count 3 --expected-file buyer-management.spec.ts --junit test-results/buyer-management.xml
           mkdir -p artifacts/ci-t30/buyer-management
+          cp artifacts/c61/buyer-management-discovery.json artifacts/ci-t30/buyer-management/discovery.json
           cp -r test-results/. artifacts/ci-t30/buyer-management/
       - name: Verify native journey discovery before execution
         run: |
