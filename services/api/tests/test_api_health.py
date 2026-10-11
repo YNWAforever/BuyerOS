@@ -65,3 +65,25 @@ def test_capabilities_never_become_ready_from_an_unverified_env_value(monkeypatc
     monkeypatch.setenv("BUYEROS_RESEARCH_PROVIDER_KEY", "fixture-only")
     page = capabilities_payload()
     assert next(x for x in page["items"] if x["name"] == "research")["status"] == "unconfigured"
+
+def test_selected_but_invalid_provider_reports_its_current_blockers(monkeypatch):
+    from buyeros_api.providers import registry
+    from tests.test_provider_registry import fixture_registry
+    selected,_=fixture_registry()
+    monkeypatch.setattr(registry,'DEFAULT_REGISTRY',selected)
+    research=next(x for x in capabilities_payload()['items'] if x['name']=='research')
+    assert research['status']=='blocked'
+    assert set(research['reason_codes'])=={'FIXTURE_IN_PRODUCTION','PROVIDER_UNSELECTED'}
+    assert research['billable'] is False
+
+def test_capability_ready_state_uses_registry_without_starting_work(monkeypatch):
+    from buyeros_api.providers import registry
+    reads=[]
+    def readiness(service,*,environment):
+        reads.append((service,environment))
+        return {'status':'ready','reason_codes':[],'actions':[]}
+    monkeypatch.setattr(registry,'provider_readiness',readiness)
+    items=capabilities_payload()['items']
+    assert all(item['status']=='ready' and item['reason_codes']==[] for item in items[:3])
+    assert all(item['status']=='disabled' for item in items[3:])
+    assert reads==[('search','production'),('contact','production'),('model','production')]

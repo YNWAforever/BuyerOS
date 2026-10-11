@@ -31,21 +31,26 @@ def readiness_payload(*, database: str = "unavailable", queue: str = "unavailabl
 
 
 def capabilities_payload() -> dict:
-    """Contract `CapabilityPage` shape; live providers stay disabled in this phase."""
+    """Report reviewed registry state without resolving an adapter or starting work."""
     from ...providers.registry import provider_readiness
 
     now = _now()
     provider_services = {"research": "search", "contact_enrichment": "contact", "draft_generation": "model"}
-    items = [
-        {
+    items = []
+    for name in CAPABILITY_NAMES:
+        state = provider_readiness(provider_services[name], environment="production") if name in provider_services else {
+            "status":"disabled", "reason_codes":["CAPABILITY_DISABLED"],
+        }
+        # No selection is configuration missing; selected contracts expose their
+        # current blockers. Credentials never change the registry's decision.
+        status = "unconfigured" if state["reason_codes"] == ["PROVIDER_UNSELECTED"] else state["status"]
+        items.append({
             "name": name,
-            "status": "disabled" if name in {"mailbox", "crm"} else "unconfigured",
-            "reason_codes": ["live_providers_not_activated"] + (provider_readiness(provider_services[name], environment="production")["reason_codes"] if name in provider_services else []),
+            "status": status,
+            "reason_codes": state["reason_codes"],
             "checked_at": now,
             "billable": False,
-        }
-        for name in CAPABILITY_NAMES
-    ]
+        })
     return {"items": items, "offset": 0, "limit": len(items), "total": len(items)}
 
 
