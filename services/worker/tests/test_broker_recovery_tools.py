@@ -50,15 +50,15 @@ def receipts():
             snapshots += [dict(label='epoch_denied', outbox=outbox, selector_epoch=2,
                                provider=dict(id='p1', intent='provider-key', status='accepted', ref='fixture:one'),
                                reservation=dict(id='r1', state='active', remaining='0.300000'), costs=[]),
-                          dict(label='pending', outbox=outbox,
+                          dict(label='pending', outbox=outbox, selector_epoch=1,
                                provider=dict(id='p1', intent='provider-key', status='accepted', ref='fixture:one'),
                                reservation=dict(id='r1', state='active', remaining='0.300000'), costs=[]),
-                          dict(label='settled', outbox=outbox,
+                          dict(label='settled', outbox=outbox, selector_epoch=3,
                                provider=dict(id='p1', intent='provider-key', status='not_found', ref='fixture:one'),
                                reservation=dict(id='r1', state='settled', remaining='0.000000'), costs=['0.100000'])]
             events += [dict(stage='return', pid=202, task_id='old-epoch', generation=1, intent='reconcile', outcome='stale'),
-                       dict(stage='status', pid=202, ref='fixture:one', outcome='accepted'),
-                       dict(stage='status', pid=202, ref='fixture:one', outcome='not_found')]
+                       dict(stage='status', pid=202, ref='fixture:one', outcome='accepted', runtime_epoch=1),
+                       dict(stage='status', pid=202, ref='fixture:one', outcome='not_found', runtime_epoch=3)]
         captures.append(dict(name=name, complete=True, live_verified=False, release_accepted=False,
                              role=dict(name='runtime', superuser=False, bypass=False, owner='migration', rls=True),
                              owned_workers=[dict(popen_pid=101, tree_pids=[101]),dict(popen_pid=202,tree_pids=[202])],
@@ -75,7 +75,7 @@ def test_complete_recovery_requires_all_four_positive_owned_controls():
 @pytest.mark.parametrize('breakage', ['missing-case','duplicate-case','no-redelivery','wrong-task',
                                      'unowned-pid','no-unacked','missing-kill','unexpired','old-finalizer',
                                      'second-submit','released-unknown','changed-operation','status-submit',
-                                     'missing-status','epoch-not-denied','double-cost','cost-after-duplicate','privileged','live'])
+                                     'missing-status','epoch-not-denied','selector-regression','double-cost','cost-after-duplicate','privileged','live'])
 def test_incomplete_recovery_never_earns_source_acceptance(breakage):
     data=copy.deepcopy(receipts())
     if breakage=='missing-case':data.pop()
@@ -93,6 +93,7 @@ def test_incomplete_recovery_never_earns_source_acceptance(breakage):
     elif breakage=='status-submit':data[3]['events'].append(dict(stage='submit',pid=202,intent='new-key'))
     elif breakage=='missing-status':data[3]['events']=[e for e in data[3]['events'] if e['stage']!='status']
     elif breakage=='epoch-not-denied':data[3]['events'][-3]['outcome']='accepted'
+    elif breakage=='selector-regression':data[3]['snapshots'][-1]['selector_epoch']=1
     elif breakage=='double-cost':data[3]['snapshots'][-1]['costs']=['0.100000','0.100000']
     elif breakage=='cost-after-duplicate':
         extra=copy.deepcopy(data[3]['snapshots'][-1]);extra['label']='settled_duplicate'

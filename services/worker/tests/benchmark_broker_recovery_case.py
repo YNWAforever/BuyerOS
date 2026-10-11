@@ -171,27 +171,30 @@ def test_owned_broker_recovery(name, worker_database_url, pg_dsn, monkeypatch):
         if name=='unknown':
             assert final['provider']['status']=='unknown' and final['provider']['ref'] is None
         if name=='accepted':
-            # Claim the persisted status intent without publishing, then prove
-            # the original epoch is fenced. Owner writes only seed this fixture.
+            # Status at the original epoch is nonbillable and retains the hold.
             rec=f'contact.reconcile:{operation}'
             monkeypatch.setenv('BUYEROS_PAID_DISPATCH_ENABLED','false');get_settings.cache_clear()
             assert asyncio.run(claim(publish=False))[0]==[rec]
-            with psycopg.connect(pg_dsn,autocommit=True) as db:db.execute('UPDATE worker_runtime_control SET epoch=2 WHERE singleton=1')
-            send(rec,1,task_id='old-epoch')
-            wait(lambda:event('return',task_id='old-epoch',outcome='stale'))
-            snapshot('epoch_denied')
-            assert len([e for e in events() if e['stage']=='status'])==0
-            with psycopg.connect(pg_dsn,autocommit=True) as db:db.execute('UPDATE worker_runtime_control SET epoch=1 WHERE singleton=1')
             pending_id=send(rec,1)
             wait(lambda:event('return',task_id=pending_id,outcome='pending'))
             snapshot('pending')
+            with psycopg.connect(pg_dsn,autocommit=True) as db:db.execute("UPDATE outbox_events SET state='ready' WHERE intent_key=%s",(rec,))
+            assert asyncio.run(claim(publish=False))[0]==[rec]
+            with psycopg.connect(pg_dsn,autocommit=True) as db:db.execute('UPDATE worker_runtime_control SET epoch=2 WHERE singleton=1')
+            send(rec,2,task_id='old-epoch')
+            wait(lambda:event('return',task_id='old-epoch',outcome='stale'))
+            snapshot('epoch_denied')
+            assert len([e for e in events() if e['stage']=='status'])==1
+            # Compatible rollback advances the epoch; it never restores epoch1
+            # or relaxes enforce_worker_runtime_epoch, even in an owned fixture.
+            with psycopg.connect(pg_dsn,autocommit=True) as db:db.execute('UPDATE worker_runtime_control SET epoch=3 WHERE singleton=1')
             (folder/'authoritative-status').touch(exist_ok=False)
             with psycopg.connect(pg_dsn,autocommit=True) as db:db.execute("UPDATE outbox_events SET state='ready' WHERE intent_key=%s",(rec,))
             assert asyncio.run(claim())[0]==[rec]
-            wait(lambda:event('return',intent=rec,generation=2,outcome='reconciled'))
+            wait(lambda:event('return',intent=rec,generation=3,outcome='reconciled'))
             settled=snapshot('settled')
             assert settled['reservation']['state']=='settled' and settled['costs']==['0.100000']
-            duplicate_id=send(rec,2)
+            duplicate_id=send(rec,3)
             wait(lambda:event('return',task_id=duplicate_id,outcome='duplicate'))
             assert snapshot('settled_duplicate')['costs']==['0.100000']
         if job:
@@ -218,6 +221,5 @@ def test_owned_broker_recovery(name, worker_database_url, pg_dsn, monkeypatch):
         get_settings.cache_clear()
         if container:subprocess.run(['docker','rm','-f',container],capture_output=True,timeout=20)
         with psycopg.connect(pg_dsn,autocommit=True) as db:
-            db.execute('UPDATE worker_runtime_control SET epoch=1 WHERE singleton=1')
             if source:
                 db.execute('DELETE FROM outbox_events WHERE intent_key=%s',(key,));db.execute('DELETE FROM source_documents WHERE id=%s',(source,))

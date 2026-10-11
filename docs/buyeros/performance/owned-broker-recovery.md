@@ -24,7 +24,7 @@ controls. Failed attempts remain evidence and never earn a report PASS.
 | redelivery | Hard loss while private-object fixture IO is inflight, an actual unacked broker task, natural redelivery of the same task ID/generation to a different owned PID, one final outbox |
 | lease | Actual DB clock reaches the lease expiry, sweeper claims generation2, second worker completes, original still-running generation1 finalizer is stale |
 | unknown | Fixture acceptance followed by hard loss before finalization, natural broker redelivery, exactly one submit, same operation/key/reservation, unknown result and retained USD0.30 synthetic hold |
-| accepted | Accepted result committed before hard loss/ACK, duplicate broker delivery makes no submit, old selector epoch makes no status call, matching epoch polls status only; pending retains hold, authoritative synthetic USD0.10 settles once, duplicate causes no second cost |
+| accepted | Accepted result committed before hard loss/ACK, duplicate broker delivery makes no submit, original epoch1 status retains hold; selector2 rejects the old epoch, compatible owned rollback advances to3; authoritative synthetic USD0.10 settles once via status only, duplicate causes no second cost |
 
 Each case records owned launcher/interpreter identities, broker unacked IDs,
 actual Redis clock/visibility expiry, native consumer visibility/restore
@@ -34,7 +34,8 @@ snapshots preserve the actual states separately. A new producer app owns each
 disposable broker pool; these opaque-ID messages use the registered production
 consumer task. Owner seeding of a ready reconciliation intent and selector
 epochs is limited to disposable fixture data; it does not exercise API admission
-or real runtime promotion/rollback.
+or real runtime promotion/rollback. Fixture rollback respects the production
+monotonic epoch constraint; no teardown restores an older epoch.
 
 Crash cases compress the owned broker visibility to2s; lease uses120s to isolate
 the DB lease race from broker visibility. The broker's native restore scanning

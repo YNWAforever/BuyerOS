@@ -63,9 +63,11 @@ def main():
             return result
 
         async def status(self, ref):
+            from buyeros_api.execution.provider_context import active_execution
             settled=(folder/'authoritative-status').exists()
             outcome='not_found' if settled else 'accepted'
-            record(folder, 'status', ref=ref, outcome=outcome)
+            record(folder, 'status', ref=ref, outcome=outcome,
+                   runtime_epoch=active_execution.get().envelope.runtime_epoch)
             return StatusResult(outcome, ref, Decimal('0.100000') if settled else None,
                                 event_id='fixture-status-once' if settled else None)
 

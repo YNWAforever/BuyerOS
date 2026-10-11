@@ -77,9 +77,13 @@ def captures_complete(captures):
                     if denied['selector_epoch']!=2 or not any(e['stage']=='return' and e['task_id']=='old-epoch' and e['outcome']=='stale' for e in events):
                         return False
                     statuses=[e for e in events if e['stage']=='status']
-                    if [(e['ref'],e['outcome']) for e in statuses]!=[(ref,'accepted'),(ref,'not_found')]:
+                    if [(e['ref'],e['outcome'],e['runtime_epoch']) for e in statuses]!=[(ref,'accepted',1),(ref,'not_found',3)]:
                         return False
                     settled=snapshots['settled']
+                    if snapshots['pending']['selector_epoch']!=1 or settled['selector_epoch']!=3:
+                        return False
+                    if 'settled_duplicate' in snapshots and snapshots['settled_duplicate']['selector_epoch']!=3:
+                        return False
                     if settled['provider']['status']!='not_found' or settled['reservation']['state']!='settled' or Decimal(settled['reservation']['remaining'])!=0 or settled['costs']!=['0.100000']:
                         return False
         return True
