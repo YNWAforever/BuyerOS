@@ -61,13 +61,20 @@ class PlaywrightRequiredDiscoveryTests(unittest.TestCase):
   for command in [native,pre,original,post]:self.assertIn(command,body)
   self.assertLess(body.index(native),body.index(pre));self.assertLess(body.index(pre),body.index(original));self.assertLess(body.index(original),body.index(post));self.assertIn('artifacts/c61/ci-neon-session-native-discovery.json\n',body)
 
- def test_original_audit_discovers_history_with_all_previous_specs_and_requires124(self):
+ def test_original_audit_discovers_history_and_workspace_recovery_with_all128_cases(self):
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text(encoding='utf-8')
-  marker='--playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 124 --expected-file audit-delivery-history.spec.ts'
-  self.assertEqual(workflow.count(marker),2,'native original audit preflight and postgate must include all124 cases and history spec')
+  marker='--playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 128 --expected-file audit-delivery-history.spec.ts'
+  commands=[line for line in workflow.splitlines() if marker in line]
+  self.assertEqual(len(commands),2,'native audit preflight and postgate must include all128 cases')
+  retained_files=['audit-delivery-history.spec.ts','audit-access-revocation.spec.ts','audit-auth-entry.spec.ts','audit-bulk-confirmation.spec.ts','audit-bulk-manifest.spec.ts','audit-candidate-review.spec.ts','audit-daily-journey.spec.ts','audit-daily-ux.spec.ts','audit-draft-dirty.spec.ts','audit-draft-reground.spec.ts','audit-job-scope.spec.ts','audit-keyboard-workbench.spec.ts','audit-keyboard.spec.ts','audit-maintenance-settings.spec.ts','audit-memberships.spec.ts','audit-native-run-progress.spec.ts','audit-operations.spec.ts','audit-research-intent.spec.ts','audit-reviewed-list-order.spec.ts','audit-template-copy.spec.ts','work-queue-counts.spec.ts']
+  for command in commands:
+   for name in [*retained_files,'audit-workspace-recovery.spec.ts']:
+    self.assertIn('--expected-file '+name,command)
+  self.assertIn('--discovery-only',commands[0]);self.assertIn('--junit test-results/audit-fixes.xml',commands[1])
   config=(ROOT/'playwright.audit-fixes.config.ts').read_text(encoding='utf-8')
   self.assertIn("testMatch:['audit-*.spec.ts','work-queue-counts.spec.ts']",config)
   self.assertTrue((ROOT/'tests/e2e/audit-delivery-history.spec.ts').is_file())
+  self.assertTrue((ROOT/'tests/e2e/audit-workspace-recovery.spec.ts').is_file())
 
  def test_joined_authority_is_in_original_react_job_and_exact_discovery(self):
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text(encoding='utf-8')
