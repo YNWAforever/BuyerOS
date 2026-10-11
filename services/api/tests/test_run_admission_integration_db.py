@@ -157,3 +157,19 @@ def test_persisted_usage_survives_worker_restart(admission_case):
         counters, first = db.execute("SELECT usage_counters, first_dispatch_at FROM search_runs WHERE id=%s",
                                      (str(run_id),)).fetchone()
         assert counters["queries"] == 12 and first == start
+
+
+def test_lost_admission_response_replays_one_bounded_economic_intent(admission_case):
+    api, dsn = admission_case
+    lost = _post(api, key="audit-lost-202")
+    assert lost.status_code == 202
+    first_id = lost.json()["data"]["id"]
+    replay = _post(api, key="audit-lost-202")
+    assert replay.status_code == 202 and replay.json()["data"]["id"] == first_id
+    assert _count(dsn,"search_runs") == _count(dsn,"outbox_events") == 1
+    with psycopg.connect(dsn) as db:
+        ceiling = db.execute("SELECT count(*),min(approved_limit) FROM budget_accounts WHERE workspace_id=%s AND scope='run' AND scope_id=%s",(WORKSPACE_A,first_id)).fetchone()
+        assert ceiling[0] == 1 and str(ceiling[1]) == '2.000000'
+        # Admission records a ceiling, not a submitted provider operation or hold.
+        assert db.execute('SELECT count(*) FROM provider_operations WHERE workspace_id=%s',(WORKSPACE_A,)).fetchone()[0] == 0
+        assert db.execute('SELECT count(*) FROM budget_reservations WHERE workspace_id=%s',(WORKSPACE_A,)).fetchone()[0] == 0

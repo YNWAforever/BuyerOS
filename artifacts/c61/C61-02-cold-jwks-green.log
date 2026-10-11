@@ -1,0 +1,13 @@
+...................................................                      [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_auth_cache_lifecycle.py::test_revoked_membership_is_rechecked_on_next_request
+  C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\artifacts\c61\c61-cold-jwks-green.xml -
+51 passed, 2 warnings in 84.73s (0:01:24)

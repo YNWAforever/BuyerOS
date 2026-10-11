@@ -1,0 +1,183 @@
+{
+  "checked_at_utc": "2026-10-06T16:57:02.579499+00:00",
+  "pack_sha256": "1287550e1f3b9b6f0ce3f8d6fe96137edfca616502091d40007904d6dfa99d19",
+  "audit_sha256": "eaa797614dfa6baec8c91d92fe28a9a8c90bcdec9dcd96d0602ef8ec4c85262d",
+  "members": 75,
+  "manifest_matches": 74,
+  "original_case_count": 114,
+  "original_case_values_preserved": true,
+  "new_case_count": 16,
+  "task_count": 30,
+  "source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "tree_sha": "d2d8884564a78aad83e9cbd369deeff3b16c4dc3",
+  "remote_main": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "reviewed_head": "bbaf8ecd1f7ef755b89cdc29c8e01c505ad96442",
+  "reviewed_tree": "7c06894c7664aa15661b1a1249e85338c16ac2e9",
+  "ci_tree": null,
+  "merge_tree": "7c06894c7664aa15661b1a1249e85338c16ac2e9",
+  "historical_e07_ci_tree": "7c06894c7664aa15661b1a1249e85338c16ac2e9",
+  "source_drift": [
+    {
+      "path": "features/providers/workspace-session.tsx",
+      "baseline_status": "changed",
+      "reviewed_sha256": "4db66e4ffbb50c6ccb9c5379bf3e582c75f62bd34d8905f05a6e496ca24d96dd"
+    },
+    {
+      "path": "features/live/workspace-picker.tsx",
+      "baseline_status": "changed",
+      "reviewed_sha256": "dde46e787bc9cdc5010ecde3335141d6934646bb5c9c903267db05fa0551390a"
+    },
+    {
+      "path": "features/live/overview.tsx",
+      "baseline_status": "changed",
+      "reviewed_sha256": "1b653492971068e0de69dbe154d98751264985f51ad2c4d89e71b35a6fc063b1"
+    },
+    {
+      "path": "features/live/offer-wizard.tsx",
+      "baseline_status": "changed",
+      "reviewed_sha256": "2b88e005aafc8add9eeae08c0fc0eab0394999cd1f8f20811aa19288e6b2e185"
+    },
+    {
+      "path": "features/live/buyer-results.tsx",
+      "baseline_status": "changed",
+      "reviewed_sha256": "87ad6663b4c12134a9248fa364b0c79cd86c122e54b374ba74e30c4c8ca0613d"
+    },
+    {
+      "path": "features/live/results.tsx",
+      "baseline_status": "changed",
+      "reviewed_sha256": "b7894ade254cf1928f458463a23ed39b9b77bfa466d33118b7b0c472e4f6879a"
+    },
+    {
+      "path": "features/live/run-progress.tsx",
+      "baseline_status": "changed",
+      "reviewed_sha256": "f2b85e7399f8814cc3e51645200076c2f2dbfb9f7dfcfda104d46525a4ab71ed"
+    },
+    {
+      "path": "features/live/drafts.tsx",
+      "baseline_status": "changed",
+      "reviewed_sha256": "18b1a45b290073045a04cbbedcfa5c0bf6f55fd49d5e4163b88f2bd96085e91d"
+    },
+    {
+      "path": "features/live/draft-dirty-guard.tsx",
+      "baseline_status": "added",
+      "reviewed_sha256": "dde1c47ffa7d62109141b05714c529de5f2fdae00a5aca7cc5b9a1239b9999cb"
+    },
+    {
+      "path": "features/live/draft-grounding-review.tsx",
+      "baseline_status": "added",
+      "reviewed_sha256": "a8ad13353225634bf619a48570966d04a515c0f9b08eb4b5a1db237bd086c78d"
+    },
+    {
+      "path": "features/live/member-directory.tsx",
+      "baseline_status": "added",
+      "reviewed_sha256": "6ade562db088561d3508cefaac556e09950b770f0d0cf7fd382e0360b65eab2a"
+    },
+    {
+      "path": "features/live/settings.tsx",
+      "baseline_status": "changed",
+      "reviewed_sha256": "a74f49c9fad7aa0a85aebc0d970d236514e9947e19b17534bbe3f4df46a3001e"
+    },
+    {
+      "path": "features/live/operations.tsx",
+      "baseline_status": "changed",
+      "reviewed_sha256": "3b0560506807267193430d2bb80a11373c07ba9f0ffb7e3780253317a5011a35"
+    },
+    {
+      "path": "features/live/bulk-actions.tsx",
+      "baseline_status": "changed",
+      "reviewed_sha256": "162f244f9cabae04c71cd4dc786505eaf3efae2b3b95ada2e1c4983fa398c3b1"
+    },
+    {
+      "path": "features/live/bulk-manifest.tsx",
+      "baseline_status": "added",
+      "reviewed_sha256": "c6ac25f525ae713962c77e25c0326a59f6180f9edb52afdb1e03fed4e6ccc8cd"
+    },
+    {
+      "path": "services/live/runs.ts",
+      "baseline_status": "changed",
+      "reviewed_sha256": "1f7ca9885c55d48c007098e653fb50857a3378a1f4d82e61aaced65e0d033be5"
+    },
+    {
+      "path": "services/live/job-poller.ts",
+      "baseline_status": "added",
+      "reviewed_sha256": "f6f5da4a51a0701c135ec72ef26f44e0fa0fda46a341c4e8c20495f48a26ae21"
+    },
+    {
+      "path": "services/live/job-query.ts",
+      "baseline_status": "added",
+      "reviewed_sha256": "2fd5ddc1273b4be07764ead8369fd43d55143835470f6d04eeb0a13cc34765ca"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/workspaces.py",
+      "baseline_status": "already-same",
+      "reviewed_sha256": "d612aca141ccf9092106e03aa99334094f4b28b05990b1d831a5c6567fe7f34b"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/runs.py",
+      "baseline_status": "already-same",
+      "reviewed_sha256": "052d924a14dbb7fb4712944efc6ca340ea7d6dd96d59a67d5b58966c637028db"
+    },
+    {
+      "path": "services/api/buyeros_api/services/run_admission.py",
+      "baseline_status": "already-same",
+      "reviewed_sha256": "b56d0a37a962ddc406dae8ef9f5bd85592bc5f2a6f87a70a46cc6472f7ef8eb6"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/drafts.py",
+      "baseline_status": "changed",
+      "reviewed_sha256": "9a8be3d8fcc5f6be7ef9409aecbbca83057f6e2422f173e2a6cfb56b745d1eb5"
+    },
+    {
+      "path": "services/api/buyeros_api/services/draft_grounding.py",
+      "baseline_status": "added",
+      "reviewed_sha256": "7ce09ecb634a64cc1c64d5c78570643ceb053a77b35df4ee730f507d1f45ae1c"
+    },
+    {
+      "path": "services/api/buyeros_api/services/bulk_manifest.py",
+      "baseline_status": "added",
+      "reviewed_sha256": "84449aa6c4cfada456c6a41eda741377f15fa8b84bb28b5ae6e9921345cb7fa5"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/bulk_manifests.py",
+      "baseline_status": "added",
+      "reviewed_sha256": "cf32709cfe06a137bbdd45770c801a71fcf801ec39e577e86125f1492d77eb53"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/health.py",
+      "baseline_status": "changed",
+      "reviewed_sha256": "617cba20c589c73d2cc8dcda8a675c7c200c30edfadc949f86df1a48666c98fa"
+    },
+    {
+      "path": "services/api/buyeros_api/providers/base.py",
+      "baseline_status": "already-same",
+      "reviewed_sha256": "6245feaaada4c893ac4f223d703e2868950b796ccec68c98647b0a58fd357224"
+    },
+    {
+      "path": "services/api/buyeros_api/api/auth.py",
+      "baseline_status": "already-same",
+      "reviewed_sha256": "c56440501fa854ce41fa483788ad18262f4cc8ffd5a9cc81c6234cf1ddbe1f55"
+    },
+    {
+      "path": "services/api/buyeros_api/execution/handlers/capability_blocked.py",
+      "baseline_status": "already-same",
+      "reviewed_sha256": "a4246dcee6780de330d70f912c2bdc50b2b66ca9a85a0e0c04ed686b05ed2052"
+    },
+    {
+      "path": "services/api/buyeros_api/execution/handlers/draft_generate.py",
+      "baseline_status": "changed",
+      "reviewed_sha256": "a612e1ad618de46afaf47952a04abadaf421e0678d3fb2725fcdd50129b48759"
+    },
+    {
+      "path": "services/api/alembic/versions/0037_bulk_manifests.py",
+      "baseline_status": "added",
+      "reviewed_sha256": "1771f2c6d7c03ce5bba56491dd52d604421beacc33655d994b3efb6fd56c5b3e"
+    },
+    {
+      "path": "tests/e2e/fixtures/staff-journey.ts",
+      "baseline_status": "changed",
+      "reviewed_sha256": "82fb07854813a84a122d8f183c436e5c8e6babc62fb581000ab8bb2fedb9f85d"
+    }
+  ],
+  "external_readback_performed": false,
+  "signed_in_live_modules_completed": 0
+}

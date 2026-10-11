@@ -54,11 +54,16 @@ async def run_snapshot(session, run: SearchRun) -> dict:
               (BudgetAccount.workspace_id == BudgetReservation.workspace_id))
         .where(BudgetAccount.workspace_id == workspace_id, BudgetAccount.scope == "run",
                BudgetAccount.scope_id == run_id, BudgetReservation.state == "active"))).scalar_one()
+    from buyeros_api.execution.provider_context import pending_run_work
+    from .run_control import run_retryable
+    uncertain = await pending_run_work(session, workspace_id, run_id, uncertain_only=True)
+    status = ("awaiting_reconciliation" if uncertain and run.status in {"queued", "running"} else run.status)
     data = {
+        "retryable": await run_retryable(session, run), "reconciliation_pending": uncertain,
         "id": str(run.id), "workspace_id": str(workspace_id), "project_id": str(run.project_id),
         "icp_version_id": str(run.icp_version_id), "version": run.version,
         "created_at": run.created_at.isoformat(), "updated_at": run.updated_at.isoformat(),
-        "data_mode": "live", "status": run.status, "stage": run.stage,
+        "data_mode": "live", "status": status, "stage": run.stage,
         "target_companies": run.target_companies, "raw_count": run.raw_result_count, "company_count": int(companies),
         "assessed_count": int(assessed), "last_event_sequence": int(latest),
         "max_cost": _money(run.max_cost), "spent": _money(Decimal(spent)),

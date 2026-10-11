@@ -52,9 +52,9 @@ export async function saveSender(client:LiveClient,session:SessionScope,project:
     header:{'If-Match':`"${project.version}"`,'Idempotency-Key':crypto.randomUUID()},
     body:{sender_identity:sender}},ctx);
 }
-export async function listDrafts(client:LiveClient,session:SessionScope,offset:number,limit:number){
+export async function listDrafts(client:LiveClient,session:SessionScope,offset:number,limit:number,approval?:import('./work-queue').ApprovalFilter){
   const {api,ctx}=operation(client,session);
-  return api.requestOperation('listDrafts',{path:{workspace_id:ctx.workspace,project_id:ctx.project!},query:{offset,limit}},ctx);
+  return api.requestOperation('listDrafts',{path:{workspace_id:ctx.workspace,project_id:ctx.project!},query:{offset,limit,approval}},ctx);
 }
 export async function generateDraft(client:LiveClient,session:SessionScope,body:DraftRequest,key:string):Promise<DraftJob>{
   const {api,ctx}=operation(client,session);
@@ -95,4 +95,11 @@ export async function approveExactDraft(client:LiveClient,session:SessionScope,d
       recipient_contact_version:review.recipient.version,evidence_set_hash:draft.evidence_set_hash,
       icp_version_id:draft.icp_version_id,policy_decision_ids:review.policy_decision_ids,
       sender_identity_version:review.sender.version_key,confirmation:true}},ctx);
+}
+
+export async function reviewDraftGrounding(client:LiveClient,session:SessionScope,draft:Draft,
+ body:components['schemas']['DraftGroundingReviewRequest'],key:string):Promise<Draft>{
+ const {api,ctx}=operation(client,session);
+ return api.requestOperation('reviewDraftGrounding',{path:{workspace_id:ctx.workspace,draft_id:draft.id},
+  header:{'If-Match':`"${draft.version}"`,'Idempotency-Key':key},body},ctx);
 }

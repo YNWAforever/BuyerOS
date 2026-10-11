@@ -7,10 +7,10 @@ import {ActionIntent} from '@/services/live/action-intent';
 import {LiveOfferDocuments} from './offer-documents';
 import {LiveCancelled,LiveError,describeLiveError} from '@/services/live/client';
 import {emptyLiveOffer,offerFromProject,toIcpSaveRequest,toProjectCreate,validateLiveOffer} from '@/services/live/profile';
+import {readLatestProfile} from '@/services/live/profile-read';
 import {ProfileStepError,saveProfile} from '@/services/live/writes';
 
 type Project=components['schemas']['Project'];
-type ICP=components['schemas']['ICPVersion'];
 type Fact=components['schemas']['OfferFact'];
 type EditBase={id:string;version:number;offer_revision:number;latestIcpVersionId:string|null};
 const labels=['Your offer','Target buyers','Buyer requirements','Review and save'];
@@ -51,17 +51,8 @@ export function LiveOfferWizard({mode,projectId,onSaved,t}: {
       try{
         const token=session.token();
         const project=await client.request<Project>({path,token,scope:identity,signal});
-        const versions:ICP[]=[];
-        for(let offset=0;;){
-          const page=await client.request<{items:ICP[];offset:number;limit:number;total:number}>({path:`${path}/icp-versions?offset=${offset}&limit=100`,token,scope:identity,signal});
-          if(page.offset!==offset||page.limit<1||!Array.isArray(page.items))throw new Error('Invalid profile page');
-          versions.push(...page.items);
-          if(versions.length>=page.total)break;
-          if(!page.items.length)throw new Error('Incomplete profile history');
-          offset+=page.items.length;
-        }
+        const latest=await readLatestProfile(client,session,projectId,signal);
         if(!active||!session.isCurrent(identity))return;
-        const latest=versions.reduce<ICP|null>((best,row)=>!best||row.number>best.number?row:best,null);
         setOffer(offerFromProject(project,latest));
         setSelectedDocuments(latest?.offer_document_ids??[]);
         setDocumentFacts(Object.fromEntries((latest?.offer_facts??[])

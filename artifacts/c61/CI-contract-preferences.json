@@ -1,0 +1,25 @@
+{
+  "name": "CI-contract-preferences",
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_api_buyers.py",
+    "--junitxml=../../artifacts/c61/CI-contract-db.xml"
+  ],
+  "cwd": "services\\api",
+  "source_sha": "5765b8787218d64793c8934efacec4bf7ceaf5d3",
+  "tested_tree": "02a0a3bd814797fe0c8f6354efce5bcddfe4e81b",
+  "started_at_utc": "2026-10-06T17:11:39.266192+00:00",
+  "seconds": 9.717,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\CI-contract-preferences.log",
+  "tests": 8,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/CI-contract-db.xml"
+}

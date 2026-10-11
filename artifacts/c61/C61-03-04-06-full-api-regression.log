@@ -1,0 +1,59 @@
+........................................................................ [  8%]
+........................................................................ [ 16%]
+........................................................................ [ 25%]
+........................................................................ [ 33%]
+........................................................................ [ 41%]
+........................................................................ [ 50%]
+........................................................................ [ 58%]
+........................................................................ [ 66%]
+........................................................................ [ 75%]
+........................................................................ [ 83%]
+........................................................................ [ 91%]
+.......................................................................  [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_admin_operations_db.py: 3 warnings
+tests/test_api_projects_db.py: 3 warnings
+tests/test_backup_restore_t28.py: 1 warning
+tests/test_budget_atomicity_db.py: 3 warnings
+tests/test_bulk_jobs_db.py: 2 warnings
+tests/test_bulk_manifest_db.py: 3 warnings
+tests/test_buyer_management_db.py: 3 warnings
+tests/test_buyer_review_db.py: 3 warnings
+tests/test_checkpoint_schema_privileges_db.py: 3 warnings
+tests/test_cloudflare_bridge_db.py: 1 warning
+tests/test_cloudflare_local_steps_db.py: 1 warning
+tests/test_cloudflare_migration_db.py: 4 warnings
+tests/test_cloudflare_platform_db.py: 1 warning
+tests/test_cloudflare_preview_diagnostic.py: 1 warning
+tests/test_cloudflare_provider_steps_db.py: 1 warning
+tests/test_cloudflare_recovery_boundaries_db.py: 6 warnings
+tests/test_cloudflare_recovery_db.py: 1 warning
+tests/test_cloudflare_runtime_control_db.py: 1 warning
+tests/test_contact_job_migration.py: 5 warnings
+tests/test_contact_quote_migration.py: 4 warnings
+tests/test_draft_approval_migration.py: 4 warnings
+tests/test_draft_integrity_migration.py: 3 warnings
+tests/test_error_diagnostics.py: 1 warning
+tests/test_export_migration.py: 3 warnings
+tests/test_icp_write_integrity_db.py: 3 warnings
+tests/test_ingestion_migration.py: 4 warnings
+tests/test_outcome_migration.py: 3 warnings
+tests/test_policy_lifecycle_db.py: 3 warnings
+tests/test_project_constraints_db.py: 6 warnings
+tests/test_research_checkpoint_migration.py: 4 warnings
+tests/test_research_migration.py: 4 warnings
+tests/test_retention_authorization_db.py: 5 warnings
+tests/test_run_migration.py: 4 warnings
+tests/test_runtime_readiness_db.py: 1 warning
+tests/test_sender_identity_migration.py: 3 warnings
+tests/test_workspace_directory_function_db.py: 2 warnings
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-api-followup-regression.xml -
+863 passed, 104 warnings in 801.02s (0:13:21)

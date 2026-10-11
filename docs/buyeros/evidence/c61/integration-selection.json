@@ -1,0 +1,513 @@
+[
+  {
+    "group": "Q01",
+    "commit": "8251027ddcf781e5cae713da4190d32a77a81dbd",
+    "subject": "fix(Q01): recover locale and access during auth initialization",
+    "paths": [
+      "TASKS.json",
+      "app/auth/callback/page.tsx",
+      "docs/buyeros/CURRENT_STATUS.md",
+      "docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md",
+      "docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv",
+      "features/live/locale.ts",
+      "features/live/workspace-picker.tsx",
+      "features/providers/workspace-session.tsx",
+      "playwright.audit-fixes.config.ts",
+      "scripts/serve-audit-ui-fixture.mjs",
+      "tests/audit-auth-render.test.mjs",
+      "tests/e2e/audit-auth-entry.spec.ts",
+      "tests/e2e/audit-teardown.ts",
+      "tests/e2e/fixtures/workbench-auth.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q02",
+    "commit": "fb184819d038dc2ad56b7f1746362fe9b7a6089a",
+    "subject": "fix(Q02): paginate identifiable members and guard role reconciliation",
+    "paths": [
+      "docs/buyeros/contracts/openapi.proposed.yaml",
+      "docs/buyeros/decisions/2026-10-03-q02-directory-contract.md",
+      "docs/buyeros/remaining/API_OPERATION_STATUS.csv",
+      "docs/buyeros/runbooks/member-onboarding.md",
+      "features/live/locale.ts",
+      "features/live/member-directory.tsx",
+      "features/live/settings.tsx",
+      "services/api/buyeros_api/api/routes/buyers.py",
+      "services/api/buyeros_api/api/routes/memberships.py",
+      "services/api/buyeros_api/api/schemas.py",
+      "services/api/buyeros_api/services/bulk_service.py",
+      "services/api/buyeros_api/services/buyer_management.py",
+      "services/api/buyeros_api/services/membership_directory.py",
+      "services/api/tests/test_membership_directory_db.py",
+      "services/generated/buyeros-api.ts",
+      "services/generated/operation-routes.ts",
+      "services/worker/tests/fixtures/audit_memberships.py",
+      "tests/audit-member-contract.test.mjs",
+      "tests/e2e/audit-memberships.spec.ts",
+      "tests/e2e/fixtures/workbench-auth.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q03",
+    "commit": "f5936cef6b363e3662c9b84c6153ea2c43f8117b",
+    "subject": "fix(Q03): paginate generated bulk job result IDs safely",
+    "paths": [
+      "TASKS.json",
+      "docs/buyeros/CURRENT_STATUS.md",
+      "docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md",
+      "docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv",
+      "features/live/locale.ts",
+      "features/live/operations.tsx",
+      "services/worker/tests/fixtures/audit_jobs.py",
+      "tests/e2e/audit-operations.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q04",
+    "commit": "fc8fae75dfd743feaf590e73a099443d23e34788",
+    "subject": "fix(Q04): retain research intent after committed response loss",
+    "paths": [
+      "TASKS.json",
+      "docs/buyeros/CURRENT_STATUS.md",
+      "docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md",
+      "docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv",
+      "features/live/locale.ts",
+      "features/live/run-progress.tsx",
+      "services/api/tests/test_run_admission_integration_db.py",
+      "services/live/runs.ts",
+      "services/worker/tests/fixtures/audit_intents.py",
+      "tests/audit-research-intent.test.mjs",
+      "tests/e2e/audit-research-intent.spec.ts",
+      "tests/e2e/fixtures/workbench-auth.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q05",
+    "commit": "4cd0f484814be7d4333ca265c9637de940d398fa",
+    "subject": "fix(Q05): bind bulk confirmation and reconcile frozen owner assignments",
+    "paths": [
+      "features/live/bulk-actions.tsx",
+      "features/live/buyer-results.tsx",
+      "services/api/tests/test_bulk_jobs_db.py",
+      "services/live/bulk-confirmation.ts",
+      "services/worker/tests/fixtures/audit_bulk.py",
+      "tests/audit-bulk-confirmation.test.mjs",
+      "tests/e2e/audit-bulk-confirmation.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q06",
+    "commit": "b3477e341c35807bcdcbb400edfed7cceaa46de4",
+    "subject": "fix(Q06): bound actor-scoped job progress polling",
+    "paths": [
+      "docs/buyeros/contracts/openapi.proposed.yaml",
+      "features/live/bulk-actions.tsx",
+      "features/live/buyer-results.tsx",
+      "features/live/operations.tsx",
+      "services/api/buyeros_api/api/deps.py",
+      "services/api/buyeros_api/api/routes/jobs.py",
+      "services/api/buyeros_api/services/bulk_service.py",
+      "services/api/tests/test_job_summary_db.py",
+      "services/generated/buyeros-api.ts",
+      "services/generated/operation-routes.ts",
+      "services/live/client.ts",
+      "services/live/job-poller.ts",
+      "services/worker/tests/fixtures/audit_jobs.py",
+      "tests/e2e/audit-operations.spec.ts",
+      "tests/fixtures/job-clock.mjs",
+      "tests/job-poller-checks.mjs",
+      "tests/job-poller-traffic.mjs"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q07",
+    "commit": "a2696e1a317342a64c9b9b29b0585ae8ddff54bf",
+    "subject": "fix(Q07): align grounded draft controls with fixed template",
+    "paths": [
+      "docs/buyeros/03_DATA_API_AND_STATE_CONTRACTS.md",
+      "features/live/drafts.tsx",
+      "services/api/buyeros_api/execution/handlers/draft_generate.py",
+      "services/api/tests/test_draft.py",
+      "services/api/tests/test_draft_persistence_db.py",
+      "services/worker/tests/fixtures/audit_template.py",
+      "tests/e2e/audit-template-copy.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q08",
+    "commit": "c98fb6860ce2d4f9ba1797abe919454edcb13204",
+    "subject": "fix(bulk): freeze bounded actor-bound maintenance manifests (Q08)",
+    "paths": [
+      "app/globals.css",
+      "docs/buyeros/contracts/openapi.proposed.yaml",
+      "features/live/bulk-actions.tsx",
+      "features/live/bulk-manifest.tsx",
+      "features/live/buyer-results.tsx",
+      "services/api/alembic/versions/0037_bulk_manifests.py",
+      "services/api/buyeros_api/api/app.py",
+      "services/api/buyeros_api/api/deps.py",
+      "services/api/buyeros_api/api/routes/bulk_manifests.py",
+      "services/api/buyeros_api/api/schemas.py",
+      "services/api/buyeros_api/db/outbox.py",
+      "services/api/buyeros_api/services/bulk_manifest.py",
+      "services/api/buyeros_api/services/bulk_service.py",
+      "services/api/buyeros_api/services/buyer_selection.py",
+      "services/api/buyeros_api/services/worker_recovery.py",
+      "services/api/tests/test_admin_operations_db.py",
+      "services/api/tests/test_backup_restore_t28.py",
+      "services/api/tests/test_budget_atomicity_db.py",
+      "services/api/tests/test_bulk_jobs_db.py",
+      "services/api/tests/test_bulk_manifest_db.py",
+      "services/api/tests/test_buyer_management_db.py",
+      "services/api/tests/test_buyer_review_db.py",
+      "services/api/tests/test_checkpoint_schema_privileges_db.py",
+      "services/api/tests/test_cloudflare_migration_db.py",
+      "services/api/tests/test_cloudflare_recovery_boundaries_db.py",
+      "services/api/tests/test_contact_job_migration.py",
+      "services/api/tests/test_contact_quote_migration.py",
+      "services/api/tests/test_draft_approval_migration.py",
+      "services/api/tests/test_draft_integrity_migration.py",
+      "services/api/tests/test_export_migration.py",
+      "services/api/tests/test_outcome_migration.py",
+      "services/api/tests/test_policy_lifecycle_db.py",
+      "services/api/tests/test_project_constraints_db.py",
+      "services/api/tests/test_research_checkpoint_migration.py",
+      "services/api/tests/test_retention_authorization_db.py",
+      "services/api/tests/test_sender_identity_migration.py",
+      "services/generated/buyeros-api.ts",
+      "services/generated/operation-routes.ts",
+      "services/live/bulk-manifests.ts",
+      "services/worker/tests/fixtures/audit_manifests.py",
+      "tests/audit-bulk-manifests.test.mjs",
+      "tests/e2e/audit-bulk-manifest.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q09",
+    "commit": "85686a6608cca04a669dbf21156fdfd2d2af33e7",
+    "subject": "fix(buyeros): project outcome actor names from canonical IDs (Q09)",
+    "paths": [
+      "docs/buyeros/contracts/openapi.proposed.yaml",
+      "services/api/buyeros_api/api/routes/outcomes.py",
+      "services/api/buyeros_api/services/outcome_service.py",
+      "services/api/tests/test_daily_ux_db.py",
+      "services/generated/buyeros-api.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q09",
+    "commit": "3843623c934fba75a8a5bffe1db4175960444361",
+    "subject": "fix(buyeros): bound offer profile reads and retain stale review basis (Q09)",
+    "paths": [
+      "features/live/offer-wizard.tsx",
+      "features/live/profile.tsx",
+      "services/live/profile-read.ts",
+      "tests/audit-profile-read.test.mjs"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q09",
+    "commit": "35e859161536bc2f6726c8b713c8006ec01cc43a",
+    "subject": "fix(ui): prioritize selected buyers and human identities (Q09)",
+    "paths": [
+      "app/globals.css",
+      "features/live/bulk-actions.tsx",
+      "features/live/buyer-results.tsx",
+      "features/live/locale.ts",
+      "features/live/member-directory.tsx",
+      "features/live/results.tsx",
+      "tests/e2e/audit-bulk-confirmation.spec.ts",
+      "tests/e2e/audit-memberships.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q09",
+    "commit": "6e7335b2d341167ddbc6fdfbad08d789e5c8972e",
+    "subject": "fix(ui): compact scope and job progress panels (Q09)",
+    "paths": [
+      "features/live/operations.tsx",
+      "features/live/overview.tsx",
+      "features/live/run-progress.tsx",
+      "features/live/workspace-picker.tsx"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q09",
+    "commit": "1953d615dc00e6920380dbb71be6a99b96e36488",
+    "subject": "test(buyeros): verify daily staff journeys and owned fixture readiness (Q09)",
+    "paths": [
+      "playwright.audit-regression.config.ts",
+      "playwright.audit-responsive.config.ts",
+      "playwright.audit-zoom.config.ts",
+      "scripts/audit-demo-warmup.mjs",
+      "scripts/serve-audit-ui-fixture.mjs",
+      "tests/e2e/audit-daily-journey.spec.ts",
+      "tests/e2e/audit-daily-ux.spec.ts",
+      "tests/e2e/fixtures/staff-journey.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q09",
+    "commit": "f70501a174c641db65d06929ebd3b7e8b52ee3bb",
+    "subject": "test(Q09): verify five staff tasks with native keyboard input",
+    "paths": [
+      "playwright.audit-keyboard.config.ts",
+      "tests/e2e/audit-keyboard-workbench.spec.ts",
+      "tests/e2e/audit-keyboard.spec.ts",
+      "tests/e2e/fixtures/journey-input.ts",
+      "tests/e2e/fixtures/staff-journey.ts",
+      "tests/e2e/fixtures/workbench-auth.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q12",
+    "commit": "63d140b4b5d4636b1fe9125ec3885d1e69bbecb4",
+    "subject": "fix(drafts): bind manual source reviews to immutable revisions (Q12)",
+    "paths": [
+      "docs/buyeros/03_DATA_API_AND_STATE_CONTRACTS.md",
+      "docs/buyeros/contracts/openapi.proposed.yaml",
+      "services/api/buyeros_api/api/deps.py",
+      "services/api/buyeros_api/api/routes/drafts.py",
+      "services/api/buyeros_api/api/schemas.py",
+      "services/api/buyeros_api/services/approval_service.py",
+      "services/api/buyeros_api/services/draft_grounding.py",
+      "services/api/buyeros_api/services/draft_service.py",
+      "services/api/tests/test_manual_grounding_db.py",
+      "services/generated/buyeros-api.ts",
+      "services/generated/operation-routes.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q12",
+    "commit": "70d2e54ef613910ce5a684d90c4afce32f504e66",
+    "subject": "fix(ui): complete manual draft source review and approval journey (Q12)",
+    "paths": [
+      "features/live/draft-grounding-review.tsx",
+      "features/live/drafts.tsx",
+      "services/live/draft-grounding.ts",
+      "services/live/drafts.ts",
+      "tests/audit-draft-grounding.test.mjs",
+      "tests/e2e/audit-draft-reground.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q14",
+    "commit": "1aab3ddc0519bb6da8d1483efaf173eb5a87037e",
+    "subject": "fix(operations): align project job counts and scoped lists (Q14)",
+    "paths": [
+      "features/live/locale.ts",
+      "features/live/operations.tsx",
+      "features/live/overview.tsx",
+      "services/api/tests/test_job_scope_db.py",
+      "services/live/job-query.ts",
+      "services/worker/tests/fixtures/audit_job_scopes.py",
+      "tests/audit-job-query.test.mjs",
+      "tests/e2e/audit-job-scope.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q15",
+    "commit": "3efd1f3f97036e1988751d1dfb54d37d48d0929a",
+    "subject": "fix(Q15): guard dirty draft refresh and materialization",
+    "paths": [
+      "TASKS.json",
+      "docs/buyeros/CURRENT_STATUS.md",
+      "docs/buyeros/REMAINING_DEVELOPMENT_STATUS.md",
+      "docs/buyeros/remaining/AUDIT_FIX_CASE_STATUS_20261003.csv",
+      "features/live/draft-dirty-guard.tsx",
+      "features/live/drafts.tsx",
+      "services/worker/tests/fixtures/audit_drafts.py",
+      "tests/audit-draft-guard.test.mjs",
+      "tests/e2e/audit-draft-dirty.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "access-revocation",
+    "commit": "540696bc58c66ff75b3a8d95c283bc13dbef4328",
+    "subject": "fix(auth): recheck and clear revoked workspace scope (U05)",
+    "paths": [
+      "docs/superpowers/plans/2026-10-04-buyeros-u05-revocation.md",
+      "features/live/workspace-picker.tsx",
+      "services/live/client.ts",
+      "services/worker/tests/fixtures/audit_access_revocation.py",
+      "tests/audit-access-denial.test.mjs",
+      "tests/e2e/audit-access-revocation.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "access-revocation",
+    "commit": "25694d3b938e704e883f9915cf0604bbdbac1daf",
+    "subject": "fix(auth): reconcile denials during in-flight access checks",
+    "paths": [
+      "features/live/workspace-picker.tsx",
+      "tests/e2e/audit-access-revocation.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "fixture-cleanup",
+    "commit": "d7ab5b6323402adf139d9b94e4e499f1631006b4",
+    "subject": "test: verify configured fixture cleanup with owned containers",
+    "paths": [
+      "docs/superpowers/plans/2026-10-04-buyeros-local-verification-gates.md",
+      "tests/e2e-fixture-cleanup.test.mjs"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "CI-contract-preferences",
+    "commit": "546a03770b32430f9ff90b7ac21c00fa74dd2166",
+    "subject": "test(buyeros): reconcile audit CI contracts and preference persistence",
+    "paths": [
+      ".github/workflows/buyeros-ci.yml",
+      "docs/superpowers/plans/2026-10-06-q11-ci-audit-gates.md",
+      "playwright.workbench.config.ts",
+      "services/api/tests/test_api_buyers.py",
+      "tests/e2e/daily-workbench.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-02"
+  },
+  {
+    "group": "Q13",
+    "commit": "fa198ae533be3dc93eda73bc45331c2d80eb9540",
+    "subject": "fix(Q13): bound current-actor workspace discovery under RLS",
+    "paths": [
+      "services/api/alembic/versions/0038_workspace_discovery.py",
+      "services/api/buyeros_api/api/deps.py",
+      "services/api/buyeros_api/api/routes/workspaces.py",
+      "services/api/buyeros_api/db/models.py",
+      "services/api/buyeros_api/db/session.py",
+      "services/api/buyeros_api/services/worker_recovery.py",
+      "services/api/buyeros_api/services/workspace_directory.py",
+      "services/api/tests/benchmark_workspace_directory_case.py",
+      "services/api/tests/test_admin_operations_db.py",
+      "services/api/tests/test_backup_restore_t28.py",
+      "services/api/tests/test_budget_atomicity_db.py",
+      "services/api/tests/test_bulk_jobs_db.py",
+      "services/api/tests/test_bulk_manifest_db.py",
+      "services/api/tests/test_buyer_management_db.py",
+      "services/api/tests/test_checkpoint_schema_privileges_db.py",
+      "services/api/tests/test_cloudflare_migration_db.py",
+      "services/api/tests/test_cloudflare_recovery_boundaries_db.py",
+      "services/api/tests/test_contact_job_migration.py",
+      "services/api/tests/test_contact_quote_migration.py",
+      "services/api/tests/test_draft_approval_migration.py",
+      "services/api/tests/test_draft_integrity_migration.py",
+      "services/api/tests/test_export_migration.py",
+      "services/api/tests/test_outcome_migration.py",
+      "services/api/tests/test_policy_lifecycle_db.py",
+      "services/api/tests/test_project_constraints_db.py",
+      "services/api/tests/test_research_checkpoint_migration.py",
+      "services/api/tests/test_retention_authorization_db.py",
+      "services/api/tests/test_sender_identity_migration.py",
+      "services/api/tests/test_workspace_directory_migration_db.py",
+      "services/api/tests/test_workspace_directory_query_count.py",
+      "services/worker/tests/fixtures/audit_workspace_directory.py",
+      "tests/e2e/audit-workspace-directory.spec.ts"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-06"
+  },
+  {
+    "group": "Q10",
+    "commit": "7eb0ed557db61bc06cf7c0469c5fd6ea1eedebf0",
+    "subject": "feat(Q10): add offline goldset metrics and owned benchmark guards",
+    "paths": [
+      "docs/superpowers/plans/2026-10-04-buyeros-q10-local-quality-tools.md",
+      "scripts/benchmark-buyeros.py",
+      "services/api/tests/test_quality_tools.py",
+      "services/api/tools/evaluate_research_goldset.py",
+      "services/api/tools/quality_metrics.py"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-24/25"
+  },
+  {
+    "group": "Q10",
+    "commit": "fd97c906eb536846dccbfbaf1c6ffa42ab2f253c",
+    "subject": "test(Q10): capture owned directory scaling and retain failing budget",
+    "paths": [
+      "docs/buyeros/pilot/evaluation-protocol.md",
+      "docs/buyeros/runbooks/q10-local-quality-tools.md",
+      "scripts/benchmark-buyeros.py",
+      "scripts/benchmark-workspace-directory.py",
+      "services/api/tests/benchmark_workspace_directory_case.py",
+      "services/api/tests/test_quality_tools.py",
+      "services/api/tests/test_workspace_benchmark_tools.py",
+      "services/api/tools/quality_metrics.py"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-24/25"
+  },
+  {
+    "group": "Q10",
+    "commit": "ad4f4394819664484eb4b928bdd56c43e055fd3d",
+    "subject": "fix(Q10): admit only the verified directory actor scope",
+    "paths": [
+      "docs/buyeros/runbooks/q10-local-quality-tools.md",
+      "scripts/benchmark-workspace-directory.py",
+      "services/api/tests/benchmark_workspace_directory_case.py",
+      "services/api/tests/test_workspace_benchmark_tools.py"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-24/25"
+  },
+  {
+    "group": "Q11",
+    "commit": "5aaf6492ec10078e4f1a4fa5b17efd41c5673eba",
+    "subject": "fix(buyeros): show bounded capability responsibility and next steps",
+    "paths": [
+      "docs/buyeros/contracts/openapi.proposed.yaml",
+      "features/live/locale.ts",
+      "features/live/operations.tsx",
+      "services/api/buyeros_api/api/routes/health.py",
+      "services/api/tests/test_api_health.py",
+      "services/generated/buyeros-api.ts",
+      "tests/e2e/audit-readiness-guidance.spec.ts",
+      "tsconfig.json"
+    ],
+    "decision": "review/select source and tests; exclude historical generated evidence; verify before acceptance",
+    "task": "C61-15"
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "source_sha": "b43744336ce1ff499f503f25fca685bc3560839e",
+  "source_sha_after": "b43744336ce1ff499f503f25fca685bc3560839e",
+  "started_at_utc": "2026-10-06T20:33:36.792629+00:00",
+  "seconds": 18.486,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_staff_onboarding_db.py::test_onboarding_dry_run_no_write",
+    "tests/test_staff_onboarding_db.py::test_same_email_no_link",
+    "tests/test_staff_onboarding_db.py::test_conflict_no_escalation",
+    "tests/test_staff_onboarding_db.py::test_last_admin_survives",
+    "--junitxml=../../artifacts/c61/c61-onboarding-red.xml"
+  ],
+  "cwd": "services/api",
+  "exit_code": 1,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-03-focused-red.log",
+  "fresh_junit": true,
+  "tests": 4,
+  "failures": 4,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-onboarding-red.xml",
+  "required_gate_exit_code": 1
+}

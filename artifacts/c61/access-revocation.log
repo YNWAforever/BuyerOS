@@ -1,0 +1,12 @@
+✔ U05 request emits a scoped denial without changing its error or replaying (19.6044ms)
+✔ U05 requestContent emits a scoped denial without changing its error or replaying (0.7266ms)
+✔ U05 observer only requests membership checks for workspace-scoped 403/404 (2.5423ms)
+✔ U05 an already aborted response cannot trigger a current access check (0.4159ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 385.2337

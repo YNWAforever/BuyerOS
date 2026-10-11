@@ -1,0 +1,554 @@
+[
+  {
+    "group": "Q01",
+    "base_sha": "c2e24a1cf78269e7d4443355e0d628a6ede08d94",
+    "adopted_commits": [
+      "8251027"
+    ],
+    "commit": "f37527613ca473ed794a0c2a0f99a02aa88d6e12",
+    "test_record": {
+      "name": "Q01",
+      "command": [
+        "node",
+        "--test",
+        "tests/audit-auth-render.test.mjs"
+      ],
+      "cwd": ".",
+      "source_sha": "c2e24a1cf78269e7d4443355e0d628a6ede08d94",
+      "tested_tree": "3f9bd8f4e75707e654afabaa8d22e7da17634881",
+      "started_at_utc": "2026-10-06T17:01:35.301510+00:00",
+      "seconds": 2.887,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q01.log"
+    },
+    "observed_focused_counts": {
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  {
+    "group": "Q03",
+    "base_sha": "f37527613ca473ed794a0c2a0f99a02aa88d6e12",
+    "adopted_commits": [
+      "f5936ce"
+    ],
+    "commit": "650f25b5ca2ab1b8d96098d098629275b7b7eb7d",
+    "test_record": {
+      "name": "Q03",
+      "command": [
+        "node",
+        "tests/live-adapter-checks.mjs"
+      ],
+      "cwd": ".",
+      "source_sha": "f37527613ca473ed794a0c2a0f99a02aa88d6e12",
+      "tested_tree": "a7db2796f96f4179f2167b236404c2dadb19263a",
+      "started_at_utc": "2026-10-06T17:01:41.106840+00:00",
+      "seconds": 0.882,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q03.log"
+    },
+    "observed_focused_counts": {}
+  },
+  {
+    "group": "Q04",
+    "base_sha": "650f25b5ca2ab1b8d96098d098629275b7b7eb7d",
+    "adopted_commits": [
+      "fc8fae7"
+    ],
+    "commit": "a16990509e099a17ce26948c6a02cdca8e0ea2c8",
+    "test_record": {
+      "name": "Q04",
+      "command": [
+        "node",
+        "--test",
+        "tests/audit-research-intent.test.mjs"
+      ],
+      "cwd": ".",
+      "source_sha": "650f25b5ca2ab1b8d96098d098629275b7b7eb7d",
+      "tested_tree": "32b0cbb39e70388b4dbcc67e0007bdb43d30791d",
+      "started_at_utc": "2026-10-06T17:01:43.255889+00:00",
+      "seconds": 2.167,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q04.log"
+    },
+    "observed_focused_counts": {
+      "tests": 3,
+      "pass": 3,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  {
+    "group": "Q15",
+    "base_sha": "a16990509e099a17ce26948c6a02cdca8e0ea2c8",
+    "adopted_commits": [
+      "3efd1f3"
+    ],
+    "commit": "aa957aa683a37e7fcd0041392d87ba8580c38a62",
+    "test_record": {
+      "name": "Q15",
+      "command": [
+        "node",
+        "--test",
+        "tests/audit-draft-guard.test.mjs"
+      ],
+      "cwd": ".",
+      "source_sha": "a16990509e099a17ce26948c6a02cdca8e0ea2c8",
+      "tested_tree": "a65b453d76a91f394041b2bd42107d9bf76e38cc",
+      "started_at_utc": "2026-10-06T17:01:46.541125+00:00",
+      "seconds": 1.054,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q15.log"
+    },
+    "observed_focused_counts": {
+      "tests": 7,
+      "pass": 7,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  {
+    "group": "Q02",
+    "base_sha": "aa957aa683a37e7fcd0041392d87ba8580c38a62",
+    "adopted_commits": [
+      "fb18481"
+    ],
+    "commit": "c61ad8f5387af1c645e78eef546aef254a8eefea",
+    "test_record": {
+      "name": "Q02",
+      "command": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q",
+        "tests/test_membership_directory_db.py",
+        "--junitxml=../../artifacts/c61/Q02-db.xml"
+      ],
+      "cwd": "services\\api",
+      "source_sha": "aa957aa683a37e7fcd0041392d87ba8580c38a62",
+      "tested_tree": "fb2acdd20672487c60dcaa5310c37fee8fb70dc5",
+      "started_at_utc": "2026-10-06T17:01:48.955429+00:00",
+      "seconds": 62.093,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q02.log",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "artifacts/c61/Q02-db.xml"
+    },
+    "observed_focused_counts": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  {
+    "group": "Q05",
+    "base_sha": "c61ad8f5387af1c645e78eef546aef254a8eefea",
+    "adopted_commits": [
+      "4cd0f48"
+    ],
+    "commit": "3abd73aeb2d4000619ac80ee0a0b53de43c73034",
+    "test_record": {
+      "name": "Q05",
+      "command": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q",
+        "tests/test_bulk_jobs_db.py",
+        "--junitxml=../../artifacts/c61/Q05-db.xml"
+      ],
+      "cwd": "services\\api",
+      "source_sha": "c61ad8f5387af1c645e78eef546aef254a8eefea",
+      "tested_tree": "929d471dbd491cc8b301a05a98fb7e967042d3e5",
+      "started_at_utc": "2026-10-06T17:02:51.622209+00:00",
+      "seconds": 27.076,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q05.log",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "artifacts/c61/Q05-db.xml"
+    },
+    "observed_focused_counts": {
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  {
+    "group": "Q06",
+    "base_sha": "3abd73aeb2d4000619ac80ee0a0b53de43c73034",
+    "adopted_commits": [
+      "b3477e3"
+    ],
+    "commit": "dda5cfc8e0cbd5ca8975baabbea6800381bc8dee",
+    "test_record": {
+      "name": "Q06",
+      "command": [
+        "node",
+        "--test",
+        "tests/job-poller-checks.mjs"
+      ],
+      "cwd": ".",
+      "source_sha": "3abd73aeb2d4000619ac80ee0a0b53de43c73034",
+      "tested_tree": "dd8f4d09741391d35a91e16225f3f91455227265",
+      "started_at_utc": "2026-10-06T17:03:19.611540+00:00",
+      "seconds": 0.858,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q06.log"
+    },
+    "observed_focused_counts": {
+      "tests": 11,
+      "pass": 11,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  {
+    "group": "Q07",
+    "base_sha": "dda5cfc8e0cbd5ca8975baabbea6800381bc8dee",
+    "adopted_commits": [
+      "a2696e1"
+    ],
+    "commit": "16570ca3fdf09602a1c63514f7847785c4110011",
+    "test_record": {
+      "name": "Q07",
+      "command": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q",
+        "tests/test_draft.py",
+        "tests/test_draft_persistence_db.py",
+        "--junitxml=../../artifacts/c61/Q07-db.xml"
+      ],
+      "cwd": "services\\api",
+      "source_sha": "dda5cfc8e0cbd5ca8975baabbea6800381bc8dee",
+      "tested_tree": "14dd2614417aa343eda05a1ca1846840cd25b365",
+      "started_at_utc": "2026-10-06T17:03:21.501526+00:00",
+      "seconds": 31.59,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q07.log",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "artifacts/c61/Q07-db.xml"
+    },
+    "observed_focused_counts": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  {
+    "group": "Q12-api",
+    "base_sha": "16570ca3fdf09602a1c63514f7847785c4110011",
+    "adopted_commits": [
+      "63d140b"
+    ],
+    "commit": "14784296f4f174c605aea6d279d0ccc5fdc96ae4",
+    "test_record": {
+      "name": "Q12-api",
+      "command": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q",
+        "tests/test_manual_grounding_db.py",
+        "--junitxml=../../artifacts/c61/Q12-db.xml"
+      ],
+      "cwd": "services\\api",
+      "source_sha": "16570ca3fdf09602a1c63514f7847785c4110011",
+      "tested_tree": "5a28abcc0fdbf170619b33c132b5af965a0f0432",
+      "started_at_utc": "2026-10-06T17:03:55.592499+00:00",
+      "seconds": 151.278,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q12-api.log",
+      "tests": 31,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "artifacts/c61/Q12-db.xml"
+    },
+    "observed_focused_counts": {
+      "tests": 31,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  {
+    "group": "Q12-ui",
+    "base_sha": "14784296f4f174c605aea6d279d0ccc5fdc96ae4",
+    "adopted_commits": [
+      "70d2e54"
+    ],
+    "commit": "9615bd1b1afb29e19087173f9498d1a1bb699e95",
+    "test_record": {
+      "name": "Q12-ui",
+      "command": [
+        "node",
+        "--test",
+        "tests/audit-draft-grounding.test.mjs"
+      ],
+      "cwd": ".",
+      "source_sha": "14784296f4f174c605aea6d279d0ccc5fdc96ae4",
+      "tested_tree": "c45e935d56c3d3777f0f9c4fbf07c4d294a8094a",
+      "started_at_utc": "2026-10-06T17:06:27.591067+00:00",
+      "seconds": 1.401,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q12-ui.log"
+    },
+    "observed_focused_counts": {
+      "tests": 2,
+      "pass": 2,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  {
+    "group": "Q08",
+    "base_sha": "9615bd1b1afb29e19087173f9498d1a1bb699e95",
+    "adopted_commits": [
+      "c98fb68"
+    ],
+    "commit": "0ecd85021ba2c345507d9f5c36c900ec6b490c7e",
+    "test_record": {
+      "name": "Q08",
+      "command": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q",
+        "tests/test_bulk_manifest_db.py",
+        "--junitxml=../../artifacts/c61/Q08-db.xml"
+      ],
+      "cwd": "services\\api",
+      "source_sha": "9615bd1b1afb29e19087173f9498d1a1bb699e95",
+      "tested_tree": "3bfc60d4e29d347948e47e05db2f20c5471638bc",
+      "started_at_utc": "2026-10-06T17:06:30.018962+00:00",
+      "seconds": 124.349,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q08.log",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "artifacts/c61/Q08-db.xml"
+    },
+    "observed_focused_counts": {
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  {
+    "group": "Q14",
+    "base_sha": "0ecd85021ba2c345507d9f5c36c900ec6b490c7e",
+    "adopted_commits": [
+      "1aab3dd"
+    ],
+    "commit": "ecb2f2ccc742571dd7e260a8f373572513b5e0a1",
+    "test_record": {
+      "name": "Q14",
+      "command": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q",
+        "tests/test_job_scope_db.py",
+        "--junitxml=../../artifacts/c61/Q14-db.xml"
+      ],
+      "cwd": "services\\api",
+      "source_sha": "0ecd85021ba2c345507d9f5c36c900ec6b490c7e",
+      "tested_tree": "46b9b3df99b9fc3dca7192834e759b2357e7dbfe",
+      "started_at_utc": "2026-10-06T17:08:35.641531+00:00",
+      "seconds": 14.302,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q14.log",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "artifacts/c61/Q14-db.xml"
+    },
+    "observed_focused_counts": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  {
+    "group": "Q09-support",
+    "base_sha": "ecb2f2ccc742571dd7e260a8f373572513b5e0a1",
+    "adopted_commits": [
+      "85686a6",
+      "3843623",
+      "35e8591",
+      "6e7335b",
+      "1953d61",
+      "f70501a"
+    ],
+    "commit": "0f10c967a90b4fafa11536a5d07d0786ef856877",
+    "test_record": {
+      "name": "Q09-support",
+      "command": [
+        "node",
+        "--test",
+        "tests/audit-profile-read.test.mjs"
+      ],
+      "cwd": ".",
+      "source_sha": "ecb2f2ccc742571dd7e260a8f373572513b5e0a1",
+      "tested_tree": "9a6d9668c21013ee4122abf0100921c0fe5a1c5a",
+      "started_at_utc": "2026-10-06T17:08:52.711272+00:00",
+      "seconds": 0.664,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\Q09-support.log"
+    },
+    "observed_focused_counts": {
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  {
+    "group": "access-revocation",
+    "base_sha": "0f10c967a90b4fafa11536a5d07d0786ef856877",
+    "adopted_commits": [
+      "540696b",
+      "25694d3"
+    ],
+    "commit": "b250c269d50daa428f36487d18f48027a7723d64",
+    "test_record": {
+      "name": "access-revocation",
+      "command": [
+        "node",
+        "--test",
+        "tests/audit-access-denial.test.mjs"
+      ],
+      "cwd": ".",
+      "source_sha": "0f10c967a90b4fafa11536a5d07d0786ef856877",
+      "tested_tree": "fec1855e5eb3b5521859299a24267b2313b6e2c7",
+      "started_at_utc": "2026-10-06T17:08:54.036045+00:00",
+      "seconds": 0.744,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\access-revocation.log"
+    },
+    "observed_focused_counts": {
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  {
+    "group": "fixture-cleanup",
+    "base_sha": "b250c269d50daa428f36487d18f48027a7723d64",
+    "adopted_commits": [
+      "d7ab5b6"
+    ],
+    "commit": "5765b8787218d64793c8934efacec4bf7ceaf5d3",
+    "test_record": {
+      "name": "fixture-cleanup",
+      "command": [
+        "node",
+        "--test",
+        "tests/e2e-fixture-cleanup.test.mjs"
+      ],
+      "cwd": ".",
+      "source_sha": "b250c269d50daa428f36487d18f48027a7723d64",
+      "tested_tree": "1dcb210d4f8502c9770c2a27853bbaffc929f5f1",
+      "started_at_utc": "2026-10-06T17:10:30.955878+00:00",
+      "seconds": 67.437,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\fixture-cleanup.attempt2.log"
+    },
+    "observed_focused_counts": {
+      "tests": 24,
+      "pass": 24,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  {
+    "group": "CI-contract-preferences",
+    "base_sha": "5765b8787218d64793c8934efacec4bf7ceaf5d3",
+    "adopted_commits": [
+      "546a037"
+    ],
+    "commit": "35226658ebc15367fd643b207184464e6108d6f6",
+    "test_record": {
+      "name": "CI-contract-preferences",
+      "command": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q",
+        "tests/test_api_buyers.py",
+        "--junitxml=../../artifacts/c61/CI-contract-db.xml"
+      ],
+      "cwd": "services\\api",
+      "source_sha": "5765b8787218d64793c8934efacec4bf7ceaf5d3",
+      "tested_tree": "02a0a3bd814797fe0c8f6354efce5bcddfe4e81b",
+      "started_at_utc": "2026-10-06T17:11:39.266192+00:00",
+      "seconds": 9.717,
+      "exit_code": 0,
+      "environment": "owned-loopback-PG16/fixture-only",
+      "log": "artifacts\\c61\\CI-contract-preferences.log",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": "artifacts/c61/CI-contract-db.xml"
+    },
+    "observed_focused_counts": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  }
+]

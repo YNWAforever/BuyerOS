@@ -1,0 +1,54 @@
+✖ C61T-10 current source-review segments expose keyboard text selection without editing exact text (64.5696ms)
+✖ D03 source card retains source title, URL, dates and actual company; unsafe links stay text (0.9106ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2685.7987
+
+✖ failing tests:
+
+test at tests\draft-grounding-controls.test.mjs:27:1
+✖ C61T-10 current source-review segments expose keyboard text selection without editing exact text (64.5696ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /<textarea[^>]*aria-label="Select segment text"[^>]*readonly/. Input:
+  
+  '<section class="panel" aria-label="Manual source review"><h4>Manual source review</h4><p>Classify every segment, read each cited source and the whole message. This records your source review; it does not verify semantic truth.</p><p>Revision: 3 · sha256:fixture</p><p role="status">Loading current sources...</p><fieldset aria-label="Segment 1"><legend>Segment 1 · Subject · [0, 5)</legend><pre style="white-space:pre-wrap;overflow-wrap:anywhere">中😀é文</pre><label>Classification <select><option value="" selected="">Choose classification</option><option value="factual">Factual — cite a source</option><option value="non_factual">Non-factual — explain why</option></select></label><label>Segment reason <input maxLength="400" value=""/></label><label>Split position (code points) <input type="number" min="1" max="4" value=""/></label><button type="button" disabled="">Split segment</button></fieldset><fieldset aria-label="Segment 2"><legend>Segment 2 · Body · [0, 8)</legend><pre style="white-space:pre-wrap;overflow-wrap:anywhere">Greeting</pre><label>Classification <select><option value="" selected="">Choose classification</option><option value="factual">Factual — cite a source</option><option value="non_factual">Non-factual — explain why</option></select></label><label>Segment reason <input maxLength="400" value=""/></label><label>Split position (code points) <input type="number" min="1" max="7" value=""/></label><button type="button" disabled="">Split segment</button></fieldset><label>Overall review reason <input maxLength="400" value=""/></label><label><input type="checkbox" disabled=""/>I read the entire exact message and every cited source, including all non-factual classifications.</label><button type="button" disabled="">Submit source review</button></section>'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/tests/draft-grounding-controls.test.mjs:28:27)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '<section class="panel" aria-label="Manual source review"><h4>Manual source review</h4><p>Classify every segment, read each cited source and the whole message. This records your source review; it does not verify semantic truth.</p><p>Revision: 3 · sha256:fixture</p><p role="status">Loading current sources...</p><fieldset aria-label="Segment 1"><legend>Segment 1 · Subject · [0, 5)</legend><pre style="white-space:pre-wrap;overflow-wrap:anywhere">中😀é文</pre><label>Classification <select><option value="" selected="">Choose classification</option><option value="factual">Factual — cite a source</option><option value="non_factual">Non-factual — explain why</option></select></label><label>Segment reason <input maxLength="400" value=""/></label><label>Split position (code points) <input type="number" min="1" max="4" value=""/></label><button type="button" disabled="">Split segment</button></fieldset><fieldset aria-label="Segment 2"><legend>Segment 2 · Body · [0, 8)</legend><pre style="white-space:pre-wrap;overflow-wrap:anywhere">Greeting</pre><label>Classification <select><option value="" selected="">Choose classification</option><option value="factual">Factual — cite a source</option><option value="non_factual">Non-factual — explain why</option></select></label><label>Segment reason <input maxLength="400" value=""/></label><label>Split position (code points) <input type="number" min="1" max="7" value=""/></label><button type="button" disabled="">Split segment</button></fieldset><label>Overall review reason <input maxLength="400" value=""/></label><label><input type="checkbox" disabled=""/>I read the entire exact message and every cited source, including all non-factual classifications.</label><button type="button" disabled="">Submit source review</button></section>',
+    expected: /<textarea[^>]*aria-label="Select segment text"[^>]*readonly/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\draft-grounding-controls.test.mjs:30:1
+✖ D03 source card retains source title, URL, dates and actual company; unsafe links stay text (0.9106ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/tests/draft-grounding-controls.test.mjs:31:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

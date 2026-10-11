@@ -2,7 +2,7 @@
 
 import uuid
 
-from sqlalchemy import Boolean, ForeignKeyConstraint, Integer, String, UniqueConstraint
+from sqlalchemy import CheckConstraint, DateTime, Boolean, ForeignKeyConstraint, Integer, String, UniqueConstraint, Index, text
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -29,6 +29,23 @@ class User(Base, UUIDPk):
     display_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
 
 
+class UserIdentity(Base):
+    """Exact principal binding; canonical UUID and legacy columns stay unchanged."""
+    __tablename__ = "user_identities"
+    __table_args__ = (
+        ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
+        CheckConstraint("status IN ('active','revoked')", name="ck_user_identities_status"),
+        CheckConstraint("version >= 1", name="ck_user_identities_version"),
+    )
+    issuer: Mapped[str] = mapped_column(String(255), primary_key=True)
+    subject: Mapped[str] = mapped_column(String(255), primary_key=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="active")
+    proof_ref: Mapped[str] = mapped_column(String(200), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    created_at: Mapped[object] = mapped_column(DateTime(timezone=True), nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+
+
 class Membership(Base, TenantMixin):
     """Server-side authority: roles come from here, never from token claims."""
 
@@ -38,6 +55,7 @@ class Membership(Base, TenantMixin):
         UniqueConstraint("workspace_id", "user_id", name="uq_memberships_workspace_user"),
         ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_memberships_workspace"),
         ForeignKeyConstraint(["user_id"], ["users.id"], name="fk_memberships_user"),
+        Index("ix_memberships_active_user_workspace", "user_id", "workspace_id", postgresql_where=text("active IS TRUE")),
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)

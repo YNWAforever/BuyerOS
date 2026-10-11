@@ -78,8 +78,11 @@ def test_discovery_hands_off_to_checkpointed_fit_worker(discovery_case):
         fit_intent = db.execute("SELECT intent_key FROM outbox_events WHERE workspace_id=%s "
                                 "AND event_type='run.fit' AND state='ready'", (WS_A,)).fetchone()[0]
         db.execute("ALTER ROLE buyeros_worker LOGIN PASSWORD 'test-only'")
-        db.execute("UPDATE outbox_events SET state='dispatched',fencing_generation=1 "
-                   "WHERE intent_key=%s", (fit_intent,))
+        # Model the real dispatcher by binding this fresh lease to the current
+        # backend/epoch; an earlier owned test may have advanced the epoch.
+        db.execute("UPDATE outbox_events e SET state='dispatched',fencing_generation=1, "
+                   "runtime_backend=c.backend,runtime_epoch=c.epoch FROM worker_runtime_control c "
+                   "WHERE c.singleton=1 AND e.intent_key=%s", (fit_intent,))
     try:
         from buyeros_worker.tasks import execute_intent_sync
         checkpoint_dsn = runtime_dsn.replace("buyeros_api:test-only", "buyeros_worker:test-only", 1)

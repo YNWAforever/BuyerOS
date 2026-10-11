@@ -7,7 +7,8 @@ from tests.test_buyer_review_db import ADMIN, OPERATOR, REVIEWER, VIEWER, WORKSP
 ROOT = f"/v1/workspaces/{WORKSPACE_A}"
 
 
-def test_0017_preferences_rls_and_empty_rollback(migrated):
+def test_0017_preferences_rls_and_empty_rollback(isolated_migrated):
+    migrated = isolated_migrated
     from alembic import command
     from alembic.config import Config
     from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
@@ -22,7 +23,7 @@ def test_0017_preferences_rls_and_empty_rollback(migrated):
         assert conn.execute("SELECT to_regclass('workspace_preferences')").fetchone()[0] is None
     command.upgrade(config,'head')
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0036_checkpoint_schema_grants'
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0050_c61_delivery_authorizations'
 
 
 def _member_id(seeded, subject):

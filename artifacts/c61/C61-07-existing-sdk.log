@@ -1,0 +1,14 @@
+✔ NA01 Better Auth cross-tab session notice is delivered without retained storage (20.6424ms)
+✔ NA01 imperative SDK clears cached session on another tab sign-out without useSession (91.0661ms)
+✔ NA01 public SDK preserves GET 302 cookies and Location without following or replaying (81.048ms)
+✔ NA01 public SDK preserves POST 307 cookies and Location without following or replaying (31.4608ms)
+✔ NA01 public SDK retains upstream401 JSON and does not create auth cookies (24.5531ms)
+✔ NA01 pinned SDK token is not substituted with cached session data (87.8174ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2634.5959

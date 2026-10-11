@@ -1,0 +1,25 @@
+file:///C:/Users/laich/.codex/worktrees/c61-fixes-20261007/BuyerOS/tests/audit-preference-observer.test.mjs:3
+import {createDocumentReads} from './e2e/fixtures/journey-input.ts';
+        ^^^^^^^^^^^^^^^^^^^
+SyntaxError: The requested module './e2e/fixtures/journey-input.ts' does not provide an export named 'createDocumentReads'
+    at #asyncInstantiate (node:internal/modules/esm/module_job:327:21)
+    at async ModuleJob.run (node:internal/modules/esm/module_job:431:5)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.18.0
+✖ tests\audit-preference-observer.test.mjs (327.9814ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 339.8216
+
+✖ failing tests:
+
+test at tests\audit-preference-observer.test.mjs:1:1
+✖ tests\audit-preference-observer.test.mjs (327.9814ms)
+  'test failed'

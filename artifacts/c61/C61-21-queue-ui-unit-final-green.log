@@ -1,0 +1,13 @@
+✔ C61T-09 every card links to its actual typed scope and filtered list (127.9099ms)
+✔ C61T-09 successful summary retains server as_of and real zero counts (8.0299ms)
+✔ C61T-09 held A summary cannot publish after A-B-A scope changes (1.0248ms)
+✔ C61T-09 unavailable, partial or malformed summary never becomes fabricated zero (0.6957ms)
+✔ C61T-09 receipt page uses generated acceptance enum and captured scope (0.4824ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 609.8259

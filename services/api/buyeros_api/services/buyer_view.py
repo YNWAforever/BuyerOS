@@ -38,11 +38,39 @@ def review_data(review, fit) -> dict:
     }
 
 
-def evidence_data(evidence, source, *, mapped_company_id=None) -> dict:
+async def current_evidence_data(session, *, workspace_id, evidence, source,
+                                mapped_company_id=None, buyer_id=None) -> dict:
+    """Native prose is visible only with current server-row provenance proof."""
+    native_current = False
+    if source is not None and source.storage_mode == "research_page_excerpt":
+        from sqlalchemy import select
+        from ..db.buyers import ProjectBuyer
+        from .research_native_basis import reviewed_research_evidence
+        if buyer_id is None:
+            buyer_id = (await session.execute(select(ProjectBuyer.id).where(
+                ProjectBuyer.workspace_id == workspace_id,
+                ProjectBuyer.project_id == evidence.project_id,
+                ProjectBuyer.company_id == evidence.company_id,
+            ).order_by(ProjectBuyer.id).limit(1))).scalar_one_or_none()
+        if buyer_id is not None:
+            try:
+                await reviewed_research_evidence(session, workspace_id=workspace_id,
+                    run_id=evidence.run_id, buyer_id=buyer_id, evidence_id=evidence.id)
+                native_current = True
+            except ValueError:
+                # Keep the row identity and inference flag; retired/changed prose is hidden.
+                pass
+    return evidence_data(evidence, source, mapped_company_id=mapped_company_id,
+                         native_current=native_current)
+
+
+def evidence_data(evidence, source, *, mapped_company_id=None, native_current=False) -> dict:
     """Expose source provenance and current accessibility without leaking retired content."""
     modern = source is not None and source.project_id is not None
     if source is None:
         status = "deleted"
+    elif source.storage_mode == "research_page_excerpt" and not native_current:
+        status = "access_blocked"
     elif modern and (source.project_id != evidence.project_id
                      or source.permission_purpose != "account_research"
                      or (evidence.run_id is not None and source.run_id != evidence.run_id)):

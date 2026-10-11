@@ -1,6 +1,7 @@
 import type {components} from '@/services/generated/buyeros-api';
 import {createOperationClient, type WriteContext} from './operations';
 import {LiveCancelled, LiveError, type LiveClient} from './client';
+import {ActionIntent} from './action-intent';
 import type {SessionScope} from './session';
 
 export type Run = components['schemas']['SearchRun'];
@@ -40,6 +41,42 @@ export async function startRun(ctx:RunContext, body:components['schemas']['RunCr
   return createOperationClient(ctx.client).requestOperation('startRun',
     {path:{workspace_id:ctx.workspaceId,project_id:ctx.projectId},
       header:{'Idempotency-Key':key},body},captured(ctx));
+}
+
+type RunCreate=components['schemas']['RunCreate'];
+export function normalizeResearchBody(body:RunCreate):RunCreate {
+  const amount=body.max_cost.amount.trim();
+  if(!/^(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/.test(amount))throw new Error('Invalid fixed-point cap');
+  const [whole,fraction='']=amount.split('.');
+  return {...body,icp_version_id:body.icp_version_id.toLowerCase(),limits:{...body.limits},
+    max_cost:{...body.max_cost,amount:`${whole}.${fraction.padEnd(6,'0')}`}};
+}
+function ordered(value:unknown):unknown {
+  if(Array.isArray(value))return value.map(ordered);
+  if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,ordered(v)]));
+  return value;
+}
+function intentScope(ctx:RunContext){const scope=ctx.session.current();return JSON.stringify({mode:scope.mode,actor:scope.actor,workspace:ctx.workspaceId,project:ctx.projectId});}
+export function researchFingerprint(ctx:RunContext,body:RunCreate){return JSON.stringify(ordered({scope:intentScope(ctx),body:normalizeResearchBody(body)}));}
+type ResearchIntent={intent:ActionIntent<Run>;uncertain:boolean;pending:boolean;body:RunCreate;fingerprint:string};
+// Session-owned memory survives route remounts. No token, cookie or credential is stored.
+const researchIntents=new WeakMap<SessionScope,Map<string,ResearchIntent>>();
+function intents(ctx:RunContext){let value=researchIntents.get(ctx.session);if(!value){value=new Map();researchIntents.set(ctx.session,value);}return value;}
+export function hasUncertainResearch(ctx:RunContext){return intents(ctx).get(intentScope(ctx))?.uncertain??false;}
+export function uncertainResearchBody(ctx:RunContext):RunCreate|null{const own=intents(ctx).get(intentScope(ctx));return own?.uncertain?normalizeResearchBody(own.body):null;}
+export function resetResearchIntent(ctx:RunContext){const map=intents(ctx),scope=intentScope(ctx);if(map.get(scope)?.pending)throw new Error('Research is still pending');map.delete(scope);}
+export function startResearch(ctx:RunContext,body:RunCreate):Promise<Run>{
+  const map=intents(ctx),scope=intentScope(ctx),normalized=normalizeResearchBody(body),fingerprint=researchFingerprint(ctx,normalized);
+  let record=map.get(scope);if(!record){record={intent:new ActionIntent<Run>(),uncertain:false,pending:false,body:normalized,fingerprint};map.set(scope,record);}
+  const own=record;
+  if(own.uncertain&&own.fingerprint!==fingerprint)throw new Error('Check existing runs and explicitly start a new intent before changing this request.');
+  own.body=normalized;own.fingerprint=fingerprint;
+  return own.intent.run(fingerprint,async key=>{
+    own.pending=true;
+    try{const value=await startRun(ctx,normalized,key);if(map.get(scope)===own)map.delete(scope);return value;}
+    catch(error){own.uncertain=true;throw error;}
+    finally{own.pending=false;}
+  });
 }
 
 export async function cancelRun(ctx:RunContext, run:Run, reason:string,key:string):Promise<Run> {

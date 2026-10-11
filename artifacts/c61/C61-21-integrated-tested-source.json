@@ -1,0 +1,31 @@
+{
+  "tested_parent_sha": "97adf4480cb6cd82a5122ed0934491a8c1c741a9",
+  "test_head_unchanged": true,
+  "changed_test_files": [
+    {
+      "path": "tests/e2e/audit-job-scope.spec.ts",
+      "sha256": "781ade47f38ac10eb14fa4fd93c8a9f03207c45dcbbd3b01556bfb7b1d5efa72",
+      "git_blob": "ac71d58efb4d86b2696d076d34a17e4e40d6fbc2"
+    },
+    {
+      "path": "tests/e2e/work-queue-counts.spec.ts",
+      "sha256": "052383b7d709ddb3990af8da13bd5970565b0ec7f7a9b78f9551c85ddf849bbe",
+      "git_blob": "8b51270ad92bdf604031940c4e67e91ffae88d45"
+    }
+  ],
+  "api_committed_source": "0abb01d7c856e9806c490b18567ef325d8787977",
+  "identical_api_and_migration_trees": {
+    "services/api/buyeros_api": "fe98977e7254a56c4940c88b6d804d4d7cf68bdb",
+    "services/api/alembic": "7f1f35f1d7dba73bcf2c5932a633210494cf7190"
+  },
+  "api_source_hash_manifest": "artifacts/c61/C61-21-tested-source.json",
+  "api_cases": 54,
+  "frontend_units": 5,
+  "built_cases": 24,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "typecheck_exit": 0,
+  "environment": "Built portable UI + owned loopback HTTP/PG16, fictional OIDC and source/provider inputs; no real-provider, production or human acceptance",
+  "failed_first_run": "24 cases: 22 pass, 1 failure plus 1 error; old paragraph selector became ambiguous; new zh test incorrectly looked for 概覽 instead of the existing 總覽. Preserved assertions and actual counts; did not increase timeouts."
+}

@@ -1,0 +1,12 @@
+✔ Q09 latest101 uses only head1/tail1 generated reads, never downloads all history (1.9711ms)
+✔ Q09 empty and single ICP use one read; malformed/foreign pages fail closed (1.2104ms)
+✔ Q09 concurrent appended history is unavailable rather than a falsely latest profile (0.261ms)
+✔ Q09 A-B-A rejects a late metadata response and token renewal alone keeps the context (0.5718ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 451.6335

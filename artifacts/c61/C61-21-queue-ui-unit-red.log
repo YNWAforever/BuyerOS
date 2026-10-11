@@ -1,0 +1,100 @@
+✖ C61T-09 every card links to its actual typed scope and filtered list (2.1669ms)
+✖ C61T-09 successful summary retains server as_of and real zero counts (0.8761ms)
+✖ C61T-09 held A summary cannot publish after A-B-A scope changes (1.2223ms)
+✖ C61T-09 unavailable, partial or malformed summary never becomes fabricated zero (1.0021ms)
+✖ C61T-09 receipt page uses generated acceptance enum and captured scope (0.8075ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 0
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 380.7492
+
+✖ failing tests:
+
+test at tests\work-queue.test.mjs:26:1
+✖ C61T-09 every card links to its actual typed scope and filtered list (2.1669ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\work-queue.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\work-queue.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at nextStep (node:internal/modules/customization_hooks:189:26)
+      at resolve (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/tests/work-queue.test.mjs:11:13)
+      at nextStep (node:internal/modules/customization_hooks:189:26)
+      at resolveWithHooks (node:internal/modules/customization_hooks:417:10)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:747:16) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/work-queue.ts'
+  }
+
+test at tests\work-queue.test.mjs:30:1
+✖ C61T-09 successful summary retains server as_of and real zero counts (0.8761ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\work-queue.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\work-queue.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at nextStep (node:internal/modules/customization_hooks:189:26)
+      at resolve (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/tests/work-queue.test.mjs:11:13)
+      at nextStep (node:internal/modules/customization_hooks:189:26)
+      at resolveWithHooks (node:internal/modules/customization_hooks:417:10)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:747:16) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/work-queue.ts'
+  }
+
+test at tests\work-queue.test.mjs:36:1
+✖ C61T-09 held A summary cannot publish after A-B-A scope changes (1.2223ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\work-queue.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\work-queue.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at nextStep (node:internal/modules/customization_hooks:189:26)
+      at resolve (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/tests/work-queue.test.mjs:11:13)
+      at nextStep (node:internal/modules/customization_hooks:189:26)
+      at resolveWithHooks (node:internal/modules/customization_hooks:417:10)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:747:16) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/work-queue.ts'
+  }
+
+test at tests\work-queue.test.mjs:41:1
+✖ C61T-09 unavailable, partial or malformed summary never becomes fabricated zero (1.0021ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\work-queue.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\work-queue.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at nextStep (node:internal/modules/customization_hooks:189:26)
+      at resolve (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/tests/work-queue.test.mjs:11:13)
+      at nextStep (node:internal/modules/customization_hooks:189:26)
+      at resolveWithHooks (node:internal/modules/customization_hooks:417:10)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:747:16) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/work-queue.ts'
+  }
+
+test at tests\work-queue.test.mjs:46:1
+✖ C61T-09 receipt page uses generated acceptance enum and captured scope (0.8075ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\live\work-queue.ts' imported from C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\tests\work-queue.test.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at nextStep (node:internal/modules/customization_hooks:189:26)
+      at resolve (file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/tests/work-queue.test.mjs:11:13)
+      at nextStep (node:internal/modules/customization_hooks:189:26)
+      at resolveWithHooks (node:internal/modules/customization_hooks:417:10)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:747:16) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/laich/.codex/worktrees/c61-diagnostics-20261007/BuyerOS/services/live/work-queue.ts'
+  }

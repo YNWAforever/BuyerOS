@@ -1,0 +1,25 @@
+{
+  "source_sha": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "source_sha_after": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "started_at_utc": "2026-10-06T20:42:25.759810+00:00",
+  "seconds": 809.54,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "--junitxml=../../artifacts/c61/c61-api-followup-regression.xml"
+  ],
+  "cwd": "services/api",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-03-04-06-full-api-regression.log",
+  "fresh_junit": true,
+  "tests": 863,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-api-followup-regression.xml",
+  "required_gate_exit_code": 0
+}

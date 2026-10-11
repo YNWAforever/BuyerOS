@@ -1,0 +1,32 @@
+{
+  "source_sha": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "source_sha_after": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "started_at_utc": "2026-10-06T21:26:24.727692+00:00",
+  "seconds": 45.686,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "tests/test_work_queue_db.py",
+    "tests/test_daily_ux_db.py",
+    "tests/test_job_scope_db.py",
+    "tests/test_draft_persistence_db.py",
+    "tests/test_api_routes_contract.py",
+    "tests/test_api_deps.py",
+    "tests/test_api_buyers.py",
+    "-q",
+    "--junitxml=../../artifacts/c61/c61-queue-api-contract-final.xml"
+  ],
+  "cwd": "services/api",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-21-queue-api-contract-final-green.log",
+  "fresh_junit": true,
+  "tests": 54,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-queue-api-contract-final.xml",
+  "required_gate_exit_code": 0
+}

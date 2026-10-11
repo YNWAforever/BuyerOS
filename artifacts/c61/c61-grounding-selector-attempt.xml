@@ -1,0 +1,113 @@
+<testsuites id="" name="" tests="15" failures="1" skipped="0" errors="1" time="218.612379">
+<testsuite name="audit-draft-dirty.spec.ts" timestamp="2026-10-06T20:58:16.649Z" hostname="" tests="10" failures="0" skipped="0" time="52.93" errors="0">
+<testcase name="D02 Refresh draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="5.62">
+</testcase>
+<testcase name="D02 Open draft Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="4.676">
+</testcase>
+<testcase name="D02 Refresh job Cancel preserves all dirty fields; Discard is explicit" classname="audit-draft-dirty.spec.ts" time="5.535">
+</testcase>
+<testcase name="D02 Save is awaited before opening another draft and persists one revision" classname="audit-draft-dirty.spec.ts" time="5.284">
+</testcase>
+<testcase name="D02 failed Save 401 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="4.791">
+</testcase>
+<testcase name="D02 failed Save 412 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="5.674">
+</testcase>
+<testcase name="D02 failed Save 503 keeps buffer and dirty baseline" classname="audit-draft-dirty.spec.ts" time="3.977">
+</testcase>
+<testcase name="D02 Refresh does not overwrite the unsaved buffer before a decision" classname="audit-draft-dirty.spec.ts" time="6.426">
+</testcase>
+<testcase name="D02 delayed refresh cannot materialize a draft into a new project scope" classname="audit-draft-dirty.spec.ts" time="5.723">
+</testcase>
+<testcase name="D02 zh-HK mobile dialog preserves content and keeps all choices visible" classname="audit-draft-dirty.spec.ts" time="5.224">
+</testcase>
+</testsuite>
+<testsuite name="audit-draft-reground.spec.ts" timestamp="2026-10-06T20:58:16.649Z" hostname="" tests="5" failures="1" skipped="0" time="109.281" errors="1">
+<testcase name="D01/D03 manual Unicode draft exposes a source review and operator cannot attest" classname="audit-draft-reground.spec.ts" time="8.767">
+</testcase>
+<testcase name="D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export" classname="audit-draft-reground.spec.ts" time="11.952">
+</testcase>
+<testcase name="D03 zh-HK mobile code-point split reads every source and exports exact Unicode message" classname="audit-draft-reground.spec.ts" time="60.144">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-draft-reground-D03-z-3f480-ports-exact-Unicode-message\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-draft-reground-D03-z-3f480-ports-exact-Unicode-message\trace.zip]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  audit-draft-reground.spec.ts:79:1 › D03 zh-HK mobile code-point split reads every source and exports exact Unicode message 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.selectOption: Target page, context or browser has been closed
+
+      59 |  await writeFile(`test-results/q12-${label}-output.json`,JSON.stringify({fixture_only:true,draft,viewer_export:viewer.status(),delivery:deliver.status()},null,2));
+      60 | }
+    > 61 | async function resetLocale(page:Page){await page.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}).first().selectOption('en');await expect(page.locator('html')).toHaveAttribute('lang','en');}
+         |                                                                                                                    ^
+      62 |
+      63 | test('D01/U09 reviewer failure retains preparation; lost committed response retries same key then exact approval/export',async({page,browser})=>{
+      64 |  const created=await editedDraft(page);const ctx=await browser.newContext();const reviewer=await ctx.newPage();
+        at resetLocale (C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:61:116)
+        at C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:87:17
+
+    Error Context: ..\..\test-results\audit-fixes\audit-draft-reground-D03-z-3f480-ports-exact-Unicode-message\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-draft-reground-D03-z-3f480-ports-exact-Unicode-message\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ..\..\test-results\audit-fixes\audit-draft-reground-D03-z-3f480-ports-exact-Unicode-message\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="U09 real stale revision preserves source form and exact buffers; scope change rejects delayed review result" classname="audit-draft-reground.spec.ts" time="15.895">
+</testcase>
+<testcase name="C61T-10 keyboard text selection binds emoji and combining marks to exact server code-point ranges" classname="audit-draft-reground.spec.ts" time="12.523">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\error-context.md]]
+
+[[ATTACHMENT|audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\trace.zip]]
+]]>
+</system-out>
+<failure message="expect(received).toEqual(expected) // deep equality" type="expect.toEqual">
+<![CDATA[  audit-draft-reground.spec.ts:108:1 › C61T-10 keyboard text selection binds emoji and combining marks to exact server code-point ranges 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   1,
+    -   3,
+    +   0,
+    +   0,
+      ]
+
+      117 |   await expect(selection).toHaveValue(text);await expect(selection).toHaveAttribute('readonly','');
+      118 |   await selection.focus();await selection.press('Home');await selection.press('ArrowRight');await selection.press('Shift+ArrowRight');
+    > 119 |   expect(await selection.evaluate((el:HTMLTextAreaElement)=>[el.selectionStart,el.selectionEnd])).toEqual([1,3]);
+          |                                                                                                   ^
+      120 |   await first.getByRole('button',{name:'Use selected text',exact:true}).click();
+      121 |   const groups=grounding.getByRole('group',{name:/^(Segment|段落) \d+$/,exact:true});await expect(groups).toHaveCount(7);await expect(groups.first().getByRole('textbox',{name:'Select segment text',exact:true})).toBeFocused();
+      122 |   expect(await groups.locator('pre').allTextContents()).toEqual(['中','😀','é文',...body.split('\n')]);
+        at C:\Users\laich\.codex\worktrees\c61-fixes-20261007\BuyerOS\tests\e2e\audit-draft-reground.spec.ts:119:99
+
+    Error Context: ..\..\test-results\audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\test-results\audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ..\..\test-results\audit-fixes\audit-draft-reground-C61T--faab2-ct-server-code-point-ranges\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

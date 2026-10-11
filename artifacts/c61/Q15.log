@@ -1,0 +1,15 @@
+✔ D02 save has the required transition order (1.8374ms)
+✔ D02 discard has the required transition order (0.4477ms)
+✔ D02 cancel has the required transition order (0.3078ms)
+✔ D02 rejected save 412 cannot proceed (1.1574ms)
+✔ D02 rejected save 503 cannot proceed (0.7946ms)
+✔ D02 clean transition does not prompt or write (0.3164ms)
+✔ D02 asynchronous Save completes before proceeding (5.7596ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 494.5874

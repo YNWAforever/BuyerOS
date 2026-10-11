@@ -1,0 +1,16 @@
+{
+  "name": "Q01",
+  "command": [
+    "node",
+    "--test",
+    "tests/audit-auth-render.test.mjs"
+  ],
+  "cwd": ".",
+  "source_sha": "c2e24a1cf78269e7d4443355e0d628a6ede08d94",
+  "tested_tree": "3f9bd8f4e75707e654afabaa8d22e7da17634881",
+  "started_at_utc": "2026-10-06T17:01:35.301510+00:00",
+  "seconds": 2.887,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q01.log"
+}

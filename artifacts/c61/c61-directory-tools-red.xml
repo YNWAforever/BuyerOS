@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="7" time="1.235" timestamp="2026-10-07T02:33:12.627953+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_workspace_benchmark_tools" name="test_directory_metrics_keep_failed_requests_and_unstable_small_sample" time="0.105" /><testcase classname="tests.test_workspace_benchmark_tools" name="test_directory_capture_rejects_empty_or_nonpassing_required_junit[&lt;testsuites tests=&quot;0&quot;/&gt;]" time="0.060"><failure message="assert 0 == 1&#10; +  where 0 = &lt;function main at 0x000002E71E2C0AE0&gt;()&#10; +    where &lt;function main at 0x000002E71E2C0AE0&gt; = &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt;.main&#10; +      where &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt; = fake_capture(&lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E018350&gt;, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects0'), '&lt;testsuites tests=&quot;0&quot;/&gt;')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E018350&gt;
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects0')
+xml = '&lt;testsuites tests="0"/&gt;'
+
+    @pytest.mark.parametrize('xml',[
+        '&lt;testsuites tests="0"/&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;skipped/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;failure/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;error/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+    ])
+    def test_directory_capture_rejects_empty_or_nonpassing_required_junit(monkeypatch,tmp_path,xml):
+&gt;       assert fake_capture(monkeypatch,tmp_path,xml).main()==1
+E       assert 0 == 1
+E        +  where 0 = &lt;function main at 0x000002E71E2C0AE0&gt;()
+E        +    where &lt;function main at 0x000002E71E2C0AE0&gt; = &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt;.main
+E        +      where &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt; = fake_capture(&lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E018350&gt;, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects0'), '&lt;testsuites tests="0"/&gt;')
+
+tests\test_workspace_benchmark_tools.py:53: AssertionError</failure></testcase><testcase classname="tests.test_workspace_benchmark_tools" name="test_directory_capture_rejects_empty_or_nonpassing_required_junit[&lt;testsuite&gt;&lt;testcase&gt;&lt;skipped/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;]" time="0.027"><failure message="AssertionError: assert 0 == 1&#10; +  where 0 = &lt;function main at 0x000002E71E314860&gt;()&#10; +    where &lt;function main at 0x000002E71E314860&gt; = &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt;.main&#10; +      where &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt; = fake_capture(&lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1E7230&gt;, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects1'), '&lt;testsuite&gt;&lt;testcase&gt;&lt;skipped/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1E7230&gt;
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects1')
+xml = '&lt;testsuite&gt;&lt;testcase&gt;&lt;skipped/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;'
+
+    @pytest.mark.parametrize('xml',[
+        '&lt;testsuites tests="0"/&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;skipped/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;failure/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;error/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+    ])
+    def test_directory_capture_rejects_empty_or_nonpassing_required_junit(monkeypatch,tmp_path,xml):
+&gt;       assert fake_capture(monkeypatch,tmp_path,xml).main()==1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = &lt;function main at 0x000002E71E314860&gt;()
+E        +    where &lt;function main at 0x000002E71E314860&gt; = &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt;.main
+E        +      where &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt; = fake_capture(&lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1E7230&gt;, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects1'), '&lt;testsuite&gt;&lt;testcase&gt;&lt;skipped/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;')
+
+tests\test_workspace_benchmark_tools.py:53: AssertionError</failure></testcase><testcase classname="tests.test_workspace_benchmark_tools" name="test_directory_capture_rejects_empty_or_nonpassing_required_junit[&lt;testsuite&gt;&lt;testcase&gt;&lt;failure/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;]" time="0.024"><failure message="AssertionError: assert 0 == 1&#10; +  where 0 = &lt;function main at 0x000002E71E314A40&gt;()&#10; +    where &lt;function main at 0x000002E71E314A40&gt; = &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt;.main&#10; +      where &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt; = fake_capture(&lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1EF140&gt;, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects2'), '&lt;testsuite&gt;&lt;testcase&gt;&lt;failure/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1EF140&gt;
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects2')
+xml = '&lt;testsuite&gt;&lt;testcase&gt;&lt;failure/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;'
+
+    @pytest.mark.parametrize('xml',[
+        '&lt;testsuites tests="0"/&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;skipped/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;failure/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;error/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+    ])
+    def test_directory_capture_rejects_empty_or_nonpassing_required_junit(monkeypatch,tmp_path,xml):
+&gt;       assert fake_capture(monkeypatch,tmp_path,xml).main()==1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = &lt;function main at 0x000002E71E314A40&gt;()
+E        +    where &lt;function main at 0x000002E71E314A40&gt; = &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt;.main
+E        +      where &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt; = fake_capture(&lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1EF140&gt;, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects2'), '&lt;testsuite&gt;&lt;testcase&gt;&lt;failure/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;')
+
+tests\test_workspace_benchmark_tools.py:53: AssertionError</failure></testcase><testcase classname="tests.test_workspace_benchmark_tools" name="test_directory_capture_rejects_empty_or_nonpassing_required_junit[&lt;testsuite&gt;&lt;testcase&gt;&lt;error/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;]" time="0.024"><failure message="AssertionError: assert 0 == 1&#10; +  where 0 = &lt;function main at 0x000002E71E315080&gt;()&#10; +    where &lt;function main at 0x000002E71E315080&gt; = &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt;.main&#10; +      where &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt; = fake_capture(&lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1E7140&gt;, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects3'), '&lt;testsuite&gt;&lt;testcase&gt;&lt;error/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;')">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1E7140&gt;
+tmp_path = WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects3')
+xml = '&lt;testsuite&gt;&lt;testcase&gt;&lt;error/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;'
+
+    @pytest.mark.parametrize('xml',[
+        '&lt;testsuites tests="0"/&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;skipped/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;failure/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+        '&lt;testsuite&gt;&lt;testcase&gt;&lt;error/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;',
+    ])
+    def test_directory_capture_rejects_empty_or_nonpassing_required_junit(monkeypatch,tmp_path,xml):
+&gt;       assert fake_capture(monkeypatch,tmp_path,xml).main()==1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = &lt;function main at 0x000002E71E315080&gt;()
+E        +    where &lt;function main at 0x000002E71E315080&gt; = &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt;.main
+E        +      where &lt;module 'c61_directory_cli' from 'C:\\Users\\laich\\.codex\\worktrees\\c61-diagnostics-20261007\\BuyerOS\\scripts\\benchmark-workspace-directory.py'&gt; = fake_capture(&lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002E71E1E7140&gt;, WindowsPath('C:/Users/laich/AppData/Local/Temp/pytest-of-laich/pytest-268/test_directory_capture_rejects3'), '&lt;testsuite&gt;&lt;testcase&gt;&lt;error/&gt;&lt;/testcase&gt;&lt;/testsuite&gt;')
+
+tests\test_workspace_benchmark_tools.py:53: AssertionError</failure></testcase><testcase classname="tests.test_workspace_benchmark_tools" name="test_directory_capture_accepts_actual_positive_required_case" time="0.020" /><testcase classname="tests.test_workspace_benchmark_tools" name="test_directory_capture_rejects_inherited_database_before_subprocess" time="0.009" /></testsuite></testsuites>

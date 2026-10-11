@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="6" time="3.464" timestamp="2026-10-07T01:17:42.020199+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_error_diagnostics" name="test_database_error_diagnostics_redacts_secrets[42P01-missing_relation]" time="0.570"><failure message="AssertionError: assert None == '42P01'&#10; +  where None = &lt;built-in method get of dict object at 0x000001B1CAD8E680&gt;('sqlstate')&#10; +    where &lt;built-in method get of dict object at 0x000001B1CAD8E680&gt; = {}.get">caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x000001B1CAC47650&gt;
+state = '42P01', classification = 'missing_relation'
+
+    @pytest.mark.parametrize(('state', 'classification'), [
+        ('42P01', 'missing_relation'), ('42501', 'insufficient_privilege'),
+        ('08006', 'connection_failure'),
+    ])
+    def test_database_error_diagnostics_redacts_secrets(caplog, state, classification):
+        class DriverError(Exception):
+            sqlstate = state
+        error = OperationalError('SELECT ' + SECRETS[2], {'password': SECRETS[0]}, DriverError(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(request(), error))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+&gt;       assert fields.get('sqlstate') == state
+E       AssertionError: assert None == '42P01'
+E        +  where None = &lt;built-in method get of dict object at 0x000001B1CAD8E680&gt;('sqlstate')
+E        +    where &lt;built-in method get of dict object at 0x000001B1CAD8E680&gt; = {}.get
+
+tests\test_error_diagnostics.py:33: AssertionError</failure></testcase><testcase classname="tests.test_error_diagnostics" name="test_database_error_diagnostics_redacts_secrets[42501-insufficient_privilege]" time="0.004"><failure message="AssertionError: assert None == '42501'&#10; +  where None = &lt;built-in method get of dict object at 0x000001B1CB485C40&gt;('sqlstate')&#10; +    where &lt;built-in method get of dict object at 0x000001B1CB485C40&gt; = {}.get">caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x000001B1CB1293D0&gt;
+state = '42501', classification = 'insufficient_privilege'
+
+    @pytest.mark.parametrize(('state', 'classification'), [
+        ('42P01', 'missing_relation'), ('42501', 'insufficient_privilege'),
+        ('08006', 'connection_failure'),
+    ])
+    def test_database_error_diagnostics_redacts_secrets(caplog, state, classification):
+        class DriverError(Exception):
+            sqlstate = state
+        error = OperationalError('SELECT ' + SECRETS[2], {'password': SECRETS[0]}, DriverError(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(request(), error))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+&gt;       assert fields.get('sqlstate') == state
+E       AssertionError: assert None == '42501'
+E        +  where None = &lt;built-in method get of dict object at 0x000001B1CB485C40&gt;('sqlstate')
+E        +    where &lt;built-in method get of dict object at 0x000001B1CB485C40&gt; = {}.get
+
+tests\test_error_diagnostics.py:33: AssertionError</failure></testcase><testcase classname="tests.test_error_diagnostics" name="test_database_error_diagnostics_redacts_secrets[08006-connection_failure]" time="0.004"><failure message="AssertionError: assert None == '08006'&#10; +  where None = &lt;built-in method get of dict object at 0x000001B1CB588AC0&gt;('sqlstate')&#10; +    where &lt;built-in method get of dict object at 0x000001B1CB588AC0&gt; = {}.get">caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x000001B1CAE8AED0&gt;
+state = '08006', classification = 'connection_failure'
+
+    @pytest.mark.parametrize(('state', 'classification'), [
+        ('42P01', 'missing_relation'), ('42501', 'insufficient_privilege'),
+        ('08006', 'connection_failure'),
+    ])
+    def test_database_error_diagnostics_redacts_secrets(caplog, state, classification):
+        class DriverError(Exception):
+            sqlstate = state
+        error = OperationalError('SELECT ' + SECRETS[2], {'password': SECRETS[0]}, DriverError(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            response = asyncio.run(internal_error_handler(request(), error))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+&gt;       assert fields.get('sqlstate') == state
+E       AssertionError: assert None == '08006'
+E        +  where None = &lt;built-in method get of dict object at 0x000001B1CB588AC0&gt;('sqlstate')
+E        +    where &lt;built-in method get of dict object at 0x000001B1CB588AC0&gt; = {}.get
+
+tests\test_error_diagnostics.py:33: AssertionError</failure></testcase><testcase classname="tests.test_error_diagnostics" name="test_pool_timeout_is_distinguished_without_logging_exception_message" time="0.003"><failure message="AssertionError: assert None == 'pool_timeout'&#10; +  where None = &lt;built-in method get of dict object at 0x000001B1CAD8CD80&gt;('classification')&#10; +    where &lt;built-in method get of dict object at 0x000001B1CAD8CD80&gt; = {}.get">caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x000001B1CAE89CA0&gt;
+
+    def test_pool_timeout_is_distinguished_without_logging_exception_message(caplog):
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(request(), PoolTimeout(SECRETS[0])))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+&gt;       assert fields.get('classification') == 'pool_timeout'
+E       AssertionError: assert None == 'pool_timeout'
+E        +  where None = &lt;built-in method get of dict object at 0x000001B1CAD8CD80&gt;('classification')
+E        +    where &lt;built-in method get of dict object at 0x000001B1CAD8CD80&gt; = {}.get
+
+tests\test_error_diagnostics.py:51: AssertionError</failure></testcase><testcase classname="tests.test_error_diagnostics" name="test_unknown_operational_failure_stays_unconfirmed" time="0.004"><failure message="AssertionError: assert None == 'unconfirmed'&#10; +  where None = &lt;built-in method get of dict object at 0x000001B1CB58BF00&gt;('classification')&#10; +    where &lt;built-in method get of dict object at 0x000001B1CB58BF00&gt; = {}.get">caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x000001B1CAC478F0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001B1CAC475F0&gt;
+
+    def test_unknown_operational_failure_stays_unconfirmed(caplog, monkeypatch):
+        monkeypatch.delenv('BUYEROS_SOURCE_SHA', raising=False)
+        monkeypatch.delenv('VERCEL_GIT_COMMIT_SHA', raising=False)
+        error = OperationalError(SECRETS[0], {'bind': SECRETS[2]}, Exception(SECRETS[1]))
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(request(), error))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+&gt;       assert fields.get('classification') == 'unconfirmed'
+E       AssertionError: assert None == 'unconfirmed'
+E        +  where None = &lt;built-in method get of dict object at 0x000001B1CB58BF00&gt;('classification')
+E        +    where &lt;built-in method get of dict object at 0x000001B1CB58BF00&gt; = {}.get
+
+tests\test_error_diagnostics.py:64: AssertionError</failure></testcase><testcase classname="tests.test_error_diagnostics" name="test_diagnostic_context_rejects_secret_bearing_and_invalid_metadata" time="0.005"><failure message="AssertionError: assert None == '1d123054-2633-40b7-8e07-b6aed83dad98'&#10; +  where None = &lt;built-in method get of dict object at 0x000001B1CB177E40&gt;('request_id')&#10; +    where &lt;built-in method get of dict object at 0x000001B1CB177E40&gt; = {}.get">caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x000001B1CAC5AF30&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001B1CAC586E0&gt;
+
+    def test_diagnostic_context_rejects_secret_bearing_and_invalid_metadata(caplog, monkeypatch):
+        value = request()
+        value.state.database_diagnostics = {
+            'schema_head': SECRETS[0], 'runtime_role': SECRETS[1],
+            'pool_wait_ms': SECRETS[2], 'connection_timeout': SECRETS[0],
+        }
+        monkeypatch.setenv('BUYEROS_SOURCE_SHA', SECRETS[0])
+        with caplog.at_level(logging.ERROR):
+            asyncio.run(internal_error_handler(value, OperationalError(SECRETS[0], {}, Exception(SECRETS[1]))))
+        fields = getattr(caplog.records[-1], 'diagnostic', {})
+&gt;       assert fields.get('request_id') == REQUEST_ID
+E       AssertionError: assert None == '1d123054-2633-40b7-8e07-b6aed83dad98'
+E        +  where None = &lt;built-in method get of dict object at 0x000001B1CB177E40&gt;('request_id')
+E        +    where &lt;built-in method get of dict object at 0x000001B1CB177E40&gt; = {}.get
+
+tests\test_error_diagnostics.py:80: AssertionError</failure></testcase></testsuite></testsuites>

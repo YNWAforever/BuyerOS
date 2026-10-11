@@ -1,0 +1,44 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________ test_alembic_configuration_preserves_api_diagnostic_logger __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002A9043A1F40>
+
+    def test_alembic_configuration_preserves_api_diagnostic_logger(monkeypatch):
+        from io import StringIO
+        from pathlib import Path
+        from alembic import command
+        from alembic.config import Config
+        from buyeros_api.settings import get_settings
+    
+        root = Path(__file__).resolve().parents[1]
+        logger = logging.getLogger('buyeros_api.api.errors')
+        monkeypatch.setattr(logger, 'disabled', False)
+        monkeypatch.setenv('BUYEROS_DATABASE_URL', 'postgresql://fixture:fixture@127.0.0.1/buyeros_test_offline')
+        monkeypatch.setenv('BUYEROS_DATABASE_MIGRATION_URL', 'postgresql://fixture:fixture@127.0.0.1/buyeros_test_offline')
+        get_settings.cache_clear()
+        config = Config(str(root / 'alembic.ini'), output_buffer=StringIO())
+        config.set_main_option('script_location', str(root / 'alembic'))
+        try:
+            command.upgrade(config, '0037_bulk_manifests:head', sql=True)
+>           assert logger.disabled is False, 'migration logging disabled the existing API diagnostic logger'
+E           AssertionError: migration logging disabled the existing API diagnostic logger
+E           assert True is False
+E            +  where True = <Logger buyeros_api.api.errors (WARNING)>.disabled
+
+tests\test_error_diagnostics.py:137: AssertionError
+---------------------------- Captured stderr call -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Generating static SQL
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 0037_bulk_manifests -> 0038_c61_workspace_directory, Restricted current-actor directory; no RLS policy or runtime privilege widening.
+============================== warnings summary ===============================
+tests/test_error_diagnostics.py::test_alembic_configuration_preserves_api_diagnostic_logger
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-migration-logging-red.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_error_diagnostics.py::test_alembic_configuration_preserves_api_diagnostic_logger
+1 failed, 1 warning in 2.08s

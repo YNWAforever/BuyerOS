@@ -236,8 +236,9 @@ def seed_outbox(
 ) -> None:
     conn.execute(
         "INSERT INTO outbox_events"
-        " (id, workspace_id, intent_key, event_type, payload, state, fencing_generation, lease_expires_at)"
-        " VALUES (%s, %s, %s, %s, %s::jsonb, %s, %s, %s)",
+        " (id, workspace_id, intent_key, event_type, payload, state, fencing_generation, lease_expires_at, runtime_backend, runtime_epoch)"
+        " SELECT %s, %s, %s, %s, %s::jsonb, %s, %s, %s, backend, epoch"
+        " FROM worker_runtime_control WHERE singleton=1",
         (
             outbox_id or str(uuid.uuid4()),
             workspace_id,

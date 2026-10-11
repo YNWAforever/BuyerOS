@@ -1,0 +1,12 @@
+✔ keyboard locale observer discards a body lost by actual document replacement and awaits the new real read (2.2211ms)
+✔ late response from a previous document never invokes its evicted body reader (0.2577ms)
+✔ a current document body failure remains an actual error (1.0593ms)
+✔ a newer real response supersedes an earlier held response in the same document (0.4648ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1535.4732

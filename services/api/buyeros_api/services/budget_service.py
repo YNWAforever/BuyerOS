@@ -11,7 +11,7 @@ from ..db.icp import Project
 
 ZERO = Decimal("0.000000")
 UNIT = Decimal("0.000001")
-CATEGORIES = frozenset({"discovery", "extraction", "assessment", "contact_lookup", "draft_generation"})
+CATEGORIES = frozenset({"discovery", "extraction", "assessment", "contact_lookup", "draft_generation", "delivery"})
 RANK = {"workspace": 0, "project": 1, "run": 2, "category": 3}
 
 

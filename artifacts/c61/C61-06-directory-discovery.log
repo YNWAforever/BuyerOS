@@ -1,0 +1,31 @@
+tests/test_workspace_listing_db.py::test_list_workspaces_reads_a_real_membership_under_runtime_role
+tests/test_workspace_listing_db.py::test_list_workspaces_paginates_authorized_memberships
+tests/test_workspace_listing_db.py::test_directory_queries_bounded_with_unrelated_workspaces
+tests/test_workspace_listing_db.py::test_verified_subject_scope_revocation_and_real_pages
+tests/test_workspace_listing_db.py::test_pooled_member_nonmember_revoked_member_clears_actor_and_tenant
+tests/test_workspace_listing_db.py::test_directory_real_twenty_row_pages_read_every_visible_workspace_once[21]
+tests/test_workspace_listing_db.py::test_directory_real_twenty_row_pages_read_every_visible_workspace_once[101]
+tests/test_workspace_listing_db.py::test_directory_oversized_offset_is_empty_instead_of_database_overflow
+tests/test_identity_resolver_db.py::test_identity_resolver_preserves_canonical_uuid_and_exact_issuer_subject
+tests/test_identity_resolver_db.py::test_identity_resolver_unknown_identity_does_not_create_user
+tests/test_workspace_directory_function_db.py::test_directory_function_acl_keeps_tenant_policy_and_runtime_nonprivileged
+tests/test_workspace_directory_function_db.py::test_directory_function_rejects_missing_malformed_or_forged_actor[None]
+tests/test_workspace_directory_function_db.py::test_directory_function_rejects_missing_malformed_or_forged_actor[]
+tests/test_workspace_directory_function_db.py::test_directory_function_rejects_missing_malformed_or_forged_actor[not-a-uuid]
+tests/test_workspace_directory_function_db.py::test_directory_function_rejects_missing_malformed_or_forged_actor[different]
+tests/test_workspace_directory_function_db.py::test_directory_session_is_readonly_and_one_snapshot_with_next_request_revocation
+tests/test_workspace_benchmark_tools.py::test_directory_metrics_keep_failed_requests_and_unstable_small_sample
+tests/test_workspace_benchmark_tools.py::test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuites tests="0"/>]
+tests/test_workspace_benchmark_tools.py::test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuite><testcase><skipped/></testcase></testsuite>]
+tests/test_workspace_benchmark_tools.py::test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuite><testcase><failure/></testcase></testsuite>]
+tests/test_workspace_benchmark_tools.py::test_directory_capture_rejects_empty_or_nonpassing_required_junit[<testsuite><testcase><error/></testcase></testsuite>]
+tests/test_workspace_benchmark_tools.py::test_directory_capture_accepts_actual_positive_required_case
+tests/test_workspace_benchmark_tools.py::test_directory_capture_rejects_inherited_database_before_subprocess
+
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+23 tests collected in 8.55s

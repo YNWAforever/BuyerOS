@@ -1,0 +1,239 @@
+FFFF                                                                     [100%]
+================================== FAILURES ===================================
+______________________ test_onboarding_dry_run_no_write _______________________
+
+staff = ('postgresql://buyeros:buyeros@127.0.0.1:58430/buyeros_test_api', UUID('b84f0ebc-104c-4408-a580-dbf1ece4e197'))
+
+    def test_onboarding_dry_run_no_write(staff):
+        dsn, user = staff
+        before = counts(dsn)
+>       result = run([row(user)])
+                 ^^^^^^^^^^^^^^^^
+
+tests\test_staff_onboarding_db.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_staff_onboarding_db.py:23: in run
+    return asyncio.run(exercise())
+           ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_staff_onboarding_db.py:18: in exercise
+    module = importlib.import_module('buyeros_api.services.staff_onboarding')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'buyeros_api.services.staff_onboarding'
+import_ = <function _gcd_import at 0x000002B1A43880E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+---------------------------- Captured stderr setup ----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001_initial, initial tenant boundary: workspaces, users, memberships
+INFO  [alembic.runtime.migration] Running upgrade 0001_initial -> 0002_rls_and_roles, row-level security and least-privilege runtime roles
+INFO  [alembic.runtime.migration] Running upgrade 0002_rls_and_roles -> 0003_p2_tables, P2 domain tables (projects, buyers, evidence, policy, budget, outbox) + RLS
+INFO  [alembic.runtime.migration] Running upgrade 0003_p2_tables -> 0004_p4_p5_tables, P4/P5 tables (quotes, provider ops, drafts, approvals, outcomes) + RLS
+INFO  [alembic.runtime.migration] Running upgrade 0004_p4_p5_tables -> 0005_p3_tables, P3 tables (runs, events, candidates, aliases, contacts) + RLS
+INFO  [alembic.runtime.migration] Running upgrade 0005_p3_tables -> 0006_worker_leases, worker leases and outbox dispatch columns
+INFO  [alembic.runtime.migration] Running upgrade 0006_worker_leases -> 0007_outbox_terminal_state, terminal outbox states, claim index and dispatcher workspace read
+INFO  [alembic.runtime.migration] Running upgrade 0007_outbox_terminal_state -> 0008_grant_users_select, grant SELECT on users to the API role
+INFO  [alembic.runtime.migration] Running upgrade 0008_grant_users_select -> 0009_project_profile_columns, project profile columns and ICP supersession
+INFO  [alembic.runtime.migration] Running upgrade 0009_project_profile_columns -> 0010_widen_idempotency_key, widen idempotency_records.key to the contract's 200 chars
+INFO  [alembic.runtime.migration] Running upgrade 0010_widen_idempotency_key -> 0011_project_buyer_version, buyer version and idempotency response storage
+INFO  [alembic.runtime.migration] Running upgrade 0011_project_buyer_version -> 0012_offer_basis_revision, Track the offer revision used by immutable ICP versions.
+INFO  [alembic.runtime.migration] Running upgrade 0012_offer_basis_revision -> 0013_project_link_constraints, Constrain project-bound links across a shared workspace.
+INFO  [alembic.runtime.migration] Running upgrade 0013_project_link_constraints -> 0014_buyer_management, Version buyer lists and persist actor-scoped presets under tenant RLS.
+INFO  [alembic.runtime.migration] Running upgrade 0014_buyer_management -> 0015_policy_lifecycle, Give policy and suppression the full purpose/subject lifecycle contract.
+INFO  [alembic.runtime.migration] Running upgrade 0015_policy_lifecycle -> 0016_bulk_jobs, Durable actor-bound bulk jobs and per-buyer results.
+INFO  [alembic.runtime.migration] Running upgrade 0016_bulk_jobs -> 0017_settings_audit, Version existing memberships and persist actor preferences and audit request IDs.
+INFO  [alembic.runtime.migration] Running upgrade 0017_settings_audit -> 0018_budget_ledger, Versioned UTC budget scopes, one operation hold and economic-event identity.
+INFO  [alembic.runtime.migration] Running upgrade 0018_budget_ledger -> 0019_offer_documents, Private offer documents and fetched-source retention metadata.
+INFO  [alembic.runtime.migration] Running upgrade 0019_offer_documents -> 0020_research_provenance, Bind canonical candidates and evidence to one tenant/run/provider context.
+INFO  [alembic.runtime.migration] Running upgrade 0020_research_provenance -> 0021_run_bounds, Persist immutable run admission basis and cumulative execution counters.
+INFO  [alembic.runtime.migration] Running upgrade 0021_run_bounds -> 0022_research_checkpoints, Own LangGraph Postgres saver 3.1.2 schema in Alembic, never at runtime.
+INFO  [alembic.runtime.migration] Running upgrade 0022_research_checkpoints -> 0023_contact_quote_basis, Bind optional contact quotes to actor, project and immutable eligibility basis.
+INFO  [alembic.runtime.migration] Running upgrade 0023_contact_quote_basis -> 0024_contact_job_execution, Persist contact job versions and provider intent/result ownership.
+INFO  [alembic.runtime.migration] Running upgrade 0024_contact_job_execution -> 0025_provider_callback_route, Narrow, non-PII callback routing index for verified vendor references.
+INFO  [alembic.runtime.migration] Running upgrade 0025_provider_callback_route -> 0026_sender_identity_versions, Bind reviewed sender metadata to an active project-owned version.
+INFO  [alembic.runtime.migration] Running upgrade 0026_sender_identity_versions -> 0027_draft_integrity, Constrain draft buyer scope and make written revisions immutable.
+INFO  [alembic.runtime.migration] Running upgrade 0027_draft_integrity -> 0028_draft_approval_context, Bind draft approval review and recipient context without rewriting historical approvals.
+INFO  [alembic.runtime.migration] Running upgrade 0028_draft_approval_context -> 0029_export_authorization, Keep actor-bound export manifests so every content read can reauthorize live data.
+INFO  [alembic.runtime.migration] Running upgrade 0029_export_authorization -> 0030_manual_outcome_provenance, Bind manual outcomes to project and make runtime writes append-only.
+INFO  [alembic.runtime.migration] Running upgrade 0030_manual_outcome_provenance -> 0031_retention_redaction, Allow narrow, irreversible retention redaction of derived draft and approval payloads.
+INFO  [alembic.runtime.migration] Running upgrade 0031_retention_redaction -> 0032_contact_retention, Add explicit contact expiry and one-way addressed-draft redaction.
+INFO  [alembic.runtime.migration] Running upgrade 0032_contact_retention -> 0033_api_rate_windows, Durable per-actor API rate windows under tenant RLS.
+INFO  [alembic.runtime.migration] Running upgrade 0033_api_rate_windows -> 0034_worker_execution, Add disabled runtime selector, fenced step receipts and machine replay guard.
+INFO  [alembic.runtime.migration] Running upgrade 0034_worker_execution -> 0035_worker_recovery_probe, Bounded recovery cursor and minimal Queue/Workflow operational receipt.
+INFO  [alembic.runtime.migration] Running upgrade 0035_worker_recovery_probe -> 0036_checkpoint_schema_grants, Keep the pinned saver schema-version table read-only for native workers.
+INFO  [alembic.runtime.migration] Running upgrade 0036_checkpoint_schema_grants -> 0037_bulk_manifests, Actor-bound frozen maintenance manifests, preserving ordinary snapshot bounds.
+INFO  [alembic.runtime.migration] Running upgrade 0037_bulk_manifests -> 0038_c61_workspace_directory, Restricted current-actor directory; no RLS policy or runtime privilege widening.
+___________________________ test_same_email_no_link ___________________________
+
+staff = ('postgresql://buyeros:buyeros@127.0.0.1:58430/buyeros_test_api', UUID('cea78c8b-3e31-415a-8d92-45c22dd72189'))
+
+    def test_same_email_no_link(staff):
+        dsn, _ = staff
+        claims = jwt.decode(fx.make_token(sub=ADMIN), options={'verify_signature': False})
+        claims['email'] = 'shared-fixture@example.invalid'
+        token = jwt.encode(claims, fx._private_key, algorithm='RS256', headers={'kid': fx.KID})
+        before = counts(dsn)
+>       assert run([row(uuid.uuid4())], token=token, apply=True)[0]['status'] == 'pending-identity'
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_staff_onboarding_db.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_staff_onboarding_db.py:23: in run
+    return asyncio.run(exercise())
+           ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_staff_onboarding_db.py:18: in exercise
+    module = importlib.import_module('buyeros_api.services.staff_onboarding')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'buyeros_api.services.staff_onboarding'
+import_ = <function _gcd_import at 0x000002B1A43880E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+_________________________ test_conflict_no_escalation _________________________
+
+staff = ('postgresql://buyeros:buyeros@127.0.0.1:58430/buyeros_test_api', UUID('acfd26d5-5df2-4fc2-8fe5-11521f300019'))
+
+    def test_conflict_no_escalation(staff):
+        dsn, user = staff
+        member = uuid.uuid4()
+        with psycopg.connect(dsn) as owner:
+            owner.execute('INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES (%s,%s,%s,%s,false)',
+                          (member, WORKSPACE_A, user, ['viewer']))
+        before = counts(dsn)
+>       result = run([row(user, roles=['workspace_admin'], version=1)], apply=True)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_staff_onboarding_db.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_staff_onboarding_db.py:23: in run
+    return asyncio.run(exercise())
+           ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_staff_onboarding_db.py:18: in exercise
+    module = importlib.import_module('buyeros_api.services.staff_onboarding')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'buyeros_api.services.staff_onboarding'
+import_ = <function _gcd_import at 0x000002B1A43880E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+__________________________ test_last_admin_survives ___________________________
+
+staff = ('postgresql://buyeros:buyeros@127.0.0.1:58430/buyeros_test_api', UUID('3e0bada1-fb17-4fd7-881c-8309d7f22a5d'))
+
+    def test_last_admin_survives(staff):
+        dsn, _ = staff
+        actor = uuid.uuid5(uuid.NAMESPACE_URL, ADMIN)
+>       result = run([row(actor, roles=['viewer'], version=1)], apply=True)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_staff_onboarding_db.py:86: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_staff_onboarding_db.py:23: in run
+    return asyncio.run(exercise())
+           ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_staff_onboarding_db.py:18: in exercise
+    module = importlib.import_module('buyeros_api.services.staff_onboarding')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'buyeros_api.services.staff_onboarding'
+import_ = <function _gcd_import at 0x000002B1A43880E0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_staff_onboarding_db.py::test_onboarding_dry_run_no_write
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-onboarding-red.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_staff_onboarding_db.py::test_onboarding_dry_run_no_write - ...
+FAILED tests/test_staff_onboarding_db.py::test_same_email_no_link - ModuleNot...
+FAILED tests/test_staff_onboarding_db.py::test_conflict_no_escalation - Modul...
+FAILED tests/test_staff_onboarding_db.py::test_last_admin_survives - ModuleNo...
+4 failed, 2 warnings in 12.90s

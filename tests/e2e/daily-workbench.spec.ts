@@ -118,40 +118,63 @@ for (const locale of ['en','zh-HK'] as const) {
   });
 }
 
-test('T29 locale waits for current preference version and survives a fresh sign-in',async({page})=>{
+test('T29 manual locale remains usable while preference loads and saves with its current version',async({page})=>{
   test.setTimeout(120_000);
-  let releasePreference:()=>void=()=>{};
+  let releasePreference:()=>void=()=>{},preferenceReads=0;
+  const preferenceWrites:string[]=[];
   const heldPreference=new Promise<void>(resolve=>{releasePreference=resolve;});
-  await page.route(`${browserApiOrigin}/v1/workspaces/${workspace}/preferences`,async route=>{
-    if(route.request().method()==='GET') await heldPreference;
+  const preferencePath=`/v1/workspaces/${workspace}/preferences`;
+  const isPreference=(response:import('@playwright/test').Response)=>new URL(response.url()).pathname===preferencePath;
+  await page.route(`${browserApiOrigin}${preferencePath}`,async route=>{
+    if(route.request().method()==='GET'){preferenceReads++;await heldPreference;}
+    else if(route.request().method()==='PATCH')preferenceWrites.push(route.request().headers()['if-match']);
     await route.continue();
   });
+  const loadedPreference=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='GET'&&response.status()===200,{timeout:30_000});
   try{
     await signIn(page,false);
     await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue(workspace,{timeout:30_000});
-    await expect(page.locator('header select')).toBeDisabled();
+    await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});
+    await expect.poll(()=>preferenceReads,{timeout:30_000}).toBeGreaterThan(0);
+    await expect(page.locator('header select')).toBeEnabled();
+    await page.locator('header select').selectOption('zh-HK');
+    await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
+    expect(preferenceWrites).toEqual([]);
   }finally{
     releasePreference();
   }
-  await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});
-  await expect(page.locator('header select')).toBeEnabled({timeout:30_000});
-  if(await page.locator('header select').inputValue()==='zh-HK'){
-    const reset=page.waitForResponse(response=>response.url().includes('/preferences')
-      && response.request().method()==='PATCH',{timeout:30_000});
-    await page.locator('header select').selectOption('en');
-    expect((await reset).status()).toBe(200);
-  }
-  const saved=page.waitForResponse(response=>response.url().includes('/preferences')
-    && response.request().method()==='PATCH',{timeout:30_000});
-  await page.locator('header select').selectOption('zh-HK');
-  expect((await saved).status()).toBe(200);
+  const loadedResponse=await loadedPreference;
+  expect(await loadedResponse.finished()).toBeNull();
+  const loaded=(await loadedResponse.json()).data;
+  expect(Number.isInteger(loaded.version)).toBe(true);
+  await expect(page.locator('header select')).toHaveValue('zh-HK');
   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
+  const reset=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='PATCH',{timeout:30_000});
+  await page.locator('header select').selectOption('en');
+  const resetResponse=await reset;
+  expect(resetResponse.status()).toBe(200);
+  expect(await resetResponse.request().headerValue('if-match')).toBe(`"${loaded.version}"`);
+  const resetVersion=(await resetResponse.json()).data.version;
+  await expect(page.locator('header select')).toBeEnabled({timeout:30_000});
+  const saved=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='PATCH',{timeout:30_000});
+  await page.locator('header select').selectOption('zh-HK');
+  const savedResponse=await saved;
+  expect(savedResponse.status()).toBe(200);
+  expect(await savedResponse.request().headerValue('if-match')).toBe(`"${resetVersion}"`);
+  const savedVersion=(await savedResponse.json()).data.version;
+  expect(preferenceWrites).toEqual([`"${loaded.version}"`,`"${resetVersion}"`]);
+  await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
+  const restoredPreference=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='GET'&&response.status()===200,{timeout:30_000});
   await page.reload();
-  await page.getByRole('button',{name:'Sign in'}).click();
+  await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
   await expect(page.getByRole('combobox',{name:/^(Project|專案)$/}))
     .toHaveValue(project,{timeout:30_000});
+  const restored=(await (await restoredPreference).json()).data;
+  expect(restored.locale).toBe('zh-HK');
+  expect(restored.version).toBe(savedVersion);
   await expect(page.locator('header select')).toHaveValue('zh-HK',{timeout:30_000});
   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
+  await page.screenshot({path:'test-results/pr11-ci-followup-20261006/locale-restored-zh.png',fullPage:true});
 });
 
 test('T29 operations resolves a failed profile lookup without a permanent spinner',async({page})=>{

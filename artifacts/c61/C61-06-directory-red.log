@@ -1,0 +1,66 @@
+..F....FF                                                                [100%]
+================================== FAILURES ===================================
+__________ test_directory_queries_bounded_with_unrelated_workspaces ___________
+
+directory_case = {'add': <function directory_case.<locals>.add_workspace at 0x00000255A55B0EA0>, 'dsn': 'postgresql://buyeros:buyeros@1...bjects': ['q13-fixture-cb775119-c185-4d23-ab8e-b640025ebe1e', 'q13-fixture-47d9e450-61a2-4933-8c39-d8b08316ee1b'], ...}
+
+    def test_directory_queries_bounded_with_unrelated_workspaces(directory_case):
+        case = directory_case
+        visible, member = case['add'](0)
+        statements, maxima = [], []
+        def observed(conn, cursor, statement, parameters, context, executemany):
+            statements.append(statement)
+        event.listen(Engine, 'before_cursor_execute', observed)
+        try:
+            with TestClient(create_app(), raise_server_exceptions=False) as client:
+                previous = 1
+                for total in (1,10,100,1000):
+                    for _ in range(previous,total):
+                        case['add']()
+                    statements.clear()
+                    result = client.get('/v1/workspaces?limit=1',headers=case['headers'][0])
+                    assert result.status_code == 200, result.text
+                    assert_contract_response('WorkspacePageResponse',result.json())
+                    assert result.json()['data'] == dict(items=[dict(id=str(visible),name='Q13 fixture',membership_id=str(member),roles=['operator'],data_mode='live')],offset=0,limit=1,total=1)
+                    maxima.append(len(statements))
+                    previous=total
+>           assert max(maxima)<=6, f"P09 SQL budget: observed {maxima} for W=1/10/100/1000"
+E           AssertionError: P09 SQL budget: observed [8, 26, 206, 2006] for W=1/10/100/1000
+E           assert 2006 <= 6
+E            +  where 2006 = max([8, 26, 206, 2006])
+
+tests\test_workspace_listing_db.py:172: AssertionError
+__ test_identity_resolver_preserves_canonical_uuid_and_exact_issuer_subject ___
+
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:50072/buyeros_test_api'
+
+    def test_identity_resolver_preserves_canonical_uuid_and_exact_issuer_subject(seeded):
+>       from buyeros_api.services.identity_resolver import resolve_user_id
+E       ModuleNotFoundError: No module named 'buyeros_api.services.identity_resolver'
+
+tests\test_identity_resolver_db.py:11: ModuleNotFoundError
+________ test_identity_resolver_unknown_identity_does_not_create_user _________
+
+seeded = 'postgresql://buyeros:buyeros@127.0.0.1:50072/buyeros_test_api'
+
+    def test_identity_resolver_unknown_identity_does_not_create_user(seeded):
+>       from buyeros_api.services.identity_resolver import resolve_user_id
+E       ModuleNotFoundError: No module named 'buyeros_api.services.identity_resolver'
+
+tests\test_identity_resolver_db.py:34: ModuleNotFoundError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_workspace_listing_db.py::test_list_workspaces_reads_a_real_membership_under_runtime_role
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\api\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-directory-red.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_workspace_listing_db.py::test_directory_queries_bounded_with_unrelated_workspaces
+FAILED tests/test_identity_resolver_db.py::test_identity_resolver_preserves_canonical_uuid_and_exact_issuer_subject
+FAILED tests/test_identity_resolver_db.py::test_identity_resolver_unknown_identity_does_not_create_user
+3 failed, 6 passed, 2 warnings in 62.79s (0:01:02)

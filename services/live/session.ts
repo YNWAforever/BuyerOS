@@ -1,3 +1,4 @@
+import {LiveCancelled} from './client';
 import type {DataMode} from './mode';
 
 export interface Scope { mode: DataMode; actor: string; workspace: string | null; project: string | null; }
@@ -14,6 +15,9 @@ export class SessionScope {
   private currentController = new AbortController();
   private currentToken: string | undefined;
   private listeners = new Set<() => void>();
+  private clearListeners = new Set<() => void>();
+  private transitionGuard: ((proceed: () => Promise<void>) => Promise<boolean>) | null = null;
+  private transitioning = false;
   private snapshot: ScopeSnapshot;
 
   constructor(initial: {mode: DataMode; actor?: string; workspace?: string | null; project?: string | null}) {
@@ -28,6 +32,20 @@ export class SessionScope {
     this.listeners.add(listener);
     return () => { this.listeners.delete(listener); };
   };
+  subscribeBeforeClear(listener: () => void): () => void {
+    this.clearListeners.add(listener); return () => {this.clearListeners.delete(listener);};
+  }
+  registerTransitionGuard(handler: (proceed: () => Promise<void>) => Promise<boolean>): () => void {
+    this.transitionGuard = handler;
+    return () => {if (this.transitionGuard === handler) this.transitionGuard = null;};
+  }
+  async transition(proceed: () => Promise<void>): Promise<boolean> {
+    if (this.transitioning) return false;
+    const identity = this.identity(); this.transitioning = true;
+    const guarded = async () => {if (!this.isCurrent(identity)) throw new LiveCancelled('scope changed'); await proceed();};
+    try {if (this.transitionGuard) return await this.transitionGuard(guarded); await guarded(); return true;}
+    finally {this.transitioning = false;}
+  }
   getSnapshot = (): ScopeSnapshot => this.snapshot;
   current(): Scope { return {...this.scope}; }
   identity(): string { return `${this.generation}:${scopeKey(this.scope)}`; }
@@ -45,6 +63,7 @@ export class SessionScope {
   token(): string | undefined { return this.currentToken; }
   setToken(token: string | undefined): void {
     if (this.currentToken === token) return;
+    if (!token) for (const listener of this.clearListeners) {try {listener();} catch {/* Security clearing cannot be prevented by a buffer/storage failure. */}}
     this.currentToken = token;
     if (!token) this.next({actor: '', workspace: null, project: null});
     else this.publish();

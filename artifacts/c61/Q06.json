@@ -1,0 +1,16 @@
+{
+  "name": "Q06",
+  "command": [
+    "node",
+    "--test",
+    "tests/job-poller-checks.mjs"
+  ],
+  "cwd": ".",
+  "source_sha": "3abd73aeb2d4000619ac80ee0a0b53de43c73034",
+  "tested_tree": "dd8f4d09741391d35a91e16225f3f91455227265",
+  "started_at_utc": "2026-10-06T17:03:19.611540+00:00",
+  "seconds": 0.858,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q06.log"
+}

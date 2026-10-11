@@ -1,0 +1,27 @@
+{
+  "source_sha": "35226658ebc15367fd643b207184464e6108d6f6",
+  "source_sha_after": "35226658ebc15367fd643b207184464e6108d6f6",
+  "started_at_utc": "2026-10-06T17:27:01.315283+00:00",
+  "seconds": 14.936,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_error_diagnostics.py",
+    "tests/test_api_routes_contract.py",
+    "tests/test_contract_required_fields.py",
+    "--junitxml=../../artifacts/c61/c61-diag.xml"
+  ],
+  "cwd": "services/api",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-04-verified.log",
+  "tests": 20,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-diag.xml",
+  "required_gate_exit_code": 0
+}

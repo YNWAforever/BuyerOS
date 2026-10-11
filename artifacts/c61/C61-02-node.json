@@ -1,0 +1,22 @@
+{
+  "source_sha": "35226658ebc15367fd643b207184464e6108d6f6",
+  "source_sha_after": "35226658ebc15367fd643b207184464e6108d6f6",
+  "started_at_utc": "2026-10-06T17:13:12.369362+00:00",
+  "seconds": 2.292,
+  "command": [
+    "node",
+    "--test",
+    "tests/audit-*.test.mjs",
+    "tests/job-poller-checks.mjs"
+  ],
+  "cwd": ".",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-02-node.log",
+  "tests": 45,
+  "pass": 45,
+  "fail": 0,
+  "skipped": 0,
+  "cancelled": 0,
+  "required_gate_exit_code": 0
+}

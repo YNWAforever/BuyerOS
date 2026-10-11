@@ -1,0 +1,16 @@
+{
+  "name": "Q04",
+  "command": [
+    "node",
+    "--test",
+    "tests/audit-research-intent.test.mjs"
+  ],
+  "cwd": ".",
+  "source_sha": "650f25b5ca2ab1b8d96098d098629275b7b7eb7d",
+  "tested_tree": "32b0cbb39e70388b4dbcc67e0007bdb43d30791d",
+  "started_at_utc": "2026-10-06T17:01:43.255889+00:00",
+  "seconds": 2.167,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q04.log"
+}

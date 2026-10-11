@@ -1,4 +1,8 @@
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+import {transformWithOxc} from 'vite';
 import {loadModule} from './ts-loader.mjs';
 const {SessionScope}=await loadModule('services/live/session.ts');
 const {createAuthAdapter, normalizeReturnPath}=await loadModule('services/live/auth.ts');
@@ -105,3 +109,54 @@ await check('logout drops the token and uses an allowlisted origin return URL',a
  assert.equal(url.searchParams.get('access_token'),null);
 });
 console.log(`${n} live auth checks passed including OIDC crypto`);
+
+// Exercise the actual layout argument after the actual Vite public definitions.
+// Cloudflare RSC has its own process.env; the Node build environment is separate.
+const {loadPublicAuth}=await loadModule('lib/auth/public-auth.ts');
+const layout=ts.createSourceFile('app/layout.tsx',readFileSync('app/layout.tsx','utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const authArguments=[];
+function visit(node){
+ if(ts.isCallExpression(node)&&ts.isIdentifier(node.expression)&&node.expression.text==='loadPublicAuth'){
+  assert.equal(node.arguments.length,1);authArguments.push(node.arguments[0].getText(layout));
+ }
+ ts.forEachChild(node,visit);
+}
+visit(layout);assert.equal(authArguments.length,1);
+const configSource=ts.createSourceFile('vite.config.ts',readFileSync('vite.config.ts','utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TS);
+const defineExpressions=[];
+function visitConfig(node){
+ if(ts.isPropertyAssignment(node)&&node.name.getText(configSource)==='define')defineExpressions.push(node.initializer.getText(configSource));
+ ts.forEachChild(node,visitConfig);
+}
+visitConfig(configSource);assert.equal(defineExpressions.length,1);
+const publicSlots=['BUYEROS_AUTH0_ISSUER','BUYEROS_AUTH0_CLIENT_ID','BUYEROS_AUTH0_AUDIENCE'];
+const publicValues=['https://oidc.buyeros.test/','fixture-public-client','fixture-api'];
+async function compiledAuth(values,runtime={}){
+ const buildEnvironment=Object.fromEntries(publicSlots.map((key,i)=>[key,values[i]]));
+ const definitions=vm.runInNewContext(`(${defineExpressions[0]})`,{process:{env:buildEnvironment},vercelTarget:false});
+ const transformed=await transformWithOxc(`globalThis.captured=${authArguments[0]};`,'layout-public-config.ts',{define:definitions});
+ const scope={process:{env:runtime}};vm.runInNewContext(transformed.code,scope);
+ return loadPublicAuth(scope.captured);
+}
+await check('compiled layout public auth remains configured in an empty Cloudflare RSC environment',async()=>{
+ assert.deepEqual(await compiledAuth(publicValues),{provider:'auth0',config:{issuer:publicValues[0],clientId:publicValues[1],audience:publicValues[2]}});
+});
+await check('compiled layout public auth remains closed when any required public setting is missing',async()=>{
+ for(let i=0;i<publicSlots.length;i++){
+  const values=[...publicValues];values[i]='';assert.deepEqual(await compiledAuth(values),{provider:'auth0',config:null});
+ }
+});
+await check('compiled layout preserves runtime provider selection and closed Neon configuration',async()=>{
+ const unavailable=await compiledAuth(publicValues,{BUYEROS_AUTH_PROVIDER:'unexpected'});
+ assert.equal(unavailable.provider,'unavailable');
+ const closed=await compiledAuth(publicValues,{BUYEROS_AUTH_PROVIDER:'neon',BUYEROS_NEON_AUTH_ROUTE_ENABLED:'0'});
+ assert.equal(closed.provider,'unavailable');assert.match(closed.message,/Neon/);
+ const neon=await compiledAuth(publicValues,{BUYEROS_AUTH_PROVIDER:'neon',BUYEROS_NEON_AUTH_ROUTE_ENABLED:'1',
+  NODE_ENV:'production',BUYEROS_NEON_ENVIRONMENT:'preview',VERCEL_ENV:'preview',
+  BUYEROS_NEON_AUTH_URL:'https://fixture.neon.tech/auth',BUYEROS_NEON_EXPECTED_AUTH_URL:'https://fixture.neon.tech/auth',
+  BUYEROS_PUBLIC_ORIGIN:'https://buyeros.test',BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN:'https://buyeros.test',
+  BUYEROS_NEON_COOKIE_SECRET:'synthetic-runtime-config-control'.repeat(2)});
+ assert.deepEqual(neon,{provider:'neon',config:{authPath:'/api/auth'}});
+ assert.equal(JSON.stringify(neon).includes('synthetic-runtime'),false);
+});
+console.log(`${n} live auth checks passed including compiled public runtime`);

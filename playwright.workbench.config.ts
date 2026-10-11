@@ -3,6 +3,7 @@ const reuse=process.env.BUYEROS_REUSE_TEST_SERVER==='1';
 export default defineConfig({
   globalTeardown:'./tests/e2e/teardown.ts',
   testDir:'./tests/e2e',testMatch:'daily-workbench.spec.ts',workers:1,
+  outputDir:'test-results/workbench/browser',
   use:{baseURL:'http://localhost:5173',browserName:'chromium',viewport:{width:1120,height:800}},
   webServer:[
     {command:'uv run --frozen python tools/serve_e2e_fixture.py',cwd:'services/api',url:'http://127.0.0.1:8000/health/live',timeout:600_000,reuseExistingServer:reuse,

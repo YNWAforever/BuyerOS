@@ -16,3 +16,19 @@ def test_normalize_strips_fragment_and_default_port():
 
 def test_normalize_keeps_non_default_port():
     assert normalize_url("http://example.com:8080/x") == "http://example.com:8080/x"
+
+
+def test_retrieved_excerpt_has_complete_utf8_codepoints():
+    import asyncio
+    from buyeros_api.services.safe_fetch import fetch_permitted_document
+    class Transport:
+        pinned_connections = True
+        async def resolve(self, host): return ["93.184.216.34"]
+        async def get(self, url, **kwargs):
+            return 200, {"content-type": "text/plain; charset=utf-8"}, ("a"*3999+"香港😀").encode()
+    class Store:
+        async def put_private(self, body, **kwargs): return "owned-synthetic-source"
+    result = asyncio.run(fetch_permitted_document({"url": "https://public.example.test/company", "permitted": True, "retention_seconds": 60}, Transport(), Store()))
+    assert result["status"] == "retrieved"
+    assert result["excerpt"] == "a"*3999
+    assert len(result["excerpt"].encode()) <= 4000

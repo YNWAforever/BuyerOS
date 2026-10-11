@@ -1,0 +1,20 @@
+{
+  "source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "tree_sha": "d2d8884564a78aad83e9cbd369deeff3b16c4dc3",
+  "base_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+  "ci_run_id": null,
+  "deployment_id": null,
+  "api_sha": null,
+  "schema_head": null,
+  "worker_sha": null,
+  "runtime_selector": null,
+  "epoch": null,
+  "evidence_paths": [
+    "docs/buyeros/evidence/c61/baseline-integrity.json",
+    "docs/buyeros/evidence/c61/integration-selection.json"
+  ],
+  "predeploy_ready": false,
+  "release_accepted": false,
+  "neon_only_accepted": false,
+  "native_send_accepted": false
+}

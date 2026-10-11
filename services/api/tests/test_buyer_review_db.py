@@ -164,6 +164,8 @@ def api(seeded, monkeypatch):
             "DELETE FROM outbox_events WHERE workspace_id = %s",
             "DELETE FROM async_job_items WHERE workspace_id = %s",
             "DELETE FROM async_jobs WHERE workspace_id = %s",
+            "DELETE FROM bulk_manifest_items WHERE workspace_id = %s",
+            "DELETE FROM bulk_manifests WHERE workspace_id = %s",
             "DELETE FROM filter_presets WHERE workspace_id = %s",
             "DELETE FROM policy_decisions WHERE workspace_id = %s",
             "DELETE FROM suppressions WHERE workspace_id = %s",
@@ -803,7 +805,8 @@ def test_expired_or_deleted_source_is_not_current_evidence(api, seeded):
     assert "source_url" not in deleted.json()["data"]
 
 
-def test_0011_downgrade_truncates_a_long_review_reason(migrated):
+def test_0011_downgrade_truncates_a_long_review_reason(isolated_migrated):
+    migrated = isolated_migrated
     """0011's downgrade narrows `reason` without failing on a stored >400-char value."""
     import os
 

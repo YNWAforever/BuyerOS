@@ -1,0 +1,16 @@
+{
+  "name": "Q15",
+  "command": [
+    "node",
+    "--test",
+    "tests/audit-draft-guard.test.mjs"
+  ],
+  "cwd": ".",
+  "source_sha": "a16990509e099a17ce26948c6a02cdca8e0ea2c8",
+  "tested_tree": "a65b453d76a91f394041b2bd42107d9bf76e38cc",
+  "started_at_utc": "2026-10-06T17:01:46.541125+00:00",
+  "seconds": 1.054,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q15.log"
+}

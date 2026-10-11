@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.744" timestamp="2026-10-07T04:15:55.239225+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_api_app" name="test_internal_error_logs_only_type_and_request_id" time="0.005"><failure message="assert 'ValueError' in 'ERROR    buyeros_api.api.errors:errors.py:112 unexpected_api_error request_id=a393efc1-36a6-4edb-8727-8626f73ecfb6 ty...id&quot;:&quot;a393efc1-36a6-4edb-8727-8626f73ecfb6&quot;,&quot;runtime_role&quot;:null,&quot;schema_head&quot;:null,&quot;source_sha&quot;:null,&quot;sqlstate&quot;:null}\n'&#10; +  where 'ERROR    buyeros_api.api.errors:errors.py:112 unexpected_api_error request_id=a393efc1-36a6-4edb-8727-8626f73ecfb6 ty...id&quot;:&quot;a393efc1-36a6-4edb-8727-8626f73ecfb6&quot;,&quot;runtime_role&quot;:null,&quot;schema_head&quot;:null,&quot;source_sha&quot;:null,&quot;sqlstate&quot;:null}\n' = &lt;_pytest.logging.LogCaptureFixture object at 0x000001C30FA3B9B0&gt;.text">caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x000001C30FA3B9B0&gt;
+
+    def test_internal_error_logs_only_type_and_request_id(caplog):
+        import asyncio
+        import logging
+        from fastapi import Request
+        from buyeros_api.api.errors import internal_error_handler
+    
+        request = Request({"type": "http", "method": "GET", "path": "/v1/test", "headers": []})
+        request.state.request_id = "a393efc1-36a6-4edb-8727-8626f73ecfb6"
+        with caplog.at_level(logging.ERROR, logger="buyeros_api.api.errors"):
+            response = asyncio.run(internal_error_handler(request, ValueError("CANARY_PRIVATE_TOKEN")))
+        assert response.status_code == 500
+        assert b"CANARY_PRIVATE_TOKEN" not in response.body
+&gt;       assert "ValueError" in caplog.text
+E       assert 'ValueError' in 'ERROR    buyeros_api.api.errors:errors.py:112 unexpected_api_error request_id=a393efc1-36a6-4edb-8727-8626f73ecfb6 ty...id":"a393efc1-36a6-4edb-8727-8626f73ecfb6","runtime_role":null,"schema_head":null,"source_sha":null,"sqlstate":null}\n'
+E        +  where 'ERROR    buyeros_api.api.errors:errors.py:112 unexpected_api_error request_id=a393efc1-36a6-4edb-8727-8626f73ecfb6 ty...id":"a393efc1-36a6-4edb-8727-8626f73ecfb6","runtime_role":null,"schema_head":null,"source_sha":null,"sqlstate":null}\n' = &lt;_pytest.logging.LogCaptureFixture object at 0x000001C30FA3B9B0&gt;.text
+
+tests\test_api_app.py:103: AssertionError</failure></testcase></testsuite></testsuites>

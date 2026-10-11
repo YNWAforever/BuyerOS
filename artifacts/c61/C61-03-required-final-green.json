@@ -1,0 +1,29 @@
+{
+  "source_sha": "8dabf5435877ccce8249a6a2a6fff0a1b1fbd803",
+  "source_sha_after": "8dabf5435877ccce8249a6a2a6fff0a1b1fbd803",
+  "started_at_utc": "2026-10-06T20:39:11.805270+00:00",
+  "seconds": 35.333,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_staff_onboarding_db.py",
+    "tests/test_staff_onboarding_cli.py",
+    "tests/test_membership_directory_db.py",
+    "tests/test_identity_resolver_db.py",
+    "--junitxml=../../artifacts/c61/c61-onboarding-final-green.xml"
+  ],
+  "cwd": "services/api",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-03-required-final-green.log",
+  "fresh_junit": true,
+  "tests": 36,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-onboarding-final-green.xml",
+  "required_gate_exit_code": 0
+}

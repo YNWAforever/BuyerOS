@@ -5,6 +5,8 @@ import { DataModeProvider } from "@/features/providers/data-mode";
 import { WorkspaceSessionProvider } from "@/features/providers/workspace-session";
 import { resolveMode } from "@/services/live/mode";
 
+import {loadPublicAuth} from "@/lib/auth/public-auth";
+
 export const metadata: Metadata = {
   title: "FIMMICK BuyerOS",
   description: "Buyer discovery, evidence review and human-approved outreach. Private demo workspace.",
@@ -29,7 +31,13 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <DataModeProvider mode={mode} apiBaseUrl={apiBaseUrl}>
-          <WorkspaceSessionProvider authConfig={process.env.BUYEROS_AUTH0_ISSUER && process.env.BUYEROS_AUTH0_CLIENT_ID && process.env.BUYEROS_AUTH0_AUDIENCE ? {issuer: process.env.BUYEROS_AUTH0_ISSUER, clientId: process.env.BUYEROS_AUTH0_CLIENT_ID, audience: process.env.BUYEROS_AUTH0_AUDIENCE} : null}>
+          <WorkspaceSessionProvider publicAuth={loadPublicAuth({
+            ...process.env,
+            // Vite injects these public settings into the separate Cloudflare RSC runtime.
+            BUYEROS_AUTH0_ISSUER: process.env.BUYEROS_AUTH0_ISSUER,
+            BUYEROS_AUTH0_CLIENT_ID: process.env.BUYEROS_AUTH0_CLIENT_ID,
+            BUYEROS_AUTH0_AUDIENCE: process.env.BUYEROS_AUTH0_AUDIENCE,
+          })}>
             <Workspace mode={mode} />{children}
           </WorkspaceSessionProvider>
         </DataModeProvider>

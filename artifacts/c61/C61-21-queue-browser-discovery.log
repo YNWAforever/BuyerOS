@@ -1,0 +1,5 @@
+Listing tests:
+  work-queue-counts.spec.ts:12:26 › U15/C61T-09 project A en desktop cards equal each real filtered list
+  work-queue-counts.spec.ts:12:26 › U15/C61T-09 project B zh-HK mobile cards equal each real filtered list
+  work-queue-counts.spec.ts:33:1 › C61T-09 held project summary cannot overwrite newer scope; failed refresh stays unavailable
+Total: 3 tests in 1 file

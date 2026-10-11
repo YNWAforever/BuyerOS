@@ -1,0 +1,25 @@
+{
+  "name": "Q02",
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_membership_directory_db.py",
+    "--junitxml=../../artifacts/c61/Q02-db.xml"
+  ],
+  "cwd": "services\\api",
+  "source_sha": "aa957aa683a37e7fcd0041392d87ba8580c38a62",
+  "tested_tree": "fb2acdd20672487c60dcaa5310c37fee8fb70dc5",
+  "started_at_utc": "2026-10-06T17:01:48.955429+00:00",
+  "seconds": 62.093,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q02.log",
+  "tests": 7,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/Q02-db.xml"
+}

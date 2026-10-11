@@ -1,0 +1,24 @@
+{
+  "source_parent_sha": "22f11abfbde4f3c422b866d0a7eec2a9c9742951",
+  "tested_uncommitted_source": [
+    {
+      "path": "services/api/buyeros_api/api/jwks.py",
+      "sha256": "b53ead26dcceb0cacdefc8b6b7aa4a8ef9cf017401f8a7e3dcb9e9d253c97f6f"
+    },
+    {
+      "path": "services/api/tests/test_jwks_cold_concurrency.py",
+      "sha256": "9b37dac08f43d0534d699e137eb2b425795d92091f39de378af68e3ebf5d85d7"
+    }
+  ],
+  "focused_required_cases": 51,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "red": "artifacts/c61/C61-02-cold-jwks-red.json",
+  "green": "artifacts/c61/C61-02-cold-jwks-green.json",
+  "root_cause": "cooldown rejected valid cold-cache concurrent request before the existing key fetch completed",
+  "trust_rules_changed": false,
+  "full_api_ci": "previous 22f11ab run 767 pass and 1 fail; new source full gate pending",
+  "historical_workspace_500_cause_confirmed": false,
+  "deployed": false
+}

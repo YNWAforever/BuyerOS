@@ -1,0 +1,16 @@
+{
+  "primary_source_sha": "f7cb47798017a3646d1339830495a20ff9792d15",
+  "api_tested_source_sha": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "identical_product_git_trees": {
+    "services/api/buyeros_api": "15b344aab4d64f1c817242b8868c8ae5e648c269",
+    "services/api/alembic": "7f1f35f1d7dba73bcf2c5932a633210494cf7190",
+    "features/live": "ac93d93ccccff5c93c6f939837054987c245add2",
+    "services/live": "dba971a269c634fab261ad41f92daaba273b3d77"
+  },
+  "tests": 863,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "environment": "Owned PG16/API fixture with synthetic providers; no live acceptance",
+  "proof_scope": "Git product tree equality only; tests and tooling need not have identical trees"
+}

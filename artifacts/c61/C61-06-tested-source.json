@@ -1,0 +1,100 @@
+{
+  "parent_sha": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "source_state": "uncommitted implementation; exact tested file bytes below bridge to eventual source commit",
+  "required_suite": {
+    "tests": 39,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "benchmark": {
+    "stages": 4,
+    "samples_per_stage": 30,
+    "sql_per_request": [
+      4,
+      4,
+      4,
+      4
+    ],
+    "fixture_only": true,
+    "production_accepted": false
+  },
+  "files": [
+    {
+      "path": "services/api/buyeros_api/api/deps.py",
+      "sha256": "2a7184f04d7dd10eded0bb3446b2e9cf69f5469913c4de3e05054c9796a49509"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/workspaces.py",
+      "sha256": "9f4d54b542d486c518b5e29da7830044ceee66721a005bc779fc79a14eb9b534"
+    },
+    {
+      "path": "services/api/buyeros_api/db/models.py",
+      "sha256": "b0d5a7169d8c79f84c5e72a3f6936a673188632435689e006c83ce169ca0a251"
+    },
+    {
+      "path": "services/api/buyeros_api/db/session.py",
+      "sha256": "1cb7c2b23332fc614bed6b857ecfcbccb3e8a7ce0ee7be49cca1aa49b0d9addf"
+    },
+    {
+      "path": "services/api/buyeros_api/services/identity_resolver.py",
+      "sha256": "9045d108499f886d26d18686642c9ca9022aa4caea2bd8a158ecbb40cf591fb3"
+    },
+    {
+      "path": "services/api/buyeros_api/services/workspace_directory.py",
+      "sha256": "92ba100352d0a5a2b7f0ffb5e9e7b9ba8bd57a62e7f97cae3087a8d840ab65d1"
+    },
+    {
+      "path": "services/api/buyeros_api/services/worker_recovery.py",
+      "sha256": "a5ec33da27cd2babd2513e52cd730f0bc00459afb305cd4fda9697ff9f456c03"
+    },
+    {
+      "path": "services/api/alembic/versions/0038_c61_workspace_directory.py",
+      "sha256": "8970021770a72946cea409a446ebeb55ced9ce16e397ac18d4b9e77bda39d7ee"
+    },
+    {
+      "path": "scripts/benchmark-workspace-directory.py",
+      "sha256": "ba7d5dbc9a2dfc3a1a5b02b75386a18d7e8b80880f56df27436384202534a2a0"
+    },
+    {
+      "path": "services/api/tools/quality_metrics.py",
+      "sha256": "c510a40589984995c8f1ddc3bcf9eeab5211ffd7d23ce7116fa36a9491dbc0e9"
+    },
+    {
+      "path": "services/api/tests/test_workspace_listing_db.py",
+      "sha256": "070f5719661dae7915d636adbedd0f6d05bd1349001b8d6ebb2a11ac983770fe"
+    },
+    {
+      "path": "services/api/tests/test_identity_resolver_db.py",
+      "sha256": "6b1105f155e4c63dc35d3921ddaf965792c82a189d6ae8a3cbf61cb8675dcd33"
+    },
+    {
+      "path": "services/api/tests/test_workspace_benchmark_tools.py",
+      "sha256": "67b950c02ff9705489aea5f93abe556e50955e43453f17a36aa36eea0eb46db1"
+    },
+    {
+      "path": "services/api/tests/test_workspace_directory_function_db.py",
+      "sha256": "5a3419a5c10d09329304870861f4036300bdc197a01fefb4166849d7aedcac50"
+    },
+    {
+      "path": "services/api/tests/benchmark_workspace_directory_case.py",
+      "sha256": "e39d3746b973deb0c9edc06bcc837a7d6ca4ef4a35380d3588c8c79193f7a442"
+    },
+    {
+      "path": "services/api/tests/test_checkpoint_schema_privileges_db.py",
+      "sha256": "fa7ab0beb46ab8b3874c90053c46f352e19bbd247ee80f4b1d4e722c3fc0b8df"
+    }
+  ],
+  "migration_payload": [
+    {
+      "path": "artifacts\\c61\\c61-workspace-directory-upgrade.sql",
+      "sha256": "9e4cd64e155af4e51435574051eab6583a6a688fa8eb55557840f8cd00404533",
+      "bytes": 2693
+    },
+    {
+      "path": "artifacts\\c61\\c61-workspace-directory-rollback.sql",
+      "sha256": "d00909018383a0ce3536ad5c71595a7044989b2e505095e64488453586409a20",
+      "bytes": 362
+    }
+  ]
+}

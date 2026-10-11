@@ -43,19 +43,30 @@ def eligible(gates: dict) -> tuple[bool, list[str]]:
     return (not reasons), reasons
 
 
-def _verified_capability(capability, project: Project, roles: list[str], environment: str) -> None:
+def _verified_capability(capability, project: Project, roles: list[str], environment: str) -> dict | None:
     if capability is None or capability.service != "contact" or not capability.roles:
         raise ApiError(503, "PROVIDER_UNAVAILABLE", "verified contact pricing is unavailable")
+    configuration=None
     for market in project.markets or []:
         for language in project.language_preferences or []:
             blockers = contact_activation_blockers(capability, market=market, language=language,
                 role=sorted(capability.roles)[0], environment=environment)
             if blockers:
                 raise ApiError(503, "PROVIDER_UNAVAILABLE", "verified contact pricing is unavailable")
+            if environment!='test':
+                from .contact_configuration import current_contact_configuration
+                try:
+                    current=current_contact_configuration(capability,market=market,language=language,
+                        role=sorted(capability.roles)[0],environment=environment)
+                except ValueError as exc:
+                    raise ApiError(503,"PROVIDER_UNAVAILABLE","current reviewed contact scope is unavailable") from exc
+                if configuration is None:
+                    configuration=current
     if not project.markets or not project.language_preferences:
         raise ApiError(503, "PROVIDER_UNAVAILABLE", "project market/language is not verified")
     if capability.max_liability is None or capability.max_liability.amount <= 0:
         raise ApiError(503, "PROVIDER_UNAVAILABLE", "bounded contact pricing is unavailable")
+    return configuration
 
 
 async def _latest(session, model, workspace_id, buyer_id):
@@ -114,7 +125,7 @@ async def quote_lookup(session, actor_id: uuid.UUID, project_id: uuid.UUID, requ
             icp.basis_offer_revision != project.offer_revision or
             icp.content_hash != canonical_hash(icp.content)):
         raise ApiError(412, "STALE_REVISION", "current approved buyer profile is required")
-    _verified_capability(capability, project, request.roles, environment)
+    configuration=_verified_capability(capability, project, request.roles, environment)
     selection = request.selection.model_dump(mode="json")
     selected = await _resolve_items(session, workspace_id=workspace_id, project_id=project_id,
                                     actor_user_id=actor_id, selection=selection)
@@ -202,11 +213,15 @@ async def quote_lookup(session, actor_id: uuid.UUID, project_id: uuid.UUID, requ
                "per_buyer_max_cost": format(capability.max_liability.amount, ".6f"),
                "roles": request.roles, "contact_type": request.contact_type,
                "rows": basis_rows}
+    if configuration is not None:
+        context['contact_configuration']=configuration
+    frozen_selection={"request":request_data,"resolved":basis_rows,"context_hash":quote_hash(context)}
+    if configuration is not None:
+        frozen_selection['contact_configuration']=configuration
     expires_at = now + QUOTE_TTL
     quote = EnrichmentQuote(
         workspace_id=workspace_id, project_id=project_id, actor_id=actor_id,
-        purpose=request.purpose, selection={"request": request_data, "resolved": basis_rows,
-                                            "context_hash": quote_hash(context)},
+        purpose=request.purpose, selection=frozen_selection,
         request_hash=request_fingerprint,
         quote_hash=quote_hash({"context": context, "expires_at": expires_at.isoformat()}),
         adapter_version=capability.adapter_version, price_version=capability.pricing_version,

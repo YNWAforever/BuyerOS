@@ -254,3 +254,27 @@ def test_addressed_admission_rejects_ineligible_contact_or_policy(quote_case, ch
     assert response.status_code == (403 if changed == "policy_blocked" else 412), response.text
     with psycopg.connect(dsn) as db:
         assert db.execute("SELECT count(*) FROM async_jobs WHERE operation='generateDraft'").fetchone()[0] == 0
+
+
+def test_fixed_template_style_metadata_stays_compatible_and_zero_cost(quote_case):
+    api, dsn, buyers = quote_case
+    evidence_id = _prepare(api, dsn, buyers[0][0])
+    jobs = []
+    for index, (objective, tone) in enumerate([
+            ("Request a demonstration", "professional"), ("Discuss procurement", "warm")]):
+        body = {**_request(buyers[0][0], evidence_id), "objective": objective, "tone": tone}
+        response = api.post(f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/drafts",
+                            json=body, headers=_h(OPERATOR, key=f"q07-template-metadata-{index}"))
+        assert response.status_code == 202, response.text
+        assert_contract_response("AsyncJobResponse", response.json())
+        jobs.append((response.json()["data"]["id"], objective, tone))
+    assert jobs[0][0] != jobs[1][0]
+    with psycopg.connect(dsn) as db:
+        for job_id, objective, tone in jobs:
+            command = db.execute("SELECT command FROM async_jobs WHERE id=%s AND workspace_id=%s",
+                                 (job_id, WORKSPACE_A)).fetchone()[0]
+            assert (command["objective"], command["tone"], command["route"], command["max_cost"]) == (
+                objective, tone, "grounded-template.v1", "0.000000")
+        assert db.execute("SELECT count(*) FROM outbox_events WHERE workspace_id=%s AND event_type='draft.generate'", (WORKSPACE_A,)).fetchone()[0] == 2
+        for table in ("provider_operations", "budget_reservations"):
+            assert db.execute(f"SELECT count(*) FROM {table} WHERE workspace_id=%s", (WORKSPACE_A,)).fetchone()[0] == 0

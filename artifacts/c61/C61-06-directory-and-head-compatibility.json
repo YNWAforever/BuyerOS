@@ -1,0 +1,30 @@
+{
+  "source_sha": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "source_sha_after": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "started_at_utc": "2026-10-06T19:32:28.640661+00:00",
+  "seconds": 707.445,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_workspace_listing_db.py",
+    "tests/test_identity_resolver_db.py",
+    "tests/test_workspace_benchmark_tools.py",
+    "tests/test_workspace_directory_function_db.py",
+    "tests/test_checkpoint_schema_privileges_db.py::test_operator_previews_current_head_without_mutating_selector",
+    "--junitxml=../../artifacts/c61/c61-directory-head-compat.xml"
+  ],
+  "cwd": "services/api",
+  "exit_code": 1,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-06-directory-and-head-compatibility.log",
+  "fresh_junit": true,
+  "tests": 24,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-directory-head-compat.xml",
+  "required_gate_exit_code": 1
+}

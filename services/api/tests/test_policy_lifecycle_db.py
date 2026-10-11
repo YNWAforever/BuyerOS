@@ -222,7 +222,8 @@ def test_current_policy_gate_waits_for_inflight_policy_mutation(api, seeded):
     assert waiting is True
     assert result["status"] == "permitted"
 
-def test_0015_policy_upgrade_and_safe_downgrade_on_disposable_db(migrated, monkeypatch):
+def test_0015_policy_upgrade_and_safe_downgrade_on_disposable_db(isolated_migrated, monkeypatch):
+    migrated = isolated_migrated
     from alembic import command
     from alembic.config import Config
     from tests.test_buyer_review_db import ALEMBIC_INI, SERVICE_ROOT
@@ -238,4 +239,4 @@ def test_0015_policy_upgrade_and_safe_downgrade_on_disposable_db(migrated, monke
         assert conn.execute("SELECT count(*) FROM information_schema.columns WHERE table_name='policy_decisions' AND column_name='subject_id'").fetchone()[0] == 0
     command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0050_c61_delivery_authorizations"

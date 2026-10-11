@@ -1,0 +1,29 @@
+{
+  "source_sha": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "source_sha_after": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "started_at_utc": "2026-10-06T19:47:23.157012+00:00",
+  "seconds": 101.901,
+  "command": [
+    "python",
+    "-X",
+    "utf8",
+    "scripts/benchmark-workspace-directory.py",
+    "--samples",
+    "30",
+    "--actors",
+    "1",
+    "--output",
+    "artifacts/c61/c61-directory-measured.json"
+  ],
+  "cwd": ".",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-06-directory-benchmark-green.log",
+  "fresh_junit": true,
+  "tests": 1,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-directory-measured.xml",
+  "required_gate_exit_code": 0
+}

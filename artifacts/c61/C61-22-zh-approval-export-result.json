@@ -1,0 +1,198 @@
+{
+  "fixture_only": true,
+  "draft": {
+    "id": "cfa7d6aa-2419-4408-bf38-6841b4d476f2",
+    "workspace_id": "e0000000-0000-4000-8000-000000000001",
+    "version": 5,
+    "created_at": "2026-10-06T21:12:39.801594+00:00",
+    "updated_at": "2026-10-06T21:12:43.242263+00:00",
+    "data_mode": "live",
+    "project_id": "e1000000-0000-4000-8000-000000000001",
+    "buyer_id": "e2000000-0000-4000-8000-000000000001",
+    "status": "approved",
+    "revision_id": "7e40df61-e9dc-4d16-8f8d-3eb013dac359",
+    "revision_number": 3,
+    "content_hash": "f29375c4cfec83c5cbdf8a9a9cb5849b53d762348f15bcc5659a41123bbd1179",
+    "context_hash": "cb7d6f7127e6f74cea7f63a1f65f07a54359e51cfce89d8f70fd7565bd173b6b",
+    "icp_version_id": "e6000000-0000-4000-8000-000000000001",
+    "evidence_set_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "policy_decision_ids": [
+      "9589e1ad-29b5-4068-bc48-dd48e3d49f70",
+      "ed000000-0000-4000-8000-000000000001",
+      "ffa55751-1a0b-469a-aed4-dbb0fc35c61d"
+    ],
+    "kind": "initial",
+    "subject": "邀請😀了解產品",
+    "body": "您好👩‍💻\nFictional industrial sensors\nFixture public catalog lists industrial sensors.\n謝謝！",
+    "language": "zh-HK",
+    "evidence_refs": [
+      {
+        "id": "e5000000-0000-4000-8000-000000000001",
+        "version": 1
+      }
+    ],
+    "claims": [
+      {
+        "kind": "non_factual",
+        "text": "邀請",
+        "evidence_ids": [],
+        "offer_fact_ids": []
+      },
+      {
+        "kind": "non_factual",
+        "text": "😀了解產品",
+        "evidence_ids": [],
+        "offer_fact_ids": []
+      },
+      {
+        "kind": "non_factual",
+        "text": "您好👩‍💻",
+        "evidence_ids": [],
+        "offer_fact_ids": []
+      },
+      {
+        "kind": "offer_fact",
+        "text": "Fictional industrial sensors",
+        "evidence_ids": [],
+        "offer_fact_ids": [
+          "eb000000-0000-4000-8000-000000000001"
+        ]
+      },
+      {
+        "kind": "observation",
+        "text": "Fixture public catalog lists industrial sensors.",
+        "evidence_ids": [
+          "e5000000-0000-4000-8000-000000000001"
+        ],
+        "offer_fact_ids": []
+      },
+      {
+        "kind": "non_factual",
+        "text": "謝謝！",
+        "evidence_ids": [],
+        "offer_fact_ids": []
+      }
+    ],
+    "approval_id": "8ac57718-7e57-46d2-9f4a-c5d5af9fea50",
+    "delivery_enabled": false,
+    "value_proposition_fact_ids": [
+      "eb000000-0000-4000-8000-000000000001"
+    ],
+    "grounding_review": {
+      "reason": "Full message and every versioned source read",
+      "segments": [
+        {
+          "end": 2,
+          "field": "subject",
+          "start": 0,
+          "reason": "Greeting, invitation or closing; no factual assertion",
+          "exact_text": "邀請",
+          "evidence_refs": [],
+          "classification": "non_factual",
+          "offer_fact_refs": []
+        },
+        {
+          "end": 7,
+          "field": "subject",
+          "start": 2,
+          "reason": "Greeting, invitation or closing; no factual assertion",
+          "exact_text": "😀了解產品",
+          "evidence_refs": [],
+          "classification": "non_factual",
+          "offer_fact_refs": []
+        },
+        {
+          "end": 5,
+          "field": "body",
+          "start": 0,
+          "reason": "Greeting, invitation or closing; no factual assertion",
+          "exact_text": "您好👩‍💻",
+          "evidence_refs": [],
+          "classification": "non_factual",
+          "offer_fact_refs": []
+        },
+        {
+          "end": 34,
+          "field": "body",
+          "start": 6,
+          "reason": "Read original retained source",
+          "exact_text": "Fictional industrial sensors",
+          "evidence_refs": [],
+          "classification": "factual",
+          "offer_fact_refs": [
+            {
+              "id": "eb000000-0000-4000-8000-000000000001",
+              "icp_version_id": "e6000000-0000-4000-8000-000000000001",
+              "icp_content_hash": "326e0a52aade3b431513ecb475d4446b61afdb0f4da92bbf8a1f5d2461213cb5"
+            }
+          ]
+        },
+        {
+          "end": 83,
+          "field": "body",
+          "start": 35,
+          "reason": "Read original retained source",
+          "exact_text": "Fixture public catalog lists industrial sensors.",
+          "evidence_refs": [
+            {
+              "id": "e5000000-0000-4000-8000-000000000001",
+              "version": 1
+            }
+          ],
+          "classification": "factual",
+          "offer_fact_refs": []
+        },
+        {
+          "end": 87,
+          "field": "body",
+          "start": 84,
+          "reason": "Greeting, invitation or closing; no factual assertion",
+          "exact_text": "謝謝！",
+          "evidence_refs": [],
+          "classification": "non_factual",
+          "offer_fact_refs": []
+        }
+      ],
+      "reviewed_at": "2026-10-06T21:12:42.846043+00:00",
+      "reviewed_by": "e0000000-0000-4000-8000-000000000004",
+      "based_on_revision_id": "721911d8-3514-4c8a-a639-9b3aa56666c0",
+      "based_on_content_hash": "378b9d6d0730ec3fc0e34b351d1fa1dbb74ca06d3aeae5492d33b754c49cf048"
+    },
+    "approval_review": {
+      "recipient": {
+        "id": "ef070000-0000-4000-8000-000000000001",
+        "version": 1,
+        "value": "recipient@fixture.example.test",
+        "validity": "provider_marked_valid"
+      },
+      "sender": {
+        "version_key": "sender:ea000000-0000-4000-8000-000000000001:1",
+        "display_name": "Fixture Alex",
+        "organization": "Fictional Seller",
+        "business_email": "alex@example.test"
+      },
+      "evidence": [
+        {
+          "id": "e5000000-0000-4000-8000-000000000001",
+          "version": 1,
+          "source_id": "e4000000-0000-4000-8000-000000000001"
+        }
+      ],
+      "policy_decision_ids": [
+        "9589e1ad-29b5-4068-bc48-dd48e3d49f70",
+        "ed000000-0000-4000-8000-000000000001",
+        "ffa55751-1a0b-469a-aed4-dbb0fc35c61d"
+      ],
+      "fit_id": "e7000000-0000-4000-8000-000000000001",
+      "review_id": "e8000000-0000-4000-8000-000000000001",
+      "icp_version_id": "e6000000-0000-4000-8000-000000000001",
+      "context_hash": "cb7d6f7127e6f74cea7f63a1f65f07a54359e51cfce89d8f70fd7565bd173b6b"
+    },
+    "objective": "Introduce the approved offer",
+    "tone": "professional",
+    "sender_identity_version": "sender:ea000000-0000-4000-8000-000000000001:1",
+    "recipient_contact_id": "ef070000-0000-4000-8000-000000000001"
+  },
+  "viewer_export": 403,
+  "delivery": 403
+}

@@ -1,0 +1,27 @@
+{
+  "source_sha": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "source_sha_after": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "started_at_utc": "2026-10-06T20:26:35.381044+00:00",
+  "seconds": 5.826,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_error_diagnostics.py",
+    "tests/test_api_app.py",
+    "--junitxml=../../artifacts/c61/c61-logging-compat-green.xml"
+  ],
+  "cwd": "services/api",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-04-logging-compatibility-green.log",
+  "fresh_junit": true,
+  "tests": 22,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-logging-compat-green.xml",
+  "required_gate_exit_code": 0
+}

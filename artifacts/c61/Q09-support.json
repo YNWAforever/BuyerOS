@@ -1,0 +1,16 @@
+{
+  "name": "Q09-support",
+  "command": [
+    "node",
+    "--test",
+    "tests/audit-profile-read.test.mjs"
+  ],
+  "cwd": ".",
+  "source_sha": "ecb2f2ccc742571dd7e260a8f373572513b5e0a1",
+  "tested_tree": "9a6d9668c21013ee4122abf0100921c0fe5a1c5a",
+  "started_at_utc": "2026-10-06T17:08:52.711272+00:00",
+  "seconds": 0.664,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q09-support.log"
+}

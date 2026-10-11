@@ -1,0 +1,31 @@
+{
+  "source_sha": "22f11abfbde4f3c422b866d0a7eec2a9c9742951",
+  "source_sha_after": "22f11abfbde4f3c422b866d0a7eec2a9c9742951",
+  "started_at_utc": "2026-10-06T20:05:57.751565+00:00",
+  "seconds": 95.724,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_jwks_cold_concurrency.py",
+    "tests/test_jwks_cache.py",
+    "tests/test_auth_tenant.py",
+    "tests/test_api_auth.py",
+    "tests/test_auth_cache_lifecycle.py",
+    "tests/test_bulk_manifest_db.py::test_concurrent_same_preview_and_execute_key_produces_one_job_outbox",
+    "--junitxml=../../artifacts/c61/c61-cold-jwks-green.xml"
+  ],
+  "cwd": "services/api",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-02-cold-jwks-green.log",
+  "fresh_junit": true,
+  "tests": 51,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-cold-jwks-green.xml",
+  "required_gate_exit_code": 0
+}

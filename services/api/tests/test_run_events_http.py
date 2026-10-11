@@ -128,6 +128,24 @@ def test_retry_only_safe_fit_checkpoint_preserves_usage_and_checks_current_profi
         db.execute("UPDATE search_runs SET status='partial',stage='fit_review_required',"
                    "usage_counters=jsonb_set(usage_counters,'{queries}','3') WHERE id=%s", (run_id,))
     body={"reason":"resume verified fit", "resume_from_last_committed_checkpoint":True}
+    def original_state():
+        with psycopg.connect(dsn) as db:
+            run = db.execute("SELECT to_jsonb(r) FROM search_runs r WHERE id=%s", (run_id,)).fetchone()[0]
+            outbox = db.execute("SELECT to_jsonb(e) FROM outbox_events e WHERE workspace_id=%s AND payload->>'run_id'=%s ORDER BY id", (WORKSPACE_A,run_id)).fetchall()
+            assert db.execute("SELECT count(*) FROM provider_operations WHERE workspace_id=%s", (WORKSPACE_A,)).fetchone()[0] == 0
+            return run,outbox
+    before=original_state()
+    assert len(before[1]) == 1 and before[1][0][0]['event_type'] == 'run.discover'
+    assert before[1][0][0]['state'] == 'ready'
+    blocked=api.post(_url(run_id)+"/retry",json=body,
+                     headers=_h(key="t20-fit-retry-pending", **{"If-Match": '\"1\"'}))
+    assert blocked.status_code == 409 and blocked.json()['code'] == 'RETRY_UNSAFE', blocked.text
+    assert original_state() == before
+    # This owned fixture represents the original discovery checkpoint finishing.
+    # No external operation exists; production retry still requires all work settled.
+    with psycopg.connect(dsn,autocommit=True) as db:
+        completed=db.execute("UPDATE outbox_events SET state='done' WHERE workspace_id=%s AND event_type='run.discover' AND payload->>'run_id'=%s AND state='ready' RETURNING id", (WORKSPACE_A,run_id)).fetchall()
+        assert [str(row[0]) for row in completed] == [before[1][0][0]['id']]
     first=api.post(_url(run_id)+"/retry",json=body,
                    headers=_h(key="t20-fit-retry-001", **{"If-Match": '"1"'}))
     assert first.status_code == 202, first.text

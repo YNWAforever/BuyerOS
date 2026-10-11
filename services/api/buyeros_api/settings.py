@@ -15,11 +15,20 @@ class Settings(BaseSettings):
     database_migration_url: str | None = Field(default=None, repr=False, exclude=True)
     auth0_issuer: str | None = None
     auth0_audience: str | None = None
+    auth_mode: str = "auth0"
+    neon_issuer: str | None = None
+    neon_audience: str | None = None
+    neon_jwks_url: str | None = None
+    neon_expected_issuer: str | None = None
+    neon_expected_audience: str | None = None
+    neon_expected_jwks_url: str | None = None
+    auth_migration_expires_at: str | None = None
     jwks_cache_seconds: int = Field(default=300, ge=1)
     jwks_max_stale_seconds: int = Field(default=3600, ge=1)
     worker_heartbeat_max_age_seconds: int = Field(default=180, ge=30, le=3600)
     environment: str = "local"
     paid_admission_enabled: bool = False
+    delivery_admission_enabled: bool = False
     live_read_enabled: bool = True
     reconciliation_enabled: bool = True
     read_per_minute: int = Field(default=600, ge=1, le=10000)

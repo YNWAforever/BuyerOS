@@ -1,0 +1,129 @@
+{
+  "tested_parent_sha": "92d19d0b2c0bfbae236c231eff6c4603299ffc49",
+  "files": [
+    {
+      "path": "docs/buyeros/contracts/openapi.proposed.yaml",
+      "sha256": "6df19729164da71498c5c9a414d6c70875b2fe6a6dabf77ff02adbfbf0247792",
+      "git_blob": "c2aa883ff5dcd096ce8dc3e083a46b13e62a1367"
+    },
+    {
+      "path": "features/live/drafts.tsx",
+      "sha256": "28f4ec45f543bd47cf27e219a9842134a67450fa8d314d9c90f28846cc4ea1e4",
+      "git_blob": "a33288dd9ffad68debbd73a66f18b6b36f45c49b"
+    },
+    {
+      "path": "features/live/locale.ts",
+      "sha256": "1fab2384a22fda270fb379b3f280e237d824892519873aece16ecd6225828eb1",
+      "git_blob": "ecae9b5f267b033248124a38527fe3a16408018c"
+    },
+    {
+      "path": "features/live/operations.tsx",
+      "sha256": "1448293c9a0dc0e68dc441b4d31560574b40e833dd7d739df11670b55356d953",
+      "git_blob": "3972cb13b72990748f475cef3e42c56aafe42e05"
+    },
+    {
+      "path": "features/live/overview.tsx",
+      "sha256": "8cd03f7e2cf3b61874834f8afa9ebfd50708f1f5168f7d9cf4124446784ab48f",
+      "git_blob": "8311fd88315f5fc6c5fb1f94f7fa23374b6078f2"
+    },
+    {
+      "path": "playwright.audit-fixes.config.ts",
+      "sha256": "14906dbac0e1258c57fcc2bec730909861a9a7042ed547c346080c8b043d40c2",
+      "git_blob": "db486866e18632e5ac4009994f0f2a4ec63d9da4"
+    },
+    {
+      "path": "services/api/buyeros_api/api/app.py",
+      "sha256": "1e3307b7779cd93689a4d1e8eeee4aa4bed5629328f6d98cd5bf2b0a35ef5e50",
+      "git_blob": "0b03532c9bcd6b15930355ea37763862c2331335"
+    },
+    {
+      "path": "services/api/buyeros_api/api/deps.py",
+      "sha256": "84eb551ea6c585e842b0aa50880a23ddf5134abc41fabc989fdd692a7bb99e5b",
+      "git_blob": "6b0eceac9456c697beaa75fc6035dc80f563d586"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/drafts.py",
+      "sha256": "1864ff124fdb26e313486302e1188dbbf4ca821cc054f6caee4a171b3cfb77de",
+      "git_blob": "4fe333cfb7f54c0a5aaa92102e5e48957b34dd65"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/jobs.py",
+      "sha256": "2d7ba5d3148f3bd84d460d32e3245205d14c8e6d99fa7a939e8d03631f53e8e8",
+      "git_blob": "ed38f0352981c59923571a5cab5be63d61f1e763"
+    },
+    {
+      "path": "services/api/buyeros_api/api/routes/work_queue.py",
+      "sha256": "7db4dc9d6543b915d496c0f73bf1bfece7ebea72295e302c78064e1233af978d",
+      "git_blob": "7a581a7588117fffbd43c67dd3263cbcccfb4b95"
+    },
+    {
+      "path": "services/api/buyeros_api/services/work_queue.py",
+      "sha256": "74071f2fbd070692912ea492c2ab4c2c448c2e73ae3d5030da853d066392957d",
+      "git_blob": "0e347f3dccc9418482967771272a4154c0c47fce"
+    },
+    {
+      "path": "services/api/tests/test_api_buyers.py",
+      "sha256": "32eba514e02175c05c55fcdb63b59d024597f1bf2d404735d1db40bb3b538235",
+      "git_blob": "061e9d11c6a4fbf4ba6d365bec20909bd2ebd1d9"
+    },
+    {
+      "path": "services/api/tests/test_work_queue_db.py",
+      "sha256": "47a5bf9b8ca294605b835c1608267ee92ad06f9bf911d6ff7d7cd73bcb92a94c",
+      "git_blob": "dd07a5c0642936ae3909bdcd6dcf08719eb8dc5f"
+    },
+    {
+      "path": "services/generated/buyeros-api.ts",
+      "sha256": "1530ce1ea2054758aad467cf15bc068da0c6c95c71cd31a61d83484201097378",
+      "git_blob": "379d0a90d3d4906f288695e49445163f7e833914"
+    },
+    {
+      "path": "services/generated/operation-routes.ts",
+      "sha256": "e59a7cd8e050eefb946e4aa42d63d0c5d7df31af44f5f94986abb064cb38a10e",
+      "git_blob": "a0c62b897edb61f2b5dd73cf1baf5c82e449e4fd"
+    },
+    {
+      "path": "services/live/drafts.ts",
+      "sha256": "1d21b5a90b689745beaf98c77f8b5fd221b24e5f744ad5730880d0f29cc33d1a",
+      "git_blob": "42e353630a6ed72720a61a8049da6be70864885d"
+    },
+    {
+      "path": "services/live/work-queue.ts",
+      "sha256": "123250666c9b63a7cc2e7ba4fb264177c58c04c88df62439088b38266501a75a",
+      "git_blob": "a77ba66cca580b7fb9fe58ebd600a70a92f92b0f"
+    },
+    {
+      "path": "services/worker/tests/fixtures/c61_work_queue.py",
+      "sha256": "26b0b099ded31dad11aaf6d16c37ddcc5533696ed8d1fa92b426aaf3a8a971f4",
+      "git_blob": "b392e77c244d6d7280fff10e680327c2610e9869"
+    },
+    {
+      "path": "tests/e2e/work-queue-counts.spec.ts",
+      "sha256": "32268b0640018703c0c6b0147b5652c4a307b8f15ae3ee9cb0075aa5bd3c4aac",
+      "git_blob": "d8d396994313b2a99f354968737529da92387e75"
+    },
+    {
+      "path": "tests/work-queue.test.mjs",
+      "sha256": "20df3cb7a8d73a9aac3f1defb2e1f1ee35b65441732bb0671da04d95f7a5c2e0",
+      "git_blob": "2acbad36c5d09fd0aae74b298e67f691f8318beb"
+    },
+    {
+      "path": "docs/buyeros/decisions/2026-10-07-work-queue-scope.md",
+      "sha256": "91ae5932881ee54188d110a1f3030df86ad9ad82fdb68270e3600bc104a2102d",
+      "git_blob": "942bac8ac4e93d303f8661f04c27c0236f50d577"
+    }
+  ],
+  "checks": [
+    "C61-21-queue-api-contract-final-green",
+    "C61-21-queue-ui-unit-final-green",
+    "C61-21-queue-final-typecheck",
+    "C61-21-generated-contract-final",
+    "C61-21-generated-routes-valid",
+    "C61-21-queue-browser-discovery"
+  ],
+  "api_cases": 54,
+  "ui_unit_cases": 5,
+  "discovered_browser_cases": 3,
+  "built_browser_run": "pending",
+  "review": "Shared predicates; exact workspace/project/canonical actor; bounded counts; READ ONLY REPEATABLE READ; no provider retry; current-revision pending list filter does not reset dirty editor; late scope reads rejected",
+  "environment": "Owned runtime-role PG16 and synthetic identity/provider inputs only; no external activation, spend or delivery"
+}

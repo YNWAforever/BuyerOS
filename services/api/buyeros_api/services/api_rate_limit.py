@@ -16,7 +16,7 @@ request_rate_bucket: ContextVar[str | None] = ContextVar("buyer_request_rate_buc
 _EXPENSIVE = frozenset({
     "projects", "buyers", "snapshots", "runs", "quotes", "exports",
     "drafts", "outcomes", "usage", "audit-events", "jobs", "evidence",
-    "documents", "bulk", "enrichment",
+    "documents", "bulk", "enrichment", "delivery-messages",
 })
 
 

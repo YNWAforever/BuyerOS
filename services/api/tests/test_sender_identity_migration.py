@@ -9,7 +9,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0036_checkpoint_schema_grants"
+HEAD = "0050_c61_delivery_authorizations"
 PROJECT_A = "a0000000-0000-4000-8000-000000000001"
 
 
@@ -24,7 +24,8 @@ def _head(dsn):
         return db.execute("SELECT version_num FROM alembic_version").fetchone()[0]
 
 
-def test_0026_empty_downgrade_and_reupgrade(migrated):
+def test_0026_empty_downgrade_and_reupgrade(isolated_migrated):
+    migrated = isolated_migrated
     assert _head(migrated) == HEAD
     try:
         command.downgrade(_config(), "0025_provider_callback_route")
@@ -38,7 +39,8 @@ def test_0026_empty_downgrade_and_reupgrade(migrated):
     assert _head(migrated) == HEAD
 
 
-def test_0026_refuses_to_drop_reviewed_sender(seeded):
+def test_0026_refuses_to_drop_reviewed_sender(isolated_seeded):
+    seeded = isolated_seeded
     sender_id = uuid.uuid4()
     with psycopg.connect(seeded, autocommit=True) as db:
         db.execute("INSERT INTO sender_identity_versions(id,workspace_id,project_id,version_key,display_name,"

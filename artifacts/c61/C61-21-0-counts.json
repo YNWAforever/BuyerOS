@@ -1,0 +1,53 @@
+{
+  "fixture_only": true,
+  "selected": {
+    "id": "5940aab2-85f0-42cd-b42d-8108e12fe413",
+    "counts": {
+      "awaiting_review": 3,
+      "pending_approval": 2,
+      "unassigned": 3,
+      "failed_job": 2,
+      "unknown_fit": 5,
+      "unknown_acceptance": 1
+    }
+  },
+  "as_of": "2026-10-06T21:40:17.129016+00:00",
+  "observations": [
+    {
+      "kind": "awaiting_review",
+      "total": 3,
+      "response_total": 3,
+      "query": "?workspace=e0000000-0000-4000-8000-000000000001&project=5940aab2-85f0-42cd-b42d-8108e12fe413&review=awaiting_review"
+    },
+    {
+      "kind": "pending_approval",
+      "total": 2,
+      "response_total": 2,
+      "query": "?workspace=e0000000-0000-4000-8000-000000000001&project=5940aab2-85f0-42cd-b42d-8108e12fe413&approval=pending"
+    },
+    {
+      "kind": "unassigned",
+      "total": 3,
+      "response_total": 3,
+      "query": "?workspace=e0000000-0000-4000-8000-000000000001&project=5940aab2-85f0-42cd-b42d-8108e12fe413&queue=unassigned"
+    },
+    {
+      "kind": "failed_job",
+      "total": 2,
+      "response_total": 2,
+      "query": "?workspace=e0000000-0000-4000-8000-000000000001&job_scope=project&project=5940aab2-85f0-42cd-b42d-8108e12fe413&job_status=failed"
+    },
+    {
+      "kind": "unknown_fit",
+      "total": 5,
+      "response_total": 5,
+      "query": "?workspace=e0000000-0000-4000-8000-000000000001&project=5940aab2-85f0-42cd-b42d-8108e12fe413&queue=unknown"
+    },
+    {
+      "kind": "unknown_acceptance",
+      "total": 1,
+      "response_total": 1,
+      "query": "?workspace=e0000000-0000-4000-8000-000000000001&project=5940aab2-85f0-42cd-b42d-8108e12fe413&acceptance=unknown"
+    }
+  ]
+}

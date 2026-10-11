@@ -1,0 +1,25 @@
+{
+  "name": "Q14",
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_job_scope_db.py",
+    "--junitxml=../../artifacts/c61/Q14-db.xml"
+  ],
+  "cwd": "services\\api",
+  "source_sha": "0ecd85021ba2c345507d9f5c36c900ec6b490c7e",
+  "tested_tree": "46b9b3df99b9fc3dca7192834e759b2357e7dbfe",
+  "started_at_utc": "2026-10-06T17:08:35.641531+00:00",
+  "seconds": 14.302,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q14.log",
+  "tests": 3,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/Q14-db.xml"
+}

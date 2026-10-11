@@ -1,0 +1,60 @@
+.........F....FF.                                                        [100%]
+================================== FAILURES ===================================
+___________ test_verified_test_registration_resolves_exact_adapter ____________
+
+    def test_verified_test_registration_resolves_exact_adapter():
+        registry,item=fixture_registry()
+        adapter=registry.resolve('search',environment='test')
+>       assert isinstance(adapter,FixtureProviderAdapter)
+E       assert False
+E        +  where False = isinstance(None, FixtureProviderAdapter)
+
+tests\test_provider_registry.py:41: AssertionError
+______________ test_verified_fixture_estimate_preserves_decimal _______________
+
+    def test_verified_fixture_estimate_preserves_decimal():
+        registry,item=fixture_registry()
+>       result=registry.estimate(ProviderIntent('stable','search','HK','en','company'),environment='test',budget=Money(Decimal('1.000000')),quoted_pricing_version=item.capability.pricing_version,quoted_contract_hash=item.contract_hash)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_provider_registry.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = ProviderRegistry(registrations=(ProviderRegistration(capability=ProviderCapability(provider='fixture', adapter_version...ry=<function fixture_registry.<locals>.<lambda> at 0x000001E321D68180>, sandbox_evidence=('fixture:test-contract',)),))
+intent = ProviderIntent(key='stable', service='search', market='HK', language='en', role='company')
+
+    def estimate(self, intent: ProviderIntent, *, environment: str, budget: Money | None,
+                 quoted_pricing_version: str, quoted_contract_hash: str) -> Money:
+        item = self.registration(intent.service)
+        reasons = self.blockers(intent.service, environment=environment, intent=intent)
+        if reasons:
+            raise ProviderUnavailable(reasons)
+        assert item is not None
+        if quote_requires_reconfirmation(quoted_pricing_version,item.capability) or quoted_contract_hash != item.contract_hash:
+            raise ProviderUnavailable(('PRICE_RECONFIRM_REQUIRED',))
+        if budget is None:
+            raise ProviderUnavailable(('BUDGET_UNVERIFIED',))
+        if item.capability.max_liability.amount > budget.amount:
+            raise ProviderUnavailable(('BUDGET_EXCEEDED',))
+>       return self.resolve(intent.service,environment=environment).estimate(intent)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'estimate'
+
+buyeros_api\providers\registry.py:100: AttributeError
+____________ test_factory_cannot_swap_verified_adapter_capability _____________
+
+    def test_factory_cannot_swap_verified_adapter_capability():
+        _,item=fixture_registry()
+        other=capability(service='contact')
+        registry=ProviderRegistry((replace(item,factory=lambda:FixtureProviderAdapter(other,environment='test')),))
+>       with pytest.raises(ProviderUnavailable) as failure:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'buyeros_api.providers.registry.ProviderUnavailable'>
+
+tests\test_provider_registry.py:84: Failed
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-providers-red.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_provider_registry.py::test_verified_test_registration_resolves_exact_adapter
+FAILED tests/test_provider_registry.py::test_verified_fixture_estimate_preserves_decimal
+FAILED tests/test_provider_registry.py::test_factory_cannot_swap_verified_adapter_capability
+3 failed, 14 passed in 1.45s

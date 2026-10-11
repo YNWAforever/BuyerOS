@@ -55,11 +55,13 @@ class AsyncJob(Base, TenantMixin):
         ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_async_jobs_workspace"),
         ForeignKeyConstraint(["workspace_id", "project_id"], ["projects.workspace_id", "projects.id"], name="fk_async_jobs_project"),
         ForeignKeyConstraint(["actor_user_id"], ["users.id"], name="fk_async_jobs_actor"),
-        CheckConstraint("requested BETWEEN 1 AND 1000", name="requested_range"),
+        ForeignKeyConstraint(["workspace_id", "manifest_id"], ["bulk_manifests.workspace_id", "bulk_manifests.id"], name="fk_async_jobs_manifest"),
+        CheckConstraint("requested BETWEEN 1 AND 1000 OR (manifest_id IS NOT NULL AND requested BETWEEN 1 AND 10000)", name="requested_range"),
         CheckConstraint("processed >= 0 AND processed <= requested", name="processed_range"),
         CheckConstraint("status IN ('queued','running','cancel_requested','cancelled','completed','failed')", name="status"),
     )
 
+    manifest_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     project_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     actor_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     kind: Mapped[str] = mapped_column(String(32), nullable=False, default="bulk_mutation")
@@ -94,3 +96,44 @@ class AsyncJobItem(Base, TenantMixin):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
     reason_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
     resulting_version: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+
+class BulkManifest(Base, TenantMixin):
+    """Frozen actor-bound maintenance selection; readiness commits atomically."""
+    __tablename__ = "bulk_manifests"
+    __table_args__ = (
+        UniqueConstraint("workspace_id", "id", name="uq_bulk_manifests_workspace_id"),
+        ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_bulk_manifests_workspace"),
+        ForeignKeyConstraint(["workspace_id", "project_id"], ["projects.workspace_id", "projects.id"], name="fk_bulk_manifests_project"),
+        ForeignKeyConstraint(["actor_user_id"], ["users.id"], name="fk_bulk_manifests_actor"),
+        CheckConstraint("count BETWEEN 0 AND 10000", name="count_range"),
+        CheckConstraint("version > 0", name="version_positive"),
+        CheckConstraint("status IN ('preparing','ready','executed')", name="status"),
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    actor_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    specification: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    operation: Mapped[str] = mapped_column(String(40), nullable=False)
+    command: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    digest: Mapped[str] = mapped_column(String(64), nullable=False, default="")
+    count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="preparing")
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    job_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+
+
+class BulkManifestItem(Base, TenantMixin):
+    __tablename__ = "bulk_manifest_items"
+    __table_args__ = (
+        UniqueConstraint("workspace_id", "id", name="uq_bulk_manifest_items_workspace_id"),
+        UniqueConstraint("workspace_id", "manifest_id", "buyer_id", name="uq_bulk_manifest_items_buyer"),
+        UniqueConstraint("workspace_id", "manifest_id", "ordinal", name="uq_bulk_manifest_items_ordinal"),
+        ForeignKeyConstraint(["workspace_id", "manifest_id"], ["bulk_manifests.workspace_id", "bulk_manifests.id"], name="fk_bulk_manifest_items_manifest"),
+        CheckConstraint("ordinal BETWEEN 0 AND 9999 AND expected_version > 0", name="position_version"),
+    )
+    manifest_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    buyer_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
+    expected_version: Mapped[int] = mapped_column(Integer, nullable=False)

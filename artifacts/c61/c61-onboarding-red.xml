@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="12.900" timestamp="2026-10-07T04:33:40.787730+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_staff_onboarding_db" name="test_onboarding_dry_run_no_write" time="8.031"><failure message="ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'">staff = ('postgresql://buyeros:buyeros@127.0.0.1:58430/buyeros_test_api', UUID('b84f0ebc-104c-4408-a580-dbf1ece4e197'))
+
+    def test_onboarding_dry_run_no_write(staff):
+        dsn, user = staff
+        before = counts(dsn)
+&gt;       result = run([row(user)])
+                 ^^^^^^^^^^^^^^^^
+
+tests\test_staff_onboarding_db.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_staff_onboarding_db.py:23: in run
+    return asyncio.run(exercise())
+           ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_staff_onboarding_db.py:18: in exercise
+    module = importlib.import_module('buyeros_api.services.staff_onboarding')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'buyeros_api.services.staff_onboarding'
+import_ = &lt;function _gcd_import at 0x000002B1A43880E0&gt;
+
+&gt;   ???
+E   ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'
+
+&lt;frozen importlib._bootstrap&gt;:1324: ModuleNotFoundError</failure></testcase><testcase classname="tests.test_staff_onboarding_db" name="test_same_email_no_link" time="0.243"><failure message="ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'">staff = ('postgresql://buyeros:buyeros@127.0.0.1:58430/buyeros_test_api', UUID('cea78c8b-3e31-415a-8d92-45c22dd72189'))
+
+    def test_same_email_no_link(staff):
+        dsn, _ = staff
+        claims = jwt.decode(fx.make_token(sub=ADMIN), options={'verify_signature': False})
+        claims['email'] = 'shared-fixture@example.invalid'
+        token = jwt.encode(claims, fx._private_key, algorithm='RS256', headers={'kid': fx.KID})
+        before = counts(dsn)
+&gt;       assert run([row(uuid.uuid4())], token=token, apply=True)[0]['status'] == 'pending-identity'
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_staff_onboarding_db.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_staff_onboarding_db.py:23: in run
+    return asyncio.run(exercise())
+           ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_staff_onboarding_db.py:18: in exercise
+    module = importlib.import_module('buyeros_api.services.staff_onboarding')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'buyeros_api.services.staff_onboarding'
+import_ = &lt;function _gcd_import at 0x000002B1A43880E0&gt;
+
+&gt;   ???
+E   ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'
+
+&lt;frozen importlib._bootstrap&gt;:1324: ModuleNotFoundError</failure></testcase><testcase classname="tests.test_staff_onboarding_db" name="test_conflict_no_escalation" time="0.353"><failure message="ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'">staff = ('postgresql://buyeros:buyeros@127.0.0.1:58430/buyeros_test_api', UUID('acfd26d5-5df2-4fc2-8fe5-11521f300019'))
+
+    def test_conflict_no_escalation(staff):
+        dsn, user = staff
+        member = uuid.uuid4()
+        with psycopg.connect(dsn) as owner:
+            owner.execute('INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES (%s,%s,%s,%s,false)',
+                          (member, WORKSPACE_A, user, ['viewer']))
+        before = counts(dsn)
+&gt;       result = run([row(user, roles=['workspace_admin'], version=1)], apply=True)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_staff_onboarding_db.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_staff_onboarding_db.py:23: in run
+    return asyncio.run(exercise())
+           ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_staff_onboarding_db.py:18: in exercise
+    module = importlib.import_module('buyeros_api.services.staff_onboarding')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'buyeros_api.services.staff_onboarding'
+import_ = &lt;function _gcd_import at 0x000002B1A43880E0&gt;
+
+&gt;   ???
+E   ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'
+
+&lt;frozen importlib._bootstrap&gt;:1324: ModuleNotFoundError</failure></testcase><testcase classname="tests.test_staff_onboarding_db" name="test_last_admin_survives" time="1.099"><failure message="ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'">staff = ('postgresql://buyeros:buyeros@127.0.0.1:58430/buyeros_test_api', UUID('3e0bada1-fb17-4fd7-881c-8309d7f22a5d'))
+
+    def test_last_admin_survives(staff):
+        dsn, _ = staff
+        actor = uuid.uuid5(uuid.NAMESPACE_URL, ADMIN)
+&gt;       result = run([row(actor, roles=['viewer'], version=1)], apply=True)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_staff_onboarding_db.py:86: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_staff_onboarding_db.py:23: in run
+    return asyncio.run(exercise())
+           ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\asyncio\base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_staff_onboarding_db.py:18: in exercise
+    module = importlib.import_module('buyeros_api.services.staff_onboarding')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\laich\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'buyeros_api.services.staff_onboarding'
+import_ = &lt;function _gcd_import at 0x000002B1A43880E0&gt;
+
+&gt;   ???
+E   ModuleNotFoundError: No module named 'buyeros_api.services.staff_onboarding'
+
+&lt;frozen importlib._bootstrap&gt;:1324: ModuleNotFoundError</failure></testcase></testsuite></testsuites>

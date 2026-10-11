@@ -1,0 +1,33 @@
+{
+  "source_parent_sha": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "files": [
+    {
+      "path": "services/api/alembic/env.py",
+      "sha256": "05fb063ac3f09c6554f024e2e2285d702281c19028ca736c87d83642a21884b1"
+    },
+    {
+      "path": "services/api/buyeros_api/api/errors.py",
+      "sha256": "51e54480786eb7260aa9299548a5f5afaff8daa55c6718a4e5d6fba11aff94aa"
+    },
+    {
+      "path": "services/api/tests/test_error_diagnostics.py",
+      "sha256": "6c0f59fddfd8c8cd8eb33cc445a21b083e1b7e39d3f66333a7cfca895d7c5ed6"
+    },
+    {
+      "path": "services/api/alembic/versions/0038_c61_workspace_directory.py",
+      "sha256": "8970021770a72946cea409a446ebeb55ced9ce16e397ac18d4b9e77bda39d7ee"
+    }
+  ],
+  "focused_cases": 22,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "observed_failures": [
+    "ValueError missing from diagnostic allowlist",
+    "Alembic fileConfig disabled the existing API diagnostic logger"
+  ],
+  "unknown_exception_names_still_redacted": true,
+  "historical_workspace_500_cause_confirmed": false,
+  "full_api_suite": "832 cases; 818 passed; 14 diagnostic failures; fix focused 22 green; whole suite rerun pending",
+  "migration_test_dependency": "C61-06 uncommitted 0038 source included by hash; offline SQL only"
+}

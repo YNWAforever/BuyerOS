@@ -1,0 +1,25 @@
+{
+  "name": "Q12-api",
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_manual_grounding_db.py",
+    "--junitxml=../../artifacts/c61/Q12-db.xml"
+  ],
+  "cwd": "services\\api",
+  "source_sha": "16570ca3fdf09602a1c63514f7847785c4110011",
+  "tested_tree": "5a28abcc0fdbf170619b33c132b5af965a0f0432",
+  "started_at_utc": "2026-10-06T17:03:55.592499+00:00",
+  "seconds": 151.278,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q12-api.log",
+  "tests": 31,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/Q12-db.xml"
+}

@@ -33,7 +33,7 @@ export function LiveUsage({t,locale}:{t:(value:string)=>string;locale:'en'|'zh-H
       <label>{t('To UTC')} <input type="date" aria-label={t('To UTC')} value={to} onChange={e=>setTo(e.target.value)}/></label>
       <button type="button" onClick={apply}>{t('Apply period')}</button><button type="button" onClick={()=>{setUsage(null);setLoading(true);setError('');setRefresh(v=>v+1);}}>{t('Refresh usage')}</button></div>
     {loading&&<p role="status">{t('Loading usage…')}</p>}{error&&<p role="alert">{error}</p>}
-    {usage&&<><p>{t('Project')}: <code>{usage.project_id}</code> · {t('As of')}: {localeDate(usage.as_of,locale)}</p>
+    {usage&&<><p>{t('As of')}: {localeDate(usage.as_of,locale)}</p><details><summary>{t('Technical details')}</summary><p>{t('Project')}: <code>{usage.project_id}</code></p></details>
       <div className="grid two-col"><div className="activity"><b>{t('Settled metered cost')}</b><p>{money(usage.total_settled)}</p></div>
         <div className="activity"><b>{t('Active holds')}</b><p>{money(usage.total_reserved)}</p></div>
         <div className="activity"><b>{t('Remaining approved budget')}</b><p>{money(usage.remaining)}</p></div>
@@ -47,7 +47,7 @@ export function LiveUsage({t,locale}:{t:(value:string)=>string;locale:'en'|'zh-H
   </section>;
 }
 
-export function LiveOutcomes({buyerId,canRecord,locale,t}:{buyerId:string|null;canRecord:boolean;locale:'en'|'zh-HK';t:(value:string)=>string}){
+export function LiveOutcomes({buyerId,buyerName,canRecord,locale,t}:{buyerId:string|null;buyerName?:string;canRecord:boolean;locale:'en'|'zh-HK';t:(value:string)=>string}){
   const {client,session}=useWorkspaceSession(),scope=useSessionSnapshot().scope;
   const [page,setPage]=useState<OutcomePage|null>(null),[offset,setOffset]=useState(0),[refresh,setRefresh]=useState(0);
   const [error,setError]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false);
@@ -84,7 +84,7 @@ export function LiveOutcomes({buyerId,canRecord,locale,t}:{buyerId:string|null;c
   function startCorrection(row:Outcome){setCorrecting(row);setStage(row.stage);setOccurred(localInput(row.occurred_at));setNotes(row.notes);setReason('');}
   return <section className="panel" aria-label={t('Manual outcomes')}><h2>{t('Manual outcomes')}</h2>
     <p>{t('These stages are entered by staff. They do not verify mailbox activity or send a message.')}</p>
-    {canRecord&&<div><p>{correcting?t('Correcting an earlier event'):buyerId?t('Selected buyer')+': '+buyerId:t('Select a buyer in Results to record an outcome.')}</p>
+    {canRecord&&<div><p>{correcting?t('Correcting an earlier event'):buyerId?t('Selected buyer')+': '+(buyerName||t('Staff-selected buyer')):t('Select a buyer in Results to record an outcome.')}</p>
       <div className="inline live-outcome-fields"><label>{t('Stage')} <select aria-label={t('Outcome stage')} value={stage} onChange={e=>setStage(e.target.value as typeof stage)}>{(['reply','meeting','opportunity','disqualified'] as const).map(value=><option key={value} value={value}>{t(value)}</option>)}</select></label>
         <label>{t('Occurred at')} <input type="datetime-local" aria-label={t('Occurred at')} value={occurred} onChange={e=>setOccurred(e.target.value)}/></label></div>
       <label>{t('Notes')} <textarea aria-label={t('Outcome notes')} value={notes} onChange={e=>setNotes(e.target.value)} maxLength={2000}/></label>
@@ -94,7 +94,7 @@ export function LiveOutcomes({buyerId,canRecord,locale,t}:{buyerId:string|null;c
     {error&&<p role="alert">{error}</p>}{loading&&<p role="status">{t('Loading outcomes…')}</p>}
     {page&&<><p>{page.total} {t('outcome events')}</p>{page.items.length?page.items.map(row=><div className="activity" key={row.id}>
       <div><b>{t(row.stage)}</b><p>{t('Source')}: {t('manual')} · {t('Occurred at')}: {localeDate(row.occurred_at,locale)} · {t('Recorded at')}: {localeDate(row.recorded_at,locale)}</p>
-        <p>{row.notes}{row.correction_reason&&<> · {t('Correction reason')}: {row.correction_reason}</>} · {t('Actor')}: <code>{row.actor_id}</code>{row.supersedes_id&&<> · {t('Corrects')}: <code>{row.supersedes_id}</code></>}</p></div>
+        <p>{row.notes}{row.correction_reason&&<> · {t('Correction reason')}: {row.correction_reason}</>} · {t('Actor')}: {row.actor_display_name||t('Staff member (name unavailable)')}</p><details><summary>{t('Technical details')}</summary><p>{t('Actor')}: <code>{row.actor_id}</code> · {t('Selected buyer')}: <code>{row.buyer_id}</code>{row.supersedes_id&&<> · {t('Corrects')}: <code>{row.supersedes_id}</code></>}</p></details></div>
       {canRecord&&<button type="button" onClick={()=>startCorrection(row)}>{t('Correct event')}</button>}</div>):<p>{t('No manual outcomes recorded.')}</p>}
       <div className="inline"><button disabled={offset===0} onClick={()=>{setPage(null);setLoading(true);setOffset(Math.max(0,offset-10));}}>{t('Previous')}</button>
         <span>{page.total?offset+1:0}–{Math.min(offset+page.items.length,page.total)} / {page.total}</span>
@@ -103,6 +103,6 @@ export function LiveOutcomes({buyerId,canRecord,locale,t}:{buyerId:string|null;c
 }
 
 export function LiveResults({locale,canReview,canEdit,canQuote,canAssign,ownMembershipId,t}:{locale:'en'|'zh-HK';canReview:boolean;canEdit:boolean;canQuote:boolean;canAssign:boolean;ownMembershipId:string|null;t:(value:string)=>string}){
-  const [buyerId,setBuyerId]=useState<string|null>(null);
-  return <><LiveUsage locale={locale} t={t}/><LiveBuyerResults locale={locale} canReview={canReview} canEdit={canEdit} canQuote={canQuote} canAssign={canAssign} ownMembershipId={ownMembershipId} onManualOutcome={setBuyerId}/><LiveOutcomes buyerId={buyerId} canRecord={canEdit||canReview} locale={locale} t={t}/></>;
+  const [buyer,setBuyer]=useState<{id:string;name:string}|null>(null);
+  return <><LiveBuyerResults locale={locale} canReview={canReview} canEdit={canEdit} canQuote={canQuote} canAssign={canAssign} ownMembershipId={ownMembershipId} onManualOutcome={(id,name)=>setBuyer({id,name})}/><LiveUsage locale={locale} t={t}/><LiveOutcomes buyerId={buyer?.id??null} buyerName={buyer?.name} canRecord={canEdit||canReview} locale={locale} t={t}/></>;
 }

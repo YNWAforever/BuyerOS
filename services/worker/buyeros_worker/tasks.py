@@ -81,6 +81,12 @@ def execute_intent_sync(intent_key: str, workspace_id: str, generation: int, *,
                 return "stale"
             if not fence_ok(generation, row["fencing_generation"]):
                 return "stale"
+            if row["event_type"] == "delivery.submit":
+                from .config import get_settings
+                settings=get_settings()
+                if not settings.paid_dispatch_enabled or not settings.delivery_dispatch_enabled:
+                    return "dispatch_disabled"
+                return await run_intent(session,{"workspace_id":workspace_id},intent_key,generation)
             if row["event_type"] in {"provider.reconcile", "research.reconcile", "contact.reconcile"}:
                 from .config import get_settings
                 if not get_settings().reconciliation_enabled:
@@ -251,6 +257,13 @@ def sweep() -> int:
     if not get_settings().eager:
         record_worker_heartbeat_sync()
     return count
+
+
+@celery_app.task(name="buyeros.reconcile_retained_deliveries", max_retries=0)
+def reconcile_retained_deliveries() -> dict:
+    """GET-only periodic retained status; no broker scope/payload or send retry."""
+    from .delivery_schedule import run_retained_delivery_schedule_sync
+    return run_retained_delivery_schedule_sync()
 
 
 signals.worker_shutdown.connect(dispose_engine, weak=False)

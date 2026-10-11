@@ -1,0 +1,25 @@
+{
+  "source_sha": "22d6fd9cefe1ac3ea8cbc98bc34dac87072feb86",
+  "source_sha_after": "22d6fd9cefe1ac3ea8cbc98bc34dac87072feb86",
+  "started_at_utc": "2026-10-06T18:09:10.087057+00:00",
+  "seconds": 35.37,
+  "command": [
+    "uv",
+    "run",
+    "--frozen",
+    "pytest",
+    "-q",
+    "tests/test_external_runner_db.py",
+    "--junitxml=../../artifacts/c61/c61-provider-worker-gate.xml"
+  ],
+  "cwd": "services/worker",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-15-worker-gate.log",
+  "tests": 5,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "artifacts/c61/c61-provider-worker-gate.xml",
+  "required_gate_exit_code": 0
+}

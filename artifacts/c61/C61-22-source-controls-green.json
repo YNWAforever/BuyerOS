@@ -1,0 +1,24 @@
+{
+  "source_sha": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "source_sha_after": "240c272a15ec01d5615a495d5fb9037e4c041655",
+  "started_at_utc": "2026-10-06T19:43:29.993820+00:00",
+  "seconds": 2.664,
+  "command": [
+    "node",
+    "--test",
+    "tests/draft-grounding-controls.test.mjs",
+    "tests/text-selection-offsets.test.mjs",
+    "tests/audit-draft-guard.test.mjs",
+    "tests/audit-draft-grounding.test.mjs"
+  ],
+  "cwd": ".",
+  "exit_code": 1,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-22-source-controls-green.log",
+  "tests": 18,
+  "pass": 17,
+  "fail": 1,
+  "skipped": 0,
+  "cancelled": 0,
+  "required_gate_exit_code": 1
+}

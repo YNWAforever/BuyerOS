@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="9" time="62.782" timestamp="2026-10-07T02:14:44.562474+08:00" hostname="DESKTOP-30TFME5"><testcase classname="tests.test_workspace_listing_db" name="test_list_workspaces_reads_a_real_membership_under_runtime_role" time="7.868" /><testcase classname="tests.test_workspace_listing_db" name="test_list_workspaces_paginates_authorized_memberships" time="0.274" /><testcase classname="tests.test_workspace_listing_db" name="test_directory_queries_bounded_with_unrelated_workspaces" time="32.656"><failure message="AssertionError: P09 SQL budget: observed [8, 26, 206, 2006] for W=1/10/100/1000&#10;assert 2006 &lt;= 6&#10; +  where 2006 = max([8, 26, 206, 2006])">directory_case = {'add': &lt;function directory_case.&lt;locals&gt;.add_workspace at 0x00000255A55B0EA0&gt;, 'dsn': 'postgresql://buyeros:buyeros@1...bjects': ['q13-fixture-cb775119-c185-4d23-ab8e-b640025ebe1e', 'q13-fixture-47d9e450-61a2-4933-8c39-d8b08316ee1b'], ...}
+
+    def test_directory_queries_bounded_with_unrelated_workspaces(directory_case):
+        case = directory_case
+        visible, member = case['add'](0)
+        statements, maxima = [], []
+        def observed(conn, cursor, statement, parameters, context, executemany):
+            statements.append(statement)
+        event.listen(Engine, 'before_cursor_execute', observed)
+        try:
+            with TestClient(create_app(), raise_server_exceptions=False) as client:
+                previous = 1
+                for total in (1,10,100,1000):
+                    for _ in range(previous,total):
+                        case['add']()
+                    statements.clear()
+                    result = client.get('/v1/workspaces?limit=1',headers=case['headers'][0])
+                    assert result.status_code == 200, result.text
+                    assert_contract_response('WorkspacePageResponse',result.json())
+                    assert result.json()['data'] == dict(items=[dict(id=str(visible),name='Q13 fixture',membership_id=str(member),roles=['operator'],data_mode='live')],offset=0,limit=1,total=1)
+                    maxima.append(len(statements))
+                    previous=total
+&gt;           assert max(maxima)&lt;=6, f"P09 SQL budget: observed {maxima} for W=1/10/100/1000"
+E           AssertionError: P09 SQL budget: observed [8, 26, 206, 2006] for W=1/10/100/1000
+E           assert 2006 &lt;= 6
+E            +  where 2006 = max([8, 26, 206, 2006])
+
+tests\test_workspace_listing_db.py:172: AssertionError</failure></testcase><testcase classname="tests.test_workspace_listing_db" name="test_verified_subject_scope_revocation_and_real_pages" time="3.225" /><testcase classname="tests.test_workspace_listing_db" name="test_pooled_member_nonmember_revoked_member_clears_actor_and_tenant" time="0.698" /><testcase classname="tests.test_workspace_listing_db" name="test_directory_real_twenty_row_pages_read_every_visible_workspace_once[21]" time="2.942" /><testcase classname="tests.test_workspace_listing_db" name="test_directory_real_twenty_row_pages_read_every_visible_workspace_once[101]" time="9.696" /><testcase classname="tests.test_identity_resolver_db" name="test_identity_resolver_preserves_canonical_uuid_and_exact_issuer_subject" time="0.101"><failure message="ModuleNotFoundError: No module named 'buyeros_api.services.identity_resolver'">seeded = 'postgresql://buyeros:buyeros@127.0.0.1:50072/buyeros_test_api'
+
+    def test_identity_resolver_preserves_canonical_uuid_and_exact_issuer_subject(seeded):
+&gt;       from buyeros_api.services.identity_resolver import resolve_user_id
+E       ModuleNotFoundError: No module named 'buyeros_api.services.identity_resolver'
+
+tests\test_identity_resolver_db.py:11: ModuleNotFoundError</failure></testcase><testcase classname="tests.test_identity_resolver_db" name="test_identity_resolver_unknown_identity_does_not_create_user" time="1.241"><failure message="ModuleNotFoundError: No module named 'buyeros_api.services.identity_resolver'">seeded = 'postgresql://buyeros:buyeros@127.0.0.1:50072/buyeros_test_api'
+
+    def test_identity_resolver_unknown_identity_does_not_create_user(seeded):
+&gt;       from buyeros_api.services.identity_resolver import resolve_user_id
+E       ModuleNotFoundError: No module named 'buyeros_api.services.identity_resolver'
+
+tests\test_identity_resolver_db.py:34: ModuleNotFoundError</failure></testcase></testsuite></testsuites>

@@ -50,7 +50,9 @@ async def claim(body: ClaimRequest, request: Request):
 
 @router.post("/step", operation_id="workerExecuteStep", response_model=StepOutcome)
 async def step(body: StepRequest, request: Request):
-    return await service.execute_step(request.state.execution_engine, body.envelope, body.step_key)
+    from ..deps import get_engine
+    return await service.execute_step(request.state.execution_engine, body.envelope, body.step_key,
+                                      research_engine=get_engine())
 
 
 @router.post("/status", operation_id="workerStepStatus", response_model=StepOutcome)

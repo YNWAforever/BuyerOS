@@ -1,0 +1,16 @@
+{
+  "name": "Q12-ui",
+  "command": [
+    "node",
+    "--test",
+    "tests/audit-draft-grounding.test.mjs"
+  ],
+  "cwd": ".",
+  "source_sha": "14784296f4f174c605aea6d279d0ccc5fdc96ae4",
+  "tested_tree": "c45e935d56c3d3777f0f9c4fbf07c4d294a8094a",
+  "started_at_utc": "2026-10-06T17:06:27.591067+00:00",
+  "seconds": 1.401,
+  "exit_code": 0,
+  "environment": "owned-loopback-PG16/fixture-only",
+  "log": "artifacts\\c61\\Q12-ui.log"
+}

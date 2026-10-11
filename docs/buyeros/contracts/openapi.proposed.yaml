@@ -402,6 +402,14 @@ paths:
           minimum: 1
           maximum: 100
           default: 20
+      - name: q
+        in: query
+        required: false
+        description: Literal case-insensitive substring of display name, full user ID or membership ID.
+        schema:
+          type: string
+          maxLength: 200
+          default: ''
       responses:
         '200':
           description: Authorized member page
@@ -409,7 +417,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipPageResponse'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
       x-permitted-roles: [workspace_admin]
+      x-cost: none
+      x-idempotency: Read-only.
+  /v1/workspaces/{workspace_id}/eligible-assignees:
+    get:
+      operationId: listEligibleAssignees
+      summary: Search current active workspace members eligible for buyer ownership
+      tags: [BO-024]
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      - name: q
+        in: query
+        required: false
+        description: Literal case-insensitive substring of display name, full user ID or membership ID.
+        schema:
+          type: string
+          maxLength: 200
+          default: ''
+      responses:
+        '200':
+          description: Eligible assignee page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibleAssigneePageResponse'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles: [operator, workspace_admin]
+      x-tenant-authorization: Current membership; target eligibility matches assignBuyerOwners and is rechecked on submission.
       x-cost: none
       x-idempotency: Read-only.
   /v1/workspaces/{workspace_id}/memberships/{membership_id}:
@@ -4996,6 +5066,73 @@ paths:
                 summary: Synthetic request shape; not a live operation or provider payload
                 value:
                   reason: Illustrative contract value
+  /v1/delivery-callbacks/resend/{endpoint_id}:
+    post:
+      operationId: receiveDeliveryCallback
+      summary: Record an authenticated original delivery event
+      description: Server-selected retained endpoint only. The selector remains closed by default (503).
+        Verify the bounded raw bytes and exactly one of each Svix header before tenant DB access.
+        HTTP body, query, JWT and account headers cannot select a workspace or provider account.
+        Duplicate events are idempotent and late events never downgrade delivery state.
+        Accepted is not delivered, and callbacks do not settle or release the original hold.
+      tags:
+      - C61-20
+      security:
+      - DeliverySvixId: []
+        DeliverySvixTimestamp: []
+        DeliverySvixSignature: []
+      parameters:
+      - name: endpoint_id
+        in: path
+        required: true
+        description: Opaque key in the private server endpoint registry; not a tenant or account selector.
+        schema:
+          type: string
+          pattern: ^[a-z0-9_-]{1,64}$
+      - name: svix-id
+        in: header
+        required: true
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{1,200}$
+      - name: svix-timestamp
+        in: header
+        required: true
+        schema:
+          type: string
+          pattern: ^[0-9]{1,12}$
+      - name: svix-signature
+        in: header
+        required: true
+        schema:
+          type: string
+          maxLength: 2048
+      requestBody:
+        required: true
+        description: Exact signed provider bytes, at most 65536 bytes. Authenticate before parsing.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryCallbackBody'
+      responses:
+        '200':
+          description: Original retained event was recorded or replayed; this is not send or economic acceptance.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryCallbackReceiptResponse'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
   /v1/provider-callbacks/{provider}:
     post:
       operationId: receiveProviderCallback
@@ -5939,6 +6076,11 @@ paths:
         schema: *id001
       - *id002
       - *id003
+      - name: approval
+        in: query
+        schema:
+          type: string
+          enum: [pending]
       responses:
         '200':
           description: Success; endpoint is PROPOSED, not implemented.
@@ -6155,6 +6297,46 @@ paths:
       x-permitted-roles: [viewer, operator, reviewer, workspace_admin]
       x-cost: none
       x-idempotency: Read-only.
+  /v1/workspaces/{workspace_id}/jobs/{job_id}/summary:
+    get:
+      operationId: getAsyncJobSummary
+      summary: Read actor-bound job status and counters without result rows
+      description: Q06 read-only summary. Current membership, original actor or current workspace administrator are rechecked on every request. No result-page queries or writes.
+      tags: [BO-011]
+      security: [{BearerAuth: []}]
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: job_id
+        in: path
+        required: true
+        schema: *id001
+      responses:
+        '200':
+          description: Durable current summary, never an inferred completion.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncJobSummaryResponse'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+          headers:
+            Retry-After:
+              schema: {type: string}
+      x-permitted-roles: [viewer, operator, reviewer, workspace_admin]
+      x-tenant-authorization: Original actor or current workspace administrator; same guard as getAsyncJob.
+      x-work-package: BO-011
+      x-cost: none
+      x-idempotency: Read-only.
+      x-implementation-status: IMPLEMENTED
   /v1/workspaces/{workspace_id}/jobs/{job_id}:
     get:
       operationId: getAsyncJob
@@ -6706,6 +6888,55 @@ paths:
                   revision_id: 10000000-0000-4000-8000-000000000001
                   content_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   context_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  /v1/workspaces/{workspace_id}/drafts/{draft_id}/grounding-reviews:
+    post:
+      operationId: reviewDraftGrounding
+      summary: Attest every segment of an exact edited message against current sources
+      description: Human source qualification; does not verify semantic truth. Appends an immutable successor without changing subject/body. Current recipient, profile, sender, fit, evidence and policy are rechecked in the locked transaction. No delivery.
+      tags: [BO-021, BO-022, Q12]
+      security:
+      - BearerAuth: []
+      parameters:
+      - {name: workspace_id, in: path, required: true, schema: *id001}
+      - {name: draft_id, in: path, required: true, schema: *id001}
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DraftGroundingReviewRequest'
+      responses:
+        '200':
+          description: Exact text retained in one grounded successor; replay rechecks current eligibility.
+          headers:
+            ETag: {schema: {type: string}, description: Current draft state version}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftResponse'
+        '400': {$ref: '#/components/responses/Error'}
+        '401': {$ref: '#/components/responses/Error'}
+        '403': {$ref: '#/components/responses/Error'}
+        '404': {$ref: '#/components/responses/Error'}
+        '409': {$ref: '#/components/responses/Error'}
+        '412': {$ref: '#/components/responses/Error'}
+        '422': {$ref: '#/components/responses/Error'}
+        '429': {$ref: '#/components/responses/Error'}
+        '500': {$ref: '#/components/responses/Error'}
+        '503': {$ref: '#/components/responses/Error'}
+      x-implementation-status: LOCAL_IMPLEMENTED
+      x-work-package: BO-022
+      x-contract-extension: Q12
+      x-tenant-authorization: Current membership, tenant RLS and exact project/company source scope; actor is server resolved.
+      x-permitted-roles: [reviewer, workspace_admin]
+      x-policy: Current draft preparation, outreach and export contact purposes, suppression and retention required.
+      x-cost: none
+      x-idempotency: Required; exact actor/tenant/target/body/precondition; unknown response retries same key.
+      x-version-precondition: If-Match
+      x-validation: Strict schema and Unicode code-point full coverage; all factual segments require versioned eligible sources.
+      x-errors: [INVALID_REQUEST, PERMISSION_DENIED, STALE_REVISION, EVIDENCE_STALE, IDEMPOTENCY_CONFLICT, INVALID_STATE, POLICY_BLOCKED]
   /v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals:
     post:
       operationId: approveDraft
@@ -7411,6 +7642,7 @@ paths:
                       notes: Illustrative contract value
                       project_id: 10000000-0000-4000-8000-000000000001
                       actor_id: 10000000-0000-4000-8000-000000000001
+                      actor_display_name: null
                       recorded_at: '2026-09-15T02:00:00Z'
                     request_id: 10000000-0000-4000-8000-000000000001
                     data_mode: live
@@ -7523,6 +7755,7 @@ paths:
                       notes: Illustrative contract value
                       project_id: 10000000-0000-4000-8000-000000000001
                       actor_id: 10000000-0000-4000-8000-000000000001
+                      actor_display_name: null
                       recorded_at: '2026-09-15T02:00:00Z'
                     request_id: 10000000-0000-4000-8000-000000000001
                     data_mode: live
@@ -7670,6 +7903,169 @@ paths:
       - POLICY_BLOCKED
       - BUDGET_LIMIT
       - PROVIDER_UNAVAILABLE
+  /v1/workspaces/{workspace_id}/delivery-messages/{message_id}/reconciliation:
+    post:
+      operationId: reconcileDeliveryMessage
+      summary: Reconcile a retained original delivery message under current admin permission
+      description: Candidate local implementation. Server-owned retained selection defaultsNone and refuses503;
+        the existing reconciliation gate can pause new requests independently of new-send admission.
+        Resolve only the saved original ref/scope. GET runs outside canonical transactions; persist its
+        monotonic observation/full unresolved hold even if current admin access is revoked mid-GET,
+        then reauthorize the response. This operation never submits, looks up a lost intent key or settles money.
+      tags:
+      - BO-022
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: message_id
+        in: path
+        required: true
+        schema: *id001
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryReconciliationRequest'
+      responses:
+        '200':
+          description: Original status-observation metadata only; no raw provider ref/account/content or billing proof.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: 'private, no-store'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryReconciliationResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-implementation-status: CANDIDATE_LOCAL
+      x-work-package: C61-20
+      x-tenant-authorization: Signed canonical principal and current workspace_admin membership before GET
+        and before returning original receipt metadata; non-enumerating404 for foreign/inactive membership/message.
+      x-permitted-roles:
+      - workspace_admin
+      x-policy: Independently reviewed retained original account/contract/ref survives closed new-send permission;
+        no client-supplied authority/ref/body/budget. Canonical admin permission still gates request and response.
+      x-cost: Only separately reviewed retained status quota/contract; no send/hold/reserve/cost release or settlement.
+      x-idempotency: Read original ref only; status observations deduplicate in their independent status namespace.
+      x-version-precondition: Exact immutable original message/scope; recheck current caller before response.
+      x-validation: Optional empty strict object only; no client ref/key/account/scope/economic/content fields.
+      x-errors:
+      - CAPABILITY_DISABLED
+      - PROVIDER_UNAVAILABLE
+      - PERMISSION_DENIED
+      - NOT_FOUND
+      - RETRY_UNSAFE
+      - RATE_LIMITED
+      - INVALID_REQUEST
+  /v1/workspaces/{workspace_id}/drafts/{draft_id}/delivery-intents:
+    post:
+      operationId: admitDraftDelivery
+      summary: Admit an exact approved revision under an independent delivery gate
+      description: Candidate local implementation. Disabled by default; no provider POST in the HTTP request.
+        Only a reviewed server-owned delivery scope may reserve the original intent. The original deliver
+        kill boundary remains unconditional403. This operation is not native-send release acceptance.
+      tags:
+      - BO-022
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: draft_id
+        in: path
+        required: true
+        schema: *id001
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+          pattern: '^[A-Za-z0-9:_/-]{8,128}$'
+        description: Stable original delivery key; accepted or unknown intents must never be resent under a new key.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryAdmissionRequest'
+      responses:
+        '202':
+          description: Original prepared or replayed message; does not prove provider acceptance or delivery.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryAdmissionResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-implementation-status: CANDIDATE_LOCAL
+      x-work-package: C61-20
+      x-tenant-authorization: Validate signed canonical principal, current membership and reviewer/admin role;
+        workspace and draft references are selectors; foreign or inactive membership returns non-enumerating404.
+      x-permitted-roles:
+      - reviewer
+      - workspace_admin
+      x-policy: Recheck current exact approval, revision, sender, recipient, policy and suppression on every replay.
+      x-cost: Independently selected delivery scope; atomic original operation/reservation/liability/outbox only.
+      x-idempotency: Stable key scoped to actor, operation, tenant and draft; exact-body conflict409;
+        original message scope is immutable and a fresh key cannot resend accepted/unknown intent.
+      x-version-precondition: Exact current approved revision and approval UUIDs in the strict body.
+      x-validation: Only four nonzero UUID references; reject arbitrary body, provider, account, budget and actor fields.
+      x-errors:
+      - DELIVERY_DISABLED
+      - PROVIDER_UNAVAILABLE
+      - CAPABILITY_DISABLED
+      - PERMISSION_DENIED
+      - NOT_FOUND
+      - STALE_REVISION
+      - POLICY_BLOCKED
+      - IDEMPOTENCY_CONFLICT
+      - RETRY_UNSAFE
   /v1/workspaces/{workspace_id}/drafts/{draft_id}/deliver:
     post:
       operationId: disabledDeliveryBoundary
@@ -7727,6 +8123,514 @@ paths:
         references. Timestamps, IDs, money limits and actor are server controlled unless explicitly input.
       x-errors:
       - DELIVERY_DISABLED
+  /v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests:
+    post:
+      operationId: previewBulkManifest
+      summary: Freeze an actor-bound maintenance selection up to10000
+      tags:
+      - BO-010
+      parameters:
+      - &q08p002
+        name: workspace_id
+        in: path
+        required: true
+        schema: &q08p001
+          type: string
+          format: uuid
+      - &q08p003
+        name: project_id
+        in: path
+        required: true
+        schema: *q08p001
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Atomic current frozen selection or durable per-row execution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkManifestResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - workspace_admin
+      x-cost: none
+      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
+        Unknown reply is explicit same-intent Retry.
+      x-tenant-authorization: Current membership and original actor; operation-specific
+        roles and target rechecked for admission and replay.
+      x-implementation-status: LOCAL_IMPLEMENTED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkManifestCreate'
+  /v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}:
+    get:
+      operationId: getBulkManifest
+      summary: Restore an original actor manifest without executing it
+      tags:
+      - BO-010
+      parameters:
+      - *q08p002
+      - *q08p003
+      - name: manifest_id
+        in: path
+        required: true
+        schema: *q08p001
+      responses:
+        '200':
+          description: Atomic current frozen selection or durable per-row execution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkManifestResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-cost: none
+      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
+        Unknown reply is explicit same-intent Retry.
+      x-tenant-authorization: Current membership and original actor; operation-specific
+        roles and target rechecked for admission and replay.
+      x-implementation-status: LOCAL_IMPLEMENTED
+  /v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}/execute:
+    post:
+      operationId: executeBulkManifest
+      summary: Confirm the exact frozen digest and current operation authority
+      tags:
+      - BO-010
+      parameters:
+      - *q08p002
+      - *q08p003
+      - name: manifest_id
+        in: path
+        required: true
+        schema: *q08p001
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '200':
+          description: Atomic current frozen selection or durable per-row execution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResultResponse'
+        '202':
+          description: Atomic current frozen selection or durable per-row execution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncJobResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - workspace_admin
+      x-cost: none
+      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
+        Unknown reply is explicit same-intent Retry.
+      x-tenant-authorization: Current membership and original actor; operation-specific
+        roles and target rechecked for admission and replay.
+      x-implementation-status: LOCAL_IMPLEMENTED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkManifestExecute'
+  /v1/workspaces/{workspace_id}/projects/{project_id}/work-queue:
+    get:
+      operationId: getWorkQueue
+      summary: Read current project work queue
+      tags:
+      - BO-024
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Bounded actor-scoped job page; workspace admins may view all workspace jobs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkQueueResponse'
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-cost: none
+      x-idempotency: Read-only.
+  /v1/workspaces/{workspace_id}/projects/{project_id}/provider-operations:
+    get:
+      operationId: listProviderOperations
+      summary: List scoped durable provider receipts
+      tags:
+      - BO-024
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Limit'
+      - name: acceptance
+        in: query
+        schema:
+          type: string
+          enum:
+          - unknown
+      responses:
+        '200':
+          description: Bounded actor-scoped job page; workspace admins may view all workspace jobs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderOperationPageResponse'
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-cost: none
+      x-idempotency: Read-only.
+  /v1/workspaces/{workspace_id}/runs/{run_id}/candidates/{raw_candidate_id}/review-context:
+    get:
+      operationId: getResearchCandidateReviewContext
+      summary: Review an exact current native page against an explicitly selected existing
+        company
+      tags:
+      - BO-016
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: run_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: raw_candidate_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: company_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Current reviewed material; no company role or fit accuracy acceptance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchCandidateReviewContextResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /v1/workspaces/{workspace_id}/runs/{run_id}/candidates/{raw_candidate_id}/review:
+    post:
+      operationId: reviewResearchCandidate
+      summary: Review an exact current native page against an explicitly selected existing
+        company
+      tags:
+      - BO-016
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: run_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: raw_candidate_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: Current reviewed material; no company role or fit accuracy acceptance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchCandidateReviewResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResearchCandidateReviewRequest'
+  /v1/workspaces/{workspace_id}/runs/{run_id}/candidates:
+    get:
+      operationId: listResearchCandidates
+      summary: Read bounded candidate observations and current source availability;
+        no entity facts inferred
+      tags:
+      - BO-016
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: run_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 10000
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+          maximum: 100
+      responses:
+        '200':
+          description: Current bounded observations; awaiting_reconciliation does not
+            authorize a repeated source GET
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchCandidatePageResponse'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /v1/workspaces/{workspace_id}/projects/{project_id}/drafts/{draft_id}/delivery-messages:
+    get:
+      security:
+      - BearerAuth: []
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      operationId: listDraftDeliveryMessages
+      summary: Read retained delivery metadata for one scoped draft
+      description: Candidate local read-only history, including prior revisions. Accepted
+        does not mean delivered. Unknown must be reconciled; no retry, provider GET/POST,
+        account/ref/key/content or money operation. New-delivery admission and reconciliation
+        switches do not hide persisted history; the global read gate and current canonical
+        membership still apply.
+      tags:
+      - BO-022
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Bounded persisted metadata page; no provider or billing acceptance
+            proof.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryMessagePageResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-implementation-status: CANDIDATE_LOCAL
+      x-work-package: C61-20
+      x-tenant-authorization: Canonical signed principal and current membership; explicit
+        workspace/project/draft predicates plus unchanged FORCE RLS. Foreign project/draft
+        and inactive membership are non-enumerating404.
+      x-policy: Same reader roles as getDraft. Metadata only; no contact data, body,
+        provider credentials or retained provider authority. Prior immutable revisions
+        remain visible to a current authorized reader.
+      x-cost: none; no provider request, reservation, settlement or release.
+      x-idempotency: Read-only; creates no message, outbox or intent. Unknown/accepted
+        history is never resubmitted.
+      x-version-precondition: none; exact scoped draft required. Returns original historical
+        revision number/id and approval id.
+      x-validation: offset >=0, limit 1..100; UUID path selectors are never authority.
+      x-errors:
+      - PERMISSION_DENIED
+      - NOT_FOUND
+      - RATE_LIMITED
+      - INVALID_REQUEST
+      - READ_DISABLED
 components:
   securitySchemes:
     BearerAuth:
@@ -7741,6 +8645,21 @@ components:
       name: X-Provider-Signature
       description: PROPOSED placeholder, not a verified provider header. BO-002 must replace with vendor-documented
         raw-body signature and replay validation before activation.
+    DeliverySvixId:
+      type: apiKey
+      in: header
+      name: svix-id
+      description: Exact event ID signed with the raw body and attempt timestamp; duplicate headers are rejected.
+    DeliverySvixTimestamp:
+      type: apiKey
+      in: header
+      name: svix-timestamp
+      description: Canonical integer attempt timestamp within the fixed five-minute replay window.
+    DeliverySvixSignature:
+      type: apiKey
+      in: header
+      name: svix-signature
+      description: Svix v1 HMAC over the exact raw bytes, event ID and attempt timestamp using the retained endpoint key.
   parameters:
     IdempotencyKey:
       name: Idempotency-Key
@@ -7785,6 +8704,175 @@ components:
           schema:
             $ref: '#/components/schemas/ApiError'
   schemas:
+    DeliveryMessageMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspace_id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        draft_id:
+          type: string
+          format: uuid
+        draft_revision_id:
+          type: string
+          format: uuid
+        approval_id:
+          type: string
+          format: uuid
+        revision_number:
+          type: integer
+          minimum: 1
+        state:
+          type: string
+          enum:
+          - prepared
+          - submitting
+          - unknown
+          - accepted
+          - delivered
+          - bounced
+          - complained
+          - unsubscribed
+          - failed
+          - rejected
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - workspace_id
+      - project_id
+      - draft_id
+      - draft_revision_id
+      - approval_id
+      - revision_number
+      - state
+      - created_at
+      - updated_at
+    DeliveryMessagePage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/DeliveryMessageMetadata'
+        offset:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+      required:
+      - items
+      - offset
+      - limit
+      - total
+    DeliveryMessagePageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/DeliveryMessagePage'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          const: live
+      required:
+      - data
+      - request_id
+      - data_mode
+    DeliveryReconciliationRequest:
+      type: object
+      additionalProperties: false
+      properties: {}
+    DeliveryReconciliationResponse:
+      type: object
+      additionalProperties: false
+      required: [data, request_id, data_mode]
+      properties:
+        request_id: *id001
+        data_mode:
+          type: string
+          enum: [live]
+        data:
+          type: object
+          additionalProperties: false
+          required: [message_id, state, event_id, replayed]
+          properties:
+            message_id: *id001
+            state:
+              type: string
+              maxLength: 32
+            event_id:
+              anyOf:
+              - type: string
+                format: uuid
+              - type: 'null'
+            replayed:
+              type: boolean
+    DeliveryAdmissionRequest:
+      type: object
+      additionalProperties: false
+      required: [draft_revision_id, recipient_ref, sender_identity_id, approval_id]
+      properties:
+        draft_revision_id:
+          type: string
+          format: uuid
+          not:
+            const: '00000000-0000-0000-0000-000000000000'
+        recipient_ref:
+          type: string
+          format: uuid
+          not:
+            const: '00000000-0000-0000-0000-000000000000'
+        sender_identity_id:
+          type: string
+          format: uuid
+          not:
+            const: '00000000-0000-0000-0000-000000000000'
+        approval_id:
+          type: string
+          format: uuid
+          not:
+            const: '00000000-0000-0000-0000-000000000000'
+    DeliveryAdmissionResponse:
+      type: object
+      additionalProperties: false
+      required: [data, request_id, data_mode]
+      properties:
+        request_id: *id001
+        data_mode:
+          type: string
+          enum: [live]
+        data:
+          type: object
+          additionalProperties: false
+          required: [message_id, state, replayed]
+          properties:
+            message_id: *id001
+            state:
+              type: string
+              maxLength: 32
+            replayed:
+              type: boolean
     Money:
       type: object
       additionalProperties: false
@@ -7930,6 +9018,11 @@ components:
         id: *id001
         workspace_id: *id001
         user_id: *id001
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Authorized display name or full canonical user ID fallback; no email or issuer projection.
         roles:
           type: array
           minItems: 1
@@ -7942,7 +9035,7 @@ components:
         version:
           type: integer
           minimum: 1
-      required: [id, workspace_id, user_id, roles, active, version]
+      required: [id, workspace_id, user_id, display_name, roles, active, version]
     MembershipUpdate:
       type: object
       additionalProperties: false
@@ -7962,6 +9055,46 @@ components:
           minLength: 3
           maxLength: 2000
       required: [roles, active, reason]
+    EligibleAssignee:
+      type: object
+      additionalProperties: false
+      properties:
+        membership_id: *id001
+        user_id: *id001
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        version:
+          type: integer
+          minimum: 1
+      required: [membership_id, display_name, user_id, version]
+    EligibleAssigneePage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EligibleAssignee'
+        offset: *id005
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total: *id005
+      required: [items, offset, limit, total]
+    EligibleAssigneePageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/EligibleAssigneePage'
+        request_id: *id001
+        data_mode:
+          type: string
+          enum: [live]
+      required: [data, request_id, data_mode]
     MembershipPage:
       type: object
       additionalProperties: false
@@ -8529,6 +9662,9 @@ components:
           - cancelled
           - failed
           - completed
+          - awaiting_reconciliation
+          description: Current read projection; awaiting_reconciliation reflects unresolved original run provider work.
+            Persisted run lifecycle and original intents are preserved.
         stage:
           type: string
         raw_count: *id005
@@ -8550,6 +9686,14 @@ components:
           type: string
         started_at: *id004
         finished_at: *id004
+        retryable:
+          type: boolean
+          readOnly: true
+          description: Current safe checkpoint retry basis; caller permissions and preconditions are revalidated when retrying.
+        reconciliation_pending:
+          type: boolean
+          readOnly: true
+          description: Original run provider acceptance requires reconciliation; no new submit or release is implied.
       required:
       - id
       - workspace_id
@@ -8570,6 +9714,266 @@ components:
       - reserved
       - limits
       - attempt
+    ResearchCandidateReviewRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        company_id:
+          type: string
+          format: uuid
+        page_source_id:
+          type: string
+          format: uuid
+        expected_page_digest:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        expected_company_hash:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        excerpt:
+          type: string
+          minLength: 5
+          maxLength: 4000
+          description: Contiguous current page excerpt; UTF-8 bytes must also be at most4000.
+        reason:
+          type: string
+          minLength: 10
+          maxLength: 400
+      required:
+      - company_id
+      - page_source_id
+      - expected_page_digest
+      - expected_company_hash
+      - excerpt
+      - reason
+    ResearchCandidateReviewResult:
+      type: object
+      additionalProperties: false
+      properties:
+        buyer_id:
+          type: string
+          format: uuid
+        evidence_id:
+          type: string
+          format: uuid
+        alias_id:
+          type: string
+          format: uuid
+        entity_status:
+          type: string
+          enum:
+          - reviewed
+        fit_status:
+          type: string
+          enum:
+          - needs_review
+      required:
+      - buyer_id
+      - evidence_id
+      - alias_id
+      - entity_status
+      - fit_status
+    ResearchCandidateReviewContext:
+      type: object
+      additionalProperties: false
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        raw_candidate_id:
+          type: string
+          format: uuid
+        company:
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: string
+              format: uuid
+            legal_name:
+              type: string
+            domain:
+              type:
+              - string
+              - 'null'
+            hash:
+              type: string
+              pattern: ^[0-9a-f]{64}$
+          required:
+          - id
+          - legal_name
+          - domain
+          - hash
+        page:
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: string
+              format: uuid
+            digest:
+              type: string
+              pattern: ^[0-9a-f]{64}$
+            excerpt:
+              type: string
+              maxLength: 4000
+            url:
+              type: string
+              format: uri
+            retention_until:
+              type: string
+              format: date-time
+          required:
+          - id
+          - digest
+          - excerpt
+          - url
+          - retention_until
+        entity_status:
+          type: string
+          enum:
+          - needs_review
+          - reviewed
+        fit_status:
+          type: string
+          enum:
+          - needs_review
+      required:
+      - run_id
+      - project_id
+      - raw_candidate_id
+      - company
+      - page
+      - entity_status
+      - fit_status
+    ResearchCandidateReviewResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/ResearchCandidateReviewResult'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
+    ResearchCandidateReviewContextResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/ResearchCandidateReviewContext'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
+    ResearchCandidateObservation:
+      type: object
+      additionalProperties: false
+      properties:
+        raw_candidate_id:
+          type: string
+          format: uuid
+        mapping_status:
+          type: string
+          enum:
+          - unmapped
+          - mapped
+        company_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        source_status:
+          type: string
+          enum:
+          - metadata_only
+          - page_available
+          - unavailable
+          - awaiting_reconciliation
+        page_source_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        title:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+          description: Search metadata excerpt label, never a verified company name or
+            role.
+        source_url:
+          type:
+          - string
+          - 'null'
+          format: uri
+      required:
+      - raw_candidate_id
+      - mapping_status
+      - company_id
+      - source_status
+      - page_source_id
+      - title
+      - source_url
+    ResearchCandidatePage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ResearchCandidateObservation'
+        offset:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+      required:
+      - items
+      - offset
+      - limit
+      - total
+    ResearchCandidatePageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/ResearchCandidatePage'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
     RunRetryRequest:
       type: object
       additionalProperties: false
@@ -9815,6 +11219,7 @@ components:
           - assessment
           - contact_lookup
           - draft_generation
+          - delivery
         approved_limit:
           $ref: '#/components/schemas/Money'
         settled:
@@ -10070,6 +11475,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GroundedClaim'
+        grounding_review:
+          $ref: '#/components/schemas/ManualGroundingReview'
         approval_review:
           $ref: '#/components/schemas/DraftApprovalReview'
         approval_id:
@@ -10130,6 +11537,7 @@ components:
           - observation
           - offer_fact
           - labelled_inference
+          - non_factual
       required:
       - text
       - evidence_ids
@@ -10202,6 +11610,62 @@ components:
       - review_id
       - icp_version_id
       - context_hash
+    GroundingOfferFactRef:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        icp_version_id: *id001
+        icp_content_hash: *id015
+      required: [id, icp_version_id, icp_content_hash]
+    GroundingSegment:
+      type: object
+      additionalProperties: false
+      properties:
+        field: {type: string, enum: [subject, body]}
+        start: {type: integer, minimum: 0, maximum: 20000, description: Unicode code-point offset; not UTF-16 code units}
+        end: {type: integer, minimum: 1, maximum: 20000, description: Exclusive Unicode code-point offset}
+        exact_text: {type: string, minLength: 1, maxLength: 20000}
+        classification: {type: string, enum: [factual, non_factual]}
+        evidence_refs:
+          type: array
+          maxItems: 50
+          items: {$ref: '#/components/schemas/VersionedId'}
+        offer_fact_refs:
+          type: array
+          maxItems: 20
+          items: {$ref: '#/components/schemas/GroundingOfferFactRef'}
+        reason: {type: string, minLength: 3, maxLength: 400}
+      required: [field, start, end, exact_text, classification, evidence_refs, offer_fact_refs, reason]
+    DraftGroundingReviewRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        revision_id: *id001
+        content_hash: *id015
+        segments:
+          type: array
+          minItems: 2
+          maxItems: 200
+          items: {$ref: '#/components/schemas/GroundingSegment'}
+        reason: {type: string, minLength: 3, maxLength: 400}
+        confirmation: {type: boolean, const: true}
+      required: [revision_id, content_hash, segments, reason, confirmation]
+    ManualGroundingReview:
+      type: object
+      additionalProperties: false
+      properties:
+        based_on_revision_id: *id001
+        based_on_content_hash: *id015
+        reviewed_by: *id001
+        reviewed_at: *id004
+        reason: {type: string, minLength: 3, maxLength: 400}
+        segments:
+          type: array
+          minItems: 2
+          maxItems: 200
+          items: {$ref: '#/components/schemas/GroundingSegment'}
+      required: [based_on_revision_id, based_on_content_hash, reviewed_by, reviewed_at, reason, segments]
     DraftReviewRequest:
       type: object
       additionalProperties: false
@@ -10417,6 +11881,283 @@ components:
       - offset
       - limit
       - total
+    AsyncJobSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        workspace_id: *id001
+        project_id: *id001
+        manifest_id: {type: string, format: uuid}
+        kind:
+          type: string
+          enum:
+          - offer_ingestion
+          - draft_generation
+          - export
+          - reconciliation
+          - bulk_mutation
+        status:
+          type: string
+          enum:
+          - queued
+          - running
+          - cancel_requested
+          - cancelled
+          - completed
+          - failed
+          - unknown
+        requested: *id005
+        processed: *id005
+        updated: *id005
+        unchanged: *id005
+        blocked: *id005
+        conflicts: *id005
+        cancelled: *id005
+        result_id: *id001
+        failure_code:
+          type: string
+        created_at: *id004
+        updated_at: *id004
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - id
+      - workspace_id
+      - project_id
+      - kind
+      - status
+      - created_at
+      - updated_at
+      - data_mode
+      - requested
+      - processed
+      - updated
+      - unchanged
+      - blocked
+      - conflicts
+      - cancelled
+    BulkManifestCreate:
+      oneOf:
+      - type: object
+        additionalProperties: false
+        properties:
+          filters: &q08s002
+            $ref: '#/components/schemas/BuyerFilters'
+          excluded_ids: &q08s003
+            type: array
+            items: &q08s001
+              type: string
+              format: uuid
+            maxItems: 10000
+            uniqueItems: true
+          reason: &q08s004
+            type: string
+            minLength: 3
+            maxLength: 2000
+          source_job_id: *q08s001
+          operation:
+            type: string
+            enum:
+            - assignBuyerOwners
+          target:
+            type: object
+            additionalProperties: false
+            properties:
+              owner_membership_id:
+                type:
+                - string
+                - 'null'
+                format: uuid
+            required:
+            - owner_membership_id
+        required:
+        - filters
+        - excluded_ids
+        - reason
+        - operation
+        - target
+      - type: object
+        additionalProperties: false
+        properties:
+          filters: *q08s002
+          excluded_ids: *q08s003
+          reason: *q08s004
+          source_job_id: *q08s001
+          operation:
+            type: string
+            enum:
+            - reviewBuyers
+          target:
+            type: object
+            additionalProperties: false
+            properties:
+              status:
+                type: string
+                enum:
+                - accepted
+                - rejected
+                - needs_information
+            required:
+            - status
+        required:
+        - filters
+        - excluded_ids
+        - reason
+        - operation
+        - target
+      - type: object
+        additionalProperties: false
+        properties:
+          filters: *q08s002
+          excluded_ids: *q08s003
+          reason: *q08s004
+          source_job_id: *q08s001
+          operation:
+            type: string
+            enum:
+            - changeListMemberships
+          target:
+            type: object
+            additionalProperties: false
+            properties:
+              list_id: *q08s001
+              operation:
+                type: string
+                enum:
+                - add
+                - remove
+            required:
+            - list_id
+            - operation
+        required:
+        - filters
+        - excluded_ids
+        - reason
+        - operation
+        - target
+    BulkManifestExecute:
+      type: object
+      additionalProperties: false
+      properties:
+        digest: &q08s005
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        confirmation:
+          type: boolean
+          const: true
+      required:
+      - digest
+      - confirmation
+    BulkManifest:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *q08s001
+        workspace_id: *q08s001
+        project_id: *q08s001
+        actor_user_id: *q08s001
+        operation:
+          type: string
+          enum:
+          - assignBuyerOwners
+          - reviewBuyers
+          - changeListMemberships
+        target:
+          oneOf:
+          - type: object
+            additionalProperties: false
+            properties:
+              owner_membership_id:
+                type:
+                - string
+                - 'null'
+                format: uuid
+            required:
+            - owner_membership_id
+          - type: object
+            additionalProperties: false
+            properties:
+              status:
+                type: string
+                enum:
+                - accepted
+                - rejected
+                - needs_information
+            required:
+            - status
+          - type: object
+            additionalProperties: false
+            properties:
+              list_id: *q08s001
+              operation:
+                type: string
+                enum:
+                - add
+                - remove
+            required:
+            - list_id
+            - operation
+        filters:
+          $ref: '#/components/schemas/BuyerFilters'
+        excluded_ids: *q08s003
+        reason: *q08s004
+        count:
+          type: integer
+          minimum: 1
+          maximum: 10000
+        digest: *q08s005
+        expires_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+          - ready
+          - executed
+        version:
+          type: integer
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+        job_id: *q08s001
+        source_job_id: *q08s001
+        result:
+          $ref: '#/components/schemas/BulkResult'
+      required:
+      - id
+      - workspace_id
+      - project_id
+      - actor_user_id
+      - operation
+      - target
+      - filters
+      - excluded_ids
+      - reason
+      - count
+      - digest
+      - expires_at
+      - status
+      - version
+      - created_at
+    BulkManifestResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/BulkManifest'
+        data_mode:
+          type: string
+          enum: [live]
+        request_id:
+          type: string
+      required:
+      - data
+      - request_id
+      - data_mode
     AsyncJob:
       type: object
       additionalProperties: false
@@ -10424,6 +12165,7 @@ components:
         id: *id001
         workspace_id: *id001
         project_id: *id001
+        manifest_id: {type: string, format: uuid}
         kind:
           type: string
           enum:
@@ -10517,6 +12259,13 @@ components:
         provenance_reference: *id055
         project_id: *id001
         actor_id: *id001
+        actor_display_name:
+          type:
+          - string
+          - 'null'
+          minLength: 1
+          maxLength: 200
+          description: Current display name of this event's canonical actor; never identity or role authority.
         recorded_at: *id004
         supersedes_id: *id001
         correction_reason:
@@ -10537,6 +12286,7 @@ components:
       - notes
       - project_id
       - actor_id
+      - actor_display_name
       - recorded_at
     OutcomeCorrection:
       type: object
@@ -10902,6 +12652,21 @@ components:
           type: string
           enum: [live]
       required: [data, request_id, data_mode]
+    AsyncJobSummaryResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/AsyncJobSummary'
+        request_id: *id001
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
     AsyncJobResponse:
       type: object
       additionalProperties: false
@@ -11267,6 +13032,57 @@ components:
       - data
       - request_id
       - data_mode
+    DeliveryCallbackBody:
+      type: object
+      additionalProperties: true
+      required:
+      - type
+      - created_at
+      - data
+      properties:
+        type:
+          type: string
+          enum: [email.sent, email.delivered, email.bounced, email.complained, email.failed, email.suppressed]
+        created_at:
+          type: string
+          format: date-time
+          maxLength: 64
+        data:
+          type: object
+          additionalProperties: true
+          required:
+          - email_id
+          properties:
+            email_id:
+              type: string
+              format: uuid
+    DeliveryCallbackReceipt:
+      type: object
+      additionalProperties: false
+      required: [message_id, event_id, state, replayed]
+      properties:
+        message_id:
+          type: string
+          format: uuid
+        event_id:
+          type: string
+          format: uuid
+        state:
+          type: string
+          enum: [prepared, submitting, unknown, accepted, delivered, bounced, complained, unsubscribed, failed, rejected]
+        replayed:
+          type: boolean
+    DeliveryCallbackReceiptResponse:
+      type: object
+      additionalProperties: false
+      required: [data, request_id, data_mode]
+      properties:
+        data:
+          $ref: '#/components/schemas/DeliveryCallbackReceipt'
+        request_id: *id001
+        data_mode:
+          type: string
+          enum: [live]
     CallbackReceiptResponse:
       type: object
       additionalProperties: false
@@ -11715,6 +13531,149 @@ components:
       - reviewed_at
       description: Read-only server-generated immutable project sender identity. This is reviewed preparation context;
         sender-domain/mailbox ownership verification remains a separate later delivery gate.
+    WorkQueueItem:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          type: string
+          enum:
+          - awaiting_review
+          - pending_approval
+          - unassigned
+          - failed_job
+          - unknown_fit
+          - unknown_acceptance
+        count:
+          type: integer
+          minimum: 0
+        filters:
+          type: object
+          additionalProperties: false
+          properties:
+            review:
+              type: string
+              enum:
+              - awaiting_review
+            queue:
+              type: string
+              enum:
+              - unassigned
+              - unknown
+            status:
+              type: string
+              enum:
+              - failed
+            approval:
+              type: string
+              enum:
+              - pending
+            acceptance:
+              type: string
+              enum:
+              - unknown
+          required: []
+      required:
+      - kind
+      - count
+      - filters
+    WorkQueue:
+      type: object
+      additionalProperties: false
+      properties:
+        as_of:
+          type: string
+          format: date-time
+        items:
+          type: array
+          minItems: 6
+          maxItems: 6
+          items:
+            $ref: '#/components/schemas/WorkQueueItem'
+      required:
+      - as_of
+      - items
+    ProviderOperationSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        capability:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - status
+      - capability
+      - created_at
+      - updated_at
+    ProviderOperationPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ProviderOperationSummary'
+        offset:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+      required:
+      - items
+      - offset
+      - limit
+      - total
+    WorkQueueResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/WorkQueue'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
+    ProviderOperationPageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/ProviderOperationPage'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
 x-plan-status: PROPOSED
 x-contract-owner: BO-003; serialize changes with BO-005 schema owner
 x-pilot-constraints:

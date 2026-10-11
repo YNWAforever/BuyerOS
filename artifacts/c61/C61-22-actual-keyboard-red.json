@@ -1,0 +1,37 @@
+{
+  "fixture_only": true,
+  "keyboardStates": [
+    {
+      "label": "focused",
+      "focused": true,
+      "start": 0,
+      "end": 0,
+      "disabled": false,
+      "value": "中😀é文"
+    },
+    {
+      "label": "Home",
+      "focused": true,
+      "start": 0,
+      "end": 0,
+      "disabled": false,
+      "value": "中😀é文"
+    },
+    {
+      "label": "ArrowRight",
+      "focused": true,
+      "start": 0,
+      "end": 0,
+      "disabled": false,
+      "value": "中😀é文"
+    },
+    {
+      "label": "Shift+ArrowRight",
+      "focused": true,
+      "start": 0,
+      "end": 0,
+      "disabled": false,
+      "value": "中😀é文"
+    }
+  ]
+}

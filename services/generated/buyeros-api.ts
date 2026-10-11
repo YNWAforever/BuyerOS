@@ -101,6 +101,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/eligible-assignees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search current active workspace members eligible for buyer ownership */
+        get: operations["listEligibleAssignees"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/memberships/{membership_id}": {
         parameters: {
             query?: never;
@@ -783,6 +800,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/delivery-callbacks/resend/{endpoint_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record an authenticated original delivery event
+         * @description Server-selected retained endpoint only. The selector remains closed by default (503). Verify the bounded raw bytes and exactly one of each Svix header before tenant DB access. HTTP body, query, JWT and account headers cannot select a workspace or provider account. Duplicate events are idempotent and late events never downgrade delivery state. Accepted is not delivered, and callbacks do not settle or release the original hold.
+         */
+        post: operations["receiveDeliveryCallback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/provider-callbacks/{provider}": {
         parameters: {
             query?: never;
@@ -972,6 +1009,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/jobs/{job_id}/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read actor-bound job status and counters without result rows
+         * @description Q06 read-only summary. Current membership, original actor or current workspace administrator are rechecked on every request. No result-page queries or writes.
+         */
+        get: operations["getAsyncJobSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/jobs/{job_id}": {
         parameters: {
             query?: never;
@@ -1070,6 +1127,26 @@ export interface paths {
          * @description PROPOSED.
          */
         post: operations["requestDraftReview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/drafts/{draft_id}/grounding-reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Attest every segment of an exact edited message against current sources
+         * @description Human source qualification; does not verify semantic truth. Appends an immutable successor without changing subject/body. Current recipient, profile, sender, fit, evidence and policy are rechecked in the locked transaction. No delivery.
+         */
+        post: operations["reviewDraftGrounding"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1260,6 +1337,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/delivery-messages/{message_id}/reconciliation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reconcile a retained original delivery message under current admin permission
+         * @description Candidate local implementation. Server-owned retained selection defaultsNone and refuses503; the existing reconciliation gate can pause new requests independently of new-send admission. Resolve only the saved original ref/scope. GET runs outside canonical transactions; persist its monotonic observation/full unresolved hold even if current admin access is revoked mid-GET, then reauthorize the response. This operation never submits, looks up a lost intent key or settles money.
+         */
+        post: operations["reconcileDeliveryMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/drafts/{draft_id}/delivery-intents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Admit an exact approved revision under an independent delivery gate
+         * @description Candidate local implementation. Disabled by default; no provider POST in the HTTP request. Only a reviewed server-owned delivery scope may reserve the original intent. The original deliver kill boundary remains unconditional403. This operation is not native-send release acceptance.
+         */
+        post: operations["admitDraftDelivery"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/drafts/{draft_id}/deliver": {
         parameters: {
             query?: never;
@@ -1280,10 +1397,236 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Freeze an actor-bound maintenance selection up to10000 */
+        post: operations["previewBulkManifest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Restore an original actor manifest without executing it */
+        get: operations["getBulkManifest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}/execute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm the exact frozen digest and current operation authority */
+        post: operations["executeBulkManifest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/work-queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read current project work queue */
+        get: operations["getWorkQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/provider-operations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List scoped durable provider receipts */
+        get: operations["listProviderOperations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/runs/{run_id}/candidates/{raw_candidate_id}/review-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Review an exact current native page against an explicitly selected existing company */
+        get: operations["getResearchCandidateReviewContext"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/runs/{run_id}/candidates/{raw_candidate_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Review an exact current native page against an explicitly selected existing company */
+        post: operations["reviewResearchCandidate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/runs/{run_id}/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read bounded candidate observations and current source availability; no entity facts inferred */
+        get: operations["listResearchCandidates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/drafts/{draft_id}/delivery-messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read retained delivery metadata for one scoped draft
+         * @description Candidate local read-only history, including prior revisions. Accepted does not mean delivered. Unknown must be reconciled; no retry, provider GET/POST, account/ref/key/content or money operation. New-delivery admission and reconciliation switches do not hide persisted history; the global read gate and current canonical membership still apply.
+         */
+        get: operations["listDraftDeliveryMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        DeliveryMessageMetadata: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workspace_id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            draft_id: string;
+            /** Format: uuid */
+            draft_revision_id: string;
+            /** Format: uuid */
+            approval_id: string;
+            revision_number: number;
+            /** @enum {string} */
+            state: "prepared" | "submitting" | "unknown" | "accepted" | "delivered" | "bounced" | "complained" | "unsubscribed" | "failed" | "rejected";
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        DeliveryMessagePage: {
+            items: components["schemas"]["DeliveryMessageMetadata"][];
+            offset: number;
+            limit: number;
+            total: number;
+        };
+        DeliveryMessagePageResponse: {
+            data: components["schemas"]["DeliveryMessagePage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @constant */
+            data_mode: "live";
+        };
+        DeliveryReconciliationRequest: Record<string, never>;
+        DeliveryReconciliationResponse: {
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+            data: {
+                /** Format: uuid */
+                message_id: string;
+                state: string;
+                event_id: string | null;
+                replayed: boolean;
+            };
+        };
+        DeliveryAdmissionRequest: {
+            /** Format: uuid */
+            draft_revision_id: string;
+            /** Format: uuid */
+            recipient_ref: string;
+            /** Format: uuid */
+            sender_identity_id: string;
+            /** Format: uuid */
+            approval_id: string;
+        };
+        DeliveryAdmissionResponse: {
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+            data: {
+                /** Format: uuid */
+                message_id: string;
+                state: string;
+                replayed: boolean;
+            };
+        };
         /** @description PROPOSED pilot accounting currency USD. Decimal strings, six fractional digits; never binary floats. Credits and subscription allocations are separate units, never implicitly summed with USD. */
         Money: {
             /** @example 2.400000 */
@@ -1346,6 +1689,8 @@ export interface components {
             workspace_id: string;
             /** Format: uuid */
             user_id: string;
+            /** @description Authorized display name or full canonical user ID fallback; no email or issuer projection. */
+            display_name: string;
             roles: ("viewer" | "operator" | "reviewer" | "workspace_admin")[];
             active: boolean;
             version: number;
@@ -1354,6 +1699,27 @@ export interface components {
             roles: ("viewer" | "operator" | "reviewer" | "workspace_admin")[];
             active: boolean;
             reason: string;
+        };
+        EligibleAssignee: {
+            /** Format: uuid */
+            membership_id: string;
+            /** Format: uuid */
+            user_id: string;
+            display_name: string;
+            version: number;
+        };
+        EligibleAssigneePage: {
+            items: components["schemas"]["EligibleAssignee"][];
+            offset: number;
+            limit: number;
+            total: number;
+        };
+        EligibleAssigneePageResponse: {
+            data: components["schemas"]["EligibleAssigneePage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
         };
         MembershipPage: {
             items: components["schemas"]["Membership"][];
@@ -1597,8 +1963,11 @@ export interface components {
             /** Format: uuid */
             icp_version_id: string;
             target_companies?: number;
-            /** @enum {string} */
-            status: "draft" | "queued" | "running" | "partial" | "paused_budget" | "cancel_requested" | "cancelled" | "failed" | "completed";
+            /**
+             * @description Current read projection; awaiting_reconciliation reflects unresolved original run provider work. Persisted run lifecycle and original intents are preserved.
+             * @enum {string}
+             */
+            status: "draft" | "queued" | "running" | "partial" | "paused_budget" | "cancel_requested" | "cancelled" | "failed" | "completed" | "awaiting_reconciliation";
             stage: string;
             raw_count: number;
             company_count: number;
@@ -1618,6 +1987,105 @@ export interface components {
             started_at?: string;
             /** Format: date-time */
             finished_at?: string;
+            /** @description Current safe checkpoint retry basis; caller permissions and preconditions are revalidated when retrying. */
+            readonly retryable?: boolean;
+            /** @description Original run provider acceptance requires reconciliation; no new submit or release is implied. */
+            readonly reconciliation_pending?: boolean;
+        };
+        ResearchCandidateReviewRequest: {
+            /** Format: uuid */
+            company_id: string;
+            /** Format: uuid */
+            page_source_id: string;
+            expected_page_digest: string;
+            expected_company_hash: string;
+            /** @description Contiguous current page excerpt; UTF-8 bytes must also be at most4000. */
+            excerpt: string;
+            reason: string;
+        };
+        ResearchCandidateReviewResult: {
+            /** Format: uuid */
+            buyer_id: string;
+            /** Format: uuid */
+            evidence_id: string;
+            /** Format: uuid */
+            alias_id: string;
+            /** @enum {string} */
+            entity_status: "reviewed";
+            /** @enum {string} */
+            fit_status: "needs_review";
+        };
+        ResearchCandidateReviewContext: {
+            /** Format: uuid */
+            run_id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            raw_candidate_id: string;
+            company: {
+                /** Format: uuid */
+                id: string;
+                legal_name: string;
+                domain: string | null;
+                hash: string;
+            };
+            page: {
+                /** Format: uuid */
+                id: string;
+                digest: string;
+                excerpt: string;
+                /** Format: uri */
+                url: string;
+                /** Format: date-time */
+                retention_until: string;
+            };
+            /** @enum {string} */
+            entity_status: "needs_review" | "reviewed";
+            /** @enum {string} */
+            fit_status: "needs_review";
+        };
+        ResearchCandidateReviewResponse: {
+            data: components["schemas"]["ResearchCandidateReviewResult"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        ResearchCandidateReviewContextResponse: {
+            data: components["schemas"]["ResearchCandidateReviewContext"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        ResearchCandidateObservation: {
+            /** Format: uuid */
+            raw_candidate_id: string;
+            /** @enum {string} */
+            mapping_status: "unmapped" | "mapped";
+            /** Format: uuid */
+            company_id: string | null;
+            /** @enum {string} */
+            source_status: "metadata_only" | "page_available" | "unavailable" | "awaiting_reconciliation";
+            /** Format: uuid */
+            page_source_id: string | null;
+            /** @description Search metadata excerpt label, never a verified company name or role. */
+            title: string | null;
+            /** Format: uri */
+            source_url: string | null;
+        };
+        ResearchCandidatePage: {
+            items: components["schemas"]["ResearchCandidateObservation"][];
+            offset: number;
+            limit: number;
+            total: number;
+        };
+        ResearchCandidatePageResponse: {
+            data: components["schemas"]["ResearchCandidatePage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
         };
         RunRetryRequest: {
             reason: string;
@@ -2239,7 +2707,7 @@ export interface components {
             /** Format: date-time */
             period_end: string;
             /** @enum {string} */
-            category: "all" | "discovery" | "extraction" | "assessment" | "contact_lookup" | "draft_generation";
+            category: "all" | "discovery" | "extraction" | "assessment" | "contact_lookup" | "draft_generation" | "delivery";
             approved_limit: components["schemas"]["Money"];
             settled: components["schemas"]["Money"];
             reserved: components["schemas"]["Money"];
@@ -2354,6 +2822,7 @@ export interface components {
             /** Format: uuid */
             parent_draft_id?: string;
             claims: components["schemas"]["GroundedClaim"][];
+            grounding_review?: components["schemas"]["ManualGroundingReview"];
             approval_review?: components["schemas"]["DraftApprovalReview"];
             approval_id: string | null;
             /** @constant */
@@ -2365,7 +2834,7 @@ export interface components {
             evidence_ids: string[];
             offer_fact_ids: string[];
             /** @enum {string} */
-            kind: "observation" | "offer_fact" | "labelled_inference";
+            kind: "observation" | "offer_fact" | "labelled_inference" | "non_factual";
         };
         DraftApprovalReview: {
             recipient: {
@@ -2398,6 +2867,47 @@ export interface components {
             /** Format: uuid */
             icp_version_id: string;
             context_hash: string;
+        };
+        GroundingOfferFactRef: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            icp_version_id: string;
+            icp_content_hash: string;
+        };
+        GroundingSegment: {
+            /** @enum {string} */
+            field: "subject" | "body";
+            /** @description Unicode code-point offset; not UTF-16 code units */
+            start: number;
+            /** @description Exclusive Unicode code-point offset */
+            end: number;
+            exact_text: string;
+            /** @enum {string} */
+            classification: "factual" | "non_factual";
+            evidence_refs: components["schemas"]["VersionedId"][];
+            offer_fact_refs: components["schemas"]["GroundingOfferFactRef"][];
+            reason: string;
+        };
+        DraftGroundingReviewRequest: {
+            /** Format: uuid */
+            revision_id: string;
+            content_hash: string;
+            segments: components["schemas"]["GroundingSegment"][];
+            reason: string;
+            /** @constant */
+            confirmation: true;
+        };
+        ManualGroundingReview: {
+            /** Format: uuid */
+            based_on_revision_id: string;
+            based_on_content_hash: string;
+            /** Format: uuid */
+            reviewed_by: string;
+            /** Format: date-time */
+            reviewed_at: string;
+            reason: string;
+            segments: components["schemas"]["GroundingSegment"][];
         };
         DraftReviewRequest: {
             /** Format: uuid */
@@ -2527,6 +3037,127 @@ export interface components {
             limit: number;
             total: number;
         };
+        AsyncJobSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workspace_id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            manifest_id?: string;
+            /** @enum {string} */
+            kind: "offer_ingestion" | "draft_generation" | "export" | "reconciliation" | "bulk_mutation";
+            /** @enum {string} */
+            status: "queued" | "running" | "cancel_requested" | "cancelled" | "completed" | "failed" | "unknown";
+            requested: number;
+            processed: number;
+            updated: number;
+            unchanged: number;
+            blocked: number;
+            conflicts: number;
+            cancelled: number;
+            /** Format: uuid */
+            result_id?: string;
+            failure_code?: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        BulkManifestCreate: {
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            /** @enum {string} */
+            operation: "assignBuyerOwners";
+            target: {
+                /** Format: uuid */
+                owner_membership_id: string | null;
+            };
+        } | {
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            /** @enum {string} */
+            operation: "reviewBuyers";
+            target: {
+                /** @enum {string} */
+                status: "accepted" | "rejected" | "needs_information";
+            };
+        } | {
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            /** @enum {string} */
+            operation: "changeListMemberships";
+            target: {
+                /** Format: uuid */
+                list_id: string;
+                /** @enum {string} */
+                operation: "add" | "remove";
+            };
+        };
+        BulkManifestExecute: {
+            digest: string;
+            /** @constant */
+            confirmation: true;
+        };
+        BulkManifest: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workspace_id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            actor_user_id: string;
+            /** @enum {string} */
+            operation: "assignBuyerOwners" | "reviewBuyers" | "changeListMemberships";
+            target: {
+                /** Format: uuid */
+                owner_membership_id: string | null;
+            } | {
+                /** @enum {string} */
+                status: "accepted" | "rejected" | "needs_information";
+            } | {
+                /** Format: uuid */
+                list_id: string;
+                /** @enum {string} */
+                operation: "add" | "remove";
+            };
+            filters: components["schemas"]["BuyerFilters"];
+            excluded_ids: string[];
+            reason: string;
+            count: number;
+            digest: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** @enum {string} */
+            status: "ready" | "executed";
+            version: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: uuid */
+            job_id?: string;
+            /** Format: uuid */
+            source_job_id?: string;
+            result?: components["schemas"]["BulkResult"];
+        };
+        BulkManifestResponse: {
+            data: components["schemas"]["BulkManifest"];
+            /** @enum {string} */
+            data_mode: "live";
+            request_id: string;
+        };
         AsyncJob: {
             /** Format: uuid */
             id: string;
@@ -2534,6 +3165,8 @@ export interface components {
             workspace_id: string;
             /** Format: uuid */
             project_id: string;
+            /** Format: uuid */
+            manifest_id?: string;
             /** @enum {string} */
             kind: "offer_ingestion" | "draft_generation" | "export" | "reconciliation" | "bulk_mutation";
             /** @enum {string} */
@@ -2603,6 +3236,8 @@ export interface components {
             project_id: string;
             /** Format: uuid */
             actor_id: string;
+            /** @description Current display name of this event's canonical actor; never identity or role authority. */
+            actor_display_name: string | null;
             /** Format: date-time */
             recorded_at: string;
             /** Format: uuid */
@@ -2762,6 +3397,13 @@ export interface components {
             /** @enum {string} */
             data_mode: "live";
         };
+        AsyncJobSummaryResponse: {
+            data: components["schemas"]["AsyncJobSummary"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
         AsyncJobResponse: {
             data: components["schemas"]["AsyncJob"];
             /** Format: uuid */
@@ -2913,6 +3555,36 @@ export interface components {
         };
         EnrichmentJobResponse: {
             data: components["schemas"]["EnrichmentJob"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        DeliveryCallbackBody: {
+            /** @enum {string} */
+            type: "email.sent" | "email.delivered" | "email.bounced" | "email.complained" | "email.failed" | "email.suppressed";
+            /** Format: date-time */
+            created_at: string;
+            data: {
+                /** Format: uuid */
+                email_id: string;
+            } & {
+                [key: string]: unknown;
+            };
+        } & {
+            [key: string]: unknown;
+        };
+        DeliveryCallbackReceipt: {
+            /** Format: uuid */
+            message_id: string;
+            /** Format: uuid */
+            event_id: string;
+            /** @enum {string} */
+            state: "prepared" | "submitting" | "unknown" | "accepted" | "delivered" | "bounced" | "complained" | "unsubscribed" | "failed" | "rejected";
+            replayed: boolean;
+        };
+        DeliveryCallbackReceiptResponse: {
+            data: components["schemas"]["DeliveryCallbackReceipt"];
             /** Format: uuid */
             request_id: string;
             /** @enum {string} */
@@ -3100,6 +3772,58 @@ export interface components {
             /** Format: date-time */
             reviewed_at: string;
         };
+        WorkQueueItem: {
+            /** @enum {string} */
+            kind: "awaiting_review" | "pending_approval" | "unassigned" | "failed_job" | "unknown_fit" | "unknown_acceptance";
+            count: number;
+            filters: {
+                /** @enum {string} */
+                review?: "awaiting_review";
+                /** @enum {string} */
+                queue?: "unassigned" | "unknown";
+                /** @enum {string} */
+                status?: "failed";
+                /** @enum {string} */
+                approval?: "pending";
+                /** @enum {string} */
+                acceptance?: "unknown";
+            };
+        };
+        WorkQueue: {
+            /** Format: date-time */
+            as_of: string;
+            items: components["schemas"]["WorkQueueItem"][];
+        };
+        ProviderOperationSummary: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            capability: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        ProviderOperationPage: {
+            items: components["schemas"]["ProviderOperationSummary"][];
+            offset: number;
+            limit: number;
+            total: number;
+        };
+        WorkQueueResponse: {
+            data: components["schemas"]["WorkQueue"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        ProviderOperationPageResponse: {
+            data: components["schemas"]["ProviderOperationPage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
     };
     responses: {
         /** @description Structured error; reason code determines safe user recovery. 202 never implies job completion. */
@@ -3274,6 +3998,8 @@ export interface operations {
             query?: {
                 offset?: number;
                 limit?: number;
+                /** @description Literal case-insensitive substring of display name, full user ID or membership ID. */
+                q?: string;
             };
             header?: never;
             path: {
@@ -3292,6 +4018,41 @@ export interface operations {
                     "application/json": components["schemas"]["MembershipPageResponse"];
                 };
             };
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+        };
+    };
+    listEligibleAssignees: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+                /** @description Literal case-insensitive substring of display name, full user ID or membership ID. */
+                q?: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Eligible assignee page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EligibleAssigneePageResponse"];
+                };
+            };
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            422: components["responses"]["Error"];
         };
     };
     updateMembership: {
@@ -5162,6 +5923,44 @@ export interface operations {
             503: components["responses"]["Error"];
         };
     };
+    receiveDeliveryCallback: {
+        parameters: {
+            query?: never;
+            header: {
+                "svix-id": string;
+                "svix-timestamp": string;
+                "svix-signature": string;
+            };
+            path: {
+                /** @description Opaque key in the private server endpoint registry; not a tenant or account selector. */
+                endpoint_id: string;
+            };
+            cookie?: never;
+        };
+        /** @description Exact signed provider bytes, at most 65536 bytes. Authenticate before parsing. */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeliveryCallbackBody"];
+            };
+        };
+        responses: {
+            /** @description Original retained event was recorded or replayed; this is not send or economic acceptance. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryCallbackReceiptResponse"];
+                };
+            };
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
     receiveProviderCallback: {
         parameters: {
             query?: never;
@@ -5543,6 +6342,7 @@ export interface operations {
             query?: {
                 offset?: components["parameters"]["Offset"];
                 limit?: components["parameters"]["Limit"];
+                approval?: "pending";
             };
             header?: never;
             path: {
@@ -5647,6 +6447,33 @@ export interface operations {
                     "application/json": components["schemas"]["AsyncJobPageResponse"];
                 };
             };
+        };
+    };
+    getAsyncJobSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Durable current summary, never an inferred completion. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AsyncJobSummaryResponse"];
+                };
+            };
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            429: components["responses"]["Error"];
         };
     };
     getAsyncJob: {
@@ -5870,6 +6697,50 @@ export interface operations {
                     /** @description Server correlation ID */
                     "X-Request-ID"?: string;
                     /** @description Version ETag when response is one versioned entity */
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    reviewDraftGrounding: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Strong version ETag, e.g. "4". Compare in mutation transaction; stale is 412 STALE_REVISION, missing is 400. */
+                "If-Match": components["parameters"]["IfMatch"];
+            };
+            path: {
+                workspace_id: string;
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftGroundingReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Exact text retained in one grounded successor; replay rechecks current eligibility. */
+            200: {
+                headers: {
+                    /** @description Current draft state version */
                     ETag?: string;
                     [name: string]: unknown;
                 };
@@ -6302,6 +7173,83 @@ export interface operations {
             503: components["responses"]["Error"];
         };
     };
+    reconcileDeliveryMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DeliveryReconciliationRequest"];
+            };
+        };
+        responses: {
+            /** @description Original status-observation metadata only; no raw provider ref/account/content or billing proof. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "private, no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryReconciliationResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    admitDraftDelivery: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Stable original delivery key; accepted or unknown intents must never be resent under a new key. */
+                "Idempotency-Key": string;
+            };
+            path: {
+                workspace_id: string;
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeliveryAdmissionRequest"];
+            };
+        };
+        responses: {
+            /** @description Original prepared or replayed message; does not prove provider acceptance or delivery. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryAdmissionResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
     disabledDeliveryBoundary: {
         parameters: {
             query?: never;
@@ -6323,6 +7271,316 @@ export interface operations {
             404: components["responses"]["Error"];
             409: components["responses"]["Error"];
             412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    previewBulkManifest: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkManifestCreate"];
+            };
+        };
+        responses: {
+            /** @description Atomic current frozen selection or durable per-row execution */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkManifestResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+        };
+    };
+    getBulkManifest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+                manifest_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Atomic current frozen selection or durable per-row execution */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkManifestResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+        };
+    };
+    executeBulkManifest: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description Strong version ETag, e.g. "4". Compare in mutation transaction; stale is 412 STALE_REVISION, missing is 400. */
+                "If-Match": components["parameters"]["IfMatch"];
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                manifest_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkManifestExecute"];
+            };
+        };
+        responses: {
+            /** @description Atomic current frozen selection or durable per-row execution */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkResultResponse"];
+                };
+            };
+            /** @description Atomic current frozen selection or durable per-row execution */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AsyncJobResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+        };
+    };
+    getWorkQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bounded actor-scoped job page; workspace admins may view all workspace jobs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkQueueResponse"];
+                };
+            };
+        };
+    };
+    listProviderOperations: {
+        parameters: {
+            query?: {
+                offset?: components["parameters"]["Offset"];
+                limit?: components["parameters"]["Limit"];
+                acceptance?: "unknown";
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bounded actor-scoped job page; workspace admins may view all workspace jobs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderOperationPageResponse"];
+                };
+            };
+        };
+    };
+    getResearchCandidateReviewContext: {
+        parameters: {
+            query: {
+                company_id: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+                raw_candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current reviewed material; no company role or fit accuracy acceptance */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResearchCandidateReviewContextResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    reviewResearchCandidate: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path: {
+                workspace_id: string;
+                run_id: string;
+                raw_candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResearchCandidateReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Current reviewed material; no company role or fit accuracy acceptance */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResearchCandidateReviewResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    listResearchCandidates: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current bounded observations; awaiting_reconciliation does not authorize a repeated source GET */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResearchCandidatePageResponse"];
+                };
+            };
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    listDraftDeliveryMessages: {
+        parameters: {
+            query?: {
+                offset?: components["parameters"]["Offset"];
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bounded persisted metadata page; no provider or billing acceptance proof. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "private, no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryMessagePageResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
             422: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];

@@ -1,0 +1,28 @@
+{
+  "source_sha": "97adf4480cb6cd82a5122ed0934491a8c1c741a9",
+  "source_sha_after": "97adf4480cb6cd82a5122ed0934491a8c1c741a9",
+  "started_at_utc": "2026-10-06T21:36:22.162931+00:00",
+  "seconds": 253.199,
+  "command": [
+    "node",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    "tests/e2e/work-queue-counts.spec.ts",
+    "tests/e2e/audit-draft-dirty.spec.ts",
+    "tests/e2e/audit-draft-reground.spec.ts",
+    "tests/e2e/audit-job-scope.spec.ts",
+    "--config",
+    "playwright.audit-fixes.config.ts"
+  ],
+  "cwd": ".",
+  "exit_code": 0,
+  "environment": "L0/L1 owned loopback PG16 fixture; no production/provider/human acceptance",
+  "log": "artifacts\\c61\\C61-21-integrated-built-final.log",
+  "fresh_junit": true,
+  "tests": 24,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit": "test-results/audit-fixes.xml",
+  "required_gate_exit_code": 0
+}

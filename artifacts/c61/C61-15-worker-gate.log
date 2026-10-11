@@ -1,0 +1,9 @@
+.....                                                                    [100%]
+============================== warnings summary ===============================
+tests/test_external_runner_db.py::test_external_network_has_no_open_db_lock_and_timeout_retains_hold
+  C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\services\worker\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\laich\.codex\worktrees\c61-diagnostics-20261007\BuyerOS\artifacts\c61\c61-provider-worker-gate.xml -
+5 passed, 1 warning in 25.52s

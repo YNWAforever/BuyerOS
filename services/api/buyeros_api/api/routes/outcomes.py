@@ -9,7 +9,7 @@ from ..errors import ApiError, envelope
 from ..idempotency import begin_idempotency, complete_idempotency, if_match_version
 from ..schemas import OutcomeCreateRequest, OutcomeCorrectionRequest
 from ...services.outcome_service import (correct_outcome, list_outcomes, load_outcome,
-                                         outcome_data, record_outcome)
+                                         project_outcome_data, record_outcome)
 
 router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["outcomes"])
 
@@ -51,7 +51,7 @@ async def record_manual_outcome(workspace_id: uuid.UUID, project_id: uuid.UUID,
             event = await record_outcome(session, workspace_id=workspace_id,
                 project_id=project_id, actor_id=member["user_id"], request=payload)
             complete_idempotency(outcome, str(event.id))
-        data = outcome_data(event)
+        data = await project_outcome_data(session, event)
         response.headers["ETag"] = f'"{event.version}"'
     return envelope(data, request.state.request_id)
 
@@ -84,6 +84,6 @@ async def correct_manual_outcome(workspace_id: uuid.UUID, outcome_id: uuid.UUID,
                 outcome_id=outcome_id, actor_id=member["user_id"], request=payload,
                 expected_version=expected_version)
             complete_idempotency(outcome, str(event.id))
-        data = outcome_data(event)
+        data = await project_outcome_data(session, event)
         response.headers["ETag"] = f'"{event.version}"'
     return envelope(data, request.state.request_id)

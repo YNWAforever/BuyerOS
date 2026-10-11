@@ -1,6 +1,7 @@
 """One durable buyer-list/preset service sharing T08 selection and tenant tables."""
 import uuid
 
+from .membership_directory import eligible_owner_predicate
 from sqlalchemy import func, select
 
 from ..api.errors import ApiError
@@ -96,8 +97,7 @@ async def assign_owners(session, *, workspace_id, project_id, actor_user_id,
     owner_user_id = None
     if owner_membership_id is not None:
         member = (await session.execute(select(Membership).where(
-            Membership.workspace_id == workspace_id, Membership.id == owner_membership_id,
-            Membership.active.is_(True)).with_for_update())).scalar_one_or_none()
+            Membership.id == owner_membership_id, eligible_owner_predicate(workspace_id)).with_for_update())).scalar_one_or_none()
         if member is None:
             raise ApiError(422, "INVALID_REQUEST", "owner membership is not active in this workspace")
         owner_user_id = member.user_id

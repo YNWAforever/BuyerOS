@@ -1,0 +1,10 @@
+To: recipient@fixture.example.test
+From: Fixture Alex <alex@example.test>
+Subject: 邀請😀了解產品
+
+您好👩‍💻
+Fictional industrial sensors
+Fixture public catalog lists industrial sensors.
+謝謝！
+
+Sources: e4000000-0000-4000-8000-000000000001

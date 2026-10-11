@@ -1,0 +1,33 @@
+▶ every disposable-API Playwright configuration actually removes its owned container and marker
+  ✔ playwright.admin.config.ts (5114.2842ms)
+  ✔ playwright.approval.config.ts (2458.3636ms)
+  ✔ playwright.audit-fixes.config.ts (3675.1988ms)
+  ✔ playwright.bulk.config.ts (2830.3626ms)
+  ✔ playwright.buyer-management.config.ts (3422.0918ms)
+  ✔ playwright.buyer.config.ts (3880.5291ms)
+  ✔ playwright.config.ts (2814.4174ms)
+  ✔ playwright.confirm.config.ts (2184.8292ms)
+  ✔ playwright.contact-job.config.ts (3215.4358ms)
+  ✔ playwright.cors.config.ts (2770.9391ms)
+  ✔ playwright.draft.config.ts (2138.227ms)
+  ✔ playwright.exports.config.ts (2576.8576ms)
+  ✔ playwright.ingestion.config.ts (3245.6484ms)
+  ✔ playwright.mvp-research.config.ts (3566.3611ms)
+  ✔ playwright.mvp.config.ts (3834.1148ms)
+  ✔ playwright.offer.config.ts (2870.7636ms)
+  ✔ playwright.policy.config.ts (2516.6198ms)
+  ✔ playwright.quote.config.ts (2784.2183ms)
+  ✔ playwright.run.config.ts (2053.2844ms)
+  ✔ playwright.workbench.config.ts (2080.1988ms)
+✔ every disposable-API Playwright configuration actually removes its owned container and marker (60094.0297ms)
+✔ configured audit teardown also removes its labelled UI sentinel and marker (4249.3126ms)
+✔ configured audit teardown refuses a UI container whose owner label differs (2440.3025ms)
+✔ configured database teardown refuses an unrecognized marker without deleting it (153.3743ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 67208.1619

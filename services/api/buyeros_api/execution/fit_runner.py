@@ -17,7 +17,7 @@ from buyeros_api.db.icp import IcpVersion, Project
 from buyeros_api.db.models import Membership
 from buyeros_api.db.runs import SearchRun
 from .provider_context import execution_session as tenant_session
-from buyeros_api.services.fit import evaluate_evidence_fit
+from buyeros_api.services.fit import evaluate_evidence_fit, requirement_claims
 from buyeros_api.services.policy_service import evaluate_current_policy
 
 
@@ -107,10 +107,22 @@ class FitDomainRunner:
                            source.retrieved_at is not None and source.excerpt and
                            hashlib.sha256(source.excerpt.encode()).hexdigest() == source.digest and
                            claim.excerpt in source.excerpt)
+            native_kind = {}
+            if source is not None and source.storage_mode=='research_page_excerpt':
+                from ..services.research_native_basis import reviewed_research_evidence
+                try:
+                    proof=await reviewed_research_evidence(session,workspace_id=self.workspace_id,run_id=run.id,
+                        buyer_id=buyer.id,evidence_id=claim.id)
+                    current=proof.get('current') is True
+                    if current:
+                        native_kind={'source_kind':proof['source_kind']}
+                except ValueError:current=False
+            elif source is not None and source.storage_mode not in {'excerpt_only','private_object'}:current=False
             evidence.append({
                 "id": str(claim.id), "requirement_id": claim.requirement_id,
                 "stance": claim.stance, "current": current,
                 "is_inference": claim.is_inference, "version": claim.version,
+                **native_kind,
             })
             basis_evidence.append({"id": str(claim.id), "version": claim.version,
                                    "hash": claim.content_hash,
@@ -140,7 +152,7 @@ class FitDomainRunner:
             basis_hash, requirements, evidence, _ = await self._basis(session)
             if basis_hash != state["basis_hash"]:
                 raise ValueError("fit basis changed")
-            assessment = evaluate_evidence_fit(requirements, evidence)
+            assessment = evaluate_evidence_fit(requirements, requirement_claims(evidence))
             return {"hard_excluded": assessment["verdict"] == "not_a_match"}
 
     async def fit(self, state: dict) -> dict:
@@ -156,7 +168,7 @@ class FitDomainRunner:
             basis_hash, requirements, evidence, _ = await self._basis(session)
             if basis_hash != state["basis_hash"]:
                 raise ValueError("fit basis changed before verification")
-            evaluate_evidence_fit(requirements, evidence)
+            evaluate_evidence_fit(requirements, requirement_claims(evidence))
             return {"verified": True}
 
     async def persist(self, state: dict) -> dict:
@@ -167,7 +179,7 @@ class FitDomainRunner:
             basis_hash, requirements, evidence, buyer = await self._basis(session, lock_buyer=True)
             if basis_hash != state["basis_hash"]:
                 raise ValueError("fit basis changed before persistence")
-            details = evaluate_evidence_fit(requirements, evidence)
+            details = evaluate_evidence_fit(requirements, requirement_claims(evidence))
             assessment_id = uuid.uuid5(uuid.NAMESPACE_URL,
                 f"fit-v1:{self.run_id}:{self.buyer_id}:{basis_hash}")
             existing = (await session.execute(select(FitAssessment).where(

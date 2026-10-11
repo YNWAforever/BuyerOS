@@ -376,7 +376,8 @@ def test_contact_expiry_removes_address_person_and_addressed_draft(seeded):
             conn.execute("DELETE FROM companies WHERE id=%s", (company_id,))
 
 
-def test_contact_retention_migration_rolls_back_and_forward_on_empty_disposable_db(migrated):
+def test_contact_retention_migration_rolls_back_and_forward_on_empty_disposable_db(isolated_migrated):
+    migrated = isolated_migrated
     from pathlib import Path
     from alembic import command
     from alembic.config import Config
@@ -393,7 +394,7 @@ def test_contact_retention_migration_rolls_back_and_forward_on_empty_disposable_
     finally:
         command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0050_c61_delivery_authorizations"
         assert conn.execute("SELECT count(*) FROM information_schema.columns "
                             "WHERE table_name='contact_points' AND column_name='retention_expires_at'").fetchone()[0] == 1
 
@@ -437,7 +438,8 @@ def test_expensive_read_and_write_rate_limits_are_actor_scoped_and_durable(proje
     get_settings.cache_clear()
 
 
-def test_rate_window_migration_empty_rollback_and_rls(migrated):
+def test_rate_window_migration_empty_rollback_and_rls(isolated_migrated):
+    migrated = isolated_migrated
     from pathlib import Path
     from alembic import command
     from alembic.config import Config
@@ -456,13 +458,14 @@ def test_rate_window_migration_empty_rollback_and_rls(migrated):
     finally:
         command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0050_c61_delivery_authorizations"
         assert conn.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class "
                             "WHERE relname='api_rate_windows'").fetchone() == (True, True)
         assert conn.execute("SELECT has_table_privilege('buyeros_api','api_rate_windows','DELETE')").fetchone()[0] is False
 
 
-def test_rate_window_migration_refuses_populated_rollback(migrated):
+def test_rate_window_migration_refuses_populated_rollback(isolated_migrated):
+    migrated = isolated_migrated
     from pathlib import Path
     from alembic import command
     from alembic.config import Config
@@ -479,7 +482,7 @@ def test_rate_window_migration_refuses_populated_rollback(migrated):
         with pytest.raises(RuntimeError, match="retained API rate windows"):
             command.downgrade(config, "0032_contact_retention")
         with psycopg.connect(migrated) as conn:
-            assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0036_checkpoint_schema_grants"
+            assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0050_c61_delivery_authorizations"
     finally:
         with psycopg.connect(migrated, autocommit=True) as conn:
             conn.execute("DELETE FROM api_rate_windows WHERE workspace_id=%s AND actor_id=%s",

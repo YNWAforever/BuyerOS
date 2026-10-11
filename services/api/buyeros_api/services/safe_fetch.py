@@ -125,6 +125,9 @@ async def fetch_permitted_document(intent: dict, transport, object_store) -> dic
             or transport is None or object_store is None
             or getattr(transport, "pinned_connections", False) is not True):
         return {"status": "blocked", "reason": "permission_or_transport_unavailable"}
+    byte_limit = intent.get("max_page_bytes", MAX_DECODED_BYTES)
+    if type(byte_limit) is not int or not 1 <= byte_limit <= MAX_DECODED_BYTES:
+        return {"status": "blocked", "reason": "invalid_page_byte_limit"}
     url = intent.get("url")
     if not isinstance(url, str) or len(url) > 2000:
         return {"status": "blocked", "reason": "invalid_url"}
@@ -145,7 +148,7 @@ async def fetch_permitted_document(intent: dict, transport, object_store) -> dic
                     return {"status": "blocked", "reason": "unsafe_dns_answer"}
                 status, headers, raw = await transport.get(
                     normalized, pinned_ip=addresses[0], timeout_seconds=10,
-                    max_transfer_bytes=MAX_TRANSFER_BYTES,
+                    max_transfer_bytes=min(MAX_TRANSFER_BYTES, byte_limit),
                 )
                 if not isinstance(headers, dict) or not isinstance(raw, bytes):
                     return {"status": "quarantined", "reason": "invalid_response"}
@@ -160,9 +163,13 @@ async def fetch_permitted_document(intent: dict, transport, object_store) -> dic
                 mime = headers.get("content-type", "").split(";", 1)[0].strip().lower()
                 if mime not in ALLOWED_MIME:
                     return {"status": "quarantined", "reason": "unsupported_mime"}
+                if len(raw) > min(MAX_TRANSFER_BYTES, byte_limit):
+                    return {"status": "quarantined", "reason": "body_limit_or_encoding"}
                 try:
                     decoded = _decode_body(raw, headers.get("content-encoding", "").lower().strip())
                 except (ValueError, zlib.error):
+                    return {"status": "quarantined", "reason": "body_limit_or_encoding"}
+                if len(decoded) > byte_limit:
                     return {"status": "quarantined", "reason": "body_limit_or_encoding"}
                 sanitized = _sanitized_text(decoded, mime)
                 if not sanitized:
@@ -179,7 +186,7 @@ async def fetch_permitted_document(intent: dict, transport, object_store) -> dic
                 return {
                     "status": "retrieved", "source_url": normalized, "digest": digest,
                     "source_digest": source_digest, "language": language,
-                    "bytes": len(decoded), "object_key": key, "excerpt": sanitized[:4000].decode(),
+                    "bytes": len(decoded), "object_key": key, "excerpt": sanitized[:4000].decode("utf-8", errors="ignore"),
                 }
     except (TimeoutError, OSError, ValueError, zlib.error):
         return {"status": "blocked", "reason": "retrieval_failed"}
