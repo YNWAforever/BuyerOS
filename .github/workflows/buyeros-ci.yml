@@ -553,10 +553,10 @@ jobs:
         working-directory: services/api
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 2544 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 2563 --discovery-only
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/api
-      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 2544 --junit services/api/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 2563 --junit services/api/artifacts/tests.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -672,6 +672,14 @@ jobs:
       - name: Capture owned backlog rotation and worker restart
         run: services/worker/.venv/bin/python scripts/benchmark-worker-capacity.py --output artifacts/c61/ci-worker-capacity-observations.json --junit artifacts/c61/ci-worker-capacity.xml
       - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-worker-capacity.xml
+      - name: Capture owned bulk resources with exact native discovery and execution
+        run: services/api/.venv/bin/python scripts/benchmark-bulk-capacity.py --output-dir artifacts/c61/ci-bulk-capacity
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-owned-bulk-capacity
+          path: artifacts/c61/ci-bulk-capacity/
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
