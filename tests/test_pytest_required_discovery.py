@@ -44,7 +44,7 @@ class PytestRequiredDiscoveryTests(unittest.TestCase):
   self.assertLess(body.index(discover),body.index(pre));self.assertLess(body.index(pre),body.index(original));self.assertLess(body.index(original),body.index(post))
   self.assertIn('services/'+name+'/artifacts/c61-full-discovery.txt',body)
  def test_original_API_requires_full_native_collection_and_exact_execution(self):self.assert_original_job('api',2563,'worker')
- def test_original_worker_requires_full_native_collection_and_exact_execution(self):self.assert_original_job('worker',282,'owned-worker-capacity')
+ def test_original_worker_requires_full_native_collection_and_exact_execution(self):self.assert_original_job('worker',301,'owned-worker-capacity')
  def test_original_CI_discovers_and_executes_all_gate_controls(self):
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text(encoding='utf-8');body=workflow.split('      - name: Verify required full pytest discovery guards\n',1)[1].split('      - name: Discover C61 evidence checker assertions before running',1)[0]
   self.assertIn("pattern='test_pytest_required_discovery.py'",body);self.assertIn('assert len(names)==len(set(names))==21,',body);self.assertIn('assert result.testsRun==21 and result.wasSuccessful() and not result.skipped,',body)

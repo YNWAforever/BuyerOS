@@ -18,6 +18,10 @@ and zero failures/errors/skips before validating the raw capture denominators.
 The original twelve required CI jobs include this runner in
 `owned-worker-capacity`; the default worker suite includes the refusal/capture
 controls. Failed attempts remain evidence and never earn a report PASS.
+The 45 default controls require recovery completion to match the started task,
+intent, generation and replacement PID. Accepted reconciliation must retain
+both its settlement and matching duplicate execution/snapshot, with one cost
+and the same settled reservation; omitted or unrelated evidence is refused.
 
 | Case | Required observations |
 | --- | --- |

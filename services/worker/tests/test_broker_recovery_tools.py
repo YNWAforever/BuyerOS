@@ -59,6 +59,14 @@ def receipts():
             events += [dict(stage='return', pid=202, task_id='old-epoch', generation=1, intent='reconcile', outcome='stale'),
                        dict(stage='status', pid=202, ref='fixture:one', outcome='accepted', runtime_epoch=1),
                        dict(stage='status', pid=202, ref='fixture:one', outcome='not_found', runtime_epoch=3)]
+            duplicate = copy.deepcopy(snapshots[-1])
+            duplicate['label'] = 'settled_duplicate'
+            snapshots.append(duplicate)
+            for task_id, outcome in [('settle', 'reconciled'), ('settle-again', 'duplicate')]:
+                events += [dict(stage='started', pid=202, task_id=task_id, generation=3,
+                                intent='contact.reconcile:p1', redelivered=False),
+                           dict(stage='return', pid=202, task_id=task_id, generation=3,
+                                intent='contact.reconcile:p1', outcome=outcome)]
         captures.append(dict(name=name, complete=True, live_verified=False, release_accepted=False,
                              role=dict(name='runtime', superuser=False, bypass=False, owner='migration', rls=True),
                              owned_workers=[dict(popen_pid=101, tree_pids=[101]),dict(popen_pid=202,tree_pids=[202])],
@@ -92,7 +100,7 @@ def test_incomplete_recovery_never_earns_source_acceptance(breakage):
     elif breakage=='changed-operation':data[2]['snapshots'][-1]['provider']['id']='p2'
     elif breakage=='status-submit':data[3]['events'].append(dict(stage='submit',pid=202,intent='new-key'))
     elif breakage=='missing-status':data[3]['events']=[e for e in data[3]['events'] if e['stage']!='status']
-    elif breakage=='epoch-not-denied':data[3]['events'][-3]['outcome']='accepted'
+    elif breakage=='epoch-not-denied':next(e for e in data[3]['events'] if e.get('task_id')=='old-epoch')['outcome']='accepted'
     elif breakage=='selector-regression':data[3]['snapshots'][-1]['selector_epoch']=1
     elif breakage=='double-cost':data[3]['snapshots'][-1]['costs']=['0.100000','0.100000']
     elif breakage=='cost-after-duplicate':
@@ -100,6 +108,38 @@ def test_incomplete_recovery_never_earns_source_acceptance(breakage):
         extra['costs']=['0.100000','0.100000'];data[3]['snapshots'].append(extra)
     elif breakage=='privileged':data[0]['role']['bypass']=True
     elif breakage=='live':data[0]['live_verified']=True
+    assert not validate(data)
+
+
+@pytest.mark.parametrize('name', ['redelivery', 'lease', 'unknown', 'accepted'])
+@pytest.mark.parametrize('field,value', [('task_id', 'unrelated'), ('generation', 999), ('pid', 101)])
+def test_recovery_completion_must_match_replacement_execution(name, field, value):
+    data = receipts()
+    capture = next(c for c in data if c['name'] == name)
+    completed = next(e for e in capture['events'] if e['stage'] == 'return' and e['intent'] == 'lookup' and e['pid'] == 202)
+    completed[field] = value
+    assert not validate(data)
+
+
+def test_late_lease_finalizer_must_match_original_task():
+    data = receipts()
+    data[1]['events'][-1]['task_id'] = 'unrelated'
+    assert not validate(data)
+
+
+@pytest.mark.parametrize('breakage', ['missing-snapshot', 'missing-return', 'wrong-intent',
+                                     'wrong-generation', 'wrong-task', 'wrong-provider-state'])
+def test_duplicate_settlement_requires_matching_execution_and_unchanged_snapshot(breakage):
+    data = receipts()
+    capture = data[3]
+    duplicate = next(e for e in capture['events'] if e.get('task_id') == 'settle-again' and e['stage'] == 'return')
+    if breakage == 'missing-snapshot':
+        capture['snapshots'] = [s for s in capture['snapshots'] if s['label'] != 'settled_duplicate']
+    elif breakage == 'missing-return': capture['events'].remove(duplicate)
+    elif breakage == 'wrong-intent': duplicate['intent'] = 'another-operation'
+    elif breakage == 'wrong-generation': duplicate['generation'] = 999
+    elif breakage == 'wrong-task': duplicate['task_id'] = 'unrelated'
+    else: capture['snapshots'][-1]['provider']['status'] = 'unknown'
     assert not validate(data)
 
 

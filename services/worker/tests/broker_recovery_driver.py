@@ -31,17 +31,23 @@ def captures_complete(captures):
             if (final['state'], final['generation']) != ('done', 2 if c['name'] == 'lease' else 1):
                 return False
             starts = [e for e in events if e['stage'] == 'started' and e['intent'] == inflight['key']]
-            returns = [e for e in events if e['stage'] == 'return' and e['intent'] == inflight['key']]
             first = starts[0]
+            def matching_return(start, outcome):
+                return any(e['stage'] == 'return' and e['outcome'] == outcome
+                           and all(e[key] == start[key] for key in ('pid', 'task_id', 'generation', 'intent'))
+                           for e in events[events.index(start) + 1:])
+            replacements = [e for e in starts[1:] if e['pid'] in workers[1]['tree_pids']]
+            if first['generation'] != 1:
+                return False
             if c['broker_final'] != dict(unacked=[], queued=0):
                 return False
             if c['name'] == 'lease':
                 expired = snapshots['expired']
                 if datetime.fromisoformat(expired['db_now']) < datetime.fromisoformat(expired['lease_expires']):
                     return False
-                if not any(e['generation']==2 and e['outcome']=='done' for e in returns):
+                if not any(e['generation']==2 and matching_return(e, 'done') for e in replacements):
                     return False
-                if not any(e['pid']==first['pid'] and e['generation']==1 and e['outcome']=='stale' for e in returns):
+                if not matching_return(first, 'stale'):
                     return False
             else:
                 kill = c['killed']
@@ -49,10 +55,10 @@ def captures_complete(captures):
                     return False
                 if first['task_id'] not in c['broker_before']['unacked']:
                     return False
-                if not any(e['redelivered'] is True and e['task_id']==first['task_id'] and e['pid']!=first['pid'] for e in starts[1:]):
-                    return False
                 want = {'redelivery':'done','unknown':'unknown','accepted':'duplicate'}[c['name']]
-                if not any(e['outcome']==want and e['pid']!=first['pid'] for e in returns):
+                if not any(e['redelivered'] is True and e['task_id']==first['task_id']
+                           and e['generation']==first['generation'] and e['pid']!=first['pid']
+                           and matching_return(e, want) for e in replacements):
                     return False
             if c['name'] in ('unknown','accepted'):
                 submits = [e for e in events if e['stage']=='submit']
@@ -82,9 +88,17 @@ def captures_complete(captures):
                     settled=snapshots['settled']
                     if snapshots['pending']['selector_epoch']!=1 or settled['selector_epoch']!=3:
                         return False
-                    if 'settled_duplicate' in snapshots and snapshots['settled_duplicate']['selector_epoch']!=3:
+                    duplicate=snapshots['settled_duplicate']
+                    if duplicate['selector_epoch']!=3 or any(duplicate[k]!=settled[k] for k in ('provider','reservation','costs')):
                         return False
                     if settled['provider']['status']!='not_found' or settled['reservation']['state']!='settled' or Decimal(settled['reservation']['remaining'])!=0 or settled['costs']!=['0.100000']:
+                        return False
+                    reconcile='contact.reconcile:'+original['provider']['id']
+                    reconciliations=[e for e in events if e['stage']=='started' and e['intent']==reconcile
+                                     and e['generation']==3 and e['pid'] in workers[1]['tree_pids']]
+                    if not any(matching_return(a, 'reconciled') and matching_return(b, 'duplicate')
+                               and a['task_id']!=b['task_id'] and events.index(a)<events.index(b)
+                               for a in reconciliations for b in reconciliations):
                         return False
         return True
     except (KeyError, TypeError, ValueError, IndexError, ArithmeticError):
