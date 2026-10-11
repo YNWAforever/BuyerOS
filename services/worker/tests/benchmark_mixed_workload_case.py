@@ -20,6 +20,7 @@ from tests.test_contact_uncertainty_db import _setup
 from tests.test_valkey_integration import _valkey_container
 from tests.worker_capacity_driver import sample_worker_resources, _owned_process_tree
 from tests.mixed_workload_driver import DURATION_NS, INTERVAL_NS, WAVES, workload_complete
+from tests.mixed_workload_cleanup import capture_then_cleanup
 
 
 def test_owned_ten_workspaces_thirty_minute_mixed_nonpaid(worker_database_url, pg_dsn, monkeypatch):
@@ -207,17 +208,18 @@ def test_owned_ten_workspaces_thirty_minute_mixed_nonpaid(worker_database_url, p
                      owned_workers=ownership,baseline_holds=baseline,provider_calls=sum(e['stage']=='forbidden_provider_call' for e in raw_events),send_calls=0,
                      observations=observations,publications=publications,events=raw_events,terminal=terminal,durable=durable,samples=samples,dispatcher_cycles=cycles,
                      method='actual monotonic1800s/60waves;publisher send begin to worker task-entry wait includes producer enqueue overhead;execution includes committed task body;10s SQL created-at age/state and broker counts/RSS samples are separate, not queue latency or all-time peak/PSS/cgroup;bulk seed bypasses API admission;private delete IO synthetic;no adopted resource/queue/fleet SLO;no HK/field/provider/UAT acceptance')
-        with (folder/'capture.json').open('x',encoding='utf-8') as f: json.dump(capture,f,indent=2,allow_nan=False);f.write('\n')
-        for p in workers:
+        def stop_worker(p):
             if p.poll() is None:
                 if os.name=='nt': subprocess.run(['taskkill','/PID',str(p.pid),'/T','/F'],capture_output=True,timeout=10)
                 else: p.terminate()
                 try: p.wait(timeout=10)
                 except subprocess.TimeoutExpired: p.kill();p.wait(timeout=10)
-        if publisher: publisher.close()
-        if client: client.close()
-        if container: subprocess.run(['docker','rm','-f',container],capture_output=True,timeout=20)
+        actions=[lambda p=p:stop_worker(p) for p in workers]
+        if publisher: actions.append(publisher.close)
+        if client: actions.append(client.close)
+        if container: actions.append(lambda:subprocess.run(['docker','rm','-f',container],capture_output=True,timeout=20,check=True))
         # PG fixture owns and drops its entire disposable database/container.
         # Never mutate or release the seeded liabilities during cleanup.
-        get_settings.cache_clear()
+        actions.append(get_settings.cache_clear)
+        capture_then_cleanup(folder,capture,actions)
     assert workload_complete(capture), 'strict sustained denominator refused; all raw evidence retained'

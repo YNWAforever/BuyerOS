@@ -32,7 +32,7 @@ def main():
     python=WORKER/'.venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python')
     if not python.is_file(): parser.error('frozen worker virtual environment required')
     folder.mkdir(parents=True)
-    paths=[Path(__file__),WORKER/'tests/benchmark_mixed_workload_case.py',WORKER/'tests/mixed_workload_fixture.py',WORKER/'tests/mixed_workload_driver.py',WORKER/'tests/broker_recovery_fixture.py',WORKER/'tests/conftest.py',WORKER/'tests/test_contact_uncertainty_db.py',WORKER/'tests/test_valkey_integration.py',WORKER/'tests/worker_capacity_driver.py',WORKER/'buyeros_worker/tasks.py',WORKER/'buyeros_worker/app.py',API/'buyeros_api/execution/dispatcher.py',API/'buyeros_api/execution/handlers/retention.py',API/'buyeros_api/execution/handlers/bulk_mutate.py',API/'buyeros_api/services/bulk_service.py']
+    paths=[Path(__file__),WORKER/'tests/benchmark_mixed_workload_case.py',WORKER/'tests/mixed_workload_fixture.py',WORKER/'tests/mixed_workload_driver.py',WORKER/'tests/mixed_workload_cleanup.py',WORKER/'tests/broker_recovery_fixture.py',WORKER/'tests/conftest.py',WORKER/'tests/test_contact_uncertainty_db.py',WORKER/'tests/test_valkey_integration.py',WORKER/'tests/worker_capacity_driver.py',WORKER/'buyeros_worker/tasks.py',WORKER/'buyeros_worker/app.py',API/'buyeros_api/execution/dispatcher.py',API/'buyeros_api/execution/handlers/retention.py',API/'buyeros_api/execution/handlers/bulk_mutate.py',API/'buyeros_api/services/bulk_service.py']
     frozen=provenance(ROOT,paths)
     with (folder/'provenance-start.json').open('x',encoding='utf-8') as f:json.dump(frozen,f,indent=2);f.write('\n')
     env=dict(os.environ);env.pop('PYTEST_ADDOPTS',None)
