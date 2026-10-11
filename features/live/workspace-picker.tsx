@@ -62,6 +62,10 @@ export function LiveWorkspace() {
   const [selectionError, setSelectionError] = useState('');
   const [workspaceRefresh,setWorkspaceRefresh]=useState(0);
   const [accessError,setAccessError]=useState('');
+  const [accessCheck,setAccessCheck]=useState<string|null>(null);
+  const [lastChecked,setLastChecked]=useState<{identity:string;time:string}|null>(null);
+  const [diagnostic,setDiagnostic]=useState<{identity:string;text:string;result:'copying'|'copied'|'failed'}|null>(null);
+  const accessChecking=accessCheck===snapshot.identity;
   const checkingAccess=useRef(false),allowAutoSelection=useRef(true),pendingAccessCheck=useRef<string|null>(null);
   const [projectRefresh, setProjectRefresh] = useState(0);
   const [locale, setLocale] = useState<'en'|'zh-HK'>('en');
@@ -106,6 +110,8 @@ export function LiveWorkspace() {
     finally{setLocaleSaving(false);}
   }
   function retryAccess(){
+    if(checkingAccess.current)return;
+    checkingAccess.current=true;setAccessCheck(session.identity());setDiagnostic(null);
     setSelectionError('');setAccessError('');
     // Preserve a legitimate member's editor while checking; a failed read is not revocation.
     setWorkspaces(current=>current.kind==='ready'?current:{kind:'loading'});
@@ -118,17 +124,27 @@ export function LiveWorkspace() {
     setWorkspaceRefresh(value=>value+1);
   }),[client,session]);
   const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
-  function copyDiagnostics(){
-    const message=workspaces.kind==='error'?workspaces.message:'';
+  async function copyDiagnostics(){
+    const identity=session.identity();
+    const message=workspaces.kind==='error'?workspaces.message:accessError;
     const requestId=message.match(/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/i)?.[0]??null;
     // Allow-listed support fields only: no token, OAuth code, email or user claims.
-    void navigator.clipboard?.writeText(JSON.stringify({request_id:requestId,time:new Date().toISOString(),
-      workspace_id:workspace,project_id:project,login_method:auth?.provider??'auth0'},null,2));
+    const text=JSON.stringify({request_id:requestId,time:lastChecked?.identity===identity?lastChecked.time:new Date().toISOString(),
+      workspace_id:workspace,project_id:project,login_method:auth?.provider??'auth0'},null,2);
+    setDiagnostic({identity,text,result:'copying'});
+    try {
+      if(!navigator.clipboard?.writeText)throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(text);
+      if(session.isCurrent(identity))setDiagnostic({identity,text,result:'copied'});
+    } catch {
+      if(session.isCurrent(identity))setDiagnostic({identity,text,result:'failed'});
+    }
   }
   useEffect(() => {
     if (!snapshot.authenticated) return;
     const own = new AbortController(),identity=session.identity();
     checkingAccess.current=true;
+    queueMicrotask(()=>{if(!own.signal.aborted)setAccessCheck(identity);});
     const signal = AbortSignal.any([session.controller().signal, own.signal, AbortSignal.timeout(10_000)]);
     void allPages(client,session,'/v1/workspaces',toWorkspaces,signal).then(items => {
       if (own.signal.aborted || !session.isCurrent(identity)) return;
@@ -152,6 +168,7 @@ export function LiveWorkspace() {
     }).finally(()=>{
       if(own.signal.aborted||!session.isCurrent(identity))return;
       checkingAccess.current=false;
+      setAccessCheck(null);setLastChecked({identity,time:new Date().toISOString()});
       const followup=pendingAccessCheck.current===identity;pendingAccessCheck.current=null;
       if(followup)setWorkspaceRefresh(value=>value+1);
     });
@@ -221,10 +238,14 @@ export function LiveWorkspace() {
     <LiveNavigation t={t} navigate={navigate} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>
     <div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
       {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
-      {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
+      {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button disabled={accessChecking} onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
       {workspaces.kind === 'ready' && (workspaces.items.length ? <label className="live-scope-select">{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p></>)}
-      {workspaces.kind==='ready'&&<><button onClick={retryAccess}>{t('Check access again')}</button>{accessError&&<p role="alert">{localizeError(accessError)}</p>}</>}
-      {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={copyDiagnostics}>{t('Copy diagnostics')}</button></>}
+      {workspaces.kind==='ready'&&<><button disabled={accessChecking} onClick={retryAccess}>{t('Check access again')}</button>{accessError&&<p role="alert">{localizeError(accessError)}</p>}</>}
+      {accessChecking&&<p role="status" aria-live="polite">{t('Checking access…')}</p>}
+      {lastChecked?.identity===snapshot.identity&&<p>{t('Last checked')}: {new Date(lastChecked.time).toLocaleTimeString(locale)}</p>}
+      {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={()=>void copyDiagnostics()}>{t('Copy diagnostics')}</button></>}
+      {diagnostic?.identity===snapshot.identity&&<><p role="status" aria-live="polite">{t(diagnostic.result==='copied'?'Diagnostics copied.':diagnostic.result==='failed'?'Could not copy. Select the diagnostics below.':'Copying diagnostics…')}</p>
+        {diagnostic.result==='failed'&&<label>{t('Diagnostic details')}<textarea aria-label={t('Diagnostic details')} readOnly rows={7} value={diagnostic.text}/></label>}</>}
       {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
     </section>
     {authorized && <section className="panel" aria-label={t('Project selection')}><h2>{t('Projects')}</h2>

@@ -1,0 +1,87 @@
+name: BuyerOS protected runtime observations
+on:
+  workflow_dispatch:
+    inputs:
+      publish_observations:
+        description: Publish only the exact reviewed redacted observations; requires a protected payload authorization
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+concurrency:
+  group: buyeros-runtime-observations
+  cancel-in-progress: false
+jobs:
+  collect-observations:
+    if: github.ref == 'refs/heads/main'
+    environment: buyeros-runtime-readonly
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install uv==0.11.27
+      - run: uv sync --frozen
+        working-directory: services/api
+      - name: Bind private reviewed source, read scope and optional exact publication payload
+        env:
+          BUYEROS_G0_TARGET_JSON: ${{ secrets.BUYEROS_G0_TARGET_JSON }}
+          BUYEROS_SCHEMA_CONTRACT_JSON: ${{ secrets.BUYEROS_SCHEMA_CONTRACT_JSON }}
+          BUYEROS_G0_CONTRACT_SHA256: ${{ vars.BUYEROS_G0_CONTRACT_SHA256 }}
+          BUYEROS_SCHEMA_CONTRACT_SHA256: ${{ vars.BUYEROS_SCHEMA_CONTRACT_SHA256 }}
+          BUYEROS_RUNTIME_READ_SCOPE_SHA256: ${{ secrets.BUYEROS_RUNTIME_READ_SCOPE_SHA256 }}
+          BUYEROS_RUNTIME_WORKFLOW_REQUEST_SHA256: ${{ secrets.BUYEROS_RUNTIME_WORKFLOW_REQUEST_SHA256 }}
+          BUYEROS_G0_ALLOWED_ORIGIN: ${{ vars.BUYEROS_G0_ALLOWED_ORIGIN }}
+          BUYEROS_G0_OWNED_TOKEN: ${{ secrets.BUYEROS_G0_OWNED_TOKEN }}
+          BUYEROS_G0_FOREIGN_TOKEN: ${{ secrets.BUYEROS_G0_FOREIGN_TOKEN }}
+          BUYEROS_G0_EMPTY_TOKEN: ${{ secrets.BUYEROS_G0_EMPTY_TOKEN }}
+          BUYEROS_G0_REVOKED_TOKEN: ${{ secrets.BUYEROS_G0_REVOKED_TOKEN }}
+          PUBLISH_OBSERVATIONS: ${{ inputs.publish_observations }}
+          BUYEROS_RUNTIME_PUBLICATION_SCOPE: ${{ vars.BUYEROS_RUNTIME_PUBLICATION_SCOPE }}
+          BUYEROS_RUNTIME_PUBLICATION_REQUEST_SHA256: ${{ secrets.BUYEROS_RUNTIME_PUBLICATION_REQUEST_SHA256 }}
+        run: services/api/.venv/bin/python scripts/runtime-observation-packet.py prepare --directory "$RUNNER_TEMP/buyeros-private-observations" > "$RUNNER_TEMP/buyeros-runtime-prepare.log" 2>&1
+      - name: Read bounded schema with the reviewed runtime login; never migrate
+        id: schema
+        continue-on-error: true
+        env:
+          BUYEROS_SCHEMA_CHECK_DATABASE_URL: ${{ secrets.BUYEROS_SCHEMA_CHECK_DATABASE_URL }}
+        run: services/api/.venv/bin/python services/api/tools/check_schema_readiness.py --contract "$RUNNER_TEMP/buyeros-private-observations/schema-contract.json" --output "$RUNNER_TEMP/buyeros-private-observations/schema-observations.json" > "$RUNNER_TEMP/buyeros-private-observations/schema-read.log" 2>&1
+      - name: Read exact owned, empty, revoked and foreign API controls; never submit
+        id: api
+        continue-on-error: true
+        env:
+          BUYEROS_G0_ALLOWED_ORIGIN: ${{ vars.BUYEROS_G0_ALLOWED_ORIGIN }}
+          BUYEROS_G0_OWNED_TOKEN: ${{ secrets.BUYEROS_G0_OWNED_TOKEN }}
+          BUYEROS_G0_FOREIGN_TOKEN: ${{ secrets.BUYEROS_G0_FOREIGN_TOKEN }}
+          BUYEROS_G0_EMPTY_TOKEN: ${{ secrets.BUYEROS_G0_EMPTY_TOKEN }}
+          BUYEROS_G0_REVOKED_TOKEN: ${{ secrets.BUYEROS_G0_REVOKED_TOKEN }}
+        run: services/api/.venv/bin/python scripts/collect-workspace-observations.py --contract "$RUNNER_TEMP/buyeros-private-observations/api-contract.json" --source-sha "$GITHUB_SHA" --output "$RUNNER_TEMP/buyeros-private-observations/api-observations.json" > "$RUNNER_TEMP/buyeros-private-observations/api-read.log" 2>&1
+      - name: Redact partial observations without creating a promotion bundle
+        id: summary
+        continue-on-error: true
+        run: services/api/.venv/bin/python scripts/runtime-observation-packet.py summarize --directory "$RUNNER_TEMP/buyeros-private-observations" --output artifacts/runtime-observations.json > "$RUNNER_TEMP/buyeros-private-observations/summary-read.log" 2>&1
+      - name: Attest only the authorized redacted observations
+        if: inputs.publish_observations && vars.BUYEROS_RUNTIME_PUBLICATION_SCOPE == 'public-redacted-observations-v1'
+        uses: actions/attest@v4
+        with:
+          subject-path: artifacts/runtime-observations.json
+      - name: Publish only authorized observations, never private contracts or raw receipts
+        if: inputs.publish_observations && vars.BUYEROS_RUNTIME_PUBLICATION_SCOPE == 'public-redacted-observations-v1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: buyeros-runtime-observations
+          path: artifacts/runtime-observations.json
+          if-no-files-found: error
+          retention-days: 3
+      - name: Failed reads remain failed; partial observations never satisfy promotion
+        env:
+          SCHEMA_OUTCOME: ${{ steps.schema.outcome }}
+          API_OUTCOME: ${{ steps.api.outcome }}
+          SUMMARY_OUTCOME: ${{ steps.summary.outcome }}
+        run: test "$SCHEMA_OUTCOME" = success && test "$API_OUTCOME" = success && test "$SUMMARY_OUTCOME" = success

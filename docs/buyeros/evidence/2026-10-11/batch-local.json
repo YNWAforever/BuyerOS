@@ -1,0 +1,86 @@
+{
+  "schema": "buyeros.repair-batch-local.v1",
+  "candidate_code_sha": "ac5a2614005a0b312079996f4c8c51c64b27db3d",
+  "scope": "local source/strict-owned-db/built-fixture/transport controls only",
+  "commits": {
+    "C61-31": "ac5a2614",
+    "C61-32": "3b997374",
+    "C61-33": "ac5a2614",
+    "C61-28": "ac5a2614",
+    "C61-02": "6532d591",
+    "C61-03": "6532d591",
+    "C61-06": "6532d591",
+    "C61-15": "b358ce2f"
+  },
+  "gates_accepted": {
+    "G0": false,
+    "GN": false,
+    "GA": false,
+    "GS": false
+  },
+  "suites": [
+    {
+      "name": "schema-contract-green.xml",
+      "passed": 16,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "0e25033dbec58d26a55cd43bfae72477e910908fa9b148ceec250b2fde9bcdf2"
+    },
+    {
+      "name": "auth-workspace-focused.xml",
+      "passed": 101,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "824d550e06468a5be45db816eb1c340466f6a7afc9349fbdac89e43e24439d1e"
+    },
+    {
+      "name": "schema-recovery-green.xml",
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "0cd1e44a79d8673a05ac09fed50e30d8a0e8cf06558c4fd6f0762bff16804344"
+    },
+    {
+      "name": "review-gate-green.xml",
+      "passed": 40,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "e5c4a7a437b410d1d37d5b4b1d5d7f2f21210bb2a345bb444c9648be57341a65"
+    },
+    {
+      "name": "workspace-recovery-green.xml",
+      "passed": 21,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "851e148c96173cedbfb6594e63e002c136e85f303ff5b368726ed278312c57b9"
+    },
+    {
+      "name": "capabilities-green.xml",
+      "passed": 42,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "905657332cb094b50d9e266b8844854c224b2297f3ff089cbbc26c3394f06134"
+    },
+    {
+      "name": "node-focused.xml",
+      "passed": 81,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "227174ebe4e3bfd4249a96c658739e8a14d245142ee4c4c57d4cd784d421ca66"
+    }
+  ],
+  "real_neon": {
+    "registered": 2,
+    "executed": 0,
+    "accepted": false
+  },
+  "production_mutations": 0,
+  "fixture_is_live_acceptance": false
+}

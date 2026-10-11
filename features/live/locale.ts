@@ -26,6 +26,12 @@ export const liveZh: Record<string,string> = {
   'Check access again':'重新檢查存取',
   'Contact your workspace administrator.':'請聯絡工作區管理員。',
   'Copy diagnostics':'複製診斷資料',
+  'Diagnostics copied.':'診斷資料已複製。',
+  'Could not copy. Select the diagnostics below.':'未能複製，請選取以下診斷資料。',
+  'Copying diagnostics…':'正在複製診斷資料…',
+  'Diagnostic details':'診斷資料',
+  'Checking access…':'正在檢查存取…',
+  'Last checked':'最後檢查',
   'Initializing sign-in…':'正在初始化登入…',
   'Sign in to access your workspaces.':'請登入以存取工作區。',
 

@@ -1,0 +1,10 @@
+........................................................................ [ 51%]
+...................................................................      [100%]
+=============================== warnings summary ===============================
+tests/test_neon_verifier.py::test_invalid_header_kid_returns401_at_actual_API_boundary
+  /workspace/scratch/c5168c1ba5e0/buyeros-audit-20261011/services/api/.venv/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /workspace/scratch/c5168c1ba5e0/audit-20261011/evidence/E09-auth-provider-tests.xml -
+139 passed, 1 warning in 3.53s

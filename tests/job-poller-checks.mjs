@@ -86,3 +86,60 @@ test('B13 rapid hidden-visible during abort settlement resumes once immediately'
  await flush();assert.equal(calls,1);visible=false;f.visibility.dispatchEvent(new Event('visibilitychange'));visible=true;f.visibility.dispatchEvent(new Event('visibilitychange'));f.visibility.dispatchEvent(new Event('visibilitychange'));await flush();
  assert.equal(calls,2);stop();await flush();
 });
+
+test('C61-25 B13 offline starts no reads; repeated online events resume once',async()=>{
+ let online=false;const connectivity=new EventTarget(),f=setup({isOnline:()=>online,connectivityTarget:connectivity});let calls=0;
+ const stop=startJobPoller({...f.options,fetchSummary:signal=>{calls++;return f.latency(2500,running,signal);},onValue:()=>{},onError:assert.fail});
+ await f.advance(60_000);assert.equal(calls,0);assert.equal(f.timers.size,0);
+ online=true;connectivity.dispatchEvent(new Event('online'));connectivity.dispatchEvent(new Event('online'));await flush();
+ assert.equal(calls,1);stop();await flush();assert.equal(f.timers.size,0);
+});
+
+test('C61-25 B13 offline aborts quietly and waits for online before retrying',async()=>{
+ let online=true;const connectivity=new EventTarget(),f=setup({isOnline:()=>online,connectivityTarget:connectivity}),values=[],errors=[];let calls=0,inFlight=0;
+ const stop=startJobPoller({...f.options,fetchSummary:async signal=>{calls++;inFlight++;try{return await f.latency(2500,running,signal);}finally{inFlight--;}} ,onValue:v=>values.push(v),onError:e=>errors.push(e)});
+ await flush();assert.equal(inFlight,1);online=false;connectivity.dispatchEvent(new Event('offline'));await flush();
+ assert.equal(inFlight,0);await f.advance(60_000);assert.equal(calls,1);assert.deepEqual(values,[]);assert.deepEqual(errors,[]);
+ online=true;connectivity.dispatchEvent(new Event('online'));await f.advance(2500);assert.equal(calls,2);assert.equal(values.length,1);stop();await flush();
+});
+
+test('C61-25 B13 rapid offline-online settlement resumes once without stale values',async()=>{
+ let online=true;const connectivity=new EventTarget(),f=setup({isOnline:()=>online,connectivityTarget:connectivity}),values=[];let calls=0,max=0,inFlight=0;
+ const stop=startJobPoller({...f.options,fetchSummary:async signal=>{const id=++calls;max=Math.max(max,++inFlight);try{return {...await f.latency(2500,running,signal),id};}finally{inFlight--;}} ,onValue:v=>values.push(v.id),onError:assert.fail});
+ await flush();online=false;connectivity.dispatchEvent(new Event('offline'));online=true;connectivity.dispatchEvent(new Event('online'));connectivity.dispatchEvent(new Event('online'));await flush();
+ assert.equal(calls,2);assert.equal(max,1);await f.advance(2500);assert.deepEqual(values,[2]);stop();await flush();
+});
+
+test('C61-25 B13 reconnect respects Retry-After and terminal/unmounted lifetimes',async()=>{
+ let online=true;const connectivity=new EventTarget(),f=setup({isOnline:()=>online,connectivityTarget:connectivity});let calls=0;
+ const stop=startJobPoller({...f.options,fetchSummary:async()=>{calls++;if(calls===1)throw new LiveError('limit','RATE_LIMITED',429,'fixture',true,'12');return {...running,status:'completed'};},onValue:()=>{},onError:()=>{}});
+ await flush();online=false;connectivity.dispatchEvent(new Event('offline'));await f.advance(1000);online=true;connectivity.dispatchEvent(new Event('online'));connectivity.dispatchEvent(new Event('online'));
+ await f.advance(10_999);assert.equal(calls,1);await f.advance(1);assert.equal(calls,2);
+ online=false;connectivity.dispatchEvent(new Event('offline'));online=true;connectivity.dispatchEvent(new Event('online'));await f.advance(60_000);assert.equal(calls,2);assert.equal(f.timers.size,0);
+ stop();connectivity.dispatchEvent(new Event('online'));await f.advance(60_000);assert.equal(calls,2);
+});
+
+test('C61-25 B12 B13 ten views/jobs keep frozen traffic budget through hidden/offline/scope switches',async()=>{
+ const f=fixtureClock(),origin=f.clock.now(),rows=[],values=[],errors=[],session=new SessionScope({mode:'live',actor:'fixture',workspace:'A',project:'p'});
+ session.setToken('fixture-memory-token');
+ let online=true,visible=true;const connectivity=new EventTarget(),visibility=new EventTarget(),active=Array(10).fill(0),max=Array(10).fill(0),stops=[];
+ function begin(view,job){
+  const ctx=session.captureWriteContext();
+  stops.push(startJobPoller({signal:ctx.signal,clock:f.clock,isVisible:()=>visible,isOnline:()=>online,connectivityTarget:connectivity,visibilityTarget:visibility,
+   fetchSummary:async signal=>{rows.push({view,job,scope:ctx.identity,at_ms:f.clock.now()-origin});max[view]=Math.max(max[view],++active[view]);try{return await f.latency(2500,{...running,id:job},signal);}finally{active[view]--;}} ,
+   onValue:value=>{assert.ok(session.isCurrent(ctx.identity));values.push(value.id);},onError:error=>errors.push(error)}));
+ }
+ for(let view=0;view<10;view++)begin(view,`old-${view}`);
+ await f.advance(59_999);assert.equal(rows.length,140);assert.ok(max.every(n=>n===1));
+ online=false;connectivity.dispatchEvent(new Event('offline'));await f.advance(60_000);assert.equal(rows.length,140);assert.ok(active.every(n=>n===0));
+ visible=false;visibility.dispatchEvent(new Event('visibilitychange'));online=true;connectivity.dispatchEvent(new Event('online'));await f.advance(60_000);assert.equal(rows.length,140);
+ session.next({workspace:'B'});session.next({workspace:'A'});for(let view=0;view<10;view++)begin(view,`new-${view}`);
+ const oldCount=values.length;visible=true;visibility.dispatchEvent(new Event('visibilitychange'));visibility.dispatchEvent(new Event('visibilitychange'));connectivity.dispatchEvent(new Event('online'));await flush();
+ assert.equal(rows.length,150);await f.advance(2500);assert.deepEqual(values.slice(oldCount).sort(),Array.from({length:10},(_,n)=>`new-${n}`).sort());
+ for(const stop of stops)stop();await f.advance(60_000);assert.equal(rows.length,150);assert.ok(max.every(n=>n===1));assert.deepEqual(errors,[]);assert.equal(f.timers.size,0);
+});
+
+test('C61-25 B12 fast summary reads stay within30 starts per half-open60s window',async()=>{
+ const f=setup();let calls=0;const stop=startJobPoller({...f.options,fetchSummary:async()=>{calls++;return running;},onValue:()=>{},onError:assert.fail});
+ await f.advance(59_999);assert.equal(calls,30);stop();await f.advance(60_000);assert.equal(calls,30);assert.equal(f.timers.size,0);
+});

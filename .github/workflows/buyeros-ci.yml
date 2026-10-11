@@ -6,6 +6,28 @@ on:
     branches: [main]
 
 jobs:
+  release-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install uv==0.11.27
+      - run: uv sync --frozen
+        working-directory: services/api
+      - name: Discover and execute all promotion refusal controls
+        run: |
+          mkdir -p artifacts/repair
+          services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_workspace_runtime_observations.py tests/test_runtime_observation_packet.py tests/test_runtime_observation_workflow.py --collect-only -q > artifacts/repair/promotion-discovery.txt
+          services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_workspace_runtime_observations.py tests/test_runtime_observation_packet.py tests/test_runtime_observation_workflow.py -q --junitxml=artifacts/repair/promotion.xml
+          python scripts/check-required-tests.py --pytest-discovery artifacts/repair/promotion-discovery.txt --expected-count 95 --junit artifacts/repair/promotion.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-promotion-controls
+          path: artifacts/repair/promotion*
+          if-no-files-found: error
   frontend:
     runs-on: ubuntu-latest
     steps:
@@ -42,6 +64,23 @@ jobs:
       - run: node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-neon-built.xml tests/neon-auth-built.test.mjs
       - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-neon-built.xml
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Verify C61-25 polling budget and native connectivity defaults
+        run: |
+          node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-job-poller.xml tests/job-poller-checks.mjs
+          python scripts/check-required-tests.py --junit artifacts/c61/ci-job-poller.xml
+          pnpm exec playwright test --config playwright.job-poller.config.ts --list --reporter=json > artifacts/c61/ci-job-poller-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-job-poller-discovery.json --expected-count 3 --expected-file job-poller-connectivity.spec.ts --discovery-only
+          pnpm exec playwright test --config playwright.job-poller.config.ts
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-job-poller-discovery.json --expected-count 3 --expected-file job-poller-connectivity.spec.ts --junit test-results/job-poller.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-poller-local-boundary
+          path: |
+            artifacts/c61/ci-job-poller*
+            test-results/job-poller.xml
+            test-results/job-poller/
+          if-no-files-found: error
       - run: |
           pnpm exec playwright test --config playwright.neon-runtime-built.config.ts --list > artifacts/c61/ci-neon-session-discovery.txt
           python -c "import pathlib,re; text=pathlib.Path('artifacts/c61/ci-neon-session-discovery.txt').read_text(); match=re.search(r'Total: (\d+) tests?',text); assert match and int(match[1])>0 and 'neon-session-production.spec.ts' in text and 'neon-security-production.spec.ts' in text, 'empty or wrong Neon discovery'"
@@ -514,10 +553,10 @@ jobs:
         working-directory: services/api
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 2525 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 2563 --discovery-only
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/api
-      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 2525 --junit services/api/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 2563 --junit services/api/artifacts/tests.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -575,7 +614,7 @@ jobs:
         working-directory: services/worker
         run: |
           uv run --frozen pytest tests/test_claim_limit_db.py tests/test_worker_capacity_tools.py --collect-only -q > artifacts/c61-claim-capacity-discovery.txt
-          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-claim-capacity-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==19 and all(name in text for name in ('test_actual_single_tenant_claim_respects_locked_limit[1]', 'test_actual_single_tenant_claim_respects_locked_limit[3]', 'test_worker_capacity_requires_named_positive_zero_skip_junit', 'test_worker_capacity_continues_returned_cursor_after_empty_budget_cycle', 'test_worker_capacity_stalled_backlog_stops_with_all_empty_cycles_retained', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[incomplete]', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[empty]', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[same-worker]')), 'empty or missing bounded claim/capacity discovery'"
+          python -c "import pathlib,re; text=pathlib.Path('artifacts/c61-claim-capacity-discovery.txt').read_text(); m=re.search(r'(\d+) tests collected',text); assert m and int(m[1])==29 and all(name in text for name in ('test_actual_single_tenant_claim_respects_locked_limit[1]', 'test_actual_single_tenant_claim_respects_locked_limit[3]', 'test_worker_capacity_requires_named_positive_zero_skip_junit', 'test_worker_capacity_continues_returned_cursor_after_empty_budget_cycle', 'test_worker_capacity_stalled_backlog_stops_with_all_empty_cycles_retained', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[incomplete]', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[empty]', 'test_worker_capacity_named_pass_cannot_hide_missing_raw_denominator[same-worker]', 'test_worker_resource_sampler_reads_the_owned_live_process')) and all('test_worker_capacity_rejects_missing_or_invalid_resource_measurement['+name+']' in text for name in ('missing-memory','missing-second-worker','unowned-pid','zero-rss','missing-queue','nonfinite-age','negative-age','missing-tenant','launcher-only')), 'empty or missing bounded claim/capacity discovery'"
       - name: Verify required C61 worker research guard discovery
         working-directory: services/worker
         run: |
@@ -591,10 +630,10 @@ jobs:
         working-directory: services/worker
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 246 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 256 --discovery-only
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/worker
-      - run: python scripts/check-required-tests.py --pytest-discovery services/worker/artifacts/c61-full-discovery.txt --expected-count 246 --junit services/worker/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/worker/artifacts/c61-full-discovery.txt --expected-count 256 --junit services/worker/artifacts/tests.xml
       - run: python -m pip install uv==0.11.27 && uv sync --project services/worker --frozen --no-dev --python 3.12
       - run: services/worker/.venv/bin/python scripts/run-render-worker.py worker --check
       - run: services/worker/.venv/bin/python scripts/run-render-worker.py dispatcher --check
@@ -633,6 +672,14 @@ jobs:
       - name: Capture owned backlog rotation and worker restart
         run: services/worker/.venv/bin/python scripts/benchmark-worker-capacity.py --output artifacts/c61/ci-worker-capacity-observations.json --junit artifacts/c61/ci-worker-capacity.xml
       - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-worker-capacity.xml
+      - name: Capture owned bulk resources with exact native discovery and execution
+        run: services/api/.venv/bin/python scripts/benchmark-bulk-capacity.py --output-dir artifacts/c61/ci-bulk-capacity
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-owned-bulk-capacity
+          path: artifacts/c61/ci-bulk-capacity/
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -913,9 +960,9 @@ jobs:
           mkdir -p artifacts/c61
           pnpm exec playwright test --config playwright.audit-fixes.config.ts --list --reporter=json > artifacts/c61/playwright-discovery.json
           python -c "import importlib.util,pathlib; s=importlib.util.spec_from_file_location('c61_gate',pathlib.Path('scripts/check-c61-evidence.py')); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); names=m._built_playwright_names(pathlib.Path('artifacts/c61/playwright-discovery.json').read_bytes(),'audit'); print('native unique '+str(len(names)))"
-          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 124 --expected-file audit-delivery-history.spec.ts --expected-file audit-access-revocation.spec.ts --expected-file audit-auth-entry.spec.ts --expected-file audit-bulk-confirmation.spec.ts --expected-file audit-bulk-manifest.spec.ts --expected-file audit-candidate-review.spec.ts --expected-file audit-daily-journey.spec.ts --expected-file audit-daily-ux.spec.ts --expected-file audit-draft-dirty.spec.ts --expected-file audit-draft-reground.spec.ts --expected-file audit-job-scope.spec.ts --expected-file audit-keyboard-workbench.spec.ts --expected-file audit-keyboard.spec.ts --expected-file audit-maintenance-settings.spec.ts --expected-file audit-memberships.spec.ts --expected-file audit-native-run-progress.spec.ts --expected-file audit-operations.spec.ts --expected-file audit-research-intent.spec.ts --expected-file audit-reviewed-list-order.spec.ts --expected-file audit-template-copy.spec.ts --expected-file work-queue-counts.spec.ts --discovery-only
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 128 --expected-file audit-delivery-history.spec.ts --expected-file audit-access-revocation.spec.ts --expected-file audit-auth-entry.spec.ts --expected-file audit-workspace-recovery.spec.ts --expected-file audit-bulk-confirmation.spec.ts --expected-file audit-bulk-manifest.spec.ts --expected-file audit-candidate-review.spec.ts --expected-file audit-daily-journey.spec.ts --expected-file audit-daily-ux.spec.ts --expected-file audit-draft-dirty.spec.ts --expected-file audit-draft-reground.spec.ts --expected-file audit-job-scope.spec.ts --expected-file audit-keyboard-workbench.spec.ts --expected-file audit-keyboard.spec.ts --expected-file audit-maintenance-settings.spec.ts --expected-file audit-memberships.spec.ts --expected-file audit-native-run-progress.spec.ts --expected-file audit-operations.spec.ts --expected-file audit-research-intent.spec.ts --expected-file audit-reviewed-list-order.spec.ts --expected-file audit-template-copy.spec.ts --expected-file work-queue-counts.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.audit-fixes.config.ts
-      - run: python scripts/check-required-tests.py --playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 124 --expected-file audit-delivery-history.spec.ts --expected-file audit-access-revocation.spec.ts --expected-file audit-auth-entry.spec.ts --expected-file audit-bulk-confirmation.spec.ts --expected-file audit-bulk-manifest.spec.ts --expected-file audit-candidate-review.spec.ts --expected-file audit-daily-journey.spec.ts --expected-file audit-daily-ux.spec.ts --expected-file audit-draft-dirty.spec.ts --expected-file audit-draft-reground.spec.ts --expected-file audit-job-scope.spec.ts --expected-file audit-keyboard-workbench.spec.ts --expected-file audit-keyboard.spec.ts --expected-file audit-maintenance-settings.spec.ts --expected-file audit-memberships.spec.ts --expected-file audit-native-run-progress.spec.ts --expected-file audit-operations.spec.ts --expected-file audit-research-intent.spec.ts --expected-file audit-reviewed-list-order.spec.ts --expected-file audit-template-copy.spec.ts --expected-file work-queue-counts.spec.ts --junit test-results/audit-fixes.xml
+      - run: python scripts/check-required-tests.py --playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 128 --expected-file audit-delivery-history.spec.ts --expected-file audit-access-revocation.spec.ts --expected-file audit-auth-entry.spec.ts --expected-file audit-workspace-recovery.spec.ts --expected-file audit-bulk-confirmation.spec.ts --expected-file audit-bulk-manifest.spec.ts --expected-file audit-candidate-review.spec.ts --expected-file audit-daily-journey.spec.ts --expected-file audit-daily-ux.spec.ts --expected-file audit-draft-dirty.spec.ts --expected-file audit-draft-reground.spec.ts --expected-file audit-job-scope.spec.ts --expected-file audit-keyboard-workbench.spec.ts --expected-file audit-keyboard.spec.ts --expected-file audit-maintenance-settings.spec.ts --expected-file audit-memberships.spec.ts --expected-file audit-native-run-progress.spec.ts --expected-file audit-operations.spec.ts --expected-file audit-research-intent.spec.ts --expected-file audit-reviewed-list-order.spec.ts --expected-file audit-template-copy.spec.ts --expected-file work-queue-counts.spec.ts --junit test-results/audit-fixes.xml
       - run: python -c "import importlib.util,pathlib; s=importlib.util.spec_from_file_location('c61_gate',pathlib.Path('scripts/check-c61-evidence.py')); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); discovered=m._built_playwright_names(pathlib.Path('artifacts/c61/playwright-discovery.json').read_bytes(),'audit'); executed=m._junit(pathlib.Path('test-results/audit-fixes.xml').read_bytes()); assert discovered==executed, 'native JSON discovery/JUnit mismatch'"
       - name: Discover and verify strict C61 built process ownership
         run: |

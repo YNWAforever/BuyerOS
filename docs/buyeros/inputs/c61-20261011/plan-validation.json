@@ -1,0 +1,23 @@
+{
+  "schema": "buyeros.plan-document-validation.v1",
+  "date": "2026-10-11",
+  "findings": 24,
+  "tasks": 33,
+  "cases": 148,
+  "checklist_steps": 113,
+  "execution_dag_nodes": 26,
+  "dependency_cycles": 0,
+  "all_cases_have_task_mapping": true,
+  "original_task_dependencies_retained": true,
+  "input_zip_manifest_hash_entries_verified": 28,
+  "input_zip_total_files": 29,
+  "screenshot_reviewed": true,
+  "html_toc_entries": 26,
+  "html_internal_links_valid": true,
+  "html_visual_render": "not_completed_local_chromium_binary_unavailable",
+  "source_checkout_changed": false,
+  "product_tests_run_in_plan_turn": false,
+  "live_reaudit_performed_in_plan_turn": false,
+  "release_acceptance": false,
+  "scope": "Document coverage/structure/hash validation only; not product acceptance."
+}

@@ -1,0 +1,18 @@
+{
+  "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+  "deployment_id": "dpl_DWwUAPyLxDR6pLU95BgcUxgseAFZ",
+  "observed_relation": "user_identities",
+  "sqlstate": "42P01",
+  "classification": "missing_relation",
+  "schema_head": "unknown, diagnostic null",
+  "runtime_role": "unknown, diagnostic null",
+  "stack": [
+    "api/routes/workspaces.py:22",
+    "services/identity_resolver.py:10"
+  ],
+  "request_diagnostics": [
+    "    unexpected_api_error request_id=b7aea690-a1a4-4c58-b85e-27dc02a7e7c8 type=ProgrammingError diagnostics={\"classification\":\"missing_relation\",\"connection_timeout\":null,\"error_class\":\"ProgrammingError\",\"pool_wait_ms\":null,\"request_id\":\"b7aea690-a1a4-4c58-b85e-27dc02a7e7c8\",\"runtime_role\":null,\"schema_head\":null,\"source_sha\":\"cbbe0e93b0132ae07ff0d87f6cc57f871f13200e\",\"sqlstate\":\"42P01\"}",
+    "    unexpected_api_error request_id=0c64e2f6-0da5-4309-a34a-224c1c9dcf52 type=ProgrammingError diagnostics={\"classification\":\"missing_relation\",\"connection_timeout\":null,\"error_class\":\"ProgrammingError\",\"pool_wait_ms\":null,\"request_id\":\"0c64e2f6-0da5-4309-a34a-224c1c9dcf52\",\"runtime_role\":null,\"schema_head\":null,\"source_sha\":\"cbbe0e93b0132ae07ff0d87f6cc57f871f13200e\",\"sqlstate\":\"42P01\"}"
+  ],
+  "redactions": "Excluded SQL parameters, identity subjects, tokens, cookies, DSNs and OAuth URL parameters. Error groups are evidence samples, not traffic totals."
+}

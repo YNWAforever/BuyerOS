@@ -1,0 +1,27 @@
+{
+  "schema": "buyeros.c61-local-verification.v1",
+  "task_id": "C61-32",
+  "parent_status": "OPEN_EXACT_TARGET_REPAIR_AND_G0",
+  "evidence_mode": "owned_disposable_fixture",
+  "live_accepted": false,
+  "implementation": "reuse existing explicit 0034\u20130050 additive migrations; no new revision or production change",
+  "new_rehearsal": {
+    "passed": 1,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0,
+    "junit_sha256": "0cd1e44a79d8673a05ac09fed50e30d8a0e8cf06558c4fd6f0762bff16804344"
+  },
+  "existing_focused": {
+    "passed": 101,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0,
+    "junit_sha256": "824d550e06468a5be45db816eb1c340466f6a7afc9349fbdac89e43e24439d1e"
+  },
+  "holds_and_cold_api_rollback_cases": [
+    "test_neon_cutover_rollback_preserves_new_users",
+    "test_restore_replays_deletion_before_reopen"
+  ],
+  "ruling": "Initial new rehearsal asserted equality of the entire policy catalog. Existing migrations legitimately add policies for new relations; verify every pre-existing policy unchanged plus restricted runtime flags instead."
+}

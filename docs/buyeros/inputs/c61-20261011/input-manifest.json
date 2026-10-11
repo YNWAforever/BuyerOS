@@ -1,0 +1,41 @@
+{
+  "schema": "buyeros.plan-input-manifest.v1",
+  "created_date": "2026-10-11",
+  "inputs": [
+    {
+      "file_name": "BuyerOS_Audit_2026-10-11_Evidence.zip",
+      "sha256": "538ccba296a9a2abc569189b652911882a7ef82aac21cc9da7bc89ac52bc087d",
+      "size_bytes": 244972,
+      "included_in_plan_pack": true,
+      "pack_path": "inputs/BuyerOS_Audit_2026-10-11_Evidence.zip",
+      "audit_files_including_hash_manifest": 29,
+      "verified_manifest_entries": 28
+    },
+    {
+      "file_name": "buyeros-20261011-workspace-error.jpg",
+      "sha256": "dd42e056995d6f824896c530b7e4bf9defab18a95df8dbf6c83ec1570dc6ff06",
+      "size_bytes": 31533,
+      "included_in_plan_pack": false,
+      "visual_review": "Workspace error visible after login; request ID matches E03. Screenshot alone does not prove migration root cause.",
+      "correlated_request_id": "b7aea690-a1a4-4c58-b85e-27dc02a7e7c8"
+    }
+  ],
+  "basis": "Pinned audit plus read-only source review; no new live audit or product test execution in plan turn.",
+  "official_docs_reviewed": [
+    {
+      "url": "https://neon.com/docs/auth/overview.md",
+      "checked_on": "2026-10-11",
+      "method": "Retrieved Markdown from official Neon documentation index"
+    },
+    {
+      "url": "https://neon.com/docs/auth/production-checklist.md",
+      "checked_on": "2026-10-11",
+      "method": "Retrieved Markdown from official Neon documentation index"
+    },
+    {
+      "url": "https://neon.com/docs/auth/guides/configure-domains.md",
+      "checked_on": "2026-10-11",
+      "method": "Retrieved Markdown from official Neon documentation index"
+    }
+  ]
+}

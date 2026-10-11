@@ -1,0 +1,98 @@
+{
+  "schema": "buyeros.repair-baseline.v1",
+  "checked_at": "2026-10-11T08:22:33.501372+00:00",
+  "audit_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+  "main_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+  "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+  "tree_sha": "127970f6538dd257523c49fa84b82dae011cc39f",
+  "branch": "codex/buyeros-gpt61-20261011",
+  "audit_to_current_changes": "",
+  "lockfile_sha256": "bd30f7286e1705a7b522ef456950935223565693ac724486b3f38d75ac44293d",
+  "api_lockfile_sha256": "30387745dc472607c5a7a647cbf73c1bc7267fbb7836170cb49b78ba9556e5b0",
+  "deployment": {
+    "id": "dpl_DWwUAPyLxDR6pLU95BgcUxgseAFZ",
+    "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "state": "READY",
+    "verified_current": true
+  },
+  "ci": {
+    "run_id": 38117173377,
+    "source_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "conclusion": "success",
+    "job_count": 11,
+    "evidence_mode": "historical_current_main_metadata"
+  },
+  "api_metadata": {
+    "source_sha": null,
+    "blocked": "fresh authenticated runtime diagnostic unavailable; E03 remains historical"
+  },
+  "worker_metadata": {
+    "source_sha": null,
+    "runtime_selector": null,
+    "epoch": null,
+    "blocked": "same-deployment runtime-role DB receipt absent"
+  },
+  "db_target_match": null,
+  "auth_live_accepted": false,
+  "provider_live_accepted": false,
+  "native_send_accepted": false,
+  "test_environment": {
+    "postgres": "owned disposable postgres:16 via Docker",
+    "strict": true,
+    "python": "3.12.13",
+    "node": "24.18.0",
+    "pnpm": "11.25.0",
+    "uv": "0.11.27"
+  },
+  "inputs": {
+    "audit_zip_verified": true,
+    "manifest_entries_verified": [
+      "BuyerOS_Audit_2026-10-11_zhHK.md",
+      "BuyerOS_Audit_2026-10-11_zhHK.html",
+      "BuyerOS_Audit_Tracker_2026-10-11.xlsx",
+      "README_Evidence.md",
+      "audit-matrices.json",
+      "BuyerOS_Cases_2026-10-11.csv",
+      "BuyerOS_Findings_2026-10-11.csv",
+      "BuyerOS_Operations_2026-10-11.csv",
+      "BuyerOS_Tasks_2026-10-11.csv",
+      "BuyerOS_UI_Actions_2026-10-11.csv",
+      "evidence/E01-source-deployment.json",
+      "evidence/E02-live-browser-notes.json",
+      "evidence/E03-runtime-diagnostics-redacted.json",
+      "evidence/E04-main-ci-summary.json",
+      "evidence/E05-source-excerpts.txt",
+      "evidence/E06-inventory-summary.json",
+      "evidence/E07-focused-node-tests.log",
+      "evidence/E08-focused-api-tests.log",
+      "evidence/E08-focused-api-tests.xml",
+      "evidence/E09-auth-provider-tests.log",
+      "evidence/E09-auth-provider-tests.xml",
+      "evidence/E12-matrix-validation.json",
+      "evidence/baseline-0.csv",
+      "evidence/baseline-1.csv",
+      "evidence/baseline-2.csv",
+      "evidence/baseline-3.csv",
+      "evidence/baseline-4.csv",
+      "evidence/baseline-5.csv"
+    ],
+    "jpg": "BLOCKED_MISSING_ATTACHMENT_NOT_IN_PACK",
+    "jpg_expected_sha256": "dd42e056995d6f824896c530b7e4bf9defab18a95df8dbf6c83ec1570dc6ff06"
+  },
+  "tool_blockers": [
+    "codebase graph list/search timed out; fallback to specified source files",
+    "native managed worktree delayed; isolated repo-local fallback used",
+    "Vercel connector env 403; CLI metadata succeeded; sensitive production DSN value is unreadable"
+  ],
+  "preserved_original_checkout": {
+    "head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
+    "dirty_files_untouched": true
+  },
+  "db_observations": {
+    "named_branch_owner_head": "0033_api_rate_windows",
+    "runtime_identity_relation": false,
+    "runtime_directory_function": false,
+    "runtime_version_column_readable": false,
+    "actual_deployment_connection_binding": "unproven"
+  }
+}

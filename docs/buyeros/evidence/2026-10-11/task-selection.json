@@ -1,0 +1,574 @@
+[
+  {
+    "task_id": "C61-01",
+    "classification": "modify",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "本次 SHA／PR／alias 已核對；需把版本資料寫回 authoritative release 文件。",
+    "reuse_paths": [
+      "TASKS.json",
+      "docs/buyeros/CURRENT_STATUS.md",
+      ".github/workflows/buyeros-ci.yml"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-02",
+    "classification": "reuse",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "PR12 已合併並部署，hosted main CI 通過；正式 user acceptance 仍受阻。",
+    "reuse_paths": [
+      "features/live/workspace-picker.tsx",
+      "features/live/settings.tsx",
+      "features/live/operations.tsx",
+      "features/live/bulk-actions.tsx",
+      "features/live/bulk-manifest.tsx",
+      "features/live/drafts.tsx",
+      "features/live/draft-grounding-review.tsx",
+      "features/live/draft-dirty-guard.tsx",
+      "services/live/job-poller.ts",
+      "services/live/job-query.ts",
+      "services/api/buyeros_api/services/bulk_manifest.py",
+      "services/api/buyeros_api/services/draft_grounding.py",
+      "services/api/tests/test_membership_directory_db.py",
+      "services/api/tests/test_bulk_manifest_db.py",
+      "services/api/tests/test_manual_grounding_db.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-03",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "員工 reconciliation source 已存在；F23 解決後讀回真實 canonical UUID／membership。",
+    "reuse_paths": [
+      "features/live/workspace-picker.tsx",
+      "features/live/settings.tsx",
+      "services/api/buyeros_api/api/deps.py",
+      "services/api/tests/test_membership_directory_db.py",
+      "tests/e2e/audit-access-revocation.spec.ts"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-04",
+    "classification": "blocked",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "本次新 42P01 已取得 request-correlated 證據；Oct2 舊根因仍未知。",
+    "reuse_paths": [
+      "docs/buyeros/incidents/2026-10-03-workspace-500.md",
+      "services/api/buyeros_api/api/errors.py",
+      "services/api/buyeros_api/api/deps.py",
+      "services/api/buyeros_api/db/session.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-05",
+    "classification": "blocked",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "保留針對舊 F21 的根因調查；新 F23 用 C61-31/32 處理。",
+    "reuse_paths": [
+      "docs/buyeros/incidents/2026-10-03-workspace-500.md"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-06",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "0038 有界 directory 已實作；production schema／成功查詢驗收受阻。",
+    "reuse_paths": [
+      "services/api/buyeros_api/api/routes/workspaces.py",
+      "services/api/buyeros_api/api/deps.py",
+      "services/api/buyeros_api/db/models.py",
+      "services/api/tests/test_workspace_listing_db.py",
+      "services/api/tests/benchmark_workspace_directory_case.py",
+      "scripts/benchmark-workspace-directory.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-07",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "ADR及 pinned Neon SDK 已存在；真實 target branch/session/provider acceptance 未完成。",
+    "reuse_paths": [
+      "package.json",
+      "pnpm-lock.yaml",
+      "playwright.neon-runtime-built.config.ts"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-08",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "server/config/route boundary 已實作，本次 Node tests 覆蓋；尚未 live activation。",
+    "reuse_paths": [
+      "package.json",
+      "pnpm-lock.yaml",
+      "services/api/buyeros_api/settings.py",
+      "services/live/auth.ts"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-09",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "0039 identity mapping 已實作，但 production resolver 所需 relation 缺失。",
+    "reuse_paths": [
+      "services/api/buyeros_api/db/models.py",
+      "services/api/buyeros_api/api/deps.py",
+      "services/api/buyeros_api/api/routes/workspaces.py",
+      "services/api/tests/test_auth_routes_db.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-10",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "Neon verifier 已實作，本次離線 verifier tests 通過；實際 Neon JWT trust 未驗收。",
+    "reuse_paths": [
+      "services/api/buyeros_api/api/auth.py",
+      "services/api/buyeros_api/api/verifier.py",
+      "services/api/buyeros_api/api/jwks.py",
+      "services/api/buyeros_api/settings.py",
+      "services/api/tests/test_auth_cache_lifecycle.py",
+      "services/api/tests/test_auth_tenant.py",
+      "services/api/tests/test_api_auth.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-11",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "Neon session/cross-tab/renewal 已實作，本次本地測試通過；live Auth0 reload 仍重新要求 Sign in。",
+    "reuse_paths": [
+      "services/live/auth.ts",
+      "services/live/session.ts",
+      "features/providers/workspace-session.tsx",
+      "features/live/workspace-picker.tsx",
+      "tests/e2e/audit-auth-entry.spec.ts"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-12",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "負向測試在 hosted/local；真實 tenant／角色登入 readback 仍待做。",
+    "reuse_paths": [
+      "services/api/tests/test_auth_tenant.py",
+      "services/api/tests/test_auth_routes_db.py",
+      "tests/e2e/audit-access-revocation.spec.ts",
+      "tests/e2e/audit-memberships.spec.ts"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-13",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "owned DB migration/cutover suites 在 hosted CI；production target 與rollback兼容需先 C61-31/32。",
+    "reuse_paths": [
+      "services/api/tests/test_backup_restore_t28.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-14",
+    "classification": "activation-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "未切 Neon-only，live Auth0 仍 active；不能直接刪 Auth0 或以 email 自動連結。",
+    "reuse_paths": [
+      "services/api/buyeros_api/settings.py",
+      "services/api/buyeros_api/api/auth_trust.py",
+      "services/live/auth.ts",
+      "docs/buyeros/CURRENT_STATUS.md"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-15",
+    "classification": "modify",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "DEFAULT_REGISTRY 空；需選定驗證的 immutable account/contract/cost scope。",
+    "reuse_paths": [
+      "services/api/buyeros_api/providers/base.py",
+      "services/api/buyeros_api/providers/search.py",
+      "services/api/buyeros_api/providers/model.py",
+      "services/api/buyeros_api/providers/contact.py",
+      "services/api/tests/test_provider_contracts.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-16",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "live_search adapter 已實作；本次 mock transport tests 通過；real sandbox 未驗收。",
+    "reuse_paths": [
+      "services/api/buyeros_api/providers/search.py",
+      "services/api/buyeros_api/execution/provider_dispatch.py",
+      "services/api/buyeros_api/execution/external_runner.py",
+      "services/api/buyeros_api/execution/handlers/capability_blocked.py",
+      "services/api/tests/test_provider_contracts.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-17",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "live_model 與 research handoff source 已實作；real grounded output 品質未驗收。",
+    "reuse_paths": [
+      "services/api/buyeros_api/providers/model.py",
+      "services/api/buyeros_api/execution/fit_runner.py",
+      "services/api/buyeros_api/execution/fit_execution.py",
+      "services/api/buyeros_api/execution/research_graph.py",
+      "services/worker/buyeros_worker/fit_runner.py",
+      "services/worker/tests/test_research_graph.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-18",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "live_contact quote/receipt/adapter 已實作；real account/cost/contact acceptance 未驗收。",
+    "reuse_paths": [
+      "services/api/buyeros_api/providers/contact.py",
+      "services/api/buyeros_api/execution/handlers/contact_submit.py",
+      "services/api/buyeros_api/services/contact_result_service.py",
+      "features/live/contact-quote.tsx",
+      "services/api/tests/test_contact_confirm_atomicity_db.py",
+      "services/worker/tests/test_contact_uncertainty_db.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-19",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "durable research orchestration 與unknown回復有 hosted coverage；正式 provider未選定。",
+    "reuse_paths": [
+      "services/api/buyeros_api/api/routes/runs.py",
+      "services/api/buyeros_api/services/run_admission.py",
+      "services/api/buyeros_api/execution/provider_dispatch.py",
+      "services/api/buyeros_api/execution/external_runner.py",
+      "services/api/buyeros_api/execution/handlers/capability_blocked.py",
+      "services/worker/tests/test_research_restart_db.py",
+      "services/worker/tests/test_t30_broker_research.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-20",
+    "classification": "activation-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "delivery ledger/admission/status/native/Resend候選已實作；authorization=None，無啟用。",
+    "reuse_paths": [
+      "services/api/buyeros_api/api/routes/drafts.py",
+      "services/api/buyeros_api/services/draft_service.py",
+      "services/api/buyeros_api/api/routes/provider_callbacks.py",
+      "services/api/tests/test_provider_callbacks_db.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-21",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "六卡範圍與列表 fixture 通過；正式資料量一致性未驗收。",
+    "reuse_paths": [
+      "features/live/overview.tsx",
+      "features/live/operations.tsx",
+      "services/live/job-query.ts",
+      "services/api/buyeros_api/api/routes/jobs.py",
+      "services/api/tests/test_daily_ux_db.py",
+      "services/api/tests/test_job_scope_db.py",
+      "services/api/buyeros_api/api/routes/drafts.py",
+      "services/api/buyeros_api/api/routes/buyers.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-22",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "grounding/dirty/Unicode source已實作；需真實同revision核准／匯出驗收。",
+    "reuse_paths": [
+      "features/live/drafts.tsx",
+      "features/live/draft-grounding-review.tsx",
+      "features/live/draft-dirty-guard.tsx",
+      "services/live/draft-grounding.ts",
+      "tests/e2e/audit-draft-dirty.spec.ts",
+      "tests/e2e/audit-draft-reground.spec.ts"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-23",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "bulk manifest、expiry、Settings與keyboard已加測；正式站受阻。",
+    "reuse_paths": [
+      "features/live/bulk-manifest.tsx",
+      "features/live/bulk-actions.tsx",
+      "features/live/settings.tsx",
+      "features/live/operations.tsx",
+      "tests/e2e/audit-bulk-manifest.spec.ts",
+      "tests/e2e/audit-keyboard-workbench.spec.ts",
+      "tests/e2e/audit-daily-journey.spec.ts"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-24",
+    "classification": "blocked",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "real gold set、成本及誤判指標仍無本次結果。",
+    "reuse_paths": [
+      "services/api/tools/evaluate_research_goldset.py",
+      "services/api/tools/quality_metrics.py",
+      "services/api/tests/test_quality_tools.py"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-25",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "harness與hosted容量測試存在；本次沒有真實成功請求performance baseline。",
+    "reuse_paths": [
+      "scripts/benchmark-workspace-directory.py",
+      "scripts/benchmark-buyeros.py",
+      "scripts/benchmark-buyer-mutations.py",
+      "services/api/tools/quality_metrics.py",
+      "services/worker/tests/benchmark_dispatcher_case.py",
+      "tests/job-poller-checks.mjs"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-26",
+    "classification": "acceptance-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "完整八模組流程 BLOCKED_AT_WORKSPACE。",
+    "reuse_paths": [
+      "tests/e2e/fixtures/staff-journey.ts",
+      "tests/e2e/audit-daily-journey.spec.ts",
+      "tests/e2e/audit-research-intent.spec.ts",
+      "tests/e2e/audit-draft-reground.spec.ts"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-27",
+    "classification": "blocked",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "真實員工 mobile／screen reader UAT 尚未完成。",
+    "reuse_paths": [
+      "docs/buyeros/CURRENT_STATUS.md"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-28",
+    "classification": "modify",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "證據 checker存在，但今回未阻止schema不相容程式到正式 alias；加入 C61-33。",
+    "reuse_paths": [
+      ".github/workflows/buyeros-ci.yml",
+      "scripts/check-required-tests.py",
+      "scripts/generate-api-types.mjs",
+      "scripts/generate-operation-routes.py",
+      "TASKS.json",
+      "docs/buyeros/CURRENT_STATUS.md"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-29",
+    "classification": "activation-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "程式已部署，Release A acceptance仍 NOT_ACCEPTED；需修復後實際readback。",
+    "reuse_paths": [
+      "docs/buyeros/CURRENT_STATUS.md",
+      "TASKS.json",
+      "docs/buyeros/runbooks/worker-runtime.md"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-30",
+    "classification": "activation-only",
+    "retained_current_status": "OPEN_ACCEPTANCE_OR_REMAINING_WORK",
+    "retained_current_note": "native send尚未啟用，無真實寄送receipt。",
+    "reuse_paths": [
+      "features/live/drafts.tsx",
+      "features/live/operations.tsx",
+      "docs/buyeros/CURRENT_STATUS.md"
+    ],
+    "implemented_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "tested_at_sha": null,
+    "deployed_at_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-31",
+    "classification": "modify",
+    "retained_current_status": "NOT_STARTED",
+    "retained_current_note": "只讀查 actual database/branch/search_path、alembic_version、to_regclass、0038 function、0039 grants、legacy exact mapping counts；保留已遮蔽證據。",
+    "reuse_paths": [],
+    "implemented_at_sha": null,
+    "tested_at_sha": null,
+    "deployed_at_sha": null,
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-32",
+    "classification": "blocked",
+    "retained_current_status": "NOT_STARTED",
+    "retained_current_note": "依 C61-31 結果選擇已證明相容 rollback 或 additive migration；先隔離副本排練；0039包含原 UUID backfill、trigger、grants，不只建空表。",
+    "reuse_paths": [],
+    "implemented_at_sha": null,
+    "tested_at_sha": null,
+    "deployed_at_sha": null,
+    "activated": null,
+    "live_accepted_at": null
+  },
+  {
+    "task_id": "C61-33",
+    "classification": "modify",
+    "retained_current_status": "NOT_STARTED",
+    "retained_current_note": "更新release manifest；以固定 source/API/worker/schema tuples 驗證；CI成功後在candidate以runtime role測requiredrelations/grants/mapping及known-account workspace；失敗禁止promote。",
+    "reuse_paths": [],
+    "implemented_at_sha": null,
+    "tested_at_sha": null,
+    "deployed_at_sha": null,
+    "activated": null,
+    "live_accepted_at": null
+  }
+]

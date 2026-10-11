@@ -1,0 +1,27 @@
+{
+  "schema": "buyeros.runtime-target-readback.v1",
+  "checked_at": "2026-10-11T08:31:40.930737+00:00",
+  "evidence_mode": "production_readback",
+  "connection_provenance": "Neon named production branch existing runtime credential; Vercel sensitive env ID/update timestamp unchanged, value cannot be retrieved",
+  "same_deployment_target_match": null,
+  "database_sha256": "693fe5919fc229a2cf404ad99e03e8e9277fa4a6d34e88a0d4224d81b0b057a8",
+  "endpoint_sha256": "51908be785f9a7ad53d3823694b2ec7138d71c48860015776287333f2f151f1d",
+  "runtime_role": "buyeros_api",
+  "session_role": "buyeros_api",
+  "current_schema": "public",
+  "search_path": "\"$user\", public",
+  "server_version": "18.6 (c021049)",
+  "identity_relation_present": false,
+  "directory_function_present": false,
+  "role_flags": {
+    "superuser": false,
+    "bypass_rls": false,
+    "create_db": false,
+    "create_role": false
+  },
+  "version_column_readable": false,
+  "observed_heads": null,
+  "root_cause_decision": "D: A supported for named branch; same-deployment target binding remains unproven",
+  "mapping_readback": "blocked: no identity relation",
+  "mutation_count": 0
+}

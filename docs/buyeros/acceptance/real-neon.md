@@ -1,0 +1,11 @@
+# C61-07/11/13 real Neon acceptance remains blocked
+
+The separate real configuration has two registered existing-account controls: real email login/reload/cookie/two-tab logout and a Neon-only account on an independent compatible frontend+API rollback origin. It starts no loopback fixture, patches no identity/JWKS/session, and stores no trace, screenshot, video or browser state. Discovery is not execution or GN acceptance. Missing target/account/rollback evidence fails explicitly, never skips.
+
+To run after scope review, prepare a private completed target packet using the example, independently verify both deployments' source/config/API/schema metadata, and set `BUYEROS_NEON_REAL_TARGET_FILE`, exact HTTPS allowlists `BUYEROS_NEON_REAL_ALLOWED_ORIGIN` / `BUYEROS_NEON_REAL_ALLOWED_ROLLBACK_ORIGIN`, and the authorized existing account's email/password through secret storage. Source fields in this packet are operator readback references; the browser tests do not independently establish build provenance or canonical UUID/FK/roles. Join those real runtime receipts at the promotion gate. Test output must be reviewed/redacted before publication.
+
+Run `pnpm exec playwright test --config playwright.neon-real-acceptance.config.ts --list --reporter=json` before execution, then compare the exact two names with JUnit using the required-suite checker. Until all external prerequisites exist, do not add this blocked live suite as a skipping/zero-test job to required fixture CI.
+
+Still blocked: actual Neon enrollment/verification/reset mail addresses and mail scope authorization; Google success/cancel/callback error with a real human/account; wrong/revoked/foreign account controls for two tenants and all four roles; exact UUID/FK mapping readback; token lifetime/revocation observation; Chrome/Safari/storage failure evidence; cold restore and independent Neon-only frontend+API rollback deployment IDs. No verification/reset mail, OAuth enrollment or account mutation was executed. Existing protocol/strict DB regressions cover their local engineering boundary only.
+
+References to recheck for the actual account: [production checklist](https://neon.com/docs/auth/production-checklist), [trusted domains](https://neon.com/docs/auth/guides/configure-domains), [Auth overview](https://neon.com/docs/auth/overview).

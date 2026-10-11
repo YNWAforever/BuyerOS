@@ -1,0 +1,18 @@
+{
+  "audit_date": "2026-10-11",
+  "timezone": "UTC / Asia/Hong_Kong UTC+8",
+  "repository": "https://github.com/YNWAforever/BuyerOS",
+  "main_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+  "tree_sha": "127970f6538dd257523c49fa84b82dae011cc39f",
+  "pull_request": 12,
+  "pr_merged_at": "2026-10-11T06:10:03Z",
+  "production_alias": "https://buyer-os-nu.vercel.app/",
+  "deployment_id": "dpl_DWwUAPyLxDR6pLU95BgcUxgseAFZ",
+  "deployment_sha": "cbbe0e93b0132ae07ff0d87f6cc57f871f13200e",
+  "deployment_state": "READY",
+  "deployment_ready_at": "2026-10-11T06:11:12.939Z",
+  "ci_run": 38117173377,
+  "ci_completed_at": "2026-10-11T06:46:17Z",
+  "ci_conclusion": "success",
+  "source": "GitHub and Vercel authenticated read-only connector responses; runtime source_sha confirms erroring API artifact"
+}

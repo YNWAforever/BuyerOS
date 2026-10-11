@@ -1,0 +1,689 @@
+# Current-source excerpts
+Source SHA: cbbe0e93b0132ae07ff0d87f6cc57f871f13200e
+No secrets or environment values captured.
+
+## services/api/buyeros_api/api/routes/workspaces.py
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/services/api/buyeros_api/api/routes/workspaces.py
+1: from fastapi import APIRouter, Depends, Query, Request
+2: 
+3: from ..auth import Principal, get_principal
+4: from ..errors import envelope
+5: 
+6: router = APIRouter(prefix="/v1/workspaces", tags=["workspaces"])
+7: 
+8: 
+9: @router.get("")
+10: async def list_workspaces(
+11:     request: Request,
+12:     offset: int = Query(0, ge=0),
+13:     limit: int = Query(20, ge=1, le=100),
+14:     principal: Principal = Depends(get_principal),
+15: ) -> dict:
+16:     from ...db.session import workspace_directory_session
+17:     from ...services.identity_resolver import resolve_user_id
+18:     from ...services.workspace_directory import list_authorized_workspaces
+19:     from ..deps import get_engine
+20: 
+21:     async with workspace_directory_session(get_engine()) as session:
+22:         user_id = await resolve_user_id(session, principal)
+23:         page = ({'items': [], 'offset': offset, 'limit': limit, 'total': 0} if user_id is None
+24:                 else await list_authorized_workspaces(session, user_id=user_id, offset=offset, limit=limit))
+25:     return envelope(page, request.state.request_id)
+
+## services/api/buyeros_api/services/identity_resolver.py
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/services/api/buyeros_api/services/identity_resolver.py
+1: """Resolve a verified principal to the existing canonical user; never create/link."""
+2: import uuid
+3: from sqlalchemy import select
+4: from sqlalchemy.ext.asyncio import AsyncSession
+5: from ..api.auth import Principal
+6: from ..db.models import UserIdentity
+7: 
+8: 
+9: async def resolve_user_id(session: AsyncSession, principal: Principal) -> uuid.UUID | None:
+10:     return (await session.execute(select(UserIdentity.user_id).where(
+11:         UserIdentity.issuer == principal.issuer, UserIdentity.subject == principal.subject, UserIdentity.status == "active"
+12:     ))).scalar_one_or_none()
+
+## services/api/alembic/versions/0039_c61_user_identities.py
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/services/api/alembic/versions/0039_c61_user_identities.py
+1: """Add exact principal mappings; preserve canonical users, history and existing RLS."""
+2: from alembic import op
+3: revision='0039_c61_user_identities'
+4: down_revision='0038_c61_workspace_directory'
+5: branch_labels=None
+6: depends_on=None
+7: 
+8: def upgrade():
+9:     op.execute("""
+10:     CREATE TABLE IF NOT EXISTS public.user_identities (
+11:       issuer varchar(255) NOT NULL, subject varchar(255) NOT NULL,
+12:       user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+13:       status varchar(16) NOT NULL DEFAULT 'active', proof_ref varchar(200) NOT NULL,
+14:       version integer NOT NULL DEFAULT 1, created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+15:       CONSTRAINT pk_user_identities PRIMARY KEY(issuer,subject),
+16:       CONSTRAINT ck_user_identities_status CHECK (status IN ('active','revoked')),
+17:       CONSTRAINT ck_user_identities_version CHECK (version>=1),
+18:       CONSTRAINT ck_user_identities_nonempty CHECK (issuer<>'' AND subject<>'' AND proof_ref<>'')
+19:     );
+20:     CREATE INDEX IF NOT EXISTS ix_user_identities_user ON public.user_identities(user_id);
+21:     REVOKE ALL ON public.user_identities FROM PUBLIC,buyeros_api,buyeros_worker;
+22:     GRANT SELECT(issuer,subject,user_id,status) ON public.user_identities TO buyeros_api;
+23:     INSERT INTO public.user_identities(issuer,subject,user_id,proof_ref)
+24:       SELECT issuer,subject,id,'legacy-backfill:'||id::text FROM public.users
+25:       ON CONFLICT(issuer,subject) DO NOTHING;
+26:     DO $verify$ BEGIN
+27:       IF EXISTS (SELECT 1 FROM public.users u LEFT JOIN public.user_identities i
+28:           ON i.issuer=u.issuer AND i.subject=u.subject AND i.user_id=u.id WHERE i.user_id IS NULL)
+29:       THEN RAISE EXCEPTION 'legacy canonical mapping conflict'; END IF;
+30:     END $verify$;
+31:     """)
+32:     # Legacy insertion creates one new canonical user, never links by email.
+33:     # Refuse creation if this exact alias is already bound to another UUID.
+34:     op.execute("""
+35:     CREATE OR REPLACE FUNCTION public.buyeros_primary_identity() RETURNS trigger
+36:     LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,public AS $primary$
+37:     BEGIN
+38:       INSERT INTO public.user_identities(issuer,subject,user_id,proof_ref)
+39:         VALUES(NEW.issuer,NEW.subject,NEW.id,COALESCE(NULLIF(current_setting('app.identity_proof_ref',true),''),'canonical-primary:'||NEW.id::text))
+40:         ON CONFLICT(issuer,subject) DO NOTHING;
+41:       IF NOT EXISTS(SELECT 1 FROM public.user_identities WHERE issuer=NEW.issuer
+42:           AND subject=NEW.subject AND user_id=NEW.id AND status='active')
+43:       THEN RAISE EXCEPTION USING ERRCODE='23505',MESSAGE='principal already bound'; END IF;
+44:       RETURN NEW;
+45:     END $primary$;
+46:     REVOKE ALL ON FUNCTION public.buyeros_primary_identity() FROM PUBLIC,buyeros_api,buyeros_worker;
+47:     DROP TRIGGER IF EXISTS buyeros_primary_identity ON public.users;
+48:     CREATE TRIGGER buyeros_primary_identity AFTER INSERT ON public.users
+49:       FOR EACH ROW EXECUTE FUNCTION public.buyeros_primary_identity();
+50:     CREATE OR REPLACE FUNCTION public.buyeros_identity_immutable() RETURNS trigger
+51:     LANGUAGE plpgsql SET search_path=pg_catalog,public AS $immutable$
+52:     BEGIN
+53:       IF (NEW.issuer,NEW.subject,NEW.user_id,NEW.proof_ref,NEW.created_at)
+54:           IS DISTINCT FROM (OLD.issuer,OLD.subject,OLD.user_id,OLD.proof_ref,OLD.created_at)
+55:         OR NEW.version<>OLD.version+1 OR OLD.status<>'active' OR NEW.status<>'revoked'
+56:       THEN RAISE EXCEPTION USING ERRCODE='23514',MESSAGE='immutable identity association'; END IF;
+57:       RETURN NEW;
+58:     END $immutable$;
+59:     REVOKE ALL ON FUNCTION public.buyeros_identity_immutable() FROM PUBLIC,buyeros_api,buyeros_worker;
+60:     DROP TRIGGER IF EXISTS buyeros_identity_immutable ON public.user_identities;
+61:     CREATE TRIGGER buyeros_identity_immutable BEFORE UPDATE ON public.user_identities
+62:       FOR EACH ROW EXECUTE FUNCTION public.buyeros_identity_immutable();
+63:     """)
+64: 
+65: def downgrade():
+66:     # Route/verifier rollback uses legacy User columns. Keep additive mappings,
+67:     # revoked identities and Neon-only users; never delete history for rollback.
+68:     pass
+
+## lib/auth/public-auth.ts
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/lib/auth/public-auth.ts
+1: import {loadNeonConfig} from './neon-config';
+2: import type {AuthConfig} from '../../services/live/auth';
+3: import type {PublicNeonConfig} from '../../services/live/neon-auth';
+4: export type PublicAuth = {provider:'auth0';config:AuthConfig|null} | {provider:'neon';config:PublicNeonConfig} | {provider:'unavailable';message:string};
+5: /** Server selects one explicit provider. Only public config crosses the RSC boundary. */
+6: export function loadPublicAuth(env:Record<string,string|undefined>):PublicAuth {
+7:   const provider=env.BUYEROS_AUTH_PROVIDER??'auth0';
+8:   if(provider==='auth0')return {provider,config:env.BUYEROS_AUTH0_ISSUER&&env.BUYEROS_AUTH0_CLIENT_ID&&env.BUYEROS_AUTH0_AUDIENCE
+9:     ?{issuer:env.BUYEROS_AUTH0_ISSUER,clientId:env.BUYEROS_AUTH0_CLIENT_ID,audience:env.BUYEROS_AUTH0_AUDIENCE}:null};
+10:   if(provider==='neon'){
+11:     try {if(env.BUYEROS_NEON_AUTH_ROUTE_ENABLED!=='1')throw Error('closed');loadNeonConfig(env);return {provider,config:{authPath:'/api/auth'}};}
+12:     catch {return {provider:'unavailable',message:'Neon sign-in configuration is unavailable.'};}
+13:   }
+14:   return {provider:'unavailable',message:'Sign-in provider configuration is unavailable.'};
+15: }
+
+## services/live/auth.ts
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/services/live/auth.ts
+60: }
+61: export function createAuthAdapter(config: AuthConfig, provided?: AuthEnvironment): AuthAdapter {
+62:   if ('clientSecret' in config || !config.clientId || !config.audience) throw new Error('Public OIDC configuration required');
+63:   const issuer = issuerOf(config.issuer);
+64:   const env = provided ?? {location: window.location, storage: window.sessionStorage, fetch: window.fetch.bind(window), crypto: window.crypto, now: Date.now};
+65:   const redirectUri = `${env.location.origin}/auth/callback`;
+66:   let accessToken: string | undefined;
+67:   let subject = '';
+68:   let expiry = 0;
+69:   let completedReturnPath = '/app';
+70:   async function verifyIdToken(raw: string, nonce: string): Promise<string> {
+115:       const verifiedSubject = await verifyIdToken(token.id_token, tx.nonce);
+116:       accessToken = token.access_token;
+117:       subject = verifiedSubject;
+118:       expiry = env.now() + Math.min(token.expires_in * 1000, 86_400_000);
+119:       completedReturnPath = normalizeReturnPath(typeof tx.returnPath === 'string' ? tx.returnPath : '/app');
+120:     },
+121:     async getAccessToken() {
+122:       if (!accessToken || env.now() >= expiry - 30_000) { accessToken = undefined; subject = ''; throw new Error('Sign-in expired'); }
+123:       return accessToken;
+124:     },
+125:     async signOut() {
+126:       accessToken = undefined; subject = ''; expiry = 0;
+127:       env.storage.removeItem(transactionKey);
+128:       const url = new URL('v2/logout', issuer);
+129:       url.searchParams.set('client_id', config.clientId);
+130:       url.searchParams.set('returnTo', `${env.location.origin}/app`);
+131:       env.location.assign(url.toString());
+132:     },
+133:     subject: () => subject,
+134:     returnPath: () => completedReturnPath,
+135:     expiresAt: () => expiry,
+136:   };
+137: }
+
+## services/api/buyeros_api/providers/registry.py
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/services/api/buyeros_api/providers/registry.py
+1: """Versioned code-owned provider registry. No live provider is selected."""
+2: from __future__ import annotations
+3: import hashlib
+4: import json
+5: from dataclasses import dataclass
+6: from enum import StrEnum
+7: from typing import Callable
+8: from .base import (FixtureProviderAdapter, Money, ProviderAdapter, ProviderCapability,
+9:                    ProviderIntent, Service, SELECTED_LIVE_PROVIDERS, activation_blockers, quote_requires_reconfirmation)
+10: from ..api.errors import ApiError
+11: from .model import ModelRoute
+12: 
+13: 
+14: class ProviderName(StrEnum):
+15:     FIXTURE = 'fixture'
+16:     BRAVE_SEARCH = 'brave-search'
+17:     OPENAI_RESPONSES = 'openai-responses'
+18:     HUNTER = 'hunter'
+304: DEFAULT_REGISTRY = ProviderRegistry()
+
+## services/api/buyeros_api/api/routes/runs.py
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/services/api/buyeros_api/api/routes/runs.py
+25: 
+26: router = APIRouter(prefix="/v1/workspaces/{workspace_id}/projects/{project_id}/runs", tags=["runs"])
+27: 
+28: 
+29: def selected_run_capability() -> tuple[dict | None, str]:
+30:     """Only the current code-owned verified registry can supply production scope."""
+31:     from ...providers import registry
+32:     return registry.DEFAULT_REGISTRY.search_run_capability(environment="production"), "production"
+33: 
+34: 
+35: @router.post("", status_code=202, name="startRun")
+36: async def start_run(
+
+## services/api/buyeros_api/api/routes/delivery.py
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/services/api/buyeros_api/api/routes/delivery.py
+1: """Independent exact-revision delivery admission; no provider network side effect."""
+2: import re
+3: import uuid
+4: 
+5: from fastapi import APIRouter, Depends, Header, Request, Response
+6: 
+7: from ...services.delivery_admission import admit_delivery
+8: from ...services.delivery_budget import DeliveryBudgetAuthorization
+9: from ...services.delivery_reconciliation import reconcile_delivery_message
+10: from ...settings import get_settings
+11: from ..auth import Principal, get_principal
+12: from ..deps import get_engine, load_membership, permission_for_roles, read_current_membership, tenant_scoped
+13: from ..errors import ApiError, envelope
+14: from ..idempotency import begin_idempotency, complete_idempotency
+15: from ..schemas import DeliveryAdmissionRequest, DeliveryReconciliationRequest
+16: 
+17: router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["delivery"])
+18: 
+19: 
+20: def selected_delivery_authorization(*, workspace_id: uuid.UUID, draft_id: uuid.UUID,
+21:                                     actor_id: uuid.UUID) -> DeliveryBudgetAuthorization | None:
+22:     # A reviewed server-owned registry must explicitly select this independent
+23:     # scope. Neither a request field nor a feature flag selects an account/price.
+24:     return None
+25: 
+26: 
+27: @router.post("/drafts/{draft_id}/delivery-intents", status_code=202,
+28:              operation_id="admitDraftDelivery")
+29: async def admit_draft_delivery(workspace_id: uuid.UUID, draft_id: uuid.UUID,
+30:                                payload: DeliveryAdmissionRequest, request: Request,
+31:                                principal: Principal = Depends(get_principal),
+32:                                idempotency_key: str | None = Header(default=None, alias="Idempotency-Key")) -> dict:
+33:     if not get_settings().delivery_admission_enabled:
+34:         raise ApiError(403, "DELIVERY_DISABLED", "new delivery admission is disabled")
+35:     # The shared API contract's minimum and the permanent delivery intent's
+36:     # stricter bounded ASCII key both apply; invalid keys must not become500.
+37:     if not idempotency_key or re.fullmatch(r"[A-Za-z0-9:_/-]{8,128}", idempotency_key) is None:
+38:         raise ApiError(400, "INVALID_REQUEST", "bounded delivery Idempotency-Key is required")
+39:     async with tenant_scoped(workspace_id) as session:
+40:         member = await load_membership(session, principal=principal, workspace_id=workspace_id)
+41:         if not permission_for_roles(member["roles"], "admitDraftDelivery"):
+42:             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+43:         authorization = selected_delivery_authorization(
+44:             workspace_id=workspace_id, draft_id=draft_id, actor_id=member["user_id"])
+45:         if type(authorization) is not DeliveryBudgetAuthorization:
+46:             raise ApiError(503, "PROVIDER_UNAVAILABLE", "reviewed delivery authority is unavailable")
+47:         outcome = await begin_idempotency(session, workspace_id=workspace_id,
+48:             actor_id=member["user_id"], operation_id="admitDraftDelivery", key=idempotency_key,
+49:             body=payload.model_dump(mode="json"),
+50:             target={"workspace_id": str(workspace_id), "draft_id": str(draft_id)})
+51:         # Replays always re-enter the authoritative admission checks. Returning
+52:         # a cached202 here would bypass current membership/approval/policy and
+53:         # hide an original unknown/accepted state or rebind its immutable scope.
+54:         admitted = await admit_delivery(session, authorization=authorization,
+55:             environment="production", workspace_id=workspace_id, actor_id=member["user_id"],
+56:             draft_id=draft_id, key=idempotency_key, **payload.model_dump())
+57:         data = {"message_id": str(admitted.message_id), "state": admitted.state,
+58:                 "replayed": admitted.replayed}
+59:         if not outcome.replay:
+60:             complete_idempotency(outcome, str(admitted.message_id),
+61:                 response={"http_status": 202, "data": data})
+
+## services/api/buyeros_api/api/routes/health.py
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/services/api/buyeros_api/api/routes/health.py
+17: def readiness_payload(*, database: str = "unavailable", queue: str = "unavailable", worker: str = "unavailable") -> dict:
+18:     """Contract `Readiness` shape. No credential, DSN or provider detail is ever included.
+19: 
+20:     The route reaches this builder after a tenant-scoped DB query. Queue and worker
+21:     become ready only with a recent committed heartbeat from a broker-delivered
+22:     sweep task; absence and expiry fail closed.
+23:     """
+24:     return {
+25:         "ready": database == "ready" and queue == "ready" and worker == "ready",
+26:         "database": database,
+27:         "queue": queue,
+28:         "worker": worker,
+29:         "checked_at": _now(),
+30:     }
+31: 
+32: 
+33: def capabilities_payload() -> dict:
+34:     """Contract `CapabilityPage` shape; live providers stay disabled in this phase."""
+35:     from ...providers.registry import provider_readiness
+36: 
+37:     now = _now()
+38:     provider_services = {"research": "search", "contact_enrichment": "contact", "draft_generation": "model"}
+39:     items = [
+40:         {
+41:             "name": name,
+42:             "status": "disabled" if name in {"mailbox", "crm"} else "unconfigured",
+43:             "reason_codes": ["live_providers_not_activated"] + (provider_readiness(provider_services[name], environment="production")["reason_codes"] if name in provider_services else []),
+44:             "checked_at": now,
+45:             "billable": False,
+46:         }
+47:         for name in CAPABILITY_NAMES
+48:     ]
+49:     return {"items": items, "offset": 0, "limit": len(items), "total": len(items)}
+50: 
+51: 
+52: @router.get("/health/live")
+53: async def live(request: Request) -> dict:
+54:     """Minimal unauthenticated liveness with a contract-valid correlation ID."""
+55:     from ..errors import envelope
+56: 
+72: @router.get("/v1/workspaces/{workspace_id}/readiness")
+73: async def readiness(workspace_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)) -> dict:
+74:     from ..errors import envelope
+75: 
+76:     from sqlalchemy import select
+77:     from ...db.worker import WorkerHeartbeat
+78:     from ..deps import load_membership, permission_for_roles, tenant_scoped
+79:     from ..errors import ApiError
+80:     from ...settings import get_settings
+81: 
+82:     async with tenant_scoped(workspace_id) as session:
+83:         member = await load_membership(session, principal=principal, workspace_id=workspace_id)
+84:         if not permission_for_roles(member["roles"], "getReadiness"):
+85:             raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+86:         from ...db.worker_execution import WorkerRuntimeControl
+87:         backend, enabled = (await session.execute(select(WorkerRuntimeControl.backend, WorkerRuntimeControl.enabled))).one()
+88:         heartbeat = (await session.execute(select(WorkerHeartbeat)
+89:             .order_by(WorkerHeartbeat.observed_at.desc()).limit(1))).scalar_one_or_none() if backend == 'celery' and enabled else None
+90:         worker, queue = "unavailable", "unavailable"
+91:         if backend == 'cloudflare':
+92:             from ...services.worker_recovery import read_execution_health
+93:             health = await read_execution_health(session, now=datetime.now(timezone.utc))
+94:             worker, queue = health['worker'], health['queue']
+95:         elif heartbeat is not None:
+96:             age = (datetime.now(timezone.utc) - heartbeat.observed_at).total_seconds()
+97:             if 0 <= age <= get_settings().worker_heartbeat_max_age_seconds:
+98:                 worker, queue = "ready", heartbeat.broker_state
+99:             else:
+100:                 worker = "stale"
+101:     return envelope(readiness_payload(database="ready", queue=queue, worker=worker), request.state.request_id)
+102: 
+103: 
+104: @router.get("/v1/workspaces/{workspace_id}/capabilities")
+
+## services/api/buyeros_api/settings.py
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/services/api/buyeros_api/settings.py
+17:     auth0_audience: str | None = None
+18:     auth_mode: str = "auth0"
+19:     neon_issuer: str | None = None
+20:     neon_audience: str | None = None
+21:     neon_jwks_url: str | None = None
+22:     neon_expected_issuer: str | None = None
+23:     neon_expected_audience: str | None = None
+24:     neon_expected_jwks_url: str | None = None
+25:     auth_migration_expires_at: str | None = None
+26:     jwks_cache_seconds: int = Field(default=300, ge=1)
+27:     jwks_max_stale_seconds: int = Field(default=3600, ge=1)
+28:     worker_heartbeat_max_age_seconds: int = Field(default=180, ge=30, le=3600)
+29:     environment: str = "local"
+30:     paid_admission_enabled: bool = False
+31:     delivery_admission_enabled: bool = False
+32:     live_read_enabled: bool = True
+33:     reconciliation_enabled: bool = True
+34:     read_per_minute: int = Field(default=600, ge=1, le=10000)
+35:     write_per_minute: int = Field(default=300, ge=1, le=10000)
+36:     expensive_read_per_minute: int = Field(default=120, ge=1, le=10000)
+
+## features/live/navigation.tsx
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/features/live/navigation.tsx
+1: type Props = {
+2:   t: (value:string)=>string;
+3:   navigate: (path:string)=>void;
+4:   authorized: boolean;
+5:   projectKnown: boolean;
+6:   canEdit: boolean;
+7:   projectActive: boolean;
+8:   canCreate: boolean;
+9: };
+10: 
+11: /** Route navigation keeps the parent workspace session and scope checks authoritative. */
+12: export function LiveNavigation({t,navigate,authorized,projectKnown,canEdit,projectActive,canCreate}:Props){
+13:   return <nav aria-label="BuyerOS sections" style={{display:'flex',gap:'1rem',flexWrap:'wrap',padding:'0.75rem 0'}}>
+14:     <button onClick={()=>navigate('/app')}>{t('Overview')}</button>
+15:     <button onClick={()=>navigate(projectKnown?'/app/discover/edit':'/app/discover/new')} disabled={!authorized || !(projectKnown?canEdit&&projectActive:canCreate)}>{t('Offer')}</button>
+16:     <button onClick={()=>navigate('/app/discover')} disabled={!projectKnown}>{t('Buyers')}</button>
+17:     <button onClick={()=>navigate('/app/results')} disabled={!projectKnown}>{t('Results')}</button>
+18:     <button onClick={()=>navigate('/app/runs')} disabled={!projectKnown}>{t('Research runs')}</button>
+19:     <button onClick={()=>navigate('/app/outreach')} disabled={!projectKnown}>{t('Drafts')}</button>
+20:     <button onClick={()=>navigate('/app/settings')} disabled={!authorized}>{t('Settings')}</button>
+21:     <button onClick={()=>navigate('/app/operations')} disabled={!authorized}>{t('Operations')}</button>
+22:   </nav>;
+23: }
+
+## features/live/workspace-picker.tsx
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/features/live/workspace-picker.tsx
+118:     setWorkspaceRefresh(value=>value+1);
+119:   }),[client,session]);
+120:   const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
+121:   function copyDiagnostics(){
+122:     const message=workspaces.kind==='error'?workspaces.message:'';
+123:     const requestId=message.match(/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/i)?.[0]??null;
+124:     // Allow-listed support fields only: no token, OAuth code, email or user claims.
+125:     void navigator.clipboard?.writeText(JSON.stringify({request_id:requestId,time:new Date().toISOString(),
+126:       workspace_id:workspace,project_id:project,login_method:auth?.provider??'auth0'},null,2));
+127:   }
+128:   useEffect(() => {
+211:   }
+212:   function navigate(path:string) {
+213:     const params = new URLSearchParams(); if (workspace) params.set('workspace',workspace); if (project) params.set('project',project); if (project && requested('profile')) params.set('profile',requested('profile')!);
+214:     const target=new URL(path,window.location.origin);for(const [key,value] of params)target.searchParams.set(key,value);
+215:     void session.transition(async()=>{if(mayLeaveOffer())router.push(target.pathname+target.search);}).catch(()=>{});
+216:   }
+217:   if (!auth || authBootstrap.kind==='initializing') return <main className="main-shell">{languagePicker}<section className="panel" role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&<p>{authError}</p>}</section></main>;
+218:   if (!snapshot.authenticated) return <main className="main-shell">{languagePicker}<section className="panel"><h1>FIMMICK BuyerOS</h1><p>{t('Sign in to access your workspaces.')}</p>{authError&&<p role="alert">{authError}</p>}<button onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></section></main>;
+219:   return <main className="main-shell live-workspace"><div className="content">
+220:     <header className="topbar live-topbar"><b>FIMMICK BuyerOS</b><span>{t('Live workspace')}</span>{languagePicker}<button onClick={()=>void session.transition(async()=>{if(!mayLeaveOffer())return;session.setToken(undefined);await auth.signOut();}).catch(()=>{})}>{t('Sign out')}</button></header>
+221:     <LiveNavigation t={t} navigate={navigate} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>
+222:     <div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
+223:       {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
+224:       {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
+225:       {workspaces.kind === 'ready' && (workspaces.items.length ? <label className="live-scope-select">{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p></>)}
+226:       {workspaces.kind==='ready'&&<><button onClick={retryAccess}>{t('Check access again')}</button>{accessError&&<p role="alert">{localizeError(accessError)}</p>}</>}
+227:       {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={copyDiagnostics}>{t('Copy diagnostics')}</button></>}
+228:       {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
+229:     </section>
+
+## scripts/run-vercel.mjs
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/scripts/run-vercel.mjs
+1: import { fileURLToPath } from "node:url";
+2: 
+3: const [command, ...args] = process.argv.slice(2);
+4: if (!["dev", "build"].includes(command)) throw new Error("Expected dev or build.");
+5: 
+6: process.env.BUYEROS_DEPLOY_TARGET = "vercel";
+7: if (command === "build") process.env.NITRO_PRESET = "vercel";
+8: 
+9: const cli = new URL("../node_modules/vite/bin/vite.js", import.meta.url);
+10: process.argv = [process.execPath, fileURLToPath(cli), command,
+11:   ...(command === "dev" && process.env.PORT ? ["--port", process.env.PORT] : []),
+12:   ...args];
+13: await import(cli.href);
+
+## vercel.json
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/vercel.json
+1: {
+2:   "$schema": "https://openapi.vercel.sh/vercel.json",
+3:   "services": {
+4:     "app": {
+5:       "root": ".",
+6:       "framework": "nitro",
+7:       "buildCommand": "node scripts/run-vercel.mjs build",
+8:       "devCommand": "node scripts/run-vercel.mjs dev",
+9:       "bindings": [
+10:         {
+11:           "type": "service",
+12:           "service": "api",
+13:           "format": "url",
+14:           "env": "BUYEROS_INTERNAL_API_URL"
+15:         }
+16:       ]
+17:     },
+18:     "api": {
+19:       "root": "services/api",
+20:       "framework": "fastapi",
+21:       "entrypoint": "buyeros_api.api.vercel:app",
+22:       "functions": {
+23:         "buyeros_api/api/vercel.py": {
+24:           "maxDuration": 90
+25:         }
+26:       }
+27:     }
+28:   },
+29:   "rewrites": [
+30:     {
+31:       "source": "/(.*)",
+32:       "destination": {
+33:         "service": "app"
+34:       }
+35:     }
+36:   ]
+37: }
+
+## docs/buyeros/CURRENT_STATUS.md
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/docs/buyeros/CURRENT_STATUS.md
+1: # BuyerOS C61 execution status
+2: 
+3: Execution date: 2026-10-07 Asia/Hong_Kong. Original audit date: 2026-10-06.
+4: Draft PR #12: https://github.com/YNWAforever/BuyerOS/pull/12 . Published head is
+5: 22f11ab; later local commits are reviewable follow-ups awaiting PR synchronization.
+6: The original audit, 114 outcomes and task columns remain preserved. New outcomes
+7: use execution fields; fixture evidence does not close a production finding.
+8: 
+9: C61-01: input hashes, HEAD/worktrees and Q drift comparison verified locally.
+10: C61-02: selective Q integration retained; required Q PG suite 64/64, 45 Node
+11: cases and full built 96/96 at 53bb6cf pass. Initial PR CI exposed a cold JWKS
+12: race and document preference observer issue. Focused RED then 51 auth/DB cases,
+13: 4 observer units and the fresh full 96-case built suite pass. Earlier interrupted,
+14: stale, empty and ENOSPC runs remain unsuccessful. JWT trust was not widened.
+15: Latest hosted CI and integrated complete browser run remain pending.
+16: 
+17: C61-03: bounded staff reconciliation CLI defaults to read-only, supports existing
+18: canonical users only and requires current DB admin authority and exact versions.
+19: 36 focused required cases pass. Actual staff accounts and role readback are pending.
+20: C61-04: sanitized diagnostics and Alembic logging compatibility pass 22 focused
+21: cases. The historical Oct2 OperationalError root is unconfirmed; C61-05 remains
+22: blocked on historical evidence. No pool/cold-start explanation is inferred.
+23: C61-06: migration 0038 restricted directory, canonical resolver and rollback
+24: payload pass 39 required cases and actual runtime-role warm benchmark. SQL stays
+25: 4 per sample across W=1/10/100/1000. Production migration-owner eligibility,
+26: index/lock review, deployment and directory performance readback are pending.
+27: The complete follow-up API suite is 863/863 with fresh JUnit and zero fail/error/
+28: skip at 92d19d0. Git API/migration tree equality connects it to the integrated
+29: source; this does not certify later C61-21 edits or the entire repository tree.
+30: 
+31: C61-07: current public Neon SDK/production contract ADR prepared; six offline
+32: peer SDK cases reviewed. Target Neon project/branch, real email/Google login,
+33: JWT trust and portable runtime acceptance are pending. C61-08/09 can start locally.
+34: C61-15: closed provider registry and immutable activation contract are implemented.
+35: 40 API registry cases and 5 durable worker safety cases pass. No provider selected,
+36: verified account contract or credential configured; activation/spend stay zero.
+37: C61-16: existing 33 search/fetch/ingestion safety cases verified; live adapters
+38: and market/language account acceptance still need implementation/evidence.
+39: 
+40: C61-21: typed scoped six-card summary, pending-approval draft filtering and
+41: private durable receipt pages are integrated. 54 API/contract, 5 frontend units
+42: and 24 fresh built cases pass with zero fail/error/skip; all six A/B en/zh-HK390
+43: cards equal actual filtered API totals. Current membership/project/actor
+44: predicates and read-only repeatable snapshots isolate receipt pages. Dirty
+45: drafts and exact Unicode approval/export still pass. Errors remain unavailable.
+46: The first built 22-pass/2-unsuccessful run is retained; both locator defects
+47: were corrected without weakening counts or increasing timeouts. Same-version
+48: real account/provider, production readback and human acceptance remain pending.
+49: C61-22: readable source cards, exact read-only keyboard selection and workflow
+50: are integrated. Native Chromium readonly caret failure was reproduced independently;
+51: grapheme keyboard movement fixes actual [1,3] DOM selection -> [1,2] server emoji
+52: citation. 22 core + 15 fresh built draft/dirty/retry/Unicode/approval/export cases
+53: pass, zero fail/error/skip, with source hashes and exact export artifacts. Human
+54: screen reader/zoom and real-source semantic/readback acceptance are pending.
+55: 
+56: Research admission still returns honest 503. Native delivery stays protected 403.
+57: Real provider, built preview with real auth/provider, production readback and human
+58: UAT have separate gates. Unowned dirty Neon worktree and user branches are untouched.
+59: 
+60: Release A (research + approved export): NOT ACCEPTED.
+61: Neon-only: NOT ACCEPTED.
+62: Native send (C61-20/30): NOT ACCEPTED.
+63: 
+64: Next local work: finish C61-23 maintenance/expiry acceptance; C61-08/09
+65: and live adapter source remain independent ready tasks. C61-05 depends on actual
+66: historical root evidence. Production/auth/provider spend/send need their specific
+67: authority and same-version verified payloads. Rollback remains per task source
+68: commit; 0038 rollback removes only directory function/index after route rollback,
+69: preserving canonical IDs, FKs, existing memberships, audit, revisions and holds.
+
+## docs/buyeros/release-candidate.json
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/docs/buyeros/release-candidate.json
+1: {
+2:   "source_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+3:   "tree_sha": "d2d8884564a78aad83e9cbd369deeff3b16c4dc3",
+4:   "base_sha": "a78859fe474f5722be3755b10e2586436b53bf97",
+5:   "ci_run_id": null,
+6:   "deployment_id": null,
+7:   "api_sha": null,
+8:   "schema_head": null,
+9:   "worker_sha": null,
+10:   "runtime_selector": null,
+11:   "epoch": null,
+12:   "evidence_paths": [
+13:     "docs/buyeros/evidence/c61/baseline-integrity.json",
+14:     "docs/buyeros/evidence/c61/integration-selection.json"
+15:   ],
+16:   "predeploy_ready": false,
+17:   "release_accepted": false,
+18:   "neon_only_accepted": false,
+19:   "native_send_accepted": false
+20: }
+
+## services/api/tests/test_workspace_listing_db.py
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/services/api/tests/test_workspace_listing_db.py
+150: 
+151: 
+152: def test_directory_queries_bounded_with_unrelated_workspaces(directory_case):
+153:     case = directory_case
+154:     visible, member = case['add'](0)
+155:     statements, maxima = [], []
+156:     def observed(conn, cursor, statement, parameters, context, executemany):
+157:         statements.append(statement)
+158:     event.listen(Engine, 'before_cursor_execute', observed)
+159:     try:
+160:         with TestClient(create_app(), raise_server_exceptions=False) as client:
+161:             previous = 1
+162:             for total in (1,10,100,1000):
+163:                 for _ in range(previous,total):
+164:                     case['add']()
+165:                 statements.clear()
+166:                 result = client.get('/v1/workspaces?limit=1',headers=case['headers'][0])
+167:                 assert result.status_code == 200, result.text
+168:                 assert_contract_response('WorkspacePageResponse',result.json())
+169:                 assert result.json()['data'] == dict(items=[dict(id=str(visible),name='Q13 fixture',membership_id=str(member),roles=['operator'],data_mode='live')],offset=0,limit=1,total=1)
+170:                 maxima.append(len(statements))
+171:                 previous=total
+172:         assert max(maxima)<=6, f"P09 SQL budget: observed {maxima} for W=1/10/100/1000"
+173:         assert len(set(maxima))==1, f"P10 unrelated-workspace scan: {maxima}"
+174:     finally:
+175:         event.remove(Engine,'before_cursor_execute',observed)
+176: 
+177: 
+
+## services/api/tests/test_bulk_manifest_db.py
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/services/api/tests/test_bulk_manifest_db.py
+85: def test_10000_committed_crash_recovery_exact_results_and_failed_child_preview(api,seeded):
+86:     from buyeros_api.api.deps import tenant_scoped
+87:     from buyeros_api.services.bulk_service import apply_bulk_chunk
+88:     _seed_many(seeded,10000);owner=_admin_membership(seeded);manifest=_preview(api,owner)
+89:     assert manifest["count"]==10000
+90:     with psycopg.connect(seeded) as conn:
+91:         stale=conn.execute("SELECT buyer_id FROM bulk_manifest_items WHERE manifest_id=%s ORDER BY ordinal LIMIT 50",(manifest["id"],)).fetchall()
+92:         conn.cursor().executemany("UPDATE project_buyers SET version=version+1 WHERE id=%s",stale)
+93:     response=_execute(api,manifest);assert response.status_code==202,response.text
+94:     job=response.json()["data"];job_id=uuid.UUID(job["id"])
+95:     async def run():
+96:         async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:await apply_bulk_chunk(session,job_id)
+97:         try:
+98:             async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
+99:                 await apply_bulk_chunk(session,job_id)
+100:                 raise RuntimeError("crash before chunk commit")
+101:         except RuntimeError:pass
+102:         with psycopg.connect(seeded) as conn:
+103:             assert conn.execute("SELECT processed FROM async_jobs WHERE id=%s",(job_id,)).fetchone()[0]==50
+104:             assert conn.execute("SELECT count(*) FROM project_buyers WHERE owner_user_id IS NOT NULL AND workspace_id=%s",(WORKSPACE_A,)).fetchone()[0]==0
+105:         restart_script = """import asyncio,json,sys,os,uuid
+106: if sys.platform=='win32':asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+107: from buyeros_api.api.deps import tenant_scoped,dispose_engines
+108: from buyeros_api.services.bulk_service import apply_bulk_chunk
+109: async def resume():
+110:  try:
+111:   async with tenant_scoped(uuid.UUID(sys.argv[2])) as session:
+112:    result=await apply_bulk_chunk(session,uuid.UUID(sys.argv[1]))
+113:   print(json.dumps({'pid':os.getpid(),'processed':result['processed']}))
+114:  finally:await dispose_engines()
+115: asyncio.run(resume())
+116: """
+117:         restarted=subprocess.run([sys.executable,"-c",restart_script,str(job_id),WORKSPACE_A],capture_output=True,text=True,check=True)
+118:         receipt=json.loads(restarted.stdout);assert receipt["pid"]!=os.getpid() and receipt["processed"]==50
+119:         with psycopg.connect(seeded) as conn:
+120:             assert conn.execute("SELECT processed FROM async_jobs WHERE id=%s",(job_id,)).fetchone()[0]==100
+121:         for _ in range(198):
+122:             async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
+123:                 result=await apply_bulk_chunk(session,job_id)
+124:                 assert result["processed"]<=50
+125:         async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:assert (await apply_bulk_chunk(session,job_id))["processed"]==0
+126:     asyncio.run(run())
+127:     with psycopg.connect(seeded) as conn:
+128:         assert conn.execute("SELECT requested,processed,updated,conflicts,status FROM async_jobs WHERE id=%s",(job_id,)).fetchone()==(10000,10000,9950,50,"completed")
+129:         assert conn.execute("SELECT count(*),count(DISTINCT buyer_id) FROM async_job_items WHERE job_id=%s",(job_id,)).fetchone()==(10000,10000)
+130:     ids=[]
+131:     for offset in range(0,10000,100):
+132:         read=api.get(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job_id}?offset={offset}&limit=100",headers=_h())
+133:         assert read.status_code==200,read.text
+134:         page=read.json()["data"]["result_page"]
+135:         assert page["total"]==10000 and len(page["items"])==100;ids.extend(i["id"] for i in page["items"])
+136:     assert len(ids)==len(set(ids))==10000
+137:     old_retry=api.post(f"/v1/workspaces/{WORKSPACE_A}/jobs/{job_id}/retry-failed",json={},headers=_h(key="q08-no-blind-retry"))
+138:     assert old_retry.status_code==409 and old_retry.json()["code"]=="MANIFEST_REVIEW_REQUIRED"
+139:     child=_preview(api,owner,filters={},source_job_id=str(job_id));assert child["count"]==50 and child["digest"]!=manifest["digest"]
+
+## scripts/c61-performance-harness.py
+https://github.com/YNWAforever/BuyerOS/blob/cbbe0e93b0132ae07ff0d87f6cc57f871f13200e/scripts/c61-performance-harness.py
+30:         raise ValueError('invalid or weakened numerical ceiling')
+31:     return value
+32: 
+33: def validate_budget(budget):
+34:     if set(budget)!=set(('owner','adopted','frozen_at','warm_api_p95_ms','warm_api_p99_ms','http_5xx_rate_max','sql_max','tenant_errors_max')):
+35:         raise ValueError('unexpected budget fields')
+36:     if type(budget['owner']) is not str or not budget['owner'].strip() or type(budget['adopted']) is not bool:
+37:         raise ValueError('invalid owner or adoption declaration')
+38:     if type(budget['frozen_at']) is not str:
+39:         raise ValueError('missing freeze timestamp')
+40:     frozen=datetime.fromisoformat(budget['frozen_at'].replace('Z','+00:00'))
+41:     if frozen.tzinfo is None or frozen.utcoffset() is None:
+42:         raise ValueError('freeze must have timezone')
+43:     bounded(budget['warm_api_p95_ms'],800);bounded(budget['warm_api_p99_ms'],1500)
+44:     bounded(budget['http_5xx_rate_max'],.01)

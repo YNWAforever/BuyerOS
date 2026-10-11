@@ -1,0 +1,34 @@
+{
+  "summaries": [
+    {
+      "name": "Findings",
+      "records": 24,
+      "columns": 24
+    },
+    {
+      "name": "Cases",
+      "records": 148,
+      "columns": 38
+    },
+    {
+      "name": "Tasks",
+      "records": 33,
+      "columns": 37
+    },
+    {
+      "name": "Operations",
+      "records": 93,
+      "columns": 9
+    },
+    {
+      "name": "UI_Actions",
+      "records": 48,
+      "columns": 23
+    }
+  ],
+  "values_roundtrip": "exact",
+  "formula_count": 0,
+  "format": "UTF-8 BOM quoted CSV + XLSX",
+  "historical_fields": "baseline_ prefix retained",
+  "record_counts": "24 findings; 148 cases; 33 tasks; 93 declared operations; 48 representative UI actions"
+}
