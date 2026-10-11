@@ -1,0 +1,41 @@
+{
+  "schema": "buyeros.c61-local-verification.v1",
+  "task_id": "C61-31",
+  "parent_status": "OPEN_RUNTIME_TARGET_AND_MAPPING_ACCEPTANCE",
+  "test_base_sha": "135969cf71453bec4eef82e87e78cd3b971f06eb",
+  "source_files_sha256": {
+    "services/api/buyeros_api/services/schema_readiness.py": "ef912a8133259c4dd06630a2af6f533f3d4467bdc9a2f738713e3e97fdfe8b90",
+    "services/api/tools/check_schema_readiness.py": "0f04e644339ae4edd5dd40d65cf7639af65b5b463a13ff14302016b9067bf604",
+    "services/api/tests/test_schema_readiness_db.py": "2b564f012cf8cf6453622c2f971e884d7dce893130607010338537977587e128"
+  },
+  "red": {
+    "suite": "schema-readiness",
+    "result": "11 failed: missing probe",
+    "junit_sha256": "d195fd5eb09ae3bb551bf0dbdad2409b479aaf3822c9a558e7cc570655d8eb52"
+  },
+  "additional_red": {
+    "case": "required lineage cannot be declared",
+    "result": "1 failed",
+    "log_sha256": "cfe8c6cd7637d84bb8f7c1fc5c529e9ec6df9e081631633b5392ac45e8a8afb4"
+  },
+  "green": {
+    "passed": 12,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "junit_sha256": "0578f4325fd464ef528b9c6900fa3934c3ded127d3fb6f39a1a91fffd9159d8b"
+  },
+  "focused": {
+    "passed": 101,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "junit_sha256": "824d550e06468a5be45db816eb1c340466f6a7afc9349fbdac89e43e24439d1e"
+  },
+  "evidence_mode": "owned_disposable_fixture",
+  "live_accepted": false,
+  "rulings": [
+    "Runtime lacks Alembic metadata read. Positive owned probes explicitly grant only SELECT(version_num), isolated to the test clone. No production grant applied.",
+    "Known branch shape supports A, but deployment target cannot be independently bound to the sensitive DSN; root-cause decision remains D."
+  ]
+}

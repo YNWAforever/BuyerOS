@@ -82,10 +82,17 @@
   "tool_blockers": [
     "codebase graph list/search timed out; fallback to specified source files",
     "native managed worktree delayed; isolated repo-local fallback used",
-    "Vercel env metadata connector 403; CLI fallback pending"
+    "Vercel connector env 403; CLI metadata succeeded; sensitive production DSN value is unreadable"
   ],
   "preserved_original_checkout": {
     "head": "671fed7aa580f2c700aa04110f4a5a44e23a2ac1",
     "dirty_files_untouched": true
+  },
+  "db_observations": {
+    "named_branch_owner_head": "0033_api_rate_windows",
+    "runtime_identity_relation": false,
+    "runtime_directory_function": false,
+    "runtime_version_column_readable": false,
+    "actual_deployment_connection_binding": "unproven"
   }
 }

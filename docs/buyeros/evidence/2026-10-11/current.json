@@ -548,7 +548,17 @@
       "tested_at_sha": null,
       "deployed_at_sha": null,
       "activated": null,
-      "live_accepted_at": null
+      "live_accepted_at": null,
+      "current_status": "OPEN_RUNTIME_TARGET_AND_MAPPING_ACCEPTANCE",
+      "current_source": "read-only typed probe and bounded CLI implemented",
+      "current_test": "12 schema / 101 focused strict PG16 passed; 0 fail/error/skip",
+      "current_deploy": "not deployed",
+      "current_activation": "none",
+      "current_live_acceptance": "blocked exact deployed target/mapping/canary",
+      "evidence": [
+        "C61-31-local.json",
+        "db-readback.redacted.json"
+      ]
     },
     {
       "task_id": "C61-32",
@@ -1468,7 +1478,14 @@
   "gates": {
     "G0": {
       "accepted": false,
-      "blockers": []
+      "blockers": [
+        "same-deployment DB target binding",
+        "exact canonical account mapping readback",
+        "reviewed schema change authorization",
+        "compatible frontend+API rollback artifact IDs",
+        "known-account workspace canary",
+        "remote promotion protection"
+      ]
     },
     "GN": {
       "accepted": false,

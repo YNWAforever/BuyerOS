@@ -60,6 +60,7 @@ services/**/*.egg-info/
 .superpowers/
 
 # local verification artifacts
+/artifacts/repair/
 /services/api/artifacts/
 /services/worker/artifacts/
 /test-results/
