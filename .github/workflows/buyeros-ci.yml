@@ -64,6 +64,23 @@ jobs:
       - run: node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-neon-built.xml tests/neon-auth-built.test.mjs
       - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-neon-built.xml
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Verify C61-25 polling budget and native connectivity defaults
+        run: |
+          node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-job-poller.xml tests/job-poller-checks.mjs
+          python scripts/check-required-tests.py --junit artifacts/c61/ci-job-poller.xml
+          pnpm exec playwright test --config playwright.job-poller.config.ts --list --reporter=json > artifacts/c61/ci-job-poller-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-job-poller-discovery.json --expected-count 3 --expected-file job-poller-connectivity.spec.ts --discovery-only
+          pnpm exec playwright test --config playwright.job-poller.config.ts
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-job-poller-discovery.json --expected-count 3 --expected-file job-poller-connectivity.spec.ts --junit test-results/job-poller.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-poller-local-boundary
+          path: |
+            artifacts/c61/ci-job-poller*
+            test-results/job-poller.xml
+            test-results/job-poller/
+          if-no-files-found: error
       - run: |
           pnpm exec playwright test --config playwright.neon-runtime-built.config.ts --list > artifacts/c61/ci-neon-session-discovery.txt
           python -c "import pathlib,re; text=pathlib.Path('artifacts/c61/ci-neon-session-discovery.txt').read_text(); match=re.search(r'Total: (\d+) tests?',text); assert match and int(match[1])>0 and 'neon-session-production.spec.ts' in text and 'neon-security-production.spec.ts' in text, 'empty or wrong Neon discovery'"
