@@ -5,6 +5,7 @@ import os
 import socket
 import sys
 import time
+import uuid
 
 
 def serve(config, control):
@@ -139,7 +140,9 @@ def process_config(dsn, **extra):
     from tests import auth_fixtures as fx
     from tests.conftest import _require_disposable_test_dsn, runtime_role_dsn
     _require_disposable_test_dsn(dsn)
-    return dict(runtime_dsn=runtime_role_dsn(dsn), issuer=fx.ISSUER,
+    label = 'owned-api-' + uuid.uuid4().hex
+    return dict(runtime_dsn=runtime_role_dsn(dsn) + '?application_name=' + label,
+                backend_label=label, issuer=fx.ISSUER,
                 audience=fx.AUDIENCE, jwks=fx.jwks_document(), **extra)
 
 
@@ -155,7 +158,7 @@ def wait_for_backend_exit(dsn, pids):
             time.sleep(0.01)
 
 
-def runtime_backends(dsn):
+def runtime_backends(dsn, label):
     import psycopg
     with psycopg.connect(dsn) as db:
-        return db.execute("SELECT pid,state FROM pg_stat_activity WHERE usename='buyeros_api' ORDER BY pid").fetchall()
+        return db.execute("SELECT pid,state FROM pg_stat_activity WHERE usename='buyeros_api' AND application_name=%s ORDER BY pid", (label,)).fetchall()

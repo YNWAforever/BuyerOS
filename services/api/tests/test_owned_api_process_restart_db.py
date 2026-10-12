@@ -46,7 +46,7 @@ def test_owned_process_death_reuses_original_key_after_confirmed_rollback_or_com
             pending = executor.submit(interrupted_post, first, path, headers, CREATE)
             boundary = first.event(phase)
             rows_at_boundary = project_rows(seeded, key)
-            pids = [r[0] for r in runtime_backends(seeded)]
+            pids = [r[0] for r in runtime_backends(seeded, first.config['backend_label'])]
             assert pids
             if phase == 'before-commit':
                 assert rows_at_boundary == before
@@ -81,7 +81,7 @@ def test_owned_process_death_reuses_original_key_after_confirmed_rollback_or_com
         assert (changed.status_code, changed.json()['code']) == (409, 'IDEMPOTENCY_CONFLICT')
         assert project_rows(seeded, key) == once
         assert not second.control.poll()
-        second_pids = [r[0] for r in runtime_backends(seeded)]
+        second_pids = [r[0] for r in runtime_backends(seeded, second.config['backend_label'])]
         assert second_pids
     assert second.exit['exitcode'] == 0
     assert wait_for_backend_exit(seeded, second_pids) == []
@@ -113,8 +113,11 @@ def test_owned_delivery_process_restart_keeps_original_uncertain_identity_ref_an
                 db.execute('UPDATE delivery_messages SET state=%s,provider_ref=%s WHERE id=%s', (state, ref, message))
                 db.execute('UPDATE provider_operations SET status=%s,provider_ref=%s WHERE id=%s',
                     ('accepted' if state == 'accepted' else 'unknown_acceptance', ref, operation))
+            pids = [r[0] for r in runtime_backends(dsn, first.config['backend_label'])]
+            assert pids
             first.stop(hard=True)
             lost_transport = pending.result(timeout=5)
+        assert wait_for_backend_exit(dsn, pids) == []
     result = SimpleNamespace(message_id=message, operation_id=operation, reservation_id=reservation, outbox_id=outbox)
     original = snapshot(dsn, result)
     original_counts = counts(dsn)
@@ -134,9 +137,13 @@ def test_owned_delivery_process_restart_keeps_original_uncertain_identity_ref_an
             assert db.execute('SELECT id,intent_key,input_hash,status,provider_ref FROM provider_operations WHERE id=%s', (operation,)).fetchone() == original_operation
             assert db.execute('SELECT count(*) FROM cost_events WHERE operation_id=%s', (operation,)).fetchone() == (0,)
         assert not second.control.poll()
+        second_pids = [r[0] for r in runtime_backends(dsn, second.config['backend_label'])]
+        assert second_pids
     assert second.exit['exitcode'] == 0
+    assert wait_for_backend_exit(dsn, second_pids) == []
     record_property('owned_evidence', json.dumps({'state': state, 'boundary': boundary,
         'processes': [first.ready, first.exit, second.ready, second.exit], 'transport': lost_transport,
         'original_snapshot': original, 'provider_operation': original_operation, 'counts': original_counts,
         'replays': [r.json() for r in replies], 'fresh_key_code': denied.json()['code'],
+        'backend_pids': [pids, second_pids], 'backend_remaining': [],
         'provider_posts': 0, 'send_calls': 0, 'live_acceptance': False}, default=str, sort_keys=True))
