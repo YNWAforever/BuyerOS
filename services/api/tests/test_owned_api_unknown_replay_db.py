@@ -112,14 +112,16 @@ def test_owned_same_payload_uncertain_delivery_readback_preserves_identity_hold_
         ref = 'owned-retained-provider-ref' if state == 'accepted' else None
         db.execute("UPDATE delivery_messages SET state='submitting' WHERE id=%s", (message,))
         db.execute('UPDATE delivery_messages SET state=%s,provider_ref=%s WHERE id=%s', (state, ref, message))
-        db.execute('UPDATE provider_operations SET status=%s WHERE id=%s',
-                   ('accepted' if state == 'accepted' else 'unknown_acceptance', operation))
+        db.execute('UPDATE provider_operations SET status=%s,provider_ref=%s WHERE id=%s',
+                   ('accepted' if state == 'accepted' else 'unknown_acceptance', ref, operation))
     from types import SimpleNamespace
     result = SimpleNamespace(message_id=message, operation_id=operation, reservation_id=reservation, outbox_id=outbox)
     original = snapshot(dsn, result)
     before = counts(dsn)
     with psycopg.connect(dsn) as db:
         provider_before = db.execute('SELECT id,intent_key,input_hash,status,provider_ref FROM provider_operations WHERE id=%s', (operation,)).fetchone()
+    assert provider_before[3] == ('accepted' if state == 'accepted' else 'unknown_acceptance')
+    assert provider_before[4] == original[0][9] == ref
     replies = [client.post(url(args), headers=_h(REVIEWER, key=args['key']), json=body(args)) for _ in range(3)]
     assert all(r.status_code == 202 and r.json()['data'] == {
         'message_id': str(message), 'state': state, 'replayed': True} for r in replies)
