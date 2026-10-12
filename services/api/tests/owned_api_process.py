@@ -119,7 +119,8 @@ class OwnedAPIProcess:
             return
         if self.process.is_alive():
             if hard:
-                self.process.terminate()
+                # SIGTERM is graceful under uvicorn on POSIX; hard means OS death.
+                self.process.kill()
             else:
                 self.control.send('shutdown')
             self.process.join(timeout=10)
