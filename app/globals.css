@@ -343,3 +343,8 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
 .live-buyer-row .pill{font-size:11px}
 @media(max-width:1100px){.live-queue-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.live-queue-grid{grid-template-columns:minmax(0,1fr)}.live-buyer-row{flex-wrap:wrap}}
+/* Wizard step tabs keep the original borderless step style (the generic button look overflowed at 390px). */
+.live-workspace .steps button:not(.live-nav-item):not([data-slot]){border:0;background:transparent;padding:0;min-height:0;justify-content:flex-start;min-width:0}
+.live-workspace .steps button:not(.live-nav-item):not([data-slot]):hover:not(:disabled){background:transparent}
+.live-workspace .steps{flex-wrap:wrap;min-width:0}
+.live-topbar button{white-space:nowrap}
