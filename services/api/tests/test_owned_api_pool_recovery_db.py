@@ -13,6 +13,11 @@ from tests.conftest import runtime_role_dsn
 from tests.test_api_tenant_isolation import WORKSPACE_A, WORKSPACE_B
 from tests.owned_api_evidence import record_property
 from tests.owned_api_process import wait_for_backend_exit
+from tests.test_api_projects_db import api as project_api, OPERATOR, REVIEWER, _h
+
+
+async def connection_context(connection):
+    return (await connection.execute(text("SELECT pg_backend_pid(),current_setting('app.workspace_id',true),current_setting('app.user_id',true)"))).one()
 
 
 def setup(monkeypatch, seeded):
@@ -61,7 +66,7 @@ def test_owned_cancelled_transaction_recycles_original_backend_without_tenant_or
                 assert db.execute('SELECT count(*) FROM projects WHERE id=%s', (project,)).fetchone() == (0,)
                 assert db.execute('SELECT state FROM pg_stat_activity WHERE pid=%s', (result['cancelled_pid'],)).fetchone() == ('idle',)
             async with engine.connect() as raw:
-                no_scope = (await raw.execute(text("SELECT pg_backend_pid(),current_setting('app.workspace_id',true),current_setting('app.actor_id',true)"))).one()
+                no_scope = await connection_context(raw)
                 assert no_scope[0] == result['cancelled_pid']
                 assert no_scope[1] in (None, '') and no_scope[2] in (None, '')
                 # Existing policies cast the cleared transaction-local GUC to UUID.
@@ -92,6 +97,81 @@ def test_owned_cancelled_transaction_recycles_original_backend_without_tenant_or
         result['backend_remaining'] = []
     asyncio.run(scenario())
     record_property('owned_evidence', json.dumps(dict(kind=kind, live_acceptance=False, **result), default=str, sort_keys=True))
+
+
+def test_owned_cancelled_directory_clears_populated_canonical_user_on_same_backend_before_other_actor(project_api, seeded, monkeypatch, record_property):
+    import httpx
+    from buyeros_api.api import deps
+    from buyeros_api.services import workspace_directory
+    actor_a = uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)
+    actor_b = uuid.uuid5(uuid.NAMESPACE_URL, REVIEWER)
+    with psycopg.connect(seeded) as db:
+        db.execute('DELETE FROM memberships WHERE user_id=%s', (actor_b,))
+        db.execute("INSERT INTO memberships(id,workspace_id,user_id,roles,active) VALUES (%s,%s,%s,ARRAY['reviewer'],true)",
+                   (uuid.uuid4(), WORKSPACE_B, actor_b))
+    original = workspace_directory.list_authorized_workspaces
+    result = {}
+    async def scenario():
+        from buyeros_api.api.auth import Principal
+        from buyeros_api.db.session import workspace_directory_session
+        from buyeros_api.services.identity_resolver import resolve_user_id
+        from tests import auth_fixtures as fx
+        reached = asyncio.Event()
+        engine = deps.get_engine()
+        async def populated():
+            async with workspace_directory_session(engine) as session:
+                canonical = await resolve_user_id(session, Principal(issuer=fx.ISSUER, subject=OPERATOR))
+                assert canonical == actor_a
+                page = await original(session, user_id=canonical, offset=0, limit=20)
+                result['populated_user'] = (await session.execute(text("SELECT current_setting('app.user_id',true)"))).scalar_one()
+                result['before_cancel'] = await connection_context(session)
+                result['first_page'] = page
+                reached.set()
+                await asyncio.Event().wait()
+        async with project_api.app.router.lifespan_context(project_api.app):
+            request = asyncio.create_task(populated())
+            try:
+                await asyncio.wait_for(reached.wait(), timeout=10)
+                assert result['populated_user'] == str(actor_a)
+                assert result['before_cancel'][2] == str(actor_a), 'pool observer must see the actual populated directory user'
+                assert [i['id'] for i in result['first_page']['items']] == [WORKSPACE_A]
+            finally:
+                request.cancel()
+                await asyncio.gather(request, return_exceptions=True)
+            assert request.cancelled()
+            assert engine.pool.checkedout() == 0
+            async with engine.connect() as raw:
+                context = await connection_context(raw)
+                assert context[0] == result['before_cancel'][0]
+                assert context[1] in (None, '') and context[2] in (None, '')
+                with pytest.raises(DBAPIError) as denied:
+                    await raw.execute(text('SELECT public.buyeros_workspace_directory(:actor,0,20)'), {'actor': actor_a})
+                assert denied.value.orig.sqlstate == '42501'
+                await raw.rollback()
+                result['after_cancel'] = context
+            async def observed_directory(session, **kwargs):
+                page = await original(session, **kwargs)
+                result.setdefault('signed_contexts', []).append(await connection_context(session))
+                return page
+            monkeypatch.setattr(workspace_directory, 'list_authorized_workspaces', observed_directory)
+            async with httpx.AsyncClient(transport=httpx.ASGITransport(app=project_api.app), base_url='http://owned.test') as client:
+                responses = []
+                for subject, actor, workspace in [(REVIEWER, actor_b, WORKSPACE_B), (OPERATOR, actor_a, WORKSPACE_A)]:
+                    response = await client.get('/v1/workspaces', headers=_h(subject))
+                    assert response.status_code == 200, response.text
+                    assert [i['id'] for i in response.json()['data']['items']] == [workspace]
+                    assert result['signed_contexts'][-1] == (result['before_cancel'][0], '', str(actor))
+                    assert engine.pool.checkedout() == 0
+                    responses.append(response.json())
+            async with engine.connect() as raw:
+                final_context = await connection_context(raw)
+                assert final_context[0] == result['before_cancel'][0]
+                assert final_context[1] in (None, '') and final_context[2] in (None, '')
+            result.update(signed_responses=responses, after_success=final_context)
+        assert wait_for_backend_exit(seeded, [result['before_cancel'][0]]) == []
+        result['backend_remaining'] = []
+    asyncio.run(scenario())
+    record_property('owned_evidence', json.dumps(dict(live_acceptance=False, **result), default=str, sort_keys=True))
 
 
 @pytest.mark.parametrize('kind', ['tenant', 'rate'])
