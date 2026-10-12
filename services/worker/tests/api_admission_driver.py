@@ -18,6 +18,8 @@ def capture_complete(r):
             if role['superuser'] is not False or role['bypass'] is not False or role['owner'] is not False or role['rls'] is not True:return False
         workers=r['workers'];owners={w['popen_pid'] for w in workers};pids={p for w in workers for p in w['tree_pids']}
         if len(workers)!=2 or len(owners)!=2 or any(w['popen_pid'] not in w['tree_pids'] for w in workers):return False
+        trees={w['popen_pid']:set(w['tree_pids']) for w in workers}
+        if any(not integer(p) or p==0 for p in pids) or sum(len(w['tree_pids']) for w in workers)!=len(pids):return False
         requests=r['requests']
         if len(requests)!=110 or len({q['id'] for q in requests})!=110 or len({q['request_id'] for q in requests})!=110:return False
         if len({q['key'] for q in requests})!=110:return False
@@ -123,6 +125,16 @@ def capture_complete(r):
             if any(not integer(x[k]) for x in s['spaces'] for k in ['ready','dispatched','done']):return False
             resources=s['resources']
             if {x['owner_pid'] for x in resources}!=owners or any(x['pid'] not in pids or not integer(x['rss_bytes']) or x['rss_bytes']==0 or x['method'] not in ['linux_proc_status_VmRSS','windows_GetProcessMemoryInfo_WorkingSetSize'] for x in resources):return False
+            measured={x['pid']:x for x in resources}
+            if len(measured)!=len(resources) or not used_pids<=set(measured):return False
+            for owner,tree in trees.items():
+                rows={x['pid']:x for x in resources if x['owner_pid']==owner}
+                if set(rows)!=tree or len(rows)>16 or rows[owner]['parent_pid'] is not None or rows[owner]['depth']!=0:return False
+                for row in rows.values():
+                    if not integer(row['depth']) or row['depth']>4:return False
+                    if row['pid']==owner:continue
+                    parent=rows.get(row['parent_pid'])
+                    if parent is None or row['depth']!=parent['depth']+1:return False
             ids=[]
             for kind in ['queued','unacked']:
                 q=s['broker'];values=q[kind+'_task_ids']

@@ -57,7 +57,7 @@ def positive():
                 sid=f's{wave}-{i}-{n}';o=delivery('source:'+sid,wave,m,'source.delete')
                 sources.append(dict(id=sid,workspace=m['workspace'],wave=wave,outbox_id=o,object_key=None,excerpt=None,tombstoned=True))
     holds=dict(operations=[dict(id='held-unknown',status='unknown',intent='held1',ref=None,input_hash='b'*64),dict(id='held-accepted',status='accepted',intent='held2',ref='retained',input_hash='c'*64)],reservation=dict(id='hold',state='active',remaining='0.600000'),costs=[])
-    samples=[dict(at_ns=at,holds=copy.deepcopy(holds),spaces=[dict(workspace=m['workspace'],ready=0,dispatched=0,done=0) for m in members],resources=[dict(owner_pid=p['popen_pid'],pid=p['popen_pid'],rss_bytes=1000,method='linux_proc_status_VmRSS') for p in workers],broker=dict(queued=0,unacked=0,queued_task_ids=[],unacked_task_ids=[])) for at in [1,6000]]
+    samples=[dict(at_ns=at,holds=copy.deepcopy(holds),spaces=[dict(workspace=m['workspace'],ready=0,dispatched=0,done=0) for m in members],resources=[dict(owner_pid=p['popen_pid'],pid=p['popen_pid'],parent_pid=None,depth=0,rss_bytes=1000,method='linux_proc_status_VmRSS') for p in workers],broker=dict(queued=0,unacked=0,queued_task_ids=[],unacked_task_ids=[])) for at in [1,6000]]
     result=dict(schema='buyeros.owned-api-admission.v1',complete=True,error=None,live_verified=False,release_accepted=False,
                 paid_enabled=False,delivery_enabled=False,provider_calls=0,send_calls=0,auth_method='real_RS256_local_JWKS',
                 members=members,workers=workers,api_role=dict(superuser=False,bypass=False,rls=True,owner=False),worker_role=dict(superuser=False,bypass=False,rls=True,owner=False),
