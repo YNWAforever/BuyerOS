@@ -1,5 +1,6 @@
 """Strict short-burst owned API evidence; no sustained/live/SLO acceptance."""
 from collections import Counter
+import hashlib,json
 
 
 def capture_complete(r):
@@ -25,6 +26,8 @@ def capture_complete(r):
             if q['workspace'] not in indexed or q['project']!=indexed[q['workspace']]['project'] or q['wave'] not in range(3):return False
             if not q['request_id'] or q['header_request_id']!=q['request_id'] or q['method']!='POST' or not q['key']:return False
             if not isinstance(q['body_hash'],str) or len(q['body_hash'])!=64:return False
+            if not isinstance(q['body'],dict) or hashlib.sha256(json.dumps(q['body'],sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()!=q['body_hash']:return False
+            if q['response']['request_id']!=q['request_id'] or q['response'].get('code')!=q['code']:return False
             if not integer(q['started_ns']) or not integer(q['returned_ns']) or q['returned_ns']<q['started_ns']:return False
         expected_pairs=Counter()
         for s in spaces:
@@ -81,6 +84,15 @@ def capture_complete(r):
                 q=reqs[b[key]];owned_requests.add(b[key])
                 if q['stage']!=stage or q['status']!=status or q['path']!=path or q['code'] is not None:return False
                 if any(q[k]!=b[k] for k in ['workspace','project','actor','wave']):return False
+                data=q['response']['data']
+                if data['workspace_id']!=b['workspace'] or data['project_id']!=b['project']:return False
+                if stage=='preview':
+                    if data['id']!=b['manifest_id'] or data['count']!=count or data['digest']!=b['digest'] or data['actor_user_id']!=b['actor']:return False
+                    if q['body']['operation']!='assignBuyerOwners' or q['body']['target']['owner_membership_id']!=m['membership']:return False
+                    if data['target']!=q['body']['target'] or data['filters']!=q['body']['filters'] or data['excluded_ids']!=q['body']['excluded_ids']:return False
+                else:
+                    if data['id']!=b['job_id'] or data['manifest_id']!=b['manifest_id'] or data['requested']!=count:return False
+                    if q['body']['confirmation'] is not True or q['body']['digest']!=b['digest']:return False
         if len(owned_requests)!=60 or denied|owned_requests!=set(reqs):return False
         for s in sources:
             oid=s['outbox_id'];p=pubs[oid]
@@ -94,6 +106,9 @@ def capture_complete(r):
             if b['id'] not in j['buyer_ids'] or b['workspace']!=j['workspace'] or b['status']!='updated' or b['version']!=2 or b['owner']!=j['actor']:return False
         baseline=r['baseline_holds']
         if {o['status'] for o in baseline['operations']}!={'unknown','accepted'} or len(baseline['operations'])!=2:return False
+        if len({o['id'] for o in baseline['operations']})!=2 or len({o['intent'] for o in baseline['operations']})!=2:return False
+        if any(not o['id'] or not o['intent'] or len(o['input_hash'])!=64 or (o['ref'] is not None if o['status']=='unknown' else not o['ref']) for o in baseline['operations']):return False
+        if not baseline['reservation']['id']:return False
         if baseline['reservation']['state']!='active' or baseline['reservation']['remaining']!='0.600000' or baseline['costs']!=[]:return False
         samples=r['samples']
         if len(samples)<2:return False

@@ -1,5 +1,5 @@
 """Hand-derived positive and corrupt API/task/durable admission evidence."""
-import copy
+import copy,hashlib,json
 import importlib.util
 from pathlib import Path
 import pytest
@@ -58,10 +58,20 @@ def positive():
                 sources.append(dict(id=sid,workspace=m['workspace'],wave=wave,outbox_id=o,object_key=None,excerpt=None,tombstoned=True))
     holds=dict(operations=[dict(id='held-unknown',status='unknown',intent='held1',ref=None,input_hash='b'*64),dict(id='held-accepted',status='accepted',intent='held2',ref='retained',input_hash='c'*64)],reservation=dict(id='hold',state='active',remaining='0.600000'),costs=[])
     samples=[dict(at_ns=at,holds=copy.deepcopy(holds),spaces=[dict(workspace=m['workspace'],ready=0,dispatched=0,done=0) for m in members],resources=[dict(owner_pid=p['popen_pid'],pid=p['popen_pid'],rss_bytes=1000,method='linux_proc_status_VmRSS') for p in workers],broker=dict(queued=0,unacked=0,queued_task_ids=[],unacked_task_ids=[])) for at in [1,6000]]
-    return dict(schema='buyeros.owned-api-admission.v1',complete=True,error=None,live_verified=False,release_accepted=False,
+    result=dict(schema='buyeros.owned-api-admission.v1',complete=True,error=None,live_verified=False,release_accepted=False,
                 paid_enabled=False,delivery_enabled=False,provider_calls=0,send_calls=0,auth_method='real_RS256_local_JWKS',
                 members=members,workers=workers,api_role=dict(superuser=False,bypass=False,rls=True,owner=False),worker_role=dict(superuser=False,bypass=False,rls=True,owner=False),
                 requests=requests,denial_pairs=pairs,bulk=bulk,sources=sources,publications=pubs,events=events,terminal=terminal,buyers=buyers,baseline_holds=holds,samples=samples)
+    reqs={q['id']:q for q in requests};member_map={m['workspace']:m for m in members}
+    def body(q,b):q['body']=b;q['body_hash']=hashlib.sha256(json.dumps(b,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()
+    for b in bulk:
+        m=member_map[b['workspace']];p=reqs[b['preview_id']];e=reqs[b['execute_id']]
+        command=dict(filters={'q':f"Owned wave{b['wave']}"},excluded_ids=[],operation='assignBuyerOwners',target={'owner_membership_id':m['membership']},reason='Owned API admission')
+        body(p,command);p['response']=dict(request_id=p['request_id'],data=dict(id=b['manifest_id'],workspace_id=b['workspace'],project_id=b['project'],actor_user_id=b['actor'],count=b['count'],digest=b['digest'],version=1,status='ready',target=command['target'],filters=command['filters'],excluded_ids=[]))
+        body(e,dict(digest=b['digest'],confirmation=True));e['response']=dict(request_id=e['request_id'],data=dict(id=b['job_id'],manifest_id=b['manifest_id'],workspace_id=b['workspace'],project_id=b['project'],requested=b['count'],status='queued'))
+    for pair in pairs:
+        d,o=reqs[pair['denied_id']],reqs[pair['owned_id']];body(d,copy.deepcopy(o['body']));d['response']=dict(request_id=d['request_id'],code=d['code'])
+    return result
 
 
 def test_complete_owned_api_task_and_durable_chain_is_accepted():
