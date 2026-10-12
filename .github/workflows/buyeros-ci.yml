@@ -549,14 +549,34 @@ jobs:
         run: |
           uv run --frozen pytest tests/test_neon_cutover_db.py tests/test_backup_restore_t28.py --collect-only -q > artifacts/neon-cutover-discovery.txt
           python -c "import pathlib,re; text=pathlib.Path('artifacts/neon-cutover-discovery.txt').read_text(); match=re.search(r'(\d+) tests collected',text); assert match and int(match[1])>0 and 'test_neon_cutover_rollback_preserves_new_users' in text and 'test_restore_replays_deletion_before_reopen' in text and 'test_disposable_restore_replays_older_backup_deletion_journal' in text, 'empty or missing required cutover discovery'"
+      - name: Verify owned API rate-window and replay controls
+        working-directory: services/api
+        run: |
+          uv run --frozen pytest tests/test_owned_api_rate_window_db.py tests/test_owned_api_idempotency_db.py tests/test_owned_api_unknown_replay_db.py --collect-only -q > artifacts/c61-owned-api-replay-discovery.txt
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-owned-api-replay-discovery.txt --expected-count 9 --discovery-only
+          uv run --frozen pytest tests/test_owned_api_rate_window_db.py tests/test_owned_api_idempotency_db.py tests/test_owned_api_unknown_replay_db.py -q --junitxml=artifacts/c61-owned-api-replay.xml
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-owned-api-replay-discovery.txt --expected-count 9 --junit artifacts/c61-owned-api-replay.xml
+          python - <<'PY'
+          import json,pathlib,xml.etree.ElementTree as ET
+          cases=ET.parse('artifacts/c61-owned-api-replay.xml').getroot().findall('.//testcase')
+          proofs={}
+          for case in cases:
+              values=[p.attrib['value'] for p in case.findall('./properties/property') if p.attrib.get('name')=='owned_evidence']
+              assert len(values)==1, 'missing or duplicate owned proof'
+              proof=json.loads(values[0]);assert proof.get('live_acceptance') is False, 'owned proof cannot claim live acceptance'
+              identity=case.attrib['classname']+'::'+case.attrib['name'];assert identity not in proofs
+              proofs[identity]=proof
+          assert len(proofs)==9
+          pathlib.Path('artifacts/c61-owned-api-replay.json').write_text(json.dumps(proofs,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
       - name: Discover full native C61 api inventory before execution
         working-directory: services/api
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 2563 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 2572 --discovery-only
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/api
-      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 2563 --junit services/api/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 2572 --junit services/api/artifacts/tests.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -566,6 +586,7 @@ jobs:
             services/api/artifacts/neon-cutover-discovery.txt
             services/api/artifacts/tests.xml
             services/api/artifacts/c61-full-discovery.txt
+            services/api/artifacts/c61-owned-api-replay*
           if-no-files-found: error
 
   worker:
