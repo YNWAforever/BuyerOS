@@ -697,6 +697,14 @@ jobs:
           name: buyeros-owned-bulk-capacity
           path: artifacts/c61/ci-bulk-capacity/
           if-no-files-found: error
+      - name: Capture owned API admission tenant pairs and mixed distribution
+        run: services/worker/.venv/bin/python scripts/benchmark-api-admission.py --output-dir artifacts/c61/ci-api-admission
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-owned-api-admission
+          path: artifacts/c61/ci-api-admission/
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
