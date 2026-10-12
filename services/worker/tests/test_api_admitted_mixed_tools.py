@@ -71,6 +71,10 @@ def positive():
         body(e,dict(digest=b['digest'],confirmation=True));e['response']=dict(request_id=e['request_id'],data=dict(id=b['job_id'],manifest_id=b['manifest_id'],workspace_id=b['workspace'],project_id=b['project'],requested=b['count'],status='queued'))
     for pair in pairs:
         d,o=reqs[pair['denied_id']],reqs[pair['owned_id']];body(d,copy.deepcopy(o['body']));d['response']=dict(request_id=d['request_id'],code=d['code'])
+    pub_map={p['outbox_id']:p for p in pubs};final_map={t['id']:t for t in terminal}
+    for b in bulk:
+        for oid in b['outbox_ids']:pub_map[oid]['payload']={'job_id':b['job_id']};final_map[oid]['payload']={'job_id':b['job_id']}
+    for s in sources:pub_map[s['outbox_id']]['payload']={'source_document_id':s['id']};final_map[s['outbox_id']]['payload']={'source_document_id':s['id']}
     return result
 
 

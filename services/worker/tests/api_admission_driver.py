@@ -62,6 +62,7 @@ def capture_complete(r):
         for p in publications:
             f=final[p['outbox_id']]
             if any(f[k]!=p[k] for k in ['intent','workspace','kind','generation']) or f['state']!='done' or f['epoch']!=1 or p['generation']!=1:return False
+            if p['payload']!=f['payload']:return False
             a,b=event_index['started',p['task_id']],event_index['return',p['task_id']]
             if any(e[k]!=p[k] for e in [a,b] for k in ['intent','workspace','generation']):return False
             if a['pid']!=b['pid'] or a['pid'] not in pids or b['outcome']!='done':return False
@@ -78,6 +79,7 @@ def capture_complete(r):
             if len(b['outbox_ids'])!=(count+49)//50:return False
             for oid in b['outbox_ids']:
                 if oid in claimed or pubs[oid]['kind']!='bulk.mutate' or pubs[oid]['workspace']!=b['workspace'] or pubs[oid]['wave']!=b['wave']:return False
+                if pubs[oid]['payload']!={'job_id':b['job_id']}:return False
                 claimed.add(oid)
             base=f"/v1/workspaces/{b['workspace']}/projects/{b['project']}/bulk-manifests"
             for key,stage,status,path in [('preview_id','preview',201,base),('execute_id','execute',202,base+'/'+b['manifest_id']+'/execute')]:
@@ -97,6 +99,7 @@ def capture_complete(r):
         for s in sources:
             oid=s['outbox_id'];p=pubs[oid]
             if oid in claimed or p['kind']!='source.delete' or p['workspace']!=s['workspace'] or p['wave']!=s['wave']:return False
+            if p['payload']!={'source_document_id':s['id']}:return False
             if s['object_key'] is not None or s['excerpt'] is not None or s['tombstoned'] is not True:return False
             claimed.add(oid)
         if claimed!=set(pubs) or len(buyers)!=3636 or len({b['id'] for b in buyers})!=3636 or {b['id'] for b in buyers}!=selected:return False
