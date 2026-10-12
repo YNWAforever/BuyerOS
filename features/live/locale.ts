@@ -329,4 +329,17 @@ export const liveZh: Record<string,string> = {
   'unmapped':'尚未對應',
   'mapped':'已有對應',
   'An entity review already exists. Read current evidence and reconcile the original review before a new intent.':'此實體已有覆核。請查閱目前證據並先對帳原覆核，才新增 intent。',
+  // Live shell (sidebar, page headings, sign-in card).
+  'ADMIN':'管理',
+  'Describe your offer, then approve the buyer profile before research starts.':'描述你的產品，並在研究開始前批准買家輪廓。',
+  'Update offer facts and the buyer profile that research will use.':'更新產品事實及研究會使用的買家輪廓。',
+  'Track research progress, failures and recovery.':'追蹤研究進度、失敗及恢復。',
+  'Review outcomes, costs and manual follow-up records.':'查看成果、成本及人手跟進紀錄。',
+  'Prepare grounded outreach. Every message stays under human review.':'準備有來源依據的外展內容，每封訊息都經人手覆核。',
+  'Members, roles, language, budgets and policy.':'成員、角色、語言、預算及政策。',
+  'Readiness, jobs, retries and the audit trail.':'就緒狀態、工作、重試及審計紀錄。',
+  'Your next actions across one connected buyer workspace.':'在同一個買家工作區內的下一步行動。',
+  'No workspace selected':'未選擇工作區',
+  'No project selected':'未選擇專案',
+  'Private workspace. Sign-in is required for every visitor.':'私人工作區，所有訪客均需登入。',
 };

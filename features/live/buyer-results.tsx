@@ -18,6 +18,8 @@ import {startNewManifest} from '@/services/live/bulk-manifests';
 
 const reviewStatuses=['accepted','rejected','needs_information'] as const;
 const initial=():BuyerQuery=>readBuyerQuery(typeof window==='undefined'?'':window.location.search);
+/** Visual tone for fit/review status pills; text is unchanged so status stays readable without colour. */
+function toneFor(value?:string|null){if(!value)return 'gray';if(['match','accepted','approved'].includes(value))return 'green';if(['needs_review','awaiting_review','pending'].includes(value))return 'amber';if(['not_a_match','rejected'].includes(value))return 'red';return 'blue';}
 export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,canAssign=false,ownMembershipId=null,locale='en',onManualOutcome}:{canReview?:boolean;canEdit?:boolean;canQuote?:boolean;canAssign?:boolean;ownMembershipId?:string|null;locale?:'en'|'zh-HK';onManualOutcome?:(buyerId:string,buyerName:string)=>void}){
   const {session,client}=useWorkspaceSession();
   const t=(value:string)=>locale==='zh-HK'?(liveZh[value]||value):value;
@@ -180,9 +182,9 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
         <button type="button" onClick={()=>{setAllFiltered(false);setSelected({});setExcluded([]);}}>{t('Clear selection')}</button>
         <span aria-live="polite">{t(allFiltered?'{count} selected across this snapshot':'{count} selected explicitly').replace('{count}',String(selectedCount))}</span>
       </div>
-      {page.items.length?page.items.map(buyer=><div className="activity" key={buyer.id}>
+      {page.items.length?page.items.map(buyer=><div className="activity live-buyer-row" key={buyer.id}>
         <input type="checkbox" aria-label={t('Select {buyer}').replace('{buyer}',buyer.name)} checked={allFiltered?!excluded.includes(buyer.id):buyer.id in selected} onChange={()=>toggle(buyer.id,buyer.version)}/>
-        <div><b>{buyer.name}</b><p>{t(buyer.fitVerdict||'Fit not assessed')} · {t(buyer.reviewStatus||'Not reviewed')} · {buyer.note||t('No note')}</p></div>
+        <div><b>{buyer.name}</b><p><span className={`pill ${toneFor(buyer.fitVerdict)}`}>{t(buyer.fitVerdict||'Fit not assessed')}</span> · <span className={`pill ${toneFor(buyer.reviewStatus)}`}>{t(buyer.reviewStatus||'Not reviewed')}</span> · {buyer.note||t('No note')}</p></div>
         <button type="button" data-buyer-id={buyer.id} onClick={event=>{lastDetailTrigger.current=event.currentTarget;setDetailId(buyer.id);}}>{t('Details')}</button>
         {onManualOutcome&&<button type="button" onClick={()=>onManualOutcome(buyer.id,buyer.name)}>{t('Log outcome')}</button>}
       </div>):<p>{t('No buyers in this snapshot.')}</p>}

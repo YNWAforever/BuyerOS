@@ -78,9 +78,9 @@ export function LiveWorkQueue({t,onNavigate}:{t:(value:string)=>string;onNavigat
   return <section className="panel" aria-label={t('Daily work queue')} aria-busy={Boolean(scope.project&&!current?.value&&!current?.error)}><h2>{t('Daily work queue')}</h2>
     <p>{t('As of')}: {current?.value?<time dateTime={current.value.as_of}>{new Date(current.value.as_of).toLocaleString()}</time>:'—'}</p>
     <details><summary>{t('Technical details')}</summary><p>{t('Project')}: <code>{scope.project}</code></p></details>
-    <div className="grid two-col">{cards.map(([kind,label])=>{
+    <div className="grid two-col live-queue-grid">{cards.map(([kind,label])=>{
       const item=current?.value?.items.find(row=>row.kind===kind);
-      return <div className="activity" key={kind} data-work-queue-kind={kind}><div><b>{t(label)}</b><p><output aria-label={t('Count')}>{item?.count??'—'}</output></p>
+      return <div className="activity live-queue-card" key={kind} data-work-queue-kind={kind}><div><b>{t(label)}</b><p><output aria-label={t('Count')}>{item?.count??'—'}</output></p>
       {item&&<p>{Object.entries(item.filters).map(([filter,value])=>`${t(filter)}: ${t(value)}`).join(' · ')}</p>}</div>
       <button type="button" disabled={!item||!scope.workspace||!scope.project} onClick={()=>{if(item&&scope.workspace&&scope.project)onNavigate(workQueueLink(item,{workspaceId:scope.workspace,projectId:scope.project}));}}>{t('Open')}</button></div>;
     })}</div>
