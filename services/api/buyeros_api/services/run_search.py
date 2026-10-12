@@ -4,6 +4,7 @@ Only the original run.discover envelope is accepted. Its payload is never
 rewritten. A separate worker role claims the receipt before external IO.
 """
 import re,uuid
+from ..providers.base import LIVE_SEARCH_PROVIDERS
 from dataclasses import dataclass
 from datetime import datetime,timezone
 from sqlalchemy import select,text
@@ -59,7 +60,7 @@ async def frozen_run_search(session,*,workspace_id,event,capability,new_call=Fal
     if run is None or run.status not in {'queued','running','partial'}:raise ValueError('current resumable run required')
     snapshot=run.execution_snapshot or {};frozen=snapshot.get('capability') or {};plan=snapshot.get('query_plan') or {}
     queries=plan.get('queries')
-    if (capability.provider!='brave-search' or capability.service!='search' or capability.max_liability is None or
+    if (capability.provider not in LIVE_SEARCH_PROVIDERS or capability.service!='search' or capability.max_liability is None or
         capability.idempotency!='verified' or capability.status!='verified' or
         frozen.get('receipt_contract_hash')!=ProviderRegistration(capability,lambda:None).contract_hash or
         frozen.get('provider')!=capability.provider or frozen.get('price_version')!=capability.pricing_version or

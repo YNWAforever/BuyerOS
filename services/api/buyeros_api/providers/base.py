@@ -12,8 +12,27 @@ Support = Literal["verified", "unsupported", "unknown"]
 SubmissionState = Literal["accepted", "unknown", "rejected"]
 StatusState = Literal["accepted", "pending", "unknown", "succeeded", "not_found", "failed"]
 _QUANTUM = Decimal("0.000001")
-# No real vendor has been selected and verified for this repository.
-SELECTED_LIVE_PROVIDERS: frozenset[str] = frozenset()
+# Live adapters that share the durable search/model receipt ports.
+LIVE_SEARCH_PROVIDERS: frozenset[str] = frozenset({"brave-search", "exa-search"})
+LIVE_MODEL_PROVIDERS: frozenset[str] = frozenset({"openai-responses", "anthropic-messages"})
+
+
+def _selected_from_environment() -> frozenset[str]:
+    """A vendor is selected only when its server-only credential is deployed.
+
+    Selection is necessary, not sufficient: registration, budgets, the account
+    research policy and the paid-dispatch switch still gate every call.
+    """
+    import os
+    selected = set()
+    if os.environ.get("BUYEROS_EXA_API_KEY"):
+        selected.add("exa-search")
+    if os.environ.get("BUYEROS_ANTHROPIC_API_KEY"):
+        selected.add("anthropic-messages")
+    return frozenset(selected)
+
+
+SELECTED_LIVE_PROVIDERS: frozenset[str] = _selected_from_environment()
 
 
 @dataclass(frozen=True)

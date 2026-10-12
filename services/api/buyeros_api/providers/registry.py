@@ -1,4 +1,4 @@
-"""Versioned code-owned provider registry. No live provider is selected."""
+"""Versioned code-owned provider registry. Live providers register only from deployed credentials."""
 from __future__ import annotations
 import hashlib
 import json
@@ -6,7 +6,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Callable
 from .base import (FixtureProviderAdapter, Money, ProviderAdapter, ProviderCapability,
-                   ProviderIntent, Service, SELECTED_LIVE_PROVIDERS, activation_blockers, quote_requires_reconfirmation)
+                   ProviderIntent, Service, SELECTED_LIVE_PROVIDERS, LIVE_MODEL_PROVIDERS, LIVE_SEARCH_PROVIDERS,
+                   activation_blockers, quote_requires_reconfirmation)
 from ..api.errors import ApiError
 from .model import ModelRoute
 
@@ -16,6 +17,8 @@ class ProviderName(StrEnum):
     BRAVE_SEARCH = 'brave-search'
     OPENAI_RESPONSES = 'openai-responses'
     HUNTER = 'hunter'
+    EXA_SEARCH = 'exa-search'
+    ANTHROPIC_MESSAGES = 'anthropic-messages'
 
 
 class ProviderUnavailable(ApiError):
@@ -49,7 +52,7 @@ def _verified_search_scope(item) -> bool:
 def _verified_model_scope(item) -> bool:
     """Immutable code-owned model identity and route, never inferred from factory IO."""
     route, model_id = item.model_route, item.model_id
-    if (item.capability.service != 'model' or item.capability.provider != ProviderName.OPENAI_RESPONSES
+    if (item.capability.service != 'model' or item.capability.provider not in LIVE_MODEL_PROVIDERS
         or type(route) is not ModelRoute or type(model_id) is not str
         or not 1 <= len(model_id) <= 200 or any(c.isspace() or ord(c) < 32 for c in model_id)
         or type(route.permitted_tools) is not frozenset or route.permitted_tools
@@ -211,7 +214,7 @@ class ProviderRegistry:
         if self.blockers('search',environment=environment):
             return None
         item=self.registration('search')
-        if item is None or item.capability.provider!=ProviderName.BRAVE_SEARCH or not _verified_search_scope(item):
+        if item is None or item.capability.provider not in LIVE_SEARCH_PROVIDERS or not _verified_search_scope(item):
             return None
         cap=item.capability
         # PostgresSearchReceipts binds the capability-only receipt contract. The
@@ -301,7 +304,8 @@ class ProviderRegistry:
         return estimate
 
 
-DEFAULT_REGISTRY = ProviderRegistry()
+from .activation import environment_registrations  # noqa: E402 - needs the classes above
+DEFAULT_REGISTRY = ProviderRegistry(environment_registrations())
 
 
 def resolve_provider(service: Service, *, environment: str) -> ProviderAdapter:

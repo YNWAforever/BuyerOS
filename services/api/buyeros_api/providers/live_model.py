@@ -142,7 +142,7 @@ class ResponsesModelClient:
 
 
 from dataclasses import dataclass,asdict
-from .base import Money,ProviderCapability,ProviderIntent,SubmissionResult,StatusResult
+from .base import LIVE_MODEL_PROVIDERS,Money,ProviderCapability,ProviderIntent,SubmissionResult,StatusResult
 
 @dataclass(frozen=True)
 class ModelRequest:
@@ -175,7 +175,7 @@ class LiveModelAdapter:
     money settlement, native idempotency guarantee or factual-accuracy approval.
     """
     def __init__(self,*,capability:ProviderCapability,client,receipts):
-        if capability.provider!='openai-responses' or capability.service!='model':raise ValueError('code-owned model candidate required')
+        if capability.provider not in LIVE_MODEL_PROVIDERS or capability.service!='model':raise ValueError('code-owned model candidate required')
         self.capability,self.client,self.receipts=capability,client,receipts
 
     def estimate(self,intent:ProviderIntent)->Money:
