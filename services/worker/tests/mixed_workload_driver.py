@@ -15,6 +15,8 @@ def workload_complete(r):
         return type(value) in (int, float) and math.isfinite(value) and value >= 0
 
     try:
+        # This legacy collector seeds bulk jobs. It cannot certify API admission.
+        if r.get('api_admission_required', False) is not False: return False
         if (r['schema'] != 'buyeros.owned-mixed-workload.v1' or r['complete'] is not True
                 or r['error'] is not None or r['live_verified'] is not False
                 or r['release_accepted'] is not False or r['paid_enabled'] is not False
