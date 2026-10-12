@@ -37,7 +37,7 @@ def capture_complete(r):
             if pair['denied_id'] in denied:return False
             denied.add(pair['denied_id']);accepted.add(pair['owned_id'])
             if any(d[k]!=o[k] for k in ['method','path','workspace','project','wave','stage','body_hash']):return False
-            status,code={'foreign_preview':(404,'NOT_FOUND'),'foreign_execute':(404,'NOT_FOUND'),'inactive':(404,'NOT_FOUND'),'viewer':(403,'FORBIDDEN'),'stale':(412,'STALE_REVISION')}[kind]
+            status,code={'foreign_preview':(404,'NOT_FOUND'),'foreign_execute':(404,'NOT_FOUND'),'inactive':(404,'NOT_FOUND'),'viewer':(403,'PERMISSION_DENIED'),'stale':(412,'STALE_REVISION')}[kind]
             if (d['status'],d['code'])!=(status,code) or o['status']!=(201 if kind=='foreign_preview' else 202) or o['code'] is not None:return False
             if o['actor']!=indexed[o['workspace']]['actor']:return False
             if (d['actor']==o['actor']) != (kind not in ['foreign_preview','foreign_execute']):return False
@@ -104,7 +104,7 @@ def capture_complete(r):
             if s['holds']!=baseline or {x['workspace'] for x in s['spaces']}!=set(spaces) or len(s['spaces'])!=10:return False
             if any(not integer(x[k]) for x in s['spaces'] for k in ['ready','dispatched','done']):return False
             resources=s['resources']
-            if {x['owner_pid'] for x in resources}!=owners or any(x['pid'] not in pids or not integer(x['rss_bytes']) or x['rss_bytes']==0 or x['method'] not in ['proc_vmRSS','GetProcessMemoryInfo'] for x in resources):return False
+            if {x['owner_pid'] for x in resources}!=owners or any(x['pid'] not in pids or not integer(x['rss_bytes']) or x['rss_bytes']==0 or x['method'] not in ['linux_proc_status_VmRSS','windows_GetProcessMemoryInfo_WorkingSetSize'] for x in resources):return False
             ids=[]
             for kind in ['queued','unacked']:
                 q=s['broker'];values=q[kind+'_task_ids']

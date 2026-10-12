@@ -40,7 +40,7 @@ def positive():
             if wave==0:denied.append(('foreign_execute',request(wave,m,'execute',404,actor=members[(i+1)%10]['actor'],code='NOT_FOUND')))
             if wave==1:denied.append(('inactive',request(wave,m,'execute',404,code='NOT_FOUND')))
             if wave==2:
-                denied.append(('viewer',request(wave,m,'execute',403,code='FORBIDDEN')))
+                denied.append(('viewer',request(wave,m,'execute',403,code='PERMISSION_DENIED')))
                 denied.append(('stale',request(wave,m,'execute',412,code='STALE_REVISION',version=999)))
             accepted=request(wave,m,'execute',202)
             for kind,rid in denied:
@@ -57,7 +57,7 @@ def positive():
                 sid=f's{wave}-{i}-{n}';o=delivery('source:'+sid,wave,m,'source.delete')
                 sources.append(dict(id=sid,workspace=m['workspace'],wave=wave,outbox_id=o,object_key=None,excerpt=None,tombstoned=True))
     holds=dict(operations=[dict(id='held-unknown',status='unknown',intent='held1',ref=None,input_hash='b'*64),dict(id='held-accepted',status='accepted',intent='held2',ref='retained',input_hash='c'*64)],reservation=dict(id='hold',state='active',remaining='0.600000'),costs=[])
-    samples=[dict(at_ns=at,holds=copy.deepcopy(holds),spaces=[dict(workspace=m['workspace'],ready=0,dispatched=0,done=0) for m in members],resources=[dict(owner_pid=p['popen_pid'],pid=p['popen_pid'],rss_bytes=1000,method='proc_vmRSS') for p in workers],broker=dict(queued=0,unacked=0,queued_task_ids=[],unacked_task_ids=[])) for at in [1,6000]]
+    samples=[dict(at_ns=at,holds=copy.deepcopy(holds),spaces=[dict(workspace=m['workspace'],ready=0,dispatched=0,done=0) for m in members],resources=[dict(owner_pid=p['popen_pid'],pid=p['popen_pid'],rss_bytes=1000,method='linux_proc_status_VmRSS') for p in workers],broker=dict(queued=0,unacked=0,queued_task_ids=[],unacked_task_ids=[])) for at in [1,6000]]
     return dict(schema='buyeros.owned-api-admission.v1',complete=True,error=None,live_verified=False,release_accepted=False,
                 paid_enabled=False,delivery_enabled=False,provider_calls=0,send_calls=0,auth_method='real_RS256_local_JWKS',
                 members=members,workers=workers,api_role=dict(superuser=False,bypass=False,rls=True,owner=False),worker_role=dict(superuser=False,bypass=False,rls=True,owner=False),
@@ -70,12 +70,19 @@ def test_complete_owned_api_task_and_durable_chain_is_accepted():
     assert validate(r)
 
 
+def test_actual_windows_rss_method_is_valid_without_claiming_linux_capacity():
+    r=positive()
+    for s in r['samples']:
+        for x in s['resources']:x['method']='windows_GetProcessMemoryInfo_WorkingSetSize'
+    assert validate(r)
+
+
 @pytest.mark.parametrize('breakage',[
     'missing_request','missing_pair','wrong_error','foreign_success','different_body','wrong_route','missing_request_id',
-    'rebound_request_id','negative_wrote','missing_workspace','missing_wave','missing_chunk','duplicate_task','foreign_worker',
+    'rebound_request_id','wrong_permission_code','negative_wrote','missing_workspace','missing_wave','missing_chunk','duplicate_task','foreign_worker',
     'missing_return','wrong_generation','wrong_epoch','wrong_owner','missing_buyer','duplicate_buyer','wrong_count',
     'missing_source','retained_object','hold_release','accepted_changed','cost_added','provider_call','paid_flag',
-    'missing_resource','missing_queue_space','wrong_broker_count','foreign_broker_id','missing_worker','auth_override','superuser'])
+    'wrong_resource_method','missing_resource','missing_queue_space','wrong_broker_count','foreign_broker_id','missing_worker','auth_override','superuser'])
 def test_incomplete_or_rebound_api_admission_is_refused(breakage):
     r=positive()
     if breakage=='missing_request':r['requests'].pop()
@@ -86,6 +93,7 @@ def test_incomplete_or_rebound_api_admission_is_refused(breakage):
     elif breakage=='wrong_route':r['requests'][0]['path']='/wrong'
     elif breakage=='missing_request_id':r['requests'][0]['request_id']=None
     elif breakage=='rebound_request_id':r['requests'][0]['header_request_id']='different'
+    elif breakage=='wrong_permission_code':next(q for q in r['requests'] if q['code']=='PERMISSION_DENIED')['code']='FORBIDDEN'
     elif breakage=='negative_wrote':r['denial_pairs'][0]['after']['jobs']=['unexpected']
     elif breakage=='missing_workspace':r['members'].pop()
     elif breakage=='missing_wave':r['bulk']=[x for x in r['bulk'] if x['wave']!=2]
@@ -106,6 +114,7 @@ def test_incomplete_or_rebound_api_admission_is_refused(breakage):
     elif breakage=='cost_added':r['samples'][0]['holds']['costs']=[1]
     elif breakage=='provider_call':r['provider_calls']=1
     elif breakage=='paid_flag':r['paid_enabled']=True
+    elif breakage=='wrong_resource_method':r['samples'][0]['resources'][0]['method']='invented_rss'
     elif breakage=='missing_resource':r['samples'][0]['resources'].pop()
     elif breakage=='missing_queue_space':r['samples'][0]['spaces'].pop()
     elif breakage=='wrong_broker_count':r['samples'][0]['broker']['queued']=1
