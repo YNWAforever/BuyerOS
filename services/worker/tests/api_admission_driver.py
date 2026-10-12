@@ -1,14 +1,22 @@
 """Strict short-burst owned API evidence; no sustained/live/SLO acceptance."""
 from collections import Counter
+from datetime import datetime
 import hashlib,json
 
 
 def capture_complete(r):
     def integer(x):return type(x) is int and x>=0
+    def instant(x):
+        t=datetime.fromisoformat(x)
+        if t.tzinfo is None:raise ValueError('SQL timestamps must retain timezone')
+        return t
     try:
         if r['schema']!='buyeros.owned-api-admission.v1' or r['complete'] is not True or r['error'] is not None:return False
         if any(r[k] is not False for k in ['live_verified','release_accepted','paid_enabled','delivery_enabled']):return False
         if r['provider_calls']!=0 or r['send_calls']!=0 or r['auth_method']!='real_RS256_local_JWKS':return False
+        start,end=r['capture_started_ns'],r['capture_finished_ns']
+        if not integer(start) or start==0 or not integer(end) or end<=start:return False
+        def inside(t):return integer(t) and start<=t<=end
         members=r['members'];spaces=[m['workspace'] for m in members]
         if len(members)!=10 or len(set(spaces))!=10 or any(not m[k] for m in members for k in ['workspace','project','actor','membership']):return False
         if len({m['actor'] for m in members})!=10:return False
@@ -30,7 +38,7 @@ def capture_complete(r):
             if not isinstance(q['body_hash'],str) or len(q['body_hash'])!=64:return False
             if not isinstance(q['body'],dict) or hashlib.sha256(json.dumps(q['body'],sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()!=q['body_hash']:return False
             if q['response']['request_id']!=q['request_id'] or q['response'].get('code')!=q['code']:return False
-            if not integer(q['started_ns']) or not integer(q['returned_ns']) or q['returned_ns']<q['started_ns']:return False
+            if not inside(q['started_ns']) or not inside(q['returned_ns']) or q['returned_ns']<q['started_ns']:return False
         expected_pairs=Counter()
         for s in spaces:
             for kind,wave in [('foreign_preview',0),('foreign_execute',0),('inactive',1),('viewer',2),('stale',2)]:expected_pairs[kind,s,wave]=1
@@ -68,7 +76,7 @@ def capture_complete(r):
             a,b=event_index['started',p['task_id']],event_index['return',p['task_id']]
             if any(e[k]!=p[k] for e in [a,b] for k in ['intent','workspace','generation']):return False
             if a['pid']!=b['pid'] or a['pid'] not in pids or b['outcome']!='done':return False
-            if not p['at_ns']<=a['at_ns']<=b['at_ns']:return False
+            if any(not inside(e['at_ns']) for e in [p,a,b]) or not p['at_ns']<=a['at_ns']<=b['at_ns']:return False
             used_pids.add(a['pid'])
         if any(not used_pids.intersection(w['tree_pids']) for w in workers):return False
         claimed=set();selected=set();owned_requests=set()
@@ -118,11 +126,27 @@ def capture_complete(r):
         samples=r['samples']
         if len(samples)<2:return False
         times=[s['at_ns'] for s in samples]
-        if times!=sorted(set(times)):return False
+        if any(not inside(t) for t in times) or times!=sorted(set(times)):return False
         task_ids={p['task_id'] for p in publications}
+        previous=set()
         for s in samples:
             if s['holds']!=baseline or {x['workspace'] for x in s['spaces']}!=set(spaces) or len(s['spaces'])!=10:return False
             if any(not integer(x[k]) for x in s['spaces'] for k in ['ready','dispatched','done']):return False
+            lo,hi=s['sql_started_ns'],s['sql_finished_ns']
+            if not inside(lo) or not inside(hi) or not lo<=hi<=s['at_ns']:return False
+            observed=instant(s['sql_observed_at']);rows=s['outboxes'];seen={x['id']:x for x in rows}
+            if len(seen)!=len(rows) or not previous<=set(seen) or not set(seen)<=set(final):return False
+            counted=Counter()
+            for oid,row in seen.items():
+                f,p=final[oid],pubs[oid]
+                if row['workspace']!=f['workspace'] or row['state'] not in ['ready','dispatched','done']:return False
+                if instant(row['created_at'])!=instant(f['created_at']) or instant(row['created_at'])>observed:return False
+                if row['state']!='ready' and p['at_ns']>hi:return False
+                if event_index['return',p['task_id']]['at_ns']<lo and row['state']!='done':return False
+                counted[row['workspace'],row['state']]+=1
+            if any(p['at_ns']<lo and p['outbox_id'] not in seen for p in publications):return False
+            if any(x[k]!=counted[x['workspace'],k] for x in s['spaces'] for k in ['ready','dispatched','done']):return False
+            previous=set(seen)
             resources=s['resources']
             if {x['owner_pid'] for x in resources}!=owners or any(x['pid'] not in pids or not integer(x['rss_bytes']) or x['rss_bytes']==0 or x['method'] not in ['linux_proc_status_VmRSS','windows_GetProcessMemoryInfo_WorkingSetSize'] for x in resources):return False
             measured={x['pid']:x for x in resources}
@@ -141,5 +165,7 @@ def capture_complete(r):
                 if not integer(q[kind]) or len(values)!=q[kind] or not set(values)<=task_ids:return False
                 ids.extend(values)
             if len(ids)!=len(set(ids)):return False
+        if samples[0]['outboxes'] or previous!=set(final) or any(x['state']!='done' for x in samples[-1]['outboxes']):return False
+        if any(samples[-1]['broker'][k]!=0 for k in ['queued','unacked']):return False
         return True
     except (KeyError,TypeError,ValueError,IndexError):return False

@@ -64,19 +64,21 @@ def test_owned_api_admission_tenant_pairs_and_mixed_distribution(migrated,pg_dsn
             h=db.execute('SELECT id,state,remaining_hold FROM budget_reservations WHERE operation_id=%s',(held_job,)).fetchone()
             costs=db.execute('SELECT id,amount FROM cost_events WHERE operation_id=%s',(held_job,)).fetchall()
         return dict(operations=[dict(id=str(i),intent=k,status=s,ref=ref,input_hash=d) for i,k,s,ref,d in ops],reservation=dict(id=str(h[0]),state=h[1],remaining=str(h[2])),costs=[dict(id=str(i),amount=str(a)) for i,a in costs])
-    baseline=holds();processes=[];ownership=[];requests=[];pairs=[];bulk=[];sources=[];pubs=[];samples=[];terminal=[];buyers=[]
+    baseline=holds();processes=[];ownership=[];requests=[];pairs=[];bulk=[];sources=[];pubs=[];samples=[];terminal=[];buyers=[];capture_started=time.monotonic_ns()
     publisher=Celery('owned-admission',broker=os.environ['BUYEROS_ADMISSION_BROKER_URL']);broker=redis.Redis.from_url(os.environ['BUYEROS_ADMISSION_BROKER_URL'],socket_timeout=3)
     complete=False;error=None;api_role=role(runtime_role_dsn(seeded));worker_role=role(worker_dsn)
     def events():return sorted([json.loads(p.read_text(encoding='utf-8')) for p in (folder/'events').glob('*.json')],key=lambda x:x['at_ns'])
     def sample():
         resources=[];reader.sample_worker_resources(processes,0,resources)
+        sql_started=time.monotonic_ns()
         with psycopg.connect(seeded) as db:
-            rows=db.execute('SELECT workspace_id,state,count(*) FROM outbox_events WHERE workspace_id=ANY(%s::uuid[]) GROUP BY workspace_id,state',([m['workspace'] for m in members],)).fetchall()
+            observed,rows=db.execute("SELECT statement_timestamp(),COALESCE(jsonb_agg(jsonb_build_object('id',id,'workspace',workspace_id,'state',state,'created_at',created_at)),'[]'::jsonb) FROM outbox_events WHERE workspace_id=ANY(%s::uuid[])",([m['workspace'] for m in members],)).fetchone()
+        sql_finished=time.monotonic_ns()
         spaces=[dict(workspace=m['workspace'],ready=0,dispatched=0,done=0) for m in members]
-        for w,state,count in rows:next(x for x in spaces if x['workspace']==str(w))[state]=count
+        for row in rows:next(x for x in spaces if x['workspace']==row['workspace'])[row['state']]+=1
         with broker.pipeline(transaction=True) as pipe:q,u=pipe.lrange('celery',0,-1).hvals('unacked').execute()
         qids=[json.loads(x)['headers']['id'] for x in q];uids=[json.loads(x)[0]['headers']['id'] for x in u]
-        snap=dict(at_ns=time.monotonic_ns(),spaces=spaces,resources=resources,holds=holds(),broker=dict(queued=len(qids),unacked=len(uids),queued_task_ids=qids,unacked_task_ids=uids));samples.append(snap)
+        snap=dict(at_ns=time.monotonic_ns(),sql_started_ns=sql_started,sql_finished_ns=sql_finished,sql_observed_at=observed.isoformat(),outboxes=rows,spaces=spaces,resources=resources,holds=holds(),broker=dict(queued=len(qids),unacked=len(uids),queued_task_ids=qids,unacked_task_ids=uids));samples.append(snap)
         assert snap['holds']==baseline
         (folder/'samples'/f'{len(samples):04d}.json').write_text(json.dumps(snap)+'\n',encoding='utf-8')
     def state(m):
@@ -158,8 +160,8 @@ def test_owned_api_admission_tenant_pairs_and_mixed_distribution(migrated,pg_dsn
                     finally:await engine.dispose()
                 asyncio.run(drive())
         with psycopg.connect(seeded) as db:
-            rows=db.execute('SELECT id,intent_key,workspace_id,event_type,state,fencing_generation,runtime_epoch,payload FROM outbox_events WHERE workspace_id=ANY(%s::uuid[])',([m['workspace'] for m in members],)).fetchall()
-            terminal=[dict(id=str(i),intent=k,workspace=str(w),kind=t,state=s,generation=g,epoch=e,payload=p) for i,k,w,t,s,g,e,p in rows]
+            rows=db.execute('SELECT id,intent_key,workspace_id,event_type,state,fencing_generation,runtime_epoch,payload,created_at FROM outbox_events WHERE workspace_id=ANY(%s::uuid[])',([m['workspace'] for m in members],)).fetchall()
+            terminal=[dict(id=str(i),intent=k,workspace=str(w),kind=t,state=s,generation=g,epoch=e,payload=p,created_at=created.isoformat()) for i,k,w,t,s,g,e,p,created in rows]
             for b in bulk:
                 x=db.execute('SELECT status,processed,updated,conflicts,blocked FROM async_jobs WHERE id=%s',(b['job_id'],)).fetchone();b.update(zip(['status','processed','updated','conflicts','blocked'],x))
                 b['outbox_ids']=[str(x[0]) for x in db.execute("SELECT id FROM outbox_events WHERE payload->>'job_id'=%s ORDER BY created_at,id",(b['job_id'],)).fetchall()]
@@ -169,7 +171,7 @@ def test_owned_api_admission_tenant_pairs_and_mixed_distribution(migrated,pg_dsn
         sample();complete=True
     except Exception as exc:error=type(exc).__name__+': '+str(exc);raise
     finally:
-        raw=events();capture=dict(schema='buyeros.owned-api-admission.v1',complete=complete,error=error,live_verified=False,release_accepted=False,paid_enabled=False,delivery_enabled=False,provider_calls=sum(e['stage']=='forbidden_provider_call' for e in raw),send_calls=0,auth_method='real_RS256_local_JWKS',members=members,workers=ownership,api_role=api_role,worker_role=worker_role,requests=requests,denial_pairs=pairs,bulk=bulk,sources=sources,publications=pubs,events=raw,terminal=terminal,buyers=buyers,baseline_holds=baseline,samples=samples)
+        raw=events();capture=dict(schema='buyeros.owned-api-admission.v1',capture_started_ns=capture_started,capture_finished_ns=time.monotonic_ns(),complete=complete,error=error,live_verified=False,release_accepted=False,paid_enabled=False,delivery_enabled=False,provider_calls=sum(e['stage']=='forbidden_provider_call' for e in raw),send_calls=0,auth_method='real_RS256_local_JWKS',members=members,workers=ownership,api_role=api_role,worker_role=worker_role,requests=requests,denial_pairs=pairs,bulk=bulk,sources=sources,publications=pubs,events=raw,terminal=terminal,buyers=buyers,baseline_holds=baseline,samples=samples)
         def stop(p):
             if p.poll() is None:
                 if os.name=='nt':subprocess.run(['taskkill','/PID',str(p.pid),'/T','/F'],capture_output=True,timeout=10)

@@ -75,6 +75,13 @@ def positive():
     for b in bulk:
         for oid in b['outbox_ids']:pub_map[oid]['payload']={'job_id':b['job_id']};final_map[oid]['payload']={'job_id':b['job_id']}
     for s in sources:pub_map[s['outbox_id']]['payload']={'source_document_id':s['id']};final_map[s['outbox_id']]['payload']={'source_document_id':s['id']}
+    result.update(capture_started_ns=1,capture_finished_ns=6001)
+    for t in terminal:t['created_at']='2026-10-12T00:00:01+00:00'
+    for i,s in enumerate(samples):
+        s.update(sql_started_ns=s['at_ns'],sql_finished_ns=s['at_ns'],sql_observed_at=f'2026-10-12T00:00:0{i*2}+00:00',outboxes=[])
+        if i:
+            s['outboxes']=[{k:t[k] for k in ['id','workspace','state','created_at']} for t in terminal]
+            for ordinal,x in enumerate(s['spaces']):x['done']=30 if ordinal==0 else 12
     return result
 
 
