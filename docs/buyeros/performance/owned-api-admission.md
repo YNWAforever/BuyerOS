@@ -1,0 +1,19 @@
+# C61-25/23 — owned API admission and mixed distribution
+
+From a frozen combined worker/API environment on native Linux with Docker:
+
+```sh
+services/worker/.venv/bin/python scripts/benchmark-api-admission.py --output-dir artifacts/c61/new-api-admission
+```
+
+Inherited database variables and existing output directories are refused. The root owns exact fresh PG16/Valkey8 ids and uses the existing bounded owned process-session cleanup. Discovery and executed JUnit must have the same one positive opt-in case with no failures/errors/skips; source and all runtime file hashes must remain identical before/end. No principal resolver, membership loader, authorization or production handler is replaced. Real RS256 verification uses locally pinned fixture JWKS, then the original canonical identity/membership/RLS/API pipeline. This is separate from real Neon login/session/UAT.
+
+Ten owned actors/workspaces execute three short waves. Each workspace previews and executes an async bulk manifest: tenant0 has303 buyers and the other9 have101. Original chunk50 semantics produce102 fresh generation1/epoch1 bulk intents for30 jobs and3636 unique durable buyer results. The original retention sweep creates36 maintenance intents (tenant0 three perwave, others one). Two separate actual Celery workers execute all138 intents. This burst does not replace the separately required actual30-minute legacy mixed workload, whose source/bulk seeding scope is preserved.
+
+There are110 real ASGI requests and50 exact-route rejection/owned-success pairs: foreign preview404→owned201; foreign execute404, inactive membership404, viewer403/PERMISSION_DENIED and stale revision412/STALE_REVISION→same owned202. Owned fixture membership is restored before the matching success. Business manifest/job/outbox/idempotency snapshots are unchanged across each denial; rate limiter accounting is outside that business snapshot. Raw bodies, response envelopes/request IDs, manifest/selection/job, outbox payload/task/generation/epoch, owned PID and durable buyer/source records are joined strictly. No API job/outbox is directly seeded. Only source input fixtures and synthetic retained liabilities are seeded.
+
+Original synthetic unknown/accepted operations share an activeUSD0.60 hold. Every sample requires unchanged ids/keys/hashes/refs/reservation and zero cost events. They are never submitted, status queried, settled or released; cleanup only stops owned resources. Paid/delivery are disabled; provider and send calls are zero. Source object deletion IO is test-only.
+
+Keep all ten workspace state denominators including zeros, broker raw queue ids/counts and both owned process trees' sampled RSS. Distribution is calculated from actual task-entry/return receipts by workspace/wave/kind/PID; completion of small tenants is an owned observation, not an adopted production fairness or starvation SLO. Publish-to-entry includes enqueue overhead. RSS sampling is not true peak/PSS/cgroup; ASGI includes pytest and fixture overhead. Live backend binding, real Neon/provider/HK/field/human UAT, numerical budgets and G0/GN/GA/GS acceptance remain open. Preserve baseline and failed raw attempts.
+
+Each resource snapshot binds unique PIDs and parent/depth structure to its own captured tree and includes the interpreters that execute the tasks. Launcher-only or cross-tree samples are refused. Each queue snapshot retains original scoped SQL outbox IDs, workspace, state, creation timestamp and database observation timestamp within a monotonic read window. Counts must equal those rows; published/returned tasks constrain the window and the final snapshot must contain all138 terminal rows with no pending SQL/broker state. SQL, broker and RSS reads are separate observations; this does not infer an atomic cross-system snapshot.

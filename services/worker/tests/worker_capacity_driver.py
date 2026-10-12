@@ -6,6 +6,10 @@ import sys
 from pathlib import Path
 
 
+class _OwnedRssUnavailableError(ValueError):
+    """Missing Linux VmRSS requires a second authoritative owned-Popen check."""
+
+
 def _process_rss(pid):
     if os.name == 'nt':
         import ctypes
@@ -37,7 +41,7 @@ def _process_rss(pid):
                 value,unit=line.split()[1:]
                 if unit!='kB':raise ValueError('unexpected proc RSS unit')
                 return int(value)*1024,'linux_proc_status_VmRSS'
-        raise ValueError('live process RSS unavailable')
+        raise _OwnedRssUnavailableError('live process RSS unavailable')
     raise NotImplementedError('owned RSS capture supports Windows and Linux only')
 
 
@@ -82,7 +86,14 @@ def sample_worker_resources(processes,at_seconds,samples):
     for process in processes:
         if process.poll() is None:
             for pid,parent,depth in _owned_process_tree(process.pid):
-                rss,method=_process_rss(pid)
+                try:
+                    rss,method=_process_rss(pid)
+                except _OwnedRssUnavailableError:
+                    # The first poll and /proc read race with owned interpreter
+                    # exit. Only its own reaped Popen proves that outcome; no
+                    # missing live/descendant measurement or invalid unit passes.
+                    if pid!=process.pid or process.poll() is None:raise
+                    break
                 samples.append(dict(owner_pid=process.pid,pid=pid,parent_pid=parent,depth=depth,at_seconds=at_seconds,rss_bytes=rss,method=method))
 
 
