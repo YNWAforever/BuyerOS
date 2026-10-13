@@ -42,6 +42,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: node tests/domain-checks.mjs
       - run: node tests/live-adapter-checks.mjs
+      - run: node tests/buyer-import-checks.mjs
       - name: Verify C61 candidate client intent and source privacy
         run: |
           mkdir -p artifacts/c61
@@ -933,6 +934,14 @@ jobs:
           mkdir -p artifacts/ci-t30/buyer-management
           cp artifacts/c61/buyer-management-discovery.json artifacts/ci-t30/buyer-management/discovery.json
           cp -r test-results/. artifacts/ci-t30/buyer-management/
+      - name: Verify buyer import and recovery through disposable PostgreSQL
+        run: |
+          pnpm exec playwright test --config playwright.buyer-import.config.ts --list --reporter=json > artifacts/c61/buyer-import-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/buyer-import-discovery.json --expected-count 4 --expected-file buyer-import.spec.ts --discovery-only
+          pnpm exec playwright test --config playwright.buyer-import.config.ts --reporter=line,junit
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/buyer-import-discovery.json --expected-count 4 --expected-file buyer-import.spec.ts --junit test-results/buyer-import.xml
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/buyer-import.xml
       - name: Verify native journey discovery before execution
         run: |
           mkdir -p test-results artifacts/c61

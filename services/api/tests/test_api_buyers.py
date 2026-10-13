@@ -74,6 +74,7 @@ def test_registry_covers_every_unimplemented_contract_operation():
         "updateBuyer",
         "reviewBuyers",
         "listBuyerLists", "createBuyerList", "getBuyerList", "renameBuyerList",
+        "previewBuyerImport", "getBuyerImport", "confirmBuyerImport", "getBuyerImportSource",
         "changeListMemberships", "listFilterPresets", "saveFilterPreset",
         "assignBuyerOwners", "getAsyncJob", "listAsyncJobs", "retryFailedAsyncJob", "cancelAsyncJob",
         "listMemberships", "updateMembership", "getPreferences", "updatePreferences", "listAuditEvents",

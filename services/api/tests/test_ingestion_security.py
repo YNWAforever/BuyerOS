@@ -283,7 +283,7 @@ def test_private_object_keys_are_workspace_bound_without_network():
             b"document", digest=hashlib.sha256(b"document").hexdigest(),
             retention_seconds=3600,
         )
-        assert key.startswith(f"tenants/{ws_a}/")
+        assert key.startswith(f"r2/tenants/{ws_a}/")
         assert await store_a.get_private(key) == b"document"
         with pytest.raises(ValueError, match="foreign"):
             await store_b.get_private(key)

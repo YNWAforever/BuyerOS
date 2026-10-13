@@ -102,7 +102,7 @@ export function LiveOutcomes({buyerId,buyerName,canRecord,locale,t}:{buyerId:str
   </section>;
 }
 
-export function LiveResults({locale,canReview,canEdit,canQuote,canAssign,ownMembershipId,t}:{locale:'en'|'zh-HK';canReview:boolean;canEdit:boolean;canQuote:boolean;canAssign:boolean;ownMembershipId:string|null;t:(value:string)=>string}){
+export function LiveResults({locale,canReview,canEdit,canQuote,canAssign,canImport=false,ownMembershipId,t}:{locale:'en'|'zh-HK';canReview:boolean;canEdit:boolean;canQuote:boolean;canAssign:boolean;canImport?:boolean;ownMembershipId:string|null;t:(value:string)=>string}){
   const [buyer,setBuyer]=useState<{id:string;name:string}|null>(null);
-  return <><LiveBuyerResults locale={locale} canReview={canReview} canEdit={canEdit} canQuote={canQuote} canAssign={canAssign} ownMembershipId={ownMembershipId} onManualOutcome={(id,name)=>setBuyer({id,name})}/><LiveUsage locale={locale} t={t}/><LiveOutcomes buyerId={buyer?.id??null} buyerName={buyer?.name} canRecord={canEdit||canReview} locale={locale} t={t}/></>;
+  return <><LiveBuyerResults locale={locale} canReview={canReview} canEdit={canEdit} canQuote={canQuote} canAssign={canAssign} canImport={canImport} ownMembershipId={ownMembershipId} onManualOutcome={(id,name)=>setBuyer({id,name})}/><LiveUsage locale={locale} t={t}/><LiveOutcomes buyerId={buyer?.id??null} buyerName={buyer?.name} canRecord={canEdit||canReview} locale={locale} t={t}/></>;
 }

@@ -77,7 +77,9 @@ async def execute_source_delete(
 
     if object_key:
         try:
-            store = private_store if private_store is not None else get_private_store(workspace_id)
+            store = private_store if private_store is not None else get_private_store(
+                workspace_id, engine=engine, object_key=object_key,
+            )
             await asyncio.wait_for(store.delete_private(object_key), timeout=45)
         except Exception:
             return "storage_unavailable"

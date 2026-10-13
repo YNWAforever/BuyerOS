@@ -6,6 +6,7 @@ import {toBuyers,toEvidencePage,type LiveBuyer,type LiveEvidence} from '@/servic
 import {ActionIntent} from '@/services/live/action-intent';
 import {liveZh} from './locale';
 import {ContactQuotePreview} from './contact-quote';
+import {BuyerImportSourcePanel} from './buyer-import-source';
 import {useRouter} from 'next/navigation';
 
 type Tab='Overview'|'Evidence'|'Contacts'|'Activity';
@@ -107,6 +108,7 @@ export function LiveBuyerDetail({buyer,locale,canEdit,canQuote,canReview,ownMemb
       {tab==='Overview'&&<><p>{t('Company')}: {data.name}</p><p>{t('Domain')}: {data.domain??t('Unknown')}</p><p>{t('Fit')}: {t(data.fitVerdict??'Not assessed')}{data.fitFreshness==='stale'&&` · ${t('stale evidence')}`}</p>
         {data.fitRationale&&<p>{t('Assessment')}: {data.fitRationale}</p>}{canEdit&&data.reviewStatus==='accepted'&&data.fitVerdict==='match'&&data.fitFreshness==='current'&&<button type="button" onClick={()=>{const scope=session.current();if(scope.workspace&&scope.project){onClose();router.push(`/app/outreach?${new URLSearchParams({workspace:scope.workspace,project:scope.project,buyer:data.id})}`);}}}>{t('Prepare grounded draft')}</button>}<p>{t('Human review')}: {t(data.reviewStatus??'Not reviewed')}</p>
         <p>{t('Owner membership')}: {data.ownerMembershipId??t('Unassigned')}</p><p>{t('Evidence records')}: {data.evidenceCount}</p>
+        <BuyerImportSourcePanel key={`${session.identity()}:${buyer.id}`} buyerId={buyer.id} t={t}/>
         {canEdit&&<><div className="inline"><label>{t('Buyer note')} <textarea aria-label={t('Buyer note')} maxLength={20000} value={note} onChange={event=>setNote(event.target.value)}/></label>
           <button type="button" disabled={saving} onClick={()=>void savePatch({note})}>{saving?t('Saving...'):t('Save note')}</button>
           <button type="button" disabled={saving||!onNext} onClick={()=>void savePatch({note},true)}>{t('Save note and next')}</button></div>

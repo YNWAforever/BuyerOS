@@ -12,6 +12,7 @@ from .routes.audit import router as audit_router
 from .routes.buyers import router as buyers_router
 from .routes.budgets import router as budgets_router
 from .routes.buyer_management import router as buyer_management_router
+from .routes.buyer_imports import router as buyer_imports_router
 from .routes.bulk_manifests import router as bulk_manifests_router
 from .routes.documents import router as documents_router
 from .routes.drafts import router as drafts_router
@@ -37,6 +38,7 @@ from .routes.workspaces import router as workspaces_router
 from .routes.usage import router as usage_router
 from .routes.worker_internal import router as worker_internal_router
 from .unimplemented import router as unimplemented_router
+from .write_precondition import WritePreconditionMiddleware
 from buyeros_api.settings import get_settings
 
 
@@ -66,6 +68,7 @@ def create_app() -> FastAPI:
     app.include_router(icp_router)
     app.include_router(buyers_router)
     app.include_router(buyer_management_router)
+    app.include_router(buyer_imports_router)
     app.include_router(bulk_manifests_router)
     app.include_router(documents_router)
     app.include_router(drafts_router)
@@ -87,6 +90,9 @@ def create_app() -> FastAPI:
     app.include_router(quote_detail_router)
     app.include_router(unimplemented_router)
     app.include_router(worker_internal_router)
+
+    # This runs inside request correlation and outside route dependencies.
+    app.add_middleware(WritePreconditionMiddleware)
 
     @app.middleware("http")
     async def request_id_middleware(request: Request, call_next):
@@ -121,7 +127,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=get_settings().cors_origins,
         allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "If-Match", "X-Request-ID", "Last-Event-ID"],
+        allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "If-Match", "X-BuyerOS-If-Match", "X-Request-ID", "Last-Event-ID"],
         expose_headers=["X-Request-ID", "ETag"],
         allow_credentials=False,
         max_age=600,

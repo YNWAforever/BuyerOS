@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 from urllib.parse import urlsplit
 
 from pydantic import Field, SecretStr, field_validator
@@ -37,6 +38,7 @@ class Settings(BaseSettings):
     expensive_write_per_minute: int = Field(default=60, ge=1, le=10000)
     cors_origins: list[str] = Field(default_factory=list)
     r2_enabled: bool = False
+    private_object_backend: Literal["r2", "postgres"] = "r2"
     r2_account_id: str | None = None
     r2_bucket: str | None = None
     r2_access_key_id: str | None = None

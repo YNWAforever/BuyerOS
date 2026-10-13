@@ -31,7 +31,7 @@ test('C11 twenty rejected requests share one renewal and keep each original body
  h.env.fetch=async(url)=>{assert.equal(url,'/api/auth/token');refreshCalls++;await wait.promise;return Response.json({token:jwt('neon-user',2100)});};
  const observations=[],accepted=new Map();let runCount=0,outboxCount=0;
  const client=createLiveClient(async(url,init)=>{
-  observations.push({url,body:init.body,key:init.headers['Idempotency-Key'],auth:init.headers.Authorization,match:init.headers['If-Match']});
+  observations.push({url,body:init.body,key:init.headers['Idempotency-Key'],auth:init.headers.Authorization,match:init.headers['X-BuyerOS-If-Match']});
   if(init.headers.Authorization===`Bearer ${jwt()}`)return Response.json({code:'UNAUTHORIZED'},{status:401});
   if(!accepted.has(init.headers['Idempotency-Key'])){accepted.set(init.headers['Idempotency-Key'],init.body);if(init.headers['Idempotency-Key']==='intent-0'){runCount++;outboxCount++;}}
   return Response.json({data_mode:'live',request_id:'observed-request',data:{accepted:true}});
@@ -40,7 +40,7 @@ test('C11 twenty rejected requests share one renewal and keep each original body
  const requests=bodies.map((body,i)=>client.request({path:'/v1/research',method:'POST',token:jwt(),scope:'A',body,idempotencyKey:`intent-${i}`,ifMatch:'"7"'}));
  await new Promise(r=>setTimeout(r,0));bodies.forEach(body=>body.payload='mutated after send');wait.resolve();await Promise.all(requests);
  assert.equal(refreshCalls,1);assert.equal(runCount,1);assert.equal(outboxCount,1);assert.equal(observations.length,40);
- for(const original of observations.slice(0,20)){const retry=observations.find(x=>x.key===original.key&&x.auth!==original.auth);assert.equal(retry.body,original.body);assert.equal(retry.match,original.match);}
+ for(const original of observations.slice(0,20)){const retry=observations.find(x=>x.key===original.key&&x.auth!==original.auth);assert.equal(retry.body,original.body);assert.equal(original.match,'"7"');assert.equal(retry.match,original.match);}
 });
 test('C11 an already renewed rejected token never starts a second renewal',async()=>{
  const h=environment(),auth=await adapter(h.env);await auth.initialize();let calls=0;

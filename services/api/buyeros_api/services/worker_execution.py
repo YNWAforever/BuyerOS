@@ -241,6 +241,8 @@ async def maintenance(engine, runtime_epoch: int, *, probe_id: uuid.UUID | None 
     if enabled:
         report = await recover_execution(engine, now=now, limit=10, runtime_epoch=runtime_epoch)
         recovered = report.recovered
+        from .object_store import purge_expired_private_objects
+        await purge_expired_private_objects(engine, now=now, runtime_epoch=runtime_epoch)
         if probe_id is not None:
             enabled = await record_probe(engine, runtime_epoch=runtime_epoch, probe_id=probe_id, now=now)
     async with maker() as session:

@@ -117,7 +117,9 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '', 
       const headers: Record<string, string> = {Accept: 'application/json'};
       if (token) headers.Authorization = `Bearer ${token}`;
       if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
-      if (ifMatch) headers['If-Match'] = ifMatch;
+      // Carry the domain precondition past hosting response validators. The API
+      // restores If-Match before its unchanged version/idempotency checks run.
+      if (ifMatch) headers['X-BuyerOS-If-Match'] = ifMatch;
       if (body !== undefined && formData !== undefined) throw new LiveError('ambiguous request body', 'INVALID_REQUEST', 0, '', false);
       let payload: string | FormData | undefined=formData;
       let retryBody:FormData|undefined;

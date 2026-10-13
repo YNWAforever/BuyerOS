@@ -2,6 +2,8 @@
 
 `vercel.json` defines two HTTP services. `app` is the Vinext/React frontend built with Vite + Nitro's Vercel preset; it receives the public catch-all route. `api` is FastAPI at `services/api` and has no public service rewrite. The app's `/v1/*` route forwards each browser bearer request to `api` with the runtime service binding `BUYEROS_INTERNAL_API_URL`. Vercel generates this variable for the `app` function; do not set it in the dashboard or a build environment. Browser code uses a same-origin `/v1/*` URL and never receives the binding. The proxy handles FastAPI redirects manually and rewrites internal `/v1/*` locations back to the public path.
 
+Browser writes carry the exact quoted resource version in `X-BuyerOS-If-Match` through both services. The API restores canonical `If-Match` before route authorization, version checks, and idempotency hashing; it rejects multiple or malformed carriers. This prevents hosting HTTP conditional-response handling from replacing a successful write response when its new `ETag` differs from the pre-write version. Direct API callers can still use standard `If-Match`; hosted callers should use the application carrier. A plain hosting 412 is an unknown outcome, so retain the original key and payload and reconcile saved state before retrying. No automatic write retry is added.
+
 The Celery dispatcher/worker is a continuous Valkey consumer, not an HTTP request handler. It remains on the existing external worker host with the single approved Valkey broker. It does not call a Vercel service over HTTP, so there is no worker service or binding in this candidate. Database migrations remain Alembic's responsibility outside a Vercel build.
 
 Local source checks:

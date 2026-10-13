@@ -342,14 +342,16 @@ await test('a write sends a JSON body and the mutation headers',async()=>{
   assert.equal(seen[0].headers['Content-Type'],'application/json');
   assert.equal(seen[0].headers['Idempotency-Key'],'k1');
   assert.equal(seen[0].headers['If-Match'],undefined);
+  assert.equal(seen[0].headers['X-BuyerOS-If-Match'],undefined);
   assert.deepEqual(JSON.parse(seen[0].body),{name:'x'});
 });
 
-await test('If-Match is sent only when supplied',async()=>{
+await test('a supplied write version uses the hosting-safe precondition carrier',async()=>{
   const seen=[];
   const client=live.createLiveClient(async(url,init)=>{seen.push(init);return {status:200,ok:true,json:async()=>({data:{},request_id:'r',data_mode:'live'})};});
   await client.request({path:'/v1/x',method:'PATCH',scope:'s1',body:{a:1},ifMatch:'"2"',idempotencyKey:'k'});
-  assert.equal(seen[0].headers['If-Match'],'"2"');
+  assert.equal(seen[0].headers['X-BuyerOS-If-Match'],'"2"');
+  assert.equal(seen[0].headers['If-Match'],undefined);
 });
 
 await test('a stale write surfaces as a typed STALE_REVISION',async()=>{

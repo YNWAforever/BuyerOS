@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 
 const requestHeaders = [
   'accept', 'accept-language', 'authorization', 'content-type',
-  'idempotency-key', 'if-match', 'if-none-match', 'last-event-id', 'x-request-id',
+  'idempotency-key', 'if-match', 'x-buyeros-if-match', 'if-none-match', 'last-event-id', 'x-request-id',
 ];
 const responseHeaders = [
   'allow', 'cache-control', 'content-disposition', 'content-type', 'etag',

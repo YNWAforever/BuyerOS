@@ -9,6 +9,7 @@ foreign keys to tables declared in another module.
 from . import (  # noqa: F401
     budget,
     buyers,
+    buyer_imports,
     contact,
     drafts,
     delivery,
@@ -27,6 +28,7 @@ from . import (  # noqa: F401
 __all__ = [
     "budget",
     "buyers",
+    "buyer_imports",
     "contact",
     "drafts",
     "delivery",

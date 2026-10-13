@@ -2840,6 +2840,313 @@ paths:
                   filters: {}
                   sort: best_fit
                   requested_limit: 1
+  "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/preview":
+    post:
+      operationId: "previewBuyerImport"
+      summary: "Preview Excel or CSV buyer candidates"
+      tags:
+        - "BO-008"
+      security:
+        -
+          BearerAuth: []
+      parameters:
+        -
+          name: "workspace_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "project_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          "$ref": "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: "object"
+              additionalProperties: false
+              properties:
+                file:
+                  type: "string"
+                  format: "binary"
+              required:
+                - "file"
+      responses:
+        "201":
+          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/BuyerImportResponse"
+        "400":
+          "$ref": "#/components/responses/Error"
+        "401":
+          "$ref": "#/components/responses/Error"
+        "403":
+          "$ref": "#/components/responses/Error"
+        "404":
+          "$ref": "#/components/responses/Error"
+        "409":
+          "$ref": "#/components/responses/Error"
+        "422":
+          "$ref": "#/components/responses/Error"
+        "429":
+          "$ref": "#/components/responses/Error"
+        "500":
+          "$ref": "#/components/responses/Error"
+        "503":
+          "$ref": "#/components/responses/Error"
+      x-implementation-status: "IMPLEMENTED"
+      x-work-package: "BO-008"
+      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+      x-permitted-roles:
+        - "operator"
+        - "workspace_admin"
+      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
+      x-cost: "Deterministic offline file parsing only; no paid requests."
+      x-idempotency: "Required; exact actor, operation, target and file/digest replay."
+      x-version-precondition: "none"
+      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      x-errors:
+        - "INVALID_REQUEST"
+        - "PERMISSION_DENIED"
+        - "NOT_FOUND"
+        - "IDEMPOTENCY_CONFLICT"
+        - "IMPORT_PREVIEW_CHANGED"
+        - "IMPORT_PREVIEW_EXPIRED"
+  "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/{import_id}":
+    get:
+      operationId: "getBuyerImport"
+      summary: "Read the original preview or committed import result"
+      tags:
+        - "BO-008"
+      security:
+        -
+          BearerAuth: []
+      parameters:
+        -
+          name: "workspace_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "project_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "import_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/BuyerImportResponse"
+        "400":
+          "$ref": "#/components/responses/Error"
+        "401":
+          "$ref": "#/components/responses/Error"
+        "403":
+          "$ref": "#/components/responses/Error"
+        "404":
+          "$ref": "#/components/responses/Error"
+        "409":
+          "$ref": "#/components/responses/Error"
+        "422":
+          "$ref": "#/components/responses/Error"
+        "429":
+          "$ref": "#/components/responses/Error"
+        "500":
+          "$ref": "#/components/responses/Error"
+        "503":
+          "$ref": "#/components/responses/Error"
+      x-implementation-status: "IMPLEMENTED"
+      x-work-package: "BO-008"
+      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+      x-permitted-roles:
+        - "operator"
+        - "workspace_admin"
+      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
+      x-cost: "Deterministic offline file parsing only; no paid requests."
+      x-idempotency: "Read-only."
+      x-version-precondition: "none"
+      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      x-errors:
+        - "INVALID_REQUEST"
+        - "PERMISSION_DENIED"
+        - "NOT_FOUND"
+        - "IDEMPOTENCY_CONFLICT"
+        - "IMPORT_PREVIEW_CHANGED"
+        - "IMPORT_PREVIEW_EXPIRED"
+  "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/{import_id}/confirm":
+    post:
+      operationId: "confirmBuyerImport"
+      summary: "Atomically import the exact preview as unreviewed buyers"
+      tags:
+        - "BO-008"
+      security:
+        -
+          BearerAuth: []
+      parameters:
+        -
+          name: "workspace_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "project_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "import_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          "$ref": "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/BuyerImportConfirm"
+      responses:
+        "200":
+          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/BuyerImportResponse"
+        "400":
+          "$ref": "#/components/responses/Error"
+        "401":
+          "$ref": "#/components/responses/Error"
+        "403":
+          "$ref": "#/components/responses/Error"
+        "404":
+          "$ref": "#/components/responses/Error"
+        "409":
+          "$ref": "#/components/responses/Error"
+        "422":
+          "$ref": "#/components/responses/Error"
+        "429":
+          "$ref": "#/components/responses/Error"
+        "500":
+          "$ref": "#/components/responses/Error"
+        "503":
+          "$ref": "#/components/responses/Error"
+      x-implementation-status: "IMPLEMENTED"
+      x-work-package: "BO-008"
+      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+      x-permitted-roles:
+        - "operator"
+        - "workspace_admin"
+      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
+      x-cost: "Deterministic offline file parsing only; no paid requests."
+      x-idempotency: "Required; exact actor, operation, target and file/digest replay."
+      x-version-precondition: "Exact stored preview_digest"
+      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      x-errors:
+        - "INVALID_REQUEST"
+        - "PERMISSION_DENIED"
+        - "NOT_FOUND"
+        - "IDEMPOTENCY_CONFLICT"
+        - "IMPORT_PREVIEW_CHANGED"
+        - "IMPORT_PREVIEW_EXPIRED"
+  "/v1/workspaces/{workspace_id}/buyers/{buyer_id}/import-source":
+    get:
+      operationId: "getBuyerImportSource"
+      summary: "Read private source claims for an imported buyer"
+      tags:
+        - "BO-008"
+      security:
+        -
+          BearerAuth: []
+      parameters:
+        -
+          name: "workspace_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "buyer_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/BuyerImportSourceResponse"
+        "400":
+          "$ref": "#/components/responses/Error"
+        "401":
+          "$ref": "#/components/responses/Error"
+        "403":
+          "$ref": "#/components/responses/Error"
+        "404":
+          "$ref": "#/components/responses/Error"
+        "409":
+          "$ref": "#/components/responses/Error"
+        "422":
+          "$ref": "#/components/responses/Error"
+        "429":
+          "$ref": "#/components/responses/Error"
+        "500":
+          "$ref": "#/components/responses/Error"
+        "503":
+          "$ref": "#/components/responses/Error"
+      x-implementation-status: "IMPLEMENTED"
+      x-work-package: "BO-008"
+      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+      x-permitted-roles:
+        - "viewer"
+        - "operator"
+        - "reviewer"
+        - "workspace_admin"
+      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
+      x-cost: "Deterministic offline file parsing only; no paid requests."
+      x-idempotency: "Read-only."
+      x-version-precondition: "none"
+      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      x-errors:
+        - "INVALID_REQUEST"
+        - "PERMISSION_DENIED"
+        - "NOT_FOUND"
+        - "IDEMPOTENCY_CONFLICT"
+        - "IMPORT_PREVIEW_CHANGED"
+        - "IMPORT_PREVIEW_EXPIRED"
   /v1/workspaces/{workspace_id}/projects/{project_id}/buyers:
     get:
       operationId: listBuyers
@@ -8917,6 +9224,8 @@ components:
           - SELECTION_EXPIRED
           - SELECTION_SCOPE_MISMATCH
           - IDEMPOTENCY_CONFLICT
+          - IMPORT_PREVIEW_CHANGED
+          - IMPORT_PREVIEW_EXPIRED
           - ICP_NOT_APPROVED
           - ICP_STALE
           - POLICY_UNKNOWN
@@ -12825,6 +13134,285 @@ components:
       - data
       - request_id
       - data_mode
+    BuyerImportRow:
+      type: "object"
+      additionalProperties: false
+      properties:
+        row_number:
+          type: "integer"
+          minimum: 1
+        source_row:
+          type: "string"
+          maxLength: 10000
+        source_date:
+          type:
+            - "string"
+            - "null"
+          format: "date"
+        website:
+          type:
+            - "string"
+            - "null"
+          format: "uri"
+          maxLength: 2000
+        source_urls:
+          type: "array"
+          maxItems: 2
+          items:
+            type: "string"
+            format: "uri"
+            maxLength: 2000
+        original_fields:
+          type: "object"
+          maxProperties: 64
+          additionalProperties:
+            type: "string"
+            maxLength: 10000
+        name:
+          type: "string"
+          maxLength: 400
+        normalized_domain:
+          type:
+            - "string"
+            - "null"
+          maxLength: 255
+        errors:
+          type: "array"
+          items:
+            type: "string"
+        status:
+          type: "string"
+          enum:
+            - "ready"
+            - "duplicate"
+            - "invalid"
+        duplicate_buyer_id:
+          type:
+            - "string"
+            - "null"
+          format: "uuid"
+      required:
+        - "row_number"
+        - "source_row"
+        - "source_date"
+        - "website"
+        - "source_urls"
+        - "original_fields"
+        - "name"
+        - "normalized_domain"
+        - "errors"
+        - "status"
+        - "duplicate_buyer_id"
+    BuyerImportPreview:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        workspace_id:
+          type: "string"
+          format: "uuid"
+        project_id:
+          type: "string"
+          format: "uuid"
+        status:
+          type: "string"
+          const: "previewed"
+        file_name:
+          type: "string"
+          maxLength: 200
+        file_sha256:
+          type: "string"
+          pattern: "^[a-f0-9]{64}$"
+        preview_digest:
+          type: "string"
+          pattern: "^sha256:[a-f0-9]{64}$"
+        expires_at:
+          type: "string"
+          format: "date-time"
+        total_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        ready_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        duplicate_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        invalid_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        can_import:
+          type: "boolean"
+        rows:
+          type: "array"
+          maxItems: 500
+          items:
+            "$ref": "#/components/schemas/BuyerImportRow"
+      required:
+        - "id"
+        - "workspace_id"
+        - "project_id"
+        - "status"
+        - "file_name"
+        - "file_sha256"
+        - "preview_digest"
+        - "expires_at"
+        - "total_rows"
+        - "ready_rows"
+        - "duplicate_rows"
+        - "invalid_rows"
+        - "can_import"
+        - "rows"
+    BuyerImportResult:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        status:
+          type: "string"
+          const: "completed"
+        imported_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        skipped_duplicate_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        buyer_ids:
+          type: "array"
+          maxItems: 500
+          items:
+            type: "string"
+            format: "uuid"
+        preview_digest:
+          type: "string"
+          pattern: "^sha256:[a-f0-9]{64}$"
+      required:
+        - "id"
+        - "status"
+        - "imported_rows"
+        - "skipped_duplicate_rows"
+        - "buyer_ids"
+        - "preview_digest"
+    BuyerImportConfirm:
+      type: "object"
+      additionalProperties: false
+      properties:
+        preview_digest:
+          type: "string"
+          pattern: "^sha256:[a-f0-9]{64}$"
+        confirmation:
+          type: "boolean"
+          const: true
+      required:
+        - "preview_digest"
+        - "confirmation"
+    BuyerImportResponse:
+      type: "object"
+      additionalProperties: false
+      properties:
+        data:
+          oneOf:
+            -
+              "$ref": "#/components/schemas/BuyerImportPreview"
+            -
+              "$ref": "#/components/schemas/BuyerImportResult"
+        request_id:
+          type: "string"
+          format: "uuid"
+        data_mode:
+          type: "string"
+          const: "live"
+      required:
+        - "data"
+        - "request_id"
+        - "data_mode"
+    BuyerImportSource:
+      type: "object"
+      additionalProperties: false
+      properties:
+        import_id:
+          type: "string"
+          format: "uuid"
+        file_name:
+          type: "string"
+          maxLength: 200
+        file_sha256:
+          type: "string"
+          pattern: "^[a-f0-9]{64}$"
+        candidate_status:
+          type: "string"
+          const: "unreviewed"
+        row_number:
+          type: "integer"
+          minimum: 1
+        source_row:
+          type: "string"
+          maxLength: 10000
+        source_date:
+          type:
+            - "string"
+            - "null"
+          format: "date"
+        website:
+          type:
+            - "string"
+            - "null"
+          format: "uri"
+          maxLength: 2000
+        source_urls:
+          type: "array"
+          maxItems: 2
+          items:
+            type: "string"
+            format: "uri"
+            maxLength: 2000
+        original_fields:
+          type: "object"
+          maxProperties: 64
+          additionalProperties:
+            type: "string"
+            maxLength: 10000
+      required:
+        - "import_id"
+        - "file_name"
+        - "file_sha256"
+        - "candidate_status"
+        - "row_number"
+        - "source_row"
+        - "source_date"
+        - "website"
+        - "source_urls"
+        - "original_fields"
+    BuyerImportSourceResponse:
+      type: "object"
+      additionalProperties: false
+      properties:
+        data:
+          oneOf:
+            -
+              "$ref": "#/components/schemas/BuyerImportSource"
+            -
+              type: "null"
+        request_id:
+          type: "string"
+          format: "uuid"
+        data_mode:
+          type: "string"
+          const: "live"
+      required:
+        - "data"
+        - "request_id"
+        - "data_mode"
     BuyerResponse:
       type: object
       additionalProperties: false
