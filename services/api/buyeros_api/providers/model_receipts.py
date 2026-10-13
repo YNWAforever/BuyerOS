@@ -2,7 +2,7 @@
 import hashlib,uuid
 from .live_model import ModelRequest,canonical_json,validate_live_proposal,MAX_RESPONSE_BYTES
 from .model import ModelRoute
-from .base import ProviderIntent
+from .base import LIVE_MODEL_PROVIDERS,ProviderIntent
 from .registry import ProviderRegistration
 from ..db.session import tenant_session
 from ..execution.provider_context import execution_session
@@ -10,7 +10,7 @@ from sqlalchemy import select,text
 
 class PostgresModelReceipts:
     def __init__(self,engine,workspace_id,capability,*,model_id,route):
-        if (engine is None or not isinstance(workspace_id,uuid.UUID) or capability.provider!='openai-responses' or capability.service!='model' or capability.max_liability is None or not isinstance(route,ModelRoute) or not route.route_id or route.permitted_tools):raise ValueError('bounded code-owned model receipt contract required')
+        if (engine is None or not isinstance(workspace_id,uuid.UUID) or capability.provider not in LIVE_MODEL_PROVIDERS or capability.service!='model' or capability.max_liability is None or not isinstance(route,ModelRoute) or not route.route_id or route.permitted_tools):raise ValueError('bounded code-owned model receipt contract required')
         self.engine,self.workspace_id,self.capability,self.model_id,self.route=engine,workspace_id,capability,model_id,route
         self.contract_hash=ProviderRegistration(capability,lambda:None).contract_hash
 

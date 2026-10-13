@@ -9,7 +9,7 @@ from dataclasses import dataclass,asdict
 from datetime import datetime,timezone
 from typing import Protocol
 import httpx
-from .base import Money,ProviderCapability,ProviderIntent,SubmissionResult,StatusResult
+from .base import LIVE_SEARCH_PROVIDERS,Money,ProviderCapability,ProviderIntent,SubmissionResult,StatusResult
 from .search import SearchResult
 from ..services.safe_fetch import _safe_https_url,fetch_permitted_document
 
@@ -95,7 +95,7 @@ def source_candidate(item:dict,*,expected_company:dict|None=None)->dict:
 
 class LiveSearchAdapter:
     def __init__(self,*,capability:ProviderCapability,client,receipts:SearchReceipts,source_transport=None):
-        if capability.provider!='brave-search' or capability.service!='search':raise ValueError('code-owned candidate search contract required')
+        if capability.provider not in LIVE_SEARCH_PROVIDERS or capability.service!='search':raise ValueError('code-owned candidate search contract required')
         self.capability,self.client,self.receipts=capability,client,receipts
         self.source_transport=source_transport
 
@@ -155,7 +155,7 @@ class PostgresSearchReceipts:
     def __init__(self,engine,workspace_id:uuid.UUID,capability:ProviderCapability):
         from .registry import ProviderRegistration
         if engine is None or not isinstance(workspace_id,uuid.UUID):raise ValueError('runtime tenant engine required')
-        if capability.provider!='brave-search' or capability.service!='search' or capability.max_liability is None:raise ValueError('bounded search contract required')
+        if capability.provider not in LIVE_SEARCH_PROVIDERS or capability.service!='search' or capability.max_liability is None:raise ValueError('bounded search contract required')
         self.engine,self.workspace_id,self.capability=engine,workspace_id,capability
         self.contract_hash=ProviderRegistration(capability,lambda:None).contract_hash
 

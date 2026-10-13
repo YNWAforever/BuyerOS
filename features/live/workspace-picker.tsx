@@ -17,6 +17,8 @@ import {LiveResults,LiveUsage} from './results';
 import {LiveRunProgress} from './run-progress';
 import {LiveDraftEditor} from './drafts';
 import {LiveNavigation} from './navigation';
+import {LiveBrand, LiveFrame, LiveTopbar} from './shell';
+import {ShieldCheck} from 'lucide-react';
 import {zh} from '@/locales';
 import {liveZh} from './locale';
 import type {SessionScope} from '@/services/live/session';
@@ -231,11 +233,19 @@ export function LiveWorkspace() {
     const target=new URL(path,window.location.origin);for(const [key,value] of params)target.searchParams.set(key,value);
     void session.transition(async()=>{if(mayLeaveOffer())router.push(target.pathname+target.search);}).catch(()=>{});
   }
-  if (!auth || authBootstrap.kind==='initializing') return <main className="main-shell">{languagePicker}<section className="panel" role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&<p>{authError}</p>}</section></main>;
-  if (!snapshot.authenticated) return <main className="main-shell">{languagePicker}<section className="panel"><h1>FIMMICK BuyerOS</h1><p>{t('Sign in to access your workspaces.')}</p>{authError&&<p role="alert">{authError}</p>}<button onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></section></main>;
-  return <main className="main-shell live-workspace"><div className="content">
-    <header className="topbar live-topbar"><b>FIMMICK BuyerOS</b><span>{t('Live workspace')}</span>{languagePicker}<button onClick={()=>void session.transition(async()=>{if(!mayLeaveOffer())return;session.setToken(undefined);await auth.signOut();}).catch(()=>{})}>{t('Sign out')}</button></header>
-    <LiveNavigation t={t} navigate={navigate} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>
+  const signInFrame=(body:React.ReactNode)=><main className="main-shell live-workspace live-signin">
+    <header className="live-signin-top">{languagePicker}</header>
+    <section className="panel live-signin-card"><LiveBrand/>{body}</section>
+    <p className="live-signin-note"><ShieldCheck size={14} aria-hidden="true"/>{t('Private workspace. Sign-in is required for every visitor.')}</p>
+  </main>;
+  if (!auth || authBootstrap.kind==='initializing') return signInFrame(<div role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&<p>{authError}</p>}</div>);
+  if (!snapshot.authenticated) return signInFrame(<><h1>FIMMICK BuyerOS</h1><p>{t('Sign in to access your workspaces.')}</p>{authError&&<p role="alert">{authError}</p>}<button className="live-primary" onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></>);
+  const workspaceName=workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.name:undefined;
+  const projectName=projects.kind==='ready'?projects.items.find(item=>item.id===project)?.name:undefined;
+  return <LiveFrame t={t} pathname={pathname}
+    navigation={<LiveNavigation t={t} navigate={navigate} pathname={pathname} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>}
+    footer={<div className="user-profile"><div className="avatar" aria-hidden="true">{(workspaceName||'F').slice(0,1).toUpperCase()}</div><span><b>{workspaceName||t('No workspace selected')}</b><small>{projectName||t('No project selected')}</small></span></div>}
+    header={<LiveTopbar t={t} pathname={pathname} languagePicker={languagePicker} signOut={<button onClick={()=>void session.transition(async()=>{if(!mayLeaveOffer())return;session.setToken(undefined);await auth.signOut();}).catch(()=>{})}>{t('Sign out')}</button>}/>}>
     <div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
       {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
       {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button disabled={accessChecking} onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
@@ -267,5 +277,5 @@ export function LiveWorkspace() {
     {authorized && pathname === '/app/settings' && <><LiveSettings key={`settings-${workspace}`} workspace={workspace!} locale={locale} isAdmin={canArchive} roles={roles} canViewBudget={roles.some(role=>['operator','reviewer','workspace_admin'].includes(role))} onLocale={setLocale} onVersion={setPrefVersion} currentVersion={prefVersion} t={t}/><LivePolicySettings key={`policy-${workspace}`} roles={roles} t={t}/></>}
     {authorized && pathname === '/app/operations' && <LiveOperations key={`operations-${workspace}-${project}`} workspace={workspace!} project={projectKnown?project:null} isAdmin={canArchive} onOpenBuyers={()=>navigate('/app/discover')} t={t}/>}
     {authorized && !['/app','/app/discover','/app/discover/new','/app/discover/edit','/app/results','/app/runs','/app/outreach','/app/settings','/app/operations'].includes(pathname) && !/^\/app\/discover\/[^/]+$/.test(pathname) && <LiveUnavailable state="unavailable"/>}
-  </div></main>;
+  </LiveFrame>;
 }

@@ -6,6 +6,7 @@ The unselected production gate remains closed. Received/unknown work must use
 reconciliation; this module never resets an intent or releases its liability.
 """
 import uuid
+from ..providers.base import LIVE_MODEL_PROVIDERS
 from dataclasses import dataclass
 from datetime import datetime,timezone
 from sqlalchemy import select,text
@@ -56,7 +57,7 @@ async def _request(session,*,workspace_id,run_id,buyer_id,capability,route,model
     if environment!='test' and not get_settings().paid_admission_enabled:raise ValueError('paid model admission disabled')
     if any(not isinstance(value,uuid.UUID) for value in [workspace_id,run_id,buyer_id]):raise ValueError('canonical model scope required')
     if (await session.execute(text("SELECT current_setting('app.workspace_id',true)"))).scalar_one()!=str(workspace_id):raise ValueError('current model tenant scope required')
-    if (capability.provider!='openai-responses' or capability.service!='model' or capability.max_liability is None or
+    if (capability.provider not in LIVE_MODEL_PROVIDERS or capability.service!='model' or capability.max_liability is None or
         activation_blockers(capability,market=market,language=language,role='company',environment=environment)):
         raise ValueError('verified bounded model capability unavailable')
     selected=require_current_run_model_configuration(capability,route,model_id,market,language)
