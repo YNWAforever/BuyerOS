@@ -32,7 +32,7 @@ import {LiveProfilePanel} from './live/profile';
 import {LiveBuyers} from './live/buyers';
 type FilterPreset = {market:string;type:string;fit:string;review:string;contact:string;sourceType:string;recency:string};
 type DemoToolContext = {registerTool?: (definition:unknown, options:{signal:AbortSignal})=>unknown};
-export default function Workspace({mode='demo'}:{mode?:DataMode}){const current=usePathname();return current==='/auth/callback'?null:mode==='live'?<LiveWorkspace/>:<DemoWorkspace mode={mode}/>}
+export default function Workspace({mode='demo'}:{mode?:DataMode}){const current=usePathname();return current?.startsWith('/auth/')?null:mode==='live'?<LiveWorkspace/>:<DemoWorkspace mode={mode}/>}
 function DemoWorkspace({mode='demo'}:{mode?:DataMode}){const [s,setS]=useState<Store>(()=>mode==='demo'?seed():emptyStore()),[loaded,L]=useState(false);const path=usePathname()||'/',router=useRouter();const go=(url:string)=>router.push(url);const t=(x:string)=>s.locale==='zh-HK'?(zh[x]||x):x;
 const [sidebarOpen,SidebarOpen]=useState(true);useEffect(()=>{const m=window.matchMedia('(min-width:1024px)');const change=()=>SidebarOpen(m.matches);change();m.addEventListener('change',change);return()=>m.removeEventListener('change',change)},[]);
 const buyerTriggerRef=useRef<HTMLElement|null>(null);
