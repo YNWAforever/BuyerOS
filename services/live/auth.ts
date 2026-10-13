@@ -5,6 +5,8 @@ export interface AuthAdapter {
   getAccessToken(): Promise<string>;
   signOut(): Promise<void>;
   subject(): string;
+  /** Display only; never used to resolve workspace access. */
+  accountEmail?(): string;
   returnPath(): string;
   expiresAt(): number;
   provider?: 'auth0' | 'neon';

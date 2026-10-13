@@ -194,3 +194,32 @@ test('C11 failed provider logout remains invalidated on reload despite an old va
 test('C11 received cross-tab invalidation persists through reload without a token marker',async()=>{
  const h=environment(),auth=await adapter(h.env);await auth.initialize();h.emit({type:'logout'});const reloaded=await adapter(h.env);await reloaded.initialize();assert.equal(reloaded.subject(),'');assert.equal(JSON.stringify([...h.entries.values()]).includes(jwt()),false);
 });
+
+test('account email is visible only after a matching session token and never persisted or broadcast',async()=>{
+ const h=environment(),auth=await adapter(h.env),wait=deferred();
+ h.env.fetch=async url=>String(url).endsWith('/get-session')
+  ?Response.json({session:{},user:{id:'neon-user',email:'buyer@example.test'}})
+  :(await wait.promise,Response.json({token:jwt()}));
+ const pending=auth.initialize();await new Promise(r=>setTimeout(r,0));
+ assert.equal(auth.accountEmail?.(),'');wait.resolve();await pending;
+ assert.equal(auth.accountEmail?.(),'buyer@example.test');assert.equal(h.entries.size,0);assert.deepEqual(h.sent,[]);
+ h.emit({type:'logout'});assert.equal(auth.accountEmail?.(),'');
+ assert.doesNotMatch(JSON.stringify([...h.entries,...h.sent]),/buyer@example\.test/);
+});
+
+test('failed identity validation never exposes another account email',async()=>{
+ const h=environment(),auth=await adapter(h.env);
+ h.env.fetch=async url=>String(url).endsWith('/get-session')
+  ?Response.json({session:{},user:{id:'neon-user',email:'buyer@example.test'}})
+  :Response.json({token:jwt('other')});
+ await assert.rejects(auth.initialize());assert.equal(auth.accountEmail?.(),'');
+});
+
+test('missing or malformed account email does not prevent valid session authentication',async()=>{
+ for(const email of [undefined,{},'buyer\n@example.test','x'.repeat(321)]){
+  const h=environment(),auth=await adapter(h.env);
+  h.env.fetch=async url=>String(url).endsWith('/get-session')
+   ?Response.json({session:{},user:{id:'neon-user',email}}):Response.json({token:jwt()});
+  await auth.initialize();assert.equal(auth.subject(),'neon-user');assert.equal(auth.accountEmail?.(),'');
+ }
+});

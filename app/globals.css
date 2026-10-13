@@ -364,3 +364,4 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
   .live-nav-item{min-width:0}
 }
 @media(max-width:767px){.live-topbar .top-right{justify-content:flex-start}}
+.live-account-email { overflow-wrap: anywhere; }

@@ -1,5 +1,7 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'Signed in as':'目前登入帳戶',
+  'Check that you used the account invited to this workspace. Use Sign out to change accounts.':'請確認你使用獲邀加入工作區的帳戶。按「登出」即可切換帳戶。',
   'Profile summary':'輪廓確認摘要',
   'Save the project first, then use Edit offer to attach PDF, text or Markdown sources. PowerPoint and Excel files need a text or PDF extract.':'先儲存專案，再於「編輯產品資料」附加 PDF、文字或 Markdown 來源。PowerPoint 及 Excel 請先整理成文字或 PDF。',
   'Write one requirement per line, or separate requirements with semicolons. Commas and slashes stay within the same requirement.':'每行填寫一項條件，亦可用分號分隔。逗號及斜線會保留在同一項條件內。',

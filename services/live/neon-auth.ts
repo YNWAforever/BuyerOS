@@ -49,13 +49,13 @@ function metadata(token: unknown, expectedSubject: string, now: number): {token:
 export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonEnvironment): AuthAdapter {
   if (config.authPath !== '/api/auth') throw new Error('Same-origin Neon auth path required');
   const env = provided ?? {location: window.location, storage: window.sessionStorage, fetch: window.fetch.bind(window), crypto: window.crypto, now: Date.now, channel: browserChannel()};
-  let token = '', subject = '', expires = 0, generation = 0, blocked = env.storage.getItem(invalidatedKey)==='1', returnPath = '/app';
+  let token = '', subject = '', accountEmail = '', expires = 0, generation = 0, blocked = env.storage.getItem(invalidatedKey)==='1', returnPath = '/app';
   let renewal: Promise<string> | null = null, initialization: Promise<void> | null = null;
   const listeners = new Set<() => void>();
   function clear(type: 'logout' | 'invalidated', broadcast = true) {
     const changed = !blocked || !!token || !!subject;
     try{env.storage.setItem(invalidatedKey,'1');}catch{/* Current instance remains blocked if per-tab storage is unavailable. */}
-    generation++; blocked = true; token = ''; subject = ''; expires = 0; renewal = null; initialization = null;
+    generation++; blocked = true; token = ''; subject = ''; accountEmail = ''; expires = 0; renewal = null; initialization = null;
     if (changed) {for (const listener of listeners) listener(); if (broadcast) env.channel?.postMessage({type});}
   }
   const stop = env.channel?.subscribe(event => {
@@ -100,6 +100,8 @@ export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonE
         const id = (result as {user?: {id?: unknown}} | null)?.user?.id;
         if (typeof id !== 'string' || !id || id.length > 255 || /[\u0000-\u001f\u007f]/.test(id)) throw new Error('Invalid cookie session');
         subject = id; await refresh(); guard(captured);
+        const email = (result as {user?: {email?: unknown}} | null)?.user?.email;
+        accountEmail = typeof email === 'string' && email.length <= 320 && !/[\u0000-\u001f\u007f]/.test(email) ? email.trim() : '';
       } catch (error) {if (generation === captured) clear('invalidated'); throw error;}
     })();
     initialization = work;
@@ -147,6 +149,6 @@ export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonE
     invalidate() {clear('invalidated');},
     subscribeInvalidated(listener) {listeners.add(listener); return () => {listeners.delete(listener);};},
     dispose() {clear('invalidated', false); stop?.(); env.channel?.close?.(); listeners.clear();},
-    subject: () => subject, expiresAt: () => expires, returnPath: () => returnPath,
+    subject: () => subject, accountEmail: () => accountEmail, expiresAt: () => expires, returnPath: () => returnPath,
   };
 }
