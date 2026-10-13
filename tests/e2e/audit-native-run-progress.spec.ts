@@ -46,7 +46,7 @@ test('C61 current native safe retry sends one versioned checkpoint request',asyn
  const button=f.panel.getByRole('button',{name:'Retry safe work',exact:true});await expect(button).toBeEnabled();
  await button.evaluate(b=>{(b as HTMLButtonElement).click();(b as HTMLButtonElement).click();});
  await expect.poll(()=>f.posts.length).toBe(1);await expect(f.panel.getByText('Waiting for the worker to start.',{exact:false})).toBeVisible();
- expect(f.posts[0].headers['if-match']).toBe('"7"');expect(f.posts[0].headers['idempotency-key']).toBeTruthy();
+ expect(f.posts[0].headers['x-buyeros-if-match']).toBe('"7"');expect(f.posts[0].headers['idempotency-key']).toBeTruthy();
  expect(f.posts[0].body).toEqual({reason:'Review confirmed original checkpoint',resume_from_last_committed_checkpoint:true});
  await expect(f.panel.getByRole('button',{name:'Retry safe work',exact:true})).toHaveCount(0);
 });

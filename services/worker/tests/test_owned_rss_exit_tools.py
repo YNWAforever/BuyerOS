@@ -1,6 +1,7 @@
 """Keep exited-process sampling compatible with the bulk caller's OSError gate."""
 import importlib.util
 import os
+import subprocess
 from pathlib import Path
 from types import FunctionType, SimpleNamespace
 
@@ -38,7 +39,9 @@ def test_matching_actual_owned_process_reports_positive_rss():
 
 def owned_poll_sequence(*values):
     results=iter(values)
-    return SimpleNamespace(pid=12345,poll=lambda:next(results))
+    def still_alive(timeout):
+        raise subprocess.TimeoutExpired('owned-child',timeout)
+    return SimpleNamespace(pid=12345,poll=lambda:next(results),wait=still_alive)
 
 
 def test_owned_exit_between_initial_poll_and_missing_vmrss_does_not_fabricate_sample(tmp_path,monkeypatch):
@@ -47,6 +50,21 @@ def test_owned_exit_between_initial_poll_and_missing_vmrss_does_not_fabricate_sa
     samples=[]
     m.sample_worker_resources([owned_poll_sequence(None,0)],0,samples)
     assert samples==[]
+
+
+def test_missing_vmrss_can_precede_owned_popen_exit_confirmation(tmp_path,monkeypatch):
+    m=reader();monkeypatch.setattr(m,'_owned_process_tree',lambda p:[(p,None,0)])
+    monkeypatch.setattr(m,'_process_rss',linux_read(tmp_path,'State:\tR (running)\n',m))
+    process=owned_poll_sequence(None,None)
+    waits=[]
+    def confirms_exit(timeout):
+        assert 0<timeout<=.1
+        waits.append(timeout)
+        return 0
+    process.wait=confirms_exit
+    samples=[]
+    m.sample_worker_resources([process],0,samples)
+    assert len(waits)==1 and samples==[]
 
 
 def test_missing_vmrss_with_live_owned_popen_still_refuses(tmp_path,monkeypatch):

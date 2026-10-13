@@ -44,7 +44,7 @@ function BuyerImportForm({onImported,t}:{onImported:()=>void;t:(text:string)=>st
         if(notified.current!==value.id){notified.current=value.id;onImported();}
       }
       else setPreview(value);
-    }).catch(cause=>{if(active&&!(cause instanceof LiveCancelled)){recovered.current=true;setRecovering(false);setError(describeLiveError(cause));}});
+    }).catch(cause=>{if(active&&!(cause instanceof LiveCancelled)){recovered.current=true;setRecovering(false);setUncertain(true);setError(describeLiveError(cause));}});
     return()=>{active=false;};
   },[workflow,importId,onImported]);
   async function stage(){

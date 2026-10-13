@@ -97,6 +97,17 @@ test('CSV preview, lost-response recovery, provenance and duplicate reimport use
   }finally{releaseRecovery();}
   await expect(page.getByRole('status').filter({hasText:'Imported 2 buyers; skipped 1 duplicates.'})).toBeVisible();
   await expect(page.getByText('26 in snapshot')).toBeVisible();
+  // A failed reload lookup must retain the original import instead of allowing
+  // another preview to overwrite the only recoverable identity.
+  await page.route(`**/buyer-imports/${importId}`,route=>route.abort('connectionreset'),{times:1});
+  await page.reload();
+  await page.getByRole('button',{name:'Sign in',exact:true}).click();
+  await expect(page.getByText(/The import result is unconfirmed/)).toBeVisible();
+  await expect(page.getByLabel('Buyer spreadsheet',{exact:true})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'Preview import',exact:true})).toBeDisabled();
+  expect(new URL(page.url()).searchParams.get('buyer_import')).toBe(importId);
+  await page.getByRole('button',{name:'Check import status',exact:true}).click();
+  await expect(page.getByRole('status').filter({hasText:'Imported 2 buyers; skipped 1 duplicates.'})).toBeVisible();
   await page.getByLabel('Search buyers',{exact:true}).fill('Import Fixture Alpha');
   await page.getByRole('button',{name:'Apply filters',exact:true}).click();
   await expect(page.getByText('1 in snapshot')).toBeVisible();

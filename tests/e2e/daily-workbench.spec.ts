@@ -127,7 +127,7 @@ test('T29 manual locale remains usable while preference loads and saves with its
   const isPreference=(response:import('@playwright/test').Response)=>new URL(response.url()).pathname===preferencePath;
   await page.route(`${browserApiOrigin}${preferencePath}`,async route=>{
     if(route.request().method()==='GET'){preferenceReads++;await heldPreference;}
-    else if(route.request().method()==='PATCH')preferenceWrites.push(route.request().headers()['if-match']);
+    else if(route.request().method()==='PATCH')preferenceWrites.push(route.request().headers()['x-buyeros-if-match']);
     await route.continue();
   });
   const loadedPreference=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='GET'&&response.status()===200,{timeout:30_000});
@@ -153,14 +153,14 @@ test('T29 manual locale remains usable while preference loads and saves with its
   await page.locator('header select').selectOption('en');
   const resetResponse=await reset;
   expect(resetResponse.status()).toBe(200);
-  expect(await resetResponse.request().headerValue('if-match')).toBe(`"${loaded.version}"`);
+  expect(await resetResponse.request().headerValue('x-buyeros-if-match')).toBe(`"${loaded.version}"`);
   const resetVersion=(await resetResponse.json()).data.version;
   await expect(page.locator('header select')).toBeEnabled({timeout:30_000});
   const saved=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='PATCH',{timeout:30_000});
   await page.locator('header select').selectOption('zh-HK');
   const savedResponse=await saved;
   expect(savedResponse.status()).toBe(200);
-  expect(await savedResponse.request().headerValue('if-match')).toBe(`"${resetVersion}"`);
+  expect(await savedResponse.request().headerValue('x-buyeros-if-match')).toBe(`"${resetVersion}"`);
   const savedVersion=(await savedResponse.json()).data.version;
   expect(preferenceWrites).toEqual([`"${loaded.version}"`,`"${resetVersion}"`]);
   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
