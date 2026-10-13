@@ -143,7 +143,7 @@ def get_engine():
     key = (_current_loop_key(), url)
     engine = _ENGINES.get(key)
     if engine is None:
-        engine = create_async_engine(url)
+        engine = create_async_engine(url, pool_pre_ping=True)
         _ENGINES[key] = engine
     return engine
 
@@ -156,7 +156,7 @@ def get_rate_engine():
     key = (_current_loop_key(), url)
     engine = _RATE_ENGINES.get(key)
     if engine is None:
-        engine = create_async_engine(url, pool_size=2, max_overflow=2, pool_timeout=5)
+        engine = create_async_engine(url, pool_size=2, max_overflow=2, pool_timeout=5, pool_pre_ping=True)
         _RATE_ENGINES[key] = engine
     return engine
 
