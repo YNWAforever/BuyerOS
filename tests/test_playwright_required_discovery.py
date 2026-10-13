@@ -52,12 +52,12 @@ class PlaywrightRequiredDiscoveryTests(unittest.TestCase):
   self.assertIn('assert len(names)==len(set(names))==16,',guards)
   self.assertIn('assert result.testsRun==16 and result.wasSuccessful() and not result.skipped,',guards)
 
- def test_original_frontend_Neon_browser_binds_exact_native8_execution(self):
+ def test_original_frontend_Neon_browser_binds_exact_native9_execution(self):
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text(encoding='utf-8');body=workflow.split('  frontend:\n',1)[1].split('\n  cloudflare-controller:',1)[0]
   native='pnpm exec playwright test --config playwright.neon-runtime-built.config.ts --list --reporter=json > artifacts/c61/ci-neon-session-native-discovery.json'
-  pre='python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 8 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --discovery-only'
+  pre='python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 9 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --discovery-only'
   original='pnpm exec playwright test --config playwright.neon-runtime-built.config.ts\n'
-  post='python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 8 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --junit test-results/neon-session.xml'
+  post='python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 9 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --junit test-results/neon-session.xml'
   for command in [native,pre,original,post]:self.assertIn(command,body)
   self.assertLess(body.index(native),body.index(pre));self.assertLess(body.index(pre),body.index(original));self.assertLess(body.index(original),body.index(post));self.assertIn('artifacts/c61/ci-neon-session-native-discovery.json\n',body)
 
