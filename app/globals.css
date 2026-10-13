@@ -348,3 +348,14 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
 .live-workspace .steps button:not(.live-nav-item):not([data-slot]):hover:not(:disabled){background:transparent}
 .live-workspace .steps{flex-wrap:wrap;min-width:0}
 .live-topbar button{white-space:nowrap}
+/* Narrow screens and 200% zoom: topbar controls and section buttons wrap instead of overflowing.
+   The section bar wraps (no horizontal scroller) so no element extends past the viewport. */
+.live-topbar .top-right{flex-wrap:wrap;min-width:0}
+.live-topbar label{flex-wrap:wrap;min-width:0}
+.live-topbar select{min-width:0;max-width:100%}
+@media(max-width:1023px){
+  .live-sidebar{position:static;flex-wrap:wrap}
+  .live-nav{flex:1 1 100%;flex-wrap:wrap;overflow-x:visible}
+  .live-nav-item{min-width:0}
+}
+@media(max-width:767px){.live-topbar .top-right{justify-content:flex-start}}
