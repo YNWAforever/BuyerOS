@@ -194,3 +194,16 @@ test('C11 failed provider logout remains invalidated on reload despite an old va
 test('C11 received cross-tab invalidation persists through reload without a token marker',async()=>{
  const h=environment(),auth=await adapter(h.env);await auth.initialize();h.emit({type:'logout'});const reloaded=await adapter(h.env);await reloaded.initialize();assert.equal(reloaded.subject(),'');assert.equal(JSON.stringify([...h.entries.values()]).includes(jwt()),false);
 });
+test('Google sign-in follows the Neon Auth social init hop and still refuses foreign redirects',async()=>{
+ const attempt=async target=>{
+  const h=environment(),auth=await adapter(h.env);await auth.signIn('/app');
+  h.env.fetch=async(url,init)=>{assert.equal(url,'/api/auth/sign-in/social');assert.equal(JSON.parse(init.body).provider,'google');return Response.json({url:target,redirect:false});};
+  try{await auth.signInGoogle();return h.env.location.href;}catch{return 'refused';}
+ };
+ const neon='https://ep-a.neonauth.c-4.ap-southeast-1.aws.neon.tech/neondb/auth/sign-in/social/init?token=t';
+ assert.equal(await attempt(neon),neon);
+ assert.equal(await attempt('https://accounts.google.com/o/oauth2/v2/auth?state=s'),'https://accounts.google.com/o/oauth2/v2/auth?state=s');
+ for(const bad of ['https://evil.example/neondb/auth/sign-in/social/init?token=t','https://neon.tech.evil.example/sign-in/social/init',
+  'http://ep-a.neonauth.aws.neon.tech/neondb/auth/sign-in/social/init','https://ep-a.neonauth.aws.neon.tech/neondb/auth/sign-out',
+  'https://user@ep-a.neonauth.aws.neon.tech/neondb/auth/sign-in/social/init'])assert.equal(await attempt(bad),'refused',bad);
+});

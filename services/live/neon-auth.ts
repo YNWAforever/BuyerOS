@@ -131,7 +131,9 @@ export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonE
       const callbackURL = callbackUrl();
       const result = await request('/sign-in/social', {provider: 'google', callbackURL, disableRedirect: true});
       const url = new URL((result as {url?: string} | null)?.url ?? '');
-      if (url.protocol !== 'https:' || url.hostname !== 'accounts.google.com' || url.username || url.password || url.port) throw new Error('Invalid Google redirect');
+      // Neon Auth first redirects through its own /sign-in/social/init hop, which then forwards to Google.
+      const neonInit = url.hostname.endsWith('.neon.tech') && url.pathname.endsWith('/sign-in/social/init');
+      if (url.protocol !== 'https:' || (url.hostname !== 'accounts.google.com' && !neonInit) || url.username || url.password || url.port) throw new Error('Invalid Google redirect');
       env.location.assign(url.href);
     },
     async completeCallback() {
