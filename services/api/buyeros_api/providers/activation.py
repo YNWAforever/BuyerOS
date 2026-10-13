@@ -1,4 +1,4 @@
-"""Code-owned Exa search + Claude model registrations, enabled by deployed credentials.
+"""Code-owned Exa search + OpenCode Go model registrations, enabled by deployed credentials.
 
 Nothing registers unless the server-only key for that vendor is present, so test
 and CI environments keep an empty registry. Every call still passes the existing
@@ -18,15 +18,16 @@ from decimal import Decimal
 from .base import Money, ProviderCapability
 
 VERIFIED_AT = datetime(2026, 10, 13, tzinfo=timezone.utc)
-CONTRACT_TESTS = ('services/api/tests/test_exa_anthropic_providers.py',)
+CONTRACT_TESTS = ('services/api/tests/test_exa_opencode_providers.py',)
 DEFAULT_MARKETS = 'HK,SG,TW,JP,KR,AU,NZ,US,CA,GB,IE,DE,FR,NL,BE,CH,AT,SE,DK,NO,FI,ES,IT,PL,AE'
 # Exa has a market filter (userLocation) but no language filter. Only English is
 # admitted, so the frozen language filter is never claimed for other languages.
 SEARCH_LANGUAGES = ('en',)
 # auto search with 20 results ($0.017) + 20 text pages ($0.020) = $0.037 per call.
 EXA_MAX_LIABILITY = Money(Decimal('0.040000'))
-# 20k input tokens at $4/M + 4k output tokens at $20/M = $0.16 per fit proposal.
-CLAUDE_MAX_LIABILITY = Money(Decimal('0.160000'))
+# OpenCode Go is a subscription ($12/5h, $30/week, $60/month usage caps); beyond the caps,
+# Zen top-up is metered per token. Hold a conservative $0.10 per fit proposal.
+OPENCODE_MAX_LIABILITY = Money(Decimal('0.100000'))
 
 
 def _markets() -> frozenset[str]:
@@ -72,31 +73,31 @@ def _exa_registration(api_key: str, markets: frozenset[str]):
         market_languages=tuple((market, SEARCH_LANGUAGES) for market in sorted(markets)))
 
 
-def _claude_registration(api_key: str, markets: frozenset[str]):
+def _opencode_registration(api_key: str, markets: frozenset[str]):
     from .model import ModelRoute
     from .registry import ProviderRegistration
-    from .anthropic_model import DEFAULT_MODEL_ID
+    from .opencode_model import DEFAULT_MODEL_ID
 
-    model_id = os.environ.get('BUYEROS_ANTHROPIC_MODEL', DEFAULT_MODEL_ID)
+    model_id = os.environ.get('BUYEROS_OPENCODE_MODEL', DEFAULT_MODEL_ID)
     route = ModelRoute(prompt_version='fit-proposal.v1', permitted_tools=frozenset(),
                        max_input_tokens=20000, max_output_tokens=4000, deadline_seconds=60,
-                       repair_limit=0, route_id='anthropic-fit.v1')
+                       repair_limit=0, route_id='opencode-go-fit.v1')
     capability = ProviderCapability(
-        provider='anthropic-messages', adapter_version='anthropic-messages.v1', service='model',
+        provider='opencode-go', adapter_version='opencode-go.v1', service='model',
         markets=markets, languages=frozenset(SEARCH_LANGUAGES), roles=frozenset({'company'}),
-        auth_model='server-only x-api-key', pricing_version=f'anthropic-2026-10-13:{model_id}',
-        max_liability=CLAUDE_MAX_LIABILITY,
+        auth_model='server-only bearer key', pricing_version=f'opencode-go-2026-10-13:{model_id}',
+        max_liability=OPENCODE_MAX_LIABILITY,
         idempotency='verified', status='verified', callback='unsupported', cancel='unsupported',
         retention='no prompt or response storage beyond BuyerOS model receipts',
         verified_at=VERIFIED_AT,
-        source_urls=('https://platform.claude.com/docs/en/build-with-claude/structured-outputs',
-                     'https://www.anthropic.com/pricing#api'))
+        source_urls=('https://opencode.ai/go', 'https://opencode.ai/zen/go/v1/models'))
 
     def factory():
-        from .anthropic_model import AnthropicModelClient
+        import httpx
+        from .opencode_model import OpenCodeGoModelClient
         from .live_model import LiveModelAdapter
         from .model_receipts import PostgresModelReceipts
-        client = AnthropicModelClient(api_key=api_key, model_id=model_id)
+        client = OpenCodeGoModelClient(api_key=api_key, http=httpx.AsyncClient(), model_id=model_id)
         receipts = PostgresModelReceipts(_UnscopedEngine(), uuid.UUID(int=0), capability,
                                          model_id=model_id, route=route)
         return LiveModelAdapter(capability=capability, client=client, receipts=receipts)
@@ -107,13 +108,13 @@ def _claude_registration(api_key: str, markets: frozenset[str]):
 
 def environment_registrations() -> tuple:
     exa_key = os.environ.get('BUYEROS_EXA_API_KEY')
-    anthropic_key = os.environ.get('BUYEROS_ANTHROPIC_API_KEY')
-    if not exa_key and not anthropic_key:
+    opencode_key = os.environ.get('BUYEROS_OPENCODE_API_KEY')
+    if not exa_key and not opencode_key:
         return ()
     markets = _markets()
     registrations = []
     if exa_key:
         registrations.append(_exa_registration(exa_key, markets))
-    if anthropic_key:
-        registrations.append(_claude_registration(anthropic_key, markets))
+    if opencode_key:
+        registrations.append(_opencode_registration(opencode_key, markets))
     return tuple(registrations)

@@ -1,4 +1,4 @@
-# Exa + Claude research go-live
+# Exa + OpenCode Go research go-live
 
 Status 2026-10-13: code ready on `claude/live-ui-exa-research` (PR #19). Nothing below
 has been applied to production. Steps marked **OWNER** handle secrets or irreversible
@@ -38,14 +38,14 @@ Generate one machine secret locally, for example `openssl rand -base64 48`, and 
 | Cloudflare `buyeros-jobs` secret | `WORKER_CURRENT_SECRET` | the same secret: `npx wrangler secret put WORKER_CURRENT_SECRET --config services/cloudflare-jobs/wrangler.jsonc` |
 | Vercel (sensitive) | `BUYEROS_EXECUTION_DATABASE_URL`, `BUYEROS_CHECKPOINT_DATABASE_URL` | `buyeros_cf_runtime` DSN |
 | Vercel (sensitive) | `BUYEROS_EXA_API_KEY` | from dashboard.exa.ai |
-| Vercel (sensitive) | `BUYEROS_ANTHROPIC_API_KEY` | from platform.claude.com |
+| Vercel (sensitive) | `BUYEROS_OPENCODE_API_KEY` | OpenCode Go key from opencode.ai/auth |
 
 ## 3. Non-secret configuration
 
 | Where | Name | Value |
 | --- | --- | --- |
 | Vercel | `BUYEROS_RESEARCH_MARKETS` | optional; comma list of ISO country codes (default in `providers/activation.py`) |
-| Vercel | `BUYEROS_ANTHROPIC_MODEL` | optional; default `claude-opus-5-5` |
+| Vercel | `BUYEROS_OPENCODE_MODEL` | optional; default `kimi-k3` (list: `curl https://opencode.ai/zen/go/v1/models`) |
 | Vercel | `BUYEROS_RETENTION_POLICY_VERSION` | your reviewed policy id (max 64 chars) |
 | Worker `wrangler.jsonc` vars | `WORKER_API_ORIGIN` | `https://buyer-os-nu.vercel.app` |
 | Worker | `WORKER_API_ALLOWED_ORIGINS` | `["https://buyer-os-nu.vercel.app"]` |
@@ -68,7 +68,7 @@ From `services/api`, with `BUYEROS_RUNTIME_ADMIN_DATABASE_URL` set in your own
 shell, dry run first, then rerun with `--apply`:
 
 ```bash
-uv run --frozen python tools/set_execution_runtime.py --expected-epoch <current> --backend cloudflare --enabled true --reason "Exa+Claude go-live"
+uv run --frozen python tools/set_execution_runtime.py --expected-epoch <current> --backend cloudflare --enabled true --reason "Exa+OpenCode go-live"
 ```
 
 Then set Vercel `BUYEROS_CLOUDFLARE_EXECUTION_ENABLED=true` and Worker
@@ -81,8 +81,10 @@ Set Vercel `BUYEROS_PAID_ADMISSION_ENABLED=true` and
 `BUYEROS_PAID_DISPATCH_ENABLED=true`, then redeploy. In the app as a workspace admin:
 
 1. Settings → approve the **account research** policy.
-2. Settings → set a budget. Each Exa search holds up to $0.04 and each Claude fit
-   proposal up to $0.16.
+2. Settings → set a budget. Each Exa search holds up to $0.04 and each OpenCode Go
+   fit proposal up to $0.10. OpenCode Go also has its own subscription caps
+   ($12 per 5 hours, $30 per week, $60 per month); past them, calls fail until the
+   window resets or Zen balance is topped up.
 3. Offer → create a project and approve the buyer profile, using markets from the
    allowed list and language `en`.
 4. Research runs → Start research. Watch Operations for failed jobs.
@@ -91,5 +93,5 @@ Set Vercel `BUYEROS_PAID_ADMISSION_ENABLED=true` and
 
 Set `BUYEROS_PAID_DISPATCH_ENABLED=false` and Worker `EXECUTION_ENABLED=false`
 first. Then run the pause step in [cloudflare-worker-setup.md](cloudflare-worker-setup.md).
-Removing the Exa or Anthropic key unregisters that provider on the next deploy.
+Removing the Exa or OpenCode key unregisters that provider on the next deploy.
 Never release unknown holds just to empty a queue.

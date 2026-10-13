@@ -18,7 +18,7 @@ class ProviderName(StrEnum):
     OPENAI_RESPONSES = 'openai-responses'
     HUNTER = 'hunter'
     EXA_SEARCH = 'exa-search'
-    ANTHROPIC_MESSAGES = 'anthropic-messages'
+    OPENCODE_GO = 'opencode-go'
 
 
 class ProviderUnavailable(ApiError):
