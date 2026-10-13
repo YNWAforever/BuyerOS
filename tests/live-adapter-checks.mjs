@@ -591,7 +591,7 @@ await test('error keeps response header request ID when body omits it',async()=>
   await assert.rejects(()=>client.request({path:'/v1/x',scope:'one',token:'token'}),error=>error instanceof live.LiveError && error.requestId==='request-42');
 });
 
-await test('live error guidance distinguishes reauth, stale revision and key conflict with request ID',()=>{
+await test('live error guidance distinguishes reauth, stale revision and key conflict with request ID',async()=>{
   const cases=[
     [401,'UNAUTHENTICATED','Sign in'],[412,'STALE_REVISION','Refresh'],[409,'IDEMPOTENCY_CONFLICT','new action'],
   ];
@@ -599,6 +599,15 @@ await test('live error guidance distinguishes reauth, stale revision and key con
     const advice=live.describeLiveError(new live.LiveError('server message',code,status,'req-123',false));
     assert.ok(advice.includes(phrase),advice);assert.ok(advice.includes('req-123'),advice);
   }
+  // A hosting layer can replace a committed write's response with an empty 412.
+  // That is an unknown outcome, not evidence that the API rejected the edit.
+  const client=live.createLiveClient(async()=>new Response(null,{status:412}));
+  await assert.rejects(()=>client.request({path:'/v1/workspaces/A/projects/P',method:'PATCH',
+    scope:'one',idempotencyKey:'same-intent',ifMatch:'"1"',body:{name:'Updated'}}),error=>{
+    assert.equal(error.code,'UNKNOWN_ERROR');
+    assert.equal(live.describeLiveError(error),'The server response did not confirm the save result. Reload and compare saved data before trying again.');
+    return true;
+  });
 });
 
 const actionModule=await loadModule('services/live/action-intent.ts');

@@ -8,6 +8,7 @@ export class LiveError extends Error {
 export function describeLiveError(error: unknown): string {
   if (!(error instanceof LiveError)) return 'Request failed. Try again after checking the connection.';
   const guidance = error.status === 401 ? 'Sign in again to continue.'
+    : error.status === 412 && error.code === 'UNKNOWN_ERROR' ? 'The server response did not confirm the save result. Reload and compare saved data before trying again.'
     : error.status === 412 ? 'Refresh and compare the latest version before retrying.'
     : error.status === 409 ? 'Review the conflict and start a new action if the payload changed.'
     : error.status === 403 ? 'You do not have permission for this action.'

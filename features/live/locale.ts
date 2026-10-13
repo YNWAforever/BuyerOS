@@ -1,5 +1,7 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'Document storage is unavailable. Keep the file and ask an administrator to check storage before uploading again.':'文件儲存服務無法使用。請保留檔案，並請管理員檢查儲存設定後再上載。',
+  'The server response did not confirm the save result. Reload and compare saved data before trying again.':'伺服器回應未能確認儲存結果。請重新載入並核對已儲存資料，再決定是否重試。',
   'Signed in as':'目前登入帳戶',
   'Check that you used the account invited to this workspace. Use Sign out to change accounts.':'請確認你使用獲邀加入工作區的帳戶。按「登出」即可切換帳戶。',
   'Profile summary':'輪廓確認摘要',

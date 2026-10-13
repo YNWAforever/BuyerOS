@@ -73,7 +73,10 @@ export function LiveOfferDocuments({projectId,selected,onSelect,onApply,t}:{
       await refresh();
     }catch(cause){
       if(cause instanceof LiveCancelled||!session.isCurrent(identity))return;
-      setError(cause instanceof LiveError?describeLiveError(cause):cause instanceof Error?cause.message:'Upload failed');
+      if(cause instanceof LiveError&&cause.code==='PROVIDER_UNAVAILABLE'){
+        const guidance=t('Document storage is unavailable. Keep the file and ask an administrator to check storage before uploading again.');
+        setError(cause.requestId?`${guidance} ${t('Request ID')}: ${cause.requestId}`:guidance);
+      }else setError(cause instanceof LiveError?describeLiveError(cause):cause instanceof Error?cause.message:'Upload failed');
     }finally{if(session.isCurrent(identity))setBusy(false);}
   }
 
