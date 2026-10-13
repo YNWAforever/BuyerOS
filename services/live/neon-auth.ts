@@ -134,6 +134,9 @@ export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonE
       const result = await request('/sign-in/social', {provider: 'google', callbackURL, disableRedirect: true});
       const url = new URL((result as {url?: string} | null)?.url ?? '');
       if (url.protocol !== 'https:' || url.hostname !== 'accounts.google.com' || url.username || url.password || url.port) throw new Error('Invalid Google redirect');
+      // Keep the provider's state, PKCE and consent request, but let the user choose their account.
+      const prompts = url.searchParams.getAll('prompt').flatMap(value => value.split(/\s+/)).filter(value => value && value !== 'none');
+      url.searchParams.set('prompt', [...new Set([...prompts, 'select_account'])].join(' '));
       env.location.assign(url.href);
     },
     async completeCallback() {

@@ -223,3 +223,22 @@ test('missing or malformed account email does not prevent valid session authenti
   await auth.initialize();assert.equal(auth.subject(),'neon-user');assert.equal(auth.accountEmail?.(),'');
  }
 });
+
+test('Google sign-in always offers account selection and preserves the provider transaction',async()=>{
+ for(const [existing,expected] of [[null,'select_account'],['consent','consent select_account'],['none','select_account'],['consent select_account','consent select_account']]){
+  const h=environment(),auth=await adapter(h.env);await auth.signIn('/app?workspace=A');
+  const tx=JSON.parse(h.entries.get('buyeros-neon-return'));
+  const providerUrl=new URL('https://accounts.google.com/o/oauth2/v2/auth?client_id=fixture-client&response_type=code&scope=openid+email&state=opaque-provider-state&nonce=opaque-provider-nonce&code_challenge=opaque-pkce&redirect_uri=https%3A%2F%2Fprovider.example.test%2Fcallback');
+  if(existing)providerUrl.searchParams.set('prompt',existing);
+  h.env.fetch=async(url,init)=>{
+   assert.equal(url,'/api/auth/sign-in/social');
+   assert.deepEqual(JSON.parse(init.body),{provider:'google',callbackURL:`https://app.example.test/auth/callback?state=${tx.state}`,disableRedirect:true});
+   return Response.json({url:providerUrl.href});
+  };
+  await auth.signInGoogle();const redirect=new URL(h.env.location.href);
+  assert.equal(redirect.searchParams.get('prompt'),expected);
+  redirect.searchParams.delete('prompt');providerUrl.searchParams.delete('prompt');
+  assert.equal(redirect.href,providerUrl.href);
+  assert.equal(h.entries.get('buyeros-neon-return'),JSON.stringify(tx));
+ }
+});

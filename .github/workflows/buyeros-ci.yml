@@ -85,9 +85,9 @@ jobs:
           pnpm exec playwright test --config playwright.neon-runtime-built.config.ts --list > artifacts/c61/ci-neon-session-discovery.txt
           python -c "import pathlib,re; text=pathlib.Path('artifacts/c61/ci-neon-session-discovery.txt').read_text(); match=re.search(r'Total: (\d+) tests?',text); assert match and int(match[1])>0 and 'neon-session-production.spec.ts' in text and 'neon-security-production.spec.ts' in text, 'empty or wrong Neon discovery'"
           pnpm exec playwright test --config playwright.neon-runtime-built.config.ts --list --reporter=json > artifacts/c61/ci-neon-session-native-discovery.json
-          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 8 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --discovery-only
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 9 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.neon-runtime-built.config.ts
-      - run: python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 8 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --junit test-results/neon-session.xml
+      - run: python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 9 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --junit test-results/neon-session.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
