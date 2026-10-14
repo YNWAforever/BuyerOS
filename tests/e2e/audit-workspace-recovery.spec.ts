@@ -1,5 +1,5 @@
 import {expect,test} from '@playwright/test';
-import {signInWorkbench,resetWorkbenchFixtureRateWindows} from './fixtures/workbench-auth';
+import {signInWorkbench,resetWorkbenchFixtureRateWindows,workspace,project} from './fixtures/workbench-auth';
 const requestId='b7aea690-a1a4-4c58-b85e-27dc02a7e7c8';
 const url='http://localhost:5173/v1/workspaces?**';
 test.beforeEach(async()=>{await resetWorkbenchFixtureRateWindows();});
@@ -51,4 +51,66 @@ test('N11-04 empty membership keeps retry disabled while one read is pending',as
   await expect(page.getByRole('button',{name:'Check access again',exact:true})).toBeEnabled();
   await expect(page.getByText('No workspace membership. Ask an administrator for access.')).toBeVisible();
   await expect(page.getByText(/Last checked:/)).toBeVisible();
+});
+
+const projectsUrl=`http://localhost:5173/v1/workspaces/${workspace}/projects?**`;
+
+test('project selection recovers the first network interruption without a manual retry',async({page})=>{
+  let reads=0;
+  await page.route(projectsUrl,route=>++reads===1?route.abort('connectionreset'):route.continue());
+  await signInWorkbench(page,false);
+  await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(project);
+  await expect(page.getByRole('button',{name:'Retry loading projects'})).toHaveCount(0);
+  expect(reads).toBeGreaterThanOrEqual(2);
+});
+
+test('project selection recovers a first read deadline even when its late server response is 200',async({page})=>{
+  let reads=0,release:()=>void=()=>{};
+  const held=new Promise<void>(resolve=>{release=resolve;});
+  const failures:string[]=[];
+  page.on('requestfailed',request=>{if(new URL(request.url()).pathname===`/v1/workspaces/${workspace}/projects`)failures.push(request.failure()?.errorText??'');});
+  await page.route(projectsUrl,async route=>{
+    if(++reads===1){
+      await held;
+      await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data_mode:'live',request_id:requestId,
+        data:{items:[{id:project,name:'Late project',status:'active'}],offset:0,limit:100,total:1}})}).catch(()=>{});
+      return;
+    }
+    release();await route.continue();
+  });
+  try{
+    await signInWorkbench(page,false);
+    await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(project,{timeout:25_000});
+    await expect(page.getByRole('button',{name:'Retry loading projects'})).toHaveCount(0);
+    expect(failures).toContain('net::ERR_ABORTED');
+  }finally{release();}
+});
+
+test('workspace selection recovers one interrupted read before loading the project',async({page})=>{
+  let reads=0;
+  await page.route(url,route=>++reads===1?route.abort('connectionreset'):route.continue());
+  await signInWorkbench(page,false);
+  await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(project);
+  expect(reads).toBeGreaterThanOrEqual(2);
+});
+
+test('persistent project connection failure stops after two reads and preserves manual retry',async({page})=>{
+  let reads=0;
+  await page.route(projectsUrl,route=>{reads++;return route.abort('connectionreset');});
+  await signInWorkbench(page,false);
+  await expect(page.getByRole('button',{name:'Retry loading projects'})).toBeEnabled();
+  expect(reads).toBe(2);
+  await page.unroute(projectsUrl);
+  await page.getByRole('button',{name:'Retry loading projects'}).click();
+  await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(project);
+});
+
+test('project permission denial is shown immediately without automatic read replay',async({page})=>{
+  let reads=0;
+  await page.route(projectsUrl,route=>{reads++;return route.fulfill({status:403,contentType:'application/json',body:JSON.stringify({
+    code:'PERMISSION_DENIED',message:'fixture denial',request_id:requestId,retryable:false})});});
+  await signInWorkbench(page,false);
+  await expect(page.getByRole('alert').filter({hasText:'You do not have permission for this action.'})).toBeVisible();
+  expect(reads).toBe(1);
+  await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveCount(0);
 });
