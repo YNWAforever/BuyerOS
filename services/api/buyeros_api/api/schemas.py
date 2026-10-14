@@ -1,7 +1,7 @@
 """Strict request bodies (contract `additionalProperties: false` and x-validation)."""
 
 from typing import Annotated, Literal, Union
-from datetime import datetime
+from datetime import date, datetime
 import re
 import uuid
 from urllib.parse import urlparse
@@ -276,6 +276,55 @@ class ReviewRequest(_Strict):
     selection: Selection
     status: Literal["accepted", "rejected", "needs_information"]
     reason: str = Field(min_length=3, max_length=2000)
+
+
+class BuyerSourceReference(_Strict):
+    title: StrictStr = Field(min_length=1, max_length=300)
+    url: StrictStr = Field(min_length=1, max_length=2048)
+
+    @field_validator("title")
+    @classmethod
+    def _nonblank_title(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("source title must not be blank")
+        return value
+
+    @field_validator("url")
+    @classmethod
+    def _absolute_credential_free_http_url(cls, value: str) -> str:
+        parsed = urlparse(value)
+        try:
+            port = parsed.port
+        except ValueError as exc:
+            raise ValueError("source URL has an invalid port") from exc
+        if (
+            parsed.scheme.lower() not in {"http", "https"}
+            or not parsed.netloc
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+            or any(character.isspace() for character in value)
+        ):
+            raise ValueError("source URL must be an absolute HTTP(S) URL without credentials")
+        if port is not None and not 1 <= port <= 65535:
+            raise ValueError("source URL port is outside the valid range")
+        return value
+
+
+class BuyerSourceCheckCreate(_Strict):
+    checked_on: date
+    grade: Literal["A", "B", "C"]
+    rationale: StrictStr = Field(min_length=1, max_length=4000)
+    limitations: StrictStr | None = Field(default=None, max_length=4000)
+    sources: list[BuyerSourceReference] = Field(min_length=1, max_length=10)
+
+    @field_validator("rationale")
+    @classmethod
+    def _nonblank_rationale(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("rationale must not be blank")
+        return value
+
 
 
 class BuyerUpdate(_Strict):
