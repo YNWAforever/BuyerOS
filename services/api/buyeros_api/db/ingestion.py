@@ -35,6 +35,7 @@ class OfferDocument(Base, TenantMixin):
     fact_candidates: Mapped[list[dict]] = mapped_column(
         JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
     )
+    extraction_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb"))
     source_url: Mapped[str | None] = mapped_column(String(2000), nullable=True)
     object_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
     retention_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

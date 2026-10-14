@@ -16,6 +16,7 @@ from botocore.config import Config
 from buyeros_api.settings import get_settings
 
 MAX_OBJECT_BYTES = 5 * 1024 * 1024
+MAX_PRIVATE_OBJECT_BYTES = 20 * 1024 * 1024
 
 
 class StoreUnavailable(RuntimeError):
@@ -53,7 +54,7 @@ class PostgresPrivateStore:
         from buyeros_api.db.private_objects import PrivateDocumentObject
         from buyeros_api.db.session import tenant_session
 
-        if (not isinstance(body, bytes) or not body or len(body) > MAX_OBJECT_BYTES
+        if (not isinstance(body, bytes) or not body or len(body) > MAX_PRIVATE_OBJECT_BYTES
                 or not isinstance(digest, str) or hashlib.sha256(body).hexdigest() != digest
                 or type(retention_seconds) is not int or not 0 < retention_seconds <= 30 * 86400):
             raise ValueError("private object bounds or digest mismatch")
@@ -86,8 +87,32 @@ class PostgresPrivateStore:
         if row is None:
             raise ValueError("private object missing or expired")
         body, digest = bytes(row[0]), row[1]
-        if not body or len(body) > MAX_OBJECT_BYTES or hashlib.sha256(body).hexdigest() != digest:
+        if not body or len(body) > MAX_PRIVATE_OBJECT_BYTES or hashlib.sha256(body).hexdigest() != digest:
             raise ValueError("private object bounds or digest mismatch")
+        return body
+
+    async def get_private_chunk(self, key: str, *, offset: int, length: int,
+                                expected_sha256: str | None = None) -> bytes:
+        from sqlalchemy import func, select
+        from buyeros_api.db.private_objects import PrivateDocumentObject
+        from buyeros_api.db.session import tenant_session
+
+        object_id = self._checked_id(key)
+        if type(offset) is not int or offset < 0 or type(length) is not int or not 1 <= length <= 2 * 1024 * 1024:
+            raise ValueError('invalid private slice bounds')
+        async with tenant_session(self._engine(), self.workspace_id, read_only=True) as session:
+            row = (await session.execute(select(
+                func.substring(PrivateDocumentObject.body, offset + 1, length),
+                PrivateDocumentObject.source_sha256, func.octet_length(PrivateDocumentObject.body),
+            ).where(PrivateDocumentObject.workspace_id == self.workspace_id,
+                    PrivateDocumentObject.id == object_id,
+                    PrivateDocumentObject.retention_until > func.now()))).first()
+        if (row is None or not 1 <= row[2] <= MAX_PRIVATE_OBJECT_BYTES
+                or offset >= row[2] or expected_sha256 is not None and row[1] != expected_sha256):
+            raise ValueError('private object missing, expired or mismatched')
+        body = bytes(row[0])
+        if len(body) != min(length, row[2] - offset):
+            raise ValueError('private slice length mismatch')
         return body
 
     async def delete_private(self, key: str, *, session=None) -> None:
