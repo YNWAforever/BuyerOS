@@ -5,16 +5,22 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, File, Form, Header, Query, Request, Response, UploadFile
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 
 from ...db.contact import IdempotencyRecord
+from ...db.buyers import SourceDocument
 from ...db.icp import IcpVersion, Project
 from ...db.ingestion import OfferDocument
 from ...db.outbox import AsyncJob, OutboxEvent
-from ...services.ingestion_service import MAX_UPLOAD_BYTES, validate_upload
+from ...services.ingestion_service import (
+    MAX_UPLOAD_BYTES, document_candidate_facts, parse_upload_candidates, validate_upload,
+)
+from ...execution.pdf_parser import PdfParserTimeout
 from ...services.bulk_service import job_data
 from ...services.offer_source_policy import canonical_source_url, current_offer_source_permission
-from ...services.object_store import StoreUnavailable, get_private_store
+from ...services.object_store import (
+    PostgresPrivateStore, StoreUnavailable, get_private_store, purge_due_tenant_private_objects,
+)
 from ...services.confirm_service import IdempotencyConflict, same_request
 from ..auth import Principal, get_principal
 from ..deps import load_membership, permission_for_roles, tenant_scoped
@@ -40,6 +46,8 @@ def _data(row: OfferDocument) -> dict:
         data["failure_code"] = row.failure_code
     if row.retention_until is not None:
         data["retention_until"] = row.retention_until.isoformat()
+    if row.extraction_metadata:
+        data["extraction_metadata"] = row.extraction_metadata
     return data
 
 
@@ -50,10 +58,13 @@ async def _authorize(session, principal, workspace_id, operation):
     return member
 
 
-async def _project(session, workspace_id, project_id):
-    row = (await session.execute(select(Project).where(
+async def _project(session, workspace_id, project_id, *, lock=False):
+    query = select(Project).where(
         Project.workspace_id == workspace_id, Project.id == project_id,
-    ))).scalar_one_or_none()
+    )
+    if lock:
+        query = query.with_for_update()
+    row = (await session.execute(query)).scalar_one_or_none()
     if row is None or row.status != "active":
         raise ApiError(404, "NOT_FOUND", "project not found")
     return row
@@ -100,6 +111,7 @@ async def upload_offer_document(
     async with tenant_scoped(workspace_id) as session:
         member = await _authorize(session, principal, workspace_id, "uploadOfferDocument")
         await _project(session, workspace_id, project_id)
+        await purge_due_tenant_private_objects(session, workspace_id)
         replay = await _preflight_replay(
             session, workspace_id=workspace_id, actor_id=member["user_id"],
             key=idempotency_key, operation="uploadOfferDocument", target=target, body=identity,
@@ -109,9 +121,23 @@ async def upload_offer_document(
             return envelope(replay["data"], request.state.request_id)
     try:
         store = get_private_store(workspace_id)
-        object_key = await store.put_private(
-            upload.body, digest=upload.sha256, retention_seconds=RETENTION_SECONDS,
-        )
+        transactional_store = isinstance(store, PostgresPrivateStore)
+        object_key = None
+        inline_status, inline_facts, inline_failure = None, [], None
+        if transactional_store:
+            # Parsing may block. Reauthorize before committing any bytes or
+            # result; no database transaction remains open during extraction.
+            try:
+                inline_facts = await parse_upload_candidates(upload)
+                inline_status = "ready"
+            except PdfParserTimeout:
+                inline_status, inline_failure = "failed", "PARSER_TIMEOUT"
+            except ValueError:
+                inline_status, inline_failure = "failed", "INVALID_DOCUMENT"
+        if not transactional_store:
+            object_key = await store.put_private(
+                upload.body, digest=upload.sha256, retention_seconds=RETENTION_SECONDS,
+            )
     except StoreUnavailable as exc:
         raise ApiError(503, "PROVIDER_UNAVAILABLE", str(exc), retryable=True) from exc
     except Exception as exc:
@@ -119,7 +145,7 @@ async def upload_offer_document(
     try:
         async with tenant_scoped(workspace_id) as session:
             member = await _authorize(session, principal, workspace_id, "uploadOfferDocument")
-            await _project(session, workspace_id, project_id)
+            await _project(session, workspace_id, project_id, lock=True)
             outcome = await begin_idempotency(
                 session, workspace_id=workspace_id, actor_id=member["user_id"],
                 operation_id="uploadOfferDocument", key=idempotency_key,
@@ -130,6 +156,11 @@ async def upload_offer_document(
                     raise ApiError(409, "IDEMPOTENCY_CONFLICT", "legacy replay requires a new key")
                 data = outcome.response["data"]
             else:
+                if transactional_store:
+                    object_key = await store.put_private(
+                        upload.body, digest=upload.sha256, retention_seconds=RETENTION_SECONDS,
+                        session=session,
+                    )
                 row = OfferDocument(
                     workspace_id=workspace_id, project_id=project_id, kind="upload",
                     filename=upload.filename, media_type=upload.media_type,
@@ -139,19 +170,29 @@ async def upload_offer_document(
                 )
                 session.add(row)
                 await session.flush()
+                if transactional_store:
+                    row.status, row.failure_code = inline_status, inline_failure
+                    row.fact_candidates = document_candidate_facts(row.id, inline_facts)
+                    await session.flush()
+                    await session.refresh(row)
+                parse_payload = {"document_id": str(row.id), "actor_user_id": str(member["user_id"])}
+                if transactional_store:
+                    parse_payload["processing_mode"] = "inline_deterministic"
                 session.add(OutboxEvent(
                     workspace_id=workspace_id, intent_key=f"offer.parse:{row.id}",
-                    event_type="offer.parse", payload={"document_id": str(row.id), "actor_user_id": str(member["user_id"])},
+                    event_type="offer.parse", payload=parse_payload,
+                    state="done" if transactional_store else "ready",
                 ))
                 data = _data(row)
                 complete_idempotency(outcome, str(row.id), response={"version": row.version, "data": data})
-        if outcome.replay:
+        if outcome.replay and object_key is not None and not transactional_store:
             await store.delete_private(object_key)
     except Exception:
-        try:
-            await store.delete_private(object_key)
-        except Exception:
-            pass  # Orphan lifecycle policy is an explicit activation prerequisite.
+        if object_key is not None and not transactional_store:
+            try:
+                await store.delete_private(object_key)
+            except Exception:
+                pass  # R2 orphan lifecycle policy is an explicit activation prerequisite.
         raise
     response.headers["ETag"] = f'"{data["version"]}"'
     return envelope(data, request.state.request_id)
@@ -231,12 +272,28 @@ async def delete_offer_document(
             row.status = "deleted"
             row.deleted_at = datetime.now(timezone.utc)
             row.fact_candidates = []
+            from ...db.document_uploads import DocumentSlide
+            await session.execute(delete(DocumentSlide).where(DocumentSlide.workspace_id == workspace_id,
+                DocumentSlide.document_id == document_id))
+            inline_delete = bool(row.object_key and row.object_key.startswith("postgres/tenants/"))
+            if inline_delete:
+                await PostgresPrivateStore(workspace_id).delete_private(row.object_key, session=session)
+                row.object_key = None
+                source = (await session.execute(select(SourceDocument).where(
+                    SourceDocument.workspace_id == workspace_id, SourceDocument.id == document_id,
+                ).with_for_update())).scalar_one_or_none()
+                if source is not None:
+                    source.object_key, source.excerpt = None, None
             row.version += 1
             await session.flush()
             await session.refresh(row)
+            delete_payload = {"document_id": str(row.id)}
+            if inline_delete:
+                delete_payload["processing_mode"] = "inline_deterministic"
             session.add(OutboxEvent(
                 workspace_id=workspace_id, intent_key=f"offer.delete:{row.id}",
-                event_type="offer.delete", payload={"document_id": str(row.id)},
+                event_type="offer.delete", payload=delete_payload,
+                state="done" if inline_delete else "ready",
             ))
             data = _data(row)
             complete_idempotency(outcome, str(row.id), response={"version": row.version, "data": data})
@@ -320,11 +377,14 @@ async def list_offer_documents(
 ) -> dict:
     async with tenant_scoped(workspace_id) as session:
         await _authorize(session, principal, workspace_id, "listOfferDocuments")
+        from ...services.document_upload_service import purge_staging
+        await purge_staging(session, workspace_id)
         exists = (await session.execute(select(Project.id).where(
             Project.workspace_id == workspace_id, Project.id == project_id,
         ))).scalar_one_or_none()
         if exists is None:
             raise ApiError(404, "NOT_FOUND", "project not found")
+        await purge_due_tenant_private_objects(session, workspace_id)
         scope = (OfferDocument.workspace_id == workspace_id,
                  OfferDocument.project_id == project_id)
         total = (await session.execute(

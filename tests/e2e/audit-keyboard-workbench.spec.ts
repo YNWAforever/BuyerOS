@@ -100,7 +100,7 @@ for(const [locale,layout] of [['en','desktop'],['zh-HK','mobile']] as const){
   await input.activate(first.getByText(locale==='en'?'Technical details':'技術資料',{exact:true}));await expect(first.locator('code')).toBeVisible();
   await input.check(first.getByRole('checkbox',{name:t('operator'),exact:true}));await input.fill(directory.getByRole('textbox',{name:t('Change reason'),exact:true}),'Keyboard fixture duty rotation');
   const pending=page.waitForResponse(r=>r.request().method()==='PATCH'&&new URL(r.url()).pathname.includes('/memberships/'));
-  await input.activate(first.getByRole('button',{name:t('Save member'),exact:true}));const changed=await pending;expect(changed.status()).toBe(200);expect(changed.request().headers()['if-match']).toBe('"1"');expect(changed.request().headers()['idempotency-key']).toBeTruthy();
+  await input.activate(first.getByRole('button',{name:t('Save member'),exact:true}));const changed=await pending;expect(changed.status()).toBe(200);expect(changed.request().headers()['x-buyeros-if-match']).toBe('"1"');expect(changed.request().headers()['idempotency-key']).toBeTruthy();
   const member=(await changed.json()).data;expect(member.user_id).toBe('71000001-0000-4000-8000-000000c011de');expect(member.version).toBe(2);
   const read=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/memberships?q=Alex`,{headers:{Authorization:'Bearer fixture-admin'}});expect(read.status()).toBe(200);expect((await read.json()).data.items.map((m:{version:number})=>m.version)).toEqual([2,1]);
   await input.choose(page.getByRole('combobox',{name:t('Project'),exact:true}),projectB);await input.activate(page.getByRole('button',{name:t('Overview'),exact:true}));

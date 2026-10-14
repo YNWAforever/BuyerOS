@@ -31,7 +31,7 @@ test('C11 twenty rejected requests share one renewal and keep each original body
  h.env.fetch=async(url)=>{assert.equal(url,'/api/auth/token');refreshCalls++;await wait.promise;return Response.json({token:jwt('neon-user',2100)});};
  const observations=[],accepted=new Map();let runCount=0,outboxCount=0;
  const client=createLiveClient(async(url,init)=>{
-  observations.push({url,body:init.body,key:init.headers['Idempotency-Key'],auth:init.headers.Authorization,match:init.headers['If-Match']});
+  observations.push({url,body:init.body,key:init.headers['Idempotency-Key'],auth:init.headers.Authorization,match:init.headers['X-BuyerOS-If-Match']});
   if(init.headers.Authorization===`Bearer ${jwt()}`)return Response.json({code:'UNAUTHORIZED'},{status:401});
   if(!accepted.has(init.headers['Idempotency-Key'])){accepted.set(init.headers['Idempotency-Key'],init.body);if(init.headers['Idempotency-Key']==='intent-0'){runCount++;outboxCount++;}}
   return Response.json({data_mode:'live',request_id:'observed-request',data:{accepted:true}});
@@ -40,7 +40,7 @@ test('C11 twenty rejected requests share one renewal and keep each original body
  const requests=bodies.map((body,i)=>client.request({path:'/v1/research',method:'POST',token:jwt(),scope:'A',body,idempotencyKey:`intent-${i}`,ifMatch:'"7"'}));
  await new Promise(r=>setTimeout(r,0));bodies.forEach(body=>body.payload='mutated after send');wait.resolve();await Promise.all(requests);
  assert.equal(refreshCalls,1);assert.equal(runCount,1);assert.equal(outboxCount,1);assert.equal(observations.length,40);
- for(const original of observations.slice(0,20)){const retry=observations.find(x=>x.key===original.key&&x.auth!==original.auth);assert.equal(retry.body,original.body);assert.equal(retry.match,original.match);}
+ for(const original of observations.slice(0,20)){const retry=observations.find(x=>x.key===original.key&&x.auth!==original.auth);assert.equal(retry.body,original.body);assert.equal(original.match,'"7"');assert.equal(retry.match,original.match);}
 });
 test('C11 an already renewed rejected token never starts a second renewal',async()=>{
  const h=environment(),auth=await adapter(h.env);await auth.initialize();let calls=0;
@@ -193,4 +193,52 @@ test('C11 failed provider logout remains invalidated on reload despite an old va
 });
 test('C11 received cross-tab invalidation persists through reload without a token marker',async()=>{
  const h=environment(),auth=await adapter(h.env);await auth.initialize();h.emit({type:'logout'});const reloaded=await adapter(h.env);await reloaded.initialize();assert.equal(reloaded.subject(),'');assert.equal(JSON.stringify([...h.entries.values()]).includes(jwt()),false);
+});
+
+test('account email is visible only after a matching session token and never persisted or broadcast',async()=>{
+ const h=environment(),auth=await adapter(h.env),wait=deferred();
+ h.env.fetch=async url=>String(url).endsWith('/get-session')
+  ?Response.json({session:{},user:{id:'neon-user',email:'buyer@example.test'}})
+  :(await wait.promise,Response.json({token:jwt()}));
+ const pending=auth.initialize();await new Promise(r=>setTimeout(r,0));
+ assert.equal(auth.accountEmail?.(),'');wait.resolve();await pending;
+ assert.equal(auth.accountEmail?.(),'buyer@example.test');assert.equal(h.entries.size,0);assert.deepEqual(h.sent,[]);
+ h.emit({type:'logout'});assert.equal(auth.accountEmail?.(),'');
+ assert.doesNotMatch(JSON.stringify([...h.entries,...h.sent]),/buyer@example\.test/);
+});
+
+test('failed identity validation never exposes another account email',async()=>{
+ const h=environment(),auth=await adapter(h.env);
+ h.env.fetch=async url=>String(url).endsWith('/get-session')
+  ?Response.json({session:{},user:{id:'neon-user',email:'buyer@example.test'}})
+  :Response.json({token:jwt('other')});
+ await assert.rejects(auth.initialize());assert.equal(auth.accountEmail?.(),'');
+});
+
+test('missing or malformed account email does not prevent valid session authentication',async()=>{
+ for(const email of [undefined,{},'buyer\n@example.test','x'.repeat(321)]){
+  const h=environment(),auth=await adapter(h.env);
+  h.env.fetch=async url=>String(url).endsWith('/get-session')
+   ?Response.json({session:{},user:{id:'neon-user',email}}):Response.json({token:jwt()});
+  await auth.initialize();assert.equal(auth.subject(),'neon-user');assert.equal(auth.accountEmail?.(),'');
+ }
+});
+
+test('Google sign-in always offers account selection and preserves the provider transaction',async()=>{
+ for(const [existing,expected] of [[null,'select_account'],['consent','consent select_account'],['none','select_account'],['consent select_account','consent select_account']]){
+  const h=environment(),auth=await adapter(h.env);await auth.signIn('/app?workspace=A');
+  const tx=JSON.parse(h.entries.get('buyeros-neon-return'));
+  const providerUrl=new URL('https://accounts.google.com/o/oauth2/v2/auth?client_id=fixture-client&response_type=code&scope=openid+email&state=opaque-provider-state&nonce=opaque-provider-nonce&code_challenge=opaque-pkce&redirect_uri=https%3A%2F%2Fprovider.example.test%2Fcallback');
+  if(existing)providerUrl.searchParams.set('prompt',existing);
+  h.env.fetch=async(url,init)=>{
+   assert.equal(url,'/api/auth/sign-in/social');
+   assert.deepEqual(JSON.parse(init.body),{provider:'google',callbackURL:`https://app.example.test/auth/callback?state=${tx.state}`,disableRedirect:true});
+   return Response.json({url:providerUrl.href});
+  };
+  await auth.signInGoogle();const redirect=new URL(h.env.location.href);
+  assert.equal(redirect.searchParams.get('prompt'),expected);
+  redirect.searchParams.delete('prompt');providerUrl.searchParams.delete('prompt');
+  assert.equal(redirect.href,providerUrl.href);
+  assert.equal(h.entries.get('buyeros-neon-return'),JSON.stringify(tx));
+ }
 });

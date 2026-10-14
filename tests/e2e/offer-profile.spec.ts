@@ -31,6 +31,58 @@ async function fillOffer(page:Page,name:string){
   await page.getByRole('button',{name:'Continue'}).click();
 }
 
+test('UK rice intake keeps complete criteria and roles through summary, save and edit',async({page})=>{
+  test.setTimeout(120_000);
+  const must='Wholesale buyers serving UK retail / foodservice\nCan qualify importer, distribution and purchasing responsibilities';
+  const nice='Handles 5 kg retail / 10–20 kg foodservice packs';
+  const exclude='No online-resale / e-commerce partnership pitches\nNo unverified brand, origin or certification claims';
+  const roles='Category buyer / Purchasing manager\nImport manager';
+  await signIn(page,'fixture-access');
+  await page.getByRole('button',{name:'New project'}).click();
+  await expect(page.getByText(/Save the project first, then use Edit offer/)).toBeVisible();
+  await page.getByLabel('Company name').fill('UK Rice Pilot Fixture');
+  await page.getByLabel('Product / service').fill('Thai jasmine rice pilot');
+  await page.getByLabel('Value proposition').fill('Proposed wholesale supply; specifications and brand rights await review.');
+  await page.getByRole('button',{name:'Continue'}).click();
+  await page.getByLabel('Markets (country codes or names)').fill('United Kingdom，英國');
+  await page.getByLabel('Languages (codes or names)').fill('English，英文');
+  await page.getByRole('checkbox',{name:'Importer',exact:true}).check();
+  await page.getByRole('checkbox',{name:'Wholesaler',exact:true}).check();
+  await page.getByLabel('Desired buyer roles (optional)').fill(roles);
+  await page.getByRole('button',{name:'Continue'}).click();
+  await page.getByLabel('Must have',{exact:true}).fill(must);
+  await page.getByLabel('Nice to have',{exact:true}).fill(nice);
+  await page.getByLabel('Exclude',{exact:true}).fill(exclude);
+  await page.getByRole('checkbox',{name:/I confirm these buyer requirements/}).check();
+  await page.getByRole('button',{name:'Continue'}).click();
+  const summary=page.getByRole('region',{name:'Profile summary'});
+  for(const value of [must,nice,exclude,roles,'Importer, Wholesaler']){
+    await expect(summary.getByText(value,{exact:true})).toBeVisible();
+  }
+  for(const width of [320,390]){
+    await page.setViewportSize({width,height:844});
+    await expect(summary.getByText(exclude,{exact:true})).toBeVisible();
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+    const overflowingSteps=await page.getByRole('navigation',{name:'Offer steps'}).getByRole('button').evaluateAll(buttons=>
+      buttons.filter(button=>button.scrollWidth>button.clientWidth+1).map(button=>button.textContent));
+    expect(overflowingSteps,`Step labels must fit their controls at ${width}px`).toEqual([]);
+  }
+  await page.screenshot({path:'test-results/uk-rice-intake-summary.png',fullPage:true});
+  await page.getByRole('button',{name:'Save profile'}).click();
+  await expect(page.getByRole('heading',{name:'Profile version 1'})).toBeVisible();
+  await page.reload();await page.getByRole('button',{name:'Sign in'}).click();
+  await page.getByRole('button',{name:'Edit offer'}).click();
+  await page.getByRole('button',{name:'Continue'}).click();
+  await expect(page.getByLabel('Markets (country codes or names)')).toHaveValue('GB');
+  await expect(page.getByLabel('Languages (codes or names)')).toHaveValue('en');
+  await expect(page.getByLabel('Desired buyer roles (optional)')).toHaveValue('Category buyer / Purchasing manager, Import manager');
+  await page.getByRole('button',{name:'Continue'}).click();
+  await expect(page.getByRole('textbox',{name:'Must have',exact:true})).toHaveValue(must);
+  await expect(page.getByRole('textbox',{name:'Nice to have',exact:true})).toHaveValue(nice);
+  await expect(page.getByRole('textbox',{name:'Exclude',exact:true})).toHaveValue(exclude);
+  await expect(page.getByRole('checkbox',{name:/I confirm these buyer requirements/})).not.toBeChecked();
+});
+
 test.describe.serial('T07 persisted offer/profile journey',()=>{
   let primaryProjectId='';
   test('operator creates and edits; reviewer approves exact v1 and v2 after reload',async({browser})=>{

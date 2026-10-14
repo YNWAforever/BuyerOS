@@ -12,7 +12,7 @@ from buyeros_api.db.outbox import OutboxEvent
 from buyeros_api.db.models import Membership
 from buyeros_api.api.deps import permission_for_roles
 from .provider_context import execution_session as tenant_session
-from buyeros_api.services.ingestion_service import parse_candidate_facts, validate_upload
+from buyeros_api.services.ingestion_service import document_candidate_facts, parse_candidate_facts, validate_upload
 from buyeros_api.services.object_store import StoreUnavailable, get_private_store
 
 from .leases import fence_ok
@@ -67,7 +67,9 @@ async def execute_document(engine, workspace_id: uuid.UUID, intent_key: str,
         result, facts = "deleted", []
     else:
         try:
-            store = private_store if private_store is not None else get_private_store(workspace_id)
+            store = private_store if private_store is not None else get_private_store(
+                workspace_id, engine=engine, object_key=object_key,
+            )
             if event_type == "offer.delete":
                 await asyncio.wait_for(store.delete_private(object_key), timeout=45)
                 result, facts = "deleted", []
@@ -116,15 +118,7 @@ async def execute_document(engine, workspace_id: uuid.UUID, intent_key: str,
                 source.excerpt = None
         elif row.status == "quarantined":
             if result == "parsed":
-                row.fact_candidates = [
-                    {
-                        "id": str(uuid.uuid5(document_id, f"{index}:{fact['field']}:{fact['value']}")),
-                        "field": fact["field"], "value": fact["value"],
-                        "provenance": "document_excerpt", "source_document_id": str(document_id),
-                        "excerpt": fact["value"], "approved": False,
-                    }
-                    for index, fact in enumerate(facts)
-                ]
+                row.fact_candidates = document_candidate_facts(document_id, facts)
                 row.status = "ready"
             elif result == "parser_timeout":
                 row.status, row.failure_code = "failed", "PARSER_TIMEOUT"

@@ -9,6 +9,7 @@ import type {components} from '@/services/generated/buyeros-api';
 import {explicitSelection,snapshotSelection,type ReviewSelection} from '@/services/live/buyer-selection';
 import type {LiveBuyerPage} from '@/services/live/mapping';
 import {LiveBuyerDetail} from './buyer-detail';
+import {LiveBuyerImport} from './buyer-import';
 import {ExportDialog} from './export-dialog';
 import {LiveBuyerManagementControls} from './buyer-management-controls';
 import {BulkJobPanel,LiveBulkActions,isAsyncJob} from './bulk-actions';
@@ -20,7 +21,7 @@ const reviewStatuses=['accepted','rejected','needs_information'] as const;
 const initial=():BuyerQuery=>readBuyerQuery(typeof window==='undefined'?'':window.location.search);
 /** Visual tone for fit/review status pills; text is unchanged so status stays readable without colour. */
 function toneFor(value?:string|null){if(!value)return 'gray';if(['match','accepted','approved'].includes(value))return 'green';if(['needs_review','awaiting_review','pending'].includes(value))return 'amber';if(['not_a_match','rejected'].includes(value))return 'red';return 'blue';}
-export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,canAssign=false,ownMembershipId=null,locale='en',onManualOutcome}:{canReview?:boolean;canEdit?:boolean;canQuote?:boolean;canAssign?:boolean;ownMembershipId?:string|null;locale?:'en'|'zh-HK';onManualOutcome?:(buyerId:string,buyerName:string)=>void}){
+export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,canAssign=false,canImport=false,ownMembershipId=null,locale='en',onManualOutcome}:{canReview?:boolean;canEdit?:boolean;canQuote?:boolean;canAssign?:boolean;canImport?:boolean;ownMembershipId?:string|null;locale?:'en'|'zh-HK';onManualOutcome?:(buyerId:string,buyerName:string)=>void}){
   const {session,client}=useWorkspaceSession();
   const t=(value:string)=>locale==='zh-HK'?(liveZh[value]||value):value;
   const sessionSnapshot=useSessionSnapshot(),scope=sessionSnapshot.scope;
@@ -160,6 +161,7 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
   const current=index>=0?page?.items[index]:undefined;
   return <section ref={buyerRoot} className="panel live-buyer-results" aria-label={t('Buyer results')}>
     <div className="inline spread"><h2>{t('Buyers')}</h2><span>{snapshot?t('{count} in snapshot').replace('{count}',String(snapshot.total)):t('Loading snapshot...')}</span></div>
+    {canImport&&<LiveBuyerImport onImported={onCommitted} t={t}/>}
     <div className="inline" role="group" aria-label={t('Buyer filters')}>
       <label>{t('Search buyers')} <input aria-label={t('Search buyers')} value={search} onChange={event=>setSearch(event.target.value)} onKeyDown={event=>{if(event.key==='Enter')changeQuery({q:search.trim()},true);}}/></label>
       <button type="button" onClick={()=>changeQuery({q:search.trim()},true)}>{t('Apply filters')}</button>

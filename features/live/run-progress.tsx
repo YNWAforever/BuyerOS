@@ -130,7 +130,7 @@ export function LiveRunProgress({runId,canStart,canReview=false,t,onOpenBuyers}:
             {t(item.status)} · {item.company_count}/{item.target_companies??'—'} {t('companies')} · {item.created_at}
           </button></li>)}</ul>}
         <div className="inline"><button type="button" disabled={offset===0} onClick={()=>{setList({kind:'loading'});setOffset(Math.max(0,offset-10));}}>{t('Previous')}</button>
-          <span>{offset+1}–{Math.min(offset+list.page.items.length,list.page.total)} / {list.page.total}</span>
+          <span>{list.page.items.length?offset+1:0}–{list.page.items.length?Math.min(offset+list.page.items.length,list.page.total):0} / {list.page.total}</span>
           <button type="button" disabled={offset+list.page.items.length>=list.page.total} onClick={()=>{setList({kind:'loading'});setOffset(offset+10);}}>{t('Next')}</button></div></>}
     </>}
     {runId&&!run&&!detailError&&<p role="status">{t('Loading run…')}</p>}

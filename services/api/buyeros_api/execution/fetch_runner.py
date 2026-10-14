@@ -80,7 +80,7 @@ async def execute_offer_fetch(engine, workspace_id: uuid.UUID, intent_key: str,
             return "policy_blocked"
 
     try:
-        store = private_store if private_store is not None else get_private_store(workspace_id)
+        store = private_store if private_store is not None else get_private_store(workspace_id, engine=engine)
         checked_transport = transport if transport is not None else PinnedHttpsTransport()
         result = await asyncio.wait_for(fetch_permitted_document(
             {"url": source_url, "permitted": True, "retention_seconds": retention_seconds},

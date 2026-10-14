@@ -25,6 +25,6 @@ test('B15 execution binds exact manifest/version/digest and retains key on unkno
  const s=session(),manifest={id:'manifest-a',version:1,digest:'a'.repeat(64)},calls=[];let fail=true;
  const client=createLiveClient(async(path,init)=>{calls.push({path,init});if(fail)throw Error('unknown 202');return ok({kind:'bulk_mutation',id:'job-a'});});
  await assert.rejects(executeManifest(client,s,manifest));s.setToken('renewed');fail=false;await executeManifest(client,s,manifest);
- assert.equal(calls[0].init.headers['Idempotency-Key'],calls[1].init.headers['Idempotency-Key']);assert.equal(calls[0].init.headers['If-Match'],'"1"');assert.deepEqual(JSON.parse(calls[1].init.body),{digest:manifest.digest,confirmation:true});assert.match(calls[1].path,/manifest-a\/execute$/);
+ assert.equal(calls[0].init.headers['Idempotency-Key'],calls[1].init.headers['Idempotency-Key']);assert.equal(calls[0].init.headers['X-BuyerOS-If-Match'],'"1"');assert.deepEqual(JSON.parse(calls[1].init.body),{digest:manifest.digest,confirmation:true});assert.match(calls[1].path,/manifest-a\/execute$/);
  const before=manifestRecovery(s);startNewManifest(s);assert.notEqual(manifestRecovery(s),before);
 });

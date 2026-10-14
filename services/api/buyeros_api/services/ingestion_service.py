@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import uuid
 from dataclasses import dataclass
 
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
@@ -81,3 +82,25 @@ def parse_candidate_facts(upload: ValidatedUpload) -> list[dict]:
                 "source_digest": upload.sha256,
             })
     return facts[:20]
+
+
+async def parse_upload_candidates(upload: ValidatedUpload) -> list[dict]:
+    """Only deterministic extraction; PDFs retain the isolated eight-second child."""
+    import asyncio
+    from buyeros_api.execution.pdf_parser import parse_pdf_candidates
+
+    parser = parse_pdf_candidates if upload.kind == "pdf" else parse_candidate_facts
+    return await asyncio.to_thread(parser, upload)
+
+
+def document_candidate_facts(document_id: uuid.UUID, facts: list[dict]) -> list[dict]:
+    """Identical unapproved provenance for inline and worker extraction."""
+    return [
+        {
+            "id": str(uuid.uuid5(document_id, f"{index}:{fact['field']}:{fact['value']}")),
+            "field": fact["field"], "value": fact["value"],
+            "provenance": "document_excerpt", "source_document_id": str(document_id),
+            "excerpt": fact.get("excerpt", fact["value"]), "approved": False,
+        }
+        for index, fact in enumerate(facts)
+    ]

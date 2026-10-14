@@ -123,6 +123,7 @@ export function LiveOfferWizard({mode,projectId,onSaved,t}: {
       <label>{t('Product / service')}<input value={offer.product} onChange={e=>update('product',e.target.value)}/></label>
       <label>{t('Value proposition')}<textarea value={offer.value} onChange={e=>update('value',e.target.value)}/></label>
       <label>{t('Website (optional)')}<input value={offer.website} onChange={e=>update('website',e.target.value)}/></label>
+      {mode==='create'&&<p>{t('Save the project first, then use Edit offer to attach PowerPoint, PDF, text or Markdown sources. Import Excel or CSV buyer lists from Buyers.')}</p>}
       {mode==='edit'&&projectId&&<LiveOfferDocuments projectId={projectId} selected={selectedDocuments}
         onSelect={chooseDocument} onApply={applyCandidate} t={t}/>}
     </>}
@@ -130,15 +131,25 @@ export function LiveOfferWizard({mode,projectId,onSaved,t}: {
       <label>{t('Markets (country codes or names)')}<input value={offer.markets} onChange={e=>update('markets',e.target.value)}/></label>
       <label>{t('Languages (codes or names)')}<input value={offer.language} onChange={e=>update('language',e.target.value)}/></label>
       <fieldset><legend>{t('Buyer type')}</legend>{['Distributor','Importer','Wholesaler','Retailer','System integrator','End-user business'].map(kind=><label key={kind}><input type="checkbox" checked={offer.buyerTypes?.includes(kind)??false} onChange={e=>update('buyerTypes',e.target.checked?[...(offer.buyerTypes??[]),kind]:(offer.buyerTypes??[]).filter(item=>item!==kind))}/>{t(kind)}</label>)}</fieldset>
-      <label>{t('Desired buyer roles (optional)')}<input value={offer.roles??''} onChange={e=>update('roles',e.target.value)}/></label>
+      <label>{t('Desired buyer roles (optional)')}<textarea value={offer.roles??''} onChange={e=>update('roles',e.target.value)}/></label>
     </>}
     {step===2&&<>
-      <label>{t('Must have')}<textarea value={offer.must} onChange={e=>update('must',e.target.value)}/></label>
-      <label>{t('Nice to have')}<textarea value={offer.nice} onChange={e=>update('nice',e.target.value)}/></label>
-      <label>{t('Exclude')}<textarea value={offer.exclude} onChange={e=>update('exclude',e.target.value)}/></label>
+      <p id="buyer-requirements-help">{t('Write one requirement per line, or separate requirements with semicolons. Commas and slashes stay within the same requirement.')}</p>
+      <label>{t('Must have')}<textarea aria-describedby="buyer-requirements-help" value={offer.must} onChange={e=>update('must',e.target.value)}/></label>
+      <label>{t('Nice to have')}<textarea aria-describedby="buyer-requirements-help" value={offer.nice} onChange={e=>update('nice',e.target.value)}/></label>
+      <label>{t('Exclude')}<textarea aria-describedby="buyer-requirements-help" value={offer.exclude} onChange={e=>update('exclude',e.target.value)}/></label>
       <label><input type="checkbox" checked={offer.confirmed} onChange={e=>update('confirmed',e.target.checked)}/>{t('I confirm these buyer requirements. Changes create a new profile version.')}</label>
     </>}
-    {step===3&&<div className="notice"><p>{offer.company} · {offer.product}</p><p>{offer.value}</p><p>{offer.markets} · {offer.language}</p><p>{t('Must have')}: {offer.must}</p><p>{t('No search or provider call starts when saving.')}</p></div>}
+    {step===3&&<section className="notice" aria-label={t('Profile summary')}>
+      <dl>{([
+        ['Company name',offer.company],['Product / service',offer.product],['Value proposition',offer.value],
+        ['Website (optional)',offer.website],['Markets',offer.markets],['Languages',offer.language],
+        ['Buyer type',(offer.buyerTypes??[]).map(t).join(', ')],['Desired buyer roles (optional)',offer.roles],
+        ['Must have',offer.must],['Nice to have',offer.nice],['Exclude',offer.exclude],
+      ] as const).map(([label,value])=><div key={label}><dt><strong>{t(label)}</strong></dt>
+        <dd style={{marginInlineStart:0,whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{value||'—'}</dd></div>)}</dl>
+      <p>{t('No search or provider call starts when saving.')}</p>
+    </section>}
     {partial&&<p role="status">{partial}</p>}{error&&<p ref={errorRef} tabIndex={-1} role="alert">{t(error)}</p>}
     <div className="inline spread"><button type="button" disabled={step===0||busy} onClick={()=>setStep(current=>current-1)}>{t('Back')}</button>
       {step<3?<button type="button" disabled={busy} onClick={next}>{t('Continue')}</button>:<button type="button" disabled={busy||mode==='edit'&&!base} onClick={()=>void save()}>{busy?t('Saving profile...'):t('Save profile')}</button>}

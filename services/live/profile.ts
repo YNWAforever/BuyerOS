@@ -5,19 +5,20 @@ import type {Offer} from '@/features/discovery/wizard';
 export class ProfileError extends Error {}
 
 const MARKETS: Record<string, string> = {
+  'united kingdom': 'GB', 'great britain': 'GB', britain: 'GB', uk: 'GB', '英國': 'GB', '英国': 'GB',
   germany: 'DE', deutschland: 'DE', de: 'DE',
   netherlands: 'NL', holland: 'NL', nl: 'NL',
   belgium: 'BE', belgie: 'BE', belgi: 'BE', be: 'BE',
 };
 const LANGUAGES: Record<string, string> = {
-  english: 'en', en: 'en',
+  english: 'en', en: 'en', '英文': 'en', '英語': 'en', '英语': 'en',
   german: 'de', deutsch: 'de', de: 'de',
   dutch: 'nl', nederlands: 'nl', nl: 'nl',
   french: 'fr', francais: 'fr', fr: 'fr',
 };
 
-function split(text: string): string[] {
-  return String(text || '').split(/[,;/]/).map((part) => part.trim()).filter(Boolean);
+function split(text: string, separator = /[,;/\r\n，；、]+/): string[] {
+  return String(text || '').split(separator).map((part) => part.trim()).filter(Boolean);
 }
 
 function resolve(text: string, table: Record<string, string>): {codes: string[]; unknown: string[]} {
@@ -68,7 +69,8 @@ type RequirementCategory = 'must' | 'nice' | 'exclude';
 const BUYER_TYPES:Record<string,string>={Distributor:'distributor',Importer:'importer',Wholesaler:'wholesaler',
   Retailer:'retailer','System integrator':'system_integrator','End-user business':'end_user_business'};
 function requirements(text: string, category: RequirementCategory) {
-  return split(text).map((item, index) => ({
+  // Commas and slashes belong to the criterion (and may qualify an exclusion).
+  return split(text, /[;；\r\n]+/).map((item, index) => ({
     // IDs are stable across same-payload retries and unique within a version.
     id: `e0000000-0000-4000-8000-${{must:'1',nice:'2',exclude:'3'}[category]}${(index + 1).toString(16).padStart(11, '0')}`,
     text: item,
@@ -98,7 +100,7 @@ export function toIcpSaveRequest(offer: Offerish) {
     markets,
     buyer_types: (offer.buyerTypes?.length ? offer.buyerTypes : ['Distributor']).map(value=>BUYER_TYPES[value]??value),
     languages,
-    desired_roles: split(offer.roles ?? ''),
+    desired_roles: split(offer.roles ?? '', /[,;，；、\r\n]+/),
   };
 }
 
@@ -139,8 +141,8 @@ export function offerFromProject(project: ProjectForOffer, icp?: ProfileForOffer
     value:fact('value_proposition')??text[1]??'',website:project.website??'',
     markets:project.markets.join(', '),language:project.language_preferences.join(', '),
     buyerTypes:(icp?.buyer_types??[]).map(value=>Object.keys(BUYER_TYPES).find(label=>BUYER_TYPES[label]===value)??value),roles:icp?.desired_roles?.join(', ')??'',
-    must:icp?.requirements.filter(item=>item.category==='must').map(item=>item.text).join('; ')??'',
-    nice:icp?.requirements.filter(item=>item.category==='nice').map(item=>item.text).join('; ')??'',
-    exclude:icp?.requirements.filter(item=>item.category==='exclude').map(item=>item.text).join('; ')??'',
+    must:icp?.requirements.filter(item=>item.category==='must').map(item=>item.text).join('\n')??'',
+    nice:icp?.requirements.filter(item=>item.category==='nice').map(item=>item.text).join('\n')??'',
+    exclude:icp?.requirements.filter(item=>item.category==='exclude').map(item=>item.text).join('\n')??'',
     confirmed:false};
 }

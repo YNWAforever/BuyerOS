@@ -444,6 +444,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview Excel or CSV buyer candidates */
+        post: operations["previewBuyerImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/{import_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the original preview or committed import result */
+        get: operations["getBuyerImport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/{import_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Atomically import the exact preview as unreviewed buyers */
+        post: operations["confirmBuyerImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/buyers/{buyer_id}/import-source": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read private source claims for an imported buyer */
+        get: operations["getBuyerImportSource"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/projects/{project_id}/buyers": {
         parameters: {
             query?: never;
@@ -1553,10 +1621,206 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/offer-document-uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** startOfferDocumentUpload */
+        post: operations["startOfferDocumentUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** getOfferDocumentUpload */
+        get: operations["getOfferDocumentUpload"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/chunks/{index}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** putOfferDocumentChunk */
+        put: operations["putOfferDocumentChunk"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** completeOfferDocumentUpload */
+        post: operations["completeOfferDocumentUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/offer-documents/{document_id}/slides": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** getOfferDocumentSlides */
+        get: operations["getOfferDocumentSlides"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/offer-documents/{document_id}/content-chunks/{index}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** getOfferDocumentContentChunk */
+        get: operations["getOfferDocumentContentChunk"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        DocumentExtractionMetadata: {
+            /** @enum {string} */
+            format: "pptx" | "pdf" | "text" | "markdown";
+            slide_count?: number;
+            text_slide_count?: number;
+            /** @enum {string} */
+            classification?: "text" | "image_only";
+            text_bytes?: number;
+            external_relationships_ignored?: number;
+            embedded_parts_ignored?: number;
+            byte_length: number;
+            /** @constant */
+            chunk_size: 2097152;
+        };
+        DocumentUploadStart: {
+            filename: string;
+            /** @enum {string} */
+            media_type: "application/vnd.openxmlformats-officedocument.presentationml.presentation" | "application/pdf" | "text/plain" | "text/markdown";
+            byte_length: number;
+            source_sha256: string;
+        };
+        DocumentUploadComplete: Record<string, never>;
+        DocumentUpload: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workspace_id: string;
+            /** Format: uuid */
+            project_id: string;
+            filename: string;
+            media_type: string;
+            byte_length: number;
+            source_sha256: string;
+            /** @constant */
+            chunk_size: 2097152;
+            chunk_count: number;
+            /** @enum {string} */
+            status: "uploading" | "completed" | "failed" | "expired";
+            /** Format: date-time */
+            expires_at: string;
+            version: number;
+            received_chunks: {
+                index: number;
+                sha256: string;
+            }[];
+            /** Format: uuid */
+            document_id?: string;
+            failure_code?: string;
+        };
+        DocumentSlide: {
+            number: number;
+            text: string;
+            /** @enum {string} */
+            classification: "text" | "image_only";
+        };
+        DocumentSlidePage: {
+            items: components["schemas"]["DocumentSlide"][];
+            offset: number;
+            limit: number;
+            total: number;
+        };
+        DocumentContentChunk: {
+            index: number;
+            offset: number;
+            byte_length: number;
+            chunk_count: number;
+            source_byte_length: number;
+            chunk_sha256: string;
+            source_sha256: string;
+            filename: string;
+            media_type: string;
+            body_base64: string;
+        };
+        DocumentUploadResponse: {
+            data: components["schemas"]["DocumentUpload"];
+            /** Format: uuid */
+            request_id: string;
+            /** @constant */
+            data_mode: "live";
+        };
+        DocumentSlidePageResponse: {
+            data: components["schemas"]["DocumentSlidePage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @constant */
+            data_mode: "live";
+        };
+        DocumentContentChunkResponse: {
+            data: components["schemas"]["DocumentContentChunk"];
+            /** Format: uuid */
+            request_id: string;
+            /** @constant */
+            data_mode: "live";
+        };
         DeliveryMessageMetadata: {
             /** Format: uuid */
             id: string;
@@ -1651,7 +1915,7 @@ export interface components {
          */
         ApiError: {
             /** @enum {string} */
-            code: "INVALID_REQUEST" | "UNAUTHENTICATED" | "PERMISSION_DENIED" | "NOT_FOUND" | "STALE_REVISION" | "SELECTION_EXPIRED" | "SELECTION_SCOPE_MISMATCH" | "IDEMPOTENCY_CONFLICT" | "ICP_NOT_APPROVED" | "ICP_STALE" | "POLICY_UNKNOWN" | "POLICY_BLOCKED" | "SUPPRESSED" | "BUYER_NOT_ACCEPTED" | "FIT_REVIEW_REQUIRED" | "QUOTE_EXPIRED" | "QUOTE_CHANGED" | "BUDGET_LIMIT" | "PROVIDER_UNAVAILABLE" | "PROVIDER_SUBMISSION_UNKNOWN" | "PROVIDER_CAPABILITY_BLOCKED" | "CAPABILITY_DISABLED" | "READ_DISABLED" | "EVENT_CURSOR_EXPIRED" | "EVIDENCE_STALE" | "APPROVAL_STALE" | "DELIVERY_DISABLED" | "RATE_LIMITED" | "PARTIAL_FAILURE" | "INTERNAL_ERROR";
+            code: "INVALID_REQUEST" | "UNAUTHENTICATED" | "PERMISSION_DENIED" | "NOT_FOUND" | "STALE_REVISION" | "SELECTION_EXPIRED" | "SELECTION_SCOPE_MISMATCH" | "IDEMPOTENCY_CONFLICT" | "IMPORT_PREVIEW_CHANGED" | "IMPORT_PREVIEW_EXPIRED" | "ICP_NOT_APPROVED" | "ICP_STALE" | "POLICY_UNKNOWN" | "POLICY_BLOCKED" | "SUPPRESSED" | "BUYER_NOT_ACCEPTED" | "FIT_REVIEW_REQUIRED" | "QUOTE_EXPIRED" | "QUOTE_CHANGED" | "BUDGET_LIMIT" | "PROVIDER_UNAVAILABLE" | "PROVIDER_SUBMISSION_UNKNOWN" | "PROVIDER_CAPABILITY_BLOCKED" | "CAPABILITY_DISABLED" | "READ_DISABLED" | "EVENT_CURSOR_EXPIRED" | "EVIDENCE_STALE" | "APPROVAL_STALE" | "DELIVERY_DISABLED" | "RATE_LIMITED" | "PARTIAL_FAILURE" | "INTERNAL_ERROR";
             message: string;
             /** Format: uuid */
             request_id: string;
@@ -1839,6 +2103,7 @@ export interface components {
             fact_candidates?: components["schemas"]["OfferFact"][];
             /** Format: date-time */
             retention_until?: string;
+            extraction_metadata?: components["schemas"]["DocumentExtractionMetadata"];
         };
         /** @description Stable fact ID within immutable ICP version; approved=true is only authoritative on a reviewer-approved ICP, never solely from caller-supplied flag. */
         OfferFact: {
@@ -3472,6 +3737,93 @@ export interface components {
             /** @enum {string} */
             data_mode: "live";
         };
+        BuyerImportRow: {
+            row_number: number;
+            source_row: string;
+            /** Format: date */
+            source_date: string | null;
+            /** Format: uri */
+            website: string | null;
+            source_urls: string[];
+            original_fields: {
+                [key: string]: string;
+            };
+            name: string;
+            normalized_domain: string | null;
+            errors: string[];
+            /** @enum {string} */
+            status: "ready" | "duplicate" | "invalid";
+            /** Format: uuid */
+            duplicate_buyer_id: string | null;
+        };
+        BuyerImportPreview: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workspace_id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** @constant */
+            status: "previewed";
+            file_name: string;
+            file_sha256: string;
+            preview_digest: string;
+            /** Format: date-time */
+            expires_at: string;
+            total_rows: number;
+            ready_rows: number;
+            duplicate_rows: number;
+            invalid_rows: number;
+            can_import: boolean;
+            rows: components["schemas"]["BuyerImportRow"][];
+        };
+        BuyerImportResult: {
+            /** Format: uuid */
+            id: string;
+            /** @constant */
+            status: "completed";
+            imported_rows: number;
+            skipped_duplicate_rows: number;
+            buyer_ids: string[];
+            preview_digest: string;
+        };
+        BuyerImportConfirm: {
+            preview_digest: string;
+            /** @constant */
+            confirmation: true;
+        };
+        BuyerImportResponse: {
+            data: components["schemas"]["BuyerImportPreview"] | components["schemas"]["BuyerImportResult"];
+            /** Format: uuid */
+            request_id: string;
+            /** @constant */
+            data_mode: "live";
+        };
+        BuyerImportSource: {
+            /** Format: uuid */
+            import_id: string;
+            file_name: string;
+            file_sha256: string;
+            /** @constant */
+            candidate_status: "unreviewed";
+            row_number: number;
+            source_row: string;
+            /** Format: date */
+            source_date: string | null;
+            /** Format: uri */
+            website: string | null;
+            source_urls: string[];
+            original_fields: {
+                [key: string]: string;
+            };
+        };
+        BuyerImportSourceResponse: {
+            data: components["schemas"]["BuyerImportSource"] | null;
+            /** Format: uuid */
+            request_id: string;
+            /** @constant */
+            data_mode: "live";
+        };
         BuyerResponse: {
             data: components["schemas"]["Buyer"];
             /** Format: uuid */
@@ -5014,6 +5366,153 @@ export interface operations {
             404: components["responses"]["Error"];
             409: components["responses"]["Error"];
             412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    previewBuyerImport: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Private source claims previewed or atomically imported as unreviewed candidates. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuyerImportResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    getBuyerImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+                import_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Private source claims previewed or atomically imported as unreviewed candidates. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuyerImportResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    confirmBuyerImport: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+                import_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BuyerImportConfirm"];
+            };
+        };
+        responses: {
+            /** @description Private source claims previewed or atomically imported as unreviewed candidates. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuyerImportResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    getBuyerImportSource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                buyer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Private source claims previewed or atomically imported as unreviewed candidates. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuyerImportSourceResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
             422: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
@@ -7581,6 +8080,223 @@ export interface operations {
             401: components["responses"]["Error"];
             403: components["responses"]["Error"];
             404: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    startOfferDocumentUpload: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentUploadStart"];
+            };
+        };
+        responses: {
+            /** @description Private bounded attachment result */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentUploadResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    getOfferDocumentUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Private bounded attachment result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentUploadResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    putOfferDocumentChunk: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Chunk-Sha256": string;
+            };
+            path: {
+                workspace_id: string;
+                upload_id: string;
+                index: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/octet-stream": string;
+            };
+        };
+        responses: {
+            /** @description Private bounded attachment result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentUploadResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    completeOfferDocumentUpload: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentUploadComplete"];
+            };
+        };
+        responses: {
+            /** @description Private bounded attachment result */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferDocumentResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    getOfferDocumentSlides: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Private bounded attachment result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentSlidePageResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    getOfferDocumentContentChunk: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                document_id: string;
+                index: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Private bounded attachment result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentContentChunkResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
             422: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];

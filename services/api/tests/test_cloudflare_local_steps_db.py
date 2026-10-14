@@ -154,7 +154,7 @@ def test_document_delete_during_parse_blocks_exposure(migrated, worker_runtime, 
                 db.execute("UPDATE offer_documents SET status='deleted',fact_candidates='[]'::jsonb,version=version+1 WHERE id=%s", (document,))
             return body
     store = Store()
-    monkeypatch.setattr(document_runner, 'get_private_store', lambda ws: store)
+    monkeypatch.setattr(document_runner, 'get_private_store', lambda ws, **kwargs: store)
     assert run_local(envelope).state == 'done'
     assert run_local(envelope).state == 'done'
     with psycopg.connect(migrated) as db:
@@ -212,7 +212,7 @@ def test_parse_finalize_rechecks_actor_and_runtime_after_egress(migrated, worker
                 else:
                     db.execute("UPDATE worker_runtime_control SET enabled=false,epoch=epoch+1")
             return body
-    monkeypatch.setattr(document_runner, 'get_private_store', lambda ws: Store())
+    monkeypatch.setattr(document_runner, 'get_private_store', lambda ws, **kwargs: Store())
     result = run_local(envelope)
     assert (result.state, result.code) == (('blocked', 'ACTOR_CHANGED') if change == 'membership' else ('stale', 'STALE_FENCE'))
     with psycopg.connect(migrated) as db:

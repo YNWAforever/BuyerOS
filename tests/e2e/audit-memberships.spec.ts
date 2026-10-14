@@ -66,7 +66,7 @@ test('U07 duplicate names and suffixes remain distinct during a versioned role c
  const changed=page.waitForResponse(r=>r.request().method()==='PATCH'&&r.url().includes('/memberships/'));
  await first.getByRole('button',{name:'Save member',exact:true}).click();const response=await changed;expect(response.status()).toBe(200);
  const payload=await response.json();expect(payload.data.user_id).toBe('71000001-0000-4000-8000-000000c011de');expect(payload.data.version).toBe(2);
- expect(response.request().headers()['if-match']).toBe('"1"');expect(response.request().headers()['idempotency-key']).toBeTruthy();
+ expect(response.request().headers()['x-buyeros-if-match']).toBe('"1"');expect(response.request().headers()['idempotency-key']).toBeTruthy();
  const read=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/memberships?q=Alex`,{headers:{Authorization:'Bearer fixture-admin'}});
  expect((await read.json()).data.items.map((r:{version:number})=>r.version)).toEqual([2,1]);writeFileSync('test-results/q02-membership-role-change.json',JSON.stringify(payload,null,2));
 });

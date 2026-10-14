@@ -46,7 +46,7 @@ def admission_case(isolated_quote_case):
     client,dsn,buyers,args=approved(isolated_quote_case)
     with psycopg.connect(dsn,autocommit=True) as db:
         assert db.execute("SELECT to_regclass('public.delivery_authorizations')").fetchone()[0] is not None,'durable delivery authority schema is missing'
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0050_c61_delivery_authorizations',)
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0053_resumable_documents',)
         db.execute('UPDATE worker_runtime_control SET enabled=true,epoch=epoch+1,active_owner=NULL,active_until=NULL WHERE singleton=1')
     limits(dsn);auth=authority(args)
     try:yield client,dsn,args,auth
@@ -170,7 +170,7 @@ def test_populated_authority_downgrade_refuses_and_retains_original_refs_and_ful
     try:
         with pytest.raises(RuntimeError,match='retain original delivery authority'):command.downgrade(config(),'0049_c61_delivery_money')
         assert snapshot(dsn,result)==original
-        with psycopg.connect(dsn) as db:assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0050_c61_delivery_authorizations',)
+        with psycopg.connect(dsn) as db:assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0053_resumable_documents',)
     finally:get_settings.cache_clear()
 
 
@@ -394,7 +394,7 @@ def test_empty0050_downgrade_and_reupgrade_restore_exact_head_receipt_guards(iso
         with psycopg.connect(dsn) as db:assert db.execute("SELECT version_num,to_regclass('public.delivery_authorizations') FROM alembic_version").fetchone()==('0049_c61_delivery_money',None)
         assert guards()==(True,True,True)
         command.upgrade(config(),'head');assert guards()==(True,True,True)
-        with psycopg.connect(dsn) as db:assert db.execute("SELECT version_num,to_regclass('public.delivery_authorizations') FROM alembic_version").fetchone()==('0050_c61_delivery_authorizations','delivery_authorizations')
+        with psycopg.connect(dsn) as db:assert db.execute("SELECT version_num,to_regclass('public.delivery_authorizations') FROM alembic_version").fetchone()==('0053_resumable_documents','delivery_authorizations')
     finally:
         try:command.upgrade(config(),'head')
         finally:get_settings.cache_clear()

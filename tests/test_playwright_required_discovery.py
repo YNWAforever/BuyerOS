@@ -52,20 +52,20 @@ class PlaywrightRequiredDiscoveryTests(unittest.TestCase):
   self.assertIn('assert len(names)==len(set(names))==16,',guards)
   self.assertIn('assert result.testsRun==16 and result.wasSuccessful() and not result.skipped,',guards)
 
- def test_original_frontend_Neon_browser_binds_exact_native8_execution(self):
+ def test_original_frontend_Neon_browser_binds_exact_native9_execution(self):
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text(encoding='utf-8');body=workflow.split('  frontend:\n',1)[1].split('\n  cloudflare-controller:',1)[0]
   native='pnpm exec playwright test --config playwright.neon-runtime-built.config.ts --list --reporter=json > artifacts/c61/ci-neon-session-native-discovery.json'
-  pre='python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 8 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --discovery-only'
+  pre='python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 9 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --discovery-only'
   original='pnpm exec playwright test --config playwright.neon-runtime-built.config.ts\n'
-  post='python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 8 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --junit test-results/neon-session.xml'
+  post='python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 9 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --junit test-results/neon-session.xml'
   for command in [native,pre,original,post]:self.assertIn(command,body)
   self.assertLess(body.index(native),body.index(pre));self.assertLess(body.index(pre),body.index(original));self.assertLess(body.index(original),body.index(post));self.assertIn('artifacts/c61/ci-neon-session-native-discovery.json\n',body)
 
- def test_original_audit_discovers_history_and_workspace_recovery_with_all128_cases(self):
+ def test_original_audit_discovers_history_and_workspace_recovery_with_all133_cases(self):
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text(encoding='utf-8')
-  marker='--playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 128 --expected-file audit-delivery-history.spec.ts'
+  marker='--playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 133 --expected-file audit-delivery-history.spec.ts'
   commands=[line for line in workflow.splitlines() if marker in line]
-  self.assertEqual(len(commands),2,'native audit preflight and postgate must include all128 cases')
+  self.assertEqual(len(commands),2,'native audit preflight and postgate must include all133 cases')
   retained_files=['audit-delivery-history.spec.ts','audit-access-revocation.spec.ts','audit-auth-entry.spec.ts','audit-bulk-confirmation.spec.ts','audit-bulk-manifest.spec.ts','audit-candidate-review.spec.ts','audit-daily-journey.spec.ts','audit-daily-ux.spec.ts','audit-draft-dirty.spec.ts','audit-draft-reground.spec.ts','audit-job-scope.spec.ts','audit-keyboard-workbench.spec.ts','audit-keyboard.spec.ts','audit-maintenance-settings.spec.ts','audit-memberships.spec.ts','audit-native-run-progress.spec.ts','audit-operations.spec.ts','audit-research-intent.spec.ts','audit-reviewed-list-order.spec.ts','audit-template-copy.spec.ts','work-queue-counts.spec.ts']
   for command in commands:
    for name in [*retained_files,'audit-workspace-recovery.spec.ts']:

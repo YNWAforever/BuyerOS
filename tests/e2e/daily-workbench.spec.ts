@@ -127,7 +127,7 @@ test('T29 manual locale remains usable while preference loads and saves with its
   const isPreference=(response:import('@playwright/test').Response)=>new URL(response.url()).pathname===preferencePath;
   await page.route(`${browserApiOrigin}${preferencePath}`,async route=>{
     if(route.request().method()==='GET'){preferenceReads++;await heldPreference;}
-    else if(route.request().method()==='PATCH')preferenceWrites.push(route.request().headers()['if-match']);
+    else if(route.request().method()==='PATCH')preferenceWrites.push(route.request().headers()['x-buyeros-if-match']);
     await route.continue();
   });
   const loadedPreference=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='GET'&&response.status()===200,{timeout:30_000});
@@ -153,14 +153,14 @@ test('T29 manual locale remains usable while preference loads and saves with its
   await page.locator('header select').selectOption('en');
   const resetResponse=await reset;
   expect(resetResponse.status()).toBe(200);
-  expect(await resetResponse.request().headerValue('if-match')).toBe(`"${loaded.version}"`);
+  expect(await resetResponse.request().headerValue('x-buyeros-if-match')).toBe(`"${loaded.version}"`);
   const resetVersion=(await resetResponse.json()).data.version;
   await expect(page.locator('header select')).toBeEnabled({timeout:30_000});
   const saved=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='PATCH',{timeout:30_000});
   await page.locator('header select').selectOption('zh-HK');
   const savedResponse=await saved;
   expect(savedResponse.status()).toBe(200);
-  expect(await savedResponse.request().headerValue('if-match')).toBe(`"${resetVersion}"`);
+  expect(await savedResponse.request().headerValue('x-buyeros-if-match')).toBe(`"${resetVersion}"`);
   const savedVersion=(await savedResponse.json()).data.version;
   expect(preferenceWrites).toEqual([`"${loaded.version}"`,`"${resetVersion}"`]);
   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
@@ -280,22 +280,25 @@ test('T29 scope list timeout offers a bounded retry with current identity',async
   test.setTimeout(90_000);
   let releaseFirst:()=>void=()=>{};
   const held=new Promise<void>(resolve=>{releaseFirst=resolve;});
-  let first=true;
+  const reads:string[]=[];
   await page.route(`${browserApiOrigin}/v1/workspaces?**`,async route=>{
-    if(first){first=false;await held;}
+    reads.push(route.request().headers().authorization);
+    if(reads.length===1)await held;
+    else releaseFirst();
     try{await route.continue();}catch{ /* The first request may have timed out. */ }
   });
   try{
     await signIn(page,false);
     const picker=page.getByRole('region',{name:/^(Workspace selection|工作區選擇)$/});
-    await expect(picker.getByRole('alert')).toBeVisible({timeout:20_000});
-    await expect(page.getByRole('button',{name:'Retry loading workspaces'})).toBeEnabled();
+    await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue(workspace,{timeout:20_000});
+    await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});
+    await expect(picker.getByRole('alert')).toHaveCount(0);
+    await expect(page.getByRole('button',{name:'Retry loading workspaces'})).toHaveCount(0);
+    expect(reads.length).toBeGreaterThanOrEqual(2);
+    expect(reads.every(value=>value==='Bearer fixture-reviewer')).toBe(true);
   }finally{
     releaseFirst();
   }
-  await page.getByRole('button',{name:'Retry loading workspaces'}).click();
-  await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue(workspace,{timeout:30_000});
-  await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(project,{timeout:30_000});
 });
 
 

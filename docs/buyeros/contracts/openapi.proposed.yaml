@@ -2840,6 +2840,313 @@ paths:
                   filters: {}
                   sort: best_fit
                   requested_limit: 1
+  "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/preview":
+    post:
+      operationId: "previewBuyerImport"
+      summary: "Preview Excel or CSV buyer candidates"
+      tags:
+        - "BO-008"
+      security:
+        -
+          BearerAuth: []
+      parameters:
+        -
+          name: "workspace_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "project_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          "$ref": "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: "object"
+              additionalProperties: false
+              properties:
+                file:
+                  type: "string"
+                  format: "binary"
+              required:
+                - "file"
+      responses:
+        "201":
+          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/BuyerImportResponse"
+        "400":
+          "$ref": "#/components/responses/Error"
+        "401":
+          "$ref": "#/components/responses/Error"
+        "403":
+          "$ref": "#/components/responses/Error"
+        "404":
+          "$ref": "#/components/responses/Error"
+        "409":
+          "$ref": "#/components/responses/Error"
+        "422":
+          "$ref": "#/components/responses/Error"
+        "429":
+          "$ref": "#/components/responses/Error"
+        "500":
+          "$ref": "#/components/responses/Error"
+        "503":
+          "$ref": "#/components/responses/Error"
+      x-implementation-status: "IMPLEMENTED"
+      x-work-package: "BO-008"
+      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+      x-permitted-roles:
+        - "operator"
+        - "workspace_admin"
+      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
+      x-cost: "Deterministic offline file parsing only; no paid requests."
+      x-idempotency: "Required; exact actor, operation, target and file/digest replay."
+      x-version-precondition: "none"
+      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      x-errors:
+        - "INVALID_REQUEST"
+        - "PERMISSION_DENIED"
+        - "NOT_FOUND"
+        - "IDEMPOTENCY_CONFLICT"
+        - "IMPORT_PREVIEW_CHANGED"
+        - "IMPORT_PREVIEW_EXPIRED"
+  "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/{import_id}":
+    get:
+      operationId: "getBuyerImport"
+      summary: "Read the original preview or committed import result"
+      tags:
+        - "BO-008"
+      security:
+        -
+          BearerAuth: []
+      parameters:
+        -
+          name: "workspace_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "project_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "import_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/BuyerImportResponse"
+        "400":
+          "$ref": "#/components/responses/Error"
+        "401":
+          "$ref": "#/components/responses/Error"
+        "403":
+          "$ref": "#/components/responses/Error"
+        "404":
+          "$ref": "#/components/responses/Error"
+        "409":
+          "$ref": "#/components/responses/Error"
+        "422":
+          "$ref": "#/components/responses/Error"
+        "429":
+          "$ref": "#/components/responses/Error"
+        "500":
+          "$ref": "#/components/responses/Error"
+        "503":
+          "$ref": "#/components/responses/Error"
+      x-implementation-status: "IMPLEMENTED"
+      x-work-package: "BO-008"
+      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+      x-permitted-roles:
+        - "operator"
+        - "workspace_admin"
+      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
+      x-cost: "Deterministic offline file parsing only; no paid requests."
+      x-idempotency: "Read-only."
+      x-version-precondition: "none"
+      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      x-errors:
+        - "INVALID_REQUEST"
+        - "PERMISSION_DENIED"
+        - "NOT_FOUND"
+        - "IDEMPOTENCY_CONFLICT"
+        - "IMPORT_PREVIEW_CHANGED"
+        - "IMPORT_PREVIEW_EXPIRED"
+  "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/{import_id}/confirm":
+    post:
+      operationId: "confirmBuyerImport"
+      summary: "Atomically import the exact preview as unreviewed buyers"
+      tags:
+        - "BO-008"
+      security:
+        -
+          BearerAuth: []
+      parameters:
+        -
+          name: "workspace_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "project_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "import_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          "$ref": "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/BuyerImportConfirm"
+      responses:
+        "200":
+          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/BuyerImportResponse"
+        "400":
+          "$ref": "#/components/responses/Error"
+        "401":
+          "$ref": "#/components/responses/Error"
+        "403":
+          "$ref": "#/components/responses/Error"
+        "404":
+          "$ref": "#/components/responses/Error"
+        "409":
+          "$ref": "#/components/responses/Error"
+        "422":
+          "$ref": "#/components/responses/Error"
+        "429":
+          "$ref": "#/components/responses/Error"
+        "500":
+          "$ref": "#/components/responses/Error"
+        "503":
+          "$ref": "#/components/responses/Error"
+      x-implementation-status: "IMPLEMENTED"
+      x-work-package: "BO-008"
+      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+      x-permitted-roles:
+        - "operator"
+        - "workspace_admin"
+      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
+      x-cost: "Deterministic offline file parsing only; no paid requests."
+      x-idempotency: "Required; exact actor, operation, target and file/digest replay."
+      x-version-precondition: "Exact stored preview_digest"
+      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      x-errors:
+        - "INVALID_REQUEST"
+        - "PERMISSION_DENIED"
+        - "NOT_FOUND"
+        - "IDEMPOTENCY_CONFLICT"
+        - "IMPORT_PREVIEW_CHANGED"
+        - "IMPORT_PREVIEW_EXPIRED"
+  "/v1/workspaces/{workspace_id}/buyers/{buyer_id}/import-source":
+    get:
+      operationId: "getBuyerImportSource"
+      summary: "Read private source claims for an imported buyer"
+      tags:
+        - "BO-008"
+      security:
+        -
+          BearerAuth: []
+      parameters:
+        -
+          name: "workspace_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "buyer_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/BuyerImportSourceResponse"
+        "400":
+          "$ref": "#/components/responses/Error"
+        "401":
+          "$ref": "#/components/responses/Error"
+        "403":
+          "$ref": "#/components/responses/Error"
+        "404":
+          "$ref": "#/components/responses/Error"
+        "409":
+          "$ref": "#/components/responses/Error"
+        "422":
+          "$ref": "#/components/responses/Error"
+        "429":
+          "$ref": "#/components/responses/Error"
+        "500":
+          "$ref": "#/components/responses/Error"
+        "503":
+          "$ref": "#/components/responses/Error"
+      x-implementation-status: "IMPLEMENTED"
+      x-work-package: "BO-008"
+      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+      x-permitted-roles:
+        - "viewer"
+        - "operator"
+        - "reviewer"
+        - "workspace_admin"
+      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
+      x-cost: "Deterministic offline file parsing only; no paid requests."
+      x-idempotency: "Read-only."
+      x-version-precondition: "none"
+      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      x-errors:
+        - "INVALID_REQUEST"
+        - "PERMISSION_DENIED"
+        - "NOT_FOUND"
+        - "IDEMPOTENCY_CONFLICT"
+        - "IMPORT_PREVIEW_CHANGED"
+        - "IMPORT_PREVIEW_EXPIRED"
   /v1/workspaces/{workspace_id}/projects/{project_id}/buyers:
     get:
       operationId: listBuyers
@@ -8631,6 +8938,411 @@ paths:
       - RATE_LIMITED
       - INVALID_REQUEST
       - READ_DISABLED
+  /v1/workspaces/{workspace_id}/projects/{project_id}/offer-document-uploads:
+    post:
+      operationId: startOfferDocumentUpload
+      summary: startOfferDocumentUpload
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentUploadResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Original operation key; immutable same-position chunks; reconcile
+        before retry.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentUploadStart'
+  /v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}:
+    get:
+      operationId: getOfferDocumentUpload
+      summary: getOfferDocumentUpload
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: upload_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentUploadResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Read-only.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
+  /v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/chunks/{index}:
+    put:
+      operationId: putOfferDocumentChunk
+      summary: putOfferDocumentChunk
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: upload_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: index
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 9
+      - name: X-Chunk-Sha256
+        in: header
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+      responses:
+        '200':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentUploadResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Original operation key; immutable same-position chunks; reconcile
+        before retry.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+              maxLength: 2097152
+  /v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/complete:
+    post:
+      operationId: completeOfferDocumentUpload
+      summary: completeOfferDocumentUpload
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: upload_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '202':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferDocumentResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Original operation key; immutable same-position chunks; reconcile
+        before retry.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentUploadComplete'
+  /v1/workspaces/{workspace_id}/offer-documents/{document_id}/slides:
+    get:
+      operationId: getOfferDocumentSlides
+      summary: getOfferDocumentSlides
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: document_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 2147483647
+          default: 0
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 20
+      responses:
+        '200':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentSlidePageResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Read-only.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
+  /v1/workspaces/{workspace_id}/offer-documents/{document_id}/content-chunks/{index}:
+    get:
+      operationId: getOfferDocumentContentChunk
+      summary: getOfferDocumentContentChunk
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: document_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: index
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 9
+      responses:
+        '200':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentContentChunkResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Read-only.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
 components:
   securitySchemes:
     BearerAuth:
@@ -8704,6 +9416,308 @@ components:
           schema:
             $ref: '#/components/schemas/ApiError'
   schemas:
+    DocumentExtractionMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        format:
+          type: string
+          enum:
+          - pptx
+          - pdf
+          - text
+          - markdown
+        slide_count:
+          type: integer
+          minimum: 1
+          maximum: 100
+        text_slide_count:
+          type: integer
+          minimum: 0
+          maximum: 100
+        classification:
+          type: string
+          enum:
+          - text
+          - image_only
+        text_bytes:
+          type: integer
+          minimum: 0
+          maximum: 100000
+        external_relationships_ignored:
+          type: integer
+          minimum: 0
+          maximum: 100000
+        embedded_parts_ignored:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        byte_length:
+          type: integer
+          minimum: 1
+          maximum: 20971520
+        chunk_size:
+          type: integer
+          const: 2097152
+      required:
+      - format
+      - byte_length
+      - chunk_size
+    DocumentUploadStart:
+      type: object
+      additionalProperties: false
+      properties:
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        media_type:
+          type: string
+          enum:
+          - application/vnd.openxmlformats-officedocument.presentationml.presentation
+          - application/pdf
+          - text/plain
+          - text/markdown
+        byte_length:
+          type: integer
+          minimum: 1
+          maximum: 20971520
+        source_sha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+      required:
+      - filename
+      - media_type
+      - byte_length
+      - source_sha256
+    DocumentUploadComplete:
+      type: object
+      additionalProperties: false
+      properties: {}
+      required: []
+    DocumentUpload:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspace_id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        filename:
+          type: string
+        media_type:
+          type: string
+        byte_length:
+          type: integer
+          minimum: 1
+          maximum: 20971520
+        source_sha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        chunk_size:
+          type: integer
+          const: 2097152
+        chunk_count:
+          type: integer
+          minimum: 1
+          maximum: 10
+        status:
+          type: string
+          enum:
+          - uploading
+          - completed
+          - failed
+          - expired
+        expires_at:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        received_chunks:
+          type: array
+          maxItems: 10
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              index:
+                type: integer
+                minimum: 0
+                maximum: 9
+              sha256:
+                type: string
+                pattern: ^[a-f0-9]{64}$
+            required:
+            - index
+            - sha256
+        document_id:
+          type: string
+          format: uuid
+        failure_code:
+          type: string
+      required:
+      - id
+      - workspace_id
+      - project_id
+      - filename
+      - media_type
+      - byte_length
+      - source_sha256
+      - chunk_size
+      - chunk_count
+      - status
+      - expires_at
+      - version
+      - received_chunks
+    DocumentSlide:
+      type: object
+      additionalProperties: false
+      properties:
+        number:
+          type: integer
+          minimum: 1
+          maximum: 100
+        text:
+          type: string
+          maxLength: 100000
+        classification:
+          type: string
+          enum:
+          - text
+          - image_only
+      required:
+      - number
+      - text
+      - classification
+    DocumentSlidePage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/DocumentSlide'
+        offset:
+          type: integer
+          minimum: 0
+          maximum: 2147483647
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 20
+        total:
+          type: integer
+          minimum: 0
+          maximum: 100
+      required:
+      - items
+      - offset
+      - limit
+      - total
+    DocumentContentChunk:
+      type: object
+      additionalProperties: false
+      properties:
+        index:
+          type: integer
+          minimum: 0
+          maximum: 9
+        offset:
+          type: integer
+          minimum: 0
+          maximum: 20971519
+        byte_length:
+          type: integer
+          minimum: 1
+          maximum: 2097152
+        chunk_count:
+          type: integer
+          minimum: 1
+          maximum: 10
+        source_byte_length:
+          type: integer
+          minimum: 1
+          maximum: 20971520
+        chunk_sha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        source_sha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        filename:
+          type: string
+        media_type:
+          type: string
+        body_base64:
+          type: string
+          maxLength: 2796204
+      required:
+      - index
+      - offset
+      - byte_length
+      - chunk_count
+      - source_byte_length
+      - chunk_sha256
+      - source_sha256
+      - filename
+      - media_type
+      - body_base64
+    DocumentUploadResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/DocumentUpload'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          const: live
+      required:
+      - data
+      - request_id
+      - data_mode
+    DocumentSlidePageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/DocumentSlidePage'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          const: live
+      required:
+      - data
+      - request_id
+      - data_mode
+    DocumentContentChunkResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/DocumentContentChunk'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          const: live
+      required:
+      - data
+      - request_id
+      - data_mode
     DeliveryMessageMetadata:
       type: object
       additionalProperties: false
@@ -8917,6 +9931,8 @@ components:
           - SELECTION_EXPIRED
           - SELECTION_SCOPE_MISMATCH
           - IDEMPOTENCY_CONFLICT
+          - IMPORT_PREVIEW_CHANGED
+          - IMPORT_PREVIEW_EXPIRED
           - ICP_NOT_APPROVED
           - ICP_STALE
           - POLICY_UNKNOWN
@@ -9338,6 +10354,8 @@ components:
           items:
             $ref: '#/components/schemas/OfferFact'
         retention_until: *id004
+        extraction_metadata:
+          $ref: '#/components/schemas/DocumentExtractionMetadata'
       required:
       - id
       - workspace_id
@@ -12825,6 +13843,285 @@ components:
       - data
       - request_id
       - data_mode
+    BuyerImportRow:
+      type: "object"
+      additionalProperties: false
+      properties:
+        row_number:
+          type: "integer"
+          minimum: 1
+        source_row:
+          type: "string"
+          maxLength: 10000
+        source_date:
+          type:
+            - "string"
+            - "null"
+          format: "date"
+        website:
+          type:
+            - "string"
+            - "null"
+          format: "uri"
+          maxLength: 2000
+        source_urls:
+          type: "array"
+          maxItems: 2
+          items:
+            type: "string"
+            format: "uri"
+            maxLength: 2000
+        original_fields:
+          type: "object"
+          maxProperties: 64
+          additionalProperties:
+            type: "string"
+            maxLength: 10000
+        name:
+          type: "string"
+          maxLength: 400
+        normalized_domain:
+          type:
+            - "string"
+            - "null"
+          maxLength: 255
+        errors:
+          type: "array"
+          items:
+            type: "string"
+        status:
+          type: "string"
+          enum:
+            - "ready"
+            - "duplicate"
+            - "invalid"
+        duplicate_buyer_id:
+          type:
+            - "string"
+            - "null"
+          format: "uuid"
+      required:
+        - "row_number"
+        - "source_row"
+        - "source_date"
+        - "website"
+        - "source_urls"
+        - "original_fields"
+        - "name"
+        - "normalized_domain"
+        - "errors"
+        - "status"
+        - "duplicate_buyer_id"
+    BuyerImportPreview:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        workspace_id:
+          type: "string"
+          format: "uuid"
+        project_id:
+          type: "string"
+          format: "uuid"
+        status:
+          type: "string"
+          const: "previewed"
+        file_name:
+          type: "string"
+          maxLength: 200
+        file_sha256:
+          type: "string"
+          pattern: "^[a-f0-9]{64}$"
+        preview_digest:
+          type: "string"
+          pattern: "^sha256:[a-f0-9]{64}$"
+        expires_at:
+          type: "string"
+          format: "date-time"
+        total_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        ready_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        duplicate_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        invalid_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        can_import:
+          type: "boolean"
+        rows:
+          type: "array"
+          maxItems: 500
+          items:
+            "$ref": "#/components/schemas/BuyerImportRow"
+      required:
+        - "id"
+        - "workspace_id"
+        - "project_id"
+        - "status"
+        - "file_name"
+        - "file_sha256"
+        - "preview_digest"
+        - "expires_at"
+        - "total_rows"
+        - "ready_rows"
+        - "duplicate_rows"
+        - "invalid_rows"
+        - "can_import"
+        - "rows"
+    BuyerImportResult:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        status:
+          type: "string"
+          const: "completed"
+        imported_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        skipped_duplicate_rows:
+          type: "integer"
+          minimum: 0
+          maximum: 500
+        buyer_ids:
+          type: "array"
+          maxItems: 500
+          items:
+            type: "string"
+            format: "uuid"
+        preview_digest:
+          type: "string"
+          pattern: "^sha256:[a-f0-9]{64}$"
+      required:
+        - "id"
+        - "status"
+        - "imported_rows"
+        - "skipped_duplicate_rows"
+        - "buyer_ids"
+        - "preview_digest"
+    BuyerImportConfirm:
+      type: "object"
+      additionalProperties: false
+      properties:
+        preview_digest:
+          type: "string"
+          pattern: "^sha256:[a-f0-9]{64}$"
+        confirmation:
+          type: "boolean"
+          const: true
+      required:
+        - "preview_digest"
+        - "confirmation"
+    BuyerImportResponse:
+      type: "object"
+      additionalProperties: false
+      properties:
+        data:
+          oneOf:
+            -
+              "$ref": "#/components/schemas/BuyerImportPreview"
+            -
+              "$ref": "#/components/schemas/BuyerImportResult"
+        request_id:
+          type: "string"
+          format: "uuid"
+        data_mode:
+          type: "string"
+          const: "live"
+      required:
+        - "data"
+        - "request_id"
+        - "data_mode"
+    BuyerImportSource:
+      type: "object"
+      additionalProperties: false
+      properties:
+        import_id:
+          type: "string"
+          format: "uuid"
+        file_name:
+          type: "string"
+          maxLength: 200
+        file_sha256:
+          type: "string"
+          pattern: "^[a-f0-9]{64}$"
+        candidate_status:
+          type: "string"
+          const: "unreviewed"
+        row_number:
+          type: "integer"
+          minimum: 1
+        source_row:
+          type: "string"
+          maxLength: 10000
+        source_date:
+          type:
+            - "string"
+            - "null"
+          format: "date"
+        website:
+          type:
+            - "string"
+            - "null"
+          format: "uri"
+          maxLength: 2000
+        source_urls:
+          type: "array"
+          maxItems: 2
+          items:
+            type: "string"
+            format: "uri"
+            maxLength: 2000
+        original_fields:
+          type: "object"
+          maxProperties: 64
+          additionalProperties:
+            type: "string"
+            maxLength: 10000
+      required:
+        - "import_id"
+        - "file_name"
+        - "file_sha256"
+        - "candidate_status"
+        - "row_number"
+        - "source_row"
+        - "source_date"
+        - "website"
+        - "source_urls"
+        - "original_fields"
+    BuyerImportSourceResponse:
+      type: "object"
+      additionalProperties: false
+      properties:
+        data:
+          oneOf:
+            -
+              "$ref": "#/components/schemas/BuyerImportSource"
+            -
+              type: "null"
+        request_id:
+          type: "string"
+          format: "uuid"
+        data_mode:
+          type: "string"
+          const: "live"
+      required:
+        - "data"
+        - "request_id"
+        - "data_mode"
     BuyerResponse:
       type: object
       additionalProperties: false

@@ -1,5 +1,6 @@
 """Finite fixture driver; empty time-budget cycles keep their returned cursor."""
 from time import monotonic
+from subprocess import TimeoutExpired
 import math
 import os
 import sys
@@ -7,7 +8,7 @@ from pathlib import Path
 
 
 class _OwnedRssUnavailableError(ValueError):
-    """Missing Linux VmRSS requires a second authoritative owned-Popen check."""
+    """Missing Linux VmRSS requires authoritative owned-Popen exit proof."""
 
 
 def _process_rss(pid):
@@ -88,11 +89,14 @@ def sample_worker_resources(processes,at_seconds,samples):
             for pid,parent,depth in _owned_process_tree(process.pid):
                 try:
                     rss,method=_process_rss(pid)
-                except _OwnedRssUnavailableError:
-                    # The first poll and /proc read race with owned interpreter
-                    # exit. Only its own reaped Popen proves that outcome; no
-                    # missing live/descendant measurement or invalid unit passes.
-                    if pid!=process.pid or process.poll() is None:raise
+                except _OwnedRssUnavailableError as unavailable:
+                    # Linux can drop VmRSS before the exiting interpreter is
+                    # reapable. Give only this owned root a bounded exit check;
+                    # missing live/descendant RSS and invalid units still fail.
+                    if pid!=process.pid:raise
+                    if process.poll() is None:
+                        try:process.wait(timeout=.1)
+                        except TimeoutExpired:raise unavailable from None
                     break
                 samples.append(dict(owner_pid=process.pid,pid=pid,parent_pid=parent,depth=depth,at_seconds=at_seconds,rss_bytes=rss,method=method))
 

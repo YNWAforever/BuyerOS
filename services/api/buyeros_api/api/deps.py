@@ -14,6 +14,10 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
     "listICPVersions": _VIEWERS,
     "listBuyers": _VIEWERS,
     "getBuyer": _VIEWERS,
+    "previewBuyerImport": _WRITERS,
+    "confirmBuyerImport": _WRITERS,
+    "getBuyerImport": _WRITERS,
+    "getBuyerImportSource": _VIEWERS,
     "listBuyerEvidence": _VIEWERS,
     "getEvidence": _VIEWERS,
     "createBuyerSnapshot": _VIEWERS,
@@ -91,6 +95,12 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
     "updateBudget": frozenset({"workspace_admin"}),
     "ingestOfferUrl": _WRITERS,
     "uploadOfferDocument": _WRITERS,
+    "startOfferDocumentUpload": _WRITERS,
+    "getOfferDocumentUpload": _WRITERS,
+    "putOfferDocumentChunk": _WRITERS,
+    "completeOfferDocumentUpload": _WRITERS,
+    "getOfferDocumentSlides": _VIEWERS,
+    "getOfferDocumentContentChunk": _VIEWERS,
     "getOfferDocument": _VIEWERS,
     "listOfferDocuments": _VIEWERS,
     "deleteOfferDocument": _WRITERS,
@@ -139,7 +149,7 @@ def get_engine():
     key = (_current_loop_key(), url)
     engine = _ENGINES.get(key)
     if engine is None:
-        engine = create_async_engine(url)
+        engine = create_async_engine(url, pool_pre_ping=True)
         _ENGINES[key] = engine
     return engine
 
@@ -152,7 +162,7 @@ def get_rate_engine():
     key = (_current_loop_key(), url)
     engine = _RATE_ENGINES.get(key)
     if engine is None:
-        engine = create_async_engine(url, pool_size=2, max_overflow=2, pool_timeout=5)
+        engine = create_async_engine(url, pool_size=2, max_overflow=2, pool_timeout=5, pool_pre_ping=True)
         _RATE_ENGINES[key] = engine
     return engine
 

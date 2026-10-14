@@ -120,6 +120,19 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
 
 /* Live buyer bulk actions: readable controls and result IDs at narrow widths. */
 .live-buyer-results .inline{flex-wrap:wrap}
+.live-buyer-import{margin:16px 0;padding:16px;border:1px solid #dce4ef;border-radius:12px;background:#f8fbff;min-width:0}
+.live-buyer-import summary{cursor:pointer;font-weight:650;color:#1d3557}
+.live-buyer-import p,.live-buyer-import>label{display:block;margin:12px 0;line-height:1.6}
+.live-buyer-import input[type=file]{max-width:100%;min-width:0}
+.live-buyer-import .inline>label{min-width:0;max-width:100%}
+.live-buyer-import button,.live-buyer-source button{border:1px solid #cdd8e5;border-radius:7px;background:white;color:#1d3557;padding:8px 12px;line-height:1.4}
+.live-buyer-import button:disabled{opacity:.55;cursor:not-allowed}
+.live-buyer-import .table-scroll{overflow:auto;max-height:360px;margin:12px 0;border:1px solid #dce4ef;border-radius:8px;background:white}
+.live-buyer-import table{width:100%;border-collapse:collapse;font-size:13px}
+.live-buyer-import td,.live-buyer-import th{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid #e5e9f0;overflow-wrap:anywhere;min-width:90px}
+.live-buyer-import th{position:sticky;top:0;background:#edf3fa;z-index:1}
+.live-buyer-source{margin:16px 0;padding:12px;border:1px solid #dce4ef;border-radius:8px;overflow-wrap:anywhere}
+.live-buyer-source dl>div{margin:8px 0}.live-buyer-source dt{font-weight:600}.live-buyer-source dd{margin:4px 0;white-space:pre-wrap}
 .live-buyer-results [role="group"][aria-label="Buyer filters"]{align-items:flex-end}
 .live-buyer-results [role="group"][aria-label="Buyer filters"]>label{min-width:100px}
 .bulk-action-panel{display:grid;gap:12px;min-width:0}
@@ -347,6 +360,11 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
 .live-workspace .steps button:not(.live-nav-item):not([data-slot]){border:0;background:transparent;padding:0;min-height:0;justify-content:flex-start;min-width:0}
 .live-workspace .steps button:not(.live-nav-item):not([data-slot]):hover:not(:disabled){background:transparent}
 .live-workspace .steps{flex-wrap:wrap;min-width:0}
+@media(max-width:600px){
+  .live-workspace .steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .live-workspace .steps button:not(.live-nav-item):not([data-slot]){display:grid;grid-template-columns:22px minmax(0,1fr);align-items:start;overflow-wrap:anywhere;white-space:normal}
+  .live-workspace .steps button span{margin-bottom:0}
+}
 .live-topbar button{white-space:nowrap}
 /* Narrow screens and 200% zoom: topbar controls and section buttons wrap instead of overflowing.
    The section bar wraps (no horizontal scroller) so no element extends past the viewport. */
@@ -359,3 +377,4 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
   .live-nav-item{min-width:0}
 }
 @media(max-width:767px){.live-topbar .top-right{justify-content:flex-start}}
+.live-account-email { overflow-wrap: anywhere; }

@@ -10,6 +10,30 @@ async function ownedRoute(context:BrowserContext){
  });
 }
 test.beforeEach(async({request})=>{await request.get(loopback+'/__owned_reset');});
+
+test('empty workspace shows the current account and a clear way to switch it',async({browser})=>{
+ const context=await browser.newContext();await ownedRoute(context);const page=await context.newPage();
+ await page.route('**/v1/workspaces?**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data_mode:'live',request_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',data:{items:[],offset:0,limit:100,total:0}})}));
+ try{
+  await page.goto('/app');await page.getByRole('button',{name:'Sign in',exact:true}).click();
+  await page.getByRole('textbox',{name:'Email',exact:true}).fill('synthetic@example.test');
+  await page.getByLabel('Password',{exact:true}).fill('synthetic-only');
+  await page.getByRole('button',{name:'Sign in with email',exact:true}).click();
+  await expect(page.getByText('Signed in as: synthetic@example.test',{exact:true})).toBeVisible();
+  await expect(page.getByText('No workspace membership. Ask an administrator for access.')).toBeVisible();
+  await expect(page.getByText('Check that you used the account invited to this workspace. Use Sign out to change accounts.')).toBeVisible();
+  await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
+  await expect(page.getByText('目前登入帳戶: synthetic@example.test',{exact:true})).toBeVisible();
+  await expect(page.getByText('請確認你使用獲邀加入工作區的帳戶。按「登出」即可切換帳戶。')).toBeVisible();
+  await page.setViewportSize({width:320,height:800});
+  const label=page.locator('.live-account-email');
+  expect(await label.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+  await page.screenshot({path:'test-results/neon-session/account-recovery-zh.png',fullPage:true});
+  await page.getByRole('button',{name:'登出',exact:true}).click();
+  await expect(page.getByRole('button',{name:'登入',exact:true})).toBeVisible();
+  await expect(page.getByText('synthetic@example.test',{exact:true})).toHaveCount(0);
+ }finally{await context.close().catch(()=>{});}
+});
 test('C11 actual built email/token/API/reload/deep-link and two-tab logout; synthetic protocol only',async({browser,request})=>{
  const context=await browser.newContext();await ownedRoute(context);const page=await context.newPage();const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  try{
