@@ -46,12 +46,12 @@ def test_populated0048_money_expand_retains_original_unknown_hold_and_refuses_sh
                 command.upgrade(ledger.config(),'head')
                 assert snapshot()==before
                 with psycopg.connect(dsn) as db:
-                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0052_private_document_storage',)
+                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0053_resumable_documents',)
                     assert db.execute("SELECT numeric_precision,numeric_scale FROM information_schema.columns WHERE table_name='delivery_liabilities' AND column_name='max_liability'").fetchone()==(20,6)
                 with pytest.raises(RuntimeError,match='retain delivery history'):command.downgrade(ledger.config(),'0048_c61_delivery_ledger')
                 assert snapshot()==before
                 with psycopg.connect(dsn) as db:
-                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0052_private_document_storage',)
+                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0053_resumable_documents',)
                     assert str(db.execute('SELECT remaining_hold FROM budget_reservations WHERE id=%s',(data['reservation'],)).fetchone()[0])=='0.010000'
     finally:
         # Keep the session fixture at its declared head even if an assertion fails.

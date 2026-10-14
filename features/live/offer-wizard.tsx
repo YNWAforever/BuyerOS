@@ -123,7 +123,7 @@ export function LiveOfferWizard({mode,projectId,onSaved,t}: {
       <label>{t('Product / service')}<input value={offer.product} onChange={e=>update('product',e.target.value)}/></label>
       <label>{t('Value proposition')}<textarea value={offer.value} onChange={e=>update('value',e.target.value)}/></label>
       <label>{t('Website (optional)')}<input value={offer.website} onChange={e=>update('website',e.target.value)}/></label>
-      {mode==='create'&&<p>{t('Save the project first, then use Edit offer to attach PDF, text or Markdown sources. PowerPoint and Excel files need a text or PDF extract.')}</p>}
+      {mode==='create'&&<p>{t('Save the project first, then use Edit offer to attach PowerPoint, PDF, text or Markdown sources. Import Excel or CSV buyer lists from Buyers.')}</p>}
       {mode==='edit'&&projectId&&<LiveOfferDocuments projectId={projectId} selected={selectedDocuments}
         onSelect={chooseDocument} onApply={applyCandidate} t={t}/>}
     </>}

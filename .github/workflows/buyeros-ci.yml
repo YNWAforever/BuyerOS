@@ -43,6 +43,7 @@ jobs:
       - run: node tests/domain-checks.mjs
       - run: node tests/live-adapter-checks.mjs
       - run: node tests/buyer-import-checks.mjs
+      - run: node tests/document-upload-checks.mjs
       - name: Verify C61 candidate client intent and source privacy
         run: |
           mkdir -p artifacts/c61
@@ -554,10 +555,10 @@ jobs:
         working-directory: services/api
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 2658 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 2703 --discovery-only
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/api
-      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 2658 --junit services/api/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 2703 --junit services/api/artifacts/tests.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -942,6 +943,12 @@ jobs:
           python scripts/check-required-tests.py --playwright-discovery artifacts/c61/buyer-import-discovery.json --expected-count 4 --expected-file buyer-import.spec.ts --junit test-results/buyer-import.xml
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/buyer-import.xml
+      - name: Verify native PowerPoint through the compiled UI and disposable PostgreSQL
+        run: |
+          pnpm exec playwright test --config playwright.native-attachments.config.ts --list --reporter=json > artifacts/c61/native-attachments-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/native-attachments-discovery.json --expected-count 4 --expected-file native-attachments.spec.ts --discovery-only
+          pnpm exec playwright test --config playwright.native-attachments.config.ts
+          python scripts/check-required-tests.py --playwright-discovery artifacts/c61/native-attachments-discovery.json --expected-count 4 --expected-file native-attachments.spec.ts --junit test-results/native-attachments.xml
       - name: Verify native journey discovery before execution
         run: |
           mkdir -p test-results artifacts/c61

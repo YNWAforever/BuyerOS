@@ -10,7 +10,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0052_private_document_storage"
+HEAD = "0053_resumable_documents"
 
 
 def _config():

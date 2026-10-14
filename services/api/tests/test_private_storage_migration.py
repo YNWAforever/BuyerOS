@@ -28,7 +28,7 @@ def test_private_storage_empty_roundtrip_and_populated_refusal(isolated_migrated
         with pytest.raises(RuntimeError, match="retain private document bytes"):
             command.downgrade(config, "0051_buyer_imports")
         with psycopg.connect(dsn) as db:
-            assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0052_private_document_storage",)
+            assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0053_resumable_documents",)
             assert bytes(db.execute("SELECT body FROM private_document_objects WHERE id=%s", (object_id,)).fetchone()[0]) == b"hello"
             db.execute("DELETE FROM private_document_objects WHERE id=%s", (object_id,))
         command.downgrade(config, "0051_buyer_imports")
@@ -68,7 +68,7 @@ def test_non_bypass_table_owner_cannot_drop_hidden_private_bytes(isolated_migrat
         with pytest.raises(RuntimeError, match="retain private document bytes"):
             command.downgrade(config, "0051_buyer_imports")
         with psycopg.connect(dsn) as db:
-            assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0052_private_document_storage",)
+            assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0053_resumable_documents",)
             assert db.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE relname='private_document_objects'").fetchone() == (True, True)
             assert bytes(db.execute("SELECT body FROM private_document_objects WHERE id=%s", (object_id,)).fetchone()[0]) == b"hello"
     finally:

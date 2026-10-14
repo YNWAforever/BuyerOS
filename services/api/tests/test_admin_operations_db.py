@@ -23,7 +23,7 @@ def test_0017_preferences_rls_and_empty_rollback(isolated_migrated):
         assert conn.execute("SELECT to_regclass('workspace_preferences')").fetchone()[0] is None
     command.upgrade(config,'head')
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0052_private_document_storage'
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0053_resumable_documents'
 
 
 def _member_id(seeded, subject):

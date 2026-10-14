@@ -92,7 +92,7 @@ class PostgresPrivateStore:
         return body
 
     async def get_private_chunk(self, key: str, *, offset: int, length: int,
-                                expected_sha256: str | None = None) -> bytes:
+                                expected_sha256: str | None = None, session=None) -> bytes:
         from sqlalchemy import func, select
         from buyeros_api.db.private_objects import PrivateDocumentObject
         from buyeros_api.db.session import tenant_session
@@ -100,13 +100,17 @@ class PostgresPrivateStore:
         object_id = self._checked_id(key)
         if type(offset) is not int or offset < 0 or type(length) is not int or not 1 <= length <= 2 * 1024 * 1024:
             raise ValueError('invalid private slice bounds')
-        async with tenant_session(self._engine(), self.workspace_id, read_only=True) as session:
-            row = (await session.execute(select(
-                func.substring(PrivateDocumentObject.body, offset + 1, length),
-                PrivateDocumentObject.source_sha256, func.octet_length(PrivateDocumentObject.body),
-            ).where(PrivateDocumentObject.workspace_id == self.workspace_id,
-                    PrivateDocumentObject.id == object_id,
-                    PrivateDocumentObject.retention_until > func.now()))).first()
+        statement = select(
+            func.substring(PrivateDocumentObject.body, offset + 1, length),
+            PrivateDocumentObject.source_sha256, func.octet_length(PrivateDocumentObject.body),
+        ).where(PrivateDocumentObject.workspace_id == self.workspace_id,
+                PrivateDocumentObject.id == object_id,
+                PrivateDocumentObject.retention_until > func.now())
+        if session is not None:
+            row = (await session.execute(statement)).first()
+        else:
+            async with tenant_session(self._engine(), self.workspace_id, read_only=True) as owned_session:
+                row = (await owned_session.execute(statement)).first()
         if (row is None or not 1 <= row[2] <= MAX_PRIVATE_OBJECT_BYTES
                 or offset >= row[2] or expected_sha256 is not None and row[1] != expected_sha256):
             raise ValueError('private object missing, expired or mismatched')
@@ -140,14 +144,6 @@ async def purge_due_tenant_private_objects(session, workspace_id, *, now=None, l
     if not 1 <= limit <= 100:
         raise ValueError("private object cleanup requires a bounded limit")
     now = now or datetime.now(timezone.utc)
-    from buyeros_api.db.ingestion import OfferDocument
-    from buyeros_api.db.document_uploads import DocumentSlide
-    expired_documents = (await session.execute(select(OfferDocument.id).where(
-        OfferDocument.workspace_id == workspace_id, OfferDocument.retention_until <= now)
-        .order_by(OfferDocument.retention_until, OfferDocument.id).limit(limit))).scalars().all()
-    if expired_documents:
-        await session.execute(delete(DocumentSlide).where(DocumentSlide.workspace_id == workspace_id,
-            DocumentSlide.document_id.in_(expired_documents)))
     object_ids = (await session.execute(select(PrivateDocumentObject.id).where(
         PrivateDocumentObject.workspace_id == workspace_id,
         PrivateDocumentObject.retention_until <= now,

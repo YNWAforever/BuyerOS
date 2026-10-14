@@ -377,6 +377,8 @@ async def list_offer_documents(
 ) -> dict:
     async with tenant_scoped(workspace_id) as session:
         await _authorize(session, principal, workspace_id, "listOfferDocuments")
+        from ...services.document_upload_service import purge_staging
+        await purge_staging(session, workspace_id)
         exists = (await session.execute(select(Project.id).where(
             Project.workspace_id == workspace_id, Project.id == project_id,
         ))).scalar_one_or_none()

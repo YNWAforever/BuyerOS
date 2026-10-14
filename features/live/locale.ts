@@ -21,7 +21,7 @@ export const liveZh: Record<string,string> = {
   'Signed in as':'目前登入帳戶',
   'Check that you used the account invited to this workspace. Use Sign out to change accounts.':'請確認你使用獲邀加入工作區的帳戶。按「登出」即可切換帳戶。',
   'Profile summary':'輪廓確認摘要',
-  'Save the project first, then use Edit offer to attach PDF, text or Markdown sources. PowerPoint and Excel files need a text or PDF extract.':'先儲存專案，再於「編輯產品資料」附加 PDF、文字或 Markdown 來源。PowerPoint 及 Excel 請先整理成文字或 PDF。',
+  'Save the project first, then use Edit offer to attach PowerPoint, PDF, text or Markdown sources. Import Excel or CSV buyer lists from Buyers.':'先儲存專案，再於「編輯產品資料」附加 PowerPoint、PDF、文字或 Markdown 來源。Excel 或 CSV 買家名單可於「買家」匯入。',
   'Write one requirement per line, or separate requirements with semicolons. Commas and slashes stay within the same requirement.':'每行填寫一項條件，亦可用分號分隔。逗號及斜線會保留在同一項條件內。',
   'Ask an administrator to select a research provider and confirm its price, budget and connection test.':'請管理員選定研究供應商，確認價格、預算及接駁測試。',
   'Owner assignment results':'負責人分派結果','Selected colleague (name unavailable)':'已選同事（未提供姓名）',

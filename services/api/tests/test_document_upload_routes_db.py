@@ -281,3 +281,31 @@ def test_tampered_page_excerpt_is_rejected_by_profile_source_validator(native_ap
                 document_ids=[uuid.UUID(doc['id'])], facts=[OfferFact.model_validate(fact)])
     with pytest.raises(ApiError):
         asyncio.run(validate())
+
+
+def test_expired_slide_cleanup_progresses_past_legacy_documents_without_slides(native_api, seeded):
+    doc = complete(native_api, staged(native_api, pptx_bytes())).json()['data']
+    with psycopg.connect(seeded, autocommit=True) as db:
+        db.execute("UPDATE offer_documents SET retention_until=now()-interval '1 second' WHERE id=%s", (doc['id'],))
+        for index in range(64):
+            db.execute("INSERT INTO offer_documents(id,workspace_id,project_id,kind,filename,media_type,status,retention_until) VALUES (%s,%s,%s,'upload',%s,'text/plain','ready',now()-interval '1 day')", (uuid.uuid4(), WORKSPACE_A, PROJECT_A, f'expired-legacy-{index}.txt'))
+    result = native_api.get(f'{BASE}/projects/{PROJECT_A}/offer-documents', headers=_h(subject=VIEWER))
+    assert result.status_code == 200, result.text
+    with psycopg.connect(seeded) as db:
+        assert db.execute('SELECT count(*) FROM document_slides WHERE document_id=%s', (doc['id'],)).fetchone() == (0,)
+
+
+def test_authorized_original_read_needs_only_one_pool_connection(native_api, seeded, monkeypatch):
+    import asyncio
+    from sqlalchemy.ext.asyncio import create_async_engine
+    from buyeros_api.api import deps
+    from tests.conftest import runtime_role_dsn
+    doc = complete(native_api, staged(native_api, pptx_bytes())).json()['data']
+    engine = create_async_engine(deps.async_database_url(runtime_role_dsn(seeded)), pool_size=1, max_overflow=0, pool_timeout=0.05)
+    monkeypatch.setattr(deps, 'get_engine', lambda: engine)
+    try:
+        result = native_api.get(f"{BASE}/offer-documents/{doc['id']}/content-chunks/0", headers=_h(subject=VIEWER))
+        assert result.status_code == 200, result.text
+        assert hashlib.sha256(base64.b64decode(result.json()['data']['body_base64'])).hexdigest() == doc['sha256']
+    finally:
+        asyncio.run(engine.dispose())

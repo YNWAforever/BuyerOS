@@ -291,7 +291,7 @@ async def document_content_chunk(workspace_id: uuid.UUID, document_id: uuid.UUID
             raise ApiError(404, 'NOT_FOUND', 'original content not available')
         try:
             body = await PostgresPrivateStore(workspace_id).get_private_chunk(doc.object_key, offset=index * service.CHUNK_BYTES,
-                length=min(service.CHUNK_BYTES, length - index * service.CHUNK_BYTES), expected_sha256=doc.sha256)
+                length=min(service.CHUNK_BYTES, length - index * service.CHUNK_BYTES), expected_sha256=doc.sha256, session=session)
         except ValueError as exc:
             raise ApiError(404, 'NOT_FOUND', 'original content not available') from exc
         data = dict(index=index, offset=index * service.CHUNK_BYTES, byte_length=len(body), chunk_count=chunk_count,

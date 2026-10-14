@@ -6,7 +6,8 @@ from datetime import datetime, timezone
 
 from sqlalchemy import delete, select
 
-from ..db.document_uploads import DocumentUpload, DocumentUploadChunk
+from ..db.document_uploads import DocumentSlide, DocumentUpload, DocumentUploadChunk
+from ..db.ingestion import OfferDocument
 from ..execution.pptx_parser import parse_pptx
 from ..services.ingestion_service import parse_upload_candidates, validate_upload
 from ..api.errors import ApiError
@@ -36,6 +37,14 @@ async def clear_chunks(session, row):
 
 
 async def purge_staging(session, workspace_id):
+    expired_documents = (await session.execute(select(OfferDocument.id).where(
+        OfferDocument.workspace_id == workspace_id, OfferDocument.retention_until <= _now(),
+        select(DocumentSlide.document_id).where(DocumentSlide.workspace_id == workspace_id,
+            DocumentSlide.document_id == OfferDocument.id).exists())
+        .order_by(OfferDocument.retention_until, OfferDocument.id).limit(64))).scalars().all()
+    if expired_documents:
+        await session.execute(delete(DocumentSlide).where(DocumentSlide.workspace_id == workspace_id,
+            DocumentSlide.document_id.in_(expired_documents)))
     rows = (await session.execute(select(DocumentUpload).where(
         DocumentUpload.workspace_id == workspace_id, DocumentUpload.status == 'uploading',
         DocumentUpload.expires_at <= _now()).order_by(DocumentUpload.expires_at, DocumentUpload.id)

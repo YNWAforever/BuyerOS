@@ -58,7 +58,7 @@ def test_0016_bulk_job_tables_are_tenant_forced_and_disposable_rollback(isolated
     config = Config(str(ALEMBIC_INI))
     config.set_main_option("script_location", str(SERVICE_ROOT / "alembic"))
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0052_private_document_storage"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0053_resumable_documents"
         for table in ("async_jobs", "async_job_items"):
             assert conn.execute("SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname=%s",
                                 (table,)).fetchone() == (True, True)
