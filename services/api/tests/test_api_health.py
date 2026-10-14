@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+import pytest
 
 from buyeros_api.api.app import create_app
 from buyeros_api.api.routes.health import capabilities_payload, readiness_payload
@@ -62,11 +63,15 @@ def test_expired_worker_heartbeat_degrades_readiness():
 
 
 def test_capabilities_never_become_ready_from_an_unverified_env_value(monkeypatch):
+    from buyeros_api.settings import Settings
+    monkeypatch.setattr('buyeros_api.settings.get_settings', lambda: Settings(paid_admission_enabled=True))
     monkeypatch.setenv("BUYEROS_RESEARCH_PROVIDER_KEY", "fixture-only")
     page = capabilities_payload()
     assert next(x for x in page["items"] if x["name"] == "research")["status"] == "unconfigured"
 
 def test_selected_but_invalid_provider_reports_its_current_blockers(monkeypatch):
+    from buyeros_api.settings import Settings
+    monkeypatch.setattr('buyeros_api.settings.get_settings', lambda: Settings(paid_admission_enabled=True))
     from buyeros_api.providers import registry
     from tests.test_provider_registry import fixture_registry
     selected,_=fixture_registry()
@@ -76,14 +81,33 @@ def test_selected_but_invalid_provider_reports_its_current_blockers(monkeypatch)
     assert set(research['reason_codes'])=={'FIXTURE_IN_PRODUCTION','PROVIDER_UNSELECTED'}
     assert research['billable'] is False
 
-def test_capability_ready_state_uses_registry_without_starting_work(monkeypatch):
+@pytest.mark.parametrize('enabled', [False, True])
+def test_capability_ready_state_uses_registry_without_starting_work(monkeypatch, enabled):
     from buyeros_api.providers import registry
+    from buyeros_api.settings import Settings
+    monkeypatch.setattr('buyeros_api.settings.get_settings', lambda: Settings(paid_admission_enabled=enabled))
     reads=[]
     def readiness(service,*,environment):
         reads.append((service,environment))
         return {'status':'ready','reason_codes':[],'actions':[]}
     monkeypatch.setattr(registry,'provider_readiness',readiness)
     items=capabilities_payload()['items']
-    assert all(item['status']=='ready' and item['reason_codes']==[] for item in items[:3])
+    assert items[0]['status'] == ('ready' if enabled else 'disabled')
+    assert items[0]['reason_codes'] == ([] if enabled else ['PAID_ADMISSION_DISABLED'])
+    assert all(item['status']=='ready' and item['reason_codes']==[] for item in items[1:3])
     assert all(item['status']=='disabled' for item in items[3:])
     assert reads==[('search','production'),('contact','production'),('model','production')]
+
+
+def test_paused_admission_preserves_provider_blockers_without_enabling_delivery(monkeypatch):
+    from buyeros_api.providers import registry
+    from buyeros_api.settings import Settings
+    monkeypatch.setattr('buyeros_api.settings.get_settings', lambda: Settings(paid_admission_enabled=False))
+    monkeypatch.setattr(registry, 'provider_readiness', lambda service, **kwargs: {
+        'status': 'blocked', 'reason_codes': ['NO_SAFE_RECONCILIATION'], 'actions': [],
+    })
+    items = capabilities_payload()['items']
+    assert items[0]['status'] == 'disabled'
+    assert items[0]['reason_codes'] == ['PAID_ADMISSION_DISABLED', 'NO_SAFE_RECONCILIATION']
+    assert all(item['status'] == 'disabled' for item in items[3:])
+    assert all(item['billable'] is False for item in items)

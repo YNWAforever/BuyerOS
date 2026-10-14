@@ -510,11 +510,21 @@ def main() -> None:
                 return counts
         if os.environ.get("BUYEROS_E2E_SEED_RUNS") == "1":
             from buyeros_api.api.routes.runs import selected_run_capability
+            from buyeros_api.api.routes.health import capabilities_payload
             app.dependency_overrides[selected_run_capability] = lambda: ({
                 "service":"search", "provider":"fixture", "verified":True,
                 "price_version":"fixture-price-v1", "verified_filters":["market","language"],
                 "markets":["US"], "languages":["en"], "roles":["distributor"],
                 "market_languages":{"US":["en"]}}, "test")
+            # Only this owned fictional app admits via a test-only contract.
+            # Its UI availability must describe that contract, not production
+            # registry activation. No provider or production switch is enabled.
+            def fixture_capabilities_payload():
+                page = capabilities_payload()
+                research = next(item for item in page['items'] if item['name'] == 'research')
+                research.update(status='ready', reason_codes=[])
+                return page
+            app.dependency_overrides[capabilities_payload] = fixture_capabilities_payload
             from fastapi import Body
             import uuid
 

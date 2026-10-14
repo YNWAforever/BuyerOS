@@ -31,10 +31,12 @@ def readiness_payload(*, database: str = "unavailable", queue: str = "unavailabl
 
 
 def capabilities_payload() -> dict:
-    """Report reviewed registry state without resolving an adapter or starting work."""
+    """Report effective availability without resolving an adapter or starting work."""
     from ...providers.registry import provider_readiness
+    from ...settings import get_settings
 
     now = _now()
+    paid_admission_enabled = get_settings().paid_admission_enabled
     provider_services = {"research": "search", "contact_enrichment": "contact", "draft_generation": "model"}
     items = []
     for name in CAPABILITY_NAMES:
@@ -44,10 +46,14 @@ def capabilities_payload() -> dict:
         # No selection is configuration missing; selected contracts expose their
         # current blockers. Credentials never change the registry's decision.
         status = "unconfigured" if state["reason_codes"] == ["PROVIDER_UNSELECTED"] else state["status"]
+        reasons = list(state["reason_codes"])
+        if name == "research" and not paid_admission_enabled:
+            status = "disabled"
+            reasons = ["PAID_ADMISSION_DISABLED", *reasons]
         items.append({
             "name": name,
             "status": status,
-            "reason_codes": state["reason_codes"],
+            "reason_codes": reasons,
             "checked_at": now,
             "billable": False,
         })
@@ -107,8 +113,9 @@ async def readiness(workspace_id: uuid.UUID, request: Request, principal: Princi
 
 
 @router.get("/v1/workspaces/{workspace_id}/capabilities")
-async def capabilities(workspace_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)) -> dict:
+async def capabilities(workspace_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal),
+                       payload: dict = Depends(capabilities_payload)) -> dict:
     from ..errors import envelope
 
     await _authorize(principal, workspace_id, "getCapabilities")
-    return envelope(capabilities_payload(), request.state.request_id)
+    return envelope(payload, request.state.request_id)

@@ -1,11 +1,13 @@
 'use client';
 
-import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {useCallback,useEffect,useId,useMemo,useRef,useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {ResearchCandidateObservations} from './research-candidates';
 import type {components} from '@/services/generated/buyeros-api';
 import {useDataMode} from '@/features/providers/data-mode';
-import {useWorkspaceSession} from '@/features/providers/workspace-session';
+import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
+import {createOperationClient} from '@/services/live/operations';
+import {validCapabilities,type CapabilityPage} from '@/services/live/capabilities';
 import {LiveCancelled,describeLiveError} from '@/services/live/client';
 import {cancelRun,getRun,listRuns,retryRun,startResearch,hasUncertainResearch,resetResearchIntent,uncertainResearchBody,subscribeRun,type Run,type RunContext,type RunPage} from '@/services/live/runs';
 
@@ -28,7 +30,20 @@ export function LiveRunProgress({runId,canStart,canReview=false,t,onOpenBuyers}:
   runId?:string;canStart:boolean;canReview?:boolean;t:(text:string)=>string;onOpenBuyers:()=>void;
 }) {
   const {session,client}=useWorkspaceSession(),{apiBaseUrl}=useDataMode(),router=useRouter();
-  const scope=session.current(),workspace=scope.workspace,project=scope.project;
+  const snapshot=useSessionSnapshot(),scope=session.current(),workspace=scope.workspace,project=scope.project;
+  const api=useMemo(()=>createOperationClient(client),[client]);
+  const availabilityDescription=useId();
+  const [refresh,setRefresh]=useState(0),[capabilityRead,setCapabilityRead]=useState<{key:string;page:CapabilityPage}|null>(null);
+  const [capabilityFailure,setCapabilityFailure]=useState('');
+  const capabilityKey=JSON.stringify([snapshot.identity,refresh]);
+  const capabilityPage=capabilityRead?.key===capabilityKey?capabilityRead.page:null;
+  const research=capabilityPage?.items.find(item=>item.name==='research');
+  const researchAvailable=research?.status==='ready'&&research.reason_codes.length===0;
+  const availabilityError=capabilityFailure===capabilityKey;
+  const availabilityMessage=availabilityError?'Research availability could not be confirmed. Refresh before starting research.':
+    !capabilityPage?'Checking research availability…':research?.reason_codes.includes('PAID_ADMISSION_DISABLED')?
+    'Paid research is disabled. You can still review existing buyers and results.':
+    'Research is unavailable. Ask a workspace administrator to check its configuration.';
   const recovery=workspace&&project?uncertainResearchBody({client,session,apiBaseUrl,workspaceId:workspace,projectId:project}):null;
   const [list,setList]=useState<Load>({kind:'loading'}),[offset,setOffset]=useState(0);
   const [run,setRun]=useState<Run|null>(null),[detailError,setDetailError]=useState(''),[busy,setBusy]=useState(false);
@@ -40,6 +55,18 @@ export function LiveRunProgress({runId,canStart,canReview=false,t,onOpenBuyers}:
     {client,session,apiBaseUrl,workspaceId:workspace,projectId:project}:null,
     [client,session,apiBaseUrl,workspace,project]);
   const current=()=>ctx&&session.current().workspace===ctx.workspaceId&&session.current().project===ctx.projectId;
+  useEffect(()=>{
+    if(!ctx||runId)return;
+    const own=new AbortController(),captured=session.captureWriteContext();
+    const readContext={...captured,signal:AbortSignal.any([captured.signal,own.signal]),
+      getToken:async()=>session.token()||'',isCurrent:()=>session.isCurrent(captured.identity)&&!own.signal.aborted};
+    void api.requestOperation('getCapabilities',{path:{workspace_id:ctx.workspaceId}},readContext).then(value=>{
+      if(!readContext.isCurrent())return;
+      if(!validCapabilities(value))throw new Error('Incomplete capability response');
+      setCapabilityRead({key:capabilityKey,page:value});
+    }).catch(error=>{if(readContext.isCurrent()&&!(error instanceof LiveCancelled))setCapabilityFailure(capabilityKey);});
+    return()=>own.abort();
+  },[api,session,ctx,runId,capabilityKey]);
   const loadPage=useCallback(async(next:number)=>{
     if(!ctx)return;
     try{const page=await listRuns(ctx,next,10);
@@ -86,7 +113,7 @@ export function LiveRunProgress({runId,canStart,canReview=false,t,onOpenBuyers}:
     return()=>{active=false;unsubscribe();};
   },[ctx,session,runId]);
   async function start(){
-    if(!ctx||!profile||busyRef.current||!canStart)return;
+    if(!ctx||!profile||busyRef.current||!canStart||!researchAvailable)return;
     const targetCount=Number(target),amount=maxCost.trim();
     if(!Number.isInteger(targetCount)||targetCount<1||targetCount>100||!/^(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/.test(amount)||!/[1-9]/.test(amount)){
       setDetailError(t('Enter a target from 1 to 100 and a positive USD cap.'));return;
@@ -120,7 +147,9 @@ export function LiveRunProgress({runId,canStart,canReview=false,t,onOpenBuyers}:
       {(uncertain||hasUncertainResearch(ctx))&&<button disabled={busy} onClick={()=>{if(window.confirm(t('The previous research may already exist. Start a new intent?'))){resetResearchIntent(ctx);setUncertain(false);setDetailError('');}}}>{t('Start new research intent')}</button>}
       <div className="run-grid"><label>{t('Target companies')} <input disabled={busy||uncertain||hasUncertainResearch(ctx)} type="number" min="1" max="100" value={target} onChange={event=>setTarget(event.target.value)}/></label>
         <label>{t('Maximum research cost (USD)')} <input disabled={busy||uncertain||hasUncertainResearch(ctx)} inputMode="decimal" value={maxCost} onChange={event=>setMaxCost(event.target.value)}/></label>
-        <button type="button" disabled={!canStart||!profile||busy} onClick={()=>void start()}>{busy?t('Starting…'):t(uncertain||hasUncertainResearch(ctx)?'Retry same research':'Start research')}</button></div>
+        <button type="button" disabled={!canStart||!profile||busy||!researchAvailable} aria-describedby={!researchAvailable?availabilityDescription:undefined} onClick={()=>void start()}>{busy?t('Starting…'):t(uncertain||hasUncertainResearch(ctx)?'Retry same research':'Start research')}</button></div>
+      {!researchAvailable&&<p id={availabilityDescription} role={availabilityError?'alert':'status'}>{t(availabilityMessage)}</p>}
+      <button type="button" disabled={busy} onClick={()=>setRefresh(value=>value+1)}>{t('Refresh research availability')}</button>
       {!profile&&<p role="status">{t('Approve the current buyer profile before research.')}</p>}
       {list.kind==='loading'&&<p role="status">{t('Loading runs…')}</p>}
       {list.kind==='error'&&<p role="alert">{list.message}<button type="button" onClick={()=>{setList({kind:'loading'});void loadPage(offset);}}>{t('Retry loading')}</button></p>}
