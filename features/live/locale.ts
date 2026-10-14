@@ -322,7 +322,7 @@ export const liveZh: Record<string,string> = {
   'The source check result is unknown. Retry the same source check; its original details and key are retained.':'來源查核結果尚未確定。請重試同一項查核；原有資料及識別碼已保留。',
   'Enter a valid date, grade, rationale and 1–10 valid HTTP(S) source references.':'請填寫有效日期、等級、匹配理由及 1 至 10 個有效 HTTP(S) 來源。',
   'This source check belongs to another workspace session. Reload and inspect saved checks before retrying.':'此查核屬於另一個工作區工作階段。重試前請重新載入並核對已保存紀錄。',
-  'Source check':'來源查核','Limitations':'限制','Recorded by':'記錄者','Recorded at':'記錄時間','Source link unavailable':'來源連結無效',
+  'Source check':'來源查核','Limitations':'限制','Recorded by':'記錄者','Source link unavailable':'來源連結無效',
 
   'Provider capabilities':'供應商功能','Refresh capabilities':'重新整理功能狀態','Capabilities unavailable':'功能狀態不可用','Loading capabilities…':'正在載入功能狀態…',
   'Role responsibilities':'角色責任','Current roles':'目前角色','Checked':'查閱時間','degraded':'服務受影響',
