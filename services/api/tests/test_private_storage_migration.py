@@ -46,6 +46,11 @@ def test_non_bypass_table_owner_cannot_drop_hidden_private_bytes(isolated_migrat
     dsn = isolated_migrated
     config = Config(str(ALEMBIC_INI))
     config.set_main_option("script_location", str(SERVICE_ROOT / "alembic"))
+    # Exercise the original 0052 guard with its non-bypass private-table owner.
+    monkeypatch.setenv("BUYEROS_DATABASE_URL", dsn)
+    monkeypatch.setenv("BUYEROS_DATABASE_MIGRATION_URL", dsn)
+    get_settings.cache_clear()
+    command.downgrade(config, "0052_private_document_storage")
     role = "private_owner_" + uuid.uuid4().hex[:12]
     workspace, object_id = uuid.uuid4(), uuid.uuid4()
     with psycopg.connect(dsn, autocommit=True) as db:
@@ -68,7 +73,7 @@ def test_non_bypass_table_owner_cannot_drop_hidden_private_bytes(isolated_migrat
         with pytest.raises(RuntimeError, match="retain private document bytes"):
             command.downgrade(config, "0051_buyer_imports")
         with psycopg.connect(dsn) as db:
-            assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0053_resumable_documents",)
+            assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0052_private_document_storage",)
             assert db.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE relname='private_document_objects'").fetchone() == (True, True)
             assert bytes(db.execute("SELECT body FROM private_document_objects WHERE id=%s", (object_id,)).fetchone()[0]) == b"hello"
     finally:
