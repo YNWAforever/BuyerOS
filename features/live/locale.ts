@@ -42,6 +42,7 @@ export const liveZh: Record<string,string> = {
   'Previous results':'上一頁結果','Next results':'下一頁結果','Copy buyer ID':'複製買家編號',
   'Request ID':'請求編號',
   'Request failed. Try again after checking the connection.':'請求失敗。請檢查連線後重試。',
+  'The request timed out. Check the connection and retry.':'載入逾時，請檢查連線後重試。',
   'Service temporarily unavailable. Retry after checking the status.':'服務暫時無法使用。請確認狀態後重試。',
   'The selected item was not found in this workspace.':'在此工作區找不到所選項目。',
   'You do not have permission for this action.':'你沒有執行此操作的權限。',
