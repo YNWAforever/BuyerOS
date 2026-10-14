@@ -140,6 +140,14 @@ async def purge_due_tenant_private_objects(session, workspace_id, *, now=None, l
     if not 1 <= limit <= 100:
         raise ValueError("private object cleanup requires a bounded limit")
     now = now or datetime.now(timezone.utc)
+    from buyeros_api.db.ingestion import OfferDocument
+    from buyeros_api.db.document_uploads import DocumentSlide
+    expired_documents = (await session.execute(select(OfferDocument.id).where(
+        OfferDocument.workspace_id == workspace_id, OfferDocument.retention_until <= now)
+        .order_by(OfferDocument.retention_until, OfferDocument.id).limit(limit))).scalars().all()
+    if expired_documents:
+        await session.execute(delete(DocumentSlide).where(DocumentSlide.workspace_id == workspace_id,
+            DocumentSlide.document_id.in_(expired_documents)))
     object_ids = (await session.execute(select(PrivateDocumentObject.id).where(
         PrivateDocumentObject.workspace_id == workspace_id,
         PrivateDocumentObject.retention_until <= now,

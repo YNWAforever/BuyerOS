@@ -100,7 +100,7 @@ def document_candidate_facts(document_id: uuid.UUID, facts: list[dict]) -> list[
             "id": str(uuid.uuid5(document_id, f"{index}:{fact['field']}:{fact['value']}")),
             "field": fact["field"], "value": fact["value"],
             "provenance": "document_excerpt", "source_document_id": str(document_id),
-            "excerpt": fact["value"], "approved": False,
+            "excerpt": fact.get("excerpt", fact["value"]), "approved": False,
         }
         for index, fact in enumerate(facts)
     ]

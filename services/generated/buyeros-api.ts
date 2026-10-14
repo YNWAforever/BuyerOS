@@ -1621,10 +1621,206 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/offer-document-uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** startOfferDocumentUpload */
+        post: operations["startOfferDocumentUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** getOfferDocumentUpload */
+        get: operations["getOfferDocumentUpload"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/chunks/{index}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** putOfferDocumentChunk */
+        put: operations["putOfferDocumentChunk"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** completeOfferDocumentUpload */
+        post: operations["completeOfferDocumentUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/offer-documents/{document_id}/slides": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** getOfferDocumentSlides */
+        get: operations["getOfferDocumentSlides"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/offer-documents/{document_id}/content-chunks/{index}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** getOfferDocumentContentChunk */
+        get: operations["getOfferDocumentContentChunk"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        DocumentExtractionMetadata: {
+            /** @enum {string} */
+            format: "pptx" | "pdf" | "text" | "markdown";
+            slide_count?: number;
+            text_slide_count?: number;
+            /** @enum {string} */
+            classification?: "text" | "image_only";
+            text_bytes?: number;
+            external_relationships_ignored?: number;
+            embedded_parts_ignored?: number;
+            byte_length: number;
+            /** @constant */
+            chunk_size: 2097152;
+        };
+        DocumentUploadStart: {
+            filename: string;
+            /** @enum {string} */
+            media_type: "application/vnd.openxmlformats-officedocument.presentationml.presentation" | "application/pdf" | "text/plain" | "text/markdown";
+            byte_length: number;
+            source_sha256: string;
+        };
+        DocumentUploadComplete: Record<string, never>;
+        DocumentUpload: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workspace_id: string;
+            /** Format: uuid */
+            project_id: string;
+            filename: string;
+            media_type: string;
+            byte_length: number;
+            source_sha256: string;
+            /** @constant */
+            chunk_size: 2097152;
+            chunk_count: number;
+            /** @enum {string} */
+            status: "uploading" | "completed" | "failed" | "expired";
+            /** Format: date-time */
+            expires_at: string;
+            version: number;
+            received_chunks: {
+                index: number;
+                sha256: string;
+            }[];
+            /** Format: uuid */
+            document_id?: string;
+            failure_code?: string;
+        };
+        DocumentSlide: {
+            number: number;
+            text: string;
+            /** @enum {string} */
+            classification: "text" | "image_only";
+        };
+        DocumentSlidePage: {
+            items: components["schemas"]["DocumentSlide"][];
+            offset: number;
+            limit: number;
+            total: number;
+        };
+        DocumentContentChunk: {
+            index: number;
+            offset: number;
+            byte_length: number;
+            chunk_count: number;
+            source_byte_length: number;
+            chunk_sha256: string;
+            source_sha256: string;
+            filename: string;
+            media_type: string;
+            body_base64: string;
+        };
+        DocumentUploadResponse: {
+            data: components["schemas"]["DocumentUpload"];
+            /** Format: uuid */
+            request_id: string;
+            /** @constant */
+            data_mode: "live";
+        };
+        DocumentSlidePageResponse: {
+            data: components["schemas"]["DocumentSlidePage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @constant */
+            data_mode: "live";
+        };
+        DocumentContentChunkResponse: {
+            data: components["schemas"]["DocumentContentChunk"];
+            /** Format: uuid */
+            request_id: string;
+            /** @constant */
+            data_mode: "live";
+        };
         DeliveryMessageMetadata: {
             /** Format: uuid */
             id: string;
@@ -1907,6 +2103,7 @@ export interface components {
             fact_candidates?: components["schemas"]["OfferFact"][];
             /** Format: date-time */
             retention_until?: string;
+            extraction_metadata?: components["schemas"]["DocumentExtractionMetadata"];
         };
         /** @description Stable fact ID within immutable ICP version; approved=true is only authoritative on a reviewer-approved ICP, never solely from caller-supplied flag. */
         OfferFact: {
@@ -7883,6 +8080,223 @@ export interface operations {
             401: components["responses"]["Error"];
             403: components["responses"]["Error"];
             404: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    startOfferDocumentUpload: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentUploadStart"];
+            };
+        };
+        responses: {
+            /** @description Private bounded attachment result */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentUploadResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    getOfferDocumentUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Private bounded attachment result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentUploadResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    putOfferDocumentChunk: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Chunk-Sha256": string;
+            };
+            path: {
+                workspace_id: string;
+                upload_id: string;
+                index: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/octet-stream": string;
+            };
+        };
+        responses: {
+            /** @description Private bounded attachment result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentUploadResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    completeOfferDocumentUpload: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentUploadComplete"];
+            };
+        };
+        responses: {
+            /** @description Private bounded attachment result */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferDocumentResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    getOfferDocumentSlides: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Private bounded attachment result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentSlidePageResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    getOfferDocumentContentChunk: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                document_id: string;
+                index: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Private bounded attachment result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentContentChunkResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
             422: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];

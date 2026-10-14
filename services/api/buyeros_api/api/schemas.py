@@ -13,6 +13,17 @@ class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class DocumentUploadStart(_Strict):
+    filename: StrictStr = Field(min_length=1, max_length=255)
+    media_type: StrictStr = Field(min_length=1, max_length=128)
+    byte_length: StrictInt = Field(ge=1, le=20 * 1024 * 1024)
+    source_sha256: StrictStr = Field(pattern=r'^[a-f0-9]{64}$')
+
+
+class DocumentUploadComplete(_Strict):
+    pass
+
+
 def _check_website(value: str | None) -> str | None:
     """The contract declares `format: uri`; an annotated value must still have a scheme."""
     if value is None:

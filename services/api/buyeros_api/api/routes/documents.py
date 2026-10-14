@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, File, Form, Header, Query, Request, Response, UploadFile
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 
 from ...db.contact import IdempotencyRecord
 from ...db.buyers import SourceDocument
@@ -46,6 +46,8 @@ def _data(row: OfferDocument) -> dict:
         data["failure_code"] = row.failure_code
     if row.retention_until is not None:
         data["retention_until"] = row.retention_until.isoformat()
+    if row.extraction_metadata:
+        data["extraction_metadata"] = row.extraction_metadata
     return data
 
 
@@ -270,6 +272,9 @@ async def delete_offer_document(
             row.status = "deleted"
             row.deleted_at = datetime.now(timezone.utc)
             row.fact_candidates = []
+            from ...db.document_uploads import DocumentSlide
+            await session.execute(delete(DocumentSlide).where(DocumentSlide.workspace_id == workspace_id,
+                DocumentSlide.document_id == document_id))
             inline_delete = bool(row.object_key and row.object_key.startswith("postgres/tenants/"))
             if inline_delete:
                 await PostgresPrivateStore(workspace_id).delete_private(row.object_key, session=session)

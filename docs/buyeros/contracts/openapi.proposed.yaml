@@ -8938,6 +8938,411 @@ paths:
       - RATE_LIMITED
       - INVALID_REQUEST
       - READ_DISABLED
+  /v1/workspaces/{workspace_id}/projects/{project_id}/offer-document-uploads:
+    post:
+      operationId: startOfferDocumentUpload
+      summary: startOfferDocumentUpload
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentUploadResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Original operation key; immutable same-position chunks; reconcile
+        before retry.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentUploadStart'
+  /v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}:
+    get:
+      operationId: getOfferDocumentUpload
+      summary: getOfferDocumentUpload
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: upload_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentUploadResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Read-only.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
+  /v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/chunks/{index}:
+    put:
+      operationId: putOfferDocumentChunk
+      summary: putOfferDocumentChunk
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: upload_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: index
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 9
+      - name: X-Chunk-Sha256
+        in: header
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+      responses:
+        '200':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentUploadResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Original operation key; immutable same-position chunks; reconcile
+        before retry.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+              maxLength: 2097152
+  /v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/complete:
+    post:
+      operationId: completeOfferDocumentUpload
+      summary: completeOfferDocumentUpload
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: upload_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '202':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferDocumentResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Original operation key; immutable same-position chunks; reconcile
+        before retry.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentUploadComplete'
+  /v1/workspaces/{workspace_id}/offer-documents/{document_id}/slides:
+    get:
+      operationId: getOfferDocumentSlides
+      summary: getOfferDocumentSlides
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: document_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 2147483647
+          default: 0
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 20
+      responses:
+        '200':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentSlidePageResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Read-only.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
+  /v1/workspaces/{workspace_id}/offer-documents/{document_id}/content-chunks/{index}:
+    get:
+      operationId: getOfferDocumentContentChunk
+      summary: getOfferDocumentContentChunk
+      tags:
+      - BO-012
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: document_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: index
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 9
+      responses:
+        '200':
+          description: Private bounded attachment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentContentChunkResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-work-package: BO-012
+      x-implementation-status: IMPLEMENTED
+      x-tenant-authorization: Current workspace membership; staging creator only; source
+        reads use document read permission.
+      x-idempotency: Read-only.
+      x-version-precondition: none
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
+        no provider jobs.
 components:
   securitySchemes:
     BearerAuth:
@@ -9011,6 +9416,308 @@ components:
           schema:
             $ref: '#/components/schemas/ApiError'
   schemas:
+    DocumentExtractionMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        format:
+          type: string
+          enum:
+          - pptx
+          - pdf
+          - text
+          - markdown
+        slide_count:
+          type: integer
+          minimum: 1
+          maximum: 100
+        text_slide_count:
+          type: integer
+          minimum: 0
+          maximum: 100
+        classification:
+          type: string
+          enum:
+          - text
+          - image_only
+        text_bytes:
+          type: integer
+          minimum: 0
+          maximum: 100000
+        external_relationships_ignored:
+          type: integer
+          minimum: 0
+          maximum: 100000
+        embedded_parts_ignored:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        byte_length:
+          type: integer
+          minimum: 1
+          maximum: 20971520
+        chunk_size:
+          type: integer
+          const: 2097152
+      required:
+      - format
+      - byte_length
+      - chunk_size
+    DocumentUploadStart:
+      type: object
+      additionalProperties: false
+      properties:
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        media_type:
+          type: string
+          enum:
+          - application/vnd.openxmlformats-officedocument.presentationml.presentation
+          - application/pdf
+          - text/plain
+          - text/markdown
+        byte_length:
+          type: integer
+          minimum: 1
+          maximum: 20971520
+        source_sha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+      required:
+      - filename
+      - media_type
+      - byte_length
+      - source_sha256
+    DocumentUploadComplete:
+      type: object
+      additionalProperties: false
+      properties: {}
+      required: []
+    DocumentUpload:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspace_id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        filename:
+          type: string
+        media_type:
+          type: string
+        byte_length:
+          type: integer
+          minimum: 1
+          maximum: 20971520
+        source_sha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        chunk_size:
+          type: integer
+          const: 2097152
+        chunk_count:
+          type: integer
+          minimum: 1
+          maximum: 10
+        status:
+          type: string
+          enum:
+          - uploading
+          - completed
+          - failed
+          - expired
+        expires_at:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        received_chunks:
+          type: array
+          maxItems: 10
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              index:
+                type: integer
+                minimum: 0
+                maximum: 9
+              sha256:
+                type: string
+                pattern: ^[a-f0-9]{64}$
+            required:
+            - index
+            - sha256
+        document_id:
+          type: string
+          format: uuid
+        failure_code:
+          type: string
+      required:
+      - id
+      - workspace_id
+      - project_id
+      - filename
+      - media_type
+      - byte_length
+      - source_sha256
+      - chunk_size
+      - chunk_count
+      - status
+      - expires_at
+      - version
+      - received_chunks
+    DocumentSlide:
+      type: object
+      additionalProperties: false
+      properties:
+        number:
+          type: integer
+          minimum: 1
+          maximum: 100
+        text:
+          type: string
+          maxLength: 100000
+        classification:
+          type: string
+          enum:
+          - text
+          - image_only
+      required:
+      - number
+      - text
+      - classification
+    DocumentSlidePage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/DocumentSlide'
+        offset:
+          type: integer
+          minimum: 0
+          maximum: 2147483647
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 20
+        total:
+          type: integer
+          minimum: 0
+          maximum: 100
+      required:
+      - items
+      - offset
+      - limit
+      - total
+    DocumentContentChunk:
+      type: object
+      additionalProperties: false
+      properties:
+        index:
+          type: integer
+          minimum: 0
+          maximum: 9
+        offset:
+          type: integer
+          minimum: 0
+          maximum: 20971519
+        byte_length:
+          type: integer
+          minimum: 1
+          maximum: 2097152
+        chunk_count:
+          type: integer
+          minimum: 1
+          maximum: 10
+        source_byte_length:
+          type: integer
+          minimum: 1
+          maximum: 20971520
+        chunk_sha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        source_sha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        filename:
+          type: string
+        media_type:
+          type: string
+        body_base64:
+          type: string
+          maxLength: 2796204
+      required:
+      - index
+      - offset
+      - byte_length
+      - chunk_count
+      - source_byte_length
+      - chunk_sha256
+      - source_sha256
+      - filename
+      - media_type
+      - body_base64
+    DocumentUploadResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/DocumentUpload'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          const: live
+      required:
+      - data
+      - request_id
+      - data_mode
+    DocumentSlidePageResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/DocumentSlidePage'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          const: live
+      required:
+      - data
+      - request_id
+      - data_mode
+    DocumentContentChunkResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/DocumentContentChunk'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          const: live
+      required:
+      - data
+      - request_id
+      - data_mode
     DeliveryMessageMetadata:
       type: object
       additionalProperties: false
@@ -9647,6 +10354,8 @@ components:
           items:
             $ref: '#/components/schemas/OfferFact'
         retention_until: *id004
+        extraction_metadata:
+          $ref: '#/components/schemas/DocumentExtractionMetadata'
       required:
       - id
       - workspace_id

@@ -98,4 +98,10 @@ export const operationRoutes = {
   "reviewResearchCandidate": {method: "POST", path: "/v1/workspaces/{workspace_id}/runs/{run_id}/candidates/{raw_candidate_id}/review"},
   "listResearchCandidates": {method: "GET", path: "/v1/workspaces/{workspace_id}/runs/{run_id}/candidates"},
   "listDraftDeliveryMessages": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/drafts/{draft_id}/delivery-messages"},
+  "startOfferDocumentUpload": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/offer-document-uploads"},
+  "getOfferDocumentUpload": {method: "GET", path: "/v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}"},
+  "putOfferDocumentChunk": {method: "PUT", path: "/v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/chunks/{index}"},
+  "completeOfferDocumentUpload": {method: "POST", path: "/v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/complete"},
+  "getOfferDocumentSlides": {method: "GET", path: "/v1/workspaces/{workspace_id}/offer-documents/{document_id}/slides"},
+  "getOfferDocumentContentChunk": {method: "GET", path: "/v1/workspaces/{workspace_id}/offer-documents/{document_id}/content-chunks/{index}"},
 } as const satisfies Record<keyof operations, {method: string; path: string}>;

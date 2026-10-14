@@ -9,7 +9,7 @@ R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
 REL = 'http://schemas.openxmlformats.org/package/2006/relationships'
 
 
-def pptx_bytes(texts=('Product: Alpha',), *, order=None, extra=None, xml_override=None):
+def pptx_bytes(texts=('Product: Alpha',), *, order=None, extra=None, xml_override=None, compression=zipfile.ZIP_DEFLATED):
     order = list(range(1, len(texts) + 1)) if order is None else order
     parts = {
         '[Content_Types].xml': '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/></Types>',
@@ -22,7 +22,7 @@ def pptx_bytes(texts=('Product: Alpha',), *, order=None, extra=None, xml_overrid
     parts.update(extra or {})
     parts.update(xml_override or {})
     stream = io.BytesIO()
-    with zipfile.ZipFile(stream, 'w', compression=zipfile.ZIP_DEFLATED) as z:
+    with zipfile.ZipFile(stream, 'w', compression=compression) as z:
         for name, body in parts.items():
             z.writestr(name, body)
     return stream.getvalue()

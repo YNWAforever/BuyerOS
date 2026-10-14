@@ -54,6 +54,8 @@ def test_unimplemented_paths_match_openapi_spec():
 def test_registry_covers_every_unimplemented_contract_operation():
     """Regression guard: an out-of-slice operation must never silently 404."""
     implemented = {
+        "startOfferDocumentUpload", "getOfferDocumentUpload", "putOfferDocumentChunk",
+        "completeOfferDocumentUpload", "getOfferDocumentSlides", "getOfferDocumentContentChunk",
         "getLiveness",
         "listWorkspaces",
         "listProjects",
