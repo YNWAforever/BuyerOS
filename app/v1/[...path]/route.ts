@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 
 const requestHeaders = [
   'accept', 'accept-language', 'authorization', 'content-type',
-  'idempotency-key', 'if-match', 'x-buyeros-if-match', 'if-none-match', 'last-event-id', 'x-request-id',
+  'idempotency-key', 'if-match', 'x-buyeros-if-match', 'if-none-match', 'last-event-id', 'x-request-id', 'x-chunk-sha256',
 ];
 const responseHeaders = [
   'allow', 'cache-control', 'content-disposition', 'content-type', 'etag',
@@ -86,6 +86,7 @@ async function proxy(request: Request): Promise<Response> {
 export const GET = proxy;
 export const HEAD = proxy;
 export const POST = proxy;
+export const PUT = proxy;
 export const PATCH = proxy;
 export const DELETE = proxy;
 export const OPTIONS = proxy;

@@ -32,6 +32,8 @@ export interface LiveRequest {
   signal?: AbortSignal;
   body?: unknown;
   formData?: FormData;
+  rawBody?: Uint8Array<ArrayBuffer>;
+  chunkSha256?: string;
   idempotencyKey?: string;
   ifMatch?: string;
 }
@@ -114,15 +116,20 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '', 
           response.headers.get('X-Request-ID')||'',false);
       return {text,contentType};
     },
-    async request<T>({path, method = 'GET', token, scope, signal, body, formData, idempotencyKey, ifMatch}: LiveRequest): Promise<T> {
+    async request<T>({path, method = 'GET', token, scope, signal, body, formData, rawBody, chunkSha256, idempotencyKey, ifMatch}: LiveRequest): Promise<T> {
       const headers: Record<string, string> = {Accept: 'application/json'};
       if (token) headers.Authorization = `Bearer ${token}`;
       if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
       // Carry the domain precondition past hosting response validators. The API
       // restores If-Match before its unchanged version/idempotency checks run.
       if (ifMatch) headers['X-BuyerOS-If-Match'] = ifMatch;
-      if (body !== undefined && formData !== undefined) throw new LiveError('ambiguous request body', 'INVALID_REQUEST', 0, '', false);
-      let payload: string | FormData | undefined=formData;
+      if ([body,formData,rawBody].filter(value=>value!==undefined).length>1) throw new LiveError('ambiguous request body', 'INVALID_REQUEST', 0, '', false);
+      let payload: string | FormData | Uint8Array<ArrayBuffer> | undefined=formData;
+      if(rawBody!==undefined){
+        if(!chunkSha256||rawBody.byteLength<1||rawBody.byteLength>2097152)throw new LiveError('invalid chunk','INVALID_REQUEST',0,'',false);
+        headers['Content-Type']='application/octet-stream';headers['X-Chunk-Sha256']=chunkSha256;
+        payload=new Uint8Array(rawBody);
+      }
       let retryBody:FormData|undefined;
       if (formData) {const frozen = new FormData(); for (const [key, value] of formData.entries()) frozen.append(key, value); retryBody = frozen;}
       if (body !== undefined) {
