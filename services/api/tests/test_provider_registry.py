@@ -104,14 +104,20 @@ def test_unselected_real_vendor_cannot_use_test_environment_as_activation(enviro
     assert calls==[]
 
 
-def test_readiness_exposes_safe_reason_and_next_action():
+@pytest.mark.parametrize(('enabled', 'status', 'reasons'), [
+    (True, 'unconfigured', ['PROVIDER_UNSELECTED']),
+    (False, 'disabled', ['PAID_ADMISSION_DISABLED', 'PROVIDER_UNSELECTED']),
+])
+def test_readiness_exposes_safe_reason_and_next_action(monkeypatch, enabled, status, reasons):
     from buyeros_api.providers.registry import provider_readiness
     from buyeros_api.api.routes.health import capabilities_payload
+    from buyeros_api.settings import Settings
+    monkeypatch.setattr('buyeros_api.settings.get_settings', lambda: Settings(paid_admission_enabled=enabled))
     value=provider_readiness('search',environment='production')
     assert value['status']=='blocked'
     assert value['reason_codes']==['PROVIDER_UNSELECTED']
     assert value['actions'] and 'Choose a vendor' in value['actions'][0]
     research=next(row for row in capabilities_payload()['items'] if row['name']=='research')
-    assert research['status']=='unconfigured'
-    assert 'PROVIDER_UNSELECTED' in research['reason_codes']
+    assert research['status']==status
+    assert research['reason_codes']==reasons
     assert research['billable'] is False
