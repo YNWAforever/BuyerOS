@@ -118,9 +118,10 @@ def extract(body: bytes) -> dict:
                 label, separator, value = line.partition(':')
                 field = {'product': 'product', 'value proposition': 'value_proposition'}.get(label.strip().casefold())
                 value = value.strip()
-                if field and separator and value and len(value) <= 1000:
+                excerpt = f"Slide {slide['number']}: {line}"
+                if field and separator and value and len(value) <= 1000 and len(excerpt) <= 20000:
                     facts.append({'field': field, 'value': value, 'approved': False,
-                                  'excerpt': f"Slide {slide['number']}: {line}", 'slide_number': slide['number']})
+                                  'excerpt': excerpt, 'slide_number': slide['number']})
         return {'slides': slides, 'facts': facts[:20], 'metadata': {
             'format': 'pptx', 'slide_count': len(slides), 'text_slide_count': text_slides,
             'classification': 'text' if text_slides else 'image_only', 'text_bytes': total_text,

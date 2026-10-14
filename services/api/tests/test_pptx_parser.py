@@ -102,3 +102,10 @@ def test_parent_enforces_deadline_with_real_process(monkeypatch):
     monkeypatch.setattr(pptx_parser.subprocess, 'run', slow_child)
     with pytest.raises(pptx_parser.PptxParserTimeout):
         parse(pptx_bytes())
+
+
+def test_candidate_excerpt_stays_within_profile_contract_without_truncating_source():
+    literal='Product'+(' ' * 25000)+': Rice'
+    parsed=parse(pptx_bytes((literal,)))
+    assert parsed['slides'][0]['text']==literal
+    assert parsed['facts']==[]
