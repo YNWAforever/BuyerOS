@@ -949,8 +949,8 @@ jobs:
           python scripts/check-required-tests.py --playwright-discovery artifacts/c61/native-attachments-discovery.json --expected-count 4 --expected-file native-attachments.spec.ts --discovery-only
           pnpm exec playwright test --config playwright.native-attachments.config.ts
           python scripts/check-required-tests.py --playwright-discovery artifacts/c61/native-attachments-discovery.json --expected-count 4 --expected-file native-attachments.spec.ts --junit test-results/native-attachments.xml
-          env:
-            PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/native-attachments.xml
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/native-attachments.xml
       - name: Verify native journey discovery before execution
         run: |
           mkdir -p test-results artifacts/c61

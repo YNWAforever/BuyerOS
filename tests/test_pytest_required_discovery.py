@@ -48,3 +48,6 @@ class PytestRequiredDiscoveryTests(unittest.TestCase):
  def test_original_CI_discovers_and_executes_all_gate_controls(self):
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text(encoding='utf-8');body=workflow.split('      - name: Verify required full pytest discovery guards\n',1)[1].split('      - name: Discover C61 evidence checker assertions before running',1)[0]
   self.assertIn("pattern='test_pytest_required_discovery.py'",body);self.assertIn('assert len(names)==len(set(names))==21,',body);self.assertIn('assert result.testsRun==21 and result.wasSuccessful() and not result.skipped,',body)
+  native=workflow.split('      - name: Verify native PowerPoint through the compiled UI and disposable PostgreSQL\n',1)[1].split('\n      - name:',1)[0]
+  self.assertIn('\n        env:\n          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/native-attachments.xml',native)
+  self.assertNotIn('\n          env:',native)
