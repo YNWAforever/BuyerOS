@@ -4532,6 +4532,8 @@ export interface components {
             expected_version: number | null;
             /** Submission Key */
             submission_key: string;
+            /** Prepare Key */
+            prepare_key: string;
             /** Payload Hash */
             payload_hash: string;
             /** Payload */

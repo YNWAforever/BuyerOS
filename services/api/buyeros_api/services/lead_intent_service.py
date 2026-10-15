@@ -130,6 +130,7 @@ async def _view(session, scope, row, now):
         id=row.id, workspace_id=row.workspace_id, project_id=row.project_id,
         buyer_id=row.buyer_id, action=row.action, target_id=row.target_id,
         expected_version=row.expected_version, submission_key=row.submission_key,
+        prepare_key=row.prepare_key,
         payload_hash=payload.content_hash if payload else row.fingerprint,
         payload=content.get("payload") if content and row.state == "prepared" else None,
         state=row.state, receipt=receipt, acknowledged_at=row.acknowledged_at,

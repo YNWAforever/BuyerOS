@@ -188,6 +188,7 @@ class LeadIntentView(LeadStrict):
     target_id: UUID | None
     expected_version: int | None
     submission_key: str
+    prepare_key: str
     payload_hash: str
     payload: dict | None
     state: Literal["prepared", "applied", "cancelled"]

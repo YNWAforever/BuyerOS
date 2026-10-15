@@ -443,11 +443,28 @@ def main() -> None:
         config.set_main_option("script_location", str(service_root / "alembic"))
         command.upgrade(config, "head")
         seed(owner_dsn)
+        if os.environ.get("BUYEROS_E2E_SEED_LEAD_WORKFLOW") == "1":
+            from tools.seed_lead_workflow_fixture import seed_lead_workflow_fixture
+            seed_lead_workflow_fixture(owner_dsn)
 
         os.environ["BUYEROS_DATABASE_URL"] = runtime_role_dsn(owner_dsn)
         get_settings.cache_clear()
         app = create_app()
         app.dependency_overrides[get_principal] = fake_principal
+        if os.environ.get("BUYEROS_E2E_SEED_LEAD_WORKFLOW") == "1":
+            from tools.seed_lead_workflow_fixture import reset_lead_workflow_fixture, PROJECT as LEAD_PROJECT
+            @app.post("/fixture/lead-reset", include_in_schema=False)
+            def reset_lead_fixture():
+                reset_lead_workflow_fixture(owner_dsn)
+                return {"fixture_only": True, "project_id": LEAD_PROJECT}
+
+            @app.get("/fixture/lead-counts", include_in_schema=False)
+            def lead_fixture_counts():
+                with psycopg.connect(owner_dsn) as db:
+                    return {"fixture_only": True,
+                        "provider_operations": db.execute("SELECT count(*) FROM provider_operations").fetchone()[0],
+                        "async_jobs": db.execute("SELECT count(*) FROM async_jobs").fetchone()[0],
+                        "send_events": db.execute("SELECT count(*) FROM outbox_events WHERE event_type LIKE 'delivery.%%'").fetchone()[0]}
         @app.get('/fixture/frontend', include_in_schema=False)
         def frontend_fixture_proof():
             return {'fixture_only': True, 'origin': 'http://127.0.0.1:8000', 'issuer': ISSUER}

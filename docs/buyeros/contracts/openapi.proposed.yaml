@@ -16446,6 +16446,9 @@ components:
         submission_key:
           type: string
           title: Submission Key
+        prepare_key:
+          type: string
+          title: Prepare Key
         payload_hash:
           type: string
           title: Payload Hash
@@ -16490,6 +16493,7 @@ components:
       - target_id
       - expected_version
       - submission_key
+      - prepare_key
       - payload_hash
       - payload
       - state
