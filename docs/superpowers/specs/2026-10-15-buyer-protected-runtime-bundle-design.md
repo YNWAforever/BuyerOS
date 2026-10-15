@@ -28,6 +28,8 @@ A protected staging workflow runs only from `main` and accepts a successful CI r
 
 The Vercel project must report the expected BuyerOS repository, team, production branch `main`, and `autoAssignCustomDomains: false`. The workflow must stop if these remote settings cannot be read or differ. Main must be protected with strict required checks. The promotion environment must restrict deployments to protected branches and require at least one reviewer who is not the initiator.
 
+Owner policy update on 2026-10-15: pull-request approval is optional. Strict required CI checks and administrator branch protection remain required. The protected runtime signoff and production-promotion environment still require their independent, non-self approval; this PR-only waiver does not replace runtime or human acceptance evidence.
+
 ### Runtime database binding
 
 Add a narrowly scoped release-binding endpoint to the existing Python API. It accepts only a protected probe credential and returns a fixed response containing the runtime deployment/source identity, schema head, and a SHA-256 digest of normalized database target fields (database name plus endpoint host/port). It never returns the connection string, credentials, user/workspace rows, or arbitrary configuration. Responses must be `Cache-Control: no-store`; invalid credentials return the normal sanitized error envelope. Tests verify constant-time credential comparison, exact response keys, no DSN disclosure, and mismatch refusal.

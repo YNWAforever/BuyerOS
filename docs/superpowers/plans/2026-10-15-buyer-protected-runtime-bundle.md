@@ -21,6 +21,7 @@
 - Verify the actual environment approver using `GET /repos/YNWAforever/BuyerOS/actions/runs/{run_id}/approvals`; require an approved `buyeros-production-promote` environment review by a user whose ID differs from the workflow initiator. Do not accept a manually supplied reviewer name.
 - Require strict main protection, protected-branch environment policy, a non-self reviewer, and Vercel project/team/repository identity with `autoAssignCustomDomains=false`. Missing controls block release; do not bypass them.
 - The reviewer must inspect the staged candidate using the company account and approve with the exact comment `workspace-canary-pass:<source_sha>:<deployment_id>:roles-project-reload-retry`. Bind the verified reviewer identity and comment digest into the encrypted bundle.
+- Owner update (2026-10-15): pull-request approval is optional; the 12 CI checks and protected environment's independent approval remain required.
 - Promotion makes at most one alias call. An uncertain outcome remains `promotion_unknown`; reconcile by read-only production alias lookup and never retry automatically.
 - Keep research providers, contact enrichment, worker, delivery, CRM, and email disabled; do not create research runs, cost reservations, drafts that queue provider work, or delivery attempts.
 - Migration `0054_buyer_source_checks` is already applied with zero records. Apply no further production migration; create the 24 append-only source-check records only after exact deployment and settings readback.

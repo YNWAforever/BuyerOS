@@ -16,7 +16,7 @@ def controls():
     m,_=candidate()
     return dict(source=m['source_sha'], ci_run_id=123, branch={'protected':True,'commit':{'sha':m['source_sha']}},
         protection={'enforce_admins':{'enabled':True},'required_status_checks':{'strict':True,'contexts':m['required_ci_jobs']},
-                    'required_pull_request_reviews':{'required_approving_review_count':1,'dismiss_stale_reviews':True}},
+                    'required_pull_request_reviews':{'required_approving_review_count':0,'dismiss_stale_reviews':True,'require_last_push_approval':False}},
         environment={'protection_rules':[{'type':'required_reviewers','prevent_self_review':True,'reviewers':[{'reviewer':{'id':202}}]}],
                      'deployment_branch_policy':{'protected_branches':True,'custom_branch_policies':False},'can_admins_bypass':False},
         project={'id':'prj_owned','accountId':'team_owned','autoAssignCustomDomains':False,
@@ -35,12 +35,18 @@ def module():
     return result
 
 
-def test_exact_current_main_complete_ci_and_controls_pass():
-    assert module().verify_controls(**controls()) is None
+@pytest.mark.parametrize('pr_approvals',[None,0,1])
+def test_exact_current_main_complete_ci_and_controls_pass(pr_approvals):
+    c=controls()
+    if pr_approvals is None:
+        c['protection'].pop('required_pull_request_reviews')
+    else:
+        c['protection']['required_pull_request_reviews']['required_approving_review_count']=pr_approvals
+    assert module().verify_controls(**c) is None
 
 
 @pytest.mark.parametrize('fault',['branch','checks','ci-head','ci-skipped','ci-duplicate','ci-incomplete','repo','team',
-                                  'auto-alias','reviewers','self-review-policy','admin-bypass','environment-branch','unreviewed-main'])
+                                  'auto-alias','reviewers','self-review-policy','admin-bypass','environment-branch','admins'])
 def test_stage_refuses_missing_controls_before_deploy(fault):
     c=controls()
     if fault=='branch': c['branch']['protected']=False
@@ -56,7 +62,7 @@ def test_stage_refuses_missing_controls_before_deploy(fault):
     if fault=='self-review-policy': c['environment']['protection_rules'][0]['prevent_self_review']=False
     if fault=='admin-bypass': c['environment']['can_admins_bypass']=True
     if fault=='environment-branch': c['environment']['deployment_branch_policy']['protected_branches']=False
-    if fault=='unreviewed-main': c['protection']['required_pull_request_reviews']['required_approving_review_count']=0
+    if fault=='admins': c['protection']['enforce_admins']['enabled']=False
     with pytest.raises(ValueError): module().verify_controls(**c)
 
 

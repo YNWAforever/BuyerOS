@@ -6,7 +6,7 @@ The runtime bundle workflow stages a reviewed build. A stage is not production a
 
 Before dispatch, read back the controls rather than relying on this file:
 
-- `main` is protected, strict required checks contain all 12 BuyerOS CI jobs, administrators are covered, and stale pull-request approvals are dismissed with at least one approving reviewer.
+- `main` is protected, strict required checks contain all 12 BuyerOS CI jobs, and administrators are covered. Pull-request approvals are optional under the owner's explicit policy; neither an approving PR review nor approval of the last push is required. This PR policy does not waive the independent approval of protected runtime signoff or production promotion.
 - `buyeros-runtime-readonly` and `buyeros-production-promote` exist. Restrict them to protected branches. The latter requires a reviewer other than the workflow initiator and disallows administrator bypass.
 - The Vercel project and team match the linked BuyerOS GitHub repository, production branch is `main`, and `autoAssignCustomDomains` is `false`.
 - The reviewed production runtime has `BUYEROS_PAID_ADMISSION_ENABLED=false`, `BUYEROS_DELIVERY_ADMISSION_ENABLED=false`, and `BUYEROS_CLOUDFLARE_EXECUTION_ENABLED=false`.

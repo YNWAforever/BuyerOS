@@ -19,13 +19,10 @@ def verify_controls(*,source,ci_run_id,branch,protection,environment,project,pro
     required=release_gate().REQUIRED_CI_JOBS
     checks=protection.get('required_status_checks',{})
     contexts=set(checks.get('contexts',[]))|{x.get('context') for x in checks.get('checks',[])}
-    reviews=protection.get('required_pull_request_reviews',{})
     if (branch.get('protected') is not True or branch.get('commit',{}).get('sha')!=source
             or checks.get('strict') is not True or not required<=contexts
-            or protection.get('enforce_admins',{}).get('enabled') is not True
-            or type(reviews.get('required_approving_review_count')) is not int
-            or reviews['required_approving_review_count']<1 or reviews.get('dismiss_stale_reviews') is not True):
-        raise ValueError('strict reviewed current main protection required')
+            or protection.get('enforce_admins',{}).get('enabled') is not True):
+        raise ValueError('strict current main protection required')
     policy=environment.get('deployment_branch_policy',{})
     if (policy.get('protected_branches') is not True or policy.get('custom_branch_policies') is not False
             or environment.get('can_admins_bypass') is not False
