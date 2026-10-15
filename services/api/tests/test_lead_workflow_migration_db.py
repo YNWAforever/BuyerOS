@@ -25,6 +25,31 @@ JOURNALS = (
 )
 
 
+def test_worker_retention_function_checks_deadline_and_tenant_without_table_read(isolated_seeded):
+    workspace = uuid.UUID("11111111-1111-4111-8111-111111111111")
+    other = uuid.UUID("22222222-2222-4222-8222-222222222222")
+    project = uuid.UUID("a0000000-0000-4000-8000-000000000001")
+    document = uuid.uuid4()
+    with psycopg.connect(isolated_seeded, autocommit=True) as db:
+        db.execute("INSERT INTO offer_documents(id,workspace_id,project_id,kind,filename,media_type,status,"
+            "retention_until) VALUES (%s,%s,%s,'upload','fixture.txt','text/plain','ready',now()+interval '1 day')",
+            (document, workspace, project))
+        db.execute("SET ROLE buyeros_worker")
+        assert db.execute("SELECT has_table_privilege(current_user,'lead_private_payloads','SELECT')").fetchone() == (False,)
+        db.execute("SELECT set_config('app.workspace_id',%s,false)", (str(workspace),))
+        # The callable exists, but an unexpired subject cannot be erased.
+        assert db.execute("SELECT has_function_privilege(current_user,"
+            "'buyeros_redact_lead_subject(uuid,text,uuid)','EXECUTE')").fetchone() == (True,)
+        with pytest.raises(psycopg.errors.InsufficientPrivilege, match="not expired"):
+            db.execute("SELECT buyeros_redact_lead_subject(%s,'offer_document',%s)", (workspace, document))
+        db.execute("RESET ROLE")
+        db.execute("UPDATE offer_documents SET retention_until=now()-interval '1 second' WHERE id=%s", (document,))
+        db.execute("SET ROLE buyeros_worker")
+        with pytest.raises(psycopg.errors.InsufficientPrivilege, match="tenant scope"):
+            db.execute("SELECT buyeros_redact_lead_subject(%s,'offer_document',%s)", (other, document))
+        assert db.execute("SELECT buyeros_redact_lead_subject(%s,'offer_document',%s)", (workspace, document)).fetchone() == (0,)
+
+
 def test_lead_workflow_schema_is_tenant_scoped_and_append_only(isolated_migrated):
     with psycopg.connect(isolated_migrated) as db:
         for table in TABLES:

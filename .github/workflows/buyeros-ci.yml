@@ -44,6 +44,19 @@ jobs:
       - run: node tests/live-adapter-checks.mjs
       - run: node tests/buyer-import-checks.mjs
       - run: node tests/document-upload-checks.mjs
+      - name: Verify native lead intent client recovery
+        run: |
+          mkdir -p artifacts/lead-workflow
+          node --test --test-reporter=junit --test-reporter-destination=artifacts/lead-workflow/lead-client.xml tests/lead-intents.test.mjs
+          python scripts/check-required-tests.py --junit artifacts/lead-workflow/lead-client.xml
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('artifacts/lead-workflow/lead-client.xml').getroot().iter('testcase')); names={(c.get('classname'),c.get('name')) for c in cases}; assert len(cases)==len(names)==6, 'missing, duplicate or file-only lead client execution'"
+          python -m unittest discover -s tests -p test_lead_workflow_ci_registration.py -v
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-lead-client
+          path: artifacts/lead-workflow/
+          if-no-files-found: error
       - name: Verify C61 candidate client intent and source privacy
         run: |
           mkdir -p artifacts/c61
@@ -555,10 +568,10 @@ jobs:
         working-directory: services/api
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 2737 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 2815 --discovery-only
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/api
-      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 2737 --junit services/api/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 2815 --junit services/api/artifacts/tests.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -930,6 +943,23 @@ jobs:
           mkdir -p test-results artifacts/c61
           pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --list --reporter=json > artifacts/c61/buyer-management-discovery.json
           python scripts/check-required-tests.py --playwright-discovery artifacts/c61/buyer-management-discovery.json --expected-count 3 --expected-file buyer-management.spec.ts --discovery-only
+      - name: Verify native lead workflow without provider activation
+        run: |
+          mkdir -p artifacts/lead-workflow
+          pnpm exec playwright test --config playwright.lead-workflow.config.ts --list --reporter=json > artifacts/lead-workflow/discovery.json
+          python scripts/check-required-tests.py --playwright-discovery artifacts/lead-workflow/discovery.json --expected-count 17 --expected-file lead-evidence.spec.ts --expected-file lead-preparations.spec.ts --expected-file lead-workflow.spec.ts --expected-file pilot-budget.spec.ts --discovery-only
+          pnpm exec playwright test --config playwright.lead-workflow.config.ts --workers=1
+          python scripts/check-required-tests.py --playwright-discovery artifacts/lead-workflow/discovery.json --expected-count 17 --expected-file lead-evidence.spec.ts --expected-file lead-preparations.spec.ts --expected-file lead-workflow.spec.ts --expected-file pilot-budget.spec.ts --junit test-results/lead-workflow.xml
+          cp test-results/lead-workflow.xml artifacts/lead-workflow/lead-workflow.xml
+      - name: Verify original buyer source checks
+        run: |
+          pnpm exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-source-checks.spec.ts --list --reporter=json > artifacts/lead-workflow/source-discovery.json
+          python scripts/check-required-tests.py --playwright-discovery artifacts/lead-workflow/source-discovery.json --expected-count 5 --expected-file buyer-source-checks.spec.ts --discovery-only
+          pnpm exec playwright test --config playwright.buyer.config.ts tests/e2e/buyer-source-checks.spec.ts --workers=1 --reporter=line,junit
+          python scripts/check-required-tests.py --playwright-discovery artifacts/lead-workflow/source-discovery.json --expected-count 5 --expected-file buyer-source-checks.spec.ts --junit test-results/buyer-source-checks.xml
+          cp test-results/buyer-source-checks.xml artifacts/lead-workflow/buyer-source-checks.xml
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/buyer-source-checks.xml
       - run: pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --reporter=line,junit
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/buyer-management.xml
@@ -974,6 +1004,7 @@ jobs:
           path: |
             test-results/
             artifacts/ci-t30/
+            artifacts/lead-workflow/
           if-no-files-found: error
 
   audit-fixes:

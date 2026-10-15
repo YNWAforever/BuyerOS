@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..api.errors import ApiError
@@ -340,6 +340,11 @@ async def assert_pilot_admission(
     policy = await _policy(session, scope)
     if policy is None:
         return
+    # Native workers can identify the pilot but cannot read private accounting
+    # proofs or lead payloads. Pilot execution is disabled, so refuse admission
+    # here while leaving projects with no pilot policy on their existing path.
+    if not await session.scalar(text("SELECT pg_has_role(current_user,'buyeros_api','USAGE')")):
+        raise ApiError(409, "POLICY_BLOCKED", "disabled pilot does not admit native worker operations")
     view = await _snapshot(session, scope, now)
     if view["remaining"] is None or view["activation"] != "disabled":
         raise ApiError(409, "POLICY_BLOCKED", "pilot accounting or disabled-mode configuration requires reconciliation")

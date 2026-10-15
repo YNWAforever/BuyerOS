@@ -14,6 +14,39 @@ from tests.conftest import runtime_role_dsn
 from tests.lead_fixtures import ACTORS, WORKSPACE, PROJECT, headers, prepare, apply, lead_api, lead_case
 
 
+@pytest.mark.parametrize("configured", [False, True], ids=["legacy-without-policy", "disabled-pilot"])
+def test_worker_admission_preserves_legacy_projects_without_private_lead_access(lead_api, lead_case, configured):
+    """Worker budget admission must never require private lead evidence privileges."""
+    from sqlalchemy import text
+    from buyeros_api.db.session import tenant_session
+    from buyeros_api.api.errors import ApiError
+    from buyeros_api.services.pilot_budget_service import assert_pilot_admission
+
+    if configured:
+        configure(lead_api, lead_case)
+
+    async def run():
+        engine = create_async_engine(lead_case["dsn"].replace("postgresql://", "postgresql+psycopg://"))
+        try:
+            async with tenant_session(engine, uuid.UUID(WORKSPACE)) as session:
+                await session.execute(text("SET LOCAL ROLE buyeros_worker"))
+                assert not await session.scalar(text(
+                    "SELECT has_table_privilege(current_user,'lead_private_payloads','SELECT')"))
+                if configured:
+                    with pytest.raises(ApiError) as error:
+                        await assert_pilot_admission(session, workspace_id=uuid.UUID(WORKSPACE),
+                            project_id=uuid.UUID(PROJECT), operation_id=uuid.uuid4(),
+                            upper_bound=Decimal("0.4"), now=datetime.now(timezone.utc))
+                    assert error.value.code == "POLICY_BLOCKED"
+                else:
+                    await assert_pilot_admission(session, workspace_id=uuid.UUID(WORKSPACE),
+                        project_id=uuid.UUID(PROJECT), operation_id=uuid.uuid4(),
+                        upper_bound=Decimal("0.4"), now=datetime.now(timezone.utc))
+        finally:
+            await engine.dispose()
+    asyncio.run(run())
+
+
 def budget(api, case, role="workspace_admin"):
     response = api.get(f"{case['base']}/pilot-budget", headers=headers(role))
     assert response.status_code == 200, response.text

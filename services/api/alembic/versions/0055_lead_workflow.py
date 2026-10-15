@@ -122,6 +122,9 @@ def upgrade():
         op.execute(f"GRANT SELECT,INSERT ON {name} TO buyeros_api")
         if name in mutable:
             op.execute(f"GRANT UPDATE ON {name} TO buyeros_api")
+    # Existing native workers check whether a project is in the disabled pilot
+    # before reserving a budget. This policy row contains no private evidence.
+    op.execute("GRANT SELECT ON pilot_budget_policies TO buyeros_worker")
     # Only private contents may be cleared, after checking the canonical
     # subject's deadline and the caller's tenant scope. Journal metadata stays.
     op.execute("""
@@ -179,7 +182,7 @@ def upgrade():
       RETURN n;
     END $$;
     REVOKE ALL ON FUNCTION public.buyeros_redact_lead_subject(uuid,text,uuid) FROM PUBLIC,buyeros_worker;
-    GRANT EXECUTE ON FUNCTION public.buyeros_redact_lead_subject(uuid,text,uuid) TO buyeros_api;
+    GRANT EXECUTE ON FUNCTION public.buyeros_redact_lead_subject(uuid,text,uuid) TO buyeros_api,buyeros_worker;
     """)
     _fences(revision)
 
