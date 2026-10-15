@@ -1,6 +1,7 @@
 """Strict manual lead contracts. None of these requests can dispatch a provider."""
 from dataclasses import dataclass
 from datetime import date, datetime
+from decimal import Decimal
 from typing import Annotated, Generic, Literal, TypeVar, Union
 from urllib.parse import urlparse
 from uuid import UUID
@@ -494,6 +495,159 @@ class LeadPreparationRevisionView(LeadStrict):
 
 class LeadPreparationRevisionPage(LeadStrict):
     items: list[LeadPreparationRevisionView]
+    offset: int
+    limit: int
+    total: int
+
+
+PilotAmount = Annotated[StrictStr, Field(pattern=r"^(0|[1-9][0-9]{0,13})(\.[0-9]{1,6})?$")]
+
+
+class PilotSourceRef(LeadStrict):
+    title: StrictStr = Field(min_length=1, max_length=300)
+    url: StrictStr | None = Field(default=None, max_length=2048)
+    document_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def proof(self):
+        if bool(self.url) == bool(self.document_id) or not self.title.strip():
+            raise ValueError("one source URL or private document is required")
+        if self.url:
+            credential_free_url(self.url)
+        return self
+
+
+class PilotPolicyInput(LeadStrict):
+    monthly_limit: PilotAmount
+    reason: StrictStr = Field(min_length=3, max_length=4000)
+
+    @field_validator("monthly_limit")
+    @classmethod
+    def capped(cls, value):
+        if Decimal(value) > Decimal("10"):
+            raise ValueError("approved monthly cap cannot exceed USD 10")
+        return value
+
+
+class PilotCostInput(LeadStrict):
+    economic_charge_key: StrictStr = Field(min_length=1, max_length=255)
+    period_start: AwareDatetime
+    state: Literal["committed", "settled", "unknown", "corrected"]
+    usd_amount: PilotAmount | None = None
+    usd_upper_bound: PilotAmount | None = None
+    original_amount: PilotAmount | None = None
+    original_currency: StrictStr = Field(default="USD", pattern=r"^[A-Z]{3}$")
+    fx_basis: StrictStr | None = Field(default=None, min_length=3, max_length=2000)
+    fees_included: StrictBool
+    minimum_purchase_included: StrictBool
+    source_refs: list[PilotSourceRef] = Field(min_length=1, max_length=10)
+    reason: StrictStr = Field(min_length=3, max_length=4000)
+    previous_event_id: UUID | None = None
+    native_operation_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def consistent_money(self):
+        if self.state == "settled" and self.usd_amount is None:
+            raise ValueError("settlement amount required")
+        if self.state == "committed" and self.usd_upper_bound is None:
+            raise ValueError("verified commitment upper bound required")
+        if self.state == "corrected" and self.previous_event_id is None:
+            raise ValueError("correction requires original event")
+        if self.usd_amount is not None and self.usd_upper_bound is not None:
+            if Decimal(self.usd_amount) > Decimal(self.usd_upper_bound):
+                raise ValueError("amount exceeds stated upper bound")
+        if self.original_currency != "USD" and (self.usd_amount or self.usd_upper_bound) and not self.fx_basis:
+            raise ValueError("USD conversion evidence required")
+        return self
+
+
+class PilotCreditInput(LeadStrict):
+    provider: StrictStr = Field(min_length=1, max_length=100)
+    unit: StrictStr = Field(min_length=1, max_length=50)
+    period_start: AwareDatetime
+    period_end: AwareDatetime
+    used: PilotAmount | None = None
+    remaining: PilotAmount | None = None
+    as_of: AwareDatetime
+    source_refs: list[PilotSourceRef] = Field(min_length=1, max_length=10)
+
+    @model_validator(mode="after")
+    def valid_period(self):
+        if not self.period_start <= self.as_of < self.period_end:
+            raise ValueError("credit observation must be inside its provider period")
+        return self
+
+
+class PilotReconcileInput(LeadStrict):
+    period_start: AwareDatetime
+    ledger_version: StrictInt = Field(ge=1)
+    ledger_hash: StrictStr = Field(min_length=1, max_length=80)
+    coverage_start: AwareDatetime
+    coverage_end: AwareDatetime
+    shared_usage_known: StrictBool
+    reason: StrictStr = Field(min_length=3, max_length=4000)
+    source_refs: list[PilotSourceRef] = Field(min_length=1, max_length=10)
+
+
+class PilotPolicyIntent(LeadStrict):
+    action: Literal["pilot.policy"]
+    buyer_id: None = None
+    target_id: None = None
+    expected_version: StrictInt = Field(ge=1)
+    payload: PilotPolicyInput
+
+
+class PilotCostIntent(PilotPolicyIntent):
+    action: Literal["cost.record"]
+    payload: PilotCostInput
+
+
+class PilotCreditIntent(PilotPolicyIntent):
+    action: Literal["credits.record"]
+    payload: PilotCreditInput
+
+
+class PilotReconcileIntent(PilotPolicyIntent):
+    action: Literal["budget.reconcile"]
+    payload: PilotReconcileInput
+
+
+LeadIntentInput = Annotated[
+    Union[ObservationIntent, LeadReviewIntent, LeadCaseIntent, LeadPreparationIntent,
+          LeadPreparationReviewIntent, LeadPreparationStateIntent,
+          PilotPolicyIntent, PilotCostIntent, PilotCreditIntent, PilotReconcileIntent],
+    Field(discriminator="action"),
+]
+
+
+class PilotBudgetView(LeadStrict):
+    id: UUID | None
+    workspace_id: UUID
+    project_id: UUID
+    version: int
+    ledger_version: int
+    ledger_hash: str
+    limit: str
+    settled_total: str | None
+    recorded_settled: str
+    reserved_total: str
+    carried_reserved: str
+    external_unsettled: str | None
+    remaining: str | None
+    currency: Literal["USD"]
+    period_start: AwareDatetime
+    period_end: AwareDatetime
+    reconciliation_status: Literal["unknown", "stale", "reconciled"]
+    activation: Literal["disabled", "configuration_mismatch"]
+    budget_state: Literal["unconfigured", "reconciliation_required", "within_limit", "over_limit"]
+    last_reconciliation_id: UUID | None
+    credits: list[dict]
+    blockers: list[str]
+    as_of: AwareDatetime
+
+
+class PilotCostPage(LeadStrict):
+    items: list[dict]
     offset: int
     limit: int
     total: int

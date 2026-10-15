@@ -160,6 +160,10 @@ async def reserve_operation(session, operation_id: uuid.UUID, scope: dict, upper
             existing.currency != currency or set(assigned) != set(_keys(workspace_id, project_id, run_id, category))):
             raise ApiError(409, "IDEMPOTENCY_CONFLICT", "operation reservation differs")
         return existing.id
+    from .pilot_budget_service import assert_pilot_admission
+    await assert_pilot_admission(session, workspace_id=workspace_id, project_id=project_id,
+                                 operation_id=operation_id, upper_bound=upper_bound,
+                                 now=at or datetime.now(timezone.utc))
     accounts = await ensure_period_accounts(session, workspace_id, project_id, run_id, category, at=at)
     accounts.sort(key=lambda a: (RANK[a.scope], str(a.id)))
     for account in accounts:

@@ -1911,6 +1911,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/pilot-budget": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Getpilotbudget */
+        get: operations["getPilotBudget"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/pilot-cost-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listpilotcostevents */
+        get: operations["listPilotCostEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5263,6 +5297,291 @@ export interface components {
             historical: true;
             /** Redacted */
             redacted: boolean;
+        };
+        /** LeadEnvelope[PilotBudgetView] */
+        LeadEnvelope_PilotBudgetView_: {
+            data: components["schemas"]["PilotBudgetView"];
+            /** Request Id */
+            request_id: string;
+            /**
+             * Data Mode
+             * @constant
+             */
+            data_mode: "live";
+        };
+        /** LeadEnvelope[PilotCostPage] */
+        LeadEnvelope_PilotCostPage_: {
+            data: components["schemas"]["PilotCostPage"];
+            /** Request Id */
+            request_id: string;
+            /**
+             * Data Mode
+             * @constant
+             */
+            data_mode: "live";
+        };
+        /** PilotBudgetView */
+        PilotBudgetView: {
+            /** Id */
+            id: string | null;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /** Version */
+            version: number;
+            /** Ledger Version */
+            ledger_version: number;
+            /** Ledger Hash */
+            ledger_hash: string;
+            /** Limit */
+            limit: string;
+            /** Settled Total */
+            settled_total: string | null;
+            /** Recorded Settled */
+            recorded_settled: string;
+            /** Reserved Total */
+            reserved_total: string;
+            /** Carried Reserved */
+            carried_reserved: string;
+            /** External Unsettled */
+            external_unsettled: string | null;
+            /** Remaining */
+            remaining: string | null;
+            /**
+             * Currency
+             * @constant
+             */
+            currency: "USD";
+            /**
+             * Period Start
+             * Format: date-time
+             */
+            period_start: string;
+            /**
+             * Period End
+             * Format: date-time
+             */
+            period_end: string;
+            /**
+             * Reconciliation Status
+             * @enum {string}
+             */
+            reconciliation_status: "unknown" | "stale" | "reconciled";
+            /**
+             * Activation
+             * @enum {string}
+             */
+            activation: "disabled" | "configuration_mismatch";
+            /**
+             * Budget State
+             * @enum {string}
+             */
+            budget_state: "unconfigured" | "reconciliation_required" | "within_limit" | "over_limit";
+            /** Last Reconciliation Id */
+            last_reconciliation_id: string | null;
+            /** Credits */
+            credits: {
+                [key: string]: unknown;
+            }[];
+            /** Blockers */
+            blockers: string[];
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+        };
+        /** PilotCostInput */
+        PilotCostInput: {
+            /** Economic Charge Key */
+            economic_charge_key: string;
+            /**
+             * Period Start
+             * Format: date-time
+             */
+            period_start: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "committed" | "settled" | "unknown" | "corrected";
+            /** Usd Amount */
+            usd_amount?: string | null;
+            /** Usd Upper Bound */
+            usd_upper_bound?: string | null;
+            /** Original Amount */
+            original_amount?: string | null;
+            /**
+             * Original Currency
+             * @default USD
+             */
+            original_currency: string;
+            /** Fx Basis */
+            fx_basis?: string | null;
+            /** Fees Included */
+            fees_included: boolean;
+            /** Minimum Purchase Included */
+            minimum_purchase_included: boolean;
+            /** Source Refs */
+            source_refs: components["schemas"]["PilotSourceRef"][];
+            /** Reason */
+            reason: string;
+            /** Previous Event Id */
+            previous_event_id?: string | null;
+            /** Native Operation Id */
+            native_operation_id?: string | null;
+        };
+        /** PilotCostIntent */
+        PilotCostIntent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "cost.record";
+            /** Buyer Id */
+            buyer_id?: null;
+            /** Target Id */
+            target_id?: null;
+            /** Expected Version */
+            expected_version: number;
+            payload: components["schemas"]["PilotCostInput"];
+        };
+        /** PilotCostPage */
+        PilotCostPage: {
+            /** Items */
+            items: {
+                [key: string]: unknown;
+            }[];
+            /** Offset */
+            offset: number;
+            /** Limit */
+            limit: number;
+            /** Total */
+            total: number;
+        };
+        /** PilotCreditInput */
+        PilotCreditInput: {
+            /** Provider */
+            provider: string;
+            /** Unit */
+            unit: string;
+            /**
+             * Period Start
+             * Format: date-time
+             */
+            period_start: string;
+            /**
+             * Period End
+             * Format: date-time
+             */
+            period_end: string;
+            /** Used */
+            used?: string | null;
+            /** Remaining */
+            remaining?: string | null;
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+            /** Source Refs */
+            source_refs: components["schemas"]["PilotSourceRef"][];
+        };
+        /** PilotCreditIntent */
+        PilotCreditIntent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "credits.record";
+            /** Buyer Id */
+            buyer_id?: null;
+            /** Target Id */
+            target_id?: null;
+            /** Expected Version */
+            expected_version: number;
+            payload: components["schemas"]["PilotCreditInput"];
+        };
+        /** PilotPolicyInput */
+        PilotPolicyInput: {
+            /** Monthly Limit */
+            monthly_limit: string;
+            /** Reason */
+            reason: string;
+        };
+        /** PilotPolicyIntent */
+        PilotPolicyIntent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "pilot.policy";
+            /** Buyer Id */
+            buyer_id?: null;
+            /** Target Id */
+            target_id?: null;
+            /** Expected Version */
+            expected_version: number;
+            payload: components["schemas"]["PilotPolicyInput"];
+        };
+        /** PilotReconcileInput */
+        PilotReconcileInput: {
+            /**
+             * Period Start
+             * Format: date-time
+             */
+            period_start: string;
+            /** Ledger Version */
+            ledger_version: number;
+            /** Ledger Hash */
+            ledger_hash: string;
+            /**
+             * Coverage Start
+             * Format: date-time
+             */
+            coverage_start: string;
+            /**
+             * Coverage End
+             * Format: date-time
+             */
+            coverage_end: string;
+            /** Shared Usage Known */
+            shared_usage_known: boolean;
+            /** Reason */
+            reason: string;
+            /** Source Refs */
+            source_refs: components["schemas"]["PilotSourceRef"][];
+        };
+        /** PilotReconcileIntent */
+        PilotReconcileIntent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "budget.reconcile";
+            /** Buyer Id */
+            buyer_id?: null;
+            /** Target Id */
+            target_id?: null;
+            /** Expected Version */
+            expected_version: number;
+            payload: components["schemas"]["PilotReconcileInput"];
+        };
+        /** PilotSourceRef */
+        PilotSourceRef: {
+            /** Title */
+            title: string;
+            /** Url */
+            url?: string | null;
+            /** Document Id */
+            document_id?: string | null;
         };
     };
     responses: {
@@ -9476,7 +9795,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ObservationIntent"] | components["schemas"]["LeadReviewIntent"] | components["schemas"]["LeadCaseIntent"] | components["schemas"]["LeadPreparationIntent"] | components["schemas"]["LeadPreparationReviewIntent"] | components["schemas"]["LeadPreparationStateIntent"];
+                "application/json": components["schemas"]["ObservationIntent"] | components["schemas"]["LeadReviewIntent"] | components["schemas"]["LeadCaseIntent"] | components["schemas"]["LeadPreparationIntent"] | components["schemas"]["LeadPreparationReviewIntent"] | components["schemas"]["LeadPreparationStateIntent"] | components["schemas"]["PilotPolicyIntent"] | components["schemas"]["PilotCostIntent"] | components["schemas"]["PilotCreditIntent"] | components["schemas"]["PilotReconcileIntent"];
             };
         };
         responses: {
@@ -9816,6 +10135,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LeadEnvelope_LeadPreparationRevisionPage_"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    getPilotBudget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadEnvelope_PilotBudgetView_"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    listPilotCostEvents: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadEnvelope_PilotCostPage_"];
                 };
             };
             400: components["responses"]["Error"];

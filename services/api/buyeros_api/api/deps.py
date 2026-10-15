@@ -42,6 +42,8 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
     "listLeadPreparations": _VIEWERS,
     "getLeadPreparation": _VIEWERS,
     "listLeadPreparationRevisions": _VIEWERS,
+    "getPilotBudget": frozenset({"operator", "reviewer", "workspace_admin"}),
+    "listPilotCostEvents": frozenset({"workspace_admin"}),
     "prepareLeadIntent": frozenset({"operator", "reviewer", "workspace_admin"}),
     "listLeadIntents": _VIEWERS,
     "getLeadIntent": _VIEWERS,

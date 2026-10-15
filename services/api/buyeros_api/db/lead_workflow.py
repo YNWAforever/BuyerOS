@@ -318,7 +318,7 @@ class PilotCostEvent(Base, TenantMixin, ProjectLeadColumns):
         ),
         ForeignKeyConstraint(
             ["workspace_id", "native_operation_id"],
-            ["provider_operations.workspace_id", "provider_operations.id"],
+            ["budget_reservations.workspace_id", "budget_reservations.operation_id"],
         ),
         ForeignKeyConstraint(
             ["workspace_id", "project_id", "payload_id"],

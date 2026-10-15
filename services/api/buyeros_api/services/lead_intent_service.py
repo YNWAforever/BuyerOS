@@ -25,6 +25,8 @@ ACTION_PERMISSIONS = {
     "preparation.create": "editDraft", "preparation.revise": "editDraft",
     "preparation.review": "approveDraft", "preparation.archive": "editDraft",
     "preparation.request_review": "requestDraftReview",
+    "pilot.policy": "updateBudget", "cost.record": "updateBudget",
+    "credits.record": "updateBudget", "budget.reconcile": "updateBudget",
 }
 LOCAL_CONFIGURATION_INTENT_DAYS = 30
 
@@ -102,6 +104,15 @@ async def _receipt(session, scope, row, now):
         from .lead_preparation_service import get_preparation
         view = await get_preparation(session, scope=scope, preparation_id=row.resource_id, now=now)
         redacted = view["redacted"]
+    elif row.resource_type in {"pilot_cost_event", "pilot_credit_observation", "pilot_reconciliation"}:
+        from ..db.lead_workflow import PilotCostEvent, PilotCreditObservation, PilotReconciliation
+        model = {"pilot_cost_event": PilotCostEvent, "pilot_credit_observation": PilotCreditObservation,
+                 "pilot_reconciliation": PilotReconciliation}[row.resource_type]
+        item = await session.scalar(select(model).where(
+            model.workspace_id == scope.workspace_id, model.project_id == scope.project_id, model.id == row.resource_id,
+        ))
+        _, proof = await retained_payload(session, scope, item.payload_id, now) if item else (None, None)
+        redacted = proof is None
     return LeadIntentReceipt(intent_id=row.id, resource_type=row.resource_type,
         resource_id=row.resource_id, resource_version=row.resource_version or 1,
         state="applied", redacted=redacted).model_dump(mode="json")
@@ -175,6 +186,11 @@ async def prepare_intent(
             target, _ = await _row(session, scope, data.target_id)
             revision = await _revision(session, scope, target)
             person_id, contact_id = revision.person_id, revision.contact_id
+        elif data.action in {"pilot.policy", "cost.record", "credits.record", "budget.reconcile"}:
+            from .pilot_budget_service import validate_pilot_input
+            await validate_pilot_input(session, scope, data.action, data.payload, now)
+            if hasattr(data.payload, "source_refs"):
+                offer_document_ids = [str(source.document_id) for source in data.payload.source_refs if source.document_id]
         try:
             async with session.begin_nested():
                 private = await save_private_payload(session, scope, {
@@ -279,6 +295,28 @@ async def apply_intent(
                 expected_version=row.expected_version, reason=data.reason, now=now,
                 archive=row.action == "preparation.archive")
         resource_type, resource_version = "lead_preparation", result["version"]
+    elif row.action in {"pilot.policy", "cost.record", "credits.record", "budget.reconcile"}:
+        from ..api.lead_schemas import PilotPolicyInput, PilotCostInput, PilotCreditInput, PilotReconcileInput
+        from .pilot_budget_service import (
+            set_pilot_policy, record_pilot_cost, record_credit_observation, reconcile_pilot_budget,
+        )
+        if row.action == "pilot.policy":
+            result = await set_pilot_policy(session, scope=scope,
+                data=PilotPolicyInput.model_validate(content["payload"]), expected_version=row.expected_version, now=now)
+            resource_type, resource_version = "pilot_budget", result["version"]
+        elif row.action == "cost.record":
+            result = await record_pilot_cost(session, scope=scope,
+                data=PilotCostInput.model_validate(content["payload"]), expected_version=row.expected_version, now=now)
+            resource_type, resource_version = "pilot_cost_event", result["version"]
+        elif row.action == "credits.record":
+            result = await record_credit_observation(session, scope=scope,
+                data=PilotCreditInput.model_validate(content["payload"]), expected_version=row.expected_version, now=now)
+            resource_type, resource_version = "pilot_credit_observation", result["version"]
+        else:
+            result = await reconcile_pilot_budget(session, scope=scope,
+                data=PilotReconcileInput.model_validate(content["payload"]), expected_version=row.expected_version, now=now)
+            result = {**result, "id": result["last_reconciliation_id"]}
+            resource_type, resource_version = "pilot_reconciliation", 1
     else:
         raise ApiError(403, "POLICY_BLOCKED", "action handler unavailable")
     row.state, row.resource_type = "applied", resource_type
