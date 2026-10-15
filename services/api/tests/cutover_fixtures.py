@@ -97,17 +97,17 @@ def cold_cutover(monkeypatch,tmp_path):
         # Keep the historical identity rollback proof; current retention needs its expanded schema.
         command.upgrade(config,'head')
         with psycopg.connect(source_dsn) as db:
-            assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0053_resumable_documents',)
+            assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0054_buyer_source_checks',)
         expanded=snapshot(source_dsn,[legacy,new_user],workspace)
         assert {k:v for k,v in expanded.items() if k!='historical_fks'}=={k:v for k,v in before.items() if k!='historical_fks'}
         for user,prior in before['historical_fks'].items():
             current=expanded['historical_fks'][user]
             assert all(current[k]==v for k,v in prior.items())
             added=set(current)-set(prior)
-            assert added=={str((service+'_receipts','actor_id')) for service in ('search','model','contact')}|{str(('delivery_messages','actor_id')),str(('document_uploads','actor_user_id'))}
+            assert added=={str((service+'_receipts','actor_id')) for service in ('search','model','contact')}|{str(('delivery_messages','actor_id')),str(('document_uploads','actor_user_id')),str(('buyer_source_checks','recorded_by_user_id'))}
             assert all(current[k]==hashlib.sha256(json.dumps([]).encode()).hexdigest() for k in added)
         before=expanded
-        mark('current_receipt_privacy_schema_before_backup',schema='0053_resumable_documents',snapshot=before)
+        mark('current_receipt_privacy_schema_before_backup',schema='0054_buyer_source_checks',snapshot=before)
         dump=_docker_binary(['exec',source,'pg_dump','-U',DB_USER,'-d',DB_NAME,'--format=custom','--no-owner'])
         mark('older_backup',bytes=len(dump),sha256=hashlib.sha256(dump).hexdigest())
         policy='c61-offline-retention-v1'

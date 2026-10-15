@@ -63,10 +63,10 @@ class PlaywrightRequiredDiscoveryTests(unittest.TestCase):
 
  def test_original_audit_discovers_history_and_workspace_recovery_with_all133_cases(self):
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text(encoding='utf-8')
-  marker='--playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 133 --expected-file audit-delivery-history.spec.ts'
+  marker='--playwright-discovery artifacts/c61/playwright-discovery.json --expected-count 140 --expected-file audit-delivery-history.spec.ts'
   commands=[line for line in workflow.splitlines() if marker in line]
-  self.assertEqual(len(commands),2,'native audit preflight and postgate must include all133 cases')
-  retained_files=['audit-delivery-history.spec.ts','audit-access-revocation.spec.ts','audit-auth-entry.spec.ts','audit-bulk-confirmation.spec.ts','audit-bulk-manifest.spec.ts','audit-candidate-review.spec.ts','audit-daily-journey.spec.ts','audit-daily-ux.spec.ts','audit-draft-dirty.spec.ts','audit-draft-reground.spec.ts','audit-job-scope.spec.ts','audit-keyboard-workbench.spec.ts','audit-keyboard.spec.ts','audit-maintenance-settings.spec.ts','audit-memberships.spec.ts','audit-native-run-progress.spec.ts','audit-operations.spec.ts','audit-research-intent.spec.ts','audit-reviewed-list-order.spec.ts','audit-template-copy.spec.ts','work-queue-counts.spec.ts']
+  self.assertEqual(len(commands),2,'native audit preflight and postgate must include all133 retained cases and seven admission regressions')
+  retained_files=['audit-delivery-history.spec.ts','audit-access-revocation.spec.ts','audit-auth-entry.spec.ts','audit-bulk-confirmation.spec.ts','audit-bulk-manifest.spec.ts','audit-candidate-review.spec.ts','audit-daily-journey.spec.ts','audit-daily-ux.spec.ts','audit-draft-dirty.spec.ts','audit-draft-reground.spec.ts','audit-job-scope.spec.ts','audit-keyboard-workbench.spec.ts','audit-keyboard.spec.ts','audit-maintenance-settings.spec.ts','audit-memberships.spec.ts','audit-native-run-progress.spec.ts','audit-operations.spec.ts','audit-research-intent.spec.ts','audit-research-admission.spec.ts','audit-reviewed-list-order.spec.ts','audit-template-copy.spec.ts','work-queue-counts.spec.ts']
   for command in commands:
    for name in [*retained_files,'audit-workspace-recovery.spec.ts']:
     self.assertIn('--expected-file '+name,command)

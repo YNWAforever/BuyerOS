@@ -193,7 +193,7 @@ def test_0013_preflight_reports_legacy_conflict_without_deleting_it(isolated_see
             assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0014_buyer_management"
         command.upgrade(config, "head")
         with psycopg.connect(seeded) as owner:
-            assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0053_resumable_documents"
+            assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0054_buyer_source_checks"
     finally:
         with psycopg.connect(seeded, autocommit=True) as owner:
             owner.execute("UPDATE projects SET active_icp_version_id=NULL WHERE id=%s", (PROJECT_A,))

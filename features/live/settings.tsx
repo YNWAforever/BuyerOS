@@ -2,7 +2,8 @@
 import {useEffect,useMemo,useState} from 'react';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
 import {LiveCancelled,describeLiveError} from '@/services/live/client';
-import {createOperationClient,type OperationOutput} from '@/services/live/operations';
+import {createOperationClient} from '@/services/live/operations';
+import {capabilityNames,validCapabilities,type CapabilityPage} from '@/services/live/capabilities';
 import {BudgetSettings} from './budgets';
 import {MemberDirectory} from './member-directory';
 
@@ -58,14 +59,6 @@ export function LiveSettings({workspace,locale,isAdmin,roles,onVersion,currentVe
   </section>;
 }
 
-const capabilityNames=['research','contact_enrichment','draft_generation','mailbox','crm'] as const;
-type CapabilityPage=OperationOutput<'getCapabilities'>;
-function validCapabilities(value:CapabilityPage):boolean {
-  return value?.total===5&&value.offset===0&&value.limit===5&&Array.isArray(value.items)&&value.items.length===5&&
-    new Set(value.items.map(item=>item.name)).size===5&&value.items.every(item=>capabilityNames.includes(item.name)&&
-      ['unconfigured','blocked','ready','degraded','disabled'].includes(item.status)&&typeof item.checked_at==='string'&&
-      Number.isFinite(Date.parse(item.checked_at))&&Array.isArray(item.reason_codes)&&item.reason_codes.every(code=>typeof code==='string')&&typeof item.billable==='boolean');
-}
 function ProviderCapabilities({workspace,t}:{workspace:string;t:(value:string)=>string}) {
   const {client,session}=useWorkspaceSession(),scope=useSessionSnapshot(),api=useMemo(()=>createOperationClient(client),[client]);
   const [refresh,setRefresh]=useState(0),[loaded,setLoaded]=useState<{key:string;page:CapabilityPage}|null>(null),[error,setError]=useState({key:'',message:''});
@@ -85,7 +78,7 @@ function ProviderCapabilities({workspace,t}:{workspace:string;t:(value:string)=>
     {capabilityNames.map(name=>{const item=page?.items.find(row=>row.name===name);return <article className="panel" key={name} data-capability={name}>
       <h4>{t(name)}</h4><output>{item?t(item.status):'—'}</output>
       {item&&<><p>{t('Checked')}: <time dateTime={item.checked_at}>{item.checked_at}</time></p>
-        {item.status!=='ready'&&<p>{t(name==='mailbox'||name==='crm'?'Native delivery requires its separate acceptance gate; use an approved export when available.':'Verify configuration and the account allowance, then run an authorized connection test before activation.')}</p>}
+        {item.status!=='ready'&&<p>{t(item.reason_codes.includes('PAID_ADMISSION_DISABLED')?'Paid research is disabled. You can still review existing buyers and results.':name==='mailbox'||name==='crm'?'Native delivery requires its separate acceptance gate; use an approved export when available.':'Verify configuration and the account allowance, then run an authorized connection test before activation.')}</p>}
         <details><summary>{t('Technical details')}</summary><ul>{item.reason_codes.map(code=><li key={code} style={{overflowWrap:'anywhere'}}>{code}</li>)}</ul></details></>}
     </article>;})}
   </section>;

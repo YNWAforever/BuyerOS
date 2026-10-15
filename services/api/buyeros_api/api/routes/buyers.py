@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Header, Query, Request, Response
 
 from ..auth import Principal, get_principal
 from ..errors import ApiError, envelope
-from ..schemas import BuyerUpdate, SnapshotCreate
+from ..schemas import BuyerSourceCheckCreate, BuyerUpdate, SnapshotCreate
 
 router = APIRouter(prefix="/v1/workspaces/{workspace_id}", tags=["buyers"])
 
@@ -381,4 +381,142 @@ async def get_evidence(
         evidence, source, company_id = row
         data = await current_evidence_data(session, workspace_id=workspace_id,
             evidence=evidence, source=source, mapped_company_id=company_id)
+    return envelope(data, request.state.request_id)
+
+
+def _buyer_source_check_data(check) -> dict:
+    return {
+        "id": str(check.id),
+        "workspace_id": str(check.workspace_id),
+        "project_id": str(check.project_id),
+        "buyer_id": str(check.buyer_id),
+        "checked_on": check.checked_on.isoformat(),
+        "grade": check.grade,
+        "rationale": check.rationale,
+        "limitations": check.limitations,
+        "sources": list(check.sources),
+        "recorded_by_user_id": str(check.recorded_by_user_id),
+        "created_at": check.created_at.isoformat(),
+    }
+
+
+@router.get("/buyers/{buyer_id}/source-checks")
+async def list_buyer_source_checks(
+    workspace_id: uuid.UUID,
+    buyer_id: uuid.UUID,
+    request: Request,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1),
+    principal: Principal = Depends(get_principal),
+) -> dict:
+    from sqlalchemy import func, select
+
+    from ...db.buyers import BuyerSourceCheck, ProjectBuyer
+    from ..deps import load_membership, permission_for_roles, tenant_scoped
+
+    limit = min(limit, 100)
+    async with tenant_scoped(workspace_id) as session:
+        membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
+        if not permission_for_roles(membership["roles"], "listBuyerEvidence"):
+            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+        buyer = (
+            await session.execute(
+                select(ProjectBuyer).where(
+                    ProjectBuyer.workspace_id == workspace_id,
+                    ProjectBuyer.id == buyer_id,
+                )
+            )
+        ).scalar_one_or_none()
+        if buyer is None:
+            raise ApiError(404, "NOT_FOUND", "buyer not found")
+        scope = (
+            BuyerSourceCheck.workspace_id == workspace_id,
+            BuyerSourceCheck.project_id == buyer.project_id,
+            BuyerSourceCheck.buyer_id == buyer.id,
+        )
+        total = (
+            await session.execute(
+                select(func.count()).select_from(BuyerSourceCheck).where(*scope)
+            )
+        ).scalar_one()
+        rows = (
+            await session.execute(
+                select(BuyerSourceCheck)
+                .where(*scope)
+                .order_by(BuyerSourceCheck.created_at, BuyerSourceCheck.id)
+                .offset(offset)
+                .limit(limit)
+            )
+        ).scalars().all()
+        data = {
+            "items": [_buyer_source_check_data(row) for row in rows],
+            "offset": offset,
+            "limit": limit,
+            "total": total,
+        }
+    return envelope(data, request.state.request_id)
+
+
+@router.post("/buyers/{buyer_id}/source-checks", status_code=201)
+async def create_buyer_source_check(
+    workspace_id: uuid.UUID,
+    buyer_id: uuid.UUID,
+    payload: BuyerSourceCheckCreate,
+    request: Request,
+    principal: Principal = Depends(get_principal),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+) -> dict:
+    from sqlalchemy import select
+
+    from ...db.buyers import BuyerSourceCheck, ProjectBuyer
+    from ..deps import load_membership, permission_for_roles, tenant_scoped
+    from ..idempotency import begin_idempotency, complete_idempotency
+
+    if not idempotency_key:
+        raise ApiError(400, "INVALID_REQUEST", "Idempotency-Key header is required")
+    body = payload.model_dump(mode="json")
+
+    async with tenant_scoped(workspace_id) as session:
+        membership = await load_membership(session, principal=principal, workspace_id=workspace_id)
+        if not permission_for_roles(membership["roles"], "updateBuyer"):
+            raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
+        buyer = (
+            await session.execute(
+                select(ProjectBuyer).where(
+                    ProjectBuyer.workspace_id == workspace_id,
+                    ProjectBuyer.id == buyer_id,
+                )
+            )
+        ).scalar_one_or_none()
+        if buyer is None:
+            raise ApiError(404, "NOT_FOUND", "buyer not found")
+        outcome = await begin_idempotency(
+            session,
+            workspace_id=workspace_id,
+            actor_id=membership["user_id"],
+            operation_id="createBuyerSourceCheck",
+            key=idempotency_key,
+            body=body,
+            target={"buyer_id": str(buyer.id)},
+        )
+        if outcome.replay:
+            if outcome.response is None:
+                raise ApiError(409, "IDEMPOTENCY_CONFLICT", "source check replay has no canonical response")
+            return envelope(outcome.response, request.state.request_id)
+
+        record = BuyerSourceCheck(
+            workspace_id=workspace_id,
+            project_id=buyer.project_id,
+            buyer_id=buyer.id,
+            checked_on=payload.checked_on,
+            grade=payload.grade,
+            rationale=payload.rationale,
+            limitations=payload.limitations,
+            sources=[source.model_dump(mode="json") for source in payload.sources],
+            recorded_by_user_id=membership["user_id"],
+        )
+        session.add(record)
+        await session.flush()
+        data = _buyer_source_check_data(record)
+        complete_idempotency(outcome, str(record.id), response=data)
     return envelope(data, request.state.request_id)

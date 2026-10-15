@@ -6,9 +6,12 @@ list membership removal keeps the company and its evidence.
 """
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKeyConstraint, Index, Integer, String, UniqueConstraint, text
+from sqlalchemy import (
+    Boolean, CheckConstraint, Date, DateTime, ForeignKeyConstraint, Index, Integer, String,
+    UniqueConstraint, text,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -51,6 +54,46 @@ class ProjectBuyer(Base, TenantMixin):
     note: Mapped[str | None] = mapped_column(String(20000), nullable=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
 
+
+class BuyerSourceCheck(Base, TenantMixin):
+    """Append-only human review of official public buyer sources."""
+
+    __tablename__ = "buyer_source_checks"
+    __table_args__ = (
+        UniqueConstraint("workspace_id", "id", name="uq_buyer_source_checks_workspace_id"),
+        ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_buyer_source_checks_workspace"),
+        ForeignKeyConstraint(
+            ["workspace_id", "project_id"], ["projects.workspace_id", "projects.id"],
+            name="fk_buyer_source_checks_project",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "project_id", "buyer_id"],
+            ["project_buyers.workspace_id", "project_buyers.project_id", "project_buyers.id"],
+            name="fk_buyer_source_checks_buyer",
+        ),
+        ForeignKeyConstraint(
+            ["recorded_by_user_id"], ["users.id"], name="fk_buyer_source_checks_actor"
+        ),
+        CheckConstraint("grade IN ('A', 'B', 'C')", name="buyer_source_checks_grade"),
+        CheckConstraint(
+            "jsonb_typeof(sources) = 'array' AND jsonb_array_length(sources) BETWEEN 1 AND 10",
+            name="buyer_source_checks_sources",
+        ),
+        CheckConstraint("length(btrim(rationale)) BETWEEN 1 AND 4000", name="buyer_source_checks_rationale"),
+        Index(
+            "ix_buyer_source_checks_buyer_created",
+            "workspace_id", "project_id", "buyer_id", "created_at",
+        ),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    buyer_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    checked_on: Mapped[date] = mapped_column(Date, nullable=False)
+    grade: Mapped[str] = mapped_column(String(1), nullable=False)
+    rationale: Mapped[str] = mapped_column(String(4000), nullable=False)
+    limitations: Mapped[str | None] = mapped_column(String(4000), nullable=True)
+    sources: Mapped[list[dict[str, str]]] = mapped_column(JSONB, nullable=False)
+    recorded_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
 
 class SourceDocument(Base, TenantMixin):
     __tablename__ = "source_documents"

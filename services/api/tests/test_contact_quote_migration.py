@@ -9,7 +9,7 @@ from alembic.config import Config
 
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 
-HEAD = "0053_resumable_documents"
+HEAD = "0054_buyer_source_checks"
 PREVIOUS = "0022_research_checkpoints"
 WORKSPACE = "11111111-1111-4111-8111-111111111111"
 PROJECT = "a0000000-0000-4000-8000-000000000001"
