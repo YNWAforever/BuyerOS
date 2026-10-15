@@ -102,7 +102,7 @@ this source document or a successful build as a verification receipt.
 
 | Layer | Required evidence |
 | --- | --- |
-| API native inventory | 2,737 original cases plus 95 additions = 2,832; native discovery and `final-candidate-api.xml` must match exactly. |
+| API native inventory | 2,737 original cases plus 103 additions = 2,840; native discovery and `final-candidate-api.xml` must match exactly. |
 | Worker | 469 original cases; native discovery and `final-candidate-worker.xml`. |
 | Node clients / frontend guards | Full general Node report, separate server SDK and emitted-auth reports, plus six distinct lead client cases; empty file wrappers are rejected. |
 | Root Python guards | 332 cases, including rejection of empty/missing/skipped reports. |
@@ -122,7 +122,7 @@ fixture setup intent, a built-link navigation failure and a sibling-panel stale-
 failure. They are not relabeled as passing.
 The original 2,815-case full API attempt had two cold-cutover failures and is retained as
 failed evidence even though its intended filename contained `green`. The final corrected
-inventory is 2,832. Derived preparation and intent retention is capped by the earliest
+inventory is 2,840. Derived preparation and intent retention is capped by the earliest
 selected product-document deadline as well as the personal-policy/subject deadline;
 normal erasure must remove copies, not merely hide reads.
 Cold fixture setup explicitly permits read-only schema metadata for
@@ -130,6 +130,14 @@ the new exact-head compatibility check, retains every original positive/rollback
 hold assertion, and adds the eight new empty actor-FK histories to the original six.
 Only the reviewed 0039 and 0054 heads may omit the not-yet-installed lead policy; a missing
 current or unknown-future feature schema is refused.
+
+A later unchanged-source full run had 2,831 passing cases and one Windows `10048`
+socket-acquisition error in a local fixture; its complete failed report and independent
+passing probe remain separate. Test-only setup now allows at most three connection
+acquisition attempts for that exact Windows error and disposable loopback database
+names, with visible nonsensitive warnings. It never retries SQL, provider actions,
+unknown writes, remote databases or other error classes. Eight dedicated safety cases
+exercise these limits; production database code and OS network settings are unchanged.
 
 The original 10 untracked files, two backups (51,460 bytes), `.gitignore`, and PR23's
 `codex/ci-pg16-image-preload-20261015` reference passed the preservation hash check in
