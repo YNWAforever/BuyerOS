@@ -26,6 +26,7 @@ from .routes.release_binding import router as release_binding_router
 from .routes.icp import router as icp_router
 from .routes.jobs import router as jobs_router
 from .routes.work_queue import router as work_queue_router
+from .routes.lead_workflow import router as lead_workflow_router
 from .routes.memberships import router as memberships_router
 from .routes.outcomes import router as outcomes_router
 from .routes.projects import router as projects_router
@@ -87,6 +88,7 @@ def create_app() -> FastAPI:
     app.include_router(delivery_callbacks_router)
     app.include_router(jobs_router)
     app.include_router(work_queue_router)
+    app.include_router(lead_workflow_router)
     app.include_router(reviews_router)
     app.include_router(runs_router)
     app.include_router(run_detail_router)

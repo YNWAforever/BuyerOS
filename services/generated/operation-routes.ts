@@ -104,4 +104,11 @@ export const operationRoutes = {
   "completeOfferDocumentUpload": {method: "POST", path: "/v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/complete"},
   "getOfferDocumentSlides": {method: "GET", path: "/v1/workspaces/{workspace_id}/offer-documents/{document_id}/slides"},
   "getOfferDocumentContentChunk": {method: "GET", path: "/v1/workspaces/{workspace_id}/offer-documents/{document_id}/content-chunks/{index}"},
+  "listLeadEvidence": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-evidence"},
+  "prepareLeadIntent": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents"},
+  "listLeadIntents": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents"},
+  "getLeadIntent": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents/{intent_id}"},
+  "applyLeadIntent": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents/{intent_id}/apply"},
+  "acknowledgeLeadIntent": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents/{intent_id}/acknowledgements"},
+  "cancelLeadIntent": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents/{intent_id}/cancel"},
 } as const satisfies Record<keyof operations, {method: string; path: string}>;

@@ -152,7 +152,15 @@ def upgrade():
       WHERE workspace_id=p_workspace AND contents IS NOT NULL AND (
         (p_kind='contact_point' AND contact_id=p_id) OR
         (p_kind='person' AND person_id=p_id) OR
-        (p_kind='source_document' AND contents->'source_document_ids' @> jsonb_build_array(p_id::text))
+        (p_kind='source_document' AND contents->'source_document_ids' @> jsonb_build_array(p_id::text)) OR
+        id IN (
+          SELECT i.payload_id FROM public.lead_action_intents i
+          JOIN public.lead_observations o ON o.workspace_id=i.workspace_id
+            AND o.project_id=i.project_id AND o.id=i.resource_id
+          WHERE i.workspace_id=p_workspace AND i.resource_type='lead_observation'
+            AND ((p_kind='person' AND o.person_id=p_id)
+              OR (p_kind='contact_point' AND o.contact_id=p_id))
+        )
       );
       GET DIAGNOSTICS n=ROW_COUNT;
       RETURN n;

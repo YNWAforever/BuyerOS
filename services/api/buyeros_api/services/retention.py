@@ -110,6 +110,9 @@ async def _expire_contact(session, subject_id: uuid.UUID, policy_version: str, n
     if contact.retention_expires_at is None or contact.retention_expires_at > now:
         raise ApiError(409, "POLICY_BLOCKED", "contact retention has not expired")
     if contact.validity == "unavailable" and contact.normalized_value.startswith("expired+"):
+        from .lead_retention import redact_lead_subject
+        await redact_lead_subject(session, workspace_id=contact.workspace_id,
+                                 subject_type="contact_point", subject_id=contact.id, now=now)
         return {"expired": False, "subject_id": str(contact.id)}
     contact.normalized_value = f"expired+{contact.id}@redacted.invalid"
     contact.validity = "unavailable"
@@ -123,6 +126,10 @@ async def _expire_contact(session, subject_id: uuid.UUID, policy_version: str, n
             Person.retention_expires_at <= now,
         ).values(full_name=None, role=None))
     await session.flush()
+
+    from .lead_retention import redact_lead_subject
+    await redact_lead_subject(session, workspace_id=contact.workspace_id,
+                             subject_type="contact_point", subject_id=contact.id, now=now)
 
     revisions = list((await session.execute(select(DraftRevision).where(
         DraftRevision.workspace_id == contact.workspace_id,
@@ -179,6 +186,13 @@ async def expire_subject_data(
 ) -> dict:
     if not policy_version or len(policy_version) > 64:
         raise ApiError(422, "INVALID_REQUEST", "policy version is required")
+    if subject_type == "person":
+        from .lead_retention import redact_lead_subject
+        person = await session.scalar(select(Person).where(Person.id == subject_id))
+        if person is None:
+            raise ApiError(404, "NOT_FOUND", "retention subject not found")
+        return await redact_lead_subject(session, workspace_id=person.workspace_id,
+                                         subject_type="person", subject_id=subject_id, now=now)
     if subject_type == "contact_point":
         return await _expire_contact(session, subject_id, policy_version, now)
     if subject_type != "source_document":
@@ -191,6 +205,9 @@ async def expire_subject_data(
     if row.retention_until is None or row.retention_until > now:
         raise ApiError(409, "POLICY_BLOCKED", "source retention has not expired")
     if row.excerpt is None and row.canonical_url.startswith("https://redacted.invalid/"):
+        from .lead_retention import redact_lead_subject
+        await redact_lead_subject(session, workspace_id=row.workspace_id,
+                                 subject_type="source_document", subject_id=row.id, now=now)
         from .receipt_retention import expire_provider_receipts
         await expire_provider_receipts(session,now=now,policy_version=policy_version,limit=100,source_id=row.id)
         if row.object_key or row.run_id:
@@ -199,6 +216,9 @@ async def expire_subject_data(
     row.excerpt = None
     row.canonical_url = f"https://redacted.invalid/{row.id}"
     await session.flush()
+    from .lead_retention import redact_lead_subject
+    await redact_lead_subject(session, workspace_id=row.workspace_id,
+                             subject_type="source_document", subject_id=row.id, now=now)
     from .receipt_retention import expire_provider_receipts
     await expire_provider_receipts(session,now=now,policy_version=policy_version,limit=100,source_id=row.id)
     await _redact_derived_source_content(session, row)

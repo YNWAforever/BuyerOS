@@ -379,7 +379,8 @@ paths:
     get:
       operationId: listMemberships
       summary: List existing verified workspace memberships
-      tags: [BO-024]
+      tags:
+      - BO-024
       security:
       - BearerAuth: []
       parameters:
@@ -425,14 +426,16 @@ paths:
           $ref: '#/components/responses/Error'
         '422':
           $ref: '#/components/responses/Error'
-      x-permitted-roles: [workspace_admin]
+      x-permitted-roles:
+      - workspace_admin
       x-cost: none
       x-idempotency: Read-only.
   /v1/workspaces/{workspace_id}/eligible-assignees:
     get:
       operationId: listEligibleAssignees
       summary: Search current active workspace members eligible for buyer ownership
-      tags: [BO-024]
+      tags:
+      - BO-024
       security:
       - BearerAuth: []
       parameters:
@@ -478,15 +481,19 @@ paths:
           $ref: '#/components/responses/Error'
         '422':
           $ref: '#/components/responses/Error'
-      x-permitted-roles: [operator, workspace_admin]
-      x-tenant-authorization: Current membership; target eligibility matches assignBuyerOwners and is rechecked on submission.
+      x-permitted-roles:
+      - operator
+      - workspace_admin
+      x-tenant-authorization: Current membership; target eligibility matches assignBuyerOwners and is rechecked
+        on submission.
       x-cost: none
       x-idempotency: Read-only.
   /v1/workspaces/{workspace_id}/memberships/{membership_id}:
     patch:
       operationId: updateMembership
       summary: Versioned role or active-state change for an existing member
-      tags: [BO-024]
+      tags:
+      - BO-024
       security:
       - BearerAuth: []
       parameters:
@@ -513,7 +520,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipResponse'
-      x-permitted-roles: [workspace_admin]
+      x-permitted-roles:
+      - workspace_admin
       x-cost: none
       x-idempotency: Exact target, precondition and body replay.
   /v1/workspaces/{workspace_id}/preferences:
@@ -877,7 +885,7 @@ paths:
             examples:
               contractIllustration:
                 summary: Synthetic request shape; not a live operation or provider payload
-                value: &id007
+                value: &id010
                   name: Sensor partners pilot
                   company_name: Pilot seller
                   offer: User-approved industrial sensor offering
@@ -1360,7 +1368,7 @@ paths:
                 file:
                   type: string
                   format: binary
-                declared_sha256: &id015
+                declared_sha256: &id018
                   type: string
                   pattern: ^[a-f0-9]{64}$
               required:
@@ -2636,7 +2644,7 @@ paths:
       - name: after_sequence
         in: query
         required: false
-        schema: &id005
+        schema: &id008
           type: integer
           minimum: 0
       - name: limit
@@ -2840,313 +2848,313 @@ paths:
                   filters: {}
                   sort: best_fit
                   requested_limit: 1
-  "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/preview":
+  /v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/preview:
     post:
-      operationId: "previewBuyerImport"
-      summary: "Preview Excel or CSV buyer candidates"
+      operationId: previewBuyerImport
+      summary: Preview Excel or CSV buyer candidates
       tags:
-        - "BO-008"
+      - BO-008
       security:
-        -
-          BearerAuth: []
+      - BearerAuth: []
       parameters:
-        -
-          name: "workspace_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-        -
-          name: "project_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-        -
-          "$ref": "#/components/parameters/IdempotencyKey"
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
-              type: "object"
+              type: object
               additionalProperties: false
               properties:
                 file:
-                  type: "string"
-                  format: "binary"
+                  type: string
+                  format: binary
               required:
-                - "file"
+              - file
       responses:
-        "201":
-          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+        '201':
+          description: Private source claims previewed or atomically imported as unreviewed candidates.
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/BuyerImportResponse"
-        "400":
-          "$ref": "#/components/responses/Error"
-        "401":
-          "$ref": "#/components/responses/Error"
-        "403":
-          "$ref": "#/components/responses/Error"
-        "404":
-          "$ref": "#/components/responses/Error"
-        "409":
-          "$ref": "#/components/responses/Error"
-        "422":
-          "$ref": "#/components/responses/Error"
-        "429":
-          "$ref": "#/components/responses/Error"
-        "500":
-          "$ref": "#/components/responses/Error"
-        "503":
-          "$ref": "#/components/responses/Error"
-      x-implementation-status: "IMPLEMENTED"
-      x-work-package: "BO-008"
-      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+                $ref: '#/components/schemas/BuyerImportResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-implementation-status: IMPLEMENTED
+      x-work-package: BO-008
+      x-tenant-authorization: Current signed actor membership and workspace/project ownership; import previews belong
+        to the creating actor.
       x-permitted-roles:
-        - "operator"
-        - "workspace_admin"
-      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
-      x-cost: "Deterministic offline file parsing only; no paid requests."
-      x-idempotency: "Required; exact actor, operation, target and file/digest replay."
-      x-version-precondition: "none"
-      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      - operator
+      - workspace_admin
+      x-policy: Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs
+        are created.
+      x-cost: Deterministic offline file parsing only; no paid requests.
+      x-idempotency: Required; exact actor, operation, target and file/digest replay.
+      x-version-precondition: none
+      x-validation: At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX.
+        Invalid rows block import. Current project duplicates must match the preview; shared-company hints require
+        manual identity mapping.
       x-errors:
-        - "INVALID_REQUEST"
-        - "PERMISSION_DENIED"
-        - "NOT_FOUND"
-        - "IDEMPOTENCY_CONFLICT"
-        - "IMPORT_PREVIEW_CHANGED"
-        - "IMPORT_PREVIEW_EXPIRED"
-  "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/{import_id}":
+      - INVALID_REQUEST
+      - PERMISSION_DENIED
+      - NOT_FOUND
+      - IDEMPOTENCY_CONFLICT
+      - IMPORT_PREVIEW_CHANGED
+      - IMPORT_PREVIEW_EXPIRED
+  /v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/{import_id}:
     get:
-      operationId: "getBuyerImport"
-      summary: "Read the original preview or committed import result"
+      operationId: getBuyerImport
+      summary: Read the original preview or committed import result
       tags:
-        - "BO-008"
+      - BO-008
       security:
-        -
-          BearerAuth: []
+      - BearerAuth: []
       parameters:
-        -
-          name: "workspace_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-        -
-          name: "project_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-        -
-          name: "import_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: import_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
       responses:
-        "200":
-          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+        '200':
+          description: Private source claims previewed or atomically imported as unreviewed candidates.
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/BuyerImportResponse"
-        "400":
-          "$ref": "#/components/responses/Error"
-        "401":
-          "$ref": "#/components/responses/Error"
-        "403":
-          "$ref": "#/components/responses/Error"
-        "404":
-          "$ref": "#/components/responses/Error"
-        "409":
-          "$ref": "#/components/responses/Error"
-        "422":
-          "$ref": "#/components/responses/Error"
-        "429":
-          "$ref": "#/components/responses/Error"
-        "500":
-          "$ref": "#/components/responses/Error"
-        "503":
-          "$ref": "#/components/responses/Error"
-      x-implementation-status: "IMPLEMENTED"
-      x-work-package: "BO-008"
-      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+                $ref: '#/components/schemas/BuyerImportResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-implementation-status: IMPLEMENTED
+      x-work-package: BO-008
+      x-tenant-authorization: Current signed actor membership and workspace/project ownership; import previews belong
+        to the creating actor.
       x-permitted-roles:
-        - "operator"
-        - "workspace_admin"
-      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
-      x-cost: "Deterministic offline file parsing only; no paid requests."
-      x-idempotency: "Read-only."
-      x-version-precondition: "none"
-      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      - operator
+      - workspace_admin
+      x-policy: Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs
+        are created.
+      x-cost: Deterministic offline file parsing only; no paid requests.
+      x-idempotency: Read-only.
+      x-version-precondition: none
+      x-validation: At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX.
+        Invalid rows block import. Current project duplicates must match the preview; shared-company hints require
+        manual identity mapping.
       x-errors:
-        - "INVALID_REQUEST"
-        - "PERMISSION_DENIED"
-        - "NOT_FOUND"
-        - "IDEMPOTENCY_CONFLICT"
-        - "IMPORT_PREVIEW_CHANGED"
-        - "IMPORT_PREVIEW_EXPIRED"
-  "/v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/{import_id}/confirm":
+      - INVALID_REQUEST
+      - PERMISSION_DENIED
+      - NOT_FOUND
+      - IDEMPOTENCY_CONFLICT
+      - IMPORT_PREVIEW_CHANGED
+      - IMPORT_PREVIEW_EXPIRED
+  /v1/workspaces/{workspace_id}/projects/{project_id}/buyer-imports/{import_id}/confirm:
     post:
-      operationId: "confirmBuyerImport"
-      summary: "Atomically import the exact preview as unreviewed buyers"
+      operationId: confirmBuyerImport
+      summary: Atomically import the exact preview as unreviewed buyers
       tags:
-        - "BO-008"
+      - BO-008
       security:
-        -
-          BearerAuth: []
+      - BearerAuth: []
       parameters:
-        -
-          name: "workspace_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-        -
-          name: "project_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-        -
-          name: "import_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-        -
-          "$ref": "#/components/parameters/IdempotencyKey"
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: import_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/BuyerImportConfirm"
+              $ref: '#/components/schemas/BuyerImportConfirm'
       responses:
-        "200":
-          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+        '200':
+          description: Private source claims previewed or atomically imported as unreviewed candidates.
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/BuyerImportResponse"
-        "400":
-          "$ref": "#/components/responses/Error"
-        "401":
-          "$ref": "#/components/responses/Error"
-        "403":
-          "$ref": "#/components/responses/Error"
-        "404":
-          "$ref": "#/components/responses/Error"
-        "409":
-          "$ref": "#/components/responses/Error"
-        "422":
-          "$ref": "#/components/responses/Error"
-        "429":
-          "$ref": "#/components/responses/Error"
-        "500":
-          "$ref": "#/components/responses/Error"
-        "503":
-          "$ref": "#/components/responses/Error"
-      x-implementation-status: "IMPLEMENTED"
-      x-work-package: "BO-008"
-      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+                $ref: '#/components/schemas/BuyerImportResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-implementation-status: IMPLEMENTED
+      x-work-package: BO-008
+      x-tenant-authorization: Current signed actor membership and workspace/project ownership; import previews belong
+        to the creating actor.
       x-permitted-roles:
-        - "operator"
-        - "workspace_admin"
-      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
-      x-cost: "Deterministic offline file parsing only; no paid requests."
-      x-idempotency: "Required; exact actor, operation, target and file/digest replay."
-      x-version-precondition: "Exact stored preview_digest"
-      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      - operator
+      - workspace_admin
+      x-policy: Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs
+        are created.
+      x-cost: Deterministic offline file parsing only; no paid requests.
+      x-idempotency: Required; exact actor, operation, target and file/digest replay.
+      x-version-precondition: Exact stored preview_digest
+      x-validation: At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX.
+        Invalid rows block import. Current project duplicates must match the preview; shared-company hints require
+        manual identity mapping.
       x-errors:
-        - "INVALID_REQUEST"
-        - "PERMISSION_DENIED"
-        - "NOT_FOUND"
-        - "IDEMPOTENCY_CONFLICT"
-        - "IMPORT_PREVIEW_CHANGED"
-        - "IMPORT_PREVIEW_EXPIRED"
-  "/v1/workspaces/{workspace_id}/buyers/{buyer_id}/import-source":
+      - INVALID_REQUEST
+      - PERMISSION_DENIED
+      - NOT_FOUND
+      - IDEMPOTENCY_CONFLICT
+      - IMPORT_PREVIEW_CHANGED
+      - IMPORT_PREVIEW_EXPIRED
+  /v1/workspaces/{workspace_id}/buyers/{buyer_id}/import-source:
     get:
-      operationId: "getBuyerImportSource"
-      summary: "Read private source claims for an imported buyer"
+      operationId: getBuyerImportSource
+      summary: Read private source claims for an imported buyer
       tags:
-        - "BO-008"
+      - BO-008
       security:
-        -
-          BearerAuth: []
+      - BearerAuth: []
       parameters:
-        -
-          name: "workspace_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
-        -
-          name: "buyer_id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-            format: "uuid"
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: buyer_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
       responses:
-        "200":
-          description: "Private source claims previewed or atomically imported as unreviewed candidates."
+        '200':
+          description: Private source claims previewed or atomically imported as unreviewed candidates.
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/BuyerImportSourceResponse"
-        "400":
-          "$ref": "#/components/responses/Error"
-        "401":
-          "$ref": "#/components/responses/Error"
-        "403":
-          "$ref": "#/components/responses/Error"
-        "404":
-          "$ref": "#/components/responses/Error"
-        "409":
-          "$ref": "#/components/responses/Error"
-        "422":
-          "$ref": "#/components/responses/Error"
-        "429":
-          "$ref": "#/components/responses/Error"
-        "500":
-          "$ref": "#/components/responses/Error"
-        "503":
-          "$ref": "#/components/responses/Error"
-      x-implementation-status: "IMPLEMENTED"
-      x-work-package: "BO-008"
-      x-tenant-authorization: "Current signed actor membership and workspace/project ownership; import previews belong to the creating actor."
+                $ref: '#/components/schemas/BuyerImportSourceResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-implementation-status: IMPLEMENTED
+      x-work-package: BO-008
+      x-tenant-authorization: Current signed actor membership and workspace/project ownership; import previews belong
+        to the creating actor.
       x-permitted-roles:
-        - "viewer"
-        - "operator"
-        - "reviewer"
-        - "workspace_admin"
-      x-policy: "Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs are created."
-      x-cost: "Deterministic offline file parsing only; no paid requests."
-      x-idempotency: "Read-only."
-      x-version-precondition: "none"
-      x-validation: "At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX. Invalid rows block import. Current project duplicates must match the preview; shared-company hints require manual identity mapping."
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
+      x-policy: Source claims remain unreviewed. No contacts, fit assessments, human acceptance or provider jobs
+        are created.
+      x-cost: Deterministic offline file parsing only; no paid requests.
+      x-idempotency: Read-only.
+      x-version-precondition: none
+      x-validation: At most 5 MiB, 500 rows, 64 columns and 10000 characters per cell. CSV UTF-8 or bounded XLSX.
+        Invalid rows block import. Current project duplicates must match the preview; shared-company hints require
+        manual identity mapping.
       x-errors:
-        - "INVALID_REQUEST"
-        - "PERMISSION_DENIED"
-        - "NOT_FOUND"
-        - "IDEMPOTENCY_CONFLICT"
-        - "IMPORT_PREVIEW_CHANGED"
-        - "IMPORT_PREVIEW_EXPIRED"
+      - INVALID_REQUEST
+      - PERMISSION_DENIED
+      - NOT_FOUND
+      - IDEMPOTENCY_CONFLICT
+      - IMPORT_PREVIEW_CHANGED
+      - IMPORT_PREVIEW_EXPIRED
   /v1/workspaces/{workspace_id}/projects/{project_id}/buyers:
     get:
       operationId: listBuyers
@@ -3847,7 +3855,7 @@ paths:
             examples:
               contractIllustration:
                 summary: Synthetic request shape; not a live operation or provider payload
-                value: &id024
+                value: &id027
                   selection:
                     kind: explicit
                     buyers:
@@ -4668,7 +4676,7 @@ paths:
             examples:
               contractIllustration:
                 summary: Synthetic request shape; not a live operation or provider payload
-                value: &id028
+                value: &id031
                   selection:
                     kind: explicit
                     buyers:
@@ -5041,7 +5049,7 @@ paths:
             examples:
               contractIllustration:
                 summary: Synthetic request shape; not a live operation or provider payload
-                value: &id029
+                value: &id032
                   quote_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   confirm_eligible_only: true
   /v1/workspaces/{workspace_id}/enrichment-jobs/{job_id}:
@@ -5377,11 +5385,11 @@ paths:
     post:
       operationId: receiveDeliveryCallback
       summary: Record an authenticated original delivery event
-      description: Server-selected retained endpoint only. The selector remains closed by default (503).
-        Verify the bounded raw bytes and exactly one of each Svix header before tenant DB access.
-        HTTP body, query, JWT and account headers cannot select a workspace or provider account.
-        Duplicate events are idempotent and late events never downgrade delivery state.
-        Accepted is not delivered, and callbacks do not settle or release the original hold.
+      description: Server-selected retained endpoint only. The selector remains closed by default (503). Verify
+        the bounded raw bytes and exactly one of each Svix header before tenant DB access. HTTP body, query, JWT
+        and account headers cannot select a workspace or provider account. Duplicate events are idempotent and late
+        events never downgrade delivery state. Accepted is not delivered, and callbacks do not settle or release
+        the original hold.
       tags:
       - C61-20
       security:
@@ -6387,7 +6395,8 @@ paths:
         in: query
         schema:
           type: string
-          enum: [pending]
+          enum:
+          - pending
       responses:
         '200':
           description: Success; endpoint is PROPOSED, not implemented.
@@ -6574,7 +6583,8 @@ paths:
     get:
       operationId: listAsyncJobs
       summary: List actor-scoped durable jobs for operations recovery
-      tags: [BO-024]
+      tags:
+      - BO-024
       security:
       - BearerAuth: []
       parameters:
@@ -6589,7 +6599,13 @@ paths:
         required: false
         schema:
           type: string
-          enum: [queued, running, cancel_requested, cancelled, completed, failed]
+          enum:
+          - queued
+          - running
+          - cancel_requested
+          - cancelled
+          - completed
+          - failed
       - name: project_id
         in: query
         required: false
@@ -6601,16 +6617,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AsyncJobPageResponse'
-      x-permitted-roles: [viewer, operator, reviewer, workspace_admin]
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
       x-cost: none
       x-idempotency: Read-only.
   /v1/workspaces/{workspace_id}/jobs/{job_id}/summary:
     get:
       operationId: getAsyncJobSummary
       summary: Read actor-bound job status and counters without result rows
-      description: Q06 read-only summary. Current membership, original actor or current workspace administrator are rechecked on every request. No result-page queries or writes.
-      tags: [BO-011]
-      security: [{BearerAuth: []}]
+      description: Q06 read-only summary. Current membership, original actor or current workspace administrator
+        are rechecked on every request. No result-page queries or writes.
+      tags:
+      - BO-011
+      security:
+      - BearerAuth: []
       parameters:
       - name: workspace_id
         in: path
@@ -6637,8 +6660,13 @@ paths:
           $ref: '#/components/responses/Error'
           headers:
             Retry-After:
-              schema: {type: string}
-      x-permitted-roles: [viewer, operator, reviewer, workspace_admin]
+              schema:
+                type: string
+      x-permitted-roles:
+      - viewer
+      - operator
+      - reviewer
+      - workspace_admin
       x-tenant-authorization: Original actor or current workspace administrator; same guard as getAsyncJob.
       x-work-package: BO-011
       x-cost: none
@@ -7199,13 +7227,24 @@ paths:
     post:
       operationId: reviewDraftGrounding
       summary: Attest every segment of an exact edited message against current sources
-      description: Human source qualification; does not verify semantic truth. Appends an immutable successor without changing subject/body. Current recipient, profile, sender, fit, evidence and policy are rechecked in the locked transaction. No delivery.
-      tags: [BO-021, BO-022, Q12]
+      description: Human source qualification; does not verify semantic truth. Appends an immutable successor without
+        changing subject/body. Current recipient, profile, sender, fit, evidence and policy are rechecked in the
+        locked transaction. No delivery.
+      tags:
+      - BO-021
+      - BO-022
+      - Q12
       security:
       - BearerAuth: []
       parameters:
-      - {name: workspace_id, in: path, required: true, schema: *id001}
-      - {name: draft_id, in: path, required: true, schema: *id001}
+      - name: workspace_id
+        in: path
+        required: true
+        schema: *id001
+      - name: draft_id
+        in: path
+        required: true
+        schema: *id001
       - $ref: '#/components/parameters/IdempotencyKey'
       - $ref: '#/components/parameters/IfMatch'
       requestBody:
@@ -7218,32 +7257,56 @@ paths:
         '200':
           description: Exact text retained in one grounded successor; replay rechecks current eligibility.
           headers:
-            ETag: {schema: {type: string}, description: Current draft state version}
+            ETag:
+              schema:
+                type: string
+              description: Current draft state version
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DraftResponse'
-        '400': {$ref: '#/components/responses/Error'}
-        '401': {$ref: '#/components/responses/Error'}
-        '403': {$ref: '#/components/responses/Error'}
-        '404': {$ref: '#/components/responses/Error'}
-        '409': {$ref: '#/components/responses/Error'}
-        '412': {$ref: '#/components/responses/Error'}
-        '422': {$ref: '#/components/responses/Error'}
-        '429': {$ref: '#/components/responses/Error'}
-        '500': {$ref: '#/components/responses/Error'}
-        '503': {$ref: '#/components/responses/Error'}
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
       x-implementation-status: LOCAL_IMPLEMENTED
       x-work-package: BO-022
       x-contract-extension: Q12
-      x-tenant-authorization: Current membership, tenant RLS and exact project/company source scope; actor is server resolved.
-      x-permitted-roles: [reviewer, workspace_admin]
+      x-tenant-authorization: Current membership, tenant RLS and exact project/company source scope; actor is server
+        resolved.
+      x-permitted-roles:
+      - reviewer
+      - workspace_admin
       x-policy: Current draft preparation, outreach and export contact purposes, suppression and retention required.
       x-cost: none
       x-idempotency: Required; exact actor/tenant/target/body/precondition; unknown response retries same key.
       x-version-precondition: If-Match
-      x-validation: Strict schema and Unicode code-point full coverage; all factual segments require versioned eligible sources.
-      x-errors: [INVALID_REQUEST, PERMISSION_DENIED, STALE_REVISION, EVIDENCE_STALE, IDEMPOTENCY_CONFLICT, INVALID_STATE, POLICY_BLOCKED]
+      x-validation: Strict schema and Unicode code-point full coverage; all factual segments require versioned eligible
+        sources.
+      x-errors:
+      - INVALID_REQUEST
+      - PERMISSION_DENIED
+      - STALE_REVISION
+      - EVIDENCE_STALE
+      - IDEMPOTENCY_CONFLICT
+      - INVALID_STATE
+      - POLICY_BLOCKED
   /v1/workspaces/{workspace_id}/drafts/{draft_id}/approvals:
     post:
       operationId: approveDraft
@@ -7358,7 +7421,7 @@ paths:
             examples:
               contractIllustration:
                 summary: Synthetic request shape; not a live operation or provider payload
-                value: &id050
+                value: &id053
                   revision_id: 40000000-0000-4000-8000-000000000001
                   content_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   context_hash: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -7374,8 +7437,8 @@ paths:
     post:
       operationId: exportBulkFailures
       summary: Create an audited, short-lived export of a bulk job's failed buyer IDs and reason codes
-      description: Failure rows are read from the actor's terminal bulk job. Content rechecks current
-        membership, project and source-job result state, and never includes contact data.
+      description: Failure rows are read from the actor's terminal bulk job. Content rechecks current membership,
+        project and source-job result state, and never includes contact data.
       tags:
       - BO-023
       security:
@@ -8011,7 +8074,7 @@ paths:
             examples:
               contractIllustration:
                 summary: Synthetic request shape; not a live operation or provider payload
-                value: &id051
+                value: &id059
                   buyer_id: 30000000-0000-4000-8000-000000000001
                   stage: meeting
                   occurred_at: '2026-09-15T02:00:00Z'
@@ -8215,10 +8278,10 @@ paths:
       operationId: reconcileDeliveryMessage
       summary: Reconcile a retained original delivery message under current admin permission
       description: Candidate local implementation. Server-owned retained selection defaultsNone and refuses503;
-        the existing reconciliation gate can pause new requests independently of new-send admission.
-        Resolve only the saved original ref/scope. GET runs outside canonical transactions; persist its
-        monotonic observation/full unresolved hold even if current admin access is revoked mid-GET,
-        then reauthorize the response. This operation never submits, looks up a lost intent key or settles money.
+        the existing reconciliation gate can pause new requests independently of new-send admission. Resolve only
+        the saved original ref/scope. GET runs outside canonical transactions; persist its monotonic observation/full
+        unresolved hold even if current admin access is revoked mid-GET, then reauthorize the response. This operation
+        never submits, looks up a lost intent key or settles money.
       tags:
       - BO-022
       security:
@@ -8240,12 +8303,13 @@ paths:
               $ref: '#/components/schemas/DeliveryReconciliationRequest'
       responses:
         '200':
-          description: Original status-observation metadata only; no raw provider ref/account/content or billing proof.
+          description: Original status-observation metadata only; no raw provider ref/account/content or billing
+            proof.
           headers:
             Cache-Control:
               schema:
                 type: string
-                const: 'private, no-store'
+                const: private, no-store
           content:
             application/json:
               schema:
@@ -8270,8 +8334,8 @@ paths:
           $ref: '#/components/responses/Error'
       x-implementation-status: CANDIDATE_LOCAL
       x-work-package: C61-20
-      x-tenant-authorization: Signed canonical principal and current workspace_admin membership before GET
-        and before returning original receipt metadata; non-enumerating404 for foreign/inactive membership/message.
+      x-tenant-authorization: Signed canonical principal and current workspace_admin membership before GET and before
+        returning original receipt metadata; non-enumerating404 for foreign/inactive membership/message.
       x-permitted-roles:
       - workspace_admin
       x-policy: Independently reviewed retained original account/contract/ref survives closed new-send permission;
@@ -8292,9 +8356,9 @@ paths:
     post:
       operationId: admitDraftDelivery
       summary: Admit an exact approved revision under an independent delivery gate
-      description: Candidate local implementation. Disabled by default; no provider POST in the HTTP request.
-        Only a reviewed server-owned delivery scope may reserve the original intent. The original deliver
-        kill boundary remains unconditional403. This operation is not native-send release acceptance.
+      description: Candidate local implementation. Disabled by default; no provider POST in the HTTP request. Only
+        a reviewed server-owned delivery scope may reserve the original intent. The original deliver kill boundary
+        remains unconditional403. This operation is not native-send release acceptance.
       tags:
       - BO-022
       security:
@@ -8315,8 +8379,9 @@ paths:
           type: string
           minLength: 8
           maxLength: 128
-          pattern: '^[A-Za-z0-9:_/-]{8,128}$'
-        description: Stable original delivery key; accepted or unknown intents must never be resent under a new key.
+          pattern: ^[A-Za-z0-9:_/-]{8,128}$
+        description: Stable original delivery key; accepted or unknown intents must never be resent under a new
+          key.
       requestBody:
         required: true
         content:
@@ -8352,17 +8417,18 @@ paths:
           $ref: '#/components/responses/Error'
       x-implementation-status: CANDIDATE_LOCAL
       x-work-package: C61-20
-      x-tenant-authorization: Validate signed canonical principal, current membership and reviewer/admin role;
-        workspace and draft references are selectors; foreign or inactive membership returns non-enumerating404.
+      x-tenant-authorization: Validate signed canonical principal, current membership and reviewer/admin role; workspace
+        and draft references are selectors; foreign or inactive membership returns non-enumerating404.
       x-permitted-roles:
       - reviewer
       - workspace_admin
       x-policy: Recheck current exact approval, revision, sender, recipient, policy and suppression on every replay.
       x-cost: Independently selected delivery scope; atomic original operation/reservation/liability/outbox only.
-      x-idempotency: Stable key scoped to actor, operation, tenant and draft; exact-body conflict409;
-        original message scope is immutable and a fresh key cannot resend accepted/unknown intent.
+      x-idempotency: Stable key scoped to actor, operation, tenant and draft; exact-body conflict409; original message
+        scope is immutable and a fresh key cannot resend accepted/unknown intent.
       x-version-precondition: Exact current approved revision and approval UUIDs in the strict body.
-      x-validation: Only four nonzero UUID references; reject arbitrary body, provider, account, budget and actor fields.
+      x-validation: Only four nonzero UUID references; reject arbitrary body, provider, account, budget and actor
+        fields.
       x-errors:
       - DELIVERY_DISABLED
       - PROVIDER_UNAVAILABLE
@@ -8437,18 +8503,18 @@ paths:
       tags:
       - BO-010
       parameters:
-      - &q08p002
+      - &id006
         name: workspace_id
         in: path
         required: true
-        schema: &q08p001
+        schema: &id005
           type: string
           format: uuid
-      - &q08p003
+      - &id007
         name: project_id
         in: path
         required: true
-        schema: *q08p001
+        schema: *id005
       - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '201':
@@ -8478,10 +8544,10 @@ paths:
       - reviewer
       - workspace_admin
       x-cost: none
-      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
-        Unknown reply is explicit same-intent Retry.
-      x-tenant-authorization: Current membership and original actor; operation-specific
-        roles and target rechecked for admission and replay.
+      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version. Unknown reply is
+        explicit same-intent Retry.
+      x-tenant-authorization: Current membership and original actor; operation-specific roles and target rechecked
+        for admission and replay.
       x-implementation-status: LOCAL_IMPLEMENTED
       requestBody:
         required: true
@@ -8496,12 +8562,12 @@ paths:
       tags:
       - BO-010
       parameters:
-      - *q08p002
-      - *q08p003
+      - *id006
+      - *id007
       - name: manifest_id
         in: path
         required: true
-        schema: *q08p001
+        schema: *id005
       responses:
         '200':
           description: Atomic current frozen selection or durable per-row execution
@@ -8531,10 +8597,10 @@ paths:
       - reviewer
       - workspace_admin
       x-cost: none
-      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
-        Unknown reply is explicit same-intent Retry.
-      x-tenant-authorization: Current membership and original actor; operation-specific
-        roles and target rechecked for admission and replay.
+      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version. Unknown reply is
+        explicit same-intent Retry.
+      x-tenant-authorization: Current membership and original actor; operation-specific roles and target rechecked
+        for admission and replay.
       x-implementation-status: LOCAL_IMPLEMENTED
   /v1/workspaces/{workspace_id}/projects/{project_id}/bulk-manifests/{manifest_id}/execute:
     post:
@@ -8543,12 +8609,12 @@ paths:
       tags:
       - BO-010
       parameters:
-      - *q08p002
-      - *q08p003
+      - *id006
+      - *id007
       - name: manifest_id
         in: path
         required: true
-        schema: *q08p001
+        schema: *id005
       - $ref: '#/components/parameters/IdempotencyKey'
       - $ref: '#/components/parameters/IfMatch'
       responses:
@@ -8585,10 +8651,10 @@ paths:
       - reviewer
       - workspace_admin
       x-cost: none
-      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version.
-        Unknown reply is explicit same-intent Retry.
-      x-tenant-authorization: Current membership and original actor; operation-specific
-        roles and target rechecked for admission and replay.
+      x-idempotency: Original actor/workspace/project/body; execute also exact manifest/version. Unknown reply is
+        explicit same-intent Retry.
+      x-tenant-authorization: Current membership and original actor; operation-specific roles and target rechecked
+        for admission and replay.
       x-implementation-status: LOCAL_IMPLEMENTED
       requestBody:
         required: true
@@ -8677,8 +8743,7 @@ paths:
   /v1/workspaces/{workspace_id}/runs/{run_id}/candidates/{raw_candidate_id}/review-context:
     get:
       operationId: getResearchCandidateReviewContext
-      summary: Review an exact current native page against an explicitly selected existing
-        company
+      summary: Review an exact current native page against an explicitly selected existing company
       tags:
       - BO-016
       security:
@@ -8734,8 +8799,7 @@ paths:
   /v1/workspaces/{workspace_id}/runs/{run_id}/candidates/{raw_candidate_id}/review:
     post:
       operationId: reviewResearchCandidate
-      summary: Review an exact current native page against an explicitly selected existing
-        company
+      summary: Review an exact current native page against an explicitly selected existing company
       tags:
       - BO-016
       security:
@@ -8797,8 +8861,7 @@ paths:
   /v1/workspaces/{workspace_id}/runs/{run_id}/candidates:
     get:
       operationId: listResearchCandidates
-      summary: Read bounded candidate observations and current source availability;
-        no entity facts inferred
+      summary: Read bounded candidate observations and current source availability; no entity facts inferred
       tags:
       - BO-016
       security:
@@ -8832,8 +8895,8 @@ paths:
           maximum: 100
       responses:
         '200':
-          description: Current bounded observations; awaiting_reconciliation does not
-            authorize a repeated source GET
+          description: Current bounded observations; awaiting_reconciliation does not authorize a repeated source
+            GET
           content:
             application/json:
               schema:
@@ -8861,10 +8924,9 @@ paths:
       - workspace_admin
       operationId: listDraftDeliveryMessages
       summary: Read retained delivery metadata for one scoped draft
-      description: Candidate local read-only history, including prior revisions. Accepted
-        does not mean delivered. Unknown must be reconciled; no retry, provider GET/POST,
-        account/ref/key/content or money operation. New-delivery admission and reconciliation
-        switches do not hide persisted history; the global read gate and current canonical
+      description: Candidate local read-only history, including prior revisions. Accepted does not mean delivered.
+        Unknown must be reconciled; no retry, provider GET/POST, account/ref/key/content or money operation. New-delivery
+        admission and reconciliation switches do not hide persisted history; the global read gate and current canonical
         membership still apply.
       tags:
       - BO-022
@@ -8891,8 +8953,7 @@ paths:
       - $ref: '#/components/parameters/Limit'
       responses:
         '200':
-          description: Bounded persisted metadata page; no provider or billing acceptance
-            proof.
+          description: Bounded persisted metadata page; no provider or billing acceptance proof.
           headers:
             Cache-Control:
               schema:
@@ -8920,17 +8981,14 @@ paths:
           $ref: '#/components/responses/Error'
       x-implementation-status: CANDIDATE_LOCAL
       x-work-package: C61-20
-      x-tenant-authorization: Canonical signed principal and current membership; explicit
-        workspace/project/draft predicates plus unchanged FORCE RLS. Foreign project/draft
-        and inactive membership are non-enumerating404.
-      x-policy: Same reader roles as getDraft. Metadata only; no contact data, body,
-        provider credentials or retained provider authority. Prior immutable revisions
-        remain visible to a current authorized reader.
+      x-tenant-authorization: Canonical signed principal and current membership; explicit workspace/project/draft
+        predicates plus unchanged FORCE RLS. Foreign project/draft and inactive membership are non-enumerating404.
+      x-policy: Same reader roles as getDraft. Metadata only; no contact data, body, provider credentials or retained
+        provider authority. Prior immutable revisions remain visible to a current authorized reader.
       x-cost: none; no provider request, reservation, settlement or release.
-      x-idempotency: Read-only; creates no message, outbox or intent. Unknown/accepted
-        history is never resubmitted.
-      x-version-precondition: none; exact scoped draft required. Returns original historical
-        revision number/id and approval id.
+      x-idempotency: Read-only; creates no message, outbox or intent. Unknown/accepted history is never resubmitted.
+      x-version-precondition: none; exact scoped draft required. Returns original historical revision number/id
+        and approval id.
       x-validation: offset >=0, limit 1..100; UUID path selectors are never authority.
       x-errors:
       - PERMISSION_DENIED
@@ -8990,13 +9048,11 @@ paths:
       - workspace_admin
       x-work-package: BO-012
       x-implementation-status: IMPLEMENTED
-      x-tenant-authorization: Current workspace membership; staging creator only; source
-        reads use document read permission.
-      x-idempotency: Original operation key; immutable same-position chunks; reconcile
-        before retry.
+      x-tenant-authorization: Current workspace membership; staging creator only; source reads use document read
+        permission.
+      x-idempotency: Original operation key; immutable same-position chunks; reconcile before retry.
       x-version-precondition: none
-      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
-        no provider jobs.
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB; no provider jobs.
       requestBody:
         required: true
         content:
@@ -9054,12 +9110,11 @@ paths:
       - workspace_admin
       x-work-package: BO-012
       x-implementation-status: IMPLEMENTED
-      x-tenant-authorization: Current workspace membership; staging creator only; source
-        reads use document read permission.
+      x-tenant-authorization: Current workspace membership; staging creator only; source reads use document read
+        permission.
       x-idempotency: Read-only.
       x-version-precondition: none
-      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
-        no provider jobs.
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB; no provider jobs.
   /v1/workspaces/{workspace_id}/offer-document-uploads/{upload_id}/chunks/{index}:
     put:
       operationId: putOfferDocumentChunk
@@ -9124,13 +9179,11 @@ paths:
       - workspace_admin
       x-work-package: BO-012
       x-implementation-status: IMPLEMENTED
-      x-tenant-authorization: Current workspace membership; staging creator only; source
-        reads use document read permission.
-      x-idempotency: Original operation key; immutable same-position chunks; reconcile
-        before retry.
+      x-tenant-authorization: Current workspace membership; staging creator only; source reads use document read
+        permission.
+      x-idempotency: Original operation key; immutable same-position chunks; reconcile before retry.
       x-version-precondition: none
-      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
-        no provider jobs.
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB; no provider jobs.
       requestBody:
         required: true
         content:
@@ -9191,13 +9244,11 @@ paths:
       - workspace_admin
       x-work-package: BO-012
       x-implementation-status: IMPLEMENTED
-      x-tenant-authorization: Current workspace membership; staging creator only; source
-        reads use document read permission.
-      x-idempotency: Original operation key; immutable same-position chunks; reconcile
-        before retry.
+      x-tenant-authorization: Current workspace membership; staging creator only; source reads use document read
+        permission.
+      x-idempotency: Original operation key; immutable same-position chunks; reconcile before retry.
       x-version-precondition: none
-      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
-        no provider jobs.
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB; no provider jobs.
       requestBody:
         required: true
         content:
@@ -9271,12 +9322,11 @@ paths:
       - workspace_admin
       x-work-package: BO-012
       x-implementation-status: IMPLEMENTED
-      x-tenant-authorization: Current workspace membership; staging creator only; source
-        reads use document read permission.
+      x-tenant-authorization: Current workspace membership; staging creator only; source reads use document read
+        permission.
       x-idempotency: Read-only.
       x-version-precondition: none
-      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
-        no provider jobs.
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB; no provider jobs.
   /v1/workspaces/{workspace_id}/offer-documents/{document_id}/content-chunks/{index}:
     get:
       operationId: getOfferDocumentContentChunk
@@ -9337,12 +9387,506 @@ paths:
       - workspace_admin
       x-work-package: BO-012
       x-implementation-status: IMPLEMENTED
-      x-tenant-authorization: Current workspace membership; staging creator only; source
-        reads use document read permission.
+      x-tenant-authorization: Current workspace membership; staging creator only; source reads use document read
+        permission.
       x-idempotency: Read-only.
       x-version-precondition: none
-      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB;
-        no provider jobs.
+      x-validation: Fixed 2 MiB chunks; PPTX 20 MiB; other supported formats 5 MiB; no provider jobs.
+  /v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-evidence:
+    get:
+      tags:
+      - lead-workflow
+      summary: Listleadevidence
+      operationId: listLeadEvidence
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: buyer_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Buyer Id
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadEvidencePage_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - viewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
+  /v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents:
+    post:
+      tags:
+      - lead-workflow
+      summary: Prepareleadintent
+      operationId: prepareLeadIntent
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 200
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservationIntent'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadIntentView_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
+    get:
+      tags:
+      - lead-workflow
+      summary: Listleadintents
+      operationId: listLeadIntents
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadIntentPage_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - viewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
+  /v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents/{intent_id}:
+    get:
+      tags:
+      - lead-workflow
+      summary: Getleadintent
+      operationId: getLeadIntent
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: intent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Intent Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadIntentView_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - viewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
+  /v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents/{intent_id}/apply:
+    post:
+      tags:
+      - lead-workflow
+      summary: Applyleadintent
+      operationId: applyLeadIntent
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: intent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Intent Id
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 200
+      - name: If-Match
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: If-Match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmptyLeadBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadIntentReceipt_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
+  /v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents/{intent_id}/acknowledgements:
+    post:
+      tags:
+      - lead-workflow
+      summary: Acknowledgeleadintent
+      operationId: acknowledgeLeadIntent
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: intent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Intent Id
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 200
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmptyLeadBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadIntentView_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
+  /v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents/{intent_id}/cancel:
+    post:
+      tags:
+      - lead-workflow
+      summary: Cancelleadintent
+      operationId: cancelLeadIntent
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: intent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Intent Id
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 200
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmptyLeadBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadIntentView_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
 components:
   securitySchemes:
     BearerAuth:
@@ -9371,7 +9915,8 @@ components:
       type: apiKey
       in: header
       name: svix-signature
-      description: Svix v1 HMAC over the exact raw bytes, event ID and attempt timestamp using the retained endpoint key.
+      description: Svix v1 HMAC over the exact raw bytes, event ID and attempt timestamp using the retained endpoint
+        key.
   parameters:
     IdempotencyKey:
       name: Idempotency-Key
@@ -9820,16 +10365,24 @@ components:
     DeliveryReconciliationResponse:
       type: object
       additionalProperties: false
-      required: [data, request_id, data_mode]
+      required:
+      - data
+      - request_id
+      - data_mode
       properties:
         request_id: *id001
         data_mode:
           type: string
-          enum: [live]
+          enum:
+          - live
         data:
           type: object
           additionalProperties: false
-          required: [message_id, state, event_id, replayed]
+          required:
+          - message_id
+          - state
+          - event_id
+          - replayed
           properties:
             message_id: *id001
             state:
@@ -9845,41 +10398,52 @@ components:
     DeliveryAdmissionRequest:
       type: object
       additionalProperties: false
-      required: [draft_revision_id, recipient_ref, sender_identity_id, approval_id]
+      required:
+      - draft_revision_id
+      - recipient_ref
+      - sender_identity_id
+      - approval_id
       properties:
         draft_revision_id:
           type: string
           format: uuid
           not:
-            const: '00000000-0000-0000-0000-000000000000'
+            const: 00000000-0000-0000-0000-000000000000
         recipient_ref:
           type: string
           format: uuid
           not:
-            const: '00000000-0000-0000-0000-000000000000'
+            const: 00000000-0000-0000-0000-000000000000
         sender_identity_id:
           type: string
           format: uuid
           not:
-            const: '00000000-0000-0000-0000-000000000000'
+            const: 00000000-0000-0000-0000-000000000000
         approval_id:
           type: string
           format: uuid
           not:
-            const: '00000000-0000-0000-0000-000000000000'
+            const: 00000000-0000-0000-0000-000000000000
     DeliveryAdmissionResponse:
       type: object
       additionalProperties: false
-      required: [data, request_id, data_mode]
+      required:
+      - data
+      - request_id
+      - data_mode
       properties:
         request_id: *id001
         data_mode:
           type: string
-          enum: [live]
+          enum:
+          - live
         data:
           type: object
           additionalProperties: false
-          required: [message_id, state, replayed]
+          required:
+          - message_id
+          - state
+          - replayed
           properties:
             message_id: *id001
             state:
@@ -9958,13 +10522,13 @@ components:
         message:
           type: string
         request_id: *id001
-        retryable: &id016
+        retryable: &id019
           type: boolean
         details:
           type: array
           items:
             $ref: '#/components/schemas/ErrorDetail'
-        retry_after_seconds: *id005
+        retry_after_seconds: *id008
       required:
       - code
       - message
@@ -9983,12 +10547,12 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: &id006
+        version: &id009
           type: integer
           minimum: 1
         created_at: *id004
         updated_at: *id004
-        data_mode: &id008
+        data_mode: &id011
           type: string
           enum:
           - live
@@ -10045,13 +10609,24 @@ components:
           uniqueItems: true
           items:
             type: string
-            enum: [viewer, operator, reviewer, workspace_admin]
+            enum:
+            - viewer
+            - operator
+            - reviewer
+            - workspace_admin
         active:
           type: boolean
         version:
           type: integer
           minimum: 1
-      required: [id, workspace_id, user_id, display_name, roles, active, version]
+      required:
+      - id
+      - workspace_id
+      - user_id
+      - display_name
+      - roles
+      - active
+      - version
     MembershipUpdate:
       type: object
       additionalProperties: false
@@ -10063,14 +10638,21 @@ components:
           uniqueItems: true
           items:
             type: string
-            enum: [viewer, operator, reviewer, workspace_admin]
+            enum:
+            - viewer
+            - operator
+            - reviewer
+            - workspace_admin
         active:
           type: boolean
         reason:
           type: string
           minLength: 3
           maxLength: 2000
-      required: [roles, active, reason]
+      required:
+      - roles
+      - active
+      - reason
     EligibleAssignee:
       type: object
       additionalProperties: false
@@ -10084,7 +10666,11 @@ components:
         version:
           type: integer
           minimum: 1
-      required: [membership_id, display_name, user_id, version]
+      required:
+      - membership_id
+      - display_name
+      - user_id
+      - version
     EligibleAssigneePage:
       type: object
       additionalProperties: false
@@ -10093,13 +10679,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EligibleAssignee'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
-      required: [items, offset, limit, total]
+        total: *id008
+      required:
+      - items
+      - offset
+      - limit
+      - total
     EligibleAssigneePageResponse:
       type: object
       additionalProperties: false
@@ -10109,8 +10699,12 @@ components:
         request_id: *id001
         data_mode:
           type: string
-          enum: [live]
-      required: [data, request_id, data_mode]
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
     MembershipPage:
       type: object
       additionalProperties: false
@@ -10119,13 +10713,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Membership'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
-      required: [items, offset, limit, total]
+        total: *id008
+      required:
+      - items
+      - offset
+      - limit
+      - total
     MembershipPageResponse:
       type: object
       additionalProperties: false
@@ -10135,8 +10733,12 @@ components:
         request_id: *id001
         data_mode:
           type: string
-          enum: [live]
-      required: [data, request_id, data_mode]
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
     MembershipResponse:
       type: object
       additionalProperties: false
@@ -10146,8 +10748,12 @@ components:
         request_id: *id001
         data_mode:
           type: string
-          enum: [live]
-      required: [data, request_id, data_mode]
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
     Preferences:
       type: object
       additionalProperties: false
@@ -10162,7 +10768,7 @@ components:
           items:
             type: string
             pattern: ^[A-Z]{2}$
-        version: *id006
+        version: *id009
       required:
       - locale
       - default_markets
@@ -10220,36 +10826,36 @@ components:
       - offer
       - markets
       - language_preferences
-      example: *id007
+      example: *id010
     ProjectUpdate:
       type: object
       additionalProperties: false
       properties:
-        name: &id009
+        name: &id012
           type: string
           minLength: 2
           maxLength: 160
-        company_name: &id010
+        company_name: &id013
           type: string
           minLength: 2
           maxLength: 200
-        offer: &id011
+        offer: &id014
           type: string
           maxLength: 20000
         website:
           oneOf:
-          - &id012
+          - &id015
             type: string
             format: uri
           - type: 'null'
-        markets: &id013
+        markets: &id016
           type: array
           items:
             type: string
             pattern: ^[A-Z]{2}$
           minItems: 1
           maxItems: 20
-        language_preferences: &id014
+        language_preferences: &id017
           type: array
           items:
             type: string
@@ -10265,20 +10871,20 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
-        offer_revision: *id006
+        version: *id009
+        offer_revision: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
-        name: *id009
-        company_name: *id010
-        offer: *id011
+        data_mode: *id011
+        name: *id012
+        company_name: *id013
+        offer: *id014
         website:
           oneOf:
-          - *id012
+          - *id015
           - type: 'null'
-        markets: *id013
-        language_preferences: *id014
+        markets: *id016
+        language_preferences: *id017
         status:
           type: string
           enum:
@@ -10324,10 +10930,10 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
+        data_mode: *id011
         project_id: *id001
         filename:
           type: string
@@ -10335,7 +10941,7 @@ components:
           type: string
         sha256:
           anyOf:
-          - *id015
+          - *id018
           - type: 'null'
           description: Null while a URL fetch is queued or blocked; never a synthetic digest.
         status:
@@ -10373,7 +10979,7 @@ components:
       properties:
         field:
           type: string
-        value: *id011
+        value: *id014
         provenance:
           type: string
           enum:
@@ -10381,8 +10987,8 @@ components:
           - document_excerpt
           - model_inference
         source_document_id: *id001
-        excerpt: *id011
-        approved: *id016
+        excerpt: *id014
+        approved: *id019
         id:
           type: string
           format: uuid
@@ -10426,7 +11032,7 @@ components:
           - must
           - nice
           - exclude
-        hard_exclusion: *id016
+        hard_exclusion: *id019
       required:
       - id
       - text
@@ -10439,42 +11045,42 @@ components:
         basis_offer_revision:
           type: integer
           minimum: 1
-        offer_document_ids: &id017
+        offer_document_ids: &id020
           type: array
           items: *id001
           maxItems: 20
-        offer_facts: &id018
+        offer_facts: &id021
           type: array
           items:
             $ref: '#/components/schemas/OfferFact'
           minItems: 1
           maxItems: 100
-        requirements: &id019
+        requirements: &id022
           type: array
           items:
             $ref: '#/components/schemas/ICPRequirement'
           minItems: 1
           maxItems: 100
-        markets: &id020
+        markets: &id023
           type: array
           items:
             type: string
             pattern: ^[A-Z]{2}$
           minItems: 1
           maxItems: 20
-        buyer_types: &id021
+        buyer_types: &id024
           type: array
           items:
             type: string
           minItems: 1
           maxItems: 10
-        languages: &id022
+        languages: &id025
           type: array
           items:
             type: string
           minItems: 1
           maxItems: 10
-        desired_roles: &id023
+        desired_roles: &id026
           type: array
           items:
             type: string
@@ -10493,20 +11099,20 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
-        offer_document_ids: *id017
-        offer_facts: *id018
-        requirements: *id019
-        markets: *id020
-        buyer_types: *id021
-        languages: *id022
-        desired_roles: *id023
+        data_mode: *id011
+        offer_document_ids: *id020
+        offer_facts: *id021
+        requirements: *id022
+        markets: *id023
+        buyer_types: *id024
+        languages: *id025
+        desired_roles: *id026
         parent_icp_version_id: *id001
         project_id: *id001
-        number: *id006
+        number: *id009
         basis_offer_revision:
           oneOf:
           - type: integer
@@ -10658,10 +11264,10 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
+        data_mode: *id011
         project_id: *id001
         icp_version_id: *id001
         target_companies:
@@ -10681,14 +11287,14 @@ components:
           - failed
           - completed
           - awaiting_reconciliation
-          description: Current read projection; awaiting_reconciliation reflects unresolved original run provider work.
-            Persisted run lifecycle and original intents are preserved.
+          description: Current read projection; awaiting_reconciliation reflects unresolved original run provider
+            work. Persisted run lifecycle and original intents are preserved.
         stage:
           type: string
-        raw_count: *id005
-        company_count: *id005
-        assessed_count: *id005
-        last_event_sequence: *id005
+        raw_count: *id008
+        company_count: *id008
+        assessed_count: *id008
+        last_event_sequence: *id008
         max_cost:
           $ref: '#/components/schemas/Money'
         spent:
@@ -10697,7 +11303,7 @@ components:
           $ref: '#/components/schemas/Money'
         limits:
           $ref: '#/components/schemas/RunLimits'
-        attempt: *id006
+        attempt: *id009
         retry_of_run_id: *id001
         cancellation_requested_at: *id004
         failure_code:
@@ -10707,7 +11313,8 @@ components:
         retryable:
           type: boolean
           readOnly: true
-          description: Current safe checkpoint retry basis; caller permissions and preconditions are revalidated when retrying.
+          description: Current safe checkpoint retry basis; caller permissions and preconditions are revalidated
+            when retrying.
         reconciliation_pending:
           type: boolean
           readOnly: true
@@ -10935,8 +11542,7 @@ components:
           - string
           - 'null'
           maxLength: 200
-          description: Search metadata excerpt label, never a verified company name or
-            role.
+          description: Search metadata excerpt label, never a verified company name or role.
         source_url:
           type:
           - string
@@ -11012,7 +11618,7 @@ components:
         event_id: *id001
         workspace_id: *id001
         run_id: *id001
-        sequence: *id006
+        sequence: *id009
         type:
           type: string
           enum:
@@ -11027,11 +11633,11 @@ components:
           - run.failed
           - run.completed
         occurred_at: *id004
-        run_version: *id006
+        run_version: *id009
         stage:
           type: string
-        company_count: *id005
-        raw_count: *id005
+        company_count: *id008
+        raw_count: *id008
         message_code:
           type: string
         data_mode:
@@ -11059,9 +11665,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RunEvent'
-        next_after_sequence: *id005
-        has_more: *id016
-        latest_sequence: *id005
+        next_after_sequence: *id008
+        has_more: *id019
+        latest_sequence: *id008
       required:
       - items
       - next_after_sequence
@@ -11076,7 +11682,7 @@ components:
         project_id: *id001
         company_id: *id001
         source_document_id: *id001
-        version: *id006
+        version: *id009
         source_url:
           type: string
           format: uri
@@ -11092,10 +11698,10 @@ components:
           - provider_record
         title:
           type: string
-        excerpt: *id011
+        excerpt: *id014
         original_language:
           type: string
-        translated_excerpt: *id011
+        translated_excerpt: *id014
         translation_language:
           type: string
         translation_label:
@@ -11105,7 +11711,7 @@ components:
           - human_translation
         retrieved_at: *id004
         observed_at: *id004
-        content_hash: *id015
+        content_hash: *id018
         kind:
           type: string
           enum:
@@ -11148,7 +11754,7 @@ components:
       properties:
         id: *id001
         icp_version_id: *id001
-        assessment_version: *id006
+        assessment_version: *id009
         verdict:
           type: string
           enum:
@@ -11183,7 +11789,7 @@ components:
           enum:
           - current
           - stale
-        evidence_set_hash: *id015
+        evidence_set_hash: *id018
         prompt_version:
           type: string
         model_route_version:
@@ -11208,7 +11814,7 @@ components:
       additionalProperties: false
       properties:
         id: *id001
-        version: *id006
+        version: *id009
       required:
       - id
       - version
@@ -11265,7 +11871,7 @@ components:
         provider_operation_id: *id001
         checked_at: *id004
         retention_until: *id004
-        version: *id006
+        version: *id009
         access_state:
           type: string
           enum:
@@ -11303,7 +11909,7 @@ components:
           - permitted
           - blocked
         policy_decision_id: *id001
-        version: *id006
+        version: *id009
         expires_at: *id004
       required:
       - purpose
@@ -11314,10 +11920,10 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
+        data_mode: *id011
         project_id: *id001
         company_id: *id001
         name:
@@ -11343,7 +11949,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ContactPoint'
-        suppressed: *id016
+        suppressed: *id019
         policies:
           type: array
           items:
@@ -11352,8 +11958,8 @@ components:
           oneOf:
           - *id001
           - type: 'null'
-        note: *id011
-        evidence_count: *id005
+        note: *id014
+        evidence_count: *id008
       required:
       - id
       - workspace_id
@@ -11417,7 +12023,7 @@ components:
             - catch_all
             - unavailable
             - unverified_public
-        suppressed: *id016
+        suppressed: *id019
         source_types:
           type: array
           items:
@@ -11468,11 +12074,11 @@ components:
           enum:
           - best_fit
           - name_asc
-        total: *id005
+        total: *id008
         created_at: *id004
         expires_at: *id004
-        snapshot_version: *id006
-        result_limit_reached: *id016
+        snapshot_version: *id009
+        result_limit_reached: *id019
       required:
       - id
       - workspace_id
@@ -11494,12 +12100,12 @@ components:
           items:
             $ref: '#/components/schemas/Buyer'
         snapshot_id: *id001
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
         expires_at: *id004
       required:
       - items
@@ -11571,7 +12177,7 @@ components:
       - selection
       - status
       - reason
-      example: *id024
+      example: *id027
     BulkItemResult:
       type: object
       additionalProperties: false
@@ -11587,7 +12193,7 @@ components:
           - cancelled
         reason_code:
           type: string
-        version: *id006
+        version: *id009
       required:
       - id
       - status
@@ -11595,11 +12201,11 @@ components:
       type: object
       additionalProperties: false
       properties:
-        requested: *id005
-        updated: *id005
-        unchanged: *id005
-        blocked: *id005
-        conflicts: *id005
+        requested: *id008
+        updated: *id008
+        unchanged: *id008
+        blocked: *id008
+        conflicts: *id008
         results:
           type: array
           items:
@@ -11635,7 +12241,7 @@ components:
       type: object
       additionalProperties: false
       properties:
-        note: *id011
+        note: *id014
         owner_membership_id:
           oneOf:
           - *id001
@@ -11658,14 +12264,14 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
+        data_mode: *id011
         project_id: *id001
         name:
           type: string
-        member_count: *id005
+        member_count: *id008
       required:
       - id
       - workspace_id
@@ -11694,13 +12300,13 @@ components:
       type: object
       additionalProperties: false
       properties:
-        name: &id025
+        name: &id028
           type: string
           minLength: 1
           maxLength: 100
-        filters: &id026
+        filters: &id029
           $ref: '#/components/schemas/BuyerFilters'
-        sort: &id027
+        sort: &id030
           type: string
           enum:
           - best_fit
@@ -11715,13 +12321,13 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
-        name: *id025
-        filters: *id026
-        sort: *id027
+        data_mode: *id011
+        name: *id028
+        filters: *id029
+        sort: *id030
         project_id: *id001
         actor_id: *id001
       required:
@@ -11763,14 +12369,14 @@ components:
       - purpose
       - roles
       - contact_type
-      example: *id028
+      example: *id031
     QuoteEligibility:
       type: object
       additionalProperties: false
       properties:
         buyer_id: *id001
-        buyer_version: *id006
-        eligible: *id016
+        buyer_version: *id009
+        eligible: *id019
         reason_codes:
           type: array
           items:
@@ -11788,10 +12394,10 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
+        data_mode: *id011
         project_id: *id001
         actor_id: *id001
         status:
@@ -11805,8 +12411,8 @@ components:
           type: string
           enum:
           - contact_research
-        request_hash: *id015
-        quote_hash: *id015
+        request_hash: *id018
+        quote_hash: *id018
         eligibility:
           type: array
           items:
@@ -11890,24 +12496,24 @@ components:
       type: object
       additionalProperties: false
       properties:
-        quote_hash: *id015
+        quote_hash: *id018
         confirm_eligible_only:
           type: boolean
           const: true
       required:
       - quote_hash
       - confirm_eligible_only
-      example: *id029
+      example: *id032
     EnrichmentJob:
       type: object
       additionalProperties: false
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
+        data_mode: *id011
         project_id: *id001
         quote_id: *id001
         status:
@@ -11922,14 +12528,14 @@ components:
           - unknown
           - reconciled
           - cancelled
-        cancel_requested: *id016
+        cancel_requested: *id019
         reservation_id: *id001
         provider_operation_ids:
           type: array
           items: *id001
-        completed_count: *id005
-        found_count: *id005
-        unknown_count: *id005
+        completed_count: *id008
+        found_count: *id008
+        unknown_count: *id008
         result_contact_ids:
           type: array
           items: *id001
@@ -11999,8 +12605,8 @@ components:
           - failed
           - cancelled
         occurred_at: *id004
-        sequence: *id005
-        payload_digest: *id015
+        sequence: *id008
+        payload_digest: *id018
       required:
       - event_id
       - operation_reference
@@ -12014,8 +12620,8 @@ components:
       type: object
       additionalProperties: false
       properties:
-        accepted: *id016
-        duplicate: *id016
+        accepted: *id019
+        duplicate: *id019
         request_id: *id001
       required:
       - accepted
@@ -12025,7 +12631,7 @@ components:
       type: object
       additionalProperties: false
       properties:
-        subject_type: &id030
+        subject_type: &id033
           type: string
           enum:
           - company
@@ -12033,7 +12639,7 @@ components:
           - project
         subject_id: *id001
         controller_scope_id: *id001
-        purpose: &id031
+        purpose: &id034
           type: string
           enum:
           - offer_research
@@ -12043,27 +12649,27 @@ components:
           - outreach
           - export_accounts
           - export_contacts
-        status: &id032
+        status: &id035
           type: string
           enum:
           - requires_review
           - permitted
           - blocked
-        policy_version: &id033
+        policy_version: &id036
           type: string
-        basis_reference: &id034
+        basis_reference: &id037
           type: string
           minLength: 3
           maxLength: 1000
-        provenance: *id011
-        countries: &id035
+        provenance: *id014
+        countries: &id038
           type: array
           items:
             type: string
             pattern: ^[A-Z]{2}$
           minItems: 1
         expires_at: *id004
-        retention_days: &id036
+        retention_days: &id039
           type: integer
           minimum: 1
           maximum: 3650
@@ -12085,21 +12691,21 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
-        subject_type: *id030
+        data_mode: *id011
+        subject_type: *id033
         subject_id: *id001
         controller_scope_id: *id001
-        purpose: *id031
-        status: *id032
-        policy_version: *id033
-        basis_reference: *id034
-        provenance: *id011
-        countries: *id035
+        purpose: *id034
+        status: *id035
+        policy_version: *id036
+        basis_reference: *id037
+        provenance: *id014
+        countries: *id038
         expires_at: *id004
-        retention_days: *id036
+        retention_days: *id039
         decision_author_id: *id001
         supersedes_id: *id001
       required:
@@ -12125,17 +12731,17 @@ components:
       type: object
       additionalProperties: false
       properties:
-        subject_type: &id037
+        subject_type: &id040
           type: string
           enum:
           - company
           - contact_point
           - domain
         subject_id: *id001
-        normalized_domain: &id038
+        normalized_domain: &id041
           type: string
         controller_scope_id: *id001
-        purposes: &id039
+        purposes: &id042
           type: array
           items:
             type: string
@@ -12145,11 +12751,11 @@ components:
             - outreach
             - export_contacts
           minItems: 1
-        reason: &id040
+        reason: &id043
           type: string
           minLength: 3
           maxLength: 2000
-        source_reference: &id041
+        source_reference: &id044
           type: string
         expires_at: *id004
       required:
@@ -12165,19 +12771,19 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
-        subject_type: *id037
+        data_mode: *id011
+        subject_type: *id040
         subject_id: *id001
-        normalized_domain: *id038
+        normalized_domain: *id041
         controller_scope_id: *id001
-        purposes: *id039
-        reason: *id040
-        source_reference: *id041
+        purposes: *id042
+        reason: *id043
+        source_reference: *id044
         expires_at: *id004
-        active: *id016
+        active: *id019
         actor_id: *id001
         removed_reason:
           type: string
@@ -12214,10 +12820,10 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
+        data_mode: *id011
         scope:
           type: string
           enum:
@@ -12313,8 +12919,8 @@ components:
           $ref: '#/components/schemas/Money'
         remaining:
           $ref: '#/components/schemas/Money'
-        accepted_company_count: *id005
-        eligible_contactable_company_count: *id005
+        accepted_company_count: *id008
+        eligible_contactable_company_count: *id008
         cost_per_accepted_company:
           oneOf:
           - $ref: '#/components/schemas/SignedMoney'
@@ -12353,7 +12959,7 @@ components:
       additionalProperties: false
       properties:
         buyer_id: *id001
-        buyer_version: *id006
+        buyer_version: *id009
         recipient_contact_id: *id001
         objective:
           type: string
@@ -12402,38 +13008,38 @@ components:
       type: object
       additionalProperties: false
       properties:
-        recipient_contact_id: &id042
+        recipient_contact_id: &id045
           oneOf:
           - *id001
           - type: 'null'
-        subject: &id043
+        subject: &id046
           type: string
           maxLength: 300
-        body: &id044
+        body: &id047
           type: string
           maxLength: 20000
-        sender_identity_version: &id045
+        sender_identity_version: &id048
           type: string
           maxLength: 100
           description: Must equal active approved SenderIdentity.version_key loaded server-side for the same project.
             Arbitrary, foreign-project, retired or stale strings reject; never trusted solely because client submitted
             it.
           pattern: ^sender:[a-f0-9-]{36}:[1-9][0-9]*$
-        evidence_refs: &id046
+        evidence_refs: &id049
           type: array
           items:
             $ref: '#/components/schemas/VersionedId'
           maxItems: 50
-        objective: &id047
+        objective: &id050
           type: string
           maxLength: 1000
-        tone: &id048
+        tone: &id051
           type: string
           enum:
           - professional
           - concise
           - warm
-        language: &id049
+        language: &id052
           type: string
         value_proposition_fact_ids:
           type: array
@@ -12453,18 +13059,18 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
-        recipient_contact_id: *id042
-        subject: *id043
-        body: *id044
-        sender_identity_version: *id045
-        evidence_refs: *id046
-        objective: *id047
-        tone: *id048
-        language: *id049
+        data_mode: *id011
+        recipient_contact_id: *id045
+        subject: *id046
+        body: *id047
+        sender_identity_version: *id048
+        evidence_refs: *id049
+        objective: *id050
+        tone: *id051
+        language: *id052
         project_id: *id001
         buyer_id: *id001
         status:
@@ -12475,11 +13081,11 @@ components:
           - approved
           - stale
         revision_id: *id001
-        revision_number: *id006
-        content_hash: *id015
-        context_hash: *id015
+        revision_number: *id009
+        content_hash: *id018
+        context_hash: *id018
         icp_version_id: *id001
-        evidence_set_hash: *id015
+        evidence_set_hash: *id018
         policy_decision_ids:
           type: array
           items: *id001
@@ -12570,7 +13176,7 @@ components:
           additionalProperties: false
           properties:
             id: *id001
-            version: *id006
+            version: *id009
             value:
               type: string
               format: email
@@ -12606,7 +13212,7 @@ components:
             additionalProperties: false
             properties:
               id: *id001
-              version: *id006
+              version: *id009
               source_id: *id001
             required:
             - id
@@ -12618,7 +13224,7 @@ components:
         fit_id: *id001
         review_id: *id001
         icp_version_id: *id001
-        context_hash: *id015
+        context_hash: *id018
       required:
       - recipient
       - sender
@@ -12634,63 +13240,119 @@ components:
       properties:
         id: *id001
         icp_version_id: *id001
-        icp_content_hash: *id015
-      required: [id, icp_version_id, icp_content_hash]
+        icp_content_hash: *id018
+      required:
+      - id
+      - icp_version_id
+      - icp_content_hash
     GroundingSegment:
       type: object
       additionalProperties: false
       properties:
-        field: {type: string, enum: [subject, body]}
-        start: {type: integer, minimum: 0, maximum: 20000, description: Unicode code-point offset; not UTF-16 code units}
-        end: {type: integer, minimum: 1, maximum: 20000, description: Exclusive Unicode code-point offset}
-        exact_text: {type: string, minLength: 1, maxLength: 20000}
-        classification: {type: string, enum: [factual, non_factual]}
+        field:
+          type: string
+          enum:
+          - subject
+          - body
+        start:
+          type: integer
+          minimum: 0
+          maximum: 20000
+          description: Unicode code-point offset; not UTF-16 code units
+        end:
+          type: integer
+          minimum: 1
+          maximum: 20000
+          description: Exclusive Unicode code-point offset
+        exact_text:
+          type: string
+          minLength: 1
+          maxLength: 20000
+        classification:
+          type: string
+          enum:
+          - factual
+          - non_factual
         evidence_refs:
           type: array
           maxItems: 50
-          items: {$ref: '#/components/schemas/VersionedId'}
+          items:
+            $ref: '#/components/schemas/VersionedId'
         offer_fact_refs:
           type: array
           maxItems: 20
-          items: {$ref: '#/components/schemas/GroundingOfferFactRef'}
-        reason: {type: string, minLength: 3, maxLength: 400}
-      required: [field, start, end, exact_text, classification, evidence_refs, offer_fact_refs, reason]
+          items:
+            $ref: '#/components/schemas/GroundingOfferFactRef'
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 400
+      required:
+      - field
+      - start
+      - end
+      - exact_text
+      - classification
+      - evidence_refs
+      - offer_fact_refs
+      - reason
     DraftGroundingReviewRequest:
       type: object
       additionalProperties: false
       properties:
         revision_id: *id001
-        content_hash: *id015
+        content_hash: *id018
         segments:
           type: array
           minItems: 2
           maxItems: 200
-          items: {$ref: '#/components/schemas/GroundingSegment'}
-        reason: {type: string, minLength: 3, maxLength: 400}
-        confirmation: {type: boolean, const: true}
-      required: [revision_id, content_hash, segments, reason, confirmation]
+          items:
+            $ref: '#/components/schemas/GroundingSegment'
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 400
+        confirmation:
+          type: boolean
+          const: true
+      required:
+      - revision_id
+      - content_hash
+      - segments
+      - reason
+      - confirmation
     ManualGroundingReview:
       type: object
       additionalProperties: false
       properties:
         based_on_revision_id: *id001
-        based_on_content_hash: *id015
+        based_on_content_hash: *id018
         reviewed_by: *id001
         reviewed_at: *id004
-        reason: {type: string, minLength: 3, maxLength: 400}
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 400
         segments:
           type: array
           minItems: 2
           maxItems: 200
-          items: {$ref: '#/components/schemas/GroundingSegment'}
-      required: [based_on_revision_id, based_on_content_hash, reviewed_by, reviewed_at, reason, segments]
+          items:
+            $ref: '#/components/schemas/GroundingSegment'
+      required:
+      - based_on_revision_id
+      - based_on_content_hash
+      - reviewed_by
+      - reviewed_at
+      - reason
+      - segments
     DraftReviewRequest:
       type: object
       additionalProperties: false
       properties:
         revision_id: *id001
-        content_hash: *id015
-        context_hash: *id015
+        content_hash: *id018
+        context_hash: *id018
       required:
       - revision_id
       - content_hash
@@ -12700,11 +13362,11 @@ components:
       additionalProperties: false
       properties:
         revision_id: *id001
-        content_hash: *id015
-        context_hash: *id015
+        content_hash: *id018
+        context_hash: *id018
         recipient_contact_id: *id001
-        recipient_contact_version: *id006
-        evidence_set_hash: *id015
+        recipient_contact_version: *id009
+        evidence_set_hash: *id018
         icp_version_id: *id001
         policy_decision_ids:
           type: array
@@ -12730,24 +13392,24 @@ components:
       - policy_decision_ids
       - sender_identity_version
       - confirmation
-      example: *id050
+      example: *id053
     Approval:
       type: object
       additionalProperties: false
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
+        data_mode: *id011
         draft_id: *id001
         draft_revision_id: *id001
-        content_hash: *id015
-        context_hash: *id015
+        content_hash: *id018
+        context_hash: *id018
         recipient_contact_id: *id001
-        recipient_contact_version: *id006
-        evidence_set_hash: *id015
+        recipient_contact_version: *id009
+        evidence_set_hash: *id018
         icp_version_id: *id001
         policy_decision_ids:
           type: array
@@ -12760,7 +13422,7 @@ components:
           pattern: ^sender:[a-f0-9-]{36}:[1-9][0-9]*$
         approver_id: *id001
         approved_at: *id004
-        valid: *id016
+        valid: *id019
         invalidated_at: *id004
         invalidation_reason:
           type: string
@@ -12795,7 +13457,7 @@ components:
           enum:
           - export_accounts
           - export_contacts
-        include_contact_data: *id016
+        include_contact_data: *id019
         format:
           type: string
           enum:
@@ -12828,10 +13490,10 @@ components:
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
+        data_mode: *id011
         project_id: *id001
         status:
           type: string
@@ -12854,7 +13516,7 @@ components:
           - csv
           - text
           - clipboard
-        record_count: *id005
+        record_count: *id008
         expires_at: *id004
         download_url:
           type: string
@@ -12891,9 +13553,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BulkItemResult'
-        offset: *id005
-        limit: *id005
-        total: *id005
+        offset: *id008
+        limit: *id008
+        total: *id008
       required:
       - items
       - offset
@@ -12906,7 +13568,9 @@ components:
         id: *id001
         workspace_id: *id001
         project_id: *id001
-        manifest_id: {type: string, format: uuid}
+        manifest_id:
+          type: string
+          format: uuid
         kind:
           type: string
           enum:
@@ -12925,13 +13589,13 @@ components:
           - completed
           - failed
           - unknown
-        requested: *id005
-        processed: *id005
-        updated: *id005
-        unchanged: *id005
-        blocked: *id005
-        conflicts: *id005
-        cancelled: *id005
+        requested: *id008
+        processed: *id008
+        updated: *id008
+        unchanged: *id008
+        blocked: *id008
+        conflicts: *id008
+        cancelled: *id008
         result_id: *id001
         failure_code:
           type: string
@@ -12962,20 +13626,20 @@ components:
       - type: object
         additionalProperties: false
         properties:
-          filters: &q08s002
+          filters: &id055
             $ref: '#/components/schemas/BuyerFilters'
-          excluded_ids: &q08s003
+          excluded_ids: &id056
             type: array
-            items: &q08s001
+            items: &id054
               type: string
               format: uuid
             maxItems: 10000
             uniqueItems: true
-          reason: &q08s004
+          reason: &id057
             type: string
             minLength: 3
             maxLength: 2000
-          source_job_id: *q08s001
+          source_job_id: *id054
           operation:
             type: string
             enum:
@@ -13000,10 +13664,10 @@ components:
       - type: object
         additionalProperties: false
         properties:
-          filters: *q08s002
-          excluded_ids: *q08s003
-          reason: *q08s004
-          source_job_id: *q08s001
+          filters: *id055
+          excluded_ids: *id056
+          reason: *id057
+          source_job_id: *id054
           operation:
             type: string
             enum:
@@ -13029,10 +13693,10 @@ components:
       - type: object
         additionalProperties: false
         properties:
-          filters: *q08s002
-          excluded_ids: *q08s003
-          reason: *q08s004
-          source_job_id: *q08s001
+          filters: *id055
+          excluded_ids: *id056
+          reason: *id057
+          source_job_id: *id054
           operation:
             type: string
             enum:
@@ -13041,7 +13705,7 @@ components:
             type: object
             additionalProperties: false
             properties:
-              list_id: *q08s001
+              list_id: *id054
               operation:
                 type: string
                 enum:
@@ -13060,7 +13724,7 @@ components:
       type: object
       additionalProperties: false
       properties:
-        digest: &q08s005
+        digest: &id058
           type: string
           pattern: ^[a-f0-9]{64}$
         confirmation:
@@ -13073,10 +13737,10 @@ components:
       type: object
       additionalProperties: false
       properties:
-        id: *q08s001
-        workspace_id: *q08s001
-        project_id: *q08s001
-        actor_user_id: *q08s001
+        id: *id054
+        workspace_id: *id054
+        project_id: *id054
+        actor_user_id: *id054
         operation:
           type: string
           enum:
@@ -13109,7 +13773,7 @@ components:
           - type: object
             additionalProperties: false
             properties:
-              list_id: *q08s001
+              list_id: *id054
               operation:
                 type: string
                 enum:
@@ -13120,13 +13784,13 @@ components:
             - operation
         filters:
           $ref: '#/components/schemas/BuyerFilters'
-        excluded_ids: *q08s003
-        reason: *q08s004
+        excluded_ids: *id056
+        reason: *id057
         count:
           type: integer
           minimum: 1
           maximum: 10000
-        digest: *q08s005
+        digest: *id058
         expires_at:
           type: string
           format: date-time
@@ -13141,8 +13805,8 @@ components:
         created_at:
           type: string
           format: date-time
-        job_id: *q08s001
-        source_job_id: *q08s001
+        job_id: *id054
+        source_job_id: *id054
         result:
           $ref: '#/components/schemas/BulkResult'
       required:
@@ -13169,7 +13833,8 @@ components:
           $ref: '#/components/schemas/BulkManifest'
         data_mode:
           type: string
-          enum: [live]
+          enum:
+          - live
         request_id:
           type: string
       required:
@@ -13183,7 +13848,9 @@ components:
         id: *id001
         workspace_id: *id001
         project_id: *id001
-        manifest_id: {type: string, format: uuid}
+        manifest_id:
+          type: string
+          format: uuid
         kind:
           type: string
           enum:
@@ -13202,13 +13869,13 @@ components:
           - completed
           - failed
           - unknown
-        requested: *id005
-        processed: *id005
-        updated: *id005
-        unchanged: *id005
-        blocked: *id005
-        conflicts: *id005
-        cancelled: *id005
+        requested: *id008
+        processed: *id008
+        updated: *id008
+        unchanged: *id008
+        blocked: *id008
+        conflicts: *id008
+        cancelled: *id008
         result_page:
           $ref: '#/components/schemas/AsyncJobResultPage'
         result_id: *id001
@@ -13234,7 +13901,7 @@ components:
       additionalProperties: false
       properties:
         buyer_id: *id001
-        stage: &id052
+        stage: &id060
           type: string
           enum:
           - reply
@@ -13242,14 +13909,14 @@ components:
           - opportunity
           - disqualified
         occurred_at: *id004
-        source: &id053
+        source: &id061
           type: string
           const: manual
-        notes: &id054
+        notes: &id062
           type: string
           minLength: 3
           maxLength: 2000
-        provenance_reference: &id055
+        provenance_reference: &id063
           type: string
           maxLength: 1000
       required:
@@ -13258,23 +13925,23 @@ components:
       - occurred_at
       - source
       - notes
-      example: *id051
+      example: *id059
     OutcomeEvent:
       type: object
       additionalProperties: false
       properties:
         id: *id001
         workspace_id: *id001
-        version: *id006
+        version: *id009
         created_at: *id004
         updated_at: *id004
-        data_mode: *id008
+        data_mode: *id011
         buyer_id: *id001
-        stage: *id052
+        stage: *id060
         occurred_at: *id004
-        source: *id053
-        notes: *id054
-        provenance_reference: *id055
+        source: *id061
+        notes: *id062
+        provenance_reference: *id063
         project_id: *id001
         actor_id: *id001
         actor_display_name:
@@ -13356,7 +14023,7 @@ components:
           items:
             type: string
         checked_at: *id004
-        billable: *id016
+        billable: *id019
       required:
       - name
       - status
@@ -13385,7 +14052,7 @@ components:
       type: object
       additionalProperties: false
       properties:
-        ready: *id016
+        ready: *id019
         database:
           type: string
           enum:
@@ -13469,12 +14136,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Workspace'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -13503,12 +14170,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Capability'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -13552,12 +14219,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Project'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -13652,13 +14319,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AsyncJob'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
-      required: [items, offset, limit, total]
+        total: *id008
+      required:
+      - items
+      - offset
+      - limit
+      - total
     AsyncJobPageResponse:
       type: object
       additionalProperties: false
@@ -13668,8 +14339,12 @@ components:
         request_id: *id001
         data_mode:
           type: string
-          enum: [live]
-      required: [data, request_id, data_mode]
+          enum:
+          - live
+      required:
+      - data
+      - request_id
+      - data_mode
     AsyncJobSummaryResponse:
       type: object
       additionalProperties: false
@@ -13708,12 +14383,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ICPVersion'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -13757,12 +14432,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SearchRun'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -13844,284 +14519,280 @@ components:
       - request_id
       - data_mode
     BuyerImportRow:
-      type: "object"
+      type: object
       additionalProperties: false
       properties:
         row_number:
-          type: "integer"
+          type: integer
           minimum: 1
         source_row:
-          type: "string"
+          type: string
           maxLength: 10000
         source_date:
           type:
-            - "string"
-            - "null"
-          format: "date"
+          - string
+          - 'null'
+          format: date
         website:
           type:
-            - "string"
-            - "null"
-          format: "uri"
+          - string
+          - 'null'
+          format: uri
           maxLength: 2000
         source_urls:
-          type: "array"
+          type: array
           maxItems: 2
           items:
-            type: "string"
-            format: "uri"
+            type: string
+            format: uri
             maxLength: 2000
         original_fields:
-          type: "object"
+          type: object
           maxProperties: 64
           additionalProperties:
-            type: "string"
+            type: string
             maxLength: 10000
         name:
-          type: "string"
+          type: string
           maxLength: 400
         normalized_domain:
           type:
-            - "string"
-            - "null"
+          - string
+          - 'null'
           maxLength: 255
         errors:
-          type: "array"
+          type: array
           items:
-            type: "string"
+            type: string
         status:
-          type: "string"
+          type: string
           enum:
-            - "ready"
-            - "duplicate"
-            - "invalid"
+          - ready
+          - duplicate
+          - invalid
         duplicate_buyer_id:
           type:
-            - "string"
-            - "null"
-          format: "uuid"
+          - string
+          - 'null'
+          format: uuid
       required:
-        - "row_number"
-        - "source_row"
-        - "source_date"
-        - "website"
-        - "source_urls"
-        - "original_fields"
-        - "name"
-        - "normalized_domain"
-        - "errors"
-        - "status"
-        - "duplicate_buyer_id"
+      - row_number
+      - source_row
+      - source_date
+      - website
+      - source_urls
+      - original_fields
+      - name
+      - normalized_domain
+      - errors
+      - status
+      - duplicate_buyer_id
     BuyerImportPreview:
-      type: "object"
+      type: object
       additionalProperties: false
       properties:
         id:
-          type: "string"
-          format: "uuid"
+          type: string
+          format: uuid
         workspace_id:
-          type: "string"
-          format: "uuid"
+          type: string
+          format: uuid
         project_id:
-          type: "string"
-          format: "uuid"
+          type: string
+          format: uuid
         status:
-          type: "string"
-          const: "previewed"
+          type: string
+          const: previewed
         file_name:
-          type: "string"
+          type: string
           maxLength: 200
         file_sha256:
-          type: "string"
-          pattern: "^[a-f0-9]{64}$"
+          type: string
+          pattern: ^[a-f0-9]{64}$
         preview_digest:
-          type: "string"
-          pattern: "^sha256:[a-f0-9]{64}$"
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
         expires_at:
-          type: "string"
-          format: "date-time"
+          type: string
+          format: date-time
         total_rows:
-          type: "integer"
+          type: integer
           minimum: 0
           maximum: 500
         ready_rows:
-          type: "integer"
+          type: integer
           minimum: 0
           maximum: 500
         duplicate_rows:
-          type: "integer"
+          type: integer
           minimum: 0
           maximum: 500
         invalid_rows:
-          type: "integer"
+          type: integer
           minimum: 0
           maximum: 500
         can_import:
-          type: "boolean"
+          type: boolean
         rows:
-          type: "array"
+          type: array
           maxItems: 500
           items:
-            "$ref": "#/components/schemas/BuyerImportRow"
+            $ref: '#/components/schemas/BuyerImportRow'
       required:
-        - "id"
-        - "workspace_id"
-        - "project_id"
-        - "status"
-        - "file_name"
-        - "file_sha256"
-        - "preview_digest"
-        - "expires_at"
-        - "total_rows"
-        - "ready_rows"
-        - "duplicate_rows"
-        - "invalid_rows"
-        - "can_import"
-        - "rows"
+      - id
+      - workspace_id
+      - project_id
+      - status
+      - file_name
+      - file_sha256
+      - preview_digest
+      - expires_at
+      - total_rows
+      - ready_rows
+      - duplicate_rows
+      - invalid_rows
+      - can_import
+      - rows
     BuyerImportResult:
-      type: "object"
+      type: object
       additionalProperties: false
       properties:
         id:
-          type: "string"
-          format: "uuid"
+          type: string
+          format: uuid
         status:
-          type: "string"
-          const: "completed"
+          type: string
+          const: completed
         imported_rows:
-          type: "integer"
+          type: integer
           minimum: 0
           maximum: 500
         skipped_duplicate_rows:
-          type: "integer"
+          type: integer
           minimum: 0
           maximum: 500
         buyer_ids:
-          type: "array"
+          type: array
           maxItems: 500
           items:
-            type: "string"
-            format: "uuid"
+            type: string
+            format: uuid
         preview_digest:
-          type: "string"
-          pattern: "^sha256:[a-f0-9]{64}$"
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
       required:
-        - "id"
-        - "status"
-        - "imported_rows"
-        - "skipped_duplicate_rows"
-        - "buyer_ids"
-        - "preview_digest"
+      - id
+      - status
+      - imported_rows
+      - skipped_duplicate_rows
+      - buyer_ids
+      - preview_digest
     BuyerImportConfirm:
-      type: "object"
+      type: object
       additionalProperties: false
       properties:
         preview_digest:
-          type: "string"
-          pattern: "^sha256:[a-f0-9]{64}$"
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
         confirmation:
-          type: "boolean"
+          type: boolean
           const: true
       required:
-        - "preview_digest"
-        - "confirmation"
+      - preview_digest
+      - confirmation
     BuyerImportResponse:
-      type: "object"
+      type: object
       additionalProperties: false
       properties:
         data:
           oneOf:
-            -
-              "$ref": "#/components/schemas/BuyerImportPreview"
-            -
-              "$ref": "#/components/schemas/BuyerImportResult"
+          - $ref: '#/components/schemas/BuyerImportPreview'
+          - $ref: '#/components/schemas/BuyerImportResult'
         request_id:
-          type: "string"
-          format: "uuid"
+          type: string
+          format: uuid
         data_mode:
-          type: "string"
-          const: "live"
+          type: string
+          const: live
       required:
-        - "data"
-        - "request_id"
-        - "data_mode"
+      - data
+      - request_id
+      - data_mode
     BuyerImportSource:
-      type: "object"
+      type: object
       additionalProperties: false
       properties:
         import_id:
-          type: "string"
-          format: "uuid"
+          type: string
+          format: uuid
         file_name:
-          type: "string"
+          type: string
           maxLength: 200
         file_sha256:
-          type: "string"
-          pattern: "^[a-f0-9]{64}$"
+          type: string
+          pattern: ^[a-f0-9]{64}$
         candidate_status:
-          type: "string"
-          const: "unreviewed"
+          type: string
+          const: unreviewed
         row_number:
-          type: "integer"
+          type: integer
           minimum: 1
         source_row:
-          type: "string"
+          type: string
           maxLength: 10000
         source_date:
           type:
-            - "string"
-            - "null"
-          format: "date"
+          - string
+          - 'null'
+          format: date
         website:
           type:
-            - "string"
-            - "null"
-          format: "uri"
+          - string
+          - 'null'
+          format: uri
           maxLength: 2000
         source_urls:
-          type: "array"
+          type: array
           maxItems: 2
           items:
-            type: "string"
-            format: "uri"
+            type: string
+            format: uri
             maxLength: 2000
         original_fields:
-          type: "object"
+          type: object
           maxProperties: 64
           additionalProperties:
-            type: "string"
+            type: string
             maxLength: 10000
       required:
-        - "import_id"
-        - "file_name"
-        - "file_sha256"
-        - "candidate_status"
-        - "row_number"
-        - "source_row"
-        - "source_date"
-        - "website"
-        - "source_urls"
-        - "original_fields"
+      - import_id
+      - file_name
+      - file_sha256
+      - candidate_status
+      - row_number
+      - source_row
+      - source_date
+      - website
+      - source_urls
+      - original_fields
     BuyerImportSourceResponse:
-      type: "object"
+      type: object
       additionalProperties: false
       properties:
         data:
           oneOf:
-            -
-              "$ref": "#/components/schemas/BuyerImportSource"
-            -
-              type: "null"
+          - $ref: '#/components/schemas/BuyerImportSource'
+          - type: 'null'
         request_id:
-          type: "string"
-          format: "uuid"
+          type: string
+          format: uuid
         data_mode:
-          type: "string"
-          const: "live"
+          type: string
+          const: live
       required:
-        - "data"
-        - "request_id"
-        - "data_mode"
+      - data
+      - request_id
+      - data_mode
     BuyerResponse:
       type: object
       additionalProperties: false
@@ -14145,12 +14816,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Evidence'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -14209,12 +14880,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BuyerList'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -14258,12 +14929,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FilterPreset'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -14339,7 +15010,13 @@ components:
       properties:
         type:
           type: string
-          enum: [email.sent, email.delivered, email.bounced, email.complained, email.failed, email.suppressed]
+          enum:
+          - email.sent
+          - email.delivered
+          - email.bounced
+          - email.complained
+          - email.failed
+          - email.suppressed
         created_at:
           type: string
           format: date-time
@@ -14356,7 +15033,11 @@ components:
     DeliveryCallbackReceipt:
       type: object
       additionalProperties: false
-      required: [message_id, event_id, state, replayed]
+      required:
+      - message_id
+      - event_id
+      - state
+      - replayed
       properties:
         message_id:
           type: string
@@ -14366,20 +15047,34 @@ components:
           format: uuid
         state:
           type: string
-          enum: [prepared, submitting, unknown, accepted, delivered, bounced, complained, unsubscribed, failed, rejected]
+          enum:
+          - prepared
+          - submitting
+          - unknown
+          - accepted
+          - delivered
+          - bounced
+          - complained
+          - unsubscribed
+          - failed
+          - rejected
         replayed:
           type: boolean
     DeliveryCallbackReceiptResponse:
       type: object
       additionalProperties: false
-      required: [data, request_id, data_mode]
+      required:
+      - data
+      - request_id
+      - data_mode
       properties:
         data:
           $ref: '#/components/schemas/DeliveryCallbackReceipt'
         request_id: *id001
         data_mode:
           type: string
-          enum: [live]
+          enum:
+          - live
     CallbackReceiptResponse:
       type: object
       additionalProperties: false
@@ -14403,12 +15098,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PolicyDecision'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -14452,12 +15147,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Suppression'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -14501,12 +15196,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BudgetAccount'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -14565,12 +15260,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Draft'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -14644,12 +15339,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OutcomeEvent'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -14693,12 +15388,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AuditEvent'
-        offset: *id005
+        offset: *id008
         limit:
           type: integer
           minimum: 1
           maximum: 100
-        total: *id005
+        total: *id008
       required:
       - items
       - offset
@@ -14971,6 +15666,578 @@ components:
       - data
       - request_id
       - data_mode
+    EmptyLeadBody:
+      properties: {}
+      additionalProperties: false
+      type: object
+      title: EmptyLeadBody
+    LeadChannelInput:
+      properties:
+        contact_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Contact Id
+        type:
+          anyOf:
+          - type: string
+            enum:
+            - business_email
+            - business_phone
+            - procurement_form
+            - referral
+          - type: 'null'
+          title: Type
+        value:
+          anyOf:
+          - type: string
+            maxLength: 400
+            minLength: 3
+          - type: 'null'
+          title: Value
+        person_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Person Id
+      additionalProperties: false
+      type: object
+      title: LeadChannelInput
+    LeadEnvelope_LeadEvidencePage_:
+      properties:
+        data:
+          $ref: '#/components/schemas/LeadEvidencePage'
+        request_id:
+          type: string
+          title: Request Id
+        data_mode:
+          type: string
+          const: live
+          title: Data Mode
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - request_id
+      - data_mode
+      title: LeadEnvelope[LeadEvidencePage]
+    LeadEnvelope_LeadIntentPage_:
+      properties:
+        data:
+          $ref: '#/components/schemas/LeadIntentPage'
+        request_id:
+          type: string
+          title: Request Id
+        data_mode:
+          type: string
+          const: live
+          title: Data Mode
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - request_id
+      - data_mode
+      title: LeadEnvelope[LeadIntentPage]
+    LeadEnvelope_LeadIntentReceipt_:
+      properties:
+        data:
+          $ref: '#/components/schemas/LeadIntentReceipt'
+        request_id:
+          type: string
+          title: Request Id
+        data_mode:
+          type: string
+          const: live
+          title: Data Mode
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - request_id
+      - data_mode
+      title: LeadEnvelope[LeadIntentReceipt]
+    LeadEnvelope_LeadIntentView_:
+      properties:
+        data:
+          $ref: '#/components/schemas/LeadIntentView'
+        request_id:
+          type: string
+          title: Request Id
+        data_mode:
+          type: string
+          const: live
+          title: Data Mode
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - request_id
+      - data_mode
+      title: LeadEnvelope[LeadIntentView]
+    LeadEvidencePage:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/LeadObservationRecord'
+          type: array
+          title: Items
+        offset:
+          type: integer
+          title: Offset
+        limit:
+          type: integer
+          title: Limit
+        total:
+          type: integer
+          title: Total
+        reviews:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Reviews
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - offset
+      - limit
+      - total
+      title: LeadEvidencePage
+    LeadIntentPage:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/LeadIntentView'
+          type: array
+          title: Items
+        offset:
+          type: integer
+          title: Offset
+        limit:
+          type: integer
+          title: Limit
+        total:
+          type: integer
+          title: Total
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - offset
+      - limit
+      - total
+      title: LeadIntentPage
+    LeadIntentReceipt:
+      properties:
+        intent_id:
+          type: string
+          format: uuid
+          title: Intent Id
+        resource_type:
+          type: string
+          title: Resource Type
+        resource_id:
+          type: string
+          format: uuid
+          title: Resource Id
+        resource_version:
+          type: integer
+          title: Resource Version
+        state:
+          type: string
+          const: applied
+          title: State
+        redacted:
+          type: boolean
+          title: Redacted
+      additionalProperties: false
+      type: object
+      required:
+      - intent_id
+      - resource_type
+      - resource_id
+      - resource_version
+      - state
+      - redacted
+      title: LeadIntentReceipt
+    LeadIntentView:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        workspace_id:
+          type: string
+          format: uuid
+          title: Workspace Id
+        project_id:
+          type: string
+          format: uuid
+          title: Project Id
+        buyer_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Buyer Id
+        action:
+          type: string
+          title: Action
+        target_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Target Id
+        expected_version:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Expected Version
+        submission_key:
+          type: string
+          title: Submission Key
+        payload_hash:
+          type: string
+          title: Payload Hash
+        payload:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Payload
+        state:
+          type: string
+          enum:
+          - prepared
+          - applied
+          - cancelled
+          title: State
+        receipt:
+          anyOf:
+          - $ref: '#/components/schemas/LeadIntentReceipt'
+          - type: 'null'
+        acknowledged_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Acknowledged At
+        redacted:
+          type: boolean
+          title: Redacted
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - workspace_id
+      - project_id
+      - buyer_id
+      - action
+      - target_id
+      - expected_version
+      - submission_key
+      - payload_hash
+      - payload
+      - state
+      - receipt
+      - acknowledged_at
+      - redacted
+      - created_at
+      title: LeadIntentView
+    LeadObservationInput:
+      properties:
+        claim:
+          type: string
+          enum:
+          - employment
+          - procurement_scope
+          - channel_ownership
+          title: Claim
+        stance:
+          type: string
+          enum:
+          - supports
+          - refutes
+          - uncertain
+          title: Stance
+        person:
+          anyOf:
+          - $ref: '#/components/schemas/LeadPersonInput'
+          - type: 'null'
+        channel:
+          anyOf:
+          - $ref: '#/components/schemas/LeadChannelInput'
+          - type: 'null'
+        checked_at:
+          type: string
+          format: date-time
+          title: Checked At
+        sources:
+          items:
+            $ref: '#/components/schemas/LeadSourceInput'
+          type: array
+          maxItems: 10
+          minItems: 1
+          title: Sources
+        rationale:
+          type: string
+          maxLength: 4000
+          minLength: 1
+          title: Rationale
+        limitations:
+          anyOf:
+          - type: string
+            maxLength: 4000
+          - type: 'null'
+          title: Limitations
+        supersedes_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Supersedes Id
+      additionalProperties: false
+      type: object
+      required:
+      - claim
+      - stance
+      - checked_at
+      - sources
+      - rationale
+      title: LeadObservationInput
+    LeadObservationRecord:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        workspace_id:
+          type: string
+          format: uuid
+          title: Workspace Id
+        project_id:
+          type: string
+          format: uuid
+          title: Project Id
+        buyer_id:
+          type: string
+          format: uuid
+          title: Buyer Id
+        company_id:
+          type: string
+          format: uuid
+          title: Company Id
+        person_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Person Id
+        contact_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Contact Id
+        claim:
+          type: string
+          title: Claim
+        stance:
+          type: string
+          title: Stance
+        checked_at:
+          type: string
+          format: date-time
+          title: Checked At
+        content_hash:
+          type: string
+          title: Content Hash
+        supersedes_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Supersedes Id
+        recorded_by_user_id:
+          type: string
+          format: uuid
+          title: Recorded By User Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        sources:
+          items:
+            $ref: '#/components/schemas/LeadSourceInput'
+          type: array
+          title: Sources
+        rationale:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Rationale
+        limitations:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Limitations
+        person:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Person
+        channel:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Channel
+        redacted:
+          type: boolean
+          title: Redacted
+        availability:
+          type: string
+          enum:
+          - available
+          - expired
+          - policy_blocked
+          - redacted
+          title: Availability
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - workspace_id
+      - project_id
+      - buyer_id
+      - company_id
+      - person_id
+      - contact_id
+      - claim
+      - stance
+      - checked_at
+      - content_hash
+      - supersedes_id
+      - recorded_by_user_id
+      - created_at
+      - sources
+      - rationale
+      - limitations
+      - person
+      - channel
+      - redacted
+      - availability
+      title: LeadObservationRecord
+    LeadPersonInput:
+      properties:
+        person_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Person Id
+        full_name:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Full Name
+        role:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Role
+      additionalProperties: false
+      type: object
+      title: LeadPersonInput
+    LeadSourceInput:
+      properties:
+        title:
+          type: string
+          maxLength: 300
+          minLength: 1
+          title: Title
+        url:
+          type: string
+          maxLength: 2048
+          minLength: 1
+          title: Url
+        excerpt:
+          type: string
+          maxLength: 4000
+          minLength: 1
+          title: Excerpt
+        source_kind:
+          type: string
+          enum:
+          - official
+          - professional
+          - other
+          title: Source Kind
+        published_on:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Published On
+        published_precision:
+          anyOf:
+          - type: string
+            const: date
+          - type: 'null'
+          title: Published Precision
+      additionalProperties: false
+      type: object
+      required:
+      - title
+      - url
+      - excerpt
+      - source_kind
+      title: LeadSourceInput
+    ObservationIntent:
+      properties:
+        action:
+          type: string
+          const: observation.append
+          title: Action
+        buyer_id:
+          type: string
+          format: uuid
+          title: Buyer Id
+        target_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Target Id
+        expected_version:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Expected Version
+        payload:
+          $ref: '#/components/schemas/LeadObservationInput'
+      additionalProperties: false
+      type: object
+      required:
+      - action
+      - buyer_id
+      - payload
+      title: ObservationIntent
 x-plan-status: PROPOSED
 x-contract-owner: BO-003; serialize changes with BO-005 schema owner
 x-pilot-constraints:
