@@ -9506,12 +9506,20 @@ paths:
               - $ref: '#/components/schemas/ObservationIntent'
               - $ref: '#/components/schemas/LeadReviewIntent'
               - $ref: '#/components/schemas/LeadCaseIntent'
+              - $ref: '#/components/schemas/LeadPreparationIntent'
+              - $ref: '#/components/schemas/LeadPreparationReviewIntent'
+              - $ref: '#/components/schemas/LeadPreparationStateIntent'
               discriminator:
                 propertyName: action
                 mapping:
                   observation.append: '#/components/schemas/ObservationIntent'
                   lead.review: '#/components/schemas/LeadReviewIntent'
                   case.update: '#/components/schemas/LeadCaseIntent'
+                  preparation.create: '#/components/schemas/LeadPreparationIntent'
+                  preparation.revise: '#/components/schemas/LeadPreparationIntent'
+                  preparation.review: '#/components/schemas/LeadPreparationReviewIntent'
+                  preparation.archive: '#/components/schemas/LeadPreparationStateIntent'
+                  preparation.request_review: '#/components/schemas/LeadPreparationStateIntent'
               title: Payload
       responses:
         '201':
@@ -10058,6 +10066,220 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LeadEnvelope_LeadProgressPage_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - viewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
+  /v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-preparations:
+    get:
+      tags:
+      - lead-preparations
+      summary: Listleadpreparations
+      operationId: listLeadPreparations
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: buyer_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Buyer Id
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadPreparationPage_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - viewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
+  /v1/workspaces/{workspace_id}/projects/{project_id}/lead-preparations/{preparation_id}:
+    get:
+      tags:
+      - lead-preparations
+      summary: Getleadpreparation
+      operationId: getLeadPreparation
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: preparation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Preparation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadPreparationView_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - viewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
+  /v1/workspaces/{workspace_id}/projects/{project_id}/lead-preparations/{preparation_id}/revisions:
+    get:
+      tags:
+      - lead-preparations
+      summary: Listleadpreparationrevisions
+      operationId: listLeadPreparationRevisions
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: preparation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Preparation Id
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadPreparationRevisionPage_'
         '422':
           $ref: '#/components/responses/Error'
         '400':
@@ -16984,6 +17206,498 @@ components:
       - conflict_resolution
       - redacted
       title: LeadReviewRecord
+    LeadEnvelope_LeadPreparationPage_:
+      properties:
+        data:
+          $ref: '#/components/schemas/LeadPreparationPage'
+        request_id:
+          type: string
+          title: Request Id
+        data_mode:
+          type: string
+          const: live
+          title: Data Mode
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - request_id
+      - data_mode
+      title: LeadEnvelope[LeadPreparationPage]
+    LeadEnvelope_LeadPreparationView_:
+      properties:
+        data:
+          $ref: '#/components/schemas/LeadPreparationView'
+        request_id:
+          type: string
+          title: Request Id
+        data_mode:
+          type: string
+          const: live
+          title: Data Mode
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - request_id
+      - data_mode
+      title: LeadEnvelope[LeadPreparationView]
+    LeadPreparationInput:
+      properties:
+        person_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Person Id
+        contact_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Contact Id
+        subject:
+          type: string
+          maxLength: 300
+          title: Subject
+          default: ''
+        body:
+          type: string
+          maxLength: 12000
+          title: Body
+          default: ''
+        language:
+          type: string
+          enum:
+          - en
+          - zh-HK
+          title: Language
+          default: en
+        product_fact_refs:
+          items:
+            $ref: '#/components/schemas/LeadProductFactRef'
+          type: array
+          maxItems: 20
+          title: Product Fact Refs
+        observation_ids:
+          items:
+            type: string
+            format: uuid
+          type: array
+          maxItems: 100
+          title: Observation Ids
+        lead_review_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Lead Review Id
+        company_source_check_ids:
+          items:
+            type: string
+            format: uuid
+          type: array
+          maxItems: 10
+          title: Company Source Check Ids
+        previous_revision_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Previous Revision Id
+      additionalProperties: false
+      type: object
+      title: LeadPreparationInput
+    LeadPreparationIntent:
+      properties:
+        action:
+          type: string
+          enum:
+          - preparation.create
+          - preparation.revise
+          title: Action
+        buyer_id:
+          type: string
+          format: uuid
+          title: Buyer Id
+        target_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Target Id
+        expected_version:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Expected Version
+        payload:
+          $ref: '#/components/schemas/LeadPreparationInput'
+      additionalProperties: false
+      type: object
+      required:
+      - action
+      - buyer_id
+      - payload
+      title: LeadPreparationIntent
+    LeadPreparationPage:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/LeadPreparationView'
+          type: array
+          title: Items
+        offset:
+          type: integer
+          title: Offset
+        limit:
+          type: integer
+          title: Limit
+        total:
+          type: integer
+          title: Total
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - offset
+      - limit
+      - total
+      title: LeadPreparationPage
+    LeadPreparationReviewInput:
+      properties:
+        revision_id:
+          type: string
+          format: uuid
+          title: Revision Id
+        context_hash:
+          type: string
+          maxLength: 80
+          minLength: 1
+          title: Context Hash
+        reason:
+          type: string
+          maxLength: 4000
+          minLength: 3
+          title: Reason
+        confirmation:
+          type: boolean
+          title: Confirmation
+      additionalProperties: false
+      type: object
+      required:
+      - revision_id
+      - context_hash
+      - reason
+      - confirmation
+      title: LeadPreparationReviewInput
+    LeadPreparationReviewIntent:
+      properties:
+        action:
+          type: string
+          const: preparation.review
+          title: Action
+        buyer_id:
+          type: string
+          format: uuid
+          title: Buyer Id
+        target_id:
+          type: string
+          format: uuid
+          title: Target Id
+        expected_version:
+          type: integer
+          minimum: 1.0
+          title: Expected Version
+        payload:
+          $ref: '#/components/schemas/LeadPreparationReviewInput'
+      additionalProperties: false
+      type: object
+      required:
+      - action
+      - buyer_id
+      - target_id
+      - expected_version
+      - payload
+      title: LeadPreparationReviewIntent
+    LeadPreparationStateInput:
+      properties:
+        reason:
+          type: string
+          maxLength: 4000
+          minLength: 3
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - reason
+      title: LeadPreparationStateInput
+    LeadPreparationStateIntent:
+      properties:
+        action:
+          type: string
+          enum:
+          - preparation.archive
+          - preparation.request_review
+          title: Action
+        buyer_id:
+          type: string
+          format: uuid
+          title: Buyer Id
+        target_id:
+          type: string
+          format: uuid
+          title: Target Id
+        expected_version:
+          type: integer
+          minimum: 1.0
+          title: Expected Version
+        payload:
+          $ref: '#/components/schemas/LeadPreparationStateInput'
+      additionalProperties: false
+      type: object
+      required:
+      - action
+      - buyer_id
+      - target_id
+      - expected_version
+      - payload
+      title: LeadPreparationStateIntent
+    LeadPreparationView:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        workspace_id:
+          type: string
+          format: uuid
+          title: Workspace Id
+        project_id:
+          type: string
+          format: uuid
+          title: Project Id
+        buyer_id:
+          type: string
+          format: uuid
+          title: Buyer Id
+        company_id:
+          type: string
+          format: uuid
+          title: Company Id
+        version:
+          type: integer
+          title: Version
+        revision_id:
+          type: string
+          format: uuid
+          title: Revision Id
+        revision_number:
+          type: integer
+          title: Revision Number
+        state:
+          type: string
+          enum:
+          - editing
+          - review_requested
+          - reviewed
+          - needs_review
+          - archived
+          title: State
+        stored_state:
+          type: string
+          title: Stored State
+        context_hash:
+          type: string
+          title: Context Hash
+        content_hash:
+          type: string
+          title: Content Hash
+        content:
+          anyOf:
+          - $ref: '#/components/schemas/LeadPreparationInput'
+          - type: 'null'
+        facts:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Facts
+        source_references:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Source References
+        blockers:
+          items:
+            type: string
+          type: array
+          title: Blockers
+        context_current:
+          type: boolean
+          title: Context Current
+        redacted:
+          type: boolean
+          title: Redacted
+        reviewed_by_user_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Reviewed By User Id
+        reviewed_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Reviewed At
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - workspace_id
+      - project_id
+      - buyer_id
+      - company_id
+      - version
+      - revision_id
+      - revision_number
+      - state
+      - stored_state
+      - context_hash
+      - content_hash
+      - content
+      - facts
+      - source_references
+      - blockers
+      - context_current
+      - redacted
+      - reviewed_by_user_id
+      - reviewed_at
+      - created_at
+      title: LeadPreparationView
+    LeadProductFactRef:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        icp_version_id:
+          type: string
+          format: uuid
+          title: Icp Version Id
+        icp_content_hash:
+          type: string
+          maxLength: 80
+          minLength: 1
+          title: Icp Content Hash
+        offer_revision:
+          type: integer
+          minimum: 1.0
+          title: Offer Revision
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - icp_version_id
+      - icp_content_hash
+      - offer_revision
+      title: LeadProductFactRef
+    LeadEnvelope_LeadPreparationRevisionPage_:
+      properties:
+        data:
+          $ref: '#/components/schemas/LeadPreparationRevisionPage'
+        request_id:
+          type: string
+          title: Request Id
+        data_mode:
+          type: string
+          const: live
+          title: Data Mode
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - request_id
+      - data_mode
+      title: LeadEnvelope[LeadPreparationRevisionPage]
+    LeadPreparationRevisionPage:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/LeadPreparationRevisionView'
+          type: array
+          title: Items
+        offset:
+          type: integer
+          title: Offset
+        limit:
+          type: integer
+          title: Limit
+        total:
+          type: integer
+          title: Total
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - offset
+      - limit
+      - total
+      title: LeadPreparationRevisionPage
+    LeadPreparationRevisionView:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        preparation_id:
+          type: string
+          format: uuid
+          title: Preparation Id
+        revision_number:
+          type: integer
+          title: Revision Number
+        content_hash:
+          type: string
+          title: Content Hash
+        context_hash:
+          type: string
+          title: Context Hash
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        content:
+          anyOf:
+          - $ref: '#/components/schemas/LeadPreparationInput'
+          - type: 'null'
+        historical:
+          type: boolean
+          const: true
+          title: Historical
+        redacted:
+          type: boolean
+          title: Redacted
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - preparation_id
+      - revision_number
+      - content_hash
+      - context_hash
+      - created_at
+      - content
+      - historical
+      - redacted
+      title: LeadPreparationRevisionView
 x-plan-status: PROPOSED
 x-contract-owner: BO-003; serialize changes with BO-005 schema owner
 x-pilot-constraints:

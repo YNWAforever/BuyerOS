@@ -1860,6 +1860,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-preparations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listleadpreparations */
+        get: operations["listLeadPreparations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-preparations/{preparation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Getleadpreparation */
+        get: operations["getLeadPreparation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-preparations/{preparation_id}/revisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listleadpreparationrevisions */
+        get: operations["listLeadPreparationRevisions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4922,6 +4973,294 @@ export interface components {
             rationale: string | null;
             /** Conflict Resolution */
             conflict_resolution: string | null;
+            /** Redacted */
+            redacted: boolean;
+        };
+        /** LeadEnvelope[LeadPreparationPage] */
+        LeadEnvelope_LeadPreparationPage_: {
+            data: components["schemas"]["LeadPreparationPage"];
+            /** Request Id */
+            request_id: string;
+            /**
+             * Data Mode
+             * @constant
+             */
+            data_mode: "live";
+        };
+        /** LeadEnvelope[LeadPreparationView] */
+        LeadEnvelope_LeadPreparationView_: {
+            data: components["schemas"]["LeadPreparationView"];
+            /** Request Id */
+            request_id: string;
+            /**
+             * Data Mode
+             * @constant
+             */
+            data_mode: "live";
+        };
+        /** LeadPreparationInput */
+        LeadPreparationInput: {
+            /** Person Id */
+            person_id?: string | null;
+            /** Contact Id */
+            contact_id?: string | null;
+            /**
+             * Subject
+             * @default
+             */
+            subject: string;
+            /**
+             * Body
+             * @default
+             */
+            body: string;
+            /**
+             * Language
+             * @default en
+             * @enum {string}
+             */
+            language: "en" | "zh-HK";
+            /** Product Fact Refs */
+            product_fact_refs?: components["schemas"]["LeadProductFactRef"][];
+            /** Observation Ids */
+            observation_ids?: string[];
+            /** Lead Review Id */
+            lead_review_id?: string | null;
+            /** Company Source Check Ids */
+            company_source_check_ids?: string[];
+            /** Previous Revision Id */
+            previous_revision_id?: string | null;
+        };
+        /** LeadPreparationIntent */
+        LeadPreparationIntent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "preparation.create" | "preparation.revise";
+            /**
+             * Buyer Id
+             * Format: uuid
+             */
+            buyer_id: string;
+            /** Target Id */
+            target_id?: string | null;
+            /** Expected Version */
+            expected_version?: number | null;
+            payload: components["schemas"]["LeadPreparationInput"];
+        };
+        /** LeadPreparationPage */
+        LeadPreparationPage: {
+            /** Items */
+            items: components["schemas"]["LeadPreparationView"][];
+            /** Offset */
+            offset: number;
+            /** Limit */
+            limit: number;
+            /** Total */
+            total: number;
+        };
+        /** LeadPreparationReviewInput */
+        LeadPreparationReviewInput: {
+            /**
+             * Revision Id
+             * Format: uuid
+             */
+            revision_id: string;
+            /** Context Hash */
+            context_hash: string;
+            /** Reason */
+            reason: string;
+            /** Confirmation */
+            confirmation: boolean;
+        };
+        /** LeadPreparationReviewIntent */
+        LeadPreparationReviewIntent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "preparation.review";
+            /**
+             * Buyer Id
+             * Format: uuid
+             */
+            buyer_id: string;
+            /**
+             * Target Id
+             * Format: uuid
+             */
+            target_id: string;
+            /** Expected Version */
+            expected_version: number;
+            payload: components["schemas"]["LeadPreparationReviewInput"];
+        };
+        /** LeadPreparationStateInput */
+        LeadPreparationStateInput: {
+            /** Reason */
+            reason: string;
+        };
+        /** LeadPreparationStateIntent */
+        LeadPreparationStateIntent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "preparation.archive" | "preparation.request_review";
+            /**
+             * Buyer Id
+             * Format: uuid
+             */
+            buyer_id: string;
+            /**
+             * Target Id
+             * Format: uuid
+             */
+            target_id: string;
+            /** Expected Version */
+            expected_version: number;
+            payload: components["schemas"]["LeadPreparationStateInput"];
+        };
+        /** LeadPreparationView */
+        LeadPreparationView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /**
+             * Buyer Id
+             * Format: uuid
+             */
+            buyer_id: string;
+            /**
+             * Company Id
+             * Format: uuid
+             */
+            company_id: string;
+            /** Version */
+            version: number;
+            /**
+             * Revision Id
+             * Format: uuid
+             */
+            revision_id: string;
+            /** Revision Number */
+            revision_number: number;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "editing" | "review_requested" | "reviewed" | "needs_review" | "archived";
+            /** Stored State */
+            stored_state: string;
+            /** Context Hash */
+            context_hash: string;
+            /** Content Hash */
+            content_hash: string;
+            content: components["schemas"]["LeadPreparationInput"] | null;
+            /** Facts */
+            facts: {
+                [key: string]: unknown;
+            }[];
+            /** Source References */
+            source_references: {
+                [key: string]: unknown;
+            }[];
+            /** Blockers */
+            blockers: string[];
+            /** Context Current */
+            context_current: boolean;
+            /** Redacted */
+            redacted: boolean;
+            /** Reviewed By User Id */
+            reviewed_by_user_id: string | null;
+            /** Reviewed At */
+            reviewed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** LeadProductFactRef */
+        LeadProductFactRef: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Icp Version Id
+             * Format: uuid
+             */
+            icp_version_id: string;
+            /** Icp Content Hash */
+            icp_content_hash: string;
+            /** Offer Revision */
+            offer_revision: number;
+        };
+        /** LeadEnvelope[LeadPreparationRevisionPage] */
+        LeadEnvelope_LeadPreparationRevisionPage_: {
+            data: components["schemas"]["LeadPreparationRevisionPage"];
+            /** Request Id */
+            request_id: string;
+            /**
+             * Data Mode
+             * @constant
+             */
+            data_mode: "live";
+        };
+        /** LeadPreparationRevisionPage */
+        LeadPreparationRevisionPage: {
+            /** Items */
+            items: components["schemas"]["LeadPreparationRevisionView"][];
+            /** Offset */
+            offset: number;
+            /** Limit */
+            limit: number;
+            /** Total */
+            total: number;
+        };
+        /** LeadPreparationRevisionView */
+        LeadPreparationRevisionView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Preparation Id
+             * Format: uuid
+             */
+            preparation_id: string;
+            /** Revision Number */
+            revision_number: number;
+            /** Content Hash */
+            content_hash: string;
+            /** Context Hash */
+            context_hash: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            content: components["schemas"]["LeadPreparationInput"] | null;
+            /**
+             * Historical
+             * @constant
+             */
+            historical: true;
             /** Redacted */
             redacted: boolean;
         };
@@ -9137,7 +9476,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ObservationIntent"] | components["schemas"]["LeadReviewIntent"] | components["schemas"]["LeadCaseIntent"];
+                "application/json": components["schemas"]["ObservationIntent"] | components["schemas"]["LeadReviewIntent"] | components["schemas"]["LeadCaseIntent"] | components["schemas"]["LeadPreparationIntent"] | components["schemas"]["LeadPreparationReviewIntent"] | components["schemas"]["LeadPreparationStateIntent"];
             };
         };
         responses: {
@@ -9372,6 +9711,111 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LeadEnvelope_LeadProgressPage_"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    listLeadPreparations: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+                buyer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadEnvelope_LeadPreparationPage_"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    getLeadPreparation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+                preparation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadEnvelope_LeadPreparationView_"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    listLeadPreparationRevisions: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+                preparation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadEnvelope_LeadPreparationRevisionPage_"];
                 };
             };
             400: components["responses"]["Error"];

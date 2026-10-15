@@ -14,7 +14,7 @@ async def redact_lead_subject(
     session: AsyncSession, *, workspace_id: UUID, subject_type: str,
     subject_id: UUID, now: datetime,
 ) -> dict:
-    if subject_type not in {"person", "contact_point", "source_document"}:
+    if subject_type not in {"person", "contact_point", "source_document", "lead_payload", "offer_document"}:
         raise ApiError(422, "INVALID_REQUEST", "unsupported lead retention subject")
     if subject_type == "person":
         person = await session.scalar(select(Person).where(

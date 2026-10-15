@@ -70,6 +70,7 @@ async def review_data(session, scope, row, observations, now, *, cache=None, ref
             LeadReviewEvidence.review_id == row.id,
         ))).all())
     content = private or {}
+    references = sorted(references, key=str)
     return LeadReviewRecord(
         id=row.id, workspace_id=row.workspace_id, project_id=row.project_id, buyer_id=row.buyer_id,
         company_id=row.company_id, person_id=row.person_id, contact_id=row.contact_id,

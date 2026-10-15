@@ -21,7 +21,7 @@ from .lead_review_service import review_data
 from .lead_quality import evaluate_lead_quality
 
 
-async def _case_views(session, scope, now, *, detail=False):
+async def _case_views(session, scope, now, *, detail=False, include_preparations=True):
     require_permission(scope, "getBuyer")
     query = select(ProjectBuyer, Company).join(Company, (Company.id == ProjectBuyer.company_id)
         & (Company.workspace_id == ProjectBuyer.workspace_id)).where(
@@ -107,7 +107,7 @@ async def _case_views(session, scope, now, *, detail=False):
         else:
             stage = "review_preparation"
         case = cases.get(buyer.id)
-        results.append(LeadCaseView(
+        view = LeadCaseView(
             workspace_id=scope.workspace_id, project_id=scope.project_id, buyer_id=buyer.id,
             company_id=company.id, company_name=company.display_name,
             version=case.version if case else 1, state_exists=case is not None,
@@ -117,7 +117,14 @@ async def _case_views(session, scope, now, *, detail=False):
             quality=quality, observations=materialized[-20:] if detail else None,
             observations_total=len(materialized), reviews=history[-3:] if detail else [],
             reviews_total=len(history), source_check_ids=check_by_buyer[buyer.id], stage=stage, as_of=now,
-        ))
+        )
+        if include_preparations and view.quality.direct_channel:
+            from .lead_preparation_service import has_current_reviewed_preparation
+            review_view = view.model_copy(update={"reviews": history[-3:]})
+            view.reviewed_preparation = await has_current_reviewed_preparation(session, current_scope, review_view, now)
+            if view.reviewed_preparation:
+                view.stage = "complete"
+        results.append(view)
     return results
 
 
@@ -139,8 +146,8 @@ def metrics(rows):
         reviewed_preparation_companies=count("reviewed_preparation"))
 
 
-async def get_lead_case(session: AsyncSession, *, scope: LeadScope, now: datetime) -> dict:
-    rows = await _case_views(session, scope, now, detail=True)
+async def get_lead_case(session: AsyncSession, *, scope: LeadScope, now: datetime, include_preparations=True) -> dict:
+    rows = await _case_views(session, scope, now, detail=True, include_preparations=include_preparations)
     if len(rows) != 1:
         raise ApiError(404, "NOT_FOUND", "buyer not found")
     return rows[0].model_dump(mode="json")

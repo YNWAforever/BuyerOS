@@ -146,13 +146,25 @@ def upgrade():
                       AND retention_until<=CURRENT_TIMESTAMP) THEN
           RAISE EXCEPTION 'source not expired' USING ERRCODE='42501';
         END IF;
+      ELSIF p_kind='lead_payload' THEN
+        IF NOT EXISTS(SELECT 1 FROM public.lead_private_payloads WHERE workspace_id=p_workspace AND id=p_id
+                      AND retention_expires_at<=CURRENT_TIMESTAMP) THEN
+          RAISE EXCEPTION 'payload not expired' USING ERRCODE='42501';
+        END IF;
+      ELSIF p_kind='offer_document' THEN
+        IF NOT EXISTS(SELECT 1 FROM public.offer_documents WHERE workspace_id=p_workspace AND id=p_id
+                      AND (deleted_at IS NOT NULL OR retention_until<=CURRENT_TIMESTAMP)) THEN
+          RAISE EXCEPTION 'offer document not expired or deleted' USING ERRCODE='42501';
+        END IF;
       ELSE RAISE EXCEPTION 'unsupported subject' USING ERRCODE='42501';
       END IF;
       UPDATE public.lead_private_payloads SET contents=NULL,redacted_at=CURRENT_TIMESTAMP
       WHERE workspace_id=p_workspace AND contents IS NOT NULL AND (
         (p_kind='contact_point' AND contact_id=p_id) OR
         (p_kind='person' AND person_id=p_id) OR
+        (p_kind='lead_payload' AND id=p_id AND retention_expires_at<=CURRENT_TIMESTAMP) OR
         (p_kind='source_document' AND contents->'source_document_ids' @> jsonb_build_array(p_id::text)) OR
+        (p_kind='offer_document' AND contents->'offer_document_ids' @> jsonb_build_array(p_id::text)) OR
         id IN (
           SELECT i.payload_id FROM public.lead_action_intents i
           JOIN public.lead_observations o ON o.workspace_id=i.workspace_id

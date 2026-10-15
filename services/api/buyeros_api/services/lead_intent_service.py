@@ -22,12 +22,17 @@ from .lead_evidence_service import (
 
 ACTION_PERMISSIONS = {
     "observation.append": "updateBuyer", "lead.review": "updateBuyer", "case.update": "updateBuyer",
+    "preparation.create": "editDraft", "preparation.revise": "editDraft",
+    "preparation.review": "approveDraft", "preparation.archive": "editDraft",
+    "preparation.request_review": "requestDraftReview",
 }
 LOCAL_CONFIGURATION_INTENT_DAYS = 30
 
 
 def personal_action(action):
-    return action in {"observation.append", "lead.review"} or action.startswith("preparation.")
+    return action in {"observation.append", "lead.review"} or (
+        action.startswith("preparation.") and action != "preparation.archive"
+    )
 
 
 def require_action(scope, action):
@@ -93,6 +98,10 @@ async def _receipt(session, scope, row, now):
         if review is not None:
             data = await review_data(session, scope, review, await review_observations(session, scope, now), now)
             redacted = data.redacted
+    elif row.resource_type == "lead_preparation":
+        from .lead_preparation_service import get_preparation
+        view = await get_preparation(session, scope=scope, preparation_id=row.resource_id, now=now)
+        redacted = view["redacted"]
     return LeadIntentReceipt(intent_id=row.id, resource_type=row.resource_type,
         resource_id=row.resource_id, resource_version=row.resource_version or 1,
         state="applied", redacted=redacted).model_dump(mode="json")
@@ -101,7 +110,8 @@ async def _receipt(session, scope, row, now):
 async def _view(session, scope, row, now):
     scope = await intent_scope(session, scope, row)
     payload, content = await retained_payload(session, scope, row.payload_id, now)
-    allowed = (await personal_policy(session, scope, now, required=False) is not None) if personal_action(row.action) else True
+    allowed = (await personal_policy(session, scope, now, payload.contact_id if payload else None,
+                                     required=False) is not None) if personal_action(row.action) else True
     if not allowed:
         content = None
     receipt = await _receipt(session, scope, row, now) if row.state == "applied" else None
@@ -143,6 +153,7 @@ async def prepare_intent(
     row = await session.scalar(active_query)
     if row is None:
         person_id, contact_id = None, None
+        offer_document_ids = []
         if data.action == "observation.append":
             deadline = await validate_observation(session, scope, data.payload, now)
             person_id = data.payload.person.person_id if data.payload.person else None
@@ -151,9 +162,24 @@ async def prepare_intent(
             from .lead_review_service import validate_lead_review
             deadline, _ = await validate_lead_review(session, scope, data.payload, now)
             person_id, contact_id = data.payload.person_id, data.payload.contact_id
+        elif data.action in {"preparation.create", "preparation.revise"}:
+            from .lead_preparation_service import validate_preparation_input, _row
+            if data.target_id is not None:
+                await _row(session, scope, data.target_id)
+            context = await validate_preparation_input(session, scope, data.payload, now)
+            deadline = context["deadline"]
+            offer_document_ids = [item["id"] for item in context["documents"]]
+            person_id, contact_id = data.payload.person_id, data.payload.contact_id
+        elif data.action.startswith("preparation."):
+            from .lead_preparation_service import _row, _revision
+            target, _ = await _row(session, scope, data.target_id)
+            revision = await _revision(session, scope, target)
+            person_id, contact_id = revision.person_id, revision.contact_id
         try:
             async with session.begin_nested():
-                private = await save_private_payload(session, scope, {"payload": body["payload"]},
+                private = await save_private_payload(session, scope, {
+                    "payload": body["payload"], "offer_document_ids": offer_document_ids,
+                },
                                                       deadline, person_id, contact_id)
                 row = LeadActionIntent(id=uuid.uuid4(), workspace_id=scope.workspace_id,
                     project_id=scope.project_id, buyer_id=scope.buyer_id, actor_id=scope.actor_id,
@@ -231,6 +257,28 @@ async def apply_intent(
         result = await update_lead_case(session, scope=scope,
             data=LeadCaseUpdate.model_validate(content["payload"]), expected_version=row.expected_version)
         resource_type, resource_version = "lead_case", result["version"]
+    elif row.action.startswith("preparation."):
+        from ..api.lead_schemas import LeadPreparationInput, LeadPreparationReviewInput, LeadPreparationStateInput
+        from .lead_preparation_service import (
+            create_preparation, revise_preparation, review_preparation, change_preparation_state,
+        )
+        if row.action == "preparation.create":
+            result = await create_preparation(session, scope=scope,
+                data=LeadPreparationInput.model_validate(content["payload"]), now=now)
+        elif row.action == "preparation.revise":
+            result = await revise_preparation(session, scope=scope, preparation_id=row.target_id,
+                data=LeadPreparationInput.model_validate(content["payload"]), expected_version=row.expected_version, now=now)
+        elif row.action == "preparation.review":
+            data = LeadPreparationReviewInput.model_validate(content["payload"])
+            result = await review_preparation(session, scope=scope, preparation_id=row.target_id,
+                expected_version=row.expected_version, revision_id=data.revision_id,
+                context_hash=data.context_hash, reason=data.reason, now=now)
+        else:
+            data = LeadPreparationStateInput.model_validate(content["payload"])
+            result = await change_preparation_state(session, scope=scope, preparation_id=row.target_id,
+                expected_version=row.expected_version, reason=data.reason, now=now,
+                archive=row.action == "preparation.archive")
+        resource_type, resource_version = "lead_preparation", result["version"]
     else:
         raise ApiError(403, "POLICY_BLOCKED", "action handler unavailable")
     row.state, row.resource_type = "applied", resource_type

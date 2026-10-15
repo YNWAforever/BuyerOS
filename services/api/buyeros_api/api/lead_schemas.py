@@ -5,7 +5,7 @@ from typing import Annotated, Generic, Literal, TypeVar, Union
 from urllib.parse import urlparse
 from uuid import UUID
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictInt, StrictStr, field_validator, model_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, field_validator, model_validator
 
 
 class LeadStrict(BaseModel):
@@ -233,7 +233,7 @@ class LeadReviewInput(LeadStrict):
 
 
 class LeadCaseUpdate(LeadStrict):
-    priority: bool
+    priority: StrictBool
     priority_reason: StrictStr = Field(default="", max_length=4000)
     next_action: StrictStr = Field(default="", max_length=200)
     due_on: date | None = None
@@ -364,3 +364,136 @@ class LeadProgressPage(LeadStrict):
     metrics: LeadMetrics
     as_of: AwareDatetime
     context_hash: str
+
+
+class LeadProductFactRef(LeadStrict):
+    id: UUID
+    icp_version_id: UUID
+    icp_content_hash: StrictStr = Field(min_length=1, max_length=80)
+    offer_revision: StrictInt = Field(ge=1)
+
+
+class LeadPreparationInput(LeadStrict):
+    person_id: UUID | None = None
+    contact_id: UUID | None = None
+    subject: StrictStr = Field(default="", max_length=300)
+    body: StrictStr = Field(default="", max_length=12000)
+    language: Literal["en", "zh-HK"] = "en"
+    product_fact_refs: list[LeadProductFactRef] = Field(default_factory=list, max_length=20)
+    observation_ids: list[UUID] = Field(default_factory=list, max_length=100)
+    lead_review_id: UUID | None = None
+    company_source_check_ids: list[UUID] = Field(default_factory=list, max_length=10)
+    previous_revision_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def unique_references(self):
+        for values in (self.observation_ids, self.company_source_check_ids, [ref.id for ref in self.product_fact_refs]):
+            if len(values) != len(set(values)):
+                raise ValueError("references must be unique")
+        return self
+
+
+class LeadPreparationReviewInput(LeadStrict):
+    revision_id: UUID
+    context_hash: StrictStr = Field(min_length=1, max_length=80)
+    reason: StrictStr = Field(min_length=3, max_length=4000)
+    confirmation: StrictBool
+
+    @field_validator("confirmation")
+    @classmethod
+    def confirmed(cls, value):
+        if value is not True:
+            raise ValueError("exact-content review confirmation required")
+        return value
+
+
+class LeadPreparationStateInput(LeadStrict):
+    reason: StrictStr = Field(min_length=3, max_length=4000)
+
+
+class LeadPreparationIntent(LeadStrict):
+    action: Literal["preparation.create", "preparation.revise"]
+    buyer_id: UUID
+    target_id: UUID | None = None
+    expected_version: StrictInt | None = Field(default=None, ge=1)
+    payload: LeadPreparationInput
+
+    @model_validator(mode="after")
+    def target(self):
+        if self.action == "preparation.create" and (self.target_id is not None or self.expected_version is not None):
+            raise ValueError("creation has no previous preparation")
+        if self.action == "preparation.revise" and (self.target_id is None or self.expected_version is None):
+            raise ValueError("revision requires target and precondition")
+        return self
+
+
+class LeadPreparationReviewIntent(LeadStrict):
+    action: Literal["preparation.review"]
+    buyer_id: UUID
+    target_id: UUID
+    expected_version: StrictInt = Field(ge=1)
+    payload: LeadPreparationReviewInput
+
+
+class LeadPreparationStateIntent(LeadStrict):
+    action: Literal["preparation.archive", "preparation.request_review"]
+    buyer_id: UUID
+    target_id: UUID
+    expected_version: StrictInt = Field(ge=1)
+    payload: LeadPreparationStateInput
+
+
+LeadIntentInput = Annotated[
+    Union[ObservationIntent, LeadReviewIntent, LeadCaseIntent, LeadPreparationIntent,
+          LeadPreparationReviewIntent, LeadPreparationStateIntent], Field(discriminator="action"),
+]
+
+
+class LeadPreparationView(LeadStrict):
+    id: UUID
+    workspace_id: UUID
+    project_id: UUID
+    buyer_id: UUID
+    company_id: UUID
+    version: int
+    revision_id: UUID
+    revision_number: int
+    state: Literal["editing", "review_requested", "reviewed", "needs_review", "archived"]
+    stored_state: str
+    context_hash: str
+    content_hash: str
+    content: LeadPreparationInput | None
+    facts: list[dict]
+    source_references: list[dict]
+    blockers: list[str]
+    context_current: bool
+    redacted: bool
+    reviewed_by_user_id: UUID | None
+    reviewed_at: AwareDatetime | None
+    created_at: AwareDatetime
+
+
+class LeadPreparationPage(LeadStrict):
+    items: list[LeadPreparationView]
+    offset: int
+    limit: int
+    total: int
+
+
+class LeadPreparationRevisionView(LeadStrict):
+    id: UUID
+    preparation_id: UUID
+    revision_number: int
+    content_hash: str
+    context_hash: str
+    created_at: AwareDatetime
+    content: LeadPreparationInput | None
+    historical: Literal[True]
+    redacted: bool
+
+
+class LeadPreparationRevisionPage(LeadStrict):
+    items: list[LeadPreparationRevisionView]
+    offset: int
+    limit: int
+    total: int

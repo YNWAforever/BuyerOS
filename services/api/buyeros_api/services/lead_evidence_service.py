@@ -12,6 +12,7 @@ from ..api.errors import ApiError
 from ..api.lead_schemas import LeadScope, LeadObservationInput, LeadObservationRecord
 from ..db.buyers import ProjectBuyer
 from ..db.icp import Project, canonical_hash
+from ..db.ingestion import OfferDocument
 from ..db.lead_workflow import LeadCaseState, LeadObservation, LeadPrivatePayload
 from ..db.models import Membership
 from ..db.policy import PolicyDecision
@@ -207,6 +208,14 @@ async def retained_payload(session, scope, payload_id, now, *, cache=None):
     ))
     if payload is None or payload.contents is None or payload.retention_expires_at <= now:
         return payload, None
+    for document_id in payload.contents.get("offer_document_ids", []):
+        document = await session.scalar(select(OfferDocument).where(
+            OfferDocument.workspace_id == scope.workspace_id, OfferDocument.project_id == scope.project_id,
+            OfferDocument.id == uuid.UUID(str(document_id)),
+        ))
+        if (document is None or document.status == "deleted" or document.deleted_at is not None
+                or document.retention_until is None or document.retention_until <= now):
+            return payload, None
     if payload.person_id:
         parent = cache["people"].get(payload.person_id) if cache is not None else None
         expiry = parent.retention_expires_at if parent else None

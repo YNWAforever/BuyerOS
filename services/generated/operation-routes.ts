@@ -113,4 +113,7 @@ export const operationRoutes = {
   "cancelLeadIntent": {method: "POST", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-intents/{intent_id}/cancel"},
   "getLeadCase": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-workflow"},
   "getLeadWorkflow": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-workflow"},
+  "listLeadPreparations": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-preparations"},
+  "getLeadPreparation": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-preparations/{preparation_id}"},
+  "listLeadPreparationRevisions": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-preparations/{preparation_id}/revisions"},
 } as const satisfies Record<keyof operations, {method: string; path: string}>;

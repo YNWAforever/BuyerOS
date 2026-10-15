@@ -193,6 +193,16 @@ async def expire_subject_data(
             raise ApiError(404, "NOT_FOUND", "retention subject not found")
         return await redact_lead_subject(session, workspace_id=person.workspace_id,
                                          subject_type="person", subject_id=subject_id, now=now)
+    if subject_type == "lead_payload":
+        from ..db.lead_workflow import LeadPrivatePayload
+        from .lead_retention import redact_lead_subject
+        payload = await session.scalar(select(LeadPrivatePayload).where(LeadPrivatePayload.id == subject_id))
+        if payload is None:
+            raise ApiError(404, "NOT_FOUND", "retention subject not found")
+        if payload.retention_expires_at > now:
+            raise ApiError(409, "POLICY_BLOCKED", "payload retention has not expired")
+        return await redact_lead_subject(session, workspace_id=payload.workspace_id,
+                                         subject_type="lead_payload", subject_id=subject_id, now=now)
     if subject_type == "contact_point":
         return await _expire_contact(session, subject_id, policy_version, now)
     if subject_type != "source_document":
