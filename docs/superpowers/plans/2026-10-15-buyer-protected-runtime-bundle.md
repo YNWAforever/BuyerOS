@@ -49,11 +49,11 @@
 - Produces `GET /v1/internal/release-binding`, authorized by `Authorization: Bearer <BUYEROS_RELEASE_PROBE_TOKEN>`. Its fixed JSON keys are `schema`, `source_sha`, `deployment_id`, `schema_head`, and `db_target_sha256`; `schema` is `buyeros.runtime-db-binding.v1`.
 - Runtime identity comes from `BUYEROS_RUNTIME_SOURCE_SHA` and `BUYEROS_RUNTIME_DEPLOYMENT_ID`; absent or malformed identity fails closed. The handler reads the current single schema head without migration or writes.
 
-- [ ] **Step 1: Write failing route/helper tests** for exact target hashing, incomplete identity, wrong/missing token before database access, constant-time credential comparison, exact response keys, no-store cache policy, and absence of DSN/credentials in response or errors.
-- [ ] **Step 2: Run the focused tests and confirm they fail** because the helper, route, and settings are absent.
-- [ ] **Step 3: Implement the minimal helper, settings, and route** and register the router in `api/app.py`; use the existing request/error conventions.
-- [ ] **Step 4: Run `python -m pytest services/api/tests/test_release_binding.py -q` and confirm all focused tests pass.**
-- [ ] **Step 5: Commit** the endpoint and tests as `feat: expose protected runtime database binding`.
+- [x] **Step 1: Write failing route/helper tests** for exact target hashing, incomplete identity, wrong/missing token before database access, constant-time credential comparison, exact response keys, no-store cache policy, and absence of DSN/credentials in response or errors.
+- [x] **Step 2: Run the focused tests and confirm they fail** because the helper, route, and settings are absent.
+- [x] **Step 3: Implement the minimal helper, settings, and route** and register the router in `api/app.py`; use the existing request/error conventions.
+- [x] **Step 4: Run `python -m pytest services/api/tests/test_release_binding.py -q` and confirm all focused tests pass.**
+- [x] **Step 5: Commit** the endpoint and tests as `feat: expose protected runtime database binding`.
 
 ### Task 2: Require deployment/database binding in the workspace release gate
 
@@ -66,11 +66,11 @@
 - Its `data` has the exact fields `schema`, `verified`, `source_sha`, `deployment_id`, `db_target_sha256`, `schema_head`, and `api_origin_sha256`; schema is `buyeros.deployment-db-binding.v1`.
 - Accept only when verification is true and source, candidate deployment, database digest, and schema head match the manifest and compatible schema receipt. `api_origin_sha256` must be a lowercase SHA-256 digest.
 
-- [ ] **Step 1: Add failing tests** for a missing binding, false verification, wrong source/deployment/database digest/schema head, and malformed origin digest.
-- [ ] **Step 2: Run `python -m pytest tests/test_release_readiness.py -q` and confirm the new tests fail** on missing/unknown binding rather than an import or fixture error.
-- [ ] **Step 3: Implement the strict binding receipt contract** without weakening existing gates.
-- [ ] **Step 4: Run the focused readiness tests and confirm all pass**, including existing workspace, research, and native-send separation tests.
-- [ ] **Step 5: Commit** the gate and tests as `fix: require candidate database binding for workspace release`.
+- [x] **Step 1: Add failing tests** for a missing binding, false verification, wrong source/deployment/database digest/schema head, and malformed origin digest.
+- [x] **Step 2: Run `python -m pytest tests/test_release_readiness.py -q` and confirm the new tests fail** on missing/unknown binding rather than an import or fixture error.
+- [x] **Step 3: Implement the strict binding receipt contract** without weakening existing gates.
+- [x] **Step 4: Run the focused readiness tests and confirm all pass**, including existing workspace, research, and native-send separation tests.
+- [x] **Step 5: Commit** the gate and tests as `fix: require candidate database binding for workspace release`.
 
 ### Task 3: Build and encrypt a complete workspace runtime bundle
 
@@ -86,11 +86,11 @@
 - The CLI accepts a private input directory, exact source SHA, and output path; it composes schema/API/deployment-binding observations with protected canary and rollback receipts, evaluates only the `workspace` gate, writes an immutable encrypted envelope, and never writes plaintext receipts to a public path or stdout.
 - Final envelope keys remain exactly `schema`, `algorithm`, `source_sha`, `nonce`, and `ciphertext`; use AES-256-GCM and source SHA as authenticated metadata.
 
-- [ ] **Step 1: Write failing tests** for missing binding, wrong source/deployment/database digest, duplicate JSON keys, stale/future receipts, wrong key, tampered ciphertext, paid activation, existing output, intermediate-envelope separation, and ciphertext-only CLI output.
-- [ ] **Step 2: Run the focused tests and confirm they fail for the expected missing validation/CLI behavior.**
-- [ ] **Step 3: Complete receipt composition and the CLI** with immutable output creation, bounded input sizes, strict JSON parsing, generic sanitized failures, and best-effort private temp cleanup.
-- [ ] **Step 4: Run `python -m pytest tests/test_runtime_bundle.py tests/test_candidate_promotion.py -q` and confirm all pass.**
-- [ ] **Step 5: Commit** bundle code and tests as `feat: create encrypted workspace runtime bundles`.
+- [x] **Step 1: Write failing tests** for missing binding, wrong source/deployment/database digest, duplicate JSON keys, stale/future receipts, wrong key, tampered ciphertext, paid activation, existing output, intermediate-envelope separation, and ciphertext-only CLI output.
+- [x] **Step 2: Run the focused tests and confirm they fail for the expected missing validation/CLI behavior.**
+- [x] **Step 3: Complete receipt composition and the CLI** with immutable output creation, bounded input sizes, strict JSON parsing, generic sanitized failures, and best-effort private temp cleanup.
+- [x] **Step 4: Run `python -m pytest tests/test_runtime_bundle.py tests/test_candidate_promotion.py -q` and confirm all pass.**
+- [x] **Step 5: Commit** bundle code and tests as `feat: create encrypted workspace runtime bundles`.
 
 ### Task 4: Stage, probe, human-check, and attest the exact candidate
 
@@ -107,11 +107,11 @@
 - `bundle-signoff` uses `buyeros-production-promote`, so the required reviewer sees the staged deployment URL and redacted probe summary before approving. It reads `GET /repos/YNWAforever/BuyerOS/actions/runs/${{ github.run_id }}/approvals`, requires an approved record for that environment and a reviewer ID different from `${{ github.actor_id }}`, and requires the exact source/deployment-bound canary comment from Global Constraints. It decrypts the intermediate artifact in memory, binds reviewer identity and comment digest, builds the final encrypted bundle, attests its exact ciphertext, and uploads only `buyeros-attested-runtime` containing `runtime-bundle.json`.
 - Use `BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY` only for the intermediate packet and `BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY` only for the final artifact in the protected signoff environment.
 
-- [ ] **Step 1: Add workflow tests first** for main-only execution, exact-CI-head and all-job verification, no domain assignment, protected branch/environment rules, encrypted intermediate artifact, approval-history identity binding, exact canary comment, encrypted-only final artifact, exact attestation subject, and retention of partial observations as non-promotable.
-- [ ] **Step 2: Run `python -m pytest tests/test_runtime_bundle_workflow.py tests/test_runtime_observation_workflow.py -q` and confirm new assertions fail** before adding the workflow.
-- [ ] **Step 3: Implement the binding collector and two-job workflow**; keep secrets out of command output and ensure failure paths publish neither plaintext files nor partial final bundles.
-- [ ] **Step 4: Run the workflow tests plus `python -m pytest tests/test_runtime_observation_packet.py tests/test_workspace_runtime_observations.py -q` and confirm all pass.**
-- [ ] **Step 5: Commit** workflow, collector, and tests as `ci: stage and attest protected workspace runtime bundle`.
+- [x] **Step 1: Add workflow tests first** for main-only execution, exact-CI-head and all-job verification, no domain assignment, protected branch/environment rules, encrypted intermediate artifact, approval-history identity binding, exact canary comment, encrypted-only final artifact, exact attestation subject, and retention of partial observations as non-promotable.
+- [x] **Step 2: Run `python -m pytest tests/test_runtime_bundle_workflow.py tests/test_runtime_observation_workflow.py -q` and confirm new assertions fail** before adding the workflow.
+- [x] **Step 3: Implement the binding collector and two-job workflow**; keep secrets out of command output and ensure failure paths publish neither plaintext files nor partial final bundles.
+- [x] **Step 4: Run the workflow tests plus `python -m pytest tests/test_runtime_observation_packet.py tests/test_workspace_runtime_observations.py -q` and confirm all pass.**
+- [x] **Step 5: Commit** workflow, collector, and tests as `ci: stage and attest protected workspace runtime bundle`.
 
 ### Task 5: Verify the attested bundle and enforce fail-closed promotion
 
@@ -125,11 +125,11 @@
 - Verify the exact artifact attestation against `.github/workflows/buyeros-runtime-bundle.yml` on `refs/heads/main` before decrypting. Re-evaluate the decrypted workspace bundle, re-read exact CI jobs, branch/environment protection and current-run approval identity, Vercel project/team/repository and auto-assignment state, and exact staged production deployment.
 - The promotion workflow downloads only `buyeros-attested-runtime` from the selected runtime run, pins the gate to `workspace`, and reads its own environment approval record to confirm non-self approval before the alias call. Research and native-send gates remain disabled.
 
-- [ ] **Step 1: Add failing tests** for missing/non-self reviewer evidence, changed branch/environment rules, auto-assignment enabled, wrong project/team/repository, CI/job/source/deployment mismatch, preview deployment, and unknown alias-call outcome.
-- [ ] **Step 2: Run `python -m pytest tests/test_candidate_promotion.py -q` and confirm each new test blocks before invoking the alias callback.**
-- [ ] **Step 3: Implement strict metadata/attestation checks and preserve the single-call `promotion_unknown` behavior.**
-- [ ] **Step 4: Run `python -m pytest tests/test_candidate_promotion.py tests/test_runtime_bundle_workflow.py -q` and confirm all pass.**
-- [ ] **Step 5: Commit** promoter, workflow, and tests as `fix: gate production promotion on attested protected runtime`.
+- [x] **Step 1: Add failing tests** for missing/non-self reviewer evidence, changed branch/environment rules, auto-assignment enabled, wrong project/team/repository, CI/job/source/deployment mismatch, preview deployment, and unknown alias-call outcome.
+- [x] **Step 2: Run `python -m pytest tests/test_candidate_promotion.py -q` and confirm each new test blocks before invoking the alias callback.**
+- [x] **Step 3: Implement strict metadata/attestation checks and preserve the single-call `promotion_unknown` behavior.**
+- [x] **Step 4: Run `python -m pytest tests/test_candidate_promotion.py tests/test_runtime_bundle_workflow.py -q` and confirm all pass.**
+- [x] **Step 5: Commit** promoter, workflow, and tests as `fix: gate production promotion on attested protected runtime`.
 
 ### Task 6: Verify release controls, deploy once, and save the 24 source checks
 

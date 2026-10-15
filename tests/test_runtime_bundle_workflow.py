@@ -163,3 +163,17 @@ def test_runtime_environment_rejects_libpq_target_overrides_and_paid_activation(
     for key in ('BUYEROS_PAID_ADMISSION_ENABLED','BUYEROS_DELIVERY_ADMISSION_ENABLED','BUYEROS_CLOUDFLARE_EXECUTION_ENABLED'):
         path.write_text(base+key+'="true"\n')
         with pytest.raises(ValueError): runtime.runtime_env(path)
+
+def test_binding_collector_refuses_changed_effective_configuration():
+    from test_release_readiness import candidate
+    runtime=runtime_module();collector=runtime.load_script('collect-runtime-binding.py');manifest,_=candidate()
+    observed={'schema':'buyeros.runtime-configuration.v1','source_sha':manifest['source_sha'],
+              'deployment_id':manifest['candidate_deployment_id'],'configuration_sha256':manifest['configuration_sha256'],
+              'activation':{'providers':'disabled','worker':'disabled','delivery':'disabled','contact_enrichment':'unconfigured'}}
+    receipt=collector.collect_configuration(manifest,'https://owned.vercel.app','owned-token-'+'x'*32,get=lambda u,t:(200,observed))
+    assert receipt['data']['activation']['worker']=='disabled'
+    for key in ('providers','worker','delivery','contact_enrichment'):
+        changed={**observed,'activation':{**observed['activation'],key:'active'}}
+        with pytest.raises(ValueError): collector.collect_configuration(manifest,'https://owned.vercel.app','owned-token-'+'x'*32,get=lambda u,t:(200,changed))
+    changed={**observed,'configuration_sha256':'0'*64}
+    with pytest.raises(ValueError): collector.collect_configuration(manifest,'https://owned.vercel.app','owned-token-'+'x'*32,get=lambda u,t:(200,changed))

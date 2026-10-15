@@ -5,6 +5,7 @@ import json
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
+from .release_binding import database_endpoint_sha256
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
@@ -110,7 +111,7 @@ async def inspect_schema(connection: AsyncConnection, expected: SchemaContract) 
         await connection.execute(text('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY'))
         await scalar("SELECT set_config('statement_timeout',:timeout,true)", {'timeout':str(expected.statement_timeout_ms)})
         metadata=(await connection.execute(text("SELECT current_database() AS database, current_user AS role, session_user AS login, current_setting('search_path') AS search_path, current_setting('server_version') AS version"))).mappings().one()
-        endpoint=hashlib.sha256(f'{connection.engine.url.host}:{connection.engine.url.port or 5432}'.encode()).hexdigest()
+        endpoint=database_endpoint_sha256(connection.engine.url)
         target_match=(expected.target_receipt is not None and expected.target==expected.target_receipt
                       and expected.target.database==metadata['database']
                       and expected.target.endpoint_sha256==endpoint)

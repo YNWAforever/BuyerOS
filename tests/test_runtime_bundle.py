@@ -64,7 +64,7 @@ def private_inputs(directory):
     m,r=candidate();inputs=compose_inputs(m,r)
     files={'manifest.json':m,'protected-receipts.json':inputs['protected_receipts'],
            'schema-observations.json':inputs['schema_observation'],'api-observations.json':inputs['api_observation'],
-           'binding-observations.json':inputs['binding_observation'],
+           'binding-observations.json':inputs['binding_observation'],'configuration-observations.json':inputs['configuration_observation'],
            'build-evidence.json':{name:inputs[name] for name in ('ci','artifacts','api_contract_sha256')}}
     for name,value in files.items(): (directory/name).write_text(json.dumps(value),encoding='utf-8')
     canary=files['protected-receipts.json']['items']['workspace_canary']['data']

@@ -10,6 +10,7 @@ permissions:
   contents: read
   actions: read
   attestations: read
+  deployments: write
 concurrency:
   group: buyeros-production-promote
   cancel-in-progress: false
@@ -35,11 +36,13 @@ jobs:
       - run: npm install --global vercel@50.28.0
       - name: Fetch encrypted runtime bundle and verify protected gates before one alias call
         env:
+          BUYEROS_RELEASE_LEDGER_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ secrets.BUYEROS_PROMOTION_METADATA_TOKEN }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
           BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY: ${{ secrets.BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY }}
+          BUYEROS_RELEASE_PROBE_TOKEN: ${{ secrets.BUYEROS_RELEASE_PROBE_TOKEN }}
           RUNTIME_RUN_ID: ${{ inputs.runtime_run_id }}
         run: |
           set -euo pipefail

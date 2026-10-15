@@ -172,7 +172,8 @@ def test_promotion_cli_persists_unknown_intent_before_one_alias_attempt(tmp_path
     bundle=tmp_path/'runtime.json';bundle.write_text(json.dumps(envelope))
     output=tmp_path/'receipt.json';effects=[]
     for key,value in {'BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY':'a'*64,'GITHUB_WORKFLOW':'BuyerOS guarded promotion',
-                      'GITHUB_REF':'refs/heads/main','GITHUB_SHA':manifest['source_sha'],'GITHUB_RUN_ATTEMPT':'1'}.items():
+                      'GITHUB_REF':'refs/heads/main','GITHUB_SHA':manifest['source_sha'],'GITHUB_RUN_ATTEMPT':'1',
+                      'GITHUB_RUN_ID':'88','RUNTIME_RUN_ID':'77','VERCEL_PROJECT_ID':'prj_owned','VERCEL_ORG_ID':'team_owned','VERCEL_TOKEN':'owned-token'}.items():
         monkeypatch.setenv(key,value)
     fixture=CandidatePromotionTests();fixture.setUp()
     monkeypatch.setattr(module,'remote_metadata',lambda m,r:fixture.metadata)
@@ -182,13 +183,20 @@ def test_promotion_cli_persists_unknown_intent_before_one_alias_attempt(tmp_path
             assert '--source-digest' in argv
             assert module.SIGNER_WORKFLOW.endswith('/buyeros-runtime-bundle.yml')
             return ''
-        assert argv[:2]==['vercel','promote']
-        assert json.loads(output.read_text())['status']=='promotion_unknown'
-        raise subprocess.TimeoutExpired('owned promotion boundary',45)
+        raise AssertionError('only attestation is allowed through the CLI boundary')
     monkeypatch.setattr(module,'command',boundary)
+    monkeypatch.setattr(module,'claim_promotion_intent',lambda context:123)
+    def lose_ack(*args):
+        effects.append(['single-http-post'])
+        assert json.loads(output.read_text())['status']=='promotion_unknown'
+        raise ConnectionResetError('accepted but ack lost')
+    monkeypatch.setattr(module,'single_promote',lose_ack)
     assert module.main(['--bundle',str(bundle),'--gate','workspace','--output',str(output),'--execute'])==1
     assert json.loads(output.read_text())['status']=='promotion_unknown'
-    assert len([row for row in effects if row[:2]==['vercel','promote']])==1
+    assert len([row for row in effects if row==['single-http-post']])==1
+    assert json.loads(output.read_text())['promotion_run_id']==88
+    assert json.loads(output.read_text())['ledger_id']==123
+    assert json.loads(output.read_text())['deployment_id']=='dpl_candidate'
     effects.clear()
     assert module.main(['--bundle',str(bundle),'--gate','workspace','--output',str(output),'--execute'])==1
     assert effects==[]

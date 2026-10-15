@@ -18,7 +18,8 @@ from runtime_bundle import (canonical_json,unique_keys,encrypt_observation_packe
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'services/api'))
-from buyeros_api.services.release_binding import database_target_sha256
+from buyeros_api.services.release_binding import database_target_sha256,database_endpoint_sha256
+from buyeros_api.services.release_configuration import pulled_configuration_sha256
 from buyeros_api.services.schema_readiness import SchemaContract,inspect_schema
 
 
@@ -156,8 +157,7 @@ def stage(ci_run_id,output):
         command(['vercel','pull','--yes','--environment=production'],timeout=120)
         values=runtime_env(pulled)
         target=database_target_sha256(values['BUYEROS_DATABASE_URL'])
-        parsed=urlsplit(values['BUYEROS_DATABASE_URL'])
-        expected_endpoint=hashlib.sha256(f'{parsed.hostname}:{parsed.port or 5432}'.encode()).hexdigest()
+        expected_endpoint=database_endpoint_sha256(values['BUYEROS_DATABASE_URL'])
         if schema.target.endpoint_sha256!=expected_endpoint:
             raise ValueError('schema target endpoint differs from production binding')
         observed_schema=asyncio.run(schema_observation(values['BUYEROS_DATABASE_URL'],schema))
@@ -181,17 +181,18 @@ def stage(ci_run_id,output):
         artifacts=service_artifacts(deployed)
         manifest={'schema':'buyeros.release-manifest.v1','source_sha':source,
             'tree_sha':command(['git','rev-parse',source+'^{tree}']).strip(),
-            'configuration_sha256':digest(values),'db_target_sha256':target,'schema_contract_sha256':observed_schema['contract_sha256'],
+            'configuration_sha256':pulled_configuration_sha256(values),'db_target_sha256':target,'schema_contract_sha256':observed_schema['contract_sha256'],
             'frontend_artifact':artifacts['frontend'],'api_artifact':artifacts['api'],'worker_artifact':None,
             'required_heads':observed_schema['observed_heads'],'ci_run_id':ci_run_id,
             'required_ci_jobs':sorted(release_gate().REQUIRED_CI_JOBS),'candidate_deployment_id':deployed['id'],
             'receipt_max_age_seconds':900,'rollback_artifacts':rollback_artifacts,
             'activation':{'auth':values.get('BUYEROS_AUTH_MODE','auth0'),'providers':'disabled','worker':'disabled','delivery':'disabled'}}
         bound=load_script('collect-runtime-binding.py').collect_binding(manifest,origin,values['BUYEROS_DATABASE_URL'],os.environ['BUYEROS_RELEASE_PROBE_TOKEN'])
+        observed_configuration=load_script('collect-runtime-binding.py').collect_configuration(manifest,origin,os.environ['BUYEROS_RELEASE_PROBE_TOKEN'])
         observed_api=reads.collect({**api,'origin':origin},tokens,origin)
         if observed_api['all_checks_passed'] is not True: raise ValueError('candidate API controls failed')
         files={'manifest.json':manifest,'schema-observations.json':observed_schema,'api-observations.json':observed_api,
-               'binding-observations.json':bound,
+               'binding-observations.json':bound,'configuration-observations.json':observed_configuration,
                'build-evidence.json':{'ci':{'run_id':ci_run_id,'head_sha':source,'status':'completed','conclusion':'success',
                                           'jobs':{row['name']:row['conclusion'] for row in controls['jobs']['jobs']}},
                                      'artifacts':artifacts,'api_contract_sha256':observed_api['contract_sha256']},
@@ -226,7 +227,8 @@ def sign(input_file,output):
         raise ValueError('same-run current-main observations required')
     files=packet['files'];manifest=files['manifest.json']
     controls=current_controls(source,manifest['ci_run_id'])
-    deployment(source,manifest['candidate_deployment_id'],controls)
+    _,origin=deployment(source,manifest['candidate_deployment_id'],controls)
+    load_script('collect-runtime-binding.py').collect_configuration(manifest,origin,os.environ['BUYEROS_RELEASE_PROBE_TOKEN'])
     run=github('actions/runs/'+os.environ['GITHUB_RUN_ID'])
     if run.get('run_attempt')!=1: raise ValueError('rerun requires fresh stage and signoff')
     proof=verify_approval(github('actions/runs/'+os.environ['GITHUB_RUN_ID']+'/approvals'),
@@ -239,6 +241,7 @@ def sign(input_file,output):
     if 'neon-receipt.json' in files: manual['neon']=files['neon-receipt.json']
     receipts=compose_workspace_receipts(manifest,{'schema':'buyeros.workspace-release-receipts.v1','items':manual},
         schema_observation=schema,api_observation=api,binding_observation=files['binding-observations.json'],
+        configuration_observation=files['configuration-observations.json'],
         schema_observation_sha256=digest(schema),api_observation_sha256=digest(api),source_sha=source,**files['build-evidence.json'])
     bundle=build_workspace_bundle(manifest,receipts,source_sha=source)
     write_encrypted(output,encrypt_workspace_bundle(bundle,os.environ['BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY']))

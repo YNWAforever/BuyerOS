@@ -45,3 +45,22 @@ def collect_binding(manifest,origin,database_url,token,*,get=None):
                     'source_sha':body['source_sha'],'deployment_id':body['deployment_id'],
                     'db_target_sha256':expected,'schema_head':body['schema_head'],
                     'api_origin_sha256':hashlib.sha256(origin.encode()).hexdigest()}}
+
+
+def collect_configuration(manifest,origin,token,*,get=None):
+    if (re.fullmatch(r'https://[a-z0-9-]+\.vercel\.app',origin) is None or len(token)<32
+            or len(token)>512 or not token.isascii() or any(c.isspace() for c in token)):
+        raise ValueError('bounded staged origin and probe credential required')
+    status,body=(get or collector().get_json)(origin+'/v1/internal/release-configuration',token)
+    activation=body.get('activation',{}) if type(body) is dict else {}
+    if (status!=200 or type(body) is not dict or set(body)!={'schema','source_sha','deployment_id','configuration_sha256','activation'}
+            or body.get('schema')!='buyeros.runtime-configuration.v1' or body.get('source_sha')!=manifest['source_sha']
+            or body.get('deployment_id')!=manifest['candidate_deployment_id']
+            or body.get('configuration_sha256')!=manifest['configuration_sha256']
+            or type(activation) is not dict or set(activation)!={'providers','worker','delivery','contact_enrichment'}
+            or any(activation[key]!='disabled' for key in ('providers','worker','delivery'))
+            or activation['contact_enrichment'] not in ('disabled','unconfigured')):
+        raise ValueError('effective candidate configuration or disabled activation mismatch')
+    common={key:manifest[key] for key in ('source_sha','tree_sha','configuration_sha256','db_target_sha256')}
+    return {**common,'deployment_id':manifest['candidate_deployment_id'],
+            'checked_at':datetime.now(timezone.utc).isoformat(),'evidence_mode':'candidate_runtime','data':body}

@@ -6,30 +6,40 @@ import ipaddress
 import json
 import os
 import re
-from urllib.parse import parse_qsl, unquote, urlsplit
+from sqlalchemy.engine import make_url, URL
 
 from sqlalchemy import text
 
 
-def database_target_sha256(database_url: str) -> str:
-    parsed = urlsplit(database_url)
-    if (parsed.scheme not in {'postgresql', 'postgresql+psycopg', 'postgresql+asyncpg'}
-            or not parsed.hostname or parsed.fragment
-            or any(key.lower() not in {'sslmode', 'sslrootcert', 'channel_binding', 'connect_timeout', 'application_name'}
-                   for key, _ in parse_qsl(parsed.query, keep_blank_values=True))):
+def database_target_fields(database_url: str | URL) -> dict:
+    # SQLAlchemy does not URL-decode database names; match its driver arguments.
+    parsed = make_url(database_url)
+    if (parsed.drivername not in {'postgresql', 'postgresql+psycopg', 'postgresql+asyncpg'}
+            or not parsed.host or any(key.lower() not in {'sslmode','sslrootcert','channel_binding','connect_timeout','application_name'}
+                                     for key in parsed.query)):
         raise ValueError('ambiguous database target')
-    database = unquote(parsed.path.removeprefix('/'), errors='strict')
-    host = parsed.hostname.lower().rstrip('.')
+    database = parsed.database
+    host = parsed.host.lower().rstrip('.')
     try:
         host = ipaddress.ip_address(host).compressed
     except ValueError:
         if not re.fullmatch(r'[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?', host):
             raise ValueError('invalid database endpoint') from None
     port = parsed.port if parsed.port is not None else 5432
-    if not database or len(database.encode('utf-8')) > 63 or any(c in database for c in ('/', '\\', '\x00')) or not 1 <= port <= 65535:
+    if (not database or len(database.encode('utf-8')) > 63
+            or any(c in database for c in ('/', '\\', '\x00', '#')) or not 1 <= port <= 65535):
         raise ValueError('invalid database target')
-    raw = json.dumps({'database': database, 'host': host, 'port': port}, sort_keys=True, separators=(',', ':')).encode()
+    return {'database':database,'host':host,'port':port}
+
+
+def database_target_sha256(database_url: str | URL) -> str:
+    raw = json.dumps(database_target_fields(database_url), sort_keys=True, separators=(',', ':')).encode()
     return hashlib.sha256(raw).hexdigest()
+
+
+def database_endpoint_sha256(database_url: str | URL) -> str:
+    fields = database_target_fields(database_url)
+    return hashlib.sha256(f"{fields['host']}:{fields['port']}".encode()).hexdigest()
 
 
 def probe_authorized(supplied: str, expected: str) -> bool:
@@ -48,7 +58,7 @@ def runtime_identity(settings) -> tuple[str, str]:
 
 async def read_runtime_binding(engine, source: str, deployment: str) -> dict:
     # The engine URL is the active API pool target, not a migration/owner setting.
-    target = database_target_sha256(engine.url.render_as_string(hide_password=False))
+    target = database_target_sha256(engine.url)
     async with asyncio.timeout(8):
         async with engine.connect() as connection:
             async with connection.begin():

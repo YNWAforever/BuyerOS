@@ -112,7 +112,8 @@ def compose_workspace_receipts(manifest: dict, protected_receipts: dict, *, sche
                                api_observation: dict, schema_observation_sha256: str,
                                api_observation_sha256: str, api_contract_sha256: str,
                                ci: dict, artifacts: dict, source_sha: str,
-                               binding_observation: dict | None = None) -> dict:
+                               binding_observation: dict | None = None,
+                               configuration_observation: dict | None = None) -> dict:
     """Join actual candidate reads with separately verified human/rollback evidence."""
     gate = _release_gate()
     if not gate._manifest_valid(manifest) or manifest['source_sha'] != source_sha:
@@ -141,7 +142,8 @@ def compose_workspace_receipts(manifest: dict, protected_receipts: dict, *, sche
     items = json.loads(canonical_json(protected_receipts['items']))
     items['workspace_canary']['data']['api_observation'] = api_observation
     items.update(ci={**common, 'data':ci}, artifacts={**common, 'data':artifacts},
-                 schema={**common, 'data':schema_observation}, deployment_binding=binding_observation)
+                 schema={**common, 'data':schema_observation}, deployment_binding=binding_observation,
+                 runtime_configuration=configuration_observation)
     receipts = {'schema':'buyeros.release-receipts.v1','items':items}
     if gate.evaluate_release(manifest, receipts, 'workspace')['promotable'] is not True:
         raise ValueError('workspace release receipts do not pass the complete live gate')

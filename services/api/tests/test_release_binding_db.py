@@ -34,3 +34,27 @@ async def test_binding_refuses_unreadable_schema_metadata(seeded):
             await read_runtime_binding(engine,'a'*40,'dpl_ownedtest')
     finally:
         await engine.dispose()
+
+@pytest.mark.asyncio
+async def test_configuration_reports_actual_disabled_and_enabled_worker_state(isolated_seeded):
+    seeded=isolated_seeded
+    from buyeros_api.services.release_configuration import read_runtime_configuration
+    from buyeros_api.settings import Settings
+    settings=Settings(runtime_source_sha='a'*40,runtime_deployment_id='dpl_ownedtest',
+                      paid_admission_enabled=False,delivery_admission_enabled=False,cloudflare_execution_enabled=False)
+    engine=create_async_engine(runtime_role_dsn(seeded).replace('postgresql://','postgresql+psycopg://',1))
+    with psycopg.connect(seeded,autocommit=True) as owner:
+        prior=owner.execute('SELECT enabled FROM public.worker_runtime_control WHERE singleton=1').fetchone()[0]
+        owner.execute('GRANT SELECT(enabled) ON public.worker_runtime_control TO buyeros_api')
+    try:
+        for enabled,expected in ((False,'disabled'),(True,'active')):
+            with psycopg.connect(seeded,autocommit=True) as owner:
+                owner.execute('UPDATE public.worker_runtime_control SET enabled=%s,epoch=epoch+1 WHERE singleton=1',(enabled,))
+            value=await read_runtime_configuration(engine,settings)
+            assert value['activation']['worker']==expected
+            assert value['activation']['providers']=='disabled' and value['activation']['delivery']=='disabled'
+    finally:
+        await engine.dispose()
+        with psycopg.connect(seeded,autocommit=True) as owner:
+            owner.execute('UPDATE public.worker_runtime_control SET enabled=%s,epoch=epoch+1 WHERE singleton=1',(prior,))
+            owner.execute('REVOKE SELECT(enabled) ON public.worker_runtime_control FROM buyeros_api')

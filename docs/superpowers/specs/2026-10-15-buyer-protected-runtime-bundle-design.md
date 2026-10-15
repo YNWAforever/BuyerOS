@@ -2,7 +2,7 @@
 
 ## Status
 
-Draft for user review. No production release or source-record write is authorized by this draft.
+Approved by the user on 2026-10-15 together with the implementation plan. Production promotion and the source-record write remain conditional on the protected release gates and exact production readback.
 
 ## Goal
 
@@ -33,6 +33,14 @@ The Vercel project must report the expected BuyerOS repository, team, production
 Add a narrowly scoped release-binding endpoint to the existing Python API. It accepts only a protected probe credential and returns a fixed response containing the runtime deployment/source identity, schema head, and a SHA-256 digest of normalized database target fields (database name plus endpoint host/port). It never returns the connection string, credentials, user/workspace rows, or arbitrary configuration. Responses must be `Cache-Control: no-store`; invalid credentials return the normal sanitized error envelope. Tests verify constant-time credential comparison, exact response keys, no DSN disclosure, and mismatch refusal.
 
 The protected workflow fetches the Vercel production database connection only into an ephemeral file, calculates the same target digest without logging the DSN, and compares it with both the staged API response and the independent read-only schema receipt. It removes the temporary file on success or failure. Only digests and pass/fail codes may enter the encrypted bundle.
+
+### Implementation review refinements
+
+Independent review found that SQLAlchemy preserves percent-encoded database names in its effective driver arguments. Database binding therefore hashes the engine's exact database field and shares endpoint normalization with schema inspection; it never decodes two distinct actual database names into one digest.
+
+A second fixed, protected `/v1/internal/release-configuration` endpoint proves the candidate's effective release-settings fingerprint, actual worker-control state, and passive contact-provider readiness. Stage, signing, and promotion require this proof; a pulled environment snapshot cannot assert runtime activation. The runtime login needs only the explicit read-only metadata columns documented in the operational runbook; no production grant or migration is applied by the workflow.
+
+The installed Vercel CLI retries promotion POSTs internally, so the mutating promotion uses one direct HTTPS request with redirects/retries disabled. Before that request, a project-scoped GitHub deployment intent persists candidate, source, bundle, and run identities outside the runner. Any unresolved intent blocks new dispatches until separately authorized read-only reconciliation is recorded against the original intent. No alternate key or fresh runner bypasses the hold.
 
 ### Complete workspace evidence
 

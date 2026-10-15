@@ -1,5 +1,6 @@
 """Protected, attested promotion entry point. No retry after an uncertain alias outcome."""
 import argparse
+import hashlib
 import importlib.util
 import json
 import os
@@ -7,6 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from promotion_transport import claim_promotion_intent,single_promote
 from runtime_bundle import decrypt_workspace_bundle, is_encrypted_workspace_bundle
 from runtime_bundle import build_workspace_bundle
 from runtime_bundle import encrypt_workspace_bundle
@@ -41,7 +43,7 @@ def promote(manifest,receipts,gate,*,attestation_verified,metadata,execute,promo
     result['status']='promotion_unknown'
     try:
         promote_alias(manifest['candidate_deployment_id'])
-    except (OSError,subprocess.SubprocessError):
+    except (OSError,subprocess.SubprocessError,ValueError):
         return result
     result.update(status='promotion_submitted_readback_required',promoted=True)
     return result
@@ -62,7 +64,8 @@ def remote_metadata(manifest,receipts):
     from protected_release import verify_approval
     runtime=runtime_module()
     controls=runtime.current_controls(manifest['source_sha'],manifest['ci_run_id'])
-    deployment,_=runtime.deployment(manifest['source_sha'],manifest['candidate_deployment_id'],controls)
+    deployment,origin=runtime.deployment(manifest['source_sha'],manifest['candidate_deployment_id'],controls)
+    runtime.load_script('collect-runtime-binding.py').collect_configuration(manifest,origin,os.environ['BUYEROS_RELEASE_PROBE_TOKEN'])
     run_id=int(os.environ['GITHUB_RUN_ID'])
     run=github('actions/runs/'+str(run_id))
     if (run.get('head_sha')!=manifest['source_sha'] or run.get('head_branch')!='main'
@@ -127,14 +130,24 @@ def main(argv=None):
         build_workspace_bundle(bundle['manifest'],bundle['receipts'],source_sha=envelope['source_sha'])
         metadata=remote_metadata(bundle['manifest'],bundle['receipts'])
         def submit_once(deployment):
+            context={'schema':'buyeros.promotion-intent.v1','project_id':os.environ['VERCEL_PROJECT_ID'],
+                     'source_sha':envelope['source_sha'],'deployment_id':deployment,
+                     'bundle_sha256':hashlib.sha256(args.bundle.read_bytes()).hexdigest(),
+                     'promotion_run_id':int(os.environ['GITHUB_RUN_ID']),'runtime_run_id':int(os.environ['RUNTIME_RUN_ID'])}
+            ledger_id=claim_promotion_intent(context)
             intent={'schema':'buyeros.promotion-receipt.v1','status':'promotion_unknown','promoted':False,
-                    'blockers':[],'source_sha':envelope['source_sha'],'deployment_id':deployment}
+                    'blockers':[],**{key:value for key,value in context.items() if key!='schema'},'ledger_id':ledger_id}
             write_receipt(args.output,intent)
-            command(['vercel','promote',deployment,'--yes','--timeout','30s'])
+            single_promote(os.environ['VERCEL_PROJECT_ID'],os.environ['VERCEL_ORG_ID'],deployment,os.environ['VERCEL_TOKEN'])
         result=promote(bundle['manifest'],bundle['receipts'],args.gate,attestation_verified=True,metadata=metadata,execute=args.execute,
             promote_alias=submit_once)
+        result.update(source_sha=envelope['source_sha'],deployment_id=bundle['manifest']['candidate_deployment_id'],
+                      project_id=os.environ.get('VERCEL_PROJECT_ID'),promotion_run_id=os.environ.get('GITHUB_RUN_ID'),
+                      runtime_run_id=os.environ.get('RUNTIME_RUN_ID'),bundle_sha256=hashlib.sha256(args.bundle.read_bytes()).hexdigest())
     except (ValueError,KeyError,TypeError,OSError,subprocess.SubprocessError,json.JSONDecodeError):pass
     if args.output.exists() and result['status'] in ('promotion_unknown','promotion_submitted_readback_required'):
+        intent=gate_module().read_json(args.output)
+        result.update({key:value for key,value in intent.items() if key not in ('schema','status','promoted','blockers')})
         replacement=args.output.with_suffix('.final.tmp')
         write_receipt(replacement,result)
         os.replace(replacement,args.output)

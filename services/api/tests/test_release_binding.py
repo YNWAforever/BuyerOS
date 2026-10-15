@@ -13,7 +13,7 @@ TOKEN = 'owned-release-probe-token-0123456789abcdef'
 SOURCE = 'a' * 40
 DEPLOYMENT = 'dpl_ownedcandidate'
 DSN = 'postgresql://private_user:private_password@EP-EXAMPLE.NEON.TECH/buyer%20db?sslmode=require'
-EXPECTED = hashlib.sha256(b'{"database":"buyer db","host":"ep-example.neon.tech","port":5432}').hexdigest()
+EXPECTED = hashlib.sha256(b'{"database":"buyer%20db","host":"ep-example.neon.tech","port":5432}').hexdigest()
 
 
 def service():
@@ -44,7 +44,7 @@ def test_database_target_digest_uses_only_normalized_name_host_port():
     'postgresql:///buyer', 'postgresql://host/', 'https://host/buyer',
     'postgresql://host/buyer?host=other', 'postgresql://host/buyer?dbname=other',
     'postgresql://host/buyer?hostaddr=127.0.0.1', 'postgresql://host:0/buyer',
-    'postgresql://host/buyer#fragment', 'postgresql://host/a%2Fb',
+    'postgresql://host/buyer#fragment', 'postgresql://host/a/b',
 ])
 def test_database_target_digest_refuses_ambiguous_target(dsn):
     with pytest.raises(ValueError):
@@ -113,3 +113,43 @@ def test_release_binding_sanitizes_database_failures(configured, monkeypatch):
     assert response.json()['code'] == 'RELEASE_BINDING_UNAVAILABLE'
     assert response.headers['cache-control'] == 'no-store'
     assert 'private_password' not in response.text
+
+def test_digest_distinguishes_actual_driver_database_arguments():
+    from sqlalchemy.engine import make_url
+    from sqlalchemy.dialects.postgresql.psycopg import PGDialect_psycopg
+    module=service();dialect=PGDialect_psycopg()
+    literal='postgresql://user:pw@ep-owned.neon.tech/buyer%20db'
+    spaced='postgresql://user:pw@ep-owned.neon.tech/buyer db'
+    assert dialect.create_connect_args(make_url(literal))[1]['dbname']=='buyer%20db'
+    assert dialect.create_connect_args(make_url(spaced))[1]['dbname']=='buyer db'
+    assert module.database_target_sha256(literal)!=module.database_target_sha256(spaced)
+
+
+def test_schema_endpoint_and_binding_use_same_host_normalization():
+    module=service()
+    assert module.database_endpoint_sha256('postgresql://u:p@EP-OWNED.NEON.TECH/db') == module.database_endpoint_sha256('postgresql://u:p@ep-owned.neon.tech:5432/db')
+
+def test_effective_runtime_configuration_cannot_claim_pulled_disabled_flags():
+    module=importlib.import_module('buyeros_api.services.release_configuration')
+    from buyeros_api.settings import Settings
+    pulled=module.pulled_configuration_sha256({'BUYEROS_PAID_ADMISSION_ENABLED':'false','BUYEROS_DELIVERY_ADMISSION_ENABLED':'false'})
+    disabled=Settings(paid_admission_enabled=False,delivery_admission_enabled=False)
+    enabled=Settings(paid_admission_enabled=True,delivery_admission_enabled=False)
+    assert module.configuration_sha256(disabled)==pulled
+    assert module.configuration_sha256(enabled)!=pulled
+
+
+def test_protected_configuration_route_checks_credential_and_no_store(configured,monkeypatch):
+    routes=importlib.import_module('buyeros_api.api.routes.release_binding')
+    async def read():
+        return {'schema':'buyeros.runtime-configuration.v1','source_sha':SOURCE,'deployment_id':DEPLOYMENT,
+                'configuration_sha256':'c'*64,'activation':{'providers':'disabled','worker':'disabled',
+                                                          'delivery':'disabled','contact_enrichment':'unconfigured'}}
+    monkeypatch.setattr(routes,'read_configuration',read,raising=False)
+    with TestClient(create_app()) as client:
+        denied=client.get('/v1/internal/release-configuration')
+        assert denied.status_code==401
+        response=client.get('/v1/internal/release-configuration',headers={'Authorization':'Bearer '+TOKEN})
+    assert response.status_code==200 and response.headers['cache-control']=='no-store'
+    assert response.json()['activation']['contact_enrichment']=='unconfigured'
+    assert TOKEN not in response.text

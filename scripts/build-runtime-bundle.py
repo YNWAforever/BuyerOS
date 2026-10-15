@@ -17,7 +17,7 @@ def build_from_directory(directory: Path, source_sha: str) -> dict:
     manifest = read('manifest.json')
     receipts = compose_workspace_receipts(manifest, read('protected-receipts.json'),
         schema_observation=read('schema-observations.json'),api_observation=read('api-observations.json'),
-        binding_observation=read('binding-observations.json'),
+        binding_observation=read('binding-observations.json'),configuration_observation=read('configuration-observations.json'),
         schema_observation_sha256=digest('schema-observations.json'),api_observation_sha256=digest('api-observations.json'),
         source_sha=source_sha,**evidence)
     return build_workspace_bundle(manifest, receipts, source_sha=source_sha)

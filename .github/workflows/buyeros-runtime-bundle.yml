@@ -112,6 +112,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
           BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY: ${{ secrets.BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY }}
           BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY: ${{ secrets.BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY }}
+          BUYEROS_RELEASE_PROBE_TOKEN: ${{ secrets.BUYEROS_RELEASE_PROBE_TOKEN }}
         run: services/api/.venv/bin/python scripts/protected-runtime.py sign --input "$RUNNER_TEMP/encrypted-stage/buyeros-stage.encrypted.json" --output "$RUNNER_TEMP/runtime-bundle.json" > "$RUNNER_TEMP/buyeros-sign.log" 2>&1
       - name: Attest exact ciphertext only
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4

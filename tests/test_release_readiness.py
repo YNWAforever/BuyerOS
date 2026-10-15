@@ -57,10 +57,17 @@ def candidate():
         'privilege_missing:public.user_identities:SELECT','rls_not_forced:public.memberships',
         'function_contract_mismatch:public.buyeros_workspace_directory(uuid,bigint,integer)']
     receipts['items']['schema']['data']['checks'] += [{'code':code,'passed':True} for code in additional]
-    from runtime_bundle_fixtures import api_observation
+    fixture_spec=importlib.util.spec_from_file_location('owned_runtime_bundle_fixtures',ROOT/'tests/runtime_bundle_fixtures.py')
+    fixture_module=importlib.util.module_from_spec(fixture_spec)
+    fixture_spec.loader.exec_module(fixture_module)
+    api_observation=fixture_module.api_observation
     receipts['items']['workspace_canary']['data'].update(human_signoff=True, reviewer_id=202, initiator_id=101, approval_run_id=456,
         approval_comment_sha256='5'*64,browser_canary_sha256='3'*64,api_observation_sha256='1'*64,schema_observation_sha256='2'*64,
         api_observation=api_observation(manifest['source_sha'], common['checked_at']))
+    receipts['items']['runtime_configuration']=receipt({'schema':'buyeros.runtime-configuration.v1',
+        'source_sha':manifest['source_sha'],'deployment_id':manifest['candidate_deployment_id'],
+        'configuration_sha256':manifest['configuration_sha256'],
+        'activation':{'providers':'disabled','worker':'disabled','delivery':'disabled','contact_enrichment':'unconfigured'}})
     return manifest,receipts
 
 
@@ -162,3 +169,8 @@ class ReleaseReadinessTests(unittest.TestCase):
 
 
 if __name__=='__main__': unittest.main()
+
+def test_workspace_gate_requires_bound_effective_configuration():
+    manifest,receipts=candidate()
+    receipts['items'].pop('runtime_configuration',None)
+    assert not evaluate(manifest,receipts)['promotable']

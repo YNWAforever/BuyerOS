@@ -29,6 +29,7 @@ def compose_inputs(manifest, receipts):
                             'items':{name:protected['items'][name] for name in ('workspace_canary','rollback')}},
         schema_observation=copy.deepcopy(receipts['items']['schema']['data']),
         api_observation=api_observation(manifest['source_sha'], receipts['items']['schema']['checked_at']),
+        configuration_observation=copy.deepcopy(receipts['items']['runtime_configuration']),
         binding_observation=copy.deepcopy(receipts['items']['deployment_binding']),
         schema_observation_sha256='2'*64, api_observation_sha256='1'*64,
         api_contract_sha256='4'*64, ci=copy.deepcopy(receipts['items']['ci']['data']),
