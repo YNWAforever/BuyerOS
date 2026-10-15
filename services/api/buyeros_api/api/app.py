@@ -22,6 +22,7 @@ from .routes.delivery_history import router as delivery_history_router
 from .routes.exports import router as exports_router
 from .routes.enrichment import router as enrichment_router
 from .routes.health import router as health_router
+from .routes.release_binding import router as release_binding_router
 from .routes.icp import router as icp_router
 from .routes.jobs import router as jobs_router
 from .routes.work_queue import router as work_queue_router
@@ -60,6 +61,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(HTTPException, http_error_handler)
     app.add_exception_handler(Exception, internal_error_handler)
     app.include_router(health_router)
+    app.include_router(release_binding_router)
     app.include_router(settings_router)
     app.include_router(memberships_router)
     app.include_router(audit_router)
