@@ -136,6 +136,8 @@ async def preparation_context(session, scope, data, now, *, case_view=None, subj
             if isinstance(entity, ContactPoint) and (entity.quarantined or entity.person_id != data.person_id):
                 raise ApiError(403, "POLICY_BLOCKED", "channel is unavailable for selected person")
     facts, product, documents = await _fact_context(session, scope, data.product_fact_refs, now)
+    if documents:
+        deadline = min(deadline, *(datetime.fromisoformat(item["retention_until"]) for item in documents))
     case = case_view or await get_lead_case(session, scope=scope, now=now, include_preparations=False)
     if not isinstance(case, dict):
         case = case.model_dump(mode="json")

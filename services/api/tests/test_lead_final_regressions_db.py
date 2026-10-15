@@ -1,5 +1,7 @@
 """Final review regressions use real scoped records and normal lifecycle entry points."""
 import asyncio
+import json
+import time
 import uuid
 from datetime import datetime, timezone
 from types import SimpleNamespace
@@ -214,3 +216,36 @@ def test_missing_current_or_future_schema_never_bypasses_native_admission(lead_c
         finally:
             await engine.dispose()
     asyncio.run(run())
+
+
+def test_normal_sweep_erases_preparation_at_product_document_deadline(lead_api, lead_case, monkeypatch):
+    """An expiring attachment must not leave a longer-lived derived private copy."""
+    from buyeros_api.db.icp import canonical_hash
+    payload = ready_preparation(lead_api, lead_case)
+    document = str(uuid.uuid4())
+    marker = "Private product attachment expiry quotation"
+    with psycopg.connect(lead_case["dsn"], autocommit=True) as db:
+        db.execute("INSERT INTO offer_documents(id,workspace_id,project_id,kind,filename,media_type,status,"
+            "version,sha256,retention_until,extraction_metadata) VALUES (%s,%s,%s,'upload','expiry.txt',"
+            "'text/plain','ready',1,%s,now()+interval '5 seconds',"
+            "'{\"format\":\"text\",\"classification\":\"text\",\"byte_length\":42}')",
+            (document, WORKSPACE, PROJECT, "c"*64))
+        icp = payload["product_fact_refs"][0]["icp_version_id"]
+        content = db.execute("SELECT content FROM icp_versions WHERE id=%s", (icp,)).fetchone()[0]
+        content["offer_facts"][0].update(provenance="document_excerpt", source_document_id=document, excerpt=marker)
+        digest = canonical_hash(content)
+        db.execute("UPDATE icp_versions SET content=%s::jsonb,content_hash=%s WHERE id=%s",
+                   (json.dumps(content), digest, icp))
+    payload["product_fact_refs"][0]["icp_content_hash"] = digest
+    payload["body"] = marker
+    created, _ = create_preparation(lead_api, lead_case, payload)
+    assert created["redacted"] is False and created["content"]["body"] == marker
+    bound = time.monotonic() + 10
+    with psycopg.connect(lead_case["dsn"], autocommit=True) as db:
+        while not db.execute("SELECT retention_until<=now() FROM offer_documents WHERE id=%s", (document,)).fetchone()[0]:
+            assert time.monotonic() < bound, "fixture document deadline did not elapse"
+            time.sleep(0.05)
+    assert worker_sweep(lead_case, monkeypatch) > 0
+    with psycopg.connect(lead_case["dsn"]) as db:
+        assert db.execute("SELECT count(*) FROM lead_private_payloads WHERE contents::text LIKE %s",
+                          (f"%{marker}%",)).fetchone() == (0,)
