@@ -47,7 +47,10 @@ def candidate():
              'blockers':[],'evidence_mode':'candidate_runtime'}),
         'workspace_canary':receipt({'workspace_status':200,'correct_roles':True,'correct_project':True,
               'empty_membership_verified':True,'revoked_denied':True,'foreign_tenant_denied':True,'reload_retry_verified':True}),
-        'rollback':receipt({'frontend':'frontend-compatible','api':'api-compatible','compatible':True})}}
+        'rollback':receipt({'frontend':'frontend-compatible','api':'api-compatible','compatible':True}),
+        'deployment_binding':receipt({'schema':'buyeros.deployment-db-binding.v1','verified':True,
+            'source_sha':'a'*40,'deployment_id':'dpl_candidate','db_target_sha256':'d'*64,
+            'schema_head':'0050_c61_delivery_authorizations','api_origin_sha256':'f'*64})}}
     additional=['version_metadata_unreadable','schema_usage_missing:public','relation_missing:public.memberships',
         'relation_not_visible:public.user_identities','relation_not_visible:public.memberships',
         'relation_columns_missing:public.user_identities','relation_columns_missing:public.memberships',
@@ -103,6 +106,31 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.receipts['items']['schema']['data']['checks']=[];self.check_blocked()
     def test_wrong_deployment_receipt_is_blocked(self):
         self.receipts['items']['workspace_canary']['deployment_id']='dpl_old';self.check_blocked()
+    def test_workspace_gate_requires_a_bound_deployment_database_receipt(self):
+        self.receipts['items'].pop('deployment_binding')
+        result = evaluate(self.manifest, self.receipts)
+        self.assertFalse(result['promotable'])
+        self.assertIn('receipt_missing:deployment_binding', result['blockers'])
+
+    def test_workspace_gate_rejects_unverified_deployment_database_binding(self):
+        common = copy.deepcopy(self.receipts['items']['schema'])
+        common['data'] = {'verified': False, 'deployment_id': self.manifest['candidate_deployment_id'],
+                          'db_target_sha256': self.manifest['db_target_sha256'], 'api_origin_sha256': 'f'*64}
+        self.receipts['items']['deployment_binding'] = common
+        result = evaluate(self.manifest, self.receipts)
+        self.assertFalse(result['promotable'])
+        self.assertIn('deployment_db_binding_unverified', result['blockers'])
+    def test_workspace_gate_rejects_mismatched_binding(self):
+        for key, value in {'source_sha':'0'*40, 'deployment_id':'dpl_old',
+                           'db_target_sha256':'0'*64, 'schema_head':'0053_wrong',
+                           'api_origin_sha256':'not-a-digest', 'verified':1, 'extra':True}.items():
+            with self.subTest(key=key):
+                changed = copy.deepcopy(self.receipts)
+                changed['items']['deployment_binding']['data'][key] = value
+                result = evaluate(self.manifest, changed)
+                self.assertFalse(result['promotable'])
+                self.assertIn('deployment_db_binding_unverified', result['blockers'])
+
     def test_research_gate_requires_real_neon_quality_performance_and_uat(self):
         result=evaluate(self.manifest,self.receipts,'research_export')
         self.assertFalse(result['promotable'])
