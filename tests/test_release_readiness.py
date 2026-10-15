@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 import importlib.util
 from pathlib import Path
 import unittest
+import pytest
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -153,9 +154,20 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.assertFalse(result['promotable'])
         self.assertIn('receipt_missing:delivery',result['blockers'])
     def test_workspace_cannot_enable_delivery_without_GS(self):
-        self.manifest['activation']['delivery']='active';self.check_blocked()
+        self.manifest['activation']['delivery']='active'
+        self.receipts['items']['runtime_configuration']['data']['activation']['delivery']='active'
+        result=evaluate(self.manifest,self.receipts)
+        self.assertFalse(result['promotable'])
+        self.assertIn('activation_exceeds_workspace_gate:delivery',result['blockers'])
+        self.assertNotIn('effective_runtime_configuration_unverified',result['blockers'])
     def test_workspace_cannot_enable_paid_research_without_GA(self):
-        self.manifest['activation'].update(providers='active',worker='active');self.check_blocked()
+        self.manifest['activation'].update(providers='active',worker='active')
+        self.receipts['items']['runtime_configuration']['data']['activation'].update(providers='active',worker='active')
+        result=evaluate(self.manifest,self.receipts)
+        self.assertFalse(result['promotable'])
+        self.assertIn('activation_exceeds_workspace_gate:providers',result['blockers'])
+        self.assertIn('activation_exceeds_workspace_gate:worker',result['blockers'])
+        self.assertNotIn('effective_runtime_configuration_unverified',result['blockers'])
     def test_unknown_activation_value_is_malformed(self):
         self.manifest['activation']['delivery']='unknown-invalid-value'
         self.assertEqual(evaluate(self.manifest,self.receipts)['status'],'malformed')
@@ -174,3 +186,56 @@ def test_workspace_gate_requires_bound_effective_configuration():
     manifest,receipts=candidate()
     receipts['items'].pop('runtime_configuration',None)
     assert not evaluate(manifest,receipts)['promotable']
+
+
+def accepted_gate_candidate(gate):
+    """Complete owned receipts for evaluator tests; never runtime/provider activation."""
+    manifest,receipts=candidate()
+    if gate=='workspace': return manifest,receipts
+    manifest['activation']={'auth':'neon','providers':'active','worker':'active',
+                            'delivery':'active' if gate=='native_send' else 'disabled'}
+    manifest['worker_artifact']='worker-a'
+    receipts['items']['artifacts']['data']['worker']='worker-a'
+    receipts['items']['runtime_configuration']['data']['activation']={
+        'providers':'active','worker':'active','delivery':'active' if gate=='native_send' else 'disabled',
+        'contact_enrichment':'unconfigured'}
+    for name in ('neon','worker','providers','quality','performance','staff_uat','journey'):
+        receipts['items'][name]={**copy.deepcopy(receipts['items']['ci']),'data':{'accepted':True}}
+    receipts['items']['neon']['data']['neon_only_rollback_verified']=True
+    receipts['items']['staff_uat']['data']['human_signoff']=True
+    receipts['items']['journey']['data']['same_chain_verified']=True
+    if gate=='native_send':
+        receipts['items']['auth0_retirement']={**copy.deepcopy(receipts['items']['ci']),'data':{'accepted':True}}
+        receipts['items']['delivery']={**copy.deepcopy(receipts['items']['ci']),'data':{
+            'authority_verified':True,'recipient_scope_verified':True,'cost_cap_verified':True,
+            'approved_revision_verified':True,'single_submit_verified':True,'callback_verified':True,
+            'suppression_verified':True,'unknown_hold_preserved':True,'provider_state':'delivered'}}
+    return manifest,receipts
+
+
+@pytest.mark.parametrize('gate',['research_export','native_send'])
+def test_higher_gate_accepts_fully_bound_matching_effective_activation(gate):
+    manifest,receipts=accepted_gate_candidate(gate)
+    result=evaluate(manifest,receipts,gate)
+    assert result['promotable'] is True,result['blockers']
+
+
+@pytest.mark.parametrize('gate',['workspace','research_export','native_send'])
+@pytest.mark.parametrize('capability',['providers','worker','delivery'])
+def test_each_gate_rejects_effective_activation_that_differs_from_manifest(gate,capability):
+    manifest,receipts=accepted_gate_candidate(gate)
+    actual=receipts['items']['runtime_configuration']['data']['activation']
+    actual[capability]='disabled' if actual[capability]=='active' else 'active'
+    result=evaluate(manifest,receipts,gate)
+    assert result['promotable'] is False
+    assert 'effective_runtime_configuration_unverified' in result['blockers']
+
+
+@pytest.mark.parametrize('gate',['research_export','native_send'])
+def test_higher_gate_refuses_disabled_runtime_receipt_for_active_manifest(gate):
+    manifest,receipts=accepted_gate_candidate(gate)
+    receipts['items']['runtime_configuration']['data']['activation'].update(
+        providers='disabled',worker='disabled',delivery='disabled')
+    result=evaluate(manifest,receipts,gate)
+    assert result['promotable'] is False
+    assert 'effective_runtime_configuration_unverified' in result['blockers']

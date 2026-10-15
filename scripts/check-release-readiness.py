@@ -122,7 +122,7 @@ def evaluate_release(manifest: dict, receipts: dict, gate: str) -> dict:
         and configuration.get('deployment_id')==manifest['candidate_deployment_id']
         and configuration.get('configuration_sha256')==manifest['configuration_sha256']
         and type(effective) is dict and set(effective)=={'providers','worker','delivery','contact_enrichment'}
-        and all(effective.get(key)=='disabled' for key in ('providers','worker','delivery'))
+        and all(effective.get(key)==manifest['activation'][key] for key in ('providers','worker','delivery'))
         and effective.get('contact_enrichment') in ('disabled','unconfigured'),
         'effective_runtime_configuration_unverified')
     canary=data('workspace_canary')

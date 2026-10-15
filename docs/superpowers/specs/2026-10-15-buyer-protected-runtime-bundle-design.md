@@ -44,6 +44,8 @@ A second fixed, protected `/v1/internal/release-configuration` endpoint proves t
 
 The installed Vercel CLI retries promotion POSTs internally, so the mutating promotion uses one direct HTTPS request with redirects/retries disabled. Before that request, a project-scoped GitHub deployment intent persists candidate, source, bundle, and run identities outside the runner. Any unresolved intent blocks new dispatches until separately authorized read-only reconciliation is recorded against the original intent. No alternate key or fresh runner bypasses the hold.
 
+Review refinements: Vercel deployment variants may omit `autoAssignCustomDomains`; the reviewed project must explicitly disable it, the ready candidate must report `aliasAssigned: false`, and an explicit deployment-level auto-assignment value must also be false. Effective activation receipts must match the manifest for every gate. Workspace manifests still require providers, worker, and delivery disabled; higher-gate evaluator tests do not activate runtime capabilities or waive their independent acceptance.
+
 ### Complete workspace evidence
 
 The bundle builder runs `evaluate_release(..., "workspace")` and emits nothing unless the full gate is `ready`. It composes, without inventing fields:

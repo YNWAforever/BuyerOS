@@ -176,7 +176,9 @@ def stage(ci_run_id,output):
         if re.fullmatch(r'https://[a-z0-9-]+\.vercel\.app',url) is None: raise ValueError('staging outcome unverified; do not retry')
         created=vercel('/v13/deployments/'+url.removeprefix('https://')+'?teamId='+controls['team_id'])
         deployed,origin=deployment(source,created['id'],controls)
-        if deployed.get('aliasAssigned') not in (False,None) or deployed.get('autoAssignCustomDomains') is not False:
+        if (deployed.get('aliasAssigned') is not False
+                or controls['project'].get('autoAssignCustomDomains') is not False
+                or ('autoAssignCustomDomains' in deployed and deployed['autoAssignCustomDomains'] is not False)):
             raise ValueError('staged deployment unexpectedly assigned aliases')
         artifacts=service_artifacts(deployed)
         manifest={'schema':'buyeros.release-manifest.v1','source_sha':source,

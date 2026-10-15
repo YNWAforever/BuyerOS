@@ -183,3 +183,94 @@ def test_binding_collector_refuses_changed_effective_configuration():
         with pytest.raises(ValueError): collector.collect_configuration(manifest,'https://owned.vercel.app','owned-token-'+'x'*32,get=lambda u,t:(200,changed))
     changed={**observed,'configuration_sha256':'0'*64}
     with pytest.raises(ValueError): collector.collect_configuration(manifest,'https://owned.vercel.app','owned-token-'+'x'*32,get=lambda u,t:(200,changed))
+
+
+def owned_stage(tmp_path, monkeypatch, deployment_policy=False):
+    """Run real stage orchestration with only external CLI/HTTP/DB adapters replaced."""
+    import json
+    from types import SimpleNamespace
+    from test_release_readiness import candidate
+    from test_runtime_observation_packet import schema_contract
+    from test_workspace_runtime_observations import packet, TOKENS
+    from runtime_bundle_fixtures import api_observation
+    runtime=runtime_module()
+    _,receipts=candidate()
+    account=packet();schema=schema_contract()
+    dsn='postgresql://user:pw@ep-owned.neon.tech/owned'
+    schema['target']['endpoint_sha256']=runtime.database_endpoint_sha256(dsn)
+    schema['target_receipt']=copy.deepcopy(schema['target'])
+    parsed_schema=runtime.SchemaContract.model_validate(schema)
+    observed_schema=copy.deepcopy(receipts['items']['schema']['data'])
+    observed_schema['contract_sha256']=runtime.digest(parsed_schema.model_dump(mode='json',by_alias=True))
+    reads=runtime.load_script('collect-workspace-observations.py')
+    observed_api=api_observation('a'*40,receipts['items']['schema']['checked_at'])
+    monkeypatch.setattr(reads,'collect',lambda *args:copy.deepcopy(observed_api))
+    collector=SimpleNamespace(collect_binding=lambda *args:copy.deepcopy(receipts['items']['deployment_binding']),
+        collect_configuration=lambda *args:copy.deepcopy(receipts['items']['runtime_configuration']))
+    monkeypatch.setattr(runtime,'load_script',lambda name:reads if name=='collect-workspace-observations.py' else collector)
+    async def observe(*args): return copy.deepcopy(observed_schema)
+    monkeypatch.setattr(runtime,'schema_observation',observe)
+    monkeypatch.setattr(runtime,'current_controls',lambda *args:controls())
+    monkeypatch.setattr(runtime,'ROOT',tmp_path)
+    values={'GITHUB_SHA':'a'*40,'GITHUB_REF':'refs/heads/main','GITHUB_WORKFLOW':'BuyerOS protected runtime bundle',
+        'BUYEROS_ENABLE_PROTECTED_STAGE':'true','GITHUB_RUN_ID':'456','GITHUB_OUTPUT':str(tmp_path/'github-output'),
+        'BUYEROS_G0_TARGET_JSON':json.dumps(account),'BUYEROS_SCHEMA_CONTRACT_JSON':json.dumps(schema),
+        'BUYEROS_G0_CONTRACT_SHA256':runtime.digest(account),
+        'BUYEROS_SCHEMA_CONTRACT_SHA256':runtime.digest(parsed_schema.model_dump(mode='json',by_alias=True)),
+        'BUYEROS_RUNTIME_READ_SCOPE_SHA256':account['authorization_reference_sha256'],
+        'BUYEROS_RELEASE_PROBE_TOKEN':'owned-probe-token','BUYEROS_ROLLBACK_DEPLOYMENT_ID':'dpl_rollback',
+        'BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY':'1'*64,
+        **{'BUYEROS_G0_'+key.upper()+'_TOKEN':token for key,token in TOKENS.items()}}
+    for key,value in values.items(): monkeypatch.setenv(key,value)
+    candidate_deployment={'id':'dpl_candidate','projectId':'prj_owned','ownerId':'team_owned','target':'production',
+        'readyState':'READY','url':'owned-candidate.vercel.app','aliasAssigned':False,
+        'meta':{'githubCommitSha':'a'*40,'githubCommitOrg':'YNWAforever','githubCommitRepo':'BuyerOS','githubCommitRepoId':'1234'},
+        'services':[{'name':'app'},{'name':'api'}],
+        'lambdas':[{'readyState':'READY','output':[{'functionName':'app'},{'functionName':'api'}]}]}
+    if deployment_policy!='absent': candidate_deployment['autoAssignCustomDomains']=deployment_policy
+    rollback={**copy.deepcopy(candidate_deployment),'id':'dpl_rollback','url':'owned-rollback.vercel.app'}
+    def read_vercel(path):
+        if '/dpl_rollback?' in path: return copy.deepcopy(rollback)
+        assert '/dpl_candidate?' in path or '/owned-candidate.vercel.app?' in path
+        return copy.deepcopy(candidate_deployment)
+    monkeypatch.setattr(runtime,'vercel',read_vercel)
+    calls=[]
+    def command(argv,**kwargs):
+        calls.append(argv)
+        if argv[:2]==['vercel','pull']:
+            path=tmp_path/'.vercel/.env.production.local';path.parent.mkdir()
+            path.write_text('BUYEROS_DATABASE_URL='+json.dumps(dsn)+'\nBUYEROS_RELEASE_PROBE_TOKEN="owned-probe-token"\n')
+            return ''
+        if argv[:2]==['vercel','build']: return ''
+        if argv[:2]==['vercel','deploy']:
+            assert '--skip-domain' in argv
+            return 'https://owned-candidate.vercel.app\n'
+        assert argv==['git','rev-parse',('a'*40)+'^{tree}']
+        return ('b'*40)+'\n'
+    monkeypatch.setattr(runtime,'command',command)
+    return runtime,candidate_deployment,calls,tmp_path/'stage.encrypted.json'
+
+
+@pytest.mark.parametrize('deployment_policy',['absent',False],ids=['optional-field-absent','explicitly-disabled'])
+def test_stage_accepts_native_deployment_with_reviewed_project_policy(tmp_path,monkeypatch,deployment_policy):
+    import json
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch,deployment_policy)
+    runtime.stage(123,output)
+    packet=runtime.decrypt_observation_packet(json.loads(output.read_text()),'1'*64)
+    assert packet['files']['manifest.json']['candidate_deployment_id']=='dpl_candidate'
+    assert packet['files']['manifest.json']['activation']=={'auth':'auth0','providers':'disabled','worker':'disabled','delivery':'disabled'}
+    assert len([call for call in calls if call[:2]==['vercel','deploy']])==1
+    assert not (tmp_path/'.vercel/.env.production.local').exists()
+    assert 'postgresql://' not in output.read_text()
+
+
+@pytest.mark.parametrize('fault',['assigned','assignment-unproven','auto-assigned','malformed-auto-assignment'])
+def test_stage_refuses_assigned_or_unproven_candidate_aliases(tmp_path,monkeypatch,fault):
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch)
+    if fault=='assigned': deployed['aliasAssigned']=True
+    if fault=='assignment-unproven': deployed.pop('aliasAssigned')
+    if fault=='auto-assigned': deployed['autoAssignCustomDomains']=True
+    if fault=='malformed-auto-assignment': deployed['autoAssignCustomDomains']=None
+    with pytest.raises(ValueError,match='unexpectedly assigned aliases'): runtime.stage(123,output)
+    assert not output.exists()
+    assert not (tmp_path/'.vercel/.env.production.local').exists()
