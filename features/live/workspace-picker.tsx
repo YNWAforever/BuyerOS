@@ -18,6 +18,8 @@ import {LiveResults,LiveUsage} from './results';
 import {LiveRunProgress} from './run-progress';
 import {LiveDraftEditor} from './drafts';
 import {LeadPreparationsPanel} from './lead-workflow/preparations-panel';
+import {LeadProgressPanel} from './lead-workflow/progress-panel';
+import {PilotBudgetPanel} from './lead-workflow/budget-panel';
 import {LiveNavigation} from './navigation';
 import {LiveBrand, LiveFrame, LiveTopbar} from './shell';
 import {ShieldCheck} from 'lucide-react';
@@ -235,6 +237,9 @@ export function LiveWorkspace() {
     </div>
     {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
     {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
+    {authorized&&projectKnown&&pathname==='/app'&&<><LeadProgressPanel key={`lead-overview-${snapshot.identity}`} mode="overview" locale={locale} onNavigate={navigate}/><PilotBudgetPanel key={`pilot-summary-${snapshot.identity}`} locale={locale} isAdmin={canArchive} summary/></>}
+    {authorized&&projectKnown&&pathname==='/app/operations'&&<LeadProgressPanel key={`lead-queue-${snapshot.identity}`} mode="queue" locale={locale} canEdit={canBuyerEdit&&projectActive} onNavigate={navigate}/>}
+    {authorized&&projectKnown&&pathname==='/app/settings'&&<PilotBudgetPanel key={`pilot-budget-${snapshot.identity}`} locale={locale} isAdmin={canArchive&&projectActive}/>}
     {authorized && canCreate && pathname === '/app/discover/new' && <LiveOfferWizard key={`new-${workspace}`} mode="create" onSaved={saved} t={t}/>}
     {authorized && canEdit && projectKnown && projectActive && pathname === '/app/discover/edit' && <LiveOfferWizard key={`edit-${workspace}-${project}`} mode="edit" projectId={project!} onSaved={saved} t={t}/>}
     {authorized && projectKnown && pathname === '/app' && <><LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/><LiveUsage key={`usage-${workspace}-${project}`} locale={locale} t={t}/><LiveProfilePanel key={`${workspace}-${project}`} canApprove={canApprove&&projectActive} t={t}/>{canArchive&&<LiveProjectManager key={`manager-${workspace}-${project}`} projectId={project!} t={t} onArchived={()=>{session.next({project:null});updateUrl(router,{project:null,profile:null});setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}/>}</>}
