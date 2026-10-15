@@ -64,7 +64,17 @@ person/channel references. Journals are append-only. Workers can read the non-pr
 pilot policy row to distinguish legacy projects, but a configured disabled pilot refuses
 worker admission before private accounting reads. Workers do not receive SELECT on
 private lead payloads. The existing retention sweeper receives only EXECUTE on the
-tenant/deadline-checked erasure function.
+tenant/deadline-checked erasure function. Normal maintenance discovers person-only
+records and unapplied private intents through bounded tenant-scoped erasure; workers
+receive no SELECT on private payload contents.
+
+Purchasing reviews are scoped to their person/channel. A company qualifies when any
+current subject qualifies, while a later rejection of that same person's role prevents
+older channels from preserving a false qualification. A preparation follows its own
+reviewed subject rather than another person's newer review. Its target changes only
+through an explicit editor selection. The complete review journal has its own bounded
+pagination. Human preparation reasons remain in erasable, subject/document-linked
+original intent payloads; permanent audit records contain fixed reason codes.
 
 ## Monthly USD10 accounting
 
@@ -86,16 +96,20 @@ The execution ledger and retained discovery, JUnit and failure logs are in:
 
 `.superpowers/sdd/2026-10-16-golden-resources-contact-workflow/`
 
-| Layer | Evidence / status |
+The following are the exact required local inventories and receipt locations. Use the
+final execution ledger and the actual reports for pass/fail status, rather than treating
+this source document or a successful build as a verification receipt.
+
+| Layer | Required evidence |
 | --- | --- |
-| API native inventory | 2,737 original cases plus 78 additions = 2,815. Full execution pending at document creation. |
-| Worker | 469/469 passed after the policy-read and narrow-retention regression fixes. |
-| Node clients / frontend guards | 269/269 general cases, plus 3/3 server SDK and 3/3 emitted-auth cases. |
-| Root Python guards | Final 332/332 pass, including rejection of an empty Node file wrapper. Initial stale-count and authoring-error logs remain retained. |
-| TypeScript / generated contracts | TypeScript and both generation checks pass; 117 operations. |
-| Builds | Default build and local Vercel build pass. Neither command deploys. |
-| Browser | Fixed local Vercel bundle: lead 17/17, original source checks 5/5, import 4/4, native attachments 4/4, formal draft 1/1. Native discovery and JUnit match without skips. |
-| Lint | Zero errors; three existing Hook warnings in `features/live/drafts.tsx`. |
+| API native inventory | 2,737 original cases plus 94 additions = 2,831; native discovery and `final-candidate-api.xml` must match exactly. |
+| Worker | 469 original cases; native discovery and `final-candidate-worker.xml`. |
+| Node clients / frontend guards | Full general Node report, separate server SDK and emitted-auth reports, plus six distinct lead client cases; empty file wrappers are rejected. |
+| Root Python guards | 332 cases, including rejection of empty/missing/skipped reports. |
+| TypeScript / generated contracts | TypeScript and both generation checks; 118 operations. |
+| Builds | Default build and local Vercel build. Neither command deploys. |
+| Browser | Fixed local Vercel bundle: lead 17, original source checks 5, import 4, native attachments 4, formal draft 1. `browser-final-matrix.json` binds each exact discovery/JUnit pair without skips. |
+| Lint | Full lint report; three existing Hook warnings in `features/live/drafts.tsx` are separate from any new errors. |
 | Remote CI / hosted company account / production | Not run or claimed in this implementation round. |
 
 Browser fixtures are expressly fictional: `Fixture Rice Buyer 01` through `24`,
@@ -106,6 +120,13 @@ Earlier failures remain retained, including missing UI RED runs, a definitive-va
 client-cache regression, development-server startup/IPC failures, an unacknowledged
 fixture setup intent, a built-link navigation failure and a sibling-panel stale-state
 failure. They are not relabeled as passing.
+The original 2,815-case full API attempt had two cold-cutover failures and is retained as
+failed evidence even though its intended filename contained `green`. The final corrected
+inventory is 2,831. Cold fixture setup explicitly permits read-only schema metadata for
+the new exact-head compatibility check, retains every original positive/rollback/unknown
+hold assertion, and adds the eight new empty actor-FK histories to the original six.
+Only the reviewed 0039 and 0054 heads may omit the not-yet-installed lead policy; a missing
+current or unknown-future feature schema is refused.
 
 The original 10 untracked files, two backups (51,460 bytes), `.gitignore`, and PR23's
 `codex/ci-pg16-image-preload-20261015` reference passed the preservation hash check in
