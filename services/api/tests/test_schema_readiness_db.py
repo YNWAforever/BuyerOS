@@ -27,7 +27,7 @@ def contract(dsn, **changes):
     parsed = urlsplit(dsn)
     data = dict(contract_version='buyeros.schema-contract.v1', source_sha=SHA,
         required_revisions=['0038_c61_workspace_directory','0039_c61_user_identities'],
-        compatible_heads=['0054_buyer_source_checks'],
+        compatible_heads=['0055_lead_workflow'],
         required_relations={'public.user_identities':['issuer','subject','user_id','status'],
                             'public.memberships':['id','workspace_id','user_id','roles','active']},
         required_functions=['public.buyeros_workspace_directory(uuid,bigint,integer)'],
@@ -65,7 +65,7 @@ def inspect(dsn, data=None, statements=None):
 def test_expanded_compatible_schema_is_allowed(readiness_db):
     result=inspect(readiness_db)
     assert result.compatible is True and result.target_match is True
-    assert result.observed_heads == ['0054_buyer_source_checks']
+    assert result.observed_heads == ['0055_lead_workflow']
     assert result.blockers == []
 
 def test_runtime_receipt_has_unambiguous_checks_for_promotion(readiness_db):
@@ -118,7 +118,7 @@ def test_same_head_wrong_target_is_blocked(readiness_db):
     data=contract(readiness_db)
     data['target']['metadata_receipt_sha256']='c'*64
     result=inspect(readiness_db,data)
-    assert result.observed_heads == ['0054_buyer_source_checks']
+    assert result.observed_heads == ['0055_lead_workflow']
     assert result.target_match is False and result.compatible is False
 
 

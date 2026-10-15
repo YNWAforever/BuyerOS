@@ -10,7 +10,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0054_buyer_source_checks"
+HEAD = "0055_lead_workflow"
 
 
 def _config():
