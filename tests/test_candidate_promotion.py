@@ -2,6 +2,7 @@
 import copy
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 import unittest
 from test_release_readiness import candidate
@@ -21,7 +22,7 @@ class CandidatePromotionTests(unittest.TestCase):
         self.metadata={'source_sha':self.manifest['source_sha'],'deployment_id':'dpl_candidate',
             'project_match':True,'team_match':True,'repository_match':True,
             'target':'production','ready_state':'READY','auto_main_disabled':True,'protected_main':True,
-            'protected_environment':True,'ci_completed':True,'ci_head':self.manifest['source_sha'],
+            'protected_environment':True,'nonself_approval_verified':True,'runtime_run_verified':True,'ci_completed':True,'ci_head':self.manifest['source_sha'],
             'ci_run_id':123,'jobs':{key:'success' for key in self.manifest['required_ci_jobs']}}
     def promote(self,verified=True,execute=True):
         return load().promote(self.manifest,self.receipts,'workspace',attestation_verified=verified,
@@ -136,4 +137,58 @@ class CandidatePromotionTests(unittest.TestCase):
                 module.build_workspace_bundle(manifest, self.receipts, source_sha=manifest['source_sha'])
         self.assertEqual(self.calls, [])
 
+    def test_current_run_requires_nonself_approval(self):
+        self.metadata['nonself_approval_verified']=False
+        self.assertFalse(self.promote()['promoted'])
+        self.assertEqual(self.calls,[])
+
+    def test_unverified_runtime_run_never_promotes(self):
+        self.metadata['runtime_run_verified']=False
+        self.assertFalse(self.promote()['promoted'])
+        self.assertEqual(self.calls,[])
+
+    def test_alias_timeout_is_unknown_and_never_retried(self):
+        calls=[]
+        def uncertain(deployment):
+            calls.append(deployment)
+            raise subprocess.TimeoutExpired('owned-alias-command',45)
+        result=load().promote(self.manifest,self.receipts,'workspace',attestation_verified=True,
+            metadata=self.metadata,execute=True,promote_alias=uncertain)
+        self.assertEqual(result['status'],'promotion_unknown')
+        self.assertEqual(calls,['dpl_candidate'])
+
+    def test_non_workspace_promotion_is_disabled(self):
+        result=load().promote(self.manifest,self.receipts,'research_export',attestation_verified=True,
+            metadata=self.metadata,execute=True,promote_alias=lambda value:self.calls.append(value))
+        self.assertIn('workspace_gate_only',result['blockers'])
+        self.assertEqual(self.calls,[])
+
 if __name__=='__main__':unittest.main()
+
+def test_promotion_cli_persists_unknown_intent_before_one_alias_attempt(tmp_path,monkeypatch):
+    import os
+    module=load();manifest,receipts=candidate()
+    envelope=module.encrypt_workspace_bundle(module.build_workspace_bundle(manifest,receipts,source_sha=manifest['source_sha']),'a'*64)
+    bundle=tmp_path/'runtime.json';bundle.write_text(json.dumps(envelope))
+    output=tmp_path/'receipt.json';effects=[]
+    for key,value in {'BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY':'a'*64,'GITHUB_WORKFLOW':'BuyerOS guarded promotion',
+                      'GITHUB_REF':'refs/heads/main','GITHUB_SHA':manifest['source_sha'],'GITHUB_RUN_ATTEMPT':'1'}.items():
+        monkeypatch.setenv(key,value)
+    fixture=CandidatePromotionTests();fixture.setUp()
+    monkeypatch.setattr(module,'remote_metadata',lambda m,r:fixture.metadata)
+    def boundary(argv):
+        effects.append(argv)
+        if argv[:3]==['gh','attestation','verify']:
+            assert '--source-digest' in argv
+            assert module.SIGNER_WORKFLOW.endswith('/buyeros-runtime-bundle.yml')
+            return ''
+        assert argv[:2]==['vercel','promote']
+        assert json.loads(output.read_text())['status']=='promotion_unknown'
+        raise subprocess.TimeoutExpired('owned promotion boundary',45)
+    monkeypatch.setattr(module,'command',boundary)
+    assert module.main(['--bundle',str(bundle),'--gate','workspace','--output',str(output),'--execute'])==1
+    assert json.loads(output.read_text())['status']=='promotion_unknown'
+    assert len([row for row in effects if row[:2]==['vercel','promote']])==1
+    effects.clear()
+    assert module.main(['--bundle',str(bundle),'--gate','workspace','--output',str(output),'--execute'])==1
+    assert effects==[]

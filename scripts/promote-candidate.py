@@ -14,7 +14,7 @@ from runtime_bundle import compose_workspace_receipts
 
 ROOT=Path(__file__).resolve().parents[1]
 REPOSITORY='YNWAforever/BuyerOS'
-SIGNER_WORKFLOW=REPOSITORY+'/.github/workflows/buyeros-runtime-acceptance.yml'
+SIGNER_WORKFLOW=REPOSITORY+'/.github/workflows/buyeros-runtime-bundle.yml'
 ENVIRONMENT='buyeros-production-promote'
 
 def gate_module():
@@ -25,8 +25,9 @@ def gate_module():
 def promote(manifest,receipts,gate,*,attestation_verified,metadata,execute,promote_alias):
     evaluation=gate_module().evaluate_release(manifest,receipts,gate)
     blockers=list(evaluation['blockers'])
+    if gate!='workspace':blockers.append('workspace_gate_only')
     if attestation_verified is not True:blockers.append('trusted_runtime_attestation_missing')
-    for key in ['auto_main_disabled','protected_main','protected_environment','ci_completed','project_match','team_match','repository_match']:
+    for key in ['auto_main_disabled','protected_main','protected_environment','ci_completed','project_match','team_match','repository_match','nonself_approval_verified','runtime_run_verified']:
         if metadata.get(key) is not True:blockers.append('remote_control_unverified:'+key)
     if metadata.get('source_sha')!=manifest.get('source_sha'):blockers.append('remote_source_mismatch')
     if metadata.get('deployment_id')!=manifest.get('candidate_deployment_id'):blockers.append('remote_deployment_mismatch')
@@ -51,40 +52,56 @@ def command(argv):
 def github(path):return json.loads(command(['gh','api',f'repos/{REPOSITORY}/{path}']))
 def vercel(path):return json.loads(command(['vercel','api',path,'-X','GET','--raw']))
 
-def remote_metadata(manifest):
-    branch=github('branches/main')
-    protection=github('branches/main/protection')
-    environment=github('environments/'+ENVIRONMENT)
-    run=github('actions/runs/'+str(manifest['ci_run_id']))
-    jobs=github('actions/runs/'+str(manifest['ci_run_id'])+'/jobs?per_page=100')
-    project_id=os.environ.get('VERCEL_PROJECT_ID','');team_id=os.environ.get('VERCEL_ORG_ID','')
-    if not project_id.startswith('prj_') or not team_id.startswith('team_'):raise ValueError('exact project/team configuration absent')
-    deployment=vercel('/v13/deployments/'+manifest['candidate_deployment_id']+'?teamId='+team_id)
-    project=vercel('/v9/projects/'+project_id+'?teamId='+team_id)
-    project_match=project.get('id')==project_id==deployment.get('projectId')
-    team_match=project.get('accountId')==team_id==deployment.get('ownerId')
-    link=project.get('link',{});meta=deployment.get('meta',{})
-    repository_match=(link.get('type')=='github' and link.get('org')+'/'+link.get('repo')==REPOSITORY
-        and meta.get('githubCommitOrg')==link.get('org') and meta.get('githubCommitRepo')==link.get('repo')
-        and bool(link.get('repoId')) and str(meta.get('githubCommitRepoId'))==str(link['repoId']))
-    rules=environment.get('protection_rules',[])
-    reviewed=any(rule.get('type')=='required_reviewers' and rule.get('reviewers') and rule.get('prevent_self_review') is True for rule in rules)
-    status_checks=protection.get('required_status_checks',{})
-    contexts=set(status_checks.get('contexts',[]))|{row.get('context') for row in status_checks.get('checks',[])}
-    protected_main=branch.get('protected') is True and status_checks.get('strict') is True and gate_module().REQUIRED_CI_JOBS<=contexts
-    # The project API must positively report the adopted no-auto-main control.
-    # Missing/changed API shape fails closed; a local vercel.json is insufficient.
-    main_disabled=project.get('autoAssignCustomDomains') is False
-    job_rows=jobs.get('jobs',[])
-    complete_inventory=jobs.get('total_count')==len(job_rows) and len({row['name'] for row in job_rows})==len(job_rows)
-    return {'source_sha':deployment.get('meta',{}).get('githubCommitSha'),'deployment_id':deployment.get('id'),
-        'project_match':project_match,'team_match':team_match,'repository_match':repository_match,
-        'target':deployment.get('target'),'ready_state':deployment.get('readyState'),
-        'auto_main_disabled':main_disabled,'protected_main':protected_main,
-        'protected_environment':reviewed and environment.get('deployment_branch_policy',{}).get('protected_branches') is True,
-        'ci_completed':run.get('status')=='completed' and run.get('conclusion')=='success' and run.get('path')=='.github/workflows/buyeros-ci.yml' and complete_inventory,
-        'ci_head':run.get('head_sha'),'ci_run_id':run.get('id'),
-        'jobs':{row['name']:row.get('conclusion') if row.get('status')=='completed' else None for row in job_rows}}
+def runtime_module():
+    spec=importlib.util.spec_from_file_location('promotion_runtime',ROOT/'scripts/protected-runtime.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    return module
+
+
+def remote_metadata(manifest,receipts):
+    from protected_release import verify_approval
+    runtime=runtime_module()
+    controls=runtime.current_controls(manifest['source_sha'],manifest['ci_run_id'])
+    deployment,_=runtime.deployment(manifest['source_sha'],manifest['candidate_deployment_id'],controls)
+    run_id=int(os.environ['GITHUB_RUN_ID'])
+    run=github('actions/runs/'+str(run_id))
+    if (run.get('head_sha')!=manifest['source_sha'] or run.get('head_branch')!='main'
+            or run.get('run_attempt')!=1 or run.get('path')!='.github/workflows/buyeros-promote.yml'):
+        raise ValueError('fresh exact-source promotion run required')
+    verify_approval(github('actions/runs/'+str(run_id)+'/approvals'),initiator_id=run['triggering_actor']['id'],
+                    run_id=run_id,source=manifest['source_sha'],deployment_id=manifest['candidate_deployment_id'],require_canary=False)
+    runtime_run_id=int(os.environ['RUNTIME_RUN_ID'])
+    runtime_run=github('actions/runs/'+str(runtime_run_id))
+    if (runtime_run.get('head_sha')!=manifest['source_sha'] or runtime_run.get('head_branch')!='main'
+            or runtime_run.get('run_attempt')!=1 or runtime_run.get('path')!='.github/workflows/buyeros-runtime-bundle.yml'
+            or runtime_run.get('status')!='completed' or runtime_run.get('conclusion')!='success'
+            or receipts['items']['workspace_canary']['data']['approval_run_id']!=runtime_run_id):
+        raise ValueError('exact successful protected runtime run required')
+    runtime_proof=verify_approval(github('actions/runs/'+str(runtime_run_id)+'/approvals'),
+        initiator_id=runtime_run['triggering_actor']['id'],run_id=runtime_run_id,source=manifest['source_sha'],
+        deployment_id=manifest['candidate_deployment_id'])
+    if any(receipts['items']['workspace_canary']['data'].get(key)!=value for key,value in runtime_proof.items()):
+        raise ValueError('runtime browser signoff proof mismatch')
+    alias=vercel('/v4/aliases/buyer-os-nu.vercel.app?teamId='+controls['team_id'])
+    if (alias.get('projectId')!=controls['project_id'] or alias.get('redirect')
+            or not alias.get('deploymentId') or alias.get('deploymentId')==manifest['candidate_deployment_id']
+            or receipts['items']['rollback']['data'].get('deployment_id')!=alias['deploymentId']):
+        raise ValueError('current production rollback identity changed; reconcile read-only')
+    return {'source_sha':deployment['meta']['githubCommitSha'],'deployment_id':deployment['id'],
+        'project_match':True,'team_match':True,'repository_match':True,
+        'target':deployment['target'],'ready_state':deployment['readyState'],
+        'auto_main_disabled':True,'protected_main':True,'protected_environment':True,
+        'ci_completed':True,'nonself_approval_verified':True,'runtime_run_verified':True,
+        'ci_head':controls['run']['head_sha'],'ci_run_id':controls['run']['id'],
+        'jobs':{row['name']:row['conclusion'] for row in controls['jobs']['jobs']}}
+
+
+def write_receipt(path,value):
+    path.parent.mkdir(parents=True,exist_ok=True)
+    with path.open('x',encoding='utf-8') as handle:
+        handle.write(json.dumps(value,indent=2)+'\n')
+        handle.flush();os.fsync(handle.fileno())
+
 
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
@@ -96,21 +113,33 @@ def main(argv=None):
     result={'schema':'buyeros.promotion-receipt.v1','status':'blocked','promoted':False,'blockers':['invalid_or_untrusted_input']}
     try:
         if args.output.exists():raise ValueError('immutable output exists')
+        if args.gate!='workspace':raise ValueError('workspace gate only')
         envelope=gate_module().read_json(args.bundle)
         if not is_encrypted_workspace_bundle(envelope):raise ValueError('encrypted workspace bundle required')
         # Attest the exact ciphertext before decrypting the customer/runtime receipt payload.
         command(['gh','attestation','verify',str(args.bundle),'--repo',REPOSITORY,'--signer-workflow',SIGNER_WORKFLOW,
-            '--source-ref','refs/heads/main','--deny-self-hosted-runners'])
+            '--source-ref','refs/heads/main','--source-digest',envelope['source_sha'],'--deny-self-hosted-runners'])
         bundle=decrypt_workspace_bundle(envelope,os.environ.get('BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY',''))
         if args.execute and (os.environ.get('GITHUB_WORKFLOW')!='BuyerOS guarded promotion' or os.environ.get('GITHUB_REF')!='refs/heads/main'):
             raise ValueError('execution requires reviewed protected workflow')
-        metadata=remote_metadata(bundle['manifest'])
+        if args.execute and (os.environ.get('GITHUB_SHA')!=envelope['source_sha'] or os.environ.get('GITHUB_RUN_ATTEMPT')!='1'):
+            raise ValueError('exact main source and first run attempt required')
+        build_workspace_bundle(bundle['manifest'],bundle['receipts'],source_sha=envelope['source_sha'])
+        metadata=remote_metadata(bundle['manifest'],bundle['receipts'])
+        def submit_once(deployment):
+            intent={'schema':'buyeros.promotion-receipt.v1','status':'promotion_unknown','promoted':False,
+                    'blockers':[],'source_sha':envelope['source_sha'],'deployment_id':deployment}
+            write_receipt(args.output,intent)
+            command(['vercel','promote',deployment,'--yes','--timeout','30s'])
         result=promote(bundle['manifest'],bundle['receipts'],args.gate,attestation_verified=True,metadata=metadata,execute=args.execute,
-            promote_alias=lambda deployment:command(['vercel','promote',deployment,'--yes']))
+            promote_alias=submit_once)
     except (ValueError,KeyError,TypeError,OSError,subprocess.SubprocessError,json.JSONDecodeError):pass
-    if not args.output.exists():
-        args.output.parent.mkdir(parents=True,exist_ok=True)
-        with args.output.open('x',encoding='utf-8') as output:output.write(json.dumps(result,indent=2)+'\n')
+    if args.output.exists() and result['status'] in ('promotion_unknown','promotion_submitted_readback_required'):
+        replacement=args.output.with_suffix('.final.tmp')
+        write_receipt(replacement,result)
+        os.replace(replacement,args.output)
+    elif not args.output.exists():
+        write_receipt(args.output,result)
     print(json.dumps(result))
     return 0 if result['status'] in ('preflight_ready','promotion_submitted_readback_required') else 1
 
