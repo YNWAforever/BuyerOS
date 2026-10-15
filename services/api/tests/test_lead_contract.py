@@ -8,6 +8,7 @@ from buyeros_api.api.app import create_app
 BASE = "/v1/workspaces/{workspace_id}/projects/{project_id}"
 OPERATIONS = {
     ("get", BASE + "/buyers/{buyer_id}/lead-evidence"): "listLeadEvidence",
+    ("get", BASE + "/buyers/{buyer_id}/lead-reviews"): "listLeadReviews",
     ("post", BASE + "/lead-intents"): "prepareLeadIntent",
     ("get", BASE + "/lead-intents"): "listLeadIntents",
     ("get", BASE + "/lead-intents/{intent_id}"): "getLeadIntent",

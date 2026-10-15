@@ -48,6 +48,10 @@ def test_worker_retention_function_checks_deadline_and_tenant_without_table_read
         with pytest.raises(psycopg.errors.InsufficientPrivilege, match="tenant scope"):
             db.execute("SELECT buyeros_redact_lead_subject(%s,'offer_document',%s)", (other, document))
         assert db.execute("SELECT buyeros_redact_lead_subject(%s,'offer_document',%s)", (workspace, document)).fetchone() == (0,)
+        with pytest.raises(psycopg.errors.InsufficientPrivilege, match="tenant scope"):
+            db.execute("SELECT * FROM buyeros_expire_due_lead_payloads(%s,1)", (other,))
+        with pytest.raises(psycopg.errors.InvalidParameterValue, match="bounded retention"):
+            db.execute("SELECT * FROM buyeros_expire_due_lead_payloads(%s,0)", (workspace,))
 
 
 def test_lead_workflow_schema_is_tenant_scoped_and_append_only(isolated_migrated):

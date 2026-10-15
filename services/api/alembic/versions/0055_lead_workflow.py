@@ -184,6 +184,32 @@ def upgrade():
     REVOKE ALL ON FUNCTION public.buyeros_redact_lead_subject(uuid,text,uuid) FROM PUBLIC,buyeros_worker;
     GRANT EXECUTE ON FUNCTION public.buyeros_redact_lead_subject(uuid,text,uuid) TO buyeros_api,buyeros_worker;
     """)
+    op.execute("""
+    CREATE FUNCTION public.buyeros_expire_due_lead_payloads(p_workspace uuid,p_limit integer)
+    RETURNS TABLE(subject_id uuid,erased integer) LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path=pg_catalog,public AS $$
+    DECLARE candidate record;
+    BEGIN
+      IF p_workspace IS NULL OR p_workspace IS DISTINCT FROM
+         NULLIF(current_setting('app.workspace_id',true),'')::uuid THEN
+        RAISE EXCEPTION 'tenant scope required' USING ERRCODE='42501';
+      END IF;
+      IF p_limit IS NULL OR p_limit<1 OR p_limit>100 THEN
+        RAISE EXCEPTION 'bounded retention required' USING ERRCODE='22023';
+      END IF;
+      FOR candidate IN SELECT p.id FROM public.lead_private_payloads p
+        WHERE p.workspace_id=p_workspace AND p.retention_expires_at<=CURRENT_TIMESTAMP
+          AND p.contents IS NOT NULL
+        ORDER BY p.retention_expires_at,p.id LIMIT p_limit FOR UPDATE SKIP LOCKED
+      LOOP
+        subject_id:=candidate.id;
+        erased:=public.buyeros_redact_lead_subject(p_workspace,'lead_payload',candidate.id);
+        RETURN NEXT;
+      END LOOP;
+    END $$;
+    REVOKE ALL ON FUNCTION public.buyeros_expire_due_lead_payloads(uuid,integer) FROM PUBLIC;
+    GRANT EXECUTE ON FUNCTION public.buyeros_expire_due_lead_payloads(uuid,integer) TO buyeros_api,buyeros_worker;
+    """)
     _fences(revision)
 
 
@@ -193,6 +219,7 @@ def downgrade():
         op.execute(f"ALTER TABLE {name} NO FORCE ROW LEVEL SECURITY")
         if db.execute(sa.text(f"SELECT EXISTS(SELECT 1 FROM {name})")).scalar_one():
             raise RuntimeError("0055 downgrade blocked: preserve lead evidence and original intents")
+    op.execute("DROP FUNCTION public.buyeros_expire_due_lead_payloads(uuid,integer)")
     op.execute("DROP FUNCTION public.buyeros_redact_lead_subject(uuid,text,uuid)")
     for name in reversed(TABLE_NAMES):
         op.drop_table(name)

@@ -186,4 +186,10 @@ async def expire_due_contacts(engine, now, *, policy_version: str, limit: int = 
                     session, contact_id, policy_version, now, subject_type="contact_point"
                 )
                 expired.append(str(contact_id))
+            remaining = limit - len(expired)
+            if remaining:
+                from buyeros_api.services.lead_retention import expire_due_lead_subjects
+                expired.extend(await expire_due_lead_subjects(
+                    session, now=now, policy_version=policy_version, limit=remaining,
+                ))
     return expired

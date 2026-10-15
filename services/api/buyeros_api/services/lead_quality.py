@@ -1,5 +1,6 @@
 """Pure source-quality rules. Technical deliverability is a separate property."""
 from datetime import datetime, timedelta
+from dataclasses import dataclass
 
 from ..api.lead_schemas import LeadObservationRecord, LeadReviewRecord, LeadQuality
 
@@ -7,6 +8,58 @@ SHARED_MAILBOXES = frozenset({
     "info", "sales", "contact", "hello", "office", "admin", "support", "orders",
     "purchasing", "procurement", "buying", "enquiries", "enquiry", "accounts",
 })
+
+
+@dataclass(frozen=True)
+class ReviewedLeadSubject:
+    review: LeadReviewRecord
+    role_review: LeadReviewRecord
+    quality: LeadQuality
+
+
+def direct_evidence(observations, review, now):
+    for row in relevant_observations(observations, review.person_id, review.contact_id):
+        if (row.claim != "channel_ownership" or row.stance != "supports" or row.redacted
+                or row.availability != "available" or not row.checked_at <= now < row.checked_at + timedelta(days=7)):
+            continue
+        point = row.channel or {}
+        value = point.get("value", "")
+        local = value.split("@", 1)[0].casefold() if "@" in value else ""
+        if (point.get("type") in {"business_email", "business_phone"}
+                and point.get("person_id") == str(review.person_id) and local not in SHARED_MAILBOXES):
+            return True
+    return False
+
+
+def reviewed_subjects(observations, history, now):
+    """Latest channel judgement per pair; latest role judgement applies to that person."""
+    pairs, roles = {}, {}
+    for review in sorted(history, key=lambda item: item.case_version):
+        pairs[(review.person_id, review.contact_id)] = review
+        roles[review.person_id] = review
+    subjects = []
+    role_blockers = {"manual_review_required", "employment_not_confirmed", "procurement_not_confirmed",
+        "official_role_source_required", "named_person_required", "employment_expired_or_unavailable",
+        "procurement_scope_expired_or_unavailable", "review_context_changed", "source_conflict_unresolved"}
+    for review in pairs.values():
+        role_review = roles[review.person_id]
+        pair = evaluate_lead_quality(observations=observations, review=review, now=now)
+        if role_review.id == review.id:
+            quality = pair
+        else:
+            role = evaluate_lead_quality(observations=observations, review=role_review, now=now)
+            blockers = [item for item in pair.blockers if item not in role_blockers]
+            blockers.extend(item for item in role.blockers if item in role_blockers)
+            quality = pair.model_copy(update={
+                "employment_current": role.employment_current, "procurement_current": role.procurement_current,
+                "qualified_person": role.qualified_person,
+                "direct_channel": bool(role.qualified_person and pair.channel_ownership_current
+                                       and direct_evidence(observations, review, now)),
+                "needs_review": pair.needs_review or (role.needs_review and not role.qualified_person),
+                "blockers": list(dict.fromkeys(blockers)),
+            })
+        subjects.append(ReviewedLeadSubject(review, role_review, quality))
+    return subjects
 
 
 def relevant_observations(observations, person_id, contact_id):
@@ -58,24 +111,23 @@ def evaluate_lead_quality(
     official_role = any(source.source_kind == "official" for row in employment + procurement for source in row.sources)
     employment_ok = bool(base and role_review_current and review.employment == "accepted" and employment)
     procurement_ok = bool(base and role_review_current and review.procurement_scope == "accepted" and procurement)
-    person_ok = employment_ok and procurement_ok and official_role
+    named_person = any(
+        isinstance((row.person or {}).get("full_name"), str)
+        and (row.person or {})["full_name"].strip()
+        for row in employment + procurement
+    )
+    person_ok = bool(employment_ok and procurement_ok and official_role and named_person)
     channel_ok = bool(base and channel_review_current and review.channel_ownership == "accepted"
                       and channel and any(source.source_kind == "official" for row in channel for source in row.sources))
-    direct = False
-    for row in channel:
-        point = row.channel or {}
-        value = point.get("value", "")
-        local = value.split("@", 1)[0].casefold() if "@" in value else ""
-        if (point.get("type") in {"business_email", "business_phone"}
-                and point.get("person_id") == str(review.person_id)
-                and local not in SHARED_MAILBOXES):
-            direct = True
+    direct = direct_evidence(observations, review, now)
     if not employment_ok:
         blockers.append("employment_not_confirmed")
     if not procurement_ok:
         blockers.append("procurement_not_confirmed")
     if not official_role:
         blockers.append("official_role_source_required")
+    if not named_person:
+        blockers.append("named_person_required")
     if review.contact_id and (not channel_ok or not direct):
         blockers.append("direct_person_channel_not_confirmed")
     expiries.append(review.created_at + timedelta(days=7 if review.contact_id else 30))

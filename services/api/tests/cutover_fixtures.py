@@ -62,6 +62,10 @@ def cold_cutover(monkeypatch,tmp_path):
         with psycopg.connect(source_dsn) as db:
             db.execute("ALTER ROLE buyeros_api LOGIN PASSWORD 'test-only'")
             db.execute("ALTER ROLE buyeros_worker LOGIN PASSWORD 'test-only'")
+            # Current admission verifies an exact legacy head before excluding
+            # the not-yet-installed pilot policy. This is metadata read only;
+            # the cold fixture still uses the ordinary non-bypass worker role.
+            db.execute("GRANT SELECT ON alembic_version TO buyeros_worker")
             db.execute("UPDATE worker_runtime_control SET backend='cloudflare',enabled=true,epoch=epoch+1 WHERE singleton=1")
             epoch=db.execute('SELECT epoch FROM worker_runtime_control').fetchone()[0]
         monkeypatch.setenv('BUYEROS_EXECUTION_DATABASE_URL',role_dsn(source_dsn,'buyeros_worker'));monkeypatch.setenv('BUYEROS_CLOUDFLARE_EXECUTION_ENABLED','true');get_settings.cache_clear()
@@ -87,7 +91,7 @@ def cold_cutover(monkeypatch,tmp_path):
             db.execute('UPDATE budget_accounts SET settled_spend=0.050000 WHERE workspace_id=%s',(workspace,))
             db.execute("INSERT INTO cost_events(id,workspace_id,kind,amount,pricing_version) VALUES (%s,%s,'commit',0.050000,'fixture-price-v1')",(uuid.uuid4(),workspace))
         adapter=SearchFixture(research,timeout=True);outcome=run_provider(research['envelope'],adapter=adapter)
-        assert outcome.state=='reconcile' and outcome.code=='PROVIDER_UNKNOWN' and adapter.calls==1
+        assert outcome.state=='reconcile' and outcome.code=='PROVIDER_UNKNOWN' and adapter.calls==1, (outcome, adapter.calls)
         before=snapshot(source_dsn,[legacy,new_user],workspace)
         assert before['ledger_and_unknown']['budget_reservations']['count']==1 and before['ledger_and_unknown']['provider_operations']['count']==1
         mark('expand_and_map',snapshot=before)
@@ -104,7 +108,11 @@ def cold_cutover(monkeypatch,tmp_path):
             current=expanded['historical_fks'][user]
             assert all(current[k]==v for k,v in prior.items())
             added=set(current)-set(prior)
-            assert added=={str((service+'_receipts','actor_id')) for service in ('search','model','contact')}|{str(('delivery_messages','actor_id')),str(('document_uploads','actor_user_id')),str(('buyer_source_checks','recorded_by_user_id'))}
+            expected_added={str((service+'_receipts','actor_id')) for service in ('search','model','contact')}|{str(('delivery_messages','actor_id')),str(('document_uploads','actor_user_id')),str(('buyer_source_checks','recorded_by_user_id'))}
+            expected_added|={str(('lead_action_intents','actor_id'))}|{str((table,'recorded_by_user_id')) for table in (
+                'lead_observations','lead_reviews','lead_preparation_revisions','lead_preparation_content_reviews',
+                'pilot_cost_events','pilot_credit_observations','pilot_reconciliations')}
+            assert added==expected_added, (sorted(added),sorted(expected_added))
             assert all(current[k]==hashlib.sha256(json.dumps([]).encode()).hexdigest() for k in added)
         before=expanded
         mark('current_receipt_privacy_schema_before_backup',schema='0055_lead_workflow',snapshot=before)

@@ -2,7 +2,7 @@
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..api.errors import ApiError
@@ -32,6 +32,37 @@ async def review_observations(session, scope, now):
         LeadObservation.buyer_id == scope.buyer_id,
     ).order_by(LeadObservation.created_at, LeadObservation.id))).all())
     return [LeadObservationRecord.model_validate(await observation_data(session, scope, row, now)) for row in rows]
+
+
+async def review_history(session, scope, observations, now):
+    rows = list((await session.scalars(select(LeadReview).where(
+        LeadReview.workspace_id == scope.workspace_id, LeadReview.project_id == scope.project_id,
+        LeadReview.buyer_id == scope.buyer_id,
+    ).order_by(LeadReview.case_version))).all())
+    return [await review_data(session, scope, row, observations, now) for row in rows]
+
+
+async def list_lead_reviews(session, scope, *, offset, limit, now, purpose="contact_research"):
+    require_permission(scope, "getBuyer")
+    filters = (LeadReview.workspace_id == scope.workspace_id, LeadReview.project_id == scope.project_id,
+               LeadReview.buyer_id == scope.buyer_id)
+    total = await session.scalar(select(func.count()).select_from(LeadReview).where(*filters))
+    rows = list((await session.scalars(select(LeadReview).where(*filters)
+        .order_by(LeadReview.case_version.desc()).offset(offset).limit(limit))).all())
+    observations = await review_observations(session, scope, now) if rows else []
+    items = [await review_data(session, scope, row, observations, now) for row in rows]
+    if purpose == "draft_preparation":
+        from .policy_service import evaluate_current_policy
+        for index, item in enumerate(items):
+            gate = await evaluate_current_policy(session, {
+                "workspace_id": scope.workspace_id, "project_id": scope.project_id, "company_id": scope.company_id,
+                **({"contact_point_id": item.contact_id} if item.contact_id else {}),
+            }, "draft_preparation", now)
+            if not gate["allowed"]:
+                items[index] = item.model_copy(update={
+                    "redacted": True, "context_current": False, "rationale": None, "conflict_resolution": None,
+                })
+    return {"items": [item.model_dump(mode="json") for item in items], "offset": offset, "limit": limit, "total": total}
 
 
 async def validate_lead_review(session, scope, data, now):
@@ -94,6 +125,7 @@ async def append_lead_review(
     previous = await session.scalar(select(LeadReview).where(
         LeadReview.workspace_id == scope.workspace_id, LeadReview.project_id == scope.project_id,
         LeadReview.buyer_id == scope.buyer_id,
+        LeadReview.person_id == data.person_id, LeadReview.contact_id == data.contact_id,
     ).order_by(LeadReview.case_version.desc()).limit(1))
     if data.previous_review_id is not None and (previous is None or previous.id != data.previous_review_id):
         raise ApiError(412, "STALE_REVISION", "previous review changed")

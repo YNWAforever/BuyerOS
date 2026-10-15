@@ -18,7 +18,7 @@ from ..db.lead_workflow import (
 from ..db.runs import Person, ContactPoint
 from .lead_evidence_service import require_permission, observation_data, personal_policy
 from .lead_review_service import review_data
-from .lead_quality import evaluate_lead_quality
+from .lead_quality import evaluate_lead_quality, reviewed_subjects
 
 
 async def _case_views(session, scope, now, *, detail=False, include_preparations=True):
@@ -90,8 +90,15 @@ async def _case_views(session, scope, now, *, detail=False, include_preparations
                               references=refs_by_review[row.id], policy_allowed=await allowed(row.contact_id))
             for row in review_by_buyer[buyer.id]
         ]
-        latest = history[-1] if history else None
-        quality = evaluate_lead_quality(observations=materialized, review=latest, now=now)
+        subjects = reviewed_subjects(materialized, history, now)
+        selected = max(subjects, key=lambda item: (
+            item.quality.direct_channel, item.quality.qualified_person,
+            item.quality.employment_current, item.review.case_version,
+        )) if subjects else None
+        latest = selected.review if selected else None
+        quality = selected.quality if selected else evaluate_lead_quality(observations=materialized, review=None, now=now)
+        selected_history = [item for item in history if latest and
+            item.person_id == latest.person_id and item.contact_id == latest.contact_id]
         person_id = latest.person_id if latest else next((row.person_id for row in reversed(materialized) if row.person_id), None)
         contact_id = latest.contact_id if latest else None
         if quality.needs_review:
@@ -115,13 +122,14 @@ async def _case_views(session, scope, now, *, detail=False, include_preparations
             owner_user_id=buyer.owner_user_id, next_action=case.next_action if case else "",
             due_on=case.due_on if case else None, selected_person_id=person_id, selected_contact_id=contact_id,
             quality=quality, observations=materialized[-20:] if detail else None,
-            observations_total=len(materialized), reviews=history[-3:] if detail else [],
+            observations_total=len(materialized), reviews=selected_history[-3:] if detail else [],
             reviews_total=len(history), source_check_ids=check_by_buyer[buyer.id], stage=stage, as_of=now,
         )
         if include_preparations and view.quality.direct_channel:
             from .lead_preparation_service import has_current_reviewed_preparation
-            review_view = view.model_copy(update={"reviews": history[-3:]})
-            view.reviewed_preparation = await has_current_reviewed_preparation(session, current_scope, review_view, now)
+            review_view = view.model_copy(update={"reviews": selected_history[-3:]})
+            view.reviewed_preparation = await has_current_reviewed_preparation(
+                session, current_scope, review_view, now, subject_states=subjects)
             if view.reviewed_preparation:
                 view.stage = "complete"
         results.append(view)

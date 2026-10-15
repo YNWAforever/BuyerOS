@@ -302,6 +302,13 @@ class LeadReviewRecord(LeadStrict):
     redacted: bool
 
 
+class LeadReviewPage(LeadStrict):
+    items: list[LeadReviewRecord]
+    offset: int
+    limit: int
+    total: int
+
+
 LeadStage = Literal[
     "find_person", "verify_employment", "verify_procurement", "verify_channel",
     "refresh_evidence", "review_preparation", "complete",
@@ -472,6 +479,8 @@ class LeadPreparationView(LeadStrict):
     redacted: bool
     reviewed_by_user_id: UUID | None
     reviewed_at: AwareDatetime | None
+    review_reason: str | None = None
+    state_reason: str | None = None
     created_at: AwareDatetime
 
 

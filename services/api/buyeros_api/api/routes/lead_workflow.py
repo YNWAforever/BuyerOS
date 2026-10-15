@@ -1,6 +1,7 @@
 """Manual evidence and durable local intentions, with current server authority."""
 import uuid
 from datetime import datetime, timezone
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Header, Query, Request
 
@@ -10,13 +11,14 @@ from ..errors import envelope
 from ..lead_schemas import (
     EmptyLeadBody, LeadEnvelope, LeadEvidencePage, LeadIntentInput,
     LeadIntentPage, LeadIntentReceipt, LeadIntentView,
-    LeadCaseView, LeadProgressPage, LeadFilters, LeadProgressQuery,
+    LeadCaseView, LeadProgressPage, LeadFilters, LeadProgressQuery, LeadReviewPage,
 )
 from ...services.lead_evidence_service import resolve_lead_scope, list_observations
 from ...services.lead_intent_service import (
     prepare_intent, read_intent, list_intents, apply_intent, acknowledge_intent, cancel_intent,
 )
 from ...services.lead_progress_service import get_lead_case, get_lead_progress
+from ...services.lead_review_service import list_lead_reviews
 
 router = APIRouter(
     prefix="/v1/workspaces/{workspace_id}/projects/{project_id}", tags=["lead-workflow"],
@@ -63,6 +65,22 @@ async def list_lead_evidence(
         scope = await resolve_lead_scope(session, workspace_id=workspace_id, project_id=project_id,
                                          buyer_id=buyer_id, principal=principal)
         result = await list_observations(session, scope, offset=offset, limit=limit, now=datetime.now(timezone.utc))
+    return envelope(result, request.state.request_id)
+
+
+@router.get("/buyers/{buyer_id}/lead-reviews", operation_id="listLeadReviews",
+            name="listLeadReviews", response_model=LeadEnvelope[LeadReviewPage])
+async def lead_review_history(
+    workspace_id: uuid.UUID, project_id: uuid.UUID, buyer_id: uuid.UUID, request: Request,
+    offset: int = Query(0, ge=0), limit: int = Query(20, ge=1, le=100),
+    purpose: Literal["contact_research", "draft_preparation"] = Query("contact_research"),
+    principal: Principal = Depends(get_principal),
+):
+    async with tenant_scoped(workspace_id) as session:
+        scope = await resolve_lead_scope(session, workspace_id=workspace_id, project_id=project_id,
+                                         buyer_id=buyer_id, principal=principal)
+        result = await list_lead_reviews(session, scope, offset=offset, limit=limit,
+                                         now=datetime.now(timezone.utc), purpose=purpose)
     return envelope(result, request.state.request_id)
 
 

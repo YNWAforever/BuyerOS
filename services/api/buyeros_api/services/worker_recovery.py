@@ -116,10 +116,17 @@ async def _expire_retention(session, *, now, limit):
         await expire_subject_data(session, contact, policy, now, subject_type='contact_point')
     remaining=limit-len(sources)-len(contacts)
     if remaining>0:
+        from .lead_retention import expire_due_lead_subjects
+        leads = await expire_due_lead_subjects(session, now=now, policy_version=policy,
+                                              limit=min(100, remaining))
+        remaining -= len(leads)
+    else:
+        leads = []
+    if remaining>0:
         from .receipt_retention import expire_provider_receipts
         receipts=await expire_provider_receipts(session,now=now,policy_version=policy,limit=min(100,remaining))
     else:receipts=[]
-    return len(sources)+len(contacts)+len(receipts)
+    return len(sources)+len(contacts)+len(leads)+len(receipts)
 
 
 async def recover_execution(engine, *, now: datetime, limit: int = 10, runtime_epoch: int | None = None) -> RecoveryReport:

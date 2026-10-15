@@ -32,9 +32,7 @@ LOCAL_CONFIGURATION_INTENT_DAYS = 30
 
 
 def personal_action(action):
-    return action in {"observation.append", "lead.review"} or (
-        action.startswith("preparation.") and action != "preparation.archive"
-    )
+    return action in {"observation.append", "lead.review"} or action.startswith("preparation.")
 
 
 def require_action(scope, action):
@@ -123,6 +121,13 @@ async def _view(session, scope, row, now):
     payload, content = await retained_payload(session, scope, row.payload_id, now)
     allowed = (await personal_policy(session, scope, now, payload.contact_id if payload else None,
                                      required=False) is not None) if personal_action(row.action) else True
+    if allowed and row.action.startswith("preparation."):
+        from .policy_service import evaluate_current_policy
+        gate = await evaluate_current_policy(session, {
+            "workspace_id": scope.workspace_id, "project_id": scope.project_id, "company_id": scope.company_id,
+            **({"contact_point_id": payload.contact_id} if payload and payload.contact_id else {}),
+        }, "draft_preparation", now)
+        allowed = gate["allowed"]
     if not allowed:
         content = None
     receipt = await _receipt(session, scope, row, now) if row.state == "applied" else None
@@ -183,9 +188,15 @@ async def prepare_intent(
             offer_document_ids = [item["id"] for item in context["documents"]]
             person_id, contact_id = data.payload.person_id, data.payload.contact_id
         elif data.action.startswith("preparation."):
-            from .lead_preparation_service import _row, _revision
+            from .lead_preparation_service import _row, _revision, get_preparation
             target, _ = await _row(session, scope, data.target_id)
             revision = await _revision(session, scope, target)
+            current = await get_preparation(session, scope=scope, preparation_id=target.id, now=now)
+            private, retained = await retained_payload(session, scope, revision.payload_id, now)
+            if current["redacted"] or not retained or private is None:
+                raise ApiError(403, "POLICY_BLOCKED", "current retained preparation required")
+            deadline = min(deadline, private.retention_expires_at)
+            offer_document_ids = retained.get("offer_document_ids", [])
             person_id, contact_id = revision.person_id, revision.contact_id
         elif data.action in {"pilot.policy", "cost.record", "credits.record", "budget.reconcile"}:
             from .pilot_budget_service import validate_pilot_input

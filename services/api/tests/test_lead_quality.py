@@ -78,6 +78,17 @@ def test_public_channel_can_be_source_verified_without_technical_upgrade():
     assert before["validity"] == "unverified_public"
 
 
+@pytest.mark.parametrize("name", [None, "", "   "], ids=["legacy-null", "empty", "whitespace"])
+def test_qualified_purchasing_person_requires_a_current_retained_name(name):
+    rows = [observation(kind) for kind in ("employment", "procurement_scope", "channel_ownership")]
+    for row in rows:
+        row.person["full_name"] = name
+    actual = quality(rows)
+    assert actual.qualified_person is False
+    assert actual.direct_channel is False
+    assert "named_person_required" in actual.blockers
+
+
 @pytest.mark.parametrize("mode", ["missing_procurement", "no_official_role", "shared_inbox", "department_form", "redacted", "stale_context"])
 def test_evidence_gaps_do_not_turn_into_a_qualified_direct_contact(mode):
     rows = [observation(kind) for kind in ("employment", "procurement_scope", "channel_ownership")]

@@ -336,6 +336,9 @@ async def assert_pilot_admission(
     session: AsyncSession, *, workspace_id: UUID, project_id: UUID, operation_id: UUID,
     upper_bound: Decimal, now: datetime,
 ) -> None:
+    from .lead_schema import lead_schema_available
+    if not await lead_schema_available(session):
+        return
     scope = LeadScope(workspace_id, project_id, None, None, UUID(int=0), 0, frozenset())
     policy = await _policy(session, scope)
     if policy is None:

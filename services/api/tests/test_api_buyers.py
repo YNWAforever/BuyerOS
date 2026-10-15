@@ -94,7 +94,7 @@ def test_registry_covers_every_unimplemented_contract_operation():
         "previewBulkManifest", "getBulkManifest", "executeBulkManifest",
         "getWorkQueue", "listProviderOperations",
         "listResearchCandidates", "getResearchCandidateReviewContext", "reviewResearchCandidate",
-        "listLeadEvidence", "getLeadWorkflow", "getLeadCase", "prepareLeadIntent",
+        "listLeadEvidence", "listLeadReviews", "getLeadWorkflow", "getLeadCase", "prepareLeadIntent",
         "listLeadIntents", "getLeadIntent", "applyLeadIntent", "acknowledgeLeadIntent", "cancelLeadIntent",
         "listLeadPreparations", "getLeadPreparation", "listLeadPreparationRevisions",
         "getPilotBudget", "listPilotCostEvents",

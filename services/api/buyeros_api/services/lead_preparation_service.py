@@ -13,6 +13,7 @@ from ..db.icp import Project, IcpVersion, canonical_hash
 from ..db.ingestion import OfferDocument
 from ..db.lead_workflow import (
     LeadPreparation, LeadPreparationRevision, LeadPreparationEvidence, LeadPreparationContentReview,
+    LeadActionIntent,
 )
 from ..db.policy import PolicyDecision
 from ..db.runs import Person, ContactPoint
@@ -21,7 +22,8 @@ from .icp_service import effective_offer_facts
 from .lead_evidence_service import (
     require_permission, personal_policy, save_private_payload, retained_payload, assert_active_project,
 )
-from .lead_review_service import review_observations
+from .lead_review_service import review_observations, review_history
+from .lead_quality import reviewed_subjects, evaluate_lead_quality
 from .policy_service import evaluate_current_policy
 
 
@@ -47,6 +49,27 @@ async def _revision(session, scope, row):
     if revision is None:
         raise ApiError(409, "INVALID_STATE", "current preparation revision unavailable")
     return revision
+
+
+async def _retained_action_reason(session, scope, row, actions, now, *, revision=None, context_hash=None):
+    """The applied original intent is the single erasable source of human reasons."""
+    query = select(LeadActionIntent).where(
+        LeadActionIntent.workspace_id == scope.workspace_id, LeadActionIntent.project_id == scope.project_id,
+        LeadActionIntent.buyer_id == scope.buyer_id, LeadActionIntent.resource_id == row.id,
+        LeadActionIntent.resource_type == "lead_preparation", LeadActionIntent.state == "applied",
+        LeadActionIntent.action.in_(actions),
+    )
+    if revision is None:
+        query = query.where(LeadActionIntent.resource_version == row.version)
+    intent = await session.scalar(query.order_by(LeadActionIntent.resource_version.desc()).limit(1))
+    if intent is None:
+        return None
+    _, private = await retained_payload(session, scope, intent.payload_id, now)
+    body = private.get("payload", {}) if private else {}
+    if revision is not None and (body.get("revision_id") != str(revision.id)
+                                  or body.get("context_hash") != context_hash):
+        return None
+    return body.get("reason") if isinstance(body.get("reason"), str) else None
 
 
 async def _fact_context(session, scope, references, now):
@@ -91,7 +114,7 @@ async def _fact_context(session, scope, references, now):
                       "offer_revision": project.offer_revision, "documents": documents}, documents
 
 
-async def preparation_context(session, scope, data, now, *, case_view=None):
+async def preparation_context(session, scope, data, now, *, case_view=None, subject_states=None):
     from .lead_progress_service import get_lead_case
     deadline = await personal_policy(session, scope, now, data.contact_id)
     gate = await evaluate_current_policy(session, {
@@ -117,6 +140,12 @@ async def preparation_context(session, scope, data, now, *, case_view=None):
     if not isinstance(case, dict):
         case = case.model_dump(mode="json")
     observations = await review_observations(session, scope, now)
+    if subject_states is None:
+        subject_states = reviewed_subjects(observations, await review_history(session, scope, observations, now), now)
+    subject = next((item for item in subject_states
+        if item.review.person_id == data.person_id and item.review.contact_id == data.contact_id), None)
+    latest = subject.review if subject else None
+    quality = subject.quality if subject else evaluate_lead_quality(observations=observations, review=None, now=now)
     selected = {row.id: row for row in observations if row.id in data.observation_ids}
     if set(selected) != set(data.observation_ids):
         raise ApiError(404, "NOT_FOUND", "cited observation not found")
@@ -136,9 +165,9 @@ async def preparation_context(session, scope, data, now, *, case_view=None):
     ).order_by(PolicyDecision.id))).all())
     frame = {
         "company_name": case["company_name"], "person_id": str(data.person_id), "contact_id": str(data.contact_id),
-        "lead_review_id": str(data.lead_review_id), "selected_person": str(case["selected_person_id"]),
-        "selected_contact": str(case["selected_contact_id"]), "quality": case["quality"],
-        "latest_review": case["reviews"][-1] if case["reviews"] else None,
+        "lead_review_id": str(data.lead_review_id), "quality": quality.model_dump(mode="json"),
+        "latest_review": latest.model_dump(mode="json") if latest else None,
+        "role_review": subject.role_review.model_dump(mode="json") if subject else None,
         "observations": [{"id": str(row.id), "hash": row.content_hash, "checked_at": row.checked_at.isoformat(),
                           "person": row.person, "channel": row.channel, "availability": row.availability}
                          for row in sorted(selected.values(), key=lambda row: str(row.id))],
@@ -155,12 +184,9 @@ async def preparation_context(session, scope, data, now, *, case_view=None):
         blockers.append("approved_product_fact_required")
     if not data.company_source_check_ids:
         blockers.append("company_source_required")
-    latest = case["reviews"][-1] if case["reviews"] else None
-    if (not latest or str(data.lead_review_id) != latest["id"]
-            or str(data.person_id) != case["selected_person_id"]
-            or str(data.contact_id) != case["selected_contact_id"]
-            or not case["quality"]["direct_channel"]
-            or set(map(str, data.observation_ids)) != set(latest["observation_ids"])):
+    if (not latest or data.lead_review_id != latest.id
+            or not quality.direct_channel
+            or set(data.observation_ids) != set(latest.observation_ids)):
         blockers.append("current_person_and_source_verified_channel_required")
     links = [source.model_dump(mode="json") for row in selected.values() for source in row.sources]
     links.extend({**source, "kind": "company_source_check", "checked_on": check_map[identity].checked_on.isoformat()}
@@ -238,7 +264,7 @@ async def revise_preparation(
 
 
 async def get_preparation(
-    session: AsyncSession, *, scope: LeadScope, preparation_id: UUID, now: datetime, case_view=None,
+    session: AsyncSession, *, scope: LeadScope, preparation_id: UUID, now: datetime, case_view=None, subject_states=None,
 ):
     require_permission(scope, "getDraft")
     row, scope = await _row(session, scope, preparation_id)
@@ -249,7 +275,7 @@ async def get_preparation(
     if stored:
         try:
             content = LeadPreparationInput.model_validate(stored["input"])
-            context = await preparation_context(session, scope, content, now, case_view=case_view)
+            context = await preparation_context(session, scope, content, now, case_view=case_view, subject_states=subject_states)
             facts, sources = context["facts"], context["source_references"]
             current = context["hash"] == revision.context_hash
             blockers = context["blockers"]
@@ -271,6 +297,10 @@ async def get_preparation(
     state = row.state
     if state in {"reviewed", "review_requested"} and (not current or blockers or proof is None and state == "reviewed"):
         state = "needs_review"
+    review_reason = await _retained_action_reason(session, scope, row, ["preparation.review"], now,
+        revision=revision, context_hash=revision.context_hash) if content and proof else None
+    state_reason = await _retained_action_reason(session, scope, row,
+        ["preparation.archive", "preparation.request_review"], now) if content else None
     return LeadPreparationView(
         id=row.id, workspace_id=row.workspace_id, project_id=row.project_id, buyer_id=row.buyer_id,
         company_id=row.company_id, version=row.version, revision_id=revision.id, revision_number=revision.revision_number,
@@ -278,6 +308,7 @@ async def get_preparation(
         content=content, facts=facts, source_references=sources, blockers=list(dict.fromkeys(blockers)),
         context_current=current, redacted=stored is None, reviewed_by_user_id=proof.recorded_by_user_id if proof else None,
         reviewed_at=proof.created_at if proof else None, created_at=row.created_at,
+        review_reason=review_reason, state_reason=state_reason,
     ).model_dump(mode="json")
 
 
@@ -298,7 +329,8 @@ async def review_preparation(
         context_hash=context_hash, content_hash=view["content_hash"], recorded_by_user_id=scope.actor_id))
     append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
                  action="lead.preparation.content_reviewed", entity_type="lead_preparation", entity_id=row.id,
-                 reason=reason, detail_digest=canonical_hash({"revision": str(revision_id), "context": context_hash}))
+                 reason="PREPARATION_CONTENT_REVIEWED",
+                 detail_digest=canonical_hash({"revision": str(revision_id), "context": context_hash}))
     await session.flush()
     return await get_preparation(session, scope=scope, preparation_id=row.id, now=now)
 
@@ -316,7 +348,8 @@ async def change_preparation_state(session, *, scope, preparation_id, expected_v
     row.state, row.version = ("archived" if archive else "review_requested"), row.version + 1
     append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
                  action="lead.preparation.archived" if archive else "lead.preparation.review_requested",
-                 entity_type="lead_preparation", entity_id=row.id, reason=reason)
+                 entity_type="lead_preparation", entity_id=row.id,
+                 reason="PREPARATION_ARCHIVED" if archive else "PREPARATION_REVIEW_REQUESTED")
     await session.flush()
     return await get_preparation(session, scope=scope, preparation_id=row.id, now=now)
 
@@ -337,13 +370,14 @@ async def list_preparations(session, *, scope, offset, limit, now):
             "offset": offset, "limit": limit, "total": total}
 
 
-async def has_current_reviewed_preparation(session, scope, case_view, now):
+async def has_current_reviewed_preparation(session, scope, case_view, now, *, subject_states=None):
     ids = (await session.scalars(select(LeadPreparation.id).where(
         LeadPreparation.workspace_id == scope.workspace_id, LeadPreparation.project_id == scope.project_id,
         LeadPreparation.buyer_id == scope.buyer_id, LeadPreparation.state == "reviewed",
     ))).all()
     for identity in ids:
-        view = await get_preparation(session, scope=scope, preparation_id=identity, now=now, case_view=case_view)
+        view = await get_preparation(session, scope=scope, preparation_id=identity, now=now,
+                                     case_view=case_view, subject_states=subject_states)
         if view["state"] == "reviewed" and view["context_current"] and not view["redacted"]:
             return True
     return False
