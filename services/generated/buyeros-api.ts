@@ -1945,6 +1945,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listleadreviews */
+        get: operations["listLeadReviews"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5223,6 +5240,10 @@ export interface components {
             reviewed_by_user_id: string | null;
             /** Reviewed At */
             reviewed_at: string | null;
+            /** Review Reason */
+            review_reason?: string | null;
+            /** State Reason */
+            state_reason?: string | null;
             /**
              * Created At
              * Format: date-time
@@ -5584,6 +5605,28 @@ export interface components {
             url?: string | null;
             /** Document Id */
             document_id?: string | null;
+        };
+        /** LeadEnvelope[LeadReviewPage] */
+        LeadEnvelope_LeadReviewPage_: {
+            data: components["schemas"]["LeadReviewPage"];
+            /** Request Id */
+            request_id: string;
+            /**
+             * Data Mode
+             * @constant
+             */
+            data_mode: "live";
+        };
+        /** LeadReviewPage */
+        LeadReviewPage: {
+            /** Items */
+            items: components["schemas"]["LeadReviewRecord"][];
+            /** Offset */
+            offset: number;
+            /** Limit */
+            limit: number;
+            /** Total */
+            total: number;
         };
     };
     responses: {
@@ -10204,6 +10247,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LeadEnvelope_PilotCostPage_"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    listLeadReviews: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+                purpose?: "contact_research" | "draft_preparation";
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+                buyer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadEnvelope_LeadReviewPage_"];
                 };
             };
             400: components["responses"]["Error"];

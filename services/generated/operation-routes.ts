@@ -118,4 +118,5 @@ export const operationRoutes = {
   "listLeadPreparationRevisions": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-preparations/{preparation_id}/revisions"},
   "getPilotBudget": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/pilot-budget"},
   "listPilotCostEvents": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/pilot-cost-events"},
+  "listLeadReviews": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-reviews"},
 } as const satisfies Record<keyof operations, {method: string; path: string}>;

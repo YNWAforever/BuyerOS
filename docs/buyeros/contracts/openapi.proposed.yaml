@@ -10432,6 +10432,93 @@ paths:
       - workspace_admin
       security:
       - BearerAuth: []
+  /v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-reviews:
+    get:
+      tags:
+      - lead-workflow
+      summary: Listleadreviews
+      operationId: listLeadReviews
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: buyer_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Buyer Id
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: purpose
+        in: query
+        required: false
+        schema:
+          enum:
+          - contact_research
+          - draft_preparation
+          type: string
+          default: contact_research
+          title: Purpose
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadReviewPage_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - viewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
 components:
   securitySchemes:
     BearerAuth:
@@ -17684,6 +17771,16 @@ components:
             format: date-time
           - type: 'null'
           title: Reviewed At
+        review_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Review Reason
+        state_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: State Reason
         created_at:
           type: string
           format: date-time
@@ -18357,6 +18454,48 @@ components:
       required:
       - title
       title: PilotSourceRef
+    LeadEnvelope_LeadReviewPage_:
+      properties:
+        data:
+          $ref: '#/components/schemas/LeadReviewPage'
+        request_id:
+          type: string
+          title: Request Id
+        data_mode:
+          type: string
+          const: live
+          title: Data Mode
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - request_id
+      - data_mode
+      title: LeadEnvelope[LeadReviewPage]
+    LeadReviewPage:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/LeadReviewRecord'
+          type: array
+          title: Items
+        offset:
+          type: integer
+          title: Offset
+        limit:
+          type: integer
+          title: Limit
+        total:
+          type: integer
+          title: Total
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - offset
+      - limit
+      - total
+      title: LeadReviewPage
 x-plan-status: PROPOSED
 x-contract-owner: BO-003; serialize changes with BO-005 schema owner
 x-pilot-constraints:
