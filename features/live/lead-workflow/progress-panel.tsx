@@ -1,5 +1,5 @@
 'use client';
-import {useCallback,useEffect,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {LeadLink} from './link';
 import {useSearchParams} from 'next/navigation';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
@@ -21,25 +21,40 @@ export function LeadProgressPanel({mode,locale,canEdit=false,onNavigate}:{
   const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot(),params=useSearchParams();
   const criterion=params.get('lead_qualifies')??'',stage=params.get('lead_stage')??'';
   const owner=params.get('lead_owner')??'',due=params.get('lead_due')??'';
-  const [page,setPage]=useState<LeadProgressPage|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);
-  const [offset,setOffset]=useState(0),[selected,setSelected]=useState(''),[reload,setReload]=useState(0);
+  const queryKey=JSON.stringify([criterion,stage,owner,due]);
+  const [projection,setProjection]=useState<{query:string;offset:number;value:LeadProgressPage}|null>(null);
+  const [error,setError]=useState(''),[loading,setLoading]=useState(false);
+  const [paging,setPaging]=useState({query:queryKey,offset:0}),[selected,setSelected]=useState(''),[reload,setReload]=useState(0);
+  const sequence=useRef(0);
+  if(paging.query!==queryKey){setPaging({query:queryKey,offset:0});if(selected)setSelected('');}
+  const offset=paging.query===queryKey?paging.offset:0;
+  const page=projection?.query===queryKey&&projection.offset===offset?projection.value:null;
+  function setOffset(update:number|((value:number)=>number)){
+    setPaging(current=>({query:queryKey,offset:typeof update==='function'?update(current.query===queryKey?current.offset:0):update}));
+  }
   const t=(value:string)=>leadText(locale,value);
-  const refresh=useCallback(async()=>{
-    const identity=session.identity();
+  const refresh=useCallback(async(signal:AbortSignal)=>{
+    const identity=session.identity(),serial=++sequence.current;
+    const current=()=>!signal.aborted&&serial===sequence.current&&session.isCurrent(identity);
     const filters:LeadFilters={
       ...(criteria.includes(criterion as typeof criteria[number])?{qualifies_for:criterion as typeof criteria[number]}:{}),
       ...(stages.includes(stage as typeof stages[number])?{stage:stage as typeof stages[number]}:{}),
       ...(owner?{owner_user_id:owner}:{}),...(due?{due_before:due}:{}),
     };
     try{
-      setLoading(true);
-      const value=await loadLeadProgress(client,session,filters,undefined,offset,20);
-      if(session.isCurrent(identity)){setPage(value);setError('');}
+      if(signal.aborted)return;
+      setLoading(true);setError('');
+      const value=await loadLeadProgress(client,session,filters,signal,offset,20);
+      if(current()){setProjection({query:queryKey,offset,value});setError('');}
     }catch(cause){
-      if(session.isCurrent(identity)&&!(cause instanceof LiveCancelled)){setPage(null);setError(describeLiveError(cause));}
-    }finally{if(session.isCurrent(identity))setLoading(false);}
-  },[client,session,criterion,stage,owner,due,offset]);
-  useEffect(()=>{void Promise.resolve().then(refresh);},[refresh,snapshot.identity,reload]);
+      if(current()&&!(cause instanceof LiveCancelled)){setProjection(null);setError(describeLiveError(cause));}
+    }finally{if(current())setLoading(false);}
+  },[client,session,criterion,stage,owner,due,offset,queryKey]);
+  useEffect(()=>{
+    const own=new AbortController();
+    void Promise.resolve().then(()=>refresh(own.signal));
+    return()=>own.abort();
+  },[refresh,snapshot.identity,reload]);
   function url(path:string,extra:Record<string,string>={}){
     const scope=session.current();return `${path}?${new URLSearchParams({workspace:scope.workspace!,project:scope.project!,...extra})}`;
   }

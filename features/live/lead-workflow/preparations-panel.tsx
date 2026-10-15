@@ -4,7 +4,7 @@ import {LeadLink} from './link';
 import type {components} from '@/services/generated/buyeros-api';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
 import {LiveCancelled,describeLiveError} from '@/services/live/client';
-import {loadLeadProgress,loadLeadCase,type LeadCaseView} from '@/services/live/lead-workflow';
+import {loadLeadProgress,loadLeadCase,listLeadReviews,type LeadCaseView,type LeadReviewRecord} from '@/services/live/lead-workflow';
 import {loadDraftContext} from '@/services/live/drafts';
 import {loadLeadPreparations,listLeadPreparationRevisions,type LeadPreparation,type LeadPreparationInput} from '@/services/live/lead-preparations';
 import {createOperationClient} from '@/services/live/operations';
@@ -51,23 +51,41 @@ function PreparationEditor({buyerId,locale,canEdit,canReview}:{buyerId:string;lo
   const [language,setLanguage]=useState<'en'|'zh-HK'>(locale),[reason,setReason]=useState(''),[confirm,setConfirm]=useState(false),[error,setError]=useState('');
   const [history,setHistory]=useState<components['schemas']['LeadPreparationRevisionView'][]>([]),[historyTotal,setHistoryTotal]=useState(0);
   const [offset,setOffset]=useState(0),[total,setTotal]=useState(0);
+  const [targetReviews,setTargetReviews]=useState<LeadReviewRecord[]>([]),[targetReview,setTargetReview]=useState('');
+  const [loadingSources,setLoadingSources]=useState(false);
   const t=(value:string)=>leadText(locale,value);
   function show(row:LeadPreparation|null){
     setData(row);setSelected(row?.id??'');setSubject(row?.content?.subject??'');setBody(row?.content?.body??'');
     setLanguage(row?.content?.language??locale);setConfirm(false);setHistory([]);setHistoryTotal(0);
     if(row?.content)setFacts((row.content.product_fact_refs??[]).map(fact=>fact.id));
+    if(row)setTargetReview(row.content?.lead_review_id??'none');
+    else setTargetReview(value=>value||'none');
   }
   const refresh=useCallback(async()=>{
     const identity=session.identity(),ctx=leadContext(session);
+    setLoadingSources(true);
+    try{
+    const reviews:LeadReviewRecord[]=[];
+    const readTargets=async()=>{
+      for(let start=0;;){
+        const page=await listLeadReviews(client,session,buyerId,start,100,undefined,'draft_preparation');
+        reviews.push(...page.items);
+        if(reviews.length>=page.total)break;
+        if(!page.items.length)throw new Error('Incomplete purchasing review history');
+        start=reviews.length;
+      }
+    };
     const [page,current,product,documents]=await Promise.all([
       loadLeadPreparations(client,session,buyerId,offset),loadLeadCase(client,session,buyerId),
       loadDraftContext(client,session,buyerId),createOperationClient(client).requestOperation('listOfferDocuments',{
         path:{workspace_id:ctx.workspace,project_id:ctx.project},query:{offset:0,limit:100},
-      },ctx),
+      },ctx),readTargets(),
     ]);
     if(!session.isCurrent(identity))return;
-    setRows(page.items);setTotal(page.total);setLead(current);setContext(product);setDocs(documents.items);setError('');
+    setRows(page.items);setTotal(page.total);setLead(current);setContext(product);setDocs(documents.items);setTargetReviews(reviews);setError('');
+    if(!page.items.length)setTargetReview(value=>value||(reviews.some(row=>!row.redacted&&row.id===current.reviews.at(-1)?.id)?current.reviews.at(-1)!.id:'none'));
     return page.items;
+    }finally{if(session.isCurrent(identity))setLoadingSources(false);}
   },[client,session,buyerId,offset]);
   const readback=useCallback(async()=>{
     const values=await refresh();if(values)show(values.find(row=>row.id===selected)??values[0]??null);
@@ -82,12 +100,24 @@ function PreparationEditor({buyerId,locale,canEdit,canReview}:{buyerId:string;lo
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[refresh]);
   const approved=context?.icp?.offer_facts.filter(fact=>fact.approved)??[];
-  const blocked=operation.busy||operation.unknown||operation.pending.length>0;
+  const blocked=loadingSources||operation.busy||operation.unknown||operation.pending.length>0;
+  const currentTargets=new Map<string,LeadReviewRecord>();
+  for(const row of targetReviews){
+    const key=`${row.person_id}:${row.contact_id??''}`;
+    if(!currentTargets.has(key))currentTargets.set(key,row);
+  }
+  const choices=[...currentTargets.values()].filter(row=>!row.redacted);
+  const storedReview=targetReviews.find(row=>row.id===data?.content?.lead_review_id);
+  if(storedReview&&!storedReview.redacted&&!choices.some(row=>row.id===storedReview.id))choices.unshift(storedReview);
+  const chosen=targetReviews.find(row=>row.id===targetReview&&!row.redacted);
+  const dirty=Boolean(data?.content&&(subject!==data.content.subject||body!==data.content.body||
+    language!==data.content.language||JSON.stringify(facts)!==JSON.stringify((data.content.product_fact_refs??[]).map(f=>f.id))||
+    targetReview!==(data.content.lead_review_id??'none')));
   const caveat=docs.some(doc=>doc.status!=='ready'||doc.extraction_metadata?.classification==='image_only'||
     (doc.extraction_metadata?.text_slide_count!==undefined&&doc.extraction_metadata?.slide_count!==undefined&&doc.extraction_metadata.text_slide_count<doc.extraction_metadata.slide_count));
   function input(empty=false):LeadPreparationInput{
-    const review=lead?.reviews.at(-1),icp=context?.icp;
-    return {person_id:lead?.selected_person_id??null,contact_id:lead?.selected_contact_id??null,
+    const review=chosen,icp=context?.icp;
+    return {person_id:review?.person_id??null,contact_id:review?.contact_id??null,
       subject:empty?'':subject,body:empty?'':body,language,
       product_fact_refs:icp&&context?approved.filter(fact=>empty||facts.includes(fact.id)).map(fact=>({
         id:fact.id,icp_version_id:icp.id,icp_content_hash:icp.content_hash,offer_revision:context.project.offer_revision,
@@ -134,7 +164,18 @@ function PreparationEditor({buyerId,locale,canEdit,canReview}:{buyerId:string;lo
       <p>{t('Source context')}: {data.context_hash}</p>
       {data.blockers.map(item=><p key={item}>{t(item)}</p>)}
       {data.reviewed_at&&<p>{t('Content reviewed at')}: {leadTime(data.reviewed_at,locale)} · {data.reviewed_by_user_id}</p>}
+      {data.review_reason&&<p>{t('Content review reason')}: {data.review_reason}</p>}
+      {data.state_reason&&<p>{t('Saved state change reason')}: {data.state_reason}</p>}
       {data.redacted?<p role="alert">{t('Source evidence is unavailable or expired.')}</p>:<>
+        <label>{t('Preparation purchasing review')}<select aria-label={t('Preparation purchasing review')} value={targetReview}
+          disabled={!canEdit||blocked||data.state==='archived'} onChange={e=>{setTargetReview(e.target.value);setConfirm(false);}}>
+          <option value="none">{t('No purchasing person selected')}</option>
+          {choices.map(row=>{
+            const person=lead?.observations?.find(item=>item.person_id===row.person_id&&item.person)?.person;
+            const channel=lead?.observations?.find(item=>item.contact_id===row.contact_id&&item.channel)?.channel;
+            return <option key={row.id} value={row.id}>{String(person?.full_name??row.person_id)} · {String(channel?.value??t('No direct channel'))} · {t('Revision')} {row.case_version}</option>;
+          })}
+        </select></label>
         <label>{t('Preparation subject')}<input aria-label={t('Preparation subject')} readOnly={!canEdit} disabled={blocked||data.state==='archived'} maxLength={300} value={subject} onChange={e=>{setSubject(e.target.value);setConfirm(false);}}/></label>
         <label>{t('Preparation body')}<textarea aria-label={t('Preparation body')} readOnly={!canEdit} disabled={blocked||data.state==='archived'} rows={8} maxLength={12000} value={body} onChange={e=>{setBody(e.target.value);setConfirm(false);}}/></label>
         <label>{t('Preparation language')}<select aria-label={t('Preparation language')} disabled={!canEdit||blocked||data.state==='archived'} value={language} onChange={e=>{setLanguage(e.target.value as typeof language);setConfirm(false);}}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>
@@ -153,8 +194,8 @@ function PreparationEditor({buyerId,locale,canEdit,canReview}:{buyerId:string;lo
       {(canEdit||canReview)&&data.state!=='archived'&&<>
         <label>{t('Content review reason')}<textarea aria-label={t('Content review reason')} maxLength={4000} disabled={blocked} value={reason} onChange={e=>setReason(e.target.value)}/></label>
         {canReview&&<><label><input type="checkbox" disabled={blocked} checked={confirm} onChange={e=>setConfirm(e.target.checked)}/>{t('I reviewed this exact preparation content.')}</label>
-          <button disabled={blocked||!confirm||reason.trim().length<3||data.blockers.length>0||subject!==data.content?.subject||body!==data.content?.body||language!==data.content?.language||JSON.stringify(facts)!==JSON.stringify((data.content?.product_fact_refs??[]).map(f=>f.id))} onClick={()=>void change('preparation.review')}>{t('Mark content reviewed')}</button></>}
-        {canEdit&&<><button disabled={blocked||reason.trim().length<3||data.blockers.length>0} onClick={()=>void change('preparation.request_review')}>{t('Request content review')}</button>
+          <button disabled={blocked||!confirm||reason.trim().length<3||data.blockers.length>0||dirty} onClick={()=>void change('preparation.review')}>{t('Mark content reviewed')}</button></>}
+        {canEdit&&<><button disabled={blocked||dirty||reason.trim().length<3||data.blockers.length>0} onClick={()=>void change('preparation.request_review')}>{t('Request content review')}</button>
           <button disabled={blocked||reason.trim().length<3} onClick={()=>void change('preparation.archive')}>{t('Archive preparation')}</button></>}
       </>}
       <button disabled={blocked||history.length>0&&history.length>=historyTotal} onClick={()=>void loadHistory()}>{t('Load revision history')}</button>

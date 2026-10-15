@@ -22,6 +22,13 @@ test('metrics_and_filtered_results_count_distinct_companies',async({page})=>{
   await expect(results.locator('[data-lead-buyer]')).toHaveCount(4);
   await page.reload();await signInLead(page,'/app/operations?lead_qualifies=direct_channel');
   await expect(results.getByText('Matching companies: 4',{exact:true})).toBeVisible();
+  await results.getByRole('link',{name:'Clear lead filters',exact:true}).click();
+  await expect(results.getByText('Matching companies: 24',{exact:true})).toBeVisible();
+  await results.getByRole('button',{name:'Next page',exact:true}).click();
+  await expect(results.getByText('Fixture Rice Buyer 21',{exact:true})).toBeVisible();
+  await results.getByRole('link',{name:'Direct channels: 4 / 4',exact:true}).click();
+  await expect(results.getByText('Matching companies: 4',{exact:true})).toBeVisible();
+  await expect(results.locator('[data-lead-buyer]')).toHaveCount(4);
 });
 test('read_failure_is_unavailable_not_zero',async({page})=>{
   await page.route('**/lead-workflow?*',route=>route.fulfill({status:503,contentType:'application/json',body:'{"code":"TEMPORARY_UNAVAILABLE","message":"Unavailable","retryable":true,"request_id":"fixture"}'}));
@@ -32,6 +39,27 @@ test('read_failure_is_unavailable_not_zero',async({page})=>{
   await page.unroute('**/lead-workflow?*');
   await panel.getByRole('button',{name:'Refresh lead progress',exact:true}).click();
   await expect(panel.getByRole('link',{name:'Company evidence: 24 / 24',exact:true})).toBeVisible();
+  await panel.getByRole('link',{name:'Company evidence: 24 / 24',exact:true}).click();
+  await expect(panel.getByText('Matching companies: 24',{exact:true})).toBeVisible();
+  let release!:()=>void,delivered!:()=>void,oldFetched=false,heldOnce=false;
+  const hold=new Promise<void>(resolve=>{release=resolve;});
+  const oldDelivered=new Promise<void>(resolve=>{delivered=resolve;});
+  await page.route('**/lead-workflow?*',async route=>{
+    if(new URL(route.request().url()).searchParams.get('qualifies_for')==='company_card'&&!heldOnce){
+      heldOnce=true;const response=await route.fetch();oldFetched=true;
+      await hold;try{await route.fulfill({response});}finally{delivered();}
+    }else await route.continue();
+  });
+  try{
+    await panel.getByRole('button',{name:'Refresh lead progress',exact:true}).click();
+    await expect.poll(()=>oldFetched).toBe(true);
+    await panel.getByRole('link',{name:'Direct channels: 4 / 4',exact:true}).click();
+    await expect(panel.getByText('Matching companies: 4',{exact:true})).toBeVisible();
+    release();await oldDelivered;
+    await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));
+    await expect(panel.getByText('Matching companies: 4',{exact:true})).toBeVisible();
+    await expect(panel.locator('[data-lead-buyer]')).toHaveCount(4);
+  }finally{release();}
 });
 test('followup_due_date_never_starts_a_job',async({page,request})=>{
   const before=await (await request.get('http://127.0.0.1:8000/fixture/lead-counts')).json();

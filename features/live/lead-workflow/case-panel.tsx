@@ -2,7 +2,7 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
 import {LiveCancelled,describeLiveError} from '@/services/live/client';
-import {loadLeadCase,listLeadEvidence,type LeadCaseView,type LeadObservationRecord} from '@/services/live/lead-workflow';
+import {loadLeadCase,listLeadEvidence,listLeadReviews,type LeadCaseView,type LeadObservationRecord,type LeadReviewRecord} from '@/services/live/lead-workflow';
 import {useLeadOperation,LeadRecovery} from './operation';
 import {leadText,leadTime,type LeadLocale} from './copy';
 
@@ -19,6 +19,7 @@ export function LeadCasePanel({buyerId,locale,canEdit,canAssign=false,onChanged=
   const [employment,setEmployment]=useState<Judgement>('uncertain'),[procurement,setProcurement]=useState<Judgement>('uncertain');
   const [ownership,setOwnership]=useState<Judgement>('uncertain'),[rationale,setRationale]=useState(''),[conflict,setConflict]=useState('');
   const [confirmed,setConfirmed]=useState(false),[cited,setCited]=useState<string[]>([]);
+  const [history,setHistory]=useState<LeadReviewRecord[]|null>(null),[historyTotal,setHistoryTotal]=useState(0),[historyBusy,setHistoryBusy]=useState(false);
   const previousContext=useRef(contextVersion);
   const t=(value:string)=>leadText(locale,value);
   const refresh=useCallback(async()=>{
@@ -33,7 +34,7 @@ export function LeadCasePanel({buyerId,locale,canEdit,canAssign=false,onChanged=
     if(!session.isCurrent(identity))return;
     setData(current);setObservations(all);setError('');return current;
   },[client,session,buyerId]);
-  const readback=useCallback(async()=>{await refresh();onChanged();},[refresh,onChanged]);
+  const readback=useCallback(async()=>{await refresh();setHistory(null);onChanged();},[refresh,onChanged]);
   const operation=useLeadOperation(buyerId,actions,readback,locale);
   useEffect(()=>{
     let active=true;
@@ -48,7 +49,7 @@ export function LeadCasePanel({buyerId,locale,canEdit,canAssign=false,onChanged=
     if(previousContext.current===contextVersion)return;
     previousContext.current=contextVersion;
     // A sibling evidence save updates the canonical status, never local edit text.
-    void Promise.resolve().then(refresh).catch(cause=>{
+    void Promise.resolve().then(refresh).then(()=>setHistory(null)).catch(cause=>{
       if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));
     });
   },[contextVersion,refresh]);
@@ -71,8 +72,17 @@ export function LeadCasePanel({buyerId,locale,canEdit,canAssign=false,onChanged=
     await operation.run({action:'lead.review',buyer_id:buyerId,expected_version:data.version,
       payload:{person_id:person,contact_id:contact||null,employment,procurement_scope:procurement,
         channel_ownership:ownership,observation_ids:cited,rationale,conflict_resolution:conflict||null,
-        previous_review_id:data.reviews.at(-1)?.id??null}},'Purchasing review saved.');
+        previous_review_id:null}},'Purchasing review saved.');
     await refresh().catch(cause=>setError(describeLiveError(cause)));
+  }
+  async function loadHistory(){
+    if(historyBusy)return;
+    const identity=session.identity();setHistoryBusy(true);
+    try{
+      const page=await listLeadReviews(client,session,buyerId,history?.length??0);
+      if(session.isCurrent(identity)){setHistory(rows=>[...(rows??[]),...page.items]);setHistoryTotal(page.total);}
+    }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
+    finally{if(session.isCurrent(identity))setHistoryBusy(false);}
   }
   return <section className="panel" aria-label={t('Lead contact preparation')}>
     <h4>{t('Lead contact preparation')}</h4>
@@ -97,11 +107,11 @@ export function LeadCasePanel({buyerId,locale,canEdit,canAssign=false,onChanged=
           <button type="submit" disabled={disabled}>{t('Save lead work state')}</button>
         </form>
         <form onSubmit={event=>void saveReview(event)}>
-          <label>{t('Review person')}<select aria-label={t('Review person')} value={person} disabled={disabled} onChange={e=>{setPerson(e.target.value);setCited([]);setConfirmed(false);}}>
-            <option value="">{t('No named person')}</option>{[...people].map(([id,row])=><option key={id} value={id}>{row.full_name as string}</option>)}
+          <label>{t('Review person')}<select aria-label={t('Review person')} value={person} disabled={disabled} onChange={e=>{setPerson(e.target.value);setContact('');setOwnership('uncertain');setCited([]);setConfirmed(false);}}>
+            <option value="">{t('No named person')}</option>{[...people].map(([id,row])=><option key={id} value={id}>{row.full_name as string||t('Unnamed candidate')}</option>)}
           </select></label>
           <label>{t('Review channel')}<select aria-label={t('Review channel')} value={contact} disabled={disabled} onChange={e=>{setContact(e.target.value);setCited([]);setConfirmed(false);}}>
-            <option value="">{t('No direct channel')}</option>{[...channels].map(([id,row])=><option key={id} value={id}>{row.value as string}</option>)}
+            <option value="">{t('No direct channel')}</option>{[...channels].filter(([,row])=>!row.person_id||row.person_id===person).map(([id,row])=><option key={id} value={id}>{row.value as string}</option>)}
           </select></label>
           {([[t('Review employment'),employment,setEmployment],[t('Review procurement'),procurement,setProcurement],[t('Review ownership'),ownership,setOwnership]] as const).map(([label,value,set])=><label key={label}>{label}<select aria-label={label} value={value} disabled={disabled} onChange={e=>set(e.target.value as Judgement)}>
             <option value="uncertain">{t('Uncertain')}</option><option value="accepted">{t('Accepted')}</option><option value="rejected">{t('Rejected')}</option>
@@ -115,6 +125,18 @@ export function LeadCasePanel({buyerId,locale,canEdit,canAssign=false,onChanged=
         </form>
       </>}
     </>}
+    <section aria-label={t('Purchasing review history')}>
+      <h5>{t('Purchasing review history')}</h5>
+      <button disabled={historyBusy||history!==null&&history.length>=historyTotal} onClick={()=>void loadHistory()}>{t('Load purchasing review history')}</button>
+      {history!==null&&<p>{history.length} / {historyTotal}</p>}
+      {history?.map(row=><article className="activity" key={row.id}>
+        <p>{t('Historical review')} · {row.case_version} · {leadTime(row.created_at,locale)}</p>
+        <p>{t('Reviewed by')}: {row.recorded_by_user_id}</p>
+        <p>{t('Review employment')}: {t(row.employment)} · {t('Review procurement')}: {t(row.procurement_scope)} · {t('Review ownership')}: {t(row.channel_ownership)}</p>
+        {row.redacted?<p>{t('Source evidence is unavailable or expired.')}</p>:<><p>{row.rationale}</p>{row.conflict_resolution&&<p>{row.conflict_resolution}</p>}</>}
+        <ul>{row.observation_ids.map(id=><li key={id}>{id} · {observations.find(value=>value.id===id)?.content_hash??t('Source no longer available.')}</li>)}</ul>
+      </article>)}
+    </section>
     <LeadRecovery operation={operation} locale={locale}/>
   </section>;
 }

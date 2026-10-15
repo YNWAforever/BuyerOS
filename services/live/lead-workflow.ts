@@ -6,6 +6,7 @@ import {leadContext} from './lead-context';
 
 export type LeadCaseView=components['schemas']['LeadCaseView'];
 export type LeadObservationRecord=components['schemas']['LeadObservationRecord'];
+export type LeadReviewRecord=components['schemas']['LeadReviewRecord'];
 export type LeadProgressPage=components['schemas']['LeadProgressPage'];
 export type LeadFilters=Omit<NonNullable<operations['getLeadWorkflow']['parameters']['query']>,'offset'|'limit'>;
 
@@ -31,5 +32,14 @@ export async function listLeadEvidence(
   const ctx=leadContext(session,signal);
   return createOperationClient(client).requestOperation('listLeadEvidence',{
     path:{workspace_id:ctx.workspace,project_id:ctx.project,buyer_id:buyerId},query:{offset,limit},
+  },ctx);
+}
+export async function listLeadReviews(
+  client:LiveClient,session:SessionScope,buyerId:string,offset=0,limit=20,signal?:AbortSignal,
+  purpose:'contact_research'|'draft_preparation'='contact_research',
+){
+  const ctx=leadContext(session,signal);
+  return createOperationClient(client).requestOperation('listLeadReviews',{
+    path:{workspace_id:ctx.workspace,project_id:ctx.project,buyer_id:buyerId},query:{offset,limit,purpose},
   },ctx);
 }

@@ -1,6 +1,11 @@
 import {liveZh} from '../locale';
 export type LeadLocale='en'|'zh-HK';
 const zh:Record<string,string>={
+  'Preparation purchasing review':'準備稿採購人複核版本','No purchasing person selected':'尚未選擇採購人物',
+  'Saved state change reason':'已保存狀態變更理由',
+  'Purchasing review history':'採購複核歷史','Load purchasing review history':'讀取採購複核歷史',
+  'Historical review':'歷史複核','Reviewed by':'複核人','Unnamed candidate':'未有姓名的候選人',
+  'A current named person is required.':'需要有姓名的現任人物。',
   'Company evidence':'公司來源','Priority companies':'優先公司','Purchasing people':'採購人物',
   'Direct channels':'直接渠道','Reviewed preparations':'已審準備稿','As of':'資料時間','Matching companies':'符合條件公司',
   'Targets count different companies. Fixture data does not count as real leads.':'目標以不同公司計算。測試資料不計入真實買家成果。',
@@ -109,6 +114,7 @@ const zh:Record<string,string>={
   'Owner assignment remains in the buyer management controls.':'負責人仍可在既有買家管理功能指派。',
 };
 const messages:Record<string,string>={
+  named_person_required:'A current named person is required.',
   external_usage_reconciliation_required:'External account usage must be reconciled.',
   complete_cost_evidence_required:'Complete fee evidence is required.',unknown_cost_upper_bound:'The external cost upper bound is unknown.',
   unknown_cost_amount:'The external cost amount is unknown.',native_cost_mismatch:'Native cost evidence does not match.',

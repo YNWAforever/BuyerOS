@@ -61,6 +61,36 @@ test('preparation_reload_restores_revision_and_original_intent',async({page,requ
   expect(stored.revision_number).toBe(2);
   await restored.getByRole('button',{name:'Load revision history',exact:true}).click();
   await expect(restored.getByText('Historical revision 1',{exact:true})).toBeVisible();
+  async function append(action:string,payload:object,version?:number){
+    const staged=await request.post(`${apiBase}/lead-intents`,{headers:{...bearer,'Idempotency-Key':crypto.randomUUID()},
+      data:{action,buyer_id:leadBuyer,payload,...(version?{expected_version:version}:{})}});
+    expect(staged.status(),await staged.text()).toBe(201);const intent=(await staged.json()).data;
+    const applied=await request.post(`${apiBase}/lead-intents/${intent.id}/apply`,{
+      headers:{...bearer,'Idempotency-Key':intent.submission_key,...(version?{'If-Match':`"${version}"`}:{})},data:{}});
+    expect(applied.ok(),await applied.text()).toBe(true);return (await applied.json()).data.resource_id as string;
+  }
+  const observation={stance:'supports',checked_at:new Date().toISOString(),rationale:'Official fixture identifies the rice buyer.',
+    sources:[{title:'Official second purchaser',url:'https://buyer1.example.test/blair',excerpt:'Blair Fixture buys rice and uses blair@buyer1.example.test.',source_kind:'official'}]};
+  const employment=await append('observation.append',{...observation,claim:'employment',person:{full_name:'Blair Fixture',role:'Rice Buyer'}});
+  const evidence=async()=>((await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-evidence`,{headers:bearer})).json()).data.items);
+  const other=(await evidence()).find((row:{id:string})=>row.id===employment).person_id as string;
+  const procurement=await append('observation.append',{...observation,claim:'procurement_scope',person:{person_id:other}});
+  const channel=await append('observation.append',{...observation,claim:'channel_ownership',person:{person_id:other},
+    channel:{type:'business_email',value:'blair@buyer1.example.test',person_id:other}});
+  const contact=(await evidence()).find((row:{id:string})=>row.id===channel).contact_id as string;
+  const current=(await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-workflow`,{headers:bearer})).json()).data;
+  const otherReview=await append('lead.review',{person_id:other,contact_id:contact,employment:'accepted',
+    procurement_scope:'accepted',channel_ownership:'accepted',observation_ids:[employment,procurement,channel],
+    rationale:'Independent official purchasing role and business channel.'},current.version);
+  await restored.getByRole('button',{name:'Refresh preparations',exact:true}).click();
+  await restored.getByLabel('Preparation subject').fill('Original purchaser still intended');
+  await restored.getByRole('button',{name:'Save preparation revision',exact:true}).click();
+  await expect(restored.getByText('Preparation saved.',{exact:true})).toBeVisible();
+  const saved=(await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-preparations`,{headers:bearer})).json()).data.items[0];
+  expect(saved.content.person_id).toBe(stored.content.person_id);
+  await restored.getByLabel('Preparation purchasing review').selectOption(otherReview);
+  await restored.getByRole('button',{name:'Save preparation revision',exact:true}).click();
+  await expect.poll(async()=>((await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-preparations`,{headers:bearer})).json()).data.items[0].content.person_id)).toBe(other);
 });
 test('missing_product_fact_or_extraction_caveat_is_visible',async({page,request})=>{
   const changed=await request.post('http://127.0.0.1:8000/fixture/lead-scenario',{data:{scenario:'product_caveat'}});

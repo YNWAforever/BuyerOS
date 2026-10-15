@@ -11,6 +11,9 @@ test('company_person_channel_have_separate_statuses',async({page})=>{
   await expect(panel.getByText('Channel ownership: confirmed',{exact:true})).toBeVisible();
   await expect(panel.getByText('Technical check: not tested',{exact:true})).toBeVisible();
   await expect(panel.getByText('Sending: disabled',{exact:true})).toBeVisible();
+  await panel.getByRole('button',{name:'Load purchasing review history',exact:true}).click();
+  await expect(panel.getByRole('region',{name:'Purchasing review history',exact:true})
+    .getByText('Fictional purchasing identity and source ownership checked.',{exact:true})).toBeVisible();
   await page.getByRole('combobox',{name:/^(Language|語言)$/}).selectOption('zh-HK');
   const zh=page.getByRole('region',{name:'採購聯絡準備'});
   await expect(zh.getByText('採購職責：已核實',{exact:true})).toBeVisible();
