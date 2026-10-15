@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 import importlib.util
 from pathlib import Path
 import unittest
+import pytest
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -47,13 +48,27 @@ def candidate():
              'blockers':[],'evidence_mode':'candidate_runtime'}),
         'workspace_canary':receipt({'workspace_status':200,'correct_roles':True,'correct_project':True,
               'empty_membership_verified':True,'revoked_denied':True,'foreign_tenant_denied':True,'reload_retry_verified':True}),
-        'rollback':receipt({'frontend':'frontend-compatible','api':'api-compatible','compatible':True})}}
+        'rollback':receipt({'frontend':'frontend-compatible','api':'api-compatible','compatible':True}),
+        'deployment_binding':receipt({'schema':'buyeros.deployment-db-binding.v1','verified':True,
+            'source_sha':'a'*40,'deployment_id':'dpl_candidate','db_target_sha256':'d'*64,
+            'schema_head':'0050_c61_delivery_authorizations','api_origin_sha256':'f'*64})}}
     additional=['version_metadata_unreadable','schema_usage_missing:public','relation_missing:public.memberships',
         'relation_not_visible:public.user_identities','relation_not_visible:public.memberships',
         'relation_columns_missing:public.user_identities','relation_columns_missing:public.memberships',
         'privilege_missing:public.user_identities:SELECT','rls_not_forced:public.memberships',
         'function_contract_mismatch:public.buyeros_workspace_directory(uuid,bigint,integer)']
     receipts['items']['schema']['data']['checks'] += [{'code':code,'passed':True} for code in additional]
+    fixture_spec=importlib.util.spec_from_file_location('owned_runtime_bundle_fixtures',ROOT/'tests/runtime_bundle_fixtures.py')
+    fixture_module=importlib.util.module_from_spec(fixture_spec)
+    fixture_spec.loader.exec_module(fixture_module)
+    api_observation=fixture_module.api_observation
+    receipts['items']['workspace_canary']['data'].update(human_signoff=True, reviewer_id=202, initiator_id=101, approval_run_id=456,
+        approval_comment_sha256='5'*64,browser_canary_sha256='3'*64,api_observation_sha256='1'*64,schema_observation_sha256='2'*64,
+        api_observation=api_observation(manifest['source_sha'], common['checked_at']))
+    receipts['items']['runtime_configuration']=receipt({'schema':'buyeros.runtime-configuration.v1',
+        'source_sha':manifest['source_sha'],'deployment_id':manifest['candidate_deployment_id'],
+        'configuration_sha256':manifest['configuration_sha256'],
+        'activation':{'providers':'disabled','worker':'disabled','delivery':'disabled','contact_enrichment':'unconfigured'}})
     return manifest,receipts
 
 
@@ -103,6 +118,31 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.receipts['items']['schema']['data']['checks']=[];self.check_blocked()
     def test_wrong_deployment_receipt_is_blocked(self):
         self.receipts['items']['workspace_canary']['deployment_id']='dpl_old';self.check_blocked()
+    def test_workspace_gate_requires_a_bound_deployment_database_receipt(self):
+        self.receipts['items'].pop('deployment_binding')
+        result = evaluate(self.manifest, self.receipts)
+        self.assertFalse(result['promotable'])
+        self.assertIn('receipt_missing:deployment_binding', result['blockers'])
+
+    def test_workspace_gate_rejects_unverified_deployment_database_binding(self):
+        common = copy.deepcopy(self.receipts['items']['schema'])
+        common['data'] = {'verified': False, 'deployment_id': self.manifest['candidate_deployment_id'],
+                          'db_target_sha256': self.manifest['db_target_sha256'], 'api_origin_sha256': 'f'*64}
+        self.receipts['items']['deployment_binding'] = common
+        result = evaluate(self.manifest, self.receipts)
+        self.assertFalse(result['promotable'])
+        self.assertIn('deployment_db_binding_unverified', result['blockers'])
+    def test_workspace_gate_rejects_mismatched_binding(self):
+        for key, value in {'source_sha':'0'*40, 'deployment_id':'dpl_old',
+                           'db_target_sha256':'0'*64, 'schema_head':'0053_wrong',
+                           'api_origin_sha256':'not-a-digest', 'verified':1, 'extra':True}.items():
+            with self.subTest(key=key):
+                changed = copy.deepcopy(self.receipts)
+                changed['items']['deployment_binding']['data'][key] = value
+                result = evaluate(self.manifest, changed)
+                self.assertFalse(result['promotable'])
+                self.assertIn('deployment_db_binding_unverified', result['blockers'])
+
     def test_research_gate_requires_real_neon_quality_performance_and_uat(self):
         result=evaluate(self.manifest,self.receipts,'research_export')
         self.assertFalse(result['promotable'])
@@ -114,9 +154,20 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.assertFalse(result['promotable'])
         self.assertIn('receipt_missing:delivery',result['blockers'])
     def test_workspace_cannot_enable_delivery_without_GS(self):
-        self.manifest['activation']['delivery']='active';self.check_blocked()
+        self.manifest['activation']['delivery']='active'
+        self.receipts['items']['runtime_configuration']['data']['activation']['delivery']='active'
+        result=evaluate(self.manifest,self.receipts)
+        self.assertFalse(result['promotable'])
+        self.assertIn('activation_exceeds_workspace_gate:delivery',result['blockers'])
+        self.assertNotIn('effective_runtime_configuration_unverified',result['blockers'])
     def test_workspace_cannot_enable_paid_research_without_GA(self):
-        self.manifest['activation'].update(providers='active',worker='active');self.check_blocked()
+        self.manifest['activation'].update(providers='active',worker='active')
+        self.receipts['items']['runtime_configuration']['data']['activation'].update(providers='active',worker='active')
+        result=evaluate(self.manifest,self.receipts)
+        self.assertFalse(result['promotable'])
+        self.assertIn('activation_exceeds_workspace_gate:providers',result['blockers'])
+        self.assertIn('activation_exceeds_workspace_gate:worker',result['blockers'])
+        self.assertNotIn('effective_runtime_configuration_unverified',result['blockers'])
     def test_unknown_activation_value_is_malformed(self):
         self.manifest['activation']['delivery']='unknown-invalid-value'
         self.assertEqual(evaluate(self.manifest,self.receipts)['status'],'malformed')
@@ -130,3 +181,61 @@ class ReleaseReadinessTests(unittest.TestCase):
 
 
 if __name__=='__main__': unittest.main()
+
+def test_workspace_gate_requires_bound_effective_configuration():
+    manifest,receipts=candidate()
+    receipts['items'].pop('runtime_configuration',None)
+    assert not evaluate(manifest,receipts)['promotable']
+
+
+def accepted_gate_candidate(gate):
+    """Complete owned receipts for evaluator tests; never runtime/provider activation."""
+    manifest,receipts=candidate()
+    if gate=='workspace': return manifest,receipts
+    manifest['activation']={'auth':'neon','providers':'active','worker':'active',
+                            'delivery':'active' if gate=='native_send' else 'disabled'}
+    manifest['worker_artifact']='worker-a'
+    receipts['items']['artifacts']['data']['worker']='worker-a'
+    receipts['items']['runtime_configuration']['data']['activation']={
+        'providers':'active','worker':'active','delivery':'active' if gate=='native_send' else 'disabled',
+        'contact_enrichment':'unconfigured'}
+    for name in ('neon','worker','providers','quality','performance','staff_uat','journey'):
+        receipts['items'][name]={**copy.deepcopy(receipts['items']['ci']),'data':{'accepted':True}}
+    receipts['items']['neon']['data']['neon_only_rollback_verified']=True
+    receipts['items']['staff_uat']['data']['human_signoff']=True
+    receipts['items']['journey']['data']['same_chain_verified']=True
+    if gate=='native_send':
+        receipts['items']['auth0_retirement']={**copy.deepcopy(receipts['items']['ci']),'data':{'accepted':True}}
+        receipts['items']['delivery']={**copy.deepcopy(receipts['items']['ci']),'data':{
+            'authority_verified':True,'recipient_scope_verified':True,'cost_cap_verified':True,
+            'approved_revision_verified':True,'single_submit_verified':True,'callback_verified':True,
+            'suppression_verified':True,'unknown_hold_preserved':True,'provider_state':'delivered'}}
+    return manifest,receipts
+
+
+@pytest.mark.parametrize('gate',['research_export','native_send'])
+def test_higher_gate_accepts_fully_bound_matching_effective_activation(gate):
+    manifest,receipts=accepted_gate_candidate(gate)
+    result=evaluate(manifest,receipts,gate)
+    assert result['promotable'] is True,result['blockers']
+
+
+@pytest.mark.parametrize('gate',['workspace','research_export','native_send'])
+@pytest.mark.parametrize('capability',['providers','worker','delivery'])
+def test_each_gate_rejects_effective_activation_that_differs_from_manifest(gate,capability):
+    manifest,receipts=accepted_gate_candidate(gate)
+    actual=receipts['items']['runtime_configuration']['data']['activation']
+    actual[capability]='disabled' if actual[capability]=='active' else 'active'
+    result=evaluate(manifest,receipts,gate)
+    assert result['promotable'] is False
+    assert 'effective_runtime_configuration_unverified' in result['blockers']
+
+
+@pytest.mark.parametrize('gate',['research_export','native_send'])
+def test_higher_gate_refuses_disabled_runtime_receipt_for_active_manifest(gate):
+    manifest,receipts=accepted_gate_candidate(gate)
+    receipts['items']['runtime_configuration']['data']['activation'].update(
+        providers='disabled',worker='disabled',delivery='disabled')
+    result=evaluate(manifest,receipts,gate)
+    assert result['promotable'] is False
+    assert 'effective_runtime_configuration_unverified' in result['blockers']

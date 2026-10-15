@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     jwks_cache_seconds: int = Field(default=300, ge=1)
     jwks_max_stale_seconds: int = Field(default=3600, ge=1)
     worker_heartbeat_max_age_seconds: int = Field(default=180, ge=30, le=3600)
+    release_probe_token: SecretStr | None = Field(default=None, repr=False, exclude=True)
+    runtime_source_sha: str | None = None
+    runtime_deployment_id: str | None = None
     environment: str = "local"
     paid_admission_enabled: bool = False
     delivery_admission_enabled: bool = False

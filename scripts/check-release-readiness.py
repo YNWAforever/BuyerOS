@@ -9,7 +9,7 @@ MANIFEST_KEYS={'schema','source_sha','tree_sha','configuration_sha256','db_targe
     'frontend_artifact','api_artifact','worker_artifact','required_heads','ci_run_id',
     'required_ci_jobs','candidate_deployment_id','receipt_max_age_seconds','rollback_artifacts','activation'}
 COMMON_KEYS={'source_sha','tree_sha','configuration_sha256','db_target_sha256','deployment_id','checked_at','evidence_mode','data'}
-WORKSPACE=('ci','artifacts','schema','workspace_canary','rollback')
+WORKSPACE=('ci','artifacts','schema','workspace_canary','rollback','deployment_binding','runtime_configuration')
 RESEARCH=WORKSPACE+('neon','worker','providers','quality','performance','staff_uat','journey')
 GATES={'workspace':WORKSPACE,'research_export':RESEARCH,'native_send':RESEARCH+('auth0_retirement','delivery')}
 # A submitted manifest cannot omit a failing original required job.
@@ -103,6 +103,28 @@ def evaluate_release(manifest: dict, receipts: dict, gate: str) -> dict:
     require(valid_checks and len(codes)==len(set(codes)) and required_checks<=set(codes),'schema_required_checks_missing_or_failed')
     try:require(-30<=(now-_time(schema.get('checked_at'))).total_seconds()<=manifest['receipt_max_age_seconds'],'schema_receipt_stale_or_future')
     except (ValueError,TypeError,OverflowError):blockers.append('schema_receipt_time_invalid')
+    binding=data('deployment_binding')
+    binding_keys={'schema','verified','source_sha','deployment_id','db_target_sha256','schema_head','api_origin_sha256'}
+    require(set(binding)==binding_keys and binding.get('schema')=='buyeros.deployment-db-binding.v1'
+        and binding.get('verified') is True
+        and binding.get('source_sha')==manifest['source_sha']
+        and binding.get('deployment_id')==manifest['candidate_deployment_id']
+        and binding.get('db_target_sha256')==manifest['db_target_sha256']
+        and [binding.get('schema_head')]==manifest['required_heads']==schema.get('observed_heads')
+        and type(binding.get('api_origin_sha256')) is str
+        and re.fullmatch(r'[0-9a-f]{64}',binding['api_origin_sha256']) is not None,
+        'deployment_db_binding_unverified')
+    configuration=data('runtime_configuration')
+    effective=configuration.get('activation',{})
+    require(set(configuration)=={'schema','source_sha','deployment_id','configuration_sha256','activation'}
+        and configuration.get('schema')=='buyeros.runtime-configuration.v1'
+        and configuration.get('source_sha')==manifest['source_sha']
+        and configuration.get('deployment_id')==manifest['candidate_deployment_id']
+        and configuration.get('configuration_sha256')==manifest['configuration_sha256']
+        and type(effective) is dict and set(effective)=={'providers','worker','delivery','contact_enrichment'}
+        and all(effective.get(key)==manifest['activation'][key] for key in ('providers','worker','delivery'))
+        and effective.get('contact_enrichment') in ('disabled','unconfigured'),
+        'effective_runtime_configuration_unverified')
     canary=data('workspace_canary')
     require(type(canary.get('workspace_status')) is int and canary.get('workspace_status')==200,'workspace_canary_failed')
     for key in ['correct_roles','correct_project','empty_membership_verified','revoked_denied','foreign_tenant_denied','reload_retry_verified']:
