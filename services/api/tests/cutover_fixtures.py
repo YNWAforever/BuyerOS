@@ -104,7 +104,7 @@ def cold_cutover(monkeypatch,tmp_path):
             current=expanded['historical_fks'][user]
             assert all(current[k]==v for k,v in prior.items())
             added=set(current)-set(prior)
-            assert added=={str((service+'_receipts','actor_id')) for service in ('search','model','contact')}|{str(('delivery_messages','actor_id')),str(('document_uploads','actor_user_id'))}
+            assert added=={str((service+'_receipts','actor_id')) for service in ('search','model','contact')}|{str(('delivery_messages','actor_id')),str(('document_uploads','actor_user_id')),str(('buyer_source_checks','recorded_by_user_id'))}
             assert all(current[k]==hashlib.sha256(json.dumps([]).encode()).hexdigest() for k in added)
         before=expanded
         mark('current_receipt_privacy_schema_before_backup',schema='0054_buyer_source_checks',snapshot=before)
