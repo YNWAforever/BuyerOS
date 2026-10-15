@@ -57,6 +57,10 @@ def candidate():
         'privilege_missing:public.user_identities:SELECT','rls_not_forced:public.memberships',
         'function_contract_mismatch:public.buyeros_workspace_directory(uuid,bigint,integer)']
     receipts['items']['schema']['data']['checks'] += [{'code':code,'passed':True} for code in additional]
+    from runtime_bundle_fixtures import api_observation
+    receipts['items']['workspace_canary']['data'].update(human_signoff=True, reviewer_id=202, initiator_id=101, approval_run_id=456,
+        approval_comment_sha256='5'*64,browser_canary_sha256='3'*64,api_observation_sha256='1'*64,schema_observation_sha256='2'*64,
+        api_observation=api_observation(manifest['source_sha'], common['checked_at']))
     return manifest,receipts
 
 

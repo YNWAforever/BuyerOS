@@ -5,6 +5,12 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from runtime_bundle import decrypt_workspace_bundle, is_encrypted_workspace_bundle
+from runtime_bundle import build_workspace_bundle
+from runtime_bundle import encrypt_workspace_bundle
+from runtime_bundle import compose_workspace_receipts
 
 ROOT=Path(__file__).resolve().parents[1]
 REPOSITORY='YNWAforever/BuyerOS'
@@ -90,12 +96,12 @@ def main(argv=None):
     result={'schema':'buyeros.promotion-receipt.v1','status':'blocked','promoted':False,'blockers':['invalid_or_untrusted_input']}
     try:
         if args.output.exists():raise ValueError('immutable output exists')
-        bundle=gate_module().read_json(args.bundle)
-        if set(bundle)!={'schema','manifest','receipts'} or bundle['schema']!='buyeros.attested-runtime-bundle.v1':raise ValueError('invalid bundle')
-        # Verify the exact bundle bytes against a designated protected runtime producer,
-        # not arbitrary local assertions or a PR's CI attestation.
+        envelope=gate_module().read_json(args.bundle)
+        if not is_encrypted_workspace_bundle(envelope):raise ValueError('encrypted workspace bundle required')
+        # Attest the exact ciphertext before decrypting the customer/runtime receipt payload.
         command(['gh','attestation','verify',str(args.bundle),'--repo',REPOSITORY,'--signer-workflow',SIGNER_WORKFLOW,
-            '--source-ref','refs/heads/main','--source-digest',bundle['manifest']['source_sha'],'--deny-self-hosted-runners'])
+            '--source-ref','refs/heads/main','--deny-self-hosted-runners'])
+        bundle=decrypt_workspace_bundle(envelope,os.environ.get('BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY',''))
         if args.execute and (os.environ.get('GITHUB_WORKFLOW')!='BuyerOS guarded promotion' or os.environ.get('GITHUB_REF')!='refs/heads/main'):
             raise ValueError('execution requires reviewed protected workflow')
         metadata=remote_metadata(bundle['manifest'])
