@@ -1,4 +1,4 @@
-import {LiveCancelled,type LiveClient} from './client';
+import {LiveCancelled,LiveError,type LiveClient} from './client';
 import type {SessionScope} from './session';
 import {createOperationClient,type OperationInput} from './operations';
 import type {components} from '@/services/generated/buyeros-api';
@@ -82,6 +82,13 @@ export async function prepareLeadIntent(
   })();
   entry.promise=work;
   try{return await work;}
+  catch(error){
+    if(error instanceof LiveError&&error.status>=400&&error.status<500&&error.status!==409){
+      if(error.status===401||error.status===403)store.clear();
+      else if(store.get(destination)===entry)store.delete(destination);
+    }
+    throw error;
+  }
   finally{if(store.get(destination)===entry)entry.promise=undefined;}
 }
 

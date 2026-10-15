@@ -133,3 +133,19 @@ test('foreign intent scope is rejected before any HTTP write',async()=>{
   await assert.rejects(m.applyLeadIntent(ctx.client,ctx.session,{...staged,project_id:'foreign'}),/scope|project/i);
   assert.equal(s.requests.length,before);
 });
+
+test('definitive prepare validation failure permits a corrected edit without inventing an unknown retry',async()=>{
+  const m=await api(),s=server();
+  const {LiveError}=await loadModule('services/live/client.ts');
+  let first=true;
+  const ctx=setup(async request=>{
+    if(first&&request.method==='POST'&&request.path.endsWith('/lead-intents')){
+      first=false;throw new LiveError('Invalid values','INVALID_REQUEST',422,'fixture',false);
+    }
+    return s.request(request);
+  });
+  await assert.rejects(m.prepareLeadIntent(ctx.client,ctx.session,input()),/Invalid values/);
+  const corrected=input();corrected.payload.next_action='Corrected action';
+  const result=await m.prepareLeadIntent(ctx.client,ctx.session,corrected);
+  assert.equal(result.payload.next_action,'Corrected action');
+});

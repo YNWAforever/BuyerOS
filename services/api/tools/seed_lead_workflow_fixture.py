@@ -19,6 +19,7 @@ PROJECT = "e3100000-0000-4000-8000-000000000001"
 ADMIN = "e0000000-0000-4000-8000-000000000008"
 ICP = "e3400000-0000-4000-8000-000000000001"
 FACT = "e3500000-0000-4000-8000-000000000001"
+DOCUMENT = "e3600000-0000-4000-8000-000000000001"
 BUYERS = [f"e3200000-0000-4000-8000-{index+1:012d}" for index in range(24)]
 COMPANIES = [f"e3300000-0000-4000-8000-{index+1:012d}" for index in range(24)]
 
@@ -45,6 +46,14 @@ def reset_lead_workflow_fixture(dsn):
         db.execute("DELETE FROM people WHERE workspace_id=%s AND company_id=ANY(%s::uuid[])", (WORKSPACE, COMPANIES))
         db.execute("UPDATE projects SET offer_revision=1,version=1,active_icp_version_id=%s WHERE id=%s", (ICP, PROJECT))
         db.execute("UPDATE icp_versions SET superseded_at=NULL,approved_at=now(),approved_by=%s WHERE id=%s", (ADMIN, ICP))
+        content = db.execute("SELECT content FROM icp_versions WHERE id=%s", (ICP,)).fetchone()[0]
+        content["offer_facts"] = [{"id": FACT, "field": "product", "value": "Thai jasmine rice",
+            "provenance": "document_excerpt", "approved": False, "source_document_id": DOCUMENT,
+            "excerpt": "Thai jasmine rice. Fictional fixture source."}]
+        db.execute("UPDATE icp_versions SET content=%s::jsonb,content_hash=%s WHERE id=%s",
+                   (json.dumps(content), canonical_hash(content), ICP))
+        db.execute("UPDATE offer_documents SET status='ready',extraction_metadata='{}'::jsonb,"
+                   "deleted_at=NULL,retention_until=now()+interval '90 days' WHERE id=%s", (DOCUMENT,))
         db.execute("UPDATE memberships SET active=true,roles=CASE "
                    "WHEN user_id='e0000000-0000-4000-8000-000000000008'::uuid THEN ARRAY['workspace_admin'] "
                    "WHEN user_id='e0000000-0000-4000-8000-000000000004'::uuid THEN ARRAY['reviewer'] "
@@ -70,6 +79,10 @@ def seed_lead_workflow_fixture(dsn):
                    "approved_at,approved_by) VALUES (%s,%s,%s,1,1,%s::jsonb,%s,now(),%s)",
                    (ICP, WORKSPACE, PROJECT, json.dumps(content), canonical_hash(content), ADMIN))
         db.execute("UPDATE projects SET active_icp_version_id=%s WHERE id=%s", (ICP, PROJECT))
+        db.execute("INSERT INTO offer_documents(id,workspace_id,project_id,kind,filename,media_type,status,version,"
+                   "sha256,retention_until) VALUES (%s,%s,%s,'upload','Fixture product.pptx',"
+                   "'application/vnd.openxmlformats-officedocument.presentationml.presentation','ready',1,%s,"
+                   "now()+interval '90 days')", (DOCUMENT, WORKSPACE, PROJECT, "f"*64))
         for index, (buyer, company) in enumerate(zip(BUYERS, COMPANIES)):
             name = f"Fixture Rice Buyer {index+1:02d}"
             db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name,domain) VALUES (%s,%s,%s,%s,%s)",
@@ -91,7 +104,26 @@ def seed_lead_workflow_fixture(dsn):
                        "VALUES (%s,%s,'project',%s,%s,%s,'permitted','lead-browser-fixture','fictional fixture',"
                        "'owned loopback only',ARRAY['GB'],now()+interval '90 days',90,%s)",
                        (uuid.uuid4(), WORKSPACE, PROJECT, WORKSPACE, purpose, ADMIN))
-    asyncio.run(_seed_records(dsn))
+    reset_lead_workflow_fixture(dsn)
+
+
+def apply_lead_fixture_scenario(dsn, scenario):
+    _guard(dsn)
+    with psycopg.connect(dsn) as db:
+        if scenario == "expire_channel":
+            db.execute("UPDATE contact_points SET retention_expires_at=now()-interval '1 second' "
+                       "WHERE workspace_id=%s AND company_id=ANY(%s::uuid[])",
+                       (WORKSPACE, COMPANIES))
+        elif scenario == "product_caveat":
+            content = db.execute("SELECT content FROM icp_versions WHERE id=%s", (ICP,)).fetchone()[0]
+            content["offer_facts"] = []
+            db.execute("UPDATE icp_versions SET content=%s::jsonb,content_hash=%s WHERE id=%s",
+                       (json.dumps(content), canonical_hash(content), ICP))
+            db.execute("UPDATE offer_documents SET extraction_metadata=%s::jsonb WHERE id=%s",
+                       (json.dumps({"format":"pptx","byte_length":64,"classification":"image_only",
+                                    "slide_count":2,"text_slide_count":0}), DOCUMENT))
+        else:
+            raise ValueError("unsupported fixture scenario")
 
 
 async def _seed_records(dsn):

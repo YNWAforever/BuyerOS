@@ -12,5 +12,7 @@ export default defineConfig({
     BUYEROS_E2E_SEED_LEAD_WORKFLOW:'1',BUYEROS_DATABASE_MIGRATION_URL:'',
     BUYEROS_PAID_ADMISSION_ENABLED:'false',BUYEROS_DELIVERY_ADMISSION_ENABLED:'false',
     BUYEROS_CLOUDFLARE_EXECUTION_ENABLED:'false',
-  }}:server),
+  }}:{...server,...(process.env.BUYEROS_E2E_FRONTEND==='next'?{
+    command:'pnpm exec next dev --webpack --hostname 127.0.0.1 --port 5173',
+  }:{})}),
 });

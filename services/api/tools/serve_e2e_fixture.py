@@ -452,18 +452,38 @@ def main() -> None:
         app = create_app()
         app.dependency_overrides[get_principal] = fake_principal
         if os.environ.get("BUYEROS_E2E_SEED_LEAD_WORKFLOW") == "1":
-            from tools.seed_lead_workflow_fixture import reset_lead_workflow_fixture, PROJECT as LEAD_PROJECT
+            from tools.seed_lead_workflow_fixture import reset_lead_workflow_fixture, apply_lead_fixture_scenario, PROJECT as LEAD_PROJECT
+            from fastapi import Body
+            @app.post("/fixture/lead-scenario", include_in_schema=False)
+            def lead_fixture_scenario(scenario: str = Body(embed=True)):
+                if scenario not in {"expire_channel", "product_caveat"}:
+                    raise ApiError(422, "INVALID_REQUEST", "unsupported fixture scenario")
+                apply_lead_fixture_scenario(owner_dsn, scenario)
+                return {"fixture_only": True}
             @app.post("/fixture/lead-reset", include_in_schema=False)
             def reset_lead_fixture():
                 reset_lead_workflow_fixture(owner_dsn)
                 return {"fixture_only": True, "project_id": LEAD_PROJECT}
+
+            @app.post("/fixture/lead-revoke-admin", include_in_schema=False)
+            def revoke_lead_fixture_admin():
+                from tools.seed_lead_workflow_fixture import _guard, ADMIN
+                _guard(owner_dsn)
+                with psycopg.connect(owner_dsn) as db:
+                    db.execute("UPDATE memberships SET roles=ARRAY['viewer'],version=version+1 "
+                               "WHERE workspace_id=%s AND user_id=%s", (WORKSPACE_ID, ADMIN))
+                return {"fixture_only": True}
 
             @app.get("/fixture/lead-counts", include_in_schema=False)
             def lead_fixture_counts():
                 with psycopg.connect(owner_dsn) as db:
                     return {"fixture_only": True,
                         "provider_operations": db.execute("SELECT count(*) FROM provider_operations").fetchone()[0],
+                          "model_receipts": db.execute("SELECT count(*) FROM model_receipts").fetchone()[0],
+                          "contact_receipts": db.execute("SELECT count(*) FROM contact_receipts").fetchone()[0],
+                          "search_receipts": db.execute("SELECT count(*) FROM search_receipts").fetchone()[0],
                         "async_jobs": db.execute("SELECT count(*) FROM async_jobs").fetchone()[0],
+                          "formal_drafts": db.execute("SELECT count(*) FROM outreach_drafts").fetchone()[0],
                         "send_events": db.execute("SELECT count(*) FROM outbox_events WHERE event_type LIKE 'delivery.%%'").fetchone()[0]}
         @app.get('/fixture/frontend', include_in_schema=False)
         def frontend_fixture_proof():
