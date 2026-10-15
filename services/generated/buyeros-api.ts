@@ -1826,6 +1826,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-workflow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Getleadcase */
+        get: operations["getLeadCase"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/projects/{project_id}/lead-workflow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Getleadworkflow */
+        get: operations["getLeadWorkflow"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4569,8 +4603,8 @@ export interface components {
         /** ObservationIntent */
         ObservationIntent: {
             /**
-             * Action
-             * @constant
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
              */
             action: "observation.append";
             /**
@@ -4583,6 +4617,313 @@ export interface components {
             /** Expected Version */
             expected_version?: number | null;
             payload: components["schemas"]["LeadObservationInput"];
+        };
+        /** LeadCaseIntent */
+        LeadCaseIntent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "case.update";
+            /**
+             * Buyer Id
+             * Format: uuid
+             */
+            buyer_id: string;
+            /** Target Id */
+            target_id?: string | null;
+            /** Expected Version */
+            expected_version: number;
+            payload: components["schemas"]["LeadCaseUpdate"];
+        };
+        /** LeadCaseUpdate */
+        LeadCaseUpdate: {
+            /** Priority */
+            priority: boolean;
+            /**
+             * Priority Reason
+             * @default
+             */
+            priority_reason: string;
+            /**
+             * Next Action
+             * @default
+             */
+            next_action: string;
+            /** Due On */
+            due_on?: string | null;
+        };
+        /** LeadCaseView */
+        LeadCaseView: {
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /**
+             * Buyer Id
+             * Format: uuid
+             */
+            buyer_id: string;
+            /**
+             * Company Id
+             * Format: uuid
+             */
+            company_id: string;
+            /** Company Name */
+            company_name: string;
+            /** Version */
+            version: number;
+            /** State Exists */
+            state_exists: boolean;
+            /** Priority */
+            priority: boolean;
+            /** Priority Reason */
+            priority_reason: string;
+            /** Owner User Id */
+            owner_user_id: string | null;
+            /** Next Action */
+            next_action: string;
+            /** Due On */
+            due_on: string | null;
+            /** Selected Person Id */
+            selected_person_id: string | null;
+            /** Selected Contact Id */
+            selected_contact_id: string | null;
+            quality: components["schemas"]["LeadQuality"];
+            /** Observations */
+            observations: components["schemas"]["LeadObservationRecord"][] | null;
+            /** Observations Total */
+            observations_total: number;
+            /** Reviews */
+            reviews: components["schemas"]["LeadReviewRecord"][];
+            /** Reviews Total */
+            reviews_total: number;
+            /** Source Check Ids */
+            source_check_ids: string[];
+            /**
+             * Stage
+             * @enum {string}
+             */
+            stage: "find_person" | "verify_employment" | "verify_procurement" | "verify_channel" | "refresh_evidence" | "review_preparation" | "complete";
+            /**
+             * Reviewed Preparation
+             * @default false
+             */
+            reviewed_preparation: boolean;
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+        };
+        /** LeadEnvelope[LeadCaseView] */
+        LeadEnvelope_LeadCaseView_: {
+            data: components["schemas"]["LeadCaseView"];
+            /** Request Id */
+            request_id: string;
+            /**
+             * Data Mode
+             * @constant
+             */
+            data_mode: "live";
+        };
+        /** LeadEnvelope[LeadProgressPage] */
+        LeadEnvelope_LeadProgressPage_: {
+            data: components["schemas"]["LeadProgressPage"];
+            /** Request Id */
+            request_id: string;
+            /**
+             * Data Mode
+             * @constant
+             */
+            data_mode: "live";
+        };
+        /** LeadMetrics */
+        LeadMetrics: {
+            /** Company Cards */
+            company_cards: number;
+            /** Priority Companies */
+            priority_companies: number;
+            /** Qualified People Companies */
+            qualified_people_companies: number;
+            /** Direct Channel Companies */
+            direct_channel_companies: number;
+            /** Reviewed Preparation Companies */
+            reviewed_preparation_companies: number;
+        };
+        /** LeadProgressPage */
+        LeadProgressPage: {
+            /** Items */
+            items: components["schemas"]["LeadCaseView"][];
+            /** Offset */
+            offset: number;
+            /** Limit */
+            limit: number;
+            /** Total */
+            total: number;
+            metrics: components["schemas"]["LeadMetrics"];
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+            /** Context Hash */
+            context_hash: string;
+        };
+        /** LeadQuality */
+        LeadQuality: {
+            /** Employment Current */
+            employment_current: boolean;
+            /** Procurement Current */
+            procurement_current: boolean;
+            /** Channel Ownership Current */
+            channel_ownership_current: boolean;
+            /** Qualified Person */
+            qualified_person: boolean;
+            /** Direct Channel */
+            direct_channel: boolean;
+            /** Needs Review */
+            needs_review: boolean;
+            /** Blockers */
+            blockers: string[];
+            /** Expires At */
+            expires_at: string | null;
+        };
+        /** LeadReviewInput */
+        LeadReviewInput: {
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Contact Id */
+            contact_id?: string | null;
+            /**
+             * Employment
+             * @enum {string}
+             */
+            employment: "accepted" | "uncertain" | "rejected";
+            /**
+             * Procurement Scope
+             * @enum {string}
+             */
+            procurement_scope: "accepted" | "uncertain" | "rejected";
+            /**
+             * Channel Ownership
+             * @enum {string}
+             */
+            channel_ownership: "accepted" | "uncertain" | "rejected";
+            /** Observation Ids */
+            observation_ids: string[];
+            /** Conflict Resolution */
+            conflict_resolution?: string | null;
+            /** Rationale */
+            rationale: string;
+            /** Previous Review Id */
+            previous_review_id?: string | null;
+        };
+        /** LeadReviewIntent */
+        LeadReviewIntent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "lead.review";
+            /**
+             * Buyer Id
+             * Format: uuid
+             */
+            buyer_id: string;
+            /** Target Id */
+            target_id?: string | null;
+            /** Expected Version */
+            expected_version: number;
+            payload: components["schemas"]["LeadReviewInput"];
+        };
+        /** LeadReviewRecord */
+        LeadReviewRecord: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /**
+             * Buyer Id
+             * Format: uuid
+             */
+            buyer_id: string;
+            /**
+             * Company Id
+             * Format: uuid
+             */
+            company_id: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Contact Id */
+            contact_id: string | null;
+            /**
+             * Employment
+             * @enum {string}
+             */
+            employment: "accepted" | "uncertain" | "rejected";
+            /**
+             * Procurement Scope
+             * @enum {string}
+             */
+            procurement_scope: "accepted" | "uncertain" | "rejected";
+            /**
+             * Channel Ownership
+             * @enum {string}
+             */
+            channel_ownership: "accepted" | "uncertain" | "rejected";
+            /** Case Version */
+            case_version: number;
+            /** Context Hash */
+            context_hash: string;
+            /**
+             * Context Current
+             * @default true
+             */
+            context_current: boolean;
+            /** Observation Ids */
+            observation_ids: string[];
+            /** Previous Review Id */
+            previous_review_id: string | null;
+            /**
+             * Recorded By User Id
+             * Format: uuid
+             */
+            recorded_by_user_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Rationale */
+            rationale: string | null;
+            /** Conflict Resolution */
+            conflict_resolution: string | null;
+            /** Redacted */
+            redacted: boolean;
         };
     };
     responses: {
@@ -8796,7 +9137,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ObservationIntent"];
+                "application/json": components["schemas"]["ObservationIntent"] | components["schemas"]["LeadReviewIntent"] | components["schemas"]["LeadCaseIntent"];
             };
         };
         responses: {
@@ -8958,6 +9299,79 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LeadEnvelope_LeadIntentView_"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    getLeadCase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+                buyer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadEnvelope_LeadCaseView_"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    getLeadWorkflow: {
+        parameters: {
+            query?: {
+                priority?: boolean | null;
+                stage?: ("find_person" | "verify_employment" | "verify_procurement" | "verify_channel" | "refresh_evidence" | "review_preparation" | "complete") | null;
+                owner_user_id?: string | null;
+                due_before?: string | null;
+                qualifies_for?: ("company_card" | "priority_company" | "qualified_person" | "direct_channel" | "reviewed_preparation") | null;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadEnvelope_LeadProgressPage_"];
                 };
             };
             400: components["responses"]["Error"];

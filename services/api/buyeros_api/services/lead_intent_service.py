@@ -1,7 +1,7 @@
 """Actor-scoped durable local writes; no provider, worker or sending registry."""
 import uuid
 from dataclasses import replace
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -13,14 +13,21 @@ from ..api.idempotency import begin_idempotency, complete_idempotency, if_match_
 from ..api.lead_schemas import LeadScope, LeadIntentInput, LeadIntentView, LeadIntentReceipt
 from ..db.buyers import ProjectBuyer
 from ..db.icp import canonical_hash
-from ..db.lead_workflow import LeadActionIntent, LeadObservation
+from ..db.lead_workflow import LeadActionIntent, LeadObservation, LeadReview
 from .audit_service import append_audit
 from .lead_evidence_service import (
     append_observation, assert_active_project, observation_data, personal_policy,
     retained_payload, save_private_payload, validate_observation,
 )
 
-ACTION_PERMISSIONS = {"observation.append": "updateBuyer"}
+ACTION_PERMISSIONS = {
+    "observation.append": "updateBuyer", "lead.review": "updateBuyer", "case.update": "updateBuyer",
+}
+LOCAL_CONFIGURATION_INTENT_DAYS = 30
+
+
+def personal_action(action):
+    return action in {"observation.append", "lead.review"} or action.startswith("preparation.")
 
 
 def require_action(scope, action):
@@ -76,6 +83,16 @@ async def _receipt(session, scope, row, now):
         else:
             current = await observation_data(session, scope, observation, now)
             redacted = current["redacted"]
+    elif row.resource_type == "lead_review":
+        from .lead_review_service import review_observations, review_data
+        review = await session.scalar(select(LeadReview).where(
+            LeadReview.workspace_id == scope.workspace_id, LeadReview.project_id == scope.project_id,
+            LeadReview.id == row.resource_id,
+        ))
+        redacted = review is None
+        if review is not None:
+            data = await review_data(session, scope, review, await review_observations(session, scope, now), now)
+            redacted = data.redacted
     return LeadIntentReceipt(intent_id=row.id, resource_type=row.resource_type,
         resource_id=row.resource_id, resource_version=row.resource_version or 1,
         state="applied", redacted=redacted).model_dump(mode="json")
@@ -84,7 +101,7 @@ async def _receipt(session, scope, row, now):
 async def _view(session, scope, row, now):
     scope = await intent_scope(session, scope, row)
     payload, content = await retained_payload(session, scope, row.payload_id, now)
-    allowed = await personal_policy(session, scope, now, required=False) is not None
+    allowed = (await personal_policy(session, scope, now, required=False) is not None) if personal_action(row.action) else True
     if not allowed:
         content = None
     receipt = await _receipt(session, scope, row, now) if row.state == "applied" else None
@@ -107,7 +124,7 @@ async def prepare_intent(
     require_key(key)
     require_action(scope, data.action)
     await assert_active_project(session, scope)
-    deadline = await personal_policy(session, scope, now)
+    deadline = (await personal_policy(session, scope, now)) if personal_action(data.action) else now + timedelta(days=LOCAL_CONFIGURATION_INTENT_DAYS)
     body = data.model_dump(mode="json")
     fingerprint = canonical_hash({"scope": [str(scope.workspace_id), str(scope.project_id),
                                           str(scope.buyer_id), str(scope.company_id)], "body": body})
@@ -125,9 +142,15 @@ async def prepare_intent(
     )
     row = await session.scalar(active_query)
     if row is None:
-        deadline = await validate_observation(session, scope, data.payload, now)
-        person_id = data.payload.person.person_id if data.payload.person else None
-        contact_id = data.payload.channel.contact_id if data.payload.channel else None
+        person_id, contact_id = None, None
+        if data.action == "observation.append":
+            deadline = await validate_observation(session, scope, data.payload, now)
+            person_id = data.payload.person.person_id if data.payload.person else None
+            contact_id = data.payload.channel.contact_id if data.payload.channel else None
+        elif data.action == "lead.review":
+            from .lead_review_service import validate_lead_review
+            deadline, _ = await validate_lead_review(session, scope, data.payload, now)
+            person_id, contact_id = data.payload.person_id, data.payload.contact_id
         try:
             async with session.begin_nested():
                 private = await save_private_payload(session, scope, {"payload": body["payload"]},
@@ -193,11 +216,25 @@ async def apply_intent(
     _, content = await retained_payload(session, scope, row.payload_id, now)
     if content is None:
         raise ApiError(409, "INVALID_STATE", "original payload is no longer retained")
-    from ..api.lead_schemas import LeadObservationInput
-    result = await append_observation(session, scope=scope,
-                                      data=LeadObservationInput.model_validate(content["payload"]), now=now)
-    row.state, row.resource_type = "applied", "lead_observation"
-    row.resource_id, row.resource_version = uuid.UUID(result["id"]), 1
+    from ..api.lead_schemas import LeadObservationInput, LeadReviewInput, LeadCaseUpdate
+    if row.action == "observation.append":
+        result = await append_observation(session, scope=scope,
+            data=LeadObservationInput.model_validate(content["payload"]), now=now)
+        resource_type, resource_version = "lead_observation", 1
+    elif row.action == "lead.review":
+        from .lead_review_service import append_lead_review
+        result = await append_lead_review(session, scope=scope,
+            data=LeadReviewInput.model_validate(content["payload"]), expected_version=row.expected_version, now=now)
+        resource_type, resource_version = "lead_review", result["case_version"]
+    elif row.action == "case.update":
+        from .lead_review_service import update_lead_case
+        result = await update_lead_case(session, scope=scope,
+            data=LeadCaseUpdate.model_validate(content["payload"]), expected_version=row.expected_version)
+        resource_type, resource_version = "lead_case", result["version"]
+    else:
+        raise ApiError(403, "POLICY_BLOCKED", "action handler unavailable")
+    row.state, row.resource_type = "applied", resource_type
+    row.resource_id, row.resource_version = uuid.UUID(result["id"]), resource_version
     append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
         action="lead.intent.applied", entity_type=row.resource_type, entity_id=row.resource_id,
         detail_digest=row.fingerprint)

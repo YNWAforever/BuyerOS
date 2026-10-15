@@ -166,7 +166,8 @@ async def validate_observation(session, scope, data, now):
         ))
         if previous is None:
             raise ApiError(404, "NOT_FOUND", "original observation not found")
-        if previous.claim != data.claim or (person and previous.person_id != person.id):
+        if (previous.claim != data.claim
+                or (previous.person_id is not None and (person is None or previous.person_id != person.id))):
             raise ApiError(422, "INVALID_REQUEST", "correction must describe the same subject and claim")
     return deadline
 
@@ -199,21 +200,24 @@ async def save_private_payload(session, scope, contents, deadline, person_id=Non
     return payload
 
 
-async def retained_payload(session, scope, payload_id, now):
-    payload = await session.scalar(select(LeadPrivatePayload).where(
+async def retained_payload(session, scope, payload_id, now, *, cache=None):
+    payload = cache["payloads"].get(payload_id) if cache is not None else await session.scalar(select(LeadPrivatePayload).where(
         LeadPrivatePayload.workspace_id == scope.workspace_id,
         LeadPrivatePayload.project_id == scope.project_id, LeadPrivatePayload.id == payload_id,
     ))
     if payload is None or payload.contents is None or payload.retention_expires_at <= now:
         return payload, None
     if payload.person_id:
-        expiry = await session.scalar(select(Person.retention_expires_at).where(
-            Person.workspace_id == scope.workspace_id, Person.id == payload.person_id,
-        ))
+        parent = cache["people"].get(payload.person_id) if cache is not None else None
+        expiry = parent.retention_expires_at if parent else None
+        if cache is None:
+            expiry = await session.scalar(select(Person.retention_expires_at).where(
+                Person.workspace_id == scope.workspace_id, Person.id == payload.person_id,
+            ))
         if expiry is None or expiry <= now:
             return payload, None
     if payload.contact_id:
-        contact = await session.scalar(select(ContactPoint).where(
+        contact = cache["contacts"].get(payload.contact_id) if cache is not None else await session.scalar(select(ContactPoint).where(
             ContactPoint.workspace_id == scope.workspace_id, ContactPoint.id == payload.contact_id,
         ))
         if contact is None or contact.quarantined or contact.retention_expires_at is None or contact.retention_expires_at <= now:
@@ -221,8 +225,8 @@ async def retained_payload(session, scope, payload_id, now):
     return payload, payload.contents
 
 
-async def observation_data(session, scope, row, now, *, policy_allowed=None):
-    payload, content = await retained_payload(session, scope, row.payload_id, now)
+async def observation_data(session, scope, row, now, *, policy_allowed=None, cache=None):
+    payload, content = await retained_payload(session, scope, row.payload_id, now, cache=cache)
     if policy_allowed is None:
         policy_allowed = await personal_policy(session, scope, now, row.contact_id, required=False) is not None
     availability = "available"
@@ -232,11 +236,11 @@ async def observation_data(session, scope, row, now, *, policy_allowed=None):
         availability = "redacted" if payload and payload.redacted_at else "expired"
     person, contact = None, None
     if content and row.person_id:
-        candidate = await session.get(Person, row.person_id)
+        candidate = cache["people"].get(row.person_id) if cache is not None else await session.get(Person, row.person_id)
         if candidate and candidate.workspace_id == scope.workspace_id:
             person = {"id": str(candidate.id), "full_name": candidate.full_name, "role": candidate.role}
     if content and row.contact_id:
-        candidate = await session.get(ContactPoint, row.contact_id)
+        candidate = cache["contacts"].get(row.contact_id) if cache is not None else await session.get(ContactPoint, row.contact_id)
         if candidate and candidate.workspace_id == scope.workspace_id:
             contact = {"id": str(candidate.id), "type": candidate.type,
                        "value": candidate.normalized_value, "validity": candidate.validity,

@@ -1,7 +1,7 @@
 """Strict manual lead contracts. None of these requests can dispatch a provider."""
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Generic, Literal, TypeVar
+from typing import Annotated, Generic, Literal, TypeVar, Union
 from urllib.parse import urlparse
 from uuid import UUID
 
@@ -133,9 +133,6 @@ class ObservationIntent(LeadStrict):
     payload: LeadObservationInput
 
 
-LeadIntentInput = ObservationIntent
-
-
 class EmptyLeadBody(LeadStrict):
     pass
 
@@ -213,3 +210,157 @@ class LeadEnvelope(LeadStrict, Generic[T]):
     data: T
     request_id: str
     data_mode: Literal["live"]
+
+
+class LeadReviewInput(LeadStrict):
+    person_id: UUID
+    contact_id: UUID | None = None
+    employment: Literal["accepted", "uncertain", "rejected"]
+    procurement_scope: Literal["accepted", "uncertain", "rejected"]
+    channel_ownership: Literal["accepted", "uncertain", "rejected"]
+    observation_ids: list[UUID] = Field(min_length=1, max_length=100)
+    conflict_resolution: StrictStr | None = Field(default=None, max_length=4000)
+    rationale: StrictStr = Field(min_length=1, max_length=4000)
+    previous_review_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def valid_review(self):
+        if len(set(self.observation_ids)) != len(self.observation_ids) or not self.rationale.strip():
+            raise ValueError("unique references and a rationale are required")
+        if self.contact_id is None and self.channel_ownership == "accepted":
+            raise ValueError("accepted ownership requires a selected channel")
+        return self
+
+
+class LeadCaseUpdate(LeadStrict):
+    priority: bool
+    priority_reason: StrictStr = Field(default="", max_length=4000)
+    next_action: StrictStr = Field(default="", max_length=200)
+    due_on: date | None = None
+
+    @model_validator(mode="after")
+    def priority_has_reason(self):
+        if self.priority and not self.priority_reason.strip():
+            raise ValueError("priority requires a reason")
+        return self
+
+
+class LeadReviewIntent(LeadStrict):
+    action: Literal["lead.review"]
+    buyer_id: UUID
+    target_id: UUID | None = None
+    expected_version: StrictInt = Field(ge=1)
+    payload: LeadReviewInput
+
+
+class LeadCaseIntent(LeadStrict):
+    action: Literal["case.update"]
+    buyer_id: UUID
+    target_id: UUID | None = None
+    expected_version: StrictInt = Field(ge=1)
+    payload: LeadCaseUpdate
+
+
+LeadIntentInput = Annotated[
+    Union[ObservationIntent, LeadReviewIntent, LeadCaseIntent], Field(discriminator="action"),
+]
+
+
+class LeadQuality(LeadStrict):
+    employment_current: bool
+    procurement_current: bool
+    channel_ownership_current: bool
+    qualified_person: bool
+    direct_channel: bool
+    needs_review: bool
+    blockers: list[str]
+    expires_at: AwareDatetime | None
+
+
+class LeadReviewRecord(LeadStrict):
+    id: UUID
+    workspace_id: UUID
+    project_id: UUID
+    buyer_id: UUID
+    company_id: UUID
+    person_id: UUID
+    contact_id: UUID | None
+    employment: Literal["accepted", "uncertain", "rejected"]
+    procurement_scope: Literal["accepted", "uncertain", "rejected"]
+    channel_ownership: Literal["accepted", "uncertain", "rejected"]
+    case_version: int
+    context_hash: str
+    context_current: bool = True
+    observation_ids: list[UUID]
+    previous_review_id: UUID | None
+    recorded_by_user_id: UUID
+    created_at: AwareDatetime
+    rationale: str | None
+    conflict_resolution: str | None
+    redacted: bool
+
+
+LeadStage = Literal[
+    "find_person", "verify_employment", "verify_procurement", "verify_channel",
+    "refresh_evidence", "review_preparation", "complete",
+]
+LeadCriterion = Literal[
+    "company_card", "priority_company", "qualified_person", "direct_channel", "reviewed_preparation",
+]
+
+
+class LeadFilters(LeadStrict):
+    priority: bool | None = None
+    stage: LeadStage | None = None
+    owner_user_id: UUID | None = None
+    due_before: date | None = None
+    qualifies_for: LeadCriterion | None = None
+
+
+class LeadProgressQuery(LeadFilters):
+    offset: int = Field(default=0, ge=0)
+    limit: int = Field(default=20, ge=1, le=100)
+
+
+class LeadCaseView(LeadStrict):
+    workspace_id: UUID
+    project_id: UUID
+    buyer_id: UUID
+    company_id: UUID
+    company_name: str
+    version: int
+    state_exists: bool
+    priority: bool
+    priority_reason: str
+    owner_user_id: UUID | None
+    next_action: str
+    due_on: date | None
+    selected_person_id: UUID | None
+    selected_contact_id: UUID | None
+    quality: LeadQuality
+    observations: list[LeadObservationRecord] | None
+    observations_total: int
+    reviews: list[LeadReviewRecord]
+    reviews_total: int
+    source_check_ids: list[UUID]
+    stage: LeadStage
+    reviewed_preparation: bool = False
+    as_of: AwareDatetime
+
+
+class LeadMetrics(LeadStrict):
+    company_cards: int = Field(ge=0)
+    priority_companies: int = Field(ge=0)
+    qualified_people_companies: int = Field(ge=0)
+    direct_channel_companies: int = Field(ge=0)
+    reviewed_preparation_companies: int = Field(ge=0)
+
+
+class LeadProgressPage(LeadStrict):
+    items: list[LeadCaseView]
+    offset: int
+    limit: int
+    total: int
+    metrics: LeadMetrics
+    as_of: AwareDatetime
+    context_hash: str

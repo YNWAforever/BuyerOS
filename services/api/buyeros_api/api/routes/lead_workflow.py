@@ -10,15 +10,46 @@ from ..errors import envelope
 from ..lead_schemas import (
     EmptyLeadBody, LeadEnvelope, LeadEvidencePage, LeadIntentInput,
     LeadIntentPage, LeadIntentReceipt, LeadIntentView,
+    LeadCaseView, LeadProgressPage, LeadFilters, LeadProgressQuery,
 )
 from ...services.lead_evidence_service import resolve_lead_scope, list_observations
 from ...services.lead_intent_service import (
     prepare_intent, read_intent, list_intents, apply_intent, acknowledge_intent, cancel_intent,
 )
+from ...services.lead_progress_service import get_lead_case, get_lead_progress
 
 router = APIRouter(
     prefix="/v1/workspaces/{workspace_id}/projects/{project_id}", tags=["lead-workflow"],
 )
+
+
+@router.get("/buyers/{buyer_id}/lead-workflow", operation_id="getLeadCase", name="getLeadCase",
+            response_model=LeadEnvelope[LeadCaseView])
+async def get_lead_case_route(
+    workspace_id: uuid.UUID, project_id: uuid.UUID, buyer_id: uuid.UUID, request: Request,
+    principal: Principal = Depends(get_principal),
+):
+    async with tenant_scoped(workspace_id) as session:
+        scope = await resolve_lead_scope(session, workspace_id=workspace_id, project_id=project_id,
+                                         buyer_id=buyer_id, principal=principal)
+        result = await get_lead_case(session, scope=scope, now=datetime.now(timezone.utc))
+    return envelope(result, request.state.request_id)
+
+
+@router.get("/lead-workflow", operation_id="getLeadWorkflow", name="getLeadWorkflow",
+            response_model=LeadEnvelope[LeadProgressPage])
+async def get_lead_progress_route(
+    workspace_id: uuid.UUID, project_id: uuid.UUID, request: Request,
+    query: LeadProgressQuery = Query(),
+    principal: Principal = Depends(get_principal),
+):
+    async with tenant_scoped(workspace_id) as session:
+        scope = await resolve_lead_scope(session, workspace_id=workspace_id, project_id=project_id,
+                                         buyer_id=None, principal=principal)
+        filters = LeadFilters.model_validate(query.model_dump(exclude={"offset", "limit"}))
+        result = await get_lead_progress(session, scope=scope, filters=filters,
+                                         offset=query.offset, limit=query.limit, now=datetime.now(timezone.utc))
+    return envelope(result, request.state.request_id)
 
 
 @router.get("/buyers/{buyer_id}/lead-evidence", operation_id="listLeadEvidence",

@@ -9502,7 +9502,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ObservationIntent'
+              oneOf:
+              - $ref: '#/components/schemas/ObservationIntent'
+              - $ref: '#/components/schemas/LeadReviewIntent'
+              - $ref: '#/components/schemas/LeadCaseIntent'
+              discriminator:
+                propertyName: action
+                mapping:
+                  observation.append: '#/components/schemas/ObservationIntent'
+                  lead.review: '#/components/schemas/LeadReviewIntent'
+                  case.update: '#/components/schemas/LeadCaseIntent'
+              title: Payload
       responses:
         '201':
           description: Successful Response
@@ -9884,6 +9894,192 @@ paths:
       x-permitted-roles:
       - operator
       - reviewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
+  /v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-workflow:
+    get:
+      tags:
+      - lead-workflow
+      summary: Getleadcase
+      operationId: getLeadCase
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: buyer_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Buyer Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadCaseView_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - viewer
+      - workspace_admin
+      security:
+      - BearerAuth: []
+  /v1/workspaces/{workspace_id}/projects/{project_id}/lead-workflow:
+    get:
+      tags:
+      - lead-workflow
+      summary: Getleadworkflow
+      operationId: getLeadWorkflow
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Workspace Id
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Project Id
+      - name: priority
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Priority
+      - name: stage
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - find_person
+            - verify_employment
+            - verify_procurement
+            - verify_channel
+            - refresh_evidence
+            - review_preparation
+            - complete
+            type: string
+          - type: 'null'
+          title: Stage
+      - name: owner_user_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Owner User Id
+      - name: due_before
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Due Before
+      - name: qualifies_for
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - company_card
+            - priority_company
+            - qualified_person
+            - direct_channel
+            - reviewed_preparation
+            type: string
+          - type: 'null'
+          title: Qualifies For
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadEnvelope_LeadProgressPage_'
+        '422':
+          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - operator
+      - reviewer
+      - viewer
       - workspace_admin
       security:
       - BearerAuth: []
@@ -16238,6 +16434,556 @@ components:
       - buyer_id
       - payload
       title: ObservationIntent
+    LeadCaseIntent:
+      properties:
+        action:
+          type: string
+          const: case.update
+          title: Action
+        buyer_id:
+          type: string
+          format: uuid
+          title: Buyer Id
+        target_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Target Id
+        expected_version:
+          type: integer
+          minimum: 1.0
+          title: Expected Version
+        payload:
+          $ref: '#/components/schemas/LeadCaseUpdate'
+      additionalProperties: false
+      type: object
+      required:
+      - action
+      - buyer_id
+      - expected_version
+      - payload
+      title: LeadCaseIntent
+    LeadCaseUpdate:
+      properties:
+        priority:
+          type: boolean
+          title: Priority
+        priority_reason:
+          type: string
+          maxLength: 4000
+          title: Priority Reason
+          default: ''
+        next_action:
+          type: string
+          maxLength: 200
+          title: Next Action
+          default: ''
+        due_on:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Due On
+      additionalProperties: false
+      type: object
+      required:
+      - priority
+      title: LeadCaseUpdate
+    LeadCaseView:
+      properties:
+        workspace_id:
+          type: string
+          format: uuid
+          title: Workspace Id
+        project_id:
+          type: string
+          format: uuid
+          title: Project Id
+        buyer_id:
+          type: string
+          format: uuid
+          title: Buyer Id
+        company_id:
+          type: string
+          format: uuid
+          title: Company Id
+        company_name:
+          type: string
+          title: Company Name
+        version:
+          type: integer
+          title: Version
+        state_exists:
+          type: boolean
+          title: State Exists
+        priority:
+          type: boolean
+          title: Priority
+        priority_reason:
+          type: string
+          title: Priority Reason
+        owner_user_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Owner User Id
+        next_action:
+          type: string
+          title: Next Action
+        due_on:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Due On
+        selected_person_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Selected Person Id
+        selected_contact_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Selected Contact Id
+        quality:
+          $ref: '#/components/schemas/LeadQuality'
+        observations:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/LeadObservationRecord'
+            type: array
+          - type: 'null'
+          title: Observations
+        observations_total:
+          type: integer
+          title: Observations Total
+        reviews:
+          items:
+            $ref: '#/components/schemas/LeadReviewRecord'
+          type: array
+          title: Reviews
+        reviews_total:
+          type: integer
+          title: Reviews Total
+        source_check_ids:
+          items:
+            type: string
+            format: uuid
+          type: array
+          title: Source Check Ids
+        stage:
+          type: string
+          enum:
+          - find_person
+          - verify_employment
+          - verify_procurement
+          - verify_channel
+          - refresh_evidence
+          - review_preparation
+          - complete
+          title: Stage
+        reviewed_preparation:
+          type: boolean
+          title: Reviewed Preparation
+          default: false
+        as_of:
+          type: string
+          format: date-time
+          title: As Of
+      additionalProperties: false
+      type: object
+      required:
+      - workspace_id
+      - project_id
+      - buyer_id
+      - company_id
+      - company_name
+      - version
+      - state_exists
+      - priority
+      - priority_reason
+      - owner_user_id
+      - next_action
+      - due_on
+      - selected_person_id
+      - selected_contact_id
+      - quality
+      - observations
+      - observations_total
+      - reviews
+      - reviews_total
+      - source_check_ids
+      - stage
+      - as_of
+      title: LeadCaseView
+    LeadEnvelope_LeadCaseView_:
+      properties:
+        data:
+          $ref: '#/components/schemas/LeadCaseView'
+        request_id:
+          type: string
+          title: Request Id
+        data_mode:
+          type: string
+          const: live
+          title: Data Mode
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - request_id
+      - data_mode
+      title: LeadEnvelope[LeadCaseView]
+    LeadEnvelope_LeadProgressPage_:
+      properties:
+        data:
+          $ref: '#/components/schemas/LeadProgressPage'
+        request_id:
+          type: string
+          title: Request Id
+        data_mode:
+          type: string
+          const: live
+          title: Data Mode
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - request_id
+      - data_mode
+      title: LeadEnvelope[LeadProgressPage]
+    LeadMetrics:
+      properties:
+        company_cards:
+          type: integer
+          minimum: 0.0
+          title: Company Cards
+        priority_companies:
+          type: integer
+          minimum: 0.0
+          title: Priority Companies
+        qualified_people_companies:
+          type: integer
+          minimum: 0.0
+          title: Qualified People Companies
+        direct_channel_companies:
+          type: integer
+          minimum: 0.0
+          title: Direct Channel Companies
+        reviewed_preparation_companies:
+          type: integer
+          minimum: 0.0
+          title: Reviewed Preparation Companies
+      additionalProperties: false
+      type: object
+      required:
+      - company_cards
+      - priority_companies
+      - qualified_people_companies
+      - direct_channel_companies
+      - reviewed_preparation_companies
+      title: LeadMetrics
+    LeadProgressPage:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/LeadCaseView'
+          type: array
+          title: Items
+        offset:
+          type: integer
+          title: Offset
+        limit:
+          type: integer
+          title: Limit
+        total:
+          type: integer
+          title: Total
+        metrics:
+          $ref: '#/components/schemas/LeadMetrics'
+        as_of:
+          type: string
+          format: date-time
+          title: As Of
+        context_hash:
+          type: string
+          title: Context Hash
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - offset
+      - limit
+      - total
+      - metrics
+      - as_of
+      - context_hash
+      title: LeadProgressPage
+    LeadQuality:
+      properties:
+        employment_current:
+          type: boolean
+          title: Employment Current
+        procurement_current:
+          type: boolean
+          title: Procurement Current
+        channel_ownership_current:
+          type: boolean
+          title: Channel Ownership Current
+        qualified_person:
+          type: boolean
+          title: Qualified Person
+        direct_channel:
+          type: boolean
+          title: Direct Channel
+        needs_review:
+          type: boolean
+          title: Needs Review
+        blockers:
+          items:
+            type: string
+          type: array
+          title: Blockers
+        expires_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expires At
+      additionalProperties: false
+      type: object
+      required:
+      - employment_current
+      - procurement_current
+      - channel_ownership_current
+      - qualified_person
+      - direct_channel
+      - needs_review
+      - blockers
+      - expires_at
+      title: LeadQuality
+    LeadReviewInput:
+      properties:
+        person_id:
+          type: string
+          format: uuid
+          title: Person Id
+        contact_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Contact Id
+        employment:
+          type: string
+          enum:
+          - accepted
+          - uncertain
+          - rejected
+          title: Employment
+        procurement_scope:
+          type: string
+          enum:
+          - accepted
+          - uncertain
+          - rejected
+          title: Procurement Scope
+        channel_ownership:
+          type: string
+          enum:
+          - accepted
+          - uncertain
+          - rejected
+          title: Channel Ownership
+        observation_ids:
+          items:
+            type: string
+            format: uuid
+          type: array
+          maxItems: 100
+          minItems: 1
+          title: Observation Ids
+        conflict_resolution:
+          anyOf:
+          - type: string
+            maxLength: 4000
+          - type: 'null'
+          title: Conflict Resolution
+        rationale:
+          type: string
+          maxLength: 4000
+          minLength: 1
+          title: Rationale
+        previous_review_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Previous Review Id
+      additionalProperties: false
+      type: object
+      required:
+      - person_id
+      - employment
+      - procurement_scope
+      - channel_ownership
+      - observation_ids
+      - rationale
+      title: LeadReviewInput
+    LeadReviewIntent:
+      properties:
+        action:
+          type: string
+          const: lead.review
+          title: Action
+        buyer_id:
+          type: string
+          format: uuid
+          title: Buyer Id
+        target_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Target Id
+        expected_version:
+          type: integer
+          minimum: 1.0
+          title: Expected Version
+        payload:
+          $ref: '#/components/schemas/LeadReviewInput'
+      additionalProperties: false
+      type: object
+      required:
+      - action
+      - buyer_id
+      - expected_version
+      - payload
+      title: LeadReviewIntent
+    LeadReviewRecord:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        workspace_id:
+          type: string
+          format: uuid
+          title: Workspace Id
+        project_id:
+          type: string
+          format: uuid
+          title: Project Id
+        buyer_id:
+          type: string
+          format: uuid
+          title: Buyer Id
+        company_id:
+          type: string
+          format: uuid
+          title: Company Id
+        person_id:
+          type: string
+          format: uuid
+          title: Person Id
+        contact_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Contact Id
+        employment:
+          type: string
+          enum:
+          - accepted
+          - uncertain
+          - rejected
+          title: Employment
+        procurement_scope:
+          type: string
+          enum:
+          - accepted
+          - uncertain
+          - rejected
+          title: Procurement Scope
+        channel_ownership:
+          type: string
+          enum:
+          - accepted
+          - uncertain
+          - rejected
+          title: Channel Ownership
+        case_version:
+          type: integer
+          title: Case Version
+        context_hash:
+          type: string
+          title: Context Hash
+        context_current:
+          type: boolean
+          title: Context Current
+          default: true
+        observation_ids:
+          items:
+            type: string
+            format: uuid
+          type: array
+          title: Observation Ids
+        previous_review_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Previous Review Id
+        recorded_by_user_id:
+          type: string
+          format: uuid
+          title: Recorded By User Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        rationale:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Rationale
+        conflict_resolution:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Conflict Resolution
+        redacted:
+          type: boolean
+          title: Redacted
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - workspace_id
+      - project_id
+      - buyer_id
+      - company_id
+      - person_id
+      - contact_id
+      - employment
+      - procurement_scope
+      - channel_ownership
+      - case_version
+      - context_hash
+      - observation_ids
+      - previous_review_id
+      - recorded_by_user_id
+      - created_at
+      - rationale
+      - conflict_resolution
+      - redacted
+      title: LeadReviewRecord
 x-plan-status: PROPOSED
 x-contract-owner: BO-003; serialize changes with BO-005 schema owner
 x-pilot-constraints:

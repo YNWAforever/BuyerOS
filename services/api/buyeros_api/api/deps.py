@@ -37,6 +37,8 @@ OPERATION_ROLES: dict[str, frozenset[str]] = {
     "listAsyncJobs": _VIEWERS,
     "getWorkQueue": _VIEWERS,
     "listLeadEvidence": _VIEWERS,
+    "getLeadCase": _VIEWERS,
+    "getLeadWorkflow": _VIEWERS,
     "prepareLeadIntent": frozenset({"operator", "reviewer", "workspace_admin"}),
     "listLeadIntents": _VIEWERS,
     "getLeadIntent": _VIEWERS,
