@@ -822,6 +822,9 @@ jobs:
       BUYEROS_STRICT_INTEGRATION: '1'
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare disposable PostgreSQL 16 image
+        timeout-minutes: 3
+        run: docker pull postgres:16
       - uses: pnpm/action-setup@v4
         with:
           version: 11.25.0
@@ -982,6 +985,9 @@ jobs:
       C61_SOURCE_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare disposable PostgreSQL 16 image
+        timeout-minutes: 3
+        run: docker pull postgres:16
       - uses: pnpm/action-setup@v4
         with:
           version: 11.25.0
