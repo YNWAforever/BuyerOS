@@ -1,7 +1,7 @@
 import {expect,test} from '@playwright/test';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
-import {registerStaffJourney} from './fixtures/staff-journey';
+import {registerWorkbenchStaffJourney as registerStaffJourney} from './fixtures/staff-journey';
 import {runOwnedFixtureProcess} from './fixtures/owned-fixture-process';
 
 type Row={id:string;version:number;owner:string|null};

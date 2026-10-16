@@ -1,5 +1,5 @@
 import {expect,test} from '@playwright/test';
-import {registerStaffJourney,signIn,resetStaffJourneyFixtureRateWindows} from './fixtures/staff-journey';
+import {registerWorkbenchStaffJourney as registerStaffJourney,signIn,resetStaffJourneyFixtureRateWindows} from './fixtures/staff-journey';
 const workspace='e0000000-0000-4000-8000-000000000001';
 const project='e1000000-0000-4000-8000-000000000001';
 const scope=`workspace=${workspace}&project=${project}`;

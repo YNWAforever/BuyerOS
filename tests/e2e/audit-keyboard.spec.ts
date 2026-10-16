@@ -1,2 +1,2 @@
-import {registerStaffJourney} from './fixtures/staff-journey';
+import {registerWorkbenchStaffJourney as registerStaffJourney} from './fixtures/staff-journey';
 registerStaffJourney('celery','keyboard');

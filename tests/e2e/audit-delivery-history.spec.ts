@@ -1,5 +1,5 @@
 import {expect,test} from '@playwright/test';
-import {registerStaffJourney} from './fixtures/staff-journey';
+import {registerWorkbenchStaffJourney as registerStaffJourney} from './fixtures/staff-journey';
 
 // Four locale/layout UI-created journeys. History states below are display-only
 // browser metadata fixtures; real restricted PG history has a separate proof.

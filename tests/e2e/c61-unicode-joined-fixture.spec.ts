@@ -1,6 +1,6 @@
 import {expect,test} from '@playwright/test';
 import {createHash} from 'node:crypto';
-import {registerStaffJourney,type StaffJourneyReadback} from './fixtures/staff-journey';
+import {registerWorkbenchStaffJourney as registerStaffJourney,type StaffJourneyReadback} from './fixtures/staff-journey';
 import {observeJoinedPages,joinedReadback} from './fixtures/c61-joined-readback';
 test.beforeEach(observeJoinedPages);
 async function unicodeReadback(context:StaffJourneyReadback){
