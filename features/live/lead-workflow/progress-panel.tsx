@@ -82,7 +82,7 @@ export function LeadProgressPanel({mode,locale,canEdit=false,onNavigate}:{
         <LeadLink onNavigate={onNavigate} href={url('/app/operations')}>{t('Clear lead filters')}</LeadLink>
         <p>{t('Matching companies')}: {page.total}</p>
         {page.items.length===0&&<p>{t('No matching companies.')}</p>}
-        {page.items.map(row=><article className="activity" key={row.buyer_id} data-lead-buyer={row.buyer_id}>
+        {page.items.map(row=><article className="activity lead-queue-item" key={row.buyer_id} data-lead-buyer={row.buyer_id}>
           <h3>{row.company_name}</h3><p>{t(row.stage)}</p><p>{row.next_action||t('Next action not recorded.')}</p>
           <p>{t('Follow-up date')}: {row.due_on??t('Unknown')} · {t('Owner')}: {row.owner_user_id??t('Unassigned')}</p>
           {row.quality.blockers.map(value=><p key={value}>{t(value)}</p>)}

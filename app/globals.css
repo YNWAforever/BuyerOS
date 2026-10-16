@@ -378,3 +378,7 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
 }
 @media(max-width:767px){.live-topbar .top-right{justify-content:flex-start}}
 .live-account-email { overflow-wrap: anywhere; }
+
+/* Native manual queue cards stack their evidence and wrap actions at narrow widths. */
+.live-workspace .lead-queue-item{display:block;min-width:0;overflow-wrap:anywhere}
+.live-workspace .lead-queue-item>.inline{flex-wrap:wrap}
