@@ -8,6 +8,8 @@ import {createBuyerSourceCheck,listBuyerSourceChecks,type LiveBuyerSourceCheck,t
 import {liveZh} from './locale';
 import {ContactQuotePreview} from './contact-quote';
 import {BuyerImportSourcePanel} from './buyer-import-source';
+import {LeadEvidencePanel} from './lead-workflow/evidence-panel';
+import {LeadCasePanel} from './lead-workflow/case-panel';
 import {useRouter} from 'next/navigation';
 
 type Tab='Overview'|'Evidence'|'Contacts'|'Activity';
@@ -189,6 +191,7 @@ export function LiveBuyerDetail({buyer,locale,canEdit,canQuote,canReview,ownMemb
           <button type="button" disabled={saving||reviewReason.trim().length<3} onClick={()=>void saveReviewAndNext()}>{t(onNext?'Save review and next':'Save review')}</button></div>}
         {saveError&&<p role="alert">{saveError}</p>}</>}
       {tab==='Evidence'&&<>
+        <LeadEvidencePanel key={`${session.identity()}:${buyer.id}`} buyerId={buyer.id} locale={locale} canEdit={canEdit}/>
         {evidence.length?evidence.map(row=><div className="activity" key={row.id}><div><b>{t(row.relationship)}</b>
           <p>{row.excerpt}</p>{row.translatedExcerpt&&<p>{t('Translation')}: {row.translatedExcerpt}</p>}
           <p>{t('Requirement')}: {row.requirementId??t('Unlinked')} · {t(row.kind)} · {t(row.status)}</p>
@@ -238,6 +241,7 @@ export function LiveBuyerDetail({buyer,locale,canEdit,canQuote,canReview,ownMemb
         </section>
       </>}
       {tab==='Contacts'&&<><p>{t('Contact research')}: {t(data.contactResearchStatus??'Unknown')}</p>
+        <LeadCasePanel key={`${session.identity()}:${buyer.id}`} buyerId={buyer.id} locale={locale} canEdit={canEdit} canAssign={canEdit}/>
         <p>{t('Eligible retained recipients can be selected when preparing a grounded draft.')}</p>
         <ContactQuotePreview key={`${data.id}:${data.version}`} buyerId={data.id} buyerVersion={data.version} canQuote={canQuote} t={t}/></>}
       {tab==='Activity'&&<><p>{t('Review')}: {t(data.reviewStatus??'No human review recorded')}</p>

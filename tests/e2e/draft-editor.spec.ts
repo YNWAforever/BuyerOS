@@ -50,14 +50,14 @@ test('T24 staff prepares an unaddressed draft and recovers immutable edits',asyn
 
   await page.getByRole('button',{name:'Open draft'}).first().click();
   await expect(page).toHaveURL(new RegExp(`draft=${seededDraft}`));
-  await expect(page.getByRole('textbox',{name:'Body'})).toContainText('fictional industrial sensors');
-  await page.getByRole('textbox',{name:'Body'}).fill('Human edited draft, pending grounding review.');
+  await expect(page.getByRole('textbox',{name:'Body',exact:true})).toContainText('fictional industrial sensors');
+  await page.getByRole('textbox',{name:'Body',exact:true}).fill('Human edited draft, pending grounding review.');
   await page.getByRole('button',{name:'Save revision'}).click();
   await expect(page.getByRole('status').filter({hasText:/Human edits require a new grounding review/})).toBeVisible();
-  await expect(page.getByText(/Revision: 2/)).toBeVisible();
+  await expect(page.getByText('Revision: 2',{exact:true})).toBeVisible();
   await page.reload();
   await page.getByRole('button',{name:'Sign in'}).click();
-  await expect(page.getByRole('textbox',{name:'Body'})).toContainText('Human edited draft, pending grounding review.');
+  await expect(page.getByRole('textbox',{name:'Body',exact:true})).toContainText('Human edited draft, pending grounding review.');
   const denied=await request.patch(`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${seededDraft}`,{
     headers:{Authorization:'Bearer fixture-viewer','Idempotency-Key':'viewer-draft-edit',
       'If-Match':'"2"'},data:{body:'Viewer edit'},
@@ -69,7 +69,7 @@ test('T24 staff prepares an unaddressed draft and recovers immutable edits',asyn
   await expect(page.getByRole('status').filter({hasText:/queued/})).toBeVisible();
   await page.getByRole('combobox',{name:'Language'}).first().selectOption('zh-HK');
   await page.setViewportSize({width:390,height:844});
-  await expect(page.getByRole('heading',{name:'草稿',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'草稿',exact:true,level:1})).toBeVisible();
   await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await page.screenshot({path:'test-results/t24-draft-zh-mobile-fixture.png',fullPage:true});
 });

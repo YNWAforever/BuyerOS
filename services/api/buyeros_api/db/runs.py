@@ -128,6 +128,7 @@ class Person(Base, TenantMixin):
     __tablename__ = "people"
     __table_args__ = (
         UniqueConstraint("workspace_id", "id", name="uq_people_workspace_id"),
+        UniqueConstraint("workspace_id", "company_id", "id", name="uq_people_lead_company"),
         ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_people_workspace"),
         ForeignKeyConstraint(
             ["workspace_id", "company_id"], ["companies.workspace_id", "companies.id"], name="fk_people_company"
@@ -146,6 +147,8 @@ class ContactPoint(Base, TenantMixin):
     __tablename__ = "contact_points"
     __table_args__ = (
         UniqueConstraint("workspace_id", "id", name="uq_contact_points_workspace_id"),
+        UniqueConstraint("workspace_id", "company_id", "id", name="uq_contact_lead_company"),
+        UniqueConstraint("workspace_id", "company_id", "person_id", "id", name="uq_contact_lead_person"),
         UniqueConstraint("workspace_id", "company_id", "type", "normalized_value", name="uq_contact_points_value"),
         ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_contact_points_workspace"),
         ForeignKeyConstraint(

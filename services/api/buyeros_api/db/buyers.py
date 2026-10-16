@@ -39,6 +39,7 @@ class ProjectBuyer(Base, TenantMixin):
         UniqueConstraint("workspace_id", "id", name="uq_project_buyers_workspace_id"),
         UniqueConstraint("workspace_id", "project_id", "company_id", name="uq_project_buyers_project_company"),
         UniqueConstraint("workspace_id", "project_id", "id", name="uq_project_buyers_project_id"),
+        UniqueConstraint("workspace_id", "project_id", "id", "company_id", name="uq_project_buyers_lead_company"),
         ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], name="fk_project_buyers_workspace"),
         ForeignKeyConstraint(
             ["workspace_id", "project_id"], ["projects.workspace_id", "projects.id"], name="fk_project_buyers_project"

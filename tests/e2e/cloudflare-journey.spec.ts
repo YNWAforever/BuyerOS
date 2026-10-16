@@ -1,5 +1,5 @@
 import {expect,test} from '@playwright/test';
-import {registerStaffJourney,signIn} from './fixtures/staff-journey';
+import {registerWorkbenchStaffJourney as registerStaffJourney,signIn,resetStaffJourneyFixtureRateWindows} from './fixtures/staff-journey';
 const workspace='e0000000-0000-4000-8000-000000000001';
 const project='e1000000-0000-4000-8000-000000000001';
 const scope=`workspace=${workspace}&project=${project}`;
@@ -7,6 +7,7 @@ registerStaffJourney('cloudflare');
 
 test('CF07 real second page, 101-row native bulk and persistent Workflow restart',async({page,request})=>{
   test.setTimeout(240_000);
+  await resetStaffJourneyFixtureRateWindows();
   await signIn(page,'fixture-access',`/app/discover?${scope}`);
   await expect(page.getByText('101 in snapshot')).toBeVisible();
   await page.getByRole('button',{name:'Next page'}).click();
@@ -46,6 +47,7 @@ test('CF07 real second page, 101-row native bulk and persistent Workflow restart
 
 test('CF07 optional lookup unknown acceptance retains one hold and never blindly resubmits',async({page,request})=>{
   test.setTimeout(180_000);
+  await resetStaffJourneyFixtureRateWindows();
   await signIn(page,'fixture-access',`/app/discover?${scope}`);
   await page.getByRole('button',{name:'Details'}).first().click();
   await page.getByRole('tab',{name:'Contacts'}).click();
@@ -68,6 +70,7 @@ test('CF07 optional lookup unknown acceptance retains one hold and never blindly
 
 test('CF07 viewer and reviewer negative roles; a late real buyer response cannot overwrite another project',async({page,browser,request})=>{
   test.setTimeout(180_000);
+  await resetStaffJourneyFixtureRateWindows();
   const viewerContext=await browser.newContext();const viewer=await viewerContext.newPage();
   await signIn(viewer,'fixture-viewer',`/app/discover?${scope}`);
   await expect(viewer.getByRole('button',{name:'Assign selected buyers'})).toHaveCount(0);

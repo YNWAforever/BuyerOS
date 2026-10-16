@@ -16,6 +16,21 @@ from urllib.parse import urlsplit
 
 import pytest
 
+
+@pytest.fixture(scope="session", autouse=True)
+def bounded_windows_owned_connection_setup():
+    """Only acquire a new owned test connection after the exact Winsock collision."""
+    import os
+    if os.name != "nt":
+        yield
+        return
+    import functools
+    import psycopg
+    from tests.owned_connection import connect_owned
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(psycopg, "connect", functools.partial(connect_owned, psycopg.connect, windows=True))
+        yield
+
 # psycopg's async driver cannot run on Windows' default ProactorEventLoop; the
 # async SQLAlchemy engine used by the route tests needs the selector loop pinned.
 if sys.platform == "win32":

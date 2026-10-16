@@ -1,5 +1,5 @@
 import {expect,test} from '@playwright/test';
-import {registerStaffJourney} from './fixtures/staff-journey';
+import {registerWorkbenchStaffJourney as registerStaffJourney} from './fixtures/staff-journey';
 
 // Existing access/dirty-buffer repairs are exercised after one UI-created
 // research -> exact review -> approved export -> manual outcome chain.

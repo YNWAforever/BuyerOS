@@ -286,6 +286,9 @@ async def delete_offer_document(
                     source.object_key, source.excerpt = None, None
             row.version += 1
             await session.flush()
+            from ...services.lead_retention import redact_lead_subject
+            await redact_lead_subject(session, workspace_id=workspace_id, subject_type="offer_document",
+                                     subject_id=row.id, now=datetime.now(timezone.utc))
             await session.refresh(row)
             delete_payload = {"document_id": str(row.id)}
             if inline_delete:

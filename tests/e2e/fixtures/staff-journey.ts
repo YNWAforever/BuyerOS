@@ -6,6 +6,8 @@ import {resolve} from 'node:path';
 import {readFile} from 'node:fs/promises';
 import {awaitCloudflareIntent} from './cloudflare-stack';
 import {createJourneyInput,observeWorkspaceLocale,type JourneyInputMode} from './journey-input';
+import {resetWorkbenchFixtureRateWindows as resetStaffJourneyFixtureRateWindows} from './workbench-auth';
+export {resetStaffJourneyFixtureRateWindows};
 
 const workspace='e0000000-0000-4000-8000-000000000001';
 const project='e9100000-0000-4000-8000-000000000001';
@@ -111,11 +113,17 @@ const journeyZh:Record<string,string>={
 type GroundingRequest=components['schemas']['DraftGroundingReviewRequest'];
 export type GroundingReceipt={requests:{key:string;body:GroundingRequest}[];committed_status:number};
 export type StaffJourneyReadback={page:Page;reviewer:Page;browser:Browser;request:APIRequestContext;workspace:string;project:string;runId:string;draftJobId:string;draftId:string;exportId:string;buyerId:string;contactId:string;locale:'en'|'zh-HK';layout:'desktop'|'mobile';approvedCopy:string;groundingReceipt?:GroundingReceipt};
-export function registerStaffJourney(transport:'celery'|'cloudflare'='celery',inputMode:JourneyInputMode='pointer',afterJourney?:(context:StaffJourneyReadback)=>Promise<void>,options:{unicode?:boolean;loseGroundingAck?:boolean;delayedReviewAck?:boolean;acceptedUnknownSearch?:boolean}={}){
+/** Explicit opt-in for fixtures that seed the guarded workbench anchor. */
+export function registerWorkbenchStaffJourney(...args:Parameters<typeof registerStaffJourney>){
+  const [transport,inputMode,afterJourney,options]=args;
+  return registerStaffJourney(transport,inputMode,afterJourney,{...options,isolateBeforeLogin:true});
+}
+export function registerStaffJourney(transport:'celery'|'cloudflare'='celery',inputMode:JourneyInputMode='pointer',afterJourney?:(context:StaffJourneyReadback)=>Promise<void>,options:{isolateBeforeLogin?:boolean;unicode?:boolean;loseGroundingAck?:boolean;delayedReviewAck?:boolean;acceptedUnknownSearch?:boolean}={}){
 for(const locale of ['en','zh-HK'] as const){
 for(const layout of ['desktop','mobile'] as const){
 test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboard ':''}${locale} ${layout} UI-created offer through research, grounded addressed approval, export and outcome on one dataset`,async({page,browser,request})=>{
   test.setTimeout(inputMode==='keyboard'?600_000:360_000);
+  if(options.isolateBeforeLogin)await resetStaffJourneyFixtureRateWindows();
   const input=createJourneyInput(inputMode);await input.install(page);
   page.setDefaultTimeout(10_000);
   const failedApi:string[]=[];
