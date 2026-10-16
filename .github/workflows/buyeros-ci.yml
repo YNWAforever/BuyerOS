@@ -944,6 +944,8 @@ jobs:
           pnpm exec playwright test --config playwright.buyer-management.config.ts tests/e2e/buyer-management.spec.ts --workers=1 --list --reporter=json > artifacts/c61/buyer-management-discovery.json
           python scripts/check-required-tests.py --playwright-discovery artifacts/c61/buyer-management-discovery.json --expected-count 3 --expected-file buyer-management.spec.ts --discovery-only
       - name: Verify native lead workflow without provider activation
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/lead-workflow.xml
         run: |
           mkdir -p artifacts/lead-workflow
           pnpm exec playwright test --config playwright.lead-workflow.config.ts --list --reporter=json > artifacts/lead-workflow/discovery.json

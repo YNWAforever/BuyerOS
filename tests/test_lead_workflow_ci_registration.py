@@ -64,6 +64,10 @@ class LeadWorkflowCIRegistration(unittest.TestCase):
             guards = [cmd for cmd in commands if cmd[:2] == ["python", "scripts/check-required-tests.py"]]
             self.assertEqual(len(guards), 2)
             execution = next(cmd for cmd in guards if "--junit" in cmd)
+            consumed_report = execution[execution.index("--junit") + 1]
+            step_report = re.findall(r"^          PLAYWRIGHT_JUNIT_OUTPUT_FILE:\s*(\S+)\s*$", block, re.MULTILINE)
+            self.assertEqual(step_report, [consumed_report],
+                             "step must override inherited JUnit output with its consumed report")
             names = self.checker._built_playwright_names(self.inventories[key].read_bytes(), key)
             report = self.directory / f"{key}-synthetic-guard-only.xml"
             suite = ET.Element("testsuite")

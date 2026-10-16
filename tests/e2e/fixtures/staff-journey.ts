@@ -6,6 +6,8 @@ import {resolve} from 'node:path';
 import {readFile} from 'node:fs/promises';
 import {awaitCloudflareIntent} from './cloudflare-stack';
 import {createJourneyInput,observeWorkspaceLocale,type JourneyInputMode} from './journey-input';
+import {resetWorkbenchFixtureRateWindows as resetStaffJourneyFixtureRateWindows} from './workbench-auth';
+export {resetStaffJourneyFixtureRateWindows};
 
 const workspace='e0000000-0000-4000-8000-000000000001';
 const project='e9100000-0000-4000-8000-000000000001';
@@ -116,6 +118,7 @@ for(const locale of ['en','zh-HK'] as const){
 for(const layout of ['desktop','mobile'] as const){
 test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboard ':''}${locale} ${layout} UI-created offer through research, grounded addressed approval, export and outcome on one dataset`,async({page,browser,request})=>{
   test.setTimeout(inputMode==='keyboard'?600_000:360_000);
+  await resetStaffJourneyFixtureRateWindows();
   const input=createJourneyInput(inputMode);await input.install(page);
   page.setDefaultTimeout(10_000);
   const failedApi:string[]=[];
