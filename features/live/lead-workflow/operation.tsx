@@ -41,7 +41,14 @@ export function useLeadOperation(
       if(!alive.current||!session.isCurrent(identity))return;
       await readback();
       await acknowledgeLeadIntent(client,session,staged.id);
-      if(alive.current&&session.isCurrent(identity)){setUnknown(false);setMessage(t(success));await refreshPending();}
+      if(alive.current&&session.isCurrent(identity)){
+        const acknowledgedId=staged.id;
+        setPending(rows=>rows.filter(row=>row.id!==acknowledgedId));
+        setUnknown(false);setMessage(t(success));
+        try{await refreshPending();}catch(cause){
+          if(alive.current&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled))setError(t(describeLiveError(cause)));
+        }
+      }
     }catch(cause){
       if(alive.current&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled)){
         const uncertain=applied||!(cause instanceof LiveError)||cause.status===0||cause.status>=500;
