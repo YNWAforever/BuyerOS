@@ -103,3 +103,56 @@ def test_viewer_cannot_prepare_and_missing_key_is_rejected(lead_api, lead_case):
         headers=headers(),
     )
     assert response.status_code == 400, response.text
+
+
+@pytest.mark.parametrize("subject,channel_type,first_value,second_value", [
+    ("person", "business_email", "alex@rice.example.test", "alex.second@rice.example.test"),
+    ("department", "procurement_form", "https://rice.example.test/purchasing", "https://rice.example.test/suppliers"),
+    ("referral", "referral", "https://rice.example.test/referral/a", "https://rice.example.test/referral/b"),
+])
+@pytest.mark.parametrize("correction", ["same_value", "same_id", "other_existing", "other_new"])
+def test_channel_correction_preserves_exact_channel_subject(
+    lead_api, lead_case, subject, channel_type, first_value, second_value, correction,
+):
+    """A correction for B must never suppress A, even without a named person."""
+    person = None
+    if subject == "person":
+        employment, _, _ = save_observation(lead_api, lead_case)
+        person = {"person_id": employment["person_id"]}
+    channel = {"type": channel_type, "value": first_value}
+    if person:
+        channel["person_id"] = person["person_id"]
+    payload = observation_payload(claim="channel_ownership", person=person, channel=channel)
+    original, _, _ = save_observation(lead_api, lead_case, payload)
+    replacement = copy.deepcopy(payload)
+    replacement["supersedes_id"] = original["id"]
+    replacement["stance"] = "refutes"
+    if correction == "same_id":
+        replacement["channel"] = {"contact_id": original["contact_id"]}
+        if person:
+            replacement["channel"]["person_id"] = person["person_id"]
+    elif correction.startswith("other"):
+        replacement["channel"]["value"] = second_value
+        if correction == "other_existing":
+            second_payload = copy.deepcopy(payload)
+            second_payload["channel"]["value"] = second_value
+            save_observation(lead_api, lead_case, second_payload)
+    with psycopg.connect(lead_case["dsn"]) as db:
+        before = db.execute("SELECT count(*) FROM lead_observations").fetchone()[0]
+        intents_before = db.execute("SELECT count(*) FROM lead_action_intents").fetchone()[0]
+    if correction.startswith("same"):
+        corrected, _, _ = save_observation(lead_api, lead_case, replacement)
+        assert corrected["contact_id"] == original["contact_id"]
+        assert corrected["supersedes_id"] == original["id"]
+        assert corrected["stance"] == "refutes"
+    else:
+        rejected = prepare(lead_api, lead_case, "observation.append", replacement)
+        assert rejected.status_code == 422, rejected.text
+        assert rejected.json()["message"] == "correction must describe the same subject and claim"
+        with psycopg.connect(lead_case["dsn"]) as db:
+            assert db.execute("SELECT count(*) FROM lead_observations").fetchone() == (before,)
+            assert db.execute("SELECT count(*) FROM lead_action_intents").fetchone() == (intents_before,)
+            assert db.execute("SELECT count(*) FROM lead_observations WHERE supersedes_id=%s",
+                              (original["id"],)).fetchone() == (0,)
+            assert str(db.execute("SELECT contact_id FROM lead_observations WHERE id=%s",
+                                  (original["id"],)).fetchone()[0]) == original["contact_id"]

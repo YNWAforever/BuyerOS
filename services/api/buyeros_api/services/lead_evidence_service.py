@@ -168,7 +168,8 @@ async def validate_observation(session, scope, data, now):
         if previous is None:
             raise ApiError(404, "NOT_FOUND", "original observation not found")
         if (previous.claim != data.claim
-                or (previous.person_id is not None and (person is None or previous.person_id != person.id))):
+                or (previous.person_id is not None and (person is None or previous.person_id != person.id))
+                or (previous.contact_id is not None and (contact is None or previous.contact_id != contact.id))):
             raise ApiError(422, "INVALID_REQUEST", "correction must describe the same subject and claim")
     return deadline
 
