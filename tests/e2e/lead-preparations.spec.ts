@@ -105,3 +105,74 @@ test('missing_product_fact_or_extraction_caveat_is_visible',async({page,request}
   await page.goto(entry('/app/outreach'));await signInLead(page,'/app/outreach');
   await expect(page.getByRole('region',{name:'Lead preparations',exact:true})).toBeVisible();
 });
+
+
+test('committed_write_retains_original_handle_when_readback_and_history_are_rate_limited',async({page,request})=>{
+  const panel=await create(page);
+  const before=await (await request.get('http://127.0.0.1:8000/fixture/lead-counts')).json();
+  let committed=false,applies=0,readbackLimited=false,historyLimited=false;
+  await page.route('**/lead-intents/*/apply',async route=>{
+    applies++;const response=await route.fetch();expect(response.status()).toBe(200);
+    committed=true;await route.fulfill({response});
+  });
+  const limited={status:429,contentType:'application/json',headers:{'Retry-After':'1'},
+    body:'{"code":"RATE_LIMITED","message":"fixture read limit","request_id":"fixture-readback","retryable":true}'};
+  await page.route(/\/buyers\/[^/]+\/lead-preparations(?:\?|$)/,async route=>{
+    if(committed&&!readbackLimited){readbackLimited=true;await route.fulfill(limited);}else await route.continue();
+  });
+  await page.route(/\/lead-intents\?/,async route=>{
+    if(committed&&!historyLimited){historyLimited=true;await route.fulfill(limited);}else await route.continue();
+  });
+  await panel.getByLabel('Content review reason').fill('Exact sources reviewed; no consent or sending inferred.');
+  await panel.getByLabel('I reviewed this exact preparation content.').check();
+  await panel.getByRole('button',{name:'Mark content reviewed',exact:true}).click();
+  await expect.poll(()=>committed&&readbackLimited&&historyLimited).toBe(true);
+  await expect(panel.getByText('The save result is unconfirmed. Read the original operation before another edit.',{exact:true})).toBeVisible();
+  await expect(panel.getByRole('button',{name:'Read original operation',exact:true})).toHaveCount(1);
+  await expect(panel.getByRole('button',{name:'Save preparation revision',exact:true})).toBeDisabled();
+  await expect(panel.getByText('Content review saved.',{exact:true})).toHaveCount(0);
+  const canonical=async()=>((await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-preparations`,{headers:bearer})).json()).data.items[0]);
+  const stored=await canonical();expect(stored.state).toBe('reviewed');expect(stored.version).toBe(2);
+  await panel.getByRole('button',{name:'Read original operation',exact:true}).click();
+  await expect(panel.getByText('Preparation state: reviewed',{exact:true})).toBeVisible();
+  await expect(panel.getByRole('button',{name:'Read original operation',exact:true})).toHaveCount(0);
+  expect(applies).toBe(1);expect((await canonical()).version).toBe(stored.version);
+  expect(await (await request.get('http://127.0.0.1:8000/fixture/lead-counts')).json()).toEqual(before);
+});
+
+
+test('acknowledged_write_is_not_recovered_after_history_refresh_failure',async({page,request})=>{
+  const panel=await create(page);
+  const before=await (await request.get('http://127.0.0.1:8000/fixture/lead-counts')).json();
+  let applies=0,acknowledged=false,limited=false,intentId='';
+  await page.route('**/lead-intents/*/apply',async route=>{
+    applies++;intentId=route.request().url().split('/').at(-2)!;
+    const response=await route.fetch();expect(response.status()).toBe(200);await route.fulfill({response});
+  });
+  const ackReply=page.waitForResponse(response=>response.status()===200&&
+    Boolean(intentId)&&response.url().includes(`/lead-intents/${intentId}/acknowledgements`));
+  page.on('response',response=>{
+    if(response.status()===200&&intentId&&response.url().includes(`/lead-intents/${intentId}/acknowledgements`))acknowledged=true;
+  });
+  const limitedReply=page.waitForResponse(response=>response.status()===429&&/\/lead-intents\?/.test(response.url()));
+  await page.route(/\/lead-intents\?/,async route=>{
+    if(acknowledged&&!limited){limited=true;await route.fulfill({status:429,contentType:'application/json',
+      headers:{'Retry-After':'1'},body:'{"code":"RATE_LIMITED","message":"fixture history read limit","request_id":"fixture-post-ack","retryable":true}'});
+    }else await route.continue();
+  });
+  await panel.getByLabel('Content review reason').fill('Exact sources reviewed; acknowledged save must remain complete.');
+  await panel.getByLabel('I reviewed this exact preparation content.').check();
+  await panel.getByRole('button',{name:'Mark content reviewed',exact:true}).click();
+  await ackReply;await limitedReply;
+  expect(acknowledged&&limited).toBe(true);
+  const saved=(await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-preparations`,{headers:bearer})).json()).data.items[0];
+  expect(saved.state).toBe('reviewed');expect(saved.version).toBe(2);
+  const pending=(await (await request.get(`${apiBase}/lead-intents`,{headers:bearer})).json()).data.items;
+  expect(pending.some((row:{id:string})=>row.id===intentId)).toBe(false);
+  await expect(panel.getByText('Content review saved.',{exact:true})).toBeVisible();
+  await expect(panel.getByText('The save result is unconfirmed. Read the original operation before another edit.',{exact:true})).toHaveCount(0);
+  await expect(panel.getByRole('button',{name:'Read original operation',exact:true})).toHaveCount(0);
+  await expect(panel.getByRole('button',{name:'Save preparation revision',exact:true})).toBeEnabled();
+  expect(applies).toBe(1);
+  expect(await (await request.get('http://127.0.0.1:8000/fixture/lead-counts')).json()).toEqual(before);
+});
