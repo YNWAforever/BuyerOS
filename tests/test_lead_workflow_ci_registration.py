@@ -10,7 +10,8 @@ import unittest
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = {"lead-evidence.spec.ts": 5, "lead-preparations.spec.ts": 4,
+# Retain all original 17 browser IDs and add the post-commit readback regression.
+EXPECTED = {"lead-evidence.spec.ts": 5, "lead-preparations.spec.ts": 5,
             "lead-workflow.spec.ts": 4, "pilot-budget.spec.ts": 4}
 
 

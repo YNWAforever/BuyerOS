@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "git": {"deploymentEnabled": {"main": false, "codex/golden-resources-lead-workflow-20261016": false}},
+  "git": {"deploymentEnabled": {"main": false, "codex/golden-resources-lead-workflow-20261016": false, "codex/native-save-readback-recovery-20261016": false}},
   "services": {
     "app": {
       "root": ".",

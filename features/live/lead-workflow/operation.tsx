@@ -33,19 +33,26 @@ export function useLeadOperation(
   async function run(input:LeadIntentInput,success:string){
     if(busy)return;
     const identity=session.identity();setBusy(true);setError('');setMessage('');
+    let staged:LeadIntentView|null=null,applied=false;
     try{
-      const staged=await prepareLeadIntent(client,session,input);
-      await applyLeadIntent(client,session,staged);
+      staged=await prepareLeadIntent(client,session,input);
+      const receipt=await applyLeadIntent(client,session,staged);
+      applied=true;staged={...staged,state:'applied',receipt,payload:null};
       if(!alive.current||!session.isCurrent(identity))return;
       await readback();
       await acknowledgeLeadIntent(client,session,staged.id);
       if(alive.current&&session.isCurrent(identity)){setUnknown(false);setMessage(t(success));await refreshPending();}
     }catch(cause){
       if(alive.current&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled)){
-        const uncertain=!(cause instanceof LiveError)||cause.status===0||cause.status>=500;
-        setUnknown(uncertain);
+        const uncertain=applied||!(cause instanceof LiveError)||cause.status===0||cause.status>=500;
+        setUnknown(uncertain);setMessage('');
         setError(uncertain?t('The save result is unconfirmed. Read the original operation before another edit.'):t(describeLiveError(cause)));
         try{await refreshPending();}catch{/* The unresolved state remains explicit; never substitute an empty history. */}
+        if(alive.current&&session.isCurrent(identity)&&uncertain&&staged){
+          // A failed history read must not discard the original durable handle.
+          const original={...staged,payload:null};
+          setPending(rows=>rows.some(row=>row.id===original.id)?rows:[...rows,original]);
+        }
       }
     }finally{if(alive.current&&session.isCurrent(identity))setBusy(false);}
   }

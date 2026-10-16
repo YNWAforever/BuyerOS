@@ -949,9 +949,9 @@ jobs:
         run: |
           mkdir -p artifacts/lead-workflow
           pnpm exec playwright test --config playwright.lead-workflow.config.ts --list --reporter=json > artifacts/lead-workflow/discovery.json
-          python scripts/check-required-tests.py --playwright-discovery artifacts/lead-workflow/discovery.json --expected-count 17 --expected-file lead-evidence.spec.ts --expected-file lead-preparations.spec.ts --expected-file lead-workflow.spec.ts --expected-file pilot-budget.spec.ts --discovery-only
+          python scripts/check-required-tests.py --playwright-discovery artifacts/lead-workflow/discovery.json --expected-count 18 --expected-file lead-evidence.spec.ts --expected-file lead-preparations.spec.ts --expected-file lead-workflow.spec.ts --expected-file pilot-budget.spec.ts --discovery-only
           pnpm exec playwright test --config playwright.lead-workflow.config.ts --workers=1
-          python scripts/check-required-tests.py --playwright-discovery artifacts/lead-workflow/discovery.json --expected-count 17 --expected-file lead-evidence.spec.ts --expected-file lead-preparations.spec.ts --expected-file lead-workflow.spec.ts --expected-file pilot-budget.spec.ts --junit test-results/lead-workflow.xml
+          python scripts/check-required-tests.py --playwright-discovery artifacts/lead-workflow/discovery.json --expected-count 18 --expected-file lead-evidence.spec.ts --expected-file lead-preparations.spec.ts --expected-file lead-workflow.spec.ts --expected-file pilot-budget.spec.ts --junit test-results/lead-workflow.xml
           cp test-results/lead-workflow.xml artifacts/lead-workflow/lead-workflow.xml
       - name: Verify original buyer source checks
         run: |
