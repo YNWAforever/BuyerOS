@@ -79,3 +79,14 @@ local Cloudflare acceptance 包含實際 compiled handler、local Queue/Workflow
 同一原 testcase 補入 300 欄位的實測路徑：Project 向後一步到 Overview；頁尾向前經瀏覽器邊界兩步回 Overview。原慢速 40 次 Tab 及負向案例不變，audit inventory 仍為 140。新增路徑在舊 helper 重現 250 步失敗；Chromium probe 證明瀏覽器邊界會令 activeElement 為 BODY，不能誤稱 BODY 具有頁內焦點。最初兩次不準確的 wrap 斷言失敗、probe 及所有原始 logs/JUnit 保留，沒有覆寫。
 
 本機最新結果：無 DB protocol 2/2、完整原 `audit-keyboard-workbench.spec.ts` 6/6、TypeScript、兩檔 ESLint、C61 evidence 163/163，無失敗或跳過。完整6案使用新的 owned disposable DB、fixture Auth 與 compiled UI；啟動前清除繼承 DB/provider 設定，再由既有 allocator 檢查 Docker/context、container/image/label/port/mount 與 receipt。命令、原始結果及各次失敗在 private evidence `publish-01/ci-fix-04/`。這只是測試 helper 修正，不更改產品授權、保存行為或 migration；更新 head 的完整12-job CI另行驗證，不拼合舊 SHA 結果。
+
+
+## 已退出程序的 /proc 觀測時序
+
+`8c54c0e0` 的 run `39044341945` 已通過 audit 工作；容量工作的 30 分鐘 mixed workload 本身通過，但原 timeout cleanup testcase 在 `exists()` 與 `read_text()` 之間遇上程序退出，`/proc/<pid>/stat` 消失而失敗。後續 broker/bulk/admission 因該失敗未執行，不能視為通過。原始 failed log、workload ZIP/JUnit 與所有量測保留於 private evidence `publish-01/ci-39044341945/`、`ci-fix-05/`；該 run 不作完整12項通過聲明。
+
+最小修正只在測試 probe 直接讀取 stat，僅將確切 `FileNotFoundError` 視為該 owned 程序已退出；`PermissionError` 及其他無法核實狀態繼續失敗。原兩秒清理界限、頑固 grandchild／cooperative finally 斷言、30 分鐘窗口及1320分母保持不變。
+
+同一原 opt-in testcase 增加可重現的退出時序及權限拒絕控制，再執行原本未攔截的真實程序清理。舊 helper 的 RED 與新 helper 的 GREEN 均在 digest 固定的本機 Python3.12.15 Linux 容器完成，無 DB、無網絡、唯讀來源；獨立 harness 直接執行該原 test 函式的 AST，避免 import benchmark 頂層 DB 模組，不將其當成完整 sustained pytest suite。實際 SIGINT 可產生預期 KeyboardInterrupt 輸出；GREEN exit0，cooperative receipt及所有原斷言均成立。
+
+既有 mixed/cleanup 純工具65/65亦通過，語法及diff檢查通過；原 sustained case IDs仍為2，default worker469 inventory不新增或刪除。此修正沒有產品、schema、API或provider行為變更。完整新的同 head12-job CI仍須重新執行，包含原30分鐘窗口、Linux broker、bulk及admission，不能拼合舊 run。

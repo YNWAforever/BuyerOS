@@ -33,7 +33,11 @@ def check_owned_timeout():
             deadline = time.monotonic() + 2
             while time.monotonic() < deadline:
                 stat = Path(f'/proc/{pid}/stat')
-                if not stat.exists() or stat.read_text().split()[2] == 'Z':
+                try:
+                    state = stat.read_text().split()[2]
+                except FileNotFoundError:
+                    break  # The owned process exited before its /proc read.
+                if state == 'Z':
                     break
                 time.sleep(.02)
             else:
